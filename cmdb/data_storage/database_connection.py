@@ -39,6 +39,13 @@ class Connector:
         """
         raise NotImplementedError
 
+    def is_connected(self):
+        """
+        check if connection to database exists
+        :return: True/False
+        """
+        raise NotImplementedError
+
 
 class MongoConnector(Connector):
     """
@@ -47,7 +54,7 @@ class MongoConnector(Connector):
 
     DEFAULT_CONNECTION_TIMEOUT = 100
 
-    def __init__(self, host, port, database_name, *auth):
+    def __init__(self, host, port, database_name, auth):
         """
         init mongodb connector
         :param host: database server address
@@ -85,6 +92,17 @@ class MongoConnector(Connector):
         """
         self.client.close()
 
+    def is_connected(self):
+        """
+        check if connection to database exists
+        :return: True/False
+        """
+        try:
+            self.connect()
+            return True
+        except ServerSelectionTimeoutError:
+            return False
+
     def get_database_name(self):
         """
         get database name
@@ -107,6 +125,13 @@ class MongoConnector(Connector):
         :return: collection object
         """
         return self.database[name]
+
+    def get_collections(self):
+        """
+        list all collections inside mongo database
+        :return:
+        """
+        return self.database.collection_names()
 
 
 class ServerTimeoutError(Exception):

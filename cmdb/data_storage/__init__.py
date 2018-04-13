@@ -1,3 +1,6 @@
+"""
+Global objects for database management
+"""
 from cmdb import SYSTEM_CONFIG_READER
 from cmdb.data_storage.database_connection import MongoConnector
 GLOBAL_DATABASE_MANAGER = MongoConnector(
