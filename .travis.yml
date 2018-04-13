@@ -7,7 +7,6 @@ python:
     - 3.4
     - 3.5
     - 3.6
-    - 3.7-dev
 
 env:
     - DATBASE_HOST=127.0.0.1 DATBASE_POST=27017
@@ -20,4 +19,3 @@ install:
 
 script:
     - pylint cmdb/
-    
