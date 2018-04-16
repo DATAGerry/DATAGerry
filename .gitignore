@@ -1,5 +1,5 @@
 # Project
-etc/cmdb.conf
+cmdb.conf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

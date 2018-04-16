@@ -20,7 +20,7 @@ TODO
 We recommend pylint for testing coding styles and error detection.
 
 ## Development
-> See [DEV-NOTES](https://github.com/markheumueller/NetCMDB/blob/master/.github/DEV-NOTES.md)
+> See [DEV_NOTES](https://github.com/markheumueller/NetCMDB/blob/master/.github/DEV_NOTES.md)
 
 ### Coding Style
 All Python based code parts must follow the [PEP 8 Style Guide](https://www.python.org/dev/peps/pep-0008/). All web-based elements must comply with the standards defined by the World Wide Web Consortium (W3C) and be validated if necessary. All other technologies are implemented according to agreement.
