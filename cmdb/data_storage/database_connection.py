@@ -90,7 +90,7 @@ class MongoConnector(Connector):
         try's to disconnect from database
         :return: server status
         """
-        self.client.close()
+        return self.client.close()
 
     def is_connected(self):
         """

@@ -154,7 +154,7 @@ class DatabaseManagerMongo(DatabaseManager):
         result = self.database_connector.get_collection(collection).insert_one(data)
         return result.inserted_id
 
-    def update(self, collection, public_id, data):
+    def update(self, collection, public_id: int, data):
         """
         update document inside database
         :param collection: name of collection
@@ -166,7 +166,7 @@ class DatabaseManagerMongo(DatabaseManager):
         formatted_data = {'$set': data}
         return self.database_connector.get_collection(collection).update(formatted_public_id, formatted_data)
 
-    def delete(self, collection, public_id):
+    def delete(self, collection, public_id: int):
         """
         delete document inside database
         :param collection: name of collection
