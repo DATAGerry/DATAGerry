@@ -15,8 +15,9 @@ services:
     - mongodb
 
 install:
+    - if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then pip install --upgrade pip setuptools; fi
     - pip install -r requirements-dev.txt
+    - pip install -e cmdb
 
 script:
     - pytest tests/
-    
