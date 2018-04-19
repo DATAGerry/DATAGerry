@@ -14,7 +14,7 @@ class HTTPServer(BaseApplication):
         :param app: app object - default flask instance
         :param options: parameters for app start
         """
-        self.options = options
+        self.options = options or {}
         if 'workers' not in self.options:
             self.options['workers'] = HTTPServer.number_of_workers()
         self.application = app
@@ -35,8 +35,9 @@ class HTTPServer(BaseApplication):
         loading the config into cfg
         :return:
         """
-        config = dict([(key, value) for key, value in self.options if key in self.cfg.settings and value is not None])
-        for key, value in config:
+        config = dict([(key, value) for key, value in self.options.items() if key in self.cfg.settings and value is not None])
+        print(config)
+        for key, value in config.items():
             self.cfg.set(key.lower(), value)
 
     def load(self):

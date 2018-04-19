@@ -37,7 +37,7 @@ class SystemConfigReader(SystemReader):
     """
     System reader for local config file
     """
-    DEFAULT_CONFIG_LOCATION = os.path.join(os.path.dirname(__file__), '../etc/')
+    DEFAULT_CONFIG_LOCATION = os.path.join(os.path.dirname(__file__), '../../etc/')
     DEFAULT_CONFIG_NAME = 'cmdb.conf'
     CONFIG_LOADED = True
     CONFIG_NOT_LOADED = False

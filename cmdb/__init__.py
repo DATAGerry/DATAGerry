@@ -2,7 +2,7 @@
 cmdb global init
 """
 
-from cmdb.system_reader import SystemConfigReader, SystemSettingsReader
+from cmdb.application_utils.system_reader import SystemConfigReader, SystemSettingsReader
 # Loading global system config reader
 SYSTEM_CONFIG_READER = SystemConfigReader(
     config_name=SystemConfigReader.DEFAULT_CONFIG_NAME,

@@ -1,0 +1,1 @@
+from cmdb.communication_interface.web_app.objects import OBJECT_PAGES
