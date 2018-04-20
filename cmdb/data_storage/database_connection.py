@@ -54,7 +54,7 @@ class MongoConnector(Connector):
 
     DEFAULT_CONNECTION_TIMEOUT = 100
 
-    def __init__(self, host, port, database_name, auth):
+    def __init__(self, host, port, database_name, timeout):
         """
         init mongodb connector
         :param host: database server address
@@ -64,12 +64,11 @@ class MongoConnector(Connector):
                @see http://api.mongodb.com/python/current/examples/authentication.html
                for more informations - same paramenters in cmdb.conf
         """
-        super().__init__(host, port, database_name, MongoConnector.DEFAULT_CONNECTION_TIMEOUT)
+        super().__init__(host, port, database_name, timeout)
         from pymongo import MongoClient
         self.client = MongoClient(
             self.host,
             self.port,
-            *auth,
             socketTimeoutMS=self.timeout,
             serverSelectionTimeoutMS=self.timeout
         )
