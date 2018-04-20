@@ -11,7 +11,7 @@ class TestDatabaseConnection:
             host=os.environ['DATABASE_HOST'],
             port=int(os.environ['DATABASE_PORT']),
             database_name='test',
-            auth={}
+            timeout=1
         )
         # Check if connection exists
         assert connector.connect()['ok'] == 1.0
@@ -28,6 +28,6 @@ class TestDatabaseManager:
             host=os.environ['DATABASE_HOST'],
             port=int(os.environ['DATABASE_PORT']),
             database_name='test',
-            auth={}
+            timeout=1
         ))
         assert test_manager.status() is True
