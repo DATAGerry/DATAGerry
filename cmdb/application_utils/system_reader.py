@@ -32,6 +32,13 @@ class SystemReader:
         """
         raise NotImplementedError
 
+    def setup(self):
+        """
+        performs an setup on call
+        :return: setup informations
+        """
+        raise NotImplementedError
+
 
 class SystemConfigReader(SystemReader):
     """
@@ -54,14 +61,16 @@ class SystemConfigReader(SystemReader):
         self.config_name = config_name
         self.config_location = config_location
         self.config_file = self.config_location + self.config_name
+        self.config_status = self.setup()
+        if self.config_status == SystemConfigReader.CONFIG_NOT_LOADED:
+            raise ConfigFileNotFound(self.config_name)
+
+    def setup(self):
         try:
-            # Try to read the file
             self.read_config_file(self.config_file)
-            self.config_status = SystemConfigReader.CONFIG_LOADED
-        except ConfigFileNotFound as cff:
-            # raises exception if file not found on the given path
-            self.config_status = SystemConfigReader.CONFIG_NOT_LOADED
-            raise ConfigFileNotFound(cff.filename)
+            return SystemConfigReader.CONFIG_LOADED
+        except ConfigFileNotFound:
+            return SystemConfigReader.CONFIG_NOT_LOADED
 
     def read_config_file(self, file):
         """
@@ -144,6 +153,12 @@ class SystemSettingsReader(SystemReader):
     Settings reader loads settings from database
     """
     COLLECTION = 'system.settings'
+    SETUP_INITS = [
+        {
+            '_id': 'security',
+            'secret_key': 'testkey'
+        }
+    ]
 
     def __init__(self, database_manager):
         """
@@ -184,6 +199,9 @@ class SystemSettingsReader(SystemReader):
             collection=SystemSettingsReader.COLLECTION,
             filter={'_id': section}
         )
+
+    def setup(self):
+        return SystemSettingsReader.SETUP_INITS
 
 
 class ConfigFileNotFound(Exception):

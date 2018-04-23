@@ -9,6 +9,6 @@ DATABASE_MANAGER = DatabaseManagerMongo(
         host=SYSTEM_CONFIG_READER.get_value('host', 'Database'),
         port=int(SYSTEM_CONFIG_READER.get_value('port', 'Database')),
         database_name=SYSTEM_CONFIG_READER.get_value('database_name', 'Database'),
-        auth=SYSTEM_CONFIG_READER.get_all_values_from_section('DatabaseAuth')
+        timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT
     )
 )

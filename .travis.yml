@@ -3,20 +3,19 @@ sudo: false
 language: python
 
 python:
-    - 3.3
     - 3.4
     - 3.5
     - 3.6
 
 env:
-    - DATBASE_HOST=127.0.0.1 DATBASE_POST=27017
+    - DATABASE_HOST=127.0.0.1 DATABASE_PORT=27017 PYTHONPATH=$PYTHONPATH:/cmdb
 
 services:
     - mongodb
 
 install:
+    - if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then pip install --upgrade pip setuptools; fi
     - pip install -r requirements-dev.txt
 
 script:
-    - pylint cmdb/
     - pytest tests/
