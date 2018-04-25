@@ -1,12 +1,29 @@
 import pytest
 from cmdb.object_framework.cmdb_object import CmdbObject
 from cmdb.object_framework.cmdb_dao import RequiredInitKeyNotFound
+from cmdb.object_framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.data_storage.database_connection import MongoConnector
+
+
+@pytest.fixture(scope='session', autouse=True)
+def cmdb_manager():
+    cmdb_man = CmdbObjectManager(
+        database_manager=DatabaseManagerMongo(
+            connector=MongoConnector(
+                host='127.0.0.1',
+                port=27017,
+                database_name="cmdb_test",
+                timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT
+            )
+        )
+    )
+    return cmdb_man
 
 
 @pytest.fixture(scope="module")
 def cmdb_init():
     init_values = {
-        "_id": "5ad85720fc13ae3880000040",
         "public_id": 1,
         "type_id": 1,
         "active": True,
@@ -43,3 +60,8 @@ def cmdb_object(cmdb_init):
 def test_init_required(cmdb_object, cmdb_init):
     assert isinstance(cmdb_object, CmdbObject)
     assert cmdb_object.__dict__ == cmdb_init
+
+
+def test_insert(cmdb_init, cmdb_manager):
+    test = cmdb_manager.insert_object(data=cmdb_init)
+    print(test)

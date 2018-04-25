@@ -72,6 +72,7 @@ class MongoConnector(Connector):
             socketTimeoutMS=self.timeout,
             serverSelectionTimeoutMS=self.timeout
         )
+        self.client.d
         self.database = self.client[database_name]
 
     def connect(self):
@@ -137,6 +138,7 @@ class ServerTimeoutError(Exception):
     """
     Server timeout error if connection is lost
     """
+
     def __init__(self, host):
         super().__init__()
         self.message = "Server Timeout - No connection to database at {}".format(host)

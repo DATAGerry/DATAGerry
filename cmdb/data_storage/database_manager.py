@@ -1,7 +1,6 @@
 """
 Database Management instance for database actions
 """
-# pylint: disable-msg=arguments-differ
 
 
 class DatabaseManager:
@@ -88,6 +87,22 @@ class DatabaseManager:
         """
         raise NotImplementedError
 
+    def create(self, db_name):
+        """
+        create new database
+        :param db_name: name of database
+        :return: acknowledged
+        """
+        raise NotImplementedError
+
+    def drop(self, db_name):
+        """
+        delete database
+        :param db_name: name of database
+        :return: acknowledged
+        """
+        raise NotImplementedError
+
 
 class DatabaseManagerMongo(DatabaseManager):
     """
@@ -152,7 +167,14 @@ class DatabaseManagerMongo(DatabaseManager):
         :return: public id of inserted document
         """
         result = self.database_connector.get_collection(collection).insert_one(data)
-        return result.inserted_id
+        if result.acknowledged:
+            self.__find(collection=collection, )
+            formatted_id = {'_id': result.inserted_id}
+            projection = {'public_id': 1}
+            cursor_result = self.__find(collection, formatted_id, projection, limit=1)
+            for result in cursor_result.limit(-1):
+                return int(result['public_id'])
+        return None
 
     def update(self, collection, public_id: int, data):
         """
@@ -179,11 +201,28 @@ class DatabaseManagerMongo(DatabaseManager):
             raise DocumentCouldNotBeDeleted(collection, public_id)
         return result
 
+    def create(self, db_name):
+        """
+        create database
+        :param db_name: name of database
+        :return: acknowledge of operation
+        """
+        return self.database_connector.client[db_name]
+
+    def drop(self, db_name):
+        """
+        delete database
+        :param db_name: name of database
+        :return: acknowledge of operation
+        """
+        return self.database_connector.client.drop_database(db_name)
+
 
 class NoDocumentFound(Exception):
     """
     Error if no document was found
     """
+
     def __init__(self, collection, public_id):
         super().__init__()
         self.message = "No document with the id {} was found inside {}".format(public_id, collection)
@@ -193,6 +232,7 @@ class DocumentCouldNotBeDeleted(Exception):
     """
     Error if document could not be deleted from database
     """
+
     def __init__(self, collection, public_id):
         super().__init__()
         self.message = "The document with the id {} could not be deleted inside {}".format(public_id, collection)

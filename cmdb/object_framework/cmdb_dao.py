@@ -1,55 +1,77 @@
-"""
-Data Access Object for CMDB
-"""
-
-
 class CmdbDAO:
     """
-    Data Access Object for CMDB
+    The data access object is the basic presentation if objects and
+    their necessary dependent classes are to be stored in the database.
     """
+
     COLLECTION = 'objects.*'
+    _SUPER_INIT_KEYS = [
+        'public_id'
+    ]
     REQUIRED_INIT_KEYS = []
     VERSIONING_MAJOR = 1.0
     VERSIONING_MINOR = 0.1
     VERSIONING_PATCH = 0.01
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
+        """
+        init methode which auto convert params to the attribute dict
+        :param kwargs: new generated attributes
+        """
         for key in kwargs:
             setattr(self, key, kwargs[key])
 
+    def get_public_id(self):
+        """
+        returns necessary public id
+        :return: public_id of object
+        """
+        return self.public_id
+
     def __new__(cls, *args, **kwargs):
         """
-        @deprecated
+        @deprecated_implementation
         if not all(key in key_list for key in cls.REQUIRED_INIT_KEYS):
         raise InitKeyNotFoundError()
         """
-        for r_key in cls.REQUIRED_INIT_KEYS:
-            if r_key in kwargs:
+        init_keys = cls._SUPER_INIT_KEYS + cls.REQUIRED_INIT_KEYS
+        for req_key in init_keys:
+            if req_key in kwargs:
                 continue
             else:
-                raise RequiredInitKeyNotFound(r_key)
+                raise RequiredInitKeyNotFound(req_key)
         return super(CmdbDAO, cls).__new__(cls)
 
-    @classmethod
-    def _update_version(cls, current_version, update):
+    def _update_version(self, update):
+        """
+        updates the version based on versioning
+        :param update: update step
+        :return: new version
+        """
         import math
-        if update == cls.VERSIONING_MINOR:
-            return float(current_version) + float(update)
-        elif update == cls.VERSIONING_MAJOR:
-            return math.floor(current_version + update)
-        return current_version + update
+        if update == self.VERSIONING_MINOR:
+            return float(self.version) + float(update)
+        elif update == self.VERSIONING_MAJOR:
+            return math.floor(self.version + update)
+        return self.version + update
 
     def __repr__(self):
-        """Debug function for print tests
-
-        Returns: pretty formatted string
+        """
+        Debug function for print tests
+        :return: pretty formatted string
         """
         import pprint
         return 'Class: %s \nDict:\n%s' % \
                (self.__class__.__name__, pprint.pformat(self.__dict__))
 
+    def to_database(self):
+        return self.__dict__
+
 
 class RequiredInitKeyNotFound(Exception):
+    """
+    Error if on of the given parameters is missing inside required init keys
+    """
 
     def __init__(self, key_name):
         super().__init__()
