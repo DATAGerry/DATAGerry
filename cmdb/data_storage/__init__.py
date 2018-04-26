@@ -1,7 +1,7 @@
 """
 Global objects for database management
 """
-from cmdb import SYSTEM_CONFIG_READER
+from cmdb.application_utils import SYSTEM_CONFIG_READER
 from cmdb.data_storage.database_connection import MongoConnector
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 DATABASE_MANAGER = DatabaseManagerMongo(
