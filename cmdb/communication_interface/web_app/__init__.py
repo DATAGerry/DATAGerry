@@ -22,6 +22,11 @@ def register_blueprints(app):
     app.register_blueprint(TYPE_PAGES)
 
 
+def register_context_processors(app):
+    from cmdb.communication_interface.web_app.context_injector import inject_frontend_info
+    app.context_processor(inject_frontend_info)
+
+
 def register_error_pages(app):
     """
     registers error pages
@@ -42,3 +47,4 @@ def register_error_pages(app):
 
 register_error_pages(APP)
 register_blueprints(APP)
+register_context_processors(APP)

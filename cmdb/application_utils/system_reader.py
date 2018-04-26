@@ -152,11 +152,10 @@ class SystemSettingsReader(SystemReader):
     """
     Settings reader loads settings from database
     """
-    COLLECTION = 'system.settings'
+    COLLECTION = 'settings.conf'
     SETUP_INITS = [
         {
-            '_id': 'security',
-            'secret_key': 'testkey'
+            'TODO'
         }
     ]
 
@@ -174,7 +173,7 @@ class SystemSettingsReader(SystemReader):
         :param section: section of the value
         :return: value
         """
-        return self.dbm.find_one(
+        return self.dbm.find_one_by(
             collection=SystemSettingsReader.COLLECTION,
             filter={'_id': section}
         )[name]
