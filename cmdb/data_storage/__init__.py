@@ -1,14 +1,18 @@
 """
 Global objects for database management
 """
-from cmdb.application_utils import SYSTEM_CONFIG_READER
+from cmdb.application_utils.system_reader import SystemConfigReader
 from cmdb.data_storage.database_connection import MongoConnector
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
+database_reader = SystemConfigReader(
+    config_name=SystemConfigReader.DEFAULT_CONFIG_NAME,
+    config_location=SystemConfigReader.DEFAULT_CONFIG_LOCATION
+)
 DATABASE_MANAGER = DatabaseManagerMongo(
     connector=MongoConnector(
-        host=SYSTEM_CONFIG_READER.get_value('host', 'Database'),
-        port=int(SYSTEM_CONFIG_READER.get_value('port', 'Database')),
-        database_name=SYSTEM_CONFIG_READER.get_value('database_name', 'Database'),
+        host=database_reader.get_value('host', 'Database'),
+        port=int(database_reader.get_value('port', 'Database')),
+        database_name=database_reader.get_value('database_name', 'Database'),
         timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT
     )
 )
