@@ -152,7 +152,7 @@ class SystemSettingsReader(SystemReader):
     """
     Settings reader loads settings from database
     """
-    COLLECTION = 'system.settings'
+    COLLECTION = 'settings.conf'
     SETUP_INITS = [
         {
             '_id': 'security',
