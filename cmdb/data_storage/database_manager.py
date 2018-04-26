@@ -42,6 +42,9 @@ class DatabaseManager:
         """
         raise NotImplementedError
 
+    def find_one_by(self, *args, **kwargs):
+        raise NotImplementedError
+
     def find_one(self, *args, **kwargs):
         """
         calls __find with single return
@@ -148,6 +151,12 @@ class DatabaseManagerMongo(DatabaseManager):
         for result in cursor_result.limit(-1):
             return result
         raise NoDocumentFound(collection, public_id)
+
+    def find_one_by(self, collection, *args, **kwargs):
+        cursor_result = self.__find(collection, limit=1, *args, **kwargs)
+        for result in cursor_result.limit(-1):
+            return result
+        raise NoDocumentFound(collection, args)
 
     def find_all(self, collection, *args, **kwargs):
         """
