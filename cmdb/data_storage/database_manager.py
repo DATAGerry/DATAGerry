@@ -177,7 +177,6 @@ class DatabaseManagerMongo(DatabaseManager):
         """
         result = self.database_connector.get_collection(collection).insert_one(data)
         if result.acknowledged:
-            self.__find(collection=collection, )
             formatted_id = {'_id': result.inserted_id}
             projection = {'public_id': 1}
             cursor_result = self.__find(collection, formatted_id, projection, limit=1)
