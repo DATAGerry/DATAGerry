@@ -61,7 +61,3 @@ def test_init_required(cmdb_object, cmdb_init):
     assert isinstance(cmdb_object, CmdbObject)
     assert cmdb_object.__dict__ == cmdb_init
 
-
-def test_insert(cmdb_init, cmdb_manager):
-    test = cmdb_manager.insert_object(data=cmdb_init)
-    print(test)

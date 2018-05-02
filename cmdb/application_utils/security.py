@@ -3,6 +3,7 @@ import ast
 from Cryptodome import Random
 from Crypto.Cipher import AES
 import base64
+from cmdb.data_storage.database_manager import NoDocumentFound
 
 
 class SecurityManager:
@@ -59,7 +60,7 @@ class SecurityManager:
     def get_sym_key(self):
         try:
             symmetric_key = self.ssr.get_value('symmetric_key', 'security')
-        except KeyError:
+        except (KeyError, NoDocumentFound):
             symmetric_key = jwk.JWK.generate(kty='oct', size=256).export()
             symmetric_key = ast.literal_eval(symmetric_key)
             self.ssw.write('security', {'symmetric_key': symmetric_key})
@@ -68,7 +69,7 @@ class SecurityManager:
     def get_key_pair(self):
         try:
             asy_key = self.ssr.get_value('key_pair', 'security')
-        except KeyError:
+        except (KeyError, NoDocumentFound):
             asy_key = jwk.JWK.generate(kty='EC', crv='P-256')
             public_key = ast.literal_eval(asy_key.export_public())
             private_key = ast.literal_eval(asy_key.export_private())
