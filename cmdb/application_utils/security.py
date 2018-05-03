@@ -14,6 +14,7 @@ class SecurityManager:
         self.ssw = settings_writer
         self.symmetric_key = self.get_sym_key()
         self.key_pair = self.get_key_pair()
+        self.salt = "cmdb"
 
     def generate_hmac(self, data):
 
@@ -23,7 +24,7 @@ class SecurityManager:
 
         generated_hash = hmac.new(
             bytes(self.symmetric_key, 'utf-8'),
-            bytes(data, 'utf-8'),
+            bytes(data + self.salt, 'utf-8'),
             hashlib.sha256
         )
 

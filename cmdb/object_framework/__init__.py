@@ -12,8 +12,18 @@ from cmdb.object_framework.cmdb_object_type import CmdbType
 from cmdb.object_framework.cmdb_object_category import CmdbTypeCategory
 from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
 from cmdb.object_framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.data_storage import DATABASE_MANAGER
+from cmdb.data_storage.database_connection import MongoConnector
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.application_utils import SYSTEM_CONFIG_READER
 
 OBJECT_MANAGER = CmdbObjectManager(
-    database_manager=DATABASE_MANAGER
+    database_manager=DatabaseManagerMongo(
+    connector=MongoConnector(
+        host=SYSTEM_CONFIG_READER.get_value('host', 'Database'),
+        port=int(SYSTEM_CONFIG_READER.get_value('port', 'Database')),
+        database_name=SYSTEM_CONFIG_READER.get_value('database_name', 'Database'),
+        timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT
+    )
+)
+
 )

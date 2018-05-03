@@ -1,0 +1,78 @@
+{% extends 'layout.html' %}
+{% from 'utils.html' import render_pagination with context %}
+{% block body %}
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">Home</li>
+    <li class="breadcrumb-item active"><a href="/type/{{ type.public_id }}">{{ type.title }}</a></li>
+</ol>
+
+<div class="container-fluid animated fadeIn">
+    <div class="row">
+        <div class="col-xl-9 col-lg-9">
+            <div class="card">
+                <div class="card-header">
+                    {{ type.active | label_active }} {{ type.title }}
+                    <span class="badge badge-pill badge-secondary float-right mr-1">Objects: {{ object_counts }}</span>
+                </div>
+                <div class="card-body">
+                    Description: {{ type.description }}
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    {% if object_counts > 0 %}
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            {% for sum_table in type.render_meta.summary %}
+                            <th>{{ sum_table.label }}</th>
+                            {% endfor %}
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for current_ob in objects %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('object_pages.view_single_object', public_id=current_ob.get_public_id()) }}">{{
+                                    current_ob.get_public_id() }}</a></td>
+                            {% for sum_table in type.render_meta.summary %}
+                            <td>{% for sum_field in sum_table.fields %}
+                                {{ current_ob.get_value(sum_field) }}
+                                {% endfor %}
+                            </td>
+                            {% endfor %}
+                            <td>
+                                <span class="badge badge-pill badge-{{current_ob.status.brand}}">{{ current_ob.status.name }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <nav aria-label="table_navigation">
+                        <ul class="pagination justify-content-center">
+                            {{ render_pagination(page) }}
+                        </ul>
+                    </nav>
+
+
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-3">
+            <div class="card">
+                <div class="card-header">
+                    Metadata
+                    <span class="badge badge-pill badge-secondary float-right mr-1">Version: {{ type.version }}</span>
+                </div>
+                <div class="card-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

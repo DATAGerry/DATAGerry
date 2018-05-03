@@ -1,4 +1,4 @@
-from cmdb import SYSTEM_CONFIG_READER
+from cmdb.application_utils import SYSTEM_CONFIG_READER
 
 
 class AuthenticationProvider:
@@ -10,10 +10,6 @@ class AuthenticationProvider:
     def authenticate(self, username, password):
         raise NotImplementedError
 
-    @staticmethod
-    def get_auth_providers():
-        return eval(SYSTEM_CONFIG_READER.get_value("provider", "Authentication"))
-
 
 class LocalAuthenticationProvider(AuthenticationProvider):
 
@@ -23,13 +19,14 @@ class LocalAuthenticationProvider(AuthenticationProvider):
         self.dbm = database_manager
 
     def authenticate(self, user, password):
-        from cmdb.application.security.security_manager import hmac_sha256
-        compare_hash = hmac_sha256(self.security['secret_key'], password+self.security['password_salt'])
+        from cmdb.application_utils import SECURITY_MANAGER
+        compare_hash = SECURITY_MANAGER.generate_hmac(password)
         if compare_hash == user.password:
             return True
         return False
 
-
+"""
+@deprecated
 class LdapAuthenticationProvider(AuthenticationProvider):
 
     def __init__(self):
@@ -68,3 +65,4 @@ class LdapAuthenticationProvider(AuthenticationProvider):
         connection = self.connect(bind_dn=self.bind_dn, password=self.bind_password)
         connection.search(self.base_dn, self.search_filter_sync, attributes='uid')
         return connection.entries
+"""

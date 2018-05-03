@@ -1,0 +1,40 @@
+<div class="sidebar">
+    <nav class="sidebar-nav">
+        <ul class="nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/"><i class="icon-speedometer"></i> Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/favorite"><i class="icon-star"></i> Favorite</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/newest"><i class="icon-energy"></i> Newest</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/latest"><i class="icon-action-redo"></i> Latest changes</a>
+            </li>
+            <li class="nav-title">Categories</li>
+            {% for cat in sidebar_categories() %}
+            {% if cat.type_list|length > 0 %}
+            <li class="nav-item nav-dropdown">
+                <a class="nav-link nav-dropdown-toggle" name="{{ cat.name }}" href="#"><i
+                        class="{{ cat.icon | default_cat_icon }}"></i> {{ cat.title }}</a>
+
+                <ul class="nav-dropdown-items">
+                    {% for type_id in cat.type_list %}
+                    <li class="nav-item">
+                        {% set current_type = object_manager.get_type(type_id) %}
+                        {% set count_objects = object_manager.get_objects_by_type(type_id) | length %}
+                        <a class="nav-link" name="{{ current_type.name }}"
+                           href="{{ url_for('type_pages.view_type_list', public_id=current_type.public_id) }}"><i
+                                class="icon-doc"></i> {{current_type.title}} <span class="badge badge-primary">{{ count_objects }}</span></a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+    </nav>
+    <button class="sidebar-minimizer brand-minimizer" type="button"></button>
+</div>

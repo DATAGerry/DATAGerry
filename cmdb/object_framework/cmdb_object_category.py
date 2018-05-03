@@ -9,11 +9,9 @@ class CmdbTypeCategory(CmdbDAO):
     REQUIRED_INIT_KEYS = [
         'name',
         'title',
-        'sub_categories',
-        'type_list'
     ]
 
-    def __init__(self, name, title, type_list, sub_categories, **kwargs):
+    def __init__(self, name, title, **kwargs):
         """
         init category
         :param name: name of category
@@ -24,8 +22,6 @@ class CmdbTypeCategory(CmdbDAO):
         """
         self.name = name
         self.title = title
-        self.type_list = type_list
-        self.sub_categories = sub_categories
         super(CmdbTypeCategory, self).__init__(**kwargs)
 
     def get_name(self):

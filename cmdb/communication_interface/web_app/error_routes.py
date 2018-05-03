@@ -5,10 +5,10 @@ Error handlers for web_app module
 from flask import Blueprint
 from flask import render_template
 
-ERROR_PAGES = Blueprint('error_pages', __name__, template_folder='templates')
+error_pages = Blueprint('error_pages', __name__, template_folder='templates')
 
 
-@ERROR_PAGES.errorhandler(400)
+@error_pages.errorhandler(400)
 def bad_request(error):
     """
     The request message had an incorrect structure.
@@ -18,7 +18,7 @@ def bad_request(error):
     return render_template('error.html', error=error), 400
 
 
-@ERROR_PAGES.errorhandler(401)
+@error_pages.errorhandler(401)
 def unauthorized_user(error):
     """
     The request cannot be executed without valid authentication.
@@ -30,7 +30,7 @@ def unauthorized_user(error):
     return render_template('error.html', error=error), 401
 
 
-@ERROR_PAGES.errorhandler(403)
+@error_pages.errorhandler(403)
 def forbidden(error):
     """
     The request was not executed because the client was not authorized,
@@ -42,7 +42,7 @@ def forbidden(error):
     return render_template('error.html', error=error), 403
 
 
-@ERROR_PAGES.errorhandler(404)
+@error_pages.errorhandler(404)
 def page_not_found(error):
     """
     The requested resource was not found. This status code can
@@ -53,7 +53,7 @@ def page_not_found(error):
     return render_template('error.html', error=error), 404
 
 
-@ERROR_PAGES.errorhandler(410)
+@error_pages.errorhandler(410)
 def page_gone(error):
     """
     The requested resource is no longer provided and has been permanently removed.
@@ -63,7 +63,7 @@ def page_gone(error):
     return render_template('error.html', error=error), 410
 
 
-@ERROR_PAGES.errorhandler(418)
+@error_pages.errorhandler(418)
 def iam_a_teapot(error):
     """
     This code is to be understood as an April Fool of the IETF.
@@ -75,7 +75,7 @@ def iam_a_teapot(error):
     return render_template('error.html', error=error), 418
 
 
-@ERROR_PAGES.errorhandler(500)
+@error_pages.errorhandler(500)
 def internal_server_error(error):
     """
     This is a collective status code for unexpected server errors.

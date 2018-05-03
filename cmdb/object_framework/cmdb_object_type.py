@@ -9,13 +9,15 @@ class CmdbType(CmdbDAO):
     REQUIRED_INIT_KEYS = [
         'name',
         'title',
-        'sections',
         'fields',
-        'version'
+        'version',
+        'render_meta',
+        'created',
+        'status'
     ]
     POSSIBLE_FIELD_TYPES = []
 
-    def __init__(self, name, title, sections, fields, version, **kwargs):
+    def __init__(self, name, title, fields, version, **kwargs):
         """
         init of cmdb type
         :param name: name of type
@@ -27,7 +29,6 @@ class CmdbType(CmdbDAO):
         """
         self.name = name
         self.title = title
-        self.sections = sections
         self.version = version
         self.fields = fields
         super(CmdbType, self).__init__(**kwargs)
@@ -74,8 +75,8 @@ class CmdbType(CmdbDAO):
         :param name: field name
         :return: field with value
         """
-        for field in self.fields.items():
-            if field.name == name:
+        for field in self.fields:
+            if field['name'] == name:
                 return field
         raise FieldNotFoundError(name, self.get_name())
 
