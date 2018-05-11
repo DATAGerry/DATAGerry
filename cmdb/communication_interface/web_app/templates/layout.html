@@ -1,5 +1,5 @@
 {% include 'includes/_head.html' %}
-<body class="app header-fixed sidebar-fixed aside-menu-fixed aside-menu-hidden">
+<body class="app header-fixed sidebar-fixed">
 {% include 'includes/_header.html' %}
 <div class="app-body">
     {% include 'includes/_sidebar.html' %}
@@ -11,5 +11,6 @@
     {% endblock %}
 </div>
 {% include 'includes/_footer.html' %}
-</body>
+{% block appjs %}
+{% endblock %}
 {% include 'includes/_foot.html' %}

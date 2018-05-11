@@ -8,10 +8,6 @@ from cmdb.object_framework import *
 
 class CmdbManagerBase:
     def __init__(self, database_manager):
-        """
-
-        :param database_manager:
-        """
         if database_manager:
             self.dbm = database_manager
         else:
@@ -19,22 +15,17 @@ class CmdbManagerBase:
             self.dbm = DATABASE_MANAGER
 
     def _get(self, collection: str, public_id: int):
-        """
-
-        :param collection:
-        :param public_id:
-        :return:
-        """
         return self.dbm.find_one(
             collection=collection,
             public_id=public_id
         )
 
-    def _get_all(self, collection: str, **requirements: dict):
+    def _get_all(self, collection: str, sort='public_id', **requirements: dict):
         requirements_filter = {}
+        formatted_sort = [(sort, self.dbm.DESCENDING)]
         for k, req in requirements.items():
             requirements_filter.update({k: req})
-        return self.dbm.find_all(collection=collection, filter=requirements_filter)
+        return self.dbm.find_all(collection=collection, filter=requirements_filter, sort=formatted_sort)
 
     def _insert(self, collection: str, data: dict):
         return self.dbm.insert(
@@ -60,6 +51,13 @@ class CmdbObjectManager(CmdbManagerBase):
     def __init__(self, database_manager=None):
         super(CmdbObjectManager, self).__init__(database_manager)
 
+    def get_highest_id(self, collection):
+        return int(self.get_document_with_highest_id(collection)['public_id'])
+
+    def get_document_with_highest_id(self, collection):
+        formatted_sort = [('public_id', self.dbm.DESCENDING)]
+        return self.dbm.find_one_by(collection=collection, sort=formatted_sort)
+
     def get_object(self, public_id: int):
         return CmdbObject(
             **self._get(
@@ -68,9 +66,15 @@ class CmdbObjectManager(CmdbManagerBase):
             )
         )
 
-    def get_objects_by(self, **requirements: dict):
+    def get_objects(self, public_ids: list):
+        object_list = []
+        for public_id in public_ids:
+            object_list.append(self.get_object(public_id))
+        return object_list
+
+    def get_objects_by(self, sort='public_id', **requirements: dict):
         ack = []
-        objects = self._get_all(collection=CmdbObject.COLLECTION, **requirements)
+        objects = self._get_all(collection=CmdbObject.COLLECTION, sort=sort, **requirements)
         for obj in objects:
             ack.append(CmdbObject(**obj))
         return ack
@@ -160,11 +164,18 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = self._delete(CmdbType.COLLECTION, public_id)
         return ack
 
+    def get_all_categories(self):
+        ack = []
+        cats = self.dbm.find_all(collection=CmdbTypeCategory.COLLECTION)
+        for cat_obj in cats:
+            ack.append(CmdbTypeCategory(**cat_obj))
+        return ack
+
     def get_category(self, public_id: int):
         return CmdbTypeCategory(**self.dbm.find_one(
             collection=CmdbTypeCategory.COLLECTION,
             public_id=public_id)
-                                )
+        )
 
     def insert_category(self, data: dict):
         new_category = CmdbTypeCategory(**data)

@@ -4,20 +4,15 @@ from cmdb.user_management.user_exceptions import NoValidAuthenticationProvider
 
 
 class UserSetup(UserManagementSetup):
-    """
-
-    """
 
     def setup(self):
         return self.dbm.insert(UserSetup.get_setup_data().to_mongo(), User.COLLECTION)
 
     @staticmethod
     def get_setup_data():
-        from cmdb.application.security.security_manager import hmac_sha256
-        from cmdb.application import system_config_reader
+        from cmdb.application_utils import SECURITY_MANAGER
         from datetime import datetime
-        admin_pass = hmac_sha256(system_config_reader.get_value('secret_key', 'Security'),
-                                    'admin' + system_config_reader.get_value('password_salt', 'Security'))
+        admin_pass = SECURITY_MANAGER.generate_hmac('admin')
         return User(
             public_id=0,
             user_name='admin',

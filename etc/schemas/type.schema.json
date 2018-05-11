@@ -1,0 +1,397 @@
+{
+  "$id": "http://example.com/example.json",
+  "type": "object",
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "name": {
+      "$id": "/properties/name",
+      "type": "string",
+      "title": "The Name Schema ",
+      "default": "",
+      "examples": [
+        "example"
+      ]
+    },
+    "title": {
+      "$id": "/properties/title",
+      "type": "string",
+      "title": "The Title Schema ",
+      "default": "",
+      "examples": [
+        "Example"
+      ]
+    },
+    "active": {
+      "$id": "/properties/active",
+      "type": "boolean",
+      "title": "The Active Schema ",
+      "default": false,
+      "examples": [
+        true
+      ]
+    },
+    "created": {
+      "$id": "/properties/created",
+      "type": "string",
+      "title": "The Created Schema ",
+      "default": "",
+      "examples": [
+        "1526027287"
+      ]
+    },
+    "status": {
+      "$id": "/properties/status",
+      "type": "array",
+      "items": {
+        "$id": "/properties/status/items",
+        "type": "integer",
+        "title": "The 0th Schema ",
+        "default": 0,
+        "examples": [
+          1,
+          2
+        ]
+      }
+    },
+    "render_meta": {
+      "$id": "/properties/render_meta",
+      "type": "object",
+      "properties": {
+        "external": {
+          "$id": "/properties/render_meta/properties/external",
+          "type": "array",
+          "items": {
+            "$id": "/properties/render_meta/properties/external/items",
+            "type": "object",
+            "properties": {
+              "icon": {
+                "$id": "/properties/render_meta/properties/external/items/properties/icon",
+                "type": "string",
+                "title": "The Icon Schema ",
+                "default": "",
+                "examples": [
+                  "far"
+                ]
+              },
+              "label": {
+                "$id": "/properties/render_meta/properties/external/items/properties/label",
+                "type": "string",
+                "title": "The Label Schema ",
+                "default": "",
+                "examples": [
+                  "Link name"
+                ]
+              },
+              "url": {
+                "$id": "/properties/render_meta/properties/external/items/properties/url",
+                "type": "string",
+                "title": "The Url Schema ",
+                "default": "",
+                "examples": [
+                  "http://www.example.com/%field1% %field2% %field3%"
+                ]
+              }
+            }
+          }
+        },
+        "summary": {
+          "$id": "/properties/render_meta/properties/summary",
+          "type": "array",
+          "items": {
+            "$id": "/properties/render_meta/properties/summary/items",
+            "type": "object",
+            "properties": {
+              "label": {
+                "$id": "/properties/render_meta/properties/summary/items/properties/label",
+                "type": "string",
+                "title": "The Label Schema ",
+                "default": "",
+                "examples": [
+                  "Name"
+                ]
+              },
+              "fields": {
+                "$id": "/properties/render_meta/properties/summary/items/properties/fields",
+                "type": "array",
+                "items": {
+                  "$id": "/properties/render_meta/properties/summary/items/properties/fields/items",
+                  "type": "string",
+                  "title": "The 0th Schema ",
+                  "default": "",
+                  "examples": [
+                    "ex_name"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "sections": {
+          "$id": "/properties/render_meta/properties/sections",
+          "type": "array",
+          "items": {
+            "$id": "/properties/render_meta/properties/sections/items",
+            "type": "object",
+            "properties": {
+              "type": {
+                "$id": "/properties/render_meta/properties/sections/items/properties/type",
+                "type": "string",
+                "title": "The Type Schema ",
+                "default": "",
+                "examples": [
+                  "header"
+                ]
+              },
+              "subtype": {
+                "$id": "/properties/render_meta/properties/sections/items/properties/subtype",
+                "type": "string",
+                "title": "The Subtype Schema ",
+                "default": "",
+                "examples": [
+                  "h1"
+                ]
+              },
+              "name": {
+                "$id": "/properties/render_meta/properties/sections/items/properties/name",
+                "type": "string",
+                "title": "The Name Schema ",
+                "default": "",
+                "examples": [
+                  "name"
+                ]
+              },
+              "label": {
+                "$id": "/properties/render_meta/properties/sections/items/properties/label",
+                "type": "string",
+                "title": "The Label Schema ",
+                "default": "",
+                "examples": [
+                  "Name"
+                ]
+              },
+              "access": {
+                "$id": "/properties/render_meta/properties/sections/items/properties/access",
+                "type": "boolean",
+                "title": "The Access Schema ",
+                "default": false,
+                "examples": [
+                  true
+                ]
+              },
+              "roles": {
+                "$id": "/properties/render_meta/properties/sections/items/properties/roles",
+                "type": "array",
+                "items": {
+                  "$id": "/properties/render_meta/properties/sections/items/properties/roles/items",
+                  "type": "integer",
+                  "title": "The 0th Schema ",
+                  "default": 0,
+                  "examples": [
+                    1,
+                    2
+                  ]
+                }
+              },
+              "fields": {
+                "$id": "/properties/render_meta/properties/sections/items/properties/fields",
+                "type": "array",
+                "items": {
+                  "$id": "/properties/render_meta/properties/sections/items/properties/fields/items",
+                  "type": "string",
+                  "title": "The 0th Schema ",
+                  "default": "",
+                  "examples": [
+                    "ex_name"
+                  ]
+                }
+              },
+              "position": {
+                "$id": "/properties/render_meta/properties/sections/items/properties/position",
+                "type": "integer",
+                "title": "The Position Schema ",
+                "default": 0,
+                "examples": [
+                  1
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "fields": {
+      "$id": "/properties/fields",
+      "type": "array",
+      "items": {
+        "$id": "/properties/fields/items",
+        "type": "object",
+        "properties": {
+          "type": {
+            "$id": "/properties/fields/items/properties/type",
+            "type": "string",
+            "title": "The Type Schema ",
+            "default": "",
+            "examples": [
+              "text"
+            ]
+          },
+          "required": {
+            "$id": "/properties/fields/items/properties/required",
+            "type": "boolean",
+            "title": "The Required Schema ",
+            "default": false,
+            "examples": [
+              true
+            ]
+          },
+          "label": {
+            "$id": "/properties/fields/items/properties/label",
+            "type": "string",
+            "title": "The Label Schema ",
+            "default": "",
+            "examples": [
+              "Text Field"
+            ]
+          },
+          "description": {
+            "$id": "/properties/fields/items/properties/description",
+            "type": "string",
+            "title": "The Description Schema ",
+            "default": "",
+            "examples": [
+              "test"
+            ]
+          },
+          "placeholder": {
+            "$id": "/properties/fields/items/properties/placeholder",
+            "type": "string",
+            "title": "The Placeholder Schema ",
+            "default": "",
+            "examples": [
+              "test"
+            ]
+          },
+          "className": {
+            "$id": "/properties/fields/items/properties/className",
+            "type": "string",
+            "title": "The Classname Schema ",
+            "default": "",
+            "examples": [
+              "form-control"
+            ]
+          },
+          "name": {
+            "$id": "/properties/fields/items/properties/name",
+            "type": "string",
+            "title": "The Name Schema ",
+            "default": "",
+            "examples": [
+              "text-1526028654861"
+            ]
+          },
+          "value": {
+            "$id": "/properties/fields/items/properties/value",
+            "type": "string",
+            "title": "The Value Schema ",
+            "default": "",
+            "examples": [
+              "teset"
+            ]
+          },
+          "subtype": {
+            "$id": "/properties/fields/items/properties/subtype",
+            "type": "string",
+            "title": "The Subtype Schema ",
+            "default": "",
+            "examples": [
+              "text"
+            ]
+          },
+          "maxlength": {
+            "$id": "/properties/fields/items/properties/maxlength",
+            "type": "string",
+            "title": "The Maxlength Schema ",
+            "default": "",
+            "examples": [
+              "120"
+            ]
+          },
+          "role": {
+            "$id": "/properties/fields/items/properties/role",
+            "type": "string",
+            "title": "The Role Schema ",
+            "default": "",
+            "examples": [
+              "1"
+            ]
+          },
+          "access": {
+            "$id": "/properties/fields/items/properties/access",
+            "type": "boolean",
+            "title": "The Access Schema ",
+            "default": false,
+            "examples": [
+              true
+            ]
+          },
+          "values": {
+            "$id": "/properties/fields/items/properties/values",
+            "type": "array",
+            "items": {
+              "$id": "/properties/fields/items/properties/values/items",
+              "type": "object",
+              "properties": {
+                "label": {
+                  "$id": "/properties/fields/items/properties/values/items/properties/label",
+                  "type": "string",
+                  "title": "The Label Schema ",
+                  "default": "",
+                  "examples": [
+                    "Option 1"
+                  ]
+                },
+                "value": {
+                  "$id": "/properties/fields/items/properties/values/items/properties/value",
+                  "type": "string",
+                  "title": "The Value Schema ",
+                  "default": "",
+                  "examples": [
+                    "option-1"
+                  ]
+                },
+                "selected": {
+                  "$id": "/properties/fields/items/properties/values/items/properties/selected",
+                  "type": "boolean",
+                  "title": "The Selected Schema ",
+                  "default": false,
+                  "examples": [
+                    true
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "description": {
+      "$id": "/properties/description",
+      "type": "string",
+      "title": "The Description Schema ",
+      "default": "",
+      "examples": [
+        "CMDB Beispiel Typ"
+      ]
+    },
+    "version": {
+      "$id": "/properties/version",
+      "type": "string",
+      "title": "The Version Schema ",
+      "default": "",
+      "examples": [
+        "1.0.0"
+      ]
+    }
+  }
+}

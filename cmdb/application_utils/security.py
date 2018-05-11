@@ -3,6 +3,7 @@ import ast
 from Cryptodome import Random
 from Crypto.Cipher import AES
 import base64
+from cmdb.data_storage.database_manager import NoDocumentFound
 
 
 class SecurityManager:
@@ -13,6 +14,7 @@ class SecurityManager:
         self.ssw = settings_writer
         self.symmetric_key = self.get_sym_key()
         self.key_pair = self.get_key_pair()
+        self.salt = "cmdb"
 
     def generate_hmac(self, data):
 
@@ -22,7 +24,7 @@ class SecurityManager:
 
         generated_hash = hmac.new(
             bytes(self.symmetric_key, 'utf-8'),
-            bytes(data, 'utf-8'),
+            bytes(data + self.salt, 'utf-8'),
             hashlib.sha256
         )
 
@@ -59,7 +61,7 @@ class SecurityManager:
     def get_sym_key(self):
         try:
             symmetric_key = self.ssr.get_value('symmetric_key', 'security')
-        except KeyError:
+        except (KeyError, NoDocumentFound):
             symmetric_key = jwk.JWK.generate(kty='oct', size=256).export()
             symmetric_key = ast.literal_eval(symmetric_key)
             self.ssw.write('security', {'symmetric_key': symmetric_key})
@@ -68,7 +70,7 @@ class SecurityManager:
     def get_key_pair(self):
         try:
             asy_key = self.ssr.get_value('key_pair', 'security')
-        except KeyError:
+        except (KeyError, NoDocumentFound):
             asy_key = jwk.JWK.generate(kty='EC', crv='P-256')
             public_key = ast.literal_eval(asy_key.export_public())
             private_key = ast.literal_eval(asy_key.export_private())
@@ -79,7 +81,3 @@ class SecurityManager:
             self.ssw.write('security', {'key_pair': insert_key})
         return asy_key
 
-
-class TokenManager:
-    def __init__(self):
-        pass

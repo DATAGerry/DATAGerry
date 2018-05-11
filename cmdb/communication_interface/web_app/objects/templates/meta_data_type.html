@@ -1,0 +1,34 @@
+<div class="card">
+    <div class="card-header">
+        Metadata
+        <span class="badge badge-pill badge-secondary float-right">Version: {{ type.version }}</span>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Data</th>
+                <th>Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Creation time</td>
+                <td>{{type.creation_time}}</td>
+            </tr>
+            <tr>
+                <td>Creator</td>
+                <td>
+                    {{type.creator_id}}
+                </td>
+            </tr>
+            <tr>
+                <td>Status</td>
+                <td>
+                    <span class="badge badge-{{type.status.brand}}">{{type.status.name}}</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

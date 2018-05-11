@@ -46,10 +46,22 @@ class CmdbObject(CmdbDAO):
         self.last_editor_id = last_editor_id
         self.last_edit_time = last_edit_time
         self.active = active
-        self.views = views
+        self.views = int(views)
         self.fields = fields
         self.logs = logs
         super(CmdbObject, self).__init__(**kwargs)
+
+    def get_type_id(self):
+        return self.type_id
+
+    def get_links(self):
+        if self.links:
+            return self.links
+        else:
+            None
+
+    def update_view_counter(self):
+        self.views += 1
 
     def get_all_fields(self):
         """
@@ -64,6 +76,10 @@ class CmdbObject(CmdbDAO):
         :param field: field_name
         :return: value of field
         """
-        el = [x for x in self.fields if x['name'] == field][0]
-        if el:
-            return el['value']
+        for f in self.fields:
+            if f['name'] == field:
+                return f['value']
+            else:
+                continue
+        return ""
+

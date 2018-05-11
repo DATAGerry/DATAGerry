@@ -1,0 +1,126 @@
+{% extends 'layout.html' %}
+{% from 'utils.html' import generate_link_table with context %}
+{% block body %}
+<ol class="breadcrumb">
+    <li class="breadcrumb-item">Home</li>
+    <li class="breadcrumb-item"><a href="/type/{{ type.public_id }}">{{ type.title }}</a></li>
+    <li class="breadcrumb-item active">ID: {{ object.public_id }}</li>
+    <li class="breadcrumb-menu d-md-down-none">
+        <div class="btn-group" role="group" aria-label="Button group">
+            <a class="btn" href="#"><i class="far fa-star"></i> Favorite</a>
+            <a class="btn" href="/object/edit/{{object.public_id}}"><i class="far fa-edit"></i> Edit</a>
+            <a class="btn" href="/object/copy/{{object.public_id}}"><i class="far fa-copy"></i> Copy</a>
+            <a class="btn" href="/object/print/{{object.public_id}}"><i class="fas fa-print"></i> Print</a>
+            <a class="btn" href="/object/delete/{{object.public_id}}"><i class="far fa-trash-alt"></i> Delete</a>
+        </div>
+    </li>
+</ol>
+
+<div class="container-fluid animated fadeIn">
+    <div class="row">
+        <div class="col-xl-9 col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    {{ object.active | label_active }} {{ type.title }} #{{
+                    object.public_id }}
+                    <span class="badge badge-pill badge-secondary float-right mr-1">Views: {{ object.views }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <div id="qrcode"></div>
+                        </div>
+                        <div class="col-9">
+                            <h3>Summary</h3>
+                            <div class="row">
+                                {% for summary in type.render_meta.summary %}
+                                <div class="col">
+                                    <h5>{{ summary.label }}</h5>
+                                    {% for current_field in summary.fields %}
+                                    {{ object.get_value(current_field) }}
+                                    {% endfor %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active show" data-toggle="tab" href="#data" role="tab"
+                               aria-controls="data" aria-selected="true">Data</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#links" role="tab" aria-controls="links"
+                               aria-selected="false">Links</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#references" role="tab"
+                               aria-controls="references"
+                               aria-selected="false">References</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#logs" role="tab" aria-controls="logs"
+                               aria-selected="false">Logs</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active show" id="data" role="tabpanel">
+                            {% for section in type.render_meta.sections %}
+                            <span class="h3">{{ section.label }}</span>
+                            <hr>
+                            {% for field in section.fields %}
+                            {% set current_field = type.get_field(field) %}
+                            <div class="form-group">
+                                <label for="{{ current_field.name }}">{{ current_field.label }}</label>
+                                <input type="{{ current_field.type }}" class="form-control"
+                                       id="{{ current_field.name }}" name="{{ current_field.name }}"
+                                       value="{{ object.get_value(current_field.name) }}" readonly/>
+                            </div>
+                            {% endfor %}
+                            {% endfor %}
+                        </div>
+                        <div class="tab-pane" id="links" role="tabpanel">
+                            {{ generate_link_table(linked_objects) }}
+                        </div>
+                        <div class="tab-pane" id="references" role="tabpanel">
+                            TODO
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    External
+                </div>
+                <div class="card-body">
+                    {% for external in type.render_meta.external %}
+                    <i class="{{ external.icon }}"></i> <a href="{{ calc_url(external.url, object) }}"
+                                                           target="_blank">{{ external.label }}</a>
+                    {% endfor %}
+
+                </div>
+            </div>
+            {% include 'meta_data_object.html' %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block appjs %}
+<script type="text/javascript">
+var qrcode = new QRCode("qrcode", {
+    text: "{{ current_url() }}",
+    width: 128,
+    height: 128,
+    colorDark : "#000000",
+    colorLight : "#ffffff",
+    correctLevel : QRCode.CorrectLevel.H
+});
+</script>
+{% endblock %}

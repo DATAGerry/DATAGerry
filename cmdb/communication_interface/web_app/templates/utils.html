@@ -1,0 +1,109 @@
+{% macro render_pagination(pagination) %}
+<div class=pagination>
+    {% if pagination.has_prev %}
+    <li class="page-item">
+        <a class="page-link" href="{{ url_for_other_page(pagination.page + -1) }}">Prev</a>
+    </li>
+    {% endif %}
+    {%- for page in pagination.iter_pages() %}
+    {% if page %}
+    {% if page != pagination.page %}
+    <li class="page-item"><a class="page-link" href="{{ url_for_other_page(page) }}">{{ page }}</a></li>
+    {% else %}
+    <li class="page-item active"><a class="page-link" href="{{ url_for_other_page(page) }}">{{ page }}</a></li>
+    {% endif %}
+    {% else %}
+    <span class=ellipsis>…</span>
+    {% endif %}
+    {%- endfor %}
+    {% if pagination.has_next %}
+    <li class="page-item">
+        <a class="page-link" href="{{ url_for_other_page(pagination.page + 1) }}">Next</a>
+    </li>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro generate_form_from_type(type_object) %}
+    {% for section in type_object.get_sections() %}
+        <span class="h3">{{ section['label'] }}</span>
+        <hr/>
+        {% for field_name in section['fields'] %}
+            {% set current_field = type_object.get_field(field_name) %}
+
+                {{ generate_input_form_html_type(current_field) }}
+
+        {% endfor %}
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="reset" class="btn btn-secondary">Reset</button>
+{% endmacro %}
+
+{% macro generate_input_form_html_type(field) %}
+    <div class="form-group">
+        <label for="{{ field.name }}">{{ field.label }}</label>
+        {{ parse_input(**field) }}
+        {% if field.small_help is defined %}
+        <small class="form-text text-muted">{{ field.small_help }}</small>
+        {% endif %}
+    </div>
+{% endmacro%}
+
+
+{% macro generate_default_table(post) %}
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>ID</th>
+        <th>Type</th>
+        <th>Author</th>
+        <th>Date</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for link in post %}
+    <tr>
+        {% set buffer_object = object_manager.get_object(link['public_id']) %}
+        {% set buffer_type = object_manager.get_type(buffer_object.get_type_id()) %}
+        <td>{{ buffer_object.active | label_active }}</td>
+        <td><a href="/object/{{buffer_object.get_public_id()}}">{{buffer_object.get_public_id()}}</a></td>
+        <td><a href="/type/{{buffer_type.get_public_id()}}">{{buffer_type.get_title()}}</a></td>
+        <td>{{buffer_object.creator_id}}</td>
+        <td>{{buffer_object.creation_time}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endmacro %}
+
+
+{% macro generate_link_table(post) %}
+{% if post != None %}
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>ID</th>
+        <th>Type</th>
+        <th>Author</th>
+        <th>Date</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for link in post %}
+    <tr>
+        {% set buffer_object = object_manager.get_object(link['public_id']) %}
+        {% set buffer_type = object_manager.get_type(buffer_object.get_type_id()) %}
+        <td>{{ buffer_object.active | label_active }}</td>
+        <td><a href="/object/{{buffer_object.get_public_id()}}">{{buffer_object.get_public_id()}}</a></td>
+        <td>{{buffer_type.get_title()}}</td>
+        <td>{{link['adding_id']}}</td>
+        <td>{{link['adding_time']}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endmacro %}

@@ -8,24 +8,13 @@ class CmdbTypeCategory(CmdbDAO):
     COLLECTION = "objects.categories"
     REQUIRED_INIT_KEYS = [
         'name',
-        'title',
-        'sub_categories',
-        'type_list'
+        'label',
     ]
 
-    def __init__(self, name, title, type_list, sub_categories, **kwargs):
-        """
-        init category
-        :param name: name of category
-        :param title: displayed title
-        :param type_list: list of all types
-        :param sub_categories: selected categories
-        :param kwargs: additional data
-        """
+    def __init__(self, name, label, icon=None, **kwargs):
         self.name = name
-        self.title = title
-        self.type_list = type_list
-        self.sub_categories = sub_categories
+        self.label = label
+        self.icon = icon
         super(CmdbTypeCategory, self).__init__(**kwargs)
 
     def get_name(self):
@@ -35,12 +24,12 @@ class CmdbTypeCategory(CmdbDAO):
         """
         return self.name
 
-    def get_title(self):
+    def get_label(self):
         """
-        get title of category
-        :return: category title
+        get label of category
+        :return: category label
         """
-        return self.title
+        return self.label
 
     def get_sub_categories(self):
         """
