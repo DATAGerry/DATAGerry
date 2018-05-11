@@ -8,10 +8,6 @@ from cmdb.object_framework import *
 
 class CmdbManagerBase:
     def __init__(self, database_manager):
-        """
-
-        :param database_manager:
-        """
         if database_manager:
             self.dbm = database_manager
         else:
@@ -19,12 +15,6 @@ class CmdbManagerBase:
             self.dbm = DATABASE_MANAGER
 
     def _get(self, collection: str, public_id: int):
-        """
-
-        :param collection:
-        :param public_id:
-        :return:
-        """
         return self.dbm.find_one(
             collection=collection,
             public_id=public_id

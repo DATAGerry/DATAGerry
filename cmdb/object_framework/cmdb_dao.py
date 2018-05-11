@@ -8,6 +8,7 @@ class CmdbDAO:
     _SUPER_INIT_KEYS = [
         'public_id'
     ]
+    IGNORED_INIT_KEYS = []
     REQUIRED_INIT_KEYS = []
     VERSIONING_MAJOR = 1.0
     VERSIONING_MINOR = 0.1
@@ -28,6 +29,12 @@ class CmdbDAO:
         """
         return self.public_id
 
+    def has_object_id(self):
+        if hasattr(self, '_id'):
+            return True
+        else:
+            return False
+
     def __new__(cls, *args, **kwargs):
         """
         @deprecated_implementation
@@ -35,6 +42,8 @@ class CmdbDAO:
         raise InitKeyNotFoundError()
         """
         init_keys = cls._SUPER_INIT_KEYS + cls.REQUIRED_INIT_KEYS
+        if len(cls.IGNORED_INIT_KEYS) > 0:
+            init_keys = [i for j, i in enumerate(init_keys) if j in cls.IGNORED_INIT_KEYS]
         for req_key in init_keys:
             if req_key in kwargs:
                 continue
