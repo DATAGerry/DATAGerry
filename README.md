@@ -1,5 +1,5 @@
 # NetCMDB
-[![Build Status](https://travis-ci.com/markheumueller/NetCMDB.svg?token=7TFxCyzxQMaA2yUsKDqy&branch=master)](https://travis-ci.com/markheumueller/NetCMDB)  
+[![Build Status](https://travis-ci.com/NETHINKS/NetCMDB.svg?token=7TFxCyzxQMaA2yUsKDqy&branch=master)](https://travis-ci.com/markheumueller/NetCMDB)  
 net|cmdb is a open-source configurable management database. It is used
 for creation and management of objects that can be defined dynamically
 at a higher level of abstraction.
@@ -20,7 +20,7 @@ TODO
 We recommend pylint for testing coding styles and error detection.
 
 ## Development
-> See [DEV_NOTES](https://github.com/markheumueller/NetCMDB/blob/master/.github/DEV_NOTES.md)
+> See [DEV_NOTES](https://github.com/NETHINKS/NetCMDB/blob/master/.github/DEV_NOTES.md)
 
 ### Coding Style
 All Python based code parts must follow the [PEP 8 Style Guide](https://www.python.org/dev/peps/pep-0008/). All web-based elements must comply with the standards defined by the World Wide Web Consortium (W3C) and be validated if necessary. All other technologies are implemented according to agreement.
@@ -40,7 +40,7 @@ TODO
 * Michael Batz [michael.batz@nethinks.com](michael.batz@nethinks.com)
 
 ## Contributing
-> See [CONTRIBUTING](https://github.com/markheumueller/NetCMDB/blob/master/.github/CONTRIBUTING.md)
+> See [CONTRIBUTING](https://github.com/NETHINKS/NetCMDB/blob/master/.github/CONTRIBUTING.md)
 
 ### Contributors
 None yet. Why not be the first?
