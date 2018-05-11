@@ -12,7 +12,7 @@ class CmdbType(CmdbDAO):
         'fields',
         'version',
         'render_meta',
-        'created',
+        'creation_time',
         'status'
     ]
     POSSIBLE_FIELD_TYPES = []
@@ -52,7 +52,7 @@ class CmdbType(CmdbDAO):
         get all sections
         :return: all sections
         """
-        return self.sections
+        return self.render_meta['sections']
 
     def get_section(self, name):
         """
@@ -60,7 +60,7 @@ class CmdbType(CmdbDAO):
         :param name: name of section
         :return: chosen section
         """
-        return self.sections[name]
+        return self.render_meta['sections']
 
     def get_fields(self):
         """

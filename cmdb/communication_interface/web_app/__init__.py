@@ -25,13 +25,13 @@ def register_blueprints(app):
 def register_context_processors(app):
     from cmdb.communication_interface.web_app.context_injector import inject_frontend_info, inject_current_url, \
         inject_sidebar, inject_object_manager
-    from cmdb.communication_interface.web_app.objects.objects_injector import inject_calc_url, inject_link_table
+    from cmdb.communication_interface.web_app.objects.objects_injector import inject_calc_url, inject_input_generator
     app.context_processor(inject_object_manager)
     app.context_processor(inject_frontend_info)
     app.context_processor(inject_current_url)
     app.context_processor(inject_sidebar)
     app.context_processor(inject_calc_url)
-    app.context_processor(inject_link_table)
+    app.context_processor(inject_input_generator)
 
 
 def register_filters(app):
@@ -40,6 +40,7 @@ def register_filters(app):
     app.jinja_env.filters['label_active'] = label_active
     app.jinja_env.filters['default_cat_icon'] = default_cat_icon
     app.jinja_env.globals['url_for_other_page'] = url_for_other_page
+
 
 def register_error_pages(app):
     """

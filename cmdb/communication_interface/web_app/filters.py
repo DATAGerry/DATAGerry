@@ -10,4 +10,4 @@ def default_cat_icon(s):
     if s:
         return s
     else:
-        return str("far fa-folder")
+        return str("icon-folder-alt")

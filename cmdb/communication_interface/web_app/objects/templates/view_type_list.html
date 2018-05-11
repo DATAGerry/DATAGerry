@@ -4,11 +4,19 @@
 <ol class="breadcrumb">
     <li class="breadcrumb-item">Home</li>
     <li class="breadcrumb-item active"><a href="/type/{{ type.public_id }}">{{ type.title }}</a></li>
+
+    <li class="breadcrumb-menu d-md-down-none">
+        <div class="btn-group" role="group" aria-label="Button group">
+            <a class="btn" href="/object/add/{{type.public_id}}"><i class="far fa-plus-square"></i> Add</a>
+            <a class="btn" href="/type/edit/{{type.public_id}}"><i class="far fa-edit"></i> Edit</a>
+            <a class="btn" href="/type/export/{{type.public_id}}"><i class="fas fa-print"></i> Export</a>
+        </div>
+    </li>
 </ol>
 
 <div class="container-fluid animated fadeIn">
     <div class="row">
-        <div class="col-xl-9 col-lg-9">
+        <div class="col-xl-9 col-lg-12">
             <div class="card">
                 <div class="card-header">
                     {{ type.active | label_active }} {{ type.title }}
@@ -18,12 +26,14 @@
                     Description: {{ type.description }}
                 </div>
             </div>
+            {% if object_counts > 0 %}
             <div class="card">
                 <div class="card-body">
-                    {% if object_counts > 0 %}
+
                     <table class="table table-striped">
                         <thead>
                         <tr>
+                            <th>#</th>
                             <th>ID</th>
                             {% for sum_table in type.render_meta.summary %}
                             <th>{{ sum_table.label }}</th>
@@ -34,6 +44,7 @@
                         <tbody>
                         {% for current_ob in objects %}
                         <tr>
+                            <td>{{ current_ob.active | label_active }}</td>
                             <td>
                                 <a href="{{ url_for('object_pages.view_single_object', public_id=current_ob.get_public_id()) }}">{{
                                     current_ob.get_public_id() }}</a></td>
@@ -44,7 +55,7 @@
                             </td>
                             {% endfor %}
                             <td>
-                                <span class="badge badge-pill badge-{{current_ob.status.brand}}">{{ current_ob.status.name }}
+                                <span class="badge badge-pill badge-{{current_ob.status.brand}}">{{ current_ob.status.name }}</span>
                             </td>
                         </tr>
                         {% endfor %}
@@ -57,20 +68,12 @@
                     </nav>
 
 
-                    {% endif %}
                 </div>
             </div>
+            {% endif %}
         </div>
-        <div class="col-xl-3 col-lg-3">
-            <div class="card">
-                <div class="card-header">
-                    Metadata
-                    <span class="badge badge-pill badge-secondary float-right mr-1">Version: {{ type.version }}</span>
-                </div>
-                <div class="card-body">
-
-                </div>
-            </div>
+        <div class="col-xl-3 col-lg-12">
+        {% include 'meta_data_type.html' %}
         </div>
     </div>
 </div>

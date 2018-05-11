@@ -1,6 +1,3 @@
-from flask import Markup
-
-
 def inject_calc_url():
     def calc_url(url, url_object):
         import re
@@ -13,22 +10,11 @@ def inject_calc_url():
     return dict(calc_url=calc_url)
 
 
-def inject_link_table():
-    def generate_link_table(link_ids: list):
-        from cmdb.object_framework import OBJECT_MANAGER
-        output = Markup('<table class="table table-striped">')
-        output += Markup('<thead><tr><th>ID</th><th>Type</th><th>Author</th><th>Date</th></tr></thead>')
-        output += Markup('<tbody>')
-        for link in link_ids:
-            output += Markup('<tr>')
-            buffer_object = OBJECT_MANAGER.get_object(link['public_id'])
-            buffer_type = OBJECT_MANAGER.get_type(buffer_object.get_type_id())
-            output += Markup('<td><a href="/object/{0}">{1}</a></td>').format(buffer_object.get_public_id(), buffer_object.get_public_id())
-            output += Markup('<td>{}</td>').format(buffer_type.get_title())
-            output += Markup('<td>{}</td>').format(link['adding_id'])
-            output += Markup('<td>{}</td>').format(link['adding_time'])
-            output += Markup('</tr>')
-        output += Markup('</tbody>')
-        output += Markup('</table>')
-        return output
-    return dict(generate_link_table=generate_link_table)
+def inject_input_generator():
+    def parse_input(**field):
+        from flask import Markup
+        from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
+        field.update({'public_id': 1})
+        current_field = CmdbFieldType(**field)
+        return Markup(current_field.get_html_output())
+    return dict(parse_input=parse_input)

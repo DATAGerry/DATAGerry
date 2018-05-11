@@ -81,7 +81,3 @@ class SecurityManager:
             self.ssw.write('security', {'key_pair': insert_key})
         return asy_key
 
-
-class TokenManager:
-    def __init__(self):
-        pass

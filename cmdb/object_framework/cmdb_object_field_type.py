@@ -8,9 +8,8 @@ class CmdbFieldType(CmdbDAO):
     COLLECTION = 'objects.fields'
     REQUIRED_INIT_KEYS = [
         'name',
-        'html_type',
-        'default',
-        'attributes',
+        'label',
+        'type',
     ]
     POSSIBLE_HTML_INPUT_TYPES = [
         'text',
@@ -30,21 +29,17 @@ class CmdbFieldType(CmdbDAO):
         'textarea'
     ]
 
-    def __init__(self, name, html_type, default, attributes, attr_data=None, **kwargs):
+    def __init__(self, **kwargs):
         """
         init of field types
         :param name: name of field type
+        :param label: display label of name
         :param html_type: html type
         :param default: default value
         :param attributes: html attributes
         :param attr_data: optional data attributes
         :param kwargs: additional data
         """
-        self.name = name
-        self.html_type = self._check_html_type(html_type)
-        self.default = default
-        self.attributes = attributes
-        self.attr_data = attr_data
         super(CmdbFieldType, self).__init__(**kwargs)
 
     @classmethod
@@ -65,12 +60,12 @@ class CmdbFieldType(CmdbDAO):
         """
         return self.name
 
-    def get_html_type(self):
+    def get_type(self):
         """
         get chosen html type
         :return: html type
         """
-        return self.html_type
+        return self.type
 
     def get_default_value(self):
         """
@@ -93,6 +88,41 @@ class CmdbFieldType(CmdbDAO):
         :return: selected attribute
         """
         return self.attributes[name]
+
+    def get_html_output(self):
+        if self.get_type() == 'text':
+            return '<input type="text" class="form-control" id="{0}" name="{1}" />'.format(
+                self.get_name(), self.get_name()
+            )
+        elif self.get_type() == 'password':
+            return '<input type="password" class="form-control" id="{0}" name="{1}" />'.format(
+                self.get_name(), self.get_name()
+            )
+        elif self.get_type() == 'textarea':
+            return '<textarea class="form-control" rows="5" id="{0}" name="{1}"></textarea>'.format(
+                self.get_name(), self.get_name()
+            )
+        elif self.get_type() == 'email':
+            return '<input type="email" class="form-control" id="{0}" name="{1}" />'.format(
+                self.get_name(), self.get_name()
+            )
+        elif self.get_type() == 'url':
+            return '<input type="text" class="form-control" id="{0}" name="{1}" />'.format(
+                self.get_name(), self.get_name()
+            )
+        elif self.get_type() == 'radio':
+            output = ""
+            for rad in self.possible_values:
+                output += '<div class="form-check">' \
+                       '<input class="form-check-input" type="radio" id="{0}" name="{1} "value="{2}">' \
+                       '<label class="form-check-label" for="{3}">{4}</label></div>'.format(
+                            rad, self.get_name(), rad, self.get_name(), rad)
+            return output
+        elif self.get_type() == 'range':
+            return '<input type="range" class="form-control-range" id="{0}" name="{1}"" />'.format(
+                self.get_name(), self.get_name()
+            )
+        return ""
 
 
 class WrongHtmlType(Exception):
