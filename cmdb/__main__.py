@@ -11,5 +11,5 @@ from cmdb.data_storage import DATABASE_MANAGER
 
 if __name__ == "__main__":
 
-    status = DATABASE_MANAGER.find_one(collection=CmdbStatus.COLLECTION, public_id=1)
+    status = DATABASE_MANAGER.find_one(collection=CmdbStatus.COLLECTION, public_id=2)
     print(CmdbStatus(**status))
