@@ -5,6 +5,11 @@ open-source configurable management database
 You should have received a copy of the MIT License along with Net|CMDB.
 If not, see <https://github.com/markheumueller/NetCMDB/blob/master/LICENSE>.
 """
-from cmdb.communication_interface import WEB_APP
+from cmdb.object_framework import CmdbStatus
+from cmdb.data_storage import DATABASE_MANAGER
+
+
 if __name__ == "__main__":
-    WEB_APP.run()
+
+    status = DATABASE_MANAGER.find_one(collection=CmdbStatus.COLLECTION, public_id=1)
+    print(CmdbStatus(**status))
