@@ -51,13 +51,6 @@ class CmdbObjectManager(CmdbManagerBase):
     def __init__(self, database_manager=None):
         super(CmdbObjectManager, self).__init__(database_manager)
 
-    def get_highest_id(self, collection):
-        return int(self.get_document_with_highest_id(collection)['public_id'])
-
-    def get_document_with_highest_id(self, collection):
-        formatted_sort = [('public_id', self.dbm.DESCENDING)]
-        return self.dbm.find_one_by(collection=collection, sort=formatted_sort)
-
     def get_object(self, public_id: int):
         return CmdbObject(
             **self._get(

@@ -15,23 +15,17 @@ def register_blueprints(app):
     """
     from cmdb.communication_interface.web_app.index_routes import index_pages
     from cmdb.communication_interface.web_app.static_routes import static_pages
-    from cmdb.communication_interface.web_app.objects import object_pages, type_pages
     app.register_blueprint(index_pages)
     app.register_blueprint(static_pages)
-    app.register_blueprint(object_pages)
-    app.register_blueprint(type_pages)
 
 
 def register_context_processors(app):
     from cmdb.communication_interface.web_app.context_injector import inject_frontend_info, inject_current_url, \
         inject_sidebar, inject_object_manager
-    from cmdb.communication_interface.web_app.objects.objects_injector import inject_calc_url, inject_input_generator
     app.context_processor(inject_object_manager)
     app.context_processor(inject_frontend_info)
     app.context_processor(inject_current_url)
     app.context_processor(inject_sidebar)
-    app.context_processor(inject_calc_url)
-    app.context_processor(inject_input_generator)
 
 
 def register_filters(app):

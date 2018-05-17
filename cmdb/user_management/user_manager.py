@@ -1,8 +1,7 @@
-from cmdb.user_management.user_exceptions import NoUserFoundExceptions, WrongTypeException, UserHasNotRequiredRight
 from cmdb.user_management.user_rights import UserRight
 from cmdb.user_management.user_groups import UserGroup
 from cmdb.user_management.user import User
-from cmdb.user_management.user_authentication import *
+from cmdb.data_storage import NoDocumentFound
 
 
 class UserManagement:
@@ -13,16 +12,12 @@ class UserManagement:
         'USER_CLASSES': User
     }
 
-    def __init__(self):
-        from cmdb.data_storage import database_manager
+    def __init__(self, database_manager, security_manager):
         self.dbm = database_manager
+        self.scm = security_manager
 
-    def _get_user(self, pre_filter, value):
-        return self.dbm.find_one(collection=User.COLLECTION, filter={pre_filter: value})
-
-    def get_next_public_id(self):
-        latest_id = self.dbm.find_one(collection=User.COLLECTION, filter={}, sort=[('public_id', self.dbm.DESCENDING)])
-        return int(latest_id['public_id'])+1
+    def _get_user(self, public_id):
+        return self.dbm.find_one(collection=User.COLLECTION, public_id=public_id)
 
     def get_all_users(self):
         all_users = self.dbm.find_all(collection=User.COLLECTION)
@@ -34,62 +29,73 @@ class UserManagement:
             user_list.append(tmp_user)
         return user_list
 
+    def get_all_groups(self):
+        all_groups = self.dbm.find_all(collection=UserGroup.COLLECTION)
+        group_list = []
+        for group in all_groups:
+            tmp_group = UserGroup(
+                **group
+            )
+            group_list.append(tmp_group)
+        return group_list
+
+    def get_group_by_name(self, name):
+        formatted_filter = {'name': name }
+        try:
+            return self.dbm.find_one_by(collection=UserGroup.COLLECTION, filter=formatted_filter)
+        except NoDocumentFound:
+            raise GroupNotFound(name)
+
     def get_user_by_id(self, public_id):
-        result = self._get_user('public_id', public_id)
+        result = self._get_user(public_id)
         if not result:
             raise NoUserFoundExceptions(public_id)
         return User(**result)
 
-    def get_user_by_username(self, user_name):
-        result = self._get_user('user_name', user_name)
-        if not result:
-            raise NoUserFoundExceptions(user_name)
-        return User(**result)
-
-    def add_user(self, user):
-        if not isinstance(user, User):
-            raise WrongTypeException()
+    def add_user(self, user_name, group, authenticator, password=""):
+        import datetime
+        if password != "":
+            password = self.scm.generate_hmac(password)
+        group = UserGroup(
+            **self.get_group_by_name(group)
+        )
+        user_data = {
+            'public_id': self.dbm.get_highest_id(collection=User.COLLECTION),
+            'username': user_name,
+            'password': password,
+            'authenticator': authenticator,
+            'group': group._id,
+            'registration_time': datetime.datetime.utcnow()
+        }
+        insert_id = self.dbm.insert(collection=User.COLLECTION, data=user_data)
         try:
-            new_user_id = self.dbm.insert(user.to_mongo(), user.COLLECTION)
-        except Exception as es:
-            raise es
-        return new_user_id
-
-    def change_user_pass(self, user, old_pass, new_pass):
-        raise NotImplementedError
-
-    def check_management_settings(self):
-        for classes in UserManagement.MANAGEMENT_CLASSES.values():
-            if self.dbm.is_empty_collection(classes.COLLECTION):
-                classes.SETUP_CLASS().setup()
-
-    def init_authentication_methods(self):
-        from datetime import datetime
-        from cmdb.user_management.user_authentication import LdapAuthenticationProvider
-        ldap_con = LdapAuthenticationProvider()
-        ldap_accounts = ldap_con.sync_ldap()
-        all_users = self.get_all_users()
-        user_names = [names.user_name for names in all_users]
-        ldap_names = []
-        for ldap_users in ldap_accounts:
-            ldap_names.append(str(ldap_users.uid))
-        user_not_in_db = list(set(ldap_names) - set(user_names))
-        if len(user_not_in_db) > 0:
-            for new_user in user_not_in_db:
-                self.add_user(
-                    User(
-                        public_id=self.get_next_public_id(),
-                        user_name=new_user,
-                        authenticator='LdapAuthenticationProvider',
-                        group='user',
-                        registration_time=datetime.utcnow()
-                    )
-                )
+            User(**self.dbm.find_one(collection=User.COLLECTION, public_id=insert_id))
+        except Exception as e:
+            self.dbm.delete(collection=User.COLLECTION, public_id=insert_id)
+            raise UserAddFailedException(user_name, e.message)
+        return insert_id
 
     def user_has_right(self, user, right):
         founded_group = self.dbm.find_one(collection=UserGroup.COLLECTION, filter={'name': user.group})
         founded_right = self.dbm.find_one(collection=UserRight.COLLECTION, filter={'name': right})
         if founded_right['name'] in founded_group['rights']:
             return True
-        else:
-            raise UserHasNotRequiredRight(user, right)
+        return False
+
+
+class NoUserFoundExceptions(Exception):
+    """Exception if user was not found in the database"""
+    def __init__(self, username):
+        self.message = "No user with the username or the id {} was found in database".format(username)
+
+
+class GroupNotFound(Exception):
+    def __init__(self, name):
+        super().__init__()
+        self.message = "The following group does not exists: {}".format(name)
+
+
+class UserAddFailedException(Exception):
+    def __init__(self, username, error_msg):
+        self.message = "User could not be added {} into database \n Error: {}"\
+            .format(username, error_msg)

@@ -1,5 +1,4 @@
 {% extends 'layout.html' %}
-{% from 'utils.html' import generate_default_table with context %}
 {% block body %}
 <ol class="breadcrumb">
     <li class="breadcrumb-item">Home</li>
@@ -36,7 +35,7 @@
                    Latest objects
                 </div>
                 <div class="card-body">
-                    {{ generate_default_table(objects) }}
+
                 </div>
             </div>
         </div>

@@ -225,6 +225,13 @@ class DatabaseManagerMongo(DatabaseManager):
         """
         return self.database_connector.client.drop_database(db_name)
 
+    def get_document_with_highest_id(self, collection):
+        formatted_sort = [('public_id', self.DESCENDING)]
+        return self.find_one_by(collection=collection, sort=formatted_sort)
+
+    def get_highest_id(self, collection):
+        return int(self.get_document_with_highest_id(collection)['public_id'])
+
 
 class NoDocumentFound(Exception):
     """

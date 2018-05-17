@@ -1,8 +1,8 @@
-from jwcrypto import jwk
 import ast
+import base64
+from jwcrypto import jwk
 from Cryptodome import Random
 from Crypto.Cipher import AES
-import base64
 from cmdb.data_storage.database_manager import NoDocumentFound
 
 

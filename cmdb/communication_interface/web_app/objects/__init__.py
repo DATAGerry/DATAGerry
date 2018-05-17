@@ -1,2 +1,0 @@
-from cmdb.communication_interface.web_app.objects.object_routes import object_pages
-from cmdb.communication_interface.web_app.objects.type_routes import type_pages

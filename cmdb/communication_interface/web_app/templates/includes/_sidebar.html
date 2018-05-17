@@ -18,7 +18,7 @@
             {% if cat.type_list|length > 0 %}
             <li class="nav-item nav-dropdown">
                 <a class="nav-link nav-dropdown-toggle" name="{{ cat.name }}" href="#"><i
-                        class="{{ cat.icon | default_cat_icon }}"></i> {{ cat.title }}</a>
+                        class="{{ cat.icon | default_cat_icon }}"></i> {{ cat.label }}</a>
 
                 <ul class="nav-dropdown-items">
                     {% for type_id in cat.type_list %}
@@ -26,7 +26,7 @@
                         {% set current_type = object_manager.get_type(type_id) %}
                         {% set count_objects = object_manager.get_objects_by_type(type_id) | length %}
                         <a class="nav-link" name="{{ current_type.name }}"
-                           href="{{ url_for('type_pages.view_type_list', public_id=current_type.public_id) }}"><i
+                           href="#"><i
                                 class="icon-doc"></i> {{current_type.title}} <span class="badge badge-primary">{{ count_objects }}</span></a>
                     </li>
                     {% endfor %}

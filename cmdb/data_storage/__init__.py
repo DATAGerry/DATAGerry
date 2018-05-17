@@ -4,6 +4,7 @@ Global objects for database management
 from cmdb.application_utils.system_reader import SystemConfigReader
 from cmdb.data_storage.database_connection import MongoConnector
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.data_storage.database_manager import NoDocumentFound, DocumentCouldNotBeDeleted
 
 database_reader = SystemConfigReader(
     config_name=SystemConfigReader.DEFAULT_CONFIG_NAME,

@@ -1,4 +1,4 @@
-from cmdb.user_management.user_dao import UserManagementSetup, UserManagementBase
+from cmdb.user_management.user_base import UserManagementSetup, UserManagementBase
 
 
 class UserGroupSetup(UserManagementSetup):
@@ -41,10 +41,10 @@ class UserGroup(UserManagementBase):
     COLLECTION = 'management.groups'
     SETUP_CLASS = UserGroupSetup
 
-    def __init__(self, name, rights, _id=None):
-        self._id = _id
+    def __init__(self, name, rights, **kwargs):
         self.name = name
         self.rights = rights
+        super(UserGroup, self).__init__(**kwargs)
 
     def add_right(self, right_name):
         self.rights.append(right_name)
