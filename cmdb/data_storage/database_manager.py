@@ -118,7 +118,7 @@ class DatabaseManagerMongo(DatabaseManager):
         :param connector: mongodb connector
         """
         super().__init__(connector)
-        self.database_name = self.database_connector.get_database_name()
+        #self.database_name = self.database_connector.get_database_name()
 
     def setup(self):
         """
