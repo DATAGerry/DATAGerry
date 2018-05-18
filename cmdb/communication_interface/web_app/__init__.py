@@ -3,8 +3,37 @@ Init module for web routes
 """
 from flask import Flask
 
-APP = Flask(__name__)
-APP.debug = True
+
+def create_web_app():
+    from cmdb.object_framework import CmdbObjectManager
+    from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+    from cmdb.application_utils import get_system_config_reader, get_system_settings_reader
+
+    system_config_reader = get_system_config_reader()
+    database_manager = DatabaseManagerMongo(
+        connector=MongoConnector(
+            host=system_config_reader.get_value('host', 'Database'),
+            port=int(system_config_reader.get_value('port', 'Database')),
+            database_name=system_config_reader.get_value('database_name', 'Database'),
+            timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT
+        )
+    )
+    object_manager = CmdbObjectManager(database_manager=database_manager)
+    system_setting_reader = get_system_settings_reader(database_manager=database_manager)
+
+    app = Flask(__name__)
+    app.debug = True
+    app.dbm = database_manager
+    app.obm = object_manager
+    app.scr = system_config_reader
+    app.ssr = system_setting_reader
+
+    register_filters(app)
+    register_error_pages(app)
+    register_blueprints(app)
+    register_context_processors(app)
+
+    return app
 
 
 def register_blueprints(app):
@@ -54,7 +83,3 @@ def register_error_pages(app):
     app.register_error_handler(500, internal_server_error)
 
 
-register_filters(APP)
-register_error_pages(APP)
-register_blueprints(APP)
-register_context_processors(APP)
