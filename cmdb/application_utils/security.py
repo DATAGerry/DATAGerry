@@ -1,6 +1,6 @@
 import ast
 import base64
-from jwcrypto import jwk
+from jwcrypto import jwk, jwt, jws
 from Cryptodome import Random
 from Crypto.Cipher import AES
 from cmdb.data_storage.database_manager import NoDocumentFound
@@ -65,7 +65,7 @@ class SecurityManager:
             symmetric_key = jwk.JWK.generate(kty='oct', size=256).export()
             symmetric_key = ast.literal_eval(symmetric_key)
             self.ssw.write('security', {'symmetric_key': symmetric_key})
-        return symmetric_key['k']
+        return jwk.JWK(**symmetric_key)
 
     def get_key_pair(self):
         try:
@@ -81,3 +81,53 @@ class SecurityManager:
             self.ssw.write('security', {'key_pair': insert_key})
         return asy_key
 
+    def get_private_key(self):
+        pub_key = self.get_key_pair()['private_key']
+        return jwk.JWK(**pub_key)
+
+    def get_public_key(self):
+        pub_key = self.get_key_pair()['public_key']
+        return jwk.JWK(**pub_key)
+
+
+class TokenManager:
+
+    DEFAULT_ALG = 'HS512'
+
+    REQUIRED_CLAIMS = {
+        'exp': 'Expiration Time'
+    }
+
+    from jwcrypto.jwt import JWTClaimsRegistry
+
+    REQUIRED_CLAIMS = JWTClaimsRegistry
+
+    def __init__(self, symmetric_key, public_key, private_key):
+        self.symmetric_key = symmetric_key
+        self.public_key = public_key
+        self.private_key = private_key
+
+    def create_token(self, payload: dict) -> str:
+        import json
+        payload = json.dumps(payload)
+        jws_token = jws.JWS(payload=payload)
+        jws_token.add_signature(
+            key=self.symmetric_key,
+            alg=TokenManager.DEFAULT_ALG,
+            protected={'alg': TokenManager.DEFAULT_ALG},
+            header={'kid': self.symmetric_key.thumbprint()}
+        )
+        enc_token = jwt.JWT(header={"alg": "HS512"}, claims=jws_token.serialize(), default_claims=self.REQUIRED_CLAIMS)
+        enc_token._add_default_claims(self.REQUIRED_CLAIMS)
+        enc_token.make_signed_token(self.symmetric_key)
+
+        return enc_token.serialize()
+
+    def decrypt_token(self, token):
+        t = jwt.JWT(key=self.symmetric_key, jwt=token)
+        print(t.claims)
+        jsw_token = jws.JWS()
+        jsw_token.deserialize(t.claims)
+        jsw_token.verify(self.symmetric_key)
+
+        return jsw_token.payload

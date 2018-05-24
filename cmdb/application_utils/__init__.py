@@ -1,39 +1,28 @@
 from cmdb.application_utils.system_reader import SystemConfigReader, SystemSettingsReader
 from cmdb.application_utils.system_writer import SystemSettingsWriter
-from cmdb.application_utils.security import SecurityManager
-from cmdb.data_storage.database_connection import MongoConnector
-from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.application_utils.security import SecurityManager, TokenManager
+from cmdb.application_utils.logger import log
 
 SYSTEM_CONFIG_READER = SystemConfigReader(
     config_name=SystemConfigReader.DEFAULT_CONFIG_NAME,
     config_location=SystemConfigReader.DEFAULT_CONFIG_LOCATION
 )
 
-SYSTEM_SETTINGS_READER = SystemSettingsReader(
-    database_manager=DatabaseManagerMongo(
-        connector=MongoConnector(
-            host=SYSTEM_CONFIG_READER.get_value('host', 'Database'),
-            port=int(SYSTEM_CONFIG_READER.get_value('port', 'Database')),
-            database_name=SYSTEM_CONFIG_READER.get_value('database_name', 'Database'),
-            timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT
-        )
+
+def get_system_config_reader():
+    return SystemConfigReader(
+        config_name=SystemConfigReader.DEFAULT_CONFIG_NAME,
+        config_location=SystemConfigReader.DEFAULT_CONFIG_LOCATION
     )
 
-)
 
-SYSTEM_SETTINGS_WRITER = SystemSettingsWriter(
-    database_manager=DatabaseManagerMongo(
-        connector=MongoConnector(
-            host=SYSTEM_CONFIG_READER.get_value('host', 'Database'),
-            port=int(SYSTEM_CONFIG_READER.get_value('port', 'Database')),
-            database_name=SYSTEM_CONFIG_READER.get_value('database_name', 'Database'),
-            timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT
-        )
+def get_system_settings_writer(database_manager):
+    return SystemSettingsWriter(
+        database_manager=database_manager
     )
-)
 
-SECURITY_MANAGER = SecurityManager(
-    SYSTEM_SETTINGS_READER,
-    SYSTEM_SETTINGS_WRITER
-)
 
+def get_system_settings_reader(database_manager):
+    return SystemSettingsReader(
+        database_manager=database_manager
+    )
