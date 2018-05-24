@@ -4,8 +4,7 @@ from cmdb.user_management.user_base import UserManagementSetup, UserManagementBa
 class UserGroupSetup(UserManagementSetup):
 
     def setup(self):
-        for group in UserGroupSetup.get_setup_data():
-            self.dbm.insert(group.to_mongo(), UserGroup.COLLECTION)
+        pass
 
     @staticmethod
     def get_setup_data():

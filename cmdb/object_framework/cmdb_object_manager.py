@@ -72,6 +72,13 @@ class CmdbObjectManager(CmdbManagerBase):
             ack.append(CmdbObject(**obj))
         return ack
 
+    def get_all_objects(self):
+        ack = []
+        objects = self.dbm.find_all(collection=CmdbObject.COLLECTION)
+        for obj in objects:
+            ack.append(CmdbObject(**obj))
+        return ack
+
     def get_objects_by_type(self, type_id: int):
         return self.get_objects_by(type_id=type_id)
 

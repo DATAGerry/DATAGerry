@@ -1,3 +1,0 @@
-"""
-cmdb global init
-"""

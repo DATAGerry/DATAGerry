@@ -6,21 +6,11 @@ from cmdb.user_management.user_exceptions import NoValidAuthenticationProvider
 class UserSetup(UserManagementSetup):
 
     def setup(self):
-        return self.dbm.insert(UserSetup.get_setup_data().to_mongo(), User.COLLECTION)
+        pass
 
     @staticmethod
     def get_setup_data():
-        from cmdb.application_utils import SECURITY_MANAGER
-        from datetime import datetime
-        admin_pass = SECURITY_MANAGER.generate_hmac('admin')
-        return User(
-            public_id=0,
-            user_name='admin',
-            password=admin_pass,
-            authenticator='LocalAuthenticationProvider',
-            group='admin',
-            registration_time=datetime.utcnow(),
-        )
+       pass
 
 
 class User(UserManagementBase):

@@ -4,8 +4,7 @@ from cmdb.user_management.user_base import UserManagementSetup, UserManagementBa
 class UserRightSetup(UserManagementSetup):
 
     def setup(self):
-        for right in UserRightSetup.get_setup_data():
-            self.dbm.insert(right.to_mongo(), UserRight.COLLECTION)
+        pass
 
     @staticmethod
     def get_setup_data():
