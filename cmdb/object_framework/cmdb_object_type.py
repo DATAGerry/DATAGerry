@@ -10,7 +10,6 @@ class CmdbType(CmdbDAO):
     SCHEMA = "type.schema.json"
     REQUIRED_INIT_KEYS = [
         'name',
-        'label',
         'version'
     ]
     POSSIBLE_FIELD_TYPES = []

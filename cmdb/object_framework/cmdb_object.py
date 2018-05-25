@@ -62,6 +62,7 @@ class CmdbObject(CmdbDAO):
 
     def update_view_counter(self):
         self.views += 1
+        return self.views
 
     def get_all_fields(self):
         """

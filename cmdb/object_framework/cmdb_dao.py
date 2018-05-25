@@ -76,6 +76,9 @@ class CmdbDAO:
     def to_database(self):
         return self.__dict__
 
+    def to_json(self):
+        return {k: v for k, v in self.__dict__.items() if v is not None}
+
 
 class RequiredInitKeyNotFound(Exception):
     """

@@ -1,11 +1,7 @@
-from cmdb.application_utils import SYSTEM_CONFIG_READER
-
-
 class AuthenticationProvider:
 
     def __init__(self):
-        self.settings = SYSTEM_CONFIG_READER.get_all_values_from_section('Authentication')
-        self.security = SYSTEM_CONFIG_READER.get_all_values_from_section('Security')
+        pass
 
     def authenticate(self, username, password):
         raise NotImplementedError
@@ -19,11 +15,7 @@ class LocalAuthenticationProvider(AuthenticationProvider):
         self.dbm = database_manager
 
     def authenticate(self, user, password):
-        from cmdb.application_utils import SECURITY_MANAGER
-        compare_hash = SECURITY_MANAGER.generate_hmac(password)
-        if compare_hash == user.password:
-            return True
-        return False
+        pass
 
 """
 @deprecated
