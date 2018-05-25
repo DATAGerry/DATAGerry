@@ -33,7 +33,7 @@ Listing of the development parts. If sections meet their functional requirements
 * [ ] Sync-API
   * [ ] Export
   * [ ] Event-Handling
-* Communication-Interface
+* [ ] Communication-Interface
   * [ ] HTTP-Server
   * [ ] Web-APP
   * [ ] Rest-APP
