@@ -47,7 +47,6 @@ def default(obj):
     if isinstance(obj, DBRef):
         return obj.as_doc()
     if isinstance(obj, datetime.datetime):
-        # TODO share this code w/ bson.py?
         if obj.utcoffset() is not None:
             obj = obj - obj.utcoffset()
         millis = int(calendar.timegm(obj.timetuple()) * 1000 +

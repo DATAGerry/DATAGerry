@@ -17,6 +17,7 @@ class HTTPServer(BaseApplication):
         self.options = options or {}
         if 'workers' not in self.options:
             self.options['workers'] = HTTPServer.number_of_workers()
+        self.options['worker_class'] = 'gevent'
         self.application = app
         super(HTTPServer, self).__init__()
 

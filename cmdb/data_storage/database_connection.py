@@ -69,10 +69,17 @@ class MongoConnector(Connector):
         self.client = MongoClient(
             self.host,
             self.port,
+            connect=False,
             socketTimeoutMS=self.timeout,
             serverSelectionTimeoutMS=self.timeout,
+            socketKeepAlive=True,
+            maxPoolSize=None
         )
-        self.client.admin.command('ping')
+        try:
+            self.client.admin.command('ping')
+        except ServerSelectionTimeoutError:
+            raise ServerTimeoutError(self.host)
+
         self.database = self.client[database_name]
 
     def connect(self):

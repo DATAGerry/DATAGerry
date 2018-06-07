@@ -10,9 +10,6 @@ class CmdbManagerBase:
     def __init__(self, database_manager):
         if database_manager:
             self.dbm = database_manager
-        else:
-            from cmdb.data_storage import DATABASE_MANAGER
-            self.dbm = DATABASE_MANAGER
 
     def _get(self, collection: str, public_id: int):
         return self.dbm.find_one(
