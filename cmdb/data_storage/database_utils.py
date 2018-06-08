@@ -17,7 +17,14 @@ from bson.tz_util import utc
 _RE_TYPE = type(re.compile("foo"))
 
 
-def object_hook(dct):
+def object_hook(dct: dict):
+    """Helper function for converting json to mongo bson
+    Args:
+        dct: json data
+
+    Returns:
+        bson json format
+    """
     if "$oid" in dct:
         return ObjectId(str(dct["$oid"]))
     if "$ref" in dct:
@@ -42,6 +49,13 @@ def object_hook(dct):
 
 
 def default(obj):
+    """Helper function for converting bson to json
+        Args:
+            obj: bson data
+
+        Returns:
+            json format
+        """
     if isinstance(obj, ObjectId):
         return {"$oid": str(obj)}
     if isinstance(obj, DBRef):
