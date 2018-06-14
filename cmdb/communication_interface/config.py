@@ -1,5 +1,6 @@
-class Config(object):
+class Config:
     """Parent configuration class."""
+    TESTING = False
     DEBUG = False
     ENV = 'production'
 

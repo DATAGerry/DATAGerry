@@ -12,10 +12,8 @@ from optparse import OptionParser
 from cmdb.application_utils import log
 from time import sleep
 
-exit_message = "STOPPING cmdb!"
 
-
-def build_argparser():
+def build_arg_parser():
     _parser = OptionParser(
         usage="usage: {} [options]".format(__title__),
         version=" {}".format(__version__)
@@ -32,16 +30,17 @@ def build_argparser():
 
 
 def main(args):
+    exit_message = "STOPPING cmdb!"
     from cmdb.communication_interface.web_app import create_web_app
     from cmdb.data_storage.database_connection import ServerTimeoutError
     try:
         create_web_app().run()
     except OSError as e:
         log.warning(e.errno)
-        exit(exit_message)
+        exit(log.info(exit_message))
     except ServerTimeoutError as e:
         log.warning(e.message)
-        exit(exit_message)
+        exit(log.info(exit_message))
 
 
 if __name__ == "__main__":
@@ -58,7 +57,7 @@ __  __ _____ _____ ____ __  __ ____  ____
    
 ###########################################                                        
     '''
-    parameters, arguments = build_argparser()
+    parameters, arguments = build_arg_parser()
     print(brand_string)
     print(welcome_string.format(parameters))
     sleep(0.1)  # prevent logger output

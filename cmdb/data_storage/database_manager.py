@@ -174,8 +174,6 @@ class DatabaseManagerMongo(DatabaseManager):
 
         """
         super().__init__(connector)
-        if not self.database_name:
-            self.database_name = self.database_connector.get_database_name()
 
     def setup(self):
         """setup script

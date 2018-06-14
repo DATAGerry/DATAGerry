@@ -2,6 +2,7 @@
 This manager represents the core functionalities for the use of CMDB objects.
 All communication with the objects is controlled by this manager.
 The implementation of the manager used is always realized using the respective superclass.
+
 """
 from cmdb.object_framework import *
 
@@ -10,7 +11,9 @@ class CmdbManagerBase:
     """Represents the base class for object managers. A respective implementation is always adapted to the
        respective database manager :class:`cmdb.data_storage.DatabaseManager` or the used functionalities.
        But should always use at least the super functions listed here.
+
     """
+
     def __init__(self, database_manager):
         """Example:
             Depending on the condition or whether a fork process is used, the database manager can also be seen
@@ -72,8 +75,8 @@ class CmdbManagerBase:
         return self.dbm.find_all(collection=collection, filter=requirements_filter, sort=formatted_sort)
 
     def _insert(self, collection: str, data: dict) -> int:
-        """
-        insert document/object into database
+        """insert document/object into database
+
         Args:
             collection (str): name of the database collection
             data (dict): dictionary of object or the data
@@ -104,9 +107,21 @@ class CmdbManagerBase:
 
 class CmdbObjectManager(CmdbManagerBase):
     def __init__(self, database_manager=None):
+        """
+
+        Args:
+            database_manager:
+        """
         super(CmdbObjectManager, self).__init__(database_manager)
 
     def get_object(self, public_id: int):
+        """get object by public id
+        Args:
+            public_id:
+
+        Returns:
+
+        """
         return CmdbObject(
             **self._get(
                 collection=CmdbObject.COLLECTION,
@@ -200,7 +215,7 @@ class CmdbObjectManager(CmdbManagerBase):
         return CmdbType(**self.dbm.find_one(
             collection=CmdbType.COLLECTION,
             public_id=public_id)
-                        )
+        )
 
     def insert_type(self, data: dict):
         new_type = CmdbType(**data)
