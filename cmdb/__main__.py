@@ -33,10 +33,14 @@ def build_arg_parser():
 
 def main(args):
     exit_message = "STOPPING cmdb!"
-    from cmdb.communication_interface.web_app.__init__ import create_web_app
+    from cmdb.communication_interface.web_app import create_web_app
     from cmdb.communication_interface.gunicorn import HTTPServer
+    from cmdb.data_storage import init_database
 
+    database_manager = init_database()
     try:
+        database_manager.database_connector.connect()
+
         server = HTTPServer(create_web_app())
         server.run()
         from cmdb.data_storage.database_connection import ServerTimeoutError
@@ -46,6 +50,8 @@ def main(args):
     except ServerTimeoutError as e:
         log.warning(e.message)
         exit(log.info(exit_message))
+    finally:
+        database_manager.database_connector.disconnect()
 
 
 if __name__ == "__main__":

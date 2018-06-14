@@ -75,10 +75,6 @@ class MongoConnector(Connector):
             socketKeepAlive=True,
             maxPoolSize=None
         )
-        try:
-            pass#self.client.admin.command('ping')
-        except ServerSelectionTimeoutError:
-            raise ServerTimeoutError(self.host)
 
         self.database = self.client[database_name]
 
@@ -88,6 +84,7 @@ class MongoConnector(Connector):
         :return: server status
         """
         try:
+            self.client.admin.command('ping')
             return self.client.server_info()
         except ServerSelectionTimeoutError:
             raise ServerTimeoutError(self.host)

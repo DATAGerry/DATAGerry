@@ -2,7 +2,9 @@
 Init module for web routes
 """
 from flask import Flask
+
 from cmdb.communication_interface.config import app_config
+from cmdb.data_storage import init_database
 
 
 def create_web_app():
@@ -29,21 +31,6 @@ def create_web_app():
     app.ssr = system_setting_reader
 
     return app
-
-
-def init_database():
-    from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
-    from cmdb.application_utils import get_system_config_reader
-    system_config_reader = get_system_config_reader()
-    database_manager = DatabaseManagerMongo(
-        connector=MongoConnector(
-                host=system_config_reader.get_value('host', 'Database'),
-                port=int(system_config_reader.get_value('port', 'Database')),
-                database_name=system_config_reader.get_value('database_name', 'Database'),
-                timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT
-        )
-    )
-    return database_manager
 
 
 def register_blueprints(app):
