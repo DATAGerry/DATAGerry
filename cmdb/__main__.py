@@ -15,6 +15,7 @@ from cmdb.application_utils import log
 from time import sleep
 
 
+
 def build_arg_parser():
     _parser = OptionParser(
         usage="usage: {} [options]".format(__title__),
@@ -37,6 +38,8 @@ def main(args):
     from cmdb.communication_interface.web_app import create_web_app
     from cmdb.communication_interface.gunicorn import HTTPServer
     from cmdb.data_storage import init_database
+    from cmdb.data_storage.database_connection import ServerTimeoutError
+    from cmdb.plugins.auth import PluginAuthBase
 
     database_manager = init_database()
     try:
@@ -46,8 +49,11 @@ def main(args):
             app=create_web_app(),
             options=web_server_options
         )
-        server.run()
-        from cmdb.data_storage.database_connection import ServerTimeoutError
+        #server.run()
+
+        for plugin in PluginAuthBase.plugins:
+            plugin.authenticate("sd", "sdf")
+
     except OSError as e:
         log.warning(e.errno)
         exit(log.info(exit_message))
