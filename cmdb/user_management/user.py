@@ -19,7 +19,7 @@ class User(UserManagementBase):
     SETUP_CLASS = UserSetup
 
     def __init__(self, public_id, user_name, group, registration_time, last_visit_time=None, password="",
-                 first_name="", last_name="", authenticator=LocalAuthenticationProvider, **kwargs):
+                 first_name="", last_name="", authenticator=LocalAuthenticationProvider):
         self.public_id = public_id
         self.user_name = user_name
         self.password = password
@@ -29,7 +29,7 @@ class User(UserManagementBase):
         self.last_visit_time = last_visit_time
         self.first_name = first_name
         self.last_name = last_name
-        super(User, self).__init__(**kwargs)
+        super(User, self).__init__()
 
     @staticmethod
     def check_authenticator(authenticator):
