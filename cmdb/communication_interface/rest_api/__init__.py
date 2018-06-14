@@ -4,7 +4,7 @@ Init module for rest routes
 from flask import Flask
 
 from cmdb.communication_interface.config import app_config
-
+'''
 
 def create_rest_api():
     from cmdb.object_framework import CmdbObjectManager
@@ -49,3 +49,4 @@ def register_error_pages(app):
     from cmdb.communication_interface.rest_api.error_routes import page_not_found, not_acceptable
     app.register_error_handler(404, page_not_found)
     app.register_error_handler(406, not_acceptable)
+'''

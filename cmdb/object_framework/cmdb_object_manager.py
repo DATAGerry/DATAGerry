@@ -2,32 +2,90 @@
 This manager represents the core functionalities for the use of CMDB objects.
 All communication with the objects is controlled by this manager.
 The implementation of the manager used is always realized using the respective superclass.
+
 """
 from cmdb.object_framework import *
 
 
 class CmdbManagerBase:
+    """Represents the base class for object managers. A respective implementation is always adapted to the
+       respective database manager :class:`cmdb.data_storage.DatabaseManager` or the used functionalities.
+       But should always use at least the super functions listed here.
+
+    """
+
     def __init__(self, database_manager):
+        """Example:
+            Depending on the condition or whether a fork process is used, the database manager can also be seen
+            directly in the declaration of the object manager
+
+        .. code-block:: python
+               :linenos:
+
+                system_config_reader = get_system_config_reader()
+                object_manager = CmdbObjectManager(
+                    database_manager = DatabaseManagerMongo(
+                        connector=MongoConnector(
+                            host=system_config_reader.get_value('host', 'Database'),
+                            port=int(system_config_reader.get_value('port', 'Database')),
+                            database_name=system_config_reader.get_value('database_name', 'Database'),
+                            timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT
+                        )
+                    )
+                )
+
+        Args:
+            database_manager (DatabaseManager): initialisation of an database manager
+
+        """
         if database_manager:
             self.dbm = database_manager
-        else:
-            from cmdb.data_storage import DATABASE_MANAGER
-            self.dbm = DATABASE_MANAGER
 
-    def _get(self, collection: str, public_id: int):
+    def _get(self, collection: str, public_id: int) -> str:
+        """get document from the database by their public id
+
+        Args:
+            collection (str): name of the database collection
+            public_id (int): public id of the document/entry
+
+        Returns:
+            str: founded document in json format
+        """
         return self.dbm.find_one(
             collection=collection,
             public_id=public_id
         )
 
-    def _get_all(self, collection: str, sort='public_id', **requirements: dict):
+    def _get_all(self, collection: str, sort='public_id', **requirements: dict) -> list:
+        """get all documents from the database which have the passing requirements
+
+        Args:
+            collection (str): name of the database collection
+            sort (str): sort by given key - default public_id
+            **requirements (dict): dictionary of key value requirement
+
+        Returns:
+            list: list of all documents
+
+        """
         requirements_filter = {}
         formatted_sort = [(sort, self.dbm.DESCENDING)]
         for k, req in requirements.items():
             requirements_filter.update({k: req})
         return self.dbm.find_all(collection=collection, filter=requirements_filter, sort=formatted_sort)
 
-    def _insert(self, collection: str, data: dict):
+    def _insert(self, collection: str, data: dict) -> int:
+        """insert document/object into database
+
+        Args:
+            collection (str): name of the database collection
+            data (dict): dictionary of object or the data
+
+        Returns:
+            int: new public_id of inserted document
+            None: if anything goes wrong
+
+        """
         return self.dbm.insert(
             collection=collection,
             data=data
@@ -49,9 +107,21 @@ class CmdbManagerBase:
 
 class CmdbObjectManager(CmdbManagerBase):
     def __init__(self, database_manager=None):
+        """
+
+        Args:
+            database_manager:
+        """
         super(CmdbObjectManager, self).__init__(database_manager)
 
     def get_object(self, public_id: int):
+        """get object by public id
+        Args:
+            public_id:
+
+        Returns:
+
+        """
         return CmdbObject(
             **self._get(
                 collection=CmdbObject.COLLECTION,
@@ -145,7 +215,7 @@ class CmdbObjectManager(CmdbManagerBase):
         return CmdbType(**self.dbm.find_one(
             collection=CmdbType.COLLECTION,
             public_id=public_id)
-                        )
+        )
 
     def insert_type(self, data: dict):
         new_type = CmdbType(**data)

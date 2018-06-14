@@ -15,21 +15,30 @@ class CmdbDAO:
     VERSIONING_PATCH = 0.01
 
     def __init__(self, **kwargs):
-        """
-        init methode which auto convert params to the attribute dict
-        :param kwargs: new generated attributes
-        """
         for key in kwargs:
             setattr(self, key, kwargs[key])
 
-    def get_public_id(self):
+    def get_public_id(self) -> int:
         """
-        returns necessary public id
-        :return: public_id of object
+        get the public id of current element
+
+        Note:
+            Since the dao object is not initializable
+            the child class object will inherit this function
+            SHOULD NOT BE OVERWRITTEN!
+
+        Returns:
+            int: public id
+
         """
         return self.public_id
 
     def has_object_id(self):
+        """
+
+        Returns:
+
+        """
         if hasattr(self, '_id'):
             return True
         else:

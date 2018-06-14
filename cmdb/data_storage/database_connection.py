@@ -69,10 +69,13 @@ class MongoConnector(Connector):
         self.client = MongoClient(
             self.host,
             self.port,
+            connect=False,
             socketTimeoutMS=self.timeout,
             serverSelectionTimeoutMS=self.timeout,
+            socketKeepAlive=True,
+            maxPoolSize=None
         )
-        self.client.admin.command('ping')
+
         self.database = self.client[database_name]
 
     def connect(self):
@@ -81,6 +84,7 @@ class MongoConnector(Connector):
         :return: server status
         """
         try:
+            self.client.admin.command('ping')
             return self.client.server_info()
         except ServerSelectionTimeoutError:
             raise ServerTimeoutError(self.host)
