@@ -4,10 +4,11 @@ Init module for web routes
 from flask import Flask
 from cmdb.communication_interface.config import app_config
 
-database_manager = None
-
 
 def create_web_app():
+
+    from cmdb.object_framework import CmdbObjectManager
+    from cmdb.application_utils import get_system_config_reader, get_system_settings_reader
 
     app = Flask(__name__)
     app.config.from_object(app_config['development'])
@@ -16,16 +17,6 @@ def create_web_app():
     register_error_pages(app)
     register_blueprints(app)
     register_context_processors(app)
-    add_app_objects(app)
-    return app
-
-
-def add_app_objects(app):
-    global database_manager
-    from cmdb.object_framework import CmdbObjectManager
-
-    from cmdb.application_utils import get_system_config_reader, get_system_settings_reader
-
     system_config_reader = get_system_config_reader()
     database_manager = init_database()
 
@@ -37,31 +28,25 @@ def add_app_objects(app):
     app.scr = system_config_reader
     app.ssr = system_setting_reader
 
+    return app
+
 
 def init_database():
-    global database_manager
-
-    if database_manager is None:
-        from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
-        from cmdb.application_utils import get_system_config_reader
-        system_config_reader = get_system_config_reader()
-        database_manager = DatabaseManagerMongo(
-            connector=MongoConnector(
+    from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+    from cmdb.application_utils import get_system_config_reader
+    system_config_reader = get_system_config_reader()
+    database_manager = DatabaseManagerMongo(
+        connector=MongoConnector(
                 host=system_config_reader.get_value('host', 'Database'),
                 port=int(system_config_reader.get_value('port', 'Database')),
                 database_name=system_config_reader.get_value('database_name', 'Database'),
                 timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT
-            )
         )
+    )
     return database_manager
 
 
 def register_blueprints(app):
-    """
-    registers blueprints
-    :param app: flask app
-    :return:
-    """
     from cmdb.communication_interface.web_app.index_routes import index_pages
     from cmdb.communication_interface.web_app.static_routes import static_pages
     app.register_blueprint(index_pages)
@@ -86,11 +71,6 @@ def register_filters(app):
 
 
 def register_error_pages(app):
-    """
-    registers error pages
-    :param app: flask app
-    :return:
-    """
     from cmdb.communication_interface.web_app.error_routes import bad_request, unauthorized_user, \
         forbidden, page_not_found, page_gone, iam_a_teapot, internal_server_error
 

@@ -76,7 +76,7 @@ class MongoConnector(Connector):
             maxPoolSize=None
         )
         try:
-            self.client.admin.command('ping')
+            pass#self.client.admin.command('ping')
         except ServerSelectionTimeoutError:
             raise ServerTimeoutError(self.host)
 

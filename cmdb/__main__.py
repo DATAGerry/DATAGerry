@@ -6,6 +6,8 @@ open-source configurable management database
 You should have received a copy of the MIT License along with Net|CMDB.
 If not, see <https://github.com/NETHINKS/NetCMDB/blob/master/LICENSE>.
 """
+from gevent import monkey
+monkey.patch_all()
 
 from cmdb import __version__, __title__, __DEBUG__
 from optparse import OptionParser
@@ -31,10 +33,13 @@ def build_arg_parser():
 
 def main(args):
     exit_message = "STOPPING cmdb!"
-    from cmdb.communication_interface.web_app import create_web_app
-    from cmdb.data_storage.database_connection import ServerTimeoutError
+    from cmdb.communication_interface.web_app.__init__ import create_web_app
+    from cmdb.communication_interface.gunicorn import HTTPServer
+
     try:
-        create_web_app().run()
+        server = HTTPServer(create_web_app())
+        server.run()
+        from cmdb.data_storage.database_connection import ServerTimeoutError
     except OSError as e:
         log.warning(e.errno)
         exit(log.info(exit_message))

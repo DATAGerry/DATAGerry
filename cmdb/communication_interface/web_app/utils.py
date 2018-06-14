@@ -1,6 +1,5 @@
 from math import ceil
-from functools import wraps
-from flask import request, redirect, url_for, abort
+
 
 class Pagination:
     def __init__(self, page, per_page, total_count):
