@@ -1,1 +1,2 @@
-cmdb/communication_interface/web_app/static/* linguist-vendored=false
+docs/* linguist-documentation
+cmdb/communication_interface/web_app/static/* linguist-vendored
