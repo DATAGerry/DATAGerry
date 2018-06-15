@@ -7,13 +7,13 @@ You should have received a copy of the MIT License along with Net|CMDB.
 If not, see <https://github.com/NETHINKS/NetCMDB/blob/master/LICENSE>.
 """
 from gevent import monkey
+
 monkey.patch_all()
 
 from cmdb import __version__, __title__, __DEBUG__
 from optparse import OptionParser
 from cmdb.application_utils import log
 from time import sleep
-
 
 
 def build_arg_parser():
@@ -39,7 +39,7 @@ def main(args):
     from cmdb.communication_interface.gunicorn import HTTPServer
     from cmdb.data_storage import init_database
     from cmdb.data_storage.database_connection import ServerTimeoutError
-    from cmdb.plugins.auth import PluginAuthBase
+    from cmdb.plugins.auth.base import PluginAuthBase
 
     database_manager = init_database()
     try:
@@ -49,10 +49,8 @@ def main(args):
             app=create_web_app(),
             options=web_server_options
         )
-        #server.run()
-
-        for plugin in PluginAuthBase.plugins:
-            plugin.authenticate("sd", "sdf")
+        # server.run()
+        print(PluginAuthBase.plugins)
 
     except OSError as e:
         log.warning(e.errno)
