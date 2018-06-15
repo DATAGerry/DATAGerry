@@ -2,7 +2,6 @@ from cmdb.object_framework.cmdb_dao import CmdbDAO
 
 
 class CmdbObject(CmdbDAO):
-
     """The CMDB object is the basic data wrapper for storing and holding the pure objects within the CMDB.
     """
 
@@ -39,6 +38,18 @@ class CmdbObject(CmdbDAO):
             logs: object log
             **kwargs: additional data
         """
+        self.type_id = type_id
+        self.status = status
+        self.version = version
+        self.creation_time = creation_time
+        self.creator_id = creator_id
+        self.last_editor_id = last_editor_id
+        self.last_edit_time = last_edit_time
+        self.active = active
+        self.views = views
+        self.fields = fields
+        self.logs = logs
+        super(CmdbDAO, self).__init__(**kwargs)
 
     def get_type_id(self) -> int:
         """get type if of this object
@@ -97,4 +108,3 @@ class CmdbObject(CmdbDAO):
             else:
                 continue
         return None
-
