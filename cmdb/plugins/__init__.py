@@ -4,7 +4,7 @@ based on: https://stackoverflow.com/questions/14510286/plugin-architecture-plugi
 """
 from cmdb.plugins.plugin_base import PluginType
 from cmdb.plugins.plugin_manager import PluginManager
-from cmdb.plugins.auth import *
+from cmdb.plugins import auth
 
 plugin_manager = PluginManager(
 

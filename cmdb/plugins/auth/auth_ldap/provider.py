@@ -3,17 +3,17 @@ from cmdb.plugins.auth import PluginAuthBase
 
 class LdapAuthenticationProvider(PluginAuthBase):
 
-    def __init__(self, settings):
+    def __init__(self, settings=None):
 
         self.settings = settings
-        self.ldap_server = self.settings['ldap_server']
+        '''self.ldap_server = self.settings['ldap_server']
         self.ldap_port = self.settings['ldap_port']
         self.ldap_ssl = eval(self.settings['ldap_ssl'])
         self.bind_dn = self.settings['bind_dn']
         self.base_dn = self.settings['base_dn']
         self.bind_password = self.settings['bind_password']
         self.search_filter = self.settings['search_filter']
-        self.search_filter_sync = self.settings['search_filter_sync']
+        self.search_filter_sync = self.settings['search_filter_sync']'''
         super(PluginAuthBase, self).__init__()
 
     def connect(self, bind_dn, password):
@@ -36,3 +36,6 @@ class LdapAuthenticationProvider(PluginAuthBase):
             return True
         except Exception:
             return False
+
+    def register_signals(self):
+        print("Class created and registering signals")

@@ -4,6 +4,8 @@ from cmdb.user_management.user_authentication import AuthenticationProvider
 
 class PluginAuthBase(AuthenticationProvider, metaclass=PluginType):
 
+    PREFIX = 'auth_'
+
     def __init__(self, requirements=None):
         self.requirements = requirements or 'requirements.txt'
 

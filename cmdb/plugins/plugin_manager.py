@@ -6,8 +6,7 @@ class PluginManager:
 
     PLUGIN_PATH = os.path.dirname(os.path.realpath(__file__))+'/'
     PLUGIN_DIRECTORIES = [
-        'auth',
-        'export'
+        'auth'
     ]
 
     def __init__(self, plugin_path=None, plugin_directories=None):
