@@ -1,7 +1,10 @@
 """
 Server module for web-based services
 """
+import datetime
 from gunicorn.app.base import BaseApplication
+from cmdb.application_utils.logger import DEFAULT_LOG_DIR, DEFAULT_FILE_EXTENSION
+complete_log_file = DEFAULT_LOG_DIR + 'webserver' + "_" + str(datetime.date.today()) + DEFAULT_FILE_EXTENSION
 
 
 class HTTPServer(BaseApplication):
@@ -15,6 +18,11 @@ class HTTPServer(BaseApplication):
             self.options['workers'] = HTTPServer.number_of_workers()
         if 'worker_class' not in self.options:
             self.options['worker_class'] = 'gevent'
+        self.options['accesslog'] = complete_log_file
+        self.options['errorlog'] = complete_log_file
+        self.options['loglevel'] = 'info'
+        self.options['reload'] = True
+
         self.application = app
         super(HTTPServer, self).__init__()
 

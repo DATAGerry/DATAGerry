@@ -12,8 +12,10 @@ monkey.patch_all()
 
 from cmdb import __version__, __title__, __DEBUG__
 from optparse import OptionParser
-from cmdb.application_utils import log
 from time import sleep
+from cmdb.application_utils.logger import create_module_logger
+
+logger = create_module_logger(__name__)
 
 
 def build_arg_parser():
@@ -34,30 +36,31 @@ def build_arg_parser():
 
 def main(args):
     exit_message = "STOPPING cmdb!"
-    from cmdb.application_utils import get_system_config_reader
-    from cmdb.communication_interface.web_app import create_web_app
-    from cmdb.communication_interface.gunicorn import HTTPServer
+
+
+    from cmdb.communication_interface import HTTPServer, application
     from cmdb.data_storage import init_database
     from cmdb.data_storage.database_connection import ServerTimeoutError
-    from cmdb.plugins.auth.base import PluginAuthBase
+    from cmdb.plugins import plugin_manager
 
     database_manager = init_database()
     try:
         database_manager.database_connector.connect()
+
+        from cmdb.application_utils import get_system_config_reader
         web_server_options = get_system_config_reader().get_all_values_from_section('WebServer')
-        server = HTTPServer(
-            app=create_web_app(),
-            options=web_server_options
-        )
-        # server.run()
-        print(PluginAuthBase.plugins)
+        HTTPServer(
+            application, web_server_options
+        ).run()
+
+        #plugin_manager.load_plugins()
 
     except OSError as e:
-        log.warning(e.errno)
-        exit(log.info(exit_message))
+        logger.warning(e.errno)
+        exit(logger.info(exit_message))
     except ServerTimeoutError as e:
-        log.warning(e.message)
-        exit(log.info(exit_message))
+        logger.warning(e.message)
+        exit(logger.info(exit_message))
     finally:
         database_manager.database_connector.disconnect()
 
@@ -80,11 +83,11 @@ __  __ _____ _____ ____ __  __ ____  ____
     print(brand_string)
     print(welcome_string.format(parameters))
     sleep(0.1)  # prevent logger output
-
+    logger.info("STARTING CMDB...")
     if parameters.debug:
         global __DEBUG__
         __DEBUG__ = True
-        log.setLevel(10)
+        #log.setLevel(10)
 
     if parameters.start:
         main(arguments)

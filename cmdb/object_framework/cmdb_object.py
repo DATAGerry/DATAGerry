@@ -49,7 +49,7 @@ class CmdbObject(CmdbDAO):
         self.views = views
         self.fields = fields
         self.logs = logs
-        super(CmdbDAO, self).__init__(**kwargs)
+        super(CmdbObject, self).__init__(**kwargs)
 
     def get_type_id(self) -> int:
         """get type if of this object
