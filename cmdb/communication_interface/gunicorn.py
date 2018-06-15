@@ -1,7 +1,10 @@
 """
 Server module for web-based services
 """
+import datetime
 from gunicorn.app.base import BaseApplication
+from cmdb.application_utils.logger import DEFAULT_LOG_DIR, DEFAULT_FILE_EXTENSION
+complete_log_file = DEFAULT_LOG_DIR + 'webserver' + "_" + str(datetime.date.today()) + DEFAULT_FILE_EXTENSION
 
 
 class HTTPServer(BaseApplication):
@@ -15,6 +18,11 @@ class HTTPServer(BaseApplication):
             self.options['workers'] = HTTPServer.number_of_workers()
         if 'worker_class' not in self.options:
             self.options['worker_class'] = 'gevent'
+        self.options['accesslog'] = complete_log_file
+        self.options['errorlog'] = complete_log_file
+        self.options['loglevel'] = 'info'
+        self.options['reload'] = True
+
         self.application = app
         super(HTTPServer, self).__init__()
 
@@ -37,3 +45,28 @@ class HTTPServer(BaseApplication):
 
         import multiprocessing
         return (multiprocessing.cpu_count() * 2) + 1
+
+
+class DispatcherMiddleware:
+
+    def __init__(self, app, mounts=None):
+        self.app = app
+        self.mounts = mounts or {}
+
+    def __call__(self, environ, start_response):
+        script = environ.get('PATH_INFO', '')
+        path_info = ''
+        while '/' in script:
+            if script in self.mounts:
+                app = self.mounts[script]
+                break
+            script, last_item = script.rsplit('/', 1)
+            path_info = '/%s%s' % (last_item, path_info)
+        else:
+            app = self.mounts.get(script, self.app)
+        original_script_name = environ.get('SCRIPT_NAME', '')
+        environ['SCRIPT_NAME'] = original_script_name + script
+        environ['PATH_INFO'] = path_info
+        return app(environ, start_response)
+
+

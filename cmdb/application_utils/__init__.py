@@ -1,7 +1,6 @@
 from cmdb.application_utils.system_reader import SystemConfigReader, SystemSettingsReader
 from cmdb.application_utils.system_writer import SystemSettingsWriter
 from cmdb.application_utils.security import SecurityManager, TokenManager
-from cmdb.application_utils.logger import log
 
 SYSTEM_CONFIG_READER = SystemConfigReader(
     config_name=SystemConfigReader.DEFAULT_CONFIG_NAME,

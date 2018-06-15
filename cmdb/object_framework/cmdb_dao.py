@@ -74,13 +74,8 @@ class CmdbDAO:
         return self.version + update
 
     def __repr__(self):
-        """
-        Debug function for print tests
-        :return: pretty formatted string
-        """
-        import pprint
-        return 'Class: %s \nDict:\n%s' % \
-               (self.__class__.__name__, pprint.pformat(self.__dict__))
+        from cmdb.application_utils.program_utils import debug_print
+        return debug_print(self)
 
     def to_database(self):
         return self.__dict__
