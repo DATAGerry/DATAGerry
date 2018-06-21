@@ -9,16 +9,12 @@ If not, see <https://github.com/NETHINKS/NetCMDB/blob/master/LICENSE>.
 from gevent import monkey
 
 monkey.patch_all()
-
-from cmdb import __version__, __title__, __DEBUG__
-from optparse import OptionParser
-from time import sleep
-from cmdb.application_utils.logger import create_module_logger
-
-logger = create_module_logger(__name__)
+from cmdb.application_utils.logger import cmdb_logger
 
 
 def build_arg_parser():
+    from optparse import OptionParser
+    from cmdb import __version__, __title__, __DEBUG__
     _parser = OptionParser(
         usage="usage: {} [options]".format(__title__),
         version=" {}".format(__version__)
@@ -34,38 +30,45 @@ def build_arg_parser():
     return options, args
 
 
-def main(args):
-    exit_message = "STOPPING cmdb!"
-
-
+def main():
+    from multiprocessing import Process
     from cmdb.communication_interface import HTTPServer, application
     from cmdb.data_storage import init_database
     from cmdb.data_storage.database_connection import ServerTimeoutError
-    from cmdb.plugins import plugin_manager
+    from cmdb.application_utils import get_system_config_reader
+
+    exit_message = "STOPPING cmdb!"
 
     database_manager = init_database()
     try:
         database_manager.database_connector.connect()
 
-        from cmdb.application_utils import get_system_config_reader
-        web_server_options = get_system_config_reader().get_all_values_from_section('WebServer')
-        HTTPServer(
-            application, web_server_options
-        ).run()
-
-        #plugin_manager.load_plugins()
-
     except OSError as e:
-        logger.warning(e.errno)
-        exit(logger.info(exit_message))
+        cmdb_logger.warning(e.errno)
+        exit(cmdb_logger.info(exit_message))
     except ServerTimeoutError as e:
-        logger.warning(e.message)
-        exit(logger.info(exit_message))
+        cmdb_logger.warning(e.message)
+        exit(cmdb_logger.info(exit_message))
     finally:
         database_manager.database_connector.disconnect()
 
+    web_server_options = get_system_config_reader().get_all_values_from_section('WebServer')
+    http_process = Process(
+        target=HTTPServer(application, web_server_options).run
+    )
+    http_process.daemon = True
+    http_process.start()
+
+    cmdb_logger.info("Webserver startet @ {}:{}".format(web_server_options['host'], web_server_options['port']))
+    cmdb_logger.info("CMDB successfully started")
+
+    http_process.join()
+    cmdb_logger.info("CMDB stopped")
+
 
 if __name__ == "__main__":
+    from time import sleep
+
     welcome_string = '''Welcome to Net|CMDB
 Starting core system with following parameters: \n{}
     '''
@@ -83,11 +86,12 @@ __  __ _____ _____ ____ __  __ ____  ____
     print(brand_string)
     print(welcome_string.format(parameters))
     sleep(0.1)  # prevent logger output
-    logger.info("STARTING CMDB...")
+    cmdb_logger.info("STARTING CMDB...")
+
     if parameters.debug:
         global __DEBUG__
         __DEBUG__ = True
-        #log.setLevel(10)
+        # log.setLevel(10)
 
     if parameters.start:
-        main(arguments)
+        main()

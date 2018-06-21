@@ -1,6 +1,5 @@
 import os
-from cmdb.application_utils.logger import create_module_logger
-logger = create_module_logger(__name__)
+from cmdb.application_utils.logger import cmdb_logger
 
 
 class PluginManager:
@@ -16,7 +15,7 @@ class PluginManager:
         try:
             self.check_path_sets()
         except DefaultPluginDirsNotFound as e:
-            logger.warning(e.message)
+            cmdb_logger.warning(e.message)
 
     def check_path_sets(self):
         error_list = []

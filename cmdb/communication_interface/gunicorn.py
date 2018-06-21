@@ -1,14 +1,52 @@
 """
 Server module for web-based services
 """
-import datetime
 from gunicorn.app.base import BaseApplication
 from cmdb.application_utils.logger import DEFAULT_LOG_DIR, DEFAULT_FILE_EXTENSION
-complete_log_file = DEFAULT_LOG_DIR + 'webserver' + "_" + str(datetime.date.today()) + DEFAULT_FILE_EXTENSION
 
 
 class HTTPServer(BaseApplication):
     """Basic server application"""
+
+    CONFIG_DEFAULTS = dict(
+        version=1,
+        disable_existing_loggers=False,
+
+        loggers={
+            "gunicorn.error": {
+                "level": "INFO",
+                "handlers": ["error"],
+                "propagate": True,
+                "qualname": "gunicorn.error"
+            },
+
+            "gunicorn.access": {
+                "level": "INFO",
+                "handlers": ["access"],
+                "propagate": True,
+                "qualname": "gunicorn.access"
+            }
+        },
+        handlers={
+            "error": {
+                "class": "logging.FileHandler",
+                "formatter": "generic",
+                "filename": DEFAULT_LOG_DIR + "webserver.error" + DEFAULT_FILE_EXTENSION
+            },
+            "access": {
+                "class": "logging.FileHandler",
+                "formatter": "generic",
+                "filename": DEFAULT_LOG_DIR + "webserver.access" + DEFAULT_FILE_EXTENSION
+            }
+        },
+        formatters={
+            "generic": {
+                "format": "[%(asctime)s] [%(levelname)-8s] --- %(message)s (%(filename)s)",
+                "datefmt": "%Y-%m-%d %H:%M:%S",
+                "class": "logging.Formatter"
+            }
+        }
+    )
 
     def __init__(self, app, options=None):
         self.options = options or {}
@@ -18,10 +56,8 @@ class HTTPServer(BaseApplication):
             self.options['workers'] = HTTPServer.number_of_workers()
         if 'worker_class' not in self.options:
             self.options['worker_class'] = 'gevent'
-        self.options['accesslog'] = complete_log_file
-        self.options['errorlog'] = complete_log_file
-        self.options['loglevel'] = 'info'
-        self.options['reload'] = True
+        self.options['logconfig_dict'] = HTTPServer.CONFIG_DEFAULTS
+        #self.options['reload'] = True
 
         self.application = app
         super(HTTPServer, self).__init__()
