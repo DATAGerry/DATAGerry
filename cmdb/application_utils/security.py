@@ -1,5 +1,11 @@
+"""
+Security module - this regulates everything in the area of cryptography, encryption and security measures.
+The different subsections divided into individual managers.
+"""
 import ast
 import base64
+import hashlib
+import hmac
 from jwcrypto import jwk, jwt, jws
 from Cryptodome import Random
 from Crypto.Cipher import AES
@@ -18,9 +24,7 @@ class SecurityManager:
 
     def generate_hmac(self, data):
 
-        import hashlib
-        import hmac
-        import base64
+
 
         generated_hash = hmac.new(
             bytes(self.symmetric_key, 'utf-8'),

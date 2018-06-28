@@ -8,34 +8,43 @@ class SystemReader:
     """
     Reader super class
     """
+
     def get_value(self, name, section):
         """
         get specific value from a section
-        :param name: key name of value
-        :param section: section identifer
-        :return: value
+        Args:
+            name: key name of value
+            section: section identifer
+
+        Returns:
+            value
         """
         raise NotImplementedError
 
     def get_sections(self):
         """
         get all sections from config
-        :return: list of config names
+        Returns:
+            list of config names
         """
         raise NotImplementedError
 
     def get_all_values_from_section(self, section):
         """
         get list of all values in section
-        :param section key
-        :return: key/value list of all values inside a section
+        Args:
+            section: section key
+
+        Returns:
+            key/value list of all values inside a section
         """
         raise NotImplementedError
 
     def setup(self):
         """
         performs an setup on call
-        :return: setup informations
+        Returns:
+            setup informations
         """
         raise NotImplementedError
 
@@ -52,22 +61,26 @@ class SystemConfigReader:
 
     def __new__(cls, config_name, config_location):
         if not SystemConfigReader.instance:
-            SystemConfigReader.instance = SystemConfigReader.__SystemConfigReader(config_name, config_location)
+            SystemConfigReader.instance = SystemConfigReader._SystemConfigReader(config_name, config_location)
         return SystemConfigReader.instance
 
     def __getattr__(self, name):
         return getattr(self.instance, name)
 
-    def __setattr__(self, name):
+    def __setattr__(self, name, value):
         return setattr(self.instance, name)
 
-    class __SystemConfigReader(SystemReader):
+    class _SystemConfigReader(SystemReader):
+
+        CONFIG_LOADED = True
+        CONFIG_NOT_LOADED = False
 
         def __init__(self, config_name, config_location):
             """
             init the system config reader
-            :param config_name: name of config file with extension
-            :param config_location: directory of config file
+            Args:
+                config_name: name of config file with extension
+                config_location: directory of config file
             """
             import configparser
             self.config_status = SystemConfigReader.CONFIG_NOT_LOADED
@@ -80,6 +93,11 @@ class SystemConfigReader:
                 raise ConfigFileNotFound(self.config_name)
 
         def setup(self):
+            """
+            init configuration file
+            Returns:
+                loading status
+            """
             try:
                 self.read_config_file(self.config_file)
                 return SystemConfigReader.CONFIG_LOADED
@@ -88,10 +106,10 @@ class SystemConfigReader:
 
         def read_config_file(self, file):
             """
-            helper function for file reading
-            sets the path directly inside the config attribute
-            :param file: path to config file
-            :return:
+            helper function for file reading sets the path directly inside the config attribute
+            Args:
+                file: path to config file
+
             """
             if os.path.isfile(file):
                 self.config.read(file)
@@ -101,9 +119,12 @@ class SystemConfigReader:
         def get_value(self, name, section):
             """
             get a value from a given section
-            :param name: key of value
-            :param section: section of the value
-            :return: value
+            Args:
+                name: key of value
+                section: section of the value
+
+            Returns:
+                value
             """
             if self.config_status == SystemConfigReader.CONFIG_LOADED:
                 if self.config.has_section(section):
@@ -119,7 +140,8 @@ class SystemConfigReader:
         def get_sections(self):
             """
             get all sections from config
-            :return: list of sections inside a config
+            Returns:
+                list of sections inside a config
             """
             if self.config_status == SystemConfigReader.CONFIG_LOADED:
                 return self.config.sections()
@@ -129,8 +151,11 @@ class SystemConfigReader:
         def get_all_values_from_section(self, section):
             """
             get all values from a section
-            :param section: section name
-            :return: key value dict of all elements inside section
+            Args:
+                section: section name
+
+            Returns:
+                key value dict of all elements inside section
             """
             if self.config_status == SystemConfigReader.CONFIG_LOADED:
                 try:
@@ -146,7 +171,8 @@ class SystemConfigReader:
         def status(self):
             """
             checks if config is loaded correctly
-            :return: True/False statement of loading status
+            Returns:
+                True/False statement of loading status
             """
             if self.config_status:
                 return self.CONFIG_LOADED
@@ -155,8 +181,8 @@ class SystemConfigReader:
         def __repr__(self):
             """
             Helper function for debugging
-            :return:
             """
+
             from pprint import pprint
             for names in self.get_sections():
                 pprint(names + ": {}".format(self.config.items(names)))
@@ -176,17 +202,22 @@ class SystemSettingsReader(SystemReader):
     def __init__(self, database_manager):
         """
         init system settings reader
-        :param dbm: database manager
+        Args:
+            database_manager: database manager
         """
         self.dbm = database_manager
 
     def get_value(self, name, section):
         """
         get a value from a given section
-        :param name: key of value
-        :param section: section of the value
-        :return: value
+        Args:
+            name: key of value
+            section: section of the value
+
+        Returns:
+            value
         """
+
         return self.dbm.find_one_by(
             collection=SystemSettingsReader.COLLECTION,
             filter={'_id': section}
@@ -195,7 +226,8 @@ class SystemSettingsReader(SystemReader):
     def get_sections(self):
         """
         get all sections from config
-        :return: list of sections inside a config
+        Returns:
+            list of sections inside a config
         """
         return self.dbm.find_all(
             collection=SystemSettingsReader.COLLECTION,
@@ -205,8 +237,11 @@ class SystemSettingsReader(SystemReader):
     def get_all_values_from_section(self, section):
         """
         get all values from a section
-        :param section: section name
-        :return: key value dict of all elements inside section
+        Args:
+            section: section name
+
+        Returns:
+            key value dict of all elements inside section
         """
         return self.dbm.find_all(
             collection=SystemSettingsReader.COLLECTION,
@@ -214,6 +249,11 @@ class SystemSettingsReader(SystemReader):
         )
 
     def setup(self):
+        """
+        get setup data
+        Returns:
+            setup dict
+        """
         return SystemSettingsReader.SETUP_INITS
 
 
@@ -221,34 +261,38 @@ class ConfigFileNotFound(Exception):
     """
     Error if local file could not be loaded
     """
+
     def __init__(self, filename):
         super().__init__()
         self.filename = filename
-        self.message = 'Configurations file: '+self.filename+' was not found!'
+        self.message = 'Configurations file: ' + self.filename + ' was not found!'
 
 
 class ConfigNotLoaded(Exception):
     """
     Error if reader is not loaded
     """
+
     def __init__(self, filename):
         super().__init__()
-        self.message = 'Configurations file: '+filename+' was not loaded correctly!'
+        self.message = 'Configurations file: ' + filename + ' was not loaded correctly!'
 
 
 class SectionError(Exception):
     """
     Error if section not exists
     """
+
     def __init__(self, name):
         super().__init__()
-        self.message = 'The section '+name+' does not exist!'
+        self.message = 'The section ' + name + ' does not exist!'
 
 
 class KeySectionError(Exception):
     """
     Error if key not exists in section
     """
+
     def __init__(self, name):
         super().__init__()
-        self.message = 'The key '+name+' was not found!'
+        self.message = 'The key ' + name + ' was not found!'

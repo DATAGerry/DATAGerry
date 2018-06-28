@@ -1,4 +1,6 @@
-import logging
+"""
+Logging module
+"""
 import logging.config
 import os
 
@@ -37,4 +39,4 @@ LOGGING_CONF = dict(
 )
 
 logging.config.dictConfig(LOGGING_CONF)
-cmdb_logger = logging.getLogger('cmdb')
+CMDB_LOGGER = logging.getLogger('cmdb')

@@ -9,7 +9,7 @@ If not, see <https://github.com/NETHINKS/NetCMDB/blob/master/LICENSE>.
 from gevent import monkey
 
 monkey.patch_all()
-from cmdb.application_utils.logger import cmdb_logger
+from cmdb.application_utils.logger import CMDB_LOGGER
 
 
 def build_arg_parser():
@@ -44,11 +44,11 @@ def main():
         database_manager.database_connector.connect()
 
     except OSError as e:
-        cmdb_logger.warning(e.errno)
-        exit(cmdb_logger.info(exit_message))
+        CMDB_LOGGER.warning(e.errno)
+        exit(CMDB_LOGGER.info(exit_message))
     except ServerTimeoutError as e:
-        cmdb_logger.warning(e.message)
-        exit(cmdb_logger.info(exit_message))
+        CMDB_LOGGER.warning(e.message)
+        exit(CMDB_LOGGER.info(exit_message))
     finally:
         database_manager.database_connector.disconnect()
 
@@ -59,11 +59,11 @@ def main():
     http_process.daemon = True
     http_process.start()
 
-    cmdb_logger.info("Webserver startet @ {}:{}".format(web_server_options['host'], web_server_options['port']))
-    cmdb_logger.info("CMDB successfully started")
+    CMDB_LOGGER.info("Webserver startet @ http://{}:{}".format(web_server_options['host'], web_server_options['port']))
+    CMDB_LOGGER.info("CMDB successfully started")
 
     http_process.join()
-    cmdb_logger.info("CMDB stopped")
+    CMDB_LOGGER.info("CMDB stopped")
 
 
 if __name__ == "__main__":
@@ -86,7 +86,7 @@ __  __ _____ _____ ____ __  __ ____  ____
     print(brand_string)
     print(welcome_string.format(parameters))
     sleep(0.1)  # prevent logger output
-    cmdb_logger.info("STARTING CMDB...")
+    CMDB_LOGGER.info("STARTING CMDB...")
 
     if parameters.debug:
         global __DEBUG__
