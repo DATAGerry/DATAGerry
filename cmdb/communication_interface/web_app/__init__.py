@@ -6,7 +6,6 @@ from flask import Flask
 from cmdb.communication_interface.config import app_config
 from cmdb.data_storage import init_database
 
-
 def create_web_app():
 
     from cmdb.object_framework import CmdbObjectManager

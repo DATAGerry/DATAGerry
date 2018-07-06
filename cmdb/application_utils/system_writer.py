@@ -1,6 +1,8 @@
 """
 Writer module for database based system configurations
 """
+
+
 class SystemWriter:
     """
 

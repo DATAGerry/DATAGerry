@@ -31,7 +31,7 @@ def build_arg_parser():
 
 
 def main():
-    from multiprocessing import Process
+    from multiprocessing import Process, Queue
     from cmdb.communication_interface import HTTPServer, application
     from cmdb.data_storage import init_database
     from cmdb.data_storage.database_connection import ServerTimeoutError
@@ -51,17 +51,15 @@ def main():
         exit(CMDB_LOGGER.info(exit_message))
     finally:
         database_manager.database_connector.disconnect()
-
+    server_queue = Queue()
     web_server_options = get_system_config_reader().get_all_values_from_section('WebServer')
     http_process = Process(
-        target=HTTPServer(application, web_server_options).run
+        target=HTTPServer(application, web_server_options).run,
+        args=(server_queue,)
     )
-    http_process.daemon = True
     http_process.start()
-
-    CMDB_LOGGER.info("Webserver startet @ http://{}:{}".format(web_server_options['host'], web_server_options['port']))
-    CMDB_LOGGER.info("CMDB successfully started")
-
+    if server_queue.get():
+        CMDB_LOGGER.info("CMDB successfully started")
     http_process.join()
     CMDB_LOGGER.info("CMDB stopped")
 

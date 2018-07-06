@@ -1,8 +1,11 @@
 """
 Server module for web-based services
 """
+import sys
 from gunicorn.app.base import BaseApplication
+from cmdb.application_utils.logger import CMDB_LOGGER
 from cmdb.application_utils.logger import DEFAULT_LOG_DIR, DEFAULT_FILE_EXTENSION
+from gunicorn.arbiter import Arbiter
 
 
 class HTTPServer(BaseApplication):
@@ -57,8 +60,8 @@ class HTTPServer(BaseApplication):
         if 'worker_class' not in self.options:
             self.options['worker_class'] = 'gevent'
         self.options['logconfig_dict'] = HTTPServer.CONFIG_DEFAULTS
-        #self.options['reload'] = True
-
+        self.options['timeout'] = 2
+        self.running = None
         self.application = app
         super(HTTPServer, self).__init__()
 
@@ -70,6 +73,33 @@ class HTTPServer(BaseApplication):
 
     def load(self):
         return self.application
+
+    def run(self, queue):
+        from multiprocessing import Process
+
+        try:
+            ar = Arbiter(self)
+
+            arbiter_process = Process(
+                target=ar.run
+            )
+            arbiter_process.start()
+
+            if arbiter_process.is_alive():
+                queue.put(True)
+                CMDB_LOGGER.info("Webserver started @ http://{}:{}".format(ar.address[0][0], ar.address[0][1]))
+            else:
+                CMDB_LOGGER.critical("Someting went wrong - see {} for more informations".format(
+                    HTTPServer.CONFIG_DEFAULTS['handlers']['error']['filename'])
+                )
+                arbiter_process.terminate()
+
+            arbiter_process.join()
+
+        except RuntimeError as e:
+            CMDB_LOGGER.critical(e.message)
+            sys.exit(1)
+
 
     @staticmethod
     def number_of_workers() -> int:
