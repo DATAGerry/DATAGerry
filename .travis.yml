@@ -11,9 +11,7 @@ services:
     - mongodb
 
 env:
-    - TEST_HOST=127.0.0.1
-    - TEST_PORT=27017
-    - TEST_DATABASE=cmdb_test
+    - TEST_HOST=127.0.0.1 TEST_PORT=27017 TEST_DATABASE=cmdb_test
 
 install:
     - pip install -r requirements.txt
