@@ -1,0 +1,8 @@
+atomicwrites==1.1.5
+attrs==18.1.0
+more-itertools==4.2.0
+pluggy==0.6.0
+py==1.5.4
+pymongo==3.7.1
+pytest==3.6.3
+six==1.11.0

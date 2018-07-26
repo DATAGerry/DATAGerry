@@ -3,13 +3,20 @@ sudo: false
 language: python
 
 python:
-    - 3.4
     - 3.5
     - 3.6
+    - "3.7-dev"
 
 services:
     - mongodb
 
+env:
+    - TEST_HOST=127.0.0.1
+    - TEST_PORT=27017
+    - TEST_DATABASE=cmdb_test
+
 install:
-    - if [[ $TRAVIS_PYTHON_VERSION == 3.3 ]]; then pip install --upgrade pip setuptools; fi
-    - pip install -r requirements-dev.txt
+    - pip install -r requirements.txt
+    - pip install .
+script:
+    - pytest tests
