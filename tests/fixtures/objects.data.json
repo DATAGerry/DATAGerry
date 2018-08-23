@@ -1,0 +1,22 @@
+{
+  "public_id": 1,
+  "type_id": 1,
+  "active": true,
+  "version": "1.0.1",
+  "views": 100,
+  "creation_time": "2017-06-24T00:48:38.000+0000",
+  "last_edit_time": "2017-06-24T00:48:38.000+0000",
+  "creator_id" : 1,
+  "last_editor_id" : 1,
+  "fields": [],
+  "tag": {
+    "name": "Test",
+    "brand": "Primary"
+  },
+  "logs":[
+    {
+      "date": "2017-06-24T00:48:38.000+0000",
+      "log": "ewogICJwdWJsaWNfaWQiOiAxLAogICJ0eXBlX2lkIjogMSwKICAiYWN0aXZlIjogdHJ1ZSwKICAidmVyc2lvbiI6ICIxLjAuMSIsCiAgInZpZXdzIjogMTAwLAogICJjcmVhdGlvbl90aW1lIjogIjIwMTctMDYtMjRUMDA6NDg6MzguMDAwKzAwMDAiLAogICJsYXN0X2VkaXRfdGltZSI6ICIyMDE3LTA2LTI0VDAwOjQ4OjM4LjAwMCswMDAwIiwKICAiY3JlYXRvcl9pZCIgOiAxLAogICJsYXN0X2VkaXRvcl9pZCIgOiAxLAogICJ0YWciOiB7CiAgICAibmFtZSI6ICJUZXN0IiwKICAgICJicmFuZCI6ICJQcmltYXJ5IgogIH0KfQ=="
+    }
+  ]
+}

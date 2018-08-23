@@ -8,7 +8,7 @@ class CmdbObject(CmdbDAO):
     COLLECTION = 'objects.data'
     REQUIRED_INIT_KEYS = [
         'type_id',
-        'status',
+        'tag',
         'version',
         'creation_time',
         'creator_id',
@@ -20,13 +20,13 @@ class CmdbObject(CmdbDAO):
         'logs'
     ]
 
-    def __init__(self, type_id, status, version, creation_time, creator_id,
+    def __init__(self, type_id, tag, version, creation_time, creator_id,
                  last_editor_id, last_edit_time, active, views, fields, logs, **kwargs):
         """init of object
 
         Args:
             type_id: public type id which implements the object
-            status: current status of object
+            tag: current tag of object
             version: current version of object
             creation_time: date of object creation
             creator_id: public id of creation user
@@ -39,7 +39,7 @@ class CmdbObject(CmdbDAO):
             **kwargs: additional data
         """
         self.type_id = type_id
-        self.status = status
+        self.tag = tag
         self.version = version
         self.creation_time = creation_time
         self.creator_id = creator_id
@@ -58,20 +58,9 @@ class CmdbObject(CmdbDAO):
             int: public id of type
 
         """
+        if self.type_id == 0 or self.type_id is None:
+            raise TypeNotSetError(self.get_public_id())
         return self.type_id
-
-    def get_links(self) -> list:
-        """get list of all linked objects
-
-        Returns:
-            list: list of objects public ids
-            None: if none exists
-
-        """
-        if self.links:
-            return self.links
-        else:
-            None
 
     def update_view_counter(self) -> int:
         """update the number of times this object was viewd
@@ -83,7 +72,7 @@ class CmdbObject(CmdbDAO):
         self.views += 1
         return self.views
 
-    def get_all_fields(self):
+    def get_all_fields(self) -> list:
         """ get all fields with key value pair
 
         Returns:
@@ -93,7 +82,7 @@ class CmdbObject(CmdbDAO):
 
         return self.fields
 
-    def get_value(self, field):
+    def get_value(self, field) -> str:
         """get value of an field
 
         Args:
@@ -105,6 +94,26 @@ class CmdbObject(CmdbDAO):
         for f in self.fields:
             if f['name'] == field:
                 return f['value']
-            else:
-                continue
+            continue
         return None
+
+    def empty_logs(self) -> bool:
+        if len(self.logs) > 0:
+            return True
+        return False
+
+
+class TypeNotSetError(Exception):
+
+    def __init__(self, public_id):
+        super().__init__()
+        self.message = 'The object (ID: {}) is not connected with a type'.format(public_id)
+
+
+class NoLinksAvailableError(Exception):
+    """
+    @deprecated
+    """
+    def __init__(self, public_id):
+        super().__init__()
+        self.message = 'The object (ID: {}) has no links'.format(public_id)

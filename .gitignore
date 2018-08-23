@@ -12,6 +12,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 .idea/
+venv/
 env/
 env3/
 build/

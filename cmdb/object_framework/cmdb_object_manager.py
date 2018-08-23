@@ -5,7 +5,7 @@ The implementation of the manager used is always realized using the respective s
 
 """
 from cmdb.object_framework import *
-
+from cmdb.data_storage.database_manager import PublicIDAlreadyExists
 
 class CmdbManagerBase:
     """Represents the base class for object managers. A respective implementation is always adapted to the
@@ -157,10 +157,13 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def insert_object(self, data: dict):
         new_object = CmdbObject(**data)
-        ack = self.dbm.insert(
-            collection=CmdbObject.COLLECTION,
-            data=new_object.to_database()
-        )
+        try:
+            ack = self.dbm.insert(
+                collection=CmdbObject.COLLECTION,
+                data=new_object.to_database()
+            )
+        except PublicIDAlreadyExists as e:
+            return e
         return ack
 
     def insert_many_objects(self, objects: list):

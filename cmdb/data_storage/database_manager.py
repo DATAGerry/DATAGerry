@@ -2,6 +2,7 @@
 Database Management instance for database actions
 
 """
+from pymongo.errors import DuplicateKeyError
 
 
 class DatabaseManager:
@@ -163,8 +164,7 @@ class DatabaseManager:
 
 
 class DatabaseManagerMongo(DatabaseManager):
-    """PyMongo (mongodb) implementation of Database Manager
-    """
+    """PyMongo (mongodb) implementation of Database Manager"""
 
     def __init__(self, connector):
         """init mongo implementation
@@ -175,14 +175,42 @@ class DatabaseManagerMongo(DatabaseManager):
         """
         super().__init__(connector)
 
-    def setup(self):
+    def setup(self) -> bool:
         """setup script
 
         Returns:
             acknowledged
 
         """
-        raise NotImplementedError
+        from cmdb.object_framework import __COLLECTIONS__ as cmdb_collection
+
+        def _gen_default_tables(collection_class: object):
+            self.create_collection(collection_class.COLLECTION)
+            self.create_indexes(collection_class.COLLECTION, collection_class._SUPER_INDEX_KEYS)
+            if len(collection_class.INDEX_KEYS) > 0:
+                self.create_indexes(collection_class.COLLECTION, collection_class.INDEX_KEYS)
+
+        for collection in cmdb_collection:
+            # generating the default database "tables"
+            try:
+                _gen_default_tables(collection)
+            except Exception:
+                return False
+        return True
+
+    def create_index(self, collection: str, name: str, unique: bool, background=True):
+        self.database_connector.get_collection(collection).create_index(
+            name=name,
+            unique=unique,
+            background=background
+        )
+
+    def create_indexes(self, collection: str, indexes: list):
+        from pymongo import IndexModel
+        import_list = []
+        for idx in indexes:
+            import_list.append(IndexModel(idx['keys']))
+        self.database_connector.get_collection(collection).create_indexes(import_list)
 
     def __find(self, collection: str, *args, **kwargs):
         """general find function for database search
@@ -369,13 +397,23 @@ class DatabaseManagerMongo(DatabaseManager):
             int: highest public id
 
         """
-        return int(self.get_document_with_highest_id(collection)['public_id'])
+        try:
+            highest = int(self.get_document_with_highest_id(collection)['public_id'])
+        except NoDocumentFound:
+            return 0
+        return highest
 
 
 class CollectionAlreadyExists(Exception):
     def __init__(self, collection_name):
         super().__init__()
         self.message = "Collection {} already exists".format(collection_name)
+
+
+class PublicIDAlreadyExists(DuplicateKeyError):
+    def __init__(self, public_id):
+        super().__init__()
+        self.message = "Object with this public id already exists: {}".format(public_id)
 
 
 class NoDocumentFound(Exception):

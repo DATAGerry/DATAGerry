@@ -143,6 +143,9 @@ class MongoConnector(Connector):
         """
         return self.database.collection_names()
 
+    def __exit__(self, *err):
+        self.client.close()
+
 
 class ServerTimeoutError(Exception):
     """

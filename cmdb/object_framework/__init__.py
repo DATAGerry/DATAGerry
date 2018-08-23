@@ -12,4 +12,21 @@ from cmdb.object_framework.cmdb_object_type import CmdbType
 from cmdb.object_framework.cmdb_object_category import CmdbTypeCategory
 from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
 from cmdb.object_framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.object_framework.cmdb_status import CmdbStatus
+from cmdb.object_framework.cmdb_object_status import CmdbObjectStatus
+from cmdb.object_framework.cmdb_object_link import CmdbObjectLink
+
+__COLLECTIONS__ = [
+    CmdbObject,
+    CmdbType,
+    CmdbTypeCategory,
+    CmdbFieldType,
+    CmdbObjectStatus,
+    CmdbObjectLink
+]
+
+
+def get_object_manager():
+    from cmdb.data_storage import get_pre_init_database
+    return CmdbObjectManager(
+        database_manager=get_pre_init_database()
+    )

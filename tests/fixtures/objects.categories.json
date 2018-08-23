@@ -1,0 +1,49 @@
+[{
+		"name": "default",
+		"label": "Default",
+		"parent_id": 0,
+		"icon": null,
+		"type_list": [],
+		"public_id": 1
+	},
+	{
+		"name": "archive",
+		"label": "Archive",
+		"parent_id": 0,
+		"icon": "fas fa-archive",
+		"type_list": [],
+		"public_id": 2
+	},
+	{
+		"name": "infrastructure",
+		"label": "Infrastructure",
+		"parent_id": 0,
+		"icon": "fas fa-layer-group",
+		"type_list": [],
+		"public_id": 3
+	},
+	{
+		"name": "locations",
+		"label": "Locations",
+		"parent_id": 3,
+		"icon": "fas fa-map-marked-alt",
+		"type_list": [],
+		"public_id": 4
+	},
+	{
+		"name": "hardware",
+		"label": "Hardware",
+		"parent_id": 3,
+		"icon": "far fa-hdd",
+		"type_list": [],
+		"public_id": 5
+	},
+	{
+		"name": "customers",
+		"label": "Customers",
+		"parent_id": 0,
+		"icon": "far fa-address-card",
+		"type_list": [],
+		"public_id": 6
+	}
+]

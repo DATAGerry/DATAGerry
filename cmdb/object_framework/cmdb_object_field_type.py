@@ -5,6 +5,7 @@ class CmdbFieldType(CmdbDAO):
     """
     Presentation of a field type which is created within the Cmdb type.
     """
+    COLLECTION = 'objects.types.fields'
     REQUIRED_INIT_KEYS = [
         'name',
         'label',
@@ -13,11 +14,13 @@ class CmdbFieldType(CmdbDAO):
     IGNORED_INIT_KEYS = [
         'public_id'
     ]
+    INDEX_KEYS = [
+        {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
+    ]
 
     def __init__(self, type: str, subtype: str, name: str, label: str, description: str = None, placeholder: str = None,
-                 values: list = [], role: list = [], maxlength: int = None, required: bool = False, access: bool = False,
-                 className: str = 'form-control', public_id: int = -1, **kwargs):
-        self.public_id = public_id
+                 values: list = [], roles: list = [], maxlength: int = None, required: bool = False, access: bool = False,
+                 className: str = 'form-control', **kwargs):
         self.value = None
         self.type = type
         self.subtype = subtype
@@ -27,14 +30,11 @@ class CmdbFieldType(CmdbDAO):
         self.placeholder = placeholder
         self.className = className
         self.values = values
-        self.role = role
+        self.roles = roles
         self.maxlength = maxlength
         self.required = required
         self.access = access
         super(CmdbFieldType, self).__init__(**kwargs)
-
-    def set_value(self, val):
-        self.value = val
 
     def get_value(self):
         return self.value

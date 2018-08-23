@@ -1,4 +1,4 @@
-from cmdb.object_framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFound
+from cmdb.object_framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
 from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
 
 
@@ -78,7 +78,7 @@ class CmdbType(CmdbDAO):
             if field['name'] == name:
                 try:
                     return CmdbFieldType(**field)
-                except RequiredInitKeyNotFound as e:
+                except RequiredInitKeyNotFoundError as e:
                     print(e.message)
                     return None
         raise FieldNotFoundError(name, self.get_name())

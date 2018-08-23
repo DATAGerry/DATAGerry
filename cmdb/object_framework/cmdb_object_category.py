@@ -5,58 +5,41 @@ class CmdbTypeCategory(CmdbDAO):
     """
     Type category
     """
-    COLLECTION = "objects.categories"
+    COLLECTION = 'objects.categories'
     REQUIRED_INIT_KEYS = [
         'name',
-        'label',
+        'label'
     ]
 
-    def __init__(self, name, label, icon=None, **kwargs):
+    def __init__(self, name, label, parent_id=0, icon=None, type_list=[], **kwargs):
         self.name = name
         self.label = label
+        self.parent_id = parent_id
         self.icon = icon
+        self.type_list = type_list
         super(CmdbTypeCategory, self).__init__(**kwargs)
 
-    def get_name(self):
-        """
-        get name of category
-        :return: category name
-        """
+    def get_name(self) -> str:
         return self.name
 
-    def get_label(self):
-        """
-        get label of category
-        :return: category label
-        """
+    def get_label(self) -> str:
         return self.label
 
-    def get_sub_categories(self):
-        """
-        get all sub categories
-        :return: list of all sub categories
-        """
-        return self.sub_categories
+    def get_parent_id(self) -> int:
+        return self.parent_id
 
-    def get_sub_category(self, name):
-        """
-        get specific sub category
-        :param name: name of selected category
-        :return: specific sub category
-        """
-        return self.sub_categories[name]
+    def get_icon(self) -> str:
+        return self.icon
 
-    def get_types(self):
-        """
-        get all types which are in this category
-        :return: all types
-        """
+    def has_icon(self) -> bool:
+        if self.icon:
+            return True
+        return False
+
+    def get_types(self) -> list:
         return self.type_list
 
-    def get_type(self, name):
-        """
-        get specific type
-        :param name: type name
-        :return: selected type
-        """
-        return self.type_list[name]
+    def is_empty(self) -> bool:
+        if len(self.type_list) > 0:
+            return False
+        return True

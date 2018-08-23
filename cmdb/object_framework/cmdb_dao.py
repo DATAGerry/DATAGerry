@@ -4,12 +4,18 @@ class CmdbDAO:
     their necessary dependent classes are to be stored in the database.
     """
 
+    DAO_ASCENDING = 1
+    DAO_DESCENDING = -1
     COLLECTION = 'objects.*'
     _SUPER_INIT_KEYS = [
         'public_id'
     ]
+    _SUPER_INDEX_KEYS = [
+        {'keys': [('public_id', DAO_ASCENDING)], 'name': 'public_id', 'unique': True}
+    ]
     IGNORED_INIT_KEYS = []
     REQUIRED_INIT_KEYS = []
+    INDEX_KEYS = []
     VERSIONING_MAJOR = 1.0
     VERSIONING_MINOR = 0.1
     VERSIONING_PATCH = 0.01
@@ -31,18 +37,14 @@ class CmdbDAO:
             int: public id
 
         """
+        if self.public_id == 0 or self.public_id is None:
+            raise NoPublicIDError()
         return self.public_id
 
     def has_object_id(self):
-        """
-
-        Returns:
-
-        """
         if hasattr(self, '_id'):
             return True
-        else:
-            return False
+        return False
 
     def __new__(cls, *args, **kwargs):
         """
@@ -57,14 +59,12 @@ class CmdbDAO:
             if req_key in kwargs:
                 continue
             else:
-                raise RequiredInitKeyNotFound(req_key)
+                raise RequiredInitKeyNotFoundError(req_key)
         return super(CmdbDAO, cls).__new__(cls)
 
     def _update_version(self, update):
         """
         updates the version based on versioning
-        :param update: update step
-        :return: new version
         """
         import math
         if update == self.VERSIONING_MINOR:
@@ -74,17 +74,29 @@ class CmdbDAO:
         return self.version + update
 
     def __repr__(self):
-        from cmdb.application_utils.program_utils import debug_print
+        from cmdb.utils.helpers import debug_print
         return debug_print(self)
 
-    def to_database(self):
+    def to_database(self) -> dict:
         return self.__dict__
 
-    def to_json(self):
+    def to_json(self) -> dict:
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
 
-class RequiredInitKeyNotFound(Exception):
+class NoVersionError(Exception):
+    def __init__(self, public_id):
+        super().__init__()
+        self.message = 'The object (ID: {}) has no version control'.format(public_id)
+
+
+class NoPublicIDError(Exception):
+    def __init__(self):
+        super().__init__()
+        self.message = 'The object has no general public id - look at the IGNORED_INIT_KEYS constant or the docs'
+
+
+class RequiredInitKeyNotFoundError(Exception):
     """
     Error if on of the given parameters is missing inside required init keys
     """
