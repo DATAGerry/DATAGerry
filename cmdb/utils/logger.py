@@ -10,6 +10,9 @@ DEFAULT_FILE_EXTENSION = 'log'
 
 
 def get_logger(module='cmdb', export=False):
+    import pathlib
+
+    pathlib.Path(DEFAULT_LOG_DIR).mkdir(parents=True, exist_ok=True)
     logging_conf = dict(
         version=1,
         disable_existing_loggers=True,
