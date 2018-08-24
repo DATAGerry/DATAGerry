@@ -7,6 +7,7 @@ The implementation of the manager used is always realized using the respective s
 from cmdb.object_framework import *
 from cmdb.data_storage.database_manager import PublicIDAlreadyExists
 
+
 class CmdbManagerBase:
     """Represents the base class for object managers. A respective implementation is always adapted to the
        respective database manager :class:`cmdb.data_storage.DatabaseManager` or the used functionalities.

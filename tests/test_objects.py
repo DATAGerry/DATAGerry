@@ -1,9 +1,10 @@
 import pytest
-from cmdb.object_framework import CmdbObjectManager, CmdbTypeCategory, CmdbObjectStatus
+import json
+from cmdb.object_framework import CmdbObjectManager, CmdbTypeCategory, CmdbObjectStatus, CmdbObject, CmdbObjectLog
 
 
 @pytest.fixture
-def database_manager(scope='module'):
+def database_manager():
     import os
     from cmdb.data_storage.database_connection import MongoConnector
     from cmdb.data_storage.database_manager import DatabaseManagerMongo
@@ -16,12 +17,38 @@ def database_manager(scope='module'):
         )
     )
 
-
 @pytest.fixture
 def object_manager(database_manager):
     return CmdbObjectManager(
         database_manager=database_manager
     )
+
+
+@pytest.fixture
+def objects_data_json():
+    with open('./fixtures/objects.data.json') as json_file:
+        return json.load(json_file)
+
+
+def test_cmdb_object(objects_data_json):
+    test_object = CmdbObject(**objects_data_json[0])
+    assert type(test_object) == CmdbObject
+
+
+def test_cmdb_object_logs(objects_data_json):
+    from cmdb.object_framework.cmdb_object import ActionNotPossibleError
+    from datetime import datetime
+    with open('./fixtures/objects.data.logs.json') as json_file:
+        test_data_array = json.load(json_file)
+    test_log = CmdbObjectLog(**test_data_array[0])
+    assert test_log.action == 'create'
+    assert test_log.author == 1
+    assert test_log.message == "Default"
+    assert len(test_log.state) == 0
+    assert type(test_log.date) == datetime
+
+    with pytest.raises(ActionNotPossibleError):
+        CmdbObjectLog(**test_data_array[1])
 
 
 def test_object_categories(object_manager):
@@ -107,3 +134,4 @@ def test_object_status():
 
 def test_object_manager(object_manager):
     assert object_manager.is_ready() is True
+

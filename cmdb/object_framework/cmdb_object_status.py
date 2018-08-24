@@ -16,18 +16,21 @@ class CmdbObjectStatus(CmdbDAO):
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
-    def __init__(self, name: str, **kwargs):
+    def __init__(self, name: str, label: str, color: str, icon: str=None, **kwargs):
         self.name = name
+        self.label = label or self.name.title()
+        self.color = color
+        self.icon = icon
         super(CmdbObjectStatus, self).__init__(**kwargs)
 
-    def get_name(self):
+    def get_name(self) -> str:
         return self.name
 
-    def get_label(self):
+    def get_label(self) -> str:
         return self.label
 
-    def get_color(self):
+    def get_color(self) -> str:
         return self.color
 
-    def get_icon(self):
+    def get_icon(self) -> str:
         return self.icon

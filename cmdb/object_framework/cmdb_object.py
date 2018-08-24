@@ -1,4 +1,5 @@
 from cmdb.object_framework.cmdb_dao import CmdbDAO
+from datetime import datetime
 
 
 class CmdbObject(CmdbDAO):
@@ -11,7 +12,7 @@ class CmdbObject(CmdbDAO):
         'tag',
         'version',
         'creation_time',
-        'creator_id',
+        'author_id',
         'last_editor_id',
         'last_edit_time',
         'active',
@@ -20,7 +21,7 @@ class CmdbObject(CmdbDAO):
         'logs'
     ]
 
-    def __init__(self, type_id, tag, version, creation_time, creator_id,
+    def __init__(self, type_id, tag, version, creation_time, author_id,
                  last_editor_id, last_edit_time, active, views, fields, logs, **kwargs):
         """init of object
 
@@ -29,7 +30,7 @@ class CmdbObject(CmdbDAO):
             tag: current tag of object
             version: current version of object
             creation_time: date of object creation
-            creator_id: public id of creation user
+            author_id: public id of author
             last_editor_id: public id of last author which edits the object
             last_edit_time: last date of editing
             active: object activation status
@@ -42,7 +43,7 @@ class CmdbObject(CmdbDAO):
         self.tag = tag
         self.version = version
         self.creation_time = creation_time
-        self.creator_id = creator_id
+        self.author_id = author_id
         self.last_editor_id = last_editor_id
         self.last_edit_time = last_edit_time
         self.active = active
@@ -101,6 +102,42 @@ class CmdbObject(CmdbDAO):
         if len(self.logs) > 0:
             return True
         return False
+
+
+class CmdbObjectLog:
+
+    POSSIBLE_COMMANDS = ['create', 'edit', 'delete']
+
+    def __init__(self, author: id, action: str, message: str, state: list, date: str):
+        self.author = author
+        self.action = action
+        self.message = message
+        self.state = state
+        self.date = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.000Z") or datetime.today()
+
+    def get_date(self) -> datetime:
+        return self.date
+
+    @property
+    def action(self) -> str:
+        return self._action
+
+    @action.setter
+    def action(self, value: str):
+        if value not in CmdbObjectLog.POSSIBLE_COMMANDS:
+            raise ActionNotPossibleError(value)
+        self._action = value
+
+    def __repr__(self):
+        from cmdb.utils.helpers import debug_print
+        return debug_print(self)
+
+
+class ActionNotPossibleError(Exception):
+
+    def __init__(self, action):
+        super().__init__()
+        self.message = 'Object log could not be set - wrong action {}'.format(action)
 
 
 class TypeNotSetError(Exception):

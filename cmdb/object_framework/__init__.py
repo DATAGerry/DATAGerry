@@ -7,13 +7,14 @@ The respective DAO is used to apply the attributes and to convert
 the elements for the database.
 """
 from cmdb.object_framework.cmdb_dao import CmdbDAO
-from cmdb.object_framework.cmdb_object import CmdbObject
+from cmdb.object_framework.cmdb_object import CmdbObject, CmdbObjectLog
 from cmdb.object_framework.cmdb_object_type import CmdbType
 from cmdb.object_framework.cmdb_object_category import CmdbTypeCategory
 from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
 from cmdb.object_framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.object_framework.cmdb_object_status import CmdbObjectStatus
 from cmdb.object_framework.cmdb_object_link import CmdbObjectLink
+from cmdb.object_framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplates
 
 __COLLECTIONS__ = [
     CmdbObject,
@@ -21,7 +22,9 @@ __COLLECTIONS__ = [
     CmdbTypeCategory,
     CmdbFieldType,
     CmdbObjectStatus,
-    CmdbObjectLink
+    CmdbObjectLink,
+    CmdbCollection,
+    CmdbCollectionTemplates
 ]
 
 

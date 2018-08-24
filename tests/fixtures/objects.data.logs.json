@@ -1,0 +1,15 @@
+[
+  {
+    "author": 1,
+    "action": "create",
+    "message": "Default",
+    "state": [],
+    "date": "2017-06-24T00:48:38.000Z"
+  },{
+    "author": 1,
+    "action": "foo",
+    "message": "Default",
+    "state": [],
+    "date": "2017-06-24T00:48:38.000Z"
+  }
+]

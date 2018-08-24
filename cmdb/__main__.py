@@ -15,7 +15,7 @@ LOGGER = get_logger()
 
 def activate_debug():
     import cmdb
-    cmdb.__DEBUG__ = True
+    cmdb.__MODE__ = 'DEBUG'
     LOGGER.warning("DEBUG mode enabled")
 
 

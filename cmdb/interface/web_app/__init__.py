@@ -16,7 +16,7 @@ def create_web_app():
     from cmdb.object_framework import get_object_manager
 
     app = Flask(__name__)
-    if cmdb.__DEBUG__:
+    if cmdb.__MODE__:
         app.config.from_object(app_config['development'])
     else:
         app.config.from_object(app_config['production'])
