@@ -17,7 +17,7 @@
     {
       "date": "2017-06-24T00:48:38.000+0000",
       "author": 1,
-      "action": "",
+      "_action": "",
       "message": "testaction",
       "log": ""
     }

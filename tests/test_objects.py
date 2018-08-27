@@ -41,7 +41,7 @@ def test_cmdb_object_logs(objects_data_json):
     with open('./fixtures/objects.data.logs.json') as json_file:
         test_data_array = json.load(json_file)
     test_log = CmdbObjectLog(**test_data_array[0])
-    assert test_log.action == 'create'
+    assert test_log._action == 'create'
     assert test_log.author == 1
     assert test_log.message == "Default"
     assert len(test_log.state) == 0

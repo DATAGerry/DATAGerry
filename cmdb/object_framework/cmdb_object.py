@@ -108,9 +108,9 @@ class CmdbObjectLog:
 
     POSSIBLE_COMMANDS = ['create', 'edit', 'delete']
 
-    def __init__(self, author: id, action: str, message: str, state: list, date: str):
+    def __init__(self, author: id, _action: str, message: str, state: list, date: str):
         self.author = author
-        self.action = action
+        self.action = _action
         self.message = message
         self.state = state
         self.date = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.000Z") or datetime.today()
