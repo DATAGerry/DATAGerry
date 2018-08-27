@@ -106,7 +106,7 @@ class CmdbObject(CmdbDAO):
 
 class CmdbObjectLog:
 
-    POSSIBLE_COMMANDS = ['create', 'edit', 'delete']
+    POSSIBLE_COMMANDS = ('create', 'edit', 'delete')
 
     def __init__(self, author: id, _action: str, message: str, state: list, date: str):
         self.author = author

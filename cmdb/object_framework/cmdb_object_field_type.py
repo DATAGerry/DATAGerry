@@ -6,6 +6,10 @@ class CmdbFieldType(CmdbDAO):
     Presentation of a field type which is created within the Cmdb type.
     """
     COLLECTION = 'objects.types.fields'
+    VIEW_MODE = (
+        '_VIEW',
+        '_EDIT'
+    )
     REQUIRED_INIT_KEYS = [
         'name',
         'label',
@@ -48,5 +52,5 @@ class CmdbFieldType(CmdbDAO):
     def is_protected(self):
         return self.access
 
-    def render_html(self):
+    def render_html(self, mode: int =VIEW_MODE[0]):
         return NotImplemented
