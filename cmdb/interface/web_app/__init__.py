@@ -41,7 +41,12 @@ def create_web_app():
 
 
 def register_blueprints(app):
+    from cmdb.interface.web_app.static_routes import static_pages
+    from cmdb.interface.web_app.auth_routes import auth_pages
     from cmdb.interface.web_app.index_routes import index_pages
+
+    app.register_blueprint(static_pages)
+    app.register_blueprint(auth_pages)
     app.register_blueprint(index_pages)
 
 

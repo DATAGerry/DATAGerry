@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+{% block head %}
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0 shrink-to-fit=no">
+  <title>CMDB | {% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <script src="{{ url_for('static', filename='js/vendors/jquery-3.3.1.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/vendors/jquery-ui.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/vendors/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/cmdb.js') }}"></script>
+</head>
+{% endblock %}
+<body class="embedded-layout">
+  {% block content %}
+  {% endblock %}
+</body>
+</html>

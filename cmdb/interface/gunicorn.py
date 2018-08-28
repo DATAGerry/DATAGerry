@@ -2,6 +2,7 @@
 Server module for web-based services
 """
 import sys
+from cmdb import __MODE__
 from gunicorn.app.base import BaseApplication
 from cmdb.utils.logger import get_logger, DEFAULT_LOG_DIR, DEFAULT_FILE_EXTENSION
 from gunicorn.arbiter import Arbiter
@@ -61,6 +62,9 @@ class HTTPServer(BaseApplication):
             self.options['worker_class'] = 'gevent'
         self.options['logconfig_dict'] = HTTPServer.CONFIG_DEFAULTS
         self.options['timeout'] = 2
+        if __MODE__ == 'DEBUG' or 'TESTING':
+            self.options['reload'] = True
+            CMDB_LOGGER.info("Gunicorn starting with auto reload option")
         self.running = None
         self.application = app
         super(HTTPServer, self).__init__()

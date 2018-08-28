@@ -1,0 +1,59 @@
+{% extends 'embedded.html' %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+{{ super() }}
+<section class="h-100">
+    <div class="container h-100">
+        <div class="row justify-content-md-center h-100">
+            <div class="card-wrapper">
+                <div class="brand">
+
+                </div>
+                <div class="card fat animated fadeIn">
+                    <div class="inner-pace"></div>
+                    <div class="card-body">
+                        <h4 class="card-title">Login</h4>
+                        <form method="POST">
+
+                            <div class="form-group">
+                                <label for="username">Username/E-Mail Address</label>
+                                <input id="username" placeholder="Username" type="username" class="form-control"
+                                       name="username" value="" required="" autofocus="">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="password">Password
+                                    <a href="forgot.html" class="float-right">
+                                        Forgot Password?
+                                    </a>
+                                </label>
+                                <input id="password" placeholder="Password" type="password" class="form-control"
+                                       name="password" required="">
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" name="remember"> Remember Me
+                                </label>
+                            </div>
+
+                            <div class="form-group no-margin">
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    Login
+                                </button>
+                            </div>
+                            <div class="margin-top20 text-center">
+                                Don't have an account? <a href="register.html">Create One</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="footer">
+                    CMDB © NETHINKS GmbH
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
