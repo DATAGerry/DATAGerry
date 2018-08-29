@@ -7,21 +7,23 @@ class User(UserManagementBase):
 
     COLLECTION = 'management.users'
 
-    def __init__(self, public_id, user_name, group, registration_time, last_visit_time=None, password=None,
-                 first_name=None, last_name=None, authenticator=LocalAuthenticationProvider):
+    def __init__(self, public_id, user_name, group_id, registration_time, password=None,
+                 first_name=None, last_name=None, authenticator='LocalAuthenticationProvider', **kwargs):
         self.public_id = public_id
         self.user_name = user_name
         self.password = password
-        self.group = group
+        self.group_id = group_id
         self.authenticator = authenticator
         self.registration_time = registration_time
-        self.last_visit_time = last_visit_time
         self.first_name = first_name
         self.last_name = last_name
-        super(User, self).__init__()
+        super(User, self).__init__(**kwargs)
+
+    def get_username(self):
+        return self.user_name
 
     def get_authenticator(self):
-        if issubclass(self.authenticator, AuthenticationProvider):
-            return self.authenticator
+        if issubclass(eval(self.authenticator), AuthenticationProvider):
+            return eval(self.authenticator)
         else:
             raise NoValidAuthenticationProviderError(self.authenticator)

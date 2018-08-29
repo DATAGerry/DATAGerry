@@ -29,6 +29,7 @@ Pygments==2.2.0
 pymongo==3.7.1
 pyparsing==2.2.0
 pytest==3.6.3
+pytest-datafiles==1.0
 pytz==2018.5
 requests==2.19.1
 six==1.11.0

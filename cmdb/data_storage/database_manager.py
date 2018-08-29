@@ -3,6 +3,7 @@ Database Management instance for database actions
 
 """
 from pymongo.errors import DuplicateKeyError
+from pymongo.results import DeleteResult
 
 
 class DatabaseManager:
@@ -183,6 +184,8 @@ class DatabaseManagerMongo(DatabaseManager):
 
         """
         from cmdb.object_framework import __COLLECTIONS__ as cmdb_collection
+        from cmdb.user_management import __COLLECTIONS__ as user_collection
+        collection = cmdb_collection + user_collection
 
         def _gen_default_tables(collection_class: object):
             self.create_collection(collection_class.COLLECTION)
@@ -190,10 +193,10 @@ class DatabaseManagerMongo(DatabaseManager):
             if len(collection_class.INDEX_KEYS) > 0:
                 self.create_indexes(collection_class.COLLECTION, collection_class.INDEX_KEYS)
 
-        for collection in cmdb_collection:
+        for coll in collection:
             # generating the default database "tables"
             try:
-                _gen_default_tables(collection)
+                _gen_default_tables(coll)
             except Exception:
                 return False
         return True
@@ -281,7 +284,7 @@ class DatabaseManagerMongo(DatabaseManager):
 
         return list(self.__find(collection=collection, *args, **kwargs))
 
-    def insert(self, collection, data) -> int:
+    def insert(self, collection: str, data: dict) -> int:
         """adds document to database
 
         Args:
@@ -318,7 +321,7 @@ class DatabaseManagerMongo(DatabaseManager):
         formatted_data = {'$set': data}
         return self.database_connector.get_collection(collection).update(formatted_public_id, formatted_data)
 
-    def delete(self, collection: str, public_id: int):
+    def delete(self, collection: str, public_id: int) -> DeleteResult:
         """delete document inside database
 
         Args:

@@ -23,3 +23,8 @@ def logout_page():
 @auth_pages.route('/register')
 def register_page():
     return render_template('register.html')
+
+
+@auth_pages.route('/forgot-password')
+def forgot_password_page():
+    return render_template('forgot-password.html')

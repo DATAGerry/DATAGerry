@@ -1,6 +1,17 @@
 import pytest
 import json
+import os
 from cmdb.object_framework import CmdbObjectManager, CmdbTypeCategory, CmdbObjectStatus, CmdbObject, CmdbObjectLog
+
+FIXTURE_DIR = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)),
+    'fixtures',
+)
+
+ALL_JSON = pytest.mark.datafiles(
+    os.path.join(FIXTURE_DIR, 'objects.data.logs.json'),
+    os.path.join(FIXTURE_DIR, 'objects.data.json')
+)
 
 
 @pytest.fixture
@@ -17,6 +28,7 @@ def database_manager():
         )
     )
 
+
 @pytest.fixture
 def object_manager(database_manager):
     return CmdbObjectManager(
@@ -24,23 +36,29 @@ def object_manager(database_manager):
     )
 
 
+@ALL_JSON
 @pytest.fixture
-def objects_data_json():
-    with open('fixtures/objects.data.json') as json_file:
-        return json.load(json_file)
+def objects_data_json(datafiles):
+    datalist = {}
+    for j in datafiles.listdir():
+        with open(j) as json_file:
+            datalist.update({
+                json_file.name.rsplit('/', 1)[1]: json.load(json_file)
+            })
+    return datalist
 
 
+@ALL_JSON
 def test_cmdb_object(objects_data_json):
-    test_object = CmdbObject(**objects_data_json[0])
+    test_object = CmdbObject(**objects_data_json['objects.data.json'][0])
     assert type(test_object) == CmdbObject
 
 
+@ALL_JSON
 def test_cmdb_object_logs(objects_data_json):
     from cmdb.object_framework.cmdb_object import ActionNotPossibleError
     from datetime import datetime
-    with open('fixtures/objects.data.logs.json') as json_file:
-        test_data_array = json.load(json_file)
-    test_log = CmdbObjectLog(**test_data_array[0])
+    test_log = CmdbObjectLog(**objects_data_json['objects.data.logs.json'][0])
     assert test_log._action == 'create'
     assert test_log.author == 1
     assert test_log.message == "Default"
@@ -48,12 +66,12 @@ def test_cmdb_object_logs(objects_data_json):
     assert type(test_log.date) == datetime
 
     with pytest.raises(ActionNotPossibleError):
-        CmdbObjectLog(**test_data_array[1])
+        CmdbObjectLog(**objects_data_json['objects.data.logs.json'][1])
 
 
 def test_object_categories(object_manager):
     default_category = CmdbTypeCategory(
-        public_id=object_manager.dbm.get_highest_id(CmdbTypeCategory.COLLECTION)+1,
+        public_id=object_manager.dbm.get_highest_id(CmdbTypeCategory.COLLECTION) + 1,
         name='default',
         label='Default',
     )
@@ -134,4 +152,3 @@ def test_object_status():
 
 def test_object_manager(object_manager):
     assert object_manager.is_ready() is True
-
