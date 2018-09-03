@@ -55,7 +55,7 @@ class MongoConnector(Connector):
 
     DEFAULT_CONNECTION_TIMEOUT = 100
 
-    def __init__(self, host, port, database_name, timeout):
+    def __init__(self, host, port, database_name, timeout: int=DEFAULT_CONNECTION_TIMEOUT):
         """
         init mongodb connector
         :param host: database server address
@@ -83,6 +83,7 @@ class MongoConnector(Connector):
         try's to connect to database
         :return: server status
         """
+        print("TESEST")
         try:
             self.client.admin.command('ping')
             return self.client.server_info()

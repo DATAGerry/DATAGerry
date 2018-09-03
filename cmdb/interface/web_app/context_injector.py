@@ -1,9 +1,9 @@
-from flask import current_app
+from cmdb.interface.web_app import MANAGER_HOLDER
 
 
 def inject_object_manager():
     def object_manager():
-        return current_app.obm
+        return MANAGER_HOLDER.get_object_manager()
     return dict(object_manager=object_manager())
 
 

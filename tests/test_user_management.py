@@ -1,6 +1,5 @@
 import pytest
 from cmdb.user_management import User, UserManagement, UserGroup
-from cmdb.user_management.user_authentication import LocalAuthenticationProvider
 
 
 @pytest.fixture
@@ -22,9 +21,30 @@ def database_manager():
 
 
 @pytest.fixture
-def user_manager(database_manager) -> UserManagement:
+def security_manager(database_manager):
+    from cmdb.utils import SystemSettingsWriter, SystemSettingsReader, SecurityManager
+
+    return SecurityManager(
+        settings_reader=SystemSettingsReader(
+            database_manager=database_manager
+        ),
+        settings_writer=SystemSettingsWriter(
+            database_manager=database_manager
+        ),
+        symmetric_key={"k": "ztMslRhuRqUvy69BVtEEkggv6usyCipEdQUviNYhpug", "kty": "oct"},
+        key_pair={"public_key": {"crv": "P-256", "kty": "EC", "x": "nlGuINoMPt1c0uskP39OGUjOAx4R2Re2gv7GAWu13_s",
+                                 "y": "Z5LYPDAshCpO21dPD3FJBMY_Z5Gy15NDK_MKoJ1py70"},
+                  "private_key": {"crv": "P-256", "d": "epIihdG0XqvmrXA_7CR5W8jhK-oWe3F_o3FRlwJVi1s", "kty": "EC",
+                                  "x": "nlGuINoMPt1c0uskP39OGUjOAx4R2Re2gv7GAWu13_s",
+                                  "y": "Z5LYPDAshCpO21dPD3FJBMY_Z5Gy15NDK_MKoJ1py70"}},
+    )
+
+
+@pytest.fixture
+def user_manager(database_manager, security_manager) -> UserManagement:
     return UserManagement(
-        database_manager=database_manager
+        database_manager=database_manager,
+        security_manager=security_manager
     )
 
 
@@ -52,7 +72,7 @@ def test_manager_user(user_manager):
     group_id = user_manager.insert_group('testgroup', 'Testgroup')
 
     # INSERT
-    user_id  = user_manager.insert_user(
+    user_id = user_manager.insert_user(
         user_name='test_user',
         group_id=group_id,
         password=None,

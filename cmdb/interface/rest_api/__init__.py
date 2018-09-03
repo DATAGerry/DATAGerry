@@ -9,7 +9,26 @@ LOGGER = get_logger()
 
 def create_rest_api():
     import cmdb
-    from cmdb.object_framework import get_object_manager
+    from cmdb.object_framework import CmdbObjectManager
+    from cmdb.data_storage.database_manager import DatabaseManagerMongo
+    from cmdb.data_storage.database_connection import MongoConnector
+    from cmdb.utils import SystemConfigReader
+
+    system_config_reader = SystemConfigReader(
+        config_name=SystemConfigReader.DEFAULT_CONFIG_NAME,
+        config_location=SystemConfigReader.DEFAULT_CONFIG_LOCATION
+    )
+
+    database_manager = DatabaseManagerMongo(
+        MongoConnector(
+            host=system_config_reader.get_value('host', 'Database'),
+            port=int(system_config_reader.get_value('port', 'Database')),
+            database_name=system_config_reader.get_value('database_name', 'Database')
+        )
+    )
+    object_manager = CmdbObjectManager(
+        database_manager=database_manager
+    )
 
     app = Flask(__name__)
     if cmdb.__MODE__ == 'DEBUG':
@@ -21,7 +40,7 @@ def create_rest_api():
         app.config.from_object(app_config['rest'])
         LOGGER.info('RestAPI started with config mode {}'.format(app.config.get("ENV")))
 
-    app.obm = get_object_manager()
+    app.obm = object_manager
     register_blueprints(app)
     register_error_pages(app)
     return app

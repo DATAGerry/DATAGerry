@@ -3,25 +3,30 @@ import ast
 from Cryptodome import Random
 from Cryptodome.Cipher import AES
 from cmdb.data_storage.database_manager import NoDocumentFound
+from cmdb.utils.system_reader import SystemSettingsReader
+from cmdb.utils.system_writer import SystemSettingsWriter
 from jwcrypto import jwk
 
 
 class SecurityManager:
     DEFAULT_BLOCK_SIZE = 32
 
-    def __init__(self, settings_reader, settings_writer):
-        self.ssr = settings_reader
-        self.ssw = settings_writer
-        self.symmetric_key = self.get_sym_key()
-        self.key_pair = self.get_key_pair()
+    def __init__(self, database_manager, symmetric_key=None, key_pair=None):
+        self.ssr = SystemSettingsReader(database_manager)
+        self.ssw = SystemSettingsWriter(database_manager)
+        self.symmetric_key = symmetric_key
+        self.key_pair = key_pair
         self.salt = "cmdb"
+
+    def _setup(self):
+        pass
 
     def generate_hmac(self, data):
         import hashlib
         import hmac
 
         generated_hash = hmac.new(
-            bytes(self.symmetric_key, 'utf-8'),
+            bytes(self.symmetric_key.export_symmetric(), 'utf-8'),
             bytes(data + self.salt, 'utf-8'),
             hashlib.sha256
         )

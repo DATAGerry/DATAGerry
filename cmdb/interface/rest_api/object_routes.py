@@ -5,6 +5,7 @@ from cmdb.data_storage.database_manager import NoDocumentFound, DocumentCouldNot
 from cmdb.object_framework.cmdb_dao import RequiredInitKeyNotFoundError
 from bson import json_util
 import json
+from cmdb.interface.web_app import MANAGER_HOLDER
 
 object_rest = Blueprint('object_rest', __name__, url_prefix='/objects')
 
@@ -12,7 +13,7 @@ object_rest = Blueprint('object_rest', __name__, url_prefix='/objects')
 @object_rest.route('/<int:public_id>', methods=['GET'])
 def get_object(public_id):
     try:
-        tmp_object = current_app.obm.get_object(public_id)
+        tmp_object = MANAGER_HOLDER.get_object_manager().get_object(public_id)
     except NoDocumentFound:
         abort(404)
     except RequiredInitKeyNotFoundError:
@@ -27,7 +28,7 @@ def add_object():
     try:
         new_object = CmdbObject(**request.json)
         try:
-            ack = current_app.obm.insert_object(new_object.to_database())
+            ack = MANAGER_HOLDER.get_object_manager().insert_object(new_object.to_database())
         except PublicIDAlreadyExists as e:
             abort(409, e, e.message)
     except RequiredInitKeyNotFoundError as e:
@@ -41,10 +42,10 @@ def add_object():
 @object_rest.route('/<int:public_id>', methods=['PUT'])
 def update_object(public_id):
     try:
-        current_app.obm.get_object(public_id)
+        MANAGER_HOLDER.get_object_manager().get_object(public_id)
         deload = json.loads(json_util.dumps((request.json)), object_hook=json_util.object_hook)
         up_object = CmdbObject(**deload)
-        ack = current_app.obm.update_object(up_object.to_database())
+        ack = MANAGER_HOLDER.get_object_manager().update_object(up_object.to_database())
     except NoDocumentFound:
         abort(404)
     except RequiredInitKeyNotFoundError as e:
@@ -55,7 +56,7 @@ def update_object(public_id):
 @object_rest.route('/<int:public_id>', methods=['DELETE'])
 def delete_object(public_id):
     try:
-        ack = current_app.obm.delete_object(public_id)
+        ack = MANAGER_HOLDER.get_object_manager().delete_object(public_id)
     except DocumentCouldNotBeDeleted as e:
         abort(400, e.message)
     return jsonify(ack.acknowledged)

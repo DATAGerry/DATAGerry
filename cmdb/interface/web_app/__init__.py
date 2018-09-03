@@ -3,17 +3,15 @@ Init module for web routes
 """
 
 from flask import Flask
+from cmdb.interface.cmdb_holder import CmdbManagerHolder
 from cmdb.interface.config import app_config
-from cmdb.utils import get_system_settings_reader
-from cmdb.data_storage import get_pre_init_database
 from cmdb.utils import get_logger
 LOGGER = get_logger()
+MANAGER_HOLDER = CmdbManagerHolder()
 
 
 def create_web_app():
     import cmdb
-    from cmdb.utils import get_system_config_reader
-    from cmdb.object_framework import get_object_manager
 
     app = Flask(__name__)
     if cmdb.__MODE__:
@@ -22,20 +20,47 @@ def create_web_app():
         app.config.from_object(app_config['production'])
     LOGGER.info('Webapp started with config mode {}'.format(app.config.get("ENV")))
 
-    #register_filters(app)
+    from cmdb.object_framework import CmdbObjectManager
+    from cmdb.data_storage.database_manager import DatabaseManagerMongo
+    from cmdb.data_storage.database_connection import MongoConnector
+    from cmdb.utils.security import SecurityManager
+    from cmdb.user_management import UserManagement
+    from cmdb.utils import SystemConfigReader
+
+    system_config_reader = SystemConfigReader(
+        config_name=SystemConfigReader.DEFAULT_CONFIG_NAME,
+        config_location=SystemConfigReader.DEFAULT_CONFIG_LOCATION
+    )
+
+    database_manager = DatabaseManagerMongo(
+        MongoConnector(
+            host=system_config_reader.get_value('host', 'Database'),
+            port=int(system_config_reader.get_value('port', 'Database')),
+            database_name=system_config_reader.get_value('database_name', 'Database')
+        )
+    )
+
+    object_manager = CmdbObjectManager(
+        database_manager=database_manager
+    )
+
+    security_manager = SecurityManager(database_manager)
+
+    user_manager = UserManagement(
+        database_manager=database_manager,
+        security_manager=security_manager
+    )
+
+    MANAGER_HOLDER.set_database_manager(database_manager)
+    MANAGER_HOLDER.set_security_manager(security_manager)
+    MANAGER_HOLDER.set_object_manager(object_manager)
+    MANAGER_HOLDER.set_user_manager(user_manager)
+    MANAGER_HOLDER.init_app(app)
+
+    # register_filters(app)
     register_error_pages(app)
     register_blueprints(app)
     register_context_processors(app)
-
-    system_config_reader = get_system_config_reader()
-    database_manager = get_pre_init_database()
-
-    object_manager = get_object_manager()
-    system_setting_reader = get_system_settings_reader(database_manager=database_manager)
-
-    app.obm = object_manager
-    app.scr = system_config_reader
-    app.ssr = system_setting_reader
 
     return app
 

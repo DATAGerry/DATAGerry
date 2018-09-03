@@ -9,7 +9,7 @@ If not, see <https://github.com/NETHINKS/CMDB/blob/master/LICENSE>.
 
 from gevent import monkey
 monkey.patch_all()
-from cmdb.utils import get_logger, get_system_config_reader
+from cmdb.utils import get_logger
 LOGGER = get_logger()
 
 
@@ -50,6 +50,7 @@ def main(args):
         from cmdb.interface import HTTPServer, main_application
         LOGGER.info("Starting rest- and web- server")
         server_queue = Queue()
+        from cmdb.utils import get_system_config_reader
         web_server_options = get_system_config_reader().get_all_values_from_section('WebServer')
         http_process = Process(
             target=HTTPServer(main_application, web_server_options).run,

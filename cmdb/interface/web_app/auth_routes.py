@@ -1,6 +1,9 @@
 from flask import Blueprint
 from flask import render_template
 from flask import request
+from cmdb.utils import get_logger
+from cmdb.interface.web_app import MANAGER_HOLDER
+CMDB_LOGGER = get_logger()
 
 auth_pages = Blueprint('auth_pages', __name__, template_folder='templates')
 
@@ -12,7 +15,17 @@ def login_page():
 
 @auth_pages.route('/login', methods=['POST'])
 def login_page_post():
-    return request.form['password'], request.form['password']
+    from cmdb.user_management.user_manager import NoUserFoundExceptions
+    user_name = request.form['user_name']
+    password = request.form['password']
+
+    try:
+        login_user = MANAGER_HOLDER.get_user_manager().get_user_by_name(user_name)
+    except NoUserFoundExceptions:
+        CMDB_LOGGER.info("Wrong login try - user {} not found".format(password))
+        return render_template('login.html')
+    print(login_user)
+    return render_template('login.html')
 
 
 @auth_pages.route('/logout')
