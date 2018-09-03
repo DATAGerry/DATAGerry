@@ -5,28 +5,57 @@ from Cryptodome.Cipher import AES
 from cmdb.data_storage.database_manager import NoDocumentFound
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
-from jwcrypto import jwk
+from jwcrypto import jwk, jwt, jws
 
 
 class SecurityManager:
     DEFAULT_BLOCK_SIZE = 32
+    DEFAULT_ALG = 'HS512'
+    DEFAULT_EXPIRES = int(300)
 
-    def __init__(self, database_manager, symmetric_key=None, key_pair=None):
+    def __init__(self, database_manager, expire_time=None):
         self.ssr = SystemSettingsReader(database_manager)
         self.ssw = SystemSettingsWriter(database_manager)
-        self.symmetric_key = symmetric_key
-        self.key_pair = key_pair
         self.salt = "cmdb"
+        self.expire_time = expire_time or SecurityManager.DEFAULT_EXPIRES
 
     def _setup(self):
         pass
+
+    def encrypt_token(self, payload: dict) -> str:
+        import json
+        payload = json.dumps(payload)
+        jws_token = jws.JWS(payload=payload)
+        jws_token.add_signature(
+            key=self.get_sym_key(),
+            alg=SecurityManager.DEFAULT_ALG,
+            protected={'alg': SecurityManager.DEFAULT_ALG},
+            header={'kid': self.get_sym_key().thumbprint()}
+        )
+        import time
+        req_claim = {
+            'exp':  int(time.time()) + self.expire_time
+        }
+
+        enc_token = jwt.JWT(header={"alg": "HS512"}, claims=jws_token.serialize(), default_claims=req_claim)
+        enc_token.make_signed_token(self.get_sym_key())
+
+        return enc_token.serialize()
+
+    def decrypt_token(self, token):
+        t = jwt.JWT(key=self.get_sym_key(), jwt=token)
+        jsw_token = jws.JWS()
+        jsw_token.deserialize(t.claims)
+        jsw_token.verify(self.get_sym_key())
+
+        return jsw_token.payload
 
     def generate_hmac(self, data):
         import hashlib
         import hmac
 
         generated_hash = hmac.new(
-            bytes(self.symmetric_key.export_symmetric(), 'utf-8'),
+            bytes(self.get_sym_key().export_symmetric(), 'utf-8'),
             bytes(data + self.salt, 'utf-8'),
             hashlib.sha256
         )
@@ -55,7 +84,7 @@ class SecurityManager:
     @staticmethod
     def _pad(s):
         return s + (SecurityManager.DEFAULT_BLOCK_SIZE - len(s) % SecurityManager.DEFAULT_BLOCK_SIZE) * \
-                   chr(SecurityManager.DEFAULT_BLOCK_SIZE - len(s) % SecurityManager.DEFAULT_BLOCK_SIZE)
+               chr(SecurityManager.DEFAULT_BLOCK_SIZE - len(s) % SecurityManager.DEFAULT_BLOCK_SIZE)
 
     @staticmethod
     def _unpad(s):

@@ -22,6 +22,12 @@ def login_required(f):
             token = request.cookies.get('access-token')
         else:
             return redirect(url_for('auth_pages.login_page'))
+        try:
+            from flask import current_app
+            security_manager = current_app.manager_holder.get_security_manager()
+            security_manager.decrypt_token(token)
+        except Exception as e:
+            return redirect(url_for('auth_pages.login_page'))
         return f(*args, **kwargs)
     return decorated
 

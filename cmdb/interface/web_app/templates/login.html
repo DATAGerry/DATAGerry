@@ -4,13 +4,15 @@
 {% block content %}
 {{ super() }}
 <section class="h-100">
+    {% if error is defined %}
+    {% endif %}
     <div class="container h-100">
         <div class="row justify-content-md-center h-100">
             <div class="card-wrapper">
                 <div class="brand">
 
                 </div>
-                <div class="card fat animated fadeIn">
+                <div class="card fat animated {% if error is defined %}shake{%else%}fadeIn{% endif %}">
                     <div class="inner-pace"></div>
                     <div class="card-body">
                         <h4 class="card-title">Login</h4>

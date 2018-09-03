@@ -27,8 +27,11 @@ class User(UserManagementBase):
     def get_username(self):
         return self.user_name
 
-    def get_authenticator(self):
+    def get_password(self):
+        return self.password
+
+    def get_authenticator(self) -> AuthenticationProvider:
         if issubclass(eval(self.authenticator), AuthenticationProvider):
-            return eval(self.authenticator)
+            return eval(self.authenticator)()
         else:
             raise NoValidAuthenticationProviderError(self.authenticator)

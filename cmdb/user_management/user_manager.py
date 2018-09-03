@@ -108,44 +108,6 @@ class UserManagement:
                 LOGGER.warn(e)
             raise GroupDeleteError(public_id)
 
-    """
-    def get_all_users(self):
-        all_users = self.dbm.find_all(collection=User.COLLECTION)
-        user_list = []
-        for user in all_users:
-            tmp_user = User(
-                **user
-            )
-            user_list.append(tmp_user)
-        return user_list
-
-    def get_all_groups(self):
-        all_groups = self.dbm.find_all(collection=UserGroup.COLLECTION)
-        group_list = []
-        for group in all_groups:
-            tmp_group = UserGroup(
-                **group
-            )
-            group_list.append(tmp_group)
-        return group_list
-
-    def get_group_by_name(self, name):
-        formatted_filter = {'name': name}
-        try:
-            return self.dbm.find_one_by(collection=UserGroup.COLLECTION, filter=formatted_filter)
-        except NoDocumentFound:
-            raise GroupNotFound(name)
-
-
-
-    def user_has_right(self, user, right):
-        founded_group = self.dbm.find_one(collection=UserGroup.COLLECTION, filter={'name': user.group})
-        founded_right = self.dbm.find_one(collection=UserRight.COLLECTION, filter={'name': right})
-        if founded_right['name'] in founded_group['rights']:
-            return True
-        return False
-    """
-
 
 class GroupDeleteError(Exception):
     def __init__(self, name):

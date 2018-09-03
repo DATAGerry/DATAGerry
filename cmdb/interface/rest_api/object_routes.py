@@ -18,7 +18,7 @@ def get_object(public_id):
         abort(404)
     except RequiredInitKeyNotFoundError:
         abort(406)
-    return jsonify(json.loads(json_util.dumps(tmp_object.to_json())))
+    return jsonify(json.loads(json_util.dumps(tmp_object.to_database())))
 
 
 @json_required

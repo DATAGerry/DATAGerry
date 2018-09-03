@@ -83,7 +83,6 @@ class MongoConnector(Connector):
         try's to connect to database
         :return: server status
         """
-        print("TESEST")
         try:
             self.client.admin.command('ping')
             return self.client.server_info()

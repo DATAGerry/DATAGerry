@@ -81,7 +81,9 @@ class CmdbDAO:
         return self.__dict__
 
     def to_json(self) -> dict:
-        return {k: v for k, v in self.__dict__.items() if v is not None}
+        from cmdb.data_storage.database_utils import default
+        import json
+        return json.dumps(self.__dict__, default=default)
 
 
 class NoVersionError(Exception):
