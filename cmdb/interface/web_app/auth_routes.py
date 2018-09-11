@@ -15,6 +15,7 @@ def login_page():
 def login_page_post():
     from cmdb.user_management.user_manager import NoUserFoundExceptions
     from cmdb.user_management.user import NoValidAuthenticationProviderError
+    from cmdb.user_management.user_authentication import WrongUserPasswordError
     user_name = request.form['user_name']
     password = request.form['password']
 
@@ -28,7 +29,10 @@ def login_page_post():
         )
     except NoUserFoundExceptions as e:
         CMDB_LOGGER.info("Wrong login try - user {} not found".format(password))
-        return render_template('login.html', error=e)
+        return render_template('login.html', error=e.message)
+    except WrongUserPasswordError as e:
+        CMDB_LOGGER.info("Wrong password login try for user {}".format(password))
+        return render_template('login.html', error=e.message)
     except NoValidAuthenticationProviderError as e:
         CMDB_LOGGER.info("{}".format(e))
         return render_template('login.html', error=e)

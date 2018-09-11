@@ -11,12 +11,22 @@ class CmdbTypeCategory(CmdbDAO):
         'label'
     ]
 
-    def __init__(self, name, label, parent_id=0, icon=None, type_list=[], **kwargs):
+    def __init__(self, name: str, label: str=None, icon: str=None, type_list: list=None, children_list: list=None, **kwargs):
         self.name = name
-        self.label = label
-        self.parent_id = parent_id
+        self.label = label or self.name.title()
         self.icon = icon
-        self.type_list = type_list
+        self.type_list = type_list or []
+        add_children = []
+        if children_list is not None:
+            for child in children_list:
+                add_children.append(
+                    CmdbTypeCategory(
+                        **child
+                    )
+                )
+                self.child_list = add_children
+        else:
+            self.child_list = children_list or []
         super(CmdbTypeCategory, self).__init__(**kwargs)
 
     def get_name(self) -> str:
@@ -25,9 +35,6 @@ class CmdbTypeCategory(CmdbDAO):
     def get_label(self) -> str:
         return self.label
 
-    def get_parent_id(self) -> int:
-        return self.parent_id
-
     def get_icon(self) -> str:
         return self.icon
 
@@ -35,6 +42,14 @@ class CmdbTypeCategory(CmdbDAO):
         if self.icon:
             return True
         return False
+
+    def has_children(self) -> bool:
+        if len(self.child_list) > 0:
+            return True
+        return False
+
+    def get_children(self) -> list:
+        return self.child_list
 
     def get_types(self) -> list:
         return self.type_list

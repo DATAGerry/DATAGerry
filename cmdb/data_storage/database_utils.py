@@ -1,8 +1,11 @@
 import calendar
 import datetime
 import re
+import ast
+
 try:
     import uuid
+
     _use_uuid = True
 except ImportError:
     _use_uuid = False
@@ -15,6 +18,29 @@ from bson.timestamp import Timestamp
 from bson.tz_util import utc
 
 _RE_TYPE = type(re.compile("foo"))
+
+
+def convert_form_data(data: dict) -> dict:
+    buf_dict = {}
+    for k, v in data.items():
+        b = form_converter(k, v)
+        buf_dict.update(b)
+    return buf_dict
+
+
+def form_converter(k, v) -> dict:
+    dict_buffer = {}
+    if v is None:
+        dict_buffer.update({k: None})
+    if v == "on":
+        dict_buffer.update({k: True})
+    else:
+        try:
+            converted = ast.literal_eval(v)
+            dict_buffer.update({k: converted})
+        except Exception:
+            dict_buffer.update({k: v})
+    return dict_buffer
 
 
 def object_hook(dct: dict):

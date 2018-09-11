@@ -2,6 +2,7 @@ from cmdb.object_framework import CmdbObjectManager
 from cmdb.user_management import UserManagement
 from cmdb.data_storage import DatabaseManagerMongo
 from cmdb.utils import SecurityManager
+from cmdb.utils import SystemSettingsReader, SystemSettingsWriter
 
 
 class CmdbManagerHolder:
@@ -11,6 +12,8 @@ class CmdbManagerHolder:
         self.object_manager = None
         self.user_manager = None
         self.security_manager = None
+        self.system_settings_reader = None
+        self.system_settings_writer = None
 
     def set_database_manager(self, database_manager: DatabaseManagerMongo):
         self.database_manager = database_manager
@@ -24,6 +27,12 @@ class CmdbManagerHolder:
     def set_security_manager(self, security_manager: SecurityManager):
         self.security_manager = security_manager
 
+    def set_system_settings_reader(self, system_settings_reader: SystemSettingsReader):
+        self.system_settings_reader = system_settings_reader
+
+    def set_system_settings_writer(self, system_settings_writer: SystemSettingsWriter):
+        self.system_settings_writer = system_settings_writer
+
     def get_database_manager(self) ->DatabaseManagerMongo:
         return self.database_manager
 
@@ -35,6 +44,12 @@ class CmdbManagerHolder:
 
     def get_security_manager(self) ->SecurityManager:
         return self.security_manager
+
+    def get_system_settings_reader(self) ->SystemSettingsReader:
+        return self.system_settings_reader
+
+    def get_system_settings_writer(self) ->SystemSettingsWriter:
+        return self.system_settings_writer
 
     def init_app(self, app):
         app.manager_holder = self

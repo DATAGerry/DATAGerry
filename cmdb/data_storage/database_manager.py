@@ -251,7 +251,7 @@ class DatabaseManagerMongo(DatabaseManager):
             return result
         raise NoDocumentFound(collection, public_id)
 
-    def find_one_by(self, collection: str, *args, **kwargs):
+    def find_one_by(self, collection: str, *args, **kwargs) -> dict:
         """find one specific document by special requirements
 
         Args:
@@ -301,7 +301,7 @@ class DatabaseManagerMongo(DatabaseManager):
             projection = {'public_id': 1}
             cursor_result = self.__find(collection, formatted_id, projection, limit=1)
             for result in cursor_result.limit(-1):
-                return int(result['public_id'])
+                return result['public_id']
         return None
 
     def update(self, collection: str, public_id: int, data: dict):
@@ -319,7 +319,24 @@ class DatabaseManagerMongo(DatabaseManager):
 
         formatted_public_id = {'public_id': public_id}
         formatted_data = {'$set': data}
-        return self.database_connector.get_collection(collection).update(formatted_public_id, formatted_data)
+        return self.database_connector.get_collection(collection).update_one(formatted_public_id, formatted_data)
+
+    def update_with_internal(self, collection: str, _id: int or str, data: dict):
+        """update function for database elements without public id
+
+        Args:
+            collection (str): name of database collection
+            _id (int): mongodb id of document
+            data: data to update
+
+        Returns:
+            acknowledged
+
+        """
+
+        formatted_id = {'_id': _id}
+        formatted_data = {'$set': data}
+        return self.database_connector.get_collection(collection).update_one(formatted_id, formatted_data)
 
     def delete(self, collection: str, public_id: int) -> DeleteResult:
         """delete document inside database

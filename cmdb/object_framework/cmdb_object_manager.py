@@ -222,7 +222,7 @@ class CmdbObjectManager(CmdbManagerBase):
         return CmdbType(**self.dbm.find_one(
             collection=CmdbType.COLLECTION,
             public_id=public_id)
-        )
+                        )
 
     def insert_type(self, data: dict):
         new_type = CmdbType(**data)
@@ -243,16 +243,24 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_all_categories(self):
         ack = []
-        cats = self.dbm.find_all(collection=CmdbTypeCategory.COLLECTION)
+        cats = self.dbm.find_all(collection=CmdbTypeCategory.COLLECTION, sort=[('public_id', 1)])
         for cat_obj in cats:
             ack.append(CmdbTypeCategory(**cat_obj))
         return ack
 
     def get_category(self, public_id: int):
+        """
+        TODO: UPDATE TO NEW STRUCTURE
+        Args:
+            public_id:
+
+        Returns:
+
+        """
         return CmdbTypeCategory(**self.dbm.find_one(
             collection=CmdbTypeCategory.COLLECTION,
             public_id=public_id)
-        )
+                                )
 
     def insert_category(self, data: dict):
         new_category = CmdbTypeCategory(**data)

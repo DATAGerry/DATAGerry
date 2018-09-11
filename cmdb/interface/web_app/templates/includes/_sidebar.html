@@ -1,23 +1,48 @@
 <div id="sidebar">
-  <nav class="sidebar-nav">
-    <ul class="nav">
-      <li class="nav-item">
-        <a class="nav-link active" href="/dashboard"><i class="line-icon-speedometer"></i> Dashboard</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/favorite"><i class="line-icon-star"></i> Favorite</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/newest"><i class="line-icon-energy"></i> Newest</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/latest"><i class="line-icon-action-redo"></i> Latest changes</a>
-      </li>
-      <div class="sidebar-categories">
-        <li class="nav-title">Categories</li>
-        <input id="category_filter" class="form-control form-control-sm" type="text" placeholder="Filter..">
+    <nav class="sidebar-nav">
+        <ul class="nav">
+            <li class="nav-item">
+                <a class="nav-link active" href="/dashboard"><i class="line-icon-speedometer"></i> Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/favorite"><i class="line-icon-star"></i> Favorite</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/newest"><i class="line-icon-energy"></i> Newest</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/latest"><i class="line-icon-action-redo"></i> Latest changes</a>
+            </li>
+            <div class="sidebar-categories">
+                <li class="nav-title">Categories</li>
+                <input id="category_filter" class="form-control form-control-sm" type="text" placeholder="Filter..">
+                {% for cats in sidebar %}
 
-      </div>
-    </ul>
-  </nav>
+                    {% if cats.has_children() %}
+                    <li class="nav-item nav-dropdown">
+                        <a href="#" class="nav-link nav-dropdown-toggle">
+                            <i class="line-icon-folder"></i>{{cats.get_label()}} <i class="fa fa-caret-left"></i>
+                        </a>
+                        <ul class="nav-dropdown-items">
+                            {% for sub_cats in cats.get_children() %}
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="line-icon-folder"></i> {{ sub_cats.get_label() }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="line-icon-folder"></i> {{cats.get_label()}}
+                        </a>
+                    </li>
+
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </ul>
+    </nav>
 </div>

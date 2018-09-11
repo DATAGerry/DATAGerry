@@ -1,7 +1,6 @@
 from cmdb.user_management.user_rights import UserRight
 from cmdb.user_management.user_groups import UserGroup
 from cmdb.user_management.user import User
-from cmdb.user_management.user_authentication import LocalAuthenticationProvider
 from cmdb.data_storage import NoDocumentFound, DatabaseManagerMongo
 from cmdb.data_storage.database_manager import DeleteResult
 from cmdb.utils import SecurityManager
@@ -31,6 +30,9 @@ class UserManagement:
             raise NoUserFoundExceptions(public_id)
         return User(**result)
 
+    def get_all_users(self):
+        return self.dbm.find_all(collection=User.COLLECTION)
+
     def get_user_by_name(self, user_name) -> User:
         formatted_filter = {'user_name': user_name}
         try:
@@ -39,10 +41,9 @@ class UserManagement:
             raise NoUserFoundExceptions(user_name)
 
     def insert_user(self, user_name: str, group_id: int, password=None,
-                    first_name=None, last_name=None, authenticator=LocalAuthenticationProvider) -> int:
+                    first_name=None, last_name=None, authenticator='LocalAuthenticationProvider') -> int:
         from datetime import datetime
         new_public_id = self.dbm.get_highest_id(collection=User.COLLECTION)+1
-        authenticator = authenticator.__class__.__name__
 
         if password is not None:
             password = self.scm.generate_hmac(password)
@@ -108,6 +109,37 @@ class UserManagement:
                 LOGGER.warn(e)
             raise GroupDeleteError(public_id)
 
+    def get_right_by_name(self, name):
+        formatted_filter = {'name': name}
+        try:
+            founded_right = self.dbm.find_one_by(collection=UserRight.COLLECTION, filter=formatted_filter)
+            return UserRight(**founded_right)
+        except NoDocumentFound:
+            raise RightNotExistsError(name)
+
+    def get_right(self, public_id: int) -> UserRight:
+        formatted_filter = {'public_id': public_id}
+        try:
+            founded_right = self.dbm.find_one_by(collection=UserRight.COLLECTION, filter=formatted_filter)
+            return UserRight(**founded_right)
+        except NoDocumentFound:
+            raise RightNotExistsError(public_id)
+
+    def user_group_has_right(self, user: User, right: UserRight) -> bool:
+        group = UserGroup(**self.dbm.find_one(UserGroup.COLLECTION, user.get_group()))
+        right_list = group.get_rights()
+        if len(right_list) <= 0:
+            return False
+        select_rights = []
+        for right_id in right_list:
+            try:
+                select_rights.append(self.get_right(right_id))
+            except RightNotExistsError:
+                continue
+        if right in select_rights:
+            return True
+        return False
+
 
 class GroupDeleteError(Exception):
     def __init__(self, name):
@@ -132,6 +164,12 @@ class GroupNotExistsError(Exception):
     def __init__(self, name):
         super().__init__()
         self.message = "The following group does not exists: {}".format(name)
+
+
+class RightNotExistsError(Exception):
+    def __init__(self, name):
+        super().__init__()
+        self.message = "The following right does not exists: {}".format(name)
 
 
 class GroupInsertError(Exception):

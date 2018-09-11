@@ -19,11 +19,16 @@ class LocalAuthenticationProvider(AuthenticationProvider):
         login_pass = security_manager.generate_hmac(password)
         if login_pass == user.get_password():
             return True
-        CMDB_LOGGER.info("Wrong password")
-        return False
+        raise WrongUserPasswordError(user.get_username())
 
 
 class NoValidAuthenticationProviderError(Exception):
     """Exception if auth provider do not exist"""
     def __init__(self, authenticator):
         self.message = "The Provider {} is not a valid authentication-provider".format(authenticator)
+
+
+class WrongUserPasswordError(Exception):
+    """Exception if auth provider do not exist"""
+    def __init__(self, user):
+        self.message = "The password for the user {} was wrong!".format(user)

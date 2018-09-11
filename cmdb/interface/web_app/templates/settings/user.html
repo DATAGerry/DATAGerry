@@ -1,0 +1,52 @@
+{% extends 'layout.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block navigation %}
+{% include 'includes/_navigation.html' %}
+{% endblock %}
+{% block breadcrumb %}
+{% include 'includes/_breadcrumb.html' %}
+{% endblock %}
+{% block content %}
+<div class="content">
+    <div class="container-fluid">
+        {{ super() }}
+        <div class="row">
+            <div class="col-10">
+                <h1 class="display-4">User Management</h1>
+
+                <h2 class="display-4">User List</h2>
+                <hr />
+                <table class="data_table table">
+                    <thead class="thead">
+                    <tr>
+                        <th scope="col">id</th>
+                        <th scope="col">username</th>
+                        <th scope="col">firstname</th>
+                        <th scope="col">lastname</th>
+                        <th scope="col">group</th>
+                        <th scope="col">registration time</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for user_entry in user_list %}
+                    <tr>
+                        <td>{{ user_entry.public_id }}</td>
+                        <td>{{ user_entry.user_name }}</td>
+                        <td>{{ user_entry.first_name }}</td>
+                        <td>{{ user_entry.last_name }}</td>
+                        <td>{{ user_entry.group_name }}</td>
+                        <td>{{ user_entry.registration_time }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <h2>Add new user</h2>
+            </div>
+            <div class="col-2">
+                {% set active_page = 'user' %}
+                {% include 'settings/_sidebar.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -11,7 +11,7 @@ from jwcrypto import jwk, jwt, jws
 class SecurityManager:
     DEFAULT_BLOCK_SIZE = 32
     DEFAULT_ALG = 'HS512'
-    DEFAULT_EXPIRES = int(300)
+    DEFAULT_EXPIRES = int(10)
 
     def __init__(self, database_manager, expire_time=None):
         self.ssr = SystemSettingsReader(database_manager)
@@ -94,24 +94,32 @@ class SecurityManager:
         try:
             symmetric_key = self.ssr.get_value('symmetric_key', 'security')
         except (KeyError, NoDocumentFound):
-            symmetric_key = jwk.JWK.generate(kty='oct', size=256).export()
-            symmetric_key = ast.literal_eval(symmetric_key)
-            self.ssw.write('security', {'symmetric_key': symmetric_key})
+            symmetric_key = self.generate_sym_key()
+        return jwk.JWK(**symmetric_key)
+
+    def generate_sym_key(self):
+        symmetric_key = jwk.JWK.generate(kty='oct', size=256).export()
+        symmetric_key = ast.literal_eval(symmetric_key)
+        self.ssw.write('security', {'symmetric_key': symmetric_key})
         return jwk.JWK(**symmetric_key)
 
     def get_key_pair(self):
         try:
             asy_key = self.ssr.get_value('key_pair', 'security')
         except (KeyError, NoDocumentFound):
-            asy_key = jwk.JWK.generate(kty='EC', crv='P-256')
-            public_key = ast.literal_eval(asy_key.export_public())
-            private_key = ast.literal_eval(asy_key.export_private())
-            insert_key = {
-                'public_key': public_key,
-                'private_key': private_key
-            }
-            self.ssw.write('security', {'key_pair': insert_key})
+            asy_key = self.get_key_pair()
         return asy_key
+
+    def generate_key_par(self):
+        asy_key = jwk.JWK.generate(kty='EC', crv='P-256')
+        public_key = ast.literal_eval(asy_key.export_public())
+        private_key = ast.literal_eval(asy_key.export_private())
+        insert_key = {
+            'public_key': public_key,
+            'private_key': private_key
+        }
+        self.ssw.write('security', {'key_pair': insert_key})
+        return insert_key
 
     def get_private_key(self):
         pub_key = self.get_key_pair()['private_key']

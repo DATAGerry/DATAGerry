@@ -15,7 +15,7 @@ def bad_request(error):
     :param error: error code
     :return: error page
     """
-    return render_template('error.html', error=error), 400
+    return render_template('errors/default.html', error=error), 400
 
 
 @error_pages.errorhandler(401)
@@ -27,7 +27,7 @@ def unauthorized_user(error):
     :param error: error code
     :return: error page
     """
-    return render_template('error.html', error=error), 401
+    return render_template('errors/default.html', error=error), 401
 
 
 @error_pages.errorhandler(403)
@@ -39,7 +39,7 @@ def forbidden(error):
     :param error: error code
     :return: error page
     """
-    return render_template('error.html', error=error), 403
+    return render_template('errors/default.html', error=error), 403
 
 
 @error_pages.errorhandler(404)
@@ -50,7 +50,7 @@ def page_not_found(error):
     :param error: error code
     :return: error page
     """
-    return render_template('error.html', error=error), 404
+    return render_template('errors/default.html', error=error), 404
 
 
 @error_pages.errorhandler(410)
@@ -60,7 +60,7 @@ def page_gone(error):
     :param error: error code
     :return: error page
     """
-    return render_template('error.html', error=error), 410
+    return render_template('errors/default.html', error=error), 410
 
 
 @error_pages.errorhandler(418)
@@ -72,7 +72,7 @@ def iam_a_teapot(error):
     :param error: error code
     :return: error page
     """
-    return render_template('error.html', error=error), 418
+    return render_template('errors/default.html', error=error), 418
 
 
 @error_pages.errorhandler(500)
@@ -82,4 +82,4 @@ def internal_server_error(error):
     :param error: error code
     :return: error page
     """
-    return render_template('error.html', error=error), 500
+    return render_template('errors/default.html', error=error), 500

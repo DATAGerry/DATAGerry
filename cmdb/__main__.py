@@ -8,8 +8,10 @@ If not, see <https://github.com/NETHINKS/CMDB/blob/master/LICENSE>.
 """
 
 from gevent import monkey
+
 monkey.patch_all()
 from cmdb.utils import get_logger
+
 LOGGER = get_logger()
 
 
@@ -19,6 +21,32 @@ def activate_debug():
     LOGGER.warning("DEBUG mode enabled")
 
 
+def _setup():
+    from cmdb.data_storage import get_pre_init_database
+    from cmdb.user_management import get_user_manager
+    from cmdb.utils import get_security_manager
+
+    try:
+        setup_database = get_pre_init_database()
+        setup_security = get_security_manager(setup_database)
+        setup_security.generate_sym_key()
+        setup_management = get_user_manager()
+        group_id = setup_management.insert_group('admin', 'Administrator')
+        admin_pass = input('Enter admin password: ')
+        admin_user_id = setup_management.insert_user(
+            user_name='admin',
+            group_id=group_id,
+            password=admin_pass
+        )
+    except Exception as e:
+        return e
+
+    if admin_user_id == 1:
+        return True
+
+    return False
+
+
 def build_arg_parser():
     from optparse import OptionParser
     from cmdb import __version__, __title__
@@ -26,6 +54,8 @@ def build_arg_parser():
         usage="usage: {} [options]".format(__title__),
         version=" {}".format(__version__)
     )
+    _parser.add_option('--setup', action='store_true', default=False, dest='setup',
+                       help="init cmdb")
     _parser.add_option('-d', '--debug', action='store_true', default=False, dest='debug',
                        help="enable debug mode: DO NOT USE ON PRODUCTIVE SYSTEMS")
 
@@ -40,6 +70,13 @@ def build_arg_parser():
 
 def main(args):
     from multiprocessing import Process, Queue
+    if args.setup:
+        setup_finish = _setup()
+        if setup_finish is True:
+            LOGGER.info("SETUP COMPLETE")
+        else:
+            LOGGER.critical("During setup something went wrong - {}".format(setup_finish))
+        exit(0)
     if args.debug:
         activate_debug()
     '''
@@ -65,6 +102,7 @@ def main(args):
 if __name__ == "__main__":
 
     from time import sleep
+
     welcome_string = '''Welcome to Net|CMDB \nStarting system with following parameters: \n{}'''
     brand_string = '''
     ###########################################

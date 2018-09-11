@@ -11,9 +11,8 @@ class User(UserManagementBase):
         {'keys': [('user_name', UserManagementBase.DAO_ASCENDING)], 'user_name': 'user_name', 'unique': True}
     ]
 
-    def __init__(self, public_id, user_name, group_id, registration_time, password=None,
+    def __init__(self, user_name, group_id, registration_time, password=None,
                  first_name=None, last_name=None, email=None, authenticator='LocalAuthenticationProvider', **kwargs):
-        self.public_id = public_id
         self.user_name = user_name
         self.password = password
         self.group_id = group_id
@@ -29,6 +28,9 @@ class User(UserManagementBase):
 
     def get_password(self):
         return self.password
+
+    def get_group(self):
+        return self.group_id
 
     def get_authenticator(self) -> AuthenticationProvider:
         if issubclass(eval(self.authenticator), AuthenticationProvider):

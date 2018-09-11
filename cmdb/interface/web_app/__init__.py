@@ -25,7 +25,8 @@ def create_web_app():
     from cmdb.data_storage.database_connection import MongoConnector
     from cmdb.utils.security import SecurityManager
     from cmdb.user_management import UserManagement
-    from cmdb.utils import SystemConfigReader
+    from cmdb.utils import SystemConfigReader, SystemSettingsReader, SystemSettingsWriter
+    from flask_breadcrumbs import Breadcrumbs
 
     system_config_reader = SystemConfigReader(
         config_name=SystemConfigReader.DEFAULT_CONFIG_NAME,
@@ -51,33 +52,49 @@ def create_web_app():
         security_manager=security_manager
     )
 
+    system_settings_reader = SystemSettingsReader(
+        database_manager=database_manager
+    )
+
+    system_settings_writer = SystemSettingsWriter(
+        database_manager=database_manager
+    )
+
     MANAGER_HOLDER.set_database_manager(database_manager)
     MANAGER_HOLDER.set_security_manager(security_manager)
     MANAGER_HOLDER.set_object_manager(object_manager)
     MANAGER_HOLDER.set_user_manager(user_manager)
+    MANAGER_HOLDER.set_system_settings_reader(system_settings_reader)
+    MANAGER_HOLDER.set_system_settings_writer(system_settings_writer)
     MANAGER_HOLDER.init_app(app)
 
     # register_filters(app)
-    register_error_pages(app)
-    register_blueprints(app)
-    register_context_processors(app)
+    with app.app_context():
+        register_error_pages(app=app)
+        register_blueprints(app=app)
+        register_context_processors(app=app)
+        Breadcrumbs(app=app)
 
     return app
 
 
 def register_blueprints(app):
+    from cmdb.interface.web_app.index_routes import index_pages
     from cmdb.interface.web_app.static_routes import static_pages
     from cmdb.interface.web_app.auth_routes import auth_pages
-    from cmdb.interface.web_app.index_routes import index_pages
+    from cmdb.interface.web_app.settings_routes import settings_pages
+    from cmdb.interface.web_app.object_routes import object_pages
 
+    app.register_blueprint(index_pages)
     app.register_blueprint(static_pages)
     app.register_blueprint(auth_pages)
-    app.register_blueprint(index_pages)
+    app.register_blueprint(settings_pages)
+    app.register_blueprint(object_pages)
 
 
 def register_context_processors(app):
-    from cmdb.interface.web_app.context_injector import inject_current_url, inject_object_manager
-    app.context_processor(inject_object_manager)
+    from cmdb.interface.web_app.context_injector import inject_current_url, inject_object_manager, inject_sidebar
+    app.context_processor(inject_sidebar)
 
 
 def register_error_pages(app):

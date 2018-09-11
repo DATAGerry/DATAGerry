@@ -13,3 +13,6 @@ class UserGroup(UserManagementBase):
 
     def get_name(self):
         return self.name
+
+    def get_rights(self):
+        return self.rights

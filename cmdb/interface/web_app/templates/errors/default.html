@@ -1,0 +1,7 @@
+{% extends 'embedded.html' %}
+{% block title %}{{error.code}} Error{% endblock %}
+
+{% block content %}
+{{ super() }}
+{{error}}
+{% endblock %}
