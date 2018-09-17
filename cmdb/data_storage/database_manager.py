@@ -227,7 +227,6 @@ class DatabaseManagerMongo(DatabaseManager):
             founded document
 
         """
-
         return self.database_connector.get_collection(collection).find(*args, **kwargs)
 
     def find_one(self, collection: str, public_id: int, *args, **kwargs):

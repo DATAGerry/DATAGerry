@@ -22,7 +22,7 @@ class SecurityManager:
     def _setup(self):
         pass
 
-    def encrypt_token(self, payload: dict) -> str:
+    def encrypt_token(self, payload: dict, timeout: int=(DEFAULT_EXPIRES*60)) -> str:
         import json
         payload = json.dumps(payload)
         jws_token = jws.JWS(payload=payload)
@@ -34,7 +34,7 @@ class SecurityManager:
         )
         import time
         req_claim = {
-            'exp':  int(time.time()) + self.expire_time
+            'exp':  int(time.time()) + timeout
         }
 
         enc_token = jwt.JWT(header={"alg": "HS512"}, claims=jws_token.serialize(), default_claims=req_claim)

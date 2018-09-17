@@ -1,4 +1,4 @@
-from cmdb.object_framework.cmdb_dao import CmdbDAO
+from cmdb.object_framework.cmdb_dao import CmdbDAO, CMDBError
 from datetime import datetime
 
 
@@ -9,11 +9,9 @@ class CmdbObject(CmdbDAO):
     COLLECTION = 'objects.data'
     REQUIRED_INIT_KEYS = [
         'type_id',
-        'tag',
         'version',
         'creation_time',
         'author_id',
-        'last_editor_id',
         'last_edit_time',
         'active',
         'views',
@@ -21,17 +19,15 @@ class CmdbObject(CmdbDAO):
         'logs'
     ]
 
-    def __init__(self, type_id, tag, version, creation_time, author_id,
-                 last_editor_id, last_edit_time, active, views, fields, logs, **kwargs):
+    def __init__(self, type_id, status, creation_time, author_id, last_edit_time, active, fields, logs,
+                 views: int = 0, version: str = '1.0.0', **kwargs):
         """init of object
 
         Args:
-            type_id: public type id which implements the object
-            tag: current tag of object
+            type_id: public input_type id which implements the object
             version: current version of object
             creation_time: date of object creation
             author_id: public id of author
-            last_editor_id: public id of last author which edits the object
             last_edit_time: last date of editing
             active: object activation status
             views: numbers of views
@@ -40,11 +36,10 @@ class CmdbObject(CmdbDAO):
             **kwargs: additional data
         """
         self.type_id = type_id
-        self.tag = tag
+        self.status = status
         self.version = version
         self.creation_time = creation_time
         self.author_id = author_id
-        self.last_editor_id = last_editor_id
         self.last_edit_time = last_edit_time
         self.active = active
         self.views = views
@@ -53,10 +48,10 @@ class CmdbObject(CmdbDAO):
         super(CmdbObject, self).__init__(**kwargs)
 
     def get_type_id(self) -> int:
-        """get type if of this object
+        """get input_type if of this object
 
         Returns:
-            int: public id of type
+            int: public id of input_type
 
         """
         if self.type_id == 0 or self.type_id is None:
@@ -64,7 +59,7 @@ class CmdbObject(CmdbDAO):
         return self.type_id
 
     def update_view_counter(self) -> int:
-        """update the number of times this object was viewd
+        """update the number of times this object was viewed
 
         Returns:
             int: number of views
@@ -103,17 +98,23 @@ class CmdbObject(CmdbDAO):
             return True
         return False
 
+    def last_log(self):
+        try:
+            last_log = CmdbObjectLog(**self.logs[-1])
+        except CMDBError:
+            return None
+        return last_log
+
 
 class CmdbObjectLog:
-
     POSSIBLE_COMMANDS = ('create', 'edit', 'delete')
 
-    def __init__(self, author: id, _action: str, message: str, state: list, date: str):
-        self.author = author
+    def __init__(self, editor: id, _action: str, message: str, date: str, log: str):
+        self.editor = editor
         self.action = _action
         self.message = message
-        self.state = state
-        self.date = datetime.strptime(date, "%Y-%m-%dT%H:%M:%S.000Z") or datetime.today()
+        self.date = date or datetime.today()
+        self.log = log
 
     def get_date(self) -> datetime:
         return self.date
@@ -133,24 +134,25 @@ class CmdbObjectLog:
         return debug_print(self)
 
 
-class ActionNotPossibleError(Exception):
+class ActionNotPossibleError(CMDBError):
 
     def __init__(self, action):
         super().__init__()
         self.message = 'Object log could not be set - wrong action {}'.format(action)
 
 
-class TypeNotSetError(Exception):
+class TypeNotSetError(CMDBError):
 
     def __init__(self, public_id):
         super().__init__()
-        self.message = 'The object (ID: {}) is not connected with a type'.format(public_id)
+        self.message = 'The object (ID: {}) is not connected with a input_type'.format(public_id)
 
 
-class NoLinksAvailableError(Exception):
+class NoLinksAvailableError(CMDBError):
     """
     @deprecated
     """
+
     def __init__(self, public_id):
         super().__init__()
         self.message = 'The object (ID: {}) has no links'.format(public_id)

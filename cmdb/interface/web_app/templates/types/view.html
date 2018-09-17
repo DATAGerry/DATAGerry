@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+{% block title %}Type view {{type.get_name()}}{% endblock %}
+{% block navigation %}
+{% include 'includes/_navigation.html' %}
+{% endblock %}
+{% block breadcrumb %}
+{% include 'includes/_breadcrumb.html' %}
+{% endblock %}
+{% block content %}
+<div class="content">
+    <div class="container-fluid">
+        {{ super() }}
+        <h1>View: {{ type.get_label() }}</h1>
+        {{ type }}
+    </div>
+</div>
+{% endblock %}

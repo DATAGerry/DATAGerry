@@ -86,23 +86,33 @@ class CmdbDAO:
         return json.dumps(self.__dict__, default=default)
 
 
-class NoVersionError(Exception):
+class CMDBError(Exception):
+    def __init__(self):
+        super().__init__()
+
+    def __repr__(self):
+        from cmdb.utils.helpers import debug_print
+        return debug_print(self.message)
+
+
+class NoVersionError(CMDBError):
     def __init__(self, public_id):
         super().__init__()
         self.message = 'The object (ID: {}) has no version control'.format(public_id)
 
 
-class NoPublicIDError(Exception):
+class NoPublicIDError(CMDBError):
     def __init__(self):
         super().__init__()
         self.message = 'The object has no general public id - look at the IGNORED_INIT_KEYS constant or the docs'
 
 
-class RequiredInitKeyNotFoundError(Exception):
+class RequiredInitKeyNotFoundError(CMDBError):
     """
     Error if on of the given parameters is missing inside required init keys
     """
 
     def __init__(self, key_name):
-        super().__init__()
+
         self.message = 'Following initalisation key was not found inside the document: {}'.format(key_name)
+        super().__init__()

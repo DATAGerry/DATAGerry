@@ -9,14 +9,14 @@
   "author_id" : 1,
   "last_editor_id" : 1,
   "fields": [],
-  "tag": {
+  "status": {
     "name": "Test",
     "brand": "Primary"
   },
   "logs":[
     {
       "date": "2017-06-24T00:48:38.000+0000",
-      "author": 1,
+      "editor": 1,
       "_action": "",
       "message": "testaction",
       "log": ""

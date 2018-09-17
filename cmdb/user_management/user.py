@@ -23,6 +23,12 @@ class User(UserManagementBase):
         self.last_name = last_name
         super(User, self).__init__(**kwargs)
 
+    def get_name(self):
+        if self.first_name is "" and self.last_name is "":
+            return self.user_name
+        else:
+            return "{} {}".format(self.first_name, self.last_name)
+
     def get_username(self):
         return self.user_name
 

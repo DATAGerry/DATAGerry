@@ -102,8 +102,9 @@ def main(args):
 if __name__ == "__main__":
 
     from time import sleep
+    from termcolor import colored
 
-    welcome_string = '''Welcome to Net|CMDB \nStarting system with following parameters: \n{}'''
+    welcome_string = colored('Welcome to Net|CMDB \nStarting system with following parameters: \n{}', 'green')
     brand_string = '''
     ###########################################
     __  __ _____ _____ ____ __  __ ____  ____

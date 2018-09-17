@@ -59,7 +59,7 @@
 
 			// cache elements
 			this.$label = $element;
-			this.$chk = this.$label.find( 'input[type="checkbox"]' );
+			this.$chk = this.$label.find( 'input[input_type="checkbox"]' );
 			this.$container = $element.parent( '.checkbox' ); // the container div
 
 			if ( !this.options.ignoreVisibilityCheck && this.$chk.css( 'visibility' ).match( /hidden|collapse/ ) ) {
@@ -966,7 +966,7 @@
 				if ( topPercentage < 5 ) {
 					start = parseInt( $yearUl.find( 'li:first' ).attr( 'data-year' ), 10 );
 					for ( i = ( start - 1 ); i > ( start - 11 ); i-- ) {
-						$yearUl.prepend( '<li data-year="' + i + '"><button type="button">' + i + '</button></li>' );
+						$yearUl.prepend( '<li data-year="' + i + '"><button input_type="button">' + i + '</button></li>' );
 					}
 					this.artificialScrolling = true;
 					$yearUl.scrollTop( ( $yearUl.get( 0 ).scrollHeight - scrollHeight ) + scrollTop );
@@ -974,7 +974,7 @@
 				} else if ( bottomPercentage > 90 ) {
 					start = parseInt( $yearUl.find( 'li:last' ).attr( 'data-year' ), 10 );
 					for ( i = ( start + 1 ); i < ( start + 11 ); i++ ) {
-						$yearUl.append( '<li data-year="' + i + '"><button type="button">' + i + '</button></li>' );
+						$yearUl.append( '<li data-year="' + i + '"><button input_type="button">' + i + '</button></li>' );
 					}
 				}
 			},
@@ -1166,7 +1166,7 @@
 						if ( $td.hasClass( 'restricted' ) ) {
 							$td.html( '<span><b class="datepicker-date">' + curDate + '</b></span>' );
 						} else {
-							$td.html( '<span><button type="button" class="datepicker-date">' + curDate + '</button></span>' );
+							$td.html( '<span><button input_type="button" class="datepicker-date">' + curDate + '</button></span>' );
 						}
 
 						curDate++;
@@ -1217,7 +1217,7 @@
 
 				$yearUl.empty();
 				for ( i = ( year - 10 ); i < ( year + 11 ); i++ ) {
-					$yearUl.append( '<li data-year="' + i + '"><button type="button">' + i + '</button></li>' );
+					$yearUl.append( '<li data-year="' + i + '"><button input_type="button">' + i + '</button></li>' );
 				}
 				$yearSelected = $yearUl.find( 'li[data-year="' + year + '"]' );
 				$yearSelected.addClass( 'selected' );
@@ -2032,7 +2032,7 @@
 
 			// cache elements
 			this.$label = $( element );
-			this.$radio = this.$label.find( 'input[type="radio"]' );
+			this.$radio = this.$label.find( 'input[input_type="radio"]' );
 			this.groupName = this.$radio.attr( 'name' ); // don't cache group itself since items can be added programmatically
 
 			if ( !this.options.ignoreVisibilityCheck && this.$radio.css( 'visibility' ).match( /hidden|collapse/ ) ) {
@@ -2730,7 +2730,7 @@
 		var Spinbox = function Spinbox( element, options ) {
 			this.$element = $( element );
 			this.$element.find( '.btn' ).on( 'click', function( e ) {
-				//keep spinbox from submitting if they forgot to say type="button" on their spinner buttons
+				//keep spinbox from submitting if they forgot to say input_type="button" on their spinner buttons
 				e.preventDefault();
 			} );
 			this.options = $.extend( {}, $.fn.spinbox.defaults, options );
@@ -3293,7 +3293,7 @@
 						//
 						// {
 						//     text: "An Item",
-						//     type: 'item',
+						//     input_type: 'item',
 						//     attr = {
 						//         'classes': 'required-item red-text',
 						//         'data-parent': parentId,
@@ -3971,14 +3971,14 @@
 				[
 					{
 						name: '',
-						type: 'folder',
+						input_type: 'folder',
 						attr: {
 							id: ''
 						},
 						children: [
 							{
 								name: '',
-								type: 'item',
+								input_type: 'item',
 								attr: {
 									id: '',
 									'data-icon': 'glyphicon glyphicon-file'
@@ -3988,7 +3988,7 @@
 					},
 					{
 						name: '',
-						type: 'item',
+						input_type: 'item',
 						attr: {
 							id: '',
 							'data-icon': 'glyphicon glyphicon-file'
@@ -4686,7 +4686,7 @@
 				this.fetchingData = true;
 				this.$element.append( load );
 				if ( this.options.hybrid && force !== true ) {
-					moreBtn = $( '<button type="button" class="btn btn-primary"></button>' );
+					moreBtn = $( '<button input_type="button" class="btn btn-primary"></button>' );
 					if ( typeof this.options.hybrid === 'object' ) {
 						moreBtn.append( this.options.hybrid.label );
 					} else {
@@ -5094,7 +5094,7 @@
 				var isFocusOutEvent = e.type === 'focusout';
 				var blurredAfterInput = ( isFocusOutEvent && text.length > 0 );
 				// If we test for keycode only, it will match for `<` & `,` instead of just `,`
-				// This way users can type `<3` and `1 < 3`, etc...
+				// This way users can input_type `<3` and `1 < 3`, etc...
 				var acceptKeyPressed = ( this.acceptKeyCodes[ e.keyCode ] && !isShiftHeld( e ) );
 
 				if ( acceptKeyPressed || blurredAfterInput ) {
@@ -6408,7 +6408,7 @@
 			defaultView: -1, // should be a string value. -1 means it will grab the active view from the view controls
 			dropPagingCap: 10,
 			staticHeight: -1, // normally true or false. -1 means it will look for data-staticheight on the element
-			views: null, // can be set to an object to configure multiple views of the same type,
+			views: null, // can be set to an object to configure multiple views of the same input_type,
 			searchOnKeyPress: false,
 			allowCancel: true
 		};
@@ -6694,7 +6694,7 @@
 				}
 
 				var actionsDropdown = '<div class="btn-group">' +
-					'<button type="button" class="btn btn-xs btn-default dropdown-toggle repeater-actions-button" data-toggle="dropdown" data-flip="auto" aria-expanded="false">' +
+					'<button input_type="button" class="btn btn-xs btn-default dropdown-toggle repeater-actions-button" data-toggle="dropdown" data-flip="auto" aria-expanded="false">' +
 					'<span class="caret"></span>' +
 					'</button>' +
 					'<ul class="dropdown-menu dropdown-menu-right" role="menu">' +
@@ -7073,7 +7073,7 @@
 
 			if ( this.viewOptions.list_selectable === 'multi' && columns[ columnIndex ].property === '@_CHECKBOX_@' ) {
 				var checkBoxMarkup = '<label data-row="' + rowIndex + '" class="checkbox-custom checkbox-inline body-checkbox repeater-select-checkbox">' +
-					'<input class="sr-only" type="checkbox"></label>';
+					'<input class="sr-only" input_type="checkbox"></label>';
 
 				$col.html( checkBoxMarkup );
 			}
@@ -7090,7 +7090,7 @@
 
 			var checkBoxMarkup = '<div class="repeater-list-heading header-checkbox">' +
 				'<label id="' + checkAllID + '" class="checkbox-custom checkbox-inline">' +
-				'<input class="sr-only" type="checkbox" value="">' +
+				'<input class="sr-only" input_type="checkbox" value="">' +
 				'<span class="checkbox-label">&nbsp;</span>' +
 				'</label>' +
 				'</div>';
@@ -8495,12 +8495,12 @@
 
 			this.$trigger.on( 'keydown.fu.picker', $.proxy( this.keyComplete, this ) );
 			this.$trigger.on( 'focus.fu.picker', $.proxy( function inputFocus( e ) {
-				if ( typeof e === "undefined" || $( e.target ).is( 'input[type=text]' ) ) {
+				if ( typeof e === "undefined" || $( e.target ).is( 'input[input_type=text]' ) ) {
 					$.proxy( this.show(), this );
 				}
 			}, this ) );
 			this.$trigger.on( 'click.fu.picker', $.proxy( function triggerClick( e ) {
-				if ( !$( e.target ).is( 'input[type=text]' ) ) {
+				if ( !$( e.target ).is( 'input[input_type=text]' ) ) {
 					$.proxy( this.toggle(), this );
 				} else {
 					$.proxy( this.show(), this );

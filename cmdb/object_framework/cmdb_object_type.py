@@ -1,38 +1,50 @@
 from cmdb.object_framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
 from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
+from datetime import datetime
+from cmdb.utils import get_logger
+
+LOGGER = get_logger()
 
 
 class CmdbType(CmdbDAO):
     """
-    Definition of an object type - which fields were created and how.
+    Definition of an object input_type - which fields were created and how.
     """
     COLLECTION = "objects.types"
-    SCHEMA = "type.schema.json"
+    SCHEMA = "input_type.schema.json"
     REQUIRED_INIT_KEYS = [
         'name',
-        'version'
+        'active',
+        'author_id',
+        'creation_time',
+        'active',
+        'render_meta',
     ]
-    POSSIBLE_FIELD_TYPES = []
 
-    def __init__(self, name: str, title: str, description: str, version: str, status: list,
-                 active: bool, creator_id: int, creation_time, render_meta: list, fields: list,
-                 last_editor_id: int=0, last_edit_time=None, **kwargs):
+    def __init__(self, name: str, description: str, active: bool, author_id: int, creation_time: datetime,
+                 render_meta: list, fields: list, version: str = '1.0.0', label: str=None, status: list = None, logs: dict = None,
+                 **kwargs):
         self.name = name
-        self.title = title
+        self.label = label or self.name.title()
         self.description = description
         self.version = version
         self.status = status
         self.active = active
-        self.creator_id = creator_id
+        self.author_id = author_id
         self.creation_time = creation_time
-        self.last_editor_id = last_editor_id
-        self.last_edit_time = last_edit_time
         self.render_meta = render_meta
-        self.fields = fields
+        self.fields = fields or []
+        self.logs = logs
         super(CmdbType, self).__init__(**kwargs)
 
     def get_name(self):
         return self.name
+
+    def get_label(self):
+        return self.label
+
+    def get_description(self):
+        return self.description
 
     def get_externals(self):
         return self.render_meta['external']
@@ -79,7 +91,7 @@ class CmdbType(CmdbDAO):
                 try:
                     return CmdbFieldType(**field)
                 except RequiredInitKeyNotFoundError as e:
-                    print(e.message)
+                    LOGGER.warning(e.message)
                     return None
         raise FieldNotFoundError(name, self.get_name())
 
@@ -91,4 +103,4 @@ class FieldNotFoundError(Exception):
 
     def __init__(self, field_name, type_name):
         super().__init__()
-        self.message = 'Field {} was not found inside type: {}'.format(field_name, type_name)
+        self.message = 'Field {} was not found inside input_type: {}'.format(field_name, type_name)

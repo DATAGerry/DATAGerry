@@ -1,0 +1,24 @@
+[
+  {
+    "public_id": 1,
+    "name": "default",
+    "title": "Default",
+    "description": "Example type - will be created during setup",
+    "active": true,
+    "author_id": 1,
+    "creation_time": {
+      "$date" : "2018-09-11T09:16:14.901+0000",
+    },
+    "render_meta": {
+      "external": null,
+      "summary": null,
+      "sections": null
+    },
+    "fields": [
+      {
+        "Test1": "test"
+      }
+    ],
+    "logs": ""
+  }
+]

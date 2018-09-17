@@ -5,7 +5,7 @@ class NoUserFoundExceptions(Exception):
 
 
 class WrongTypeException(Exception):
-    """Exception if type was wrong"""
+    """Exception if input_type was wrong"""
     def __init__(self):
         super().__init__()
 

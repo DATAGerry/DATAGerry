@@ -68,8 +68,8 @@ def create_web_app():
     MANAGER_HOLDER.set_system_settings_writer(system_settings_writer)
     MANAGER_HOLDER.init_app(app)
 
-    # register_filters(app)
     with app.app_context():
+        register_filters(app=app)
         register_error_pages(app=app)
         register_blueprints(app=app)
         register_context_processors(app=app)
@@ -78,18 +78,25 @@ def create_web_app():
     return app
 
 
+def register_filters(app):
+    from cmdb.interface.web_app.filters import label_active
+    app.jinja_env.filters['label_active'] = label_active
+
+
 def register_blueprints(app):
     from cmdb.interface.web_app.index_routes import index_pages
     from cmdb.interface.web_app.static_routes import static_pages
     from cmdb.interface.web_app.auth_routes import auth_pages
     from cmdb.interface.web_app.settings_routes import settings_pages
     from cmdb.interface.web_app.object_routes import object_pages
+    from cmdb.interface.web_app.type_routes import type_pages
 
     app.register_blueprint(index_pages)
     app.register_blueprint(static_pages)
     app.register_blueprint(auth_pages)
     app.register_blueprint(settings_pages)
     app.register_blueprint(object_pages)
+    app.register_blueprint(type_pages)
 
 
 def register_context_processors(app):

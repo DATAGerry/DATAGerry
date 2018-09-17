@@ -6,7 +6,7 @@ Except for the manager, this module can be used completely modular.
 The respective DAO is used to apply the attributes and to convert
 the elements for the database.
 """
-from cmdb.object_framework.cmdb_dao import CmdbDAO
+from cmdb.object_framework.cmdb_dao import CmdbDAO, CMDBError
 from cmdb.object_framework.cmdb_object import CmdbObject, CmdbObjectLog
 from cmdb.object_framework.cmdb_object_type import CmdbType
 from cmdb.object_framework.cmdb_object_category import CmdbTypeCategory

@@ -16,7 +16,7 @@ def login_page_post():
     from cmdb.user_management.user_manager import NoUserFoundExceptions
     from cmdb.user_management.user import NoValidAuthenticationProviderError
     from cmdb.user_management.user_authentication import WrongUserPasswordError
-    user_name = request.form['user_name']
+    user_name = str(request.form['user_name']).lower()
     password = request.form['password']
 
     correct = False
@@ -40,7 +40,8 @@ def login_page_post():
     if correct is True:
         resp = make_response(redirect(url_for('index_pages.index_page')))
         import time
-        expire_date = time.time() + 300
+        timeout = MANAGER_HOLDER.get_system_settings_reader().get_value('token_timeout', 'security')
+        expire_date = time.time() + (timeout*60)
         resp.set_cookie('access-token', MANAGER_HOLDER.get_security_manager().encrypt_token(login_user.to_json()),
                         expires=expire_date)
         return resp

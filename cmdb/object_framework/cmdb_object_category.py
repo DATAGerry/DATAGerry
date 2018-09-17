@@ -8,13 +8,13 @@ class CmdbTypeCategory(CmdbDAO):
     COLLECTION = 'objects.categories'
     REQUIRED_INIT_KEYS = [
         'name',
-        'label'
+
     ]
 
     def __init__(self, name: str, label: str=None, icon: str=None, type_list: list=None, children_list: list=None, **kwargs):
         self.name = name
         self.label = label or self.name.title()
-        self.icon = icon
+        self.icon = icon or None
         self.type_list = type_list or []
         add_children = []
         if children_list is not None:
