@@ -15,6 +15,15 @@ def inject_sidebar():
     return dict(sidebar=sidebar())
 
 
+def inject_sidebar_hidden():
+    def sidebar_hidden():
+        import flask
+        if 'sidebar_hidden' in flask.request.cookies:
+            return True
+        return False
+    return dict(sidebar_hidden=sidebar_hidden())
+
+
 def inject_current_url():
     def current_url():
         from flask import request

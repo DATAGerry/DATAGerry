@@ -15,7 +15,7 @@ from cmdb.utils import get_logger
 LOGGER = get_logger()
 
 
-def activate_debug():
+def _activate_debug():
     import cmdb
     cmdb.__MODE__ = 'DEBUG'
     LOGGER.warning("DEBUG mode enabled")
@@ -32,11 +32,18 @@ def _setup():
         setup_security.generate_sym_key()
         setup_management = get_user_manager()
         group_id = setup_management.insert_group('admin', 'Administrator')
-        admin_pass = input('Enter admin password: ')
+        admin_username = input('Enter admin USERNAME: ')
+        while True:
+            admin_pass_1 = input('Enter admin PASSWORD: ')
+            admin_pass_2 = input('Repeate PASSWORD: ')
+            if admin_pass_1 == admin_pass_2:
+                break
+            else:
+                LOGGER.info("Passwords are not the same - please repeate")
         admin_user_id = setup_management.insert_user(
-            user_name='admin',
+            user_name=admin_username,
             group_id=group_id,
-            password=admin_pass
+            password=admin_pass_1
         )
     except Exception as e:
         return e
@@ -45,6 +52,23 @@ def _setup():
         return True
 
     return False
+
+
+def _start_apps():
+    from multiprocessing import Process, Queue
+    from cmdb.interface import HTTPServer, main_application
+    LOGGER.info("Starting rest- and web- server")
+    server_queue = Queue()
+    from cmdb.utils import get_system_config_reader
+    web_server_options = get_system_config_reader().get_all_values_from_section('WebServer')
+    http_process = Process(
+        target=HTTPServer(main_application, web_server_options).run,
+        args=(server_queue,)
+    )
+    http_process.start()
+    if server_queue.get():
+        LOGGER.info("CMDB successfully started")
+    http_process.join()
 
 
 def build_arg_parser():
@@ -69,7 +93,6 @@ def build_arg_parser():
 
 
 def main(args):
-    from multiprocessing import Process, Queue
     if args.setup:
         setup_finish = _setup()
         if setup_finish is True:
@@ -78,25 +101,13 @@ def main(args):
             LOGGER.critical("During setup something went wrong - {}".format(setup_finish))
         exit(0)
     if args.debug:
-        activate_debug()
+        _activate_debug()
     '''
     if args.command:
         LOGGER.info("Starting CLI menu")
         pass#cli'''
     if args.start:
-        from cmdb.interface import HTTPServer, main_application
-        LOGGER.info("Starting rest- and web- server")
-        server_queue = Queue()
-        from cmdb.utils import get_system_config_reader
-        web_server_options = get_system_config_reader().get_all_values_from_section('WebServer')
-        http_process = Process(
-            target=HTTPServer(main_application, web_server_options).run,
-            args=(server_queue,)
-        )
-        http_process.start()
-        if server_queue.get():
-            LOGGER.info("CMDB successfully started")
-        http_process.join()
+        _start_apps()
 
 
 if __name__ == "__main__":

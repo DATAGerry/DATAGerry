@@ -100,8 +100,9 @@ def register_blueprints(app):
 
 
 def register_context_processors(app):
-    from cmdb.interface.web_app.context_injector import inject_current_url, inject_object_manager, inject_sidebar
+    from cmdb.interface.web_app.context_injector import inject_sidebar, inject_sidebar_hidden
     app.context_processor(inject_sidebar)
+    app.context_processor(inject_sidebar_hidden)
 
 
 def register_error_pages(app):

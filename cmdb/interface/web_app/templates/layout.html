@@ -14,7 +14,8 @@
 
 </head>
 {% endblock %}
-<body class="sidebar-fixed header-fixed">
+<body class="sidebar-fixed {% if sidebar_hidden %} sidebar-hidden {% endif %} header-fixed">
+
 <div id="app-wrapper">
     {% block navigation %}
     {% endblock %}

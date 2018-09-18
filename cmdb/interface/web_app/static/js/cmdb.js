@@ -11,6 +11,27 @@
 
   $ = $ && $.hasOwnProperty('default') ? $['default'] : $;
 
+  (function ($$$1, global, undefined) {
+
+    $$$1.fn.sidebar = function (opt) {
+      $$$1(this).on('click', function (e) {
+        e.preventDefault();
+
+        if (document.cookie.indexOf('sidebar_hidden') == -1) {
+          document.cookie = 'sidebar_hidden=1; path=/';
+        } else {
+          document.cookie = 'sidebar_hidden=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+        }
+
+        $$$1('body').toggleClass('sidebar-hidden');
+      });
+    };
+
+    if (global.module && global.module.exports) {
+      module.exports = $$$1.fn.sidebar;
+    }
+  })(jQuery, window || global);
+
   /*
    * Error error_code
    * based on https://codepen.io/Ahmed_B_Hameed/pen/LkqNmp
@@ -19878,18 +19899,11 @@
       $(this).parent().toggleClass('open');
     });
     $('ul.nav').find('a.active').parent().parent().parent().addClass('open');
-    $('.sidebar-toggle').on('click', function (e) {
-      e.preventDefault();
-      $('body').toggleClass('sidebar-hidden');
-    });
-    $('.sidebar-mobile-toggle').on('click', function () {
-      $('body').toggleClass('sidebar-mobile-show');
-    });
+    $('.sidebar-toggle').sidebar();
     $('input#category_filter').quicksearch('#sidebar .sidebar-categories .nav-link');
     $('.data_table').each(function () {
       $(this).DataTable();
     });
-    $('.data_table').quicksearch();
     $('.wizard').each(function () {
       $(this).wizard();
     });

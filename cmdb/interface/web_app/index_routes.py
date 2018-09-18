@@ -25,8 +25,12 @@ def index_page():
     try:
         obm = MANAGER_HOLDER.get_object_manager()
         uum = MANAGER_HOLDER.get_user_manager()
-        new_objects = obm.get_objects_by(sort='creation_time', active={"$eq": True})[:25]
-        last_objects = obm.get_objects_by(sort='last_edit_time', active={"$eq": True})[:25]
+        new_objects = obm.get_objects_by(sort='creation_time', active={"$eq": True})
+        if len(new_objects) > 25:
+            new_objects = new_objects[: 25]
+        last_objects = obm.get_objects_by(sort='last_edit_time', active={"$eq": True})
+        if len(last_objects) > 25:
+            last_objects = last_objects[: 25]
     except CMDBError as cmdb_e:
         logger.warning(cmdb_e.message)
         return render_template('index.html', object_manager=obm, user_manager=uum, new_objects=new_objects,
