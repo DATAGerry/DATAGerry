@@ -1,15 +1,15 @@
 [
   {
-    "author": 1,
+    "editor": 1,
     "_action": "create",
     "message": "Default",
-    "state": [],
+    "log": [],
     "date": "2017-06-24T00:48:38.000Z"
   },{
-    "author": 1,
+    "editor": 1,
     "_action": "foo",
     "message": "Default",
-    "state": [],
+    "log": [],
     "date": "2017-06-24T00:48:38.000Z"
   }
 ]

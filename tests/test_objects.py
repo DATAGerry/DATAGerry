@@ -60,10 +60,10 @@ def test_cmdb_object_logs(objects_data_json):
     from datetime import datetime
     test_log = CmdbObjectLog(**objects_data_json['objects.data.logs.json'][0])
     assert test_log._action == 'create'
-    assert test_log.author == 1
+    assert test_log.editor == 1
     assert test_log.message == "Default"
-    assert len(test_log.state) == 0
-    assert type(test_log.date) == datetime
+    assert len(test_log.log) == 0
+    assert type(test_log.date) == str
 
     with pytest.raises(ActionNotPossibleError):
         CmdbObjectLog(**objects_data_json['objects.data.logs.json'][1])

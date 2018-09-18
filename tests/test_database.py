@@ -1,6 +1,7 @@
 import pytest
 import os
-from cmdb.data_storage.database_connection import MongoConnector, ServerTimeoutError
+from cmdb.utils.error import CMDBError
+from cmdb.data_storage.database_connection import MongoConnector
 from cmdb.data_storage.database_manager import DatabaseManagerMongo, CollectionAlreadyExists
 
 
