@@ -5,6 +5,7 @@ The implementation of the manager used is always realized using the respective s
 
 """
 from cmdb.object_framework import *
+from cmdb.object_framework import CmdbObjectStatus
 from cmdb.data_storage.database_manager import PublicIDAlreadyExists
 
 
@@ -278,3 +279,9 @@ class CmdbObjectManager(CmdbManagerBase):
     def delete_category(self, public_id: int):
         ack = self._delete(CmdbTypeCategory.COLLECTION, public_id)
         return ack
+
+    def get_status(self, name) -> CmdbObjectStatus:
+        return CmdbObjectStatus(**self.dbm.find_one_by(
+            collection=CmdbObjectStatus.COLLECTION,
+            filter={'name': name})
+            )

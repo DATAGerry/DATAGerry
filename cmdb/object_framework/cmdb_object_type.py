@@ -1,5 +1,6 @@
 from cmdb.object_framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
 from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
+from cmdb.utils.error import CMDBError
 from datetime import datetime
 from cmdb.utils import get_logger
 
@@ -80,7 +81,7 @@ class CmdbType(CmdbDAO):
         """
         return self.fields
 
-    def get_field(self, name):
+    def get_field(self, name) -> CmdbFieldType:
         """
         get specific field
         :param name: field name
@@ -96,7 +97,7 @@ class CmdbType(CmdbDAO):
         raise FieldNotFoundError(name, self.get_name())
 
 
-class FieldNotFoundError(Exception):
+class FieldNotFoundError(CMDBError):
     """
     Error if field do not exists
     """

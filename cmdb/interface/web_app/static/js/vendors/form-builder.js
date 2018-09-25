@@ -426,7 +426,7 @@ var _Mathfloor = Math.floor,
           var e = {
               type: A.attr("type")
             },
-            t = $(".fld-subtype", A).val();
+            t = $(".fld-subinput_type", A).val();
           return t !== e.type && (e.subtype = t), e
         }, A.prototype.fieldOptionData = function(A) {
           var e = [],
@@ -1645,7 +1645,7 @@ var _Mathfloor = Math.floor,
               var e = "li" == A.target.tagName ? $(A.target).attr("id") : $(A.target).closest("li.form-field").attr("id");
               C.toggleEdit(e), A.handled = !0
             }
-          }), N.on("change", '[name="subtype"]', function(A) {
+          }), N.on("change", '[name="subinput_type"]', function(A) {
             var e = $(A.target).closest("li.form-field");
             $(".value-wrap", e).toggle("quill" !== A.target.value)
           }), N.on("change", [".prev-holder input", ".prev-holder select", ".prev-holder textarea"].join(", "), function(A) {

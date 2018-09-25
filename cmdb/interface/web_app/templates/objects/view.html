@@ -10,8 +10,127 @@
 <div class="content">
     <div class="container-fluid">
         {{ super() }}
+        <div class="row">
+  <div class="col-md-9">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <h5 class="card-header">
+							#{{view_object.get_public_id()}} {{view_type.get_label()}}
+              <span class="badge badge-secondary float-right">v{{view_object.version}}</span>
+            <span class="badge badge-primary float-right mr-1">{{view_object.status}}</span>
+						</h5>
+          <div class="card-body">
+            <p class="card-text">
+              Card content
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div id="object_content" class="col-md-12 mt-3">
+        <div class="card">
+          <h5 class="card-header">Content</h5>
+          <div class="card-body">
+            {{ render_form }}
+            {{ render_form }}
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <div class="row">
+      <div class="col-md-12 mt-3">
+        <div class="tabbable">
+          <ul class="nav nav-tabs">
+            <li class="nav-item">
+              <a class="nav-link active show" href="#object-references" data-toggle="tab">References</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#object-links" data-toggle="tab">Links</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#object-logs" data-toggle="tab">Logs</a>
+            </li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active show" id="object-references">
+              References
+            </div>
+            <div class="tab-pane" id="object-links">
+              Links
+            </div>
+            <div class="tab-pane" id="object-logs">
+              Logs
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3" id="object_view_meta">
+    <div class="row">
+      <div class="col-md-12">
+        <div id="object_code"></div>
+      </div>
+      <div class="col-md-12 mt-3">
+        <div class="card">
+          <h5 class="card-header">
+            Meta informations
+          </h5>
+          <div class="card-body">
+            <table class="table table-sm">
+              <tbody>
+                <tr>
+                  <th class="border-top-0" scope="row">public id</th>
+                  <td class="border-top-0">{{view_object.get_public_id()}}</td>
+                </tr>
+                <tr>
+                  <th scope="row">type</th>
+                  <td>{{view_type.get_label()}}</td>
+                </tr>
+                <tr>
+                  <th scope="row">views</th>
+                  <td>{{view_object.views}}</td>
+                </tr>
+                <tr>
+                  <th scope="row">edits</th>
+                  <td>{{view_object.log_length()}}</td>
+                </tr>
+                <tr>
+                  <th scope="row">author</th>
+                  <td>{{author_name}}</td>
+                </tr>
+                <tr>
+                  <th scope="row">creation time</th>
+                  <td>{{view_object.creation_time}}</td>
+                </tr>
+                <tr>
+                  <th scope="row">last edit</th>
+                  <td>{{view_object.last_edit_time}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card-footer">
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
 
     </div>
 </div>
+<script type="text/javascript">
+  $('#object_code').qrcode({
+    text: "{{object_base}}",
+    mode: 2,
+    label: 'CMDB',
+    ecLevel: 'H'
+  });
+</script>
 {% endblock %}

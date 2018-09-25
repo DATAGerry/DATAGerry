@@ -1,6 +1,17 @@
 from cmdb.interface.web_app import MANAGER_HOLDER
 
 
+def inject_current_user():
+    def current_user():
+        from flask import request
+        from jwcrypto import jwt
+
+
+        return 1
+
+    return dict(current_user_id=current_user())
+
+
 def inject_object_manager():
     def object_manager():
         return MANAGER_HOLDER.get_object_manager()
@@ -12,6 +23,7 @@ def inject_sidebar():
     def sidebar():
         categories = MANAGER_HOLDER.get_object_manager().get_all_categories()
         return categories
+
     return dict(sidebar=sidebar())
 
 
@@ -21,6 +33,7 @@ def inject_sidebar_hidden():
         if 'sidebar_hidden' in flask.request.cookies:
             return True
         return False
+
     return dict(sidebar_hidden=sidebar_hidden())
 
 

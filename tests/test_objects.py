@@ -1,7 +1,68 @@
 import pytest
 import json
 import os
-from cmdb.object_framework import CmdbObjectManager, CmdbTypeCategory, CmdbObjectStatus, CmdbObject, CmdbObjectLog
+from cmdb.object_framework import CmdbDAO, CmdbObjectManager, CmdbTypeCategory, CmdbObjectStatus, CmdbObject, CmdbObjectLog
+
+
+"""
+CMDB_DAO TESTS
+"""
+
+
+def test_cmdb_dao():
+    from cmdb.object_framework.cmdb_dao import NoPublicIDError, RequiredInitKeyNotFoundError, NoVersionError
+
+    # test public_id error
+    dao_0 = CmdbDAO(public_id=0)
+    with pytest.raises(NoPublicIDError):
+        dao_0.get_public_id()
+
+    # default init test
+    dao_1 = CmdbDAO(
+        public_id=1
+    )
+    # test public id
+    assert dao_1.get_public_id() == 1
+    # test database_id
+    assert dao_1.has_object_id() is False
+    # test database convert
+    assert type(dao_1.to_database()) is dict
+    # test version raise
+    with pytest.raises(NoVersionError):
+        dao_1._update_version(CmdbDAO.VERSIONING_MAJOR)
+
+    # test new requirements
+    CmdbDAO.REQUIRED_INIT_KEYS.append('test_param')
+    dao_2 = CmdbDAO(
+        public_id=2,
+        test_param=2
+    )
+    assert dao_2.test_param == 2
+
+    # test init key raise
+    with pytest.raises(RequiredInitKeyNotFoundError):
+        CmdbDAO(
+            public_id=2
+        )
+    CmdbDAO.REQUIRED_INIT_KEYS.remove('test_param')
+
+    # test kwargs init
+    dao_3 = CmdbDAO(
+        public_id=3,
+        test_param=3,
+        version='1.0.0'
+    )
+    assert len(dao_3.__dict__) == 3
+
+    # test version update
+    assert dao_3.version == '1.0.0'
+    dao_3._update_version(CmdbDAO.VERSIONING_MAJOR)
+    assert dao_3.version == '2.0.0'
+    dao_3._update_version(CmdbDAO.VERSIONING_MINOR)
+    assert dao_3.version == '2.1.0'
+    dao_3._update_version(CmdbDAO.VERSIONING_PATCH)
+    assert dao_3.version == '2.1.1'
+
 
 FIXTURE_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),

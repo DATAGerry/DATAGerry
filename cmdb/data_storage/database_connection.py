@@ -3,6 +3,7 @@ Database-Connection
 Real connection to database over a given connector
 """
 from pymongo.errors import ServerSelectionTimeoutError
+from cmdb.utils.error import CMDBError
 
 
 class Connector:
@@ -147,7 +148,13 @@ class MongoConnector(Connector):
         self.client.close()
 
 
-class ServerTimeoutError(Exception):
+class DatabaseConnectionError(CMDBError):
+    def __init__(self):
+        super().__init__()
+        self.message = "Connection Error"
+
+
+class ServerTimeoutError(CMDBError):
     """
     Server timeout error if connection is lost
     """

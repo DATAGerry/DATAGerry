@@ -4,6 +4,7 @@ Database Management instance for database actions
 """
 from pymongo.errors import DuplicateKeyError
 from pymongo.results import DeleteResult
+from cmdb.data_storage.database_connection import Connector
 
 
 class DatabaseManager:
@@ -16,7 +17,7 @@ class DatabaseManager:
     ASCENDING = 1
     DESCENDING = -1
 
-    def __init__(self, connector):
+    def __init__(self, connector: Connector):
         """instance of super class
 
         Args:

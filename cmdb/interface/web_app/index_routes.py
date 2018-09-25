@@ -2,7 +2,7 @@
 Index Page
 """
 from cmdb.interface.web_app import MANAGER_HOLDER
-from cmdb.object_framework import CMDBError
+from cmdb.utils.error import CMDBError
 from cmdb.utils import get_logger
 from cmdb.utils.interface_wraps import login_required
 from flask import Blueprint

@@ -8,11 +8,21 @@ If not, see <https://github.com/NETHINKS/CMDB/blob/master/LICENSE>.
 """
 
 from gevent import monkey
-
 monkey.patch_all()
 from cmdb.utils import get_logger
+from cmdb.data_storage import get_pre_init_database
+from cmdb.utils import get_system_config_reader
 
 LOGGER = get_logger()
+config_reader = get_system_config_reader()
+
+
+def _check_database():
+    LOGGER.info("Checking database connection with cmdb.conf data")
+    dbm = get_pre_init_database()
+    connection_test = dbm.database_connector.is_connected()
+    dbm.database_connector.disconnect()
+    return connection_test
 
 
 def _activate_debug():
@@ -22,7 +32,6 @@ def _activate_debug():
 
 
 def _setup():
-    from cmdb.data_storage import get_pre_init_database
     from cmdb.user_management import get_user_manager
     from cmdb.utils import get_security_manager
 
@@ -40,7 +49,7 @@ def _setup():
                 break
             else:
                 LOGGER.info("Passwords are not the same - please repeate")
-        admin_user_id = setup_management.insert_user(
+        setup_management.insert_user(
             user_name=admin_username,
             group_id=group_id,
             password=admin_pass_1
@@ -48,10 +57,7 @@ def _setup():
     except Exception as e:
         return e
 
-    if admin_user_id == 1:
-        return True
-
-    return False
+    return True
 
 
 def _start_apps():
@@ -93,13 +99,22 @@ def build_arg_parser():
 
 
 def main(args):
+    from cmdb.data_storage.database_connection import DatabaseConnectionError
+    try:
+        conn = _check_database()
+        if not conn:
+            raise DatabaseConnectionError()
+        LOGGER.info("Database connection established.")
+    except Exception as e:
+        LOGGER.critical(e.message)
+        exit(1)
     if args.setup:
         setup_finish = _setup()
         if setup_finish is True:
             LOGGER.info("SETUP COMPLETE")
         else:
             LOGGER.critical("During setup something went wrong - {}".format(setup_finish))
-        exit(0)
+        exit(1)
     if args.debug:
         _activate_debug()
     '''
@@ -115,17 +130,16 @@ if __name__ == "__main__":
     from time import sleep
     from termcolor import colored
 
-    welcome_string = colored('Welcome to Net|CMDB \nStarting system with following parameters: \n{}', 'green')
-    brand_string = '''
-    ###########################################
-    __  __ _____ _____ ____ __  __ ____  ____
-    | \ | | ____|_   _/ ___|  \/  |  _ \| __ ) 
-    |  \| |  _|   | || |   | |\/| | | | |  _ \ 
-    | |\  | |___  | || |___| |  | | |_| | |_) |
-    |_| \_|_____| |_| \____|_|  |_|____/|____/ 
+    welcome_string = colored('Welcome to Net|CMDB \nStarting system with following parameters: \n{}\n', 'yellow')
+    brand_string = colored('''
+###########################################
+__  __ _____ _____ ____ __  __ ____  ____
+| \ | | ____|_   _/ ___|  \/  |  _ \| __ ) 
+|  \| |  _|   | || |   | |\/| | | | |  _ \ 
+| |\  | |___  | || |___| |  | | |_| | |_) |
+|_| \_|_____| |_| \____|_|  |_|____/|____/ 
 
-    ###########################################                                        
-    '''
+###########################################\n''', 'green')
 
     try:
         (options, args) = build_arg_parser()

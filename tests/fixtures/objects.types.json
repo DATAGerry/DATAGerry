@@ -7,16 +7,61 @@
     "active": true,
     "author_id": 1,
     "creation_time": {
-      "$date" : "2018-09-11T09:16:14.901+0000",
+      "$date": "2018-09-11T09:16:14.901+0000"
     },
     "render_meta": {
       "external": null,
       "summary": null,
-      "sections": null
+      "sections": [
+        {
+          "name": "section_1",
+          "label": "Section 1",
+          "fields": [
+            "test-field"
+          ],
+          "position": 1
+        },
+        {
+          "name": "section_2",
+          "label": "Section 2",
+          "fields": [
+            "email",
+            "password"
+          ],
+          "position": 2
+        }
+      ]
     },
     "fields": [
       {
-        "Test1": "test"
+        "type": "text",
+        "required": true,
+        "label": "Text Field",
+        "description": "Test field - with all values",
+        "placeholder": "Lorem Ipsum",
+        "className": "form-control",
+        "name": "test-field",
+        "access": true,
+        "value": "not set",
+        "subtype": "text",
+        "maxlength": "120",
+        "role": "1"
+      },
+      {
+        "type": "text",
+        "subtype": "email",
+        "label": "Email",
+        "placeholder": "example@example.com",
+        "className": "form-control",
+        "name": "email"
+      },
+      {
+        "type": "text",
+        "subtype": "password",
+        "label": "Password Field",
+        "description": "password encrypted",
+        "className": "form-control",
+        "name": "password"
       }
     ],
     "logs": ""

@@ -128,3 +128,8 @@ class SecurityManager:
     def get_public_key(self):
         pub_key = self.get_key_pair()['public_key']
         return jwk.JWK(**pub_key)
+
+    @staticmethod
+    def encode_object_base_64(data: object):
+        from bson.json_util import dumps
+        return base64.b64encode(dumps(data).encode('utf-8')).decode("utf-8")

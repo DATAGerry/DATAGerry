@@ -1,4 +1,5 @@
-from cmdb.object_framework.cmdb_dao import CmdbDAO, CMDBError
+from cmdb.object_framework.cmdb_dao import CmdbDAO
+from cmdb.utils.error import CMDBError
 from datetime import datetime
 
 
@@ -97,6 +98,9 @@ class CmdbObject(CmdbDAO):
         if len(self.logs) > 0:
             return True
         return False
+
+    def log_length(self):
+        return len(self.logs)-1
 
     def last_log(self):
         try:

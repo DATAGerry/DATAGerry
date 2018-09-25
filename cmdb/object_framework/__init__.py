@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 This module presents the core system of the CMDB.
 All initializations and specifications for creating objects,
@@ -6,15 +7,16 @@ Except for the manager, this module can be used completely modular.
 The respective DAO is used to apply the attributes and to convert
 the elements for the database.
 """
-from cmdb.object_framework.cmdb_dao import CmdbDAO, CMDBError
+from cmdb.object_framework.cmdb_dao import CmdbDAO
 from cmdb.object_framework.cmdb_object import CmdbObject, CmdbObjectLog
 from cmdb.object_framework.cmdb_object_type import CmdbType
 from cmdb.object_framework.cmdb_object_category import CmdbTypeCategory
 from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
-from cmdb.object_framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.object_framework.cmdb_object_status import CmdbObjectStatus
 from cmdb.object_framework.cmdb_object_link import CmdbObjectLink
 from cmdb.object_framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplates
+from cmdb.object_framework.cmdb_render import CmdbRender
+from cmdb.object_framework.cmdb_object_manager import CmdbObjectManager
 
 __COLLECTIONS__ = [
     CmdbObject,
@@ -27,9 +29,16 @@ __COLLECTIONS__ = [
     CmdbCollectionTemplates
 ]
 
+from cmdb.data_storage.database_manager import DatabaseManager
 
-def get_object_manager():
+
+def get_object_manager(database_manager: DatabaseManager = None):
+    """
+
+    Returns:
+
+    """
     from cmdb.data_storage import get_pre_init_database
     return CmdbObjectManager(
-        database_manager=get_pre_init_database()
+        database_manager=database_manager or get_pre_init_database()
     )

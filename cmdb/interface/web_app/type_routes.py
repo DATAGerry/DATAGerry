@@ -3,7 +3,8 @@ from cmdb.utils import get_logger
 from flask import Blueprint, render_template
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from cmdb.interface.web_app import MANAGER_HOLDER
-from cmdb.object_framework import CMDBError
+from cmdb.utils.error import CMDBError
+
 LOGGER = get_logger()
 
 type_pages = Blueprint('type_pages', __name__, template_folder='templates', url_prefix='/type')
