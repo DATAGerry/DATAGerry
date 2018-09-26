@@ -1,6 +1,7 @@
 from flask import Blueprint, request, render_template, make_response, url_for, redirect
 from cmdb.utils import get_logger
 from cmdb.interface.web_app import MANAGER_HOLDER
+
 CMDB_LOGGER = get_logger()
 
 auth_pages = Blueprint('auth_pages', __name__, template_folder='templates')
@@ -41,8 +42,9 @@ def login_page_post():
         resp = make_response(redirect(url_for('index_pages.index_page')))
         import time
         timeout = MANAGER_HOLDER.get_system_settings_reader().get_value('token_timeout', 'security')
-        expire_date = time.time() + (timeout*60)
-        resp.set_cookie('access-token', MANAGER_HOLDER.get_security_manager().encrypt_token(login_user.to_json()),
+        expire_date = time.time() + (timeout * 60)
+        resp.set_cookie('access-token',
+                        MANAGER_HOLDER.get_security_manager().encrypt_token(login_user.to_json(), timeout=timeout*60),
                         expires=expire_date)
         return resp
     return render_template('login.html')
