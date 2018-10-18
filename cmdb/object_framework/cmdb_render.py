@@ -1,4 +1,4 @@
-"""CMDB TYPE -> OBJECT RENDER
+"""OBJECT RENDER
 """
 from cmdb.utils.error import CMDBError
 from cmdb.object_framework import CmdbObject, CmdbType, CmdbFieldType
@@ -12,13 +12,15 @@ class CmdbRender:
 
     VIEW_MODE = 0
     EDIT_MODE = 1
+    DEFAULT_MODE = VIEW_MODE
 
-    POSSIBLE_FORM_TYPES = ['text', 'password', 'email']
+    POSSIBLE_FORM_TYPES = ['text', 'password', 'email', 'tel']
     POSSIBLE_RENDER_MODES = [VIEW_MODE, EDIT_MODE]
 
     def __init__(self, object_instance: CmdbObject, type_instance: CmdbType):
         self.object_instance = object_instance
         self.type_instance = type_instance
+        self.mode = CmdbRender.DEFAULT_MODE
 
     @property
     def object_instance(self) -> CmdbObject:
@@ -45,13 +47,12 @@ class CmdbRender:
         if mode not in CmdbRender.POSSIBLE_RENDER_MODES:
             raise RenderModeError()
         if mode == CmdbRender.VIEW_MODE:
-            return self.render_html_form_view()
+            self.mode = CmdbRender.VIEW_MODE
         elif mode == CmdbRender.EDIT_MODE:
-            return self.render_html_form_edit()
+            self.mode = CmdbRender.EDIT_MODE
         else:
             raise RenderModeError()
 
-    def render_html_form_view(self):
         type_sections = self.type_instance.get_sections()
         html_code = ""
         for section in type_sections:
@@ -59,32 +60,45 @@ class CmdbRender:
             for field_name in section['fields']:
                 try:
                     field_typ = self.type_instance.get_field(name=field_name)
-
+                    object_field_value = self.object_instance.get_value(field_typ.get_name())
+                    # override default type values with database entries
+                    if object_field_value is not None and object_field_value != "":
+                        field_typ.set_value(object_field_value)
                     html_code += self._render_html_input(field_typ)
                 except CMDBError as e:
                     LOGGER.info(e.message)
                     continue
 
+        self.mode = CmdbRender.DEFAULT_MODE
         return Markup(html_code)
 
-    @staticmethod
-    def _render_html_input(field_type: CmdbFieldType):
+    def _render_html_input(self, field_type: CmdbFieldType) -> str:
         html_type = field_type.get_sub_type()
         if html_type not in CmdbRender.POSSIBLE_FORM_TYPES:
             raise InvalidHtmlInputType(html_type)
 
         render_output = ''
-        if field_type.get_type() == 'text':
-            render_output += '<div class="form-group">'
-            render_output += '<label for="{0}">{1}</label><input name="{0}" type="{2}" ' \
-                             'class="form-control">'.format(
-                field_type.name, field_type.label, field_type.get_sub_type())
-            render_output += '</div>'
+        if field_type.get_sub_type() in ('text', 'password', 'email', 'tel'):
+            render_output += self._render_html_text(field_type)
 
         return render_output
 
-    def _render_html_text(self):
-        pass
+    def _render_html_text(self, field_type: CmdbFieldType) -> str:
+
+        render_text_output = ''
+        render_text_output += '<div class="form-group">'
+        render_text_output += '<label for="{0}">'.format(field_type.get_name())
+        render_text_output += str(field_type.label)
+        render_text_output += '</label>'
+        render_text_output += '<input name="{0}" class="form-control" type="{1}" '.format(field_type.get_name(), field_type.get_sub_type())
+        if field_type.get_value() is not None or field_type.get_value() != "":
+            render_text_output += ' value="{0}" '.format(field_type.get_value())
+        if self.mode == CmdbRender.VIEW_MODE:
+            render_text_output += ' readonly '
+        render_text_output += ' />'
+
+        render_text_output += '</div>'
+        return render_text_output
 
     def _render_html_textarea(self):
         pass
@@ -94,7 +108,6 @@ class RenderModeError(CMDBError):
     def __init__(self):
         super(CMDBError, self)
         self.message = "No possible render mode"
-
 
 
 class ObjectInstanceError(CMDBError):
