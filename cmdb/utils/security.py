@@ -22,6 +22,10 @@ class SecurityManager:
     def _setup(self):
         pass
 
+    def _load_authentificator(self):
+        """TODO: LOAD AUTHS HERE"""
+        pass
+
     def encrypt_token(self, payload: dict, timeout: int=(DEFAULT_EXPIRES*60)) -> str:
         import json
         payload = json.dumps(payload)

@@ -26,6 +26,9 @@ def view_page(public_id):
     usm = MANAGER_HOLDER.get_user_manager()
     ssm = MANAGER_HOLDER.get_security_manager()
     view_object = obm.get_object(public_id=public_id)
+    view_object.update_view_counter()
+    ack = MANAGER_HOLDER.get_object_manager().update_object(view_object.to_database())
+    LOGGER.debug(ack)
     view_type = obm.get_type(public_id=view_object.get_type_id())
     author_name = usm.get_user(view_object.author_id).get_name()
     object_base = ssm.encode_object_base_64(view_object.get_all_fields())
@@ -37,5 +40,5 @@ def view_page(public_id):
                            author_name=author_name,
                            view_object=view_object,
                            view_type=view_type,
-                           render_form=render.render_html_form(CmdbRender.VIEW_MODE)
+                           render=render
                            )

@@ -1,6 +1,6 @@
 from cmdb.object_framework.cmdb_dao import CmdbDAO
+from cmdb.object_framework.cmdb_log import CmdbLog
 from cmdb.utils.error import CMDBError
-from datetime import datetime
 
 
 class CmdbObject(CmdbDAO):
@@ -43,7 +43,7 @@ class CmdbObject(CmdbDAO):
         self.author_id = author_id
         self.last_edit_time = last_edit_time
         self.active = active
-        self.views = views
+        self.views = int(views)
         self.fields = fields
         self.logs = logs
         super(CmdbObject, self).__init__(**kwargs)
@@ -88,6 +88,8 @@ class CmdbObject(CmdbDAO):
         Returns:
             value of field
         """
+        if len(self.fields) <= 0:
+            return None
         for f in self.fields:
             if f['name'] == field:
                 return f['value']
@@ -104,45 +106,10 @@ class CmdbObject(CmdbDAO):
 
     def last_log(self):
         try:
-            last_log = CmdbObjectLog(**self.logs[-1])
+            last_log = CmdbLog(**self.logs[-1])
         except CMDBError:
             return None
         return last_log
-
-
-class CmdbObjectLog:
-    POSSIBLE_COMMANDS = ('create', 'edit', 'delete')
-
-    def __init__(self, editor: id, _action: str, message: str, date: str, log: str):
-        self.editor = editor
-        self.action = _action
-        self.message = message
-        self.date = date or datetime.today()
-        self.log = log
-
-    def get_date(self) -> datetime:
-        return self.date
-
-    @property
-    def action(self) -> str:
-        return self._action
-
-    @action.setter
-    def action(self, value: str):
-        if value not in CmdbObjectLog.POSSIBLE_COMMANDS:
-            raise ActionNotPossibleError(value)
-        self._action = value
-
-    def __repr__(self):
-        from cmdb.utils.helpers import debug_print
-        return debug_print(self)
-
-
-class ActionNotPossibleError(CMDBError):
-
-    def __init__(self, action):
-        super().__init__()
-        self.message = 'Object log could not be set - wrong action {}'.format(action)
 
 
 class TypeNotSetError(CMDBError):

@@ -11,10 +11,19 @@ type_pages = Blueprint('type_pages', __name__, template_folder='templates', url_
 default_breadcrumb_root(type_pages, '.type_pages')
 
 
+@type_pages.route('/')
+@register_breadcrumb(type_pages, '.', 'Type')
+def index_page():
+    obm = MANAGER_HOLDER.get_object_manager()
+    uum = MANAGER_HOLDER.get_user_manager()
+    all_types = MANAGER_HOLDER.get_object_manager().get_all_types()
+    return render_template('types/index.html', all_types=all_types, object_manager=obm, user_manager=uum)
+
+
 @right_required
 @type_pages.route('/<int:public_id>')
 @type_pages.route('/view/<int:public_id>')
-@register_breadcrumb(type_pages, '.', 'Type')
+@register_breadcrumb(type_pages, '.Type', 'View')
 def view_page(public_id):
     current_type = None
     try:
@@ -27,7 +36,7 @@ def view_page(public_id):
 
 @right_required
 @type_pages.route('/edit/<int:public_id>')
-@register_breadcrumb(type_pages, '.', 'Type')
+@register_breadcrumb(type_pages, '.Type', 'Edit')
 def edit_page(public_id):
     current_type = None
     try:

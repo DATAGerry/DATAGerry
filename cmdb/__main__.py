@@ -12,7 +12,7 @@ monkey.patch_all()
 from cmdb.utils import get_logger
 from cmdb.data_storage import get_pre_init_database
 from cmdb.utils import get_system_config_reader
-
+from cmdb.utils.helpers import timing
 LOGGER = get_logger()
 config_reader = get_system_config_reader()
 
@@ -60,6 +60,13 @@ def _setup():
     return True
 
 
+def _load_plugins():
+    LOGGER.info("Loading plugins")
+    from cmdb.plugins.plugin_system import PluginManager
+    pgm = PluginManager()
+    LOGGER.info("Plugins loaded")
+
+
 def _start_apps():
     from multiprocessing import Process, Queue
     from cmdb.interface import HTTPServer, main_application
@@ -72,9 +79,11 @@ def _start_apps():
         args=(server_queue,)
     )
     http_process.start()
+
     if server_queue.get():
         LOGGER.info("CMDB successfully started")
-    http_process.join()
+
+    # http_process.join()
 
 
 def build_arg_parser():
@@ -97,7 +106,7 @@ def build_arg_parser():
 
     return _parser.parse_args()
 
-
+@timing
 def main(args):
     from cmdb.data_storage.database_connection import DatabaseConnectionError
     try:
@@ -117,6 +126,7 @@ def main(args):
         exit(1)
     if args.debug:
         _activate_debug()
+    _load_plugins()
     '''
     if args.command:
         LOGGER.info("Starting CLI menu")
@@ -149,6 +159,7 @@ __  __ _____ _____ ____ __  __ ____  ____
 
         LOGGER.info("CMDB starting...")
         main(options)
+
     except Exception as e:
         LOGGER.critical("There was an unforseen error {}".format(e))
         LOGGER.info("CMDB stopped!")

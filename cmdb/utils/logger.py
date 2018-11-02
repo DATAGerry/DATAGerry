@@ -38,7 +38,7 @@ def get_logger(module='cmdb', export=False):
         },
         loggers={
             'cmdb': {
-                'level': 'INFO',
+                'level': 'DEBUG',
                 'handlers': ['console', 'file'],
                 'propagate': False
             }

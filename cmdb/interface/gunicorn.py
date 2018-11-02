@@ -62,6 +62,8 @@ class HTTPServer(BaseApplication):
             self.options['worker_class'] = 'gevent'
         self.options['logconfig_dict'] = HTTPServer.CONFIG_DEFAULTS
         self.options['timeout'] = 2
+        self.options['daemon'] = True
+        self.daemon = True
         if __MODE__ == 'DEBUG' or 'TESTING':
             self.options['reload'] = True
             CMDB_LOGGER.info("Gunicorn starting with auto reload option")

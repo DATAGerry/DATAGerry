@@ -2,7 +2,6 @@
 """
 from cmdb.utils.error import CMDBError
 from cmdb.object_framework import CmdbObject, CmdbType, CmdbFieldType
-from markupsafe import Markup
 from cmdb.utils.logger import get_logger
 
 LOGGER = get_logger()
@@ -14,13 +13,18 @@ class CmdbRender:
     EDIT_MODE = 1
     DEFAULT_MODE = VIEW_MODE
 
-    POSSIBLE_FORM_TYPES = ['text', 'password', 'email', 'tel']
+    POSSIBLE_INPUT_FORM_TYPES = ['text', 'password', 'email', 'tel']
     POSSIBLE_RENDER_MODES = [VIEW_MODE, EDIT_MODE]
 
-    def __init__(self, object_instance: CmdbObject, type_instance: CmdbType):
+    def __init__(self, object_instance: CmdbObject, type_instance: CmdbType, mode: int=DEFAULT_MODE):
         self.object_instance = object_instance
         self.type_instance = type_instance
-        self.mode = CmdbRender.DEFAULT_MODE
+        if mode not in CmdbRender.POSSIBLE_RENDER_MODES:
+            raise RenderModeError()
+        self.mode = mode
+
+    def get_mode(self):
+        return self.mode
 
     @property
     def object_instance(self) -> CmdbObject:
@@ -42,19 +46,28 @@ class CmdbRender:
             raise ObjectInstanceError()
         self._type_instance = type_instance
 
-    def render_html_form(self, mode: int= VIEW_MODE):
+    def get_field(self, name):
+        try:
+            field = self.type_instance.get_field(name)
+            LOGGER.debug(field)
+            object_value = self.object_instance.get_value(name)
+            if object_value is not None or object_value != '':
+                field.set_value(object_value)
+        except CMDBError:
+            # TODO: Error handling
+            return None
+        return field
+    """
+    def render_html_object(self, mode: int=VIEW_MODE):
+        
+        html_code = self.render_html_form()
+        self.mode = CmdbRender.DEFAULT_MODE
+        return html_code
 
-        if mode not in CmdbRender.POSSIBLE_RENDER_MODES:
-            raise RenderModeError()
-        if mode == CmdbRender.VIEW_MODE:
-            self.mode = CmdbRender.VIEW_MODE
-        elif mode == CmdbRender.EDIT_MODE:
-            self.mode = CmdbRender.EDIT_MODE
-        else:
-            raise RenderModeError()
-
+    def render_html_form(self):
         type_sections = self.type_instance.get_sections()
         html_code = ""
+
         for section in type_sections:
             html_code += '<h2>{}</h2><hr />'.format(section['label'])
             for field_name in section['fields']:
@@ -69,18 +82,15 @@ class CmdbRender:
                     LOGGER.info(e.message)
                     continue
 
-        self.mode = CmdbRender.DEFAULT_MODE
-        return Markup(html_code)
+        return html_code
 
     def _render_html_input(self, field_type: CmdbFieldType) -> str:
         html_type = field_type.get_sub_type()
-        if html_type not in CmdbRender.POSSIBLE_FORM_TYPES:
+        if html_type not in CmdbRender.POSSIBLE_INPUT_FORM_TYPES:
             raise InvalidHtmlInputType(html_type)
 
-        render_output = ''
-        if field_type.get_sub_type() in ('text', 'password', 'email', 'tel'):
-            render_output += self._render_html_text(field_type)
-
+        render_output = '{{ input('+field_type.to_json()+')}}'
+        LOGGER.debug(render_output)
         return render_output
 
     def _render_html_text(self, field_type: CmdbFieldType) -> str:
@@ -99,9 +109,7 @@ class CmdbRender:
 
         render_text_output += '</div>'
         return render_text_output
-
-    def _render_html_textarea(self):
-        pass
+    """
 
 
 class RenderModeError(CMDBError):

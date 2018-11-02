@@ -68,40 +68,38 @@ class CmdbType(CmdbDAO):
     def get_sections(self):
         return sorted(self.render_meta['sections'], key=lambda k: k['position'])
 
-    def get_section(self, _id):
+    def get_section(self, name):
         try:
-            return self.render_meta['sections'][_id]
+            return self.render_meta['sections'][name]
         except IndexError:
             return None
 
     def get_fields(self):
-        """
-        get all fields
-        :return: list of fields
-        """
+
         return self.fields
 
     def get_field(self, name) -> CmdbFieldType:
-        """
-        get specific field
-        :param name: field name
-        :return: field with value
-        """
-        for field in self.fields:
-            if field['name'] == name:
-                try:
-                    return CmdbFieldType(**field)
-                except RequiredInitKeyNotFoundError as e:
-                    LOGGER.warning(e.message)
-                    return None
+        field = [x for x in self.fields if x['name'] == name]
+        if field:
+            try:
+                return CmdbFieldType(**field[0])
+            except (RequiredInitKeyNotFoundError, CMDBError) as e:
+                LOGGER.warning(e.message)
+                raise FieldInitError(name)
         raise FieldNotFoundError(name, self.get_name())
 
 
 class FieldNotFoundError(CMDBError):
-    """
-    Error if field do not exists
-    """
+    """Error if field do not exists"""
 
     def __init__(self, field_name, type_name):
         super().__init__()
         self.message = 'Field {} was not found inside input_type: {}'.format(field_name, type_name)
+
+
+class FieldInitError(CMDBError):
+    """Error if field could not be initialized"""
+
+    def __init__(self, field_name):
+        super().__init__()
+        self.message = 'Field {} could not be initialized: {}'.format(field_name)

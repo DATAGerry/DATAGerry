@@ -1,0 +1,66 @@
+{% extends 'layout.html' %}
+{% block title %}Type List{% endblock %}
+{% block navigation %}
+    {% include 'includes/_navigation.html' %}
+{% endblock %}
+{% block breadcrumb %}
+    {% include 'includes/_breadcrumb.html' %}
+{% endblock %}
+{% block content %}
+    <div class="content">
+        <div class="container-fluid">
+            {{ super() }}
+            <div class="row">
+                <div class="col-12">
+                    <h1>List: Types</h1>
+                    <hr/>
+                </div>
+                <div class="col">
+                    {% if all_types|length < 1 %}
+                        <div class="alert alert-danger" role="alert">
+                            No types have been defined yet.
+                        </div>
+                    {% else %}
+                        <table data-order='[[ 2, "asc" ]]' class="data_table table">
+                            <thead class="thead">
+                            <tr>
+                                <th scope="col">Active</th>
+                                <th scope="col">Type ID</th>
+                                <th scope="col">Title</th>
+                                <th scope="col">Description</th>
+                                <th scope="col">Author</th>
+                                <th scope="col">Number of objects</th>
+                                <th scope="col">Creation Time</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for type_instance in all_types %}
+                                <tr>
+                                    <td>{{ type_instance.active | label_active }}</td>
+                                    <td>{{ type_instance.public_id }}</td>
+                                    <td><a href="/type/{{ type_instance.public_id }}">{{ type_instance.title }}</a></td>
+                                    <td>{{ type_instance.description }}</td>
+                                    <td>{{ user_manager.get_user(type_instance.author_id).user_name }}</td>
+                                    <td>{{ object_manager.get_objects_by_type(type_instance.public_id) | length }}</td>
+                                    <td>{{ type_instance.creation_time }}</td>
+                                    <td>
+                                        <div class="d-flex bd-highlight">
+                                            <div class="p-1 flex-fill bd-highlight"><a href="#"><i
+                                                    class="far fa-eye"></i></a></div>
+                                            <div class="p-1 flex-fill bd-highlight"><a href="#"><i
+                                                    class="far fa-edit"></i></a></div>
+                                            <div class="p-1 flex-fill bd-highlight"><a href="#"><i
+                                                    class="far fa-trash-alt"></i></a></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

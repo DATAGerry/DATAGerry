@@ -34,35 +34,41 @@
     },
     "fields": [
       {
-        "type": "text",
-        "required": true,
-        "label": "Text Field",
-        "description": "Test field - with all values",
-        "placeholder": "Lorem Ipsum",
-        "className": "form-control",
-        "name": "test-field",
-        "access": true,
-        "value": "not set",
-        "subtype": "text",
-        "maxlength": "120",
-        "role": "1"
-      },
-      {
-        "type": "text",
-        "subtype": "email",
-        "label": "Email",
-        "placeholder": "example@example.com",
-        "className": "form-control",
-        "name": "email"
-      },
-      {
-        "type": "text",
-        "subtype": "password",
-        "label": "Password Field",
-        "description": "password encrypted",
-        "className": "form-control",
-        "name": "password"
-      }
+		"type": "text",
+		"required": true,
+		"label": "Text Field",
+		"description": "test text field",
+		"className": "form-control",
+		"name": "text-1537878884067",
+		"access": true,
+		"value": "fixed value",
+		"subtype": "text",
+		"maxlength": "20",
+		"role": "1"
+	},
+	{
+		"type": "text",
+		"subtype": "password",
+		"required": true,
+		"label": "Password field",
+		"className": "form-control",
+		"name": "text-1537878886380"
+	},
+	{
+		"type": "text",
+		"subtype": "email",
+		"label": "Email field",
+		"placeholder": "example@example.org",
+		"className": "form-control",
+		"name": "text-1537878910749"
+	},
+	{
+		"type": "text",
+		"subtype": "tel",
+		"label": "Tel Field",
+		"className": "form-control",
+		"name": "text-1537878936733"
+	}
     ],
     "logs": ""
   }

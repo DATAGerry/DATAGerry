@@ -43,7 +43,7 @@ class UserManagement:
     def insert_user(self, user_name: str, group_id: int, password=None,
                     first_name=None, last_name=None, authenticator='LocalAuthenticationProvider') -> int:
         from datetime import datetime
-        new_public_id = self.dbm.get_highest_id(collection=User.COLLECTION)+1
+        new_public_id = self.dbm.get_highest_id(collection=User.COLLECTION) + 1
 
         if password is not None:
             password = self.scm.generate_hmac(password)
@@ -87,7 +87,7 @@ class UserManagement:
             raise GroupNotExistsError(public_id)
 
     def insert_group(self, name: str, label: str = None, rights: list = []) -> int:
-        new_public_id = self.dbm.get_highest_id(collection=UserGroup.COLLECTION)+1
+        new_public_id = self.dbm.get_highest_id(collection=UserGroup.COLLECTION) + 1
         insert_group = UserGroup(
             name=name,
             label=label or name.title(),

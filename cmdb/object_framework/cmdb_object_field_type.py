@@ -38,7 +38,14 @@ class CmdbFieldType(CmdbDAO):
         self.access = access
         super(CmdbFieldType, self).__init__(**kwargs)
 
+    def get_name(self):
+        return self.name
+
     def get_value(self):
+        return self.value
+
+    def set_value(self, value):
+        self.value = value
         return self.value
 
     def get_type(self):

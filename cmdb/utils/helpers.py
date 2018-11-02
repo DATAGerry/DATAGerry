@@ -25,3 +25,17 @@ def get_config_dir():
     """
     import os
     return os.path.join(os.path.dirname(__file__), '../../etc/')
+
+
+def timing(f):
+    from cmdb.utils import get_logger
+
+    def wrap(*args):
+        import time
+        time1 = time.time()
+        ret = f(*args)
+        time2 = time.time()
+        get_logger().debug('CMDB took {:.3f}ms to start'.format((time2 - time1) * 1000.0))
+        return ret
+
+    return wrap

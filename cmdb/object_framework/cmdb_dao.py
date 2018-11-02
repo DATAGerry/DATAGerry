@@ -1,4 +1,6 @@
 from cmdb.utils.error import CMDBError
+from cmdb.utils import get_logger
+LOGGER = get_logger()
 
 
 class CmdbDAO:

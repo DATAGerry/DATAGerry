@@ -33,12 +33,12 @@ def create_rest_api():
     app = Flask(__name__)
     if cmdb.__MODE__ == 'DEBUG':
         app.config.from_object(app_config['rest_development'])
-        LOGGER.info('RestAPI started with config mode {}'.format(app.config.get("ENV")))
+        LOGGER.info('RestAPI starting with config mode {}'.format(app.config.get("ENV")))
     elif cmdb.__MODE__ == 'TESTING':
         app.config.from_object(app_config['testing'])
     else:
         app.config.from_object(app_config['rest'])
-        LOGGER.info('RestAPI started with config mode {}'.format(app.config.get("ENV")))
+        LOGGER.info('RestAPI starting with config mode {}'.format(app.config.get("ENV")))
 
     app.obm = object_manager
     register_blueprints(app)

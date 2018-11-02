@@ -1,0 +1,412 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "array",
+  "title": "The Root Schema",
+  "items": {
+    "$id": "#/items",
+    "type": "object",
+    "title": "The Items Schema",
+    "required": [
+      "public_id",
+      "title",
+      "name",
+      "description",
+      "version",
+      "active",
+      "author_id",
+      "creation_time",
+      "render_meta",
+      "fields",
+      "logs"
+    ],
+    "properties": {
+      "public_id": {
+        "$id": "#/items/properties/public_id",
+        "type": "integer",
+        "title": "The Public_id Schema",
+        "default": 0,
+        "examples": [
+          1
+        ]
+      },
+      "title": {
+        "$id": "#/items/properties/title",
+        "type": "string",
+        "title": "The Title Schema",
+        "default": "",
+        "examples": [
+          "Employees"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "name": {
+        "$id": "#/items/properties/name",
+        "type": "string",
+        "title": "The Name Schema",
+        "default": "",
+        "examples": [
+          "employees"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "description": {
+        "$id": "#/items/properties/description",
+        "type": "string",
+        "title": "The Description Schema",
+        "default": "",
+        "examples": [
+          "company employees"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "version": {
+        "$id": "#/items/properties/version",
+        "type": "string",
+        "title": "The Version Schema",
+        "default": "",
+        "examples": [
+          "1.0.0"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "active": {
+        "$id": "#/items/properties/active",
+        "type": "boolean",
+        "title": "The Active Schema",
+        "default": false,
+        "examples": [
+          true
+        ]
+      },
+      "author_id": {
+        "$id": "#/items/properties/author_id",
+        "type": "integer",
+        "title": "The Author_id Schema",
+        "default": 0,
+        "examples": [
+          1
+        ]
+      },
+      "creation_time": {
+        "$id": "#/items/properties/creation_time",
+        "type": "object",
+        "title": "The Creation_time Schema",
+        "required": [
+          "$date"
+        ],
+        "properties": {
+          "$date": {
+            "$id": "#/items/properties/creation_time/properties/$date",
+            "type": "string",
+            "title": "The $date Schema",
+            "default": "",
+            "examples": [
+              "2018-09-28T16:13:00.000Z"
+            ],
+            "pattern": "^(.*)$"
+          }
+        }
+      },
+      "render_meta": {
+        "$id": "#/items/properties/render_meta",
+        "type": "object",
+        "title": "The Render_meta Schema",
+        "required": [
+          "external",
+          "summary",
+          "sections"
+        ],
+        "properties": {
+          "external": {
+            "$id": "#/items/properties/render_meta/properties/external",
+            "type": "array",
+            "title": "The External Schema",
+            "items": {
+              "$id": "#/items/properties/render_meta/properties/external/items",
+              "type": "object",
+              "title": "The Items Schema",
+              "required": [
+                "href",
+                "icon",
+                "fields"
+              ],
+              "properties": {
+                "href": {
+                  "$id": "#/items/properties/render_meta/properties/external/items/properties/href",
+                  "type": "string",
+                  "title": "The Href Schema",
+                  "default": "",
+                  "examples": [
+                    "https://www.xing.com/profile/{0}"
+                  ],
+                  "pattern": "^(.*)$"
+                },
+                "icon": {
+                  "$id": "#/items/properties/render_meta/properties/external/items/properties/icon",
+                  "type": "string",
+                  "title": "The Icon Schema",
+                  "default": "",
+                  "examples": [
+                    "fab fa-xing"
+                  ],
+                  "pattern": "^(.*)$"
+                },
+                "fields": {
+                  "$id": "#/items/properties/render_meta/properties/external/items/properties/fields",
+                  "type": "array",
+                  "title": "The Fields Schema",
+                  "items": {
+                    "$id": "#/items/properties/render_meta/properties/external/items/properties/fields/items",
+                    "type": "string",
+                    "title": "The Items Schema",
+                    "default": "",
+                    "examples": [
+                      "xing"
+                    ],
+                    "pattern": "^(.*)$"
+                  }
+                }
+              }
+            }
+          },
+          "summary": {
+            "$id": "#/items/properties/render_meta/properties/summary",
+            "type": "array",
+            "title": "The Summary Schema",
+            "items": {
+              "$id": "#/items/properties/render_meta/properties/summary/items",
+              "type": "object",
+              "title": "The Items Schema",
+              "required": [
+                "label",
+                "fields"
+              ],
+              "properties": {
+                "label": {
+                  "$id": "#/items/properties/render_meta/properties/summary/items/properties/label",
+                  "type": "string",
+                  "title": "The Label Schema",
+                  "default": "",
+                  "examples": [
+                    "Name"
+                  ],
+                  "pattern": "^(.*)$"
+                },
+                "fields": {
+                  "$id": "#/items/properties/render_meta/properties/summary/items/properties/fields",
+                  "type": "array",
+                  "title": "The Fields Schema",
+                  "items": {
+                    "$id": "#/items/properties/render_meta/properties/summary/items/properties/fields/items",
+                    "type": "string",
+                    "title": "The Items Schema",
+                    "default": "",
+                    "examples": [
+                      "first_name",
+                      "last_name"
+                    ],
+                    "pattern": "^(.*)$"
+                  }
+                }
+              }
+            }
+          },
+          "sections": {
+            "$id": "#/items/properties/render_meta/properties/sections",
+            "type": "array",
+            "title": "The Sections Schema",
+            "items": {
+              "$id": "#/items/properties/render_meta/properties/sections/items",
+              "type": "object",
+              "title": "The Items Schema",
+              "required": [
+                "tag",
+                "name",
+                "label",
+                "fields",
+                "position"
+              ],
+              "properties": {
+                "tag": {
+                  "$id": "#/items/properties/render_meta/properties/sections/items/properties/tag",
+                  "type": "string",
+                  "title": "The Tag Schema",
+                  "default": "",
+                  "examples": [
+                    "h1"
+                  ],
+                  "pattern": "^(.*)$"
+                },
+                "name": {
+                  "$id": "#/items/properties/render_meta/properties/sections/items/properties/name",
+                  "type": "string",
+                  "title": "The Name Schema",
+                  "default": "",
+                  "examples": [
+                    "employee_details"
+                  ],
+                  "pattern": "^(.*)$"
+                },
+                "label": {
+                  "$id": "#/items/properties/render_meta/properties/sections/items/properties/label",
+                  "type": "string",
+                  "title": "The Label Schema",
+                  "default": "",
+                  "examples": [
+                    "Employee Details"
+                  ],
+                  "pattern": "^(.*)$"
+                },
+                "fields": {
+                  "$id": "#/items/properties/render_meta/properties/sections/items/properties/fields",
+                  "type": "array",
+                  "title": "The Fields Schema",
+                  "items": {
+                    "$id": "#/items/properties/render_meta/properties/sections/items/properties/fields/items",
+                    "type": "string",
+                    "title": "The Items Schema",
+                    "default": "",
+                    "examples": [
+                      "employee_number",
+                      "first_name",
+                      "last_name",
+                      "department"
+                    ],
+                    "pattern": "^(.*)$"
+                  }
+                },
+                "position": {
+                  "$id": "#/items/properties/render_meta/properties/sections/items/properties/position",
+                  "type": "integer",
+                  "title": "The Position Schema",
+                  "default": 0,
+                  "examples": [
+                    1
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "fields": {
+        "$id": "#/items/properties/fields",
+        "type": "array",
+        "title": "The Fields Schema",
+        "items": {
+          "$id": "#/items/properties/fields/items",
+          "type": "object",
+          "title": "The Items Schema",
+          "required": [
+            "input_type",
+            "required",
+            "label",
+            "className",
+            "name",
+            "access",
+            "subinput_type",
+            "maxlength",
+            "role"
+          ],
+          "properties": {
+            "input_type": {
+              "$id": "#/items/properties/fields/items/properties/input_type",
+              "type": "string",
+              "title": "The Input_type Schema",
+              "default": "",
+              "examples": [
+                "text"
+              ],
+              "pattern": "^(.*)$"
+            },
+            "required": {
+              "$id": "#/items/properties/fields/items/properties/required",
+              "type": "boolean",
+              "title": "The Required Schema",
+              "default": false,
+              "examples": [
+                true
+              ]
+            },
+            "label": {
+              "$id": "#/items/properties/fields/items/properties/label",
+              "type": "string",
+              "title": "The Label Schema",
+              "default": "",
+              "examples": [
+                "Employee Number"
+              ],
+              "pattern": "^(.*)$"
+            },
+            "className": {
+              "$id": "#/items/properties/fields/items/properties/className",
+              "type": "string",
+              "title": "The Classname Schema",
+              "default": "",
+              "examples": [
+                "form-control"
+              ],
+              "pattern": "^(.*)$"
+            },
+            "name": {
+              "$id": "#/items/properties/fields/items/properties/name",
+              "type": "string",
+              "title": "The Name Schema",
+              "default": "",
+              "examples": [
+                "employee_number"
+              ],
+              "pattern": "^(.*)$"
+            },
+            "access": {
+              "$id": "#/items/properties/fields/items/properties/access",
+              "type": "boolean",
+              "title": "The Access Schema",
+              "default": false,
+              "examples": [
+                true
+              ]
+            },
+            "subinput_type": {
+              "$id": "#/items/properties/fields/items/properties/subinput_type",
+              "type": "string",
+              "title": "The Subinput_type Schema",
+              "default": "",
+              "examples": [
+                "text"
+              ],
+              "pattern": "^(.*)$"
+            },
+            "maxlength": {
+              "$id": "#/items/properties/fields/items/properties/maxlength",
+              "type": "string",
+              "title": "The Maxlength Schema",
+              "default": "",
+              "examples": [
+                "4"
+              ],
+              "pattern": "^(.*)$"
+            },
+            "role": {
+              "$id": "#/items/properties/fields/items/properties/role",
+              "type": "string",
+              "title": "The Role Schema",
+              "default": "",
+              "examples": [
+                "1"
+              ],
+              "pattern": "^(.*)$"
+            }
+          }
+        }
+      },
+      "logs": {
+        "$id": "#/items/properties/logs",
+        "type": "array",
+        "title": "The Logs Schema"
+      }
+    }
+  }
+}

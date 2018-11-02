@@ -54,7 +54,7 @@ class CmdbTypeCategory(CmdbDAO):
     def get_types(self) -> list:
         return self.type_list
 
-    def is_empty(self) -> bool:
+    def has_types(self) -> bool:
         if len(self.type_list) > 0:
-            return False
-        return True
+            return True
+        return False

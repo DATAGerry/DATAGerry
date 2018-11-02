@@ -1,12 +1,12 @@
 from cmdb.interface.web_app import MANAGER_HOLDER
+from cmdb.utils.error import CMDBError
 
 
 def inject_current_user():
     def current_user():
+        # TODO: extract current user
         from flask import request
         from jwcrypto import jwt
-
-
         return 1
 
     return dict(current_user_id=current_user())
@@ -16,7 +16,7 @@ def inject_object_manager():
     def object_manager():
         return MANAGER_HOLDER.get_object_manager()
 
-    return dict(object_manager=object_manager())
+    return dict(injected_object_manager=object_manager)
 
 
 def inject_sidebar():
@@ -24,7 +24,7 @@ def inject_sidebar():
         categories = MANAGER_HOLDER.get_object_manager().get_all_categories()
         return categories
 
-    return dict(sidebar=sidebar())
+    return dict(sidebar=sidebar)
 
 
 def inject_sidebar_hidden():

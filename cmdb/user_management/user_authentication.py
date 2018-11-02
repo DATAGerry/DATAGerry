@@ -29,6 +29,6 @@ class NoValidAuthenticationProviderError(Exception):
 
 
 class WrongUserPasswordError(Exception):
-    """Exception if auth provider do not exist"""
+    """Exception if wrong user password"""
     def __init__(self, user):
         self.message = "The password for the user {} was wrong!".format(user)

@@ -6,6 +6,7 @@ from flask import Flask
 from cmdb.interface.cmdb_holder import CmdbManagerHolder
 from cmdb.interface.config import app_config
 from cmdb.utils import get_logger
+
 LOGGER = get_logger()
 MANAGER_HOLDER = CmdbManagerHolder()
 
@@ -18,7 +19,7 @@ def create_web_app():
         app.config.from_object(app_config['development'])
     else:
         app.config.from_object(app_config['production'])
-    LOGGER.info('Webapp started with config mode {}'.format(app.config.get("ENV")))
+    LOGGER.info('Webapp starting with config mode {}'.format(app.config.get("ENV")))
 
     from cmdb.object_framework import CmdbObjectManager
     from cmdb.data_storage.database_manager import DatabaseManagerMongo
@@ -79,8 +80,9 @@ def create_web_app():
 
 
 def register_filters(app):
-    from cmdb.interface.web_app.filters import label_active
+    from cmdb.interface.web_app.filters import label_active, display_icon
     app.jinja_env.filters['label_active'] = label_active
+    app.jinja_env.filters['display_icon'] = display_icon
 
 
 def register_blueprints(app):
@@ -102,10 +104,12 @@ def register_blueprints(app):
 
 
 def register_context_processors(app):
-    from cmdb.interface.web_app.context_injector import inject_sidebar, inject_sidebar_hidden, inject_current_user
+    from cmdb.interface.web_app.context_injector import inject_sidebar, inject_sidebar_hidden, inject_current_user, \
+        inject_object_manager
     app.context_processor(inject_sidebar)
     app.context_processor(inject_sidebar_hidden)
     app.context_processor(inject_current_user)
+    app.context_processor(inject_object_manager)
 
 
 def register_error_pages(app):

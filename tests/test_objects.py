@@ -1,7 +1,7 @@
 import pytest
 import json
 import os
-from cmdb.object_framework import CmdbDAO, CmdbObjectManager, CmdbTypeCategory, CmdbObjectStatus, CmdbObject, CmdbObjectLog
+from cmdb.object_framework import CmdbDAO, CmdbObjectManager, CmdbTypeCategory, CmdbObjectStatus, CmdbObject, CmdbLog
 
 
 """
@@ -117,9 +117,9 @@ def test_cmdb_object(objects_data_json):
 
 @ALL_JSON
 def test_cmdb_object_logs(objects_data_json):
-    from cmdb.object_framework.cmdb_object import ActionNotPossibleError
-    from datetime import datetime
-    test_log = CmdbObjectLog(**objects_data_json['objects.data.logs.json'][0])
+    from cmdb.object_framework.cmdb_log import ActionNotPossibleError
+
+    test_log = CmdbLog(**objects_data_json['objects.data.logs.json'][0])
     assert test_log._action == 'create'
     assert test_log.editor == 1
     assert test_log.message == "Default"
@@ -127,7 +127,7 @@ def test_cmdb_object_logs(objects_data_json):
     assert type(test_log.date) == str
 
     with pytest.raises(ActionNotPossibleError):
-        CmdbObjectLog(**objects_data_json['objects.data.logs.json'][1])
+        CmdbLog(**objects_data_json['objects.data.logs.json'][1])
 
 
 def test_object_categories(object_manager):
@@ -136,7 +136,7 @@ def test_object_categories(object_manager):
         name='default',
         label='Default',
     )
-    assert default_category.is_empty() is True
+    assert default_category.has_types() is False
 
     inserted_id = object_manager.insert_category(default_category.to_database())
     assert inserted_id == 1
