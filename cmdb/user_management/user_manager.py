@@ -3,7 +3,6 @@ from cmdb.user_management.user_groups import UserGroup
 from cmdb.user_management.user import User
 from cmdb.data_storage import NoDocumentFound, DatabaseManagerMongo
 from cmdb.data_storage.database_manager import DeleteResult
-from cmdb.utils import SecurityManager
 from cmdb.utils import get_logger
 import cmdb
 
@@ -11,13 +10,14 @@ LOGGER = get_logger()
 
 
 class UserManagement:
+
     MANAGEMENT_CLASSES = {
         'RIGHT_CLASSES': UserRight,
         'GROUP_CLASSES': UserGroup,
         'USER_CLASSES': User
     }
 
-    def __init__(self, database_manager: DatabaseManagerMongo, security_manager: SecurityManager):
+    def __init__(self, database_manager: DatabaseManagerMongo, security_manager):
         self.dbm = database_manager
         self.scm = security_manager
 

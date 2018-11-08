@@ -44,7 +44,7 @@ def login_page_post():
         timeout = MANAGER_HOLDER.get_system_settings_reader().get_value('token_timeout', 'security')
         expire_date = time.time() + (timeout * 60)
         resp.set_cookie('access-token',
-                        MANAGER_HOLDER.get_security_manager().encrypt_token(login_user.to_json(), timeout=timeout*60),
+                        MANAGER_HOLDER.get_security_manager().encrypt_token(login_user, timeout=timeout*60),
                         expires=expire_date)
         return resp
     return render_template('login.html')

@@ -1,5 +1,5 @@
 from cmdb.object_framework import CmdbObjectManager
-from cmdb.user_management import UserManagement
+from cmdb.user_management.user_manager import UserManagement
 from cmdb.data_storage import DatabaseManagerMongo
 from cmdb.utils import SecurityManager
 from cmdb.utils import SystemSettingsReader, SystemSettingsWriter

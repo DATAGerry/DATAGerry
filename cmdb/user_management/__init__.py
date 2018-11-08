@@ -1,4 +1,4 @@
-from cmdb.user_management.user_manager import UserManagement
+
 from cmdb.user_management.user_groups import UserGroup
 from cmdb.user_management.user import User
 from cmdb.user_management.user_rights import UserRight
@@ -10,6 +10,11 @@ __COLLECTIONS__ = [
 
 
 def get_user_manager():
+    from cmdb.utils import get_logger
+    try:
+        from cmdb.user_management.user_manager import UserManagement
+    except Exception as e:
+        get_logger().debug(e)
     from cmdb.data_storage import get_pre_init_database
     from cmdb.utils import get_security_manager
     db_man = get_pre_init_database()

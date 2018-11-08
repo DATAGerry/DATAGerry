@@ -25,7 +25,7 @@ def create_web_app():
     from cmdb.data_storage.database_manager import DatabaseManagerMongo
     from cmdb.data_storage.database_connection import MongoConnector
     from cmdb.utils.security import SecurityManager
-    from cmdb.user_management import UserManagement
+    from cmdb.user_management.user_manager import UserManagement
     from cmdb.utils import SystemConfigReader, SystemSettingsReader, SystemSettingsWriter
     from flask_breadcrumbs import Breadcrumbs
 

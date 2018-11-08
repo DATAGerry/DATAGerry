@@ -6,6 +6,7 @@ from cmdb.data_storage.database_manager import NoDocumentFound
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from jwcrypto import jwk, jwt, jws
+from cmdb.user_management import User
 
 
 class SecurityManager:
@@ -26,9 +27,13 @@ class SecurityManager:
         """TODO: LOAD AUTHS HERE"""
         pass
 
-    def encrypt_token(self, payload: dict, timeout: int=(DEFAULT_EXPIRES*60)) -> str:
+    def encrypt_token(self, payload: User, timeout: int = (DEFAULT_EXPIRES * 60)) -> str:
         import json
-        payload = json.dumps(payload)
+        user_data = {
+            'public_id': payload.get_public_id(),
+            'user_name': payload.get_username()
+        }
+        payload = json.dumps(user_data)
         jws_token = jws.JWS(payload=payload)
         jws_token.add_signature(
             key=self.get_sym_key(),
@@ -38,7 +43,7 @@ class SecurityManager:
         )
         import time
         req_claim = {
-            'exp':  int(time.time()) + timeout
+            'exp': int(time.time()) + timeout
         }
 
         enc_token = jwt.JWT(header={"alg": "HS512"}, claims=jws_token.serialize(), default_claims=req_claim)
