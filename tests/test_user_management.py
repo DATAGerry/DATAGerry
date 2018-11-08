@@ -1,5 +1,6 @@
 import pytest
-from cmdb.user_management import User, UserManagement, UserGroup
+from cmdb.user_management import User, UserGroup
+from cmdb.user_management.user_manager import UserManagement
 
 
 @pytest.fixture
