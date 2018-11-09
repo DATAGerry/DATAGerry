@@ -3,7 +3,10 @@ Database-Connection
 Real connection to database over a given connector
 """
 from pymongo.errors import ServerSelectionTimeoutError
+from cmdb.utils.logger import get_logger
 from cmdb.utils.error import CMDBError
+
+CMDB_LOGGER = get_logger()
 
 
 class Connector:
@@ -11,7 +14,7 @@ class Connector:
     Superclass connector
     """
 
-    DEFAULT_CONNECTION_TIMEOUT = 10
+    DEFAULT_CONNECTION_TIMEOUT = 100
 
     def __init__(self, host, port, database_name, timeout=DEFAULT_CONNECTION_TIMEOUT):
         """
@@ -54,7 +57,7 @@ class MongoConnector(Connector):
     PyMongo (MongoDB) implementation from connector
     """
 
-    DEFAULT_CONNECTION_TIMEOUT = 100
+    DEFAULT_CONNECTION_TIMEOUT = 1000
 
     def __init__(self, host, port, database_name, timeout: int=DEFAULT_CONNECTION_TIMEOUT):
         """
@@ -105,7 +108,8 @@ class MongoConnector(Connector):
         try:
             self.connect()
             return True
-        except ServerSelectionTimeoutError:
+        except ServerTimeoutError as timeout_error:
+            CMDB_LOGGER.error(timeout_error.message)
             return False
 
     def create_collection(self, collection_name):
@@ -151,7 +155,7 @@ class MongoConnector(Connector):
 class DatabaseConnectionError(CMDBError):
     def __init__(self):
         super().__init__()
-        self.message = "Connection Error"
+        self.message = "Connection error - No connection could be established with the database"
 
 
 class ServerTimeoutError(CMDBError):

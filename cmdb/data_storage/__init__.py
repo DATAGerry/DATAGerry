@@ -7,11 +7,15 @@ def get_pre_init_database():
     from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
     from cmdb.utils import get_system_config_reader
     system_config_reader = get_system_config_reader()
+    try:
+        timeout = system_config_reader.get_value('connection_timeout', 'Database')
+    except KeyError:
+        timeout = MongoConnector.DEFAULT_CONNECTION_TIMEOUT
     return DatabaseManagerMongo(
         connector=MongoConnector(
-                host=system_config_reader.get_value('host', 'Database'),
-                port=int(system_config_reader.get_value('port', 'Database')),
-                database_name=system_config_reader.get_value('database_name', 'Database'),
-                timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT
+            host=system_config_reader.get_value('host', 'Database'),
+            port=int(system_config_reader.get_value('port', 'Database')),
+            database_name=system_config_reader.get_value('database_name', 'Database'),
+            timeout=timeout
         )
     )

@@ -13,6 +13,7 @@ from cmdb.utils import get_logger
 from cmdb.data_storage import get_pre_init_database
 from cmdb.utils import get_system_config_reader
 from cmdb.utils.helpers import timing
+from cmdb.utils.error import CMDBError
 LOGGER = get_logger()
 config_reader = get_system_config_reader()
 
@@ -21,7 +22,18 @@ def _check_database():
     LOGGER.info("Checking database connection with cmdb.conf data")
     dbm = get_pre_init_database()
     connection_test = dbm.database_connector.is_connected()
-    dbm.database_connector.disconnect()
+    LOGGER.debug("Database status is {}".format(connection_test))
+    if connection_test is True:
+        dbm.database_connector.disconnect()
+        return connection_test
+    retries = 0
+    while retries < 3:
+            retries += 1
+            LOGGER.warning("Retry {}: Checking database connection with cmdb.conf data".format(retries))
+            connection_test = dbm.database_connector.is_connected()
+            if connection_test:
+                dbm.database_connector.disconnect()
+                return connection_test
     return connection_test
 
 
@@ -44,7 +56,7 @@ def _setup():
         admin_username = input('Enter admin USERNAME: ')
         while True:
             admin_pass_1 = input('Enter admin PASSWORD: ')
-            admin_pass_2 = input('Repeate PASSWORD: ')
+            admin_pass_2 = input('Repeat admin PASSWORD: ')
             if admin_pass_1 == admin_pass_2:
                 break
             else:
@@ -114,8 +126,8 @@ def main(args):
         if not conn:
             raise DatabaseConnectionError()
         LOGGER.info("Database connection established.")
-    except Exception as e:
-        LOGGER.critical(e.message)
+    except CMDBError as conn_error:
+        LOGGER.critical(conn_error.message)
         exit(1)
     if args.setup:
         setup_finish = _setup()
