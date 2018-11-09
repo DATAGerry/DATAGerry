@@ -4,7 +4,7 @@ CMDB is a flexible asset management tool and
 open-source configurable management database
 
 You should have received a copy of the MIT License along with Net|CMDB.
-If not, see <https://github.com/NETHINKS/CMDB/blob/master/LICENSE>.
+If not, see <https://github.com/NETHINKS/NetCMDB/blob/master/LICENSE>.
 """
 
 from gevent import monkey
@@ -19,6 +19,11 @@ config_reader = get_system_config_reader()
 
 
 def _check_database():
+    """
+    Checks whether the specified connection of the configuration is reachable.
+    Returns: True if response otherwise False
+
+    """
     LOGGER.info("Checking database connection with cmdb.conf data")
     dbm = get_pre_init_database()
     connection_test = dbm.database_connector.is_connected()
@@ -38,12 +43,21 @@ def _check_database():
 
 
 def _activate_debug():
+    """
+    Activate the debug mode
+    """
     import cmdb
     cmdb.__MODE__ = 'DEBUG'
     LOGGER.warning("DEBUG mode enabled")
 
 
 def _setup():
+    """
+    Setup function which generates default settings and admin user
+    will be triggered with the --setup parameter
+    Returns:
+
+    """
     from cmdb.user_management import get_user_manager
     from cmdb.utils import get_security_manager
 
@@ -80,6 +94,9 @@ def _load_plugins():
 
 
 def _start_apps():
+    """
+    Starting the web and rest service
+    """
     from multiprocessing import Process, Queue
     from cmdb.interface import HTTPServer, main_application
     LOGGER.info("Starting rest- and web- server")
@@ -99,6 +116,11 @@ def _start_apps():
 
 
 def build_arg_parser():
+    """
+    Generate application parameter parser
+    Returns: instance of OptionParser
+
+    """
     from optparse import OptionParser
     from cmdb import __version__, __title__
     _parser = OptionParser(
@@ -118,8 +140,15 @@ def build_arg_parser():
 
     return _parser.parse_args()
 
+
 @timing
 def main(args):
+    """
+    Default application start function
+    Args:
+        args: start-options
+
+    """
     from cmdb.data_storage.database_connection import DatabaseConnectionError
     try:
         conn = _check_database()
