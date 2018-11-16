@@ -68,7 +68,7 @@ class CmdbDAO:
             raise NoPublicIDError()
         return self.public_id
 
-    def has_object_id(self):
+    def has_object_id(self) -> bool:
         """
         checks if object already has a database _id
 
@@ -170,7 +170,7 @@ class _Versioning:
             raise VersionTypeError('major', str(value))
         self._major = value
 
-    def update_major(self):
+    def update_major(self) -> int:
         self.major += 1
         return self.major
 
@@ -184,7 +184,7 @@ class _Versioning:
             raise VersionTypeError('major', str(value))
         self._minor = value
 
-    def update_minor(self):
+    def update_minor(self) -> int:
         self.minor += 1
         return self.minor
 
@@ -198,7 +198,7 @@ class _Versioning:
             raise VersionTypeError('major', str(value))
         self._patch = value
 
-    def update_patch(self):
+    def update_patch(self) -> int:
         self.patch += 1
         return self.patch
 

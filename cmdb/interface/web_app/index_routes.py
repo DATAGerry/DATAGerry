@@ -20,7 +20,6 @@ default_breadcrumb_root(index_pages, '.')
 @index_pages.route('/')
 @index_pages.route('/dashboard')
 @register_breadcrumb(index_pages, '.', 'Home')
-@login_required
 def index_page():
     try:
         obm = MANAGER_HOLDER.get_object_manager()

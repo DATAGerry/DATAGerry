@@ -6,11 +6,32 @@
 {% macro text(field, mode) -%}
     <div class="form-group">
         <label for="{{ field.name }}">{{ field.label }}</label>
-        <input class="{{ field.className }}" type="{{ field.get_sub_type() }}" name="{{ field.name }}" value="{{ field.value|e }}">
+        <input class="{{ field.className }}" type="{{ field.get_sub_type() }}" name="{{ field.name }}"
+               value="{{ field.value|e }}"
+                {% if mode == 0 %}
+               readonly
+                {% endif %}
+        />
         {% if field.description %}
             <small id="{{ field.name }}_help" class="form-text text-muted">{{ field.description }}</small>
         {% endif %}
     </div>
+{%- endmacro %}
+
+{% macro href(field, mode) -%}
+    {% if mode == 0 %}
+        {{ field.label }}: <a href="{{ field.value|e }}" alt="{{ field.name }}" target="_blank">{{ field.value|e }}</a>
+    {% elif mode == 1 %}
+        <div class="form-group">
+            <label for="{{ field.name }}">{{ field.label }}</label>
+            <input class="{{ field.className }}" type="{{ field.get_sub_type() }}" name="{{ field.name }}"
+                   value="{{ field.value|e }}"
+            />
+            {% if field.description %}
+                <small id="{{ field.name }}_help" class="form-text text-muted">{{ field.description }}</small>
+            {% endif %}
+        </div>
+    {% endif %}
 {%- endmacro %}
 
 {% macro render_object_view(render) -%}
@@ -18,8 +39,16 @@
         {{ render_section(section) }}
         {% for field in section['fields'] %}
             {% set current_field = render.get_field(field) %}
-            {% if current_field.get_type() == 'text' %}
-                {{ text(current_field, render.get_mode()) }}
+            {% if current_field %}
+                {% if current_field.get_type() == 'text' %}
+                    {{ text(current_field, render.get_mode()) }}
+                {% endif %}
+                {% if current_field.get_type() == 'href' %}
+                    {{ href(current_field, render.get_mode()) }}
+                {% endif %}
+                {% if current_field.get_type() == 'date' %}
+                    {{ text(current_field, render.get_mode()) }}
+                {% endif %}
             {% endif %}
         {% endfor %}
     {% endfor %}

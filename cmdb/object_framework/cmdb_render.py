@@ -49,7 +49,6 @@ class CmdbRender:
     def get_field(self, name):
         try:
             field = self.type_instance.get_field(name)
-            LOGGER.debug(field)
             object_value = self.object_instance.get_value(name)
             if object_value is not None or object_value != '':
                 field.set_value(object_value)

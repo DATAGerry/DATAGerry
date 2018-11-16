@@ -7,7 +7,7 @@ The implementation of the manager used is always realized using the respective s
 from cmdb.object_framework import *
 from cmdb.object_framework import CmdbObjectStatus
 from cmdb.data_storage.database_manager import PublicIDAlreadyExists
-
+from cmdb.utils.error import CMDBError
 
 class CmdbManagerBase:
     """Represents the base class for object managers. A respective implementation is always adapted to the
@@ -220,10 +220,13 @@ class CmdbObjectManager(CmdbManagerBase):
         return ack
 
     def get_type(self, public_id: int):
-        return CmdbType(**self.dbm.find_one(
-            collection=CmdbType.COLLECTION,
-            public_id=public_id)
-                        )
+        try:
+            return CmdbType(**self.dbm.find_one(
+                collection=CmdbType.COLLECTION,
+                public_id=public_id)
+                            )
+        except CMDBError:
+            return None
 
     def insert_type(self, data: dict):
         new_type = CmdbType(**data)
@@ -280,8 +283,11 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = self._delete(CmdbTypeCategory.COLLECTION, public_id)
         return ack
 
-    def get_status(self, name) -> CmdbObjectStatus:
-        return CmdbObjectStatus(**self.dbm.find_one_by(
-            collection=CmdbObjectStatus.COLLECTION,
-            filter={'name': name})
-            )
+    def get_status(self, public_id) -> CmdbObjectStatus:
+        try:
+            return CmdbObjectStatus(**self.dbm.find_one(
+                collection=CmdbObjectStatus.COLLECTION,
+                public_id=public_id)
+                            )
+        except CMDBError:
+            return None

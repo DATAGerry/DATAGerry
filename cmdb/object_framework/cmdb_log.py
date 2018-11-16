@@ -1,17 +1,20 @@
 from datetime import datetime
-
 from cmdb.utils.error import CMDBError
 
 
 class CmdbLog:
     POSSIBLE_COMMANDS = ('create', 'edit', 'delete')
 
-    def __init__(self, editor: id, _action: str, message: str, date: str, log: str):
-        self.editor = editor
-        self.action = _action
+    def __init__(self, author_id: int, action: str, message: str, log: list=None, date: str=None):
+        """TODO: Security manager encrypt log"""
+        self.author_id = author_id
+        self.action = action
         self.message = message
         self.date = date or datetime.today()
-        self.log = log
+        if log is None:
+            self.log = None
+        else:
+            self.log = log
 
     def get_date(self) -> datetime:
         return self.date

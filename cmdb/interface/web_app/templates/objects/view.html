@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
 {% from "includes/_render_macros.html" import render_object_view with context %}
-{% block title %}Dashboard{% endblock %}
+{% block title %}View #{{ view_object.get_public_id() }} {{ view_type.get_label() }}{% endblock %}
 {% block navigation %}
     {% include 'includes/_navigation.html' %}
 {% endblock %}
@@ -110,6 +110,33 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div id="object_code"></div>
+                        </div>
+                        <div class="col-md-12 mt-3">
+                            <div class="card">
+                                <h5 class="card-header">
+                                    Object actions
+                                </h5>
+                                <div class="card-body">
+                                    <div class="list-group list-group-flush">
+                                        <a href="/object/type/{{ view_type.get_public_id() }}/list/" class="list-group-item list-group-item-action">
+                                            <i class="fas fa-list-ol"></i> View list
+                                        </a>
+                                        <a href="/object/type/{{ view_type.get_public_id() }}/add/" class="list-group-item list-group-item-action">
+                                            <i class="fas fa-plus-square"></i> Add new
+                                        </a>
+                                        <a href="/object/{{ view_object.get_public_id() }}/copy" class="list-group-item list-group-item-action">
+                                            <i class="fas fa-clone"></i> Copy object
+                                        </a>
+                                        <a href="/object/{{ view_object.get_public_id() }}/edit/" class="list-group-item list-group-item-action">
+                                            <i class="fas fa-edit"></i> Edit object
+                                        </a>
+                                        <a href="/object/{{ view_object.get_public_id() }}/delete/" class="list-group-item list-group-item-action">
+                                            <i class="fas fa-trash-alt"></i> Delete object
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="card-footer"></div>
+                            </div>
                         </div>
                         <div class="col-md-12 mt-3">
                             <div class="card">

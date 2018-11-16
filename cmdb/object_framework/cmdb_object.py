@@ -16,8 +16,7 @@ class CmdbObject(CmdbDAO):
         'last_edit_time',
         'active',
         'views',
-        'fields',
-        'logs'
+        'fields'
     ]
 
     def __init__(self, type_id, status, creation_time, author_id, last_edit_time, active, fields, logs,

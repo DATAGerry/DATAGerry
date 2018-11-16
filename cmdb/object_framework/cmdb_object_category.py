@@ -8,7 +8,6 @@ class CmdbTypeCategory(CmdbDAO):
     COLLECTION = 'objects.categories'
     REQUIRED_INIT_KEYS = [
         'name',
-
     ]
 
     def __init__(self, name: str, label: str=None, icon: str=None, type_list: list=None, children_list: list=None, **kwargs):

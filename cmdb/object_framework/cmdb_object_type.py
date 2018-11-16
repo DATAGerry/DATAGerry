@@ -9,10 +9,9 @@ LOGGER = get_logger()
 
 class CmdbType(CmdbDAO):
     """
-    Definition of an object input_type - which fields were created and how.
+    Definition of an object type - which fields were created and how.
     """
     COLLECTION = "objects.types"
-    SCHEMA = "input_type.schema.json"
     REQUIRED_INIT_KEYS = [
         'name',
         'active',

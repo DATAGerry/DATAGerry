@@ -47,13 +47,15 @@
                     {% endif %}
                     {% if cats.has_types() %}
                         {% for cat_type_id in cats.get_types() %}
+                            {% set current_sidebar_type = object_manager.get_type(cat_type_id) %}
+                            {% if current_sidebar_type %}
                             <li class="nav-item">
-                                {% set current_sidebar_type = injected_object_manager().get_type(cat_type_id) %}
                                 <a href="/type/{{ current_sidebar_type.get_public_id() }}" class="nav-link">
                                     <i class="line-icon-notebook"></i> {{ current_sidebar_type.get_label() }}
                                     <span class="badge badge-primary float-right m-1">{{ injected_object_manager().get_objects_by_type(cat_type_id) | length }}</span>
                                 </a>
                             </li>
+                            {% endif %}
                         {% endfor %}
 
                     {% endif %}

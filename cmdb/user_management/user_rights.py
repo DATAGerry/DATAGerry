@@ -5,6 +5,13 @@ class UserRight(UserManagementBase):
 
     COLLECTION = 'management.rights'
 
+    IGNORED_INIT_KEYS = [
+        'public_id'
+    ]
+    INDEX_KEYS = [
+        {'keys': [('name', UserManagementBase.DAO_ASCENDING)], 'name': 'name', 'unique': True}
+    ]
+
     CRITICAL = 100
     SECURE = 50
     PERMISSION = 10

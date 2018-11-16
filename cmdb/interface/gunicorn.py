@@ -64,8 +64,10 @@ class HTTPServer(BaseApplication):
         self.options['timeout'] = 2
         self.options['daemon'] = True
         self.daemon = True
+        self.proc_name = 'cmdb_gunicorn'
         if __MODE__ == 'DEBUG' or 'TESTING':
             self.options['reload'] = True
+            self.options['check_config'] = True
             CMDB_LOGGER.info("Gunicorn starting with auto reload option")
         self.running = None
         self.application = app

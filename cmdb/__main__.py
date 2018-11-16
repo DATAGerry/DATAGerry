@@ -80,8 +80,8 @@ def _setup():
             group_id=group_id,
             password=admin_pass_1
         )
-    except Exception as e:
-        return e
+    except CMDBError as setup_error:
+        return setup_error
 
     return True
 

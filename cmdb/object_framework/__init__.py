@@ -33,7 +33,7 @@ __COLLECTIONS__ = [
 from cmdb.data_storage.database_manager import DatabaseManager
 
 
-def get_object_manager(database_manager: DatabaseManager = None):
+def get_object_manager(database_manager: DatabaseManager = None) -> CmdbObjectManager:
     """
 
     Returns:

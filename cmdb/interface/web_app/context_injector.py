@@ -1,5 +1,8 @@
 from cmdb.interface.web_app import MANAGER_HOLDER
 from cmdb.utils.error import CMDBError
+from cmdb.utils.logger import get_logger
+
+LOGGER = get_logger()
 
 
 def inject_current_user():
@@ -16,12 +19,15 @@ def inject_object_manager():
     def object_manager():
         return MANAGER_HOLDER.get_object_manager()
 
-    return dict(injected_object_manager=object_manager)
+    return dict(object_manager=object_manager)
 
 
 def inject_sidebar():
     def sidebar():
-        categories = MANAGER_HOLDER.get_object_manager().get_all_categories()
+        try:
+            categories = MANAGER_HOLDER.get_object_manager().get_all_categories()
+        except CMDBError:
+            return []
         return categories
 
     return dict(sidebar=sidebar)

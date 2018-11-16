@@ -9,9 +9,6 @@ class CmdbObjectStatus(CmdbDAO):
         'label',
         'color'
     ]
-    IGNORED_INIT_KEYS = [
-        'public_id'
-    ]
     INDEX_KEYS = [
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]

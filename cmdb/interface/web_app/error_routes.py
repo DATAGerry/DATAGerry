@@ -83,3 +83,18 @@ def internal_server_error(error):
     :return: error page
     """
     return render_template('errors/default.html', error=error), 500
+
+
+@error_pages.errorhandler(501)
+def not_implemented_error(error):
+    """
+    The functionality to process the request is not provided by this server.
+    For example, the cause is an unknown or unsupported HTTP method.
+
+    Args:
+        error: error code
+
+    Returns: error page
+
+    """
+    return render_template('errors/default.html', error=error), 501

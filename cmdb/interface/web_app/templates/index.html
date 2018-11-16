@@ -1,77 +1,48 @@
 {% extends 'layout.html' %}
 {% block title %}Dashboard{% endblock %}
 {% block navigation %}
-{% include 'includes/_navigation.html' %}
+    {% include 'includes/_navigation.html' %}
 {% endblock %}
 {% block breadcrumb %}
-{% include 'includes/_breadcrumb.html' %}
+    {% include 'includes/_breadcrumb.html' %}
 {% endblock %}
 {% block content %}
-<div class="content">
-    <div class="container-fluid">
-        {{ super() }}
-        <h2>Newest objects</h2>
-        <hr/>
-        <table data-order='[[ 6, "desc" ]]' class="data_table table">
-            <thead class="thead">
-            <tr>
-                <th scope="col">Active</th>
-                <th scope="col">Public ID</th>
-                <th scope="col">Type</th>
-                <th scope="col">Status</th>
-                <th scope="col">Version</th>
-                <th scope="col">Author</th>
-                <th scope="col">Creation time</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for newest_obj in new_objects %}
-            <tr>
-                <td>{{ newest_obj.active | label_active }}</td>
-                <td><a href="/object/{{ newest_obj.public_id }}">{{ newest_obj.public_id }}</a></td>
-                <td>{{ object_manager.get_type(newest_obj.type_id).get_name() }}</td>
-                <td>{% set current_status = object_manager.get_status(newest_obj.status) %}
-                     <span class="badge" style="background-color: {{current_status.get_color()}}">{{current_status.get_label()}}</span>
-                </td>
-                <td>{{ newest_obj.version }}</td>
-                <td>{{ user_manager.get_user(newest_obj.author_id).get_name() }}</td>
-                <td>{{ newest_obj.creation_time }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        <h2>Last changed objects</h2>
-        <hr/>
-        <table data-order='[[ 7, "desc" ]]' class="data_table table">
-            <thead class="thead">
-            <tr>
-                <th scope="col">Active</th>
-                <th scope="col">Public ID</th>
-                <th scope="col">Type</th>
-                <th scope="col">Status</th>
-                <th scope="col">Version</th>
-                <th scope="col">Last editor</th>
-                <th scope="col">Last edit action</th>
-                <th scope="col">Last edit time</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for last_edit_obj in last_objects %}
-            <tr>
-                <td>{{ last_edit_obj.active | label_active }}</td>
-                <td><a href="/object/{{ last_edit_obj.public_id }}">{{ last_edit_obj.public_id }}</a></td>
-                <td>{{ object_manager.get_type(last_edit_obj.type_id).get_name() }}</td>
-                <td>{% set current_status = object_manager.get_status(last_edit_obj.status) %}
-                     <span class="badge" style="background-color: {{current_status.get_color()}}">{{current_status.get_label()}}</span>
-                </td>
-                <td>{{ last_edit_obj.version }}</td>
-                <td>{{ user_manager.get_user(last_edit_obj.last_log().editor).get_name() }}</td>
-                <td>{{ last_edit_obj.last_log().action }}</td>
-                <td>{{ last_edit_obj.last_edit_time }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+    <div class="content">
+        <div class="container-fluid">
+            {{ super() }}
+            <h2>Newest objects</h2>
+            <hr/>
+            <table data-order='[[ 6, "desc" ]]' class="data_table table">
+                <thead class="thead">
+                <tr>
+                    <th scope="col">Active</th>
+                    <th scope="col">Public ID</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Version</th>
+                    <th scope="col">Author</th>
+                    <th scope="col">Creation time</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for newest_obj in new_objects %}
+                    <tr>
+                        <td>{{ newest_obj.active | label_active }}</td>
+                        <td><a href="/object/{{ newest_obj.public_id }}">{{ newest_obj.public_id }}</a></td>
+                        <td>{{ object_manager.get_type(newest_obj.type_id).get_name() }}</td>
+                        <td>{% set current_status = object_manager.get_status(newest_obj.status) %}
+                            {% if current_status %}
+                                <span class="badge"
+                                      style="background-color: {{ current_status.get_color() }}">{{ current_status.get_label() }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ newest_obj.version }}</td>
+                        <td>{{ user_manager.get_user(newest_obj.author_id).get_name() }}</td>
+                        <td>{{ newest_obj.creation_time }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 {% endblock %}

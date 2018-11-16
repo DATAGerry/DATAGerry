@@ -114,7 +114,7 @@ def register_context_processors(app):
 
 def register_error_pages(app):
     from cmdb.interface.web_app.error_routes import bad_request, unauthorized_user, \
-        forbidden, page_not_found, page_gone, iam_a_teapot, internal_server_error
+        forbidden, page_not_found, page_gone, iam_a_teapot, internal_server_error, not_implemented_error
     app.register_error_handler(400, bad_request)
     app.register_error_handler(401, unauthorized_user)
     app.register_error_handler(403, forbidden)
@@ -122,3 +122,4 @@ def register_error_pages(app):
     app.register_error_handler(410, page_gone)
     app.register_error_handler(418, iam_a_teapot)
     app.register_error_handler(500, internal_server_error)
+    app.register_error_handler(501, not_implemented_error)

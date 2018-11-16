@@ -5,6 +5,9 @@ Database Management instance for database actions
 from pymongo.errors import DuplicateKeyError
 from pymongo.results import DeleteResult
 from cmdb.data_storage.database_connection import Connector
+from cmdb.utils.error import CMDBError
+from cmdb.utils import get_logger
+LOGGER = get_logger()
 
 
 class DatabaseManager:
@@ -39,6 +42,9 @@ class DatabaseManager:
         """
         setup script for database init
         """
+        raise NotImplementedError
+
+    def _import(self, *args, **kwargs):
         raise NotImplementedError
 
     def __find(self, *args, **kwargs):
@@ -202,6 +208,21 @@ class DatabaseManagerMongo(DatabaseManager):
                 return False
         return True
 
+    def _import(self, collection: str, data_list: list):
+        LOGGER.debug(data_list)
+        try:
+            self.delete_collection(collection)
+        except Exception as e:
+            LOGGER.debug(e)
+        for import_data in data_list:
+            try:
+                self.insert(collection=collection, data=import_data)
+            except (Exception, CMDBError) as e:
+                LOGGER.debug(e)
+                LOGGER.debug("IMPORT ERROR: {}".format(e))
+                return False
+        return True
+
     def create_index(self, collection: str, name: str, unique: bool, background=True):
         self.database_connector.get_collection(collection).create_index(
             name=name,
@@ -295,7 +316,10 @@ class DatabaseManagerMongo(DatabaseManager):
             int: new public id of the document
             None: if anything goes wrong while inserting
         """
-        result = self.database_connector.get_collection(collection).insert_one(data)
+        try:
+            result = self.database_connector.get_collection(collection).insert_one(data)
+        except Exception as e:
+            LOGGER.debug(e)
         if result.acknowledged:
             formatted_id = {'_id': result.inserted_id}
             projection = {'public_id': 1}
@@ -424,10 +448,16 @@ class DatabaseManagerMongo(DatabaseManager):
         return highest
 
 
-class CollectionAlreadyExists(Exception):
+class CollectionAlreadyExists(CMDBError):
     def __init__(self, collection_name):
         super().__init__()
         self.message = "Collection {} already exists".format(collection_name)
+
+
+class FileImportError(CMDBError):
+    def __init__(self, collection_name):
+        super().__init__()
+        self.message = "Collection {} could not be imported".format(collection_name)
 
 
 class PublicIDAlreadyExists(DuplicateKeyError):
@@ -436,7 +466,7 @@ class PublicIDAlreadyExists(DuplicateKeyError):
         self.message = "Object with this public id already exists: {}".format(public_id)
 
 
-class NoDocumentFound(Exception):
+class NoDocumentFound(CMDBError):
     """
     Error if no document was found
     """
@@ -446,7 +476,7 @@ class NoDocumentFound(Exception):
         self.message = "No document with the id {} was found inside {}".format(public_id, collection)
 
 
-class DocumentCouldNotBeDeleted(Exception):
+class DocumentCouldNotBeDeleted(CMDBError):
     """
     Error if document could not be deleted from database
     """
