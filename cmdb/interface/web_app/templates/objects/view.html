@@ -14,7 +14,7 @@
             <div class="row">
                 <div class="col-md-9">
                     <div class="row">
-                        <div class="col-8">
+                        <div class="{% if render.has_external() == False or render.all_externals_empty() %}col-12{% else %}col-8{% endif %}">
                             <div class="card">
                                 <h5 class="card-header">
                                     #{{ view_object.get_public_id() }} {{ view_type.get_label() }}
@@ -40,6 +40,7 @@
                                 </div>
                             </div>
                         </div>
+                        {% if render.has_external() == True and not render.all_externals_empty() %}
                         <div class="col-4">
                             <div class="card">
                                 <h5 class="card-header">
@@ -54,7 +55,7 @@
                                                     <th{% if loop.first %} class="border-top-0" {% endif %}scope="row">
                                                         <i class="{{ ext_link['icon'] }}"></i></th>
                                                     <td{% if loop.first %} class="border-top-0" {% endif %}>
-                                                        <a href="{{ ext_link['href'].format(view_object.get_value(*ext_link['fields'])) }}"
+                                                        <a href="{{ ext_link['href'].format(view_object.get_values(*ext_link['fields'])) }}"
                                                            target="_blank">{{ ext_link['label'] }}
                                                         </a>
                                                     </td>
@@ -66,6 +67,7 @@
                                 </div>
                             </div>
                         </div>
+                        {% endif %}
                     </div>
                     <div class="row">
                         <div id="object_content" class="col-md-12 mt-3">
@@ -118,19 +120,24 @@
                                 </h5>
                                 <div class="card-body">
                                     <div class="list-group list-group-flush">
-                                        <a href="/object/type/{{ view_type.get_public_id() }}/list/" class="list-group-item list-group-item-action">
+                                        <a href="/object/type/{{ view_type.get_public_id() }}/list/"
+                                           class="list-group-item list-group-item-action">
                                             <i class="fas fa-list-ol"></i> View list
                                         </a>
-                                        <a href="/object/type/{{ view_type.get_public_id() }}/add/" class="list-group-item list-group-item-action">
+                                        <a href="/object/type/{{ view_type.get_public_id() }}/add/"
+                                           class="list-group-item list-group-item-action">
                                             <i class="fas fa-plus-square"></i> Add new
                                         </a>
-                                        <a href="/object/{{ view_object.get_public_id() }}/copy" class="list-group-item list-group-item-action">
+                                        <a href="/object/{{ view_object.get_public_id() }}/copy"
+                                           class="list-group-item list-group-item-action">
                                             <i class="fas fa-clone"></i> Copy object
                                         </a>
-                                        <a href="/object/{{ view_object.get_public_id() }}/edit/" class="list-group-item list-group-item-action">
+                                        <a href="/object/{{ view_object.get_public_id() }}/edit/"
+                                           class="list-group-item list-group-item-action">
                                             <i class="fas fa-edit"></i> Edit object
                                         </a>
-                                        <a href="/object/{{ view_object.get_public_id() }}/delete/" class="list-group-item list-group-item-action">
+                                        <a href="/object/{{ view_object.get_public_id() }}/delete/"
+                                           class="list-group-item list-group-item-action">
                                             <i class="fas fa-trash-alt"></i> Delete object
                                         </a>
                                     </div>
@@ -189,7 +196,7 @@
     </div>
     <script type="text/javascript">
         $('#object_code').qrcode({
-            text: "{{object_base}}",
+            text: "Test",
             mode: 2,
             label: 'CMDB',
             ecLevel: 'H'

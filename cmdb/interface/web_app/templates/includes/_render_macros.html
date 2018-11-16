@@ -34,20 +34,53 @@
     {% endif %}
 {%- endmacro %}
 
+{% macro ref(field, mode) -%}
+    {% set ref_type = object_manager.get_type(field.type_id) %}
+    {% set ref_type_fields = ref_type.get_summary_fields(field.summary_field) %}
+    {% if mode == 0 %}
+        {% set ref_object = object_manager.get_object(field.value) %}
+        {% set ref_string = ref_object.to_value_strings(ref_type_fields) %}
+        <div class="form-group">
+            <label for="{{ field.name }}">{{ field.label }}</label>
+            <div class="input-group">
+                <input class="{{ field.className }}" type="{{ field.get_sub_type() }}" name="{{ field.name }}"
+                       value="{{ ref_string }}"
+                        {% if mode == 0 %}
+                       readonly
+                        {% endif %}
+                />
+                <div class="input-group-append">
+                    <span class="input-group-text"><a href="/object/{{ ref_object.get_public_id() }}"><i class="fas fa-angle-double-right"></i></a></span>
+                </div>
+                {% if field.description %}
+                    <small id="{{ field.name }}_help" class="form-text text-muted">{{ field.description }}</small>
+                {% endif %}
+            </div>
+        </div>
+    {% elif mode == 1 %}
+
+    {% endif %}
+{%- endmacro %}
+
 {% macro render_object_view(render) -%}
     {% for section in render.type_instance.get_sections() %}
         {{ render_section(section) }}
         {% for field in section['fields'] %}
             {% set current_field = render.get_field(field) %}
-            {% if current_field %}
-                {% if current_field.get_type() == 'text' %}
-                    {{ text(current_field, render.get_mode()) }}
-                {% endif %}
-                {% if current_field.get_type() == 'href' %}
-                    {{ href(current_field, render.get_mode()) }}
-                {% endif %}
-                {% if current_field.get_type() == 'date' %}
-                    {{ text(current_field, render.get_mode()) }}
+            {% if current_field != None %}
+                {% if current_field %}
+                    {% if current_field.get_type() == 'text' %}
+                        {{ text(current_field, render.get_mode()) }}
+                    {% endif %}
+                    {% if current_field.get_type() == 'href' %}
+                        {{ href(current_field, render.get_mode()) }}
+                    {% endif %}
+                    {% if current_field.get_type() == 'date' %}
+                        {{ text(current_field, render.get_mode()) }}
+                    {% endif %}
+                    {% if current_field.get_type() == 'ref' %}
+                        {{ ref(current_field, render.get_mode()) }}
+                    {% endif %}
                 {% endif %}
             {% endif %}
         {% endfor %}

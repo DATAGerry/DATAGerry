@@ -49,20 +49,20 @@ class CmdbType(CmdbDAO):
     def get_externals(self):
         return self.render_meta['external']
 
-    def get_external(self, _id):
-        try:
-            return self.render_meta['external'][_id]
-        except IndexError:
-            return None
+    def get_external(self, name):
+        return self.render_meta['external'][name]
 
     def get_summaries(self):
         return self.render_meta['summary']
 
-    def get_summary(self, _id):
-        try:
-            return self.render_meta['summary'][_id]
-        except IndexError:
-            return None
+    def get_summary(self, name):
+        for summary in self.render_meta['summary']:
+            if summary['name'] == name:
+                return summary
+        return None
+
+    def get_summary_fields(self, name):
+        return self.get_summary(name)['fields']
 
     def get_sections(self):
         return sorted(self.render_meta['sections'], key=lambda k: k['position'])

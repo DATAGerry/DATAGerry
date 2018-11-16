@@ -168,10 +168,6 @@ def main(args):
     if args.debug:
         _activate_debug()
     _load_plugins()
-    '''
-    if args.command:
-        LOGGER.info("Starting CLI menu")
-        pass#cli'''
     if args.start:
         _start_apps()
 

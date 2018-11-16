@@ -87,13 +87,29 @@ class CmdbObject(CmdbDAO):
         Returns:
             value of field
         """
-        if len(self.fields) <= 0:
-            return None
         for f in self.fields:
             if f['name'] == field:
                 return f['value']
             continue
         return None
+
+    def get_values(self, fields: list) -> list:
+        list_of_values = []
+        for field in self.fields:
+            if field['name'] in fields:
+                list_of_values.append(field['value'])
+        return list_of_values
+
+    def to_value_strings(self, field_names: list) -> str:
+        value_string = ''
+        for field_name in field_names:
+            try:
+                field_value = self.get_value(field_name)
+                value_string += str(field_value)
+                value_string += str(' ')
+            except CMDBError:
+                continue
+        return value_string.strip()
 
     def empty_logs(self) -> bool:
         if len(self.logs) > 0:

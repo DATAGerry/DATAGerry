@@ -9,7 +9,6 @@ from flask import Blueprint
 from flask import render_template
 from flask_breadcrumbs import register_breadcrumb, default_breadcrumb_root
 
-# from flask import current_app
 
 logger = get_logger()
 
@@ -20,6 +19,7 @@ default_breadcrumb_root(index_pages, '.')
 @index_pages.route('/')
 @index_pages.route('/dashboard')
 @register_breadcrumb(index_pages, '.', 'Home')
+@login_required
 def index_page():
     try:
         obm = MANAGER_HOLDER.get_object_manager()
