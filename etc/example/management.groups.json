@@ -1,0 +1,78 @@
+[
+  {
+    "public_id": 1,
+    "label": "Admin",
+    "name": "admin",
+    "rights": [
+      {
+        "name": "view"
+      },
+      {
+        "name": "edit"
+      },
+      {
+        "name": "delete"
+      },
+      {
+        "name": "settings"
+      }
+    ]
+  },
+  {
+    "public_id": 2,
+    "label": "User",
+    "name": "user",
+    "rights": [
+      {
+        "name": "view"
+      },
+      {
+        "name": "edit"
+      },
+      {
+        "name": "delete"
+      },
+      {
+        "name": "settings"
+      }
+    ]
+  },
+  {
+    "public_id": 3,
+    "label": "Guest",
+    "name": "guest",
+    "rights": [
+      {
+        "name": "view"
+      },
+      {
+        "name": "edit"
+      },
+      {
+        "name": "delete"
+      },
+      {
+        "name": "settings"
+      }
+    ]
+  },
+  {
+    "public_id": 4,
+    "label": "Rest",
+    "name": "rest",
+    "rights": [
+      {
+        "name": "view"
+      },
+      {
+        "name": "edit"
+      },
+      {
+        "name": "delete"
+      },
+      {
+        "name": "settings"
+      }
+    ]
+  }
+]

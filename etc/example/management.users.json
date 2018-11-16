@@ -1,0 +1,119 @@
+[
+  {
+    "public_id": 2,
+    "first_name": "Aristotle",
+    "last_name": "Rentenbeck",
+    "user_name": "arentenbeck",
+    "group_id": 2,
+    "registration_time": {
+      "$date": "2018-05-07T12:24:30.000Z"
+    },
+    "email": "aristotle.rentenbeck@example.com",
+    "authenticator": "LocalAuthenticationProvider",
+    "password": null
+  },
+  {
+    "public_id": 3,
+    "first_name": "Mason",
+    "last_name": "Kealy",
+    "user_name": "mkealy",
+    "group_id": 3,
+    "registration_time": {
+      "$date": "2018-05-30T19:27:15.000Z"
+    },
+    "email": "mason.kealy@example.com",
+    "authenticator": "LocalAuthenticationProvider",
+    "password": null
+  },
+  {
+    "public_id": 4,
+    "first_name": "Bearnard",
+    "last_name": "Gissop",
+    "user_name": "bgissop",
+    "group_id": 4,
+    "registration_time": {
+      "$date": "2018-10-13T05:45:26.000Z"
+    },
+    "email": "bearnard.gissop@example.com",
+    "authenticator": "LocalAuthenticationProvider",
+    "password": null
+  },
+  {
+    "public_id": 5,
+    "first_name": "Allina",
+    "last_name": "Puvia",
+    "user_name": "apuvia",
+    "group_id": 2,
+    "registration_time": {
+      "$date": "2018-05-04T17:29:07.000Z"
+    },
+    "email": "allina.puvia@example.com",
+    "authenticator": "LocalAuthenticationProvider",
+    "password": null
+  },
+  {
+    "public_id": 6,
+    "first_name": "Crysta",
+    "last_name": "Edgecombe",
+    "user_name": "cedgecombe",
+    "group_id": 4,
+    "registration_time": {
+      "$date": "2018-10-15T05:19:48.000Z"
+    },
+    "email": "crysta.edgecombe@example.com",
+    "authenticator": "LocalAuthenticationProvider",
+    "password": null
+  },
+  {
+    "public_id": 7,
+    "first_name": "Chev",
+    "last_name": "Habden",
+    "user_name": "chabden",
+    "group_id": 4,
+    "registration_time": {
+      "$date": "2018-03-24T04:03:00.000Z"
+    },
+    "email": "chev.habden@example.com",
+    "authenticator": "LocalAuthenticationProvider",
+    "password": null
+  },
+  {
+    "public_id": 8,
+    "first_name": "Neysa",
+    "last_name": "Walby",
+    "user_name": "nwalby",
+    "group_id": 4,
+    "registration_time": {
+      "$date": "2018-01-23T15:11:09.000Z"
+    },
+    "email": "neysa.walby@example.com",
+    "authenticator": "LocalAuthenticationProvider",
+    "password": null
+  },
+  {
+    "public_id": 9,
+    "first_name": "Livia",
+    "last_name": "Dell 'Orto",
+    "user_name": "ldell 'orto",
+    "group_id": 3,
+    "registration_time": {
+      "$date": "2018-07-26T13:29:31.000Z"
+    },
+    "email": "livia.dell 'orto@example.com",
+    "authenticator": "LocalAuthenticationProvider",
+    "password": null
+  },
+  {
+    "public_id": 10,
+    "first_name": "Nikoletta",
+    "last_name": "Braywood",
+    "user_name": "nbraywood",
+    "group_id": 1,
+    "registration_time": {
+      "$date": "2018-04-25T22:03:14.000Z"
+    },
+    "email": "nikoletta.braywood@example.com",
+    "authenticator": "LocalAuthenticationProvider",
+    "password": null
+  }
+]

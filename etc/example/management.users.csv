@@ -1,0 +1,10 @@
+public_id,user_name,first_name,last_name,authenticator,email,group_id,password,registration_time
+2,arentenbeck,Aristotle,Rentenbeck,LocalAuthenticationProvider,aristotle.rentenbeck@example.com,2,,2018-05-07T12:24:30.000Z
+3,mkealy,Mason,Kealy,LocalAuthenticationProvider,mason.kealy@example.com,3,,2018-05-30T19:27:15.000Z
+4,bgissop,Bearnard,Gissop,LocalAuthenticationProvider,bearnard.gissop@example.com,4,,2018-10-13T05:45:26.000Z
+5,apuvia,Allina,Puvia,LocalAuthenticationProvider,allina.puvia@example.com,2,,2018-05-04T17:29:07.000Z
+6,cedgecombe,Crysta,Edgecombe,LocalAuthenticationProvider,crysta.edgecombe@example.com,4,,2018-10-15T05:19:48.000Z
+7,chabden,Chev,Habden,LocalAuthenticationProvider,chev.habden@example.com,4,,2018-03-24T04:03:00.000Z
+8,nwalby,Neysa,Walby,LocalAuthenticationProvider,neysa.walby@example.com,4,,2018-01-23T15:11:09.000Z
+9,ldell 'orto,Livia,Dell 'Orto,LocalAuthenticationProvider,livia.dell 'orto@example.com,3,,2018-07-26T13:29:31.000Z
+10,nbraywood,Nikoletta,Braywood,LocalAuthenticationProvider,nikoletta.braywood@example.com,1,,2018-04-25T22:03:14.000Z

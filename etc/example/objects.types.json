@@ -104,11 +104,11 @@
         "subinput_type": "text"
       },
       {
-        "input_type": "text",
+        "input_type": "ref",
         "label": "Department",
         "className": "form-control",
         "name": "department",
-        "subinput_type": "text"
+        "type_id": 2
       },
       {
         "input_type": "text",
@@ -141,13 +141,6 @@
         "name": "email_address"
       },
       {
-        "input_type": "user",
-        "required": true,
-        "label": "CMDB ID",
-        "className": "form-control",
-        "name": "cmdb_user"
-      },
-      {
         "input_type": "text",
         "label": "XING Name",
         "description": "Profile name inside https://www.xing.com/profile/<br>USERNAME</br>/",
@@ -170,76 +163,77 @@
       }
     ],
     "logs": [
+      {
+        "author_id": 1,
+        "action": "create",
+        "message": "Auto-generation of employee type",
+        "date": {
+          "$date": "2018-09-28T16:13:00.000Z"
+        }
+      }
     ]
   },
   {
     "public_id": 2,
-    "title": "Customers",
-    "name": "customers",
-    "description": "customers",
+    "title": "Departments",
+    "name": "departments",
+    "description": "company departments",
     "version": "1.0.0",
     "active": true,
     "author_id": 1,
     "creation_time": {
-      "$date": "2018-09-20T16:13:00.000Z"
+      "$date": "2018-09-28T16:13:00.000Z"
     },
     "render_meta": {
       "external": [
-        {
-          "href": "https://www.xing.com/profile/{0}",
-          "icon": "fas fa-link",
-          "fields": [
-            "web_page"
-          ]
-        }
       ],
       "summary": [
         {
           "label": "Name",
           "fields": [
-            "first_name",
-            "last_name"
-          ]
-        },{
-          "label": "Company",
-          "fields": [
-            "company_name",
-            "department"
+            "name",
+            "department_head"
           ]
         }
       ],
       "sections": [
         {
           "tag": "h1",
-          "name": "customer_details",
-          "label": "Customer Details",
+          "name": "informations",
+          "label": "Informations of department",
           "fields": [
-            "customer_number",
-            "first_name",
-            "last_name",
-            "company_name",
-            "department",
-            "address",
-            "web_page"
+            "name",
+            "department_head"
           ],
           "position": 1
-        },
-        {
-          "tag": "h1",
-          "name": "customer_contact",
-          "label": "Customer Contact",
-          "fields": [
-            "email",
-            "phone",
-            "mobile"
-          ],
-          "position": 2
         }
       ]
     },
     "fields": [
+      {
+        "input_type": "text",
+        "label": "Name",
+        "className": "form-control",
+        "name": "name",
+        "subinput_type": "text"
+      },
+      {
+        "input_type": "ref",
+        "label": "Head of department",
+        "className": "form-control",
+        "name": "department_head",
+        "type_id": 1
+      }
     ],
     "logs": [
+      {
+        "author_id": 1,
+        "action": "create",
+        "message": "Auto-generation of departments type",
+        "date": {
+          "$date": "2018-09-28T16:13:00.000Z"
+        }
+      }
     ]
   }
 ]

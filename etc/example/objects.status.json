@@ -1,0 +1,142 @@
+[
+  {
+    "public_id": 1,
+    "label": "Puce",
+    "name": "puce",
+    "color": "#7dc344",
+    "icon": null
+  },
+  {
+    "public_id": 2,
+    "label": "Crimson",
+    "name": "crimson",
+    "color": "#2d1c9a",
+    "icon": "fas fa-frown-open"
+  },
+  {
+    "public_id": 3,
+    "label": "Maroon",
+    "name": "maroon",
+    "color": "#676317",
+    "icon": "fas fa-grin-alt"
+  },
+  {
+    "public_id": 4,
+    "label": "Indigo",
+    "name": "indigo",
+    "color": "#7b22d9",
+    "icon": "fas fa-laugh"
+  },
+  {
+    "public_id": 5,
+    "label": "Red",
+    "name": "red",
+    "color": "#5c6dec",
+    "icon": "fas fa-grin-stars"
+  },
+  {
+    "public_id": 6,
+    "label": "Khaki",
+    "name": "khaki",
+    "color": "#4e58f0",
+    "icon": null
+  },
+  {
+    "public_id": 7,
+    "label": "Violet",
+    "name": "violet",
+    "color": "#2d4ae7",
+    "icon": null
+  },
+  {
+    "public_id": 8,
+    "label": "Teal",
+    "name": "teal",
+    "color": "#68d74d",
+    "icon": "fas fa-laugh-wink"
+  },
+  {
+    "public_id": 9,
+    "label": "Crimson",
+    "name": "crimson",
+    "color": "#54e769",
+    "icon": null
+  },
+  {
+    "public_id": 10,
+    "label": "Pink",
+    "name": "pink",
+    "color": "#5a31bb",
+    "icon": "fas fa-laugh"
+  },
+  {
+    "public_id": 11,
+    "label": "Orange",
+    "name": "orange",
+    "color": "#d1dc7d",
+    "icon": "fas fa-laugh"
+  },
+  {
+    "public_id": 12,
+    "label": "Fuscia",
+    "name": "fuscia",
+    "color": "#bdb4b1",
+    "icon": "fas fa-laugh"
+  },
+  {
+    "public_id": 13,
+    "label": "Yellow",
+    "name": "yellow",
+    "color": "#fa2958",
+    "icon": "fas fa-laugh"
+  },
+  {
+    "public_id": 14,
+    "label": "Violet",
+    "name": "violet",
+    "color": "#c08de8",
+    "icon": null
+  },
+  {
+    "public_id": 15,
+    "label": "Crimson",
+    "name": "crimson",
+    "color": "#de98cf",
+    "icon": "fas fa-grin-hearts"
+  },
+  {
+    "public_id": 16,
+    "label": "Orange",
+    "name": "orange",
+    "color": "#a044d9",
+    "icon": null
+  },
+  {
+    "public_id": 17,
+    "label": "Yellow",
+    "name": "yellow",
+    "color": "#1ed4da",
+    "icon": "fas fa-grin-hearts"
+  },
+  {
+    "public_id": 18,
+    "label": "Mauv",
+    "name": "mauv",
+    "color": "#935850",
+    "icon": "fas fa-grin-alt"
+  },
+  {
+    "public_id": 19,
+    "label": "Crimson",
+    "name": "crimson",
+    "color": "#ff15af",
+    "icon": "fas fa-laugh-wink"
+  },
+  {
+    "public_id": 20,
+    "label": "Goldenrod",
+    "name": "goldenrod",
+    "color": "#11a810",
+    "icon": null
+  }
+]
