@@ -8,7 +8,7 @@
     "active": true,
     "author_id": 1,
     "creation_time": {
-      "$date": "2018-09-28T16:13:00.000Z"
+      "$date": "2018-09-28T16:13:00.000+0000"
     },
     "render_meta": {
       "external": [
@@ -17,7 +17,8 @@
           "icon": "fab fa-xing",
           "fields": [
             "xing"
-          ]
+          ],
+          "label": "XING"
         }
       ],
       "summary": [
@@ -26,7 +27,8 @@
           "fields": [
             "first_name",
             "last_name"
-          ]
+          ],
+          "name": "name"
         }
       ],
       "sections": [
@@ -108,7 +110,8 @@
         "label": "Department",
         "className": "form-control",
         "name": "department",
-        "type_id": 2
+        "type_id": 2,
+        "summary_field": "name"
       },
       {
         "input_type": "text",
@@ -168,7 +171,7 @@
         "action": "create",
         "message": "Auto-generation of employee type",
         "date": {
-          "$date": "2018-09-28T16:13:00.000Z"
+          "$date": "2018-09-28T16:13:00.000+0000"
         }
       }
     ]
@@ -180,20 +183,19 @@
     "description": "company departments",
     "version": "1.0.0",
     "active": true,
-    "author_id": 1,
+    "author_id": 1.0,
     "creation_time": {
-      "$date": "2018-09-28T16:13:00.000Z"
+      "$date": "2018-09-28T16:13:00.000+0000"
     },
     "render_meta": {
-      "external": [
-      ],
+      "external": [],
       "summary": [
         {
           "label": "Name",
           "fields": [
-            "name",
-            "department_head"
-          ]
+            "name"
+          ],
+          "name": "name"
         }
       ],
       "sections": [
@@ -205,7 +207,7 @@
             "name",
             "department_head"
           ],
-          "position": 1
+          "position": 1.0
         }
       ]
     },
@@ -222,16 +224,17 @@
         "label": "Head of department",
         "className": "form-control",
         "name": "department_head",
-        "type_id": 1
+        "type_id": 1.0,
+        "summary_field": "name"
       }
     ],
     "logs": [
       {
-        "author_id": 1,
+        "author_id": 1.0,
         "action": "create",
         "message": "Auto-generation of departments type",
         "date": {
-          "$date": "2018-09-28T16:13:00.000Z"
+          "$date": "2018-09-28T16:13:00.000+0000"
         }
       }
     ]
