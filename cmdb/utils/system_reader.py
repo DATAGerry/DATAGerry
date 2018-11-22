@@ -2,6 +2,7 @@
 Collection of system readers which loads configuration files and settings
 """
 import os
+from cmdb.utils.error import CMDBError
 
 
 class SystemReader:
@@ -257,7 +258,7 @@ class SystemSettingsReader(SystemReader):
         return SystemSettingsReader.SETUP_INITS
 
 
-class ConfigFileNotFound(Exception):
+class ConfigFileNotFound(CMDBError):
     """
     Error if local file could not be loaded
     """
@@ -268,7 +269,7 @@ class ConfigFileNotFound(Exception):
         self.message = 'Configurations file: ' + self.filename + ' was not found!'
 
 
-class ConfigNotLoaded(Exception):
+class ConfigNotLoaded(CMDBError):
     """
     Error if reader is not loaded
     """
@@ -278,7 +279,7 @@ class ConfigNotLoaded(Exception):
         self.message = 'Configurations file: ' + filename + ' was not loaded correctly!'
 
 
-class SectionError(Exception):
+class SectionError(CMDBError):
     """
     Error if section not exists
     """
@@ -288,7 +289,7 @@ class SectionError(Exception):
         self.message = 'The section ' + name + ' does not exist!'
 
 
-class KeySectionError(Exception):
+class KeySectionError(CMDBError):
     """
     Error if key not exists in section
     """
