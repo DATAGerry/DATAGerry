@@ -291,3 +291,9 @@ class CmdbObjectManager(CmdbManagerBase):
                             )
         except CMDBError:
             return None
+
+    def get_status_by_type(self, type_id: int):
+        status_list = []
+        for status in self.get_type(type_id).status:
+            status_list.append(self.get_status(status))
+        return status_list

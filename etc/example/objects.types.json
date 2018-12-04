@@ -6,6 +6,18 @@
     "description": "company employees",
     "version": "1.0.0",
     "active": true,
+    "status": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
     "author_id": 1,
     "creation_time": {
       "$date": "2018-09-28T16:13:00.000+0000"
@@ -183,6 +195,18 @@
     "description": "company departments",
     "version": "1.0.0",
     "active": true,
+    "status": [
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
     "author_id": 1.0,
     "creation_time": {
       "$date": "2018-09-28T16:13:00.000+0000"
