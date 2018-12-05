@@ -104,7 +104,7 @@ class HTTPServer(BaseApplication):
             arbiter_process.join()
 
         except RuntimeError as e:
-            CMDB_LOGGER.critical(e.message)
+            CMDB_LOGGER.critical(e)
             sys.exit(1)
 
     @staticmethod
