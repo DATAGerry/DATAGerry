@@ -1,6 +1,10 @@
 from cmdb.object_framework.cmdb_dao import CmdbDAO
 from cmdb.object_framework.cmdb_log import CmdbLog
+from cmdb.object_framework.cmdb_object_field_type import FieldNotFoundError
 from cmdb.utils.error import CMDBError
+from cmdb.utils import get_logger
+
+CMDB_LOGGER = get_logger()
 
 
 class CmdbObject(CmdbDAO):
@@ -78,6 +82,20 @@ class CmdbObject(CmdbDAO):
 
         return self.fields
 
+    def set_new_value(self, field, value):
+        self.fields.append({
+            'name': field,
+            'value': value
+        })
+
+    def set_value(self, field, value) -> str:
+        for f in self.fields:
+            if f['name'] == field:
+                f['value'] = value
+                return f['name']
+            continue
+        raise FieldNotFoundError
+
     def get_value(self, field) -> str:
         """get value of an field
 
@@ -111,20 +129,25 @@ class CmdbObject(CmdbDAO):
                 continue
         return value_string.strip()
 
-    def empty_logs(self) -> bool:
-        if len(self.logs) > 0:
-            return True
-        return False
+    def get_logs(self):
+        return self.logs
 
-    def log_length(self):
-        return len(self.logs)-1
-
-    def last_log(self):
+    def last_log(self) -> CmdbLog:
         try:
             last_log = CmdbLog(**self.logs[-1])
         except CMDBError:
             return None
         return last_log
+
+    def add_last_log_state(self, state):
+        last_log = CmdbLog(**self.logs[-1])
+        last_log.set_state(state)
+        CMDB_LOGGER.debug("CURRENT STATE {}, Length: {}".format(last_log.state, len(last_log.state)))
+        self.logs[-1] = last_log.__dict__
+
+    def add_log(self, log: CmdbLog):
+        CMDB_LOGGER.debug("NEW LOG: {}".format(log))
+        self.logs.append(log.__dict__)
 
 
 class TypeNotSetError(CMDBError):

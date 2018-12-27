@@ -1,4 +1,5 @@
 from cmdb.object_framework.cmdb_dao import CmdbDAO
+from cmdb.utils.error import CMDBError
 
 
 class CmdbFieldType(CmdbDAO):
@@ -58,3 +59,11 @@ class CmdbFieldType(CmdbDAO):
 
     def is_protected(self):
         return self.access
+
+
+class FieldNotFoundError(CMDBError):
+    """Error if field do not exists"""
+
+    def __init__(self, field_name, type_name):
+        super().__init__()
+        self.message = 'Field {} was not found inside input_type: {}'.format(field_name, type_name)

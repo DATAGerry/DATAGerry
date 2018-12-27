@@ -1,0 +1,81 @@
+{% extends 'layout.html' %}
+{% from "includes/_render_macros.html" import render_object_view with context %}
+{% block title %}View #{{ view_object.get_public_id() }} {{ view_type.get_label() }}{% endblock %}
+{% block navigation %}
+    {% include 'includes/_navigation.html' %}
+{% endblock %}
+{% block breadcrumb %}
+    {% include 'includes/_breadcrumb.html' %}
+{% endblock %}
+{% block content %}
+    <div class="content">
+        <div class="container-fluid">
+            {{ super() }}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <h5 class="card-header">
+                            #{{ view_object.get_public_id() }} {{ view_type.get_label() }}
+                            <span class="badge badge-secondary float-right">v{{ view_object.version }}</span>
+                            <span class="badge badge-primary float-right mr-1">{{ view_object.status }}</span>
+                        </h5>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tbody>
+                                {% for summary in view_type.render_meta['summary'] %}
+                                    <tr>
+                                        <th{% if loop.first %} class="border-top-0" {% endif %}scope="row">
+                                            <b>{{ summary['label'] }}:</b></th>
+                                        <td{% if loop.first %} class="border-top-0" {% endif %}>
+                                            {% for field_name in summary['fields'] %}
+                                                {{ view_object.get_value(field_name) }}
+                                            {% endfor %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div id="object_content" class="col-12 mt-3">
+                            <div class="card">
+                                <h5 class="card-header">Content</h5>
+                                <div class="card-body">
+                                    <form action="/object/{{ view_object.get_public_id() }}/edit/" method="post"
+                                          novalidate>
+                                        {{ render_object_view(render) }}
+
+                                        <h3 class>Log message</h3>
+                                        <hr/>
+                                        <div class="form-group">
+                                            <label for="log_message">Optional comment field to describe the
+                                                change</label>
+                                            <textarea maxlength="250" class="form-control" name="log_message" id="log_message"
+                                                      rows="3"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                        <button type="reset" class="btn btn-outline-secondary">Reset</button>
+                                        <a class="btn btn-outline-primary"
+                                           href="/object/{{ view_object.get_public_id() }}/" role="button">Cancel</a>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+    <script type="text/javascript">
+        $('#object_code').qrcode({
+            text: "Test",
+            mode: 2,
+            label: 'CMDB',
+            ecLevel: 'H'
+        });
+    </script>
+{% endblock %}

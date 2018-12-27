@@ -140,6 +140,9 @@ class CmdbDAO:
         self.version = updater_version.__repr__()
         return self.version
 
+    def get_version(self):
+        return self.version
+
     def __repr__(self):
         from cmdb.utils.helpers import debug_print
         return debug_print(self)

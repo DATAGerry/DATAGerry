@@ -4,6 +4,7 @@ from cmdb.user_management.user import User
 from cmdb.data_storage import NoDocumentFound, DatabaseManagerMongo
 from cmdb.data_storage.database_manager import DeleteResult
 from cmdb.utils import get_logger
+from cmdb.utils.error import CMDBError
 import cmdb
 
 LOGGER = get_logger()
@@ -118,7 +119,7 @@ class UserManagement:
             raise RightNotExistsError(name)
 
     def get_right(self, public_id: int) -> UserRight:
-        formatted_filter = {'public_id': public_id}
+        formatted_filter = {'_id': public_id}
         try:
             founded_right = self.dbm.find_one_by(collection=UserRight.COLLECTION, filter=formatted_filter)
             return UserRight(**founded_right)
@@ -141,44 +142,44 @@ class UserManagement:
         return False
 
 
-class GroupDeleteError(Exception):
+class GroupDeleteError(CMDBError):
     def __init__(self, name):
         super().__init__()
         self.message = "The following group could not be deleted: {}".format(name)
 
 
-class UserDeleteError(Exception):
+class UserDeleteError(CMDBError):
     def __init__(self, name):
         super().__init__()
         self.message = "The following user could not be deleted: {}".format(name)
 
 
-class NoUserFoundExceptions(Exception):
+class NoUserFoundExceptions(CMDBError):
     """Exception if user was not found in the database"""
 
     def __init__(self, username):
         self.message = "No user with the username or the id {} was found in database".format(username)
 
 
-class GroupNotExistsError(Exception):
+class GroupNotExistsError(CMDBError):
     def __init__(self, name):
         super().__init__()
         self.message = "The following group does not exists: {}".format(name)
 
 
-class RightNotExistsError(Exception):
+class RightNotExistsError(CMDBError):
     def __init__(self, name):
         super().__init__()
         self.message = "The following right does not exists: {}".format(name)
 
 
-class GroupInsertError(Exception):
+class GroupInsertError(CMDBError):
     def __init__(self, name):
         super().__init__()
         self.message = "The following group could not be added: {}".format(name)
 
 
-class UserInsertError(Exception):
+class UserInsertError(CMDBError):
     def __init__(self, name):
         super().__init__()
         self.message = "The following user could not be added: {}".format(name)

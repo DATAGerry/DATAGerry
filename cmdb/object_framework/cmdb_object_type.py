@@ -1,5 +1,5 @@
 from cmdb.object_framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
-from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
+from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType, FieldNotFoundError
 from cmdb.utils.error import CMDBError
 from datetime import datetime
 from cmdb.utils import get_logger
@@ -77,6 +77,21 @@ class CmdbType(CmdbDAO):
 
         return self.fields
 
+    def get_field_of_type_with_value(self, input_type: str, _filter: str, value) -> CmdbFieldType:
+        field = [x for x in self.fields if x['input_type'] == input_type and x[_filter] == value]
+        if field:
+            LOGGER.debug('Field of type {}'.format(input_type))
+            LOGGER.debug('Field len'.format(field))
+            LOGGER.debug('Field {}'.format(len(field)))
+            try:
+                return CmdbFieldType(**field[0])
+            except (RequiredInitKeyNotFoundError, CMDBError) as e:
+                LOGGER.warning(e.message)
+                raise FieldInitError(value)
+        else:
+            LOGGER.debug('Field of type {} NOT found'.format(input_type))
+            raise FieldNotFoundError(value, self.get_name())
+
     def get_field(self, name) -> CmdbFieldType:
         field = [x for x in self.fields if x['name'] == name]
         if field:
@@ -86,14 +101,6 @@ class CmdbType(CmdbDAO):
                 LOGGER.warning(e.message)
                 raise FieldInitError(name)
         raise FieldNotFoundError(name, self.get_name())
-
-
-class FieldNotFoundError(CMDBError):
-    """Error if field do not exists"""
-
-    def __init__(self, field_name, type_name):
-        super().__init__()
-        self.message = 'Field {} was not found inside input_type: {}'.format(field_name, type_name)
 
 
 class FieldInitError(CMDBError):

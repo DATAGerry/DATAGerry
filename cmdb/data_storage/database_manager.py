@@ -16,6 +16,7 @@ class DatabaseManager:
 
     """
 
+    DB_MANAGER_TYPE = 'base'
     DEFAULT_DATABASE_NAME = 'cmdb'
     ASCENDING = 1
     DESCENDING = -1
@@ -173,6 +174,8 @@ class DatabaseManager:
 
 class DatabaseManagerMongo(DatabaseManager):
     """PyMongo (mongodb) implementation of Database Manager"""
+
+    DB_MANAGER_TYPE = 'MONGO_DB'
 
     def __init__(self, connector):
         """init mongo implementation

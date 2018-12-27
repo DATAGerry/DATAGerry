@@ -3,31 +3,33 @@ from cmdb.utils.error import CMDBError
 
 
 class CmdbLog:
-    POSSIBLE_COMMANDS = ('create', 'edit', 'delete')
+    POSSIBLE_COMMANDS = ('create', 'edit')
 
-    def __init__(self, author_id: int, action: str, message: str, log: list=None, date: str=None):
+    def __init__(self, author_id: int, action: str, message: str, state: str = None, date: (str, datetime) = None):
         """TODO: Security manager encrypt log"""
         self.author_id = author_id
         self.action = action
         self.message = message
         self.date = date or datetime.today()
-        if log is None:
-            self.log = None
+        if state is None:
+            self.state = None
         else:
-            self.log = log
+            self.state = state
 
     def get_date(self) -> datetime:
         return self.date
 
-    @property
-    def action(self) -> str:
-        return self._action
+    def get_action(self) -> str:
+        return self.action
 
-    @action.setter
-    def action(self, value: str):
-        if value not in CmdbLog.POSSIBLE_COMMANDS:
-            raise ActionNotPossibleError(value)
-        self._action = value
+    def get_message(self) -> str:
+        return self.message
+
+    def get_state(self) -> str:
+        return self.state
+
+    def set_state(self, state):
+        self.state = state
 
     def __repr__(self):
         from cmdb.utils.helpers import debug_print

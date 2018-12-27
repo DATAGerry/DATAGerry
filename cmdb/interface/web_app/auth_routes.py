@@ -46,7 +46,6 @@ def login_page_post():
             timeout = MANAGER_HOLDER.get_system_settings_reader().get_value('token_timeout', 'security')
         except KeyError:
             timeout = MANAGER_HOLDER.get_security_manager().DEFAULT_EXPIRES
-        CMDB_LOGGER.debug(type(timeout))
         expire_date = time.time() + (timeout * 60)
         resp.set_cookie('access-token',
                         MANAGER_HOLDER.get_security_manager().encrypt_token(login_user, timeout=timeout*60),

@@ -2,6 +2,8 @@
 """
 from cmdb.utils.error import CMDBError
 from cmdb.object_framework import CmdbObject, CmdbType
+from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
+from cmdb.object_framework.cmdb_log import CmdbLog
 from cmdb.utils.logger import get_logger
 
 LOGGER = get_logger()
@@ -61,11 +63,22 @@ class CmdbRender:
             raise ObjectInstanceError()
         self._type_instance = type_instance
 
+    def get_logs(self) -> (list, None):
+        LOGGER.debug("LOG Size: {}".format(len(self.object_instance.get_logs())))
+        log_list = []
+        for log in self.object_instance.get_logs():
+            try:
+                tmp_log = CmdbLog(**log)
+                log_list.append(tmp_log)
+            except CMDBError:
+                continue
+        return log_list
+
     def get_field(self, name):
         if self.mode == self.VIEW_MODE:
             try:
                 object_value = self.object_instance.get_value(name)
-                LOGGER.debug("OBJECTVALUE for Field {}: - {}".format(name, object_value))
+                # LOGGER.debug("OBJECTVALUE for Field {}: - {}".format(name, object_value))
                 if object_value is None or object_value == '':
                     return None
             except CMDBError:
@@ -74,10 +87,22 @@ class CmdbRender:
             field = self.type_instance.get_field(name)
             object_value = self.object_instance.get_value(name)
             if object_value is not None or object_value != '':
-                field.set_value(object_value)
+                enc_value = CmdbRender.field_encoder(field, object_value)
+                field.set_value(enc_value)
         except CMDBError:
             return None
         return field
+
+    @staticmethod
+    def field_encoder(field: CmdbFieldType, value):
+        if field.get_type() == 'date':
+            LOGGER.debug("Current field TYPE: {} | VALUE: {}".format(field.get_type(), value))
+            str_date_value = value.strftime("%Y-%m-%dT%H:%M")
+            LOGGER.debug("Current field VALUE: {} | NEW VALUE: {}".format(value, str_date_value))
+            return str_date_value
+        else:
+            return value
+        return value
 
 
 class RenderModeError(CMDBError):

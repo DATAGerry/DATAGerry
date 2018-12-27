@@ -8,6 +8,11 @@ from cmdb.object_framework import *
 from cmdb.object_framework import CmdbObjectStatus
 from cmdb.data_storage.database_manager import PublicIDAlreadyExists
 from cmdb.utils.error import CMDBError
+from cmdb.utils import get_logger
+from cmdb.utils.helpers import timing
+
+CMDB_LOGGER = get_logger()
+
 
 class CmdbManagerBase:
     """Represents the base class for object managers. A respective implementation is always adapted to the
@@ -43,7 +48,7 @@ class CmdbManagerBase:
         if database_manager:
             self.dbm = database_manager
 
-    def _get(self, collection: str, public_id: int) -> str:
+    def _get(self, collection: str, public_id: int) -> object:
         """get document from the database by their public id
 
         Args:
@@ -76,7 +81,7 @@ class CmdbManagerBase:
             requirements_filter.update({k: req})
         return self.dbm.find_all(collection=collection, filter=requirements_filter, sort=formatted_sort)
 
-    def _insert(self, collection: str, data: dict) -> int:
+    def _insert(self, collection: str, data: dict) -> (int, None):
         """insert document/object into database
 
         Args:
@@ -93,7 +98,17 @@ class CmdbManagerBase:
             data=data
         )
 
-    def _update(self, collection: str, public_id: int, data: dict):
+    def _update(self, collection: str, public_id: int, data: dict) -> object:
+        """
+        update document/object in database
+        Args:
+            collection (str): name of the database collection
+            public_id (int): public id of object
+            data: changed data/object
+
+        Returns:
+            acknowledgment of database
+        """
         return self.dbm.update(
             collection=collection,
             public_id=public_id,
@@ -101,6 +116,15 @@ class CmdbManagerBase:
         )
 
     def _delete(self, collection: str, public_id: int):
+        """
+        delete document/object inside database
+        Args:
+            collection (str): name of the database collection
+            public_id (int): public id of object
+
+        Returns:
+            acknowledgment of database
+        """
         return self.dbm.delete(
             collection=collection,
             public_id=public_id
@@ -179,8 +203,13 @@ class CmdbObjectManager(CmdbManagerBase):
                 raise Exception
         return ack
 
-    def update_object(self, data: dict):
-        update_object = CmdbObject(**data)
+    def update_object(self, data: (dict, CmdbObject)) -> str:
+        if type(data) == dict:
+            update_object = CmdbObject(**data)
+        elif type(data) == CmdbObject:
+            update_object = data
+        else:
+            raise UpdateError(CmdbObject.__class__, data, 'Wrong CmdbObject init format - expecting CmdbObject or dict')
         ack = self.dbm.update(
             collection=CmdbObject.COLLECTION,
             public_id=update_object.get_public_id(),
@@ -198,6 +227,47 @@ class CmdbObjectManager(CmdbManagerBase):
             else:
                 raise Exception
         return ack
+
+    @timing("Object references loading time took ")
+    def get_object_references(self, public_id: int) -> list:
+        # Type of given object id
+        type_id = self.get_object(public_id=public_id).get_type_id()
+        CMDB_LOGGER.debug("Type ID: {}".format(type_id))
+        # query for all types with ref input type with value of type id
+        req_type_query = {"fields": {"$elemMatch": {"input_type": "ref", "$and": [{"type_id": int(type_id)}]}}}
+        CMDB_LOGGER.debug("Query: {}".format(req_type_query))
+        # get type list
+        req_type_list = self.dbm.find_all(collection=CmdbType.COLLECTION, filter=req_type_query)
+        CMDB_LOGGER.debug("Req type list: {}".format(req_type_list))
+        type_init_list = []
+        for new_type_init in req_type_list:
+            try:
+                current_loop_type = self.get_type(new_type_init['public_id'])
+                ref_field = current_loop_type.get_field_of_type_with_value(input_type='ref', _filter='type_id',
+                                                                           value=type_id)
+                CMDB_LOGGER.debug("Current reference field {}".format(ref_field))
+                type_init_list.append(
+                    {"type_id": current_loop_type.get_public_id(), "field_name": ref_field.get_name()})
+            except CMDBError as e:
+                CMDB_LOGGER.warning('Unsolvable type reference with type {}'.format(e.message))
+                continue
+        CMDB_LOGGER.debug("Init type list: {}".format(type_init_list))
+
+        referenced_by_objects = []
+        for possible_object_types in type_init_list:
+            referenced_query = {"type_id": possible_object_types['type_id'], "fields": {
+                "$elemMatch": {"$and": [{"name": possible_object_types['field_name']}],
+                               "$or": [{"value": int(public_id)}]}}}
+            referenced_by_objects = referenced_by_objects + self.dbm.find_all(collection=CmdbObject.COLLECTION,
+                                                                              filter=referenced_query)
+        matched_objects = []
+        for matched_object in referenced_by_objects:
+            matched_objects.append(CmdbObject(
+                **matched_object
+            ))
+        CMDB_LOGGER.debug("matched objects count: {}".format(len(matched_objects)))
+        CMDB_LOGGER.debug("matched objects: {}".format(matched_objects))
+        return matched_objects
 
     def delete_object(self, public_id: int):
         ack = self._delete(CmdbObject.COLLECTION, public_id)
@@ -283,12 +353,12 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = self._delete(CmdbTypeCategory.COLLECTION, public_id)
         return ack
 
-    def get_status(self, public_id) -> CmdbObjectStatus:
+    def get_status(self, public_id) -> (CmdbObjectStatus, None):
         try:
             return CmdbObjectStatus(**self.dbm.find_one(
                 collection=CmdbObjectStatus.COLLECTION,
                 public_id=public_id)
-                            )
+                                    )
         except CMDBError:
             return None
 
@@ -297,3 +367,15 @@ class CmdbObjectManager(CmdbManagerBase):
         for status in self.get_type(type_id).status:
             status_list.append(self.get_status(status))
         return status_list
+
+    def generate_log_state(self, state: (list, dict)) -> str:
+        from cmdb.utils.security import SecurityManager
+        scm = SecurityManager(self.dbm)
+        encrypted_state = scm.encrypt_aes(state)
+        CMDB_LOGGER.debug("Encrypt log state: {}".format(encrypted_state))
+        return encrypted_state
+
+
+class UpdateError(CMDBError):
+    def __init__(self, class_name, data, error):
+        self.message = 'Update error while updating {} - Data: {} - Error: '.format(class_name, data, error)

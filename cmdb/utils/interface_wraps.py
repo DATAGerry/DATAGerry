@@ -21,8 +21,10 @@ def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
+
+        LOGGER.debug("User COOKIE: {}".format(request.cookies))
         if 'access-token' in request.cookies:
-            token = request.cookies.get('access-token')
+            token = request.cookies['access-token']
         else:
             return redirect(url_for('auth_pages.login_page'))
         try:

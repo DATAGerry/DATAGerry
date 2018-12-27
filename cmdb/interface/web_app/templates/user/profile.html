@@ -1,19 +1,98 @@
 {% extends 'layout.html' %}
 {% block title %}User view{% endblock %}
 {% block navigation %}
-{% include 'includes/_navigation.html' %}
+    {% include 'includes/_navigation.html' %}
 {% endblock %}
 {% block breadcrumb %}
-{% include 'includes/_breadcrumb.html' %}
+    {% include 'includes/_breadcrumb.html' %}
 {% endblock %}
 {% block content %}
-<div class="content">
-    <div class="container-fluid">
-        {{ super() }}
-        <div class="row">
-            {{ current_user_id }}
-            {{ view_user }}
+    <div class="content">
+        <div class="container-fluid">
+            {{ super() }}
+            <div class="row">
+                <div class="col-8">
+                    <h1>Profil: {{ view_user.get_name() }}</h1>
+                    <hr/>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username" name="username"
+                               aria-describedby="username_input" placeholder="Username"
+                               value="{{ view_user.get_username() }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email address</label>
+                        <input type="email" class="form-control" id="email" name="email"
+                               aria-describedby="email_help" placeholder="Email address"
+                               value="{{ view_user.get_email() }}">
+                        <small id="email_help" class="form-text text-muted">We'll never share your email with anyone
+                            else.
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <label for="firstname">First name</label>
+                        <input type="text" class="form-control" id="first_name" name="first_name"
+                               placeholder="Firstname" value="{{ view_user.get_first_name() }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastname">Last name</label>
+                        <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Lastname"
+                               value="{{ view_user.get_last_name() }}">
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card">
+                        <h5 class="card-header">
+                            User meta
+                        </h5>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tbody>
+                                <tr>
+                                    <th class="border-top-0" scope="row">User ID</th>
+                                    <td class="border-top-0">{{ view_user.get_public_id() }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Registration Time</th>
+                                    <td>{{ view_user.registration_time }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Authenticator</th>
+                                    <td>{{ view_user.authenticator }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer"></div>
+                    </div>
+                    <div class="card mt-3">
+                        <h5 class="card-header">
+                            Group data
+                        </h5>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tbody>
+                                <tr>
+                                    <th class="border-top-0" scope="row">Group</th>
+                                    <td class="border-top-0">{{ user_group.get_label() }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Rights</th>
+                                    <th scope="row">Level</th>
+                                </tr>
+                                {% for user_right in group_rights %}
+                                    <tr>
+                                        <td>{{ user_right.get_name() }}</td>
+                                        <td><span class="badge badge-primary">{{ user_right.get_level_name() }}</span></td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer"></div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 {% endblock %}

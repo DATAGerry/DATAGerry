@@ -7,6 +7,9 @@ from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from jwcrypto import jwk, jwt, jws
 from cmdb.user_management import User
+from cmdb.utils import get_logger
+
+CMDB_LOGGER = get_logger()
 
 
 class SecurityManager:
@@ -28,13 +31,13 @@ class SecurityManager:
         pass
 
     def encrypt_token(self, payload: User, timeout: int = (DEFAULT_EXPIRES * 60)) -> str:
+        """TODO: Fix json encoding error - current workaround with direct dump"""
         import json
-        user_data = {
-            'public_id': payload.get_public_id(),
-            'user_name': payload.get_username()
-        }
-        payload = json.dumps(user_data)
-        jws_token = jws.JWS(payload=payload)
+        user_data = payload.to_json()
+        CMDB_LOGGER.debug("Login User: {}, format {}".format(user_data, type(user_data)))
+        # payload_user = json.dumps(user_data)
+        CMDB_LOGGER.debug("Login User Payload: {}, format {}".format(user_data, type(user_data)))
+        jws_token = jws.JWS(payload=user_data)
         jws_token.add_signature(
             key=self.get_sym_key(),
             alg=SecurityManager.DEFAULT_ALG,
@@ -79,15 +82,18 @@ class SecurityManager:
         :param raw: unencrypted data
         :return:
         """
-        raw = SecurityManager._pad(raw)
+        if type(raw) == list:
+            import json
+            raw = json.dumps(raw)
+        raw = SecurityManager._pad(raw).encode('UTF-8')
         iv = Random.new().read(AES.block_size)
-        cipher = AES.new(self.symmetric_key, AES.MODE_CBC, iv)
+        cipher = AES.new(self.get_symmetric_aes_key(), AES.MODE_CBC, iv)
         return base64.b64encode(iv + cipher.encrypt(raw))
 
-    def decrypt(self, enc):
+    def decrypt_aes(self, enc):
         enc = base64.b64decode(enc)
         iv = enc[:AES.block_size]
-        cipher = AES.new(self.symmetric_key, AES.MODE_CBC, iv)
+        cipher = AES.new(self.get_symmetric_aes_key(), AES.MODE_CBC, iv)
         return SecurityManager._unpad(cipher.decrypt(enc[AES.block_size:])).decode('utf-8')
 
     @staticmethod
@@ -105,6 +111,12 @@ class SecurityManager:
         except (KeyError, NoDocumentFound):
             symmetric_key = self.generate_sym_key()
         return jwk.JWK(**symmetric_key)
+
+    def generate_symmetric_aes_key(self):
+        self.ssw.write('security', {'symmetric_aes_key': Random.get_random_bytes(32)})
+
+    def get_symmetric_aes_key(self):
+        return self.ssr.get_value('symmetric_aes_key', 'security')
 
     def generate_sym_key(self):
         symmetric_key = jwk.JWK.generate(kty='oct', size=256).export()

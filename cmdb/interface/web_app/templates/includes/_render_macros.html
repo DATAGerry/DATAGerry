@@ -18,6 +18,21 @@
     </div>
 {%- endmacro %}
 
+{% macro date(field, mode) -%}
+    <div class="form-group">
+        <label for="{{ field.name }}">{{ field.label }}</label>
+        <input class="{{ field.className }}" type="{{ field.get_sub_type() }}" name="{{ field.name }}"
+               value="{{ field.value|e }}"
+                {% if mode == 0 %}
+               readonly
+                {% endif %}
+        />
+        {% if field.description %}
+            <small id="{{ field.name }}_help" class="form-text text-muted">{{ field.description }}</small>
+        {% endif %}
+    </div>
+{%- endmacro %}
+
 {% macro href(field, mode) -%}
     {% if mode == 0 %}
         {{ field.label }}: <a href="{{ field.value|e }}" alt="{{ field.name }}" target="_blank">{{ field.value|e }}</a>
@@ -43,14 +58,12 @@
         <div class="form-group">
             <label for="{{ field.name }}">{{ field.label }}</label>
             <div class="input-group">
-                <input class="{{ field.className }}" type="{{ field.get_sub_type() }}" name="{{ field.name }}"
-                       value="{{ ref_string }}"
-                        {% if mode == 0 %}
-                       readonly
-                        {% endif %}
-                />
+                <input data-value="{{ ref_object.get_public_id() }}" class="{{ field.className }}"
+                       type="{{ field.get_sub_type() }}" name="{{ field.name }}"
+                       value="{{ ref_string }}" readonly/>
                 <div class="input-group-append">
-                    <span class="input-group-text"><a href="/object/{{ ref_object.get_public_id() }}"><i class="fas fa-angle-double-right"></i></a></span>
+                    <span class="input-group-text"><a href="/object/{{ ref_object.get_public_id() }}"><i
+                            class="fas fa-angle-double-right"></i></a></span>
                 </div>
                 {% if field.description %}
                     <small id="{{ field.name }}_help" class="form-text text-muted">{{ field.description }}</small>
@@ -58,7 +71,19 @@
             </div>
         </div>
     {% elif mode == 1 %}
-        TODO: EDIT MODE
+        {% set ref_object = object_manager.get_object(field.value) %}
+        {% set ref_string = ref_object.to_value_strings(ref_type_fields) %}
+        <div class="form-group">
+            <label for="{{ field.name }}">{{ field.label }}</label>
+            <div class="input-group">
+                <input class="{{ field.className }}" type="{{ field.get_sub_type() }}" name="{{ field.name }}"
+                       value="{{ ref_object.get_public_id() }}"
+                />
+                {% if field.description %}
+                    <small id="{{ field.name }}_help" class="form-text text-muted">{{ field.description }}</small>
+                {% endif %}
+            </div>
+        </div>
     {% endif %}
 {%- endmacro %}
 
@@ -76,7 +101,7 @@
                         {{ href(current_field, render.get_mode()) }}
                     {% endif %}
                     {% if current_field.get_type() == 'date' %}
-                        {{ text(current_field, render.get_mode()) }}
+                        {{ date(current_field, render.get_mode()) }}
                     {% endif %}
                     {% if current_field.get_type() == 'ref' %}
                         {{ ref(current_field, render.get_mode()) }}

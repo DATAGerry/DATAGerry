@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+{% from "includes/_render_macros.html" import render_object_view with context %}
+{% block title %}View #{{ old_object.get_public_id() }}{% endblock %}
+{% block navigation %}
+    {% include 'includes/_navigation.html' %}
+{% endblock %}
+{% block breadcrumb %}
+    {% include 'includes/_breadcrumb.html' %}
+{% endblock %}
+{% block content %}
+    <div class="content">
+        <div class="container-fluid">
+            {{ super() }}
+            {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    <strong>ERROR:</strong> {{ error }} <br/><a href="/object/{{ old_object.get_public_id() }}/"
+                                                                class="alert-link">Back to object</a>.
+                </div>
+            {% else %}
+                <div class="alert alert-success" role="alert">
+                    <h4 class="alert-heading">Successful!</h4>
+                    <p>Update successfully completed</p>
+                    <hr>
+                    <p class="mb-0"><a href="/object/{{ old_object.get_public_id() }}/" class="alert-link">Back to
+                        object</a>
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

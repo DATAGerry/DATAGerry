@@ -51,6 +51,15 @@ def _activate_debug():
     LOGGER.warning("DEBUG mode enabled")
 
 
+def _generate_security_keys():
+    LOGGER.info("Generating security keys")
+    from cmdb.utils import get_security_manager
+    sec_database = get_pre_init_database()
+    sec_security = get_security_manager(sec_database)
+    sec_security.generate_symmetric_aes_key()
+    LOGGER.info("Security keys generated")
+
+
 def _setup():
     """
     Setup function which generates default settings and admin user
@@ -65,6 +74,7 @@ def _setup():
         setup_database = get_pre_init_database()
         setup_security = get_security_manager(setup_database)
         setup_security.generate_sym_key()
+        _generate_security_keys()
         setup_management = get_user_manager()
         group_id = setup_management.insert_group('admin', 'Administrator')
         admin_username = input('Enter admin USERNAME: ')
@@ -129,6 +139,10 @@ def build_arg_parser():
     )
     _parser.add_option('--setup', action='store_true', default=False, dest='setup',
                        help="init cmdb")
+
+    _parser.add_option('--keys', action='store_true', default=False, dest='keys',
+                       help="init securty keys")
+
     _parser.add_option('-d', '--debug', action='store_true', default=False, dest='debug',
                        help="enable debug mode: DO NOT USE ON PRODUCTIVE SYSTEMS")
 
@@ -141,7 +155,7 @@ def build_arg_parser():
     return _parser.parse_args()
 
 
-@timing
+@timing('CMDB start took')
 def main(args):
     """
     Default application start function
@@ -159,6 +173,9 @@ def main(args):
         LOGGER.critical(conn_error.message)
         exit(1)
     if args.setup:
+        if args.keys:
+            _generate_security_keys()
+            exit(1)
         setup_finish = _setup()
         if setup_finish is True:
             LOGGER.info("SETUP COMPLETE")

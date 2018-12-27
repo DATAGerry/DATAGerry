@@ -41,32 +41,33 @@
                             </div>
                         </div>
                         {% if render.has_external() == True and not render.all_externals_empty() %}
-                        <div class="col-4">
-                            <div class="card">
-                                <h5 class="card-header">
-                                    External links
-                                </h5>
-                                <div class="card-body">
-                                    {% if view_type.render_meta['external'] | length > 0 %}
-                                        <table class="table table-sm">
-                                            <tbody>
-                                            {% for ext_link in view_type.render_meta['external'] %}
-                                                <tr>
-                                                    <th{% if loop.first %} class="border-top-0" {% endif %}scope="row">
-                                                        <i class="{{ ext_link['icon'] }}"></i></th>
-                                                    <td{% if loop.first %} class="border-top-0" {% endif %}>
-                                                        <a href="{{ ext_link['href'].format(view_object.get_values(*ext_link['fields'])) }}"
-                                                           target="_blank">{{ ext_link['label'] }}
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    {% endif %}
+                            <div class="col-4">
+                                <div class="card">
+                                    <h5 class="card-header">
+                                        External links
+                                    </h5>
+                                    <div class="card-body">
+                                        {% if view_type.render_meta['external'] | length > 0 %}
+                                            <table class="table table-sm">
+                                                <tbody>
+                                                {% for ext_link in view_type.render_meta['external'] %}
+                                                    <tr>
+                                                        <th{% if loop.first %}
+                                                            class="border-top-0" {% endif %}scope="row">
+                                                            <i class="{{ ext_link['icon'] }}"></i></th>
+                                                        <td{% if loop.first %} class="border-top-0" {% endif %}>
+                                                            <a href="{{ ext_link['href'].format(view_object.get_values(*ext_link['fields'])) }}"
+                                                               target="_blank">{{ ext_link['label'] }}
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                         {% endif %}
                     </div>
                     <div class="row">
@@ -84,24 +85,80 @@
                             <div class="tabbable">
                                 <ul class="nav nav-tabs">
                                     <li class="nav-item">
-                                        <a class="nav-link active show" href="#object-references" data-toggle="tab">References</a>
+                                        <a class="nav-link active show" href="#object-logs" data-toggle="tab">Logs</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#object-references" data-toggle="tab">References <small>({{ references|length }})</small></a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" href="#object-links" data-toggle="tab">Links</a>
                                     </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="#object-logs" data-toggle="tab">Logs</a>
-                                    </li>
                                 </ul>
                                 <div class="tab-content">
-                                    <div class="tab-pane active show" id="object-references">
-                                        References
+                                    <div class="tab-pane mt-2" id="object-references">
+                                        {% if references|length < 1 or references == None %}
+                                            <div class="alert alert-primary" role="alert">
+                                                No references found
+                                            </div>
+                                        {% else %}
+                                            <table data-order='[[ 0, "asc" ]]' class="data_table table table-striped">
+                                                <thead>
+                                                <tr>
+                                                    <th scope="col">Public ID</th>
+                                                    <th scope="col">Type</th>
+                                                    <th scope="col">Link</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for ref in references %}
+                                                    <tr>
+                                                        <th scope="row">{{ ref.get_public_id() }}</th>
+                                                        <td>{{ object_manager.get_type(ref.get_type_id()).get_label() }}</td>
+                                                        <td><a href="/object/{{ ref.get_public_id() }}"><i
+                                                                class="fas fa-angle-double-right"></i></a></td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        {% endif %}
                                     </div>
                                     <div class="tab-pane" id="object-links">
                                         Links
                                     </div>
-                                    <div class="tab-pane" id="object-logs">
-                                        Logs
+                                    <div class="tab-pane active show" id="object-logs">
+                                        {% set logs = render.get_logs() %}
+                                        {% if logs %}
+                                            <table class="table table-striped">
+                                                <thead>
+                                                <tr>
+                                                    <th scope="col">Date</th>
+                                                    <th scope="col">Author</th>
+                                                    <th scope="col">Action</th>
+                                                    <th scope="col">Message</th>
+                                                    <th scope="col">Log state</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {% for log in logs %}
+                                                    <tr>
+                                                        <th scope="row">{{ log.get_date() }}</th>
+                                                        <td>{{ user_manager.get_user(log.author_id).get_name() }}</td>
+                                                        <td>{{ log.get_action() }}</td>
+                                                        <td>{{ log.get_message() }}</td>
+                                                        {% if log.get_state() %}
+                                                            <td><a href="/object/{{ view_object.get_public_id() }}/{{ log.get_state() }}">View</a></td>
+                                                        {% else %}
+                                                            <td></td>
+                                                        {% endif %}
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        {% else %}
+                                            <div class="alert alert-primary" role="alert">
+                                                Empty logs
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -167,7 +224,7 @@
                                         </tr>
                                         <tr>
                                             <th scope="row">edits</th>
-                                            <td>{{ view_object.log_length() }}</td>
+                                            <td>{{ (view_object.get_logs()|length-1) }}</td>
                                         </tr>
                                         <tr>
                                             <th scope="row">author</th>
