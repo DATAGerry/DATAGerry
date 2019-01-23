@@ -36,7 +36,8 @@ from cmdb.data_storage.database_manager import DatabaseManager
 def get_object_manager(database_manager: DatabaseManager = None) -> CmdbObjectManager:
     """
 
-    Returns:
+    Returns (CmdbObjectManager): instance of object manager
+
 
     """
     from cmdb.data_storage import get_pre_init_database

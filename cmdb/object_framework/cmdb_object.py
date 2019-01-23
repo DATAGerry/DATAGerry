@@ -91,6 +91,8 @@ class CmdbObject(CmdbDAO):
     def set_value(self, field, value) -> str:
         for f in self.fields:
             if f['name'] == field:
+                if value.isdigit():
+                    value = int(value)
                 f['value'] = value
                 return f['name']
             continue

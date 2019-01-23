@@ -1,6 +1,6 @@
 # Project
 cmdb.conf
-sync_api
+etc/cmdb.conf
 IDEAS.md
 
 # Byte-compiled / optimized / DLL files

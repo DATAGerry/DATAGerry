@@ -84,7 +84,8 @@ class SecurityManager:
         """
         if type(raw) == list:
             import json
-            raw = json.dumps(raw)
+            from bson import json_util
+            raw = json.dumps(raw, default=json_util.default)
         raw = SecurityManager._pad(raw).encode('UTF-8')
         iv = Random.new().read(AES.block_size)
         cipher = AES.new(self.get_symmetric_aes_key(), AES.MODE_CBC, iv)
