@@ -7,12 +7,12 @@ CMDB_LOGGER = get_logger()
 auth_pages = Blueprint('auth_pages', __name__, template_folder='templates')
 
 
-@auth_pages.route('/login', methods=['GET'])
+@auth_pages.route('/login/', methods=['GET'])
 def login_page():
     return render_template('login.html')
 
 
-@auth_pages.route('/login', methods=['POST'])
+@auth_pages.route('/login/', methods=['POST'])
 def login_page_post():
     from cmdb.user_management.user_manager import NoUserFoundExceptions
     from cmdb.user_management.user import NoValidAuthenticationProviderError
@@ -54,18 +54,18 @@ def login_page_post():
     return render_template('login.html')
 
 
-@auth_pages.route('/logout')
+@auth_pages.route('/logout/')
 def logout_page():
     resp = make_response(redirect(url_for('auth_pages.login_page')))
     resp.set_cookie('access-token', '', expires=0)
     return resp
 
 
-@auth_pages.route('/register')
+@auth_pages.route('/register/')
 def register_page():
     return render_template('register.html')
 
 
-@auth_pages.route('/forgot-password')
+@auth_pages.route('/forgot-password/')
 def forgot_password_page():
     return render_template('forgot-password.html')

@@ -1,59 +1,133 @@
 <nav class="navbar navbar-cmdb navbar-light navbar-expand-md fixed-top">
-  <a class="navbar-brand" href="/"><small>//</small><b>NET</b>CMDB</a>
-  <a href="#" class="btn btn-link sidebar-toggle d-md-down-none">
-    <i class="fa fa-bars"></i>
-  </a>
-  <ul id="nav-quick-search" class="navbar-nav border">
-    <input class="form-control" type="text" placeholder="Search" aria-label="Search">
-  </ul>
-  <ul class="navbar-nav ml-auto">
-    <li class="nav-item">
-      <a class="nav-link" href="message">
-        <i class="line-icon-envelope"></i>
-        <span class="badge badge-pill badge-primary">0</span>
-      </a>
-    </li>
-    <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <i class="line-icon-bell"></i>
-      </a>
-        <div class="dropdown-menu dropdown-menu-right">
-          <div class="dropdown-header">Objects modified</div>
-          <a href="/user/[[ID]]/objects/new" class="dropdown-item">
-            <i class="far fa-file-alt"></i> New
-          </a>
-          <a href="/user/[[ID]]/objects/changed" class="dropdown-item">
-            <i class="fas fa-paste"></i> Changed
-          </a>
-          <a href="/user/[[ID]]/objects/your" class="dropdown-item">
-            <i class="fas fa-file-code"></i> Your items
-          </a>
-        </div>
-    </li>
-    <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <i class="line-icon-user"></i>
-      </a>
-      <div class="dropdown-menu dropdown-menu-right">
-        <div class="dropdown-header">Account</div>
-        <a href="/user/" class="dropdown-item">
-          <i class="fa fa-user"></i> Profile
-        </a>
-        <div class="dropdown-header">Settings</div>
-          <a href="/settings" class="dropdown-item">
-            <i class="fa fa-wrench"></i> Settings
-          </a>
-          <a href="#" class="dropdown-item">
-            <i class="fa fa-lock"></i> Lock
-          </a>
-          <a href="/logout" class="dropdown-item">
-            <i class="fa fa-lock"></i> Logout
-          </a>
-      </div>
-    </li>
-  </ul>
-  <!-- Mobile button -->
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+    <a class="navbar-brand" href="/">
+        <small>//</small>
+        <b>NET</b>CMDB</a>
+    <a href="#" class="btn btn-link sidebar-toggle d-md-down-none">
+        <i class="fa fa-bars"></i>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#nav-quick-search"
+            aria-controls="nav-quick-search" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div id="nav-quick-search" class="navbar-collapse collapse">
+        <ul class="navbar-nav ">
+            <form class="border">
+                <div class="input-group">
+                    <input id="quick-search" type="search" class="form-control" placeholder="Search"
+                           aria-label="search">
+                    <div class="input-group-append">
+                        <button class="advanced-search-button btn dropdown-toggle" type="button" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false"></button>
+                        <div class="dropdown-menu">
+                            <form>
+                                <div class="form-group">
+                                    <label for="filter-type">Filter by</label>
+                                    <div>
+                                        <select id="filter-type" name="filter-type" class="custom-select">
+                                            <option selected></option>
+                                            {% for filter_type in all_types %}
+                                                <option value="{{ filter_type['public_id'] }}">{{ filter_type['label'] }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="filter-author">Author</label>
+                                    <div>
+                                        <select id="filter-author" name="filter-author" class="custom-select">
+                                            <option selected></option>
+                                            {% for filter_user in all_users %}
+                                                <option value="{{ filter_user['public_id'] }}">{{ filter_user['name'] }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="filter-exclude">Exclude words</label>
+                                    <input id="filter-exclude" name="filter-exclude" type="text" class="form-control">
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <button name="submit" type="submit" class="btn btn-primary">search</button>
+                                        </div>
+                                    </div>
+                                    <div id="advanced-search-link" class="col">
+                                        <a href="/search/">Advanced search</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="advanced-search-button-submit btn btn-primary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </ul>
+    </div>
+    <ul class="navbar-nav ml-auto">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+               aria-expanded="false">
+                <i class="far fa-bell"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right">
+                <div class="dropdown-header">Objects modified</div>
+                <a href="/user/[[ID]]/objects/new" class="dropdown-item">
+                    <i class="fa fa-plus"></i> New
+                </a>
+                <a href="/user/[[ID]]/objects/changed" class="dropdown-item">
+                    <i class="fas fa-redo"></i> Changed
+                </a>
+                <a href="/user/[[ID]]/objects/your" class="dropdown-item">
+                    <i class="fa fa-briefcase"></i> Your items
+                </a>
+            </div>
+        </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+               aria-expanded="false">
+                <i class="far fa-user"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right">
+                <div class="dropdown-header">Account</div>
+                <a href="#" class="dropdown-item">
+                    <i class="fa fa-user"></i> Profile
+                </a>
+                <div class="dropdown-header">Session</div>
+                <a href="/lock/" class="dropdown-item">
+                    <i class="fa fa-lock"></i> Lock
+                </a>
+                <a href="/logout/" class="dropdown-item">
+                    <i class="fa fa-power-off"></i> Logout
+                </a>
+            </div>
+        </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+               aria-expanded="false">
+                <i class="fas fa-cogs"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right">
+                <div class="dropdown-header">App Settings</div>
+                <a href="/settings/" class="dropdown-item">
+                    <i class="fa fa-info"></i> Default
+                </a>
+                <a href="/settings/frontend/" class="dropdown-item">
+                    <i class="fa fa-font"></i> Frontend
+                </a>
+                <a href="/settings/security/" class="dropdown-item">
+                    <i class="fas fa-user-secret"></i> Security
+                </a>
+                <div class="dropdown-header">User Settings</div>
+                <a href="/settings/user-management/" class="dropdown-item">
+                    <i class="fa fa-users" aria-hidden="true"></i> Management
+                </a>
+            </div>
+        </li>
+    </ul>
 </nav>

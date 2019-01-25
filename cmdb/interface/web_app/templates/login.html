@@ -7,9 +7,7 @@
     <div class="container h-100">
         <div class="row justify-content-md-center h-100">
             <div class="card-wrapper">
-                <div class="brand">
-
-                </div>
+                <div id="cmdb_brand"></div>
                 <div class="card fat animated {% if error is defined or request.args.get('error') %}shake{%else%}fadeIn{% endif %}">
                     <div class="inner-pace"></div>
                     <div class="card-body">
@@ -22,7 +20,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="password">Password
-                                    <a href="/forgot-password" class="float-right">
+                                    <a href="/forgot-password/" class="float-right">
                                         Forgot Password?
                                     </a>
                                 </label>
@@ -48,7 +46,7 @@
                                 </button>
                             </div>
                             <div class="margin-top20 text-center">
-                                Don't have an account? <a href="/register">Create One</a>
+                                Don't have an account? <a href="/register/">Create One</a>
                             </div>
                         </form>
 

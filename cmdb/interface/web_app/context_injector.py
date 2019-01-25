@@ -5,6 +5,44 @@ from cmdb.utils.logger import get_logger
 LOGGER = get_logger()
 
 
+def inject_modus():
+    def modus():
+        from cmdb import __MODE__
+        return __MODE__
+    return dict(mode=modus())
+
+
+def inject_all_types():
+    def all_types():
+        all_types_in_db = MANAGER_HOLDER.get_object_manager().get_all_types()
+        type_list = []
+        for type_in_db in all_types_in_db:
+            type_list.append({
+                'public_id': type_in_db.get_public_id(),
+                'label': type_in_db.get_label()
+            })
+        return type_list
+    return dict(all_types=all_types())
+
+
+def inject_user_names():
+    def all_users():
+        from cmdb.user_management.user import User
+        all_users_in_db = MANAGER_HOLDER.get_user_manager().get_all_users()
+        user_list = []
+        for user_name in all_users_in_db:
+            try:
+                user_list.append({
+                    'public_id': User(**user_name).get_public_id(),
+                    'name': User(**user_name).get_name()
+                })
+            except CMDBError:
+                LOGGER.warning("User {} not initable".format(user_name))
+                continue
+        return user_list
+    return dict(all_users=all_users())
+
+
 def inject_current_user():
     def current_user():
         # TODO: extract current user
