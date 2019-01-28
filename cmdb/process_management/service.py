@@ -18,7 +18,7 @@ class AbstractCmdbService:
         signal.signal(signal.SIGTERM, self._shutdown)
 
         # start event manager
-        self._event_manager = cmd.even_management.event_manager.EventManagerAmqp(self._event_shutdown, self._handle_event, self._name, self._eventtypes)
+        self._event_manager = cmdb.event_management.event_manager.EventManagerAmqp(self._event_shutdown, self._handle_event, self._name, self._eventtypes)
 
         # start daemon logic in own thread
         self._thread_service = threading.Thread(target=self._run, daemon=False)

@@ -7,8 +7,7 @@ You should have received a copy of the MIT License along with Net|CMDB.
 If not, see <https://github.com/NETHINKS/NetCMDB/blob/master/LICENSE>.
 """
 
-from gevent import monkey
-monkey.patch_all()
+import signal
 from cmdb.utils import get_logger
 from cmdb.data_storage import get_pre_init_database
 from cmdb.utils import get_system_config_reader
@@ -103,26 +102,42 @@ def _load_plugins():
     LOGGER.info("Plugins loaded")
 
 
-def _start_apps():
+def _start_app():
     """
-    Starting the web and rest service
+    Starting the services
     """
-    from multiprocessing import Process, Queue
-    from cmdb.interface import HTTPServer, main_application
-    LOGGER.info("Starting rest- and web- server")
-    server_queue = Queue()
-    from cmdb.utils import get_system_config_reader
-    web_server_options = get_system_config_reader().get_all_values_from_section('WebServer')
-    http_process = Process(
-        target=HTTPServer(main_application, web_server_options).run,
-        args=(server_queue,)
-    )
-    http_process.start()
+    import cmdb.process_management.process_manager
 
-    if server_queue.get():
-        LOGGER.info("CMDB successfully started")
+    global app_manager
+
+    # install signal handler
+    signal.signal(signal.SIGTERM, _stop_app)
+
+    # start app
+    app_manager = cmdb.process_management.process_manager.ProcessManager()
+    app_manager.start_app()
+
+    ##old
+    #from multiprocessing import Process, Queue
+    #from cmdb.interface import HTTPServer, main_application
+    #LOGGER.info("Starting rest- and web- server")
+    #server_queue = Queue()
+    #from cmdb.utils import get_system_config_reader
+    #web_server_options = get_system_config_reader().get_all_values_from_section('WebServer')
+    #http_process = Process(
+    #    target=HTTPServer(main_application, web_server_options).run,
+    #    args=(server_queue,)
+    #)
+    #http_process.start()
+
+    #if server_queue.get():
+    #    LOGGER.info("CMDB successfully started")
 
     # http_process.join()
+
+def _stop_app(signum, frame):
+    global app_manager
+    app_manager.stop_app()
 
 
 def build_arg_parser():
@@ -186,7 +201,7 @@ def main(args):
         _activate_debug()
     _load_plugins()
     if args.start:
-        _start_apps()
+        _start_app()
 
 
 if __name__ == "__main__":

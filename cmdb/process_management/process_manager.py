@@ -8,9 +8,8 @@ class ProcessManager:
     def __init__(self):
         # service definitions (in correct order)
         self.__service_defs = []
-        self.__service_defs.append(CmdbProcess("service2", "cmdbeval.backend.example.ExampleService2"))
-        self.__service_defs.append(CmdbProcess("service1", "cmdbeval.backend.example.ExampleService1"))
-        self.__service_defs.append(CmdbProcess("webapp", "cmdbeval.webapp.app.WebappService"))
+        self.__service_defs.append(CmdbProcess("exampleservice1", "cmdb.process_management.example_service.ExampleService"))
+        #self.__service_defs.append(CmdbProcess("webapp", "cmdbeval.webapp.app.WebappService"))
 
         # processlist
         self.__process_list = []
