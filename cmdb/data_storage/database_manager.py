@@ -7,6 +7,7 @@ from pymongo.results import DeleteResult
 from cmdb.data_storage.database_connection import Connector
 from cmdb.utils.error import CMDBError
 from cmdb.utils import get_logger
+
 LOGGER = get_logger()
 
 
@@ -410,6 +411,14 @@ class DatabaseManagerMongo(DatabaseManager):
         return self.database_connector.client.drop_database(db_name)
 
     def create_collection(self, collection_name):
+        """
+        Creation empty MongoDB collection
+        Args:
+            collection_name: name of collectio
+
+        Returns:
+            collection name
+        """
         from pymongo.errors import CollectionInvalid
 
         try:
@@ -419,6 +428,14 @@ class DatabaseManagerMongo(DatabaseManager):
         return collection_name
 
     def delete_collection(self, collection_name):
+        """
+        Delete MongoDB collection
+        Args:
+            collection_name: collection name
+
+        Returns:
+            delete ack
+        """
         return self.database_connector.delete_collection(collection_name)
 
     def get_document_with_highest_id(self, collection: str) -> str:
@@ -452,18 +469,30 @@ class DatabaseManagerMongo(DatabaseManager):
 
 
 class CollectionAlreadyExists(CMDBError):
+    """
+    Creation error if collection already exists
+    """
+
     def __init__(self, collection_name):
         super().__init__()
         self.message = "Collection {} already exists".format(collection_name)
 
 
 class FileImportError(CMDBError):
+    """
+    Error if json file import to database failed
+    """
+
     def __init__(self, collection_name):
         super().__init__()
         self.message = "Collection {} could not be imported".format(collection_name)
 
 
 class PublicIDAlreadyExists(DuplicateKeyError):
+    """
+    Error if public_id inside database already exists
+    """
+
     def __init__(self, public_id):
         super().__init__()
         self.message = "Object with this public id already exists: {}".format(public_id)

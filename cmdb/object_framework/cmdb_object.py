@@ -144,15 +144,16 @@ class CmdbObject(CmdbDAO):
     def add_last_log_state(self, state):
         last_log = CmdbLog(**self.logs[-1])
         last_log.set_state(state)
-        CMDB_LOGGER.debug("CURRENT STATE {}, Length: {}".format(last_log.state, len(last_log.state)))
         self.logs[-1] = last_log.__dict__
 
     def add_log(self, log: CmdbLog):
-        CMDB_LOGGER.debug("NEW LOG: {}".format(log))
         self.logs.append(log.__dict__)
 
 
 class TypeNotSetError(CMDBError):
+    """
+    @deprecated
+    """
 
     def __init__(self, public_id):
         super().__init__()

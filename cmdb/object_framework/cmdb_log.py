@@ -1,3 +1,6 @@
+"""
+
+"""
 from datetime import datetime
 from cmdb.utils.error import CMDBError
 

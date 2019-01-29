@@ -29,8 +29,16 @@ def get_config_dir():
 
 
 def timing(msg=None):
-    def _timing(f):
+    """
+    Time wrap function - Measures time of function duration
+    Args:
+        msg: output message
 
+    Returns:
+        wrap function
+    """
+
+    def _timing(f):
         @wraps(f)
         def wrap(*args, **kwargs):
             from cmdb.utils import get_logger
@@ -40,5 +48,7 @@ def timing(msg=None):
             time2 = time.time()
             get_logger().debug('{} {:.3f}ms'.format(msg, (time2 - time1) * 1000.0))
             return ret
+
         return wrap
+
     return _timing

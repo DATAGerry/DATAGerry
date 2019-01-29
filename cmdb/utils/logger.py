@@ -4,12 +4,19 @@ Logging module
 import logging.config
 import os
 import datetime
+
 DEFAULT_LOG_DIR = os.path.join(os.path.dirname(__file__), '../../logs/')
 DEFAULT_FILE_NAME = 'cmdb'
 DEFAULT_FILE_EXTENSION = 'log'
 
 
 def get_log_level():
+    """
+    loads logger configuration from config file
+    will be overwrite cmdb.__MODE__
+    Returns:
+        config level
+    """
     import cmdb
     from cmdb.utils.system_reader import SystemConfigReader
     scr = SystemConfigReader(
@@ -29,6 +36,15 @@ def get_log_level():
 
 
 def get_logger(module='cmdb', export=False):
+    """
+    get an instance of the default logger
+    Args:
+        module: name of logger
+        export: if true only returns logger config
+
+    Returns:
+        instance of logging.Logger
+    """
     import pathlib
 
     pathlib.Path(DEFAULT_LOG_DIR).mkdir(parents=True, exist_ok=True)

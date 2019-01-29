@@ -1,25 +1,49 @@
+"""
+Different wrapper functions for interface module
+"""
 from functools import wraps
 from flask import request, abort, redirect, url_for
 from cmdb.utils.logger import get_logger
 from jwcrypto.jwt import JWTExpired, JWTNotYetValid
 from jwcrypto.jws import InvalidJWSSignature, InvalidJWSObject
 from cmdb.user_management import User, UserRight
+
 LOGGER = get_logger()
 
 
 def json_required(f):
+    """
+    json requirement wrapper
+    implements by routes with required an JSON content-type
+    Args:
+        f: target function
+
+    """
+
     @wraps(f)
     def _json_required(*args, **kwargs):
+        """
+        checks if HTTP Content-Type is jso
+        TODO: Implement
+        """
         if not request or not request.json:
             LOGGER.warn("Not json | {}".format(request))
             abort(400)
         return f(*args, **kwargs)
+
     return _json_required
 
 
 def login_required(f):
+    """
+    Wrapper function for routes which requires an authentication
+    """
+
     @wraps(f)
     def decorated(*args, **kwargs):
+        """
+        checks if user is logged in and valid
+        """
         token = None
 
         LOGGER.debug("User COOKIE: {}".format(request.cookies))
@@ -36,11 +60,13 @@ def login_required(f):
         except Exception as e:
             return redirect(url_for('auth_pages.login_page', error=e))
         return f(*args, **kwargs)
+
     return decorated
 
 
 def right_required(required_right: str):
     """
+    TODO: Implement
     See Also: https: // stackoverflow.com / questions / 5929107 / decorators -
     with-parameters
         https: // www.artima.com / weblogs / viewpost.jsp?thread = 240845"""
@@ -60,5 +86,7 @@ def right_required(required_right: str):
                 abort(401)
                 return redirect(url_for('static_pages.error_404_page'))
             return f(*args, **kwargs)
+
         return decorated
+
     return page_right

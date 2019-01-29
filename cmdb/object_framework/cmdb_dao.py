@@ -1,11 +1,13 @@
+"""
+Data access object for all core objects that are to be stored in the database.
+"""
 from cmdb.utils.error import CMDBError
 from cmdb.utils import get_logger
 LOGGER = get_logger()
 
 
 class CmdbDAO:
-    """Data access object for all core objects that are to be stored in the database.
-
+    """
     The data access object is the basic presentation if objects and
     their necessary dependent classes are to be stored in the database.
 
@@ -140,25 +142,53 @@ class CmdbDAO:
         self.version = updater_version.__repr__()
         return self.version
 
-    def get_version(self):
-        return self.version
+    def get_version(self) -> (str, None):
+        """
+        Get version number if exists
+        Returns:
+            version number
+        """
+        if self.version:
+            return self.version
+        else:
+            None
 
     def __repr__(self):
         from cmdb.utils.helpers import debug_print
         return debug_print(self)
 
     def to_database(self) -> dict:
+        """
+        quick and dirty database converter
+        at the moment it only returns the dict, but anyway should be used.
+        Returns:
+            dict: attribute dict of object
+        """
         return self.__dict__
 
     def to_json(self) -> dict:
+        """
+        converts attribute dict to json - maybe later for database updates
+        Returns:
+            dict: json dump with database default encoding of the object attributes
+        """
         from cmdb.data_storage.database_utils import default
         import json
         return json.dumps(self.__dict__, default=default)
 
 
 class _Versioning:
+    """
+    Helper class for object/type versioning
+    """
 
     def __init__(self, major: int=1, minor: int=0, patch: int=0):
+        """
+        Args:
+            major: core changes with no compatibility
+            minor: code changes
+            patch: little fixes
+        """
         self.major = major
         self.minor = minor
         self.patch = patch
@@ -210,18 +240,27 @@ class _Versioning:
 
 
 class VersionTypeError(CMDBError):
+    """
+    Error if update step input was wrong
+    """
     def __init__(self, level, update_input):
         super().__init__()
         self.message = 'The version type {1} update for {0} is wrong'.format(level, update_input)
 
 
 class NoVersionError(CMDBError):
+    """
+    Error if object from dao child class has no version number
+    """
     def __init__(self, public_id):
         super().__init__()
         self.message = 'The object (ID: {}) has no version control'.format(public_id)
 
 
 class NoPublicIDError(CMDBError):
+    """
+    Error if object has no public key and public key was'n removed over IGNORED_INIT_KEYS
+    """
     def __init__(self):
         super().__init__()
         self.message = 'The object has no general public id - look at the IGNORED_INIT_KEYS constant or the docs'

@@ -33,14 +33,14 @@ class Connector:
     def connect(self):
         """
         connect to database
-        :return: connections status
+        Returns: connections status
         """
         raise NotImplementedError
 
     def disconnect(self):
         """
         disconnect from database
-        :return: connection status
+        Returns: connection status
         """
         raise NotImplementedError
 
@@ -59,33 +59,40 @@ class MongoConnector(Connector):
 
     DEFAULT_CONNECTION_TIMEOUT = 1000
 
-    def __init__(self, host, port, database_name, timeout: int=DEFAULT_CONNECTION_TIMEOUT):
+    def __init__(self, host, port, database_name, timeout: int = DEFAULT_CONNECTION_TIMEOUT, auth: str = ''):
         """
+
         init mongodb connector
-        :param host: database server address
-        :param port: database server port
-        :param database_name: database name
-        :param auth: (optional) authentication methods
-               @see http://api.mongodb.com/python/current/examples/authentication.html
-               for more informations - same paramenters in cmdb.conf
+        Args:
+            host: database server address
+            port: database server port
+            database_name: database name
+            timeout: connection timeout
+            auth: (optional) authentication methods
+            @see http://api.mongodb.com/python/current/examples/authentication.html for more informations -
+            same paramenters in cmdb.conf
         """
+
         super().__init__(host, port, database_name, timeout)
         from pymongo import MongoClient
+        self.auth_method = auth  # TODO: Implement authentication
         self.client = MongoClient(
             self.host,
             self.port,
             connect=False,
             socketTimeoutMS=self.timeout,
             serverSelectionTimeoutMS=self.timeout,
-            socketKeepAlive=True,
+            # socketKeepAlive=True, # Deactivated on DeprecationWarning: The socketKeepAlive option is deprecated.
+            # see https://docs.mongodb.com/manual/faq/diagnostics/#does-tcp-keepalive-time-affect-mongodb-deployments
             maxPoolSize=None
         )
         self.database = self.client[database_name]
 
-    def connect(self):
+    def connect(self) -> str:
         """
         try's to connect to database
-        :return: server status
+        Returns:
+            server status
         """
         try:
             self.client.admin.command('ping')
@@ -93,17 +100,19 @@ class MongoConnector(Connector):
         except ServerSelectionTimeoutError:
             raise ServerTimeoutError(self.host)
 
-    def disconnect(self):
+    def disconnect(self) -> bool:
         """
         try's to disconnect from database
-        :return: server status
+        Returns:
+            server status
         """
         return self.client.close()
 
-    def is_connected(self):
+    def is_connected(self) -> bool:
         """
         check if connection to database exists
-        :return: True/False
+        Returns:
+            connection status
         """
         try:
             self.connect()
@@ -112,23 +121,41 @@ class MongoConnector(Connector):
             CMDB_LOGGER.error(timeout_error.message)
             return False
 
-    def create_collection(self, collection_name):
+    def create_collection(self, collection_name) -> str:
+        """
+        creation collection/table in database
+        Args:
+            collection_name: name of collection
+
+        Returns:
+            creation ack
+        """
         return self.database.create_collection(collection_name)
 
-    def delete_collection(self, collection_name):
+    def delete_collection(self, collection_name) -> str:
+        """
+        delete collection/table in database
+        Args:
+            collection_name: name of collection
+
+        Returns:
+            creation ack
+        """
         return self.database.drop_collection(collection_name)
 
-    def get_database_name(self):
+    def get_database_name(self) -> str:
         """
         get database name
-        :return: database name
+        Returns:
+            name of selected database
         """
         return self.database.name
 
     def get_database(self):
         """
         get database
-        :return: database object
+        Returns:
+            database object
         """
         return self.database
 
@@ -141,18 +168,24 @@ class MongoConnector(Connector):
         """
         return self.database[name]
 
-    def get_collections(self):
+    def get_collections(self) -> list:
         """
         list all collections inside mongo database
-        :return:
+        Returns:
+            list of collections
         """
         return self.database.collection_names()
 
     def __exit__(self, *err):
+        """auto close client on exit"""
         self.client.close()
 
 
 class DatabaseConnectionError(CMDBError):
+    """
+    Error if connection to database broke up
+    """
+
     def __init__(self):
         super().__init__()
         self.message = "Connection error - No connection could be established with the database"

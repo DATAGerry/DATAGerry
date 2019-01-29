@@ -5,6 +5,14 @@ from cmdb.utils.security import SecurityManager
 
 
 def get_security_manager(database_manager) -> SecurityManager:
+    """
+    get a instance of the security manager
+    Args:
+        database_manager (DatabaseManager): instance of the database manager
+
+    Returns:
+        (SecurityManager): instance of SecurityManager
+    """
     return SecurityManager(database_manager)
 
 

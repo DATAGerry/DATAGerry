@@ -1,51 +1,56 @@
 """
-Writer module for database based system configurations
+Configuration module for settings in file format and in the database
 """
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.data_storage.database_manager import NoDocumentFound
+from cmdb.utils.error import CMDBError
 
 
 class SystemWriter:
     """
-
+    Superclass for general write permissions
+    Watch out with the collection constants. In Mongo the Settings Collection is pre-defined
     """
+
+    COLLECTION = 'settings.*'
 
     def __init__(self, writer: DatabaseManagerMongo):
         """
-
+        Default constructor
         Args:
-            writer:
+            writer: Database manager instance
         """
         self.writer = writer
 
     def write(self, _id: str, data: dict) -> str:
         """
-
+        write data into database
+        it' the only module where no public_id is used
         Args:
-            _id:
-            data:
+            _id: database entry identifier
+            data: data to write
 
         Returns:
-
+            acknowledgment: based on database manager
         """
         raise NotImplementedError
 
     def update(self, _id: str or int, data: dict) -> str:
         """
-
+        update entry in database
         Args:
-            _id:
-            data:
+            _id: database entry identifier
+            data: data to update
 
         Returns:
-
+            acknowledgment: based on database manager
         """
         raise NotImplementedError
 
     def verify(self, _id: int, data: dict) -> bool:
         """
-
-        Returns:
+        Checks if configuration entry exists
+        Returns: True if exists - else False
 
         """
         raise NotImplementedError
@@ -59,20 +64,21 @@ class SystemSettingsWriter(SystemWriter):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         """
-
+        Init database writer with DatabaseManagerMongo
         Args:
-            database_manager:
+            database_manager: Database connection
         """
         super(SystemSettingsWriter, self).__init__(database_manager)
 
-    def write(self, _id: str, data: dict):
+    def write(self, _id: str, data: dict) -> str:
         """
-        TODO: Setup bug fixen
+        Write new settings in database
         Args:
-            _id:
-            data:
-
+            _id: new settings_id
+            data: data to write
         Returns:
+            acknowledgment: based on database manager
+        TODO: auto find _id
 
         """
         try:
@@ -91,13 +97,15 @@ class SystemSettingsWriter(SystemWriter):
 
     def update(self, _id: str or int, data: dict) -> str:
         """
-
+        Update existing setting in database
         Args:
-            _id:
-            data:
+            _id: settings entry id
+            data: data to update
 
         Returns:
+            acknowledgment: based on database manager
 
+        TODO: Error handling
         """
         from cmdb.data_storage.database_utils import convert_form_data
         new_data = convert_form_data(data)
@@ -106,23 +114,30 @@ class SystemSettingsWriter(SystemWriter):
         ack = self.writer.update_with_internal(collection=self.COLLECTION, _id=_id, data=current_setting)
         return ack
 
-    def verify(self, _id: str, data: dict) -> bool:
+    def verify(self, _id: str, data: dict = None) -> bool:
         """
-
+        Checks if setting exists and has data
         Args:
-            _id:
-            data:
+            _id: settings entry id
+            data: verify if has same data
 
         Returns:
-
+            bool if entry exists and has data (compare), otherwise false
         """
-        verify_document = self.writer.find_one_by(collection=self.COLLECTION, filter={'_id': _id})
-        if verify_document != data:
+        try:
+            verify_document = self.writer.find_one_by(collection=self.COLLECTION, filter={'_id': _id})
+        except (NoEntryFoundError, CMDBError):
+            return False
+
+        if verify_document != data and data is not None:
             return False
         return True
 
 
-class NoEntryFoundError(Exception):
+class NoEntryFoundError(CMDBError):
+    """
+    Error if no entry exists
+    """
 
     def __init__(self, _id):
         super().__init__()

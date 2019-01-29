@@ -1,3 +1,8 @@
+"""
+Error super class
+"""
+
+
 class CMDBError(Exception):
     def __init__(self):
         super().__init__()

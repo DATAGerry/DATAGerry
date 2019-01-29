@@ -32,10 +32,8 @@ class SecurityManager:
 
     def encrypt_token(self, payload: User, timeout: int = (DEFAULT_EXPIRES * 60)) -> str:
         """TODO: Fix json encoding error - current workaround with direct dump"""
-        import json
         user_data = payload.to_json()
         CMDB_LOGGER.debug("Login User: {}, format {}".format(user_data, type(user_data)))
-        # payload_user = json.dumps(user_data)
         CMDB_LOGGER.debug("Login User Payload: {}, format {}".format(user_data, type(user_data)))
         jws_token = jws.JWS(payload=user_data)
         jws_token.add_signature(

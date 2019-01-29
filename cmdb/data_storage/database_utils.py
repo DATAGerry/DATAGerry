@@ -1,3 +1,6 @@
+"""
+List of useful functions for the database
+"""
 import calendar
 import datetime
 import re
@@ -21,6 +24,14 @@ _RE_TYPE = type(re.compile("foo"))
 
 
 def convert_form_data(data: dict) -> dict:
+    """
+    Quick convert data from data for database entry
+    Args:
+        data: data for conversion
+
+    Returns:
+        converted dictionary
+    """
     buf_dict = {}
     for k, v in data.items():
         b = form_converter(k, v)
@@ -29,6 +40,7 @@ def convert_form_data(data: dict) -> dict:
 
 
 def form_converter(k, v) -> dict:
+    """filter function for dict"""
     dict_buffer = {}
     if v is None:
         dict_buffer.update({k: None})

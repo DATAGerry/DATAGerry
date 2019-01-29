@@ -18,6 +18,7 @@ from cmdb.object_framework.cmdb_collection import CmdbCollection, CmdbCollection
 from cmdb.object_framework.cmdb_render import CmdbRender
 from cmdb.object_framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.object_framework.cmdb_log import CmdbLog
+from cmdb.data_storage.database_manager import DatabaseManager
 
 __COLLECTIONS__ = [
     CmdbObject,
@@ -30,15 +31,11 @@ __COLLECTIONS__ = [
     CmdbCollectionTemplates
 ]
 
-from cmdb.data_storage.database_manager import DatabaseManager
-
 
 def get_object_manager(database_manager: DatabaseManager = None) -> CmdbObjectManager:
     """
-
+    auto init a instance of an object manager
     Returns (CmdbObjectManager): instance of object manager
-
-
     """
     from cmdb.data_storage import get_pre_init_database
     return CmdbObjectManager(

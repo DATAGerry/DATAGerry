@@ -66,11 +66,10 @@ def test_cmdb_dao():
 
 FIXTURE_DIR = os.path.join(
     os.path.dirname(os.path.realpath(__file__)),
-    'fixtures',
+    '../etc/example/',
 )
 
 ALL_JSON = pytest.mark.datafiles(
-    os.path.join(FIXTURE_DIR, 'objects.data.logs.json'),
     os.path.join(FIXTURE_DIR, 'objects.data.json')
 )
 
@@ -113,21 +112,6 @@ def objects_data_json(datafiles):
 def test_cmdb_object(objects_data_json):
     test_object = CmdbObject(**objects_data_json['objects.data.json'][0])
     assert type(test_object) == CmdbObject
-
-
-@ALL_JSON
-def test_cmdb_object_logs(objects_data_json):
-    from cmdb.object_framework.cmdb_log import ActionNotPossibleError
-
-    test_log = CmdbLog(**objects_data_json['objects.data.logs.json'][0])
-    assert test_log._action == 'create'
-    assert test_log.editor == 1
-    assert test_log.message == "Default"
-    assert len(test_log.log) == 0
-    assert type(test_log.date) == str
-
-    with pytest.raises(ActionNotPossibleError):
-        CmdbLog(**objects_data_json['objects.data.logs.json'][1])
 
 
 def test_object_categories(object_manager):
@@ -201,6 +185,7 @@ def test_object_categories(object_manager):
 
 def test_object_status():
     default_stati = CmdbObjectStatus(
+        public_id=1,
         name='default',
         label='Default',
         color='#F0F'

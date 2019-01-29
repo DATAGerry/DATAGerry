@@ -14,6 +14,7 @@ from cmdb.data_storage import get_pre_init_database
 from cmdb.utils import get_system_config_reader
 from cmdb.utils.helpers import timing
 from cmdb.utils.error import CMDBError
+from optparse import OptionParser
 LOGGER = get_logger()
 config_reader = get_system_config_reader()
 
@@ -33,12 +34,12 @@ def _check_database():
         return connection_test
     retries = 0
     while retries < 3:
-            retries += 1
-            LOGGER.warning("Retry {}: Checking database connection with cmdb.conf data".format(retries))
-            connection_test = dbm.database_connector.is_connected()
-            if connection_test:
-                dbm.database_connector.disconnect()
-                return connection_test
+        retries += 1
+        LOGGER.warning("Retry {}: Checking database connection with cmdb.conf data".format(retries))
+        connection_test = dbm.database_connector.is_connected()
+        if connection_test:
+            dbm.database_connector.disconnect()
+            return connection_test
     return connection_test
 
 
@@ -52,6 +53,9 @@ def _activate_debug():
 
 
 def _generate_security_keys():
+    """
+    Generating security settings keys
+    """
     LOGGER.info("Generating security keys")
     from cmdb.utils import get_security_manager
     sec_database = get_pre_init_database()
@@ -60,12 +64,12 @@ def _generate_security_keys():
     LOGGER.info("Security keys generated")
 
 
-def _setup():
+def _setup() -> bool:
     """
     Setup function which generates default settings and admin user
     will be triggered with the --setup parameter
     Returns:
-
+        bool: True if setup was complete without error
     """
     from cmdb.user_management import get_user_manager
     from cmdb.utils import get_security_manager
@@ -92,11 +96,14 @@ def _setup():
         )
     except CMDBError as setup_error:
         return setup_error
-
     return True
 
 
 def _load_plugins():
+    """
+    Loading plugin syste,
+    TODO: Write plugin system
+    """
     LOGGER.info("Loading plugins")
     from cmdb.plugins.plugin_system import PluginManager
     pgm = PluginManager()
@@ -118,20 +125,16 @@ def _start_apps():
         args=(server_queue,)
     )
     http_process.start()
-
     if server_queue.get():
         LOGGER.info("CMDB successfully started")
 
-    # http_process.join()
 
-
-def build_arg_parser():
+def build_arg_parser() -> OptionParser:
     """
     Generate application parameter parser
     Returns: instance of OptionParser
 
     """
-    from optparse import OptionParser
     from cmdb import __version__, __title__
     _parser = OptionParser(
         usage="usage: {} [options]".format(__title__),
@@ -161,7 +164,6 @@ def main(args):
     Default application start function
     Args:
         args: start-options
-
     """
     from cmdb.data_storage.database_connection import DatabaseConnectionError
     try:
