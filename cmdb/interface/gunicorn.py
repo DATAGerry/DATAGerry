@@ -1,13 +1,40 @@
 """
 Server module for web-based services
 """
+import multiprocessing
+import signal
 import sys
 from cmdb import __MODE__
-from gunicorn.app.base import BaseApplication
+import cmdb.process_management.service
+from cmdb.interface.rest_api import create_rest_api
+from cmdb.interface.web_app import create_web_app
 from cmdb.utils.logger import get_logger, DEFAULT_LOG_DIR, DEFAULT_FILE_EXTENSION
-from gunicorn.arbiter import Arbiter
+from gunicorn.app.base import BaseApplication
 CMDB_LOGGER = get_logger()
 
+class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
+
+    def __init__(self):
+        super(WebCmdbService, self).__init__()
+        self._name = "webapp"
+        self._eventtypes = ["cmdb.webapp.#"]
+        self._threaded_service = False
+
+    def _run(self):
+        # start webserver
+        app = DispatcherMiddleware(
+            app=create_web_app(),
+            mounts={'/rest': create_rest_api()}
+        )
+        options = None
+
+        # start gunicorn as new process
+        webserver = HTTPServer(app, options)
+        webserver.run()
+
+    def _handle_event(self, event):
+        """ignore events"""
+        pass
 
 class HTTPServer(BaseApplication):
     """Basic server main_application"""
@@ -56,20 +83,16 @@ class HTTPServer(BaseApplication):
         self.options = options or {}
         if 'host' in self.options and 'port' in self.options:
             self.options['bind'] = '%s:%s' % (self.options['host'], self.options['port'])
-        if 'workers' not in self.options:
-            self.options['workers'] = HTTPServer.number_of_workers()
-        if 'worker_class' not in self.options:
-            self.options['worker_class'] = 'gevent'
+        #if 'workers' not in self.options:
+        #    self.options['workers'] = HTTPServer.number_of_workers()
+        self.options['worker_class'] = 'gthread'
         self.options['logconfig_dict'] = HTTPServer.CONFIG_DEFAULTS
         self.options['timeout'] = 2
         self.options['daemon'] = True
-        self.daemon = True
-        self.proc_name = 'cmdb_gunicorn'
         if __MODE__ == 'DEBUG' or 'TESTING':
             self.options['reload'] = True
             self.options['check_config'] = True
             CMDB_LOGGER.info("Gunicorn starting with auto reload option")
-        self.running = None
         self.application = app
         super(HTTPServer, self).__init__()
 
@@ -81,31 +104,6 @@ class HTTPServer(BaseApplication):
 
     def load(self):
         return self.application
-
-    def run(self, queue):
-        from multiprocessing import Process
-
-        try:
-            ar = Arbiter(self)
-            arbiter_process = Process(
-                target=ar.run
-            )
-            arbiter_process.start()
-
-            if arbiter_process.is_alive():
-                queue.put(True)
-                CMDB_LOGGER.info("Webserver started @ http://{}:{}".format(ar.address[0][0], ar.address[0][1]))
-            else:
-                CMDB_LOGGER.critical("Someting went wrong - see {} for more informations".format(
-                    HTTPServer.CONFIG_DEFAULTS['handlers']['error']['filename'])
-                )
-                arbiter_process.terminate()
-
-            arbiter_process.join()
-
-        except RuntimeError as e:
-            CMDB_LOGGER.critical(e)
-            sys.exit(1)
 
     @staticmethod
     def number_of_workers() -> int:

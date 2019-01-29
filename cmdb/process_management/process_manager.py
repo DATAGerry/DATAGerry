@@ -9,7 +9,7 @@ class ProcessManager:
         # service definitions (in correct order)
         self.__service_defs = []
         self.__service_defs.append(CmdbProcess("exampleservice1", "cmdb.process_management.example_service.ExampleService"))
-        #self.__service_defs.append(CmdbProcess("webapp", "cmdbeval.webapp.app.WebappService"))
+        self.__service_defs.append(CmdbProcess("webapp", "cmdb.interface.gunicorn.WebCmdbService"))
 
         # processlist
         self.__process_list = []

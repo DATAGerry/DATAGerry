@@ -11,6 +11,8 @@ class AbstractCmdbService:
         self._name = "abstract-service"
         # define event types for subscription
         self._eventypes = ["cmdb.#"]
+        # boolean: execute _run() method as own thread
+        self._threaded_service = True
         
     def start(self):
         # init shutdown handling
@@ -20,9 +22,12 @@ class AbstractCmdbService:
         # start event manager
         self._event_manager = cmdb.event_management.event_manager.EventManagerAmqp(self._event_shutdown, self._handle_event, self._name, self._eventtypes)
 
-        # start daemon logic in own thread
-        self._thread_service = threading.Thread(target=self._run, daemon=False)
-        self._thread_service.start()
+        if self._threaded_service:
+            # start daemon logic in own thread
+            self._thread_service = threading.Thread(target=self._run, daemon=False)
+            self._thread_service.start()
+        else:
+            self._run()
 
         # wait for shutdown, if daemon logic was terminated
         self._event_shutdown.wait()
