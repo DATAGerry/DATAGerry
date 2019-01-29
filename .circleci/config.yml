@@ -41,7 +41,7 @@ jobs:
           name: run lint
           command: |
             . venv/bin/activate
-            pylint cmdb/
+            pylint tests/
 
       - store_artifacts:
           path: test-reports
