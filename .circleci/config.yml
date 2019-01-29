@@ -31,7 +31,7 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            pytest cmdb/
+            pytest tests/
           environment:
             TEST_HOST: 127.0.0.1
             TEST_PORT: 27017
@@ -41,7 +41,7 @@ jobs:
           name: run lint
           command: |
             . venv/bin/activate
-            pylint tests/
+            pylint cmdb/
 
       - store_artifacts:
           path: test-reports
