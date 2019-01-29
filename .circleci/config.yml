@@ -10,7 +10,6 @@ jobs:
 
     steps:
       - checkout
-
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "requirements.txt" }}
@@ -32,11 +31,17 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            python -m cmdb -c
+            pytest cmdb/
           environment:
             TEST_HOST: 127.0.0.1
             TEST_PORT: 27017
             TEST_DATABASE: cmdb_test
+
+      - run:
+          name: run lint
+          command: |
+            . venv/bin/activate
+            pylint cmdb/
 
       - store_artifacts:
           path: test-reports
