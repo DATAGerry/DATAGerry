@@ -4,6 +4,7 @@ import multiprocessing
 import threading
 import pika
 from cmdb.event_management.event import Event
+from cmdb.utils import get_system_config_reader
 
 class EventManager:
 
@@ -69,13 +70,39 @@ class EventSenderAmqp(threading.Thread):
         self.__flag_shutdown = flag_shutdown
         self.__process_id = process_id
 
+        # get configuration
+        self.__config_mq = get_system_config_reader().get_all_values_from_section('MessageQueueing')
+        self.__config_host = self.__config_mq.get("host", "127.0.0.1")
+        self.__config_port = self.__config_mq.get("port", "5672")
+        self.__config_username = self.__config_mq.get("username", "guest")
+        self.__config_password = self.__config_mq.get("password", "guest")
+        self.__config_exchange = self.__config_mq.get("exchange", "netcmdb.eventbus")
+        self.__config_retries = int(self.__config_mq.get("connection_attempts", "5"))
+        self.__config_retrydelay = int(self.__config_mq.get("retry_delay", "6"))
+        self.__config_tls = False
+        if self.__config_mq.get("use_tls", "False") in ("true", "True", "1", "yes"):
+            self.__config_tls = True
+
+
     def __init_connection(self):
         # init connection to broker
         try:
-            self.__connection = pika.BlockingConnection(pika.ConnectionParameters(host="localhost", connection_attempts=5, retry_delay=6))
+            credentials = pika.credentials.PlainCredentials(self.__config_username, self.__config_password)
+            self.__connection = pika.BlockingConnection(pika.ConnectionParameters(
+                                                            host=self.__config_host,
+                                                            port=self.__config_port,
+                                                            connection_attempts=self.__config_retries, 
+                                                            retry_delay=self.__config_retrydelay,
+                                                            credentials=credentials,
+                                                            ssl=self.__config_tls
+                                                            )
+                                                        )
             self.__channel = self.__connection.channel()
-            self.__channel.exchange_declare(exchange="netcmdb.eventbus", exchange_type="topic")
-        except pika.exceptions.ConnectionClosed:
+            self.__channel.exchange_declare(
+                exchange=self.__config_exchange,
+                exchange_type="topic"
+            )
+        except pika.exceptions.AMQPConnectionError:
             print("connection error")
             self.__flag_shutdown.set()
 
@@ -90,11 +117,13 @@ class EventSenderAmqp(threading.Thread):
                     event = self.__queue.get(block=True, timeout=2)
                     event_type = event.get_type()
                     event_serialized = event.json_repr()
-                    self.__channel.basic_publish(exchange="netcmdb.eventbus", routing_key=event_type, body=event_serialized)
+                    self.__channel.basic_publish(exchange=self.__config_exchange,
+                                                 routing_key=event_type,
+                                                 body=event_serialized)
                 except queue.Empty:
                     self.__connection.process_data_events()
-            # handle lost connections to AMQP broker
-            except pika.exceptions.ConnectionClosed:
+            # handle AMQP connection errors
+            except pika.exceptions.AMQPConnectionError:
                 print("connection to broker lost, try to reconnect...")
                 self.__init_connection()
 
@@ -107,6 +136,19 @@ class EventReceiverAmqp(threading.Thread):
         self.__flag_shutdown = flag_shutdown
         self.__process_id = process_id
         self.__event_types = event_types
+
+        # get configuration
+        self.__config_mq = get_system_config_reader().get_all_values_from_section('MessageQueueing')
+        self.__config_host = self.__config_mq.get("host", "127.0.0.1")
+        self.__config_port = self.__config_mq.get("port", "5672")
+        self.__config_username = self.__config_mq.get("username", "guest")
+        self.__config_password = self.__config_mq.get("password", "guest")
+        self.__config_exchange = self.__config_mq.get("exchange", "netcmdb.eventbus")
+        self.__config_retries = int(self.__config_mq.get("connection_attempts", "5"))
+        self.__config_retrydelay = int(self.__config_mq.get("retry_delay", "6"))
+        self.__config_tls = False
+        if self.__config_mq.get("use_tls", "False") in ("true", "True", "1", "yes"):
+            self.__config_tls = True
 
     def __process_event_cb(self, ch, method, properties, body):
         event = Event.create_event(body)
@@ -125,20 +167,29 @@ class EventReceiverAmqp(threading.Thread):
     def __init_connection(self):
         try:
             # init connection to broker
-            self.__connection = pika.BlockingConnection(pika.ConnectionParameters(host="localhost", connection_attempts=5, retry_delay=6))
+            credentials = pika.credentials.PlainCredentials(self.__config_username, self.__config_password)
+            self.__connection = pika.BlockingConnection(pika.ConnectionParameters(
+                                                            host=self.__config_host, 
+                                                            port=self.__config_port,
+                                                            connection_attempts=self.__config_retries, 
+                                                            retry_delay=self.__config_retrydelay,
+                                                            credentials=credentials,
+                                                            ssl=self.__config_tls
+                                                            )
+                                                        )
             self.__channel = self.__connection.channel()
-            self.__channel.exchange_declare(exchange="netcmdb.eventbus", exchange_type="topic")
+            self.__channel.exchange_declare(exchange=self.__config_exchange, exchange_type="topic")
             queue_name = ""
             if self.__process_id:
-                queue_name = "netcmdb.eventbus.{}".format(self.__process_id)
+                queue_name = "{}.{}".format(self.__config_exchange, self.__process_id)
             queue_declare_result = self.__channel.queue_declare(queue=queue_name, exclusive=True)
             queue = queue_declare_result.method.queue
             for event_type in self.__event_types:
-                self.__channel.queue_bind(exchange="netcmdb.eventbus", queue=queue, routing_key=event_type)
+                self.__channel.queue_bind(exchange=self.__config_exchange, queue=queue, routing_key=event_type)
 
             # register callback function for event handling
             self.__channel.basic_consume(self.__process_event_cb, queue=queue, no_ack=True)
-        except pika.exceptions.ConnectionClosed:
+        except pika.exceptions.AMQPConnectionError:
             print("connection error")
             self.__flag_shutdown.set()
 
@@ -151,7 +202,7 @@ class EventReceiverAmqp(threading.Thread):
                 # start handling events
                 self.__connection.add_timeout(2, self.__check_shutdown_flag)
                 self.__channel.start_consuming()
-            # handle lost connections to AMQP broker
-            except pika.exceptions.ConnectionClosed:
+            # handle AMQP connection errors
+            except pika.exceptions.AMQPConnectionError:
                 print("connection to broker lost, try to reconnect...")
                 self.__init_connection()
