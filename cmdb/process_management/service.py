@@ -13,6 +13,8 @@ class AbstractCmdbService:
         self._eventypes = ["cmdb.#"]
         # boolean: execute _run() method as own thread
         self._threaded_service = True
+        # boolean: multiprocessing service
+        self._multiprocessing = False
         
     def start(self):
         # init shutdown handling
@@ -20,7 +22,7 @@ class AbstractCmdbService:
         signal.signal(signal.SIGTERM, self._shutdown)
 
         # start event manager
-        self._event_manager = cmdb.event_management.event_manager.EventManagerAmqp(self._event_shutdown, self._handle_event, self._name, self._eventtypes)
+        self._event_manager = cmdb.event_management.event_manager.EventManagerAmqp(self._event_shutdown, self._handle_event, self._name, self._eventtypes, self._multiprocessing)
 
         if self._threaded_service:
             # start daemon logic in own thread

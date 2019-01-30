@@ -1,5 +1,6 @@
 import json
 import queue
+import multiprocessing
 import threading
 import pika
 from cmdb.event_management.event import Event
@@ -12,20 +13,27 @@ class EventManager:
     def send_event(self, event):
         pass
 
+    def get_send_queue(self):
+        pass
+
     def shutdown():
         pass
 
 
 class EventManagerAmqp(EventManager):
 
-    def __init__(self, flag_shutdown, receiver_callback, process_id=None, event_types=["#"]):
+    def __init__(self, flag_shutdown, receiver_callback, process_id=None, event_types=["#"], flag_multiproc=False):
         # store variables
         self.__process_id = process_id
         self.__receiver_callback = receiver_callback
         self.__event_types = event_types
+        self.__multiprocessing = flag_multiproc
 
         # create queue for events to send
-        self.__queue_send = queue.Queue()
+        if self.__multiprocessing:
+            self.__queue_send = multiprocessing.Queue()
+        else:
+            self.__queue_send = queue.Queue()
 
         # setup shutdown flag
         self.__flag_shutdown = flag_shutdown
@@ -41,6 +49,9 @@ class EventManagerAmqp(EventManager):
 
     def send_event(self, event):
         self.__queue_send.put(event)
+
+    def get_send_queue(self):
+        return self.__queue_send
 
     def shutdown(self):
         # set shutdown flag

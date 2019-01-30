@@ -117,23 +117,6 @@ def _start_app():
     app_manager = cmdb.process_management.process_manager.ProcessManager()
     app_manager.start_app()
 
-    ##old
-    #from multiprocessing import Process, Queue
-    #from cmdb.interface import HTTPServer, main_application
-    #LOGGER.info("Starting rest- and web- server")
-    #server_queue = Queue()
-    #from cmdb.utils import get_system_config_reader
-    #web_server_options = get_system_config_reader().get_all_values_from_section('WebServer')
-    #http_process = Process(
-    #    target=HTTPServer(main_application, web_server_options).run,
-    #    args=(server_queue,)
-    #)
-    #http_process.start()
-
-    #if server_queue.get():
-    #    LOGGER.info("CMDB successfully started")
-
-    # http_process.join()
 
 def _stop_app(signum, frame):
     global app_manager

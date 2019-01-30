@@ -8,6 +8,7 @@ from cmdb import __MODE__
 import cmdb.process_management.service
 from cmdb.interface.rest_api import create_rest_api
 from cmdb.interface.web_app import create_web_app
+from cmdb.utils import get_system_config_reader
 from cmdb.utils.logger import get_logger, DEFAULT_LOG_DIR, DEFAULT_FILE_EXTENSION
 from gunicorn.app.base import BaseApplication
 CMDB_LOGGER = get_logger()
@@ -19,21 +20,27 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
         self._name = "webapp"
         self._eventtypes = ["cmdb.webapp.#"]
         self._threaded_service = False
+        self._multiprocessing = True
 
     def _run(self):
-        # start webserver
-        app = DispatcherMiddleware(
-            app=create_web_app(),
-            mounts={'/rest': create_rest_api()}
-        )
-        options = None
+        # get queue for sending events
+        event_queue = self._event_manager.get_send_queue()
 
-        # start gunicorn as new process
+        # get WSGI app
+        app = DispatcherMiddleware(
+            app=create_web_app(event_queue),
+            mounts={'/rest': create_rest_api(event_queue)}
+        )
+
+        # get gunicorn options
+        options = get_system_config_reader().get_all_values_from_section('WebServer')
+
+        # start gunicorn
         webserver = HTTPServer(app, options)
         webserver.run()
 
     def _handle_event(self, event):
-        """ignore events"""
+        """ignore incomming events"""
         pass
 
 class HTTPServer(BaseApplication):
@@ -83,9 +90,9 @@ class HTTPServer(BaseApplication):
         self.options = options or {}
         if 'host' in self.options and 'port' in self.options:
             self.options['bind'] = '%s:%s' % (self.options['host'], self.options['port'])
-        #if 'workers' not in self.options:
-        #    self.options['workers'] = HTTPServer.number_of_workers()
-        self.options['worker_class'] = 'gthread'
+        if 'workers' not in self.options:
+            self.options['workers'] = HTTPServer.number_of_workers()
+        self.options['worker_class'] = 'sync'
         self.options['logconfig_dict'] = HTTPServer.CONFIG_DEFAULTS
         self.options['timeout'] = 2
         self.options['daemon'] = True
