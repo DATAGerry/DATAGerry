@@ -49,7 +49,7 @@ class AbstractCmdbService:
         # shutdown EventManager
         self._event_manager.shutdown()
         # wait for termination of service thread (max 5sec)
-        if self._thread_service:
+        if self._threaded_service and self._thread_service:
             print("wait for termination of service thread")
             self._thread_service.join(5)
             print("service thread terminated")

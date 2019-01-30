@@ -35,9 +35,15 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
         # get gunicorn options
         options = get_system_config_reader().get_all_values_from_section('WebServer')
 
-        # start gunicorn
+        # start gunicorn as own process
         webserver = HTTPServer(app, options)
-        webserver.run()
+        self.__webserver_proc = multiprocessing.Process(target=webserver.run)
+        self.__webserver_proc.start()
+        self.__webserver_proc.join()
+
+    def _shutdown(self, signam, frame):
+        self.__webserver_proc.terminate()
+        self.stop()
 
     def _handle_event(self, event):
         """ignore incomming events"""

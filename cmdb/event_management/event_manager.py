@@ -103,7 +103,7 @@ class EventSenderAmqp(threading.Thread):
                 exchange_type="topic"
             )
         except pika.exceptions.AMQPConnectionError:
-            print("connection error")
+            print("{}: EventSenderAmqp connection error".format(self.__process_id))
             self.__flag_shutdown.set()
 
     def run(self):
@@ -190,7 +190,7 @@ class EventReceiverAmqp(threading.Thread):
             # register callback function for event handling
             self.__channel.basic_consume(self.__process_event_cb, queue=queue, no_ack=True)
         except pika.exceptions.AMQPConnectionError:
-            print("connection error")
+            print("{}: EventReceiverAmqp connection error".format(self.__process_id))
             self.__flag_shutdown.set()
 
 
