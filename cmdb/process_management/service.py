@@ -34,6 +34,9 @@ class AbstractCmdbService:
         # wait for shutdown, if daemon logic was terminated
         self._event_shutdown.wait()
 
+        # shutdown daemon explicitly, if shutdown event was set
+        self._shutdown(None, None)
+
     def _run(self):
         # daemon action - to be implemented
         # implemented action must check the self._even_shutdown flag for termination
