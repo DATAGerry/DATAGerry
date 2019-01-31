@@ -37,14 +37,6 @@ class ProcessManager:
             proc_controller.join()
 
 
-    def status(self):
-        for process in self.__process_list:
-            status_string = "STOPPED"
-            if process.is_alive:
-                status_string = "RUNNING"
-            print("{}: {}".format(process.name, status_string))
-
-
     def stop_app(self):
         self.__flag_shutdown.set()
         # go through processes in different order

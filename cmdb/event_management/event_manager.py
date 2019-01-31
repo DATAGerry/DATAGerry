@@ -5,6 +5,8 @@ import threading
 import pika
 from cmdb.event_management.event import Event
 from cmdb.utils import get_system_config_reader
+from cmdb.utils import get_logger
+LOGGER = get_logger()
 
 class EventManager:
 
@@ -103,7 +105,7 @@ class EventSenderAmqp(threading.Thread):
                 exchange_type="topic"
             )
         except pika.exceptions.AMQPConnectionError:
-            print("{}: EventSenderAmqp connection error".format(self.__process_id))
+            LOGGER.error("{}: EventSenderAmqp connection error".format(self.__process_id))
             self.__flag_shutdown.set()
 
     def run(self):
@@ -124,7 +126,7 @@ class EventSenderAmqp(threading.Thread):
                     self.__connection.process_data_events()
             # handle AMQP connection errors
             except pika.exceptions.AMQPConnectionError:
-                print("connection to broker lost, try to reconnect...")
+                LOGGER.warning("connection to broker lost, try to reconnect...")
                 self.__init_connection()
 
 
@@ -190,7 +192,7 @@ class EventReceiverAmqp(threading.Thread):
             # register callback function for event handling
             self.__channel.basic_consume(self.__process_event_cb, queue=queue, no_ack=True)
         except pika.exceptions.AMQPConnectionError:
-            print("{}: EventReceiverAmqp connection error".format(self.__process_id))
+            LOGGER.error("{}: EventReceiverAmqp connection error".format(self.__process_id))
             self.__flag_shutdown.set()
 
 
@@ -204,5 +206,5 @@ class EventReceiverAmqp(threading.Thread):
                 self.__channel.start_consuming()
             # handle AMQP connection errors
             except pika.exceptions.AMQPConnectionError:
-                print("connection to broker lost, try to reconnect...")
+                LOGGER.warning("connection to broker lost, try to reconnect...")
                 self.__init_connection()

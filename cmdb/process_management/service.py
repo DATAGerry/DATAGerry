@@ -3,6 +3,8 @@ import sys
 import threading
 import time
 import cmdb.event_management.event_manager
+from cmdb.utils import get_logger
+LOGGER = get_logger()
 
 class AbstractCmdbService:
 
@@ -17,6 +19,8 @@ class AbstractCmdbService:
         self._multiprocessing = False
         
     def start(self):
+        LOGGER.info("start {} ...".format(self._name))
+
         # init shutdown handling
         self._event_shutdown = threading.Event()
         signal.signal(signal.SIGTERM, self._shutdown)
@@ -46,17 +50,18 @@ class AbstractCmdbService:
         self.stop()
 
     def stop(self):
-        print("shutdown {} ...".format(self._name))
+        LOGGER.info("shutdown {} ...".format(self._name))
         # set shutdown event
         self._event_shutdown.set()
         # shutdown EventManager
         self._event_manager.shutdown()
         # wait for termination of service thread (max 5sec)
         if self._threaded_service and self._thread_service:
-            print("wait for termination of service thread")
+            LOGGER.debug("wait for termination of service thread")
             self._thread_service.join(5)
-            print("service thread terminated")
+            LOGGER.debug("service thread terminated")
         # exit process
+        LOGGER.info("shutdown {} completed".format(self._name))
         sys.exit(0)
 
     def _handle_event(self, event):
