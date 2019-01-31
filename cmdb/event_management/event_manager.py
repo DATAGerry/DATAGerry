@@ -9,7 +9,9 @@ import pika
 from cmdb.event_management.event import Event
 from cmdb.utils import get_system_config_reader
 from cmdb.utils import get_logger
+
 LOGGER = get_logger()
+
 
 class EventManager:
     """
@@ -96,7 +98,6 @@ class EventManagerAmqp(EventManager):
                                             self.__process_id, self.__event_types)
         self.__consumer.start()
 
-
     def send_event(self, event):
         self.__queue_send.put(event)
 
@@ -148,7 +149,6 @@ class EventSenderAmqp(threading.Thread):
         self.__connection = None
         self.__channel = None
 
-
     def __init_connection(self):
         """create a connection to message broker"""
         try:
@@ -160,7 +160,7 @@ class EventSenderAmqp(threading.Thread):
                 retry_delay=self.__config_retrydelay,
                 credentials=credentials,
                 ssl=self.__config_tls
-                ))
+            ))
             self.__channel = self.__connection.channel()
             self.__channel.exchange_declare(
                 exchange=self.__config_exchange,
@@ -234,7 +234,6 @@ class EventReceiverAmqp(threading.Thread):
         self.__connection = None
         self.__channel = None
 
-
     def __process_event_cb(self, ch, method, properties, body):
         """event processing
 
@@ -288,7 +287,6 @@ class EventReceiverAmqp(threading.Thread):
         except pika.exceptions.AMQPConnectionError:
             LOGGER.error("{}: EventReceiverAmqp connection error".format(self.__process_id))
             self.__flag_shutdown.set()
-
 
     def run(self):
         """run the event receiver"""

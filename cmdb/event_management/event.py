@@ -4,6 +4,7 @@ This module defines an internal CMDB event
 """
 import json
 
+
 class Event:
     """CMDB Event
 

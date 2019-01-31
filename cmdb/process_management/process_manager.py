@@ -7,6 +7,7 @@ import multiprocessing
 import threading
 import re
 
+
 class ProcessManager:
     """Handling CMDB processes
 
@@ -47,7 +48,6 @@ class ProcessManager:
         for proc_controller in self.__process_controllers:
             proc_controller.join()
 
-
     def stop_app(self):
         """stop all services"""
         self.__flag_shutdown.set()
@@ -61,7 +61,7 @@ class ProcessManager:
         pattern = re.compile("(.*)\.(.*)")
         match = pattern.fullmatch(classname)
         if match is None:
-            raise Exception("Could not load class {}".format(classname,))
+            raise Exception("Could not load class {}".format(classname, ))
         module_name = match.group(1)
         class_name = match.group(2)
         loaded_module = importlib.import_module(module_name)

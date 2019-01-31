@@ -4,6 +4,7 @@ Init module for rest routes
 from flask import Flask
 from cmdb.interface.config import app_config
 from cmdb.utils import get_logger
+
 LOGGER = get_logger()
 
 

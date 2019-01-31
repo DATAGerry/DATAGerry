@@ -7,7 +7,9 @@ import sys
 import threading
 import cmdb.event_management.event_manager
 from cmdb.utils import get_logger
+
 LOGGER = get_logger()
+
 
 class AbstractCmdbService:
     """Abstract definition of a CMDB service

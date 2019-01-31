@@ -68,7 +68,7 @@ class UserManagement:
             return self.dbm.insert(collection=User.COLLECTION, data=insert_user.to_database())
         except Exception as e:
             if cmdb.__MODE__ is not 'TESTING':
-                LOGGER.warn(e)
+                LOGGER.warning(e)
             raise UserInsertError(insert_user.get_username())
 
     def delete_user(self, public_id: int) -> DeleteResult:
@@ -76,7 +76,7 @@ class UserManagement:
             return self.dbm.delete(collection=User.COLLECTION, public_id=public_id)
         except Exception as e:
             if cmdb.__MODE__ is not 'TESTING':
-                LOGGER.warn(e)
+                LOGGER.warning(e)
             raise UserDeleteError(public_id)
 
     def get_group(self, public_id: int) -> UserGroup:
@@ -107,7 +107,7 @@ class UserManagement:
             return self.dbm.delete(collection=UserGroup.COLLECTION, public_id=public_id)
         except Exception as e:
             if cmdb.__MODE__ is not 'TESTING':
-                LOGGER.warn(e)
+                LOGGER.warning(e)
             raise GroupDeleteError(public_id)
 
     def get_right_by_name(self, name):
