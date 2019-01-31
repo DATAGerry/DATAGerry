@@ -37,12 +37,6 @@ jobs:
             TEST_PORT: 27017
             TEST_DATABASE: cmdb_test
 
-      - run:
-          name: run lint
-          command: |
-            . venv/bin/activate
-            pylint cmdb/
-
       - store_artifacts:
           path: test-reports
           destination: test-reports
