@@ -7,6 +7,7 @@ from flask import Blueprint, render_template, request, make_response
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from cmdb.interface.web_app import MANAGER_HOLDER
 from cmdb.object_framework import CmdbRender
+from cmdb.event_management.event import Event
 import datetime
 import json
 
@@ -23,6 +24,10 @@ obm = MANAGER_HOLDER.get_object_manager()
 @register_breadcrumb(object_pages, '.', 'Objects')
 def list_page():
     uum = MANAGER_HOLDER.get_user_manager()
+    # ToDo: event sending does not make sense here, is just for testing
+    evm = MANAGER_HOLDER.get_event_queue()
+    event = Event("cmdb.core.objects.listed", {})
+    evm.put(event)
     all_objects = obm.get_all_objects()
     return render_template('objects/list.html', object_manager=obm, user_manager=uum, all_objects=all_objects)
 

@@ -11,7 +11,7 @@ LOGGER = get_logger()
 MANAGER_HOLDER = CmdbManagerHolder()
 
 
-def create_web_app():
+def create_web_app(event_queue):
     import cmdb
 
     app = Flask(__name__)
@@ -65,6 +65,7 @@ def create_web_app():
     MANAGER_HOLDER.set_security_manager(security_manager)
     MANAGER_HOLDER.set_object_manager(object_manager)
     MANAGER_HOLDER.set_user_manager(user_manager)
+    MANAGER_HOLDER.set_event_queue(event_queue)
     MANAGER_HOLDER.set_system_settings_reader(system_settings_reader)
     MANAGER_HOLDER.set_system_settings_writer(system_settings_writer)
     MANAGER_HOLDER.init_app(app)

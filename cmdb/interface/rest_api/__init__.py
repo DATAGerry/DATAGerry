@@ -7,7 +7,7 @@ from cmdb.utils import get_logger
 LOGGER = get_logger()
 
 
-def create_rest_api():
+def create_rest_api(event_queue):
     import cmdb
     from cmdb.object_framework import CmdbObjectManager
     from cmdb.data_storage.database_manager import DatabaseManagerMongo
