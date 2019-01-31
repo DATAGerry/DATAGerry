@@ -70,12 +70,8 @@
 
         </div>
     </div>
-    <script type="text/javascript">
-        $('#object_code').qrcode({
-            text: "Test",
-            mode: 2,
-            label: 'CMDB',
-            ecLevel: 'H'
-        });
-    </script>
+
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
 {% endblock %}

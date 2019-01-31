@@ -88,7 +88,9 @@
                                         <a class="nav-link active show" href="#object-logs" data-toggle="tab">Logs</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" href="#object-references" data-toggle="tab">References <small>({{ references|length }})</small></a>
+                                        <a class="nav-link" href="#object-references" data-toggle="tab">References
+                                            <small>({{ references|length }})</small>
+                                        </a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" href="#object-links" data-toggle="tab">Links</a>
@@ -146,7 +148,9 @@
                                                         <td>{{ log.get_action() }}</td>
                                                         <td>{{ log.get_message() }}</td>
                                                         {% if log.get_state() %}
-                                                            <td><a href="/object/{{ view_object.get_public_id() }}/{{ log.get_state() }}">View</a></td>
+                                                            <td>
+                                                                <a href="/object/{{ view_object.get_public_id() }}/{{ log.get_state() }}">View</a>
+                                                            </td>
                                                         {% else %}
                                                             <td></td>
                                                         {% endif %}
@@ -251,12 +255,11 @@
 
         </div>
     </div>
+
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
     <script type="text/javascript">
-        $('#object_code').qrcode({
-            text: "Test",
-            mode: 2,
-            label: 'CMDB',
-            ecLevel: 'H'
-        });
+        cmdb.$('#object_code').qr_code("http://127.0.0.1/");
     </script>
 {% endblock %}

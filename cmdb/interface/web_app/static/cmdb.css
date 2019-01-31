@@ -7361,16 +7361,42 @@ a.text-nethinks:hover, a.text-nethinks:focus {
   margin-left: 0; }
 
 body.embedded-layout {
-  font-size: 0.875rem; }
-  body.embedded-layout .brand {
+  font-size: 0.875rem;
+  /**
+ * Layout
+ */
+  /**
+ * Navbar
+ */
+  /**
+ * Content
+ */
+  /**
+ * Sidebar
+ */
+  /**
+ * Breadcrumb
+ */
+  /**
+ * Scrollbar
+ */
+  /*
+ * Login
+ */
+  /**
+ * Loader
+ */
+  /**
+ * Footer
+ */ }
+  body.embedded-layout #cmdb_brand {
     width: 90px;
     height: 90px;
     overflow: hidden;
     margin: 40px auto;
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.05); }
-    body.embedded-layout .brand span {
-      width: 100%;
-      background: url(img/icon_hi_res_512.png); }
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.05);
+    background-size: contain;
+    background-image: url(img/icon_hi_res_512.png); }
   body.embedded-layout .card-wrapper {
     width: 400px; }
   body.embedded-layout .card {
@@ -7386,10 +7412,6 @@ body.embedded-layout {
     width: 100%; }
   body.embedded-layout .btn.btn-block {
     padding: 12px 10px; }
-  body.embedded-layout .margin-top20 {
-    margin-top: 20px; }
-  body.embedded-layout .no-margin {
-    margin: 0; }
   body.embedded-layout .footer {
     margin: 40px 0;
     color: #888;
@@ -7685,6 +7707,10 @@ body.embedded-layout {
 
 .embedded-layout .pace .pace-progress {
   top: 0px; }
+
+@media screen and (max-width: 425px) {
+  .embedded-layout .pace .pace-progress {
+    height: 8px; } }
 
 /**
  * Header
