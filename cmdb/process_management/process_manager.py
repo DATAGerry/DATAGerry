@@ -1,14 +1,25 @@
+"""
+Process Manager
+Manager for handling CMDB processes
+"""
 import importlib
 import multiprocessing
 import threading
 import re
 
 class ProcessManager:
+    """Handling CMDB processes
+
+    The CMDB app consists of multiple processes (e.g. webapp, syncd).
+    The process manager starts and stops theses processes in the
+    correct order.
+    """
 
     def __init__(self):
+        """Create a new instance of the ProcessManager"""
         # service definitions (in correct order)
         self.__service_defs = []
-        self.__service_defs.append(CmdbProcess("exampleservice1", "cmdb.process_management.example_service.ExampleService"))
+        self.__service_defs.append(CmdbProcess("example1", "cmdb.process_management.example_service.ExampleService"))
         self.__service_defs.append(CmdbProcess("webapp", "cmdb.interface.gunicorn.WebCmdbService"))
 
         # processlist
@@ -21,7 +32,7 @@ class ProcessManager:
         self.__flag_shutdown = threading.Event()
 
     def start_app(self):
-        # start all services from service definitions
+        """start all services from service definitions"""
         for service_def in self.__service_defs:
             service_class = self.__load_class(service_def.get_class())
             process = multiprocessing.Process(target=service_class().start)
@@ -38,6 +49,7 @@ class ProcessManager:
 
 
     def stop_app(self):
+        """stop all services"""
         self.__flag_shutdown.set()
         # go through processes in different order
         for process in reversed(self.__process_list):
@@ -58,21 +70,46 @@ class ProcessManager:
 
 
 class CmdbProcess:
+    """Definition of a CmdbProcess"""
 
     def __init__(self, name, classname):
+        """Create a new instance
+
+        Args:
+            name(str): name of the process
+            classname(str): classname of the process
+        """
         self.__name = name
         self.__classname = classname
 
     def get_name(self):
+        """return the process name
+
+        Returns:
+            str: name of the process
+        """
         return self.__name
 
     def get_class(self):
+        """return the class name
+
+        Returns:
+            str: name of the class
+        """
         return self.__classname
 
 
 class ProcessController(threading.Thread):
+    """Controlls the state of a process"""
 
     def __init__(self, process, flag_shutdown, cb_shutdown):
+        """Creates a new instance
+        
+        Args:
+            process(multiprocessingProcess): process to control
+            flag_shutdown(threading.Event): shutdown flag
+            cb_shutdown(func): callback function if a process crashed
+        """
         super(ProcessController, self).__init__()
         self.__process = process
         self.__flag_shutdown = flag_shutdown
@@ -83,5 +120,3 @@ class ProcessController(threading.Thread):
         # terminate app, if process crashed
         if not self.__flag_shutdown.is_set():
             self.__cb_shutdown()
-
-

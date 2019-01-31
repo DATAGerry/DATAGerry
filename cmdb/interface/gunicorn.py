@@ -2,8 +2,6 @@
 Server module for web-based services
 """
 import multiprocessing
-import signal
-import sys
 from cmdb import __MODE__
 import cmdb.process_management.service
 from cmdb.interface.rest_api import create_rest_api
@@ -14,6 +12,7 @@ from gunicorn.app.base import BaseApplication
 CMDB_LOGGER = get_logger()
 
 class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
+    """CmdbService: Webapp"""
 
     def __init__(self):
         super(WebCmdbService, self).__init__()
@@ -21,6 +20,7 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
         self._eventtypes = ["cmdb.webapp.#"]
         self._threaded_service = False
         self._multiprocessing = True
+        self.__webserver_proc = None
 
     def _run(self):
         # get queue for sending events
@@ -125,8 +125,6 @@ class HTTPServer(BaseApplication):
         Returns: number of workers
 
         """
-
-        import multiprocessing
         return (multiprocessing.cpu_count() * 2) + 1
 
 
@@ -151,5 +149,3 @@ class DispatcherMiddleware:
         environ['SCRIPT_NAME'] = original_script_name + script
         environ['PATH_INFO'] = path_info
         return app(environ, start_response)
-
-
