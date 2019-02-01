@@ -6,6 +6,9 @@ import importlib
 import multiprocessing
 import threading
 import re
+from cmdb.utils.logger import get_logger
+
+LOGGER = get_logger()
 
 
 class ProcessManager:
@@ -31,11 +34,12 @@ class ProcessManager:
 
         # shutdown flag
         self.__flag_shutdown = threading.Event()
+        self._loaded = False
 
-    def start_app(self):
+    def start_app(self) -> bool:
         """start all services from service definitions"""
         for service_def in self.__service_defs:
-            service_class = self.__load_class(service_def.get_class())
+            service_class = ProcessManager.__load_class(service_def.get_class())
             process = multiprocessing.Process(target=service_class().start)
             process.start()
             self.__process_list.append(process)
@@ -43,10 +47,7 @@ class ProcessManager:
             proc_controller = ProcessController(process, self.__flag_shutdown, self.stop_app)
             proc_controller.start()
             self.__process_controllers.append(proc_controller)
-
-        # wait for process controllers
-        for proc_controller in self.__process_controllers:
-            proc_controller.join()
+        return True
 
     def stop_app(self):
         """stop all services"""
@@ -55,7 +56,11 @@ class ProcessManager:
         for process in reversed(self.__process_list):
             process.terminate()
 
-    def __load_class(self, classname):
+    def get_loading_status(self):
+        return self._loaded
+
+    @staticmethod
+    def __load_class(classname):
         """ load and return the class with the given classname """
         # extract class from module
         pattern = re.compile("(.*)\.(.*)")

@@ -10,7 +10,7 @@ from cmdb.utils import get_system_config_reader
 from cmdb.utils.logger import get_logger, DEFAULT_LOG_DIR, DEFAULT_FILE_EXTENSION
 from gunicorn.app.base import BaseApplication
 
-CMDB_LOGGER = get_logger()
+LOGGER = get_logger()
 
 
 class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
@@ -108,7 +108,7 @@ class HTTPServer(BaseApplication):
         if __MODE__ == 'DEBUG' or 'TESTING':
             self.options['reload'] = True
             self.options['check_config'] = True
-            CMDB_LOGGER.info("Gunicorn starting with auto reload option")
+            LOGGER.info("Gunicorn starting with auto reload option")
         self.application = app
         super(HTTPServer, self).__init__()
 

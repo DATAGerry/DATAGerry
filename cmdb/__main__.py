@@ -14,6 +14,8 @@ from cmdb.utils import get_system_config_reader
 from cmdb.utils.helpers import timing
 from cmdb.utils.error import CMDBError
 from optparse import OptionParser
+import time
+
 LOGGER = get_logger()
 config_reader = get_system_config_reader()
 
@@ -100,7 +102,7 @@ def _setup() -> bool:
 
 def _load_plugins():
     """
-    Loading plugin syste,
+    Loading plugin system
     TODO: Write plugin system
     """
     LOGGER.info("Loading plugins")
@@ -122,12 +124,15 @@ def _start_app():
 
     # start app
     app_manager = cmdb.process_management.process_manager.ProcessManager()
-    app_manager.start_app()
+    app_status = app_manager.start_app()
+    LOGGER.info("Process manager started: {}".format(app_status))
+    time.sleep(2)  # prevent logger output
 
 
 def _stop_app(signum, frame):
     global app_manager
     app_manager.stop_app()
+
 
 def build_arg_parser() -> OptionParser:
     """
@@ -189,6 +194,7 @@ def main(args):
     _load_plugins()
     if args.start:
         _start_app()
+    LOGGER.info("CMDB successfully started")
 
 
 if __name__ == "__main__":
@@ -215,7 +221,6 @@ __  __ _____ _____ ____ __  __ ____  ____
 
         LOGGER.info("CMDB starting...")
         main(options)
-
     except Exception as e:
         LOGGER.critical("There was an unforseen error {}".format(e))
         LOGGER.info("CMDB stopped!")

@@ -43,9 +43,9 @@ def timing(msg=None):
         def wrap(*args, **kwargs):
             from cmdb.utils import get_logger
             import time
-            time1 = time.time()
+            time1 = time.clock()
             ret = f(*args)
-            time2 = time.time()
+            time2 = time.clock()
             get_logger().debug('{} {:.3f}ms'.format(msg, (time2 - time1) * 1000.0))
             return ret
 
