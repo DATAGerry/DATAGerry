@@ -6,7 +6,7 @@ from pymongo.errors import ServerSelectionTimeoutError
 from cmdb.utils.logger import get_logger
 from cmdb.utils.error import CMDBError
 
-CMDB_LOGGER = get_logger()
+LOGGER = get_logger()
 
 
 class Connector:
@@ -118,7 +118,7 @@ class MongoConnector(Connector):
             self.connect()
             return True
         except ServerTimeoutError as timeout_error:
-            CMDB_LOGGER.error(timeout_error.message)
+            LOGGER.error(timeout_error.message)
             return False
 
     def create_collection(self, collection_name) -> str:

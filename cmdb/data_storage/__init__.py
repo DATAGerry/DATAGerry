@@ -10,7 +10,7 @@ def get_pre_init_database():
 
     """
     from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
-    from cmdb.utils import get_system_config_reader
+    from cmdb.utils.system_reader import get_system_config_reader
     system_config_reader = get_system_config_reader()
     try:
         timeout = system_config_reader.get_value('connection_timeout', 'Database')

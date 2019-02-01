@@ -60,7 +60,7 @@ class SystemConfigReader:
     CONFIG_NOT_LOADED = False
     instance = None
 
-    def __new__(cls, config_name, config_location):
+    def __new__(cls, config_name=None, config_location=None):
         if not SystemConfigReader.instance:
             SystemConfigReader.instance = SystemConfigReader._SystemConfigReader(config_name, config_location)
         return SystemConfigReader.instance
@@ -69,7 +69,7 @@ class SystemConfigReader:
         return getattr(self.instance, name)
 
     def __setattr__(self, name, value):
-        return setattr(self.instance, name)
+        return setattr(self.instance, name, value)
 
     class _SystemConfigReader(SystemReader):
 
@@ -297,3 +297,16 @@ class KeySectionError(CMDBError):
     def __init__(self, name):
         super().__init__()
         self.message = 'The key ' + name + ' was not found!'
+
+
+def get_system_config_reader() -> SystemConfigReader:
+    """
+    get a instance of the configuration file reader
+    Returns:
+        (SystemConfigReader): instance of SystemConfigReader
+
+    """
+    return SystemConfigReader(
+        SystemConfigReader.DEFAULT_CONFIG_NAME,
+        SystemConfigReader.DEFAULT_CONFIG_LOCATION
+    )

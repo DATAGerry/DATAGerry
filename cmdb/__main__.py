@@ -8,16 +8,14 @@ If not, see <https://github.com/NETHINKS/NetCMDB/blob/master/LICENSE>.
 """
 
 import signal
-from cmdb.utils import get_logger
-from cmdb.data_storage import get_pre_init_database
-from cmdb.utils import get_system_config_reader
+
+from cmdb.utils.logger import get_logger
 from cmdb.utils.helpers import timing
 from cmdb.utils.error import CMDBError
-from optparse import OptionParser
+from argparse import ArgumentParser, Namespace
 import time
 
 LOGGER = get_logger()
-config_reader = get_system_config_reader()
 
 
 def _check_database():
@@ -26,7 +24,10 @@ def _check_database():
     Returns: True if response otherwise False
 
     """
-    LOGGER.info("Checking database connection with cmdb.conf data")
+
+    from cmdb.utils.system_reader import SystemConfigReader
+    from cmdb.data_storage import get_pre_init_database
+    LOGGER.info("Checking database connection with {} data".format(SystemConfigReader.DEFAULT_CONFIG_NAME))
     dbm = get_pre_init_database()
     connection_test = dbm.database_connector.is_connected()
     LOGGER.debug("Database status is {}".format(connection_test))
@@ -36,7 +37,7 @@ def _check_database():
     retries = 0
     while retries < 3:
         retries += 1
-        LOGGER.warning("Retry {}: Checking database connection with cmdb.conf data".format(retries))
+        LOGGER.warning("Retry {}: Checking database connection with {} data".format(retries, SystemConfigReader.DEFAULT_CONFIG_NAME))
         connection_test = dbm.database_connector.is_connected()
         if connection_test:
             dbm.database_connector.disconnect()
@@ -59,6 +60,7 @@ def _generate_security_keys():
     """
     LOGGER.info("Generating security keys")
     from cmdb.utils import get_security_manager
+    from cmdb.data_storage import get_pre_init_database
     sec_database = get_pre_init_database()
     sec_security = get_security_manager(sec_database)
     sec_security.generate_symmetric_aes_key()
@@ -73,6 +75,7 @@ def _setup() -> bool:
         bool: True if setup was complete without error
     """
     from cmdb.user_management import get_user_manager
+    from cmdb.data_storage import get_pre_init_database
     from cmdb.utils import get_security_manager
 
     try:
@@ -134,31 +137,32 @@ def _stop_app(signum, frame):
     app_manager.stop_app()
 
 
-def build_arg_parser() -> OptionParser:
+def build_arg_parser() -> Namespace:
     """
     Generate application parameter parser
     Returns: instance of OptionParser
 
     """
-    from cmdb import __version__, __title__
-    _parser = OptionParser(
+
+    from cmdb import __title__
+    _parser = ArgumentParser(
+        prog='NetCMDB',
         usage="usage: {} [options]".format(__title__),
-        version=" {}".format(__version__)
     )
-    _parser.add_option('--setup', action='store_true', default=False, dest='setup',
-                       help="init cmdb")
+    _parser.add_argument('--setup', action='store_true', default=False, dest='setup',
+                         help="init cmdb")
 
-    _parser.add_option('--keys', action='store_true', default=False, dest='keys',
-                       help="init securty keys")
+    _parser.add_argument('--keys', action='store_true', default=False, dest='keys',
+                         help="init securty keys")
 
-    _parser.add_option('-d', '--debug', action='store_true', default=False, dest='debug',
-                       help="enable debug mode: DO NOT USE ON PRODUCTIVE SYSTEMS")
+    _parser.add_argument('-d', '--debug', action='store_true', default=False, dest='debug',
+                         help="enable debug mode: DO NOT USE ON PRODUCTIVE SYSTEMS")
 
-    _parser.add_option('-s', '--start', action='store_true', default=False, dest='start',
-                       help="starting cmdb core system - enables services")
+    _parser.add_argument('-s', '--start', action='store_true', default=False, dest='start',
+                         help="starting cmdb core system - enables services")
 
-    _parser.add_option('-c', '--command', action='store_true', default=True, dest='command',
-                       help="starting interactive command line interface")
+    _parser.add_argument('-c', '--config', default='./etc/cmdb.conf', dest='config_file',
+                         help="optional path to config file")
 
     return _parser.parse_args()
 
@@ -170,6 +174,13 @@ def main(args):
     Args:
         args: start-options
     """
+    import os
+
+    from cmdb.utils.system_reader import SystemConfigReader
+    path, filename = os.path.split(args.config_file)
+    if filename is not SystemConfigReader.DEFAULT_CONFIG_NAME or path is not SystemConfigReader.DEFAULT_CONFIG_LOCATION:
+        SystemConfigReader.DEFAULT_CONFIG_NAME = filename
+        SystemConfigReader.DEFAULT_CONFIG_LOCATION = path + '/'
     from cmdb.data_storage.database_connection import DatabaseConnectionError
     try:
         conn = _check_database()
@@ -214,9 +225,9 @@ __  __ _____ _____ ____ __  __ ____  ____
 ###########################################\n''', 'green')
 
     try:
-        (options, args) = build_arg_parser()
+        options = build_arg_parser()
         print(brand_string)
-        print(welcome_string.format(options))
+        print(welcome_string.format(options.__dict__))
         sleep(0.1)  # prevent logger output
 
         LOGGER.info("CMDB starting...")

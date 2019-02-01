@@ -1,6 +1,5 @@
 # Project
-cmdb.conf
-etc/cmdb.conf
+cmdb_dev.conf
 IDEAS.md
 
 # Byte-compiled / optimized / DLL files

@@ -6,7 +6,7 @@ from cmdb import __MODE__
 import cmdb.process_management.service
 from cmdb.interface.rest_api import create_rest_api
 from cmdb.interface.web_app import create_web_app
-from cmdb.utils import get_system_config_reader
+from cmdb.utils.system_reader import get_system_config_reader
 from cmdb.utils.logger import get_logger, DEFAULT_LOG_DIR, DEFAULT_FILE_EXTENSION
 from gunicorn.app.base import BaseApplication
 
