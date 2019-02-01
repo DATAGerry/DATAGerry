@@ -99,7 +99,8 @@ def _setup() -> bool:
             password=admin_pass_1
         )
     except CMDBError as setup_error:
-        return setup_error
+        LOGGER.critical(setup_error)
+        return False
     return True
 
 
