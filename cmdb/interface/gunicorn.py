@@ -108,7 +108,8 @@ class HTTPServer(BaseApplication):
         if __MODE__ == 'DEBUG' or 'TESTING':
             self.options['reload'] = True
             self.options['check_config'] = True
-            LOGGER.info("Gunicorn starting with auto reload option")
+            LOGGER.debug("Gunicorn starting with auto reload option")
+        LOGGER.info("Webserver started @ http://{}:{}".format(self.options['host'], self.options['port']))
         self.application = app
         super(HTTPServer, self).__init__()
 
