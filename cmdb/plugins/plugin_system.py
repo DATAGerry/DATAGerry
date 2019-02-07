@@ -35,8 +35,8 @@ class PluginModuleBase:
 
 class PluginManager:
 
-    def __init__(self, single_init: PluginModuleBase = None):
-        self.plugin_base_folder = 'cmdb/plugins/'
+    def __init__(self, base_folder='/cmdb/plugins/', single_init: PluginModuleBase = None):
+        self.plugin_base_folder = base_folder
         self.base_list = []
         if single_init:
             self.base_list.append(single_init)
@@ -58,18 +58,17 @@ class PluginManager:
 
 class PluginLoader:
 
-    def __init__(self, main_module: types.ModuleType, package, include_paths: list=[]):
+    def __init__(self, main_module: types.ModuleType, package, include_paths: list = None):
         """TODO: Fixing Include Paths"""
         self.main_module = main_module
         self.package = package
-        self.include_paths = include_paths
+        self.include_paths = include_paths or []
 
     def load_plugins(self):
         import pkgutil
         plugin_list = []
         for (module_loader, name, ispkg) in pkgutil.iter_modules([self.main_module.__path__[0]]):
-            #plugin_list.append(importlib.import_module('.' + name, self.package))
-            plugin_list.append(self.package)
+            plugin_list.append(importlib.import_module('.' + name, self.package))
             importlib.invalidate_caches()
         return plugin_list
 

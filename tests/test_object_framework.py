@@ -3,7 +3,6 @@ import json
 import os
 from cmdb.object_framework import CmdbDAO, CmdbObjectManager, CmdbTypeCategory, CmdbObjectStatus, CmdbObject, CmdbLog
 
-
 """
 CMDB_DAO TESTS
 """

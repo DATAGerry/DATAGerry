@@ -20,7 +20,7 @@
     ],
     "author_id": 1,
     "creation_time": {
-      "$date": "2018-09-28T16:13:00.000+0000"
+      "$date": "2018-09-28T16:13:00Z"
     },
     "render_meta": {
       "external": [
@@ -183,7 +183,7 @@
         "action": "create",
         "message": "Auto-generation of employee type",
         "date": {
-          "$date": "2018-09-28T16:13:00.000+0000"
+          "$date": "2018-09-28T16:13:00Z"
         }
       }
     ]
@@ -209,7 +209,7 @@
     ],
     "author_id": 1.0,
     "creation_time": {
-      "$date": "2018-09-28T16:13:00.000+0000"
+      "$date": "2018-09-28T16:13:00Z"
     },
     "render_meta": {
       "external": [],
@@ -258,7 +258,7 @@
         "action": "create",
         "message": "Auto-generation of departments type",
         "date": {
-          "$date": "2018-09-28T16:13:00.000+0000"
+          "$date": "2018-09-28T16:13:00Z"
         }
       }
     ]

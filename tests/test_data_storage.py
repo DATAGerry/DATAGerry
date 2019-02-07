@@ -55,4 +55,3 @@ def test_database_collection_init(mongo_connection):
     for col_name in db_col_names:
         database_manager.delete_collection(col_name)
     assert len(database_manager.database_connector.get_collections()) == 0
-

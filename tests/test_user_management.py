@@ -82,3 +82,4 @@ def test_manager_user(user_manager):
         user_manager.delete_user(1)
 
     user_manager.delete_group(1)
+

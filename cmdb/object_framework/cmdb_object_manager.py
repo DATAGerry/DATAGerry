@@ -143,6 +143,9 @@ class CmdbObjectManager(CmdbManagerBase):
     def is_ready(self) -> bool:
         return self.dbm.status()
 
+    def search(self, search: str, exclude: str=None):
+        return self.dbm.__find(CmdbObject.COLLECTION, {"$text": {"$search": search}})
+
     def get_object(self, public_id: int):
         """get object by public id
         Args:
