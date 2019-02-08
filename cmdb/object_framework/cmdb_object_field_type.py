@@ -21,12 +21,12 @@ class CmdbFieldType(CmdbDAO):
     ]
 
     def __init__(self, input_type: str, name: str, label: str = None, description: str = None, placeholder: str = None,
-                 values: list = None, roles: list = None, subtype: str = None, maxlength: int = None,
+                 values: list = None, roles: list = None, subinput_type: str = None, maxlength: int = None,
                  required: bool = False, access: bool = False,
                  className: str = 'form-control', **kwargs):
         self.value = None
         self.input_type = input_type
-        self.subinput_type = subtype
+        self.subinput_type = subinput_type
         self.name = name
         self.label = label or name.title()
         self.description = description
@@ -53,7 +53,7 @@ class CmdbFieldType(CmdbDAO):
         return self.input_type
 
     def get_sub_type(self):
-        if self.subinput_type is None:
+        if self.subinput_type is None or self.subinput_type == "":
             return self.input_type
         return self.subinput_type
 

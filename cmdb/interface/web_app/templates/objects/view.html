@@ -1,5 +1,5 @@
 {% extends 'layout.html' %}
-{% from "includes/_render_macros.html" import render_object_view with context %}
+{% from "includes/_render_macros.html" import render_object with context %}
 {% block title %}View #{{ view_object.get_public_id() }} {{ view_type.get_label() }}{% endblock %}
 {% block navigation %}
     {% include 'includes/_navigation.html' %}
@@ -10,7 +10,6 @@
 {% block content %}
     <div class="content">
         <div class="container-fluid">
-            {{ super() }}
             <div class="row">
                 <div class="col-md-9">
                     <div class="row">
@@ -19,25 +18,29 @@
                                 <h5 class="card-header">
                                     #{{ view_object.get_public_id() }} {{ view_type.get_label() }}
                                     <span class="badge badge-secondary float-right">v{{ view_object.version }}</span>
-                                    <span class="badge badge-primary float-right mr-1">{{ view_object.status }}</span>
+                                    {% if view_object.status %}
+                                        <span class="badge badge-primary float-right mr-1">{{ view_object.status }}</span>{% endif %}
                                 </h5>
-                                <div class="card-body">
-                                    <table class="table table-sm">
-                                        <tbody>
-                                        {% for summary in view_type.render_meta['summary'] %}
-                                            <tr>
-                                                <th{% if loop.first %} class="border-top-0" {% endif %}scope="row">
-                                                    <b>{{ summary['label'] }}:</b></th>
-                                                <td{% if loop.first %} class="border-top-0" {% endif %}>
-                                                    {% for field_name in summary['fields'] %}
-                                                        {{ view_object.get_value(field_name) }}
-                                                    {% endfor %}
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                {% if view_type.render_meta['summary']|length > 1 %}
+                                    <div class="card-body">
+                                        <table class="table table-sm">
+                                            <tbody>
+                                            {% for summary in view_type.render_meta['summary'] %}
+                                                <tr>
+                                                    <th{% if loop.first %} class="border-top-0" {% endif %}scope="row">
+                                                        <b>{{ summary['label'] }}:</b></th>
+                                                    <td{% if loop.first %} class="border-top-0" {% endif %}>
+                                                        {% for field_name in summary['fields'] %}
+                                                            {{ view_object.get_value(field_name) }}
+                                                        {% endfor %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                {% endif %}
                             </div>
                         </div>
                         {% if render.has_external() == True and not render.all_externals_empty() %}
@@ -75,7 +78,8 @@
                             <div class="card">
                                 <h5 class="card-header">Content</h5>
                                 <div class="card-body">
-                                    {{ render_object_view(render) }}
+
+                                    {{ render_object(render) }}
                                 </div>
                             </div>
                         </div>
@@ -238,10 +242,11 @@
                                             <th scope="row">creation time</th>
                                             <td>{{ view_object.creation_time }}</td>
                                         </tr>
-                                        <tr>
-                                            <th scope="row">last edit</th>
-                                            <td>{{ view_object.last_edit_time }}</td>
-                                        </tr>
+                                        {% if view_object.last_edit_time %}
+                                            <tr>
+                                                <th scope="row">last edit</th>
+                                                <td>{{ view_object.last_edit_time }}</td>
+                                            </tr>{% endif %}
                                         </tbody>
                                     </table>
                                 </div>
@@ -252,14 +257,21 @@
 
                 </div>
             </div>
-
+            {{ super() }}
         </div>
     </div>
 
 {% endblock %}
+{% if mode == 'DEBUG' %}
+    {% block debug %}
+        <h2>Render</h2>
+        <hr>
+        <pre>{{ render }}</pre>
+    {% endblock %}
+{% endif %}
 {% block scripts %}
     {{ super() }}
     <script type="text/javascript">
-        cmdb.$('#object_code').qr_code("http://127.0.0.1/");
+        cmdb.$('#object_code').qr_code("{{ request.url }}");
     </script>
 {% endblock %}

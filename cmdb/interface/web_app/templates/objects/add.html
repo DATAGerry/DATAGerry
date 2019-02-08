@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
-{% from 'includes/_render_macros.html' import render_object_view with context %}
+{% set object_type = render.type_instance %}
+{% from 'includes/_render_macros.html' import render_form_wrapper, render_object with context %}
 {% block title %}Add object of type {{ object_type.get_label() }}{% endblock %}
 {% block navigation %}
     {% include 'includes/_navigation.html' %}
@@ -10,43 +11,50 @@
 {% block content %}
     <div class="content">
         <div class="container-fluid">
-            {{ super() }}
             <div class="row">
                 <div class="col-12">
-                    <h1>Add new object</h1>
+                    <h1>Add new object of <a
+                            href="/type/{{ object_type.get_public_id() }}">{{ object_type.get_label() }}</a></h1>
                     <hr/>
-                    <form role="form" id="new-object-form" class="needs-validation" novalidate method="post">
-                        <div class="card">
-                            <h5 class="card-header">Meta data</h5>
-                            <div class="card-body">
-                                <div class="form-group row">
-                                    <div class="col-sm-2">Object state</div>
-                                    <div class="col-sm-10">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="active" required
-                                                   checked>
-                                            <label class="form-check-label" for="active">
-                                                Active?
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group row">
-                                    <label for="status" class="col-sm-2 col-form-label">Status</label>
-                                    <div class="col-sm-10">
-                                        <select name="status" class="form-control">
-                                            <option selected></option>
-                                            {% for status in status_list %}
-                                                <option value="{{ status.get_public_id() }}">{{ status.get_label() }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+                    {{ render_form_wrapper(request.url , render_object(render)) }}
                 </div>
             </div>
+            {{ super() }}
         </div>
     </div>
 {% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+        (function () {
+            'use strict';
+            window.addEventListener('load', function () {
+                // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                var forms = document.getElementsByClassName('cmdb_object_form');
+                // Loop over them and prevent submission
+                var validation = Array.prototype.filter.call(forms, function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+{% endblock %}
+{% if mode == 'DEBUG' %}
+    {% block debug %}
+        <h2>Render</h2>
+        <hr>
+        <pre>{{ render }}</pre>
+        <h2>Type instance</h2>
+        <hr>
+        <pre>{{ object_type }}</pre>
+        <h2>Request</h2>
+        <hr>
+        <pre>{{ request }}</pre>
+    {% endblock %}
+{% endif %}

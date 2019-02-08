@@ -320,6 +320,7 @@ class DatabaseManagerMongo(DatabaseManager):
             int: new public id of the document
             None: if anything goes wrong while inserting
         """
+        result = None
         try:
             result = self.database_connector.get_collection(collection).insert_one(data)
         except Exception as e:

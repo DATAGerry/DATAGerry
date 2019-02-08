@@ -1,5 +1,6 @@
 import base64
 import ast
+import time
 from Cryptodome import Random
 from Cryptodome.Cipher import AES
 from cmdb.data_storage.database_manager import NoDocumentFound
@@ -8,6 +9,8 @@ from cmdb.utils.system_writer import SystemSettingsWriter
 from jwcrypto import jwk, jwt, jws
 from cmdb.user_management import User
 from cmdb.utils import get_logger
+from cmdb.object_framework.cmdb_object import CmdbObject
+from cmdb.object_framework.cmdb_object_type import CmdbType
 
 CMDB_LOGGER = get_logger()
 
@@ -30,6 +33,27 @@ class SecurityManager:
         """TODO: LOAD AUTHS HERE"""
         pass
 
+    def generate_delete_token(self, data: (CmdbObject, CmdbType)):
+        import json
+        dump = {
+            'public_id': data.get_public_id(),
+            'def_type': str(type(data))
+        }
+        jws_token = jws.JWS(payload=json.dumps(dump))
+        jws_token.add_signature(
+            key=self.get_sym_key(),
+            alg=SecurityManager.DEFAULT_ALG,
+            protected={'alg': SecurityManager.DEFAULT_ALG},
+            header={'kid': self.get_sym_key().thumbprint()}
+        )
+        req_claim = {
+            'exp': int(time.time()) + (10*60)
+        }
+        enc_token = jwt.JWT(header={"alg": "HS512"}, claims=jws_token.serialize(), default_claims=req_claim)
+        enc_token.make_signed_token(self.get_sym_key())
+
+        return enc_token.serialize()
+
     def encrypt_token(self, payload: User, timeout: int = (DEFAULT_EXPIRES * 60)) -> str:
         """TODO: Fix json encoding error - current workaround with direct dump"""
         user_data = payload.to_json()
@@ -42,7 +66,6 @@ class SecurityManager:
             protected={'alg': SecurityManager.DEFAULT_ALG},
             header={'kid': self.get_sym_key().thumbprint()}
         )
-        import time
         req_claim = {
             'exp': int(time.time()) + timeout
         }

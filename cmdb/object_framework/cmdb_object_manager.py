@@ -143,8 +143,11 @@ class CmdbObjectManager(CmdbManagerBase):
     def is_ready(self) -> bool:
         return self.dbm.status()
 
-    def search(self, search: str, exclude: str=None):
+    def search(self, search: str, exclude: str = None):
         return self.dbm.__find(CmdbObject.COLLECTION, {"$text": {"$search": search}})
+
+    def get_highest_id(self, collection: str):
+        return self.dbm.get_highest_id(collection)
 
     def get_object(self, public_id: int):
         """get object by public id
@@ -184,15 +187,22 @@ class CmdbObjectManager(CmdbManagerBase):
     def get_objects_by_type(self, type_id: int):
         return self.get_objects_by(type_id=type_id)
 
-    def insert_object(self, data: dict):
-        new_object = CmdbObject(**data)
+    def insert_object(self, data: (CmdbObject, dict)):
+        if type(data) == dict:
+            try:
+                new_object = CmdbObject(**data)
+            except CMDBError as e:
+                raise ObjectInsertError(e)
+        else:
+            new_object = data
+            CMDB_LOGGER.debug(new_object)
         try:
             ack = self.dbm.insert(
                 collection=CmdbObject.COLLECTION,
                 data=new_object.to_database()
             )
-        except PublicIDAlreadyExists as e:
-            return e
+        except (CMDBError, PublicIDAlreadyExists) as e:
+            raise ObjectInsertError(e)
         return ack
 
     def insert_many_objects(self, objects: list):
@@ -298,8 +308,8 @@ class CmdbObjectManager(CmdbManagerBase):
                 collection=CmdbType.COLLECTION,
                 public_id=public_id)
                             )
-        except CMDBError:
-            return None
+        except (CMDBError, Exception):
+            raise TypeNotFoundError(type_id=public_id)
 
     def insert_type(self, data: dict):
         new_type = CmdbType(**data)
@@ -382,3 +392,18 @@ class CmdbObjectManager(CmdbManagerBase):
 class UpdateError(CMDBError):
     def __init__(self, class_name, data, error):
         self.message = 'Update error while updating {} - Data: {} - Error: '.format(class_name, data, error)
+
+
+class TypeNotFoundError(CMDBError):
+    def __init__(self, type_id):
+        self.message = 'Type with ID: {} not found!'.format(type_id)
+
+
+class ObjectInsertError(CMDBError):
+    def __init__(self, error):
+        self.message = 'Object could not be inserted | Error {} \n show into logs for details'.format(error)
+
+
+class ObjectUpdateError(CMDBError):
+    def __init__(self, msg):
+        self.message = 'Something went wrong during update: {}'.format(msg)

@@ -10,20 +10,20 @@ LOGGER = get_logger()
 
 
 class CmdbRender:
-
     VIEW_MODE = 0
     EDIT_MODE = 1
+    ADD_MODE = 2
     DEFAULT_MODE = VIEW_MODE
 
     POSSIBLE_INPUT_FORM_TYPES = ['text', 'password', 'email', 'tel']
-    POSSIBLE_RENDER_MODES = [VIEW_MODE, EDIT_MODE]
+    POSSIBLE_RENDER_MODES = [ADD_MODE, VIEW_MODE, EDIT_MODE]
 
-    def __init__(self, object_instance: CmdbObject, type_instance: CmdbType, mode: int=DEFAULT_MODE):
-        self.object_instance = object_instance
-        self.type_instance = type_instance
+    def __init__(self, type_instance: CmdbType, object_instance: CmdbObject = None, mode: int = DEFAULT_MODE):
         if mode not in CmdbRender.POSSIBLE_RENDER_MODES:
             raise RenderModeError()
         self.mode = mode
+        self.type_instance = type_instance
+        self.object_instance = object_instance
 
     def get_mode(self) -> int:
         return self.mode
@@ -49,9 +49,12 @@ class CmdbRender:
 
     @object_instance.setter
     def object_instance(self, object_instance: CmdbObject):
-        if not isinstance(object_instance, CmdbObject):
+        if self.mode == CmdbRender.ADD_MODE:
+            self._object_instance = None
+        elif not isinstance(object_instance, CmdbObject):
             raise ObjectInstanceError()
-        self._object_instance = object_instance
+        else:
+            self._object_instance = object_instance
 
     @property
     def type_instance(self) -> CmdbType:
@@ -75,34 +78,56 @@ class CmdbRender:
         return log_list
 
     def get_field(self, name):
-        if self.mode == self.VIEW_MODE:
+        """
+        TODO: Error handling
+        """
+
+        field = None
+        if self.mode == CmdbRender.VIEW_MODE or self.mode == CmdbRender.EDIT_MODE:
             try:
                 object_value = self.object_instance.get_value(name)
-                # LOGGER.debug("OBJECTVALUE for Field {}: - {}".format(name, object_value))
                 if object_value is None or object_value == '':
                     return None
             except CMDBError:
                 return None
-        try:
-            field = self.type_instance.get_field(name)
-            object_value = self.object_instance.get_value(name)
-            if object_value is not None or object_value != '':
-                enc_value = CmdbRender.field_encoder(field, object_value)
-                field.set_value(enc_value)
-        except CMDBError:
-            return None
+            try:
+                field = self.type_instance.get_field(name)
+                object_value = self.object_instance.get_value(name)
+                if object_value is not None or object_value != '':
+                    enc_value = CmdbRender.field_encoder(field, object_value)
+                    field.set_value(enc_value)
+                return field
+            except CMDBError:
+                return None
+        elif self.mode == CmdbRender.ADD_MODE:
+            try:
+                field = self.type_instance.get_field(name)
+                field.set_value(None)
+                LOGGER.debug("Field: {}".format(field))
+                return field
+            except CMDBError:
+                return None
+
+        LOGGER.debug("OBJECTVALUE Field {}:".format(field))
         return field
 
     @staticmethod
     def field_encoder(field: CmdbFieldType, value):
         if field.get_type() == 'date':
             LOGGER.debug("Current field TYPE: {} | VALUE: {}".format(field.get_type(), value))
-            str_date_value = value.strftime("%Y-%m-%dT%H:%M")
+            try:
+                str_date_value = value.strftime("%Y-%m-%d")
+            except Exception:
+                LOGGER.warning("Wrong data format in field {}".format(field))
+                return value
             LOGGER.debug("Current field VALUE: {} | NEW VALUE: {}".format(value, str_date_value))
             return str_date_value
-        else:
-            return value
         return value
+
+
+    def __repr__(self):
+        from cmdb.utils.helpers import debug_print
+        return debug_print(self)
 
 
 class RenderModeError(CMDBError):

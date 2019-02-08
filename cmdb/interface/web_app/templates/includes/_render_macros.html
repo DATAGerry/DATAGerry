@@ -1,55 +1,135 @@
-{% macro render_section(section) -%}
+{% macro render_section(section) %}
     <h2>{{ section['label'] }}</h2>
     <hr/>
-{%- endmacro %}
+{% endmacro %}
 
-{% macro text(field, mode) -%}
+{% macro text(field, mode) %}
     <div class="form-group">
         <label for="{{ field.name }}">{{ field.label }}</label>
         <input class="{{ field.className }}" type="{{ field.get_sub_type() }}" name="{{ field.name }}"
-               value="{{ field.value|e }}"
-                {% if mode == 0 %}
-               readonly
-                {% endif %}
+                {% if field.value %} value="{{ field.value|e }}" {% endif %}
+                {% if field.placeholder %} placeholder="{{ field.placeholder|e }}" {% endif %}
+                {% if field.required %} required {% endif %}
+                {% if mode == 0 %} readonly {% endif %}
         />
         {% if field.description %}
             <small id="{{ field.name }}_help" class="form-text text-muted">{{ field.description }}</small>
         {% endif %}
     </div>
-{%- endmacro %}
+{% endmacro %}
 
-{% macro date(field, mode) -%}
+{% macro textarea(field, mode) %}
+    <div class="form-group">
+        <label for="{{ field.name }}">{{ field.label }}</label>
+        {# Be careful with linebreaks here | will be insert whitespace into empty areas #}
+        <textarea class="{{ field.className }}" name="{{ field.name }}" id="{{ field.name }}"
+                {% if field.rows %} rows="{{ field.rows }}" {% else %}rows="3"{% endif %}
+                {% if field.maxlength %} maxlength="{{ field.maxlength }}" {% endif %}
+                {% if field.maxlength %} maxlength="{{ field.maxlength }}" {% endif %}
+                {% if field.required %} required {% endif %}
+                  {% if mode == 0 %}readonly{% endif %}>{% if field.value %}{{ field.value|e }}{% endif %}</textarea>
+    </div>
+{% endmacro %}
+
+{% macro select(field, mode) %}
+    <div class="form-group">
+        <label for="{{ field.name }}">{{ field.label }}</label>
+        <select class="{{ field.className }}" id="{{ field.name }}" name="{{ field.name }}"
+                {% if field.required %} required {% endif %}
+                {% if mode == 0 %}readonly{% endif %}
+                {% if field.multiple %} multiple {% endif %}>
+            {% if mode == 2 %}
+                <option></option>{% endif %}>
+            {% for options in field.values %}
+                <option value="{{ options.value }}">{{ options.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+{% endmacro %}
+
+{% macro radio(field, mode) %}
+    <div class="form-group">
+        <label for="{{ field.name }}">{{ field.label }}</label>
+        {% for options in field.values %}
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="{{ field.name }}" value="{{ options.value }}">
+                <label class="form-check-label" for="{{ field.name }}"></label>
+                {{ options.label }}
+            </div>
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{% macro checkbox(field, mode) %}
+    <div class="form-group">
+        <label for="{{ field.name }}">{{ field.label }}</label>
+        {% for options in field.values %}
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="{{ field.name }}" value="{{ options.value }}">
+                <label class="form-check-label" for="{{ field.name }}"></label>
+                {{ options.label }}
+            </div>
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{% macro password(field, mode) %}
+    <div class="form-group">
+        <label for="{{ field.name }}">{{ field.label }}</label>
+        <div class="input-group">
+            <input type="{{ field.get_sub_type() }}" {% if field.value %} value="{{ field.value|e }}" {% endif %}
+                   class="{{ field.className }} cmdb_password" id="{{ field.name }}"
+                   {% if field.placeholder %}placeholder="{{ field.placeholder|e }}"{% endif %}
+                    {% if field.required %} required {% endif %}
+                   autocomplete="off">
+            <div class="input-group-append">
+                <span class="input-group-text" data-toggle="cmdb_password"><i class="fas fa-eye"></i></span>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro date(field, mode) %}
     <div class="form-group">
         <label for="{{ field.name }}">{{ field.label }}</label>
         <input class="{{ field.className }}" type="{{ field.get_sub_type() }}" name="{{ field.name }}"
-               value="{{ field.value|e }}"
-                {% if mode == 0 %}
-               readonly
-                {% endif %}
+                {% if field.value %} value="{{ field.value|e }}" {% endif %}
+                {% if field.required %} required {% endif %}
+                {% if mode == 0 %} readonly {% endif %}
         />
         {% if field.description %}
             <small id="{{ field.name }}_help" class="form-text text-muted">{{ field.description }}</small>
         {% endif %}
     </div>
-{%- endmacro %}
+{% endmacro %}
 
-{% macro href(field, mode) -%}
+{% macro log_message() %}
+    <hr />
+    <div class="form-group">
+        <label for="log_message">Log message</label>
+        <textarea class="form-control" name="log_message" id="log_message" rows="3" maxlength="200"></textarea>
+    </div>
+{% endmacro %}
+
+{% macro href(field, mode) %}
     {% if mode == 0 %}
         {{ field.label }}: <a href="{{ field.value|e }}" alt="{{ field.name }}" target="_blank">{{ field.value|e }}</a>
     {% elif mode == 1 %}
         <div class="form-group">
             <label for="{{ field.name }}">{{ field.label }}</label>
             <input class="{{ field.className }}" type="{{ field.get_sub_type() }}" name="{{ field.name }}"
-                   value="{{ field.value|e }}"
+                    {% if field.value %} value="{{ field.value|e }}" {% endif %}
+                    {% if field.required %} required {% endif %}
+                    {% if mode == 0 %} readonly {% endif %}
             />
             {% if field.description %}
                 <small id="{{ field.name }}_help" class="form-text text-muted">{{ field.description }}</small>
             {% endif %}
         </div>
     {% endif %}
-{%- endmacro %}
+{% endmacro %}
 
-{% macro ref(field, mode) -%}
+{% macro ref(field, mode) %}
     {% set ref_type = object_manager.get_type(field.type_id) %}
     {% set ref_type_fields = ref_type.get_summary_fields(field.summary_field) %}
     {% if mode == 0 %}
@@ -85,29 +165,47 @@
             </div>
         </div>
     {% endif %}
-{%- endmacro %}
+{% endmacro %}
 
-{% macro render_object_view(render) -%}
+{% macro render_object(render) %}
     {% for section in render.type_instance.get_sections() %}
         {{ render_section(section) }}
         {% for field in section['fields'] %}
             {% set current_field = render.get_field(field) %}
             {% if current_field != None %}
                 {% if current_field %}
-                    {% if current_field.get_type() == 'text' %}
-                        {{ text(current_field, render.get_mode()) }}
-                    {% endif %}
-                    {% if current_field.get_type() == 'href' %}
+                    {% if current_field.get_sub_type() == 'password' %}
+                        {{ password(current_field, render.get_mode()) }}
+                    {% elif current_field.get_sub_type() == 'href' %}
                         {{ href(current_field, render.get_mode()) }}
-                    {% endif %}
-                    {% if current_field.get_type() == 'date' %}
+                    {% elif current_field.get_sub_type() == 'date' %}
                         {{ date(current_field, render.get_mode()) }}
-                    {% endif %}
-                    {% if current_field.get_type() == 'ref' %}
+                    {% elif current_field.get_sub_type() == 'ref' %}
                         {{ ref(current_field, render.get_mode()) }}
+                    {% elif current_field.get_sub_type() == 'textarea' %}
+                        {{ textarea(current_field, render.get_mode()) }}
+                    {% elif current_field.get_sub_type() == 'select' %}
+                        {{ select(current_field, render.get_mode()) }}
+                    {% elif current_field.get_sub_type() == 'radio-group' %}
+                        {{ radio(current_field, render.get_mode()) }}
+                    {% elif current_field.get_sub_type() == 'checkbox-group' %}
+                        {{ checkbox(current_field, render.get_mode()) }}
+                    {% elif current_field.get_type() == 'text' %}
+                        {{ text(current_field, render.get_mode()) }}
                     {% endif %}
                 {% endif %}
             {% endif %}
         {% endfor %}
     {% endfor %}
-{%- endmacro %}
+    {% if render.get_mode() == 2 %}
+        {{ log_message() }}
+    {% endif %}
+{% endmacro %}
+
+{% macro render_form_wrapper(path, content) %}
+    <form class="cmdb_object_form" method="post" action="{{ path }}" novalidate>
+        {{ content }}
+        <button class="btn btn-primary" type="submit">Submit</button>
+        <button type="reset" class="btn btn-outline-secondary">Reset</button>
+    </form>
+{% endmacro %}

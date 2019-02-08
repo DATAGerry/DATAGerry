@@ -14,16 +14,13 @@ class CmdbObject(CmdbDAO):
     COLLECTION = 'objects.data'
     REQUIRED_INIT_KEYS = [
         'type_id',
-        'version',
         'creation_time',
         'author_id',
-        'last_edit_time',
         'active',
-        'views',
         'fields'
     ]
 
-    def __init__(self, type_id, status, creation_time, author_id, last_edit_time, active, fields, logs,
+    def __init__(self, type_id, status, creation_time, author_id, last_edit_time, active, fields, logs=[],
                  views: int = 0, version: str = '1.0.0', **kwargs):
         """init of object
 

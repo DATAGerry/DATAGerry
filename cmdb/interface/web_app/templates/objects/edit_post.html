@@ -10,7 +10,6 @@
 {% block content %}
     <div class="content">
         <div class="container-fluid">
-            {{ super() }}
             {% if error %}
                 <div class="alert alert-danger" role="alert">
                     <strong>ERROR:</strong> {{ error }} <br/><a href="/object/{{ old_object.get_public_id() }}/"
@@ -26,6 +25,7 @@
                     </p>
                 </div>
             {% endif %}
+            {{ super() }}
         </div>
     </div>
 {% endblock %}

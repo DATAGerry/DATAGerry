@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+{% block title %}{% if error %}
+    Error while insert
+{% else %}
+    Added object of type{{ object_type.get_label() }}
+{% endif %}{% endblock %}
+{% block navigation %}
+    {% include 'includes/_navigation.html' %}
+{% endblock %}
+{% block breadcrumb %}
+    {% include 'includes/_breadcrumb.html' %}
+{% endblock %}
+{% block content %}
+    <div class="content">
+        <div class="container-fluid">
+            {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    <strong>ERROR:</strong> {{ error }} <br/><a href="{{ request.url }}"
+                                                                class="alert-link">Back to add form</a>.
+                </div>
+            {% else %}
+                <div class="alert alert-success" role="alert">
+                    <h4 class="alert-heading">Successful!</h4>
+                    <p>Object added successfully with ID: #{{ inserted_object.get_public_id() }}</p>
+                    <hr>
+                    <p class="mb-0"><a href="/object/{{ inserted_object.get_public_id() }}/" class="alert-link">Get to
+                        object</a>
+                    </p>
+                </div>
+            {% endif %}
+            {{ super() }}
+        </div>
+    </div>
+{% endblock %}
+
+
+{% if mode == 'DEBUG' %}
+    {% block debug %}
+        {{ inserted_object }}
+        {{ form_data }}
+    {% endblock %}
+{% endif %}

@@ -1,5 +1,5 @@
 {% extends 'layout.html' %}
-{% from "includes/_render_macros.html" import render_object_view with context %}
+{% from "includes/_render_macros.html" import render_object with context %}
 {% block title %}View #{{ view_object.get_public_id() }} {{ view_type.get_label() }}{% endblock %}
 {% block navigation %}
     {% include 'includes/_navigation.html' %}
@@ -44,7 +44,7 @@
                                 <div class="card-body">
                                     <form action="/object/{{ view_object.get_public_id() }}/edit/" method="post"
                                           novalidate>
-                                        {{ render_object_view(render) }}
+                                        {{ render_object(render) }}
 
                                         <h3 class>Log message</h3>
                                         <hr/>

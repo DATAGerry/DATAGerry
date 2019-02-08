@@ -4,6 +4,9 @@ Error handlers for web_app module
 
 from flask import Blueprint
 from flask import render_template
+from cmdb.utils.logger import get_logger
+
+LOGGER = get_logger()
 
 error_pages = Blueprint('error_pages', __name__, template_folder='templates')
 
@@ -72,7 +75,7 @@ def iam_a_teapot(error):
     :param error: error code
     :return: error page
     """
-    return render_template('errors/default.html', error=error), 418
+    return render_template('errors/bad_behavior.html', error=error), 418
 
 
 @error_pages.errorhandler(500)
@@ -82,7 +85,7 @@ def internal_server_error(error):
     :param error: error code
     :return: error page
     """
-    return render_template('errors/default.html', error=error), 500
+    return render_template('errors/bad_behavior.html', error=error), 500
 
 
 @error_pages.errorhandler(501)

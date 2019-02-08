@@ -9,7 +9,6 @@
 {% block content %}
     <div id="dashboard" class="content">
         <div class="container-fluid">
-            {{ super() }}
             <h1>Dashboard</h1>
             <hr/>
             <div class="row">
@@ -95,6 +94,7 @@
                 {% endfor %}
                 </tbody>
             </table>
+            {{ super() }}
         </div>
     </div>
 {% endblock %}
