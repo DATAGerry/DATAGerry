@@ -24,7 +24,6 @@ def index_page():
 @type_pages.route('/view/<int:public_id>')
 @register_breadcrumb(type_pages, '.Type', 'View')
 @login_required
-@right_required('view')
 def view_page(public_id):
     type_instance = None
     try:

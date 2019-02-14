@@ -1,5 +1,4 @@
-from cmdb.user_management.user_rights import UserRight
-from cmdb.user_management.user_groups import UserGroup
+from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user import User
 from cmdb.data_storage import NoDocumentFound, DatabaseManagerMongo
 from cmdb.data_storage.database_manager import DeleteResult
@@ -13,7 +12,6 @@ LOGGER = get_logger()
 class UserManagement:
 
     MANAGEMENT_CLASSES = {
-        'RIGHT_CLASSES': UserRight,
         'GROUP_CLASSES': UserGroup,
         'USER_CLASSES': User
     }
@@ -21,6 +19,7 @@ class UserManagement:
     def __init__(self, database_manager: DatabaseManagerMongo, security_manager):
         self.dbm = database_manager
         self.scm = security_manager
+        self.rights = self.__load_rights()
 
     def _get_user(self, public_id: int):
         return self.dbm.find_one(collection=User.COLLECTION, public_id=public_id)
@@ -110,23 +109,19 @@ class UserManagement:
                 LOGGER.warning(e)
             raise GroupDeleteError(public_id)
 
-    def get_right_by_name(self, name):
-        formatted_filter = {'name': name}
-        try:
-            founded_right = self.dbm.find_one_by(collection=UserRight.COLLECTION, filter=formatted_filter)
-            return UserRight(**founded_right)
-        except NoDocumentFound:
-            raise RightNotExistsError(name)
+    @staticmethod
+    def __load_rights():
+        from cmdb.user_management.rights import __all__
+        rights = []
+        for right_list in __all__:
+            for right in right_list:
+                rights.append(right)
+        return rights
 
-    def get_right(self, public_id: int) -> UserRight:
-        formatted_filter = {'_id': public_id}
-        try:
-            founded_right = self.dbm.find_one_by(collection=UserRight.COLLECTION, filter=formatted_filter)
-            return UserRight(**founded_right)
-        except NoDocumentFound:
-            raise RightNotExistsError(public_id)
-
-    def user_group_has_right(self, user: User, right: UserRight) -> bool:
+    def user_group_has_right(self, user: User, right) -> bool:
+        """
+        @deprecated
+        """
         group = UserGroup(**self.dbm.find_one(UserGroup.COLLECTION, user.get_group()))
         right_list = group.get_rights()
         if len(right_list) <= 0:
@@ -183,3 +178,21 @@ class UserInsertError(CMDBError):
     def __init__(self, name):
         super().__init__()
         self.message = "The following user could not be added: {}".format(name)
+
+
+class WrongTypeException(Exception):
+    """Exception if input_type was wrong"""
+    def __init__(self):
+        super().__init__()
+
+
+class WrongPassException(Exception):
+    """Exception if wrong password"""
+    def __init__(self):
+        super().__init__()
+
+
+class UserHasNotRequiredRight(Exception):
+    """Exception if user has not the right for an action"""
+    def __init__(self, user, right):
+        self.message = "The user {} has not the required right level {} to view this page".format(user.user_name, right)

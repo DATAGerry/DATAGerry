@@ -6,7 +6,7 @@ from flask import request, abort, redirect, url_for
 from cmdb.utils.logger import get_logger
 from jwcrypto.jwt import JWTExpired, JWTNotYetValid
 from jwcrypto.jws import InvalidJWSSignature, InvalidJWSObject
-from cmdb.user_management import User, UserRight
+from cmdb.user_management import User
 
 LOGGER = get_logger()
 
@@ -62,6 +62,10 @@ def login_required(f):
 
 
 def right_required(required_right: str):
+    """
+    TODO: FIX
+
+
     def page_right(f):
         @wraps(f)
         def decorated(*args, **kwargs):
@@ -81,5 +85,5 @@ def right_required(required_right: str):
             return f(*args, **kwargs)
 
         return decorated
-
-    return page_right
+    """
+    return None

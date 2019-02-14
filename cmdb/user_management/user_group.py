@@ -2,16 +2,15 @@ from cmdb.user_management.user_base import UserManagementBase
 
 
 class UserGroup(UserManagementBase):
-
     COLLECTION = 'management.groups'
 
     INDEX_KEYS = [
         {'keys': [('name', UserManagementBase.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
-    def __init__(self, name: str, label: str, rights: list=None, **kwargs):
+    def __init__(self, name: str, label: str = None, rights: list = None, **kwargs):
         self.name = name
-        self.label = label
+        self.label = label or name.title()
         self.rights = rights or []
         super(UserGroup, self).__init__(**kwargs)
 

@@ -6,7 +6,7 @@ from cmdb.utils.error import CMDBError
 
 class User(UserManagementBase):
     COLLECTION = 'management.users'
-
+    REQUIRED_INIT_KEYS = ['user_name']
     INDEX_KEYS = [
         {'keys': [('user_name', UserManagementBase.DAO_ASCENDING)], 'user_name': 'user_name', 'unique': True}
     ]
@@ -20,14 +20,14 @@ class User(UserManagementBase):
         if email is None or email == "":
             self.email = ""
         else:
-            self.email = self.validate_email(email)
+            self.email = self.__validate_email(email)
         self.registration_time = registration_time
         self.first_name = first_name
         self.last_name = last_name
         super(User, self).__init__(**kwargs)
 
     def get_name(self):
-        if self.first_name is "" and self.last_name is "":
+        if self.first_name is None or self.last_name is None:
             return self.user_name
         else:
             return "{} {}".format(self.first_name, self.last_name)
@@ -41,7 +41,7 @@ class User(UserManagementBase):
     def get_username(self):
         return self.user_name
 
-    def validate_email(self, address):
+    def __validate_email(self, address):
         if not self.is_valid_email(address):
             raise InvalidEmailError(address)
         return address
@@ -55,7 +55,9 @@ class User(UserManagementBase):
     def is_valid_email(email):
         import re
         if len(email) > 7:
-            return bool(re.match("^.+@(\[?)[a-zA-Z0-9-.]+.([a-zA-Z]{2,3}|[0-9]{1,3})(]?)$", email))
+            return re.match('^.+@(\[?)[a-zA-Z0-9-.]+.([a-zA-Z]{2,3}|[0-9]{1,3})(]?)$', email)
+        else:
+            return False
 
     def get_password(self):
         return self.password
