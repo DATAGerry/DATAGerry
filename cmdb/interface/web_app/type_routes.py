@@ -1,6 +1,6 @@
-from cmdb.utils.interface_wraps import right_required
+from cmdb.utils.interface_wraps import login_required, right_required
 from cmdb.utils import get_logger
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, abort
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from cmdb.interface.web_app import MANAGER_HOLDER
 from cmdb.utils.error import CMDBError
@@ -20,21 +20,22 @@ def index_page():
     return render_template('types/index.html', all_types=all_types, object_manager=obm, user_manager=uum)
 
 
-@right_required
 @type_pages.route('/<int:public_id>')
 @type_pages.route('/view/<int:public_id>')
 @register_breadcrumb(type_pages, '.Type', 'View')
+@login_required
+@right_required('view')
 def view_page(public_id):
-    current_type = None
+    type_instance = None
     try:
-        current_type = MANAGER_HOLDER.get_object_manager().get_type(public_id=public_id)
+        type_instance = MANAGER_HOLDER.get_object_manager().get_type(public_id=public_id)
     except CMDBError as e:
-        LOGGER.warning(e.message)
+        LOGGER.warning(e)
+        abort(500)
+    return render_template('types/view.html', public_id=public_id, type_instance=type_instance,
+                           user_manager=MANAGER_HOLDER.get_user_manager())
 
-    return render_template('types/view.html', public_id=public_id, type=current_type)
 
-
-@right_required
 @type_pages.route('/edit/<int:public_id>')
 @register_breadcrumb(type_pages, '.Type', 'Edit')
 def edit_page(public_id):

@@ -44,9 +44,6 @@ def login_required(f):
         """
         checks if user is logged in and valid
         """
-        token = None
-
-        LOGGER.debug("User COOKIE: {}".format(request.cookies))
         if 'access-token' in request.cookies:
             token = request.cookies['access-token']
         else:
@@ -65,23 +62,19 @@ def login_required(f):
 
 
 def right_required(required_right: str):
-    """
-    TODO: Implement
-    See Also: https: // stackoverflow.com / questions / 5929107 / decorators -
-    with-parameters
-        https: // www.artima.com / weblogs / viewpost.jsp?thread = 240845"""
-
     def page_right(f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            from flask import current_app
-            user_manager = current_app.manager_holder.get_user_manager()
-            right = user_manager.get_right()
-            security_manager = current_app.manager_holder.get_security_manager()
+            from cmdb.interface.web_app import MANAGER_HOLDER
+            usm = MANAGER_HOLDER.get_user_manager()
+
+            right = usm.get_right(required_right)
+            LOGGER.debug(right)
+            security_manager = MANAGER_HOLDER.get_security_manager()
             user = User(security_manager.decrypt_token(request.cookies.get('access-token')))
-            print(user)
             try:
-                user_manager.user_has_right(user, required_right)
+                ack_right = usm.user_has_right(user, required_right)
+                LOGGER.debug(ack_right)
             except Exception:
                 abort(401)
                 return redirect(url_for('static_pages.error_404_page'))

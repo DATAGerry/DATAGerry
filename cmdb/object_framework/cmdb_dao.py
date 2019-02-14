@@ -3,6 +3,7 @@ Data access object for all core objects that are to be stored in the database.
 """
 from cmdb.utils.error import CMDBError
 from cmdb.utils import get_logger
+
 LOGGER = get_logger()
 
 
@@ -127,7 +128,7 @@ class CmdbDAO:
         if not hasattr(self, 'version') or self.version is None:
             raise NoVersionError(self.get_public_id())
         updater_version = _Versioning(
-                *map(int, self.version.split('.'))
+            *map(int, self.version.split('.'))
         )
 
         if type(updater_version) is not _Versioning:
@@ -142,7 +143,7 @@ class CmdbDAO:
         self.version = updater_version.__repr__()
         return self.version
 
-    def get_version(self) -> (str, None):
+    def get_version(self) -> str:
         """
         Get version number if exists
         Returns:
@@ -151,11 +152,7 @@ class CmdbDAO:
         if self.version:
             return self.version
         else:
-            None
-
-    def __repr__(self):
-        from cmdb.utils.helpers import debug_print
-        return debug_print(self)
+            raise NoVersionError(self.get_public_id())
 
     def to_database(self) -> dict:
         """
@@ -165,6 +162,20 @@ class CmdbDAO:
             dict: attribute dict of object
         """
         return self.__dict__
+
+    def get_logs(self) -> list:
+        from cmdb.object_framework.cmdb_log import CmdbLog
+        if self.logs is None:
+            raise NoLogInstance()
+        else:
+            log_list = []
+            for log in self.logs:
+                try:
+                    tmp_log = CmdbLog(**log)
+                    log_list.append(tmp_log)
+                except CMDBError:
+                    continue
+            return log_list
 
     def to_json(self) -> dict:
         """
@@ -176,13 +187,17 @@ class CmdbDAO:
         import json
         return json.dumps(self.__dict__, default=default)
 
+    def __repr__(self):
+        from cmdb.utils.helpers import debug_print
+        return debug_print(self)
+
 
 class _Versioning:
     """
     Helper class for object/type versioning
     """
 
-    def __init__(self, major: int=1, minor: int=0, patch: int=0):
+    def __init__(self, major: int = 1, minor: int = 0, patch: int = 0):
         """
         Args:
             major: core changes with no compatibility
@@ -243,6 +258,7 @@ class VersionTypeError(CMDBError):
     """
     Error if update step input was wrong
     """
+
     def __init__(self, level, update_input):
         super().__init__()
         self.message = 'The version type {1} update for {0} is wrong'.format(level, update_input)
@@ -252,6 +268,7 @@ class NoVersionError(CMDBError):
     """
     Error if object from dao child class has no version number
     """
+
     def __init__(self, public_id):
         super().__init__()
         self.message = 'The object (ID: {}) has no version control'.format(public_id)
@@ -261,9 +278,16 @@ class NoPublicIDError(CMDBError):
     """
     Error if object has no public key and public key was'n removed over IGNORED_INIT_KEYS
     """
+
     def __init__(self):
         super().__init__()
         self.message = 'The object has no general public id - look at the IGNORED_INIT_KEYS constant or the docs'
+
+
+class NoLogInstance(CMDBError):
+    def __init__(self):
+        super().__init__()
+        self.message = 'Empty logs or class with no log implementation'
 
 
 class RequiredInitKeyNotFoundError(CMDBError):

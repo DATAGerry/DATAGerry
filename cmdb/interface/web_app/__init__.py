@@ -9,11 +9,12 @@ from cmdb.utils import get_logger
 
 LOGGER = get_logger()
 MANAGER_HOLDER = CmdbManagerHolder()
+app = None
 
 
 def create_web_app(event_queue):
     import cmdb
-
+    global app
     app = Flask(__name__)
     if cmdb.__MODE__:
         app.config.from_object(app_config['development'])

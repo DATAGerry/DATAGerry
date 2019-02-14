@@ -1,17 +1,164 @@
 {% extends 'layout.html' %}
-{% block title %}Type view {{type.get_name()}}{% endblock %}
+{% block title %}Type {{ type_instance.get_label() }}{% endblock %}
 {% block navigation %}
-{% include 'includes/_navigation.html' %}
+    {% include 'includes/_navigation.html' %}
 {% endblock %}
 {% block breadcrumb %}
-{% include 'includes/_breadcrumb.html' %}
+    {% include 'includes/_breadcrumb.html' %}
 {% endblock %}
 {% block content %}
-<div class="content">
-    <div class="container-fluid">
-        {{ super() }}
-        <h1>View: {{ type.get_label() }}</h1>
-        {{ type }}
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-9">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    {{ type_instance.active | label_active }}
+                                    <span class="ml-1">Type: {{ type_instance.get_label() }} #{{ public_id }}</span>
+                                    <span class="badge badge-secondary float-right mr-1">Version: {{ type_instance.get_version() }} </span>
+
+                                </div>
+                                <div class="card-body">
+                                    <dl class="row">
+                                        <dt class="col-sm-3">Public ID</dt>
+                                        <dd class="col-sm-9">{{ type_instance.get_public_id() }}</dd>
+                                        <dt class="col-sm-3">Name</dt>
+                                        <dd class="col-sm-9">{{ type_instance.get_name() }}</dd>
+                                        <dt class="col-sm-3">Label</dt>
+                                        <dd class="col-sm-9">{{ type_instance.get_label() }}</dd>
+                                        <dt class="col-sm-3">Description</dt>
+                                        <dd class="col-sm-9">{{ type_instance.get_description() }}</dd>
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <div class="card">
+                                <div class="card-header">
+                                    Fields
+                                </div>
+                                <div class="card-body">
+                                    {% set fields = type_instance.get_fields() %}
+                                    {% for field in fields %}
+                                        {% set current_field = type_instance.get_field(field['name']) %}
+                                        {{ current_field }}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-3">
+                    <div class="card">
+                        <div class="card-header">
+                            Information
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tbody>
+                                <tr>
+                                    <th class="border-top-0" scope="row">Public ID</th>
+                                    <td class="border-top-0">{{ type_instance.get_public_id() }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Edits</th>
+                                    <td>{{ (type_instance.get_logs()|length-1) }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Author</th>
+                                    <td>{{ user_manager.get_user(type_instance.author_id).get_name() }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Creation time</th>
+                                    <td>{{ type_instance.creation_time }}</td>
+                                </tr>
+                                {% if type_instance.last_edit_time %}
+                                    <tr>
+                                        <th scope="row">Last edit</th>
+                                        <td>{{ type_instance.last_edit_time }}</td>
+                                    </tr>
+                                {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            Actions
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">Cras justo odio</li>
+                                <li class="list-group-item">Dapibus ac facilisis in</li>
+                                <li class="list-group-item">Morbi leo risus</li>
+                                <li class="list-group-item">Porta ac consectetur ac</li>
+                                <li class="list-group-item">Vestibulum at eros</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mt-3">
+                    <div class="tabbable">
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link active show" href="#type-logs" data-toggle="tab">Logs</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active show" id="type-logs">
+                                {% set logs = type_instance.get_logs() %}
+                                {% if logs %}
+                                    <table class="table table-striped">
+                                        <thead>
+                                        <tr>
+                                            <th scope="col">Date</th>
+                                            <th scope="col">Author</th>
+                                            <th scope="col">Action</th>
+                                            <th scope="col">Message</th>
+                                            <th scope="col">Log state</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for log in logs %}
+                                            <tr>
+                                                <th scope="row">{{ log.get_date() }}</th>
+                                                <td>{{ user_manager.get_user(log.author_id).get_name() }}</td>
+                                                <td>{{ log.get_action() }}</td>
+                                                <td>{{ log.get_message() }}</td>
+                                                {% if log.get_state() %}
+                                                    <td>
+                                                        <a href="/type/{{ view_object.get_public_id() }}/{{ log.get_state() }}">View</a>
+                                                    </td>
+                                                {% else %}
+                                                    <td></td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% else %}
+                                    <div class="alert alert-primary" role="alert">
+                                        Empty logs
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{ super() }}
+        </div>
     </div>
-</div>
 {% endblock %}
+{% if mode == 'DEBUG' %}
+    {% block debug %}
+        <h2>Type instance</h2>
+        <hr>
+        <pre>{{ type_instance }}</pre>
+    {% endblock %}
+{% endif %}

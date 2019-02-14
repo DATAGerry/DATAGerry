@@ -67,7 +67,11 @@ class CmdbRender:
         self._type_instance = type_instance
 
     def get_logs(self) -> (list, None):
-        LOGGER.debug("LOG Size: {}".format(len(self.object_instance.get_logs())))
+        """
+        TODO: Change in code to dao function
+        Returns:
+
+        """
         log_list = []
         for log in self.object_instance.get_logs():
             try:
@@ -123,7 +127,6 @@ class CmdbRender:
             LOGGER.debug("Current field VALUE: {} | NEW VALUE: {}".format(value, str_date_value))
             return str_date_value
         return value
-
 
     def __repr__(self):
         from cmdb.utils.helpers import debug_print

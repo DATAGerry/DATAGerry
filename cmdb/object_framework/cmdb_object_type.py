@@ -22,7 +22,8 @@ class CmdbType(CmdbDAO):
     ]
 
     def __init__(self, name: str, description: str, active: bool, author_id: int, creation_time: datetime,
-                 render_meta: list, fields: list, version: str = '1.0.0', label: str=None, status: list = None, logs: dict = None,
+                 render_meta: list, fields: list, version: str = '1.0.0', label: str = None, status: list = None,
+                 logs: dict = None,
                  **kwargs):
         self.name = name
         self.label = label or self.name.title()
@@ -74,7 +75,6 @@ class CmdbType(CmdbDAO):
             return None
 
     def get_fields(self):
-
         return self.fields
 
     def get_field_of_type_with_value(self, input_type: str, _filter: str, value) -> CmdbFieldType:
