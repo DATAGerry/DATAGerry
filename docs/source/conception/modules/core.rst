@@ -29,3 +29,4 @@ This makes it possible to retrieve any former state of the object.
 
 Types
 -----
+...

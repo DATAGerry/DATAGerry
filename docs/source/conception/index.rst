@@ -36,6 +36,8 @@ Modules
 *******
 .. toctree::
     modules/core
+    modules/processmanagement
+    modules/eventhandling
     modules/interface
     modules/sync_api
 
