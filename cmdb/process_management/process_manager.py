@@ -23,7 +23,7 @@ class ProcessManager:
         """Create a new instance of the ProcessManager"""
         # service definitions (in correct order)
         self.__service_defs = []
-        self.__service_defs.append(CmdbProcess("example1", "cmdb.process_management.example_service.ExampleService"))
+        self.__service_defs.append(CmdbProcess("exportd", "cmdb.exportd.service.ExportdService"))
         self.__service_defs.append(CmdbProcess("webapp", "cmdb.interface.gunicorn.WebCmdbService"))
 
         # processlist

@@ -30,7 +30,7 @@ def list_page():
     uum = MANAGER_HOLDER.get_user_manager()
     # ToDo: event sending does not make sense here, is just for testing
     evm = MANAGER_HOLDER.get_event_queue()
-    event = Event("cmdb.core.objects.listed", {})
+    event = Event("cmdb.core.object.listed", {})
     evm.put(event)
     all_objects = obm.get_all_objects()
     return render_template('objects/list.html', object_manager=obm, user_manager=uum, all_objects=all_objects)
