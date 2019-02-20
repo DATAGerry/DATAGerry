@@ -33,8 +33,8 @@ def inject_user_names():
         for user_name in all_users_in_db:
             try:
                 user_list.append({
-                    'public_id': User(**user_name).get_public_id(),
-                    'name': User(**user_name).get_name()
+                    'public_id': user_name.get_public_id(),
+                    'name': user_name.get_name()
                 })
             except CMDBError:
                 LOGGER.warning("User {} not initable".format(user_name))

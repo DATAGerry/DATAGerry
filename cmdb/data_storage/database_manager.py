@@ -253,7 +253,10 @@ class DatabaseManagerMongo(DatabaseManager):
             founded document
 
         """
-        return self.database_connector.get_collection(collection).find(*args, **kwargs)
+        LOGGER.debug("__FIND - Collection: {}".format(collection))
+        result = self.database_connector.get_collection(collection).find(*args, **kwargs)
+        LOGGER.debug("__FIND Result - Collection: {} | Result: {}".format(collection, result.__dict__))
+        return result
 
     def find_one(self, collection: str, public_id: int, *args, **kwargs):
         """calls __find with single return
@@ -272,7 +275,8 @@ class DatabaseManagerMongo(DatabaseManager):
         formatted_public_id = {'public_id': public_id}
         formatted_sort = [('public_id', DatabaseManager.DESCENDING)]
         cursor_result = self.__find(collection, formatted_public_id, limit=1, sort=formatted_sort, *args, **kwargs)
-        for result in cursor_result.limit(-1):
+        LOGGER.debug("Find one result: {}".format(cursor_result.__dict__))
+        for result in cursor_result:
             return result
         raise NoDocumentFound(collection, public_id)
 
@@ -324,14 +328,14 @@ class DatabaseManagerMongo(DatabaseManager):
         try:
             result = self.database_connector.get_collection(collection).insert_one(data)
         except Exception as e:
-            LOGGER.debug(e)
+            raise InsertError(e)
         if result.acknowledged:
             formatted_id = {'_id': result.inserted_id}
             projection = {'public_id': 1}
             cursor_result = self.__find(collection, formatted_id, projection, limit=1)
             for result in cursor_result.limit(-1):
                 return result['public_id']
-        return None
+        return result
 
     def update(self, collection: str, public_id: int, data: dict):
         """update document inside database
@@ -467,6 +471,13 @@ class DatabaseManagerMongo(DatabaseManager):
         except NoDocumentFound:
             return 0
         return highest
+
+
+class InsertError(CMDBError):
+
+    def __init__(self, error):
+        super().__init__()
+        self.message = "Insert error {}".format(error)
 
 
 class CollectionAlreadyExists(CMDBError):

@@ -1,0 +1,14 @@
+{% set navigation_bar = [
+('/settings/user-management/', 'user-management', 'fas fa-users', 'Overview'),
+('/settings/user-management/groups/', 'groups', 'fas fa-user-friends', 'Groups'),
+('/settings/user-management/rights/', 'rights', 'fas fa-sitemap', 'Rights')
+] %}
+{% set active_page = active_page|default('user-management') -%}
+<ul class="nav nav-pills flex-column">
+    {% for href, id, icon, caption in navigation_bar %}
+        <li class="nav-item">
+            <a class="nav-link {% if id== active_page %} active{% endif %}" href="{{ href|e }}">{{ caption|e }}
+                <span class="badge float-right"><i class="{{ icon }}"></i></span></a>
+        </li>
+    {% endfor %}
+</ul>

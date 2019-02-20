@@ -1,4 +1,5 @@
 {% extends 'layout.html' %}
+{% from 'includes/_render_macros.html' import render_object with context %}
 {% block title %}Type {{ type_instance.get_label() }}{% endblock %}
 {% block navigation %}
     {% include 'includes/_navigation.html' %}
@@ -18,7 +19,6 @@
                                     {{ type_instance.active | label_active }}
                                     <span class="ml-1">Type: {{ type_instance.get_label() }} #{{ public_id }}</span>
                                     <span class="badge badge-secondary float-right mr-1">Version: {{ type_instance.get_version() }} </span>
-
                                 </div>
                                 <div class="card-body">
                                     <dl class="row">
@@ -38,13 +38,10 @@
                             <div class="card">
                                 <div class="card-header">
                                     Fields
+                                    <span class="badge badge-secondary float-right mr-1">Total: {{ type_instance.count_fields() }}</span>
                                 </div>
                                 <div class="card-body">
-                                    {% set fields = type_instance.get_fields() %}
-                                    {% for field in fields %}
-                                        {% set current_field = type_instance.get_field(field['name']) %}
-                                        {{ current_field }}
-                                    {% endfor %}
+                                    {{ render_object(render) }}
                                 </div>
                             </div>
                         </div>
@@ -91,11 +88,22 @@
                         </div>
                         <div class="card-body">
                             <ul class="list-group list-group-flush">
-                                <li class="list-group-item">Cras justo odio</li>
-                                <li class="list-group-item">Dapibus ac facilisis in</li>
-                                <li class="list-group-item">Morbi leo risus</li>
-                                <li class="list-group-item">Porta ac consectetur ac</li>
-                                <li class="list-group-item">Vestibulum at eros</li>
+                                <a href="/type/list/{{ type_instance.get_public_id() }}/"
+                                   class="list-group-item list-group-item-action">
+                                    <i class="fas fa-list-ol"></i> View objects of type
+                                </a>
+                                <a href="/object/type/{{ type_instance.get_public_id() }}/add/"
+                                   class="list-group-item list-group-item-action">
+                                    <i class="fas fa-plus-square"></i> Add new object of type
+                                </a>
+                                <a href="/type/edit/{{ type_instance.get_public_id() }}/"
+                                   class="list-group-item list-group-item-action">
+                                    <i class="fas fa-edit"></i> Edit type
+                                </a>
+                                <a href="/type/delete/{{ type_instance.get_public_id() }}/"
+                                   class="list-group-item list-group-item-action list-group-item-danger">
+                                    <i class="fas fa-trash-alt"></i> Delete type
+                                </a>
                             </ul>
                         </div>
                     </div>

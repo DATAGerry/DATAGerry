@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+{% block title %}User Management | Add user{% endblock %}
+{% block navigation %}
+    {% include 'includes/_navigation.html' %}
+{% endblock %}
+{% block breadcrumb %}
+    {% include 'includes/_breadcrumb.html' %}
+{% endblock %}
+{% block content %}
+    <div class="content">
+        <div class="container-fluid">
+            {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    <strong>ERROR:</strong> {{ error.message }} <br/><a href="/settings/user-management/" class="alert-link">Back</a>.
+                </div>
+            {% else %}
+                <div class="alert alert-success" role="alert">
+                    <strong>Success:</strong> User was added <br/><a href="/settings/user-management/" class="alert-link">Back</a>.
+                </div>
+            {% endif %}
+
+            {{ super() }}
+        </div>
+    </div>
+{% endblock %}
+{% if mode == 'DEBUG' %}
+    {% block debug %}
+        {% if error %}
+            <h2>Error</h2>
+            <hr>
+            <pre>{{ error }}</pre>
+        {% endif %}
+        <h2>Add user</h2>
+        <hr>
+        <pre>{{ add_user }}</pre>
+    {% endblock %}
+{% endif %}

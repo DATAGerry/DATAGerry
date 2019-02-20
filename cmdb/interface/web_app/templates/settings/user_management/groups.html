@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+{% block title %}User Management | Groups{% endblock %}
+{% block navigation %}
+    {% include 'includes/_navigation.html' %}
+{% endblock %}
+{% block breadcrumb %}
+    {% include 'includes/_breadcrumb.html' %}
+{% endblock %}
+{% block content %}
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-10">
+                    <h1>Groups</h1>
+                    {{ user_manager }}
+                </div>
+                <div class="col-2">
+                    {% set active_page = 'groups' %}
+                    {% include 'settings/user_management/_sidebar.html' %}
+                </div>
+            </div>
+            {{ super() }}
+        </div>
+    </div>
+{% endblock %}

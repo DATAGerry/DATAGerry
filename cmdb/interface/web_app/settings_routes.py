@@ -1,17 +1,21 @@
 """
 Admin/Settings Pages
 """
-from cmdb.utils.interface_wraps import right_required
 from cmdb.utils import get_logger
-from flask import Blueprint, render_template, jsonify
+from cmdb.utils.error import CMDBError
+from cmdb.interface.cmdb_holder import CmdbManagerHolder
+from flask import Blueprint, render_template, jsonify, current_app
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
-from cmdb.interface.web_app import MANAGER_HOLDER
 from flask import request, abort
 
 LOGGER = get_logger()
 
 settings_pages = Blueprint('settings_pages', __name__, template_folder='templates', url_prefix='/settings')
 default_breadcrumb_root(settings_pages, '.settings_pages')
+
+with current_app.app_context():
+    MANAGER_HOLDER = CmdbManagerHolder()
+    MANAGER_HOLDER = current_app.manager_holder
 
 
 @settings_pages.route('/')
@@ -20,20 +24,72 @@ def settings_page():
     return render_template('settings/default.html')
 
 
-@settings_pages.route('/user/')
+@settings_pages.route('/user-management/', methods=['GET'])
 @register_breadcrumb(settings_pages, '.user_management', 'User Management')
-def user_page():
-    usm = MANAGER_HOLDER.get_user_manager()
-    complete_user_list = usm.get_all_users()
-    user_list = []
-    dict_filter = lambda x, y: dict([(i, x[i]) for i in x if i in set(y)])
-    formatter = ('public_id', 'user_name', 'first_name', 'last_name', 'registration_time')
-    for user_element in complete_user_list:
-        user_buffer = dict_filter(user_element, formatter)
-        user_buffer['group_name'] = usm.get_group(user_element['group_id']).get_name()
-        user_list.append(user_buffer)
+def user_management_index():
+    user_manager_instance = MANAGER_HOLDER.get_user_manager()
+    user_submit_token = 'TODO'
+    return render_template('settings/user_management/index.html', user_manager=user_manager_instance,
+                           user_submit_token=user_submit_token)
 
-    return render_template('settings/user.html', user_list=user_list)
+
+@settings_pages.route('/user-management/add_user/', methods=['POST'])
+@register_breadcrumb(settings_pages, '.user_management.add_user', 'Add new user')
+def user_management_add_user():
+    """
+    TODO: Add submit token validation
+    Returns:
+
+    """
+    from cmdb.user_management.user import User
+    from cmdb.user_management.user_manager import UserInsertError
+    from datetime import datetime
+    user_manager_instance = MANAGER_HOLDER.get_user_manager()
+    security_manager_instance = MANAGER_HOLDER.get_security_manager()
+    database_manager_instance = MANAGER_HOLDER.get_database_manager()
+    add_user = None
+    error = None
+    if request.method != 'POST':
+        abort(500)
+
+    form_data = request.form.to_dict()
+    form_data = {k: v for k, v in form_data.items() if v is not ''}
+
+    # Add application side data
+    form_data['registration_time'] = datetime.utcnow()
+    form_data['group_id'] = int(form_data['group_id'])
+    form_data['authenticator'] = 'LocalAuthenticationProvider'
+    form_data['password'] = security_manager_instance.generate_hmac(form_data['password'])
+    form_data['public_id'] = database_manager_instance.get_highest_id(collection=User.COLLECTION) + 1
+
+    user_submit_token = 'TODO'
+    LOGGER.debug("User add data: {}".format(form_data))
+    try:
+        add_user = User(**form_data)
+        user_manager_instance.insert_user(add_user)
+    except UserInsertError as e:
+        error = e
+        LOGGER.error("Error while adding user into database: {}".format(e.message))
+    except CMDBError as e:
+        error = e
+        LOGGER.error("Error while init user for adding into database: {}".format(form_data))
+
+    return render_template('settings/user_management/add_user.html', add_user=add_user,
+                           user_submit_token=user_submit_token, error=error)
+
+
+@settings_pages.route('/user-management/groups/', methods=['GET'])
+@register_breadcrumb(settings_pages, '.user_management.groups', 'Groups')
+def user_management_groups():
+    user_manager_instance = MANAGER_HOLDER.get_user_manager()
+    return render_template('settings/user_management/groups.html', user_manager=user_manager_instance)
+
+
+@settings_pages.route('/user-management/rights/', methods=['GET'])
+@register_breadcrumb(settings_pages, '.user_management.rights', 'Rights')
+def user_management_rights():
+    user_manager_instance = MANAGER_HOLDER.get_user_manager()
+    return render_template('settings/user_management/rights.html', user_manager=user_manager_instance)
 
 
 @settings_pages.route('/type-config/')

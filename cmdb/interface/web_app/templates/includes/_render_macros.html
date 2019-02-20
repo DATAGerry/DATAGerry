@@ -1,6 +1,89 @@
-{% macro render_section(section) %}
-    <h2>{{ section['label'] }}</h2>
-    <hr/>
+{% set VIEW_MODE = 0 %}
+{% set EDIT_MODE = 1 %}
+{% set ADD_MODE  = 2 %}
+{% set SHOW_MODE = 3 %}
+
+{% macro render_section(section, mode) %}
+    {% if mode == SHOW_MODE %}
+        <{{ section['tag'] }} id="section_{{ section['name'] }}"> Section: {{ section['label'] }} </{{ section['tag'] }}
+        >
+        <hr/>
+        <dl class="row" id="section_description_{{ section['name'] }}_help">
+            <dt class="col-3">Name</dt>
+            <dd class="col-9">{{ section['name'] }}</dd>
+            <dt class="col-3">Label</dt>
+            <dd class="col-9">{{ section['label'] }}</dd>
+            <dt class="col-3">Tag</dt>
+            <dd class="col-9">{{ section['tag'] }}</dd>
+            <dt class="col-3">Position</dt>
+            <dd class="col-9">{{ section['position'] }}</dd>
+            <dt class="col-3">Content</dt>
+            <dd class="col-9">
+                <dl class="row">
+                    <dt class="col-3">Count</dt>
+                    <dd class="col-9">{{ section['fields'] | length }}</dd>
+                    <dt class="col-3">Fields</dt>
+                    <dd class="col-9">
+                        <div class="d-flex flex-wrap">
+                            {% for section_field in section['fields'] %}
+                                <a href="#{{ section_field }}"
+                                   class="btn btn-sm btn-outline-secondary m-1">{{ section_field }}</a>
+                            {% endfor %}
+                        </div>
+                    </dd>
+                </dl>
+            </dd>
+        </dl>
+    {% else %}
+        <{{ section['tag'] }} id="section_{{ section['name'] }}"> {{ section['label'] }} </{{ section['tag'] }}>
+        <hr/>
+    {% endif %}
+{% endmacro %}
+
+{% macro input_show(field) %}
+    <div id="{{ field.name }}">
+        <h4>{{ field.label }}
+            <small>Type: {{ field.get_type() }}</small>
+        </h4>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Label</th>
+                <th scope="col">Input type</th>
+                <th scope="col">Subinput type</th>
+                <th scope="col">Required</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <th scope="row">{{ field.name }}</th>
+                <td>{{ field.label }}</td>
+                <td>{{ field.input_type }}</td>
+                <td>{{ field.subinput_type }}</td>
+                <td>{{ field.required }}</td>
+            </tr>
+            </tbody>
+        </table>
+        <dl class="row">
+            {% if field.description %}
+                <dt class="col-sm-3">Description</dt>
+                <dd class="col-sm-9">{{ field.description }}</dd>
+            {% endif %}
+            {% if field.placeholder %}
+                <dt class="col-sm-3">Placeholder</dt>
+                <dd class="col-sm-9">{{ field.placeholder }}</dd>
+            {% endif %}
+            {% if field.access %}
+                <dt class="col-sm-3">Access</dt>
+                <dd class="col-sm-9">{{ field.access }}</dd>
+            {% endif %}
+            {% if field.roles %}
+                <dt class="col-sm-3">Roles</dt>
+                <dd class="col-sm-9">{{ field.roles }}</dd>
+            {% endif %}
+        </dl>
+    </div>
 {% endmacro %}
 
 {% macro text(field, mode) %}
@@ -104,7 +187,7 @@
 {% endmacro %}
 
 {% macro log_message() %}
-    <hr />
+    <hr/>
     <div class="form-group">
         <label for="log_message">Log message</label>
         <textarea class="form-control" name="log_message" id="log_message" rows="3" maxlength="200"></textarea>
@@ -113,7 +196,7 @@
 
 {% macro href(field, mode) %}
     {% if mode == 0 %}
-        {{ field.label }}: <a href="{{ field.value|e }}" alt="{{ field.name }}" target="_blank">{{ field.value|e }}</a>
+        {{ field.label }}: <a href="{{ field.value|e }}" name="{{ field.name }}" target="_blank">{{ field.value|e }}</a>
     {% elif mode == 1 %}
         <div class="form-group">
             <label for="{{ field.name }}">{{ field.label }}</label>
@@ -169,11 +252,17 @@
 
 {% macro render_object(render) %}
     {% for section in render.type_instance.get_sections() %}
-        {{ render_section(section) }}
+        {% set mode =  render.get_mode() %}
+        {{ render_section(section, mode) }}
+        {% if mode == SHOW_MODE %}
+            <p>Field informations:</p>
+        {% endif %}
         {% for field in section['fields'] %}
             {% set current_field = render.get_field(field) %}
             {% if current_field != None %}
-                {% if current_field %}
+                {% if mode == SHOW_MODE %}
+                    {{ input_show(current_field) }}
+                {% else %}
                     {% if current_field.get_sub_type() == 'password' %}
                         {{ password(current_field, render.get_mode()) }}
                     {% elif current_field.get_sub_type() == 'href' %}
@@ -191,7 +280,7 @@
                     {% elif current_field.get_sub_type() == 'checkbox-group' %}
                         {{ checkbox(current_field, render.get_mode()) }}
                     {% elif current_field.get_type() == 'text' %}
-                        {{ text(current_field, render.get_mode()) }}
+                        {{ text(current_field, mode) }}
                     {% endif %}
                 {% endif %}
             {% endif %}

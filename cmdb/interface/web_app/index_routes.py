@@ -1,7 +1,7 @@
 """
 Index Page
 """
-from cmdb.interface.web_app import MANAGER_HOLDER
+from cmdb.interface.web_app import app
 from cmdb.utils.error import CMDBError
 from cmdb.utils import get_logger
 from cmdb.utils.interface_wraps import login_required
@@ -12,6 +12,9 @@ logger = get_logger()
 
 index_pages = Blueprint('index_pages', __name__, template_folder='templates')
 default_breadcrumb_root(index_pages, '.')
+
+with app.app_context():
+    MANAGER_HOLDER = app.manager_holder
 
 
 @index_pages.route('/')
@@ -35,8 +38,8 @@ def index_page():
         last_objects = obm.get_objects_by(sort='last_edit_time', active={"$eq": True})
         if len(last_objects) > 25:
             last_objects = last_objects[: 25]
-    except CMDBError as cmdb_e:
-        logger.warning(cmdb_e.message)
+    except CMDBError as e:
+        logger.warning(e.message)
         return render_template('index.html',
                                all_objects_count=all_objects_count,
                                all_types_count=all_types_count,

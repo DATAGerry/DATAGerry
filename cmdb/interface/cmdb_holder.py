@@ -29,7 +29,7 @@ class CmdbManagerHolder:
     def set_security_manager(self, security_manager: SecurityManager):
         self.security_manager = security_manager
 
-    def set_event_queue(self, event_queue):
+    def set_event_queue(self, event_queue: EventManager):
         self.event_queue = event_queue
 
     def set_system_settings_reader(self, system_settings_reader: SystemSettingsReader):
@@ -50,7 +50,7 @@ class CmdbManagerHolder:
     def get_security_manager(self) -> SecurityManager:
         return self.security_manager
 
-    def get_event_queue(self):
+    def get_event_queue(self) -> EventManager:
         return self.event_queue
 
     def get_system_settings_reader(self) -> SystemSettingsReader:
