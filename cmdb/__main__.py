@@ -234,6 +234,6 @@ __  __ _____ _____ ____ __  __ ____  ____
         LOGGER.info("CMDB starting...")
         main(options)
     except Exception as e:
-        LOGGER.critical("There was an unforseen error {}".format(e))
+        LOGGER.critical("There was an unforeseen error {}".format(e))
         LOGGER.info("CMDB stopped!")
         exit(1)
