@@ -98,3 +98,7 @@
         </div>
     </div>
 {% endblock %}
+{% if mode == 'DEBUG' %}
+    {% block debug %}
+    {% endblock %}
+{% endif %}

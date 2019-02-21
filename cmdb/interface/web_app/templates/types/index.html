@@ -9,19 +9,16 @@
 {% block content %}
     <div class="content">
         <div class="container-fluid">
-            {{ super() }}
             <div class="row">
                 <div class="col-12">
                     <h1>List: Types</h1>
                     <hr/>
-                </div>
-                <div class="col">
                     {% if all_types|length < 1 %}
                         <div class="alert alert-danger" role="alert">
                             No types have been defined yet.
                         </div>
                     {% else %}
-                        <table data-order='[[ 2, "asc" ]]' class="data_table table">
+                        <table data-order='[[ 5, "desc" ]]' class="data_table table">
                             <thead class="thead">
                             <tr>
                                 <th scope="col">Active</th>
@@ -31,7 +28,6 @@
                                 <th scope="col">Author</th>
                                 <th scope="col">Number of objects</th>
                                 <th scope="col">Creation Time</th>
-                                <th scope="col">Actions</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -44,16 +40,6 @@
                                     <td>{{ user_manager.get_user(type_instance.author_id).user_name }}</td>
                                     <td>{{ object_manager.get_objects_by_type(type_instance.public_id) | length }}</td>
                                     <td>{{ type_instance.creation_time }}</td>
-                                    <td>
-                                        <div class="d-flex bd-highlight">
-                                            <div class="p-1 flex-fill bd-highlight"><a href="#"><i
-                                                    class="far fa-eye"></i></a></div>
-                                            <div class="p-1 flex-fill bd-highlight"><a href="#"><i
-                                                    class="far fa-edit"></i></a></div>
-                                            <div class="p-1 flex-fill bd-highlight"><a href="#"><i
-                                                    class="far fa-trash-alt"></i></a></div>
-                                        </div>
-                                    </td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -61,6 +47,8 @@
                     {% endif %}
                 </div>
             </div>
+
+            {{ super() }}
         </div>
     </div>
 {% endblock %}

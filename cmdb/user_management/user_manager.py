@@ -31,7 +31,14 @@ class UserManagement:
         return User(**result)
 
     def get_all_users(self):
-        return self.dbm.find_all(collection=User.COLLECTION)
+        user_list = []
+        for founded_user in self.dbm.find_all(collection=User.COLLECTION):
+            try:
+                user_list.append(User(**founded_user))
+            except CMDBError:
+                LOGGER.debug("Error while user parser: {}".format(founded_user))
+                continue
+        return user_list
 
     def get_user_by_name(self, user_name) -> User:
         formatted_filter = {'user_name': user_name}
@@ -40,35 +47,18 @@ class UserManagement:
         except NoDocumentFound:
             raise NoUserFoundExceptions(user_name)
 
-    def insert_user(self, user_name: str, group_id: int, password=None,
-                    first_name=None, last_name=None, authenticator='LocalAuthenticationProvider') -> int:
-        from datetime import datetime
-        new_public_id = self.dbm.get_highest_id(collection=User.COLLECTION) + 1
-
-        if password is not None:
-            password = self.scm.generate_hmac(password)
-
+    def insert_user(self, user: User) -> int:
         try:
-            self.get_group(public_id=group_id)
-        except GroupNotExistsError:
-            raise UserInsertError(user_name)
-
-        insert_user = User(
-            public_id=new_public_id,
-            user_name=user_name,
-            group_id=group_id,
-            registration_time=datetime.utcnow(),
-            password=password,
-            first_name=first_name or "",
-            last_name=last_name or "",
-            authenticator=authenticator
-        )
+            self.get_group(public_id=user.group_id)
+        except GroupNotExistsError as e:
+            LOGGER.error(e.message)
+            raise UserInsertError(user.get_username())
         try:
-            return self.dbm.insert(collection=User.COLLECTION, data=insert_user.to_database())
-        except Exception as e:
+            return self.dbm.insert(collection=User.COLLECTION, data=user.to_database())
+        except (CMDBError, Exception) as e:
             if cmdb.__MODE__ is not 'TESTING':
-                LOGGER.warning(e)
-            raise UserInsertError(insert_user.get_username())
+                LOGGER.error(e.message)
+            raise UserInsertError(user.get_username())
 
     def delete_user(self, public_id: int) -> DeleteResult:
         try:
@@ -78,12 +68,23 @@ class UserManagement:
                 LOGGER.warning(e)
             raise UserDeleteError(public_id)
 
+    def get_all_groups(self) -> list:
+        group_list = []
+        for founded_group in self.dbm.find_all(collection=UserGroup.COLLECTION):
+            try:
+                group_list.append(UserGroup(**founded_group))
+            except CMDBError:
+                LOGGER.debug("Error while group parser: {}".format(founded_group))
+                continue
+        return group_list
+
     def get_group(self, public_id: int) -> UserGroup:
-        formatted_filter = {'public_id': public_id}
         try:
-            founded_group = self.dbm.find_one_by(collection=UserGroup.COLLECTION, filter=formatted_filter)
+            founded_group = self.dbm.find_one(collection=UserGroup.COLLECTION, public_id=public_id)
+            LOGGER.debug("Group Found {}".format(founded_group))
             return UserGroup(**founded_group)
-        except NoDocumentFound:
+        except NoDocumentFound as e:
+            LOGGER.debug("Group find error {}".format(e.message))
             raise GroupNotExistsError(public_id)
 
     def insert_group(self, name: str, label: str = None, rights: list = []) -> int:

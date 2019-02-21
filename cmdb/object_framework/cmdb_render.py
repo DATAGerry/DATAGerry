@@ -10,13 +10,16 @@ LOGGER = get_logger()
 
 
 class CmdbRender:
+
     VIEW_MODE = 0
     EDIT_MODE = 1
     ADD_MODE = 2
+    SHOW_MODE = 3
+
     DEFAULT_MODE = VIEW_MODE
 
     POSSIBLE_INPUT_FORM_TYPES = ['text', 'password', 'email', 'tel']
-    POSSIBLE_RENDER_MODES = [ADD_MODE, VIEW_MODE, EDIT_MODE]
+    POSSIBLE_RENDER_MODES = [ADD_MODE, VIEW_MODE, EDIT_MODE, SHOW_MODE]
 
     def __init__(self, type_instance: CmdbType, object_instance: CmdbObject = None, mode: int = DEFAULT_MODE):
         if mode not in CmdbRender.POSSIBLE_RENDER_MODES:
@@ -49,7 +52,7 @@ class CmdbRender:
 
     @object_instance.setter
     def object_instance(self, object_instance: CmdbObject):
-        if self.mode == CmdbRender.ADD_MODE:
+        if self.mode == CmdbRender.ADD_MODE or self.mode == CmdbRender.SHOW_MODE:
             self._object_instance = None
         elif not isinstance(object_instance, CmdbObject):
             raise ObjectInstanceError()
@@ -63,7 +66,7 @@ class CmdbRender:
     @type_instance.setter
     def type_instance(self, type_instance: CmdbType):
         if not isinstance(type_instance, CmdbType):
-            raise ObjectInstanceError()
+            raise TypeInstanceError()
         self._type_instance = type_instance
 
     def get_logs(self) -> (list, None):
@@ -103,7 +106,7 @@ class CmdbRender:
                 return field
             except CMDBError:
                 return None
-        elif self.mode == CmdbRender.ADD_MODE:
+        elif self.mode == CmdbRender.ADD_MODE or self.mode == CmdbRender.SHOW_MODE:
             try:
                 field = self.type_instance.get_field(name)
                 field.set_value(None)
@@ -142,7 +145,13 @@ class RenderModeError(CMDBError):
 class ObjectInstanceError(CMDBError):
     def __init__(self):
         super(CMDBError, self)
-        self.message = "Wrong instance"
+        self.message = "Wrong object instance"
+
+
+class TypeInstanceError(CMDBError):
+    def __init__(self):
+        super(CMDBError, self)
+        self.message = "Wrong type instance"
 
 
 class InvalidHtmlInputType(CMDBError):

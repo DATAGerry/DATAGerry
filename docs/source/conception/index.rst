@@ -39,7 +39,6 @@ Modules
     modules/processmanagement
     modules/eventhandling
     modules/interface
-    modules/sync_api
 
 Ideas
 *****

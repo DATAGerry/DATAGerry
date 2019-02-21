@@ -74,8 +74,11 @@ class CmdbType(CmdbDAO):
         except IndexError:
             return None
 
-    def get_fields(self):
+    def get_fields(self) -> list:
         return self.fields
+
+    def count_fields(self) -> int:
+        return len(self.fields)
 
     def get_field_of_type_with_value(self, input_type: str, _filter: str, value) -> CmdbFieldType:
         field = [x for x in self.fields if x['input_type'] == input_type and x[_filter] == value]

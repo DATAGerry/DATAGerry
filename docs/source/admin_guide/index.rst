@@ -1,0 +1,6 @@
+###########
+Admin Guide
+###########
+
+.. toctree::
+    installation
