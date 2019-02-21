@@ -12,7 +12,68 @@
             <div class="row">
                 <div class="col-10">
                     <h1>Groups</h1>
-                    {{ user_manager }}
+                    <hr/>
+                    <table data-order='[[ 0, "asc" ]]' class="table data_table">
+                        <thead class="thead thead-light">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Label</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Rights</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for group in group_list %}
+                            <tr id="group_{{ group.get_name() }}">
+                                <th class="text-uppercase" scope="row">{{ group.get_public_id() }}</th>
+                                <td>{{ group.get_label() }}</td>
+                                <td>{{ group.get_name() }}</td>
+                                <td>
+                                    <button class="btn btn-outline-primary btn-sm float-right" type="button"
+                                            data-toggle="collapse"
+                                            data-target="#{{ group.get_name() }}_right_list" aria-expanded="false"
+                                            aria-controls="{{ group.get_name() }}_right_list">
+                                        Edit rights
+                                    </button>
+                                    <div class="clearfix"></div>
+                                    <div class="collapse" id="{{ group.get_name() }}_right_list">
+                                        <form action="/settings/user-management/groups/{{ group.get_public_id() }}/rights/"
+                                              class="float-right mt-3 group_rights_form"
+                                              id="{{ group.get_name() }}_right_form"
+                                              name="{{ group.get_name() }}_right_form">
+                                            <table>
+                                                {% for right in right_list %}
+                                                    <tr>
+                                                        <td>{{ right.get_name() }}</td>
+                                                        <td>{{ right.get_label() }}</td>
+                                                        <td>
+                                                            <div class="custom-control custom-checkbox">
+
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                       id="{{ group.get_name() }}_{{ right.get_name() }}"
+                                                                       name="{{ right.get_name() }}"
+                                                                        {% if group.has_right(right.get_name()) %}
+                                                                       checked
+                                                                        {% endif %}
+                                                                />
+                                                                <label class="custom-control-label"
+                                                                       for="{{ group.get_name() }}_{{ right.get_name() }}"></label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
+                                            <button type="submit" class="group-save float-right btn btn-primary btn-sm">
+                                                <span class="spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                Save
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
                 <div class="col-2">
                     {% set active_page = 'groups' %}
@@ -23,3 +84,40 @@
         </div>
     </div>
 {% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+        cmdb.$(function () {
+            cmdb.$('.group_rights_form').each(function () {
+                const $this = cmdb.$(this);
+                $this.children('button.group-save').click(function (e) {
+                    e.preventDefault();
+                    const $button_span = cmdb.$(this).children("span").addClass('spinner-border');
+                    var $SCRIPT_ROOT = $this[0].action;
+                    cmdb.$.post({
+                        url: $SCRIPT_ROOT,
+                        data: $this.serialize(),
+                        success: function (data, status) {
+                            console.log("Data: " + data + "\nStatus: " + status);
+                            setTimeout(function () {
+                                $button_span.removeClass('spinner-border');
+                            }, 1000);
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+{% endblock %}
+
+
+{% if mode == 'DEBUG' %}
+    {% block debug %}
+        <h2>Groups:</h2>
+        <hr>
+        {% for group in group_list %}
+            <pre>{{ group }}</pre>
+        {% endfor %}
+    {% endblock %}
+{% endif %}

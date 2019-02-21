@@ -15,8 +15,8 @@
                     <hr/>
                     {% set user_list = user_manager.get_all_users() %}
                     {% if user_list|length > 0 %}
-                        <table data-order='[[ 0, "asc" ]]' class="data_table table">
-                            <thead class="thead">
+                        <table data-order='[[ 0, "asc" ]]' class="table table-hover data_table">
+                            <thead class="thead thead-light">
                             <tr>
                                 <th scope="col">#ID</th>
                                 <th scope="col">Username</th>
@@ -36,7 +36,7 @@
                                         {{ current_user.get_name() }}
                                     </td>
                                     <td>
-                                        <a href="/settings/user-management/groups/{{ current_user.group_id }}/">
+                                        <a href="/settings/user-management/groups/#group_{{ user_manager.get_group(current_user.group_id).get_name() }}">
                                             {{ user_manager.get_group(current_user.group_id).get_name() }}
                                         </a>
                                     </td>

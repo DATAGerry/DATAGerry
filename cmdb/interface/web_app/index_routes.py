@@ -18,7 +18,7 @@ with app.app_context():
 
 
 @index_pages.route('/')
-@index_pages.route('/dashboard')
+@index_pages.route('/dashboard/')
 @register_breadcrumb(index_pages, '.', 'Home')
 @login_required
 def index_page():

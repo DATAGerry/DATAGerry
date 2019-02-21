@@ -1,4 +1,7 @@
 from cmdb.utils.error import CMDBError
+from cmdb.utils.logger import get_logger
+
+LOGGER = get_logger()
 
 GLOBAL_IDENTIFIER = 'global'
 
@@ -27,19 +30,23 @@ class BaseRight:
         'NOTSET': NOTSET,
     }
 
-    def __init__(self, level: int, name: str, label: str = None):
+    def __init__(self, level: int, name: str, label: str = None, description: str = None):
         self.level = level
         self.name = '{}.{}'.format(self.PREFIX, name)
         self.label = label or None
+        self.description = description or "No description"
 
     def get_prefix(self):
-        return self.PREFIX
+        return self.PREFIX.split('.')[-1]
 
     def get_name(self):
         return self.name
 
     def get_label(self):
-        return self.label or self.name.split('.')[-1]
+        return self.label or "{}.{}".format(self.get_prefix(), self.name.split('.')[-1])
+
+    def get_description(self):
+        return self.description
 
     @property
     def level(self):
@@ -60,6 +67,10 @@ class BaseRight:
 
     def get_level_name(self):
         return BaseRight._levelToName[self.level]
+
+    def __repr__(self):
+        from cmdb.utils.helpers import debug_print
+        return debug_print(self)
 
 
 class InvalidLevelRightError(CMDBError):
