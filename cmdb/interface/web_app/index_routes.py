@@ -23,6 +23,10 @@ with app.app_context():
 @login_required
 def index_page():
     import json
+    all_objects_count = None
+    all_types_count = None
+    all_user_objects_count = None
+    new_objects = None
     try:
         obm = MANAGER_HOLDER.get_object_manager()
         uum = MANAGER_HOLDER.get_user_manager()

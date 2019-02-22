@@ -132,18 +132,24 @@ class UserManagement:
         right_status = False
         try:
             chosen_group = self.get_group(group_id)
-        except GroupNotExistsError:
+        except (GroupNotExistsError, Exception):
             return right_status
         right_status = chosen_group.has_right(right_name)
         if not right_status:
-            # check for global right
-            parent_right = '{}.{}'.format('.'.join(right_name.split('.')[:-1]), GLOBAL_IDENTIFIER)
-            LOGGER.debug("Parent global right: {}".format(parent_right))
-            right_status = chosen_group.has_right(parent_right)
+            try:
+                # check for global right
+                parent_right = '{}.{}'.format('.'.join(right_name.split('.')[:-1]), GLOBAL_IDENTIFIER)
+                LOGGER.debug("Parent global right: {}".format(parent_right))
+                right_status = chosen_group.has_right(parent_right)
+            except Exception:
+                return False
         return right_status
 
     def user_group_has_right(self, user: User, right_name: str) -> bool:
-        return self.group_has_right(user.get_group(), right_name)
+        try:
+            return self.group_has_right(user.get_group(), right_name)
+        except (CMDBError, Exception):
+            return False
 
 
 class GroupDeleteError(CMDBError):
