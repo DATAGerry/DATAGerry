@@ -4,7 +4,8 @@ from cmdb.user_management.rights.framework_rights import FrameworkRight, ObjectR
 
 SYSTEM_RIGHTS = [
     SystemRight(GLOBAL_IDENTIFIER, description='system settings rights'),
-    SystemRight('security', BaseRight.CRITICAL, "security features")
+    SystemRight('security', BaseRight.CRITICAL, description="security features"),
+    SystemRight('user_management', BaseRight.CRITICAL, description="user management"),
 ]
 
 FRAMEWORK_RIGHTS = [

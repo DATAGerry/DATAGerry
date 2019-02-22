@@ -75,17 +75,25 @@ class BaseRight:
 
 class InvalidLevelRightError(CMDBError):
     def __init__(self, level):
-        self.message = 'Invalid right level - Level {} does not exist.'.format(level)
         super().__init__()
+        self.message = 'Invalid right level - Level {} does not exist.'.format(level)
 
 
 class PoorlyLevelRightError(CMDBError):
     def __init__(self, level, min_level):
+        super().__init__()
         self.message = 'The minimum level for the right has been violated. Level was {0}, expected at least {1}'.format(
             level, min_level)
 
 
 class MaxLevelRightError(CMDBError):
     def __init__(self, level, max_level):
+        super().__init__()
         self.message = 'The maximum level for the right has been violated. Level was {0}, expected at most {1}'.format(
             level, max_level)
+
+
+class NoParentPrefixError(CMDBError):
+    def __init__(self):
+        super().__init__()
+        self.message = 'Right dont has a parent prefix.'

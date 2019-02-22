@@ -1,5 +1,6 @@
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user import User
+from cmdb.user_management.user_right import BaseRight, GLOBAL_IDENTIFIER
 from cmdb.data_storage import NoDocumentFound, DatabaseManagerMongo
 from cmdb.data_storage.database_manager import DeleteResult
 from cmdb.utils import get_logger
@@ -12,7 +13,8 @@ LOGGER = get_logger()
 class UserManagement:
     MANAGEMENT_CLASSES = {
         'GROUP_CLASSES': UserGroup,
-        'USER_CLASSES': User
+        'USER_CLASSES': User,
+        'BASE_RIGHT_CLASSES': BaseRight
     }
 
     def __init__(self, database_manager: DatabaseManagerMongo, security_manager):
@@ -126,24 +128,22 @@ class UserManagement:
                 rights.append(right)
         return rights
 
-    def user_group_has_right(self, user: User, right) -> bool:
-        """
-        @deprecated
-        TODO: refactor
-        """
-        group = UserGroup(**self.dbm.find_one(UserGroup.COLLECTION, user.get_group()))
-        right_list = group.get_rights()
-        if len(right_list) <= 0:
-            return False
-        select_rights = []
-        for right_id in right_list:
-            try:
-                select_rights.append(self.get_right(right_id))
-            except RightNotExistsError:
-                continue
-        if right in select_rights:
-            return True
-        return False
+    def group_has_right(self, group_id: int, right_name: str) -> bool:
+        right_status = False
+        try:
+            chosen_group = self.get_group(group_id)
+        except GroupNotExistsError:
+            return right_status
+        right_status = chosen_group.has_right(right_name)
+        if not right_status:
+            # check for global right
+            parent_right = '{}.{}'.format('.'.join(right_name.split('.')[:-1]), GLOBAL_IDENTIFIER)
+            LOGGER.debug("Parent global right: {}".format(parent_right))
+            right_status = chosen_group.has_right(parent_right)
+        return right_status
+
+    def user_group_has_right(self, user: User, right_name: str) -> bool:
+        return self.group_has_right(user.get_group(), right_name)
 
 
 class GroupDeleteError(CMDBError):

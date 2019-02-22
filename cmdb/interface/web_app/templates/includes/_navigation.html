@@ -107,6 +107,7 @@
                 </a>
             </div>
         </li>
+        {% if user_manager.user_group_has_right(current_user, 'base.system.user_management') %}
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
                aria-expanded="false">
@@ -135,5 +136,6 @@
                 </a>
             </div>
         </li>
+        {% endif %}
     </ul>
 </nav>
