@@ -7769,8 +7769,6 @@ body.embedded-layout {
     margin-left: 10px;
     margin-bottom: 1em;
     width: auto; }
-  #sidebar #sidebar-categories {
-    width: 100%; }
   #sidebar .nav-item {
     width: 100%;
     position: relative; }
@@ -7820,6 +7818,69 @@ body.embedded-layout {
   #sidebar .nav-dropdown.open .nav-dropdown-toggle i:last-of-type, #sidebar .nav-dropdown.open .nav-dropdown-toggle svg:last-of-type {
     -webkit-transform: rotate(270deg);
             transform: rotate(270deg); }
+  #sidebar #sidebar-categories {
+    width: 100%; }
+    #sidebar #sidebar-categories .list-group-item {
+      border-radius: 0;
+      background-color: #f2f2f2;
+      color: #0d0d0d;
+      border: none;
+      white-space: nowrap;
+      font-size: 14px;
+      text-decoration: none; }
+      #sidebar #sidebar-categories .list-group-item:not(.collapsed) {
+        background-color: #f2f2f2; }
+    #sidebar #sidebar-categories .list-group .list-group-item i:first-of-type, #sidebar #sidebar-categories .list-group .list-group-item svg:first-of-type {
+      display: inline-block;
+      width: 24px;
+      margin-right: 4px;
+      color: #666666;
+      font-size: 14px; }
+    #sidebar #sidebar-categories .list-group .list-group-item[aria-expanded='false']::after {
+      font-family: 'Font Awesome 5 Free', sans-serif;
+      font-weight: 900;
+      content: '\f0d7';
+      text-align: right;
+      display: inline;
+      padding-left: 5px;
+      float: right; }
+    #sidebar #sidebar-categories .list-group .list-group-item[aria-expanded='true'] {
+      background-color: inherit; }
+      #sidebar #sidebar-categories .list-group .list-group-item[aria-expanded='true']::after {
+        font-family: 'Font Awesome 5 Free', sans-serif;
+        font-weight: 900;
+        content: '\f0da';
+        text-align: right;
+        display: inline;
+        padding-left: 5px;
+        float: right; }
+    #sidebar #sidebar-categories .list-group .collapse .list-group-item {
+      padding-left: 20px; }
+    #sidebar #sidebar-categories .list-group .collapse > .collapse .list-group-item {
+      padding-left: 30px; }
+    #sidebar #sidebar-categories .list-group .collapse > .collapse > .collapse .list-group-item {
+      padding-left: 40px; }
+    #sidebar #sidebar-categories.collapse {
+      transition-timing-function: ease;
+      transition-duration: 0.2s; }
+    #sidebar #sidebar-categories.collapsing {
+      opacity: 0.8;
+      width: 0;
+      transition-timing-function: ease-in;
+      transition-property: width; }
+  @media (max-width: 48em) {
+    #sidebar {
+      /* overlay sub levels on small screens */ }
+      #sidebar .list-group .collapse.in, #sidebar .list-group .collapsing {
+        position: absolute;
+        z-index: 1;
+        width: 190px; }
+      #sidebar .list-group > .list-group-item {
+        text-align: center;
+        padding: 0.75rem 0.5rem;
+        min-width: 39px; }
+        #sidebar .list-group > .list-group-item[aria-expanded='true']::after, #sidebar .list-group > .list-group-item[aria-expanded='false']::after {
+          display: none; } }
 
 .sidebar-fixed #sidebar {
   position: fixed; }
