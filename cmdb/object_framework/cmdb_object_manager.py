@@ -332,18 +332,58 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = []
         cats = self.dbm.find_all(collection=CmdbTypeCategory.COLLECTION, sort=[('public_id', 1)])
         for cat_obj in cats:
-            ack.append(CmdbTypeCategory(**cat_obj))
+            try:
+                ack.append(CmdbTypeCategory(**cat_obj))
+            except CMDBError as e:
+                CMDB_LOGGER.debug("Error while parsing Category")
+                CMDB_LOGGER.debug(e.message)
         return ack
 
+    def get_categories_by(self, _filter: dict) -> list:
+        """
+        get all categories by requirements
+        """
+        ack = []
+        query_filter = _filter
+        root_categories = self.dbm.find_all(collection=CmdbTypeCategory.COLLECTION, filter=query_filter)
+        CMDB_LOGGER.debug("__FIND: categories {}".format(root_categories))
+        for cat_obj in root_categories:
+            try:
+                ack.append(CmdbTypeCategory(**cat_obj))
+            except CMDBError as e:
+                CMDB_LOGGER.debug("Error while parsing Category")
+                CMDB_LOGGER.debug(e.message)
+        return ack
+
+    def _get_category_nodes(self, parent_list: list) -> dict:
+        edge = {}
+        for cat_child in parent_list:
+            next_children = self.get_categories_by(_filter={'parent_id': cat_child.get_public_id()})
+            if len(next_children) > 0:
+                edge.update({
+                    'object': cat_child,
+                    'children': self._get_category_nodes(next_children)
+                })
+            else:
+                edge.update({
+                    'object': cat_child,
+                    'children': None
+                })
+        return edge
+
+    def get_category_tree(self) -> dict:
+        tree = {}
+        root_categories = self.get_categories_by(_filter={'parent_id': {'$exists': False}})
+        if len(root_categories) > 0:
+            tree.update({
+                'object': "root",
+                'children': self._get_category_nodes(root_categories)
+            })
+        else:
+            raise NoRootCategories()
+        return tree
+
     def get_category(self, public_id: int):
-        """
-        TODO: UPDATE TO NEW STRUCTURE
-        Args:
-            public_id:
-
-        Returns:
-
-        """
         return CmdbTypeCategory(**self.dbm.find_one(
             collection=CmdbTypeCategory.COLLECTION,
             public_id=public_id)
@@ -357,7 +397,7 @@ class CmdbObjectManager(CmdbManagerBase):
         update_type = CmdbTypeCategory(**data)
         ack = self.dbm.update(
             collection=CmdbTypeCategory.COLLECTION,
-            public_id=CmdbTypeCategory.get_public_id(),
+            public_id=update_type.get_public_id(),
             data=update_type.to_database()
         )
         return ack
@@ -407,3 +447,8 @@ class ObjectInsertError(CMDBError):
 class ObjectUpdateError(CMDBError):
     def __init__(self, msg):
         self.message = 'Something went wrong during update: {}'.format(msg)
+
+
+class NoRootCategories(CMDBError):
+    def __init__(self):
+        self.message = 'No root categories exists'

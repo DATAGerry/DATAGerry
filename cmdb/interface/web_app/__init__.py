@@ -95,6 +95,7 @@ def register_blueprints(app):
     from cmdb.interface.web_app.user_routes import user_pages
     from cmdb.interface.web_app.object_routes import object_pages
     from cmdb.interface.web_app.type_routes import type_pages
+    from cmdb.interface.web_app.framework_routes import framework_pages
 
     app.register_blueprint(index_pages)
     app.register_blueprint(static_pages)
@@ -103,13 +104,13 @@ def register_blueprints(app):
     app.register_blueprint(user_pages)
     app.register_blueprint(object_pages)
     app.register_blueprint(type_pages)
+    app.register_blueprint(framework_pages)
 
 
 def register_context_processors(app):
-    from cmdb.interface.web_app.context_injector import inject_sidebar, inject_sidebar_hidden, inject_current_user, \
+    from cmdb.interface.web_app.context_injector import inject_sidebar_hidden, inject_current_user, \
         inject_object_manager, inject_modus, inject_user_names, inject_all_types, inject_user_manager
     app.context_processor(inject_modus)
-    app.context_processor(inject_sidebar)
     app.context_processor(inject_sidebar_hidden)
     app.context_processor(inject_current_user)
     app.context_processor(inject_user_manager)

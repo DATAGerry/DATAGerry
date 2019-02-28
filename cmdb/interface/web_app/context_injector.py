@@ -81,17 +81,6 @@ def inject_user_manager():
     return dict(user_manager=user_manager())
 
 
-def inject_sidebar():
-    def sidebar():
-        try:
-            categories = MANAGER_HOLDER.get_object_manager().get_all_categories()
-        except CMDBError:
-            return []
-        return categories
-
-    return dict(sidebar=sidebar)
-
-
 def inject_sidebar_hidden():
     def sidebar_hidden():
         import flask

@@ -1,0 +1,13 @@
+{% set navigation_bar = [
+('/framework/', 'overview', 'fa fa-info', 'Overview'),
+('/framework/categories/', 'categories', 'fas fa-boxes', 'Categories'),
+] %}
+{% set active_page = active_page|default('overview') -%}
+<ul class="nav nav-pills flex-column">
+    {% for href, id, icon, caption in navigation_bar %}
+        <li class="nav-item">
+            <a class="nav-link {% if id== active_page %} active{% endif %}" href="{{ href|e }}">{{ caption|e }}
+                <span class="badge float-right"><i class="{{ icon }}"></i></span></a>
+        </li>
+    {% endfor %}
+</ul>
