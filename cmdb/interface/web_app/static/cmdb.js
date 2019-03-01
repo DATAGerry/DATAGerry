@@ -46028,6 +46028,7 @@ jquery__WEBPACK_IMPORTED_MODULE_1___default()(document).ready(function () {
   jquery__WEBPACK_IMPORTED_MODULE_1___default()('.data_table').each(function () {
     jquery__WEBPACK_IMPORTED_MODULE_1___default()(this).DataTable();
   });
+  jquery__WEBPACK_IMPORTED_MODULE_1___default()('[data-toggle="tooltip"]').tooltip();
 });
 
 /***/ }),
