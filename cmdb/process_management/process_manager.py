@@ -39,8 +39,9 @@ class ProcessManager:
     def start_app(self) -> bool:
         """start all services from service definitions"""
         for service_def in self.__service_defs:
+            service_name = service_def.get_name()
             service_class = ProcessManager.__load_class(service_def.get_class())
-            process = multiprocessing.Process(target=service_class().start)
+            process = multiprocessing.Process(target=service_class().start, name=service_name)
             process.start()
             self.__process_list.append(process)
             # start process controller

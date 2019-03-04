@@ -4,9 +4,9 @@ Logging module
 import logging.config
 import os
 import datetime
+import multiprocessing
 
 DEFAULT_LOG_DIR = os.path.join(os.path.dirname(__file__), '../../logs/')
-DEFAULT_FILE_NAME = 'cmdb'
 DEFAULT_FILE_EXTENSION = 'log'
 
 
@@ -37,6 +37,10 @@ def get_logger(module='cmdb', export=False):
     import pathlib
 
     pathlib.Path(DEFAULT_LOG_DIR).mkdir(parents=True, exist_ok=True)
+
+    # get current process name
+    module = multiprocessing.current_process().name
+
     logging_conf = dict(
         version=1,
         disable_existing_loggers=True,
@@ -49,7 +53,7 @@ def get_logger(module='cmdb', export=False):
             'file': {
                 'class': 'logging.FileHandler',
                 'formatter': 'generic',
-                'filename': DEFAULT_LOG_DIR + DEFAULT_FILE_NAME + '_' + str(
+                'filename': DEFAULT_LOG_DIR + module + '_' + str(
                     datetime.date.today()) + '.' + DEFAULT_FILE_EXTENSION
             },
         },
@@ -61,7 +65,7 @@ def get_logger(module='cmdb', export=False):
             }
         },
         loggers={
-            'cmdb': {
+            module: {
                 'level': str(get_log_level()),
                 'handlers': ['console', 'file'],
                 'propagate': False
