@@ -1,6 +1,7 @@
 """
 Server module for web-based services
 """
+import logging
 import multiprocessing
 from cmdb import __MODE__
 import cmdb.process_management.service

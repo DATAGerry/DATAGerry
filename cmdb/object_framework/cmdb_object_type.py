@@ -1,10 +1,10 @@
+import logging
 from cmdb.object_framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
 from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType, FieldNotFoundError
 from cmdb.utils.error import CMDBError
 from datetime import datetime
-from cmdb.utils import get_logger
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 class CmdbType(CmdbDAO):

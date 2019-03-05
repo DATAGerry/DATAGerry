@@ -4,14 +4,14 @@ All communication with the objects is controlled by this manager.
 The implementation of the manager used is always realized using the respective superclass.
 
 """
+import logging
 from cmdb.object_framework import *
 from cmdb.object_framework import CmdbObjectStatus
 from cmdb.data_storage.database_manager import PublicIDAlreadyExists
 from cmdb.utils.error import CMDBError
-from cmdb.utils import get_logger
 from cmdb.utils.helpers import timing
 
-CMDB_LOGGER = get_logger()
+CMDB_LOGGER = logging.getLogger(__name__)
 
 
 class CmdbManagerBase:

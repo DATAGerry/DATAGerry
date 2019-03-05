@@ -1,10 +1,11 @@
+import logging
 import json
 from cmdb.interface.web_app import app
 from cmdb.utils.error import CMDBError
 from cmdb.utils.logger import get_logger
 from cmdb.user_management.user import User
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 with app.app_context():
     MANAGER_HOLDER = app.manager_holder

@@ -2,11 +2,11 @@
 Database-Connection
 Real connection to database over a given connector
 """
+import logging
 from pymongo.errors import ServerSelectionTimeoutError
-from cmdb.utils.logger import get_logger
 from cmdb.utils.error import CMDBError
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 class Connector:

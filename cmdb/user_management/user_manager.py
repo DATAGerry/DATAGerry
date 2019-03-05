@@ -1,13 +1,13 @@
+import logging
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user import User
 from cmdb.user_management.user_right import BaseRight, GLOBAL_IDENTIFIER
 from cmdb.data_storage import NoDocumentFound, DatabaseManagerMongo
 from cmdb.data_storage.database_manager import DeleteResult
-from cmdb.utils import get_logger
 from cmdb.utils.error import CMDBError
 import cmdb
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 class UserManagement:

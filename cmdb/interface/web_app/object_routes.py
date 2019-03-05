@@ -1,10 +1,10 @@
+import logging
 from cmdb.utils.interface_wraps import login_required
 from cmdb.object_framework.cmdb_dao import CmdbDAO
 from cmdb.object_framework.cmdb_object_field_type import FieldNotFoundError
 from cmdb.object_framework.cmdb_object_manager import ObjectInsertError, ObjectUpdateError
 from cmdb.object_framework.cmdb_object import CmdbObject
 from cmdb.object_framework.cmdb_log import CmdbLog
-from cmdb.utils import get_logger
 from cmdb.utils.error import CMDBError
 from flask import Blueprint, render_template, request, abort
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
@@ -14,7 +14,7 @@ from cmdb.event_management.event import Event
 import datetime
 import json
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 object_pages = Blueprint('object_pages', __name__, template_folder='templates', url_prefix='/object')
 default_breadcrumb_root(object_pages, '.object_pages')

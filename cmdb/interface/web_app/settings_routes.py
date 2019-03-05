@@ -1,14 +1,14 @@
 """
 Admin/Settings Pages
 """
-from cmdb.utils import get_logger
+import logging
 from cmdb.utils.error import CMDBError
 from cmdb.interface.cmdb_holder import CmdbManagerHolder
 from flask import Blueprint, render_template, jsonify, current_app
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from flask import request, abort
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 settings_pages = Blueprint('settings_pages', __name__, template_folder='templates', url_prefix='/settings')
 default_breadcrumb_root(settings_pages, '.settings_pages')

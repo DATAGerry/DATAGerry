@@ -2,13 +2,14 @@
 CmdbService definition
 
 """
+import logging
 import signal
 import sys
 import threading
 import cmdb.event_management.event_manager
 from cmdb.utils import get_logger
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 class AbstractCmdbService:
@@ -36,6 +37,10 @@ class AbstractCmdbService:
 
     def start(self):
         """service start"""
+        # setup service logging
+        logging_conf = get_logger(export=True)
+        logging.config.dictConfig(logging_conf)
+
         LOGGER.info("start {} ...".format(self._name))
 
         # init shutdown handling

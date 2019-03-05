@@ -1,13 +1,12 @@
 """
 Init module for web routes
 """
-
+import logging
 from flask import Flask
 from cmdb.interface.cmdb_holder import CmdbManagerHolder
 from cmdb.interface.config import app_config
-from cmdb.utils import get_logger
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 MANAGER_HOLDER = CmdbManagerHolder()
 app = None
 

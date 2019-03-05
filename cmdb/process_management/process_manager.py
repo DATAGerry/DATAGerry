@@ -2,13 +2,13 @@
 Process Manager
 Manager for handling CMDB processes
 """
+import logging
 import importlib
 import multiprocessing
 import threading
 import re
-from cmdb.utils.logger import get_logger
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 class ProcessManager:

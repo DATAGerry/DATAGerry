@@ -1,11 +1,11 @@
+import logging
 from cmdb.utils.interface_wraps import login_required
-from cmdb.utils import get_logger
 from flask import Blueprint, render_template, abort, current_app
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from cmdb.utils.error import CMDBError
 from cmdb.object_framework.cmdb_render import CmdbRender
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 type_pages = Blueprint('type_pages', __name__, template_folder='templates', url_prefix='/type')
 default_breadcrumb_root(type_pages, '.type_pages')

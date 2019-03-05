@@ -1,6 +1,7 @@
 import base64
 import ast
 import time
+import logging
 from Cryptodome import Random
 from Cryptodome.Cipher import AES
 from cmdb.data_storage.database_manager import NoDocumentFound
@@ -12,7 +13,7 @@ from cmdb.utils import get_logger
 from cmdb.object_framework.cmdb_object import CmdbObject
 from cmdb.object_framework.cmdb_object_type import CmdbType
 
-CMDB_LOGGER = get_logger()
+CMDB_LOGGER = logging.getLogger(__name__)
 
 
 class SecurityManager:
