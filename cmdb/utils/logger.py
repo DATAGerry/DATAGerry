@@ -2,12 +2,12 @@
 Logging module
 """
 import logging.config
+import logging.handlers
 import os
 import datetime
 import multiprocessing
 
 DEFAULT_LOG_DIR = os.path.join(os.path.dirname(__file__), '../../logs/')
-DEFAULT_FILE_EXTENSION = 'log'
 
 
 def get_log_level():
@@ -48,22 +48,25 @@ def get_logging_conf():
                 'formatter': 'generic'
             },
             'file_daemon': {
-                'class': 'logging.FileHandler',
+                'class': 'logging.handlers.RotatingFileHandler',
                 'formatter': 'generic',
-                'filename': DEFAULT_LOG_DIR + proc_name + '_' + str(
-                    datetime.date.today()) + '.' + DEFAULT_FILE_EXTENSION
+                'filename': "{}{}.log".format(DEFAULT_LOG_DIR, proc_name),
+                'maxBytes': 10 * 1024 * 1024,  # 10 MBytes
+                'backupCount': 4
             },
             'file_web_access': {
-                'class': 'logging.FileHandler',
+                'class': 'logging.handlers.RotatingFileHandler',
                 'formatter': 'generic',
-                'filename': DEFAULT_LOG_DIR + "webserver.access" + '_' + str(
-                    datetime.date.today()) + '.' + DEFAULT_FILE_EXTENSION
+                'filename': "{}webserver.access.log".format(DEFAULT_LOG_DIR),
+                'maxBytes': 10 * 1024 * 1024,  # 10 MBytes
+                'backupCount': 4
             },
             'file_web_error': {
-                'class': 'logging.FileHandler',
+                'class': 'logging.handlers.RotatingFileHandler',
                 'formatter': 'generic',
-                'filename': DEFAULT_LOG_DIR + "webserver.error" + '_' + str(
-                    datetime.date.today()) + '.' + DEFAULT_FILE_EXTENSION
+                'filename': "{}webserver.error.log".format(DEFAULT_LOG_DIR),
+                'maxBytes': 10 * 1024 * 1024,  # 10 MBytes
+                'backupCount': 4
             }
         },
         formatters={
