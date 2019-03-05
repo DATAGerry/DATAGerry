@@ -9,7 +9,6 @@ If not, see <https://github.com/NETHINKS/NetCMDB/blob/master/LICENSE>.
 
 import signal
 import logging
-from cmdb.utils.logger import get_logger
 from cmdb.utils.helpers import timing
 from cmdb.utils.error import CMDBError
 from argparse import ArgumentParser, Namespace

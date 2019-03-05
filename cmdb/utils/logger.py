@@ -24,12 +24,9 @@ def get_log_level():
         return cmdb.__MODE__
 
 
-def get_logger(module='cmdb', export=False):
+def get_logging_conf():
     """
-    get an instance of the default logger
-    Args:
-        module: name of logger
-        export: if true only returns logger config
+    returns the logging configuration
 
     Returns:
         instance of logging.Logger
@@ -50,12 +47,24 @@ def get_logger(module='cmdb', export=False):
                 'class': 'logging.StreamHandler',
                 'formatter': 'generic'
             },
-            'file': {
+            'file_daemon': {
                 'class': 'logging.FileHandler',
                 'formatter': 'generic',
                 'filename': DEFAULT_LOG_DIR + proc_name + '_' + str(
                     datetime.date.today()) + '.' + DEFAULT_FILE_EXTENSION
             },
+            'file_web_access': {
+                'class': 'logging.FileHandler',
+                'formatter': 'generic',
+                'filename': DEFAULT_LOG_DIR + "webserver.access" + '_' + str(
+                    datetime.date.today()) + '.' + DEFAULT_FILE_EXTENSION
+            },
+            'file_web_error': {
+                'class': 'logging.FileHandler',
+                'formatter': 'generic',
+                'filename': DEFAULT_LOG_DIR + "webserver.error" + '_' + str(
+                    datetime.date.today()) + '.' + DEFAULT_FILE_EXTENSION
+            }
         },
         formatters={
             'generic': {
@@ -67,12 +76,22 @@ def get_logger(module='cmdb', export=False):
         loggers={
             "cmdb": {
                 'level': str(get_log_level()),
-                'handlers': ['console', 'file'],
+                'handlers': ['console', 'file_daemon'],
                 'propagate': False
+            },
+            "gunicorn.error": {
+                "level": "INFO",
+                "handlers": ["file_web_error"],
+                "propagate": True,
+                "qualname": "gunicorn.error"
+            },
+            "gunicorn.access": {
+                "level": "INFO",
+                "handlers": ["file_web_access"],
+                "propagate": True,
+                "qualname": "gunicorn.access"
             }
         }
     )
-    if export:
-        return logging_conf
-    logging.config.dictConfig(logging_conf)
-    return logging.getLogger(module)
+
+    return logging_conf

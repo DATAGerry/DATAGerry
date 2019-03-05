@@ -9,7 +9,6 @@ from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from jwcrypto import jwk, jwt, jws
 from cmdb.user_management import User
-from cmdb.utils import get_logger
 from cmdb.object_framework.cmdb_object import CmdbObject
 from cmdb.object_framework.cmdb_object_type import CmdbType
 
