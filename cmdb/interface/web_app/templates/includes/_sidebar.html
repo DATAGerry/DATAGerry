@@ -9,12 +9,19 @@
                 <i class="{% if cat.has_icon() %}{{ cat.get_icon() }}{% else %}far fa-folder-open{% endif %}"></i>
                 <span class="hidden-sm-down">{{ cat.get_label() }}</span>
             </a>
-
-            {% if category_childs | length > 0 %}
-                <div class="collapse" id="{{ cat.get_name() }}">
+            <div class="collapse" id="{{ cat.get_name() }}">
+                {% if category_childs | length > 0 %}
                     {{ loop(category_childs) }}
-                </div>
-            {% endif %}
+                {% endif %}
+                {% if cat.has_types() %}
+                    {% for category_type in cat.get_types() %}
+                        {% set current_type = exception_handler(object_manager.get_type, category_type) %}
+                        {% if current_type %}
+                            <a href="/type/{{ current_type.get_public_id() }}/list/" class="list-group-item" data-parent="#{{ cat.get_name() }}"><i class="fas fa-clone"></i> {{ current_type.get_label() }}</a>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
         {% endfor %}
     </div>
 

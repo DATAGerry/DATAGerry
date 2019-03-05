@@ -3,6 +3,7 @@ from cmdb.interface.web_app import app
 from cmdb.utils.error import CMDBError
 from cmdb.utils.logger import get_logger
 from cmdb.user_management.user import User
+from types import FunctionType
 
 LOGGER = get_logger()
 
@@ -16,6 +17,15 @@ def inject_modus():
         return __MODE__
 
     return dict(mode=modus())
+
+
+def inject_exception_handler():
+    def exception_handler(func: FunctionType, *args):
+        try:
+            return func(*args)
+        except CMDBError:
+            return None
+    return dict(exception_handler=exception_handler)
 
 
 def inject_all_types():

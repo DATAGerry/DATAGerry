@@ -8,7 +8,7 @@ from cmdb.utils.interface_wraps import login_required
 from flask import Blueprint, render_template, request
 from flask_breadcrumbs import register_breadcrumb, default_breadcrumb_root
 
-logger = get_logger()
+LOGGER = get_logger()
 
 index_pages = Blueprint('index_pages', __name__, template_folder='templates')
 default_breadcrumb_root(index_pages, '.')
@@ -31,19 +31,17 @@ def index_page():
         obm = MANAGER_HOLDER.get_object_manager()
         uum = MANAGER_HOLDER.get_user_manager()
         scm = MANAGER_HOLDER.get_security_manager()
-        new_objects = obm.get_objects_by(sort='creation_time', active={"$eq": True})
+        new_objects = obm.get_objects_by(sort='creation_time', limit=25, active={"$eq": True})
+        LOGGER.debug("NEW OBJECTS {}".format(new_objects))
         all_objects_count = len(obm.get_all_objects())
         all_types_count = len(obm.get_all_types())
         current_user_token = request.cookies['access-token']
         current_user = json.loads(scm.decrypt_token(current_user_token))
         all_user_objects_count = len(obm.get_objects_by(author_id=current_user['public_id']))
-        if len(new_objects) > 25:
-            new_objects = new_objects[: 25]
-        last_objects = obm.get_objects_by(sort='last_edit_time', active={"$eq": True})
-        if len(last_objects) > 25:
-            last_objects = last_objects[: 25]
+        last_objects = obm.get_objects_by(sort='last_edit_time', limit=25, active={"$eq": True})
+
     except CMDBError as e:
-        logger.warning(e.message)
+        LOGGER.warning(e.message)
         return render_template('index.html',
                                all_objects_count=all_objects_count,
                                all_types_count=all_types_count,

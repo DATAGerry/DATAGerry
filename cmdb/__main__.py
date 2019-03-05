@@ -75,8 +75,10 @@ def _setup() -> bool:
         bool: True if setup was complete without error
     """
     from cmdb.user_management import get_user_manager
+    from cmdb.user_management.user import User
     from cmdb.data_storage import get_pre_init_database
     from cmdb.utils import get_security_manager
+    from datetime import datetime
 
     try:
         setup_database = get_pre_init_database()
@@ -93,11 +95,14 @@ def _setup() -> bool:
                 break
             else:
                 LOGGER.info("Passwords are not the same - please repeate")
-        setup_management.insert_user(
+        admin_user = User(
+            public_id=setup_database.get_highest_id(collection=User.COLLECTION) + 1,
             user_name=admin_username,
             group_id=group_id,
-            password=admin_pass_1
+            registration_time=datetime.utcnow(),
+            password=setup_security.generate_hmac(admin_pass_1)
         )
+        setup_management.insert_user(admin_user)
     except CMDBError as setup_error:
         LOGGER.critical(setup_error)
         return False

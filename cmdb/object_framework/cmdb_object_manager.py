@@ -63,7 +63,7 @@ class CmdbManagerBase:
             public_id=public_id
         )
 
-    def _get_all(self, collection: str, sort='public_id', **requirements: dict) -> list:
+    def _get_all(self, collection: str, sort='public_id', limit=0, **requirements: dict) -> list:
         """get all documents from the database which have the passing requirements
 
         Args:
@@ -79,7 +79,7 @@ class CmdbManagerBase:
         formatted_sort = [(sort, self.dbm.DESCENDING)]
         for k, req in requirements.items():
             requirements_filter.update({k: req})
-        return self.dbm.find_all(collection=collection, filter=requirements_filter, sort=formatted_sort)
+        return self.dbm.find_all(collection=collection, limit=limit, filter=requirements_filter, sort=formatted_sort)
 
     def _insert(self, collection: str, data: dict) -> (int, None):
         """insert document/object into database

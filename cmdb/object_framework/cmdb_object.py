@@ -20,7 +20,7 @@ class CmdbObject(CmdbDAO):
         'fields'
     ]
 
-    def __init__(self, type_id, status, creation_time, author_id, last_edit_time, active, fields, logs=[],
+    def __init__(self, type_id, creation_time, author_id, last_edit_time, active, fields, logs=[], status: int = None,
                  views: int = 0, version: str = '1.0.0', **kwargs):
         """init of object
 
