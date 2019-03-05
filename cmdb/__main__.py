@@ -11,10 +11,13 @@ import signal
 import logging
 from cmdb.utils.helpers import timing
 from cmdb.utils.error import CMDBError
+from cmdb.utils.logger import get_logging_conf
 from argparse import ArgumentParser, Namespace
 import time
 
-LOGGER = logging.getLogger(__name__)
+# setup logging for startup
+logging.config.dictConfig(get_logging_conf())
+LOGGER = logging.getLogger("cmdb")
 
 
 def _check_database():
