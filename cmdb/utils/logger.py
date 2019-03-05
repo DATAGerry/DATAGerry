@@ -18,10 +18,7 @@ def get_log_level():
         config level
     """
     import cmdb
-    if cmdb.__MODE__ == 'DEBUG':
-        return 'DEBUG'
-    else:
-        return cmdb.__MODE__
+    return cmdb.__MODE__
 
 
 def get_logging_conf():
