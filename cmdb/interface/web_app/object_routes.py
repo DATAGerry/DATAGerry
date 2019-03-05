@@ -9,7 +9,7 @@ from cmdb.utils.error import CMDBError
 from flask import Blueprint, render_template, request, abort
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from cmdb.interface.web_app import MANAGER_HOLDER
-from cmdb.object_framework import CmdbRender
+from cmdb.object_framework import CmdbParser
 from cmdb.event_management.event import Event
 import datetime
 import json
@@ -51,7 +51,7 @@ def add_new_page(type_id):
     except (CMDBError, Exception):
         status_list = []
 
-    render = CmdbRender(type_instance=object_type, mode=CmdbRender.ADD_MODE)
+    render = CmdbParser(type_instance=object_type, mode=CmdbParser.ADD_MODE)
     return render_template('objects/add.html', render=render, status_list=status_list)
 
 
@@ -135,7 +135,7 @@ def view_page(public_id):
     author_name = usm.get_user(view_object.author_id).get_name()
     object_base = ssm.encode_object_base_64(view_object.get_all_fields())
 
-    render = CmdbRender(view_type, view_object)
+    render = CmdbParser(view_type, view_object)
     references = obm.get_object_references(public_id)
     LOGGER.debug("TSET")
     return render_template('objects/view.html',
@@ -160,7 +160,7 @@ def edit_page_get(public_id):
     author_name = usm.get_user(view_object.author_id).get_name()
     object_base = ssm.encode_object_base_64(view_object.get_all_fields())
 
-    render = CmdbRender(view_type, view_object, mode=CmdbRender.EDIT_MODE)
+    render = CmdbParser(view_type, view_object, mode=CmdbParser.EDIT_MODE)
 
     return render_template('objects/edit.html',
                            object_base=object_base,
