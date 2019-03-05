@@ -1,11 +1,11 @@
 """
 Init module for rest routes
 """
+import logging
 from flask import Flask
 from cmdb.interface.config import app_config
-from cmdb.utils import get_logger
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 def create_rest_api(event_queue):

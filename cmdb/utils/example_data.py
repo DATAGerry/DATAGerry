@@ -1,12 +1,11 @@
 """
 Experimental module for the automated import of test data
 """
-
+import logging
 from .system_reader import SystemConfigReader
-from .logger import get_logger
 import os
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 def list_example_files(extension: str = 'json', path: str = None) -> list:

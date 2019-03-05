@@ -1,10 +1,10 @@
 """
 Data access object for all core objects that are to be stored in the database.
 """
+import logging
 from cmdb.utils.error import CMDBError
-from cmdb.utils import get_logger
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 class CmdbDAO:

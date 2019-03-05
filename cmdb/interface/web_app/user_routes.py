@@ -1,15 +1,15 @@
 """
 User Pages
 """
+import logging
 from cmdb.utils.interface_wraps import right_required, login_required
-from cmdb.utils import get_logger
 from cmdb.utils.error import CMDBError
 from flask import Blueprint, render_template, request
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from cmdb.interface.web_app import MANAGER_HOLDER
 import json
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 user_pages = Blueprint('user_pages', __name__, template_folder='templates', url_prefix='/user')
 default_breadcrumb_root(user_pages, '.user_pages')

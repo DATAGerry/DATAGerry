@@ -36,6 +36,7 @@ Modules
 *******
 .. toctree::
     modules/core
+    modules/logging
     modules/processmanagement
     modules/eventhandling
     modules/interface

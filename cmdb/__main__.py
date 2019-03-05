@@ -8,14 +8,16 @@ If not, see <https://github.com/NETHINKS/NetCMDB/blob/master/LICENSE>.
 """
 
 import signal
-
-from cmdb.utils.logger import get_logger
+import logging
 from cmdb.utils.helpers import timing
 from cmdb.utils.error import CMDBError
+from cmdb.utils.logger import get_logging_conf
 from argparse import ArgumentParser, Namespace
 import time
 
-LOGGER = get_logger()
+# setup logging for startup
+logging.config.dictConfig(get_logging_conf())
+LOGGER = logging.getLogger("cmdb")
 
 
 def _check_database():

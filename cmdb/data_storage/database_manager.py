@@ -2,13 +2,13 @@
 Database Management instance for database actions
 
 """
+import logging
 from pymongo.errors import DuplicateKeyError
 from pymongo.results import DeleteResult
 from cmdb.data_storage.database_connection import Connector
 from cmdb.utils.error import CMDBError
-from cmdb.utils import get_logger
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 class DatabaseManager:

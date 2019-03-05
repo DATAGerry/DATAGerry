@@ -1,5 +1,5 @@
-from cmdb.utils import get_logger
-CMDB_LOGGER = get_logger()
+import logging
+CMDB_LOGGER = logging.getLogger(__name__)
 
 
 class AuthenticationProvider:

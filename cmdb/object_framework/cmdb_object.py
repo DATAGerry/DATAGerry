@@ -1,10 +1,10 @@
+import logging
 from cmdb.object_framework.cmdb_dao import CmdbDAO
 from cmdb.object_framework.cmdb_log import CmdbLog
 from cmdb.object_framework.cmdb_object_field_type import FieldNotFoundError
 from cmdb.utils.error import CMDBError
-from cmdb.utils import get_logger
 
-CMDB_LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 class CmdbObject(CmdbDAO):

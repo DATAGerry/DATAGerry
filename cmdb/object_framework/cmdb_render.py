@@ -3,14 +3,14 @@ Object/Type render
 """
 
 from cmdb.utils.error import CMDBError
-from cmdb.utils.logger import get_logger
 from cmdb.object_framework.cmdb_object import CmdbObject
 from cmdb.object_framework.cmdb_object_type import CmdbType
 from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
 
 import json
+import logging
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 class CmdbRender:

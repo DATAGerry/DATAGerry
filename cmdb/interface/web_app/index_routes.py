@@ -1,14 +1,15 @@
 """
 Index Page
 """
+import logging
 from cmdb.interface.web_app import app
 from cmdb.utils.error import CMDBError
-from cmdb.utils import get_logger
 from cmdb.utils.interface_wraps import login_required
 from flask import Blueprint, render_template, request
 from flask_breadcrumbs import register_breadcrumb, default_breadcrumb_root
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
+
 
 index_pages = Blueprint('index_pages', __name__, template_folder='templates')
 default_breadcrumb_root(index_pages, '.')

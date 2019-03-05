@@ -1,12 +1,12 @@
 """OBJECT Parser
 """
+import logging
 from cmdb.utils.error import CMDBError
 from cmdb.object_framework import CmdbObject, CmdbType
 from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
 from cmdb.object_framework.cmdb_log import CmdbLog
-from cmdb.utils.logger import get_logger
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 class CmdbParser:

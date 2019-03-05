@@ -1,7 +1,7 @@
+import logging
 from cmdb.utils.error import CMDBError
-from cmdb.utils.logger import get_logger
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 GLOBAL_IDENTIFIER = 'global'
 
