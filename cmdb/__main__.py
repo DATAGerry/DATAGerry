@@ -17,7 +17,7 @@ import time
 
 # setup logging for startup
 logging.config.dictConfig(get_logging_conf())
-LOGGER = logging.getLogger("cmdb")
+LOGGER = logging.getLogger(__name__)
 
 
 def _check_database():
