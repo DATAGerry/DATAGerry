@@ -10,6 +10,7 @@ from cmdb.object_framework import CmdbObjectStatus
 from cmdb.data_storage.database_manager import PublicIDAlreadyExists
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import timing
+from cmdb.event_management.event import Event
 
 CMDB_LOGGER = logging.getLogger(__name__)
 
@@ -132,12 +133,13 @@ class CmdbManagerBase:
 
 
 class CmdbObjectManager(CmdbManagerBase):
-    def __init__(self, database_manager=None):
+    def __init__(self, database_manager=None, event_queue=None):
         """
 
         Args:
             database_manager:
         """
+        self._event_queue = event_queue
         super(CmdbObjectManager, self).__init__(database_manager)
 
     def is_ready(self) -> bool:
@@ -201,6 +203,10 @@ class CmdbObjectManager(CmdbManagerBase):
                 collection=CmdbObject.COLLECTION,
                 data=new_object.to_database()
             )
+            # create cmdb.core.object.added event
+            if self._event_queue:
+                event = Event("cmdb.core.object.added", {"id": new_object.get_public_id})
+                self._event_queue.put(event)
         except (CMDBError, PublicIDAlreadyExists) as e:
             raise ObjectInsertError(e)
         return ack
@@ -228,6 +234,10 @@ class CmdbObjectManager(CmdbManagerBase):
             public_id=update_object.get_public_id(),
             data=update_object.to_database()
         )
+        # create cmdb.core.object.updated event
+        if self._event_queue:
+            event = Event("cmdb.core.object.updated", {"id": update_object.get_public_id()})
+            self._event_queue.put(event)
         return ack
 
     def update_many_objects(self, objects: list):
@@ -284,6 +294,10 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def delete_object(self, public_id: int):
         ack = self._delete(CmdbObject.COLLECTION, public_id)
+        # create cmdb.core.object.deleted event
+        if self._event_queue:
+            event = Event("cmdb.core.object.deleted", {"id": public_id})
+            self._event_queue.put(event)
         return ack
 
     def delete_many_objects(self, public_ids: list):

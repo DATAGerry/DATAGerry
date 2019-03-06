@@ -43,7 +43,8 @@ def create_web_app(event_queue):
     )
 
     object_manager = CmdbObjectManager(
-        database_manager=database_manager
+        database_manager=database_manager,
+        event_queue=event_queue
     )
 
     security_manager = SecurityManager(database_manager)

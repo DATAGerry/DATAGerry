@@ -32,12 +32,13 @@ __COLLECTIONS__ = [
 ]
 
 
-def get_object_manager(database_manager: DatabaseManager = None) -> CmdbObjectManager:
+def get_object_manager(database_manager: DatabaseManager = None, event_queue=None) -> CmdbObjectManager:
     """
     auto init a instance of an object manager
     Returns (CmdbObjectManager): instance of object manager
     """
     from cmdb.data_storage import get_pre_init_database
     return CmdbObjectManager(
-        database_manager=database_manager or get_pre_init_database()
+        database_manager=database_manager or get_pre_init_database(),
+        event_queue=event_queue
     )
