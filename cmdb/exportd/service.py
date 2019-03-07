@@ -1,8 +1,8 @@
+import logging
 import cmdb.process_management.service
 import cmdb.exportd.exporter_base
-from cmdb.utils import get_logger
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 class ExportdService(cmdb.process_management.service.AbstractCmdbService):
 
