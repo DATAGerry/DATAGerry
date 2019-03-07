@@ -22,7 +22,6 @@ class CmdbRender:
     def __init__(self, type_instance: CmdbType, object_instance: CmdbObject, format_: (dict, str) = dict):
         self.type_instance = type_instance
         self.object_instance = object_instance
-        self.mapper = self._map_values()
         if format_ not in CmdbRender.__POSSIBLE_OUTPUT_FORMATS:
             raise WrongOutputFormat(format_)
         self.format_ = format_
@@ -92,12 +91,10 @@ class CmdbRender:
                     except CMDBError:
                         # if error while loading continue
                         continue
-
+                curr_sum.set_values(value_list)
             except CMDBError:
                 # if error with summary continue
                 continue
-            # append all to output list
-            summary_list.append(curr_sum)
             if output:
                 summary_list.append(curr_sum.__dict__)
             else:
@@ -157,43 +154,6 @@ class CmdbRender:
             else:
                 external_list.append(ext_link_instance)
         return external_list
-
-    def output(self) -> __POSSIBLE_OUTPUT_FORMATS:
-        """
-        Print or get the formatted data
-        TODO
-
-        """
-        _output = {
-            'object': {
-                'object_id': self.object_instance.get_public_id()
-            },
-            'type': {
-                'type_id': self.type_instance.get_public_id(),
-                'type_name': self.type_instance.get_name(),
-                'type_label': self.type_instance.get_label()
-            },
-            'externals': self.get_externals(output=True)
-        }
-
-        if self.format_ is str:
-            return json.dumps(_output)
-        else:
-            return _output
-
-    def _map_values(self):
-        map_ = {
-
-        }
-
-        return map_
-
-
-class __RenderMapWrapper:
-
-    def __init__(self, field: CmdbFieldType, data):
-        self.field = field
-        self.data = data
 
 
 class TypeInstanceError(CMDBError):

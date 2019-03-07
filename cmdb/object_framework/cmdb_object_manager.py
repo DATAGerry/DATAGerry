@@ -362,7 +362,6 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = []
         query_filter = _filter
         root_categories = self.dbm.find_all(collection=CmdbTypeCategory.COLLECTION, filter=query_filter)
-        CMDB_LOGGER.debug("__FIND: categories {}".format(root_categories))
         for cat_obj in root_categories:
             try:
                 ack.append(CmdbTypeCategory(**cat_obj))

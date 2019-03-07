@@ -2,6 +2,7 @@ import logging
 from cmdb.object_framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
 from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType, FieldNotFoundError
 from datetime import datetime
+
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
@@ -175,6 +176,13 @@ class _Summary:
         if len(self.fields) > 0:
             return True
         return False
+
+    def set_values(self, values):
+        self.values = values
+
+    def __repr__(self):
+        output_string = "{}: {}".format(self.label, self.values)
+        return output_string
 
 
 class ExternalFillError(CMDBError):

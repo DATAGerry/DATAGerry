@@ -82,9 +82,10 @@ def create_web_app(event_queue):
 
 
 def register_filters(app):
-    from cmdb.interface.web_app.filters import label_active, display_icon, cmdb_exception_handler
+    from cmdb.interface.web_app.filters import label_active, display_icon, cmdb_exception_handler, encode_date
     app.jinja_env.filters['label_active'] = label_active
     app.jinja_env.filters['display_icon'] = display_icon
+    app.jinja_env.filters['encode_date'] = encode_date
     app.jinja_env.filters['exception_handler'] = cmdb_exception_handler
 
 

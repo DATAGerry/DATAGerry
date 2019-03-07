@@ -1,3 +1,4 @@
+import datetime
 from types import FunctionType
 
 
@@ -14,6 +15,13 @@ def display_icon(icon):
         return icon
     else:
         return 'line-icon-folder'
+
+
+def encode_date(date):
+    try:
+        return date.strftime('%Y-%m-%d %H:%M:%S')
+    except (ValueError, AttributeError):
+        return date
 
 
 def cmdb_exception_handler(handling: FunctionType):

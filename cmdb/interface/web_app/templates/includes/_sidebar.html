@@ -30,29 +30,37 @@
 {% endmacro %}
 <div id="sidebar">
     <nav class="sidebar-nav">
+        {% set current_path = request.path %}
         <ul class="nav">
             <li class="nav-title">Navigation</li>
             <li class="nav-item">
-                <a class="nav-link active" href="/dashboard/"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a class="nav-link {% if current_path == '/dashboard/' %}active{% endif %}" href="/dashboard/">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/favorite/"><i class="far fa-star"></i> Favorite</a>
+                <a class="nav-link {% if current_path == '/favorite/' %}active{% endif %}" href="/favorite/">
+                    <i class="far fa-star"></i> Favorite</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/newest/"><i class="fas fa-bolt"></i> Newest</a>
+                <a class="nav-link {% if current_path == '/object/newest/' %}active{% endif %}" href="/object/newest/">
+                    <i class="fas fa-bolt"></i> Newest</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/latest/"><i class="fas fa-undo"></i> Latest changes</a>
+                <a class="nav-link {% if current_path == '/object/latest/' %}active{% endif %}" href="/object/latest/">
+                    <i class="fas fa-undo"></i> Latest changes</a>
             </li>
             <li class="nav-title">Assets</li>
             <li class="nav-item">
-                <a class="nav-link" href="/object/"><i class="fas fa-list"></i> List objects</a>
+                <a class="nav-link {% if current_path == '/object/' %}active{% endif %}" href="/object/">
+                    <i class="fas fa-list"></i> List objects</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/type/"><i class="fas fa-layer-group"></i> Manage types</a>
+                <a class="nav-link {% if current_path == '/type/' %}active{% endif %}" href="/type/">
+                    <i class="fas fa-layer-group"></i> Manage types</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/collection/"><i class="far fa-object-ungroup"></i></i>
+                <a class="nav-link {% if current_path == '/collection/' %}active{% endif %}" href="/collection/">
+                    <i class="far fa-object-ungroup"></i>
                     Collections</a>
             </li>
             <div id="sidebar-categories">

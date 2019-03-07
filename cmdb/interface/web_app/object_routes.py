@@ -1,34 +1,112 @@
-import logging
 from cmdb.utils.interface_wraps import login_required
 from cmdb.object_framework.cmdb_dao import CmdbDAO
 from cmdb.object_framework.cmdb_object_field_type import FieldNotFoundError
 from cmdb.object_framework.cmdb_object_manager import ObjectInsertError, ObjectUpdateError
 from cmdb.object_framework.cmdb_object import CmdbObject
 from cmdb.object_framework.cmdb_log import CmdbLog
-from cmdb.utils.error import CMDBError
-from flask import Blueprint, render_template, request, abort
+from cmdb.object_framework.cmdb_render import CmdbRender
+from flask import Blueprint, render_template, request, abort, current_app
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from cmdb.interface.web_app import MANAGER_HOLDER
 from cmdb.object_framework import CmdbParser
+
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
+
 import datetime
 import json
+import logging
 
 LOGGER = logging.getLogger(__name__)
 
 object_pages = Blueprint('object_pages', __name__, template_folder='templates', url_prefix='/object')
 default_breadcrumb_root(object_pages, '.object_pages')
 
-obm = MANAGER_HOLDER.get_object_manager()
+with current_app.app_context():
+    MANAGER_HOLDER = current_app.manager_holder
 
 
 @object_pages.route('/')
-@object_pages.route('/list')
+@object_pages.route('/list/')
 @register_breadcrumb(object_pages, '.', 'Objects')
 @login_required
 def list_page():
     uum = MANAGER_HOLDER.get_user_manager()
-    all_objects = obm.get_all_objects()
-    return render_template('objects/list.html', object_manager=obm, user_manager=uum, all_objects=all_objects)
+    all_objects = MANAGER_HOLDER.get_object_manager().get_all_objects()
+    return render_template('objects/list.html', user_manager=uum,
+                           all_objects=all_objects)
+
+
+@object_pages.route('/newest/')
+@register_breadcrumb(object_pages, '.', 'Newest')
+def newest_objects_page():
+    try:
+        object_limit = int(request.args.get('limit') or 25)
+    except ValueError:
+        object_limit = 25
+    newest_objects = []
+    try:
+        type_buffer_list = {}
+        newest_objects_list = MANAGER_HOLDER.get_object_manager().get_objects_by(sort='creation_time',
+                                                                                 limit=object_limit,
+                                                                                 active={"$eq": True})
+        for passed_object in newest_objects_list:
+            current_type = None
+            passed_object_type_id = passed_object.get_type_id()
+            if passed_object_type_id in type_buffer_list:
+                current_type = type_buffer_list[passed_object_type_id]
+            else:
+                try:
+                    current_type = MANAGER_HOLDER.get_object_manager().get_type(passed_object_type_id)
+                    type_buffer_list.update({passed_object_type_id: current_type})
+                except CMDBError as e:
+                    LOGGER.warning("Newest object type - error: {}".format(e.message))
+                    continue
+            tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
+            newest_objects.append(tmp_render)
+        LOGGER.debug(newest_objects)
+    except CMDBError:
+        newest_objects = None
+    return render_template('objects/newest.html', newest_objects=newest_objects, limit=object_limit)
+
+
+@object_pages.route('/latest/')
+@register_breadcrumb(object_pages, '.', 'Newest')
+def latest_objects_page():
+    try:
+        object_limit = int(request.args.get('limit') or 25)
+    except ValueError:
+        object_limit = 25
+    latest_objects = []
+    try:
+        type_buffer_list = {}
+        latest_objects_list = MANAGER_HOLDER.get_object_manager().get_objects_by(sort='last_edit_time',
+                                                                                 limit=object_limit,
+                                                                                 last_edit_time={
+                                                                                     "$ne": None,
+                                                                                     "$type": "date"
+                                                                                 },
+                                                                                 active={"$eq": True})
+        for passed_object in latest_objects_list:
+            current_type = None
+            passed_object_type_id = passed_object.get_type_id()
+            if passed_object_type_id in type_buffer_list:
+                current_type = type_buffer_list[passed_object_type_id]
+            else:
+                try:
+                    current_type = MANAGER_HOLDER.get_object_manager().get_type(passed_object_type_id)
+                    type_buffer_list.update({passed_object_type_id: current_type})
+                except CMDBError as e:
+                    LOGGER.warning("Latest object type - error: {}".format(e.message))
+                    continue
+            tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
+            latest_objects.append(tmp_render)
+        LOGGER.debug(latest_objects)
+    except CMDBError:
+        latest_objects = None
+    return render_template('objects/latest.html', latest_objects=latest_objects, limit=object_limit)
 
 
 @object_pages.route('/type/<int:type_id>/add', methods=['GET'])
@@ -37,12 +115,12 @@ def list_page():
 @login_required
 def add_new_page(type_id):
     try:
-        object_type = obm.get_type(type_id)
+        object_type = MANAGER_HOLDER.get_object_manager().get_type(type_id)
     except (CMDBError, Exception) as e:
         LOGGER.critical(e)
         abort(500, e.message)
     try:
-        status_list = obm.get_status_by_type(type_id)
+        status_list = MANAGER_HOLDER.get_object_manager().get_status_by_type(type_id)
     except (CMDBError, Exception):
         status_list = []
 
@@ -67,7 +145,7 @@ def add_new_page_post(type_id):
 
     try:
         try:
-            object_type = obm.get_type(type_id)
+            object_type = MANAGER_HOLDER.get_object_manager().get_type(type_id)
             scm = MANAGER_HOLDER.get_security_manager()
             current_user_token = request.cookies['access-token']
             current_user = json.loads(scm.decrypt_token(current_user_token))
@@ -78,7 +156,7 @@ def add_new_page_post(type_id):
                     'value': form_data[value_key]
                 })
             new_object = CmdbObject(
-                public_id=int(obm.get_highest_id(CmdbObject.COLLECTION) + 1),
+                public_id=int(MANAGER_HOLDER.get_object_manager().get_highest_id(CmdbObject.COLLECTION) + 1),
                 type_id=type_id,
                 creation_time=datetime.datetime.utcnow(),
                 author_id=MANAGER_HOLDER.get_user_manager().get_user(current_user['public_id']).get_public_id(),
@@ -94,10 +172,10 @@ def add_new_page_post(type_id):
                 date=datetime.datetime.utcnow()
             )
             new_object.add_log(new_log)
-            insert_ack = obm.insert_object(new_object)
+            insert_ack = MANAGER_HOLDER.get_object_manager().insert_object(new_object)
             LOGGER.debug(insert_ack)
             if insert_ack:
-                inserted_object = obm.get_object(insert_ack)
+                inserted_object = MANAGER_HOLDER.get_object_manager().get_object(insert_ack)
         except (CMDBError, Exception) as e:
             LOGGER.warning(e)
             raise ObjectInsertError(e)
@@ -120,19 +198,18 @@ def page_view(public_id, mode):
 def view_page(public_id):
     usm = MANAGER_HOLDER.get_user_manager()
     ssm = MANAGER_HOLDER.get_security_manager()
-    view_object = obm.get_object(public_id=public_id)
+    view_object = MANAGER_HOLDER.get_object_manager().get_object(public_id=public_id)
     view_object.update_view_counter()
     try:
-        obm.update_object(view_object)
+        MANAGER_HOLDER.get_object_manager().update_object(view_object)
     except CMDBError:
         pass
-    view_type = obm.get_type(public_id=view_object.get_type_id())
+    view_type = MANAGER_HOLDER.get_object_manager().get_type(public_id=view_object.get_type_id())
     author_name = usm.get_user(view_object.author_id).get_name()
     object_base = ssm.encode_object_base_64(view_object.get_all_fields())
 
     render = CmdbParser(view_type, view_object)
-    references = obm.get_object_references(public_id)
-    LOGGER.debug("TSET")
+    references = MANAGER_HOLDER.get_object_manager().get_object_references(public_id)
     return render_template('objects/view.html',
                            object_base=object_base,
                            author_name=author_name,
@@ -150,8 +227,8 @@ def view_page(public_id):
 def edit_page_get(public_id):
     usm = MANAGER_HOLDER.get_user_manager()
     ssm = MANAGER_HOLDER.get_security_manager()
-    view_object = obm.get_object(public_id=public_id)
-    view_type = obm.get_type(public_id=view_object.get_type_id())
+    view_object = MANAGER_HOLDER.get_object_manager().get_object(public_id=public_id)
+    view_type = MANAGER_HOLDER.get_object_manager().get_type(public_id=view_object.get_type_id())
     author_name = usm.get_user(view_object.author_id).get_name()
     object_base = ssm.encode_object_base_64(view_object.get_all_fields())
 
@@ -172,7 +249,7 @@ def edit_page_get(public_id):
 @login_required
 def edit_page_post(public_id):
     from cmdb.object_framework.cmdb_log import CmdbLog
-    old_object = obm.get_object(public_id=public_id)
+    old_object = MANAGER_HOLDER.get_object_manager().get_object(public_id=public_id)
     new_object = None
     error = None
     if request.method != 'POST':
@@ -185,9 +262,7 @@ def edit_page_post(public_id):
         LOGGER.debug("Form data: {}".format(form_data))
 
         old_field_values = old_object.get_all_fields()
-        LOGGER.debug('Old field values type {} | data {} '.format(type(old_field_values), old_field_values))
-        log_state = obm.generate_log_state(old_field_values)
-        LOGGER.debug('Log state values type {} | data {} '.format(type(log_state), log_state))
+        log_state = MANAGER_HOLDER.get_object_manager().generate_log_state(old_field_values)
         new_object = old_object
 
         new_object.add_last_log_state(log_state)
@@ -216,10 +291,9 @@ def edit_page_post(public_id):
 
     except (CMDBError, Exception) as e:
         error = ObjectUpdateError("Error during new object generation - {}".format(e))
-    LOGGER.debug('New object {}'.format(new_object))
     if error is None:
         try:
-            obm.update_object(new_object)
+            MANAGER_HOLDER.get_object_manager().update_object(new_object)
         except (CMDBError, Exception) as e:
             error = ObjectUpdateError("Update error while inserting into database: {}".format(e))
     return render_template('objects/edit_post.html', old_object=old_object, new_object=new_object, error=error)
@@ -230,7 +304,7 @@ def edit_page_post(public_id):
 def delete_page(public_id):
     error = None
     try:
-        delete_object = obm.get_object(public_id)
+        delete_object = MANAGER_HOLDER.get_object_manager().get_object(public_id)
     except CMDBError:
         abort(404)
     delete_token = MANAGER_HOLDER.get_security_manager().generate_delete_token(delete_object)
@@ -241,12 +315,12 @@ def delete_page(public_id):
 def delete_page_confirm(public_id):
     error = None
     try:
-        delete_object = obm.get_object(public_id)
+        delete_object = MANAGER_HOLDER.get_object_manager().get_object(public_id)
         delete_token_request = request.form.to_dict()['delete_token']
         delete_token = MANAGER_HOLDER.get_security_manager().decrypt_token(delete_token_request)
         if not delete_token:
             abort(500)
-        obm.delete_object(public_id)
+        MANAGER_HOLDER.get_object_manager().delete_object(public_id)
     except CMDBError:
         abort(404)
     return render_template('objects/delete_post.html', delete_object=delete_object, delete_token=delete_token,

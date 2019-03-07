@@ -40,6 +40,19 @@
     {% endif %}
 {% endmacro %}
 
+{% macro render_summaries(summary_list) %}
+    {% for summary in summary_list %}
+        <strong id="summary_{{ summary.name }}">{{ summary.label }}: </strong>
+        {% for value in summary.values %}
+            {{ value }}
+        {% endfor %}
+        {% if not loop.last %}
+            <br/>
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
+
+
 {% macro input_show(field) %}
     <div id="{{ field.name }}">
         <h4>{{ field.label }}

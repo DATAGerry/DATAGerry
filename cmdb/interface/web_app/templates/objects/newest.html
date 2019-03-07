@@ -1,0 +1,70 @@
+{% extends 'layout.html' %}
+{% from "includes/_render_macros.html" import render_summaries with context %}
+{% block title %}Newest objects{% endblock %}
+{% block navigation %}
+    {% include 'includes/_navigation.html' %}
+{% endblock %}
+{% block breadcrumb %}
+    {% include 'includes/_breadcrumb.html' %}
+{% endblock %}
+{% block content %}
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <h1>Newest objects</h1>
+                    <hr/>
+                    {% if newest_objects | length > 0 %}
+                        <table data-order='[[ 6, "desc" ]]' class="data_table table">
+                            <thead class="thead">
+                            <tr>
+                                <th scope="col">Active</th>
+                                <th scope="col">Public ID</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Summary</th>
+                                <th scope="col">Version</th>
+                                <th scope="col">Author</th>
+                                <th scope="col">Creation time</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for current_render in newest_objects %}
+                                <tr>
+                                    <td>{{ current_render.object_instance.active | label_active }}</td>
+                                    <td>
+                                        <a href="/object/{{ current_render.object_instance.public_id }}">
+                                            {{ current_render.object_instance.public_id }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="/object/{{ current_render.type_instance.get_public_id() }}">
+                                            {{ current_render.type_instance.get_label() }}
+                                        </a>
+                                    </td>
+                                    <td>{{ render_summaries(current_render.get_summaries()) }}</td>
+                                    <td>{{ current_render.object_instance.version }}</td>
+                                    <td>{{ current_render.object_instance.author_id }}</td>
+                                    <td>{{ current_render.object_instance.creation_time | encode_date }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="alert alert-warning" role="alert">
+                            No objects exist.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {{ super() }}
+        </div>
+    </div>
+{% endblock %}
+{% if mode == 'DEBUG' %}
+    {% block debug %}
+        <h2>Newest list</h2>
+        <hr>
+        {{ newest_objects }}
+    {% endblock %}
+{% endif %}
