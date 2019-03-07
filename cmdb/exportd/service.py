@@ -14,8 +14,9 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
 
     def _run(self):
         # ToDo: for testing only
-        time.sleep(5)
-        self.__schedule_job()
+        #time.sleep(5)
+        #self.__schedule_job()
+        pass
 
     def _handle_event(self, event):
         event_type = event.get_type()
