@@ -122,4 +122,4 @@ def test_meta_functions(type_instance, object_instance):
 
 def test_output(type_instance, object_instance):
     render_instance = CmdbRender(type_instance=type_instance, object_instance=object_instance)
-    print(render_instance.output())
+    #print(render_instance.output())

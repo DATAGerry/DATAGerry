@@ -39,7 +39,8 @@ def _check_database():
     retries = 0
     while retries < 3:
         retries += 1
-        LOGGER.warning("Retry {}: Checking database connection with {} data".format(retries, SystemConfigReader.DEFAULT_CONFIG_NAME))
+        LOGGER.warning("Retry {}: Checking database connection with {} data".format(retries,
+                                                                                    SystemConfigReader.DEFAULT_CONFIG_NAME))
         connection_test = dbm.database_connector.is_connected()
         if connection_test:
             dbm.database_connector.disconnect()
@@ -160,8 +161,11 @@ def build_arg_parser() -> Namespace:
     _parser.add_argument('--setup', action='store_true', default=False, dest='setup',
                          help="init cmdb")
 
+    _parser.add_argument('--test', action='store_true', default=False, dest='test_data',
+                         help="generate and insert test data")
+
     _parser.add_argument('--keys', action='store_true', default=False, dest='keys',
-                         help="init securty keys")
+                         help="init security keys")
 
     _parser.add_argument('-d', '--debug', action='store_true', default=False, dest='debug',
                          help="enable debug mode: DO NOT USE ON PRODUCTIVE SYSTEMS")
@@ -198,6 +202,28 @@ def main(args):
     except CMDBError as conn_error:
         LOGGER.critical(conn_error.message)
         exit(1)
+    if args.test_data:
+        _activate_debug()
+        from cmdb.utils.data_factory import DataFactory
+        from cmdb.data_storage import get_pre_init_database
+
+        _factory_database_manager = get_pre_init_database()
+        db_name = _factory_database_manager.get_database_name()
+
+        factory = DataFactory(database_manager=_factory_database_manager)
+
+        LOGGER.warning("Inserting test-data into: {}".format(db_name))
+        _factory_database_manager.drop(db_name)  # cleanup database
+        try:
+            ack = factory.insert_data()
+            LOGGER.warning("Test-data was successfully added".format(_factory_database_manager.get_database_name()))
+            if len(ack) > 0:
+                LOGGER.critical("Error while inserting test-data: {} - dropping database".format(ack))
+                _factory_database_manager.drop(db_name)  # cleanup database
+        except (Exception, CMDBError) as e:
+            import traceback
+            traceback.print_tb(e.__traceback__)
+
     if args.setup:
         if args.keys:
             _generate_security_keys()

@@ -1,12 +1,14 @@
-"""
-
-"""
 from datetime import datetime
-from cmdb.utils.error import CMDBError
+
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
 
 
 class CmdbLog:
-    POSSIBLE_COMMANDS = ('create', 'edit')
+    """Definition of an object log - list of state changes. """
+    POSSIBLE_COMMANDS = ('create', 'edit', 'active', 'deactivate')
 
     def __init__(self, author_id: int, action: str, message: str, state: str = None, date: (str, datetime) = None):
         """TODO: Security manager encrypt log"""

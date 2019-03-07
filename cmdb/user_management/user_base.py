@@ -1,4 +1,4 @@
-from cmdb.object_framework import CmdbDAO
+from cmdb.object_framework.cmdb_dao import CmdbDAO
 
 
 class UserManagementBase(CmdbDAO):

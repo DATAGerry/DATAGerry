@@ -10,4 +10,4 @@ Tested modules:
 """
 
 import cmdb
-cmdb.__MODE__ = 'DEBUG'
+cmdb.__MODE__ = 'TESTING'

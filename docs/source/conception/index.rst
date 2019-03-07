@@ -40,8 +40,3 @@ Modules
     modules/processmanagement
     modules/eventhandling
     modules/interface
-
-Ideas
-*****
-.. toctree::
-    ideas

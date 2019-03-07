@@ -8,7 +8,7 @@ from cmdb.data_storage.database_manager import NoDocumentFound
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from jwcrypto import jwk, jwt, jws
-from cmdb.user_management import User
+from cmdb.user_management.user import User
 from cmdb.object_framework.cmdb_object import CmdbObject
 from cmdb.object_framework.cmdb_object_type import CmdbType
 
@@ -57,8 +57,6 @@ class SecurityManager:
     def encrypt_token(self, payload: User, timeout: int = (DEFAULT_EXPIRES * 60)) -> str:
         """TODO: Fix json encoding error - current workaround with direct dump"""
         user_data = payload.to_json()
-        CMDB_LOGGER.debug("Login User: {}, format {}".format(user_data, type(user_data)))
-        CMDB_LOGGER.debug("Login User Payload: {}, format {}".format(user_data, type(user_data)))
         jws_token = jws.JWS(payload=user_data)
         jws_token.add_signature(
             key=self.get_sym_key(),

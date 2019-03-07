@@ -1,13 +1,13 @@
-************
+############
 Installation
-************
+############
 This guide provides an overview of the installation and startup of NetCMDB.
 The project is developed in the platform-independent programming language Python (Python3) and is available
 for different operating systems and architectures. Only the dependencies of the third-party programs
 that are required for the CMDB are excluded.
 
 Dependencies
-############
+************
 Three external programs are required to run the CMDB.
 
 1. Python
@@ -33,7 +33,7 @@ RabbitMQ is an open source message broker software that implements the Advanced 
 See the official installation guide for details: `Downloading and Installing RabbitMQ <https://www.rabbitmq.com/download.html#installation-guides>`_
 
 From source
-###########
+***********
 *Step 1:* To install from source files, first clone repository or download the zip release from github
 
 .. code-block:: bash
@@ -56,12 +56,12 @@ The default configuration should look like this:
     :literal:
 
 With Docker
-###########
+***********
 
 .. todo:: Implement docker installation
 
 Starting
-########
+********
 
 The default start is
 

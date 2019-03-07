@@ -5,6 +5,9 @@ from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.data_storage.database_manager import NoDocumentFound
 from cmdb.utils.error import CMDBError
 
+import logging
+LOGGER = logging.getLogger(__name__)
+
 
 class SystemWriter:
     """
@@ -84,8 +87,8 @@ class SystemSettingsWriter(SystemWriter):
         try:
             writing_document = self.writer.find_one_by(collection=self.COLLECTION, filter={'_id': _id})
         except NoDocumentFound:
-            new_id = self.writer.insert(collection=self.COLLECTION, data={'_id': _id})
-            writing_document = self.writer.find_one_by(collection=self.COLLECTION, filter={'_id': new_id})
+            self.writer.insert_with_internal(collection=self.COLLECTION, _id=_id, data=data)
+            writing_document = self.writer.find_one_by(collection=self.COLLECTION, filter={'_id': _id})
 
         writing_document.update(data)
         ack = self.writer.update_with_internal(
