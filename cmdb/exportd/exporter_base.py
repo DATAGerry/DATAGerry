@@ -8,9 +8,9 @@ class ExportJob:
         self.__destinations = []
         self.__exportvars = {}
         # ToDo: read data from configuration
-        exportvar_objectid = ExportVariable("objectid", "{{id}}", "")
-        exportvar_dummy1 = ExportVariable("dummy1", "{{fields.first_name}} {{fields.last_name}}", "")
-        exportvar_dummy2 = ExportVariable("dummy2", "{{fields.last_name}} {{id}}", "")
+        exportvar_objectid = ExportVariable("objectid", "{{id}}")
+        exportvar_dummy1 = ExportVariable("dummy1", "{{fields.first_name}} {{fields.last_name}}")
+        exportvar_dummy2 = ExportVariable("dummy2", "{{fields.last_name}} {{id}}")
         self.__exportvars = {
             "objectid": exportvar_objectid,
             "dummy1": exportvar_dummy1,
@@ -36,14 +36,20 @@ class ExportJob:
 
 class ExportVariable:
 
-    def __init__(self, name, value_template, value_default):
+    def __init__(self, name, value_tpl_default, value_tpl_types={}):
         self.__name = name
-        self.__value_template = value_template
-        self.__value_default = value_default
+        self.__value_tpl_default = value_tpl_default
+        self.__value_tpl_types = value_tpl_types
 
     def get_value(self, cmdb_object):
         # get object manager
         om = cmdb.object_framework.get_object_manager()
+
+        # get value template
+        value_template = self.__value_tpl_default
+        object_type_id = cmdb_object.get_type_id()
+        if object_type_id in self.__value_tpl_types:
+            value_template = self.__value_tpl_types[object_type_id]
 
         # objectdata for use in ExportVariable templates
         objectdata = {}
@@ -59,7 +65,7 @@ class ExportVariable:
         # ToDo: dereference objectrefs
 
         # render template
-        template = jinja2.Template(self.__value_template)
+        template = jinja2.Template(value_template)
         output = template.render(objectdata)
         return output
 
@@ -106,11 +112,11 @@ class ExternalSystemDummy(ExternalSystem):
     def __init__(self, export_vars):
         super(ExternalSystemDummy, self).__init__(export_vars)
         # init export vars
-        self.__objectid = self._export_vars.get("objectid", ExportVariable("objectid", "", ""))
-        self.__dummy1 = self._export_vars.get("dummy1", ExportVariable("dummy1", "", ""))
-        self.__dummy2 = self._export_vars.get("dummy2", ExportVariable("dummy2", "", ""))
-        self.__dummy3 = self._export_vars.get("dummy3", ExportVariable("dummy3", "", ""))
-        self.__dummy4 = self._export_vars.get("dummy4", ExportVariable("dummy4", "", ""))
+        self.__objectid = self._export_vars.get("objectid", ExportVariable("objectid", ""))
+        self.__dummy1 = self._export_vars.get("dummy1", ExportVariable("dummy1", ""))
+        self.__dummy2 = self._export_vars.get("dummy2", ExportVariable("dummy2", ""))
+        self.__dummy3 = self._export_vars.get("dummy3", ExportVariable("dummy3", ""))
+        self.__dummy4 = self._export_vars.get("dummy4", ExportVariable("dummy4", ""))
 
     def prepare_export(self):
         print("prepare export")
