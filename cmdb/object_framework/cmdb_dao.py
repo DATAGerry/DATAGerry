@@ -2,7 +2,10 @@
 Data access object for all core objects that are to be stored in the database.
 """
 import logging
-from cmdb.utils.error import CMDBError
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
 

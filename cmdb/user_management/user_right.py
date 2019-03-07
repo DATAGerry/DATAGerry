@@ -3,7 +3,7 @@ from cmdb.utils.error import CMDBError
 
 LOGGER = logging.getLogger(__name__)
 
-GLOBAL_IDENTIFIER = 'global'
+GLOBAL_IDENTIFIER = '*'
 
 
 class BaseRight:

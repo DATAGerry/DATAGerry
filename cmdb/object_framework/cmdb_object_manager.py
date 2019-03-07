@@ -188,14 +188,13 @@ class CmdbObjectManager(CmdbManagerBase):
         return self.get_objects_by(type_id=type_id)
 
     def insert_object(self, data: (CmdbObject, dict)):
-        if type(data) == dict:
+        if isinstance(data,  dict):
             try:
                 new_object = CmdbObject(**data)
             except CMDBError as e:
                 raise ObjectInsertError(e)
-        else:
+        elif isinstance(data, CmdbObject):
             new_object = data
-            CMDB_LOGGER.debug(new_object)
         try:
             ack = self.dbm.insert(
                 collection=CmdbObject.COLLECTION,
@@ -217,9 +216,9 @@ class CmdbObjectManager(CmdbManagerBase):
         return ack
 
     def update_object(self, data: (dict, CmdbObject)) -> str:
-        if type(data) == dict:
+        if isinstance(data, dict):
             update_object = CmdbObject(**data)
-        elif type(data) == CmdbObject:
+        elif isinstance(data, CmdbObject):
             update_object = data
         else:
             raise UpdateError(CmdbObject.__class__, data, 'Wrong CmdbObject init format - expecting CmdbObject or dict')
@@ -311,8 +310,11 @@ class CmdbObjectManager(CmdbManagerBase):
         except (CMDBError, Exception):
             raise TypeNotFoundError(type_id=public_id)
 
-    def insert_type(self, data: dict):
-        new_type = CmdbType(**data)
+    def insert_type(self, data: (CmdbType, dict)):
+        if isinstance(data, CmdbType):
+            new_type = data
+        elif isinstance(data, dict):
+            new_type = CmdbType(**data)
         return self._insert(collection=CmdbType.COLLECTION, data=new_type.to_database())
 
     def update_type(self, data: dict):
@@ -389,8 +391,12 @@ class CmdbObjectManager(CmdbManagerBase):
             public_id=public_id)
                                 )
 
-    def insert_category(self, data: dict):
-        new_category = CmdbTypeCategory(**data)
+    def insert_category(self, data: (CmdbTypeCategory, dict)):
+        if isinstance(data, CmdbTypeCategory):
+            new_category = data
+        elif isinstance(data, dict):
+            new_category = CmdbTypeCategory(**data)
+
         return self._insert(collection=CmdbTypeCategory.COLLECTION, data=new_category.to_database())
 
     def update_category(self, data: dict):
@@ -441,7 +447,7 @@ class TypeNotFoundError(CMDBError):
 
 class ObjectInsertError(CMDBError):
     def __init__(self, error):
-        self.message = 'Object could not be inserted | Error {} \n show into logs for details'.format(error)
+        self.message = 'Object could not be inserted | Error {} \n show into logs for details'.format(error.message)
 
 
 class ObjectUpdateError(CMDBError):

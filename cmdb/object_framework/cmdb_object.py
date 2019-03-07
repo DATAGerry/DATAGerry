@@ -2,7 +2,10 @@ import logging
 from cmdb.object_framework.cmdb_dao import CmdbDAO
 from cmdb.object_framework.cmdb_log import CmdbLog
 from cmdb.object_framework.cmdb_object_field_type import FieldNotFoundError
-from cmdb.utils.error import CMDBError
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
 
@@ -166,8 +169,6 @@ class NoFoundFieldValueError(CMDBError):
     def __init__(self, field_name):
         self.message = "Field value does not exists {}".format(field_name)
         super(CMDBError, self).__init__(self.message)
-
-
 
 
 class NoLinksAvailableError(CMDBError):

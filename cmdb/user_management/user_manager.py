@@ -4,6 +4,7 @@ from cmdb.user_management.user import User
 from cmdb.user_management.user_right import BaseRight, GLOBAL_IDENTIFIER
 from cmdb.data_storage import NoDocumentFound, DatabaseManagerMongo
 from cmdb.data_storage.database_manager import DeleteResult
+from cmdb.utils.security import SecurityManager
 from cmdb.utils.error import CMDBError
 import cmdb
 
@@ -17,7 +18,7 @@ class UserManagement:
         'BASE_RIGHT_CLASSES': BaseRight
     }
 
-    def __init__(self, database_manager: DatabaseManagerMongo, security_manager):
+    def __init__(self, database_manager: DatabaseManagerMongo, security_manager: SecurityManager):
         self.dbm = database_manager
         self.scm = security_manager
         self.rights = self._load_rights()
@@ -96,19 +97,10 @@ class UserManagement:
             raise GroupNotNotUpdatedError(update_group.get_name(), e)
         return ack
 
-    def insert_group(self, name: str, label: str = None, rights: list = []) -> int:
-        new_public_id = self.dbm.get_highest_id(collection=UserGroup.COLLECTION) + 1
-        insert_group = UserGroup(
-            name=name,
-            label=label or name.title(),
-            rights=rights or [],
-            public_id=new_public_id
-        )
+    def insert_group(self, insert_group: UserGroup) -> int:
         try:
             return self.dbm.insert(collection=UserGroup.COLLECTION, data=insert_group.to_database())
         except Exception as e:
-            if cmdb.__MODE__ is not 'TESTING':
-                LOGGER.warn(e)
             raise GroupInsertError(insert_group.get_name())
 
     def delete_group(self, public_id) -> DeleteResult:

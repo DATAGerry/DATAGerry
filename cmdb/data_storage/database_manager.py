@@ -7,6 +7,7 @@ from pymongo.errors import DuplicateKeyError
 from pymongo.results import DeleteResult
 from cmdb.data_storage.database_connection import Connector
 from cmdb.utils.error import CMDBError
+from cmdb.data_storage.database_connection import MongoConnector
 
 LOGGER = logging.getLogger(__name__)
 
@@ -172,13 +173,21 @@ class DatabaseManager:
         """
         raise NotImplementedError
 
+    def get_database_name(self):
+        """get name of selected database
+
+        Returns:
+            db_name (str): name of database
+        """
+        raise NotImplementedError
+
 
 class DatabaseManagerMongo(DatabaseManager):
     """PyMongo (mongodb) implementation of Database Manager"""
 
     DB_MANAGER_TYPE = 'MONGO_DB'
 
-    def __init__(self, connector):
+    def __init__(self, connector: MongoConnector):
         """init mongo implementation
 
         Args:
@@ -241,6 +250,9 @@ class DatabaseManagerMongo(DatabaseManager):
             import_list.append(IndexModel(idx['keys']))
         self.database_connector.get_collection(collection).create_indexes(import_list)
 
+    def get_database_name(self):
+        return self.database_connector.get_database_name()
+
     def __find(self, collection: str, *args, **kwargs):
         """general find function for database search
 
@@ -253,9 +265,7 @@ class DatabaseManagerMongo(DatabaseManager):
             founded document
 
         """
-        LOGGER.debug("__FIND - Collection: {}".format(collection))
         result = self.database_connector.get_collection(collection).find(*args, **kwargs)
-        LOGGER.debug("__FIND Result - Collection: {} | Result: {}".format(collection, result.__dict__))
         return result
 
     def find_one(self, collection: str, public_id: int, *args, **kwargs):
@@ -275,7 +285,6 @@ class DatabaseManagerMongo(DatabaseManager):
         formatted_public_id = {'public_id': public_id}
         formatted_sort = [('public_id', DatabaseManager.DESCENDING)]
         cursor_result = self.__find(collection, formatted_public_id, limit=1, sort=formatted_sort, *args, **kwargs)
-        LOGGER.debug("Find one result: {}".format(cursor_result.__dict__))
         for result in cursor_result:
             return result
         raise NoDocumentFound(collection, public_id)
@@ -353,6 +362,11 @@ class DatabaseManagerMongo(DatabaseManager):
         formatted_public_id = {'public_id': public_id}
         formatted_data = {'$set': data}
         return self.database_connector.get_collection(collection).update_one(formatted_public_id, formatted_data)
+
+    def insert_with_internal(self, collection: str, _id: int or str, data: dict):
+        formatted_id = {'_id': _id}
+        formatted_data = {'$set': data}
+        return self.database_connector.get_collection(collection).insert_one(formatted_id, formatted_data)
 
     def update_with_internal(self, collection: str, _id: int or str, data: dict):
         """update function for database elements without public id

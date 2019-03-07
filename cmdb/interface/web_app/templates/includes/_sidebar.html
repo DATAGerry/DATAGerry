@@ -17,7 +17,9 @@
                     {% for category_type in cat.get_types() %}
                         {% set current_type = exception_handler(object_manager.get_type, category_type) %}
                         {% if current_type %}
-                            <a href="/type/{{ current_type.get_public_id() }}/list/" class="list-group-item" data-parent="#{{ cat.get_name() }}"><i class="fas fa-clone"></i> {{ current_type.get_label() }}</a>
+                            <a href="/type/{{ current_type.get_public_id() }}/list/" class="list-group-item"
+                               data-parent="#{{ cat.get_name() }}"><i
+                                    class="fas fa-clone"></i> {{ current_type.get_label() }}</a>
                         {% endif %}
                     {% endfor %}
                 {% endif %}
@@ -56,7 +58,12 @@
             <div id="sidebar-categories">
                 <li class="nav-title">Categories</li>
                 <input id="category_filter" class="form-control form-control-sm" type="text" placeholder="Filter..">
-                {% set categories_root = object_manager.get_categories_by(_filter={'parent_id': {'$exists': False}}) %}
+                {% set categories_root = object_manager.get_categories_by(_filter={
+                '$or': [
+                    {'parent_id': {'$exists': False}},
+                    {'parent_id': None }
+                    ]
+                }) %}
                 {{ categorie_tree(categories_root) }}
             </div>
         </ul>
