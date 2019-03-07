@@ -8,9 +8,16 @@ import datetime
 import multiprocessing
 
 DEFAULT_LOG_DIR = os.path.join(os.path.dirname(__file__), '../../logs/')
+LOGLEVELS = {
+    "NOTSET": 0,
+    "DEBUG": 10,
+    "INFO": 20,
+    "WARNING": 30,
+    "ERROR": 40,
+    "CRITICAL": 50
+}
 
-
-def get_log_level():
+def get_log_level(minlevel=None):
     """
     loads logger configuration from config file
     will be overwrite cmdb.__MODE__
@@ -18,7 +25,21 @@ def get_log_level():
         config level
     """
     import cmdb
-    return cmdb.__MODE__
+
+    # set default loglevel to WARNING
+    loglevel = "WARNING"
+
+    # get loglevel from CMDB mode, if a correct value is set
+    if cmdb.__MODE__ in LOGLEVELS:
+        loglevel = cmdb.__MODE__
+
+    # ensure a minimum loglevel
+    if minlevel and minlevel in LOGLEVELS:
+        if LOGLEVELS.get(minlevel) < LOGLEVELS.get(loglevel):
+            loglevel = minlevel
+
+    # return loglevel
+    return loglevel
 
 
 def get_logging_conf():
@@ -40,7 +61,6 @@ def get_logging_conf():
         disable_existing_loggers=True,
         handlers={
             'console': {
-                'level': str(get_log_level()),
                 'class': 'logging.StreamHandler',
                 'formatter': 'generic'
             },
@@ -74,6 +94,11 @@ def get_logging_conf():
             }
         },
         loggers={
+            "__main__": {
+                'level': str(get_log_level(minlevel="INFO")),
+                'handlers': ['console', 'file_daemon'],
+                'propagate': False
+            },
             "cmdb": {
                 'level': str(get_log_level()),
                 'handlers': ['console', 'file_daemon'],
