@@ -4,14 +4,15 @@ All communication with the objects is controlled by this manager.
 The implementation of the manager used is always realized using the respective superclass.
 
 """
+import logging
 from cmdb.object_framework import *
 from cmdb.object_framework import CmdbObjectStatus
 from cmdb.data_storage.database_manager import PublicIDAlreadyExists
 from cmdb.utils.error import CMDBError
-from cmdb.utils import get_logger
 from cmdb.utils.helpers import timing
+from cmdb.event_management.event import Event
 
-CMDB_LOGGER = get_logger()
+CMDB_LOGGER = logging.getLogger(__name__)
 
 
 class CmdbManagerBase:
@@ -63,7 +64,7 @@ class CmdbManagerBase:
             public_id=public_id
         )
 
-    def _get_all(self, collection: str, sort='public_id', **requirements: dict) -> list:
+    def _get_all(self, collection: str, sort='public_id', limit=0, **requirements: dict) -> list:
         """get all documents from the database which have the passing requirements
 
         Args:
@@ -79,7 +80,7 @@ class CmdbManagerBase:
         formatted_sort = [(sort, self.dbm.DESCENDING)]
         for k, req in requirements.items():
             requirements_filter.update({k: req})
-        return self.dbm.find_all(collection=collection, filter=requirements_filter, sort=formatted_sort)
+        return self.dbm.find_all(collection=collection, limit=limit, filter=requirements_filter, sort=formatted_sort)
 
     def _insert(self, collection: str, data: dict) -> (int, None):
         """insert document/object into database
@@ -132,12 +133,13 @@ class CmdbManagerBase:
 
 
 class CmdbObjectManager(CmdbManagerBase):
-    def __init__(self, database_manager=None):
+    def __init__(self, database_manager=None, event_queue=None):
         """
 
         Args:
             database_manager:
         """
+        self._event_queue = event_queue
         super(CmdbObjectManager, self).__init__(database_manager)
 
     def is_ready(self) -> bool:
@@ -201,6 +203,10 @@ class CmdbObjectManager(CmdbManagerBase):
                 collection=CmdbObject.COLLECTION,
                 data=new_object.to_database()
             )
+            # create cmdb.core.object.added event
+            if self._event_queue:
+                event = Event("cmdb.core.object.added", {"id": new_object.get_public_id})
+                self._event_queue.put(event)
         except (CMDBError, PublicIDAlreadyExists) as e:
             raise ObjectInsertError(e)
         return ack
@@ -228,6 +234,10 @@ class CmdbObjectManager(CmdbManagerBase):
             public_id=update_object.get_public_id(),
             data=update_object.to_database()
         )
+        # create cmdb.core.object.updated event
+        if self._event_queue:
+            event = Event("cmdb.core.object.updated", {"id": update_object.get_public_id()})
+            self._event_queue.put(event)
         return ack
 
     def update_many_objects(self, objects: list):
@@ -284,6 +294,10 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def delete_object(self, public_id: int):
         ack = self._delete(CmdbObject.COLLECTION, public_id)
+        # create cmdb.core.object.deleted event
+        if self._event_queue:
+            event = Event("cmdb.core.object.deleted", {"id": public_id})
+            self._event_queue.put(event)
         return ack
 
     def delete_many_objects(self, public_ids: list):
@@ -332,18 +346,58 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = []
         cats = self.dbm.find_all(collection=CmdbTypeCategory.COLLECTION, sort=[('public_id', 1)])
         for cat_obj in cats:
-            ack.append(CmdbTypeCategory(**cat_obj))
+            try:
+                ack.append(CmdbTypeCategory(**cat_obj))
+            except CMDBError as e:
+                CMDB_LOGGER.debug("Error while parsing Category")
+                CMDB_LOGGER.debug(e.message)
         return ack
 
+    def get_categories_by(self, _filter: dict) -> list:
+        """
+        get all categories by requirements
+        """
+        ack = []
+        query_filter = _filter
+        root_categories = self.dbm.find_all(collection=CmdbTypeCategory.COLLECTION, filter=query_filter)
+        CMDB_LOGGER.debug("__FIND: categories {}".format(root_categories))
+        for cat_obj in root_categories:
+            try:
+                ack.append(CmdbTypeCategory(**cat_obj))
+            except CMDBError as e:
+                CMDB_LOGGER.debug("Error while parsing Category")
+                CMDB_LOGGER.debug(e.message)
+        return ack
+
+    def _get_category_nodes(self, parent_list: list) -> dict:
+        edge = {}
+        for cat_child in parent_list:
+            next_children = self.get_categories_by(_filter={'parent_id': cat_child.get_public_id()})
+            if len(next_children) > 0:
+                edge.update({
+                    'object': cat_child,
+                    'children': self._get_category_nodes(next_children)
+                })
+            else:
+                edge.update({
+                    'object': cat_child,
+                    'children': None
+                })
+        return edge
+
+    def get_category_tree(self) -> dict:
+        tree = {}
+        root_categories = self.get_categories_by(_filter={'parent_id': {'$exists': False}})
+        if len(root_categories) > 0:
+            tree.update({
+                'object': "root",
+                'children': self._get_category_nodes(root_categories)
+            })
+        else:
+            raise NoRootCategories()
+        return tree
+
     def get_category(self, public_id: int):
-        """
-        TODO: UPDATE TO NEW STRUCTURE
-        Args:
-            public_id:
-
-        Returns:
-
-        """
         return CmdbTypeCategory(**self.dbm.find_one(
             collection=CmdbTypeCategory.COLLECTION,
             public_id=public_id)
@@ -357,7 +411,7 @@ class CmdbObjectManager(CmdbManagerBase):
         update_type = CmdbTypeCategory(**data)
         ack = self.dbm.update(
             collection=CmdbTypeCategory.COLLECTION,
-            public_id=CmdbTypeCategory.get_public_id(),
+            public_id=update_type.get_public_id(),
             data=update_type.to_database()
         )
         return ack
@@ -407,3 +461,8 @@ class ObjectInsertError(CMDBError):
 class ObjectUpdateError(CMDBError):
     def __init__(self, msg):
         self.message = 'Something went wrong during update: {}'.format(msg)
+
+
+class NoRootCategories(CMDBError):
+    def __init__(self):
+        self.message = 'No root categories exists'

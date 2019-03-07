@@ -9,96 +9,105 @@
 {% block content %}
     <div id="dashboard" class="content">
         <div class="container-fluid">
-            <h1>Dashboard</h1>
-            <hr/>
             <div class="row">
-                <div class="col-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-3">
-                                    <i class="fas fa-globe fa-5x"></i>
-                                </div>
-                                <div class="col-9 text-right">
-                                    <p class="card-text">Total count of objects:</p>
-                            <h4 class="card-title">{{ all_objects_count }}</h4>
+                <div class="col-12">
+                    <h1>Dashboard</h1>
+                    <hr/>
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <i class="fas fa-globe fa-5x"></i>
+                                        </div>
+                                        <div class="col-9 text-right">
+                                            <p class="card-text">Total count of objects:</p>
+                                            <h4 class="card-title">{{ all_objects_count }}</h4>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
-
                         </div>
-                    </div>
-                </div>
-                <div class="col-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-3">
-                                    <i class="fas fa-file-invoice fa-5x"></i>
-                                </div>
-                                <div class="col-9 text-right">
-                                    <p class="card-text">Total count of types:</p>
-                            <h4 class="card-title">{{ all_types_count }}</h4>
+                        <div class="col-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <i class="fas fa-file-invoice fa-5x"></i>
+                                        </div>
+                                        <div class="col-9 text-right">
+                                            <p class="card-text">Total count of types:</p>
+                                            <h4 class="card-title">{{ all_types_count }}</h4>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
-
                         </div>
-                    </div>
-                </div>
-                <div class="col-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-3">
-                                    <i class="fas fa-user-tag fa-5x"></i>
-                                </div>
-                                <div class="col-9 text-right">
-                                    <p class="card-text">Your items:</p>
-                            <h4 class="card-title">{{ all_user_objects_count }}</h4>
+                        <div class="col-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <i class="fas fa-user-tag fa-5x"></i>
+                                        </div>
+                                        <div class="col-9 text-right">
+                                            <p class="card-text">Your items:</p>
+                                            <h4 class="card-title">{{ all_user_objects_count }}</h4>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
-
                         </div>
                     </div>
-                </div>
-            </div>
-            <h2 class="mt-3">Newest objects</h2>
-            <hr/>
-            <table data-order='[[ 6, "desc" ]]' class="data_table table">
-                <thead class="thead">
-                <tr>
-                    <th scope="col">Active</th>
-                    <th scope="col">Public ID</th>
-                    <th scope="col">Type</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Version</th>
-                    <th scope="col">Author</th>
-                    <th scope="col">Creation time</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for newest_obj in new_objects %}
-                    <tr>
-                        <td>{{ newest_obj.active | label_active }}</td>
-                        <td><a href="/object/{{ newest_obj.public_id }}">{{ newest_obj.public_id }}</a></td>
-                        <td>{{ object_manager.get_type(newest_obj.type_id).get_name() }}</td>
-                        <td>{% set current_status = object_manager.get_status(newest_obj.status) %}
-                            {% if current_status %}
-                                <span class="badge"
-                                      style="background-color: {{ current_status.get_color() }}">{{ current_status.get_label() }}</span>
+                    <div class="row">
+                        <div class="col-12">
+                            {% if new_objects|length > 1 %}
+                                <h2 class="mt-3">Newest objects</h2>
+                                <hr/>
+                                <table data-order='[[ 5, "desc" ]]' class="data_table table">
+                                    <thead class="thead">
+                                    <tr>
+                                        <th scope="col">Active</th>
+                                        <th scope="col">Public ID</th>
+                                        <th scope="col">Type</th>
+                                        <th scope="col">Version</th>
+                                        <th scope="col">Author</th>
+                                        <th scope="col">Creation time</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for newest_obj in new_objects %}
+                                        <tr>
+                                            <td>{{ newest_obj.active | label_active }}</td>
+                                            <td>
+                                                <a href="/object/{{ newest_obj.public_id }}">{{ newest_obj.public_id }}</a>
+                                            </td>
+                                            <td>{{ object_manager.get_type(newest_obj.type_id).get_name() }}</td>
+                                            <td>{{ newest_obj.version }}</td>
+                                            <td>{{ user_manager.get_user(newest_obj.author_id).get_name() }}</td>
+                                            <td>{{ newest_obj.creation_time }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
                             {% endif %}
-                        </td>
-                        <td>{{ newest_obj.version }}</td>
-                        <td>{{ user_manager.get_user(newest_obj.author_id).get_name() }}</td>
-                        <td>{{ newest_obj.creation_time }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
             {{ super() }}
         </div>
     </div>
 {% endblock %}
 {% if mode == 'DEBUG' %}
     {% block debug %}
+        <pre>
+        {{ new_objects }}
+        </pre>
     {% endblock %}
 {% endif %}

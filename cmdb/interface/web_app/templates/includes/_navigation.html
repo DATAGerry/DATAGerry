@@ -107,33 +107,62 @@
                 </a>
             </div>
         </li>
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
-               aria-expanded="false">
-                <i class="fas fa-cogs"></i>
-            </a>
-            <div class="dropdown-menu dropdown-menu-right">
-                <div class="dropdown-header">App Settings</div>
-                <a href="/settings/" class="dropdown-item">
-                    <i class="fa fa-info"></i> Default
+        {% if user_manager.user_group_has_right(current_user, 'base.framework.global') %}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+                   aria-expanded="false">
+                    <i class="fas fa-bezier-curve"></i>
                 </a>
-                <a href="/settings/frontend/" class="dropdown-item">
-                    <i class="fa fa-font"></i> Frontend
+                <div class="dropdown-menu dropdown-menu-right">
+                    <div class="dropdown-header">Framework</div>
+                    <a href="/framework/" class="dropdown-item">
+                        <i class="fa fa-info"></i> Default
+                    </a>
+                    <a href="/framework/types/" class="dropdown-item">
+                        <i class="fas fa-layer-group"></i> Types
+                    </a>
+                    <a href="/framework/categories/" class="dropdown-item">
+                        <i class="fas fa-boxes"></i> Categories
+                    </a>
+                    <a href="/framework/collections/" class="dropdown-item">
+                        <i class="far fa-object-ungroup"></i> Collections
+                    </a>
+                    <div class="dropdown-header">Export</div>
+                    <a href="/framework/export/services/" class="dropdown-item">
+                        <i class="fas fa-sync"></i> Services
+                    </a>
+                </div>
+            </li>
+        {% endif %}
+        {% if user_manager.user_group_has_right(current_user, 'base.system.global') %}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+                   aria-expanded="false">
+                    <i class="fas fa-cogs"></i>
                 </a>
-                <a href="/settings/security/" class="dropdown-item">
-                    <i class="fas fa-user-secret"></i> Security
-                </a>
-                <div class="dropdown-header">User-Management</div>
-                <a href="/settings/user-management/" class="dropdown-item">
-                    <i class="fa fa-users" aria-hidden="true"></i> Management
-                </a>
-                <a href="/settings/user-management/groups/" class="dropdown-item">
-                    <i class="fas fa-user-friends" aria-hidden="true"></i> Groups
-                </a>
-                <a href="/settings/user-management/rights/" class="dropdown-item">
-                    <i class="fas fa-sitemap" aria-hidden="true"></i> Rights
-                </a>
-            </div>
-        </li>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <div class="dropdown-header">App Settings</div>
+                    <a href="/settings/" class="dropdown-item">
+                        <i class="fa fa-info"></i> Default
+                    </a>
+                    <a href="/settings/frontend/" class="dropdown-item">
+                        <i class="fa fa-font"></i> Frontend
+                    </a>
+                    <a href="/settings/security/" class="dropdown-item">
+                        <i class="fas fa-user-secret"></i> Security
+                    </a>
+                    <div class="dropdown-header">User-Management</div>
+                    <a href="/settings/user-management/" class="dropdown-item">
+                        <i class="fa fa-users" aria-hidden="true"></i> Management
+                    </a>
+                    <a href="/settings/user-management/groups/" class="dropdown-item">
+                        <i class="fas fa-user-friends" aria-hidden="true"></i> Groups
+                    </a>
+                    <a href="/settings/user-management/rights/" class="dropdown-item">
+                        <i class="fas fa-sitemap" aria-hidden="true"></i> Rights
+                    </a>
+                </div>
+            </li>
+        {% endif %}
     </ul>
 </nav>

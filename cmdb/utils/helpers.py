@@ -41,12 +41,12 @@ def timing(msg=None):
     def _timing(f):
         @wraps(f)
         def wrap(*args, **kwargs):
-            from cmdb.utils import get_logger
+            import logging
             import time
             time1 = time.clock()
             ret = f(*args)
             time2 = time.clock()
-            get_logger().debug('{} {:.3f}ms'.format(msg, (time2 - time1) * 1000.0))
+            logging.getLogger(__name__).debug('{} {:.3f}ms'.format(msg, (time2 - time1) * 1000.0))
             return ret
 
         return wrap

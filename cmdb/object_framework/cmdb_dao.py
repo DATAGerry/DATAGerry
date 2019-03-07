@@ -1,10 +1,10 @@
 """
 Data access object for all core objects that are to be stored in the database.
 """
+import logging
 from cmdb.utils.error import CMDBError
-from cmdb.utils import get_logger
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 class CmdbDAO:
@@ -29,10 +29,10 @@ class CmdbDAO:
     DAO_ASCENDING = 1
     DAO_DESCENDING = -1
     COLLECTION = 'objects.*'
-    _SUPER_INIT_KEYS = [
+    __SUPER_INIT_KEYS = [
         'public_id'
     ]
-    _SUPER_INDEX_KEYS = [
+    __SUPER_INDEX_KEYS = [
         {'keys': [('public_id', DAO_ASCENDING)], 'name': 'public_id', 'unique': True}
     ]
     IGNORED_INIT_KEYS = []
@@ -101,7 +101,7 @@ class CmdbDAO:
 
 
         """
-        init_keys = cls._SUPER_INIT_KEYS + cls.REQUIRED_INIT_KEYS
+        init_keys = cls.__SUPER_INIT_KEYS + cls.REQUIRED_INIT_KEYS
         if len(cls.IGNORED_INIT_KEYS) > 0:
             init_keys = [i for j, i in enumerate(init_keys) if j in cls.IGNORED_INIT_KEYS]
         for req_key in init_keys:

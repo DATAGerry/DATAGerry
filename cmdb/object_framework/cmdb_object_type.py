@@ -1,10 +1,10 @@
+import logging
 from cmdb.object_framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
 from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType, FieldNotFoundError
 from cmdb.utils.error import CMDBError
 from datetime import datetime
-from cmdb.utils import get_logger
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 class CmdbType(CmdbDAO):
@@ -17,14 +17,13 @@ class CmdbType(CmdbDAO):
         'active',
         'author_id',
         'creation_time',
-        'active',
         'render_meta',
+        'fields'
     ]
 
-    def __init__(self, name: str, description: str, active: bool, author_id: int, creation_time: datetime,
-                 render_meta: list, fields: list, version: str = '1.0.0', label: str = None, status: list = None,
-                 logs: dict = None,
-                 **kwargs):
+    def __init__(self, name: str, active: bool, author_id: int, creation_time: datetime,
+                 render_meta: dict, fields: list, version: str = '1.0.0', label: str = None, status: list = None,
+                 description: str = None, logs: dict = None, **kwargs):
         self.name = name
         self.label = label or self.name.title()
         self.description = description
@@ -50,20 +49,27 @@ class CmdbType(CmdbDAO):
     def get_externals(self):
         return self.render_meta['external']
 
+    def has_externals(self):
+        if len(self.get_externals()) > 0:
+            return True
+        else:
+            return False
+
     def get_external(self, name):
-        return self.render_meta['external'][name]
+        ext_data = next(ext for ext in self.render_meta['external'] if ext["name"] == name)
+        return _ExternalLink(**ext_data)
 
     def get_summaries(self):
         return self.render_meta['summary']
 
-    def get_summary(self, name):
-        for summary in self.render_meta['summary']:
-            if summary['name'] == name:
-                return summary
-        return None
+    def has_summaries(self):
+        if len(self.render_meta['summary']) > 0:
+            return True
+        return False
 
-    def get_summary_fields(self, name):
-        return self.get_summary(name)['fields']
+    def get_summary(self, name):
+        sum_data = next(sum for sum in self.render_meta['summary'] if sum["name"] == name)
+        return _Summary(**sum_data)
 
     def get_sections(self):
         return sorted(self.render_meta['sections'], key=lambda k: k['position'])
@@ -106,9 +112,87 @@ class CmdbType(CmdbDAO):
         raise FieldNotFoundError(name, self.get_name())
 
 
+class _ExternalLink:
+
+    def __init__(self, name: str, href: str, label: str = None, icon: str = None, fields: list = None):
+        self.name = name
+        self.href = href
+        self.label = label or self.name.title()
+        self.icon = icon
+        self.fields = fields or []
+
+    def has_icon(self):
+        """
+        check if external link has a icon
+        """
+        if self.icon:
+            return True
+        return False
+
+    def link_requires_fields(self):
+        """
+        the type of arguments passed to it and formats it according to the format codes defined in the string
+        checks if the href link requires field informations.
+        Examples:
+            http://example.org/{}/dynamic/ -> True
+            http://example.org/static/ -> False
+        Returns:
+            bool
+        """
+        import re
+        if re.search('\{.*?\}', self.href):
+            return True
+        return False
+
+    def has_fields(self):
+        """
+        check if external link has field definitions
+        """
+        if len(self.fields) > 0:
+            return True
+        return False
+
+    def fill_href(self, inputs):
+        """fills the href brackets with data"""
+        try:
+            self.href = self.href.format(*inputs)
+        except Exception as e:
+            raise ExternalFillError(inputs, e)
+
+
+class _Summary:
+
+    def __init__(self, name: str, label: str = None, fields: list = None, values: list = None):
+        self.name = name
+        self.label = label or self.name.title()
+        self.fields = fields or []
+        self.values = values
+
+    def has_fields(self):
+        if len(self.fields) > 0:
+            return True
+        return False
+
+
+class ExternalFillError(CMDBError):
+    """Error if href of _ExternalLink could not filled with input data"""
+
+    def __init__(self, inputs, error):
+        super().__init__()
+        self.message = 'Href link do not fit with inputs: {}, error: {}'.format(inputs, error)
+
+
 class FieldInitError(CMDBError):
     """Error if field could not be initialized"""
 
     def __init__(self, field_name):
         super().__init__()
-        self.message = 'Field {} could not be initialized: {}'.format(field_name)
+        self.message = 'Field {} could not be initialized'.format(field_name)
+
+
+class NoSummaryDefinedError(CMDBError):
+    """Error if no summary fields designed"""
+
+    def __init__(self, field_name):
+        super().__init__()
+        self.message = 'Field {} could not be initialized'.format(field_name)

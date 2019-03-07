@@ -2,12 +2,11 @@
 Example service
 
 """
+import logging
 import time
 import cmdb.process_management.service
-from cmdb.utils import get_logger
 
-LOGGER = get_logger()
-
+LOGGER = logging.getLogger(__name__)
 
 class ExampleService(cmdb.process_management.service.AbstractCmdbService):
     """Example implementation of AbstractCmdbService

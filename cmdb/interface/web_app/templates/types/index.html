@@ -23,7 +23,7 @@
                             <tr>
                                 <th scope="col">Active</th>
                                 <th scope="col">Type ID</th>
-                                <th scope="col">Title</th>
+                                <th scope="col">Label</th>
                                 <th scope="col">Description</th>
                                 <th scope="col">Author</th>
                                 <th scope="col">Number of objects</th>
@@ -35,7 +35,7 @@
                                 <tr>
                                     <td>{{ type_instance.active | label_active }}</td>
                                     <td>{{ type_instance.public_id }}</td>
-                                    <td><a href="/type/{{ type_instance.public_id }}">{{ type_instance.title }}</a></td>
+                                    <td><a href="/type/{{ type_instance.public_id }}">{{ type_instance.get_label() }}</a></td>
                                     <td>{{ type_instance.description }}</td>
                                     <td>{{ user_manager.get_user(type_instance.author_id).user_name }}</td>
                                     <td>{{ object_manager.get_objects_by_type(type_instance.public_id) | length }}</td>

@@ -1,4 +1,7 @@
+import logging
 from cmdb.utils.error import CMDBError
+
+LOGGER = logging.getLogger(__name__)
 
 GLOBAL_IDENTIFIER = 'global'
 
@@ -27,19 +30,23 @@ class BaseRight:
         'NOTSET': NOTSET,
     }
 
-    def __init__(self, level: int, name: str, label: str = None):
+    def __init__(self, level: int, name: str, label: str = None, description: str = None):
         self.level = level
         self.name = '{}.{}'.format(self.PREFIX, name)
         self.label = label or None
+        self.description = description or "No description"
 
     def get_prefix(self):
-        return self.PREFIX
+        return self.PREFIX.split('.')[-1]
 
     def get_name(self):
         return self.name
 
     def get_label(self):
-        return self.label or self.name.split('.')[-1]
+        return self.label or "{}.{}".format(self.get_prefix(), self.name.split('.')[-1])
+
+    def get_description(self):
+        return self.description
 
     @property
     def level(self):
@@ -61,20 +68,32 @@ class BaseRight:
     def get_level_name(self):
         return BaseRight._levelToName[self.level]
 
+    def __repr__(self):
+        from cmdb.utils.helpers import debug_print
+        return debug_print(self)
+
 
 class InvalidLevelRightError(CMDBError):
     def __init__(self, level):
-        self.message = 'Invalid right level - Level {} does not exist.'.format(level)
         super().__init__()
+        self.message = 'Invalid right level - Level {} does not exist.'.format(level)
 
 
 class PoorlyLevelRightError(CMDBError):
     def __init__(self, level, min_level):
+        super().__init__()
         self.message = 'The minimum level for the right has been violated. Level was {0}, expected at least {1}'.format(
             level, min_level)
 
 
 class MaxLevelRightError(CMDBError):
     def __init__(self, level, max_level):
+        super().__init__()
         self.message = 'The maximum level for the right has been violated. Level was {0}, expected at most {1}'.format(
             level, max_level)
+
+
+class NoParentPrefixError(CMDBError):
+    def __init__(self):
+        super().__init__()
+        self.message = 'Right dont has a parent prefix.'

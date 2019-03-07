@@ -1,25 +1,26 @@
+import logging
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user import User
+from cmdb.user_management.user_right import BaseRight, GLOBAL_IDENTIFIER
 from cmdb.data_storage import NoDocumentFound, DatabaseManagerMongo
 from cmdb.data_storage.database_manager import DeleteResult
-from cmdb.utils import get_logger
 from cmdb.utils.error import CMDBError
 import cmdb
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 class UserManagement:
-
     MANAGEMENT_CLASSES = {
         'GROUP_CLASSES': UserGroup,
-        'USER_CLASSES': User
+        'USER_CLASSES': User,
+        'BASE_RIGHT_CLASSES': BaseRight
     }
 
     def __init__(self, database_manager: DatabaseManagerMongo, security_manager):
         self.dbm = database_manager
         self.scm = security_manager
-        self.rights = self.__load_rights()
+        self.rights = self._load_rights()
 
     def _get_user(self, public_id: int):
         return self.dbm.find_one(collection=User.COLLECTION, public_id=public_id)
@@ -87,6 +88,14 @@ class UserManagement:
             LOGGER.debug("Group find error {}".format(e.message))
             raise GroupNotExistsError(public_id)
 
+    def update_group(self, update_group: UserGroup) -> bool:
+        try:
+            ack = self.dbm.update(collection=UserGroup.COLLECTION, public_id=update_group.get_public_id(),
+                                  data=update_group.to_database())
+        except CMDBError as e:
+            raise GroupNotNotUpdatedError(update_group.get_name(), e)
+        return ack
+
     def insert_group(self, name: str, label: str = None, rights: list = []) -> int:
         new_public_id = self.dbm.get_highest_id(collection=UserGroup.COLLECTION) + 1
         insert_group = UserGroup(
@@ -111,7 +120,7 @@ class UserManagement:
             raise GroupDeleteError(public_id)
 
     @staticmethod
-    def __load_rights():
+    def _load_rights():
         from cmdb.user_management.rights import __all__
         rights = []
         for right_list in __all__:
@@ -119,23 +128,28 @@ class UserManagement:
                 rights.append(right)
         return rights
 
-    def user_group_has_right(self, user: User, right) -> bool:
-        """
-        @deprecated
-        """
-        group = UserGroup(**self.dbm.find_one(UserGroup.COLLECTION, user.get_group()))
-        right_list = group.get_rights()
-        if len(right_list) <= 0:
-            return False
-        select_rights = []
-        for right_id in right_list:
+    def group_has_right(self, group_id: int, right_name: str) -> bool:
+        right_status = False
+        try:
+            chosen_group = self.get_group(group_id)
+        except (GroupNotExistsError, Exception):
+            return right_status
+        right_status = chosen_group.has_right(right_name)
+        if not right_status:
             try:
-                select_rights.append(self.get_right(right_id))
-            except RightNotExistsError:
-                continue
-        if right in select_rights:
-            return True
-        return False
+                # check for global right
+                parent_right = '{}.{}'.format('.'.join(right_name.split('.')[:-1]), GLOBAL_IDENTIFIER)
+                LOGGER.debug("Parent global right: {}".format(parent_right))
+                right_status = chosen_group.has_right(parent_right)
+            except Exception:
+                return False
+        return right_status
+
+    def user_group_has_right(self, user: User, right_name: str) -> bool:
+        try:
+            return self.group_has_right(user.get_group(), right_name)
+        except (CMDBError, Exception):
+            return False
 
 
 class GroupDeleteError(CMDBError):
@@ -163,6 +177,12 @@ class GroupNotExistsError(CMDBError):
         self.message = "The following group does not exists: {}".format(name)
 
 
+class GroupNotNotUpdatedError(CMDBError):
+    def __init__(self, name, error):
+        super().__init__()
+        self.message = "The following group could not be updated: {} | error: {}".format(name, error.message)
+
+
 class RightNotExistsError(CMDBError):
     def __init__(self, name):
         super().__init__()
@@ -183,17 +203,20 @@ class UserInsertError(CMDBError):
 
 class WrongTypeException(Exception):
     """Exception if input_type was wrong"""
+
     def __init__(self):
         super().__init__()
 
 
 class WrongPassException(Exception):
     """Exception if wrong password"""
+
     def __init__(self):
         super().__init__()
 
 
 class UserHasNotRequiredRight(Exception):
     """Exception if user has not the right for an action"""
+
     def __init__(self, user, right):
         self.message = "The user {} has not the required right level {} to view this page".format(user.user_name, right)

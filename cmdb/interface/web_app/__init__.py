@@ -1,13 +1,12 @@
 """
 Init module for web routes
 """
-
+import logging
 from flask import Flask
 from cmdb.interface.cmdb_holder import CmdbManagerHolder
 from cmdb.interface.config import app_config
-from cmdb.utils import get_logger
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 MANAGER_HOLDER = CmdbManagerHolder()
 app = None
 
@@ -16,7 +15,7 @@ def create_web_app(event_queue):
     import cmdb
     global app
     app = Flask(__name__)
-    if cmdb.__MODE__:
+    if cmdb.__MODE__ == 'DEBUG':
         app.config.from_object(app_config['development'])
     else:
         app.config.from_object(app_config['production'])
@@ -44,7 +43,8 @@ def create_web_app(event_queue):
     )
 
     object_manager = CmdbObjectManager(
-        database_manager=database_manager
+        database_manager=database_manager,
+        event_queue=event_queue
     )
 
     security_manager = SecurityManager(database_manager)
@@ -82,9 +82,10 @@ def create_web_app(event_queue):
 
 
 def register_filters(app):
-    from cmdb.interface.web_app.filters import label_active, display_icon
+    from cmdb.interface.web_app.filters import label_active, display_icon, cmdb_exception_handler
     app.jinja_env.filters['label_active'] = label_active
     app.jinja_env.filters['display_icon'] = display_icon
+    app.jinja_env.filters['exception_handler'] = cmdb_exception_handler
 
 
 def register_blueprints(app):
@@ -95,6 +96,7 @@ def register_blueprints(app):
     from cmdb.interface.web_app.user_routes import user_pages
     from cmdb.interface.web_app.object_routes import object_pages
     from cmdb.interface.web_app.type_routes import type_pages
+    from cmdb.interface.web_app.framework_routes import framework_pages
 
     app.register_blueprint(index_pages)
     app.register_blueprint(static_pages)
@@ -103,18 +105,21 @@ def register_blueprints(app):
     app.register_blueprint(user_pages)
     app.register_blueprint(object_pages)
     app.register_blueprint(type_pages)
+    app.register_blueprint(framework_pages)
 
 
 def register_context_processors(app):
-    from cmdb.interface.web_app.context_injector import inject_sidebar, inject_sidebar_hidden, inject_current_user, \
-        inject_object_manager, inject_modus, inject_user_names, inject_all_types
+    from cmdb.interface.web_app.context_injector import inject_sidebar_hidden, inject_current_user, \
+        inject_object_manager, inject_modus, inject_user_names, inject_all_types, inject_user_manager, \
+        inject_exception_handler
     app.context_processor(inject_modus)
-    app.context_processor(inject_sidebar)
     app.context_processor(inject_sidebar_hidden)
     app.context_processor(inject_current_user)
+    app.context_processor(inject_user_manager)
     app.context_processor(inject_object_manager)
     app.context_processor(inject_user_names)
     app.context_processor(inject_all_types)
+    app.context_processor(inject_exception_handler)
 
 
 def register_error_pages(app):

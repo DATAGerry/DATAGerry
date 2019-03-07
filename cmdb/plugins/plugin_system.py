@@ -1,9 +1,9 @@
+import logging
 import importlib
 import types
-from cmdb.utils import get_logger
 from cmdb.utils.error import CMDBError
 
-CMDB_LOGGER = get_logger()
+CMDB_LOGGER = logging.getLogger(__name__)
 
 POSSIBLE_PLUGIN_TYPES = [
     'auth'

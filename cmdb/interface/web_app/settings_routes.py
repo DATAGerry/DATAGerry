@@ -1,14 +1,14 @@
 """
 Admin/Settings Pages
 """
-from cmdb.utils import get_logger
+import logging
 from cmdb.utils.error import CMDBError
 from cmdb.interface.cmdb_holder import CmdbManagerHolder
 from flask import Blueprint, render_template, jsonify, current_app
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from flask import request, abort
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 settings_pages = Blueprint('settings_pages', __name__, template_folder='templates', url_prefix='/settings')
 default_breadcrumb_root(settings_pages, '.settings_pages')
@@ -81,15 +81,47 @@ def user_management_add_user():
 @settings_pages.route('/user-management/groups/', methods=['GET'])
 @register_breadcrumb(settings_pages, '.user_management.groups', 'Groups')
 def user_management_groups():
+    """
+    TODO: IMPLEMENT EDIT GROUPS
+    """
     user_manager_instance = MANAGER_HOLDER.get_user_manager()
-    return render_template('settings/user_management/groups.html', user_manager=user_manager_instance)
+    group_list = user_manager_instance.get_all_groups()
+    right_list = user_manager_instance._load_rights()
+    return render_template('settings/user_management/groups.html', user_manager=user_manager_instance,
+                           group_list=group_list, right_list=right_list)
+
+
+@settings_pages.route('/user-management/groups/<int:public_id>/rights/', methods=['POST'])
+def user_management_group_right_change(public_id):
+
+    def _convert_to_list(form_rights: dict):
+        convert_list = []
+        for confirm_right in form_rights:
+            convert_list.append(confirm_right)
+        return convert_list
+
+    user_manager_instance = MANAGER_HOLDER.get_user_manager()
+    right_list = _convert_to_list(request.form.to_dict())
+    try:
+        choosen_group = user_manager_instance.get_group(public_id)
+        choosen_group.set_rights(right_list)
+        user_manager_instance.update_group(choosen_group)
+    except CMDBError as e:
+        return jsonify({"error": e.message})
+    return jsonify(right_list)
 
 
 @settings_pages.route('/user-management/rights/', methods=['GET'])
 @register_breadcrumb(settings_pages, '.user_management.rights', 'Rights')
 def user_management_rights():
     user_manager_instance = MANAGER_HOLDER.get_user_manager()
-    return render_template('settings/user_management/rights.html', user_manager=user_manager_instance)
+    right_list = user_manager_instance._load_rights()
+    from cmdb.user_management.user_right import GLOBAL_IDENTIFIER, BaseRight
+    security_levels = BaseRight._nameToLevel
+    global_right_ident = GLOBAL_IDENTIFIER
+    return render_template('settings/user_management/rights.html', user_manager=user_manager_instance,
+                           right_list=right_list, global_right_ident=global_right_ident,
+                           security_levels=security_levels)
 
 
 @settings_pages.route('/type-config/')

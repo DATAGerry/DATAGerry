@@ -1,8 +1,8 @@
+import logging
 from flask import Blueprint, request, render_template, make_response, url_for, redirect
-from cmdb.utils import get_logger
 from cmdb.interface.web_app import MANAGER_HOLDER
 
-CMDB_LOGGER = get_logger()
+CMDB_LOGGER = logging.getLogger(__name__)
 
 auth_pages = Blueprint('auth_pages', __name__, template_folder='templates')
 

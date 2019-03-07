@@ -1,10 +1,10 @@
+import logging
 from cmdb.object_framework.cmdb_dao import CmdbDAO
 from cmdb.object_framework.cmdb_log import CmdbLog
 from cmdb.object_framework.cmdb_object_field_type import FieldNotFoundError
 from cmdb.utils.error import CMDBError
-from cmdb.utils import get_logger
 
-CMDB_LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 class CmdbObject(CmdbDAO):
@@ -20,7 +20,8 @@ class CmdbObject(CmdbDAO):
         'fields'
     ]
 
-    def __init__(self, type_id, status, creation_time, author_id, last_edit_time, active, fields, logs=[],
+    def __init__(self, type_id, creation_time, author_id, active, fields, last_edit_time=None, logs=[],
+                 status: int = None,
                  views: int = 0, version: str = '1.0.0', **kwargs):
         """init of object
 
@@ -95,7 +96,7 @@ class CmdbObject(CmdbDAO):
             continue
         raise FieldNotFoundError
 
-    def get_value(self, field) -> str:
+    def get_value(self, field) -> (str, None):
         """get value of an field
 
         Args:
@@ -108,7 +109,7 @@ class CmdbObject(CmdbDAO):
             if f['name'] == field:
                 return f['value']
             continue
-        return None
+        raise NoFoundFieldValueError(field)
 
     def get_values(self, fields: list) -> list:
         list_of_values = []
@@ -155,6 +156,18 @@ class TypeNotSetError(CMDBError):
     def __init__(self, public_id):
         super().__init__()
         self.message = 'The object (ID: {}) is not connected with a input_type'.format(public_id)
+
+
+class NoFoundFieldValueError(CMDBError):
+    """
+    Error when field does not exists
+    """
+
+    def __init__(self, field_name):
+        self.message = "Field value does not exists {}".format(field_name)
+        super(CMDBError, self).__init__(self.message)
+
+
 
 
 class NoLinksAvailableError(CMDBError):

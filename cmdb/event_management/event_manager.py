@@ -2,15 +2,15 @@
 Event Management
 Module for sending/receiving events between CMDB processes
 """
+import logging
 import queue
 import multiprocessing
 import threading
 import pika
 from cmdb.event_management.event import Event
 from cmdb.utils.system_reader import get_system_config_reader
-from cmdb.utils import get_logger
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 class EventManager:

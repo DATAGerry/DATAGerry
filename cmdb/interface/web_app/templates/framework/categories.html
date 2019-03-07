@@ -1,0 +1,79 @@
+{% extends 'layout.html' %}
+{% block title %}Framework | Categories{% endblock %}
+{% block navigation %}
+    {% include 'includes/_navigation.html' %}
+{% endblock %}
+{% block breadcrumb %}
+    {% include 'includes/_breadcrumb.html' %}
+{% endblock %}
+{% block content %}
+    {# TODO: Add category #}
+    {# TODO: Category tree #}
+    {# TODO: Type select inside table #}
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-10">
+                    <h1>Categories</h1>
+                    <hr/>
+                    {% if all_categories|length > 0 %}
+                        <table data-order='[[ 0, "asc" ]]' class="table data_table">
+                        <thead class="thead thead-light">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Parent</th>
+                            <th scope="col">Icon</th>
+                            <th scope="col">Label</th>
+                            <th scope="col">Name</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for category_element in all_categories %}
+                            <tr>
+                                <th class="text-uppercase" scope="row">{{ category_element.get_public_id() }}</th>
+                                {% if category_element.has_parent() %}
+                                    <td>{{ object_manager.get_category(category_element.get_parent()).get_label() }}</td>
+                                {% else %}
+                                    <td class="text-center">---</td>
+                                {% endif %}
+                                <td><i class="{{ category_element.get_icon() }}"></i></td>
+                                <td>{{ category_element.get_label() }}</td>
+                                <td>{{ category_element.get_name() }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                        <div class="alert alert-danger" role="alert">
+                            No categories have been defined yet.
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-2">
+                    {% set active_page = 'categories' %}
+                    {% include 'framework/_sidebar.html' %}
+                </div>
+            </div>
+            {{ super() }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock %}
+
+{% if mode == 'DEBUG' %}
+    {% block debug %}
+        <h2>All categories:</h2>
+        <hr>
+        <pre>
+            {{ all_categories }}
+        </pre>
+        <h2>Category tree:</h2>
+        <hr>
+        <pre>
+            {{ category_tree }}
+        </pre>
+    {% endblock %}
+{% endif %}

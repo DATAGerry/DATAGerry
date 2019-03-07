@@ -1,16 +1,17 @@
 """
 Server module for web-based services
 """
+import logging
 import multiprocessing
 from cmdb import __MODE__
 import cmdb.process_management.service
 from cmdb.interface.rest_api import create_rest_api
 from cmdb.interface.web_app import create_web_app
 from cmdb.utils.system_reader import get_system_config_reader
-from cmdb.utils.logger import get_logger, DEFAULT_LOG_DIR, DEFAULT_FILE_EXTENSION
+from cmdb.utils.logger import get_logging_conf
 from gunicorn.app.base import BaseApplication
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
@@ -55,46 +56,6 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
 class HTTPServer(BaseApplication):
     """Basic server main_application"""
 
-    CONFIG_DEFAULTS = dict(
-        version=1,
-        disable_existing_loggers=False,
-
-        loggers={
-            "gunicorn.error": {
-                "level": "INFO",
-                "handlers": ["error"],
-                "propagate": True,
-                "qualname": "gunicorn.error"
-            },
-
-            "gunicorn.access": {
-                "level": "INFO",
-                "handlers": ["access"],
-                "propagate": True,
-                "qualname": "gunicorn.access"
-            }
-        },
-        handlers={
-            "error": {
-                "class": "logging.FileHandler",
-                "formatter": "generic",
-                "filename": DEFAULT_LOG_DIR + "webserver.error." + DEFAULT_FILE_EXTENSION
-            },
-            "access": {
-                "class": "logging.FileHandler",
-                "formatter": "generic",
-                "filename": DEFAULT_LOG_DIR + "webserver.access." + DEFAULT_FILE_EXTENSION
-            }
-        },
-        formatters={
-            "generic": {
-                "format": "[%(asctime)s] [%(levelname)-8s] --- %(message)s (%(filename)s)",
-                "datefmt": "%Y-%m-%d %H:%M:%S",
-                "class": "logging.Formatter"
-            }
-        }
-    )
-
     def __init__(self, app, options=None):
         self.options = options or {}
         if 'host' in self.options and 'port' in self.options:
@@ -102,7 +63,7 @@ class HTTPServer(BaseApplication):
         if 'workers' not in self.options:
             self.options['workers'] = HTTPServer.number_of_workers()
         self.options['worker_class'] = 'sync'
-        self.options['logconfig_dict'] = HTTPServer.CONFIG_DEFAULTS
+        self.options['logconfig_dict'] = get_logging_conf()
         self.options['timeout'] = 2
         self.options['daemon'] = True
         if __MODE__ == 'DEBUG' or 'TESTING':

@@ -1,20 +1,19 @@
+import logging
 from cmdb.utils.interface_wraps import login_required
 from cmdb.object_framework.cmdb_dao import CmdbDAO
 from cmdb.object_framework.cmdb_object_field_type import FieldNotFoundError
 from cmdb.object_framework.cmdb_object_manager import ObjectInsertError, ObjectUpdateError
 from cmdb.object_framework.cmdb_object import CmdbObject
 from cmdb.object_framework.cmdb_log import CmdbLog
-from cmdb.utils import get_logger
 from cmdb.utils.error import CMDBError
 from flask import Blueprint, render_template, request, abort
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from cmdb.interface.web_app import MANAGER_HOLDER
-from cmdb.object_framework import CmdbRender
-from cmdb.event_management.event import Event
+from cmdb.object_framework import CmdbParser
 import datetime
 import json
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 object_pages = Blueprint('object_pages', __name__, template_folder='templates', url_prefix='/object')
 default_breadcrumb_root(object_pages, '.object_pages')
@@ -28,10 +27,6 @@ obm = MANAGER_HOLDER.get_object_manager()
 @login_required
 def list_page():
     uum = MANAGER_HOLDER.get_user_manager()
-    # ToDo: event sending does not make sense here, is just for testing
-    evm = MANAGER_HOLDER.get_event_queue()
-    event = Event("cmdb.core.object.listed", {})
-    evm.put(event)
     all_objects = obm.get_all_objects()
     return render_template('objects/list.html', object_manager=obm, user_manager=uum, all_objects=all_objects)
 
@@ -51,7 +46,7 @@ def add_new_page(type_id):
     except (CMDBError, Exception):
         status_list = []
 
-    render = CmdbRender(type_instance=object_type, mode=CmdbRender.ADD_MODE)
+    render = CmdbParser(type_instance=object_type, mode=CmdbParser.ADD_MODE)
     return render_template('objects/add.html', render=render, status_list=status_list)
 
 
@@ -135,7 +130,7 @@ def view_page(public_id):
     author_name = usm.get_user(view_object.author_id).get_name()
     object_base = ssm.encode_object_base_64(view_object.get_all_fields())
 
-    render = CmdbRender(view_type, view_object)
+    render = CmdbParser(view_type, view_object)
     references = obm.get_object_references(public_id)
     LOGGER.debug("TSET")
     return render_template('objects/view.html',
@@ -160,7 +155,7 @@ def edit_page_get(public_id):
     author_name = usm.get_user(view_object.author_id).get_name()
     object_base = ssm.encode_object_base_64(view_object.get_all_fields())
 
-    render = CmdbRender(view_type, view_object, mode=CmdbRender.EDIT_MODE)
+    render = CmdbParser(view_type, view_object, mode=CmdbParser.EDIT_MODE)
 
     return render_template('objects/edit.html',
                            object_base=object_base,

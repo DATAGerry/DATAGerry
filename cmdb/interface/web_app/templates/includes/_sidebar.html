@@ -1,3 +1,31 @@
+{% macro categorie_tree(categorie_root) %}
+    {# TODO: Sidebar type output #}
+    <div class="list-group panel">
+        {% for cat in categorie_root recursive %}
+            {% set category_childs = object_manager.get_categories_by(_filter={'parent_id': cat.get_public_id() }) %}
+            <a href="#{{ cat.get_name() }}" class="list-group-item collapsed" data-toggle="collapse"
+               data-parent="#sidebar-categories"
+               aria-expanded="false">
+                <i class="{% if cat.has_icon() %}{{ cat.get_icon() }}{% else %}far fa-folder-open{% endif %}"></i>
+                <span class="hidden-sm-down">{{ cat.get_label() }}</span>
+            </a>
+            <div class="collapse" id="{{ cat.get_name() }}">
+                {% if category_childs | length > 0 %}
+                    {{ loop(category_childs) }}
+                {% endif %}
+                {% if cat.has_types() %}
+                    {% for category_type in cat.get_types() %}
+                        {% set current_type = exception_handler(object_manager.get_type, category_type) %}
+                        {% if current_type %}
+                            <a href="/type/{{ current_type.get_public_id() }}/list/" class="list-group-item" data-parent="#{{ cat.get_name() }}"><i class="fas fa-clone"></i> {{ current_type.get_label() }}</a>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+{% endmacro %}
 <div id="sidebar">
     <nav class="sidebar-nav">
         <ul class="nav">
@@ -25,42 +53,11 @@
                 <a class="nav-link" href="/collection/"><i class="far fa-object-ungroup"></i></i>
                     Collections</a>
             </li>
-            <div class="sidebar-categories">
+            <div id="sidebar-categories">
                 <li class="nav-title">Categories</li>
                 <input id="category_filter" class="form-control form-control-sm" type="text" placeholder="Filter..">
-                {% for cats in sidebar() recursive %}
-                    {% if cats.has_children() %}
-                        <li class="nav-item nav-dropdown">
-                            <a href="#" class="nav-link nav-dropdown-toggle">
-                                <i class="{{ cats.get_icon() | display_icon }}"></i>{{ cats.get_label() }} <i
-                                    class="fa fa-caret-left"></i>
-                            </a>
-                            <ul class="nav-dropdown-items">
-                                {{ loop(cats.get_children()) }}
-                            </ul>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="{{ cats.get_icon() | display_icon }}"></i> {{ cats.get_label() }}
-                            </a>
-                        </li>
-                    {% endif %}
-                    {% if cats.has_types() %}
-                        {% for cat_type_id in cats.get_types() %}
-                            {% set current_sidebar_type = object_manager.get_type(cat_type_id) %}
-                            {% if current_sidebar_type %}
-                            <li class="nav-item">
-                                <a href="/type/{{ current_sidebar_type.get_public_id() }}" class="nav-link">
-                                    <i class="line-icon-notebook"></i> {{ current_sidebar_type.get_label() }}
-                                    <span class="badge badge-primary float-right m-1">{{ injected_object_manager().get_objects_by_type(cat_type_id) | length }}</span>
-                                </a>
-                            </li>
-                            {% endif %}
-                        {% endfor %}
-
-                    {% endif %}
-                {% endfor %}
+                {% set categories_root = object_manager.get_categories_by(_filter={'parent_id': {'$exists': False}}) %}
+                {{ categorie_tree(categories_root) }}
             </div>
         </ul>
     </nav>

@@ -21,12 +21,12 @@
                                     {% if view_object.status %}
                                         <span class="badge badge-primary float-right mr-1">{{ view_object.status }}</span>{% endif %}
                                 </h5>
-                                {% if view_type.render_meta['summary']|length > 1 %}
+                                {% if render.has_summary() %}
                                     <div class="card-body">
                                         <table class="table table-sm">
                                             <tbody>
                                             {% for summary in view_type.render_meta['summary'] %}
-                                                <tr>
+                                                <tr name="{{ summary['name'] }}">
                                                     <th{% if loop.first %} class="border-top-0" {% endif %}scope="row">
                                                         <b>{{ summary['label'] }}:</b></th>
                                                     <td{% if loop.first %} class="border-top-0" {% endif %}>
@@ -50,24 +50,22 @@
                                         External links
                                     </h5>
                                     <div class="card-body">
-                                        {% if view_type.render_meta['external'] | length > 0 %}
-                                            <table class="table table-sm">
-                                                <tbody>
-                                                {% for ext_link in view_type.render_meta['external'] %}
-                                                    <tr>
-                                                        <th{% if loop.first %}
-                                                            class="border-top-0" {% endif %}scope="row">
-                                                            <i class="{{ ext_link['icon'] }}"></i></th>
-                                                        <td{% if loop.first %} class="border-top-0" {% endif %}>
-                                                            <a href="{{ ext_link['href'].format(view_object.get_values(*ext_link['fields'])) }}"
-                                                               target="_blank">{{ ext_link['label'] }}
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                {% endfor %}
-                                                </tbody>
-                                            </table>
-                                        {% endif %}
+                                        <table class="table table-sm">
+                                            <tbody>
+                                            {% for ext_link in view_type.render_meta['external'] %}
+                                                <tr>
+                                                    <th{% if loop.first %}
+                                                        class="border-top-0" {% endif %}scope="row">
+                                                        <i class="{{ ext_link['icon'] }}"></i></th>
+                                                    <td{% if loop.first %} class="border-top-0" {% endif %}>
+                                                        <a href="{{ ext_link['href'].format(view_object.get_values(*ext_link['fields'])) }}"
+                                                           target="_blank">{{ ext_link['label'] }}
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -78,7 +76,6 @@
                             <div class="card">
                                 <h5 class="card-header">Content</h5>
                                 <div class="card-body">
-
                                     {{ render_object(render) }}
                                 </div>
                             </div>

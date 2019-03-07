@@ -1,3 +1,6 @@
+from types import FunctionType
+
+
 def label_active(s):
     from flask import Markup
     if bool(s):
@@ -11,3 +14,11 @@ def display_icon(icon):
         return icon
     else:
         return 'line-icon-folder'
+
+
+def cmdb_exception_handler(handling: FunctionType):
+    from cmdb.utils.error import CMDBError
+    try:
+        return handling()
+    except (CMDBError, Exception):
+        return None

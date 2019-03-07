@@ -1,14 +1,14 @@
 """
 Different wrapper functions for interface module
 """
+import logging
 from functools import wraps
 from flask import request, abort, redirect, url_for
-from cmdb.utils.logger import get_logger
 from jwcrypto.jwt import JWTExpired, JWTNotYetValid
 from jwcrypto.jws import InvalidJWSSignature, InvalidJWSObject
 from cmdb.user_management import User
 
-LOGGER = get_logger()
+LOGGER = logging.getLogger(__name__)
 
 
 def json_required(f):
