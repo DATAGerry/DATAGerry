@@ -1,6 +1,8 @@
 """
 Collection of different helper classes and functions
 """
+import re
+import importlib
 from functools import wraps
 
 
@@ -52,3 +54,17 @@ def timing(msg=None):
         return wrap
 
     return _timing
+
+
+def load_class(classname):
+    """ load and return the class with the given classname """
+    # extract class from module
+    pattern = re.compile("(.*)\.(.*)")
+    match = pattern.fullmatch(classname)
+    if match is None:
+        raise Exception("Could not load class {}".format(classname, ))
+    module_name = match.group(1)
+    class_name = match.group(2)
+    loaded_module = importlib.import_module(module_name)
+    loaded_class = getattr(loaded_module, class_name)
+    return loaded_class

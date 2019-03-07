@@ -1,5 +1,7 @@
 import jinja2
 import cmdb.object_framework
+from cmdb.utils.error import CMDBError
+from cmdb.utils.helpers import load_class
 
 class ExportJob:
 
@@ -8,6 +10,7 @@ class ExportJob:
         self.__destinations = []
         self.__exportvars = {}
         # ToDo: read data from configuration
+        # setup export variables
         exportvar_objectid = ExportVariable("objectid", "{{id}}")
         exportvar_dummy1 = ExportVariable("dummy1", "{{fields.first_name}} {{fields.last_name}}")
         exportvar_dummy2 = ExportVariable("dummy2", "{{fields.last_name}} {{id}}")
@@ -16,8 +19,20 @@ class ExportJob:
             "dummy1": exportvar_dummy1,
             "dummy2": exportvar_dummy2
         }
+        # setup sources
         self.__sources.append(ExportSource())
-        self.__destinations.append(ExportDestination(self.__exportvars))
+        # setup destinations
+        destination_parms = {
+            "ip": "192.168.0.123",
+            "user": "admin",
+            "password": "admin"
+        }
+        export_destination = ExportDestination(
+            "cmdb.exportd.exporter_base.ExternalSystemDummy", 
+            destination_parms, 
+            self.__exportvars
+        )
+        self.__destinations.append(export_destination)
 
     def execute(self):
         # get cmdb objects from all sources
@@ -84,10 +99,11 @@ class ExportSource:
 
 class ExportDestination:
 
-    def __init__(self, export_vars):
-        # ToDo: make configurable
+    def __init__(self, class_external_system, destination_parms, export_vars):
+        self.__destination_parms = destination_parms
         self.__export_vars = export_vars
-        self.__external_system = ExternalSystemDummy(self.__export_vars)
+        external_system_class = load_class(class_external_system)
+        self.__external_system = external_system_class(self.__destination_parms, self.__export_vars)
 
     def get_external_system(self):
         return self.__external_system
@@ -95,7 +111,8 @@ class ExportDestination:
 
 class ExternalSystem:
 
-    def __init__(self, export_vars):
+    def __init__(self, destination_parms, export_vars):
+        self._destination_parms = destination_parms
         self._export_vars = export_vars
 
     def prepare_export(self):
@@ -107,10 +124,17 @@ class ExternalSystem:
     def finish_export(self):
         pass
 
+
 class ExternalSystemDummy(ExternalSystem):
 
-    def __init__(self, export_vars):
-        super(ExternalSystemDummy, self).__init__(export_vars)
+    def __init__(self, destination_parms, export_vars):
+        super(ExternalSystemDummy, self).__init__(destination_parms, export_vars)
+        # init destination vars
+        self.__ip = self._destination_parms.get("ip", None)
+        self.__user = self._destination_parms.get("user", None)
+        self.__password = self._destination_parms.get("password", None)
+        if not (self.__ip and self.__user and self.__password):
+            raise ExportJobConfigException()
         # init export vars
         self.__objectid = self._export_vars.get("objectid", ExportVariable("objectid", ""))
         self.__dummy1 = self._export_vars.get("dummy1", ExportVariable("dummy1", ""))
@@ -120,6 +144,7 @@ class ExternalSystemDummy(ExternalSystem):
 
     def prepare_export(self):
         print("prepare export")
+        print("destination parms: ip={} user={} password={}".format(self.__ip, self.__user, self.__password))
 
     def add_object(self, cmdb_object):
         # print values of export variables
@@ -135,3 +160,9 @@ class ExternalSystemDummy(ExternalSystem):
 
     def finish_export(self):
         print("finish export")
+
+
+class ExportJobConfigException(CMDBError):
+    def __init__(self):
+        super().__init__()
+        self.message = 'missing parameters for ExportDestination'
