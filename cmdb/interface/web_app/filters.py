@@ -24,6 +24,14 @@ def encode_date(date):
         return date
 
 
+def eval_input(caller):
+    call = eval(caller)
+    if call is FunctionType:
+        return call()
+    else:
+        return call
+
+
 def cmdb_exception_handler(handling: FunctionType):
     from cmdb.utils.error import CMDBError
     try:

@@ -3,7 +3,7 @@ import json
 from cmdb.interface.web_app import app
 from cmdb.utils.error import CMDBError
 from cmdb.user_management.user import User
-from types import FunctionType
+from types import FunctionType, MethodType
 
 LOGGER = logging.getLogger(__name__)
 
@@ -17,6 +17,20 @@ def inject_modus():
         return __MODE__
 
     return dict(mode=modus())
+
+
+def inject_eval_function_call():
+    def call_eval(obj, param):
+        try:
+            func = eval(param, globals(), {k: getattr(obj, k) for k in dir(obj)})
+            LOGGER.debug(type(func))
+            if isinstance(func, FunctionType) or isinstance(func, MethodType):
+                return func()
+            else:
+                return func
+        except AttributeError as e:
+            return None
+    return dict(call_eval=call_eval)
 
 
 def inject_exception_handler():
