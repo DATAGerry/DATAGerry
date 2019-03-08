@@ -3,10 +3,9 @@ Process Manager
 Manager for handling CMDB processes
 """
 import logging
-import importlib
 import multiprocessing
 import threading
-import re
+from cmdb.utils.helpers import load_class
 
 LOGGER = logging.getLogger(__name__)
 
@@ -23,7 +22,7 @@ class ProcessManager:
         """Create a new instance of the ProcessManager"""
         # service definitions (in correct order)
         self.__service_defs = []
-        self.__service_defs.append(CmdbProcess("example1", "cmdb.process_management.example_service.ExampleService"))
+        self.__service_defs.append(CmdbProcess("exportd", "cmdb.exportd.service.ExportdService"))
         self.__service_defs.append(CmdbProcess("webapp", "cmdb.interface.gunicorn.WebCmdbService"))
 
         # processlist
@@ -40,7 +39,7 @@ class ProcessManager:
         """start all services from service definitions"""
         for service_def in self.__service_defs:
             service_name = service_def.get_name()
-            service_class = ProcessManager.__load_class(service_def.get_class())
+            service_class = load_class(service_def.get_class())
             process = multiprocessing.Process(target=service_class().start, name=service_name)
             process.start()
             self.__process_list.append(process)
@@ -60,19 +59,6 @@ class ProcessManager:
     def get_loading_status(self):
         return self._loaded
 
-    @staticmethod
-    def __load_class(classname):
-        """ load and return the class with the given classname """
-        # extract class from module
-        pattern = re.compile("(.*)\.(.*)")
-        match = pattern.fullmatch(classname)
-        if match is None:
-            raise Exception("Could not load class {}".format(classname, ))
-        module_name = match.group(1)
-        class_name = match.group(2)
-        loaded_module = importlib.import_module(module_name)
-        loaded_class = getattr(loaded_module, class_name)
-        return loaded_class
 
 
 class CmdbProcess:
