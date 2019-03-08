@@ -20,6 +20,7 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
 
     def _handle_event(self, event):
         event_type = event.get_type()
+        LOGGER.debug("event received: {}".format(event_type))
         # ToDo: schedule jobs
         if event_type == "cmdb.core.object.listed":
             self.__schedule_job()

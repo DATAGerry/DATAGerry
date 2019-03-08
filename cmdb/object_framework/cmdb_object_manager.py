@@ -204,7 +204,7 @@ class CmdbObjectManager(CmdbManagerBase):
             )
             # create cmdb.core.object.added event
             if self._event_queue:
-                event = Event("cmdb.core.object.added", {"id": new_object.get_public_id})
+                event = Event("cmdb.core.object.added", {"id": new_object.get_public_id()})
                 self._event_queue.put(event)
         except (CMDBError, PublicIDAlreadyExists) as e:
             raise ObjectInsertError(e)
