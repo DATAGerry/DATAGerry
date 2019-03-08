@@ -3,7 +3,7 @@ from cmdb.utils.interface_wraps import login_required
 from flask import Blueprint, render_template, abort, current_app
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from cmdb.utils.error import CMDBError
-from cmdb.object_framework.cmdb_parser import CmdbParser
+from cmdb.interface.interface_parser import InterfaceParser
 
 LOGGER = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ def view_page(public_id):
     render = None
     try:
         type_instance = MANAGER_HOLDER.get_object_manager().get_type(public_id=public_id)
-        render = CmdbParser(type_instance, mode=CmdbParser.SHOW_MODE)
+        render = InterfaceParser(type_instance, mode=InterfaceParser.SHOW_MODE)
     except CMDBError as e:
         LOGGER.warning(e.message)
         abort(500)

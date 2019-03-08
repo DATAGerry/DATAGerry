@@ -9,7 +9,7 @@ from cmdb.object_framework.cmdb_log import CmdbLog
 LOGGER = logging.getLogger(__name__)
 
 
-class CmdbParser:
+class InterfaceParser:
 
     VIEW_MODE = 0
     EDIT_MODE = 1
@@ -22,7 +22,7 @@ class CmdbParser:
     POSSIBLE_RENDER_MODES = [ADD_MODE, VIEW_MODE, EDIT_MODE, SHOW_MODE]
 
     def __init__(self, type_instance: CmdbType, object_instance: CmdbObject = None, mode: int = DEFAULT_MODE):
-        if mode not in CmdbParser.POSSIBLE_RENDER_MODES:
+        if mode not in InterfaceParser.POSSIBLE_RENDER_MODES:
             raise RenderModeError()
         self.mode = mode
         self.type_instance = type_instance
@@ -62,7 +62,7 @@ class CmdbParser:
 
     @object_instance.setter
     def object_instance(self, object_instance: CmdbObject):
-        if self.mode == CmdbParser.ADD_MODE or self.mode == CmdbParser.SHOW_MODE:
+        if self.mode == InterfaceParser.ADD_MODE or self.mode == InterfaceParser.SHOW_MODE:
             self._object_instance = None
         elif not isinstance(object_instance, CmdbObject):
             raise ObjectInstanceError()
@@ -100,7 +100,7 @@ class CmdbParser:
         """
 
         field = None
-        if self.mode == CmdbParser.VIEW_MODE or self.mode == CmdbParser.EDIT_MODE:
+        if self.mode == InterfaceParser.VIEW_MODE or self.mode == InterfaceParser.EDIT_MODE:
             try:
                 object_value = self.object_instance.get_value(name)
                 if object_value is None or object_value == '':
@@ -111,12 +111,12 @@ class CmdbParser:
                 field = self.type_instance.get_field(name)
                 object_value = self.object_instance.get_value(name)
                 if object_value is not None or object_value != '':
-                    enc_value = CmdbParser.field_encoder(field, object_value)
+                    enc_value = InterfaceParser.field_encoder(field, object_value)
                     field.set_value(enc_value)
                 return field
             except CMDBError:
                 return None
-        elif self.mode == CmdbParser.ADD_MODE or self.mode == CmdbParser.SHOW_MODE:
+        elif self.mode == InterfaceParser.ADD_MODE or self.mode == InterfaceParser.SHOW_MODE:
             try:
                 field = self.type_instance.get_field(name)
                 field.set_value(None)

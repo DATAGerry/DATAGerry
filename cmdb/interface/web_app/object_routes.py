@@ -8,7 +8,7 @@ from cmdb.object_framework.cmdb_render import CmdbRender
 from flask import Blueprint, render_template, request, abort, current_app
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from cmdb.interface.web_app import MANAGER_HOLDER
-from cmdb.object_framework import CmdbParser
+from cmdb.interface.interface_parser import InterfaceParser
 
 try:
     from cmdb.utils.error import CMDBError
@@ -124,7 +124,7 @@ def add_new_page(type_id):
     except (CMDBError, Exception):
         status_list = []
 
-    render = CmdbParser(type_instance=object_type, mode=CmdbParser.ADD_MODE)
+    render = InterfaceParser(type_instance=object_type, mode=InterfaceParser.ADD_MODE)
     return render_template('objects/add.html', render=render, status_list=status_list)
 
 
@@ -187,36 +187,35 @@ def add_new_page_post(type_id):
                            form_data=form_data, error=error)
 
 
-def page_view(public_id, mode):
-    pass  # TODO: refactor view + edit together
-
-
 @object_pages.route('/<int:public_id>')
 @object_pages.route('/<int:public_id>/')
 @register_breadcrumb(object_pages, '.view', 'View')
 @login_required
 def view_page(public_id):
+
     usm = MANAGER_HOLDER.get_user_manager()
     ssm = MANAGER_HOLDER.get_security_manager()
-    view_object = MANAGER_HOLDER.get_object_manager().get_object(public_id=public_id)
-    view_object.update_view_counter()
     try:
+        view_object = MANAGER_HOLDER.get_object_manager().get_object(public_id=public_id)
+        view_object.update_view_counter()
         MANAGER_HOLDER.get_object_manager().update_object(view_object)
+        view_type = MANAGER_HOLDER.get_object_manager().get_type(public_id=view_object.get_type_id())
+        render = CmdbRender(view_type, view_object)
     except CMDBError:
-        pass
-    view_type = MANAGER_HOLDER.get_object_manager().get_type(public_id=view_object.get_type_id())
+        abort(500)
+
     author_name = usm.get_user(view_object.author_id).get_name()
     object_base = ssm.encode_object_base_64(view_object.get_all_fields())
 
-    render = CmdbParser(view_type, view_object)
+    parser = InterfaceParser(view_type, view_object)
     references = MANAGER_HOLDER.get_object_manager().get_object_references(public_id)
     return render_template('objects/view.html',
                            object_base=object_base,
                            author_name=author_name,
-                           user_manager=usm,
                            view_object=view_object,
                            view_type=view_type,
                            references=references,
+                           parser=parser,
                            render=render
                            )
 
@@ -232,7 +231,7 @@ def edit_page_get(public_id):
     author_name = usm.get_user(view_object.author_id).get_name()
     object_base = ssm.encode_object_base_64(view_object.get_all_fields())
 
-    render = CmdbParser(view_type, view_object, mode=CmdbParser.EDIT_MODE)
+    render = InterfaceParser(view_type, view_object, mode=InterfaceParser.EDIT_MODE)
 
     return render_template('objects/edit.html',
                            object_base=object_base,

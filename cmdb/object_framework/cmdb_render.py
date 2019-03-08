@@ -101,6 +101,12 @@ class CmdbRender:
                 summary_list.append(curr_sum)
         return summary_list
 
+    def has_summaries(self) -> bool:
+        if len(self.get_summaries()) > 0:
+            return True
+        else:
+            return False
+
     def get_externals(self, output=False) -> list:
         """
         get filled external links
@@ -154,6 +160,12 @@ class CmdbRender:
             else:
                 external_list.append(ext_link_instance)
         return external_list
+
+    def has_externals(self) -> bool:
+        if len(self.get_externals()) > 0:
+            return True
+        else:
+            return False
 
 
 class TypeInstanceError(CMDBError):

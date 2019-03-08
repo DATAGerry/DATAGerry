@@ -1,6 +1,6 @@
 {% extends 'layout.html' %}
-{% from "includes/_render_macros.html" import render_object with context %}
-{% block title %}View #{{ view_object.get_public_id() }} {{ view_type.get_label() }}{% endblock %}
+{% from "includes/_render_macros.html" import render_object, render_summaries, render_externals with context %}
+{% block title %}View #{{ render.object_instance.get_public_id() }} {{ render.type_instance.get_label() }}{% endblock %}
 {% block navigation %}
     {% include 'includes/_navigation.html' %}
 {% endblock %}
@@ -13,60 +13,30 @@
             <div class="row">
                 <div class="col-md-9">
                     <div class="row">
-                        <div class="{% if render.has_external() == False or render.all_externals_empty() %}col-12{% else %}col-8{% endif %}">
+                        <div class="{% if render.has_externals() %}col-8{% else %}col-12{% endif %}">
                             <div class="card">
                                 <h5 class="card-header">
-                                    #{{ view_object.get_public_id() }} {{ view_type.get_label() }}
+                                    #{{ render.object_instance.get_public_id() }} {{ render.type_instance.get_label() }}
                                     <span class="badge badge-secondary float-right">v{{ view_object.version }}</span>
                                     {% if view_object.status %}
                                         <span class="badge badge-primary float-right mr-1">{{ view_object.status }}</span>{% endif %}
                                 </h5>
-                                {% if render.has_summary() %}
-                                    <div class="card-body">
-                                        <table class="table table-sm">
-                                            <tbody>
-                                            {% for summary in view_type.render_meta['summary'] %}
-                                                <tr name="{{ summary['name'] }}">
-                                                    <th{% if loop.first %} class="border-top-0" {% endif %}scope="row">
-                                                        <b>{{ summary['label'] }}:</b></th>
-                                                    <td{% if loop.first %} class="border-top-0" {% endif %}>
-                                                        {% for field_name in summary['fields'] %}
-                                                            {{ view_object.get_value(field_name) }}
-                                                        {% endfor %}
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                <div class="card-body">
+                                    {{ render_summaries(render.get_summaries()) }}
+                                </div>
 
-                                {% endif %}
                             </div>
                         </div>
-                        {% if render.has_external() == True and not render.all_externals_empty() %}
+                        {% if render.has_externals() %}
                             <div class="col-4">
                                 <div class="card">
                                     <h5 class="card-header">
-                                        External links
+                                        External Links
                                     </h5>
                                     <div class="card-body">
-                                        <table class="table table-sm">
-                                            <tbody>
-                                            {% for ext_link in view_type.render_meta['external'] %}
-                                                <tr>
-                                                    <th{% if loop.first %}
-                                                        class="border-top-0" {% endif %}scope="row">
-                                                        <i class="{{ ext_link['icon'] }}"></i></th>
-                                                    <td{% if loop.first %} class="border-top-0" {% endif %}>
-                                                        <a href="{{ ext_link['href'].format(view_object.get_values(*ext_link['fields'])) }}"
-                                                           target="_blank">{{ ext_link['label'] }}
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            {% endfor %}
-                                            </tbody>
-                                        </table>
+                                        {{ render_externals(render.get_externals()) }}
                                     </div>
+
                                 </div>
                             </div>
                         {% endif %}
@@ -76,7 +46,7 @@
                             <div class="card">
                                 <h5 class="card-header">Content</h5>
                                 <div class="card-body">
-                                    {{ render_object(render) }}
+                                    {{ render_object(parser) }}
                                 </div>
                             </div>
                         </div>
@@ -129,7 +99,7 @@
                                         Links
                                     </div>
                                     <div class="tab-pane active show" id="object-logs">
-                                        {% set logs = render.get_logs() %}
+                                        {% set logs = parser.get_logs() %}
                                         {% if logs %}
                                             <table class="table table-striped">
                                                 <thead>

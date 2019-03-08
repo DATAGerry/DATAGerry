@@ -52,6 +52,27 @@
     {% endfor %}
 {% endmacro %}
 
+{% macro render_externals(external_list) %}
+    <table class="table table-sm">
+        <tbody>
+        {% for external_link in external_list %}
+            <th {% if loop.first %}class="border-top-0" {% endif %} scope="row">
+                {% if external_link.has_icon() %}
+                    <i class="{{ external_link.icon }}"></i>
+                {% else %}
+                    <i class="fas fa-link"></i>
+                {% endif %}
+            </th>
+            <td{% if loop.first %} class="border-top-0" {% endif %}>
+                <a href="{{ external_link.href }}"
+                   target="_blank">{{ external_link.label }}
+                </a>
+            </td>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endmacro %}
+
 
 {% macro input_show(field) %}
     <div id="{{ field.name }}">
