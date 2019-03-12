@@ -1,10 +1,12 @@
 import logging
 from flask import Blueprint, request, render_template, make_response, url_for, redirect
-from cmdb.interface.web_app import MANAGER_HOLDER
+from cmdb.interface.web_app import app
 
 CMDB_LOGGER = logging.getLogger(__name__)
-
 auth_pages = Blueprint('auth_pages', __name__, template_folder='templates')
+
+with app.app_context():
+    MANAGER_HOLDER = app.manager_holder
 
 
 @auth_pages.route('/login/', methods=['GET'])
@@ -15,15 +17,14 @@ def login_page():
 @auth_pages.route('/login/', methods=['POST'])
 def login_page_post():
     from cmdb.user_management.user_manager import NoUserFoundExceptions
-    from cmdb.user_management.user import NoValidAuthenticationProviderError
-    from cmdb.user_management.user_authentication import WrongUserPasswordError
+    from cmdb.user_management.user_authentication import WrongUserPasswordError, NoValidAuthenticationProviderError
     user_name = str(request.form['user_name']).lower()
     password = request.form['password']
 
     correct = False
     try:
         login_user = MANAGER_HOLDER.get_user_manager().get_user_by_name(user_name)
-        auth_method = login_user.get_authenticator()
+        auth_method = MANAGER_HOLDER.get_user_manager().get_authentication_provider(login_user.get_authenticator())
         correct = auth_method.authenticate(
             user=login_user,
             password=password

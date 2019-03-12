@@ -40,7 +40,7 @@
                                             {{ user_manager.get_group(current_user.group_id).get_name() }}
                                         </a>
                                     </td>
-                                    <td>{{ current_user.registration_time }}</td>
+                                    <td>{{ current_user.registration_time | encode_date }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>

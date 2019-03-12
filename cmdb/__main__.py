@@ -209,11 +209,9 @@ def main(args):
 
         _factory_database_manager = get_pre_init_database()
         db_name = _factory_database_manager.get_database_name()
-
-        factory = DataFactory(database_manager=_factory_database_manager)
-
         LOGGER.warning("Inserting test-data into: {}".format(db_name))
-        _factory_database_manager.drop(db_name)  # cleanup database
+        factory = DataFactory(database_manager=_factory_database_manager)
+        ack = list()
         try:
             ack = factory.insert_data()
             LOGGER.warning("Test-data was successfully added".format(_factory_database_manager.get_database_name()))
@@ -223,6 +221,8 @@ def main(args):
         except (Exception, CMDBError) as e:
             import traceback
             traceback.print_tb(e.__traceback__)
+            _factory_database_manager.drop(db_name)  # cleanup database
+            exit(1)
 
     if args.setup:
         if args.keys:

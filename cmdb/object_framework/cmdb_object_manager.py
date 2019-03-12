@@ -49,7 +49,7 @@ class CmdbManagerBase:
         if database_manager:
             self.dbm = database_manager
 
-    def _get(self, collection: str, public_id: int) -> object:
+    def _get(self, collection: str, public_id: int) -> (object, dict):
         """get document from the database by their public id
 
         Args:
@@ -172,7 +172,7 @@ class CmdbObjectManager(CmdbManagerBase):
             object_list.append(self.get_object(public_id))
         return object_list
 
-    def get_objects_by(self, sort='public_id', **requirements: dict):
+    def get_objects_by(self, sort='public_id', **requirements):
         ack = []
         objects = self._get_all(collection=CmdbObject.COLLECTION, sort=sort, **requirements)
         for obj in objects:
@@ -310,7 +310,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_all_types(self):
         ack = []
-        types = self.dbm.find_all(collection=CmdbType.COLLECTION)
+        types = self._get_all(collection=CmdbType.COLLECTION)
         for type_obj in types:
             ack.append(CmdbType(**type_obj))
         return ack

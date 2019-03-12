@@ -2,19 +2,17 @@
 Init module for web routes
 """
 import logging
-from flask import Flask
-from cmdb.interface.cmdb_holder import CmdbManagerHolder
+from cmdb.interface.cmdb_app import BaseCmdbApp
+from cmdb.interface.cmdb_app import CmdbManagerHolder
 from cmdb.interface.config import app_config
 
 LOGGER = logging.getLogger(__name__)
 MANAGER_HOLDER = CmdbManagerHolder()
-app = None
+app = BaseCmdbApp(__name__, MANAGER_HOLDER)
 
 
 def create_web_app(event_queue):
     import cmdb
-    global app
-    app = Flask(__name__)
     if cmdb.__MODE__ == 'DEBUG':
         app.config.from_object(app_config['development'])
     else:

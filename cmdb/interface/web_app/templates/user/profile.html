@@ -1,5 +1,5 @@
 {% extends 'layout.html' %}
-{% block title %}User view{% endblock %}
+{% block title %}User {% if edit_able %}Edit{% else %}View{% endif %}{% endblock %}
 {% block navigation %}
     {% include 'includes/_navigation.html' %}
 {% endblock %}
@@ -9,22 +9,22 @@
 {% block content %}
     <div class="content">
         <div class="container-fluid">
-            {{ super() }}
             <div class="row">
                 <div class="col-8">
-                    <h1>Profil: {{ view_user.get_name() }}</h1>
+                    <h1>Profile: {{ view_user.get_name() }}</h1>
                     <hr/>
+
                     <div class="form-group">
                         <label for="username">Username</label>
                         <input type="text" class="form-control" id="username" name="username"
                                aria-describedby="username_input" placeholder="Username"
-                               value="{{ view_user.get_username() }}">
+                               value="{{ view_user.get_username() }}" {% if not edit_able %}readonly{% endif %}>
                     </div>
                     <div class="form-group">
                         <label for="email">Email address</label>
                         <input type="email" class="form-control" id="email" name="email"
                                aria-describedby="email_help" placeholder="Email address"
-                               value="{{ view_user.get_email() }}">
+                               value="{{ view_user.get_email() }}" {% if not edit_able %}readonly{% endif %}>
                         <small id="email_help" class="form-text text-muted">We'll never share your email with anyone
                             else.
                         </small>
@@ -32,13 +32,25 @@
                     <div class="form-group">
                         <label for="firstname">First name</label>
                         <input type="text" class="form-control" id="first_name" name="first_name"
-                               placeholder="Firstname" value="{{ view_user.get_first_name() }}">
+                               placeholder="Firstname" value="{{ view_user.get_first_name() }}"
+                               {% if not edit_able %}readonly{% endif %}>
                     </div>
                     <div class="form-group">
                         <label for="lastname">Last name</label>
                         <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Lastname"
-                               value="{{ view_user.get_last_name() }}">
+                               value="{{ view_user.get_last_name() }}" {% if not edit_able %}readonly{% endif %}>
                     </div>
+
+                    {% if not edit_able %}
+                        <a href="{{ url_for("user_pages.user_profile_page_edit", public_id=view_user.get_public_id()) }}"
+                           class="btn btn-outline-primary" role="button">Edit</a>
+                    {% else %}
+                        {% if provider.is_password_able() %}
+                            <a href="#"
+                               class="btn btn-outline-primary">Generate new password
+                            </a>
+                        {% endif %}
+                    {% endif %}
                 </div>
                 <div class="col-4">
                     <div class="card">
@@ -54,11 +66,11 @@
                                 </tr>
                                 <tr>
                                     <th scope="row">Registration Time</th>
-                                    <td>{{ view_user.registration_time }}</td>
+                                    <td>{{ view_user.registration_time | encode_date }}</td>
                                 </tr>
                                 <tr>
                                     <th scope="row">Authenticator</th>
-                                    <td>{{ view_user.authenticator }}</td>
+                                    <td>{{ provider.get_name() }}</td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -80,12 +92,7 @@
                                     <th scope="row">Rights</th>
                                     <th scope="row">Level</th>
                                 </tr>
-                                {% for user_right in group_rights %}
-                                    <tr>
-                                        <td>{{ user_right.get_name() }}</td>
-                                        <td><span class="badge badge-primary">{{ user_right.get_level_name() }}</span></td>
-                                    </tr>
-                                {% endfor %}
+
                                 </tbody>
                             </table>
                         </div>
@@ -93,6 +100,14 @@
                     <div class="card-footer"></div>
                 </div>
             </div>
+            {{ super() }}
         </div>
     </div>
 {% endblock %}
+{% if mode == 'DEBUG' %}
+    {% block debug %}
+        <h2>View User:</h2>
+        <hr>
+        {{ view_user }}
+    {% endblock %}
+{% endif %}

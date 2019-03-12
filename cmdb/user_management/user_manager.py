@@ -2,6 +2,8 @@ import logging
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user import User
 from cmdb.user_management.user_right import BaseRight, GLOBAL_IDENTIFIER
+from cmdb.user_management.user_authentication import AuthenticationProvider, LocalAuthenticationProvider, \
+    NoValidAuthenticationProviderError
 from cmdb.data_storage import NoDocumentFound, DatabaseManagerMongo
 from cmdb.data_storage.database_manager import DeleteResult
 from cmdb.utils.security import SecurityManager
@@ -21,7 +23,19 @@ class UserManagement:
     def __init__(self, database_manager: DatabaseManagerMongo, security_manager: SecurityManager):
         self.dbm = database_manager
         self.scm = security_manager
+        self._authentication_providers = self._load_authentication_providers()
         self.rights = self._load_rights()
+
+    def _load_authentication_providers(self) -> dict:
+        return {
+            'LocalAuthenticationProvider': LocalAuthenticationProvider
+        }
+
+    def get_authentication_provider(self, name: str):
+        if issubclass(self._authentication_providers[name], AuthenticationProvider):
+            return self._authentication_providers[name]()
+        else:
+            raise NoValidAuthenticationProviderError(self._authentication_providers[name])
 
     def _get_user(self, public_id: int):
         return self.dbm.find_one(collection=User.COLLECTION, public_id=public_id)

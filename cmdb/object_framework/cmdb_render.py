@@ -162,9 +162,10 @@ class CmdbRender:
         return external_list
 
     def has_externals(self) -> bool:
-        if len(self.get_externals()) > 0:
+        try:
+            self.get_externals()
             return True
-        else:
+        except CMDBError:
             return False
 
 

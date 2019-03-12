@@ -5,9 +5,9 @@ from cmdb.object_framework.cmdb_object_manager import ObjectInsertError, ObjectU
 from cmdb.object_framework.cmdb_object import CmdbObject
 from cmdb.object_framework.cmdb_log import CmdbLog
 from cmdb.object_framework.cmdb_render import CmdbRender
-from flask import Blueprint, render_template, request, abort, current_app
+from flask import Blueprint, render_template, request, abort
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
-from cmdb.interface.web_app import MANAGER_HOLDER
+from cmdb.interface.web_app import app
 from cmdb.interface.interface_parser import InterfaceParser
 
 try:
@@ -24,8 +24,8 @@ LOGGER = logging.getLogger(__name__)
 object_pages = Blueprint('object_pages', __name__, template_folder='templates', url_prefix='/object')
 default_breadcrumb_root(object_pages, '.object_pages')
 
-with current_app.app_context():
-    MANAGER_HOLDER = current_app.manager_holder
+with app.app_context():
+    MANAGER_HOLDER = app.get_manager()
 
 
 @object_pages.route('/')
@@ -35,12 +35,13 @@ with current_app.app_context():
 def list_page():
     uum = MANAGER_HOLDER.get_user_manager()
     all_objects = MANAGER_HOLDER.get_object_manager().get_all_objects()
+
     return render_template('objects/list.html', user_manager=uum,
                            all_objects=all_objects)
 
 
 @object_pages.route('/newest/')
-@register_breadcrumb(object_pages, '.', 'Newest')
+@register_breadcrumb(object_pages, '.newest', 'Newest')
 def newest_objects_page():
     try:
         object_limit = int(request.args.get('limit') or 25)
@@ -73,7 +74,7 @@ def newest_objects_page():
 
 
 @object_pages.route('/latest/')
-@register_breadcrumb(object_pages, '.', 'Newest')
+@register_breadcrumb(object_pages, '.latest', 'Latest')
 def latest_objects_page():
     try:
         object_limit = int(request.args.get('limit') or 25)
@@ -107,6 +108,59 @@ def latest_objects_page():
     except CMDBError:
         latest_objects = None
     return render_template('objects/latest.html', latest_objects=latest_objects, limit=object_limit)
+
+
+@object_pages.route('/most-viewed/')
+@register_breadcrumb(object_pages, '.most', 'Most viewed')
+def most_viewed_objects_page():
+    try:
+        object_limit = int(request.args.get('limit') or 25)
+    except ValueError:
+        object_limit = 25
+    viewed_objects = []
+    try:
+        type_buffer_list = {}
+        viewed_objects_list = MANAGER_HOLDER.get_object_manager().get_objects_by(sort='views',
+                                                                                 limit=object_limit,
+                                                                                 active={"$eq": True})
+        for passed_object in viewed_objects_list:
+            current_type = None
+            passed_object_type_id = passed_object.get_type_id()
+            if passed_object_type_id in type_buffer_list:
+                current_type = type_buffer_list[passed_object_type_id]
+            else:
+                try:
+                    current_type = MANAGER_HOLDER.get_object_manager().get_type(passed_object_type_id)
+                    type_buffer_list.update({passed_object_type_id: current_type})
+                except CMDBError as e:
+                    LOGGER.warning("Viewed object type - error: {}".format(e.message))
+                    continue
+            tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
+            viewed_objects.append(tmp_render)
+        LOGGER.debug(viewed_objects)
+    except CMDBError:
+        viewed_objects = None
+    return render_template('objects/most_viewed.html', most_viewed_objects=viewed_objects, limit=object_limit)
+
+
+@object_pages.route('/user/<int:user_id>/')
+@register_breadcrumb(object_pages, '.user_created', 'Your objects')
+@login_required
+def show_user_owned_objects(user_id):
+    obm = MANAGER_HOLDER.get_object_manager()
+    user_objects_list = list()
+    user_objects = list()
+    try:
+        current_user = MANAGER_HOLDER.get_user_manager().get_user(public_id=user_id)
+        user_objects = MANAGER_HOLDER.get_object_manager().get_objects_by(author_id=current_user.get_public_id())
+    except CMDBError:
+        abort(500)
+    for user_object in user_objects:
+        try:
+            user_objects_list.append(CmdbRender(obm.get_type(user_object.get_type_id()), user_object))
+        except CMDBError:
+            continue
+    return render_template('objects/user_owned.html', user_objects=user_objects_list)
 
 
 @object_pages.route('/type/<int:type_id>/add', methods=['GET'])
@@ -192,7 +246,6 @@ def add_new_page_post(type_id):
 @register_breadcrumb(object_pages, '.view', 'View')
 @login_required
 def view_page(public_id):
-
     usm = MANAGER_HOLDER.get_user_manager()
     ssm = MANAGER_HOLDER.get_security_manager()
     try:
@@ -208,13 +261,18 @@ def view_page(public_id):
     object_base = ssm.encode_object_base_64(view_object.get_all_fields())
 
     parser = InterfaceParser(view_type, view_object)
-    references = MANAGER_HOLDER.get_object_manager().get_object_references(public_id)
+    references_objects = MANAGER_HOLDER.get_object_manager().get_object_references(public_id)
+    reference_list = list()
+
+    for reference in references_objects:
+        reference_list.append(
+            CmdbRender(MANAGER_HOLDER.get_object_manager().get_type(public_id=reference.get_type_id()), reference))
     return render_template('objects/view.html',
                            object_base=object_base,
                            author_name=author_name,
                            view_object=view_object,
                            view_type=view_type,
-                           references=references,
+                           references=reference_list,
                            parser=parser,
                            render=render
                            )

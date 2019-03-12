@@ -1,6 +1,4 @@
 from cmdb.user_management.user_base import UserManagementBase
-from cmdb.user_management.user_authentication import AuthenticationProvider
-from cmdb.user_management.user_authentication import NoValidAuthenticationProviderError, LocalAuthenticationProvider
 from cmdb.utils.error import CMDBError
 
 
@@ -65,11 +63,8 @@ class User(UserManagementBase):
     def get_group(self):
         return self.group_id
 
-    def get_authenticator(self) -> AuthenticationProvider:
-        if issubclass(eval(self.authenticator), AuthenticationProvider):
-            return eval(self.authenticator)()
-        else:
-            raise NoValidAuthenticationProviderError(self.authenticator)
+    def get_authenticator(self) -> str:
+        return self.authenticator
 
 
 class InvalidEmailError(CMDBError):

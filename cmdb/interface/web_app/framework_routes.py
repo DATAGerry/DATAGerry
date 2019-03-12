@@ -3,7 +3,7 @@ Framework pages
 """
 import logging
 from cmdb.utils.error import CMDBError
-from cmdb.interface.cmdb_holder import CmdbManagerHolder
+from cmdb.interface.cmdb_app import CmdbManagerHolder
 from flask import Blueprint, render_template, jsonify, current_app
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from flask import request, abort

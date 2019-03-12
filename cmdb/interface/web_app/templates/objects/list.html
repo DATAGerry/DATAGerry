@@ -10,7 +10,6 @@
 {% block content %}
     <div class="content">
         <div class="container-fluid">
-            {{ super() }}
             <div class="row">
                 <div class="col-12">
                     <h1>Object list - all types</h1>
@@ -31,12 +30,13 @@
                         {% for current_object in all_objects %}
                             <tr>
                                 <td>{{ current_object.active | label_active }}</td>
-                                <td><a href="/object/{{ current_object.public_id }}">{{ current_object.public_id }}</a></td>
+                                <td><a href="/object/{{ current_object.public_id }}">{{ current_object.public_id }}</a>
+                                </td>
                                 <td>{{ object_manager.get_type(current_object.type_id).get_name() }}</td>
                                 <td>{% set current_status = object_manager.get_status(current_object.status) %}
                                     {% if current_status %}
-                                    <span class="badge"
-                                          style="background-color: {{ current_status.get_color() }}">{{ current_status.get_label() }}</span>
+                                        <span class="badge"
+                                              style="background-color: {{ current_status.get_color() }}">{{ current_status.get_label() }}</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ current_object.version }}</td>
@@ -48,6 +48,7 @@
                     </table>
                 </div>
             </div>
+            {{ super() }}
         </div>
     </div>
 {% endblock %}

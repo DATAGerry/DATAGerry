@@ -71,6 +71,9 @@ class CmdbType(CmdbDAO):
             return True
         return False
 
+    def get_summary_fields(self, name):
+        return self.get_summary(name)['fields']
+
     def get_summary(self, name):
         sum_data = next(sum for sum in self.render_meta['summary'] if sum["name"] == name)
         return _Summary(**sum_data)

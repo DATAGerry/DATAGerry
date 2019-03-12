@@ -29,10 +29,6 @@ class SecurityManager:
     def _setup(self):
         pass
 
-    def _load_authentificator(self):
-        """TODO: LOAD AUTHS HERE"""
-        pass
-
     def generate_delete_token(self, data: (CmdbObject, CmdbType)):
         import json
         dump = {
@@ -148,10 +144,10 @@ class SecurityManager:
         try:
             asy_key = self.ssr.get_value('key_pair', 'security')
         except (KeyError, NoDocumentFound):
-            asy_key = self.get_key_pair()
+            asy_key = self.generate_key_pair()
         return asy_key
 
-    def generate_key_par(self):
+    def generate_key_pair(self):
         asy_key = jwk.JWK.generate(kty='EC', crv='P-256')
         public_key = ast.literal_eval(asy_key.export_public())
         private_key = ast.literal_eval(asy_key.export_private())

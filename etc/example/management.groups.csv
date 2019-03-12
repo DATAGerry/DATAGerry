@@ -1,5 +1,0 @@
-label,name,public_id,rights
-Admin,admin,1,"[ { ""name"" : ""view"" }, { ""name"" : ""edit"" }, { ""name"" : ""delete"" }, { ""name"" : ""settings"" } ]"
-User,user,2,"[ { ""name"" : ""view"" }, { ""name"" : ""edit"" }, { ""name"" : ""delete"" }, { ""name"" : ""settings"" } ]"
-Guest,guest,3,"[ { ""name"" : ""view"" }, { ""name"" : ""edit"" }, { ""name"" : ""delete"" }, { ""name"" : ""settings"" } ]"
-Rest,rest,4,"[ { ""name"" : ""view"" }, { ""name"" : ""edit"" }, { ""name"" : ""delete"" }, { ""name"" : ""settings"" } ]"

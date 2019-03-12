@@ -1,26 +1,25 @@
 import logging
 from cmdb.utils.interface_wraps import login_required
-from flask import Blueprint, render_template, abort, current_app
+from flask import Blueprint, render_template, abort, request
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from cmdb.utils.error import CMDBError
 from cmdb.interface.interface_parser import InterfaceParser
+from cmdb.interface.web_app import app
 
 LOGGER = logging.getLogger(__name__)
 
 type_pages = Blueprint('type_pages', __name__, template_folder='templates', url_prefix='/type')
 default_breadcrumb_root(type_pages, '.type_pages')
 
-with current_app.app_context():
-    MANAGER_HOLDER = current_app.manager_holder
+with app.app_context():
+    MANAGER_HOLDER = app.get_manager()
 
 
 @type_pages.route('/')
 @register_breadcrumb(type_pages, '.', 'Type')
 def index_page():
-    obm = MANAGER_HOLDER.get_object_manager()
-    uum = MANAGER_HOLDER.get_user_manager()
     all_types = MANAGER_HOLDER.get_object_manager().get_all_types()
-    return render_template('types/index.html', all_types=all_types, object_manager=obm, user_manager=uum)
+    return render_template('types/index.html', all_types=all_types)
 
 
 @type_pages.route('/<int:public_id>')

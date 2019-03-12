@@ -2,8 +2,8 @@ from cmdb.object_framework import CmdbObjectManager
 from cmdb.user_management.user_manager import UserManagement
 from cmdb.data_storage import DatabaseManagerMongo
 from cmdb.utils import SecurityManager
-from cmdb.event_management.event_manager import EventManager
 from cmdb.utils import SystemSettingsReader, SystemSettingsWriter
+from flask import Flask
 
 
 class CmdbManagerHolder:
@@ -61,3 +61,13 @@ class CmdbManagerHolder:
 
     def init_app(self, app):
         app.manager_holder = self
+
+
+class BaseCmdbApp(Flask):
+
+    def __init__(self, import_name: str, manager_holder: CmdbManagerHolder):
+        self.manager_holder = manager_holder
+        super(BaseCmdbApp, self).__init__(import_name)
+
+    def get_manager(self) -> CmdbManagerHolder:
+        return self.manager_holder

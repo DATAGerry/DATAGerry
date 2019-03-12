@@ -83,7 +83,7 @@
                 <a href="/user/[[ID]]/objects/changed" class="dropdown-item">
                     <i class="fas fa-redo"></i> Changed
                 </a>
-                <a href="/user/[[ID]]/objects/your" class="dropdown-item">
+                <a href="/object/user/{{ current_user.get_public_id() }}" class="dropdown-item">
                     <i class="fa fa-briefcase"></i> Your items
                 </a>
             </div>
@@ -95,7 +95,7 @@
             </a>
             <div class="dropdown-menu dropdown-menu-right">
                 <div class="dropdown-header">Account</div>
-                <a href="#" class="dropdown-item">
+                <a href="/user/" class="dropdown-item">
                     <i class="fa fa-user"></i> Profile
                 </a>
                 <div class="dropdown-header">Session</div>

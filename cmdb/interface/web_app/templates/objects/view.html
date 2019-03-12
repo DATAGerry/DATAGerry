@@ -79,15 +79,17 @@
                                                 <tr>
                                                     <th scope="col">Public ID</th>
                                                     <th scope="col">Type</th>
+                                                    <th scope="col">Summary</th>
                                                     <th scope="col">Link</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
                                                 {% for ref in references %}
                                                     <tr>
-                                                        <th scope="row">{{ ref.get_public_id() }}</th>
-                                                        <td>{{ object_manager.get_type(ref.get_type_id()).get_label() }}</td>
-                                                        <td><a href="/object/{{ ref.get_public_id() }}"><i
+                                                        <th scope="row">{{ ref.object_instance.get_public_id() }}</th>
+                                                        <td>{{ ref.type_instance.get_label() }}</td>
+                                                        <td>{{ render_summaries(ref.get_summaries()) }}</td>
+                                                        <td><a href="/object/{{ ref.object_instance.get_public_id() }}"><i
                                                                 class="fas fa-angle-double-right"></i></a></td>
                                                     </tr>
                                                 {% endfor %}
