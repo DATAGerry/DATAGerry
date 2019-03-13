@@ -17,6 +17,7 @@
                         <thead class="thead thead-light">
                         <tr>
                             <th scope="col">PREFIX</th>
+                            <th scope="col">M</th>
                             <th scope="col">Label</th>
                             <th scope="col">Name</th>
                             <th width="350" scope="col">Description</th>
@@ -28,13 +29,20 @@
                             <tr{% if right.get_label().split('.')[-1] == global_right_ident %}
                                 class="table-success"{% endif %}>
                                 <th class="text-uppercase" scope="row">{{ right.get_prefix() }}</th>
+                                <td>{{ right._MASTER | label_master }}</td>
                                 <td>{{ right.get_label() }}</td>
                                 <td>{{ right.get_name() }}</td>
                                 <td>{{ right.get_description() }}</td>
                                 <td {% if right.get_level() == right.CRITICAL %}
                                     class="bg-danger"
+                                {% elif right.get_level() == right.DANGER %}
+                                    class="bg-info"
                                 {% elif right.get_level() == right.SECURE %}
                                     class="bg-warning"
+                                {% elif right.get_level() == right.PROTECTED %}
+                                    class="bg-secondary"
+                                {% elif right.get_level() == right.PERMISSION %}
+                                    class="bg-white"
                                 {% endif %}>
                                     {{ right._levelToName[right.get_level()] }}
                                 </td>

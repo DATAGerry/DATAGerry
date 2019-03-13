@@ -7,25 +7,35 @@ GLOBAL_IDENTIFIER = '*'
 
 
 class BaseRight:
-    MIN_LEVEL = 0
-    MAX_LEVEL = 100
 
     CRITICAL = 100
+    DANGER = 80
     SECURE = 50
+    PROTECTED = 30
     PERMISSION = 10
     NOTSET = 0
+
+    MIN_LEVEL = NOTSET
+    MAX_LEVEL = CRITICAL
+
+    _MASTER = False
 
     PREFIX = 'base'
 
     _levelToName = {
         CRITICAL: 'CRITICAL',
+        DANGER: 'DANGER',
         SECURE: 'SECURE',
+        PROTECTED: 'PROTECTED',
         PERMISSION: 'PERMISSION',
         NOTSET: 'NOTSET',
     }
+
     _nameToLevel = {
         'CRITICAL': CRITICAL,
+        'DANGER': DANGER,
         'SECURE': SECURE,
+        'PROTECTED': PROTECTED,
         'PERMISSION': PERMISSION,
         'NOTSET': NOTSET,
     }
@@ -35,6 +45,12 @@ class BaseRight:
         self.name = '{}.{}'.format(self.PREFIX, name)
         self.label = label or None
         self.description = description or "No description"
+        if name == GLOBAL_IDENTIFIER:
+            self._MASTER = True
+
+    def __new__(cls, *args, **kwargs):
+        cls._MASTER = cls._MASTER
+        return super(BaseRight, cls).__new__(cls)
 
     def get_prefix(self):
         return self.PREFIX.split('.')[-1]
@@ -47,6 +63,9 @@ class BaseRight:
 
     def get_description(self):
         return self.description
+
+    def is_master(self):
+        return self._MASTER
 
     @property
     def level(self):

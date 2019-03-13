@@ -2,21 +2,17 @@
 Framework pages
 """
 import logging
-from cmdb.utils.error import CMDBError
-from cmdb.interface.cmdb_app import CmdbManagerHolder
-from flask import Blueprint, render_template, jsonify, current_app
+from flask import Blueprint, render_template
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
-from flask import request, abort
-
+from cmdb.interface.web_app import app
 
 LOGGER = logging.getLogger(__name__)
 
 framework_pages = Blueprint('framework_pages', __name__, template_folder='templates', url_prefix='/framework')
 default_breadcrumb_root(framework_pages, '.framework_pages')
 
-with current_app.app_context():
-    MANAGER_HOLDER = CmdbManagerHolder()
-    MANAGER_HOLDER = current_app.manager_holder
+with app.app_context():
+    MANAGER_HOLDER = app.get_manager()
 
 
 @framework_pages.route('/')

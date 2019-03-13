@@ -10,6 +10,14 @@ def label_active(s):
         return Markup('<span class="badge badge-secondary">Inactive</span>')
 
 
+def label_master(master):
+    from flask import Markup
+    if master:
+        return Markup('<i class="far fa-check-circle text-success"></i>')
+    else:
+        return Markup('<i class="far fa-times-circle text-danger"></i>')
+
+
 def display_icon(icon):
     if icon is not None:
         return icon

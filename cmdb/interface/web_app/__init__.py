@@ -81,12 +81,13 @@ def create_web_app(event_queue):
 
 def register_filters(app):
     from cmdb.interface.web_app.filters import label_active, display_icon, cmdb_exception_handler, encode_date, \
-        eval_input
+        eval_input, label_master
     app.jinja_env.filters['label_active'] = label_active
     app.jinja_env.filters['display_icon'] = display_icon
     app.jinja_env.filters['encode_date'] = encode_date
     app.jinja_env.filters['exception_handler'] = cmdb_exception_handler
     app.jinja_env.filters['eval_input'] = eval_input
+    app.jinja_env.filters['label_master'] = label_master
 
 
 def register_blueprints(app):
@@ -98,6 +99,7 @@ def register_blueprints(app):
     from cmdb.interface.web_app.object_routes import object_pages
     from cmdb.interface.web_app.type_routes import type_pages
     from cmdb.interface.web_app.framework_routes import framework_pages
+    from cmdb.interface.web_app.search_routes import search_pages
 
     app.register_blueprint(index_pages)
     app.register_blueprint(static_pages)
@@ -107,6 +109,7 @@ def register_blueprints(app):
     app.register_blueprint(object_pages)
     app.register_blueprint(type_pages)
     app.register_blueprint(framework_pages)
+    app.register_blueprint(search_pages)
 
 
 def register_context_processors(app):

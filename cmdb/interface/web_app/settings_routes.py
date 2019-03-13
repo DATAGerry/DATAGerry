@@ -2,30 +2,38 @@
 Admin/Settings Pages
 """
 import logging
-from cmdb.utils.error import CMDBError
-from cmdb.interface.cmdb_app import CmdbManagerHolder
-from flask import Blueprint, render_template, jsonify, current_app
+from cmdb.interface.web_app import app
+from cmdb.utils.interface_wraps import login_required, right_required
+from flask import Blueprint, render_template, jsonify
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from flask import request, abort
+
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
 
 settings_pages = Blueprint('settings_pages', __name__, template_folder='templates', url_prefix='/settings')
 default_breadcrumb_root(settings_pages, '.settings_pages')
 
-with current_app.app_context():
-    MANAGER_HOLDER = CmdbManagerHolder()
-    MANAGER_HOLDER = current_app.manager_holder
+with app.app_context():
+    MANAGER_HOLDER = app.get_manager()
 
 
 @settings_pages.route('/')
 @register_breadcrumb(settings_pages, '.', 'Settings')
+@login_required
+@right_required('base.system.*')
 def settings_page():
     return render_template('settings/default.html')
 
 
 @settings_pages.route('/user-management/', methods=['GET'])
 @register_breadcrumb(settings_pages, '.user_management', 'User Management')
+@login_required
+@right_required('base.system.user.manage_users')
 def user_management_index():
     user_manager_instance = MANAGER_HOLDER.get_user_manager()
     user_submit_token = 'TODO'
@@ -35,6 +43,8 @@ def user_management_index():
 
 @settings_pages.route('/user-management/add_user/', methods=['POST'])
 @register_breadcrumb(settings_pages, '.user_management.add_user', 'Add new user')
+@login_required
+@right_required('base.system.user.manage_users')
 def user_management_add_user():
     """
     TODO: Add submit token validation
@@ -80,6 +90,8 @@ def user_management_add_user():
 
 @settings_pages.route('/user-management/groups/', methods=['GET'])
 @register_breadcrumb(settings_pages, '.user_management.groups', 'Groups')
+@login_required
+@right_required('base.system.user.manage_groups')
 def user_management_groups():
     """
     TODO: IMPLEMENT EDIT GROUPS
@@ -92,8 +104,9 @@ def user_management_groups():
 
 
 @settings_pages.route('/user-management/groups/<int:public_id>/rights/', methods=['POST'])
+@login_required
+@right_required('base.system.user.manage_rights')
 def user_management_group_right_change(public_id):
-
     def _convert_to_list(form_rights: dict):
         convert_list = []
         for confirm_right in form_rights:
@@ -103,9 +116,9 @@ def user_management_group_right_change(public_id):
     user_manager_instance = MANAGER_HOLDER.get_user_manager()
     right_list = _convert_to_list(request.form.to_dict())
     try:
-        choosen_group = user_manager_instance.get_group(public_id)
-        choosen_group.set_rights(right_list)
-        user_manager_instance.update_group(choosen_group)
+        chosen_group = user_manager_instance.get_group(public_id)
+        chosen_group.set_rights(right_list)
+        user_manager_instance.update_group(chosen_group)
     except CMDBError as e:
         return jsonify({"error": e.message})
     return jsonify(right_list)
@@ -113,6 +126,8 @@ def user_management_group_right_change(public_id):
 
 @settings_pages.route('/user-management/rights/', methods=['GET'])
 @register_breadcrumb(settings_pages, '.user_management.rights', 'Rights')
+@login_required
+@right_required('base.system.user.manage_rights')
 def user_management_rights():
     user_manager_instance = MANAGER_HOLDER.get_user_manager()
     right_list = user_manager_instance._load_rights()
@@ -126,6 +141,7 @@ def user_management_rights():
 
 @settings_pages.route('/type-config/')
 @register_breadcrumb(settings_pages, '.type_config', 'Type config')
+@login_required
 def type_config_page():
     from cmdb.utils.example_data import list_example_files
     possible_example_files = list_example_files()
@@ -133,6 +149,7 @@ def type_config_page():
 
 
 @settings_pages.route('/type-config/_load_example_data/', methods=['POST'])
+@login_required
 def _type_config_load_example_data_ajax():
     """
     TODO: FIX BSON ENCODING ERROR
@@ -150,6 +167,7 @@ def _type_config_load_example_data_ajax():
 
 @settings_pages.route('/security/', methods=['GET'])
 @register_breadcrumb(settings_pages, '.security_settings', 'Security Settings')
+@login_required
 def security_page_get():
     ssr = MANAGER_HOLDER.get_system_settings_reader()
     data = ssr.get_all_values_from_section('security')[0]
@@ -158,6 +176,7 @@ def security_page_get():
 
 @settings_pages.route('/security/', methods=['POST'])
 @register_breadcrumb(settings_pages, '.security_settings', 'Security Settings')
+@login_required
 def security_page_post():
     if request.method == 'POST':
         ssr = MANAGER_HOLDER.get_system_settings_reader()

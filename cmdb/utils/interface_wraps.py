@@ -6,7 +6,11 @@ from functools import wraps
 from flask import request, abort, redirect, url_for
 from jwcrypto.jwt import JWTExpired, JWTNotYetValid
 from jwcrypto.jws import InvalidJWSSignature, InvalidJWSObject
-from cmdb.user_management import User
+
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
 
@@ -49,8 +53,8 @@ def login_required(f):
         else:
             return redirect(url_for('auth_pages.login_page'))
         try:
-            from flask import current_app
-            security_manager = current_app.manager_holder.get_security_manager()
+            from cmdb.interface.web_app import app
+            security_manager = app.manager_holder.get_security_manager()
             security_manager.decrypt_token(token)
         except (JWTExpired, JWTNotYetValid, InvalidJWSSignature, InvalidJWSObject) as e:
             return redirect(url_for('auth_pages.login_page', error=e))
@@ -62,28 +66,24 @@ def login_required(f):
 
 
 def right_required(required_right: str):
-    """
-    TODO: FIX
-
+    import json
 
     def page_right(f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            from cmdb.interface.web_app import MANAGER_HOLDER
-            usm = MANAGER_HOLDER.get_user_manager()
-
-            right = usm.get_right(required_right)
-            LOGGER.debug(right)
-            security_manager = MANAGER_HOLDER.get_security_manager()
-            user = User(security_manager.decrypt_token(request.cookies.get('access-token')))
+            has_right = False
+            from cmdb.interface.web_app import app
+            user_manager = app.get_manager().get_user_manager()
+            security_manager = app.get_manager().get_security_manager()
             try:
-                ack_right = usm.user_has_right(user, required_right)
-                LOGGER.debug(ack_right)
-            except Exception:
-                abort(401)
-                return redirect(url_for('static_pages.error_404_page'))
+                user_id = json.loads(security_manager.decrypt_token(request.cookies.get('access-token')))['public_id']
+                has_right = user_manager.user_group_has_right(user_manager.get_user(public_id=user_id), required_right)
+            except (Exception, CMDBError):
+                abort(403)
+            if not has_right:
+                abort(403)
             return f(*args, **kwargs)
 
         return decorated
-    """
-    return None
+
+    return page_right

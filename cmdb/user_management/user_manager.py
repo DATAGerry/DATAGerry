@@ -97,10 +97,8 @@ class UserManagement:
     def get_group(self, public_id: int) -> UserGroup:
         try:
             founded_group = self.dbm.find_one(collection=UserGroup.COLLECTION, public_id=public_id)
-            LOGGER.debug("Group Found {}".format(founded_group))
             return UserGroup(**founded_group)
         except NoDocumentFound as e:
-            LOGGER.debug("Group find error {}".format(e.message))
             raise GroupNotExistsError(public_id)
 
     def update_group(self, update_group: UserGroup) -> bool:
@@ -125,31 +123,52 @@ class UserManagement:
                 LOGGER.warning(e)
             raise GroupDeleteError(public_id)
 
-    @staticmethod
-    def _load_rights():
+    def _load_rights(self):
         from cmdb.user_management.rights import __all__
-        rights = []
-        for right_list in __all__:
-            for right in right_list:
+        return self._load_right_tree(__all__)
+
+    def _load_right_tree(self, right_list) -> list:
+        rights = list()
+        for right in right_list:
+            if isinstance(right, list):
+                rights = rights + self._load_right_tree(right)
+            else:
                 rights.append(right)
         return rights
+
+    def get_right_by_name(self, name) -> BaseRight:
+        try:
+            return next(right for right in self.rights if right.name == name)
+        except Exception:
+            raise RightNotExistsError(name)
 
     def group_has_right(self, group_id: int, right_name: str) -> bool:
         right_status = False
         try:
             chosen_group = self.get_group(group_id)
-        except (GroupNotExistsError, Exception):
+        except GroupNotExistsError:
             return right_status
+
         right_status = chosen_group.has_right(right_name)
         if not right_status:
             try:
-                # check for global right
-                parent_right = '{}.{}'.format('.'.join(right_name.split('.')[:-1]), GLOBAL_IDENTIFIER)
-                LOGGER.debug("Parent global right: {}".format(parent_right))
-                right_status = chosen_group.has_right(parent_right)
+                right_status = self._has_parent_right(chosen_group, right_name)
             except Exception:
                 return False
         return right_status
+
+    def _has_parent_right(self, group, right_name) -> bool:
+
+        parent_right_name = '{}.{}'.format('.'.join(right_name.split('.')[:-1]), GLOBAL_IDENTIFIER)
+        try:
+            parent_right = self.get_right_by_name(parent_right_name)
+            if parent_right.is_master():
+                return group.has_right(parent_right.get_name())
+            else:
+                return False
+        except (RightNotExistsError, Exception) as e:
+            LOGGER.debug("Right not found {}".format(e.message))
+            return False
 
     def user_group_has_right(self, user: User, right_name: str) -> bool:
         try:

@@ -1,0 +1,19 @@
+{% extends 'layout.html' %}
+{% block title %}Search{% endblock %}
+{% block navigation %}
+    {% include 'includes/_navigation.html' %}
+{% endblock %}
+{% block breadcrumb %}
+    {% include 'includes/_breadcrumb.html' %}
+{% endblock %}
+{% block content %}
+    <div class="content">
+        <div class="container-fluid">
+            {{ super() }}
+        </div>
+    </div>
+{% endblock %}
+{% if mode == 'DEBUG' %}
+    {% block debug %}
+    {% endblock %}
+{% endif %}
