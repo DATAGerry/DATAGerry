@@ -5,6 +5,7 @@ The implementation of the manager used is always realized using the respective s
 
 """
 import logging
+import re
 from cmdb.object_framework import *
 from cmdb.object_framework import CmdbObjectStatus
 from cmdb.data_storage.database_manager import PublicIDAlreadyExists
@@ -12,7 +13,7 @@ from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import timing
 from cmdb.event_management.event import Event
 
-CMDB_LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class CmdbManagerBase:
@@ -131,6 +132,9 @@ class CmdbManagerBase:
             public_id=public_id
         )
 
+    def _search(self, collection: str, requirements):
+        return self._get_all(collection, **requirements)
+
 
 class CmdbObjectManager(CmdbManagerBase):
     def __init__(self, database_manager=None, event_queue=None):
@@ -144,9 +148,6 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def is_ready(self) -> bool:
         return self.dbm.status()
-
-    def search(self, search: str, exclude: str = None):
-        return self.dbm.__find(CmdbObject.COLLECTION, {"$text": {"$search": search}})
 
     def get_highest_id(self, collection: str):
         return self.dbm.get_highest_id(collection)
@@ -188,6 +189,30 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_objects_by_type(self, type_id: int):
         return self.get_objects_by(type_id=type_id)
+
+    def _re_search_fields(self, search_object, regex):
+        """returns list of matched fields"""
+        match_list = list()
+        for field in search_object.fields:
+            if re.search(regex, str(field['value'])):
+                match_list.append(field['name'])
+        return match_list
+
+    def search_objects(self, query: dict) -> dict:
+        result_list = dict()
+        for result_objects in self._search(CmdbObject.COLLECTION, query):
+            try:
+                query_fields = query['fields.value']
+                re_query = query_fields.try_compile()
+                result_object_instance = CmdbObject(**result_objects)
+                matched_fields = self._re_search_fields(result_object_instance, re_query)
+
+                result_list.update({
+                    result_object_instance: matched_fields
+                })
+            except (CMDBError, re.error):
+                continue
+        return result_list
 
     def insert_object(self, data: (CmdbObject, dict)):
         if isinstance(data,  dict):
@@ -254,26 +279,26 @@ class CmdbObjectManager(CmdbManagerBase):
     def get_object_references(self, public_id: int) -> list:
         # Type of given object id
         type_id = self.get_object(public_id=public_id).get_type_id()
-        CMDB_LOGGER.debug("Type ID: {}".format(type_id))
+        LOGGER.debug("Type ID: {}".format(type_id))
         # query for all types with ref input type with value of type id
         req_type_query = {"fields": {"$elemMatch": {"input_type": "ref", "$and": [{"type_id": int(type_id)}]}}}
-        CMDB_LOGGER.debug("Query: {}".format(req_type_query))
+        LOGGER.debug("Query: {}".format(req_type_query))
         # get type list
         req_type_list = self.dbm.find_all(collection=CmdbType.COLLECTION, filter=req_type_query)
-        CMDB_LOGGER.debug("Req type list: {}".format(req_type_list))
+        LOGGER.debug("Req type list: {}".format(req_type_list))
         type_init_list = []
         for new_type_init in req_type_list:
             try:
                 current_loop_type = self.get_type(new_type_init['public_id'])
                 ref_field = current_loop_type.get_field_of_type_with_value(input_type='ref', _filter='type_id',
                                                                            value=type_id)
-                CMDB_LOGGER.debug("Current reference field {}".format(ref_field))
+                LOGGER.debug("Current reference field {}".format(ref_field))
                 type_init_list.append(
                     {"type_id": current_loop_type.get_public_id(), "field_name": ref_field.get_name()})
             except CMDBError as e:
-                CMDB_LOGGER.warning('Unsolvable type reference with type {}'.format(e.message))
+                LOGGER.warning('Unsolvable type reference with type {}'.format(e.message))
                 continue
-        CMDB_LOGGER.debug("Init type list: {}".format(type_init_list))
+        LOGGER.debug("Init type list: {}".format(type_init_list))
 
         referenced_by_objects = []
         for possible_object_types in type_init_list:
@@ -287,8 +312,8 @@ class CmdbObjectManager(CmdbManagerBase):
             matched_objects.append(CmdbObject(
                 **matched_object
             ))
-        CMDB_LOGGER.debug("matched objects count: {}".format(len(matched_objects)))
-        CMDB_LOGGER.debug("matched objects: {}".format(matched_objects))
+        LOGGER.debug("matched objects count: {}".format(len(matched_objects)))
+        LOGGER.debug("matched objects: {}".format(matched_objects))
         return matched_objects
 
     def delete_object(self, public_id: int):
@@ -351,8 +376,8 @@ class CmdbObjectManager(CmdbManagerBase):
             try:
                 ack.append(CmdbTypeCategory(**cat_obj))
             except CMDBError as e:
-                CMDB_LOGGER.debug("Error while parsing Category")
-                CMDB_LOGGER.debug(e.message)
+                LOGGER.debug("Error while parsing Category")
+                LOGGER.debug(e.message)
         return ack
 
     def get_categories_by(self, _filter: dict) -> list:
@@ -366,8 +391,8 @@ class CmdbObjectManager(CmdbManagerBase):
             try:
                 ack.append(CmdbTypeCategory(**cat_obj))
             except CMDBError as e:
-                CMDB_LOGGER.debug("Error while parsing Category")
-                CMDB_LOGGER.debug(e.message)
+                LOGGER.debug("Error while parsing Category")
+                LOGGER.debug(e.message)
         return ack
 
     def _get_category_nodes(self, parent_list: list) -> dict:
@@ -444,7 +469,7 @@ class CmdbObjectManager(CmdbManagerBase):
         from cmdb.utils.security import SecurityManager
         scm = SecurityManager(self.dbm)
         encrypted_state = scm.encrypt_aes(state)
-        CMDB_LOGGER.debug("Encrypt log state: {}".format(encrypted_state))
+        LOGGER.debug("Encrypt log state: {}".format(encrypted_state))
         return encrypted_state
 
 

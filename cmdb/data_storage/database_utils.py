@@ -116,8 +116,10 @@ def default(obj):
         return {"$minKey": 1}
     if isinstance(obj, MaxKey):
         return {"$maxKey": 1}
+    if isinstance(obj, dict):
+        return obj
     if isinstance(obj, Timestamp):
         return {"t": obj.time, "i": obj.inc}
     if _use_uuid and isinstance(obj, uuid.UUID):
         return {"$uuid": obj.hex}
-    raise TypeError("%r is not JSON serializable" % obj)
+    raise TypeError("{} is not JSON serializable".format(obj))

@@ -9,11 +9,119 @@
 {% block content %}
     <div class="content">
         <div class="container-fluid">
+            <h1>Search</h1>
+            <hr/>
+            <div class="row">
+                <div class="col-6">
+                    <form id="search_form" method="post" action="{{ request.url }}">
+                        <div class="form-row">
+                            <div class="form-group col-2">
+                                <label for="search_text_input">Text search</label>
+                            </div>
+                            <div class="form-group col-10">
+                                <input type="search" class="form-control" name="search_text_input"
+                                       id="search_text_input"
+                                       placeholder="searching...">
+                                <small class="form-text text-muted">
+                                    comma separated text. e.g..: Word1, Word2,
+                                </small>
+                            </div>
+                        </div>
+                        <hr/>
+                        <strong>Filters:</strong>
+                        <div class="form-row">
+                            <div class="form-group col-2">
+                                <label for="search_text_input_exclude">Exclude words</label>
+                            </div>
+                            <div class="form-group col-10">
+                                <input type="search" class="form-control" name="search_text_input_exclude"
+                                       id="search_text_input_exclude"
+                                       placeholder="exclude words">
+                                <small class="form-text text-muted">
+                                    comma separated text. e.g..: Word1, Word2,
+                                </small>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-2">
+                                <label for="search_type_id">Type selection</label>
+                            </div>
+                            <div class="form-group col-10">
+                                <select class="custom-select" name="search_type_id" id="search_type_id">
+                                    <option></option>
+                                    {% for types in type_list %}
+                                        <option value="{{ types.get_public_id() }}">{{ types.get_label() }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-2">
+                                <label for="search_type_id">Author selection</label>
+                            </div>
+                            <div class="form-group col-10">
+                                <select class="custom-select" name="search_author_id" id="search_author_id">
+                                    <option></option>
+                                    {% for user in user_list %}
+                                        <option value="{{ user.get_public_id() }}">{{ user.get_name() }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Search</button>
+                        <button type="reset" class="btn btn-outline-secondary">Reset</button>
+                    </form>
+                </div>
+            </div>
+            <hr/>
+            <div class="row">
+                <div class="col-12">
+                    <div id="results"></div>
+                </div>
+            </div>
             {{ super() }}
         </div>
     </div>
 {% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+        cmdb.$(function () {
+            cmdb.$('#search_type_id').select_choices();
+            cmdb.$('#search_author_id').select_choices();
+
+            cmdb.$('#search_form').submit(function (e) {
+                e.preventDefault();
+                const $this = cmdb.$(this);
+                var $SCRIPT_ROOT = $this[0].action;
+                cmdb.$('#results').html('<div class="d-flex justify-content-center">\n' +
+                    '  <div class="spinner-grow text-primary" role="status">\n' +
+                    '    <span class="sr-only">Loading...</span>\n' +
+                    '  </div>\n' +
+                    '</div>');
+                cmdb.$.post({
+                    url: $SCRIPT_ROOT,
+                    data: $this.serialize(),
+                    timeout: 0,
+                    success: function (data, status) {
+                        console.log("\nStatus: " + status);
+                        cmdb.$('#results').html(data);
+                        cmdb.$('#results table').DataTable({
+                            searchHighlight: true
+                        });
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        cmdb.$('#results').html(jqXHR);
+                    }
+
+                });
+            });
+
+        });
+    </script>
+{% endblock %}
 {% if mode == 'DEBUG' %}
     {% block debug %}
+        Request method: {{ request.method }}
     {% endblock %}
 {% endif %}

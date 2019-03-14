@@ -5,9 +5,6 @@ Object/Type render
 from cmdb.utils.error import CMDBError
 from cmdb.object_framework.cmdb_object import CmdbObject
 from cmdb.object_framework.cmdb_object_type import CmdbType
-from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
-
-import json
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -25,6 +22,7 @@ class CmdbRender:
         if format_ not in CmdbRender.__POSSIBLE_OUTPUT_FORMATS:
             raise WrongOutputFormat(format_)
         self.format_ = format_
+        self.matched_fields = list()
 
     @property
     def object_instance(self) -> CmdbObject:
@@ -64,6 +62,19 @@ class CmdbRender:
         if not isinstance(type_instance, CmdbType):
             raise TypeInstanceError()
         self._type_instance = type_instance
+
+    def set_matched_fieldset(self, matched_fields) -> list:
+        tmp = list()
+        for matched_field in matched_fields:
+            try:
+                tmp.append({
+                    'name': matched_field,
+                    'value': self.object_instance.get_value(matched_field)
+                })
+            except CMDBError:
+                LOGGER.warning("Could not parse matched field {}".format(matched_field))
+                continue
+        self.matched_fields = tmp
 
     def get_summaries(self, output=False) -> list:
         """

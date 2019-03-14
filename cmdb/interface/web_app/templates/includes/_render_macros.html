@@ -52,6 +52,15 @@
     {% endfor %}
 {% endmacro %}
 
+{% macro render_matched_fields(matching_list) %}
+    {% for match in matching_list %}
+        <strong>{{ match.name }}:</strong> {{ match.value }}
+        {% if not loop.last %}
+            <br/>
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
+
 {% macro render_externals(external_list) %}
     <table class="table table-sm">
         <tbody>
