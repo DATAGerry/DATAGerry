@@ -40,6 +40,12 @@
     {% endif %}
 {% endmacro %}
 
+{% macro render_summary(summary) %}
+    {% for value in summary.values %}
+        {{ value }}
+    {% endfor %}
+{% endmacro %}
+
 {% macro render_summaries(summary_list) %}
     {% for summary in summary_list %}
         <strong id="summary_{{ summary.name }}">{{ summary.label }}: </strong>

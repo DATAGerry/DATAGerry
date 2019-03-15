@@ -20,12 +20,23 @@
     </table>
 {% endmacro %}
 
-{% macro render_table(headlines, content, data_order='[[ 0, "asc" ]]') %}
+{% macro render_table(headlines, content, data_order='[[ 0, "asc" ]]', summary_inject=None, inject_position_after=3) %}
     <table data-order='{{ data_order }}' class="data_table table">
         <thead class="thead">
         <tr>
             {% for head in headlines %}
+                {% if summary_inject %}
+                    {% if loop.index0 == inject_position_after %}
+                        {% for sum_inject in summary_inject %}
+                            <th scope="col">{{ sum_inject['label'] }}
+                                <i class="fas fa-question-circle fa-xs" data-toggle="tooltip" data-placement="top"
+                                   title="Summary section based on fields: {{ sum_inject['fields'] }}"></i>
+                            </th>
+                        {% endfor %}
+                    {% endif %}
+                {% endif %}
                 <th scope="col">{{ head }}</th>
+
             {% endfor %}
         </tr>
         </thead>
