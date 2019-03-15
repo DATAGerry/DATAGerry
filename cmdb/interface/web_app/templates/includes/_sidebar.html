@@ -1,5 +1,4 @@
 {% macro categorie_tree(categorie_root) %}
-    {# TODO: Sidebar type output #}
     <div class="list-group panel">
         {% for cat in categorie_root recursive %}
             {% set category_childs = object_manager.get_categories_by(_filter={'parent_id': cat.get_public_id() }) %}
@@ -17,7 +16,7 @@
                     {% for category_type in cat.get_types() %}
                         {% set current_type = exception_handler(object_manager.get_type, category_type) %}
                         {% if current_type %}
-                            <a href="/type/{{ current_type.get_public_id() }}/list/" class="list-group-item"
+                            <a href="/type/list/{{ current_type.get_public_id() }}/" class="list-group-item"
                                data-parent="#{{ cat.get_name() }}"><i
                                     class="fas fa-clone"></i> {{ current_type.get_label() }}</a>
                         {% endif %}
