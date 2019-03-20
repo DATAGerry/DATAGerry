@@ -130,7 +130,7 @@ class UserManagement:
     def _load_right_tree(self, right_list) -> list:
         rights = list()
         for right in right_list:
-            if isinstance(right, list):
+            if isinstance(right, tuple) or isinstance(right, list):
                 rights = rights + self._load_right_tree(right)
             else:
                 rights.append(right)
