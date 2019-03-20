@@ -16,6 +16,8 @@ class CmdbRender:
         str
     ]
 
+    __slots__ = ['_type_instance', '_object_instance', 'format_', 'matched_fields']
+
     def __init__(self, type_instance: CmdbType, object_instance: CmdbObject, format_: (dict, str) = dict):
         self.type_instance = type_instance
         self.object_instance = object_instance
