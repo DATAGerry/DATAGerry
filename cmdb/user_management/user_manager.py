@@ -31,6 +31,9 @@ class UserManagement:
             'LocalAuthenticationProvider': LocalAuthenticationProvider
         }
 
+    def get_highest_id(self, collection: str):
+        return self.dbm.get_highest_id(collection)
+
     def get_authentication_provider(self, name: str):
         if issubclass(self._authentication_providers[name], AuthenticationProvider):
             return self._authentication_providers[name]()
@@ -123,6 +126,13 @@ class UserManagement:
                 LOGGER.warning(e)
             raise GroupDeleteError(public_id)
 
+    def get_right_names_with_min_level(self, MIN_LEVEL):
+        selected_levels = list()
+        for right in self.rights:
+            if right.get_level() <= MIN_LEVEL:
+                selected_levels.append(right.get_name())
+        return selected_levels
+
     def _load_rights(self):
         from cmdb.user_management.rights import __all__
         return self._load_right_tree(__all__)
@@ -135,6 +145,10 @@ class UserManagement:
             else:
                 rights.append(right)
         return rights
+
+    @staticmethod
+    def get_security_levels():
+        return BaseRight.get_levels()
 
     def get_right_by_name(self, name) -> BaseRight:
         try:

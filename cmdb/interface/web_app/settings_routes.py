@@ -7,6 +7,7 @@ from cmdb.utils.interface_wraps import login_required, right_required
 from flask import Blueprint, render_template, jsonify
 from flask_breadcrumbs import default_breadcrumb_root, register_breadcrumb
 from flask import request, abort
+from cmdb.user_management.user_group import UserGroup
 
 try:
     from cmdb.utils.error import CMDBError
@@ -93,14 +94,38 @@ def user_management_add_user():
 @login_required
 @right_required('base.system.user.manage_groups')
 def user_management_groups():
-    """
-    TODO: IMPLEMENT EDIT GROUPS
-    """
     user_manager_instance = MANAGER_HOLDER.get_user_manager()
     group_list = user_manager_instance.get_all_groups()
     right_list = user_manager_instance._load_rights()
+    security_levels = user_manager_instance.get_security_levels()
     return render_template('settings/user_management/groups.html', user_manager=user_manager_instance,
-                           group_list=group_list, right_list=right_list)
+                           group_list=group_list, right_list=right_list, security_levels=security_levels)
+
+
+@settings_pages.route('/user-management/groups/add_group/', methods=['POST'])
+@register_breadcrumb(settings_pages, '.user_management.groups', 'Groups')
+@login_required
+@right_required('base.system.user.manage_groups')
+def user_management_groups_add():
+    LOGGER.debug(request.form)
+    user_manager = MANAGER_HOLDER.get_user_manager()
+    new_group_name = request.form.get("new_group_name")
+    new_group_label = request.form.get("new_group_label")
+    new_group_rights = request.form.get("new_group_rights")
+    right_list = list()
+    if new_group_rights:
+        right_list = user_manager.get_right_names_with_min_level(int(new_group_rights))
+    new_group = UserGroup(
+        public_id=user_manager.get_highest_id(collection=UserGroup.COLLECTION),
+        name=new_group_name,
+        label=new_group_label,
+        rights=right_list
+    )
+    try:
+        MANAGER_HOLDER.get_user_manager().insert_group(new_group)
+    except CMDBError:
+        pass
+    return user_management_groups()
 
 
 @settings_pages.route('/user-management/groups/<int:public_id>/rights/', methods=['POST'])

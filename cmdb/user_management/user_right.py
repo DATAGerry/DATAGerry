@@ -67,6 +67,10 @@ class BaseRight:
     def is_master(self):
         return self._MASTER
 
+    @classmethod
+    def get_levels(cls):
+        return cls._levelToName
+
     @property
     def level(self):
         return self._level
