@@ -20,10 +20,17 @@ class CmdbObject(CmdbDAO):
         'creation_time',
         'author_id',
         'active',
-        'fields'
+        'fields',
+        'status',
+        'version',
+        'last_edit_time',
+        'views',
+        'logs'
     ]
 
-    def __init__(self, type_id, creation_time, author_id, active, fields, last_edit_time=None, logs=[],
+    __slots__ = REQUIRED_INIT_KEYS
+
+    def __init__(self, type_id, creation_time, author_id, active, fields, last_edit_time=None, logs=None,
                  status: int = None,
                  views: int = 0, version: str = '1.0.0', **kwargs):
         """init of object
@@ -49,7 +56,7 @@ class CmdbObject(CmdbDAO):
         self.active = active
         self.views = int(views)
         self.fields = fields
-        self.logs = logs
+        self.logs = logs or list()
         super(CmdbObject, self).__init__(**kwargs)
 
     def get_type_id(self) -> int:
