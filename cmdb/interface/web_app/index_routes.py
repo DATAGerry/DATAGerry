@@ -33,7 +33,6 @@ def index_page():
         uum = MANAGER_HOLDER.get_user_manager()
         scm = MANAGER_HOLDER.get_security_manager()
         new_objects = obm.get_objects_by(sort='creation_time', limit=25, active={"$eq": True})
-        LOGGER.debug("NEW OBJECTS {}".format(new_objects))
         all_objects_count = len(obm.get_all_objects())
         all_types_count = len(obm.get_all_types())
         current_user_token = request.cookies['access-token']

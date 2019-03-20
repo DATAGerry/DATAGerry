@@ -7,10 +7,14 @@
                 <li class="breadcrumb-item"><a href="{{ breadcrumb.url }}">{{ breadcrumb.text }}</a></li>
             {% endif %}
         {% endfor %}
-        <div class="custom-control custom-switch ml-auto" data-toggle="tooltip" data-placement="bottom" title="Show only active objects">
-            <input type="checkbox" class="custom-control-input" name="active_cookiee" id="active_cookiee" checked />
+
+        <div class="custom-control custom-switch ml-auto" data-toggle="tooltip" data-placement="bottom"
+             title="Show only active objects">
+            <input type="checkbox" class="custom-control-input" name="active_cookiee" id="active_cookiee"
+                   {% if only_active %}checked{% endif %}/>
             <label class="custom-control-label" for="active_cookiee"></label>
         </div>
+
     </ol>
 
 </nav>

@@ -210,9 +210,9 @@ def main(args):
         _factory_database_manager = get_pre_init_database()
         db_name = _factory_database_manager.get_database_name()
         LOGGER.warning("Inserting test-data into: {}".format(db_name))
-        factory = DataFactory(database_manager=_factory_database_manager)
-        ack = list()
         try:
+            factory = DataFactory(database_manager=_factory_database_manager)
+            ack = list()
             ack = factory.insert_data()
             LOGGER.warning("Test-data was successfully added".format(_factory_database_manager.get_database_name()))
             if len(ack) > 0:

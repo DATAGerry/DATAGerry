@@ -3,7 +3,10 @@ from cmdb.user_management.user_manager import UserManagement
 from cmdb.data_storage import DatabaseManagerMongo
 from cmdb.utils import SecurityManager
 from cmdb.utils import SystemSettingsReader, SystemSettingsWriter
-from flask import Flask
+from flask import Flask, request
+import logging
+
+LOGGER = logging.getLogger(__name__)
 
 
 class CmdbManagerHolder:
@@ -58,6 +61,18 @@ class CmdbManagerHolder:
 
     def get_system_settings_writer(self) -> SystemSettingsWriter:
         return self.system_settings_writer
+
+    @staticmethod
+    def only_active():
+        try:
+            only_active = int(request.cookies.get('only_active'))
+        except (ValueError, TypeError):
+            return False
+        if not only_active:
+            return False
+        only_active = bool(only_active)
+        LOGGER.debug("Active flag: {}".format(only_active))
+        return only_active
 
     def init_app(self, app):
         app.manager_holder = self

@@ -45,6 +45,7 @@ class CmdbDAO:
     VERSIONING_MINOR = 1
     VERSIONING_PATCH = 0
 
+
     def __init__(self, **kwargs):
         """
         All parameters inside *kwargs will be auto convert to attributes

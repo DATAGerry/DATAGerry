@@ -19,6 +19,12 @@ def inject_modus():
     return dict(mode=modus())
 
 
+def inject_active_flag():
+    def only_active():
+        return app.get_manager().only_active()
+    return dict(only_active=only_active())
+
+
 def inject_eval_function_call():
     def call_eval(obj, param):
         try:

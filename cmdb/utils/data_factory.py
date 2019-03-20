@@ -897,6 +897,10 @@ class DataGenerator:
                     "last_edit_time": None,
                     "active": self._faker.boolean(chance_of_getting_true=80),
                     "creation_time": self._faker.date_time_between(start_date="-30d"),
+                    "status": None,
+                    "logs": [
+
+                    ],
                     "fields": [
                         {
                             "name": "text-1",
@@ -965,6 +969,10 @@ class DataGenerator:
                     "last_edit_time": None,
                     "active": self._faker.boolean(chance_of_getting_true=80),
                     "creation_time": self._faker.date_time_between(start_date="-30d"),
+                    "status": None,
+                    "logs": [
+
+                    ],
                     "fields": [
                         {
                             "name": "employee_number",
@@ -1033,6 +1041,10 @@ class DataGenerator:
                     "last_edit_time": None,
                     "active": self._faker.boolean(chance_of_getting_true=80),
                     "creation_time": self._faker.date_time_between(start_date="-30d"),
+                    "status": None,
+                    "logs": [
+
+                    ],
                     "fields": [
                         {
                             "name": "name",
@@ -1061,6 +1073,10 @@ class DataGenerator:
                     "last_edit_time": None,
                     "active": self._faker.boolean(chance_of_getting_true=80),
                     "creation_time": self._faker.date_time_between(start_date="-30d"),
+                    "status": None,
+                    "logs": [
+
+                    ],
                     "fields": [
                         {
                             "name": "naming",
@@ -1113,6 +1129,10 @@ class DataGenerator:
                     "last_edit_time": None,
                     "active": self._faker.boolean(chance_of_getting_true=80),
                     "creation_time": self._faker.date_time_between(start_date="-30d"),
+                    "status": None,
+                    "logs": [
+
+                    ],
                     "fields": [
                         {
                             "name": "hostname",
@@ -1153,6 +1173,7 @@ class DataGenerator:
         for _ in range(num_objects):
             select(random.choice(type_list).get_public_id())
             public_id_counter = public_id_counter + 1
+
         object_list = example_object_list + employee_list + department_list + location_list + servers_list
         return object_list
 
@@ -1213,7 +1234,7 @@ class DataFactory:
         self.groups = self._data_generator.generate_default_groups()
         self.users = self._data_generator.generate_users(group_list=self.groups)
         self.types = self._data_generator.generate_types()
-        self.objects = self._data_generator.generate_objects(type_list=self.types, user_list=self.users)
+        self.objects = self._data_generator.generate_objects(type_list=self.types, user_list=self.users, num_objects=1000)
         self.categories = self._data_generator.generate_categories()
 
     class __FakerWrapper:

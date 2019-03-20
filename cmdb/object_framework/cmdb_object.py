@@ -28,8 +28,6 @@ class CmdbObject(CmdbDAO):
         'logs'
     ]
 
-    __slots__ = REQUIRED_INIT_KEYS
-
     def __init__(self, type_id, creation_time, author_id, active, fields, last_edit_time=None, logs=None,
                  status: int = None,
                  views: int = 0, version: str = '1.0.0', **kwargs):

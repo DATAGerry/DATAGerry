@@ -43,6 +43,7 @@ def list_page():
 @object_pages.route('/newest/')
 @register_breadcrumb(object_pages, '.newest', 'Newest')
 def newest_objects_page():
+    only_active = MANAGER_HOLDER.only_active()
     try:
         object_limit = int(request.args.get('limit') or 25)
     except ValueError:
@@ -50,9 +51,13 @@ def newest_objects_page():
     newest_objects = []
     try:
         type_buffer_list = {}
-        newest_objects_list = MANAGER_HOLDER.get_object_manager().get_objects_by(sort='creation_time',
-                                                                                 limit=object_limit,
-                                                                                 active={"$eq": True})
+        if only_active:
+            newest_objects_list = MANAGER_HOLDER.get_object_manager().get_objects_by(sort='creation_time',
+                                                                                     limit=object_limit,
+                                                                                     active={"$eq": True})
+        else:
+            newest_objects_list = MANAGER_HOLDER.get_object_manager().get_objects_by(sort='creation_time',
+                                                                                     limit=object_limit)
         for passed_object in newest_objects_list:
             current_type = None
             passed_object_type_id = passed_object.get_type_id()
