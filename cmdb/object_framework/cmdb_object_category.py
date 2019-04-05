@@ -2,7 +2,7 @@ from cmdb.object_framework.cmdb_dao import CmdbDAO
 from cmdb.utils.error import CMDBError
 
 
-class CmdbTypeCategory(CmdbDAO):
+class CmdbCategory(CmdbDAO):
     """
     Type category
     """
@@ -17,8 +17,8 @@ class CmdbTypeCategory(CmdbDAO):
         self.label = label or self.name.title()
         self.icon = icon or ''
         self.type_list = type_list or []
-        self.parent_id = parent_id
-        super(CmdbTypeCategory, self).__init__(**kwargs)
+        self.parent_id = parent_id or None
+        super(CmdbCategory, self).__init__(**kwargs)
 
     def get_name(self) -> str:
         return self.name

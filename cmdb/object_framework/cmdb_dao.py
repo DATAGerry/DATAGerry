@@ -2,6 +2,7 @@
 Data access object for all core objects that are to be stored in the database.
 """
 import logging
+
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
@@ -45,13 +46,13 @@ class CmdbDAO:
     VERSIONING_MINOR = 1
     VERSIONING_PATCH = 0
 
-
     def __init__(self, **kwargs):
         """
         All parameters inside *kwargs will be auto convert to attributes
         Args:
             **kwargs: list of parameters
         """
+        self.public_id = None
         for key in kwargs:
             setattr(self, key, kwargs[key])
 

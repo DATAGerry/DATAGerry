@@ -2,7 +2,11 @@
 Object/Type render
 """
 
-from cmdb.utils.error import CMDBError
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
+
 from cmdb.object_framework.cmdb_object import CmdbObject
 from cmdb.object_framework.cmdb_object_type import CmdbType
 import logging
@@ -16,7 +20,7 @@ class CmdbRender:
         str
     ]
 
-    __slots__ = ['_type_instance', '_object_instance', 'format_', 'matched_fields']
+    __slots__ = ['_type_instance', '_object_instance', 'format_', 'fields', 'matched_fields']
 
     def __init__(self, type_instance: CmdbType, object_instance: CmdbObject, format_: (dict, str) = dict):
         self.type_instance = type_instance
@@ -24,6 +28,7 @@ class CmdbRender:
         if format_ not in CmdbRender.__POSSIBLE_OUTPUT_FORMATS:
             raise WrongOutputFormat(format_)
         self.format_ = format_
+        self.fields = None
         self.matched_fields = list()
 
     @property
@@ -64,6 +69,10 @@ class CmdbRender:
         if not isinstance(type_instance, CmdbType):
             raise TypeInstanceError()
         self._type_instance = type_instance
+
+    def _match_field_values(self) -> list:
+        tmp = list()
+        return tmp
 
     def set_matched_fieldset(self, matched_fields) -> list:
         tmp = list()
@@ -163,7 +172,6 @@ class CmdbRender:
                     # fill the href with field value data
                     ext_link_instance.fill_href(field_list)
                 except ExternalFillError as e:
-                    LOGGER.debug("External fill error {}".format(e.message))
                     continue
             except CMDBError:
                 continue
@@ -180,6 +188,45 @@ class CmdbRender:
             return True
         except CMDBError:
             return False
+
+    def result(self):
+        from cmdb.user_management import get_user_manager
+
+        render_result = RenderResult(
+            object_id=self.object_instance.get_public_id(),
+            author_id=self.object_instance.author_id,
+            author_name=get_user_manager().get_user(self.object_instance.author_id).get_name(),
+            type_id=self.type_instance.get_public_id(),
+            type_name=self.type_instance.get_name()
+        )
+        if self.has_summaries():
+            pass  # render_result.set_summaries(self.get_summaries(True))
+        if self.has_externals():
+            pass  # render_result.set_externals(self.get_externals(True))
+        return render_result
+
+
+class RenderResult:
+
+    def __init__(self, object_id: int, author_id: int, author_name: str, type_id: int, type_name: str,
+                 type_label: str = None):
+        self.object_id = object_id
+        self.author_id = author_id
+        self.author_name = author_name
+        self.type_id = type_id
+        self.type_name = type_name
+        self.type_label = type_label or type_name.title()
+        self.summaries = None
+        self.externals = None
+
+    def set_summaries(self, summary_list: list):
+        self.summaries = summary_list
+
+    def set_externals(self, external_list: list):
+        self.externals = external_list
+
+    def to_json(self):
+        return self.__dict__
 
 
 class TypeInstanceError(CMDBError):

@@ -19,6 +19,7 @@ from bson.min_key import MinKey
 from bson.objectid import ObjectId
 from bson.timestamp import Timestamp
 from bson.tz_util import utc
+from cmdb.object_framework.cmdb_dao import CmdbDAO
 
 _RE_TYPE = type(re.compile("foo"))
 
@@ -94,6 +95,8 @@ def default(obj):
         Returns:
             json format
         """
+    if isinstance(obj, CmdbDAO):
+        return obj.__dict__
     if isinstance(obj, ObjectId):
         return {"$oid": str(obj)}
     if isinstance(obj, DBRef):

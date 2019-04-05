@@ -1,1 +1,1 @@
-from .plugin_system import PluginBase, PluginManager
+from cmdb.plugins.plugin_system import PluginBase, PluginManager

@@ -10,19 +10,20 @@ the elements for the database.
 from cmdb.object_framework.cmdb_dao import CmdbDAO
 from cmdb.object_framework.cmdb_object import CmdbObject
 from cmdb.object_framework.cmdb_object_type import CmdbType
-from cmdb.object_framework.cmdb_object_category import CmdbTypeCategory
+from cmdb.object_framework.cmdb_object_category import CmdbCategory
 from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
 from cmdb.object_framework.cmdb_object_status import CmdbObjectStatus
 from cmdb.object_framework.cmdb_object_link import CmdbObjectLink
 from cmdb.object_framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplates
 from cmdb.object_framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.object_framework.cmdb_log import CmdbLog
-from cmdb.data_storage.database_manager import DatabaseManager
+from cmdb.data_storage import database_manager
 
+# List of init collections
 __COLLECTIONS__ = [
     CmdbObject,
     CmdbType,
-    CmdbTypeCategory,
+    CmdbCategory,
     CmdbFieldType,
     CmdbObjectStatus,
     CmdbObjectLink,
@@ -30,14 +31,7 @@ __COLLECTIONS__ = [
     CmdbCollectionTemplates
 ]
 
-
-def get_object_manager(database_manager: DatabaseManager = None, event_queue=None) -> CmdbObjectManager:
-    """
-    auto init a instance of an object manager
-    Returns (CmdbObjectManager): instance of object manager
-    """
-    from cmdb.data_storage import get_pre_init_database
-    return CmdbObjectManager(
-        database_manager=database_manager or get_pre_init_database(),
-        event_queue=event_queue
-    )
+object_manager = CmdbObjectManager(
+    database_manager=database_manager,
+    event_queue=None
+)

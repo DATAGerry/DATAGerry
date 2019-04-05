@@ -4,7 +4,11 @@ Real connection to database over a given connector
 """
 import logging
 from pymongo.errors import ServerSelectionTimeoutError
-from cmdb.utils.error import CMDBError
+
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
 
@@ -47,7 +51,7 @@ class Connector:
     def is_connected(self):
         """
         check if connection to database exists
-        :return: True/False
+        Returns: True/False
         """
         raise NotImplementedError
 
@@ -59,7 +63,8 @@ class MongoConnector(Connector):
 
     DEFAULT_CONNECTION_TIMEOUT = 1000
 
-    def __init__(self, host, port, database_name, timeout: int = DEFAULT_CONNECTION_TIMEOUT, auth: str = ''):
+    def __init__(self, host: str, port: int, database_name: str, timeout: int = DEFAULT_CONNECTION_TIMEOUT,
+                 auth: str = ''):
         """
 
         init mongodb connector
@@ -117,8 +122,8 @@ class MongoConnector(Connector):
         try:
             self.connect()
             return True
-        except ServerTimeoutError as timeout_error:
-            LOGGER.error(timeout_error.message)
+        except ServerTimeoutError as e:
+            LOGGER.error(f'Not connected to database: {e.message}')
             return False
 
     def create_collection(self, collection_name) -> str:
@@ -163,8 +168,10 @@ class MongoConnector(Connector):
         """
         get a collection inside database
         (same as Tables in SQL)
-        :param name: collection name
-        :return: collection object
+        Args:
+            name:  collection name
+
+        Returns: collection object
         """
         return self.database[name]
 

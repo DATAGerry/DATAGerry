@@ -56,6 +56,8 @@ class SystemConfigReader:
     """
     DEFAULT_CONFIG_LOCATION = os.path.join(os.path.dirname(__file__), '../../etc/')
     DEFAULT_CONFIG_NAME = 'cmdb.conf'
+    RUNNING_CONFIG_LOCATION = DEFAULT_CONFIG_LOCATION
+    RUNNING_CONFIG_NAME = DEFAULT_CONFIG_NAME
     CONFIG_LOADED = True
     CONFIG_NOT_LOADED = False
     instance = None
@@ -136,7 +138,7 @@ class SystemConfigReader:
                 else:
                     raise SectionError(section)
             else:
-                raise ConfigNotLoaded(SystemConfigReader.DEFAULT_CONFIG_NAME)
+                raise ConfigNotLoaded(SystemConfigReader.RUNNING_CONFIG_NAME)
 
         def get_sections(self):
             """
@@ -147,7 +149,7 @@ class SystemConfigReader:
             if self.config_status == SystemConfigReader.CONFIG_LOADED:
                 return self.config.sections()
             else:
-                raise ConfigNotLoaded(SystemConfigReader.DEFAULT_CONFIG_NAME)
+                raise ConfigNotLoaded(SystemConfigReader.RUNNING_CONFIG_NAME)
 
         def get_all_values_from_section(self, section):
             """
@@ -167,7 +169,7 @@ class SystemConfigReader:
                 except KeyError:
                     raise KeySectionError(section)
             else:
-                raise ConfigNotLoaded(SystemConfigReader.DEFAULT_CONFIG_NAME)
+                raise ConfigNotLoaded(SystemConfigReader.RUNNING_CONFIG_NAME)
 
         def status(self):
             """

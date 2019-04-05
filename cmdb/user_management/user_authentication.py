@@ -1,6 +1,6 @@
 import logging
 
-CMDB_LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class AuthenticationProvider:
@@ -31,16 +31,13 @@ class LocalAuthenticationProvider(AuthenticationProvider):
         super(AuthenticationProvider, self).__init__()
 
     def authenticate(self, user, password: str, **kwargs) -> bool:
-        from flask import current_app
-        security_manager = current_app.manager_holder.get_security_manager()
+        from cmdb.utils import get_security_manager
+        from cmdb.data_storage import get_pre_init_database
+        security_manager = get_security_manager(get_pre_init_database())
         login_pass = security_manager.generate_hmac(password)
         if login_pass == user.get_password():
             return True
         raise WrongUserPasswordError(user.get_username())
-
-    def generate_password(self):
-        """TODO"""
-        return "TEST"
 
 
 class NoValidAuthenticationProviderError(Exception):

@@ -131,7 +131,17 @@ class UserManagement:
         for right in self.rights:
             if right.get_level() <= MIN_LEVEL:
                 selected_levels.append(right.get_name())
+        if len(selected_levels) == 0:
+            raise NoFittingRightError()
         return selected_levels
+
+    def get_all_rights(self):
+        return self.rights
+
+    @staticmethod
+    def get_right_tree():
+        from cmdb.user_management.rights import __all__
+        return __all__
 
     def _load_rights(self):
         from cmdb.user_management.rights import __all__
@@ -220,6 +230,12 @@ class GroupNotNotUpdatedError(CMDBError):
     def __init__(self, name, error):
         super().__init__()
         self.message = "The following group could not be updated: {} | error: {}".format(name, error.message)
+
+
+class NoFittingRightError(CMDBError):
+    def __init__(self):
+        super().__init__()
+        self.message = "No Rights with this requirements found"
 
 
 class RightNotExistsError(CMDBError):

@@ -5,7 +5,7 @@ NOTE: This module is highly experimental and should only be used for development
 
 from cmdb.object_framework.cmdb_object import CmdbObject
 from cmdb.object_framework.cmdb_object_type import CmdbType
-from cmdb.object_framework.cmdb_object_category import CmdbTypeCategory
+from cmdb.object_framework.cmdb_object_category import CmdbCategory
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user import User
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
@@ -1181,7 +1181,7 @@ class DataGenerator:
     @staticmethod
     def generate_categories() -> list:
         category_list = [
-            CmdbTypeCategory(**{
+            CmdbCategory(**{
                 "public_id": 1,
                 "name": "example_category",
                 "label": "Example",
@@ -1190,7 +1190,7 @@ class DataGenerator:
                     1
                 ]
             }),
-            CmdbTypeCategory(**{
+            CmdbCategory(**{
                 "public_id": 2,
                 "name": "company",
                 "label": "Company",
@@ -1200,7 +1200,7 @@ class DataGenerator:
                     3
                 ]
             }),
-            CmdbTypeCategory(**{
+            CmdbCategory(**{
                 "public_id": 3,
                 "name": "infrastructure",
                 "label": "Infrastructure",
@@ -1209,7 +1209,7 @@ class DataGenerator:
                     4
                 ]
             }),
-            CmdbTypeCategory(**{
+            CmdbCategory(**{
                 "public_id": 4,
                 "name": "hardware",
                 "icon": "fas fa-memory",

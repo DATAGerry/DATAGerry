@@ -1,13 +1,12 @@
-
 from cmdb.user_management.user_base import UserManagementBase
 from cmdb.utils.error import CMDBError
 
 
 class UserGroup(UserManagementBase):
     COLLECTION = 'management.groups'
-
+    REQUIRED_INIT_KEYS = ['name']
     INDEX_KEYS = [
-        {'keys': [('name', UserManagementBase.DAO_ASCENDING)], 'name': 'name', 'unique': True}
+        {'keys': [('name', UserManagementBase.ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
     def __init__(self, name: str, label: str = None, rights: list = None, **kwargs):

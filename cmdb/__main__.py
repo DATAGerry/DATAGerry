@@ -6,18 +6,30 @@ open-source configurable management database
 You should have received a copy of the MIT License along with Net|CMDB.
 If not, see <https://github.com/NETHINKS/NetCMDB/blob/master/LICENSE>.
 """
-
-import signal
 import logging
-from cmdb.utils.helpers import timing
-from cmdb.utils.error import CMDBError
-from cmdb.utils.logger import get_logging_conf
+import signal
+from time import sleep
 from argparse import ArgumentParser, Namespace
-import time
+from cmdb.utils.logger import get_logging_conf
+from cmdb.utils.helpers import timing
+
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
 
 # setup logging for startup
 logging.config.dictConfig(get_logging_conf())
 LOGGER = logging.getLogger(__name__)
+
+
+def _activate_debug():
+    """
+    Activate the debug mode
+    """
+    import cmdb
+    cmdb.__MODE__ = 'DEBUG'
+    LOGGER.warning("DEBUG mode enabled")
 
 
 def _check_database():
@@ -48,81 +60,6 @@ def _check_database():
     return connection_test
 
 
-def _activate_debug():
-    """
-    Activate the debug mode
-    """
-    import cmdb
-    cmdb.__MODE__ = 'DEBUG'
-    LOGGER.warning("DEBUG mode enabled")
-
-
-def _generate_security_keys():
-    """
-    Generating security settings keys
-    """
-    LOGGER.info("Generating security keys")
-    from cmdb.utils import get_security_manager
-    from cmdb.data_storage import get_pre_init_database
-    sec_database = get_pre_init_database()
-    sec_security = get_security_manager(sec_database)
-    sec_security.generate_symmetric_aes_key()
-    LOGGER.info("Security keys generated")
-
-
-def _setup() -> bool:
-    """
-    Setup function which generates default settings and admin user
-    will be triggered with the --setup parameter
-    Returns:
-        bool: True if setup was complete without error
-    """
-    from cmdb.user_management import get_user_manager
-    from cmdb.user_management.user import User
-    from cmdb.data_storage import get_pre_init_database
-    from cmdb.utils import get_security_manager
-    from datetime import datetime
-
-    try:
-        setup_database = get_pre_init_database()
-        setup_security = get_security_manager(setup_database)
-        setup_security.generate_sym_key()
-        _generate_security_keys()
-        setup_management = get_user_manager()
-        group_id = setup_management.insert_group('admin', 'Administrator')
-        admin_username = input('Enter admin USERNAME: ')
-        while True:
-            admin_pass_1 = input('Enter admin PASSWORD: ')
-            admin_pass_2 = input('Repeat admin PASSWORD: ')
-            if admin_pass_1 == admin_pass_2:
-                break
-            else:
-                LOGGER.info("Passwords are not the same - please repeate")
-        admin_user = User(
-            public_id=setup_database.get_highest_id(collection=User.COLLECTION) + 1,
-            user_name=admin_username,
-            group_id=group_id,
-            registration_time=datetime.utcnow(),
-            password=setup_security.generate_hmac(admin_pass_1)
-        )
-        setup_management.insert_user(admin_user)
-    except CMDBError as setup_error:
-        LOGGER.critical(setup_error)
-        return False
-    return True
-
-
-def _load_plugins():
-    """
-    Loading plugin system
-    TODO: Write plugin system
-    """
-    LOGGER.info("Loading plugins")
-    from cmdb.plugins.plugin_system import PluginManager
-    pgm = PluginManager()
-    LOGGER.info("Plugins loaded")
-
-
 def _start_app():
     """
     Starting the services
@@ -138,12 +75,23 @@ def _start_app():
     app_manager = cmdb.process_management.process_manager.ProcessManager()
     app_status = app_manager.start_app()
     LOGGER.info("Process manager started: {}".format(app_status))
-    time.sleep(2)  # prevent logger output
 
 
 def _stop_app(signum, frame):
     global app_manager
     app_manager.stop_app()
+
+
+def _init_config_reader(config_file):
+    import os
+
+    from cmdb.utils.system_reader import SystemConfigReader
+    path, filename = os.path.split(config_file)
+    if filename is not SystemConfigReader.DEFAULT_CONFIG_NAME or path is not SystemConfigReader.DEFAULT_CONFIG_LOCATION:
+        SystemConfigReader.RUNNING_CONFIG_NAME = filename
+        SystemConfigReader.RUNNING_CONFIG_LOCATION = path + '/'
+    SystemConfigReader(SystemConfigReader.RUNNING_CONFIG_NAME,
+                       SystemConfigReader.RUNNING_CONFIG_LOCATION)
 
 
 def build_arg_parser() -> Namespace:
@@ -164,9 +112,6 @@ def build_arg_parser() -> Namespace:
     _parser.add_argument('--test', action='store_true', default=False, dest='test_data',
                          help="generate and insert test data")
 
-    _parser.add_argument('--keys', action='store_true', default=False, dest='keys',
-                         help="init security keys")
-
     _parser.add_argument('-d', '--debug', action='store_true', default=False, dest='debug',
                          help="enable debug mode: DO NOT USE ON PRODUCTIVE SYSTEMS")
 
@@ -186,13 +131,10 @@ def main(args):
     Args:
         args: start-options
     """
-    import os
-
-    from cmdb.utils.system_reader import SystemConfigReader
-    path, filename = os.path.split(args.config_file)
-    if filename is not SystemConfigReader.DEFAULT_CONFIG_NAME or path is not SystemConfigReader.DEFAULT_CONFIG_LOCATION:
-        SystemConfigReader.DEFAULT_CONFIG_NAME = filename
-        SystemConfigReader.DEFAULT_CONFIG_LOCATION = path + '/'
+    LOGGER.info("CMDB starting...")
+    if args.debug:
+        _activate_debug()
+    _init_config_reader(args.config_file)
     from cmdb.data_storage.database_connection import DatabaseConnectionError
     try:
         conn = _check_database()
@@ -202,6 +144,7 @@ def main(args):
     except CMDBError as conn_error:
         LOGGER.critical(conn_error.message)
         exit(1)
+
     if args.test_data:
         _activate_debug()
         from cmdb.utils.data_factory import DataFactory
@@ -212,7 +155,6 @@ def main(args):
         LOGGER.warning("Inserting test-data into: {}".format(db_name))
         try:
             factory = DataFactory(database_manager=_factory_database_manager)
-            ack = list()
             ack = factory.insert_data()
             LOGGER.warning("Test-data was successfully added".format(_factory_database_manager.get_database_name()))
             if len(ack) > 0:
@@ -223,50 +165,39 @@ def main(args):
             traceback.print_tb(e.__traceback__)
             _factory_database_manager.drop(db_name)  # cleanup database
             exit(1)
-
-    if args.setup:
-        if args.keys:
-            _generate_security_keys()
-            exit(1)
-        setup_finish = _setup()
-        if setup_finish is True:
-            LOGGER.info("SETUP COMPLETE")
-        else:
-            LOGGER.critical("During setup something went wrong - {}".format(setup_finish))
-        exit(1)
-    if args.debug:
-        _activate_debug()
-    _load_plugins()
     if args.start:
         _start_app()
+    sleep(0.2)  # prevent logger output
     LOGGER.info("CMDB successfully started")
 
 
 if __name__ == "__main__":
-
-    from time import sleep
     from termcolor import colored
 
     welcome_string = colored('Welcome to Net|CMDB \nStarting system with following parameters: \n{}\n', 'yellow')
     brand_string = colored('''
-###########################################
-__  __ _____ _____ ____ __  __ ____  ____
-| \ | | ____|_   _/ ___|  \/  |  _ \| __ ) 
-|  \| |  _|   | || |   | |\/| | | | |  _ \ 
-| |\  | |___  | || |___| |  | | |_| | |_) |
-|_| \_|_____| |_| \____|_|  |_|____/|____/ 
+    ###########################################
+    __  __ _____ _____ ____ __  __ ____  ____
+    | \ | | ____|_   _/ ___|  \/  |  _ \| __ ) 
+    |  \| |  _|   | || |   | |\/| | | | |  _ \ 
+    | |\  | |___  | || |___| |  | | |_| | |_) |
+    |_| \_|_____| |_| \____|_|  |_|____/|____/ 
 
-###########################################\n''', 'green')
+    ###########################################\n''', 'green')
 
     try:
         options = build_arg_parser()
         print(brand_string)
         print(welcome_string.format(options.__dict__))
-        sleep(0.1)  # prevent logger output
-
-        LOGGER.info("CMDB starting...")
+        sleep(0.2)  # prevent logger output
         main(options)
     except Exception as e:
+        import cmdb
+
+        if cmdb.__MODE__ == 'DEBUG':
+            import traceback
+
+            traceback.print_exc()
         LOGGER.critical("There was an unforeseen error {}".format(e))
         LOGGER.info("CMDB stopped!")
         exit(1)

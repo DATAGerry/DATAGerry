@@ -43,7 +43,7 @@ class BaseRight:
     def __init__(self, level: int, name: str, label: str = None, description: str = None):
         self.level = level
         self.name = '{}.{}'.format(self.PREFIX, name)
-        self.label = label or None
+        self.label = label or f'{self.get_prefix()}.{self.name.split(".")[-1]}'
         self.description = description or "No description"
         if name == GLOBAL_IDENTIFIER:
             self._MASTER = True
@@ -59,7 +59,7 @@ class BaseRight:
         return self.name
 
     def get_label(self):
-        return self.label or "{}.{}".format(self.get_prefix(), self.name.split('.')[-1])
+        return self.label or f'{self.get_prefix()}.{self.name.split(".")[-1]}'
 
     def get_description(self):
         return self.description
@@ -69,7 +69,7 @@ class BaseRight:
 
     @classmethod
     def get_levels(cls):
-        return cls._levelToName
+        return cls._nameToLevel
 
     @property
     def level(self):

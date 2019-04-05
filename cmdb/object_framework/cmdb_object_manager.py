@@ -182,7 +182,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_all_objects(self):
         ack = []
-        objects = self.dbm.find_all(collection=CmdbObject.COLLECTION)
+        objects = self._get_all(collection=CmdbObject.COLLECTION, sort='public_id')
         for obj in objects:
             ack.append(CmdbObject(**obj))
         return ack
@@ -215,7 +215,7 @@ class CmdbObjectManager(CmdbManagerBase):
         return result_list
 
     def insert_object(self, data: (CmdbObject, dict)):
-        if isinstance(data,  dict):
+        if isinstance(data, dict):
             try:
                 new_object = CmdbObject(**data)
             except CMDBError as e:
@@ -371,10 +371,10 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_all_categories(self):
         ack = []
-        cats = self.dbm.find_all(collection=CmdbTypeCategory.COLLECTION, sort=[('public_id', 1)])
+        cats = self.dbm.find_all(collection=CmdbCategory.COLLECTION, sort=[('public_id', 1)])
         for cat_obj in cats:
             try:
-                ack.append(CmdbTypeCategory(**cat_obj))
+                ack.append(CmdbCategory(**cat_obj))
             except CMDBError as e:
                 LOGGER.debug("Error while parsing Category")
                 LOGGER.debug(e.message)
@@ -386,68 +386,71 @@ class CmdbObjectManager(CmdbManagerBase):
         """
         ack = []
         query_filter = _filter
-        root_categories = self.dbm.find_all(collection=CmdbTypeCategory.COLLECTION, filter=query_filter)
+        root_categories = self.dbm.find_all(collection=CmdbCategory.COLLECTION, filter=query_filter)
         for cat_obj in root_categories:
             try:
-                ack.append(CmdbTypeCategory(**cat_obj))
+                ack.append(CmdbCategory(**cat_obj))
             except CMDBError as e:
                 LOGGER.debug("Error while parsing Category")
                 LOGGER.debug(e.message)
         return ack
 
     def _get_category_nodes(self, parent_list: list) -> dict:
-        edge = {}
+        edge = []
         for cat_child in parent_list:
             next_children = self.get_categories_by(_filter={'parent_id': cat_child.get_public_id()})
             if len(next_children) > 0:
-                edge.update({
-                    'object': cat_child,
+                edge.append({
+                    'category': cat_child,
                     'children': self._get_category_nodes(next_children)
                 })
             else:
-                edge.update({
-                    'object': cat_child,
+                edge.append({
+                    'category': cat_child,
                     'children': None
                 })
+            LOGGER.debug(edge)
         return edge
 
-    def get_category_tree(self) -> dict:
-        tree = {}
-        root_categories = self.get_categories_by(_filter={'parent_id': {'$exists': False}})
+    def get_category_tree(self) -> list:
+        tree = list()
+        root_categories = self.get_categories_by(_filter={
+            '$or': [
+                {'parent_id': {'$exists': False}},
+                {'parent_id': None}
+            ]
+        })
         if len(root_categories) > 0:
-            tree.update({
-                'object': "root",
-                'children': self._get_category_nodes(root_categories)
-            })
+            tree = self._get_category_nodes(root_categories)
         else:
             raise NoRootCategories()
         return tree
 
     def get_category(self, public_id: int):
-        return CmdbTypeCategory(**self.dbm.find_one(
-            collection=CmdbTypeCategory.COLLECTION,
+        return CmdbCategory(**self.dbm.find_one(
+            collection=CmdbCategory.COLLECTION,
             public_id=public_id)
-                                )
+                            )
 
-    def insert_category(self, data: (CmdbTypeCategory, dict)):
-        if isinstance(data, CmdbTypeCategory):
+    def insert_category(self, data: (CmdbCategory, dict)):
+        if isinstance(data, CmdbCategory):
             new_category = data
         elif isinstance(data, dict):
-            new_category = CmdbTypeCategory(**data)
+            new_category = CmdbCategory(**data)
 
-        return self._insert(collection=CmdbTypeCategory.COLLECTION, data=new_category.to_database())
+        return self._insert(collection=CmdbCategory.COLLECTION, data=new_category.to_database())
 
     def update_category(self, data: dict):
-        update_type = CmdbTypeCategory(**data)
+        update_type = CmdbCategory(**data)
         ack = self.dbm.update(
-            collection=CmdbTypeCategory.COLLECTION,
+            collection=CmdbCategory.COLLECTION,
             public_id=update_type.get_public_id(),
             data=update_type.to_database()
         )
         return ack
 
     def delete_category(self, public_id: int):
-        ack = self._delete(CmdbTypeCategory.COLLECTION, public_id)
+        ack = self._delete(CmdbCategory.COLLECTION, public_id)
         return ack
 
     def get_status(self, public_id) -> (CmdbObjectStatus, None):

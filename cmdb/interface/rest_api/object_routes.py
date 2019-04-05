@@ -1,62 +1,166 @@
-from flask import Blueprint, current_app, jsonify, abort, request
-from cmdb.utils.interface_wraps import json_required
-from cmdb.object_framework import CmdbObject
-from cmdb.data_storage.database_manager import NoDocumentFound, DocumentCouldNotBeDeleted
-from cmdb.object_framework.cmdb_dao import RequiredInitKeyNotFoundError
-from bson import json_util
 import json
-from cmdb.interface.web_app import MANAGER_HOLDER
+import logging
 
-object_rest = Blueprint('object_rest', __name__, url_prefix='/objects')
+from flask import Blueprint, abort
+from cmdb.object_framework.cmdb_render import CmdbRender
+from cmdb.utils.interface_wraps import login_required
+from cmdb.interface.rest_api import MANAGER_HOLDER, cache
+from cmdb.interface.route_utils import make_response
+from cmdb.utils import json_encoding
+
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
+
+LOGGER = logging.getLogger(__name__)
+object_rest = Blueprint('object_rest', __name__, url_prefix='/object')
 
 
+# DEFAULT ROUTES
+
+@login_required
+@object_rest.route('/', methods=['GET'])
+def get_object_list():
+    all_objects = []
+    try:
+        type_buffer_list = {}
+        all_objects_list = MANAGER_HOLDER.get_object_manager().get_all_objects()
+        for passed_object in all_objects_list:
+            current_type = None
+            passed_object_type_id = passed_object.get_type_id()
+            if passed_object_type_id in type_buffer_list:
+                current_type = type_buffer_list[passed_object_type_id]
+            else:
+                try:
+                    current_type = MANAGER_HOLDER.get_object_manager().get_type(passed_object_type_id)
+                    type_buffer_list.update({passed_object_type_id: current_type})
+                except CMDBError as e:
+                    continue
+            tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
+            all_objects.append(tmp_render.result())
+    except CMDBError:
+        return abort(400)
+
+    resp = make_response(all_objects)
+    return resp
+
+
+@login_required
+@object_rest.route('/native', methods=['GET'])
+def get_native_object_list():
+    object_manager = MANAGER_HOLDER.get_object_manager()
+    try:
+        object_list = object_manager.get_all_objects()
+    except CMDBError:
+        return abort(404)
+    resp = make_response(object_list)
+    return resp
+
+
+@login_required
 @object_rest.route('/<int:public_id>', methods=['GET'])
 def get_object(public_id):
+    object_manager = MANAGER_HOLDER.get_object_manager()
+
     try:
-        tmp_object = MANAGER_HOLDER.get_object_manager().get_object(public_id)
-    except NoDocumentFound:
-        abort(404)
-    except RequiredInitKeyNotFoundError:
-        abort(406)
-    return jsonify(json.loads(json_util.dumps(tmp_object.to_database())))
+        object_instance = object_manager.get_object(public_id)
+    except CMDBError:
+        return make_response("error object", 404)
+
+    try:
+        type_instance = object_manager.get_type(object_instance.get_type_id())
+    except CMDBError:
+        return make_response("error type", 404)
+
+    try:
+        render = CmdbRender(object_instance=object_instance, type_instance=type_instance)
+        render_result = render.result()
+    except CMDBError:
+        return make_response("render type", 404)
+
+    resp = make_response(render_result)
+    return resp
 
 
-@json_required
+@login_required
+@object_rest.route('<int:public_id>/native/', methods=['GET'])
+def get_navtive_object(public_id: int):
+    object_manager = MANAGER_HOLDER.get_object_manager()
+    try:
+        object_instance = object_manager.get_object(public_id)
+    except CMDBError:
+        return abort(404)
+    resp = make_response(object_instance)
+    return resp
+
+
+@login_required
+@object_rest.route('/by/<dict:requirements>', methods=['GET'])
+def get_object_by(requirements):
+    """TODO Implement"""
+    requirements_dict = None
+    try:
+        pass  # requirements_dict = dict(requirements)
+    except ValueError:
+        return abort(400)
+    resp = make_response(requirements_dict)
+    return resp
+
+
+@login_required
 @object_rest.route('/', methods=['POST'])
 def add_object():
-    from cmdb.data_storage.database_manager import PublicIDAlreadyExists
-    try:
-        new_object = CmdbObject(**request.json)
-        try:
-            ack = MANAGER_HOLDER.get_object_manager().insert_object(new_object.to_database())
-        except PublicIDAlreadyExists as e:
-            abort(409, e, e.message)
-    except RequiredInitKeyNotFoundError as e:
-        abort(406, e.message)
-    except Exception as e:
-        abort(406, e)
-    return jsonify(ack)
+    pass
 
 
-@json_required
+@login_required
 @object_rest.route('/<int:public_id>', methods=['PUT'])
 def update_object(public_id):
+    object_manager = MANAGER_HOLDER.get_object_manager()
     try:
-        MANAGER_HOLDER.get_object_manager().get_object(public_id)
-        deload = json.loads(json_util.dumps((request.json)), object_hook=json_util.object_hook)
-        up_object = CmdbObject(**deload)
-        ack = MANAGER_HOLDER.get_object_manager().update_object(up_object.to_database())
-    except NoDocumentFound:
-        abort(404)
-    except RequiredInitKeyNotFoundError as e:
-        abort(406, e.message)
-    return jsonify(ack.updatedExisting)
+        object_instance = object_manager.get_object(public_id)
+    except CMDBError:
+        return abort(404)
+    resp = make_response(object_instance)
+    return resp
 
 
+@login_required
 @object_rest.route('/<int:public_id>', methods=['DELETE'])
 def delete_object(public_id):
+    object_manager = MANAGER_HOLDER.get_object_manager()
     try:
-        ack = MANAGER_HOLDER.get_object_manager().delete_object(public_id)
-    except DocumentCouldNotBeDeleted as e:
-        abort(400, e.message)
-    return jsonify(ack.acknowledged)
+        object_instance_ack = object_manager.delete_object(public_id)
+    except CMDBError:
+        return abort(400)
+    resp = make_response(object_instance_ack)
+    return resp
+
+
+# SPECIAL ROUTES
+@login_required
+@object_rest.route('/newest/')
+def get_newest_objects():
+    type_buffer_list = {}
+    newest_objects_list = MANAGER_HOLDER.get_object_manager().get_objects_by(sort='creation_time',
+                                                                             limit=25,
+                                                                             active={"$eq": True})
+    newest_objects = []
+    for passed_object in newest_objects_list:
+        global current_type
+        current_type = None
+        passed_object_type_id = passed_object.get_type_id()
+        if passed_object_type_id in type_buffer_list:
+            current_type = type_buffer_list[passed_object_type_id]
+        else:
+            try:
+                current_type = MANAGER_HOLDER.get_object_manager().get_type(passed_object_type_id)
+                type_buffer_list.update({passed_object_type_id: current_type})
+            except CMDBError as e:
+                LOGGER.warning("Newest object type - error: {}".format(e.message))
+                continue
+        tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
+        newest_objects.append(tmp_render.result())
+    resp = make_response(newest_objects)
+    return resp

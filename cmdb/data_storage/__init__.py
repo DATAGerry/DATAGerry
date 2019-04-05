@@ -3,15 +3,15 @@ from cmdb.data_storage.database_manager import DatabaseManagerMongo, DatabaseMan
 from cmdb.data_storage.database_manager import NoDocumentFound
 
 
-def get_pre_init_database():
+def get_pre_init_database() -> (DatabaseManager, DatabaseManagerMongo):
     """
-    Get a database manager with parameters from cmdb.conf
+    Get a database manager with parameters from system config reader
     Returns: DatabaseManager
 
     """
     from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
-    from cmdb.utils.system_reader import get_system_config_reader
-    system_config_reader = get_system_config_reader()
+    from cmdb.utils.system_reader import SystemConfigReader
+    system_config_reader = SystemConfigReader()
     try:
         timeout = system_config_reader.get_value('connection_timeout', 'Database')
     except KeyError:

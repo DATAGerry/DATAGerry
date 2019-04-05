@@ -1,15 +1,23 @@
 from cmdb.user_management.user_right import GLOBAL_IDENTIFIER, BaseRight
-from cmdb.user_management.rights.system_rights import SystemRight, UserManagementRights
+from cmdb.user_management.rights.system_rights import SystemRight, ManagementRight, UserRight, GroupRight
 from cmdb.user_management.rights.framework_rights import FrameworkRight, ObjectRight, TypeRight, CategoryRight
 
 SYSTEM_RIGHTS = (
     SystemRight(GLOBAL_IDENTIFIER, description='system settings rights'),
     SystemRight('security', BaseRight.CRITICAL, description="security features"),
     (
-        UserManagementRights(GLOBAL_IDENTIFIER),
-        UserManagementRights('manage_users', BaseRight.SECURE, description="manage users"),
-        UserManagementRights('manage_groups', BaseRight.SECURE, description="manage groups"),
-        UserManagementRights('manage_rights', BaseRight.DANGER, description="manage_rights")
+        ManagementRight(GLOBAL_IDENTIFIER, description='User management rights'),
+        (
+            UserRight('view', BaseRight.SECURE),
+            UserRight('add', BaseRight.SECURE),
+            UserRight('update', BaseRight.SECURE),
+            UserRight('delete', BaseRight.SECURE),
+
+            GroupRight('view', BaseRight.SECURE),
+            GroupRight('add', BaseRight.SECURE),
+            GroupRight('update', BaseRight.SECURE),
+            GroupRight('delete', BaseRight.DANGER),
+        )
     )
 )
 
@@ -18,21 +26,30 @@ FRAMEWORK_RIGHTS = (
 
     (
         ObjectRight(GLOBAL_IDENTIFIER),
-        ObjectRight('view', description="view objects"),
-        ObjectRight('edit', BaseRight.PROTECTED, description="edit objects"),
-        ObjectRight('delete', BaseRight.SECURE, description="delete objects")
+        (
+            ObjectRight('view', description="view objects"),
+            ObjectRight('add', description="add objects"),
+            ObjectRight('edit', BaseRight.PROTECTED, description="edit objects"),
+            ObjectRight('delete', BaseRight.SECURE, description="delete objects")
+        )
     ),
     (
         TypeRight(GLOBAL_IDENTIFIER),
-        TypeRight('view', BaseRight.PROTECTED, description="view types"),
-        TypeRight('edit', BaseRight.PROTECTED, description="edit types"),
-        TypeRight('delete', BaseRight.SECURE, description="delete types")
+        (
+            TypeRight('view', BaseRight.PROTECTED, description="view types"),
+            TypeRight('add', description="add types"),
+            TypeRight('edit', BaseRight.PROTECTED, description="edit types"),
+            TypeRight('delete', BaseRight.SECURE, description="delete types")
+        )
     ),
     (
         CategoryRight(GLOBAL_IDENTIFIER),
-        CategoryRight('view', description="view category"),
-        CategoryRight('edit', BaseRight.PROTECTED, description="edit category"),
-        CategoryRight('delete', BaseRight.SECURE, description="delete category")
+        (
+            CategoryRight('view', description="view category"),
+            CategoryRight('add', description="add category"),
+            CategoryRight('edit', BaseRight.PROTECTED, description="edit category"),
+            CategoryRight('delete', BaseRight.SECURE, description="delete category")
+        )
     )
 )
 

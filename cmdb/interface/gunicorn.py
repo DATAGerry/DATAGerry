@@ -5,9 +5,9 @@ import logging
 import multiprocessing
 from cmdb import __MODE__
 import cmdb.process_management.service
+from cmdb.interface.net_app import create_app
 from cmdb.interface.rest_api import create_rest_api
-from cmdb.interface.web_app import create_web_app
-from cmdb.utils.system_reader import get_system_config_reader
+from cmdb.utils.system_reader import SystemConfigReader
 from cmdb.utils.logger import get_logging_conf
 from gunicorn.app.base import BaseApplication
 
@@ -31,12 +31,12 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
 
         # get WSGI app
         app = DispatcherMiddleware(
-            app=create_web_app(event_queue),
+            app=create_app(event_queue),
             mounts={'/rest': create_rest_api(event_queue)}
         )
 
         # get gunicorn options
-        options = get_system_config_reader().get_all_values_from_section('WebServer')
+        options = SystemConfigReader().get_all_values_from_section('WebServer')
 
         # start gunicorn as own process
         webserver = HTTPServer(app, options)
@@ -64,13 +64,13 @@ class HTTPServer(BaseApplication):
             self.options['workers'] = HTTPServer.number_of_workers()
         self.options['worker_class'] = 'sync'
         self.options['logconfig_dict'] = get_logging_conf()
-        self.options['timeout'] = 2
+        self.options['timeout'] = 120
         self.options['daemon'] = True
         if __MODE__ == 'DEBUG' or 'TESTING':
             self.options['reload'] = True
             self.options['check_config'] = True
             LOGGER.debug("Gunicorn starting with auto reload option")
-        LOGGER.info("Webserver started @ http://{}:{}".format(self.options['host'], self.options['port']))
+        LOGGER.info("Interfaces started @ http://{}:{}".format(self.options['host'], self.options['port']))
         self.application = app
         super(HTTPServer, self).__init__()
 
@@ -85,11 +85,6 @@ class HTTPServer(BaseApplication):
 
     @staticmethod
     def number_of_workers() -> int:
-        """calculate number of workers based on cpu
-
-        Returns: number of workers
-
-        """
         return (multiprocessing.cpu_count() * 2) + 1
 
 

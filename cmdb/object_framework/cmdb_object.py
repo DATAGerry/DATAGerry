@@ -2,6 +2,7 @@ import logging
 from cmdb.object_framework.cmdb_dao import CmdbDAO
 from cmdb.object_framework.cmdb_log import CmdbLog
 from cmdb.object_framework.cmdb_object_field_type import FieldNotFoundError
+
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
@@ -162,8 +163,8 @@ class TypeNotSetError(CMDBError):
     """
 
     def __init__(self, public_id):
-        super().__init__()
         self.message = 'The object (ID: {}) is not connected with a input_type'.format(public_id)
+        super(CMDBError, self).__init__(self.message)
 
 
 class NoFoundFieldValueError(CMDBError):
@@ -182,5 +183,5 @@ class NoLinksAvailableError(CMDBError):
     """
 
     def __init__(self, public_id):
-        super().__init__()
         self.message = 'The object (ID: {}) has no links'.format(public_id)
+        super(CMDBError, self).__init__(self.message)

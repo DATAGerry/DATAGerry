@@ -8,6 +8,7 @@ import cmdb.process_management.service
 
 LOGGER = logging.getLogger(__name__)
 
+
 class ExampleService(cmdb.process_management.service.AbstractCmdbService):
     """Example implementation of AbstractCmdbService
     """

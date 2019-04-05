@@ -6,7 +6,7 @@ class User(UserManagementBase):
     COLLECTION = 'management.users'
     REQUIRED_INIT_KEYS = ['user_name']
     INDEX_KEYS = [
-        {'keys': [('user_name', UserManagementBase.DAO_ASCENDING)], 'user_name': 'user_name', 'unique': True}
+        {'keys': [('user_name', UserManagementBase.ASCENDING)], 'user_name': 'user_name', 'unique': True}
     ]
 
     def __init__(self, user_name, group_id, registration_time, password=None,
@@ -28,7 +28,7 @@ class User(UserManagementBase):
         if self.first_name is None or self.last_name is None:
             return self.user_name
         else:
-            return "{} {}".format(self.first_name, self.last_name)
+            return f'{self.first_name} {self.last_name}'
 
     def get_first_name(self):
         return self.first_name

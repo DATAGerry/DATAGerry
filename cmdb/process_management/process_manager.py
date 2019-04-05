@@ -60,7 +60,6 @@ class ProcessManager:
         return self._loaded
 
 
-
 class CmdbProcess:
     """Definition of a CmdbProcess"""
 

@@ -1,4 +1,6 @@
 import logging
+from cmdb.user_management.user_base import UserManagementBase
+from cmdb.user_management.user_manager import UserManagement
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user import User
 from cmdb.user_management.user_authentication import AuthenticationProvider
@@ -23,3 +25,6 @@ def get_user_manager():
             database_manager=db_man
         )
     )
+
+
+user_manager = get_user_manager()

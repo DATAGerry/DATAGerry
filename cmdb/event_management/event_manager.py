@@ -8,7 +8,7 @@ import multiprocessing
 import threading
 import pika
 from cmdb.event_management.event import Event
-from cmdb.utils.system_reader import get_system_config_reader
+from cmdb.utils.system_reader import SystemConfigReader
 
 LOGGER = logging.getLogger(__name__)
 
@@ -133,7 +133,7 @@ class EventSenderAmqp(threading.Thread):
         self.__process_id = process_id
 
         # get configuration
-        self.__config_mq = get_system_config_reader().get_all_values_from_section('MessageQueueing')
+        self.__config_mq = SystemConfigReader().get_all_values_from_section('MessageQueueing')
         self.__config_host = self.__config_mq.get("host", "127.0.0.1")
         self.__config_port = self.__config_mq.get("port", "5672")
         self.__config_username = self.__config_mq.get("username", "guest")
@@ -218,7 +218,7 @@ class EventReceiverAmqp(threading.Thread):
         self.__event_types = event_types
 
         # get configuration
-        self.__config_mq = get_system_config_reader().get_all_values_from_section('MessageQueueing')
+        self.__config_mq = SystemConfigReader().get_all_values_from_section('MessageQueueing')
         self.__config_host = self.__config_mq.get("host", "127.0.0.1")
         self.__config_port = self.__config_mq.get("port", "5672")
         self.__config_username = self.__config_mq.get("username", "guest")

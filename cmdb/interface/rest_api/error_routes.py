@@ -3,6 +3,49 @@ from flask import Blueprint, jsonify, request
 error_pages = Blueprint('error_pages', __name__)
 
 
+@error_pages.errorhandler(400)
+def bad_request(error):
+    message = {
+        'status': 400,
+        'response': 'Bad Request: ' + request.url,
+        'message': 'The request message had an incorrect structure'
+    }
+    resp = jsonify(message)
+    resp.status_code = 400
+    resp.error = error
+    return resp
+
+
+@error_pages.errorhandler(401)
+def unauthorized_user(error):
+    message = {
+        'status': 401,
+        'response': 'Unauthorized: ' + request.url,
+        'message': 'The request cannot be executed without valid authentication. '
+                   'How the authentication is to be performed is transmitted in the '
+                   'WWW-Authenticate" header field of the reply.'
+    }
+    resp = jsonify(message)
+    resp.status_code = 401
+    resp.error = error
+    return resp
+
+
+@error_pages.errorhandler(403)
+def forbidden(error):
+    message = {
+        'status': 403,
+        'response': 'Forbidden: ' + request.url,
+        'message': 'The request was not executed because the client was not authorized, for example, '
+                   'because the authenticated user is not authorized, or a URL configured as HTTPS '
+                   'was called only with HTTP.y.'
+    }
+    resp = jsonify(message)
+    resp.status_code = 403
+    resp.error = error
+    return resp
+
+
 @error_pages.errorhandler(404)
 def page_not_found(error):
     message = {
@@ -46,16 +89,20 @@ def not_acceptable(error):
     return resp
 
 
-@error_pages.errorhandler(409)
-def conflict(error, cmdb_error):
+@error_pages.errorhandler(410)
+def page_gone(error):
+    """
+
+    :param error: error code
+    :return: error page
+    """
     message = {
-        'status': 409,
-        'response': 'Conflict: ' + request.url,
-        'message': 'Conflict',
-        'cmdb_error': cmdb_error
+        'status': 410,
+        'response': 'Gone: ' + request.url,
+        'message': 'The requested resource is no longer provided and has been permanently removed.'
     }
     resp = jsonify(message)
-    resp.status_code = 409
+    resp.status_code = 410
     resp.error = error
     return resp
 
@@ -69,5 +116,20 @@ def internal_server_error(error):
     }
     resp = jsonify(message)
     resp.status_code = 500
+    resp.error = error
+    return resp
+
+
+@error_pages.errorhandler(501)
+def not_implemented(error):
+    message = {
+        'status': 501,
+        'response': 'Not Implemented ' + request.url,
+        'message': 'The server either does not recognize the request method, or it lacks the '
+                   'ability to fulfil the request. Usually this implies future availability '
+                   '(e.g., a new feature of a web-service API)'
+    }
+    resp = jsonify(message)
+    resp.status_code = 501
     resp.error = error
     return resp

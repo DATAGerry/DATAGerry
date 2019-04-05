@@ -1,4 +1,4 @@
-from cmdb.utils.system_reader import SystemReader, SystemConfigReader, SystemSettingsReader
+from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from cmdb.utils.security import SecurityManager
 

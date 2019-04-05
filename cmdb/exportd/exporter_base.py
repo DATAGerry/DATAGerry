@@ -2,6 +2,8 @@ import jinja2
 import cmdb.object_framework
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import load_class
+from cmdb.object_framework import object_manager
+
 
 class ExportJob:
 
@@ -28,8 +30,8 @@ class ExportJob:
             "password": "admin"
         }
         export_destination = ExportDestination(
-            "cmdb.exportd.exporter_base.ExternalSystemDummy", 
-            destination_parms, 
+            "cmdb.exportd.exporter_base.ExternalSystemDummy",
+            destination_parms,
             self.__exportvars
         )
         self.__destinations.append(export_destination)
@@ -58,7 +60,7 @@ class ExportVariable:
 
     def get_value(self, cmdb_object):
         # get object manager
-        om = cmdb.object_framework.get_object_manager()
+        om = object_manager
 
         # get value template
         value_template = self.__value_tpl_default
@@ -89,7 +91,6 @@ class ExportSource:
 
     def __init__(self):
         self.__objects = []
-        object_manager = cmdb.object_framework.get_object_manager()
         # ToDo: filter objects
         self.__objects = object_manager.get_all_objects()
 
@@ -156,7 +157,6 @@ class ExternalSystemDummy(ExternalSystem):
         print("object {}".format(object_id))
         print("dummy1: {}; dummy2: {}; dummy3: {}; dummy4: {}".format(dummy1, dummy2, dummy3, dummy4))
         print("")
-
 
     def finish_export(self):
         print("finish export")
