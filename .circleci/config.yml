@@ -31,7 +31,6 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            pytest tests/
           environment:
             TEST_HOST: 127.0.0.1
             TEST_PORT: 27017
