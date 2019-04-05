@@ -2,8 +2,8 @@ import base64
 import ast
 import time
 import logging
-from Cryptodome import Random
-from Cryptodome.Cipher import AES
+from Crypto import Random
+from Crypto.Cipher import AES
 from cmdb.data_storage.database_manager import NoDocumentFound
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
