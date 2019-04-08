@@ -46,7 +46,7 @@ def add_category():
 
 
 @login_required
-@categories_routes.route('/update/<int:public_id>', methods=['PUST'])
+@categories_routes.route('/update/<int:public_id>', methods=['PUT'])
 def update_category(public_id):
     pass
 
