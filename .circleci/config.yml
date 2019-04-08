@@ -31,10 +31,7 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-          environment:
-            TEST_HOST: 127.0.0.1
-            TEST_PORT: 27017
-            TEST_DATABASE: cmdb_test
+            . pytest tests/ --mongodb-dbname test
 
       - store_artifacts:
           path: test-reports
