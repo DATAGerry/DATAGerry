@@ -5,9 +5,9 @@ from cmdb.utils.error import CMDBError
 
 CMDB_LOGGER = logging.getLogger(__name__)
 
-POSSIBLE_PLUGIN_TYPES = (
+POSSIBLE_PLUGIN_TYPES = [
     'auth'
-)
+]
 
 
 class PluginModuleBase:

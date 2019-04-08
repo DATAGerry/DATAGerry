@@ -1,4 +1,4 @@
-from tests.plugins.example import ExamplePluginBase
+from tests.fixtures.plugins.example import ExamplePluginBase
 
 
 class TestPlugin(ExamplePluginBase):

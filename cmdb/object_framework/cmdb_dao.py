@@ -116,6 +116,14 @@ class CmdbDAO:
                 raise RequiredInitKeyNotFoundError(req_key)
         return super(CmdbDAO, cls).__new__(cls)
 
+    @classmethod
+    def get_index_keys(cls):
+        from pymongo import IndexModel
+        index_list = list()
+        for index in cls.INDEX_KEYS + cls.__SUPER_INDEX_KEYS:
+            index_list.append(IndexModel(**index))
+        return index_list
+
     def _update_version(self, update) -> str:
         """
         Update the version number of the object

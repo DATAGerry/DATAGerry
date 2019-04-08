@@ -18,7 +18,7 @@ class ExamplePluginBase(PluginBase):
 
 
 example_module_base = PluginModuleBase(
-    package='tests.plugins.example',
+    package='tests.fixtures.plugins.example',
     include_paths=None,
     default_file='__init__.py'
 )

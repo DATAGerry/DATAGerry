@@ -194,6 +194,7 @@ class DatabaseManagerMongo(DatabaseManager):
             connector: mongodb connector
 
         """
+        self.database_connector = connector
         super().__init__(connector)
 
     def setup(self) -> bool:
@@ -335,16 +336,21 @@ class DatabaseManagerMongo(DatabaseManager):
         """
         result = None
         try:
-            result = self.database_connector.get_collection(collection).insert_one(data)
-        except Exception as e:
-            raise InsertError(e)
-        if result.acknowledged:
-            formatted_id = {'_id': result.inserted_id}
-            projection = {'public_id': 1}
-            cursor_result = self.__find(collection, formatted_id, projection, limit=1)
-            for result in cursor_result.limit(-1):
-                return result['public_id']
-        return result
+            self.find_one(collection=collection, public_id=data['public_id'])
+        except NoDocumentFound:
+            try:
+                result = self.database_connector.get_collection(collection).insert_one(data)
+            except Exception as e:
+                raise InsertError(e)
+            if result.acknowledged:
+                formatted_id = {'_id': result.inserted_id}
+                projection = {'public_id': 1}
+                cursor_result = self.__find(collection, formatted_id, projection, limit=1)
+                for result in cursor_result.limit(-1):
+                    return result['public_id']
+            return result
+        else:
+            raise PublicIDAlreadyExists(public_id=data['public_id'])
 
     def update(self, collection: str, public_id: int, data: dict):
         """update document inside database
@@ -520,7 +526,7 @@ class PublicIDAlreadyExists(DuplicateKeyError):
     """
 
     def __init__(self, public_id):
-        super().__init__()
+        super().__init__("Public ID Exists")
         self.message = "Object with this public id already exists: {}".format(public_id)
 
 

@@ -24,7 +24,6 @@ __COLLECTIONS__ = [
     CmdbObject,
     CmdbType,
     CmdbCategory,
-    CmdbFieldType,
     CmdbObjectStatus,
     CmdbObjectLink,
     CmdbCollection,

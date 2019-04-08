@@ -54,6 +54,9 @@ class UserManagementBase:
         import json
         return json.dumps(self.__dict__, default=default)
 
+    def to_database(self):
+        return self.__dict__
+
 
 class NoUserIDError(NoPublicIDError):
 

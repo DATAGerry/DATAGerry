@@ -12,7 +12,7 @@ def test_system_init():
 
 def test_plugin_loader():
     from types import ModuleType
-    from tests.plugins.example import example_module_base
+    from tests.fixtures.plugins.example import example_module_base
 
     plugin_loader = PluginLoader(example_module_base.main_module, example_module_base.package)
     # should load all plugins inside plugins.example
@@ -25,20 +25,20 @@ def test_plugin_loader():
 def test_plugin_module_base():
     # basic tests
     example_module_base1 = PluginModuleBase(
-        package='tests.plugins.example'
+        package='tests.fixtures.plugins.example'
     )
-    assert example_module_base1.package == 'tests.plugins.example'
+    assert example_module_base1.package == 'tests.fixtures.plugins.example'
     example_module_base2 = PluginModuleBase(
-        package='tests.plugins.example',
-        include_paths='/tests/plugins/example/',
+        package='tests.fixtures.plugins.example',
+        include_paths='/tests/fixtures/plugins/example/',
         default_file='test.py'
     )
     assert example_module_base2.default_file == 'test.py'
-    assert example_module_base2.include_paths == '/tests/plugins/example/'
+    assert example_module_base2.include_paths == '/tests/fixtures/plugins/example/'
 
     # Init tests inside plugin dir
-    from .plugins.example import example_module_base
-    assert example_module_base.package == 'tests.plugins.example'
+    from tests.fixtures.plugins.example import example_module_base
+    assert example_module_base.package == 'tests.fixtures.plugins.example'
 
 
 def test_plugin_base():
@@ -51,7 +51,7 @@ def test_plugin_base():
 
 
 def test_plugin():
-    from tests.plugins.example.test_plugin import TestPlugin
+    from tests.fixtures.plugins.example.test_plugin import TestPlugin
 
     test_plugin1 = TestPlugin()
     assert test_plugin1.plugin_name == 'Test_Plugin'
@@ -65,14 +65,14 @@ def test_plugin():
 
 def test_plugin_manager():
     example_module_base = PluginModuleBase(
-        package='tests.plugins.example'
+        package='tests.fixtures.plugins.example'
     )
-    test_base_folder = '/tests/plugins/'
+    test_base_folder = '/tests/fixtures/plugins/'
     plugin_manager = PluginManager(test_base_folder, example_module_base)
 
     assert plugin_manager.plugin_base_folder == test_base_folder
     test_base = plugin_manager.base_list[0]
     assert type(test_base) == PluginModuleBase
-    assert test_base.package == 'tests.plugins.example'
+    assert test_base.package == 'tests.fixtures.plugins.example'
     # should have loaded example plugins
     assert len(test_base.plugins) == 1

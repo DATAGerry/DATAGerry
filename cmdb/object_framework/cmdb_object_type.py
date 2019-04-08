@@ -25,6 +25,10 @@ class CmdbType(CmdbDAO):
         'fields'
     ]
 
+    INDEX_KEYS = [
+        {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
+    ]
+
     def __init__(self, name: str, active: bool, author_id: int, creation_time: datetime,
                  render_meta: dict, fields: list, version: str = '1.0.0', label: str = None, status: list = None,
                  description: str = None, logs: dict = None, **kwargs):
@@ -87,6 +91,11 @@ class CmdbType(CmdbDAO):
         except IndexError:
             return None
 
+    def has_sections(self):
+        if len(self.get_sections()) == 0:
+            return False
+        return True
+
     def get_fields(self) -> list:
         return self.fields
 
@@ -147,7 +156,7 @@ class _ExternalLink:
             bool
         """
         import re
-        if re.search('\{.*?\}', self.href):
+        if re.search('{.*?}', self.href):
             return True
         return False
 

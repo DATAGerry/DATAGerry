@@ -1,12 +1,11 @@
 import json
 import logging
 
-from flask import Blueprint, abort
+from flask import abort
 from cmdb.object_framework.cmdb_render import CmdbRender
 from cmdb.utils.interface_wraps import login_required
-from cmdb.interface.rest_api import MANAGER_HOLDER, cache
-from cmdb.interface.route_utils import make_response
-from cmdb.utils import json_encoding
+from cmdb.interface.rest_api import MANAGER_HOLDER
+from cmdb.interface.route_utils import make_response, RootBlueprint
 
 try:
     from cmdb.utils.error import CMDBError
@@ -14,7 +13,7 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-object_rest = Blueprint('object_rest', __name__, url_prefix='/object')
+object_rest = RootBlueprint('object_rest', __name__, url_prefix='/object')
 
 
 # DEFAULT ROUTES

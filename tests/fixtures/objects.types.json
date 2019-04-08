@@ -1,0 +1,252 @@
+[
+  {
+    "_id": {
+      "$oid": "5c878f0a54d8ee40f18a9175"
+    },
+    "name": "example",
+    "label": "Example",
+    "description": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.                          At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata                         sanctus est Lorem ipsum dolor sit amet.",
+    "version": "1.0.0",
+    "status": null,
+    "active": true,
+    "author_id": 1,
+    "creation_time": {
+      "$date": "2019-02-03T15:31:51.000Z"
+    },
+    "render_meta": {
+      "external": [
+        {
+          "href": "/{2}/{0}/{1}",
+          "fields": [
+            "text-1",
+            "text-2",
+            "text-3"
+          ],
+          "label": "Internal link",
+          "name": "internal_link",
+          "icon": null
+        }
+      ],
+      "summary": [
+        {
+          "label": "Summary",
+          "fields": [
+            "text-1",
+            "text-2",
+            "textarea-1"
+          ],
+          "name": "example_summary"
+        },
+        {
+          "label": "Date",
+          "fields": [
+            "date-1"
+          ],
+          "name": "example_date"
+        }
+      ],
+      "sections": [
+        {
+          "tag": "h1",
+          "name": "text_fields",
+          "label": "Text Fields",
+          "fields": [
+            "text-1",
+            "text-2"
+          ],
+          "position": 1
+        },
+        {
+          "tag": "h2",
+          "name": "text_fields_special",
+          "label": "Special Fields",
+          "fields": [
+            "password-1",
+            "textarea-1"
+          ],
+          "position": 2
+        },
+        {
+          "tag": "h1",
+          "name": "check_fields",
+          "label": "Check Fields",
+          "fields": [
+            "radio-group-1",
+            "checkbox-group-1",
+            "select-1",
+            "select-2"
+          ],
+          "position": 3
+        },
+        {
+          "tag": "h1",
+          "name": "other_fields",
+          "label": "Other Fields",
+          "fields": [
+            "date-1",
+            "number-1",
+            "number-2",
+            "text-3"
+          ],
+          "position": 4
+        }
+      ]
+    },
+    "fields": [
+      {
+        "input_type": "text",
+        "label": "Basic Text Field",
+        "className": "form-control",
+        "name": "text-1",
+        "subtype": "text"
+      },
+      {
+        "input_type": "text",
+        "required": true,
+        "label": "Full Text Field",
+        "description": "example text field with all possible options",
+        "placeholder": "example",
+        "className": "form-control",
+        "name": "text-2",
+        "access": true,
+        "subtype": "text",
+        "maxlength": 120,
+        "role": 1
+      },
+      {
+        "input_type": "text",
+        "subtype": "password",
+        "required": true,
+        "label": "Password Field",
+        "className": "form-control",
+        "name": "password-1"
+      },
+      {
+        "input_type": "textarea",
+        "label": "Basic Text Area",
+        "className": "form-control",
+        "name": "textarea-1",
+        "subtype": "textarea",
+        "maxlength": 120,
+        "rows": 3
+      },
+      {
+        "input_type": "radio-group",
+        "label": "Basic Radio Group",
+        "name": "radio-group-1",
+        "values": [
+          {
+            "label": "Option 1",
+            "value": "option-1"
+          },
+          {
+            "label": "Option 2",
+            "value": "option-2"
+          },
+          {
+            "label": "Option 3",
+            "value": "option-3"
+          }
+        ]
+      },
+      {
+        "input_type": "checkbox-group",
+        "label": "Basic Checkbox Group",
+        "name": "checkbox-group-1",
+        "values": [
+          {
+            "label": "Option 1",
+            "value": "option-1",
+            "selected": true
+          },
+          {
+            "label": "Option 2",
+            "value": "option-2"
+          }
+        ]
+      },
+      {
+        "input_type": "select",
+        "label": "Basic Select",
+        "className": "form-control",
+        "name": "select-1",
+        "values": [
+          {
+            "label": "Option 1",
+            "value": "option-1",
+            "selected": true
+          },
+          {
+            "label": "Option 2",
+            "value": "option-2"
+          },
+          {
+            "label": "Option 3",
+            "value": "option-3"
+          }
+        ]
+      },
+      {
+        "input_type": "select",
+        "label": "Multi Select",
+        "className": "form-control",
+        "name": "select-2",
+        "multiple": true,
+        "values": [
+          {
+            "label": "Option 1",
+            "value": "option-1"
+          },
+          {
+            "label": "Option 2",
+            "value": "option-2"
+          },
+          {
+            "label": "Option 3",
+            "value": "option-3"
+          }
+        ]
+      },
+      {
+        "input_type": "date",
+        "label": "Basic Date Field",
+        "className": "form-control",
+        "name": "date-1"
+      },
+      {
+        "input_type": "number",
+        "label": "Basic Number",
+        "className": "form-control",
+        "name": "number-1"
+      },
+      {
+        "input_type": "number",
+        "label": "Limited Number",
+        "className": "form-control",
+        "name": "number-2",
+        "min": 10,
+        "max": 100,
+        "step": 10
+      },
+      {
+        "input_type": "text",
+        "label": "N - Text Field",
+        "n-field": true,
+        "className": "form-control",
+        "name": "text-3",
+        "subtype": "text"
+      }
+    ],
+    "logs": [
+      {
+        "author_id": 1,
+        "action": "create",
+        "message": "Auto-generation of example type",
+        "date": {
+          "$date": "2019-02-03T15:31:51.000Z"
+        }
+      }
+    ],
+    "public_id": 1
+  }
+]

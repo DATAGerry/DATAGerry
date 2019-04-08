@@ -8,7 +8,7 @@ import logging
 import re
 from cmdb.object_framework import *
 from cmdb.object_framework import CmdbObjectStatus
-from cmdb.data_storage.database_manager import PublicIDAlreadyExists
+from cmdb.data_storage.database_manager import PublicIDAlreadyExists, InsertError, PublicIDAlreadyExists
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import timing
 from cmdb.event_management.event import Event
@@ -354,13 +354,26 @@ class CmdbObjectManager(CmdbManagerBase):
             new_type = data
         elif isinstance(data, dict):
             new_type = CmdbType(**data)
-        return self._insert(collection=CmdbType.COLLECTION, data=new_type.to_database())
+        else:
+            raise WrongInputFormatError(CmdbType, data, "Possible data: dict or CmdbType")
+        try:
+            ack = self._insert(collection=CmdbType.COLLECTION, data=new_type.to_database())
+        except PublicIDAlreadyExists:
+            raise TypeAlreadyExists(type_id=new_type.get_public_id())
+        except (CMDBError, InsertError):
+            raise TypeInsertError(new_type.get_public_id())
+        return ack
 
-    def update_type(self, data: dict):
-        update_type = CmdbType(**data)
-        ack = self.dbm.update(
+    def update_type(self, data: (CmdbType, dict)):
+        if isinstance(data, CmdbType):
+            update_type = data
+        elif isinstance(data, dict):
+            update_type = CmdbType(**data)
+        else:
+            raise WrongInputFormatError(CmdbType, data, "Possible data: dict or CmdbType")
+        ack = self._update(
             collection=CmdbType.COLLECTION,
-            public_id=CmdbType.get_public_id(),
+            public_id=update_type.get_public_id(),
             data=update_type.to_database()
         )
         return ack
@@ -476,9 +489,24 @@ class CmdbObjectManager(CmdbManagerBase):
         return encrypted_state
 
 
+class WrongInputFormatError(CMDBError):
+    def __init__(self, class_name, data, error):
+        self.message = 'Error while parsing {} - Data: {} - Error: '.format(class_name, data, error)
+
+
 class UpdateError(CMDBError):
     def __init__(self, class_name, data, error):
         self.message = 'Update error while updating {} - Data: {} - Error: '.format(class_name, data, error)
+
+
+class TypeInsertError(CMDBError):
+    def __init__(self, type_id):
+        self.message = 'Type with ID: {} could not be inserted!'.format(type_id)
+
+
+class TypeAlreadyExists(CMDBError):
+    def __init__(self, type_id):
+        self.message = 'Type with ID: {} already exists!'.format(type_id)
 
 
 class TypeNotFoundError(CMDBError):
