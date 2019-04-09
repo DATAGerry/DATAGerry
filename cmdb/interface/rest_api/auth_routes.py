@@ -1,6 +1,6 @@
 import logging
-from flask import Blueprint, jsonify, request, abort
-from cmdb.interface.rest_api import app
+from cmdb import __MODE__
+from flask import Blueprint, jsonify, request, abort, current_app
 
 try:
     from cmdb.utils.error import CMDBError
@@ -10,8 +10,11 @@ except ImportError:
 auth_routes = Blueprint('auth_rest', __name__, url_prefix='/auth')
 LOGGER = logging.getLogger(__name__)
 
-with app.app_context():
-    MANAGER_HOLDER = app.manager_holder
+if __MODE__ == 'TESTING':
+    MANAGER_HOLDER = None
+else:
+    with current_app.app_context():
+        MANAGER_HOLDER = current_app.get_manager()
 
 
 @auth_routes.route('/login', methods=['POST'])

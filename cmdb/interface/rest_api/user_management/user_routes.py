@@ -1,8 +1,7 @@
 import logging
 
-from flask import abort
+from flask import abort, current_app
 from cmdb.utils.interface_wraps import login_required
-from cmdb.interface.rest_api import app
 from cmdb.interface.route_utils import RootBlueprint, make_response
 
 try:
@@ -13,8 +12,8 @@ except ImportError:
 LOGGER = logging.getLogger(__name__)
 user_routes = RootBlueprint('user_rest', __name__, url_prefix='/user')
 
-with app.app_context():
-    MANAGER_HOLDER = app.get_manager()
+with current_app.app_context():
+    MANAGER_HOLDER = current_app.get_manager()
 
 
 @login_required

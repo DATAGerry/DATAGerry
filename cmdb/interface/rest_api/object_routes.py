@@ -1,10 +1,10 @@
 import json
 import logging
 
-from flask import abort
+from cmdb import __MODE__
+from flask import abort, current_app
 from cmdb.object_framework.cmdb_render import CmdbRender
 from cmdb.utils.interface_wraps import login_required
-from cmdb.interface.rest_api import MANAGER_HOLDER
 from cmdb.interface.route_utils import make_response, RootBlueprint
 
 try:
@@ -14,6 +14,12 @@ except ImportError:
 
 LOGGER = logging.getLogger(__name__)
 object_rest = RootBlueprint('object_rest', __name__, url_prefix='/object')
+
+if __MODE__ == 'TESTING':
+    MANAGER_HOLDER = None
+else:
+    with current_app.app_context():
+        MANAGER_HOLDER = current_app.get_manager()
 
 
 # DEFAULT ROUTES

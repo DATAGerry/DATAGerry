@@ -1,11 +1,10 @@
-import json
 import logging
 
-from flask import Blueprint, jsonify, abort, request
+from cmdb import __MODE__
+from flask import current_app, abort
 from cmdb.utils.interface_wraps import login_required
-from cmdb.interface.rest_api import MANAGER_HOLDER
-from cmdb.interface.route_utils import DEFAULT_MIME_TYPE, make_response
-from cmdb.utils import json_encoding
+
+from cmdb.interface.route_utils import make_response, RootBlueprint
 
 try:
     from cmdb.utils.error import CMDBError
@@ -13,23 +12,29 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-type_rest = Blueprint('type_rest', __name__, url_prefix='/type')
+type_routes = RootBlueprint('type_routes', __name__, url_prefix='/type')
+
+if __MODE__ == 'TESTING':
+    MANAGER_HOLDER = None
+else:
+    with current_app.app_context():
+        MANAGER_HOLDER = current_app.get_manager()
 
 
 @login_required
-@type_rest.route('/', methods=['GET'])
+@type_routes.route('/', methods=['GET'])
 def get_type_list():
     object_manager = MANAGER_HOLDER.get_object_manager()
     try:
         type_list = object_manager.get_all_types()
     except CMDBError:
-        return abort(404)
+        return abort(500)
     resp = make_response(type_list)
     return resp
 
 
 @login_required
-@type_rest.route('/<int:public_id>', methods=['GET'])
+@type_routes.route('/<int:public_id>', methods=['GET'])
 def get_type(public_id: int):
     type_instance = None
     object_manager = MANAGER_HOLDER.get_object_manager()
@@ -41,13 +46,13 @@ def get_type(public_id: int):
     return resp
 
 
-@type_rest.route('/by/<dict:requirements>', defaults={'requirements': None}, methods=['GET', 'POST'])
+@type_routes.route('/by/<dict:requirements>', defaults={'requirements': None}, methods=['GET', 'POST'])
 def get_type_by(requirements: dict):
     return "test {}".format(requirements)
 
 
 @login_required
-@type_rest.route('/', methods=['POST'])
+@type_routes.route('/', methods=['POST'])
 def add_type():
     type_instance = None
     resp = make_response(type_instance)
@@ -55,7 +60,7 @@ def add_type():
 
 
 @login_required
-@type_rest.route('/<int:public_id>', methods=['PUT'])
+@type_routes.route('/<int:public_id>', methods=['PUT'])
 def update_type(public_id: int):
     type_instance = None
     resp = make_response(type_instance)
@@ -63,7 +68,7 @@ def update_type(public_id: int):
 
 
 @login_required
-@type_rest.route('/<int:public_id>', methods=['DELETE'])
+@type_routes.route('/<int:public_id>', methods=['DELETE'])
 def delete_type(public_id: int):
     type_instance = None
     resp = make_response(type_instance)

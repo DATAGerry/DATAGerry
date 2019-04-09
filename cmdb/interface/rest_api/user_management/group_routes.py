@@ -1,7 +1,8 @@
 import logging
 
+from flask import current_app
+from cmdb import __MODE__
 from cmdb.utils.interface_wraps import login_required, right_required
-from cmdb.interface.rest_api import app
 from cmdb.interface.route_utils import make_response, RootBlueprint
 
 try:
@@ -12,8 +13,11 @@ except ImportError:
 LOGGER = logging.getLogger(__name__)
 group_routes = RootBlueprint('group_rest', __name__, url_prefix='/group')
 
-with app.app_context():
-    MANAGER_HOLDER = app.get_manager()
+if __MODE__ == 'TESTING':
+    MANAGER_HOLDER = None
+else:
+    with current_app.app_context():
+        MANAGER_HOLDER = current_app.get_manager()
 
 
 @group_routes.route('/', methods=['GET'])

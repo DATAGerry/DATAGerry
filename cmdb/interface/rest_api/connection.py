@@ -1,6 +1,5 @@
 import logging
-from flask import Blueprint, make_response, jsonify
-from cmdb.interface.rest_api import app
+from flask import Blueprint, make_response, jsonify, current_app
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
@@ -9,8 +8,8 @@ except ImportError:
 connection_routes = Blueprint('connection_routes', __name__)
 LOGGER = logging.getLogger(__name__)
 
-with app.app_context():
-    MANAGER_HOLDER = app.get_manager()
+with current_app.app_context():
+    MANAGER_HOLDER = current_app.get_manager()
 
 
 @connection_routes.route('/')

@@ -99,3 +99,17 @@ class TestFrameworkType:
     def test_delete_type(self, object_manager):
         object_manager.delete_type(public_id=1)
         assert len(object_manager.get_all_types()) == 0
+
+
+@pytest.fixture
+def type_rest_client():
+    from cmdb.interface.rest_api.type_routes import type_routes
+    return type_routes.test_client()
+
+
+@pytest.mark.usefixtures("type_rest_client")
+class TestTypeRestCalls:
+
+    def test_get_routes(self, type_rest_client):
+        rv = type_rest_client
+        print(rv)
