@@ -23,37 +23,6 @@ system_config_reader = SystemConfigReader()
 
 def create_app(event_queue):
     import cmdb
-    from cmdb.object_framework.cmdb_object_manager import CmdbObjectManager
-    from cmdb.data_storage.database_manager import DatabaseManagerMongo
-    from cmdb.data_storage.database_connection import MongoConnector
-
-    database_manager = DatabaseManagerMongo(
-        MongoConnector(
-            host=system_config_reader.get_value('host', 'Database'),
-            port=int(system_config_reader.get_value('port', 'Database')),
-            database_name=system_config_reader.get_value('database_name', 'Database')
-        )
-    )
-
-    object_manager = CmdbObjectManager(
-        database_manager=database_manager,
-        event_queue=event_queue
-    )
-
-    security_manager = SecurityManager(database_manager)
-
-    user_manager = UserManagement(
-        database_manager=database_manager,
-        security_manager=security_manager
-    )
-
-    system_settings_reader = SystemSettingsReader(
-        database_manager=database_manager
-    )
-
-    system_settings_writer = SystemSettingsWriter(
-        database_manager=database_manager
-    )
 
     if cmdb.__MODE__ == 'DEBUG':
         app.config.from_object(app_config['rest_development'])
