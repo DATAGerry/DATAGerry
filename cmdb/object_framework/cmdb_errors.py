@@ -39,3 +39,27 @@ class ObjectUpdateError(CMDBError):
 class NoRootCategories(CMDBError):
     def __init__(self):
         self.message = 'No root categories exists'
+
+
+class ExternalFillError(CMDBError):
+    """Error if href of _ExternalLink could not filled with input data"""
+
+    def __init__(self, inputs, error):
+        super().__init__()
+        self.message = 'Href link do not fit with inputs: {}, error: {}'.format(inputs, error)
+
+
+class FieldInitError(CMDBError):
+    """Error if field could not be initialized"""
+
+    def __init__(self, field_name):
+        super().__init__()
+        self.message = 'Field {} could not be initialized'.format(field_name)
+
+
+class NoSummaryDefinedError(CMDBError):
+    """Error if no summary fields designed"""
+
+    def __init__(self, field_name):
+        super().__init__()
+        self.message = 'Field {} could not be initialized'.format(field_name)

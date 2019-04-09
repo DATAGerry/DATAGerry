@@ -362,6 +362,7 @@ class CmdbObjectManager(CmdbManagerBase):
             raise WrongInputFormatError(CmdbType, data, "Possible data: dict or CmdbType")
         try:
             ack = self._insert(collection=CmdbType.COLLECTION, data=new_type.to_database())
+            LOGGER.debug(f"Inserted new type with ack {ack}")
         except PublicIDAlreadyExists:
             raise TypeAlreadyExists(type_id=new_type.get_public_id())
         except (CMDBError, InsertError):
@@ -375,6 +376,7 @@ class CmdbObjectManager(CmdbManagerBase):
             update_type = CmdbType(**data)
         else:
             raise WrongInputFormatError(CmdbType, data, "Possible data: dict or CmdbType")
+
         ack = self._update(
             collection=CmdbType.COLLECTION,
             public_id=update_type.get_public_id(),

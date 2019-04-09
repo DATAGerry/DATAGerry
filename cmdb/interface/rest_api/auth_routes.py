@@ -16,6 +16,7 @@ LOGGER = logging.getLogger(__name__)
 @auth_routes.route('/login', methods=['POST'])
 def login_call():
     login_data = request.json
+
     LOGGER.debug(f"Login try for user {login_data['user_name']}")
     login_user = None
     login_user_name = login_data['user_name']

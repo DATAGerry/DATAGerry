@@ -1,5 +1,8 @@
 import logging
+
+from cmdb.object_framework.cmdb_log import CmdbLog
 from cmdb.object_framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
+from cmdb.object_framework.cmdb_errors import ExternalFillError, FieldInitError
 from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType, FieldNotFoundError
 from datetime import datetime
 
@@ -44,6 +47,12 @@ class CmdbType(CmdbDAO):
         self.fields = fields or []
         self.logs = logs
         super(CmdbType, self).__init__(**kwargs)
+
+    def __truediv__(self, other):
+        if not isinstance(other, CmdbType):
+            raise TypeError("Not a CmdbType instance")
+        from deepdiff import DeepDiff
+        return DeepDiff(self, other, ignore_order=True)
 
     def get_name(self):
         return self.name
@@ -127,6 +136,24 @@ class CmdbType(CmdbDAO):
                 raise FieldInitError(name)
         raise FieldNotFoundError(name, self.get_name())
 
+    def get_logs(self):
+        return self.logs
+
+    def last_log(self) -> CmdbLog:
+        try:
+            last_log = CmdbLog(**self.logs[-1])
+        except CMDBError:
+            return None
+        return last_log
+
+    def add_last_log_state(self, state):
+        last_log = CmdbLog(**self.logs[-1])
+        last_log.set_state(state)
+        self.logs[-1] = last_log.__dict__
+
+    def add_log(self, log: CmdbLog):
+        self.logs.append(log.__dict__)
+
 
 class _ExternalLink:
 
@@ -195,27 +222,3 @@ class _Summary:
     def __repr__(self):
         output_string = "{}: {}".format(self.label, self.values)
         return output_string
-
-
-class ExternalFillError(CMDBError):
-    """Error if href of _ExternalLink could not filled with input data"""
-
-    def __init__(self, inputs, error):
-        super().__init__()
-        self.message = 'Href link do not fit with inputs: {}, error: {}'.format(inputs, error)
-
-
-class FieldInitError(CMDBError):
-    """Error if field could not be initialized"""
-
-    def __init__(self, field_name):
-        super().__init__()
-        self.message = 'Field {} could not be initialized'.format(field_name)
-
-
-class NoSummaryDefinedError(CMDBError):
-    """Error if no summary fields designed"""
-
-    def __init__(self, field_name):
-        super().__init__()
-        self.message = 'Field {} could not be initialized'.format(field_name)
