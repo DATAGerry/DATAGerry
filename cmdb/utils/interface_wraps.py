@@ -16,23 +16,11 @@ LOGGER = logging.getLogger(__name__)
 
 
 def json_required(f):
-    """
-    json requirement wrapper
-    implements by routes with required an JSON content-type
-    Args:
-        f: target function
-
-    """
-
     @wraps(f)
     def _json_required(*args, **kwargs):
-        """
-        checks if HTTP Content-Type is jso
-        TODO: Implement
-        """
         if not request or not request.json:
-            LOGGER.warn("Not json | {}".format(request))
-            abort(400)
+            LOGGER.warning("Not json | {}".format(request))
+            return abort(400)
         return f(*args, **kwargs)
 
     return _json_required
@@ -53,8 +41,9 @@ def login_required(f):
         if auth is None and 'Authorization' in request.headers:
             token = request.headers['Authorization']
             try:
-                from cmdb.interface.rest_api import app
-                security_manager = app.get_manager().get_security_manager()
+                from cmdb.utils import get_security_manager
+                from cmdb.data_storage import get_pre_init_database
+                security_manager = get_security_manager(get_pre_init_database())
                 security_manager.decrypt_token(token)
             except (JWTExpired, JWTNotYetValid, InvalidJWSSignature, InvalidJWSObject):
                 return abort(401)

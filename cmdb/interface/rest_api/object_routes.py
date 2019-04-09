@@ -1,10 +1,9 @@
-import json
 import logging
 
 from flask import abort
 from cmdb.object_framework.cmdb_render import CmdbRender
+from cmdb.object_framework.cmdb_object_manager import object_manager
 from cmdb.utils.interface_wraps import login_required
-from cmdb.interface.rest_api import MANAGER_HOLDER
 from cmdb.interface.route_utils import make_response, RootBlueprint
 
 try:
@@ -24,7 +23,7 @@ def get_object_list():
     all_objects = []
     try:
         type_buffer_list = {}
-        all_objects_list = MANAGER_HOLDER.get_object_manager().get_all_objects()
+        all_objects_list = object_manager.get_all_objects()
         for passed_object in all_objects_list:
             current_type = None
             passed_object_type_id = passed_object.get_type_id()
@@ -32,7 +31,7 @@ def get_object_list():
                 current_type = type_buffer_list[passed_object_type_id]
             else:
                 try:
-                    current_type = MANAGER_HOLDER.get_object_manager().get_type(passed_object_type_id)
+                    current_type = object_manager.get_type(passed_object_type_id)
                     type_buffer_list.update({passed_object_type_id: current_type})
                 except CMDBError as e:
                     continue
@@ -48,7 +47,6 @@ def get_object_list():
 @login_required
 @object_rest.route('/native', methods=['GET'])
 def get_native_object_list():
-    object_manager = MANAGER_HOLDER.get_object_manager()
     try:
         object_list = object_manager.get_all_objects()
     except CMDBError:
@@ -60,8 +58,6 @@ def get_native_object_list():
 @login_required
 @object_rest.route('/<int:public_id>', methods=['GET'])
 def get_object(public_id):
-    object_manager = MANAGER_HOLDER.get_object_manager()
-
     try:
         object_instance = object_manager.get_object(public_id)
     except CMDBError:
@@ -85,7 +81,6 @@ def get_object(public_id):
 @login_required
 @object_rest.route('<int:public_id>/native/', methods=['GET'])
 def get_navtive_object(public_id: int):
-    object_manager = MANAGER_HOLDER.get_object_manager()
     try:
         object_instance = object_manager.get_object(public_id)
     except CMDBError:
@@ -116,7 +111,6 @@ def add_object():
 @login_required
 @object_rest.route('/<int:public_id>', methods=['PUT'])
 def update_object(public_id):
-    object_manager = MANAGER_HOLDER.get_object_manager()
     try:
         object_instance = object_manager.get_object(public_id)
     except CMDBError:
@@ -128,7 +122,6 @@ def update_object(public_id):
 @login_required
 @object_rest.route('/<int:public_id>', methods=['DELETE'])
 def delete_object(public_id):
-    object_manager = MANAGER_HOLDER.get_object_manager()
     try:
         object_instance_ack = object_manager.delete_object(public_id)
     except CMDBError:
@@ -142,9 +135,9 @@ def delete_object(public_id):
 @object_rest.route('/newest/')
 def get_newest_objects():
     type_buffer_list = {}
-    newest_objects_list = MANAGER_HOLDER.get_object_manager().get_objects_by(sort='creation_time',
-                                                                             limit=25,
-                                                                             active={"$eq": True})
+    newest_objects_list = object_manager.get_objects_by(sort='creation_time',
+                                                        limit=25,
+                                                        active={"$eq": True})
     newest_objects = []
     for passed_object in newest_objects_list:
         global current_type
@@ -154,7 +147,7 @@ def get_newest_objects():
             current_type = type_buffer_list[passed_object_type_id]
         else:
             try:
-                current_type = MANAGER_HOLDER.get_object_manager().get_type(passed_object_type_id)
+                current_type = object_manager.get_type(passed_object_type_id)
                 type_buffer_list.update({passed_object_type_id: current_type})
             except CMDBError as e:
                 LOGGER.warning("Newest object type - error: {}".format(e.message))

@@ -1,11 +1,12 @@
-import json
 import logging
+import json
 
-from flask import Blueprint, jsonify, abort, request
-from cmdb.utils.interface_wraps import login_required
-from cmdb.interface.rest_api import MANAGER_HOLDER
-from cmdb.interface.route_utils import DEFAULT_MIME_TYPE, make_response
-from cmdb.utils import json_encoding
+from flask import abort, request
+from cmdb.utils.interface_wraps import login_required, json_required
+from cmdb.object_framework.cmdb_object_manager import object_manager as obm
+from cmdb.interface.route_utils import make_response, RootBlueprint
+from cmdb.object_framework.cmdb_errors import TypeNotFoundError, TypeInsertError
+from cmdb.object_framework.cmdb_object_type import CmdbType
 
 try:
     from cmdb.utils.error import CMDBError
@@ -13,58 +14,93 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-type_rest = Blueprint('type_rest', __name__, url_prefix='/type')
+type_routes = RootBlueprint('type_routes', __name__, url_prefix='/type')
+
+object_manager = obm
 
 
+@type_routes.route('/', methods=['GET'])
 @login_required
-@type_rest.route('/', methods=['GET'])
 def get_type_list():
-    object_manager = MANAGER_HOLDER.get_object_manager()
     try:
         type_list = object_manager.get_all_types()
     except CMDBError:
-        return abort(404)
+        return abort(500)
     resp = make_response(type_list)
     return resp
 
 
+@type_routes.route('/<int:public_id>', methods=['GET'])
 @login_required
-@type_rest.route('/<int:public_id>', methods=['GET'])
 def get_type(public_id: int):
-    type_instance = None
-    object_manager = MANAGER_HOLDER.get_object_manager()
     try:
         type_instance = object_manager.get_type(public_id)
-    except CMDBError:
+    except TypeNotFoundError:
         return abort(404)
+    except CMDBError:
+        return abort(500)
     resp = make_response(type_instance)
     return resp
 
 
-@type_rest.route('/by/<dict:requirements>', defaults={'requirements': None}, methods=['GET', 'POST'])
-def get_type_by(requirements: dict):
-    return "test {}".format(requirements)
-
-
+@type_routes.route('/', methods=['POST'])
 @login_required
-@type_rest.route('/', methods=['POST'])
+@json_required
 def add_type():
-    type_instance = None
-    resp = make_response(type_instance)
+    from bson import json_util
+    add_data_dump = json.dumps(request.json)
+    try:
+        new_type_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
+    except TypeError as e:
+        LOGGER.warning(e)
+        abort(400)
+    try:
+        type_instance = CmdbType(**new_type_data)
+    except CMDBError:
+        return abort(400)
+    try:
+        ack = object_manager.insert_type(type_instance)
+    except TypeInsertError:
+        return abort(500)
+
+    resp = make_response(ack)
     return resp
 
 
+@type_routes.route('/', methods=['PUT'])
 @login_required
-@type_rest.route('/<int:public_id>', methods=['PUT'])
-def update_type(public_id: int):
-    type_instance = None
-    resp = make_response(type_instance)
+@json_required
+def update_type():
+    """TODO: Generate update log"""
+    from bson import json_util
+    add_data_dump = json.dumps(request.json)
+    try:
+        new_type_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
+    except TypeError as e:
+        LOGGER.warning(e)
+        abort(400)
+    try:
+        update_type_instance = CmdbType(**new_type_data)
+    except CMDBError:
+        return abort(400)
+
+    try:
+        object_manager.update_type(update_type_instance)
+    except CMDBError:
+        return abort(500)
+
+    resp = make_response(update_type_instance)
     return resp
 
 
+@type_routes.route('/<int:public_id>', methods=['DELETE'])
 @login_required
-@type_rest.route('/<int:public_id>', methods=['DELETE'])
 def delete_type(public_id: int):
-    type_instance = None
-    resp = make_response(type_instance)
+    try:
+        ack = object_manager.delete_type(public_id=public_id)
+    except TypeNotFoundError:
+        return abort(400)
+    except CMDBError:
+        return abort(500)
+    resp = make_response(ack)
     return resp

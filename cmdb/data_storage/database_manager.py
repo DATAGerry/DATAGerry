@@ -341,6 +341,7 @@ class DatabaseManagerMongo(DatabaseManager):
             try:
                 result = self.database_connector.get_collection(collection).insert_one(data)
             except Exception as e:
+                LOGGER.debug(f"Insert error while type module {e}")
                 raise InsertError(e)
             if result.acknowledged:
                 formatted_id = {'_id': result.inserted_id}

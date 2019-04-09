@@ -135,7 +135,7 @@ class CmdbRender:
         Returns:
             list of filled external links (_ExternalLink)
         """
-        from cmdb.object_framework.cmdb_object_type import ExternalFillError
+        from cmdb.object_framework.cmdb_errors import ExternalFillError
         # global external list
         external_list = []
         # checks if type has externals defined
@@ -190,7 +190,7 @@ class CmdbRender:
             return False
 
     def result(self):
-        from cmdb.user_management import get_user_manager
+        from cmdb.user_management.user_manager import get_user_manager
 
         render_result = RenderResult(
             object_id=self.object_instance.get_public_id(),

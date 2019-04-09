@@ -1,6 +1,6 @@
 import logging
 from flask import Blueprint, make_response, jsonify
-from cmdb.interface.rest_api import app
+from cmdb.data_storage import get_pre_init_database
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
@@ -8,9 +8,6 @@ except ImportError:
 
 connection_routes = Blueprint('connection_routes', __name__)
 LOGGER = logging.getLogger(__name__)
-
-with app.app_context():
-    MANAGER_HOLDER = app.get_manager()
 
 
 @connection_routes.route('/')
@@ -20,7 +17,7 @@ def connection_response():
     resp = make_response(jsonify({
         'title': __title__,
         'version': __version__,
-        'connected': MANAGER_HOLDER.get_database_manager().status()
+        'connected': get_pre_init_database().status()
     }))
     resp.mimetype = "application/json"
     return resp

@@ -15,9 +15,6 @@ from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
 from cmdb.object_framework.cmdb_object_status import CmdbObjectStatus
 from cmdb.object_framework.cmdb_object_link import CmdbObjectLink
 from cmdb.object_framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplates
-from cmdb.object_framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.object_framework.cmdb_log import CmdbLog
-from cmdb.data_storage import database_manager
 
 # List of init collections
 __COLLECTIONS__ = [
@@ -30,7 +27,3 @@ __COLLECTIONS__ = [
     CmdbCollectionTemplates
 ]
 
-object_manager = CmdbObjectManager(
-    database_manager=database_manager,
-    event_queue=None
-)

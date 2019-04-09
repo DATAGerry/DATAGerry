@@ -2,10 +2,6 @@ import calendar
 import datetime
 import re
 
-from cmdb.object_framework import CmdbDAO
-from cmdb.user_management import UserManagementBase
-from cmdb.user_management.user_right import BaseRight
-from cmdb.object_framework.cmdb_render import RenderResult
 try:
     import uuid
 
@@ -23,6 +19,10 @@ _RE_TYPE = type(re.compile("foo"))
 
 
 def default(obj):
+    from cmdb.object_framework import CmdbDAO
+    from cmdb.user_management import UserManagementBase
+    from cmdb.user_management.user_right import BaseRight
+    from cmdb.object_framework.cmdb_render import RenderResult
     """Helper function for converting cmdb objects to json"""
     if isinstance(obj, CmdbDAO):
         return obj.__dict__

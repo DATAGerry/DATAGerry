@@ -6,9 +6,13 @@ The implementation of the manager used is always realized using the respective s
 """
 import logging
 import re
+
+from cmdb import __MODE__
 from cmdb.object_framework import *
 from cmdb.object_framework import CmdbObjectStatus
-from cmdb.data_storage.database_manager import PublicIDAlreadyExists, InsertError, PublicIDAlreadyExists
+from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
+from cmdb.object_framework.cmdb_errors import WrongInputFormatError, UpdateError, TypeInsertError, TypeAlreadyExists, \
+    TypeNotFoundError, ObjectInsertError, NoRootCategories
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import timing
 from cmdb.event_management.event import Event
@@ -356,6 +360,7 @@ class CmdbObjectManager(CmdbManagerBase):
             raise WrongInputFormatError(CmdbType, data, "Possible data: dict or CmdbType")
         try:
             ack = self._insert(collection=CmdbType.COLLECTION, data=new_type.to_database())
+            LOGGER.debug(f"Inserted new type with ack {ack}")
         except PublicIDAlreadyExists:
             raise TypeAlreadyExists(type_id=new_type.get_public_id())
         except (CMDBError, InsertError):
@@ -369,6 +374,7 @@ class CmdbObjectManager(CmdbManagerBase):
             update_type = CmdbType(**data)
         else:
             raise WrongInputFormatError(CmdbType, data, "Possible data: dict or CmdbType")
+
         ack = self._update(
             collection=CmdbType.COLLECTION,
             public_id=update_type.get_public_id(),
@@ -487,41 +493,10 @@ class CmdbObjectManager(CmdbManagerBase):
         return encrypted_state
 
 
-class WrongInputFormatError(CMDBError):
-    def __init__(self, class_name, data, error):
-        self.message = 'Error while parsing {} - Data: {} - Error: '.format(class_name, data, error)
+if __MODE__ != 'TESTING':
+    from cmdb.data_storage import get_pre_init_database
 
-
-class UpdateError(CMDBError):
-    def __init__(self, class_name, data, error):
-        self.message = 'Update error while updating {} - Data: {} - Error: '.format(class_name, data, error)
-
-
-class TypeInsertError(CMDBError):
-    def __init__(self, type_id):
-        self.message = 'Type with ID: {} could not be inserted!'.format(type_id)
-
-
-class TypeAlreadyExists(CMDBError):
-    def __init__(self, type_id):
-        self.message = 'Type with ID: {} already exists!'.format(type_id)
-
-
-class TypeNotFoundError(CMDBError):
-    def __init__(self, type_id):
-        self.message = 'Type with ID: {} not found!'.format(type_id)
-
-
-class ObjectInsertError(CMDBError):
-    def __init__(self, error):
-        self.message = 'Object could not be inserted | Error {} \n show into logs for details'.format(error.message)
-
-
-class ObjectUpdateError(CMDBError):
-    def __init__(self, msg):
-        self.message = 'Something went wrong during update: {}'.format(msg)
-
-
-class NoRootCategories(CMDBError):
-    def __init__(self):
-        self.message = 'No root categories exists'
+    object_manager = CmdbObjectManager(
+        database_manager=get_pre_init_database(),
+        event_queue=None
+    )
