@@ -194,8 +194,7 @@ class CmdbObjectManager(CmdbManagerBase):
         """returns list of matched fields"""
         match_list = list()
         for field in search_object.fields:
-            if re.search(regex, str(field['value'])):
-                match_list.append(field['name'])
+            match_list.append(field['name'])
         return match_list
 
     def search_objects(self, query: dict) -> dict:
@@ -203,9 +202,8 @@ class CmdbObjectManager(CmdbManagerBase):
         for result_objects in self._search(CmdbObject.COLLECTION, query):
             try:
                 query_fields = query['fields.value']
-                re_query = query_fields.try_compile()
                 result_object_instance = CmdbObject(**result_objects)
-                matched_fields = self._re_search_fields(result_object_instance, re_query)
+                matched_fields = self._re_search_fields(result_object_instance, query_fields)
 
                 result_list.update({
                     result_object_instance: matched_fields
