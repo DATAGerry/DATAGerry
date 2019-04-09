@@ -1,38 +1,40 @@
-# Python CircleCI 2.0 configuration file
-version: 2
-jobs:
-  build:
-    docker:
-      - image: circleci/python:3.6.1
-      - image: circleci/mongo:4-xenial-ram
-
+version: 2 # use CircleCI 2.0
+jobs: # A basic unit of work in a run
+  build: # runs not using Workflows must have a `build` job as entry point 
+    # directory where steps are run
     working_directory: ~/repo
-
-    steps:
-      - checkout
+    docker: # run the steps with Docker
+      # CircleCI Python images available at:
+      - image: circleci/python:3.6.4
+        environment: # environment variables for primary container
+          PIPENV_VENV_IN_PROJECT: true
+      # CircleCI PostgreSQL images available at: https://hub.docker.com/r/circleci/postgres/
+      - image: image: circleci/mongo:4-xenial-ram
+    steps: # steps that comprise the `build` job
+      - checkout # check out source code to working directory
+      - run: sudo chown -R circleci:circleci /usr/local/bin
+      - run: sudo chown -R circleci:circleci /usr/local/lib/python3.6/site-packages
       - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "requirements.txt" }}
-          - v1-dependencies-
-
+      # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
       - run:
-          name: install dependencies
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            pip install -r requirements.txt
-
-      - save_cache:
+            sudo pip install pipenv
+            pipenv install
+      - save_cache: # cache Python dependencies using checksum of Pipfile as the cache-key
+          key: deps9-{{ .Branch }}-{{ checksum "Pipfile.lock" }}
           paths:
-            - ./venv
-          key: v1-dependencies-{{ checksum "requirements.txt" }}
-
+            - ".venv"
+            - "/usr/local/bin"
+            - "/usr/local/lib/python3.6/site-packages"
       - run:
           name: run tests
           command: |
             . venv/bin/activate
-            . pytest tests/ --mongodb-dbname test
-
-      - store_artifacts:
-          path: test-reports
-          destination: test-reports
+            mkdir test-results
+            pipenv run pytest
+      - store_test_results: # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
+          path: test-results
+      - store_artifacts: # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
+          path: test-results
+          destination: tr1
