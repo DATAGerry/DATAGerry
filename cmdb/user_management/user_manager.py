@@ -1,4 +1,5 @@
 import logging
+
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user import User
 from cmdb.user_management.user_right import BaseRight, GLOBAL_IDENTIFIER
@@ -275,3 +276,18 @@ class UserHasNotRequiredRight(Exception):
 
     def __init__(self, user, right):
         self.message = "The user {} has not the required right level {} to view this page".format(user.user_name, right)
+
+
+def get_user_manager():
+    from cmdb.data_storage import get_pre_init_database
+    from cmdb.utils import get_security_manager
+    db_man = get_pre_init_database()
+    return UserManagement(
+        database_manager=db_man,
+        security_manager=get_security_manager(
+            database_manager=db_man
+        )
+    )
+
+
+user_manager = get_user_manager()

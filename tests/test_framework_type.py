@@ -1,9 +1,9 @@
 import pytest
 
 from datetime import datetime
-from cmdb.object_framework.cmdb_dao import RequiredInitKeyNotFoundError
+
 from cmdb.object_framework.cmdb_object_type import CmdbType
-from cmdb.object_framework.cmdb_object_manager import TypeNotFoundError, TypeAlreadyExists
+from cmdb.object_framework.cmdb_errors import TypeAlreadyExists, TypeNotFoundError
 
 
 @pytest.mark.usefixtures("mongodb")
@@ -21,6 +21,7 @@ def object_manager(mongodb):
     CmdbType
 ])
 def test_cmdb_object_type_init(type_instance_class):
+    from cmdb.object_framework.cmdb_dao import RequiredInitKeyNotFoundError
     with pytest.raises(RequiredInitKeyNotFoundError):
         CmdbType(name='example', active=True, author_id=1, creation_time=datetime.utcnow(),
                  render_meta={}, fields=[])
@@ -99,17 +100,3 @@ class TestFrameworkType:
     def test_delete_type(self, object_manager):
         object_manager.delete_type(public_id=1)
         assert len(object_manager.get_all_types()) == 0
-
-
-@pytest.fixture
-def type_rest_client():
-    from cmdb.interface.rest_api.type_routes import type_routes
-    return type_routes.test_client()
-
-
-@pytest.mark.usefixtures("type_rest_client")
-class TestTypeRestCalls:
-
-    def test_get_routes(self, type_rest_client):
-        rv = type_rest_client
-        print(rv)

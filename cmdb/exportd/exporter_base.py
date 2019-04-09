@@ -2,7 +2,7 @@ import jinja2
 import cmdb.object_framework
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import load_class
-from cmdb.object_framework import object_manager
+from cmdb.object_framework.cmdb_object_manager import object_manager
 
 
 class ExportJob:

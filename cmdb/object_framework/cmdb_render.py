@@ -190,7 +190,7 @@ class CmdbRender:
             return False
 
     def result(self):
-        from cmdb.user_management import get_user_manager
+        from cmdb.user_management.user_manager import get_user_manager
 
         render_result = RenderResult(
             object_id=self.object_instance.get_public_id(),

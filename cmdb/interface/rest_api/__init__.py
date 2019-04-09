@@ -33,13 +33,12 @@ def create_rest_api(event_queue):
     from flask_caching import Cache
 
     cache = Cache(config=cache_config)
-    from cmdb.interface.cmdb_app import CmdbManagerHolder, BaseCmdbApp
-    manager_holder = CmdbManagerHolder()
-    app = BaseCmdbApp(__name__, manager_holder)
+    from cmdb.interface.cmdb_app import BaseCmdbApp
+    app = BaseCmdbApp(__name__)
     from flask_cors import CORS
     CORS(app)
     import cmdb
-    from cmdb.object_framework import CmdbObjectManager
+    from cmdb.object_framework.cmdb_object_manager import CmdbObjectManager
     from cmdb.data_storage.database_manager import DatabaseManagerMongo
     from cmdb.data_storage.database_connection import MongoConnector
 
@@ -82,15 +81,6 @@ def create_rest_api(event_queue):
     else:
         app.config.from_object(app_config['rest'])
         LOGGER.info('RestAPI starting with config mode {}'.format(app.config.get("ENV")))
-
-    manager_holder.set_database_manager(database_manager)
-    manager_holder.set_security_manager(security_manager)
-    manager_holder.set_object_manager(object_manager)
-    manager_holder.set_user_manager(user_manager)
-    manager_holder.set_event_queue(event_queue)
-    manager_holder.set_system_settings_reader(system_settings_reader)
-    manager_holder.set_system_settings_writer(system_settings_writer)
-    manager_holder.init_app(app)
 
     with app.app_context():
         register_converters(app)

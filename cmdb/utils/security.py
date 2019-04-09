@@ -8,8 +8,7 @@ from cmdb.data_storage.database_manager import NoDocumentFound
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from jwcrypto import jwk, jwt, jws
-from cmdb.object_framework.cmdb_object import CmdbObject
-from cmdb.object_framework.cmdb_object_type import CmdbType
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -28,7 +27,7 @@ class SecurityManager:
     def _setup(self):
         pass
 
-    def generate_delete_token(self, data: (CmdbObject, CmdbType)):
+    def generate_delete_token(self, data):
         import json
         dump = {
             'public_id': data.get_public_id(),
