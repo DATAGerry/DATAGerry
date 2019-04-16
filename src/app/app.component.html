@@ -1,5 +1,8 @@
 <div id="app-wrapper">
+  <router-outlet name="navigation"></router-outlet>
+  <router-outlet name="sidebar"></router-outlet>
   <main id="main">
+    <router-outlet name="breadcrumb"></router-outlet>
     <div id="content">
       <div class="container-fluid">
         <router-outlet></router-outlet>

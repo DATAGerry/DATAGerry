@@ -6,6 +6,15 @@ import { ConnectionGuard } from './connection/guards/connection.guard';
 
 const routes: Routes = [
   {
+    path: '',
+    pathMatch: 'full',
+    canActivate: [ConnectionGuard],
+    data: {
+      breadcrumb: 'Dashboard'
+    },
+    loadChildren: './dashboard/dashboard.module#DashboardModule'
+  },
+  {
     path: 'connection',
     component: ConnectionComponent
   },
@@ -13,7 +22,15 @@ const routes: Routes = [
     path: 'login',
     canActivate: [ConnectionGuard],
     component: AuthComponent
-  }
+  },
+  {
+    path: 'framework',
+    data: {
+      breadcrumb: 'Framework'
+    },
+    canActivate: [ConnectionGuard],
+    loadChildren: './framework/framework.module#FrameworkModule'
+  },
 ];
 
 @NgModule({

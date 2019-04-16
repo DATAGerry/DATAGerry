@@ -1,3 +1,9 @@
 /* import bootstrap */
 @import "scss/bootstrap_variables";
 @import "~bootstrap/scss/bootstrap";
+
+/* custom global modules */
+@import "scss/_variables";
+@import "scss/_mixins";
+@import "scss/_utils";
+@import "scss/_layout";

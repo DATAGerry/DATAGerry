@@ -1,0 +1,48 @@
+<div id="sidebar">
+  <nav class="sidebar-nav">
+    <ul class="nav">
+      <li class="nav-title">Navigation</li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/">
+          Dashboard </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/search">
+          Search </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/object/most-viewed/">
+          Most viewed</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/object/newest/">
+          Newest</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/object/latest/">
+          Latest changes</a>
+      </li>
+      <li class="nav-title">Assets</li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/object/">
+          List objects</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/type/">
+          Show types</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/collection/">
+          Collections</a>
+      </li>
+      <div id="sidebar-categories">
+        <li class="nav-title">Categories</li>
+        <input id="category_filter" class="form-control form-control-sm" type="text" placeholder="Filter..">
+        <div class="list-group panel">
+          <cmdb-sidebar-category *ngFor="let category of categoryTree;"
+                                 [categoryData]="category"></cmdb-sidebar-category>
+        </div>
+      </div>
+    </ul>
+  </nav>
+</div>
