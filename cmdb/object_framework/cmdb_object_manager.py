@@ -492,10 +492,10 @@ class CmdbObjectManager(CmdbManagerBase):
         return encrypted_state
 
 
-if __MODE__ != 'TESTING':
-    from cmdb.data_storage import get_pre_init_database
+#if __MODE__ != 'TESTING':
+from cmdb.data_storage import get_pre_init_database
 
-    object_manager = CmdbObjectManager(
-        database_manager=get_pre_init_database(),
-        event_queue=None
-    )
+object_manager = CmdbObjectManager(
+    database_manager=get_pre_init_database(),
+    event_queue=None
+)
