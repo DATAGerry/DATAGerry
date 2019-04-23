@@ -41,6 +41,11 @@ def pytest_addoption(parser):
         help='The name of the database where fixtures are created [pytest]',
         default='pytest')
 
+    parser.addini(
+        name='db_config',
+        help="optional path to config file",
+        default='./etc/cmdb_test.conf')
+
     parser.addoption(
         '--mongodb-fixture-dir',
         help='Try loading fixtures from this directory')
@@ -57,6 +62,9 @@ def pytest_addoption(parser):
         '--mongodb-dbname',
         help='The name of the database where fixtures are created [pytest]')
 
+    parser.addoption(
+        '--db_config',
+        help="optional path to config file")
 
 @pytest.fixture(scope='function')
 def mongodb(pytestconfig):
@@ -124,3 +132,35 @@ def load_fixture(db, collection, path, file_format):
 
 def mongo_engine():
     return pytest.config.getoption('mongodb_engine') or pytest.config.getini('mongodb_engine')
+
+
+@pytest.fixture(scope='function')
+def init_config_reader(pytestconfig):
+    import os
+
+    db_config =pytestconfig.getoption('db_config') or pytestconfig.getini('db_config')
+    from cmdb.utils.system_reader import SystemConfigReader
+    path, filename = os.path.split(db_config)
+    if filename is not SystemConfigReader.DEFAULT_CONFIG_NAME or path is not SystemConfigReader.DEFAULT_CONFIG_LOCATION:
+        SystemConfigReader.RUNNING_CONFIG_NAME = filename
+        SystemConfigReader.RUNNING_CONFIG_LOCATION = path + '/'
+    SystemConfigReader(SystemConfigReader.RUNNING_CONFIG_NAME,
+                       SystemConfigReader.RUNNING_CONFIG_LOCATION)
+
+
+"""
+@pytest.fixture(scope='function')
+def init_config_reader(pytestconfig):
+    from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+
+    test = DatabaseManagerMongo(
+            connector=MongoConnector(
+                host= pytestconfig.getoption('mongodb_host') or pytestconfig.getini('mongodb_host'),
+                port= 27017,
+                database_name= pytestconfig.getoption('mongodb_dbname') or pytestconfig.getini('mongodb_dbname'),
+                timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT,
+            )
+    )
+
+    return test
+"""
