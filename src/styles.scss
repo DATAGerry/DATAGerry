@@ -2,8 +2,14 @@
 @import "scss/bootstrap_variables";
 @import "~bootstrap/scss/bootstrap";
 
+/* import datatables */
+@import "~datatables.net-bs4/css/dataTables.bootstrap4.css";
+@import "~datatables.net-fixedheader-bs4/css/fixedHeader.bootstrap4.css";
+@import "~datatables.net-responsive-bs4/css/responsive.bootstrap4.css";
+
 /* custom global modules */
 @import "scss/_variables";
 @import "scss/_mixins";
 @import "scss/_utils";
 @import "scss/_layout";
+@import "scss/_sidebar";
