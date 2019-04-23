@@ -75,6 +75,7 @@ class SystemConfigReader:
 
     class _SystemConfigReader(SystemReader):
 
+        DEFAULT_CONFIG_FILE_LESS = False
         CONFIG_LOADED = True
         CONFIG_NOT_LOADED = False
 
@@ -86,14 +87,45 @@ class SystemConfigReader:
                 config_location: directory of config file
             """
             import configparser
-            self.config_status = SystemConfigReader.CONFIG_NOT_LOADED
             self.config = configparser.RawConfigParser()
-            self.config_name = config_name
-            self.config_location = config_location
-            self.config_file = self.config_location + self.config_name
-            self.config_status = self.setup()
+            if config_name is None:
+                self.config_file_less = True
+                self.config_status = SystemConfigReader.CONFIG_LOADED
+            else:
+                self.config_file_less = self.DEFAULT_CONFIG_FILE_LESS
+                self.config_status = SystemConfigReader.CONFIG_NOT_LOADED
+                self.config_name = config_name
+                self.config_location = config_location
+                self.config_file = self.config_location + self.config_name
+                self.config_status = self.setup()
             if self.config_status == SystemConfigReader.CONFIG_NOT_LOADED:
                 raise ConfigFileNotFound(self.config_name)
+
+        def add_section(self, section):
+            """
+            Add a section to the config parser
+            Notes:
+                Only allowed if no config file was loaded
+            Args:
+                section: name of the section
+            """
+            if not self.config_file_less:
+                raise ConfigFileSetError(self.config_file)
+            self.config.add_section(section)
+
+        def set(self, section, option, value):
+            """
+            Set a value inside of a sections
+            Notes:
+                Only allowed if no config file was loaded
+            Args:
+                section: name of section
+                option: name of the option
+                value: value of the option
+            """
+            if not self.config_file_less:
+                raise ConfigFileSetError(self.config_file)
+            self.config.set(section, option, value)
 
         def setup(self):
             """
@@ -258,6 +290,17 @@ class SystemSettingsReader(SystemReader):
             setup dict
         """
         return SystemSettingsReader.SETUP_INITS
+
+
+class ConfigFileSetError(CMDBError):
+    """
+    Error if code tries to set values or sections while a config file is loaded
+    """
+
+    def __init__(self, filename):
+        super().__init__()
+        self.filename = filename
+        self.message = 'Configurations file: ' + self.filename + ' was loaded. No manual editing of values are allowed!'
 
 
 class ConfigFileNotFound(CMDBError):
