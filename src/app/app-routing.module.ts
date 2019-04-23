@@ -24,6 +24,13 @@ const routes: Routes = [
     component: AuthComponent
   },
   {
+    path: 'search',
+    data: {
+      breadcrumb: 'Search'
+    },
+    loadChildren: './search/search.module#SearchModule'
+  },
+  {
     path: 'framework',
     data: {
       breadcrumb: 'Framework'
