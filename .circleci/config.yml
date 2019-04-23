@@ -1,16 +1,13 @@
-# Python CircleCI 2.0 configuration file
 version: 2 # use CircleCI 2.0
 jobs: # A basic unit of work in a run
-  build: # runs not using Workflows must have a `build` job as entry point 
+  build: # runs not using Workflows must have a `build` job as entry point
     # directory where steps are run
-    working_directory: ~/repo
+    working_directory: ~/circleci-demo-python-django
     docker: # run the steps with Docker
-      # CircleCI Python images available at:
+      # CircleCI Python images available at: https://hub.docker.com/r/circleci/python/
       - image: circleci/python:3.6.4
         environment: # environment variables for primary container
           PIPENV_VENV_IN_PROJECT: true
-      # CircleCI PostgreSQL images available at: https://hub.docker.com/r/circleci/postgres/
-      - image: image: circleci/mongo:4-xenial-ram
     steps: # steps that comprise the `build` job
       - checkout # check out source code to working directory
       - run: sudo chown -R circleci:circleci /usr/local/bin
@@ -28,12 +25,6 @@ jobs: # A basic unit of work in a run
             - ".venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.6/site-packages"
-      - run:
-          name: run tests
-          command: |
-            . venv/bin/activate
-            mkdir test-results
-            pipenv run pytest
       - store_test_results: # Upload test results for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
           path: test-results
       - store_artifacts: # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/
