@@ -43,8 +43,18 @@ def pytest_addoption(parser):
 
     parser.addini(
         name='db_config',
-        help="optional path to config file",
+        help='optional path to config file',
         default='./etc/cmdb_test.conf')
+
+    parser.addini(
+        name='port',
+        help='Port for the connection to the application',
+        default=27017)
+
+    parser.addini(
+        name='timeout',
+        help='The amount of time that an operation can take before it is aborted with an error',
+        default=1000)
 
     parser.addoption(
         '--mongodb-fixture-dir',
@@ -64,13 +74,22 @@ def pytest_addoption(parser):
 
     parser.addoption(
         '--db_config',
-        help="optional path to config file")
+        help="Optional path to config file")
+
+    parser.addoption(
+        '--port',
+        help="Port for the connection to the application ")
+
+    parser.addoption(
+        '--timeout',
+        help='The amount of time that an operation can take before it is aborted with an error')
+
 
 @pytest.fixture(scope='function')
 def mongodb(pytestconfig):
-    dbname = pytestconfig.getoption('mongodb_dbname') or pytestconfig.getini('mongodb_dbname')
+    db_name = pytestconfig.getoption('mongodb_dbname') or pytestconfig.getini('mongodb_dbname')
     client = make_mongo_client(pytestconfig)
-    db = client[dbname]
+    db = client[db_name]
     clean_database(db)
     generate_collection(db)
     load_fixtures(db, pytestconfig)
@@ -134,33 +153,22 @@ def mongo_engine():
     return pytest.config.getoption('mongodb_engine') or pytest.config.getini('mongodb_engine')
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='class')
 def init_config_reader(pytestconfig):
-    import os
-
-    db_config =pytestconfig.getoption('db_config') or pytestconfig.getini('db_config')
     from cmdb.utils.system_reader import SystemConfigReader
-    path, filename = os.path.split(db_config)
-    if filename is not SystemConfigReader.DEFAULT_CONFIG_NAME or path is not SystemConfigReader.DEFAULT_CONFIG_LOCATION:
-        SystemConfigReader.RUNNING_CONFIG_NAME = filename
-        SystemConfigReader.RUNNING_CONFIG_LOCATION = path + '/'
-    SystemConfigReader(SystemConfigReader.RUNNING_CONFIG_NAME,
-                       SystemConfigReader.RUNNING_CONFIG_LOCATION)
+    system_config_reader = SystemConfigReader()
 
+    host = pytestconfig.getoption('mongodb_host') or pytestconfig.getini('mongodb_host')
+    port = pytestconfig.getoption('port') or pytestconfig.getini('port')
+    database_name = pytestconfig.getoption('mongodb_dbname') or pytestconfig.getini('mongodb_dbname')
+    timeout = pytestconfig.getoption('timeout') or pytestconfig.getini('timeout')
 
-"""
-@pytest.fixture(scope='function')
-def init_config_reader(pytestconfig):
-    from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
-
-    test = DatabaseManagerMongo(
-            connector=MongoConnector(
-                host= pytestconfig.getoption('mongodb_host') or pytestconfig.getini('mongodb_host'),
-                port= 27017,
-                database_name= pytestconfig.getoption('mongodb_dbname') or pytestconfig.getini('mongodb_dbname'),
-                timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT,
-            )
-    )
-
-    return test
-"""
+    # Create a new section for database configuration if not available
+    if 'Database' in system_config_reader.get_sections():
+        pass
+    else:
+        system_config_reader.add_section('Database')
+        system_config_reader.set('Database', 'host', host)
+        system_config_reader.set('Database', 'port', port)
+        system_config_reader.set('Database', 'database_name', database_name)
+        system_config_reader.set('Database', 'connection_timeout', timeout)

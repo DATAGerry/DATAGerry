@@ -17,6 +17,8 @@ from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import timing
 from cmdb.event_management.event import Event
 
+from cmdb.data_storage import get_pre_init_database
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -491,9 +493,6 @@ class CmdbObjectManager(CmdbManagerBase):
         LOGGER.debug("Encrypt log state: {}".format(encrypted_state))
         return encrypted_state
 
-
-#if __MODE__ != 'TESTING':
-from cmdb.data_storage import get_pre_init_database
 
 object_manager = CmdbObjectManager(
     database_manager=get_pre_init_database(),
