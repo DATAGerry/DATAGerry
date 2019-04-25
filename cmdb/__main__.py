@@ -197,11 +197,14 @@ if __name__ == "__main__":
     |_| \_|_____| |_| \____|_|  |_|____/|____/ 
 
     ###########################################\n''', 'green')
+    license_string = colored('''Copyright (C) 2019 NETHINKS GmbH
+licensed under the terms of the GNU Affero General Public License version 3\n''', 'yellow')
 
     try:
         options = build_arg_parser()
         print(brand_string)
         print(welcome_string.format(options.__dict__))
+        print(license_string)
         sleep(0.2)  # prevent logger output
         main(options)
     except Exception as e:
