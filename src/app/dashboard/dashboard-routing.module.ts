@@ -4,6 +4,7 @@ import { NavigationComponent } from '../layout/components/navigation/navigation.
 import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
 import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';
 import { DashboardComponent } from './dashboard.component';
+import { FooterComponent } from '../layout/components/footer/footer.component';
 
 const routes: Routes = [
   {
@@ -20,6 +21,11 @@ const routes: Routes = [
     path: '',
     component: BreadcrumbComponent,
     outlet: 'breadcrumb'
+  },
+  {
+    path: '',
+    component: FooterComponent,
+    outlet: 'footer'
   },
   {
     path: '',

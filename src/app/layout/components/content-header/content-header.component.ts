@@ -8,5 +8,6 @@ import { Component, Input } from '@angular/core';
 export class ContentHeaderComponent {
 
   @Input() public title: string;
+  @Input() public separator: boolean = true;
 
 }

@@ -12,11 +12,11 @@ export class TypeListComponent implements OnInit {
 
   private typeList: CmdbType[] = [];
   public dtOptions: DataTables.Settings = {};
-  dtTrigger: Subject<any> = new Subject();
+  public dtTrigger: Subject<any> = new Subject();
 
   constructor(private typeService: TypeService) { }
 
-  ngOnInit() {
+  public ngOnInit(): void {
     this.dtOptions = {
       ordering: true,
       order: [[5, 'asc']]
