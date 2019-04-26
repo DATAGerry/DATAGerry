@@ -1,6 +1,8 @@
 {
   "name": "netcmdbapp",
   "version": "0.0.0",
+  "author": "NETHINKS GmbH",
+  "license": "AGPLv3",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -27,6 +29,7 @@
     "datatables.net-fixedheader-bs4": "^3.1.5",
     "datatables.net-responsive-bs4": "^2.2.3",
     "jquery": "^3.4.0",
+    "package.json": "^2.0.1",
     "rxjs": "~6.3.3",
     "tslib": "^1.9.0",
     "zone.js": "~0.8.26"
