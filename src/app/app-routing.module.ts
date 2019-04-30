@@ -56,6 +56,14 @@ const routes: Routes = [
     canActivate: [ConnectionGuard],
     loadChildren: './framework/framework.module#FrameworkModule'
   },
+  {
+    path: 'error',
+    loadChildren: './error/error.module#ErrorModule'
+  },
+  {
+    path: '**',
+    redirectTo: 'error/404'
+  }
 ];
 
 @NgModule({

@@ -50,8 +50,8 @@ export class TypeListComponent implements OnInit, OnDestroy {
     this.typeService.getTypeList().subscribe((list: CmdbType[]) => {
         this.typeList = this.typeList.concat(list);
       },
-      (error) => {
-        console.log(error);
+      () => {
+
       },
       () => {
         this.dtTrigger.next();

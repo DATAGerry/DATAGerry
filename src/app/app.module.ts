@@ -26,6 +26,8 @@ import { ConnectionModule } from './connection/connection.module';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthModule } from './auth/auth.module';
 import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
+import { HttpErrorInterceptor } from './auth/interceptors/http-error.interceptor.tx';
+import { PreviousRouteService } from './services/previous-route.service';
 
 @NgModule({
   declarations: [
@@ -40,7 +42,9 @@ import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor
     AppRoutingModule
   ],
   providers: [
-    {provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true}
+    PreviousRouteService,
+    {provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true},
+    {provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true},
   ],
   bootstrap: [AppComponent]
 })
