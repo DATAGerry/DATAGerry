@@ -138,8 +138,8 @@ class CmdbManagerBase:
             public_id=public_id
         )
 
-    def _search(self, collection: str, requirements):
-        return self._get_all(collection, **requirements)
+    def _search(self, collection: str, requirements, limit=0):
+        return self._get_all(collection, limit=limit, **requirements)
 
 
 class CmdbObjectManager(CmdbManagerBase):
@@ -204,8 +204,11 @@ class CmdbObjectManager(CmdbManagerBase):
         return match_list
 
     def search_objects(self, query: dict) -> dict:
+        return self.search_objects_with_limit(query, limit=0)
+
+    def search_objects_with_limit(self, query: dict, limit=0) -> dict:
         result_list = dict()
-        for result_objects in self._search(CmdbObject.COLLECTION, query):
+        for result_objects in self._search(CmdbObject.COLLECTION, query, limit=limit):
             try:
                 result_object_instance = CmdbObject(**result_objects)
                 matched_fields = self._re_search_fields(result_object_instance)

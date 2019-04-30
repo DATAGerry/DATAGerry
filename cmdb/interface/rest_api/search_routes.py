@@ -14,22 +14,38 @@ LOGGER = logging.getLogger(__name__)
 search_routes = RootBlueprint('search_rest', __name__, url_prefix='/search')
 
 
-@search_routes.route("/")
+@search_routes.route("/", methods=['GET'])
 def get_search():
     request_args = request.args.to_dict()
+
     if not bool(request_args):
         return abort(404)
-    return _get_response(request_args)
+
+    if request.args.get('limit') is not None:
+        try:
+            limit = int(request.args.get('limit'))
+        except (ValueError, TypeError):
+            return abort(400)
+    else:
+        limit = 0
+
+    return _get_response(request_args, limit=limit)
 
 
-@search_routes.route("/<string:search_input>")
+@search_routes.route("/<string:search_input>", methods=['GET'])
 def text_search(search_input):
     return _get_response({'value': search_input})
 
 
-def _get_response(args, q_operator='$and'):
+def _get_response(args, q_operator='$or', limit=0):
     query_list = []
     result_query = []
+
+    try:
+        del args["limit"]
+    except KeyError:
+        # Must be removed, otherwise the search is falsified
+        pass
 
     try:
         for key, value in args.items():
@@ -37,7 +53,7 @@ def _get_response(args, q_operator='$and'):
                 query_list.append({'fields.'+key: {'$regex': v}})
             result_query.append({q_operator: query_list})
         query = {"$or": result_query}
-        return make_response(_cm_db_render(obm.search_objects(query)))
+        return make_response(_cm_db_render(obm.search_objects_with_limit(query, limit=limit)))
 
     except CMDBError:
         raise traceback.print_exc(file=sys.stdout)
