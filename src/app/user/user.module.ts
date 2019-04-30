@@ -16,17 +16,20 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { CmdbDao } from './cmdb-dao';
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
+import { UserRoutingModule } from './user-routing.module';
+import { UserService } from './services/user.service';
 
-export class CmdbType implements CmdbDao {
-
-  readonly public_id: number;
-  public active: boolean;
-  public name: string;
-  public author_id: number;
-  public version: string;
-  public author_name: string;
-  public objects_count: number;
-
-}
+@NgModule({
+  declarations: [],
+  imports: [
+    CommonModule,
+    UserRoutingModule
+  ],
+  providers: [
+    UserService
+  ],
+})
+export class UserModule { }

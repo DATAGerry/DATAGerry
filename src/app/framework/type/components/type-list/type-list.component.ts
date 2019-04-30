@@ -16,35 +16,51 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CmdbType } from '../../../models/cmdb-type';
 import { TypeService } from '../../../services/type.service';
 import { Subject } from 'rxjs';
+import { UserService } from '../../../../user/services/user.service';
+import { User } from '../../../../user/models/user';
+import { DataTableDirective } from 'angular-datatables';
 
 @Component({
   selector: 'cmdb-type-list',
   templateUrl: './type-list.component.html',
   styleUrls: ['./type-list.component.scss']
 })
-export class TypeListComponent implements OnInit {
+export class TypeListComponent implements OnInit, OnDestroy {
+
+  @ViewChild(DataTableDirective)
+  public dtElement: DataTableDirective;
 
   private typeList: CmdbType[] = [];
   public dtOptions: DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
 
-  constructor(private typeService: TypeService) { }
+  constructor(private typeService: TypeService) {
+  }
 
   public ngOnInit(): void {
     this.dtOptions = {
       ordering: true,
-      order: [[5, 'asc']]
+      order: [[1, 'asc']]
     };
 
-    this.typeService.listObservable.subscribe((list: CmdbType[]) => {
-      this.typeList = this.typeList.concat(list);
-      this.dtTrigger.next();
-    });
+    this.typeService.getTypeList().subscribe((list: CmdbType[]) => {
+        this.typeList = this.typeList.concat(list);
+      },
+      (error) => {
+        console.log(error);
+      },
+      () => {
+        this.dtTrigger.next();
+      });
 
+  }
+
+  public ngOnDestroy(): void {
+    this.dtTrigger.unsubscribe();
   }
 
 

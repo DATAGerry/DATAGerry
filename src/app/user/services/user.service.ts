@@ -17,36 +17,38 @@
 */
 
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { CmdbType } from '../models/cmdb-type';
 import { ApiCallService } from '../../services/api-call.service';
+import { User } from '../models/user';
 
 @Injectable({
   providedIn: 'root'
 })
-export class TypeService {
+export class UserService {
 
-  private servicePrefix: string = 'type';
-  public typeObservable;
+  private readonly prefix: string = 'user';
+  private readonly userListPromise;
+  private userList;
 
   constructor(private api: ApiCallService) {
-    this.typeObservable = Observable.create((observer: any) => {
-      this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/').subscribe(
-        list => {
-          for (const typeInstance of list) {
-            observer.next(typeInstance);
-          }
-        }, (error: any) => {
-          console.log(error);
-        },
-        () => {
-          observer.complete();
-        });
-    });
+    this.userList = this.loadUserData();
+
+  }
+
+  private async loadUserData(): Promise<User[]> {
+    return await this.api.callGetRoute<User[]>('user/').toPromise();
+  }
+
+  public getUserList() {
+    return this.api.callGetRoute<User[]>(this.prefix + '/');
+  }
+
+  public getUser(publicID: number) {
+    return this.api.callGetRoute<User>(this.prefix + '/' + publicID);
+  }
+
+  public getUserAsync(publicID: number) {
+    return this.api.callAsyncGetRoute(this.prefix + '/' + publicID);
   }
 
 
-  public getTypeList() {
-    return this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/');
-  }
 }

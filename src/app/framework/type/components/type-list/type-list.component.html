@@ -8,7 +8,6 @@
     <th>Type</th>
     <th>Version</th>
     <th>Author</th>
-    <th>Number of objects</th>
     <th>Creation Time</th>
   </tr>
   </thead>
@@ -20,9 +19,9 @@
     <td><a routerLink="/framework/type/{{typeInstance.public_id}}">{{typeInstance.public_id}}</a></td>
     <td>{{typeInstance.name}}</td>
     <td>{{typeInstance.version}}</td>
-    <td><a routerLink="/user/{{typeInstance.author_id}}">{{typeInstance.author}}</a></td>
-    <td>{{typeInstance.objects_count | json}}</td>
+    <td><a routerLink="/user/{{typeInstance.author_id}}">{{typeInstance.author_id}}</a></td>
     <td>{{typeInstance.creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
   </tr>
   </tbody>
+
 </table>

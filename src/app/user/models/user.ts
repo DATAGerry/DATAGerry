@@ -16,17 +16,18 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { CmdbDao } from './cmdb-dao';
-
-
-export class CmdbType implements CmdbDao {
-
+export class User {
+  /* tslint:disable */
   readonly public_id: number;
-  public active: boolean;
-  public name: string;
-  public author_id: number;
-  public version: string;
-  public author_name: string;
-  public objects_count: number;
+  public user_name: string;
+  first_name?: string;
+  last_name?: string;
 
+  public getName() {
+    if (typeof this.first_name != 'undefined' || typeof this.last_name != 'undefined') {
+      return this.user_name;
+    }
+    return this.first_name + ' ' + this.last_name;
+  }
+  /* tslint:enable */
 }
