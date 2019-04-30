@@ -7,6 +7,10 @@
 @import "~datatables.net-fixedheader-bs4/css/fixedHeader.bootstrap4.css";
 @import "~datatables.net-responsive-bs4/css/responsive.bootstrap4.css";
 
+/* import fontawesome */
+$fa-font-path: "../node_modules/font-awesome/fonts";
+@import "~font-awesome/scss/font-awesome";
+
 /* custom global modules */
 @import "scss/_variables";
 @import "scss/_mixins";
