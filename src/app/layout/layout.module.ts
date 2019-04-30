@@ -26,7 +26,6 @@ import { BreadcrumbService } from './components/breadcrumb/breadcrumb.service';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { SidebarCategoryComponent } from './components/sidebar/sidebar-category.component';
 import { ContentHeaderComponent } from './components/content-header/content-header.component';
-import { DatatableDirective } from './directives/datatable.directive';
 import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.component';
 
 @NgModule({
@@ -37,7 +36,6 @@ import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.compon
     SidebarComponent,
     SidebarCategoryComponent,
     ContentHeaderComponent,
-    DatatableDirective,
     ActiveBadgeComponent,
   ],
   exports: [
