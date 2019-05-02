@@ -32,11 +32,12 @@ export class ConnectionGuard implements CanActivate {
 
   constructor(private router: Router, private connectionService: ConnectionService) {
     // check if connection exists
+    /*
     this.interval = setInterval(() => {
       if (!this.connectionService.isConnected) {
         this.router.navigate(['/connection']);
       }
-    }, this.connectionIntervalTime * 1000);
+    }, this.connectionIntervalTime * 1000);*/
   }
 
   canActivate(

@@ -40,7 +40,6 @@ export class ApiCallService {
     this.apiURL = 'http://' + this.hostAddress + ':' + this.hostPort + '/' + this.apiPrefix + '/';
   }
 
-
   public callGetRoute<T>(route: string): Observable<any> {
     return this.http.get<T>(this.apiURL + route);
   }
