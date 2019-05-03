@@ -27,6 +27,7 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { SidebarCategoryComponent } from './components/sidebar/sidebar-category.component';
 import { ContentHeaderComponent } from './components/content-header/content-header.component';
 import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.component';
+import { LowercaseDirective } from './directives/lowercase.directive';
 
 @NgModule({
   declarations: [
@@ -37,13 +38,15 @@ import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.compon
     SidebarCategoryComponent,
     ContentHeaderComponent,
     ActiveBadgeComponent,
+    LowercaseDirective,
   ],
   exports: [
     NavigationComponent,
     BreadcrumbComponent,
     FooterComponent,
     ContentHeaderComponent,
-    ActiveBadgeComponent
+    ActiveBadgeComponent,
+    LowercaseDirective
   ],
   imports: [
     CommonModule,

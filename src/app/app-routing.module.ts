@@ -46,6 +46,7 @@ const routes: Routes = [
     data: {
       breadcrumb: 'Search'
     },
+    canActivate: [ConnectionGuard],
     loadChildren: './search/search.module#SearchModule'
   },
   {

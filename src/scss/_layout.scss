@@ -19,6 +19,7 @@
   font-size: $content-font-size;
   line-height: $content-line-height;
   transition: all 0.3s;
+  min-height: 100%;
 }
 
 #content {

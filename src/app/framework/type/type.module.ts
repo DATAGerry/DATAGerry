@@ -24,14 +24,30 @@ import { TypeRoutingModule } from './type-routing.module';
 import { LayoutModule } from '../../layout/layout.module';
 import { DataTablesModule } from 'angular-datatables';
 import { TypeAddComponent } from './components/type-add/type-add.component';
+import { ArchwizardModule } from 'angular-archwizard';
+import { TypeBuilderComponent } from './components/type-builder/type-builder.component';
+import { TypeBasicStepComponent } from './components/type-builder/type-basic-step/type-basic-step.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { TypeFieldsStepComponent } from './components/type-builder/type-fields-step/type-fields-step.component';
+import { FormioModule } from 'angular-formio';
 
 @NgModule({
-  declarations: [TypeViewComponent, TypeListComponent, TypeAddComponent],
+  declarations: [
+    TypeViewComponent,
+    TypeListComponent,
+    TypeAddComponent,
+    TypeBuilderComponent,
+    TypeBasicStepComponent,
+    TypeFieldsStepComponent],
   imports: [
     CommonModule,
     TypeRoutingModule,
     DataTablesModule,
     LayoutModule,
+    ReactiveFormsModule,
+    ArchwizardModule,
+    FormioModule
   ]
 })
-export class TypeModule { }
+export class TypeModule {
+}

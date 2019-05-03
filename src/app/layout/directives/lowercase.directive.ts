@@ -16,20 +16,16 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Directive, HostListener } from '@angular/core';
 
-import { DashboardRoutingModule } from './dashboard-routing.module';
-import { DashboardComponent } from './dashboard.component';
-import { LayoutModule } from '../layout/layout.module';
-import { DashcardComponent } from './components/dashcard/dashcard.component';
-
-@NgModule({
-  declarations: [DashboardComponent, DashcardComponent],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    DashboardRoutingModule
-  ]
+@Directive({
+  // tslint:disable-next-line: directive-selector
+  selector: '[lowercase]'
 })
-export class DashboardModule { }
+export class LowercaseDirective {
+
+  @HostListener('input', ['$event']) onInputChange($event) {
+    $event.target.value = $event.target.value.toLowerCase();
+  }
+
+}

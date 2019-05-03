@@ -16,20 +16,23 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { TypeBasicStepComponent } from './type-basic-step/type-basic-step.component';
 
-import { DashboardRoutingModule } from './dashboard-routing.module';
-import { DashboardComponent } from './dashboard.component';
-import { LayoutModule } from '../layout/layout.module';
-import { DashcardComponent } from './components/dashcard/dashcard.component';
-
-@NgModule({
-  declarations: [DashboardComponent, DashcardComponent],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    DashboardRoutingModule
-  ]
+@Component({
+  selector: 'cmdb-type-builder',
+  templateUrl: './type-builder.component.html',
+  styleUrls: ['./type-builder.component.scss']
 })
-export class DashboardModule { }
+export class TypeBuilderComponent implements OnInit {
+
+  @ViewChild(TypeBasicStepComponent)
+  basicStep: TypeBasicStepComponent;
+
+  constructor() { }
+
+  ngOnInit() {
+    console.log(this.basicStep);
+  }
+
+}
