@@ -21,16 +21,21 @@ import { CommonModule } from '@angular/common';
 
 import { SearchRoutingModule } from './search-routing.module';
 import { SearchComponent } from './search.component';
-import {LayoutModule} from "../layout/layout.module";
+import { LayoutModule } from "../layout/layout.module";
 import { TextSearchComponent } from './components/text-search/text-search.component';
-import {ApiCallService} from "../services/api-call.service";
+import { ApiCallService } from "../services/api-call.service";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { DataTablesModule } from 'angular-datatables';
 
 @NgModule({
   declarations: [SearchComponent, TextSearchComponent],
   imports: [
     CommonModule,
     LayoutModule,
-    SearchRoutingModule
+    SearchRoutingModule,
+    FormsModule,
+    ReactiveFormsModule,
+    DataTablesModule
   ],
 
   providers: [ApiCallService]

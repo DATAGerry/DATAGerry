@@ -1,8 +1,61 @@
 
-<input class="form-control" type="text" placeholder="Search for..." aria-label="Search">
-<input type="button" (click)="getResponsResult()" value="search"/>
 
-<p>
-  {{responseresult[1].object_id | json}}
-</p>
 
+<div class="input-group">
+
+  <div class="input-group-btn search-panel">
+
+    <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <span id="categorie_concept">{{category}}</span> <span class="caret"></span>
+    </button>
+
+    <ul class="dropdown-menu" role="menu">
+      <li *ngFor="let element of categoryList" [value]="element.label" (click)="dropdownMenu(element)">
+        {{element.label}}
+      </li>
+    </ul>
+
+  </div>
+
+  <input type="hidden" name="search_param" value="all" id="search_param">
+  <input class="form-control" type="search" placeholder="Search for..." aria-label="Search"
+         [formControl]="searchCtrl"
+         (keyup)="autosearch()"
+         (keyup.enter)="getResponse()">
+
+  <ul>
+    <li *ngFor="let element of autoResult" [value]="element.label">
+      ID : {{element.type_id}} Type: {{element.type_label}} Author: {{element.author_name}}
+    </li>
+  </ul>
+
+  <button class="btn btn-default" type="button" (click)="getResponse()">
+      <i class="fa fa-search" aria-hidden="true"></i>
+  </button>
+</div>
+
+
+<p></p>
+
+<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table">
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Type</th>
+    <th>Description</th>
+    <th>Author</th>
+    <th>Action</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let result of endResult">
+    <td>{{result.type_id}}</td>
+    <td>{{result.type_label}}</td>
+    <td> TODO: Description</td>
+    <td>{{result.author_name}}</td>
+    <td>
+      <a routerLink="/framework/type/{{result.type_id}}">View</a>
+    </td>
+  </tr>
+  </tbody>
+</table>
