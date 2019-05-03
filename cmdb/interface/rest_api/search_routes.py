@@ -50,24 +50,28 @@ def get_search():
 
 @search_routes.route("/<string:search_input>", methods=['GET'])
 def text_search(search_input):
-    return _get_response({'value': search_input})
+    return _get_response({'value': search_input}, q_operator = '$or')
 
 
-def _get_response(args, q_operator='$or', limit=0):
+def _get_response(args, q_operator='$and', limit=0):
     query_list = []
     result_query = []
 
-    try:
-        del args["limit"]
-    except KeyError:
-        # Must be removed, otherwise the search is falsified
-        pass
+    # remove unnecessary query parameters
+    _filter_query(args)
 
     try:
         for key, value in args.items():
             for v in value.split(","):
-                query_list.append({'fields.'+key: {'$regex': v}})
-            result_query.append({q_operator: query_list})
+                if key == "type_id":
+                    try:
+                        query_list.append({key: int(v)})
+                    except (ValueError, TypeError):
+                        return abort(400)
+                else:
+                    query_list.append({'fields.'+key: {'$regex': v}})
+
+        result_query.append({q_operator: query_list})
         query = {"$or": result_query}
         return make_response(_cm_db_render(obm.search_objects_with_limit(query, limit=limit)))
 
@@ -90,8 +94,29 @@ def _cm_db_render(all_objects_list) -> list:
                 type_buffer_list.update({passed_object_type_id: current_type})
 
             tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
+            tmp_render.set_matched_fieldset(all_objects_list)
             all_objects.append(tmp_render.result())
     except Exception:
         raise traceback.print_exc(file=sys.stdout)
 
     return all_objects
+
+
+def _filter_query(args):
+
+    """
+    Removes the limit restriction as search parameter. And removes the search parameter "public_id" if this is undefined
+
+    Args:
+        args: query parameters
+
+    Returns:
+
+    """
+    try:
+        if args["type_id"] == "undefined":
+            del args["type_id"]
+        del args["limit"]
+    except KeyError:
+        # Must be removed, otherwise the search is falsified
+        pass
