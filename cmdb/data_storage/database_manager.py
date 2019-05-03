@@ -1,7 +1,31 @@
+# Net|CMDB - OpenSource Enterprise CMDB
+# Copyright (C) 2019 NETHINKS GmbH
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 Database Management instance for database actions
 
 """
+import logging
+from pymongo.errors import DuplicateKeyError
+from pymongo.results import DeleteResult
+from cmdb.data_storage.database_connection import Connector
+from cmdb.utils.error import CMDBError
+from cmdb.data_storage.database_connection import MongoConnector
+
+LOGGER = logging.getLogger(__name__)
 
 
 class DatabaseManager:
@@ -10,11 +34,12 @@ class DatabaseManager:
 
     """
 
+    DB_MANAGER_TYPE = 'base'
     DEFAULT_DATABASE_NAME = 'cmdb'
     ASCENDING = 1
     DESCENDING = -1
 
-    def __init__(self, connector):
+    def __init__(self, connector: Connector):
         """instance of super class
 
         Args:
@@ -36,6 +61,9 @@ class DatabaseManager:
         """
         setup script for database init
         """
+        raise NotImplementedError
+
+    def _import(self, *args, **kwargs):
         raise NotImplementedError
 
     def __find(self, *args, **kwargs):
@@ -161,28 +189,86 @@ class DatabaseManager:
         """
         raise NotImplementedError
 
+    def get_database_name(self):
+        """get name of selected database
+
+        Returns:
+            db_name (str): name of database
+        """
+        raise NotImplementedError
+
 
 class DatabaseManagerMongo(DatabaseManager):
-    """PyMongo (mongodb) implementation of Database Manager
-    """
+    """PyMongo (mongodb) implementation of Database Manager"""
 
-    def __init__(self, connector):
+    DB_MANAGER_TYPE = 'MONGO_DB'
+
+    def __init__(self, connector: MongoConnector):
         """init mongo implementation
 
         Args:
             connector: mongodb connector
 
         """
+        self.database_connector = connector
         super().__init__(connector)
 
-    def setup(self):
+    def setup(self) -> bool:
         """setup script
 
         Returns:
             acknowledged
 
         """
-        raise NotImplementedError
+        from cmdb.object_framework import __COLLECTIONS__ as cmdb_collection
+        from cmdb.user_management import __COLLECTIONS__ as user_collection
+        collection = cmdb_collection + user_collection
+
+        def _gen_default_tables(collection_class: object):
+            self.create_collection(collection_class.COLLECTION)
+            self.create_indexes(collection_class.COLLECTION, collection_class._SUPER_INDEX_KEYS)
+            if len(collection_class.INDEX_KEYS) > 0:
+                self.create_indexes(collection_class.COLLECTION, collection_class.INDEX_KEYS)
+
+        for coll in collection:
+            # generating the default database "tables"
+            try:
+                _gen_default_tables(coll)
+            except Exception:
+                return False
+        return True
+
+    def _import(self, collection: str, data_list: list):
+        LOGGER.debug(data_list)
+        try:
+            self.delete_collection(collection)
+        except Exception as e:
+            LOGGER.debug(e)
+        for import_data in data_list:
+            try:
+                self.insert(collection=collection, data=import_data)
+            except (Exception, CMDBError) as e:
+                LOGGER.debug(e)
+                LOGGER.debug("IMPORT ERROR: {}".format(e))
+                return False
+        return True
+
+    def create_index(self, collection: str, name: str, unique: bool, background=True):
+        self.database_connector.get_collection(collection).create_index(
+            name=name,
+            unique=unique,
+            background=background
+        )
+
+    def create_indexes(self, collection: str, indexes: list):
+        from pymongo import IndexModel
+        import_list = []
+        for idx in indexes:
+            import_list.append(IndexModel(idx['keys']))
+        self.database_connector.get_collection(collection).create_indexes(import_list)
+
+    def get_database_name(self):
+        return self.database_connector.get_database_name()
 
     def __find(self, collection: str, *args, **kwargs):
         """general find function for database search
@@ -196,8 +282,8 @@ class DatabaseManagerMongo(DatabaseManager):
             founded document
 
         """
-
-        return self.database_connector.get_collection(collection).find(*args, **kwargs)
+        result = self.database_connector.get_collection(collection).find(*args, **kwargs)
+        return result
 
     def find_one(self, collection: str, public_id: int, *args, **kwargs):
         """calls __find with single return
@@ -216,11 +302,11 @@ class DatabaseManagerMongo(DatabaseManager):
         formatted_public_id = {'public_id': public_id}
         formatted_sort = [('public_id', DatabaseManager.DESCENDING)]
         cursor_result = self.__find(collection, formatted_public_id, limit=1, sort=formatted_sort, *args, **kwargs)
-        for result in cursor_result.limit(-1):
+        for result in cursor_result:
             return result
         raise NoDocumentFound(collection, public_id)
 
-    def find_one_by(self, collection: str, *args, **kwargs):
+    def find_one_by(self, collection: str, *args, **kwargs) -> dict:
         """find one specific document by special requirements
 
         Args:
@@ -253,7 +339,7 @@ class DatabaseManagerMongo(DatabaseManager):
 
         return list(self.__find(collection=collection, *args, **kwargs))
 
-    def insert(self, collection, data) -> int:
+    def insert(self, collection: str, data: dict) -> int:
         """adds document to database
 
         Args:
@@ -264,14 +350,24 @@ class DatabaseManagerMongo(DatabaseManager):
             int: new public id of the document
             None: if anything goes wrong while inserting
         """
-        result = self.database_connector.get_collection(collection).insert_one(data)
-        if result.acknowledged:
-            formatted_id = {'_id': result.inserted_id}
-            projection = {'public_id': 1}
-            cursor_result = self.__find(collection, formatted_id, projection, limit=1)
-            for result in cursor_result.limit(-1):
-                return int(result['public_id'])
-        return None
+        result = None
+        try:
+            self.find_one(collection=collection, public_id=data['public_id'])
+        except NoDocumentFound:
+            try:
+                result = self.database_connector.get_collection(collection).insert_one(data)
+            except Exception as e:
+                LOGGER.debug(f"Insert error while type module {e}")
+                raise InsertError(e)
+            if result.acknowledged:
+                formatted_id = {'_id': result.inserted_id}
+                projection = {'public_id': 1}
+                cursor_result = self.__find(collection, formatted_id, projection, limit=1)
+                for result in cursor_result.limit(-1):
+                    return result['public_id']
+            return result
+        else:
+            raise PublicIDAlreadyExists(public_id=data['public_id'])
 
     def update(self, collection: str, public_id: int, data: dict):
         """update document inside database
@@ -288,9 +384,31 @@ class DatabaseManagerMongo(DatabaseManager):
 
         formatted_public_id = {'public_id': public_id}
         formatted_data = {'$set': data}
-        return self.database_connector.get_collection(collection).update(formatted_public_id, formatted_data)
+        return self.database_connector.get_collection(collection).update_one(formatted_public_id, formatted_data)
 
-    def delete(self, collection: str, public_id: int):
+    def insert_with_internal(self, collection: str, _id: int or str, data: dict):
+        formatted_id = {'_id': _id}
+        formatted_data = {'$set': data}
+        return self.database_connector.get_collection(collection).insert_one(formatted_id, formatted_data)
+
+    def update_with_internal(self, collection: str, _id: int or str, data: dict):
+        """update function for database elements without public id
+
+        Args:
+            collection (str): name of database collection
+            _id (int): mongodb id of document
+            data: data to update
+
+        Returns:
+            acknowledged
+
+        """
+
+        formatted_id = {'_id': _id}
+        formatted_data = {'$set': data}
+        return self.database_connector.get_collection(collection).update_one(formatted_id, formatted_data)
+
+    def delete(self, collection: str, public_id: int) -> DeleteResult:
         """delete document inside database
 
         Args:
@@ -334,6 +452,34 @@ class DatabaseManagerMongo(DatabaseManager):
 
         return self.database_connector.client.drop_database(db_name)
 
+    def create_collection(self, collection_name):
+        """
+        Creation empty MongoDB collection
+        Args:
+            collection_name: name of collectio
+
+        Returns:
+            collection name
+        """
+        from pymongo.errors import CollectionInvalid
+
+        try:
+            self.database_connector.create_collection(collection_name)
+        except CollectionInvalid:
+            raise CollectionAlreadyExists(collection_name)
+        return collection_name
+
+    def delete_collection(self, collection_name):
+        """
+        Delete MongoDB collection
+        Args:
+            collection_name: collection name
+
+        Returns:
+            delete ack
+        """
+        return self.database_connector.delete_collection(collection_name)
+
     def get_document_with_highest_id(self, collection: str) -> str:
         """get the document with the highest public id inside a collection
 
@@ -357,10 +503,51 @@ class DatabaseManagerMongo(DatabaseManager):
             int: highest public id
 
         """
-        return int(self.get_document_with_highest_id(collection)['public_id'])
+        try:
+            highest = int(self.get_document_with_highest_id(collection)['public_id'])
+        except NoDocumentFound:
+            return 0
+        return highest
 
 
-class NoDocumentFound(Exception):
+class InsertError(CMDBError):
+
+    def __init__(self, error):
+        super().__init__()
+        self.message = "Insert error {}".format(error)
+
+
+class CollectionAlreadyExists(CMDBError):
+    """
+    Creation error if collection already exists
+    """
+
+    def __init__(self, collection_name):
+        super().__init__()
+        self.message = "Collection {} already exists".format(collection_name)
+
+
+class FileImportError(CMDBError):
+    """
+    Error if json file import to database failed
+    """
+
+    def __init__(self, collection_name):
+        super().__init__()
+        self.message = "Collection {} could not be imported".format(collection_name)
+
+
+class PublicIDAlreadyExists(DuplicateKeyError):
+    """
+    Error if public_id inside database already exists
+    """
+
+    def __init__(self, public_id):
+        super().__init__("Public ID Exists")
+        self.message = "Object with this public id already exists: {}".format(public_id)
+
+
+class NoDocumentFound(CMDBError):
     """
     Error if no document was found
     """
@@ -370,7 +557,7 @@ class NoDocumentFound(Exception):
         self.message = "No document with the id {} was found inside {}".format(public_id, collection)
 
 
-class DocumentCouldNotBeDeleted(Exception):
+class DocumentCouldNotBeDeleted(CMDBError):
     """
     Error if document could not be deleted from database
     """

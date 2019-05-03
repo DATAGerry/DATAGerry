@@ -1,5 +1,33 @@
-from cmdb.object_framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFound
-from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
+# Net|CMDB - OpenSource Enterprise CMDB
+# Copyright (C) 2019 NETHINKS GmbH
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import logging
+
+from cmdb.object_framework.cmdb_log import CmdbLog
+from cmdb.object_framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
+from cmdb.object_framework.cmdb_errors import ExternalFillError, FieldInitError
+from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType, FieldNotFoundError
+from datetime import datetime
+
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
+
+LOGGER = logging.getLogger(__name__)
 
 
 class CmdbType(CmdbDAO):
@@ -7,88 +35,206 @@ class CmdbType(CmdbDAO):
     Definition of an object type - which fields were created and how.
     """
     COLLECTION = "objects.types"
-    SCHEMA = "type.schema.json"
     REQUIRED_INIT_KEYS = [
         'name',
-        'version'
+        'active',
+        'author_id',
+        'creation_time',
+        'render_meta',
+        'fields'
     ]
-    POSSIBLE_FIELD_TYPES = []
 
-    def __init__(self, name: str, title: str, description: str, version: str, status: list,
-                 active: bool, creator_id: int, creation_time, render_meta: list, fields: list,
-                 last_editor_id: int=0, last_edit_time=None, **kwargs):
+    INDEX_KEYS = [
+        {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
+    ]
+
+    def __init__(self, name: str, active: bool, author_id: int, creation_time: datetime,
+                 render_meta: dict, fields: list, version: str = '1.0.0', label: str = None, status: list = None,
+                 description: str = None, logs: dict = None, **kwargs):
         self.name = name
-        self.title = title
+        self.label = label or self.name.title()
         self.description = description
         self.version = version
         self.status = status
         self.active = active
-        self.creator_id = creator_id
+        self.author_id = author_id
         self.creation_time = creation_time
-        self.last_editor_id = last_editor_id
-        self.last_edit_time = last_edit_time
         self.render_meta = render_meta
-        self.fields = fields
+        self.fields = fields or []
+        self.logs = logs
         super(CmdbType, self).__init__(**kwargs)
+
+    def __truediv__(self, other):
+        if not isinstance(other, CmdbType):
+            raise TypeError("Not a CmdbType instance")
+        from deepdiff import DeepDiff
+        return DeepDiff(self, other, ignore_order=True)
 
     def get_name(self):
         return self.name
 
+    def get_label(self):
+        return self.label
+
+    def get_description(self):
+        return self.description
+
     def get_externals(self):
         return self.render_meta['external']
 
-    def get_external(self, _id):
-        try:
-            return self.render_meta['external'][_id]
-        except IndexError:
-            return None
+    def has_externals(self):
+        if len(self.get_externals()) > 0:
+            return True
+        else:
+            return False
+
+    def get_external(self, name):
+        ext_data = next(ext for ext in self.render_meta['external'] if ext["name"] == name)
+        return _ExternalLink(**ext_data)
 
     def get_summaries(self):
         return self.render_meta['summary']
 
-    def get_summary(self, _id):
-        try:
-            return self.render_meta['summary'][_id]
-        except IndexError:
-            return None
+    def has_summaries(self):
+        if len(self.render_meta['summary']) > 0:
+            return True
+        return False
+
+    def get_summary_fields(self, name):
+        return self.get_summary(name)['fields']
+
+    def get_summary(self, name):
+        sum_data = next(sum for sum in self.render_meta['summary'] if sum["name"] == name)
+        return _Summary(**sum_data)
 
     def get_sections(self):
         return sorted(self.render_meta['sections'], key=lambda k: k['position'])
 
-    def get_section(self, _id):
+    def get_section(self, name):
         try:
-            return self.render_meta['sections'][_id]
+            return self.render_meta['sections'][name]
         except IndexError:
             return None
 
-    def get_fields(self):
-        """
-        get all fields
-        :return: list of fields
-        """
+    def has_sections(self):
+        if len(self.get_sections()) == 0:
+            return False
+        return True
+
+    def get_fields(self) -> list:
         return self.fields
 
-    def get_field(self, name):
-        """
-        get specific field
-        :param name: field name
-        :return: field with value
-        """
-        for field in self.fields:
-            if field['name'] == name:
-                try:
-                    return CmdbFieldType(**field)
-                except RequiredInitKeyNotFound as e:
-                    print(e.message)
-                    return None
+    def count_fields(self) -> int:
+        return len(self.fields)
+
+    def get_field_of_type_with_value(self, input_type: str, _filter: str, value) -> CmdbFieldType:
+        field = [x for x in self.fields if x['input_type'] == input_type and x[_filter] == value]
+        if field:
+            LOGGER.debug('Field of type {}'.format(input_type))
+            LOGGER.debug('Field len'.format(field))
+            LOGGER.debug('Field {}'.format(len(field)))
+            try:
+                return CmdbFieldType(**field[0])
+            except (RequiredInitKeyNotFoundError, CMDBError) as e:
+                LOGGER.warning(e.message)
+                raise FieldInitError(value)
+        else:
+            LOGGER.debug('Field of type {} NOT found'.format(input_type))
+            raise FieldNotFoundError(value, self.get_name())
+
+    def get_field(self, name) -> CmdbFieldType:
+        field = [x for x in self.fields if x['name'] == name]
+        if field:
+            try:
+                return CmdbFieldType(**field[0])
+            except (RequiredInitKeyNotFoundError, CMDBError) as e:
+                LOGGER.warning(e.message)
+                raise FieldInitError(name)
         raise FieldNotFoundError(name, self.get_name())
 
+    def get_logs(self):
+        return self.logs
 
-class FieldNotFoundError(Exception):
-    """
-    Error if field do not exists
-    """
+    def last_log(self) -> CmdbLog:
+        try:
+            last_log = CmdbLog(**self.logs[-1])
+        except CMDBError:
+            return None
+        return last_log
 
-    def __init__(self, field_name, type_name):
-        super().__init__()
-        self.message = 'Field {} was not found inside type: {}'.format(field_name, type_name)
+    def add_last_log_state(self, state):
+        last_log = CmdbLog(**self.logs[-1])
+        last_log.set_state(state)
+        self.logs[-1] = last_log.__dict__
+
+    def add_log(self, log: CmdbLog):
+        self.logs.append(log.__dict__)
+
+
+class _ExternalLink:
+
+    def __init__(self, name: str, href: str, label: str = None, icon: str = None, fields: list = None):
+        self.name = name
+        self.href = href
+        self.label = label or self.name.title()
+        self.icon = icon
+        self.fields = fields or []
+
+    def has_icon(self):
+        """
+        check if external link has a icon
+        """
+        if self.icon:
+            return True
+        return False
+
+    def link_requires_fields(self):
+        """
+        the type of arguments passed to it and formats it according to the format codes defined in the string
+        checks if the href link requires field informations.
+        Examples:
+            http://example.org/{}/dynamic/ -> True
+            http://example.org/static/ -> False
+        Returns:
+            bool
+        """
+        import re
+        if re.search('{.*?}', self.href):
+            return True
+        return False
+
+    def has_fields(self):
+        """
+        check if external link has field definitions
+        """
+        if len(self.fields) > 0:
+            return True
+        return False
+
+    def fill_href(self, inputs):
+        """fills the href brackets with data"""
+        try:
+            self.href = self.href.format(*inputs)
+        except Exception as e:
+            raise ExternalFillError(inputs, e)
+
+
+class _Summary:
+
+    def __init__(self, name: str, label: str = None, fields: list = None, values: list = None):
+        self.name = name
+        self.label = label or self.name.title()
+        self.fields = fields or []
+        self.values = values
+
+    def has_fields(self):
+        if len(self.fields) > 0:
+            return True
+        return False
+
+    def set_values(self, values):
+        self.values = values
+
+    def __repr__(self):
+        output_string = "{}: {}".format(self.label, self.values)
+        return output_string

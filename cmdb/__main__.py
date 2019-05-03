@@ -1,93 +1,219 @@
 #!/usr/bin/env python
+# Net|CMDB - OpenSource Enterprise CMDB
+# Copyright (C) 2019 NETHINKS GmbH
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
-Net|CMDB is a flexible asset management tool and
+CMDB is a flexible asset management tool and
 open-source configurable management database
-
-You should have received a copy of the MIT License along with Net|CMDB.
-If not, see <https://github.com/NETHINKS/NetCMDB/blob/master/LICENSE>.
 """
-from gevent import monkey
-
-monkey.patch_all()
-
-from cmdb import __version__, __title__, __DEBUG__
-from optparse import OptionParser
+import logging
+import signal
 from time import sleep
-from cmdb.application_utils.logger import create_module_logger
+from argparse import ArgumentParser, Namespace
+from cmdb.utils.logger import get_logging_conf
+from cmdb.utils.helpers import timing
 
-logger = create_module_logger(__name__)
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
+
+# setup logging for startup
+logging.config.dictConfig(get_logging_conf())
+LOGGER = logging.getLogger(__name__)
 
 
-def build_arg_parser():
-    _parser = OptionParser(
+def _activate_debug():
+    """
+    Activate the debug mode
+    """
+    import cmdb
+    cmdb.__MODE__ = 'DEBUG'
+    LOGGER.warning("DEBUG mode enabled")
+
+
+def _check_database():
+    """
+    Checks whether the specified connection of the configuration is reachable.
+    Returns: True if response otherwise False
+
+    """
+
+    from cmdb.utils.system_reader import SystemConfigReader
+    from cmdb.data_storage import get_pre_init_database
+    LOGGER.info("Checking database connection with {} data".format(SystemConfigReader.DEFAULT_CONFIG_NAME))
+    dbm = get_pre_init_database()
+    connection_test = dbm.database_connector.is_connected()
+    LOGGER.debug("Database status is {}".format(connection_test))
+    if connection_test is True:
+        dbm.database_connector.disconnect()
+        return connection_test
+    retries = 0
+    while retries < 3:
+        retries += 1
+        LOGGER.warning("Retry {}: Checking database connection with {} data".format(retries,
+                                                                                    SystemConfigReader.DEFAULT_CONFIG_NAME))
+        connection_test = dbm.database_connector.is_connected()
+        if connection_test:
+            dbm.database_connector.disconnect()
+            return connection_test
+    return connection_test
+
+
+def _start_app():
+    """
+    Starting the services
+    """
+    import cmdb.process_management.process_manager
+
+    global app_manager
+
+    # install signal handler
+    signal.signal(signal.SIGTERM, _stop_app)
+
+    # start app
+    app_manager = cmdb.process_management.process_manager.ProcessManager()
+    app_status = app_manager.start_app()
+    LOGGER.info("Process manager started: {}".format(app_status))
+
+
+def _stop_app(signum, frame):
+    global app_manager
+    app_manager.stop_app()
+
+
+def _init_config_reader(config_file):
+    import os
+
+    from cmdb.utils.system_reader import SystemConfigReader
+    path, filename = os.path.split(config_file)
+    if filename is not SystemConfigReader.DEFAULT_CONFIG_NAME or path is not SystemConfigReader.DEFAULT_CONFIG_LOCATION:
+        SystemConfigReader.RUNNING_CONFIG_NAME = filename
+        SystemConfigReader.RUNNING_CONFIG_LOCATION = path + '/'
+    SystemConfigReader(SystemConfigReader.RUNNING_CONFIG_NAME,
+                       SystemConfigReader.RUNNING_CONFIG_LOCATION)
+
+
+def build_arg_parser() -> Namespace:
+    """
+    Generate application parameter parser
+    Returns: instance of OptionParser
+
+    """
+
+    from cmdb import __title__
+    _parser = ArgumentParser(
+        prog='NetCMDB',
         usage="usage: {} [options]".format(__title__),
-        version=" {}".format(__version__)
     )
-    _parser.add_option('-d', '--debug', action='store_true', default=False, dest='debug',
-                       help="enable debug mode: DO NOT USE ON PRODUCTIVE SYSTEMS")
+    _parser.add_argument('--setup', action='store_true', default=False, dest='setup',
+                         help="init cmdb")
 
-    _parser.add_option('-s', '--start', action='store_true', default=False, dest='start',
-                       help="starting cmdb core system - enables services")
+    _parser.add_argument('--test', action='store_true', default=False, dest='test_data',
+                         help="generate and insert test data")
 
-    (options, args) = _parser.parse_args()
+    _parser.add_argument('-d', '--debug', action='store_true', default=False, dest='debug',
+                         help="enable debug mode: DO NOT USE ON PRODUCTIVE SYSTEMS")
 
-    return options, args
+    _parser.add_argument('-s', '--start', action='store_true', default=False, dest='start',
+                         help="starting cmdb core system - enables services")
+
+    _parser.add_argument('-c', '--config', default='./etc/cmdb.conf', dest='config_file',
+                         help="optional path to config file")
+
+    return _parser.parse_args()
 
 
+@timing('CMDB start took')
 def main(args):
-    exit_message = "STOPPING cmdb!"
-
-
-    from cmdb.communication_interface import HTTPServer, application
-    from cmdb.data_storage import init_database
-    from cmdb.data_storage.database_connection import ServerTimeoutError
-    from cmdb.plugins import plugin_manager
-
-    database_manager = init_database()
+    """
+    Default application start function
+    Args:
+        args: start-options
+    """
+    LOGGER.info("CMDB starting...")
+    if args.debug:
+        _activate_debug()
+    _init_config_reader(args.config_file)
+    from cmdb.data_storage.database_connection import DatabaseConnectionError
     try:
-        database_manager.database_connector.connect()
+        conn = _check_database()
+        if not conn:
+            raise DatabaseConnectionError()
+        LOGGER.info("Database connection established.")
+    except CMDBError as conn_error:
+        LOGGER.critical(conn_error.message)
+        exit(1)
 
-        from cmdb.application_utils import get_system_config_reader
-        web_server_options = get_system_config_reader().get_all_values_from_section('WebServer')
-        HTTPServer(
-            application, web_server_options
-        ).run()
+    if args.test_data:
+        _activate_debug()
+        from cmdb.utils.data_factory import DataFactory
+        from cmdb.data_storage import get_pre_init_database
 
-        #plugin_manager.load_plugins()
-
-    except OSError as e:
-        logger.warning(e.errno)
-        exit(logger.info(exit_message))
-    except ServerTimeoutError as e:
-        logger.warning(e.message)
-        exit(logger.info(exit_message))
-    finally:
-        database_manager.database_connector.disconnect()
+        _factory_database_manager = get_pre_init_database()
+        db_name = _factory_database_manager.get_database_name()
+        LOGGER.warning("Inserting test-data into: {}".format(db_name))
+        try:
+            factory = DataFactory(database_manager=_factory_database_manager)
+            ack = factory.insert_data()
+            LOGGER.warning("Test-data was successfully added".format(_factory_database_manager.get_database_name()))
+            if len(ack) > 0:
+                LOGGER.critical("Error while inserting test-data: {} - dropping database".format(ack))
+                _factory_database_manager.drop(db_name)  # cleanup database
+        except (Exception, CMDBError) as e:
+            import traceback
+            traceback.print_tb(e.__traceback__)
+            _factory_database_manager.drop(db_name)  # cleanup database
+            exit(1)
+    if args.start:
+        _start_app()
+    sleep(0.2)  # prevent logger output
+    LOGGER.info("CMDB successfully started")
 
 
 if __name__ == "__main__":
-    welcome_string = '''Welcome to Net|CMDB
-Starting core system with following parameters: \n{}
-    '''
-    brand_string = '''
-###########################################
-__  __ _____ _____ ____ __  __ ____  ____
-| \ | | ____|_   _/ ___|  \/  |  _ \| __ ) 
-|  \| |  _|   | || |   | |\/| | | | |  _ \ 
-| |\  | |___  | || |___| |  | | |_| | |_) |
-|_| \_|_____| |_| \____|_|  |_|____/|____/ 
-   
-###########################################                                        
-    '''
-    parameters, arguments = build_arg_parser()
-    print(brand_string)
-    print(welcome_string.format(parameters))
-    sleep(0.1)  # prevent logger output
-    logger.info("STARTING CMDB...")
-    if parameters.debug:
-        global __DEBUG__
-        __DEBUG__ = True
-        #log.setLevel(10)
+    from termcolor import colored
 
-    if parameters.start:
-        main(arguments)
+    welcome_string = colored('Welcome to Net|CMDB \nStarting system with following parameters: \n{}\n', 'yellow')
+    brand_string = colored('''
+    ###########################################
+    __  __ _____ _____ ____ __  __ ____  ____
+    | \ | | ____|_   _/ ___|  \/  |  _ \| __ ) 
+    |  \| |  _|   | || |   | |\/| | | | |  _ \ 
+    | |\  | |___  | || |___| |  | | |_| | |_) |
+    |_| \_|_____| |_| \____|_|  |_|____/|____/ 
+
+    ###########################################\n''', 'green')
+    license_string = colored('''Copyright (C) 2019 NETHINKS GmbH
+licensed under the terms of the GNU Affero General Public License version 3\n''', 'yellow')
+
+    try:
+        options = build_arg_parser()
+        print(brand_string)
+        print(welcome_string.format(options.__dict__))
+        print(license_string)
+        sleep(0.2)  # prevent logger output
+        main(options)
+    except Exception as e:
+        import cmdb
+
+        if cmdb.__MODE__ == 'DEBUG':
+            import traceback
+
+            traceback.print_exc()
+        LOGGER.critical("There was an unforeseen error {}".format(e))
+        LOGGER.info("CMDB stopped!")
+        exit(1)
