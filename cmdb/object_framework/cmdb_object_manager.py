@@ -212,14 +212,15 @@ class CmdbObjectManager(CmdbManagerBase):
     def get_objects_by_type(self, type_id: int):
         return self.get_objects_by(type_id=type_id)
 
-    def _find_query_fields(self, query, test=list()):
+    def _find_query_fields(self, query, match_fields=list()):
         for key, items in query.items():
-            if 'fields.value' == key:
-                test.append(items['$regex'])
-            else:
-                for item in items:
-                    self._find_query_fields(item, test=test)
-        return test
+            if isinstance(items, dict):
+                if 'fields.value' == key:
+                    match_fields.append(items['$regex'])
+                else:
+                    for item in items:
+                        self._find_query_fields(item, match_fields=match_fields)
+        return match_fields
 
     def _re_search_fields(self, search_object, regex):
         """returns list of matched fields"""
