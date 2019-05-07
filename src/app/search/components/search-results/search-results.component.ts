@@ -20,6 +20,8 @@ import {Component, OnInit, ViewChild, Input} from '@angular/core';
 import {DataTableDirective} from "angular-datatables";
 import {Subject} from "rxjs";
 import {SearchService} from "../../search.service";
+import {TypeService} from "../../../framework/services/type.service";
+import {Router} from "@angular/router";
 
 
 @Component({
@@ -37,7 +39,7 @@ export class SearchResultsComponent implements OnInit {
 
   results = <any>[];
 
-  constructor(private _searchService: SearchService) { }
+  constructor(private _searchService: SearchService, private router: Router) { }
 
   ngOnInit() {
 
@@ -74,5 +76,6 @@ export class SearchResultsComponent implements OnInit {
 
   onClick(newValue){
     this._searchService.setSelectedTerm(newValue);
+    this.router.navigate(["search/view"]);
   }
 }
