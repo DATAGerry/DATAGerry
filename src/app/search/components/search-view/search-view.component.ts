@@ -17,7 +17,7 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import {SearchService} from "../../search.service";
+import { SearchService } from '../../search.service';
 
 @Component({
   selector: 'cmdb-search-view',
@@ -26,12 +26,13 @@ import {SearchService} from "../../search.service";
 })
 export class SearchViewComponent implements OnInit {
 
-  selectedTerm : any;
+  selectedTerm: any;
 
-  constructor(private _searchService: SearchService) { }
+  constructor(private searchService: SearchService) {
+  }
 
   ngOnInit() {
-    this.selectedTerm = this._searchService.getSelectedTerm();
+    this.selectedTerm = this.searchService.getSelectedTerm();
   }
 
 }

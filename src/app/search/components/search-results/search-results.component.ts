@@ -16,12 +16,11 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, OnInit, ViewChild, Input} from '@angular/core';
-import {DataTableDirective} from "angular-datatables";
-import {Subject} from "rxjs";
-import {SearchService} from "../../search.service";
-import {TypeService} from "../../../framework/services/type.service";
-import {Router} from "@angular/router";
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { DataTableDirective } from 'angular-datatables';
+import { Subject } from 'rxjs';
+import { SearchService } from '../../search.service';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -29,7 +28,7 @@ import {Router} from "@angular/router";
   templateUrl: './search-results.component.html',
   styleUrls: ['./search-results.component.scss']
 })
-export class SearchResultsComponent implements OnInit {
+export class SearchResultsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild(DataTableDirective)
   public dtElement: DataTableDirective;
@@ -37,20 +36,21 @@ export class SearchResultsComponent implements OnInit {
   public dtOptions: DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
 
-  results = <any>[];
+  results = [];
 
-  constructor(private _searchService: SearchService, private router: Router) { }
+  constructor(private searchService: SearchService, private router: Router) {
+  }
 
   ngOnInit() {
 
-    this.results = this._searchService.getSearchResult();
+    this.results = this.searchService.getSearchResult();
 
     this.dtOptions = {
       ordering: true,
       order: [[1, 'asc']],
       language: {
-        search: "",
-        searchPlaceholder: "Filter..."
+        search: '',
+        searchPlaceholder: 'Filter...'
       }
     };
     this.dtTrigger.next();
@@ -65,7 +65,7 @@ export class SearchResultsComponent implements OnInit {
     this.dtTrigger.unsubscribe();
   }
 
-  rerender(): void {
+  public rerender(): void {
     this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
       // Destroy the table first
       dtInstance.destroy();
@@ -74,8 +74,8 @@ export class SearchResultsComponent implements OnInit {
     });
   }
 
-  onClick(newValue){
-    this._searchService.setSelectedTerm(newValue);
-    this.router.navigate(["search/view"]);
+  onClick(newValue) {
+    this.searchService.setSelectedTerm(newValue);
+    this.router.navigate(['search/view']);
   }
 }

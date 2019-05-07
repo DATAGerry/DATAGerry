@@ -16,13 +16,13 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Injectable } from '@angular/core'
+import { Injectable } from '@angular/core';
 
 @Injectable()
 export class SearchService {
 
-  searchResult = <any>[];
-  selectedTerm:any;
+  searchResult = [];
+  selectedTerm: any;
 
   getSearchResult() {
     return this.searchResult;
@@ -32,11 +32,11 @@ export class SearchService {
     this.searchResult = newValue;
   }
 
-  setSelectedTerm(newValue){
+  setSelectedTerm(newValue) {
     this.selectedTerm = newValue;
   }
 
-  getSelectedTerm(){
+  getSelectedTerm() {
     return this.selectedTerm;
   }
 }
