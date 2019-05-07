@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* Net|CMDB - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -16,27 +16,22 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Injectable } from '@angular/core';
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+import { ObjectListComponent } from './components/object-list/object-list.component';
 
-@Injectable()
-export class SearchService {
-
-  searchResult = [];
-  selectedTerm: any;
-
-  getSearchResult() {
-    return this.searchResult;
+const routes: Routes = [
+  {
+    path: '',
+    data: {
+      breadcrumb: 'List'
+    },
+    component: ObjectListComponent
   }
+];
 
-  setSearchResult(newValue) {
-    this.searchResult = newValue;
-  }
-
-  setSelectedTerm(newValue) {
-    this.selectedTerm = newValue;
-  }
-
-  getSelectedTerm() {
-    return this.selectedTerm;
-  }
-}
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule]
+})
+export class ObjectRoutingModule { }

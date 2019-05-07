@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* Net|CMDB - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -19,29 +19,14 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { ApiCallService } from '../services/api-call.service';
-import { SearchService } from './search.service';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { DataTablesModule } from 'angular-datatables';
-
-import { SearchResultsComponent } from './components/search-results/search-results.component';
-import { SearchViewComponent } from './components/search-view/search-view.component';
-import { SearchRoutingModule } from './search-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-
+import { ObjectRoutingModule } from './object-routing.module';
+import { ObjectListComponent } from './components/object-list/object-list.component';
 
 @NgModule({
-  declarations: [SearchResultsComponent, SearchViewComponent],
+  declarations: [ObjectListComponent],
   imports: [
     CommonModule,
-    SearchRoutingModule,
-    FormsModule,
-    LayoutModule,
-    ReactiveFormsModule,
-    DataTablesModule
-  ],
-
-  providers: [ApiCallService, SearchService]
+    ObjectRoutingModule
+  ]
 })
-export class SearchModule {
-}
+export class ObjectModule { }

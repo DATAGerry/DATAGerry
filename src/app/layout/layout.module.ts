@@ -29,8 +29,8 @@ import { ContentHeaderComponent } from './components/content-header/content-head
 import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.component';
 import { LowercaseDirective } from './directives/lowercase.directive';
 import { SearchBarComponent } from './components/search-bar/search-bar.component';
-import {ReactiveFormsModule} from "@angular/forms";
-import {SearchService} from "../search/search.service";
+import { ReactiveFormsModule } from '@angular/forms';
+import { SearchService } from '../search/search.service';
 
 @NgModule({
   declarations: [

@@ -16,20 +16,18 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, OnInit, Input} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'cmdb-search',
-  templateUrl: './search.component.html',
-  styleUrls: ['./search.component.scss']
+  selector: 'cmdb-object-list',
+  templateUrl: './object-list.component.html',
+  styleUrls: ['./object-list.component.scss']
 })
-export class SearchComponent implements OnInit {
+export class ObjectListComponent implements OnInit {
 
   constructor() { }
 
-
   ngOnInit() {
-
   }
 
 }

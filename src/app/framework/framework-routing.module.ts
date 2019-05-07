@@ -50,6 +50,13 @@ const routes: Routes = [
       breadcrumb: 'Type'
     },
     loadChildren: './type/type.module#TypeModule',
+  },
+  {
+    path: 'object',
+    data: {
+      breadcrumb: 'Object'
+    },
+    loadChildren: './object/object.module#ObjectModule',
   }
 ];
 
