@@ -18,16 +18,15 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FrameworkRoutingModule } from './framework-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-import { ObjectRoutingModule } from './object/object-routing.module';
+
+import { ObjectRoutingModule } from './object-routing.module';
+import { ObjectListComponent } from './components/object-list/object-list.component';
 
 @NgModule({
+  declarations: [ObjectListComponent],
   imports: [
     CommonModule,
-    LayoutModule,
-    ObjectRoutingModule,
-    FrameworkRoutingModule
+    ObjectRoutingModule
   ]
 })
-export class FrameworkModule { }
+export class ObjectModule { }
