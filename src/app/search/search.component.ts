@@ -16,12 +16,12 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, Input} from '@angular/core';
 import { ApiCallService } from '../services/api-call.service';
 import { FormControl } from '@angular/forms';
-import { Subject } from "rxjs";
-import { DataTableDirective } from "angular-datatables";
 import { TypeService } from "../framework/services/type.service";
+import { Router } from '@angular/router';
+import {SearchService} from "./search.service";
 
 @Component({
   selector: 'cmdb-search',
@@ -30,50 +30,47 @@ import { TypeService } from "../framework/services/type.service";
 })
 export class SearchComponent implements OnInit {
 
-  @ViewChild(DataTableDirective)
-  public dtElement: DataTableDirective;
-
-  public dtOptions: DataTables.Settings = {};
-  public dtTrigger: Subject<any> = new Subject();
-
   searchCtrl: FormControl = new FormControl('');
   autoResult = <any>[];
-  endResult = <any>[];
   categoryList = <any>[{label : "Categories"}];
 
   category = "Categories";
-  typ_id: string = "undefined"
+  typ_id: string = "undefined";
 
-  constructor(private _apiCallService: ApiCallService, private _typService: TypeService) { }
+  showResultList = false;
+
+
+  constructor(private _apiCallService: ApiCallService, private _typService: TypeService, private router: Router, private _searchService:SearchService) { }
 
 
   ngOnInit() {
-
-    this.dtOptions = {
-      ordering: true,
-      order: [[1, 'asc']],
-      language: {
-        search: "",
-        searchPlaceholder: "Filter..."
-      }
-    };
-    this.dtTrigger.next();
 
     this._typService.getTypeList().subscribe((list) => {
       this.categoryList = this.categoryList.concat(list);
       });
   }
 
+  public onBlurMethod(){
+    this.showResultList = false;
+    this.autoResult = <any>[];
+  }
 
   public autosearch(){
     this.searchCtrl.valueChanges.subscribe(
       term => {
-        if (term != '') {
+        if (typeof term === "string" && term.length > 0 && term !== undefined) {
           this.apiCall(term,5);
         }else {
           this.autoResult = <any>[];
         }
       })
+
+    if(this.autoResult.length == 0){
+      this.showResultList = false;
+    }else{
+      this.showResultList = true;
+    }
+
   }
 
 
@@ -81,16 +78,11 @@ export class SearchComponent implements OnInit {
 
     this._apiCallService.searchTerm("/search/?value="+this.searchCtrl.value+"&type_id="+this.typ_id+"&limit="+0).subscribe(
       data => {
-        this.endResult = data as any[];
-      },
-      () => {
-
-      },
-      () => {
-        this.rerender();
+        this._searchService.setSearchResult(data as any[]);
+        this.router.navigate(["search/results"]);
+        console.log(data);
       });
   }
-
 
   public filter(arr){
     arr.forEach(function (obj) {
@@ -122,21 +114,4 @@ export class SearchComponent implements OnInit {
     return item.public_id;
   }
 
-  ngAfterViewInit(): void {
-    this.dtTrigger.next();
-  }
-
-  ngOnDestroy(): void {
-    // Do not forget to unsubscribe the event
-    this.dtTrigger.unsubscribe();
-  }
-
-  rerender(): void {
-    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-      // Destroy the table first
-      dtInstance.destroy();
-      // Call the dtTrigger to rerender again
-      this.dtTrigger.next();
-    });
-  }
 }

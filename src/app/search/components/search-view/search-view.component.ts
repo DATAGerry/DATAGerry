@@ -17,17 +17,21 @@
 */
 
 import { Component, OnInit } from '@angular/core';
+import {SearchService} from "../../search.service";
 
 @Component({
-  selector: 'cmdb-text-search',
-  templateUrl: './text-search.component.html',
-  styleUrls: ['./text-search.component.scss']
+  selector: 'cmdb-search-view',
+  templateUrl: './search-view.component.html',
+  styleUrls: ['./search-view.component.scss']
 })
-export class TextSearchComponent implements OnInit {
+export class SearchViewComponent implements OnInit {
 
-  constructor() { }
+  selectedTerm : any;
+
+  constructor(private _searchService: SearchService) { }
 
   ngOnInit() {
+    this.selectedTerm = this._searchService.getSelectedTerm();
   }
 
 }

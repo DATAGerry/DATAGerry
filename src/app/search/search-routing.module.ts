@@ -18,11 +18,14 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import {SearchComponent} from "./search.component";
 import {NavigationComponent} from "../layout/components/navigation/navigation.component";
-import {SidebarComponent} from "../layout/components/sidebar/sidebar.component";
 import {BreadcrumbComponent} from "../layout/components/breadcrumb/breadcrumb.component";
-import {TextSearchComponent} from "./components/text-search/text-search.component";
+
+import {SidebarComponent} from "../layout/components/sidebar/sidebar.component";
+import {SearchResultsComponent} from "./components/search-results/search-results.component";
+import {SearchViewComponent} from "./components/search-view/search-view.component";
+import {SearchComponent} from "./search.component";
+import {FooterComponent} from "../layout/components/footer/footer.component";
 
 const routes: Routes = [
   {
@@ -42,12 +45,22 @@ const routes: Routes = [
   },
   {
     path: '',
-    component: SearchComponent
+    component: FooterComponent,
+    outlet: 'footer'
   },
   {
-    path: 'text',
-    component: TextSearchComponent
+    path: '',
+    component: SearchComponent,
+  },
+  {
+    path: 'results',
+    component: SearchResultsComponent
+  },
+  {
+    path: 'view',
+    component: SearchViewComponent
   }
+
 ];
 
 @NgModule({

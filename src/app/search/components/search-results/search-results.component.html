@@ -1,0 +1,23 @@
+
+<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table">
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Type</th>
+    <th>Description</th>
+    <th>Author</th>
+    <th>Action</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let result of results">
+    <td>{{result.type_id}}</td>
+    <td>{{result.type_label}}</td>
+    <td> TODO: Description</td>
+    <td>{{result.author_name}}</td>
+    <td>
+      <a routerLink="search/view" (click)="onClick(result)">View</a>
+    </td>
+  </tr>
+  </tbody>
+</table>
