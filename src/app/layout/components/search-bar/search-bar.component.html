@@ -1,0 +1,39 @@
+
+
+
+<div class="input-group">
+
+  <div class="input-group-btn search-panel">
+
+    <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <span id="categorie_concept">{{category}}</span> <span class="caret"></span>
+    </button>
+
+    <ul class="dropdown-menu" role="menu">
+      <li *ngFor="let element of categoryList" [value]="element.label" (click)="dropdownMenu(element)">
+        {{element.label}}
+      </li>
+    </ul>
+
+  </div>
+
+  <div class="input-group-btn search-panel">
+    <input class="form-control" type="search" placeholder="Search for..." aria-label="Search"
+           [formControl]="searchCtrl"
+           (blur)="onBlurMethod()"
+           (keyup)="autosearch()"
+           (keyup.enter)="getResponse()">
+
+    <ul class="list-search-result" *ngIf="showResultList">
+      <li *ngFor="let element of autoResult" [value]="element.label"
+          (click) ="getResponse()">
+        ID : {{element.type_id}} Type: {{element.type_label}} Author: {{element.author_name}}
+      </li>
+    </ul>
+  </div>
+
+  <button class="btn btn-default" type="button" (click)="getResponse()">
+    <i class="fa fa-search" aria-hidden="true"></i>
+  </button>
+</div>
+

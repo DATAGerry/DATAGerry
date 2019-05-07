@@ -28,6 +28,9 @@ import { SidebarCategoryComponent } from './components/sidebar/sidebar-category.
 import { ContentHeaderComponent } from './components/content-header/content-header.component';
 import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.component';
 import { LowercaseDirective } from './directives/lowercase.directive';
+import { SearchBarComponent } from './components/search-bar/search-bar.component';
+import {ReactiveFormsModule} from "@angular/forms";
+import {SearchService} from "../search/search.service";
 
 @NgModule({
   declarations: [
@@ -39,6 +42,7 @@ import { LowercaseDirective } from './directives/lowercase.directive';
     ContentHeaderComponent,
     ActiveBadgeComponent,
     LowercaseDirective,
+    SearchBarComponent,
   ],
   exports: [
     NavigationComponent,
@@ -46,14 +50,16 @@ import { LowercaseDirective } from './directives/lowercase.directive';
     FooterComponent,
     ContentHeaderComponent,
     ActiveBadgeComponent,
+    SearchBarComponent,
     LowercaseDirective
   ],
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    ReactiveFormsModule
   ],
   providers: [
-    BreadcrumbService
+    BreadcrumbService, SearchService
   ]
 })
 export class LayoutModule {
