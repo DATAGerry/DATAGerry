@@ -27,12 +27,16 @@ import { TypeBasicStepComponent } from './type-basic-step/type-basic-step.compon
 export class TypeBuilderComponent implements OnInit {
 
   @ViewChild(TypeBasicStepComponent)
-  basicStep: TypeBasicStepComponent;
+  private basicStep: TypeBasicStepComponent;
 
-  constructor() { }
+  constructor() {
+
+  }
 
   ngOnInit() {
-    console.log(this.basicStep);
+    this.basicStep.basicForm.statusChanges.subscribe((value: any) => {
+      console.log(this.basicStep.basicForm.value);
+    });
   }
 
 }

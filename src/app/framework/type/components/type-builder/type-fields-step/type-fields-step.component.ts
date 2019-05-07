@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormioForm, FormioOptions } from 'angular-formio';
 
 @Component({
   selector: 'cmdb-type-fields-step',
@@ -6,8 +7,13 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./type-fields-step.component.scss']
 })
 export class TypeFieldsStepComponent implements OnInit {
+  public form: FormioForm = {};
+  public options: FormioOptions = {};
 
-  constructor() { }
+  constructor() {
+    this.form.title = 'Cmdb Type Builder';
+    this.form.components = [];
+  }
 
   ngOnInit() {
   }

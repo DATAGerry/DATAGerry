@@ -28,15 +28,16 @@ export class TypeBasicStepComponent implements OnInit {
 
   public basicForm: FormGroup;
 
-  constructor() { }
-
-  ngOnInit() {
+  constructor() {
     this.basicForm = new FormGroup({
       name: new FormControl(''),
       label: new FormControl(''),
       description: new FormControl(''),
       active: new FormControl(true),
     });
+  }
+
+  ngOnInit() {
     this.basicForm.get('name').valueChanges.subscribe(val => {
       this.basicForm.get('label').setValue(val.toString().charAt(0).toUpperCase() + val.toString().slice(1));
     });

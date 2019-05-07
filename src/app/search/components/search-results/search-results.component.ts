@@ -39,12 +39,12 @@ export class SearchResultsComponent implements OnInit, AfterViewInit, OnDestroy 
   results = [];
 
   constructor(private searchService: SearchService, private router: Router) {
-  }
-
-  ngOnInit() {
 
     this.results = this.searchService.getSearchResult();
 
+  }
+
+  ngOnInit() {
     this.dtOptions = {
       ordering: true,
       order: [[1, 'asc']],

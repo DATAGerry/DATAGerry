@@ -30,6 +30,9 @@ import { TypeBasicStepComponent } from './components/type-builder/type-basic-ste
 import { ReactiveFormsModule } from '@angular/forms';
 import { TypeFieldsStepComponent } from './components/type-builder/type-fields-step/type-fields-step.component';
 import { FormioModule } from 'angular-formio';
+import { TypeHeaderComponent } from './components/type-header/type-header.component';
+import { TypeQrComponent } from './components/type-qr/type-qr.component';
+import { QRCodeModule } from 'angularx-qrcode';
 
 @NgModule({
   declarations: [
@@ -38,7 +41,9 @@ import { FormioModule } from 'angular-formio';
     TypeAddComponent,
     TypeBuilderComponent,
     TypeBasicStepComponent,
-    TypeFieldsStepComponent],
+    TypeFieldsStepComponent,
+    TypeHeaderComponent,
+    TypeQrComponent],
   imports: [
     CommonModule,
     TypeRoutingModule,
@@ -46,7 +51,8 @@ import { FormioModule } from 'angular-formio';
     LayoutModule,
     ReactiveFormsModule,
     ArchwizardModule,
-    FormioModule
+    FormioModule,
+    QRCodeModule
   ]
 })
 export class TypeModule {
