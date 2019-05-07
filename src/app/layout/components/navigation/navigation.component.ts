@@ -1,5 +1,5 @@
 /*
-* Net|CMDB - OpenSource Enterprise CMDB
+* dataGerry - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@ import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 })
 export class NavigationComponent implements OnInit, OnDestroy {
 
-  public readonly title: string = 'NetCMDBApp';
+  public readonly title: string = 'dataGerryApp';
 
   constructor(private renderer: Renderer2) {
   }
