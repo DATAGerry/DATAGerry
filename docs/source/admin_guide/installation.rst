@@ -1,14 +1,14 @@
 ############
 Installation
 ############
-This guide provides an overview of the installation and startup of NetCMDB.
+This guide provides an overview of the installation and startup of dataGerry.
 The project is developed in the platform-independent programming language Python (Python3) and is available
 for different operating systems and architectures. Only the dependencies of the third-party programs
 that are required for the CMDB are excluded.
 
 Dependencies
 ************
-Three external programs are required to run the CMDB.
+Three external programs are required to run dataGerry.
 
 1. Python
 2. MongoDB
@@ -38,7 +38,7 @@ From source
 
 .. code-block:: bash
 
-   git clone https://github.com/NETHINKS/NetCMDB.git
+   git clone https://github.com/NETHINKS/dataGerry.git
 
 This should clone the complete repository with the default master branch.
 

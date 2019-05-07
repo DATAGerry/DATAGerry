@@ -1,6 +1,6 @@
-# NetCMDB Documentation
+# dataGerry Documentation
 
-This is the documentation of the NetCMDB. Python-Sphinx is used to generate the documentation.
+This is the documentation of dataGerry. Python-Sphinx is used to generate the documentation.
 
 ## Table of contents
 <!--ts-->

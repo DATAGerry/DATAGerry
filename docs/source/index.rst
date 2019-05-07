@@ -1,5 +1,5 @@
-Welcome to NetCMDB's documentation!
-===================================
+Welcome to dataGerry's documentation!
+=====================================
 
 Content:
 

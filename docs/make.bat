@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=source
 set BUILDDIR=_build
-set SPHINXPROJ=NetCMDB
+set SPHINXPROJ=dataGerry
 
 if "%1" == "" goto help
 

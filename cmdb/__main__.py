@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Net|CMDB - OpenSource Enterprise CMDB
+# dataGerry - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-CMDB is a flexible asset management tool and
+dataGerry is a flexible asset management tool and
 open-source configurable management database
 """
 import logging
@@ -116,7 +116,7 @@ def build_arg_parser() -> Namespace:
 
     from cmdb import __title__
     _parser = ArgumentParser(
-        prog='NetCMDB',
+        prog='dataGerry',
         usage="usage: {} [options]".format(__title__),
     )
     _parser.add_argument('--setup', action='store_true', default=False, dest='setup',
@@ -144,7 +144,7 @@ def main(args):
     Args:
         args: start-options
     """
-    LOGGER.info("CMDB starting...")
+    LOGGER.info("dataGerry starting...")
     if args.debug:
         _activate_debug()
     _init_config_reader(args.config_file)
@@ -181,22 +181,23 @@ def main(args):
     if args.start:
         _start_app()
     sleep(0.2)  # prevent logger output
-    LOGGER.info("CMDB successfully started")
+    LOGGER.info("dataGerry successfully started")
 
 
 if __name__ == "__main__":
     from termcolor import colored
 
-    welcome_string = colored('Welcome to Net|CMDB \nStarting system with following parameters: \n{}\n', 'yellow')
+    welcome_string = colored('Welcome to dataGerry \nStarting system with following parameters: \n{}\n', 'yellow')
     brand_string = colored('''
-    ###########################################
-    __  __ _____ _____ ____ __  __ ____  ____
-    | \ | | ____|_   _/ ___|  \/  |  _ \| __ ) 
-    |  \| |  _|   | || |   | |\/| | | | |  _ \ 
-    | |\  | |___  | || |___| |  | | |_| | |_) |
-    |_| \_|_____| |_| \____|_|  |_|____/|____/ 
+    ###################################################
+          _       _         ____                      
+       __| | __ _| |_ __ _ / ___| ___ _ __ _ __ _   _ 
+      / _` |/ _` | __/ _` | |  _ / _ \ '__| '__| | | |
+     | (_| | (_| | || (_| | |_| |  __/ |  | |  | |_| |
+      \__,_|\__,_|\__\__,_|\____|\___|_|  |_|   \__, |
+                                                |___/ 
 
-    ###########################################\n''', 'green')
+    ###################################################\n''', 'green')
     license_string = colored('''Copyright (C) 2019 NETHINKS GmbH
 licensed under the terms of the GNU Affero General Public License version 3\n''', 'yellow')
 
@@ -215,5 +216,5 @@ licensed under the terms of the GNU Affero General Public License version 3\n'''
 
             traceback.print_exc()
         LOGGER.critical("There was an unforeseen error {}".format(e))
-        LOGGER.info("CMDB stopped!")
+        LOGGER.info("dataGerry stopped!")
         exit(1)

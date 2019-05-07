@@ -1,9 +1,7 @@
 ##########
 Conception
 ##########
-All requirements listed refer to version 1.0 unless otherwise specified. The name CMDB
-(Configuration Management Database) is used in the following as project name until a name
-has been chosen for the software.
+All requirements listed refer to version 1.0 unless otherwise specified.
 
 
 Preamble
