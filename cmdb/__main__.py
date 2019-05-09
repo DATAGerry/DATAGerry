@@ -196,7 +196,13 @@ if __name__ == "__main__":
      | (_| | (_| | || (_| | |_| |  __/ |  | |  | |_| |
       \__,_|\__,_|\__\__,_|\____|\___|_|  |_|   \__, |
                                                 |___/ 
-
+                        .     .
+                       (>\---/<)
+                       ,'     `.
+                     ./  q   p  \.
+                     (  >(_Y_)<  )
+                      >-' `-' `-<-
+                        
     ###################################################\n''', 'green')
     license_string = colored('''Copyright (C) 2019 NETHINKS GmbH
 licensed under the terms of the GNU Affero General Public License version 3\n''', 'yellow')
