@@ -21,12 +21,16 @@ import { CommonModule } from '@angular/common';
 
 import { ObjectRoutingModule } from './object-routing.module';
 import { ObjectListComponent } from './components/object-list/object-list.component';
+import {DataTablesModule} from "angular-datatables";
+import {LayoutModule} from "../../layout/layout.module";
 
 @NgModule({
   declarations: [ObjectListComponent],
   imports: [
     CommonModule,
-    ObjectRoutingModule
+    ObjectRoutingModule,
+    DataTablesModule,
+    LayoutModule
   ]
 })
 export class ObjectModule { }
