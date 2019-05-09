@@ -213,27 +213,35 @@ class CmdbRender:
             author_id=self.object_instance.author_id,
             author_name=get_user_manager().get_user(self.object_instance.author_id).get_name(),
             type_id=self.type_instance.get_public_id(),
-            type_name=self.type_instance.get_name()
+            type_name=self.type_instance.get_name(),
+            type_active=self.type_instance.active,
         )
+        if self.matched_fields:
+            render_result.match_fields = self.matched_fields
+        if self.object_instance and self.object_instance.fields:
+            render_result.obj_fields = self.object_instance.fields
         if self.has_summaries():
-            pass  # render_result.set_summaries(self.get_summaries(True))
+            render_result.set_summaries(self.get_summaries(True))
         if self.has_externals():
-            pass  # render_result.set_externals(self.get_externals(True))
+            render_result.set_externals(self.get_externals(True))
         return render_result
 
 
 class RenderResult:
 
-    def __init__(self, object_id: int, author_id: int, author_name: str, type_id: int, type_name: str,
-                 type_label: str = None):
+    def __init__(self, object_id: int, author_id: int, author_name: str, type_id: int, type_active: bool,
+                 type_name: str, type_label: str = None):
         self.object_id = object_id
         self.author_id = author_id
         self.author_name = author_name
+        self.type_active = type_active
         self.type_id = type_id
         self.type_name = type_name
         self.type_label = type_label or type_name.title()
         self.summaries = None
         self.externals = None
+        self.match_fields = None
+        self.obj_fields = None
 
     def set_summaries(self, summary_list: list):
         self.summaries = summary_list
