@@ -76,6 +76,9 @@ class UserManagement:
                 continue
         return user_list
 
+    def get_all_users_as_dict(self) -> dict:
+        return self.dbm.find_all(collection=User.COLLECTION, )
+
     def get_user_by_name(self, user_name) -> User:
         formatted_filter = {'user_name': user_name}
         try:

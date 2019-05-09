@@ -21,6 +21,8 @@ from cmdb.object_framework.cmdb_render import CmdbRender
 from cmdb.object_framework.cmdb_object_manager import object_manager
 from cmdb.utils.interface_wraps import login_required
 from cmdb.interface.route_utils import make_response, RootBlueprint
+from cmdb.user_management.user_manager import get_user_manager
+usm = get_user_manager()
 
 try:
     from cmdb.utils.error import CMDBError
@@ -52,11 +54,12 @@ def get_object_list():
                 except CMDBError as e:
                     continue
             tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
-            all_objects.append(tmp_render.result())
+            all_objects.append(tmp_render)
+
     except CMDBError:
         return abort(400)
 
-    resp = make_response(all_objects)
+    resp = make_response(CmdbRender.result_loop_render(all_objects))
     return resp
 
 
@@ -87,7 +90,7 @@ def get_object(public_id):
     try:
         render = CmdbRender(object_instance=object_instance, type_instance=type_instance)
         render_result = render.result()
-    except CMDBError:
+    except CMDBError:f
         return make_response("render type", 404)
 
     resp = make_response(render_result)
@@ -169,6 +172,7 @@ def get_newest_objects():
                 LOGGER.warning("Newest object type - error: {}".format(e.message))
                 continue
         tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
-        newest_objects.append(tmp_render.result())
-    resp = make_response(newest_objects)
+        newest_objects.append(tmp_render)
+
+    resp = make_response(CmdbRender.result_loop_render(newest_objects))
     return resp

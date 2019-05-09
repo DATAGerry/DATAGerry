@@ -80,7 +80,9 @@ def _get_response(args, q_operator='$and', limit=0):
 
         result_query.append({q_operator: query_list})
         query = {"$or": result_query}
-        return make_response(_cm_db_render(obm.search_objects_with_limit(query, limit=limit), match=match_values))
+
+        resp = make_response(CmdbRender.result_loop_render(_cm_db_render(obm.search_objects_with_limit(query, limit=limit), match=match_values)))
+        return resp
 
     except CMDBError:
         raise traceback.print_exc(file=sys.stdout)
@@ -102,7 +104,7 @@ def _cm_db_render(all_objects_list, match=[]) -> list:
 
             tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
             tmp_render.set_matched_fieldset(_collect_match_fields(passed_object, match))
-            all_objects.append(tmp_render.result())
+            all_objects.append(tmp_render)
     except Exception:
         raise traceback.print_exc(file=sys.stdout)
 

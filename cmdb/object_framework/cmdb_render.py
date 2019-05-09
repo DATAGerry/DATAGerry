@@ -224,7 +224,43 @@ class CmdbRender:
             render_result.set_summaries(self.get_summaries(True))
         if self.has_externals():
             render_result.set_externals(self.get_externals(True))
+
         return render_result
+
+
+    @staticmethod
+    def result_loop_render(instances: list) -> list:
+        from cmdb.user_management.user_manager import get_user_manager
+        users_dict = get_user_manager().get_all_users_as_dict()
+
+        render_list = []
+
+        for element in instances:
+            render_result = RenderResult(
+                object_id=element.object_instance.get_public_id(),
+                author_id=element.object_instance.author_id,
+                author_name=None,
+                type_id=element.type_instance.get_public_id(),
+                type_name=element.type_instance.get_name(),
+                type_active=element.type_instance.active,
+            )
+            if element.matched_fields:
+                render_result.match_fields = element.matched_fields
+            if element.object_instance and element.object_instance.fields:
+                render_result.obj_fields = element.object_instance.fields
+            if element.has_summaries():
+                render_result.set_summaries(element.get_summaries(True))
+            if element.has_externals():
+                render_result.set_externals(element.get_externals(True))
+
+            if users_dict[0]['first_name'] and users_dict[0]['last_name']:
+                render_result.set_author_name(users_dict[0]['first_name']+" "+users_dict[0]['last_name'])
+
+            render_list.append(render_result)
+
+        return render_list
+
+
 
 
 class RenderResult:
@@ -248,6 +284,9 @@ class RenderResult:
 
     def set_externals(self, external_list: list):
         self.externals = external_list
+
+    def set_author_name(self, new_value):
+        self.author_name = new_value
 
     def to_json(self):
         return self.__dict__
