@@ -20,16 +20,25 @@
   <div class="input-group-btn search-panel">
     <input class="form-control" type="search" placeholder="Search for..." aria-label="Search"
            [formControl]="searchCtrl"
-           (blur)="onBlurMethod()"
            (keyup)="autosearch()"
+           (blur)="onBlurMethod()"
            (keyup.enter)="getResponse()">
 
     <ul class="list-search-result" *ngIf="showResultList">
-      <li *ngFor="let element of autoResult" [value]="element.label"
-          (click) ="getResponse()">
-        ID : {{element.type_id}} Type: {{element.type_label}} Author: {{element.author_name}}
+      <li *ngFor="let element of autoResult" [value]="element.label">
+        <div *ngFor="let field of element.match_fields" class="list-group">
+          <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+              <h5 class="mb-1">Type: {{element.type_label}}</h5>
+              <small class="text-muted">id: {{element.type_id}}</small>
+            </div>
+            <p class="mb-1">{{field.value}}</p>
+            <small class="text-muted">Found in <cite title="Source Title">{{field.name}}</cite></small>
+          </a>
+        </div>
       </li>
     </ul>
+
   </div>
 
   <button class="btn btn-default" type="button" (click)="getResponse()">

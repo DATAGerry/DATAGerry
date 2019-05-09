@@ -2,6 +2,7 @@
 <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table">
   <thead>
   <tr>
+    <th>Active</th>
     <th>ID</th>
     <th>Type</th>
     <th>Description</th>
@@ -11,10 +12,18 @@
   </thead>
   <tbody>
   <tr *ngFor="let result of results">
-    <td>{{result.type_id}}</td>
-    <td>{{result.type_label}}</td>
-    <td> TODO: Description</td>
-    <td>{{result.author_name}}</td>
+    <td>
+      <cmdb-active-badge [activeStatus]="result.type_active"></cmdb-active-badge>
+    </td>
+    <td><a routerLink="/framework/type/{{result.type_id}}">{{result.type_id}}</a></td>
+    <td>{{result.type_name}}</td>
+    <td>
+      <div *ngFor="let field of result.match_fields" >
+        <p class="mb-0">{{field.value}}</p>
+        <footer class="blockquote-footer">Found in <cite title="Source Title">{{field.name}}</cite></footer>
+      </div>
+    </td>
+    <td><a routerLink="/user/{{result.author_id}}">{{result.author_name}}</a></td>
     <td>
       <a routerLink="view" (click)="onClick(result)">View</a>
     </td>
