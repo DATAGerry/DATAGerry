@@ -90,7 +90,7 @@ def get_object(public_id):
     try:
         render = CmdbRender(object_instance=object_instance, type_instance=type_instance)
         render_result = render.result()
-    except CMDBError:f
+    except CMDBError:
         return make_response("render type", 404)
 
     resp = make_response(render_result)
