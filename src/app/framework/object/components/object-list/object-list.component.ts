@@ -16,18 +16,56 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { DataTableDirective } from 'angular-datatables';
+import { Subject } from 'rxjs';
+import { ApiCallService } from "../../../../services/api-call.service";
 
 @Component({
   selector: 'cmdb-object-list',
   templateUrl: './object-list.component.html',
   styleUrls: ['./object-list.component.scss']
 })
-export class ObjectListComponent implements OnInit {
+export class ObjectListComponent implements OnInit, OnDestroy {
 
-  constructor() { }
+  @ViewChild(DataTableDirective)
+  public dtElement: DataTableDirective;
+
+  dtOptions: DataTables.Settings = {};
+  object_lists = [];
+
+  // Use this trigger because fetching the list of objects can be quite long,
+  // this ensure the data is fetched before rendering
+  public dtTrigger: Subject<any> = new Subject();
+
+  constructor(private apiCallService: ApiCallService,) { }
 
   ngOnInit() {
+    this.dtOptions = {
+      ordering: true,
+      order: [[1, 'asc']],
+      language: {
+        search: '',
+        searchPlaceholder: 'Filter...'
+      }
+    };
+    this.apiCallService.callGetRoute("object/").subscribe(
+      data => {
+        this.object_lists = data as [];
+        console.log(data);
+      },
+      () => {
+
+      },
+      () => {
+        this.dtTrigger.next();
+      });
+  }
+
+  ngOnDestroy(): void {
+    // Do not forget to unsubscribe the event
+    this.dtTrigger.unsubscribe();
   }
 
 }
