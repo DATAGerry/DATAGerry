@@ -27,7 +27,7 @@ import { ApiCallService } from "../../../../services/api-call.service";
   templateUrl: './object-list.component.html',
   styleUrls: ['./object-list.component.scss']
 })
-export class ObjectListComponent implements OnInit, OnDestroy {
+export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
 
   @ViewChild(DataTableDirective)
   public dtElement: DataTableDirective;
@@ -42,23 +42,28 @@ export class ObjectListComponent implements OnInit, OnDestroy {
   constructor(private apiCallService: ApiCallService,) { }
 
   ngOnInit() {
-    this.dtOptions = {
-      ordering: true,
-      order: [[1, 'asc']],
-      language: {
-        search: '',
-        searchPlaceholder: 'Filter...'
-      }
-    };
+
+  }
+
+  ngAfterViewInit(): void {
+
     this.apiCallService.callGetRoute("object/").subscribe(
       data => {
         this.object_lists = data as [];
-        console.log(data);
       },
       () => {
 
       },
       () => {
+        this.dtOptions = {
+          ordering: true,
+          order: [[1, 'asc']],
+          language: {
+            search: '',
+            searchPlaceholder: 'Filter...'
+          },
+        };
+
         this.dtTrigger.next();
       });
   }
