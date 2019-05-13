@@ -212,6 +212,9 @@ class CmdbObjectManager(CmdbManagerBase):
     def get_objects_by_type(self, type_id: int):
         return self.get_objects_by(type_id=type_id)
 
+    def count_objects(self, public_id: int):
+        return self.dbm.count(collection=CmdbObject.COLLECTION, type_id=public_id)
+
     def _find_query_fields(self, query, match_fields=list()):
         for key, items in query.items():
             if isinstance(items, dict):
@@ -383,6 +386,13 @@ class CmdbObjectManager(CmdbManagerBase):
                             )
         except (CMDBError, Exception):
             raise TypeNotFoundError(type_id=public_id)
+
+    def get_types_by(self, sort='public_id', **requirements):
+        ack = []
+        objects = self._get_all(collection=CmdbType.COLLECTION, sort=sort, **requirements)
+        for data in objects:
+            ack.append(CmdbType(**data))
+        return ack
 
     def insert_type(self, data: (CmdbType, dict)):
         if isinstance(data, CmdbType):
