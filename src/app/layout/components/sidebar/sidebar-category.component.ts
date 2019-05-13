@@ -17,6 +17,8 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
+import {CmdbType} from "../../../framework/models/cmdb-type";
+import {ApiCallService} from "../../../services/api-call.service";
 
 @Component({
   selector: 'cmdb-sidebar-category',
@@ -26,10 +28,42 @@ import { Component, Input, OnInit } from '@angular/core';
 export class SidebarCategoryComponent implements OnInit {
 
   @Input() categoryData: any;
-  constructor() { }
+  private typeList: CmdbType[] = [];
+  private object_count = [];
+  constructor(private api: ApiCallService,) { }
 
   ngOnInit() {
 
   }
 
+  public get_objects_by_type(category_type_list){
+    this.typeList = []
+
+    for(let typ of category_type_list){
+      this.api.callGetRoute("type/"+typ).subscribe((list: CmdbType[]) => {
+          this.typeList = this.typeList.concat(list);
+        },
+        () => {
+
+        },
+        () => {
+          this.count_objects(typ);
+        });
+    }
+  }
+
+  private count_objects(typ){
+    this.api.callGetRoute("object/count/"+typ).subscribe((count) => {
+        this.object_count.push(count);
+      },
+      () => {
+
+      },
+      () => {
+        let c = this.object_count.values();
+        for(let typ of this.typeList){
+          typ['obj_counter'] = c.next().value;
+        }
+      });
+  }
 }
