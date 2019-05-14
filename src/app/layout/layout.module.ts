@@ -59,7 +59,7 @@ import { SearchService } from '../search/search.service';
     ReactiveFormsModule
   ],
   providers: [
-    BreadcrumbService, SearchService
+    BreadcrumbService
   ]
 })
 export class LayoutModule {

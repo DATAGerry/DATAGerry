@@ -25,7 +25,7 @@ import { SearchService } from '../../../search/search.service';
 @Component({
   selector: 'cmdb-search-bar',
   templateUrl: './search-bar.component.html',
-  styleUrls: ['./search-bar.component.scss']
+  styleUrls: ['./search-bar.component.scss'],
 })
 export class SearchBarComponent implements OnInit {
 
@@ -81,21 +81,14 @@ export class SearchBarComponent implements OnInit {
   public getResponse() {
     this.searchService.searchTerm('/search/?value=' + this.searchCtrl.value + '&type_id=' + this.typeID + '&limit=' + 0).subscribe(
       data => {
-        this.searchService.setSearchResult(data as any[]);
-        this.router.navigate(['search/results']);
-        console.log(data);
-      });
-  }
+        this.searchService.setSearchResult(data);
+      },
+      () => {
 
-  // Seems like it's not being used.: MH - 14-05-2019
-  public filter(arr) {
-    const outerScope = this;
-    arr.forEach(obj => {
-      Object.keys(obj).forEach((k) => {
-        console.log(k + ' - ' + obj[k]);
-        //outerScope.autoResult.add();
+      },
+      () => {
+        this.router.navigate(['search/results']);
       });
-    });
   }
 
 

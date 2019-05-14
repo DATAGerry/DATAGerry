@@ -28,6 +28,7 @@ import { AuthModule } from './auth/auth.module';
 import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
 import { HttpErrorInterceptor } from './auth/interceptors/http-error.interceptor.tx';
 import { PreviousRouteService } from './services/previous-route.service';
+import {SearchService} from "./search/search.service";
 
 @NgModule({
   declarations: [
@@ -42,7 +43,7 @@ import { PreviousRouteService } from './services/previous-route.service';
     AppRoutingModule
   ],
   providers: [
-    PreviousRouteService,
+    PreviousRouteService, SearchService,
     {provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true},
   ],

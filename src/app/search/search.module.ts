@@ -41,7 +41,7 @@ import { LayoutModule } from '../layout/layout.module';
     DataTablesModule
   ],
 
-  providers: [ApiCallService, SearchService]
+  providers: [ApiCallService]
 })
 export class SearchModule {
 }

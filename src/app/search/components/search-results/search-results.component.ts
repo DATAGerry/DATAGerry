@@ -40,24 +40,32 @@ export class SearchResultsComponent implements OnInit, AfterViewInit, OnDestroy 
 
   constructor(private searchService: SearchService, private router: Router) {
 
-    this.results = this.searchService.getSearchResult();
-
   }
 
   ngOnInit() {
-    this.dtOptions = {
-      ordering: true,
-      order: [[1, 'asc']],
-      language: {
-        search: '',
-        searchPlaceholder: 'Filter...'
-      }
-    };
-    this.dtTrigger.next();
+
   }
 
   ngAfterViewInit(): void {
-    this.dtTrigger.next();
+    console.log("TEST");
+    this.searchService.getSearchResult().subscribe(temp => {
+        this.results = temp as [];
+        console.log(this.results);
+      },
+      () => {
+
+      },
+      () => {
+        this.dtOptions = {
+          ordering: true,
+          order: [[1, 'asc']],
+          language: {
+            search: '',
+            searchPlaceholder: 'Filter...'
+          }
+        };
+        this.dtTrigger.next();
+      });
   }
 
   ngOnDestroy(): void {
