@@ -17,11 +17,10 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import {FormControl} from "@angular/forms";
-import {ApiCallService} from "../../../services/api-call.service";
-import {TypeService} from "../../../framework/services/type.service";
-import {Router} from "@angular/router";
-import {SearchService} from "../../../search/search.service";
+import { FormControl } from '@angular/forms';
+import { TypeService } from '../../../framework/services/type.service';
+import { Router } from '@angular/router';
+import { SearchService } from '../../../search/search.service';
 
 @Component({
   selector: 'cmdb-search-bar',
@@ -31,88 +30,92 @@ import {SearchService} from "../../../search/search.service";
 export class SearchBarComponent implements OnInit {
 
 
-
   searchCtrl: FormControl = new FormControl('');
-  autoResult = <any>[];
-  categoryList = <any>[{label : "Categories"}];
+  autoResult = [];
+  categoryList = [{label: 'Categories'}];
 
-  category = "Categories";
-  typ_id: string = "undefined";
+  category = 'Categories';
+  typeID: string = 'undefined';
 
   showResultList = false;
 
 
-  constructor(private _apiCallService: ApiCallService, private _typService: TypeService, private router: Router, private _searchService:SearchService) { }
+  constructor(
+    private typeService: TypeService,
+    private router: Router,
+    private searchService: SearchService) {
+  }
 
 
   ngOnInit() {
 
-    this._typService.getTypeList().subscribe((list) => {
+    this.typeService.getTypeList().subscribe((list) => {
       this.categoryList = this.categoryList.concat(list);
     });
   }
 
-  public onBlurMethod(){
+  public onBlurMethod() {
     this.showResultList = false;
-    this.autoResult = <any>[];
+    this.autoResult = [];
   }
 
-  public autosearch(){
+  public autosearch() {
     this.searchCtrl.valueChanges.subscribe(
       term => {
-        if (typeof term === "string" && term.length > 0 && term !== undefined) {
-          this.apiCall(term,5);
-        }else {
-          this.autoResult = <any>[];
+        if (typeof term === 'string' && term.length > 0 && term !== undefined) {
+          this.apiCall(term, 5);
+        } else {
+          this.autoResult = [];
         }
-      })
+      });
 
-    if(this.autoResult.length == 0){
+    if (this.autoResult.length === 0) {
       this.showResultList = false;
-    }else{
+    } else {
       this.showResultList = true;
     }
 
   }
 
 
-  public getResponse(){
-
-    this._apiCallService.searchTerm("/search/?value="+this.searchCtrl.value+"&type_id="+this.typ_id+"&limit="+0).subscribe(
+  public getResponse() {
+    this.searchService.searchTerm('/search/?value=' + this.searchCtrl.value + '&type_id=' + this.typeID + '&limit=' + 0).subscribe(
       data => {
-        this._searchService.setSearchResult(data as any[]);
-        this.router.navigate(["search/results"]);
+        this.searchService.setSearchResult(data as any[]);
+        this.router.navigate(['search/results']);
         console.log(data);
       });
   }
 
-  public filter(arr){
-    arr.forEach(function (obj) {
-      Object.keys(obj).forEach(function(k){
+  // Seems like it's not being used.: MH - 14-05-2019
+  public filter(arr) {
+    const outerScope = this;
+    arr.forEach(obj => {
+      Object.keys(obj).forEach((k) => {
         console.log(k + ' - ' + obj[k]);
-        this.autoResult.add()
+        //outerScope.autoResult.add();
       });
-    })
+    });
   }
 
 
-  private apiCall(term, limit){
+  private apiCall(term, limit) {
 
-    this._apiCallService.searchTerm("/search/?value="+term+"&type_id="+this.typ_id+"&limit="+limit).subscribe(
+    this.searchService.searchTerm('/search/?value=' + term + '&type_id=' + this.typeID + '&limit=' + limit).subscribe(
       data => {
         this.autoResult = data;
-      })
+      });
   }
 
 
-  public dropdownMenu(element){
+  public dropdownMenu(element) {
     this.category = element.label;
-    this.typ_id = this.getAppropriateTypeId(this.categoryList, this.category);
+    this.typeID = this.getAppropriateTypeId(this.categoryList, this.category);
   }
 
 
   private getAppropriateTypeId(object, value) {
-    let item = object.find(item => item.label === value);
+    const item = object.find(i => i.label === value);
     return item.public_id;
   }
 

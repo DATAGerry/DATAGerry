@@ -1,7 +1,9 @@
+@import "~src/scss/variables";
 
 li:hover {
-  background-color: #cecece;
+  background-color: $light;
 }
+
 .list-search-result{
   position: absolute;
   top: 100%;

@@ -17,12 +17,17 @@
 */
 
 import { Injectable } from '@angular/core';
+import { debounceTime, map } from 'rxjs/operators';
+import { ApiCallService } from '../services/api-call.service';
 
 @Injectable()
 export class SearchService {
 
   searchResult = [];
   selectedTerm: any;
+
+  constructor(private api: ApiCallService) {}
+
 
   getSearchResult() {
     return this.searchResult;
@@ -38,5 +43,20 @@ export class SearchService {
 
   getSelectedTerm() {
     return this.selectedTerm;
+  }
+
+  public searchTerm(route: string) {
+    const result = this.api.callGetRoute(route, {params: {limit: '5'}})
+      .pipe(
+        debounceTime(500),  // WAIT FOR 500 MILISECONDS ATER EACH KEY STROKE.
+        map(
+          (data: any) => {
+            return (
+              data.length > 0 ? data as any[] : [{'Object': 'No Object Found'} as any]
+            );
+          }
+        ));
+
+    return result;
   }
 }
