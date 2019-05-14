@@ -23,7 +23,6 @@
     "@angular/router": "~7.2.0",
     "angular-archwizard": "^4.0.0",
     "angular-datatables": "^7.0.0",
-    "angular-formio": "^3.12.0",
     "angularx-qrcode": "^1.5.3",
     "bootstrap": "^4.3.1",
     "core-js": "^2.5.4",
@@ -32,8 +31,8 @@
     "datatables.net-fixedheader-bs4": "^3.1.5",
     "datatables.net-responsive-bs4": "^2.2.3",
     "font-awesome": "^4.7.0",
-    "formiojs": "^3.20.6",
     "jquery": "^3.4.0",
+    "ngx-drag-drop": "^1.1.0",
     "rxjs": "~6.3.3",
     "tslib": "^1.9.0",
     "zone.js": "~0.8.26"
