@@ -19,6 +19,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { ObjectListComponent } from './components/object-list/object-list.component';
+import { ObjectViewComponent } from "./components/object-view/object-view.component";
 
 const routes: Routes = [
   {
@@ -27,6 +28,10 @@ const routes: Routes = [
       breadcrumb: 'List'
     },
     component: ObjectListComponent
+  },
+  {
+    path: ':publicID',
+    component: ObjectViewComponent
   }
 ];
 
