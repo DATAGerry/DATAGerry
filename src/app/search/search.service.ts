@@ -28,7 +28,7 @@ export class SearchService {
   selectedTerm: any;
 
   constructor(private api: ApiCallService) {
-    console.log("Create SearchService");
+
   }
 
 

@@ -47,10 +47,8 @@ export class SearchResultsComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   ngAfterViewInit(): void {
-    console.log("TEST");
     this.searchService.getSearchResult().subscribe(temp => {
         this.results = temp as [];
-        console.log(this.results);
       },
       () => {
 
@@ -83,7 +81,7 @@ export class SearchResultsComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   onClick(newValue) {
-    this.searchService.setSelectedTerm(newValue);
     this.router.navigate(['search/view']);
+    this.searchService.setSelectedTerm(newValue);
   }
 }

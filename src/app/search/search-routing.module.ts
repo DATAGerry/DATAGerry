@@ -49,10 +49,16 @@ const routes: Routes = [
   },
   {
     path: 'results',
+    data: {
+      breadcrumb: 'Results'
+    },
     component: SearchResultsComponent
   },
   {
     path: 'view',
+    data: {
+      breadcrumb: 'View'
+    },
     component: SearchViewComponent
   }
 

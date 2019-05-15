@@ -79,15 +79,11 @@ export class SearchBarComponent implements OnInit {
 
 
   public getResponse() {
+    this.router.navigate(['search/results']);
     this.searchService.searchTerm('/search/?value=' + this.searchCtrl.value + '&type_id=' + this.typeID + '&limit=' + 0).subscribe(
       data => {
         this.searchService.setSearchResult(data);
-      },
-      () => {
 
-      },
-      () => {
-        this.router.navigate(['search/results']);
       });
   }
 
