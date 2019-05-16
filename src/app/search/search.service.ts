@@ -40,14 +40,6 @@ export class SearchService {
     this.searchResult.next(newValue)
   }
 
-  setSelectedTerm(newValue) {
-    this.selectedTerm = newValue;
-  }
-
-  getSelectedTerm() {
-    return this.selectedTerm;
-  }
-
   public searchTerm(route: string) {
     const result = this.api.callGetRoute(route, {params: {limit: '5'}})
       .pipe(

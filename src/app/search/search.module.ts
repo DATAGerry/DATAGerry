@@ -20,18 +20,16 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { ApiCallService } from '../services/api-call.service';
-import { SearchService } from './search.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DataTablesModule } from 'angular-datatables';
 
 import { SearchResultsComponent } from './components/search-results/search-results.component';
-import { SearchViewComponent } from './components/search-view/search-view.component';
 import { SearchRoutingModule } from './search-routing.module';
 import { LayoutModule } from '../layout/layout.module';
 
 
 @NgModule({
-  declarations: [SearchResultsComponent, SearchViewComponent],
+  declarations: [SearchResultsComponent],
   imports: [
     CommonModule,
     SearchRoutingModule,

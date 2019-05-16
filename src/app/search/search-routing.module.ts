@@ -23,7 +23,6 @@ import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.
 
 import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
 import { SearchResultsComponent } from './components/search-results/search-results.component';
-import { SearchViewComponent } from './components/search-view/search-view.component';
 import { FooterComponent } from '../layout/components/footer/footer.component';
 
 const routes: Routes = [
@@ -53,15 +52,7 @@ const routes: Routes = [
       breadcrumb: 'Results'
     },
     component: SearchResultsComponent
-  },
-  {
-    path: 'view',
-    data: {
-      breadcrumb: 'View'
-    },
-    component: SearchViewComponent
   }
-
 ];
 
 @NgModule({

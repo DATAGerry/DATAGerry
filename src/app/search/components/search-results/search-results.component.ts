@@ -80,8 +80,4 @@ export class SearchResultsComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
-  onClick(newValue) {
-    this.router.navigate(['search/view']);
-    this.searchService.setSelectedTerm(newValue);
-  }
 }
