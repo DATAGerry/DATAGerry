@@ -13,7 +13,7 @@
 <!-- Summary -->
     <div class="accordion" id="accordionExample">
 
-      <div class="card" *ngIf="objectInstance?.summaries.length>0">
+      <div class="card" *ngIf="objectInstance?.summaries && objectInstance?.summaries.length>0">
         <div class="card-header" id="headingOne" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
           <h5 class="mb-0">
               Summary
@@ -39,7 +39,7 @@
       </div>
 
 <!-- Externals -->
-      <div class="card" *ngIf="objectInstance?.externals.length>0">
+      <div class="card" *ngIf="objectInstance?.externals && objectInstance?.externals.length>0">
         <div class="card-header" id="headingTwo" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
           <h5 class="mb-0">
               Externals
