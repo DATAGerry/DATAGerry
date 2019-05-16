@@ -75,7 +75,7 @@ class SecurityManager:
             header={'kid': self.get_sym_key().thumbprint()}
         )
         req_claim = {
-            'exp': int(time.time()) + timeout * 60
+            'exp': int(time.time()) + timeout
         }
 
         enc_token = jwt.JWT(header={"alg": "HS512"}, claims=jws_token.serialize(), default_claims=req_claim)
