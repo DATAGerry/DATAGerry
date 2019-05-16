@@ -229,10 +229,9 @@ class CmdbRender:
 
 
     @staticmethod
-    def result_loop_render(instances: list) -> list:
-        # from cmdb.user_management.user_manager import get_user_manager
-        # users_dict = get_user_manager().get_all_users_as_dict()
-
+    def result_loop_render(object_manager, instances: list) -> list:
+        from cmdb.user_management.user_manager import UserManagement
+        all_user = UserManagement.get_all_users_as_dict(object_manager)
         render_list = []
 
         for element in instances:
@@ -253,8 +252,8 @@ class CmdbRender:
             if element.has_externals():
                 render_result.set_externals(element.get_externals(True))
 
-            # dic = [i for i in users_dict if (i['public_id'] == element.object_instance.author_id)]
-            # render_result.set_author_name('{} {}'.format(dic[0]['first_name'], dic[0]['last_name']))
+            dic = [i for i in all_user if (i['public_id'] == element.object_instance.author_id)]
+            render_result.set_author_name('{} {}'.format(dic[0]['first_name'], dic[0]['last_name']))
             render_list.append(render_result)
 
         return render_list

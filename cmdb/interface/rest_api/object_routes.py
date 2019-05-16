@@ -59,7 +59,7 @@ def get_object_list():
     except CMDBError:
         return abort(400)
 
-    resp = make_response(CmdbRender.result_loop_render(all_objects))
+    resp = make_response(CmdbRender.result_loop_render(object_manager, all_objects))
     return resp
 
 
@@ -91,7 +91,7 @@ def get_object_by_type(type_ids):
     except CMDBError:
         return abort(400)
 
-    resp = make_response(CmdbRender.result_loop_render(all_objects))
+    resp = make_response(CmdbRender.result_loop_render(object_manager, all_objects))
     return resp
 
 
@@ -232,5 +232,5 @@ def get_newest_objects():
         tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
         newest_objects.append(tmp_render)
 
-    resp = make_response(CmdbRender.result_loop_render(newest_objects))
+    resp = make_response(CmdbRender.result_loop_render(object_manager, newest_objects))
     return resp

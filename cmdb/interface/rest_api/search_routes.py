@@ -81,7 +81,8 @@ def _get_response(args, q_operator='$and', limit=0):
         result_query.append({q_operator: query_list})
         query = {"$or": result_query}
 
-        resp = make_response(CmdbRender.result_loop_render(_cm_db_render(obm.search_objects_with_limit(query, limit=limit), match=match_values)))
+        render = _cm_db_render(obm.search_objects_with_limit(query, limit=limit), match=match_values)
+        resp = make_response(CmdbRender.result_loop_render(obm, render))
         return resp
 
     except CMDBError:

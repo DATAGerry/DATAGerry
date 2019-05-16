@@ -66,6 +66,13 @@ class UserManagement:
             raise NoUserFoundExceptions(public_id)
         return User(**result)
 
+    @staticmethod
+    def get_user_by_id(self, public_id: int):
+        result = self.dbm.find_one(collection=User.COLLECTION, public_id=public_id)
+        if not result:
+            raise NoUserFoundExceptions(public_id)
+        return result
+
     def get_all_users(self):
         user_list = []
         for founded_user in self.dbm.find_all(collection=User.COLLECTION):
@@ -76,6 +83,7 @@ class UserManagement:
                 continue
         return user_list
 
+    @staticmethod
     def get_all_users_as_dict(self) -> dict:
         return self.dbm.find_all(collection=User.COLLECTION, )
 
