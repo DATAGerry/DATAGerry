@@ -24,14 +24,18 @@ import { ObjectListComponent } from './components/object-list/object-list.compon
 import { ObjectViewComponent } from './components/object-view/object-view.component';
 import { DataTablesModule } from "angular-datatables";
 import { LayoutModule } from "../../layout/layout.module";
+import { ObjectHeaderComponent } from "./components/object-header/object-header.component";
+import { ObjectQrComponent } from "./components/object-qr/object-qr.component";
+import { QRCodeModule } from "angularx-qrcode";
 
 @NgModule({
-  declarations: [ObjectListComponent, ObjectViewComponent],
+  declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent],
   imports: [
     CommonModule,
     ObjectRoutingModule,
     DataTablesModule,
-    LayoutModule
+    LayoutModule,
+    QRCodeModule
   ]
 })
 export class ObjectModule { }

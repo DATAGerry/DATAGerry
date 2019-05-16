@@ -29,15 +29,15 @@ import { CmdbType } from '../../../models/cmdb-type';
 export class ObjectViewComponent implements OnInit {
 
   private objID: number;
-  private objectInstance: CmdbType;
+  private objectInstance: any;
 
   constructor(private api: ApiCallService, private route: ActivatedRoute) {
     this.route.params.subscribe((id) => this.objID = id.publicID);
   }
 
   ngOnInit() {
-    this.api.callGetRoute<CmdbType>('object/' + `${this.objID}`)
-      .subscribe((typeInstance: any) => this.objectInstance = typeInstance);
+    this.api.callGetRoute<any>('object/' + `${this.objID}`)
+      .subscribe(obj => this.objectInstance = obj);
   }
 
 }

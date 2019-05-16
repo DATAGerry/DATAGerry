@@ -1,0 +1,67 @@
+<div class="card">
+
+  <div class="card-header">
+    <h6 class="card-title">
+      {{objectInstance?.type_label}} #{{objectInstance?.object_id}}
+      <span class="badge badge-primary pull-right">
+        {{objectInstance?.type_active}}
+      </span>
+    </h6>
+  </div>
+
+  <div class="card-body">
+<!-- Summary -->
+    <div class="accordion" id="accordionExample">
+
+      <div class="card" *ngIf="objectInstance?.summaries.length>0">
+        <div class="card-header" id="headingOne" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+          <h5 class="mb-0">
+              Summary
+            <span class="pull-right"><i class="fa fa-angle-down rotate-icon"></i></span>
+          </h5>
+        </div>
+        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+          <div class="card-body" *ngFor="let sum of objectInstance?.summaries">
+              <h6 class="card-subtitle mb-2 text-muted">{{sum.label}}</h6>
+              <ng-container *ngFor="let field of sum.fields; let i= index">
+                <div class="row">
+                  <div class="col">
+                    {{field}}
+                  </div>
+                  <div class="col">
+                    {{sum.contens[i]}}
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+      </div>
+
+<!-- Externals -->
+      <div class="card" *ngIf="objectInstance?.externals.length>0">
+        <div class="card-header" id="headingTwo" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+          <h5 class="mb-0">
+              Externals
+            <span class="pull-right"><i class="fa fa-angle-down rotate-icon"></i></span>
+          </h5>
+        </div>
+        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+          <div class="card-body">
+            <div class="card-body" *ngFor="let ext of objectInstance?.externals">
+              <div class="row">
+                <div class="col">
+                  {{ext.label}}
+                </div>
+                <div class="col">
+                  {{ext.href}}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+</div>
