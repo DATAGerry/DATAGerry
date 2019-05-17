@@ -225,7 +225,7 @@ class _Summary:
         self.name = name
         self.label = label or self.name.title()
         self.fields = fields or []
-        self.values = values
+        self.contens = values
 
     def has_fields(self):
         if len(self.fields) > 0:
@@ -233,8 +233,8 @@ class _Summary:
         return False
 
     def set_values(self, values):
-        self.values = values
+        self.contens = values
 
     def __repr__(self):
-        output_string = "{}: {}".format(self.label, self.values)
+        output_string = "{}: {}".format(self.label, self.contens)
         return output_string
