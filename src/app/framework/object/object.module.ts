@@ -27,9 +27,12 @@ import { LayoutModule } from "../../layout/layout.module";
 import { ObjectHeaderComponent } from "./components/object-header/object-header.component";
 import { ObjectQrComponent } from "./components/object-qr/object-qr.component";
 import { QRCodeModule } from "angularx-qrcode";
+import { ObjectSummaryComponent } from './components/object-summary/object-summary.component';
+import { ObjectExternalsComponent } from './components/object-externals/object-externals.component';
+import { ObjectFieldsViewComponent } from './components/object-fields-view/object-fields-view.component';
 
 @NgModule({
-  declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent],
+  declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent, ObjectSummaryComponent, ObjectExternalsComponent, ObjectFieldsViewComponent],
   imports: [
     CommonModule,
     ObjectRoutingModule,

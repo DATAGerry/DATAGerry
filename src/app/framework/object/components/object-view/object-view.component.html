@@ -5,9 +5,10 @@
   <div class="col-3">
     <cmdb-object-qr></cmdb-object-qr>
     <hr />
+    <cmdb-object-externals [objectInstance]="objectInstance"></cmdb-object-externals>
     <div class="card">
       <div class="card-body">
-        <div class="list-group list-group-flush">
+    <div clalass="list-group list-group-flush">
           <a href="#" class="list-group-item list-group-item-action" routerLink="/framework/object/">List objects</a>
           <a href="#" class="list-group-item list-group-item-action">Copy object</a>
           <a href="#" class="list-group-item list-group-item-action list-group-item-warning">Edit object</a>
@@ -19,25 +20,25 @@
   <div class="col-12">
     <ul class="nav nav-tabs" id="typeViewTab" role="tablist">
       <li class="nav-item">
-        <a class="nav-link active" id="logs-tab" data-toggle="tab" href="#logs" role="tab" aria-controls="logs" aria-selected="true">Logs</a>
+        <a class="nav-link active" id="field-tab" data-toggle="tab" href="#fields" role="tab" aria-controls="logs" aria-selected="true">Fields</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="categories-tab" data-toggle="tab" href="#categories" role="tab" aria-controls="categories" aria-selected="false">Categories</a>
+        <a class="nav-link" id="referenced-tab" data-toggle="tab" href="#referenced_by" role="tab" aria-controls="categories" aria-selected="false">Referenced by</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="collections-tab" data-toggle="tab" href="#collections" role="tab" aria-controls="collections" aria-selected="false">Collections</a>
+        <a class="nav-link" id="links-tab" data-toggle="tab" href="#links" role="tab" aria-controls="collections" aria-selected="false">Links</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="diagnostic-tab" data-toggle="tab" href="#diagnostic" role="tab" aria-controls="diagnostic" aria-selected="false">Diagnostic</a>
+        <a class="nav-link" id="logs-tab" data-toggle="tab" href="#logs" role="tab" aria-controls="diagnostic" aria-selected="false">Logs</a>
       </li>
     </ul>
     <div class="tab-content" id="typeViewTabContent">
-      <div class="tab-pane fade show active" id="logs" role="tabpanel" aria-labelledby="logs-tab">logs</div>
-      <div class="tab-pane fade" id="categories" role="tabpanel" aria-labelledby="categories-tab"></div>
-      <div class="tab-pane fade" id="collections" role="tabpanel" aria-labelledby="collections-tab"></div>
-      <div class="tab-pane fade" id="diagnostic" role="tabpanel" aria-labelledby="diagnostic-tab">
-        {{ objectInstance | json }}
+      <div class="tab-pane fade show active" id="fields" role="tabpanel" aria-labelledby="field-tab">
+        <cmdb-object-fields-view [objectInstance]="objectInstance"></cmdb-object-fields-view>
       </div>
+      <div class="tab-pane fade" id="referenced_by" role="tabpanel" aria-labelledby="referenced-tab"></div>
+      <div class="tab-pane fade" id="links" role="tabpanel" aria-labelledby="links-tab"></div>
+      <div class="tab-pane fade" id="logs" role="tabpanel" aria-labelledby="logs-tab"></div>
     </div>
   </div>
 

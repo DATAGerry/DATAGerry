@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { CmdbType } from '../../../models/cmdb-type';
 
 @Component({
   selector: 'cmdb-object-header',
