@@ -1,0 +1,49 @@
+<div class="row">
+  <div id="builder-controls" class="col-3">
+    <div class="list-group">
+      <a *ngFor="let control of builderControls" [dndDraggable]="control.content()" type="button"
+         class="list-group-item list-group-item-action">
+        <i class="fa {{ control.icon }}" aria-hidden="true"></i> {{ control.label }}
+      </a>
+    </div>
+  </div>
+  <div id="form-container" class="col-9">
+    <section dndDropzone id="form-content" [ngClass]="{'empty': fields.length == 0 }"  (dndDrop)="addField($event)">
+      <span *ngIf="fields?.length == 0">
+        Drop fields here
+      </span>
+      <div *ngIf="fields?.length > 0" class="accordion" id="fieldBuilderListView">
+        <div class="card" *ngFor="let field of fields">
+          <div class="card-header" id="{{field.name}}">
+            Type: {{field.type}} Name: {{field.name}}
+            <span class="float-right">
+              <button class="btn btn-link fieldActionButton" type="button" data-toggle="collapse"
+                      data-target="#collapseOne"
+                      aria-expanded="true" aria-controls="collapseOne">
+                <i class="fa fa-pencil-square" aria-hidden="true"></i>
+              </button>
+                <button class="btn btn-link fieldActionButton" type="button">
+                <i class="fa fa-window-close" aria-hidden="true" (click)="deleteField(field)"></i>
+              </button>
+            </span>
+
+
+          </div>
+
+          <div id="collapseOne" class="collapse" data-parent="#fieldBuilderListView">
+            <div class="card-body">
+              Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf
+              moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod.
+              Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda
+              shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea
+              proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim
+              aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+{{fields}}

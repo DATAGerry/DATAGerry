@@ -23,6 +23,7 @@ export class CmdbType implements CmdbDao {
 
   readonly public_id: number;
   public active: boolean;
+  public description?: string;
   public name: string;
   public label: string;
   public author_id: number;

@@ -17,7 +17,7 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-type-basic-step',
@@ -30,8 +30,8 @@ export class TypeBasicStepComponent implements OnInit {
 
   constructor() {
     this.basicForm = new FormGroup({
-      name: new FormControl(''),
-      label: new FormControl(''),
+      name: new FormControl('', Validators.required),
+      label: new FormControl('', Validators.required),
       description: new FormControl(''),
       active: new FormControl(true),
     });

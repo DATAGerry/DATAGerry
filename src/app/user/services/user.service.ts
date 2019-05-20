@@ -19,6 +19,7 @@
 import { Injectable } from '@angular/core';
 import { ApiCallService } from '../../services/api-call.service';
 import { User } from '../models/user';
+import { Group } from '../models/group';
 
 @Injectable({
   providedIn: 'root'
@@ -26,28 +27,35 @@ import { User } from '../models/user';
 export class UserService {
 
   private readonly prefix: string = 'user';
-  private readonly userListPromise;
-  private userList;
+  private userList: User[] = [];
+  private groupList: Group[] = [];
 
   constructor(private api: ApiCallService) {
-    this.userList = this.loadUserData();
-
-  }
-
-  private async loadUserData(): Promise<User[]> {
-    return await this.api.callGetRoute<User[]>('user/').toPromise();
+    this.getUserList().subscribe((respUserList: User[]) => {
+      this.userList = respUserList;
+    });
   }
 
   public getUserList() {
     return this.api.callGetRoute<User[]>(this.prefix + '/');
   }
 
+  public getGroupList() {
+    return this.api.callGetRoute<Group[]>('group/');
+  }
+
   public getUser(publicID: number) {
     return this.api.callGetRoute<User>(this.prefix + '/' + publicID);
   }
 
+  public findUser(publicID: number): User {
+    return this.userList.find(id => id.public_id === publicID);
+  }
+
   public getUserAsync(publicID: number) {
-    return this.api.callAsyncGetRoute(this.prefix + '/' + publicID);
+    return this.api.callAsyncGetRoute<User>(this.prefix + '/' + publicID).then(response => {
+      return response;
+    }).catch(this.api.handleErrorPromise);
   }
 
 

@@ -18,6 +18,8 @@
 
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { TypeBasicStepComponent } from './type-basic-step/type-basic-step.component';
+import { CmdbType } from '../../../models/cmdb-type';
+import { TypeFieldsStepComponent } from './type-fields-step/type-fields-step.component';
 
 @Component({
   selector: 'cmdb-type-builder',
@@ -26,17 +28,32 @@ import { TypeBasicStepComponent } from './type-basic-step/type-basic-step.compon
 })
 export class TypeBuilderComponent implements OnInit {
 
+  private readonly typeInstance: CmdbType;
+
   @ViewChild(TypeBasicStepComponent)
   private basicStep: TypeBasicStepComponent;
 
-  constructor() {
+  @ViewChild(TypeFieldsStepComponent)
+  private fieldStep: TypeFieldsStepComponent;
 
+  constructor() {
+    this.typeInstance = new CmdbType();
   }
 
   ngOnInit() {
-    this.basicStep.basicForm.statusChanges.subscribe((value: any) => {
-      console.log(this.basicStep.basicForm.value);
-    });
+  }
+
+  private exitBasicStep() {
+    this.assignToType(this.basicStep.basicForm.value);
+  }
+
+  private exitFieldStep() {
+
+  }
+
+  public assignToType(data: any) {
+    Object.assign(this.typeInstance, data);
+    console.log(this.typeInstance);
   }
 
 }

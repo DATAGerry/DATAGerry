@@ -29,10 +29,13 @@ import { TypeBuilderComponent } from './components/type-builder/type-builder.com
 import { TypeBasicStepComponent } from './components/type-builder/type-basic-step/type-basic-step.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TypeFieldsStepComponent } from './components/type-builder/type-fields-step/type-fields-step.component';
-import { FormioModule } from 'angular-formio';
 import { TypeHeaderComponent } from './components/type-header/type-header.component';
 import { TypeQrComponent } from './components/type-qr/type-qr.component';
 import { QRCodeModule } from 'angularx-qrcode';
+import { BuilderComponent } from './builder/builder.component';
+import { DndModule } from 'ngx-drag-drop';
+import { TypeAccessStepComponent } from './components/type-builder/type-access-step/type-access-step.component';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @NgModule({
   declarations: [
@@ -43,7 +46,9 @@ import { QRCodeModule } from 'angularx-qrcode';
     TypeBasicStepComponent,
     TypeFieldsStepComponent,
     TypeHeaderComponent,
-    TypeQrComponent],
+    TypeQrComponent,
+    BuilderComponent,
+    TypeAccessStepComponent],
   imports: [
     CommonModule,
     TypeRoutingModule,
@@ -51,8 +56,9 @@ import { QRCodeModule } from 'angularx-qrcode';
     LayoutModule,
     ReactiveFormsModule,
     ArchwizardModule,
-    FormioModule,
-    QRCodeModule
+    DndModule,
+    QRCodeModule,
+    NgSelectModule
   ]
 })
 export class TypeModule {

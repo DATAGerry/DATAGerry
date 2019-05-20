@@ -16,18 +16,12 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+export class Group {
+  /* tslint:disable */
+  private readonly public_id: number;
+  public name: string;
+  public label: string;
+  private rights: any;
 
-@Component({
-  selector: 'cmdb-type-fields-step',
-  templateUrl: './type-fields-step.component.html',
-  styleUrls: ['./type-fields-step.component.scss']
-})
-export class TypeFieldsStepComponent implements OnInit {
-
-  private fieldDefinitions: any = [];
-
-  ngOnInit() {
-  }
-
+  /* tslint:enable */
 }

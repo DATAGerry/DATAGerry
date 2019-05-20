@@ -30,7 +30,7 @@ import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.compon
 import { LowercaseDirective } from './directives/lowercase.directive';
 import { SearchBarComponent } from './components/search-bar/search-bar.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { SearchService } from '../search/search.service';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @NgModule({
   declarations: [
@@ -56,6 +56,7 @@ import { SearchService } from '../search/search.service';
   imports: [
     CommonModule,
     RouterModule,
+    NgSelectModule,
     ReactiveFormsModule
   ],
   providers: [

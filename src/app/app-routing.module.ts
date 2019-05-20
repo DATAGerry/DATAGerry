@@ -58,6 +58,13 @@ const routes: Routes = [
     loadChildren: './framework/framework.module#FrameworkModule'
   },
   {
+    path: 'user',
+    data: {
+      breadcrumb: 'User'
+    },
+    loadChildren: './user/user.module#UserModule',
+  },
+  {
     path: 'error',
     loadChildren: './error/error.module#ErrorModule'
   },

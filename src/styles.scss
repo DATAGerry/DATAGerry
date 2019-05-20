@@ -25,6 +25,9 @@
 @import "~datatables.net-fixedheader-bs4/css/fixedHeader.bootstrap4.css";
 @import "~datatables.net-responsive-bs4/css/responsive.bootstrap4.css";
 
+/* import ng-select */
+@import "~@ng-select/ng-select/themes/default.theme.css";
+
 /* import fontawesome */
 $fa-font-path: "../node_modules/font-awesome/fonts";
 @import "~font-awesome/scss/font-awesome";

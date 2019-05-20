@@ -17,17 +17,28 @@
 */
 
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { User } from '../../models/user';
+import { UserService } from '../../services/user.service';
 
 @Component({
-  selector: 'cmdb-type-fields-step',
-  templateUrl: './type-fields-step.component.html',
-  styleUrls: ['./type-fields-step.component.scss']
+  selector: 'cmdb-user-view',
+  templateUrl: './user-view.component.html',
+  styleUrls: ['./user-view.component.scss']
 })
-export class TypeFieldsStepComponent implements OnInit {
+export class UserViewComponent implements OnInit {
 
-  private fieldDefinitions: any = [];
+  private userID: number;
+  private userInstance?: User;
+
+  constructor(private route: ActivatedRoute, private userService: UserService) {
+    this.route.params.subscribe((id) => this.userID = id.publicID);
+  }
 
   ngOnInit() {
+    this.userService.getUser(this.userID).subscribe((user: User) => {
+      this.userInstance = user;
+    });
   }
 
 }

@@ -16,18 +16,27 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+export interface ControlsCommon {
+  label: string;
+  name: string;
+  icon?: string;
 
-@Component({
-  selector: 'cmdb-type-fields-step',
-  templateUrl: './type-fields-step.component.html',
-  styleUrls: ['./type-fields-step.component.scss']
-})
-export class TypeFieldsStepComponent implements OnInit {
+  content(): any;
+}
 
-  private fieldDefinitions: any = [];
+export interface ControlsContent {
+  required: boolean;
+  name: string;
+  helperText: string;
+  placeholder: string;
+  type: string;
+  subtype?: string;
+  access: [];
+  value: any;
+  optional: any;
 
-  ngOnInit() {
-  }
+}
 
+export function randomName(type) {
+  return `${type}-${Math.floor(Math.random() * 10000) + 99999}`;
 }

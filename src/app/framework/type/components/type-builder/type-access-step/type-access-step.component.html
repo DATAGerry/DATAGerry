@@ -1,0 +1,48 @@
+<div class="row">
+  <div class="col-9">
+    <form [formGroup]="accessForm">
+      <div class="form-group">
+        <label>Limit access to groups:</label>
+        <ng-select
+          [items]="groupList"
+          [multiple]="true"
+          bindLabel="name"
+          bindValue="public_id"
+          placeholder="Select groups" formControlName="groups">
+        </ng-select>
+        <small class="form-text text-muted">Multiple selection possible, leave blank if no limitation.</small>
+      </div>
+      <div class="form-group">
+        <label>Limit access to specific users:</label>
+        <ng-select
+          [items]="userList"
+          [multiple]="true"
+          bindLabel="user_name"
+          bindValue="public_id"
+          placeholder="Select specific users" formControlName="users">
+        </ng-select>
+        <small class="form-text text-muted">Multiple selection possible, leave blank if no limitation.</small>
+      </div>
+    </form>
+  </div>
+  <div class="col-3">
+    <div class="card">
+      <div class="card-header text-white bg-warning">
+        Note:
+      </div>
+      <div class="card-body">
+        The limitation to users has no influence on the selection of groups. The user selection extends the use of the
+        current types.
+      </div>
+    </div>
+    <div class="card mt-3">
+      <div class="card-header">
+        Validation: <span [className]="accessForm.valid ? 'text-success' : 'text-danger'">{{accessForm.status}}</span>
+      </div>
+      <div class="card-body">
+        {{ accessForm.value | json}}
+      </div>
+    </div>
+
+  </div>
+</div>

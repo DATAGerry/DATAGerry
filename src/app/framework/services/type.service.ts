@@ -17,7 +17,6 @@
 */
 
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { CmdbType } from '../models/cmdb-type';
 import { ApiCallService } from '../../services/api-call.service';
 
@@ -27,22 +26,9 @@ import { ApiCallService } from '../../services/api-call.service';
 export class TypeService {
 
   private servicePrefix: string = 'type';
-  public typeObservable;
 
   constructor(private api: ApiCallService) {
-    this.typeObservable = Observable.create((observer: any) => {
-      this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/').subscribe(
-        list => {
-          for (const typeInstance of list) {
-            observer.next(typeInstance);
-          }
-        }, (error: any) => {
-          console.log(error);
-        },
-        () => {
-          observer.complete();
-        });
-    });
+
   }
 
 

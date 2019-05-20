@@ -16,18 +16,36 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { ControlsCommon, ControlsContent, randomName } from '../controls.common';
 
-@Component({
-  selector: 'cmdb-type-fields-step',
-  templateUrl: './type-fields-step.component.html',
-  styleUrls: ['./type-fields-step.component.scss']
-})
-export class TypeFieldsStepComponent implements OnInit {
+export class TextControl implements ControlsCommon {
 
-  private fieldDefinitions: any = [];
+  name = 'text';
+  label = 'Text';
+  icon = 'fa-font';
 
-  ngOnInit() {
+  content() {
+    return new TextContent();
+  }
+
+
+}
+
+class TextContent implements ControlsContent {
+  access: [];
+  helperText: string;
+  name: string;
+  optional: any;
+  placeholder: string;
+  required: boolean;
+  subtype: string;
+  type: string;
+  value: any;
+
+  public constructor() {
+    this.type = 'text';
+    this.subtype = 'text';
+    this.name = randomName(this.type);
   }
 
 }

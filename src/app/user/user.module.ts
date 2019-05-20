@@ -21,12 +21,15 @@ import { CommonModule } from '@angular/common';
 
 import { UserRoutingModule } from './user-routing.module';
 import { UserService } from './services/user.service';
+import { UserViewComponent } from './components/user-view/user-view.component';
+import { LayoutModule } from '../layout/layout.module';
 
 @NgModule({
-  declarations: [],
+  declarations: [UserViewComponent],
   imports: [
     CommonModule,
-    UserRoutingModule
+    UserRoutingModule,
+    LayoutModule
   ],
   providers: [
     UserService

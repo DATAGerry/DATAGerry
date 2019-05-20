@@ -18,8 +18,42 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { NavigationComponent } from '../layout/components/navigation/navigation.component';
+import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
+import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';
+import { FooterComponent } from '../layout/components/footer/footer.component';
+import { UserViewComponent } from './components/user-view/user-view.component';
 
-const routes: Routes = [];
+const routes: Routes = [
+  {
+    path: '',
+    component: NavigationComponent,
+    outlet: 'navigation'
+  },
+  {
+    path: '',
+    component: SidebarComponent,
+    outlet: 'sidebar'
+  },
+  {
+    path: '',
+    component: BreadcrumbComponent,
+    outlet: 'breadcrumb'
+  },
+  {
+    path: '',
+    component: FooterComponent,
+    outlet: 'footer'
+  },
+  {
+    path: ':publicID',
+    data: {
+      breadcrumb: 'View'
+    },
+    component: UserViewComponent
+  }
+];
+
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

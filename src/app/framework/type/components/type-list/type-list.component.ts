@@ -38,7 +38,7 @@ export class TypeListComponent implements OnInit, OnDestroy {
   public dtOptions: DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
 
-  constructor(private typeService: TypeService) {
+  constructor(private typeService: TypeService, private userService: UserService) {
   }
 
   public ngOnInit(): void {
@@ -50,13 +50,12 @@ export class TypeListComponent implements OnInit, OnDestroy {
     this.typeService.getTypeList().subscribe((list: CmdbType[]) => {
         this.typeList = this.typeList.concat(list);
       },
-      () => {
-
+      (err) => {
+        console.error(err);
       },
       () => {
         this.dtTrigger.next();
       });
-
   }
 
   public ngOnDestroy(): void {
