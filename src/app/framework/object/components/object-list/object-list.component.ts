@@ -21,6 +21,7 @@ import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import { ApiCallService } from "../../../../services/api-call.service";
+import { ShareDataService } from "../../../../services/share-data.service";
 
 @Component({
   selector: 'cmdb-object-list',
@@ -39,33 +40,37 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
   // this ensure the data is fetched before rendering
   public dtTrigger: Subject<any> = new Subject();
 
-  constructor(private apiCallService: ApiCallService,) { }
+  constructor(private apiCallService: ApiCallService, private sApi: ShareDataService) { }
 
   ngOnInit() {
+    this.dtOptions = {
+      ordering: true,
+      order: [[1, 'asc']],
+      language: {
+        search: '',
+        searchPlaceholder: 'Filter...'
+      },
+    };
 
+    this.sApi.getDataResult().subscribe(data =>{
+      this.object_lists = data as [];
+      this.rerender();
+      this.dtTrigger.next();
+    });
+
+    if(this.object_lists.length == 0){
+      this.apiCallService.callGetRoute("object/").subscribe(
+        data => {
+          this.object_lists = data as [];
+          this.rerender();
+          this.dtTrigger.next();
+        });
+    }
   }
 
   ngAfterViewInit(): void {
 
-    this.apiCallService.callGetRoute("object/").subscribe(
-      data => {
-        this.object_lists = data as [];
-      },
-      () => {
 
-      },
-      () => {
-        this.dtOptions = {
-          ordering: true,
-          order: [[1, 'asc']],
-          language: {
-            search: '',
-            searchPlaceholder: 'Filter...'
-          },
-        };
-
-        this.dtTrigger.next();
-      });
   }
 
   ngOnDestroy(): void {
@@ -73,4 +78,12 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     this.dtTrigger.unsubscribe();
   }
 
+  public rerender(): void {
+    if( typeof this.dtElement.dtInstance !== "undefined"){
+      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        // Destroy the table first
+        dtInstance.destroy();
+      });
+    }
+  }
 }

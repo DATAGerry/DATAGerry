@@ -19,7 +19,7 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
-import { SearchService } from '../../search.service';
+import { ShareDataService } from '../../../services/share-data.service';
 import { Router } from '@angular/router';
 
 
@@ -38,32 +38,29 @@ export class SearchResultsComponent implements OnInit, AfterViewInit, OnDestroy 
 
   results = [];
 
-  constructor(private searchService: SearchService, private router: Router) {
+  constructor(private sApi: ShareDataService, private router: Router) {
 
   }
 
   ngOnInit() {
+    this.dtOptions = {
+      ordering: true,
+      order: [[1, 'asc']],
+      language: {
+        search: '',
+        searchPlaceholder: 'Filter...'
+      }
+    };
 
+    this.sApi.getDataResult().subscribe(temp => {
+      this.results = temp as [];
+      this.rerender();
+      this.dtTrigger.next();
+    });
   }
 
   ngAfterViewInit(): void {
-    this.searchService.getSearchResult().subscribe(temp => {
-        this.results = temp as [];
-      },
-      () => {
 
-      },
-      () => {
-        this.dtOptions = {
-          ordering: true,
-          order: [[1, 'asc']],
-          language: {
-            search: '',
-            searchPlaceholder: 'Filter...'
-          }
-        };
-        this.dtTrigger.next();
-      });
   }
 
   ngOnDestroy(): void {
@@ -72,12 +69,13 @@ export class SearchResultsComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   public rerender(): void {
-    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-      // Destroy the table first
-      dtInstance.destroy();
-      // Call the dtTrigger to rerender again
-      this.dtTrigger.next();
-    });
+    if( typeof this.dtElement.dtInstance !== "undefined"){
+      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        // Destroy the table first
+        dtInstance.destroy();
+      });
+    }
+
   }
 
 }

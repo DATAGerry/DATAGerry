@@ -44,7 +44,11 @@ export class TypeListComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.dtOptions = {
       ordering: true,
-      order: [[1, 'asc']]
+      order: [[1, 'asc']],
+      language: {
+        search: '',
+        searchPlaceholder: 'Filter...'
+      },
     };
 
     this.typeService.getTypeList().subscribe((list: CmdbType[]) => {
