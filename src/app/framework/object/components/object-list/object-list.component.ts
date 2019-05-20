@@ -42,30 +42,25 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
   constructor(private apiCallService: ApiCallService,) { }
 
   ngOnInit() {
-
-  }
-
-  ngAfterViewInit(): void {
+    this.dtOptions = {
+      ordering: true,
+      order: [[1, 'asc']],
+      language: {
+        search: '',
+        searchPlaceholder: 'Filter...'
+      },
+    };
 
     this.apiCallService.callGetRoute("object/").subscribe(
       data => {
         this.object_lists = data as [];
-      },
-      () => {
-
-      },
-      () => {
-        this.dtOptions = {
-          ordering: true,
-          order: [[1, 'asc']],
-          language: {
-            search: '',
-            searchPlaceholder: 'Filter...'
-          },
-        };
-
         this.dtTrigger.next();
       });
+  }
+
+  ngAfterViewInit(): void {
+
+
   }
 
   ngOnDestroy(): void {
