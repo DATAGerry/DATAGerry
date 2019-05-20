@@ -43,27 +43,24 @@ export class SearchResultsComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   ngOnInit() {
+    this.dtOptions = {
+      ordering: true,
+      order: [[1, 'asc']],
+      language: {
+        search: '',
+        searchPlaceholder: 'Filter...'
+      }
+    };
 
+    this.searchService.getSearchResult().subscribe(temp => {
+      this.results = temp as [];
+      this.rerender();
+      this.dtTrigger.next();
+    });
   }
 
   ngAfterViewInit(): void {
-    this.searchService.getSearchResult().subscribe(temp => {
-        this.results = temp as [];
-      },
-      () => {
 
-      },
-      () => {
-        this.dtOptions = {
-          ordering: true,
-          order: [[1, 'asc']],
-          language: {
-            search: '',
-            searchPlaceholder: 'Filter...'
-          }
-        };
-        this.dtTrigger.next();
-      });
   }
 
   ngOnDestroy(): void {
@@ -72,12 +69,13 @@ export class SearchResultsComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   public rerender(): void {
-    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-      // Destroy the table first
-      dtInstance.destroy();
-      // Call the dtTrigger to rerender again
-      this.dtTrigger.next();
-    });
+    if( typeof this.dtElement.dtInstance !== "undefined"){
+      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        // Destroy the table first
+        dtInstance.destroy();
+      });
+    }
+
   }
 
 }
