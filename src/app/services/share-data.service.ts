@@ -18,26 +18,25 @@
 
 import { Injectable } from '@angular/core';
 import { debounceTime, map } from 'rxjs/operators';
-import { ApiCallService } from '../services/api-call.service';
+import { ApiCallService } from './api-call.service';
 import { Subject } from "rxjs";
 
 @Injectable()
-export class SearchService {
+export class ShareDataService {
 
-  private searchResult = new Subject<any>();
-  selectedTerm: any;
+  private dataResult = new Subject<any>();
 
   constructor(private api: ApiCallService) {
 
   }
 
 
-  getSearchResult() {
-    return this.searchResult.asObservable();
+  getDataResult() {
+    return this.dataResult.asObservable();
   }
 
-  setSearchResult(newValue) {
-    this.searchResult.next(newValue)
+  setDataResult(newValue) {
+    this.dataResult.next(newValue)
   }
 
   public searchTerm(route: string) {

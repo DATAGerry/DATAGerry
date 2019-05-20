@@ -17,8 +17,10 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
-import {CmdbType} from "../../../framework/models/cmdb-type";
-import {ApiCallService} from "../../../services/api-call.service";
+import { CmdbType } from "../../../framework/models/cmdb-type";
+import { ApiCallService } from "../../../services/api-call.service";
+import { Router } from "@angular/router";
+import { ShareDataService } from "../../../services/share-data.service";
 
 @Component({
   selector: 'cmdb-sidebar-category',
@@ -28,9 +30,11 @@ import {ApiCallService} from "../../../services/api-call.service";
 export class SidebarCategoryComponent implements OnInit {
 
   @Input() categoryData: any;
+
   private typeList: CmdbType[] = [];
   private object_count = [];
-  constructor(private api: ApiCallService,) { }
+
+  constructor(private api: ApiCallService, private sApi : ShareDataService) { }
 
   ngOnInit() {
 
@@ -64,6 +68,12 @@ export class SidebarCategoryComponent implements OnInit {
         for(let typ of this.typeList){
           typ['obj_counter'] = c.next().value;
         }
+      });
+  }
+
+  public get_object_by_type_id(type){
+    this.api.callGetRoute("object/type/"+type).subscribe(list => {
+        this.sApi.setDataResult(list);
       });
   }
 }

@@ -19,7 +19,7 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
-import { SearchService } from '../../search.service';
+import { ShareDataService } from '../../../services/share-data.service';
 import { Router } from '@angular/router';
 
 
@@ -38,7 +38,7 @@ export class SearchResultsComponent implements OnInit, AfterViewInit, OnDestroy 
 
   results = [];
 
-  constructor(private searchService: SearchService, private router: Router) {
+  constructor(private sApi: ShareDataService, private router: Router) {
 
   }
 
@@ -52,7 +52,7 @@ export class SearchResultsComponent implements OnInit, AfterViewInit, OnDestroy 
       }
     };
 
-    this.searchService.getSearchResult().subscribe(temp => {
+    this.sApi.getDataResult().subscribe(temp => {
       this.results = temp as [];
       this.rerender();
       this.dtTrigger.next();

@@ -20,7 +20,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { TypeService } from '../../../framework/services/type.service';
 import { Router } from '@angular/router';
-import { SearchService } from '../../../search/search.service';
+import { ShareDataService } from '../../../services/share-data.service';
 
 @Component({
   selector: 'cmdb-search-bar',
@@ -43,7 +43,7 @@ export class SearchBarComponent implements OnInit {
   constructor(
     private typeService: TypeService,
     private router: Router,
-    private searchService: SearchService) {
+    private sApi: ShareDataService) {
   }
 
 
@@ -74,23 +74,25 @@ export class SearchBarComponent implements OnInit {
     } else {
       this.showResultList = true;
     }
-
   }
 
 
   public getResponse() {
-    this.router.navigate(['search/results']);
-    this.searchService.searchTerm('/search/?value=' + this.searchCtrl.value + '&type_id=' + this.typeID + '&limit=' + 0).subscribe(
-      data => {
-        this.searchService.setSearchResult(data);
 
-      });
+    if (typeof this.searchCtrl.value === 'string' && this.searchCtrl.value.length > 0 && this.searchCtrl.value !== undefined) {
+      this.router.navigate(['search/results']);
+      this.sApi.searchTerm('/search/?value=' + this.searchCtrl.value + '&type_id=' + this.typeID + '&limit=' + 0).subscribe(
+        data => {
+          this.sApi.setDataResult(data);
+
+        });
+    }
   }
 
 
   private apiCall(term, limit) {
 
-    this.searchService.searchTerm('/search/?value=' + term + '&type_id=' + this.typeID + '&limit=' + limit).subscribe(
+    this.sApi.searchTerm('/search/?value=' + term + '&type_id=' + this.typeID + '&limit=' + limit).subscribe(
       data => {
         this.autoResult = data;
       });

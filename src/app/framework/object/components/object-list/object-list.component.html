@@ -4,7 +4,7 @@
   <thead>
   <tr>
     <th>Active</th>
-    <th>ID</th>
+    <th>Object-ID</th>
     <th>Type</th>
     <th>Description</th>
     <th>Author</th>
@@ -16,8 +16,8 @@
     <td>
       <cmdb-active-badge [activeStatus]="result.type_active"></cmdb-active-badge>
     </td>
-    <td><a routerLink="/framework/type/{{result.type_id}}">{{result.type_id}}</a></td>
-    <td>{{result.type_name}}</td>
+    <td>{{result.object_id}}</td>
+    <td><a routerLink="/framework/type/{{result.type_id}}">{{result.type_label}}</a></td>
     <td>
       <div *ngFor="let field of result.match_fields" >
         <p class="mb-0">{{field.value}}</p>

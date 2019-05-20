@@ -9,9 +9,11 @@
 
   <ul class="list-group" *ngFor="let type of typeList;">
     <li class="list-group-item d-flex justify-content-between align-items-center">
-      <i _ngcontent-grr-c8="" aria-hidden="true" class="fa fa-file-code-o"></i>
-      {{type.label}}
-      <span class="badge badge-primary badge-pill">{{type.obj_counter}}</span>
+      <a class="nav-link" routerLink="/framework/object/" (click)="get_object_by_type_id(type.public_id)">
+        <i _ngcontent-grr-c8="" aria-hidden="true" class="fa fa-file-code-o"></i>
+          {{type.label}}
+          <span class="badge badge-primary badge-pill">{{type.obj_counter}}</span>
+      </a>
     </li>
   </ul>
 
