@@ -69,7 +69,7 @@ export class SearchResultsComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   public rerender(): void {
-    if( typeof this.dtElement.dtInstance !== "undefined"){
+    if (typeof this.dtElement.dtInstance !== 'undefined') {
       this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
         // Destroy the table first
         dtInstance.destroy();

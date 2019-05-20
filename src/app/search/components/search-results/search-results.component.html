@@ -1,4 +1,3 @@
-
 <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table">
   <thead>
   <tr>
@@ -18,7 +17,7 @@
     <td><a routerLink="/framework/type/{{result.type_id}}">{{result.type_id}}</a></td>
     <td>{{result.type_name}}</td>
     <td>
-      <div *ngFor="let field of result.match_fields" >
+      <div *ngFor="let field of result.match_fields">
         <p class="mb-0">{{field.value}}</p>
         <footer class="blockquote-footer">Found in <cite title="Source Title">{{field.name}}</cite></footer>
       </div>

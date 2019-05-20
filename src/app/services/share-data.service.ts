@@ -19,7 +19,7 @@
 import { Injectable } from '@angular/core';
 import { debounceTime, map } from 'rxjs/operators';
 import { ApiCallService } from './api-call.service';
-import { Subject } from "rxjs";
+import { Subject } from 'rxjs';
 
 @Injectable()
 export class ShareDataService {
@@ -36,7 +36,7 @@ export class ShareDataService {
   }
 
   setDataResult(newValue) {
-    this.dataResult.next(newValue)
+    this.dataResult.next(newValue);
   }
 
   public searchTerm(route: string) {

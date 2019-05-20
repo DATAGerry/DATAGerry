@@ -17,10 +17,10 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { CmdbType } from "../../../framework/models/cmdb-type";
-import { ApiCallService } from "../../../services/api-call.service";
-import { Router } from "@angular/router";
-import { ShareDataService } from "../../../services/share-data.service";
+import { CmdbType } from '../../../framework/models/cmdb-type';
+import { ApiCallService } from '../../../services/api-call.service';
+import { Router } from '@angular/router';
+import { ShareDataService } from '../../../services/share-data.service';
 
 @Component({
   selector: 'cmdb-sidebar-category',
@@ -32,19 +32,20 @@ export class SidebarCategoryComponent implements OnInit {
   @Input() categoryData: any;
 
   private typeList: CmdbType[] = [];
-  private object_count = [];
+  private objectCount = [];
 
-  constructor(private api: ApiCallService, private sApi : ShareDataService) { }
+  constructor(private api: ApiCallService, private sApi: ShareDataService) {
+  }
 
   ngOnInit() {
 
   }
 
-  public get_objects_by_type(category_type_list){
-    this.typeList = []
+  public get_objects_by_type(categoryTypeList) {
+    this.typeList = [];
 
-    for(let typ of category_type_list){
-      this.api.callGetRoute("type/"+typ).subscribe((list: CmdbType[]) => {
+    for (const typ of categoryTypeList) {
+      this.api.callGetRoute('type/' + typ).subscribe((list: CmdbType[]) => {
           this.typeList = this.typeList.concat(list);
         },
         () => {
@@ -56,24 +57,24 @@ export class SidebarCategoryComponent implements OnInit {
     }
   }
 
-  private count_objects(typ){
-    this.api.callGetRoute("object/count/"+typ).subscribe((count) => {
-        this.object_count.push(count);
+  private count_objects(typ) {
+    this.api.callGetRoute('object/count/' + typ).subscribe((count) => {
+        this.objectCount.push(count);
       },
       () => {
 
       },
       () => {
-        let c = this.object_count.values();
-        for(let typ of this.typeList){
-          typ['obj_counter'] = c.next().value;
+        const c = this.objectCount.values();
+        for (const typ2 of this.typeList) {
+          typ2['objCounter'] = c.next().value;
         }
       });
   }
 
-  public get_object_by_type_id(type){
-    this.api.callGetRoute("object/type/"+type).subscribe(list => {
-        this.sApi.setDataResult(list);
-      });
+  public get_object_by_type_id(type) {
+    this.api.callGetRoute('object/type/' + type).subscribe(list => {
+      this.sApi.setDataResult(list);
+    });
   }
 }

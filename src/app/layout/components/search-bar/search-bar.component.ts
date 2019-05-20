@@ -62,7 +62,7 @@ export class SearchBarComponent implements OnInit {
   public autosearch() {
     this.searchCtrl.valueChanges.subscribe(
       term => {
-        if (typeof term === 'string' && term.length > 0 && term !== undefined) {
+        if (typeof term === 'string' && term.length > 0) {
           this.apiCall(term, 5);
         } else {
           this.autoResult = [];

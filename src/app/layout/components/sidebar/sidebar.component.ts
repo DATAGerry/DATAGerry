@@ -18,7 +18,7 @@
 
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
-import {ShareDataService} from "../../../services/share-data.service";
+import { ShareDataService } from '../../../services/share-data.service';
 
 @Component({
   selector: 'cmdb-sidebar',
@@ -27,7 +27,9 @@ import {ShareDataService} from "../../../services/share-data.service";
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   public categoryTree: any;
-  constructor(private api: ApiCallService, private sApi: ShareDataService, private renderer: Renderer2) { }
+
+  constructor(private api: ApiCallService, private sApi: ShareDataService, private renderer: Renderer2) {
+  }
 
   public ngOnInit(): void {
     this.renderer.addClass(document.body, 'sidebar-fixed');
@@ -41,8 +43,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.renderer.removeClass(document.body, 'sidebar-fixed');
   }
 
-  public get_all_Objects(){
-    this.api.callGetRoute("object/").subscribe(data =>{
+  public get_all_Objects() {
+    this.api.callGetRoute('object/').subscribe(data => {
       this.sApi.setDataResult(data);
     });
   }

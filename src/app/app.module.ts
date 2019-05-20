@@ -28,7 +28,7 @@ import { AuthModule } from './auth/auth.module';
 import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
 import { HttpErrorInterceptor } from './auth/interceptors/http-error.interceptor.tx';
 import { PreviousRouteService } from './services/previous-route.service';
-import { ShareDataService } from "./services/share-data.service";
+import { ShareDataService } from './services/share-data.service';
 
 @NgModule({
   declarations: [
