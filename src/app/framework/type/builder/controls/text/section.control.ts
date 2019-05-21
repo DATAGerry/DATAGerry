@@ -16,38 +16,30 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ControlsCommon, ControlsContent, randomName } from '../controls.common';
+import { ControlsCommon, StructureContent, randomName } from '../controls.common';
 
-export class TextControl implements ControlsCommon {
+export class SectionControl implements ControlsCommon {
 
-  name = 'text';
-  label = 'Text';
-  icon = 'fa-font';
-  dndType: string = 'inputs';
+  name = 'section';
+  label = 'Section';
+  icon = 'fa fa-square-o';
+  dndType: string = 'sections';
 
   content() {
-    return new TextContent();
+    const section = new SectionContent();
+    section.name = randomName(this.name);
+    section.label = this.label;
+    return section;
   }
 
 }
 
-class TextContent implements ControlsContent {
-  access: [];
-  helperText: string;
-  name: string;
-  optional: any;
-  placeholder: string;
-  required: boolean;
-  subtype: string;
-  type: string;
-  value: any;
+class SectionContent implements StructureContent {
+
   label: string;
-
-  public constructor() {
-    this.type = 'text';
-    this.subtype = 'text';
-    this.name = randomName(this.type);
-    this.label = 'Text Field';
-  }
-
+  name: string;
+  position: number;
+  tag: string;
+  fields: [] = [];
+  subSections: [] = [];
 }

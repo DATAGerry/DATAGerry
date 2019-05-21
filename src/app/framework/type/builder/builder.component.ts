@@ -18,8 +18,9 @@
 
 import { Component, Input, OnInit } from '@angular/core';
 import { TextControl } from './controls/text/text.control';
-import { ControlsContent } from './controls/controls.common';
+import { Controller, ControlsContent } from './controls/controls.common';
 import { DndDropEvent } from 'ngx-drag-drop';
+import { SectionControl } from './controls/text/section.control';
 
 @Component({
   selector: 'cmdb-builder',
@@ -29,14 +30,33 @@ import { DndDropEvent } from 'ngx-drag-drop';
 export class BuilderComponent implements OnInit {
 
   private fields: ControlsContent[];
+  private sections: any[];
 
   @Input() builderConfig: any = {};
   private builderControls = [
-    new TextControl()
+    new Controller('section', SectionControl),
+    new Controller('text', TextControl)
   ];
 
   ngOnInit() {
     this.fields = [];
+    this.sections = [];
+  }
+
+  private onDrop(event: DndDropEvent, list: any[]) {
+    let index = event.index;
+    if (typeof index === 'undefined') {
+
+      index = list.length;
+    }
+    list.splice(index, 0, event.data);
+    console.log(event);
+    console.log(list);
+  }
+
+  private onDragged(item: any, list: any[]) {
+    const index = list.indexOf(item);
+    list.splice(index, 1);
   }
 
   private addField(event: DndDropEvent) {

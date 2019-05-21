@@ -27,7 +27,7 @@ import { TypeAddComponent } from './components/type-add/type-add.component';
 import { ArchwizardModule } from 'angular-archwizard';
 import { TypeBuilderComponent } from './components/type-builder/type-builder.component';
 import { TypeBasicStepComponent } from './components/type-builder/type-basic-step/type-basic-step.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TypeFieldsStepComponent } from './components/type-builder/type-fields-step/type-fields-step.component';
 import { TypeHeaderComponent } from './components/type-header/type-header.component';
 import { TypeQrComponent } from './components/type-qr/type-qr.component';
@@ -36,6 +36,8 @@ import { BuilderComponent } from './builder/builder.component';
 import { DndModule } from 'ngx-drag-drop';
 import { TypeAccessStepComponent } from './components/type-builder/type-access-step/type-access-step.component';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { TypeValidationStepComponent } from './components/type-builder/type-validation-step/type-validation-step.component';
+import { RenderModule } from './render/render.module';
 
 @NgModule({
   declarations: [
@@ -48,7 +50,9 @@ import { NgSelectModule } from '@ng-select/ng-select';
     TypeHeaderComponent,
     TypeQrComponent,
     BuilderComponent,
-    TypeAccessStepComponent],
+    TypeAccessStepComponent,
+    TypeValidationStepComponent
+  ],
   imports: [
     CommonModule,
     TypeRoutingModule,
@@ -58,7 +62,9 @@ import { NgSelectModule } from '@ng-select/ng-select';
     ArchwizardModule,
     DndModule,
     QRCodeModule,
-    NgSelectModule
+    NgSelectModule,
+    RenderModule,
+    FormsModule
   ]
 })
 export class TypeModule {

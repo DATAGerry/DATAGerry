@@ -16,38 +16,21 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ControlsCommon, ControlsContent, randomName } from '../controls.common';
+import { Component, Input, OnInit } from '@angular/core';
 
-export class TextControl implements ControlsCommon {
+@Component({
+  selector: 'cmdb-render',
+  templateUrl: './render.component.html',
+  styleUrls: ['./render.component.scss']
+})
+export class RenderComponent implements OnInit {
 
-  name = 'text';
-  label = 'Text';
-  icon = 'fa-font';
-  dndType: string = 'inputs';
+  @Input() data: any;
 
-  content() {
-    return new TextContent();
-  }
+  constructor() { }
 
-}
-
-class TextContent implements ControlsContent {
-  access: [];
-  helperText: string;
-  name: string;
-  optional: any;
-  placeholder: string;
-  required: boolean;
-  subtype: string;
-  type: string;
-  value: any;
-  label: string;
-
-  public constructor() {
-    this.type = 'text';
-    this.subtype = 'text';
-    this.name = randomName(this.type);
-    this.label = 'Text Field';
+  ngOnInit() {
+    console.log();
   }
 
 }

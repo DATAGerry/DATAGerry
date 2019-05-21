@@ -1,49 +1,115 @@
 <div class="row">
   <div id="builder-controls" class="col-3">
     <div class="list-group">
-      <a *ngFor="let control of builderControls" [dndDraggable]="control.content()" type="button"
+      <a *ngFor="let control of builderControls" [dndType]="control.typeController.dndType"
+         [dndDraggable]="control.typeController.content()" type="button"
          class="list-group-item list-group-item-action">
-        <i class="fa {{ control.icon }}" aria-hidden="true"></i> {{ control.label }}
+        <i class="fa {{ control.typeController.icon }}" aria-hidden="true"></i> {{ control.typeController.label }}
       </a>
     </div>
-  </div>
-  <div id="form-container" class="col-9">
-    <section dndDropzone id="form-content" [ngClass]="{'empty': fields.length == 0 }"  (dndDrop)="addField($event)">
-      <span *ngIf="fields?.length == 0">
-        Drop fields here
-      </span>
-      <div *ngIf="fields?.length > 0" class="accordion" id="fieldBuilderListView">
-        <div class="card" *ngFor="let field of fields">
-          <div class="card-header" id="{{field.name}}">
-            Type: {{field.type}} Name: {{field.name}}
-            <span class="float-right">
-              <button class="btn btn-link fieldActionButton" type="button" data-toggle="collapse"
-                      data-target="#collapseOne"
-                      aria-expanded="true" aria-controls="collapseOne">
-                <i class="fa fa-pencil-square" aria-hidden="true"></i>
+    <div id="builder-controls-action" class="btn-group btn-group-sm mt-2 justify-content-md-center" role="group"
+         aria-label="Controls helper buttons">
+      <button id="builder-controls-action-preview" type="button" class="btn btn-secondary"
+              data-toggle="modal" [attr.data-target]="'#renderPreview'">
+        Preview
+      </button>
+      <div class="modal fade" id="renderPreview" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-xl" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Render Preview</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
               </button>
-                <button class="btn btn-link fieldActionButton" type="button">
-                <i class="fa fa-window-close" aria-hidden="true" (click)="deleteField(field)"></i>
-              </button>
-            </span>
-
-
-          </div>
-
-          <div id="collapseOne" class="collapse" data-parent="#fieldBuilderListView">
-            <div class="card-body">
-              Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf
-              moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod.
-              Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda
-              shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea
-              proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim
-              aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+            </div>
+            <div class="modal-body">
+              ...
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
           </div>
         </div>
       </div>
-    </section>
+      <button id="builder-controls-action-diagnostic" type="button" class="btn btn-secondary"
+              data-toggle="modal" [attr.data-target]="'#renderDiagnostic'">
+        Diagnostic
+      </button>
+      <div class="modal fade" id="renderDiagnostic" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Render Diagnostic</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              {{ sections | json }}
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="form-container" class="col-9">
+    <div id="form-content" [dndDropzone]="['sections']" (dndDrop)="onDrop($event, sections)">
+      <div style="border: 1px green solid; border-radius: 5px; padding: 15px;"
+           dndPlaceholderRef>
+        placeholder
+      </div>
+      <section *ngFor="let section of sections" [dndDropzone]="['inputs']"
+               (dndDrop)="onDrop($event, section.fields)">
+
+        <ng-container *ngFor="let field of section.fields">
+          <div class="card">
+            <div class="card-header">
+              {{field.label}}
+              <span class="float-right">
+                <button class="btn btn-link" type="button" data-toggle="collapse"
+                        [attr.data-target]="'#collapse' + field.name">
+                  <i class="fa fa-pencil-square"></i>
+                </button>
+                <button class="btn btn-link" type="button">
+                  <i class="fa fa-caret-square-o-left"></i>
+                </button>
+              </span>
+            </div>
+            <div class="card-body">
+              <div class="collapse" id="collapse{{field.name}}">
+                <div class="form-group">
+                  <label>Name:</label>
+                  <input [(ngModel)]="field.name" type="text" class="form-control" value="{{field.name}}" lowercase>
+                  <small class="form-text text-muted">Use a unique field-name</small>
+                </div>
+                <div class="form-group">
+                  <label>Label:</label>
+                  <input [(ngModel)]="field.label" type="text" class="form-control" value="{{field.label}}">
+                  <small class="form-text text-muted">a static display name</small>
+                </div>
+                <div class="form-group">
+                  <label>Description:</label>
+                  <textarea [(ngModel)]="field.description" class="form-control">
+                    {{field.description}}
+                  </textarea>
+                  <small class="form-text text-muted">short field description or helper text</small>
+                </div>
+                <hr/>
+              </div>
+              <cmdb-render-element [data]="field"></cmdb-render-element>
+            </div>
+          </div>
+
+        </ng-container>
+        <div style="border: 1px red solid; border-radius: 5px; padding: 15px;"
+             dndPlaceholderRef>
+          placeholder
+        </div>
+        {{section | json}}
+      </section>
+    </div>
   </div>
 </div>
-
-{{fields}}

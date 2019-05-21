@@ -20,6 +20,7 @@ export interface ControlsCommon {
   label: string;
   name: string;
   icon?: string;
+  dndType: string;
 
   content(): any;
 }
@@ -37,6 +38,23 @@ export interface ControlsContent {
 
 }
 
-export function randomName(type) {
-  return `${type}-${Math.floor(Math.random() * 10000) + 99999}`;
+export interface StructureContent {
+  name: string;
+  label: string;
+  position: number;
+}
+
+export function randomName(desc: string) {
+  return `${desc}-${Math.floor(Math.random() * 10000) + 99999}`;
+}
+
+
+export class Controller {
+
+  private typeController: ControlsCommon;
+
+  constructor(public name: string, public descr: any) {
+    this.typeController = new descr();
+  }
+
 }

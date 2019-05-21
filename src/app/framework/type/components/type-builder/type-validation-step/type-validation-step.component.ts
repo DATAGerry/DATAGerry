@@ -16,38 +16,18 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ControlsCommon, ControlsContent, randomName } from '../controls.common';
+import { Component, OnInit } from '@angular/core';
 
-export class TextControl implements ControlsCommon {
+@Component({
+  selector: 'cmdb-type-validation-step',
+  templateUrl: './type-validation-step.component.html',
+  styleUrls: ['./type-validation-step.component.scss']
+})
+export class TypeValidationStepComponent implements OnInit {
 
-  name = 'text';
-  label = 'Text';
-  icon = 'fa-font';
-  dndType: string = 'inputs';
+  constructor() { }
 
-  content() {
-    return new TextContent();
-  }
-
-}
-
-class TextContent implements ControlsContent {
-  access: [];
-  helperText: string;
-  name: string;
-  optional: any;
-  placeholder: string;
-  required: boolean;
-  subtype: string;
-  type: string;
-  value: any;
-  label: string;
-
-  public constructor() {
-    this.type = 'text';
-    this.subtype = 'text';
-    this.name = randomName(this.type);
-    this.label = 'Text Field';
+  ngOnInit() {
   }
 
 }

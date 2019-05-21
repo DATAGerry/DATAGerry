@@ -17,9 +17,10 @@
     <button class="btn btn-primary" type="button" awPreviousStep>Previous Step</button>
     <button class="btn btn-primary" type="button" awNextStep>Go to next step</button>
   </aw-wizard-step>
-  <aw-wizard-step stepId="5" stepTitle="Validation">
+  <aw-wizard-completion-step stepId="5" stepTitle="Validation">
+    <cmdb-type-validation-step></cmdb-type-validation-step>
     <button class="btn btn-primary" type="button" awPreviousStep>Previous Step</button>
-    <button class="btn btn-primary" type="button" awNextStep>Go to next step</button>
-  </aw-wizard-step>
+    <button class="btn btn-primary" type="button">Finish</button>
+  </aw-wizard-completion-step>
 </aw-wizard>
 <!--[disabled]="!basicStep.basicForm.valid"-->
