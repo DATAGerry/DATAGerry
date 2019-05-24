@@ -19,6 +19,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ConnectionService } from './services/connection.service';
 import { ConnectionResult } from './models/connection-result';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'cmdb-connection',
@@ -30,7 +31,7 @@ export class ConnectionComponent implements OnInit {
   @Input() hostPort = 4000;
   public connectionResult: ConnectionResult;
 
-  constructor(private connectionService: ConnectionService) {
+  constructor(private connectionService: ConnectionService, private route: Router) {
   }
 
   public ngOnInit() {
@@ -41,6 +42,9 @@ export class ConnectionComponent implements OnInit {
   public onConnect() {
     this.connectionService.connect(this.hostAddress, this.hostPort).subscribe((result: ConnectionResult) => {
       this.connectionResult = result;
+      if (this.connectionService.isConnected) {
+        this.route.navigate(['/']);
+      }
     });
   }
 

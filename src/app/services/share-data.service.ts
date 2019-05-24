@@ -46,7 +46,7 @@ export class ShareDataService {
         map(
           (data: any) => {
             return (
-              data.length > 0 ? data as any[] : [{'Object': 'No Object Found'} as any]
+              data.length > 0 ? data as any[] : [{object: 'No Object Found'} as any]
             );
           }
         ));

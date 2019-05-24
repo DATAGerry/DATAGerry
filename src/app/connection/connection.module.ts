@@ -22,12 +22,14 @@ import { ConnectionComponent } from './connection.component';
 import { ConnectionService } from './services/connection.service';
 import { ConnectionGuard } from './guards/connection.guard';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [ConnectionComponent],
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    RouterModule
   ],
 
   providers: [ConnectionService]

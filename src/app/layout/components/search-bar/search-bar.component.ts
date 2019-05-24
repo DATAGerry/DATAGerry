@@ -27,83 +27,76 @@ import { ShareDataService } from '../../../services/share-data.service';
   templateUrl: './search-bar.component.html',
   styleUrls: ['./search-bar.component.scss'],
 })
-export class SearchBarComponent implements OnInit {
 
+export class SearchBarComponent implements OnInit {
 
   searchCtrl: FormControl = new FormControl('');
   autoResult = [];
   categoryList = [{label: 'Categories'}];
-
   category = 'Categories';
   typeID: string = 'undefined';
 
-  showResultList = false;
-
-
   constructor(
     private typeService: TypeService,
-    private router: Router,
+    private route: Router,
     private sApi: ShareDataService) {
   }
 
-
   ngOnInit() {
-
     this.typeService.getTypeList().subscribe((list) => {
       this.categoryList = this.categoryList.concat(list);
+    }, error => {
+      /*
+      * Here it must be considered how this should be treated
+      * */
+      this.route.navigate(['login/']);
     });
+    this.autosearch();
   }
 
-  public onBlurMethod() {
-    this.showResultList = false;
-    this.autoResult = [];
+  public hiden() {
+    setTimeout(() => {
+      this.searchCtrl.setValue('');
+    }, 300);
   }
 
   public autosearch() {
-    this.searchCtrl.valueChanges.subscribe(
-      term => {
-        if (typeof term === 'string' && term.length > 0) {
-          this.apiCall(term, 5);
-        } else {
-          this.autoResult = [];
-        }
-      });
-
-    if (this.autoResult.length === 0) {
-      this.showResultList = false;
-    } else {
-      this.showResultList = true;
-    }
+    this.searchCtrl.valueChanges.subscribe( data => {
+      this.apiCall(5);
+    }, error => {
+    }, () => {
+    });
   }
 
-
   public getResponse() {
+    this.sApi.searchTerm('/search/?value=' + this.searchCtrl.value + '&type_id=' + this.typeID + '&limit=' + 0).subscribe(
+      data => {
+        this.sApi.setDataResult(data);
+      });
+    this.route.navigate(['search/results']);
+  }
 
-    if (typeof this.searchCtrl.value === 'string' && this.searchCtrl.value.length > 0 && this.searchCtrl.value !== undefined) {
-      this.router.navigate(['search/results']);
-      this.sApi.searchTerm('/search/?value=' + this.searchCtrl.value + '&type_id=' + this.typeID + '&limit=' + 0).subscribe(
+  private apiCall(limit) {
+    if (typeof this.searchCtrl.value === 'string' && this.searchCtrl.value.length > 0) {
+      this.sApi.searchTerm('/search/?value=' + this.searchCtrl.value + '&type_id=' + this.typeID + '&limit=' + limit).subscribe(
         data => {
-          this.sApi.setDataResult(data);
-
+          this.autoResult = data as [];
         });
     }
   }
 
-
-  private apiCall(term, limit) {
-
-    this.sApi.searchTerm('/search/?value=' + term + '&type_id=' + this.typeID + '&limit=' + limit).subscribe(
-      data => {
-        this.autoResult = data;
+  public highlight(value) {
+    if (typeof value === 'string' && value.length > 0) {
+      return value.replace(new RegExp(this.searchCtrl.value, 'gi'), match => {
+        return '<span class="badge badge-secondary">' + match + '</span>';
       });
+    }
   }
-
 
   public dropdownMenu(element) {
     this.category = element.label;
     this.typeID = this.getAppropriateTypeId(this.categoryList, this.category);
   }
-
 
   private getAppropriateTypeId(object, value) {
     const item = object.find(i => i.label === value);

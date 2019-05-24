@@ -29,6 +29,6 @@ export class CmdbType implements CmdbDao {
   public author_id: number;
   public version: string;
   public author_name: string;
-  public objects_count: number;
+  public countObjects: number;
 
 }

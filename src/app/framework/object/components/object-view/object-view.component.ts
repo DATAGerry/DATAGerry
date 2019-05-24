@@ -32,7 +32,11 @@ export class ObjectViewComponent implements OnInit {
   private objectInstance: any;
 
   constructor(private api: ApiCallService, private route: ActivatedRoute) {
-    this.route.params.subscribe((id) => this.objID = id.publicID);
+    this.route.params.subscribe((id) => {
+      this.objID = id.publicID;
+      this.ngOnInit();
+    });
+
   }
 
   ngOnInit() {

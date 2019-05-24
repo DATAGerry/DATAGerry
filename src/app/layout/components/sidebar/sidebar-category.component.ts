@@ -19,7 +19,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { ApiCallService } from '../../../services/api-call.service';
-import { Router } from '@angular/router';
 import { ShareDataService } from '../../../services/share-data.service';
 
 @Component({
@@ -47,11 +46,8 @@ export class SidebarCategoryComponent implements OnInit {
     for (const typ of categoryTypeList) {
       this.api.callGetRoute('type/' + typ).subscribe((list: CmdbType[]) => {
           this.typeList = this.typeList.concat(list);
-        },
-        () => {
-
-        },
-        () => {
+        }, error => {
+        }, () => {
           this.count_objects(typ);
         });
     }
@@ -60,21 +56,12 @@ export class SidebarCategoryComponent implements OnInit {
   private count_objects(typ) {
     this.api.callGetRoute('object/count/' + typ).subscribe((count) => {
         this.objectCount.push(count);
-      },
-      () => {
-
-      },
-      () => {
+      }, error => {
+      }, () => {
         const c = this.objectCount.values();
         for (const typ2 of this.typeList) {
-          typ2['objCounter'] = c.next().value;
+          typ2.countObjects = c.next().value;
         }
       });
-  }
-
-  public get_object_by_type_id(type) {
-    this.api.callGetRoute('object/type/' + type).subscribe(list => {
-      this.sApi.setDataResult(list);
-    });
   }
 }

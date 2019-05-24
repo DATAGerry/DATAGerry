@@ -1,46 +1,57 @@
+
 <div class="input-group">
 
-  <div class="input-group-btn search-panel">
+  <div class="input-group-prepend">
+    <div class="dropdown">
+      <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+        <span id="caret" >{{category}} </span>
+      </button>
 
-    <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"
-            aria-haspopup="true" aria-expanded="false">
-      <span id="categorie_concept">{{category}}</span> <span class="caret"></span>
-    </button>
-
-    <ul class="dropdown-menu" role="menu">
-      <li *ngFor="let element of categoryList" [value]="element.label" (click)="dropdownMenu(element)">
-        {{element.label}}
-      </li>
-    </ul>
-
+      <ul class="dropdown-menu" role="menu">
+        <li *ngFor="let element of categoryList" [value]="element.label" (click)="dropdownMenu(element)">
+          {{element.label}}
+        </li>
+      </ul>
+    </div>
   </div>
 
-  <div class="input-group-btn search-panel">
-    <input class="form-control" type="search" placeholder="Search for..." aria-label="Search"
-           [formControl]="searchCtrl"
-           (keyup)="autosearch()"
-           (blur)="onBlurMethod()"
-           (keyup.enter)="getResponse()">
-
-    <ul class="list-search-result" *ngIf="showResultList">
-      <li *ngFor="let element of autoResult" [value]="element.label">
-        <div *ngFor="let field of element.match_fields" class="list-group">
-          <a href="#" class="list-group-item list-group-item-action flex-column align-items-start">
-            <div class="d-flex w-100 justify-content-between">
-              <h5 class="mb-1">Type: {{element.type_label}}</h5>
-              <small class="text-muted">id: {{element.type_id}}</small>
-            </div>
-            <p class="mb-1">{{field.value}}</p>
-            <small class="text-muted">Found in <cite title="Source Title">{{field.name}}</cite></small>
-          </a>
-        </div>
-      </li>
-    </ul>
-
-  </div>
+  <input class="form-control" type="search" placeholder="Search for..." aria-label="Search"
+         [formControl]="searchCtrl"
+         (blur)="hiden()"
+         (keyup.enter)="getResponse()">
 
   <button class="btn btn-default" type="button" (click)="getResponse()">
     <i class="fa fa-search" aria-hidden="true"></i>
   </button>
+
+</div>
+
+<div class="card overflow-auto" *ngIf="searchCtrl.value" style="position: absolute; max-height: 250px; z-index: 100">
+  <ng-container *ngFor="let element of autoResult">
+
+    <div class="card-header" *ngIf="element.object">
+      {{element.object}}
+    </div>
+
+    <ng-container *ngIf="!element.object">
+      <div class="card-header">
+        {{element.type_label}} #{{element.object_id}} <span class="badge badge-primary pull-right">{{element.type_active}}</span>
+      </div>
+
+      <div class="list-group" *ngFor="let field of element.match_fields"
+           (click)="hiden()"
+           [routerLink]="['/framework/object/', element.object_id]" >
+
+        <button type="button" class="list-group-item list-group-item-action" >
+          <strong>Field</strong> : {{field.name}}<br>
+          <strong>Value</strong> : <span [innerHTML]="highlight(field.value)"></span><br>
+          <small class="text-muted pull-right">more ...</small>
+        </button>
+      </div>
+    </ng-container>
+
+
+  </ng-container>
 </div>
 

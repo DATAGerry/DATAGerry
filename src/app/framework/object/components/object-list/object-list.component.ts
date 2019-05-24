@@ -17,30 +17,44 @@
 */
 
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
-import { ApiCallService } from "../../../../services/api-call.service";
-import { ShareDataService } from "../../../../services/share-data.service";
+import { ApiCallService } from '../../../../services/api-call.service';
+import { ShareDataService } from '../../../../services/share-data.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'cmdb-object-list',
   templateUrl: './object-list.component.html',
   styleUrls: ['./object-list.component.scss']
 })
-export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
+export class ObjectListComponent implements OnDestroy, OnInit {
 
   @ViewChild(DataTableDirective)
   public dtElement: DataTableDirective;
 
   dtOptions: DataTables.Settings = {};
-  object_lists = [];
+  objectLists = [];
+  private url: string = 'object/';
+  private objID: number;
 
   // Use this trigger because fetching the list of objects can be quite long,
   // this ensure the data is fetched before rendering
   public dtTrigger: Subject<any> = new Subject();
 
-  constructor(private apiCallService: ApiCallService, private sApi: ShareDataService) { }
+  constructor(private apiCallService: ApiCallService, private sApi: ShareDataService, private route: ActivatedRoute) {
+    this.route.params.subscribe((id) => {
+      this.objID = id.publicID;
+      if ( typeof this.objID !== 'undefined') {
+        this.url = 'object/type/' + id.publicID;
+        this.callObjects();
+      } else {
+        this.url = 'object/';
+        this.callObjects();
+      }
+    });
+  }
 
   ngOnInit() {
     this.dtOptions = {
@@ -51,26 +65,15 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
         searchPlaceholder: 'Filter...'
       },
     };
-
-    this.sApi.getDataResult().subscribe(data =>{
-      this.object_lists = data as [];
-      this.rerender();
-      this.dtTrigger.next();
-    });
-
-    if(this.object_lists.length == 0){
-      this.apiCallService.callGetRoute("object/").subscribe(
-        data => {
-          this.object_lists = data as [];
-          this.rerender();
-          this.dtTrigger.next();
-        });
-    }
   }
 
-  ngAfterViewInit(): void {
-
-
+  private callObjects() {
+    this.apiCallService.callGetRoute(this.url).subscribe(
+      data => {
+        this.objectLists = data as [];
+        this.rerender();
+        this.dtTrigger.next();
+      });
   }
 
   ngOnDestroy(): void {
@@ -79,7 +82,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   public rerender(): void {
-    if( typeof this.dtElement.dtInstance !== "undefined"){
+    if (typeof this.dtElement.dtInstance !== 'undefined') {
       this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
         // Destroy the table first
         dtInstance.destroy();
