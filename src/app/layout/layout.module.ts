@@ -31,6 +31,7 @@ import { LowercaseDirective } from './directives/lowercase.directive';
 import { SearchBarComponent } from './components/search-bar/search-bar.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [
@@ -57,7 +58,8 @@ import { NgSelectModule } from '@ng-select/ng-select';
     CommonModule,
     RouterModule,
     NgSelectModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgbModule
   ],
   providers: [
     BreadcrumbService

@@ -1,12 +1,63 @@
 <div class="row">
+
   <div id="builder-controls" class="col-3">
-    <div class="list-group">
-      <a *ngFor="let control of builderControls" [dndType]="control.typeController.dndType"
-         [dndDraggable]="control.typeController.content()" type="button"
-         class="list-group-item list-group-item-action">
-        <i class="fa {{ control.typeController.icon }}" aria-hidden="true"></i> {{ control.typeController.label }}
-      </a>
+    <div class="accordion" id="controlsPanel">
+      <div class="card">
+        <div class="card-header">
+          <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#structureControls">
+            Structure Controls
+          </button>
+        </div>
+        <div id="structureControls" class="collapse show" data-parent="#controlsPanel">
+          <div class="card-body">
+            <div class="list-group">
+              <a *ngFor="let control of structureControls" [dndType]="control.typeController.dndType"
+                 [dndDraggable]="control.typeController.content()" type="button"
+                 class="list-group-item list-group-item-action">
+                <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#basicControls">
+            Basic Controls
+          </button>
+        </div>
+        <div id="basicControls" class="collapse" data-parent="#controlsPanel">
+          <div class="card-body">
+            <div class="list-group">
+              <a *ngFor="let control of basicControls" [dndType]="control.typeController.dndType"
+                 [dndDraggable]="control.typeController.content()" type="button"
+                 class="list-group-item list-group-item-action">
+                <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#specialControls">
+            Special Controls
+          </button>
+        </div>
+        <div id="specialControls" class="collapse" data-parent="#controlsPanel">
+          <div class="card-body">
+            <div class="list-group">
+              <a *ngFor="let control of specialControls" [dndType]="control.typeController.dndType"
+                 [dndDraggable]="control.typeController.content()" type="button"
+                 class="list-group-item list-group-item-action">
+                <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
     <div id="builder-controls-action" class="btn-group btn-group-sm mt-2 justify-content-md-center" role="group"
          aria-label="Controls helper buttons">
       <button id="builder-controls-action-preview" type="button" class="btn btn-secondary"
@@ -23,7 +74,7 @@
               </button>
             </div>
             <div class="modal-body">
-              ...
+              <cmdb-render [sections]="sections"></cmdb-render>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -45,7 +96,9 @@
               </button>
             </div>
             <div class="modal-body">
-              {{ sections | json }}
+              <pre>
+                <code>{{ sections | json }}</code>
+              </pre>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -56,59 +109,185 @@
     </div>
   </div>
   <div id="form-container" class="col-9">
-    <div id="form-content" [dndDropzone]="['sections']" (dndDrop)="onDrop($event, sections)">
+    <div id="form-content" data-content="Drop field here" [ngClass]="{'empty': sections.length == 0 }"
+         [dndDropzone]="['sections']" (dndDrop)="onDrop($event, sections)">
       <div style="border: 1px green solid; border-radius: 5px; padding: 15px;"
            dndPlaceholderRef>
-        placeholder
+        Drop section here
       </div>
-      <section *ngFor="let section of sections" [dndDropzone]="['inputs']"
-               (dndDrop)="onDrop($event, section.fields)">
-
-        <ng-container *ngFor="let field of section.fields">
-          <div class="card">
-            <div class="card-header">
-              {{field.label}}
-              <span class="float-right">
-                <button class="btn btn-link" type="button" data-toggle="collapse"
-                        [attr.data-target]="'#collapse' + field.name">
-                  <i class="fa fa-pencil-square"></i>
-                </button>
-                <button class="btn btn-link" type="button">
-                  <i class="fa fa-caret-square-o-left"></i>
-                </button>
-              </span>
-            </div>
+      <section *ngFor="let section of sections">
+        <div class="card">
+          <div class="card-header">
+            {{section.label}}
+            <span class="float-right">
+              <button class="btn btn-link" type="button" data-toggle="collapse"
+                      [attr.data-target]="'#section_' + section.name">
+                <i class="fa fa-pencil-square"></i>
+              </button>
+              <button class="btn btn-link" type="button" (click)="remove(section, sections)">
+                <i class="fa fa-window-close-o"></i>
+              </button>
+            </span>
+          </div>
+          <div class="collapse" id="section_{{section.name}}">
             <div class="card-body">
-              <div class="collapse" id="collapse{{field.name}}">
-                <div class="form-group">
-                  <label>Name:</label>
-                  <input [(ngModel)]="field.name" type="text" class="form-control" value="{{field.name}}" lowercase>
-                  <small class="form-text text-muted">Use a unique field-name</small>
-                </div>
-                <div class="form-group">
-                  <label>Label:</label>
-                  <input [(ngModel)]="field.label" type="text" class="form-control" value="{{field.label}}">
-                  <small class="form-text text-muted">a static display name</small>
-                </div>
-                <div class="form-group">
-                  <label>Description:</label>
-                  <textarea [(ngModel)]="field.description" class="form-control">
-                    {{field.description}}
-                  </textarea>
-                  <small class="form-text text-muted">short field description or helper text</small>
-                </div>
-                <hr/>
+              <div class="form-group">
+                <label>Name:</label>
+                <input [(ngModel)]="section.name" type="text" class="form-control" value="{{section.name}}" lowercase>
+                <small class="form-text text-muted">Use a unique field-name</small>
               </div>
-              <cmdb-render-element [data]="field"></cmdb-render-element>
+              <div class="form-group">
+                <label>Label:</label>
+                <input [(ngModel)]="section.label" type="text" class="form-control" value="{{section.label}}">
+                <small class="form-text text-muted">a static display name</small>
+              </div>
+              <div class="form-check">
+                <input [(ngModel)]="section.access" class="form-check-input" type="checkbox" data-toggle="collapse"
+                       [attr.data-target]="'#access_' + section.name">
+                <label class="form-check-label">
+                  Limit access of this section
+                </label>
+              </div>
+              <div class="collapse" id="access_{{section.name}}">
+                <div class="card card-body">
+                  <div class="form-group">
+                    <label>Limit access to groups:</label>
+                    <ng-select
+                      [items]="groupList"
+                      [multiple]="true"
+                      bindLabel="name"
+                      bindValue="public_id"
+                      placeholder="Select groups"
+                      [(ngModel)]="section.groups"
+                    >
+                    </ng-select>
+                    <small class="form-text text-muted">Multiple selection possible, leave blank if no limitation.
+                    </small>
+                  </div>
+                  <div class="form-group">
+                    <label>Limit access to specific users:</label>
+                    <ng-select
+                      [items]="userList"
+                      [multiple]="true"
+                      bindLabel="user_name"
+                      bindValue="public_id"
+                      placeholder="Select specific users"
+                      [(ngModel)]="section.users">
+                    </ng-select>
+                    <small class="form-text text-muted">Multiple selection possible, leave blank if no limitation.
+                    </small>
+                  </div>
+                </div>
+              </div>
+              <hr/>
             </div>
           </div>
-
-        </ng-container>
-        <div style="border: 1px red solid; border-radius: 5px; padding: 15px;"
-             dndPlaceholderRef>
-          placeholder
+          <div class="card-body" [dndDropzone]="['inputs']"
+               (dndDrop)="onDrop($event, section.fields)">
+            <ng-container *ngFor="let field of section.fields">
+              <div class="fields card">
+                <div class="card-header">
+                  {{field.label}}
+                  <span class="float-right">
+                    <button class="btn btn-link" type="button" data-toggle="collapse"
+                            [attr.data-target]="'#field_' + field.name">
+                      <i class="fa fa-pencil-square"></i>
+                    </button>
+                    <button class="btn btn-link" type="button" (click)="remove(field, section.fields)">
+                      <i class="fa fa-window-close-o"></i>
+                    </button>
+                  </span>
+                </div>
+                <div class="card-body">
+                  <div class="collapse" id="field_{{field.name}}">
+                    <div class="form-group form-check">
+                      <input [(ngModel)]="field.required" class="form-check-input" type="checkbox">
+                      <label class="form-check-label">
+                        Required
+                      </label>
+                    </div>
+                    <div class="form-group">
+                      <label>Name:</label>
+                      <input [(ngModel)]="field.name" type="text" class="form-control" value="{{field.name}}" lowercase>
+                      <small class="form-text text-muted">Use a unique field-name</small>
+                    </div>
+                    <div class="form-group">
+                      <label>Label:</label>
+                      <input [(ngModel)]="field.label" type="text" class="form-control" value="{{field.label}}">
+                      <small class="form-text text-muted">a static display name</small>
+                    </div>
+                    <div class="form-group">
+                      <label>Description:</label>
+                      <textarea [(ngModel)]="field.description" class="form-control">
+                        {{field.description}}
+                      </textarea>
+                      <small class="form-text text-muted">short field description or helper text</small>
+                    </div>
+                    <div class="form-group">
+                      <label>Placeholder:</label>
+                      <input [(ngModel)]="field.placeholder" type="text" class="form-control"
+                             value="{{field.placeholder}}">
+                    </div>
+                    <div class="form-group">
+                      <label>Default value:</label>
+                      <input [(ngModel)]="field.value" type="text" class="form-control" value="{{field.value}}">
+                    </div>
+                    <div class="form-group">
+                      <label>Helper text:</label>
+                      <input [(ngModel)]="field.helperText" type="text" class="form-control" value="{{field.helperText}}">
+                    </div>
+                    <div class="form-check">
+                      <input [(ngModel)]="field.access" class="form-check-input" type="checkbox" data-toggle="collapse"
+                             [attr.data-target]="'#access_' + field.name">
+                      <label class="form-check-label">
+                        Limit access of this field
+                      </label>
+                    </div>
+                    <div class="collapse" id="access_{{field.name}}">
+                      <div class="card card-body">
+                        <div class="form-group">
+                          <label>Limit access to groups:</label>
+                          <ng-select
+                            [items]="groupList"
+                            [multiple]="true"
+                            bindLabel="name"
+                            bindValue="public_id"
+                            placeholder="Select groups"
+                            [(ngModel)]="field.groups"
+                          >
+                          </ng-select>
+                          <small class="form-text text-muted">Multiple selection possible, leave blank if no limitation.
+                          </small>
+                        </div>
+                        <div class="form-group">
+                          <label>Limit access to specific users:</label>
+                          <ng-select
+                            [items]="userList"
+                            [multiple]="true"
+                            bindLabel="user_name"
+                            bindValue="public_id"
+                            placeholder="Select specific users"
+                            [(ngModel)]="field.users">
+                          </ng-select>
+                          <small class="form-text text-muted">Multiple selection possible, leave blank if no limitation.
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                    <hr/>
+                  </div>
+                  <cmdb-render-element [data]="field"></cmdb-render-element>
+                </div>
+              </div>
+            </ng-container>
+            <div style="border: 1px red solid; border-radius: 5px; padding: 15px;"
+                 dndPlaceholderRef>
+              Drop field here
+            </div>
+          </div>
         </div>
-        {{section | json}}
+
+
       </section>
     </div>
   </div>

@@ -17,15 +17,16 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
+import { ComponentsFields } from '../components.fields';
 
 @Component({
-  selector: 'cmdb-render',
-  templateUrl: './render.component.html',
-  styleUrls: ['./render.component.scss']
+  selector: 'cmdb-textarea',
+  templateUrl: './textarea.component.html',
+  styleUrls: ['./textarea.component.scss']
 })
-export class RenderComponent implements OnInit {
+export class TextareaComponent implements OnInit, ComponentsFields {
 
-  @Input() sections: any;
+  @Input() data: any;
 
   constructor() {
   }

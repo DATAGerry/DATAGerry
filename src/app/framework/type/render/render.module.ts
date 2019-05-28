@@ -18,16 +18,37 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RenderComponent } from './render.component';
 import { RenderElementComponent } from './render-element/render-element.component';
+import { TextComponent } from './fields/text/text.component';
+import { DummyComponent } from './fields/dummy/dummy.component';
+import { RenderComponent } from './render.component';
+import { PasswordComponent } from './fields/text/password.component';
+import { EmailComponent } from './fields/text/email.component';
+import { PhoneComponent } from './fields/text/phone.component';
+import { HrefComponent } from './fields/text/href.component';
+import { RadioComponent } from './fields/choice/radio.component';
+import { SelectComponent } from './fields/choice/select.component';
+import { RefComponent } from './fields/special/ref.component';
+import { CheckboxComponent } from './fields/choice/checkbox.component';
+import { TextareaComponent } from './fields/textarea/textarea.component';
+import { LayoutModule } from '../../../layout/layout.module';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+
 
 @NgModule({
-  declarations: [RenderComponent, RenderElementComponent],
+  entryComponents: [TextComponent, PasswordComponent, DummyComponent, EmailComponent, PhoneComponent, HrefComponent, RadioComponent,
+    SelectComponent, RefComponent, CheckboxComponent, TextareaComponent],
+  declarations: [RenderComponent, TextComponent, DummyComponent, RenderElementComponent, PasswordComponent, EmailComponent, PhoneComponent,
+    HrefComponent, RadioComponent, SelectComponent, RefComponent, CheckboxComponent, TextareaComponent],
   exports: [
-    RenderElementComponent
+    RenderElementComponent,
+    RenderComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    LayoutModule,
+    NgbModule
   ]
 })
-export class RenderModule { }
+export class RenderModule {
+}

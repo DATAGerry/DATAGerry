@@ -17,10 +17,22 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { TextControl } from './controls/text/text.control';
 import { Controller, ControlsContent } from './controls/controls.common';
 import { DndDropEvent } from 'ngx-drag-drop';
-import { SectionControl } from './controls/text/section.control';
+import { SectionControl } from './controls/section.control';
+import { UserService } from '../../../user/services/user.service';
+import { Group } from '../../../user/models/group';
+import { User } from '../../../user/models/user';
+import { TextControl } from './controls/text/text.control';
+import { PasswordControl } from './controls/text/password.control';
+import { EmailControl } from './controls/text/email.control';
+import { TelControl } from './controls/text/tel.control';
+import { TextAreaControl } from './controls/textarea/textarea.control';
+import { LinkControl } from './controls/text/href.control';
+import { ReferenceControl } from './controls/specials/ref.control';
+import { RadioControl } from './controls/choice/radio.control';
+import { SelectControl } from './controls/choice/select.control';
+import { CheckboxControl } from './controls/choice/checkbox.control';
 
 @Component({
   selector: 'cmdb-builder',
@@ -29,29 +41,49 @@ import { SectionControl } from './controls/text/section.control';
 })
 export class BuilderComponent implements OnInit {
 
-  private fields: ControlsContent[];
   private sections: any[];
+  private userList: User[] = [];
+  private groupList: Group[] = [];
 
   @Input() builderConfig: any = {};
-  private builderControls = [
-    new Controller('section', SectionControl),
-    new Controller('text', TextControl)
+
+  private structureControls = [
+    new Controller('section', SectionControl)
+  ];
+  private basicControls = [
+    new Controller('text', TextControl),
+    new Controller('password', PasswordControl),
+    new Controller('email', EmailControl),
+    new Controller('tel', TelControl),
+    new Controller('textarea', TextAreaControl),
+    new Controller('href', LinkControl),
+    new Controller('checkbox', CheckboxControl),
+    new Controller('radio', RadioControl),
+    new Controller('select', SelectControl),
+  ];
+  private specialControls = [
+    new Controller('ref', ReferenceControl)
   ];
 
+  public constructor(private userService: UserService) {
+  }
+
   ngOnInit() {
-    this.fields = [];
     this.sections = [];
+    this.userService.getGroupList().subscribe((gList: Group[]) => {
+      this.groupList = gList;
+    });
+    this.userService.getUserList().subscribe((uList: User[]) => {
+      this.userList = uList;
+    });
   }
 
   private onDrop(event: DndDropEvent, list: any[]) {
     let index = event.index;
     if (typeof index === 'undefined') {
-
       index = list.length;
     }
     list.splice(index, 0, event.data);
-    console.log(event);
-    console.log(list);
   }
 
   private onDragged(item: any, list: any[]) {
@@ -59,15 +91,13 @@ export class BuilderComponent implements OnInit {
     list.splice(index, 1);
   }
 
-  private addField(event: DndDropEvent) {
-    this.fields.push(event.data);
-  }
 
-  private deleteField(field: ControlsContent) {
-    const index: number = this.fields.indexOf(field);
+  private remove(item: any, list: any[]) {
+    const index: number = list.indexOf(item);
     if (index !== -1) {
-      this.fields.splice(index, 1);
+      list.splice(index, 1);
     }
   }
+
 
 }

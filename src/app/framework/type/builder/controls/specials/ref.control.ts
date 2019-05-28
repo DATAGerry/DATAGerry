@@ -16,21 +16,42 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { ControlsCommon, ControlsContent, randomName } from '../controls.common';
 
-@Component({
-  selector: 'cmdb-render',
-  templateUrl: './render.component.html',
-  styleUrls: ['./render.component.scss']
-})
-export class RenderComponent implements OnInit {
+class ReferenceContent implements ControlsContent {
 
-  @Input() sections: any;
+  access: boolean;
+  helperText: string;
+  name: string;
+  optional: any;
+  placeholder: string;
+  required: boolean;
+  type: string;
+  value: any;
+  label: string;
+  groups: number[];
+  users: number[];
+  typeID: number | number[];
 
-  constructor() {
-  }
-
-  ngOnInit() {
+  public constructor() {
+    this.type = 'ref';
+    this.name = randomName(this.type);
+    this.label = 'Ref';
   }
 
 }
+
+export class ReferenceControl implements ControlsCommon {
+
+  name = 'ref';
+  label = 'Reference';
+  icon = 'fa-retweet';
+  dndType: string = 'inputs';
+
+  content() {
+    return new ReferenceContent();
+  }
+
+}
+
+

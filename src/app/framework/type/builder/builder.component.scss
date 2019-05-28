@@ -2,18 +2,46 @@
 
 #form-container {
 
-  #form-content {
-    min-height: 50px;
-    width: 100%;
+  section {
+    margin-top: 15px;
 
-    &.empty {
-      border: 1px dashed theme-color("primary");
+    &:first-child {
+      margin-top: 0;
     }
   }
 
-  .card-header{
-    button{
-      padding: 0px;
+  .fields {
+    margin-top: 15px;
+
+    &:first-child {
+      margin-top: 0;
     }
+  }
+
+  #form-content {
+    min-height: 50px;
+    width: 100%;
+    position: relative;
+
+    &.empty {
+      border: 1px dashed theme-color("primary");
+      &:after {
+        content: attr(data-content);
+        position: absolute;
+        text-align: center;
+        top: 50%;
+        left: 0;
+        width: 100%;
+        margin-top: -1em;
+      }
+    }
+
+
+  }
+}
+
+.card-header {
+  button {
+    padding: 0;
   }
 }

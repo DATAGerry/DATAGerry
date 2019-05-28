@@ -16,7 +16,8 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, ComponentFactoryResolver, ComponentRef, Injector, Input, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { fieldComponents } from '../fields/fields.list';
 
 @Component({
   selector: 'cmdb-render-element',
@@ -25,11 +26,22 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class RenderElementComponent implements OnInit {
 
-  @Input() data: string;
+  @Input() data: any;
+  @ViewChild('fieldContainer', {read: ViewContainerRef}) container;
+  private component: any;
+  private componentRef: ComponentRef<any>;
 
-  constructor() { }
+  constructor(private resolver: ComponentFactoryResolver) {
+  }
 
   ngOnInit() {
+    this.container.clear();
+    this.component = fieldComponents[this.data.type];
+
+    const factory = this.resolver.resolveComponentFactory(this.component);
+    this.componentRef = this.container.createComponent(factory);
+    this.componentRef.instance.data = this.data;
+
   }
 
 }

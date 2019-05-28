@@ -16,21 +16,8 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Input } from '@angular/core';
 
-@Component({
-  selector: 'cmdb-render',
-  templateUrl: './render.component.html',
-  styleUrls: ['./render.component.scss']
-})
-export class RenderComponent implements OnInit {
-
-  @Input() sections: any;
-
-  constructor() {
-  }
-
-  ngOnInit() {
-  }
-
+export interface ComponentsFields {
+  data: Input;
 }
