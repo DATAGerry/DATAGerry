@@ -28,7 +28,6 @@ import { AuthModule } from './auth/auth.module';
 import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
 import { HttpErrorInterceptor } from './auth/interceptors/http-error.interceptor.tx';
 import { PreviousRouteService } from './services/previous-route.service';
-import { ShareDataService } from './services/share-data.service';
 
 @NgModule({
   declarations: [
@@ -43,7 +42,7 @@ import { ShareDataService } from './services/share-data.service';
     AppRoutingModule
   ],
   providers: [
-    PreviousRouteService, ShareDataService,
+    PreviousRouteService,
     {provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true},
   ],

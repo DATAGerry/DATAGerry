@@ -21,8 +21,8 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import { ApiCallService } from '../../../../services/api-call.service';
-import { ShareDataService } from '../../../../services/share-data.service';
 import { ActivatedRoute } from '@angular/router';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'cmdb-object-list',
@@ -43,7 +43,8 @@ export class ObjectListComponent implements OnDestroy, OnInit {
   // this ensure the data is fetched before rendering
   public dtTrigger: Subject<any> = new Subject();
 
-  constructor(private apiCallService: ApiCallService, private sApi: ShareDataService, private route: ActivatedRoute) {
+  constructor(private apiCallService: ApiCallService, private route: ActivatedRoute,
+              private spinner: NgxSpinnerService) {
     this.route.params.subscribe((id) => {
       this.objID = id.publicID;
       if ( typeof this.objID !== 'undefined') {
@@ -70,9 +71,13 @@ export class ObjectListComponent implements OnDestroy, OnInit {
   private callObjects() {
     this.apiCallService.callGetRoute(this.url).subscribe(
       data => {
-        this.objectLists = data as [];
-        this.rerender();
-        this.dtTrigger.next();
+        this.spinner.show();
+        setTimeout( () => {
+          this.objectLists = data as [];
+          this.rerender();
+          this.dtTrigger.next();
+          this.spinner.hide();
+        }, 100);
       });
   }
 

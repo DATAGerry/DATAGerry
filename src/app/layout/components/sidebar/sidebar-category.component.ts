@@ -19,7 +19,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { ApiCallService } from '../../../services/api-call.service';
-import { ShareDataService } from '../../../services/share-data.service';
 
 @Component({
   selector: 'cmdb-sidebar-category',
@@ -33,12 +32,9 @@ export class SidebarCategoryComponent implements OnInit {
   private typeList: CmdbType[] = [];
   private objectCount = [];
 
-  constructor(private api: ApiCallService, private sApi: ShareDataService) {
-  }
+  constructor(private api: ApiCallService) {}
 
-  ngOnInit() {
-
-  }
+  ngOnInit() {}
 
   public get_objects_by_type(categoryTypeList) {
     this.typeList = [];

@@ -20,7 +20,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { TypeService } from '../../../framework/services/type.service';
 import { Router } from '@angular/router';
-import { ShareDataService } from '../../../services/share-data.service';
+import { debounceTime, map } from 'rxjs/operators';
+import { ApiCallService } from '../../../services/api-call.service';
 
 @Component({
   selector: 'cmdb-search-bar',
@@ -30,16 +31,17 @@ import { ShareDataService } from '../../../services/share-data.service';
 
 export class SearchBarComponent implements OnInit {
 
-  searchCtrl: FormControl = new FormControl('');
-  autoResult = [];
-  categoryList = [{label: 'Categories'}];
-  category = 'Categories';
-  typeID: string = 'undefined';
+  public searchCtrl: FormControl = new FormControl('');
+  public autoResult: any[] = [];
+  public categoryList = [{label: 'Categories'}];
+  public category = 'Categories';
+  private typeID: string = 'undefined';
+  private url: string = '/search/?value=';
 
   constructor(
     private typeService: TypeService,
     private route: Router,
-    private sApi: ShareDataService) {
+    private api: ApiCallService) {
   }
 
   ngOnInit() {
@@ -51,7 +53,7 @@ export class SearchBarComponent implements OnInit {
       * */
       this.route.navigate(['login/']);
     });
-    this.autosearch();
+    this.autoSearch();
   }
 
   public hiden() {
@@ -60,29 +62,28 @@ export class SearchBarComponent implements OnInit {
     }, 300);
   }
 
-  public autosearch() {
-    this.searchCtrl.valueChanges.subscribe( data => {
-      this.apiCall(5);
-    }, error => {
-    }, () => {
+  public autoSearch() {
+    this.searchCtrl.valueChanges.subscribe( () => {
+      if (typeof this.searchCtrl.value === 'string' && this.searchCtrl.value.length > 0) {
+        this.api.callGetRoute(this.url + this.searchCtrl.value + '&type_id=' + this.typeID, {params: {limit: '5'}})
+          .pipe(
+            debounceTime(500),  // WAIT FOR 500 MILISECONDS AFTER EACH KEY STROKE.
+            map(
+              (data: any) => {
+                return (
+                  data.length > 0 ? data as any[] : [{object: 'No Object Found'} as any]
+                );
+              }
+            )).subscribe( value => {
+                this.autoResult = value as [];
+        });
+      }
     });
   }
 
   public getResponse() {
-    this.sApi.searchTerm('/search/?value=' + this.searchCtrl.value + '&type_id=' + this.typeID + '&limit=' + 0).subscribe(
-      data => {
-        this.sApi.setDataResult(data);
-      });
-    this.route.navigate(['search/results']);
-  }
-
-  private apiCall(limit) {
-    if (typeof this.searchCtrl.value === 'string' && this.searchCtrl.value.length > 0) {
-      this.sApi.searchTerm('/search/?value=' + this.searchCtrl.value + '&type_id=' + this.typeID + '&limit=' + limit).subscribe(
-        data => {
-          this.autoResult = data as [];
-        });
-    }
+    this.hiden();
+    this.route.navigate(['search/results'], {queryParams: {value: this.searchCtrl.value} });
   }
 
   public highlight(value) {

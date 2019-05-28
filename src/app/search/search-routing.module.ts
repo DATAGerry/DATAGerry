@@ -47,9 +47,9 @@ const routes: Routes = [
     outlet: 'footer'
   },
   {
-    path: 'results',
+    path: ':value',
     data: {
-      breadcrumb: 'Results'
+      breadcrumb: 'Searchvalue'
     },
     component: SearchResultsComponent
   }
