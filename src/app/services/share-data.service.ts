@@ -30,27 +30,4 @@ export class ShareDataService {
 
   }
 
-
-  getDataResult() {
-    return this.dataResult.asObservable();
-  }
-
-  setDataResult(newValue) {
-    this.dataResult.next(newValue);
-  }
-
-  public searchTerm(route: string) {
-    const result = this.api.callGetRoute(route, {params: {limit: '5'}})
-      .pipe(
-        debounceTime(500),  // WAIT FOR 500 MILISECONDS ATER EACH KEY STROKE.
-        map(
-          (data: any) => {
-            return (
-              data.length > 0 ? data as any[] : [{object: 'No Object Found'} as any]
-            );
-          }
-        ));
-
-    return result;
-  }
 }

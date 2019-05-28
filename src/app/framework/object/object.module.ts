@@ -22,23 +22,26 @@ import { CommonModule } from '@angular/common';
 import { ObjectRoutingModule } from './object-routing.module';
 import { ObjectListComponent } from './components/object-list/object-list.component';
 import { ObjectViewComponent } from './components/object-view/object-view.component';
-import { DataTablesModule } from "angular-datatables";
-import { LayoutModule } from "../../layout/layout.module";
-import { ObjectHeaderComponent } from "./components/object-header/object-header.component";
-import { ObjectQrComponent } from "./components/object-qr/object-qr.component";
-import { QRCodeModule } from "angularx-qrcode";
+import { DataTablesModule } from 'angular-datatables';
+import { LayoutModule } from '../../layout/layout.module';
+import { ObjectHeaderComponent } from './components/object-header/object-header.component';
+import { ObjectQrComponent } from './components/object-qr/object-qr.component';
+import { QRCodeModule } from 'angularx-qrcode';
 import { ObjectSummaryComponent } from './components/object-summary/object-summary.component';
 import { ObjectExternalsComponent } from './components/object-externals/object-externals.component';
 import { ObjectFieldsViewComponent } from './components/object-fields-view/object-fields-view.component';
+import { NgxSpinnerModule } from 'ngx-spinner';
 
 @NgModule({
-  declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent, ObjectSummaryComponent, ObjectExternalsComponent, ObjectFieldsViewComponent],
+  declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent, ObjectSummaryComponent,
+    ObjectExternalsComponent, ObjectFieldsViewComponent],
   imports: [
     CommonModule,
     ObjectRoutingModule,
     DataTablesModule,
     LayoutModule,
-    QRCodeModule
+    QRCodeModule,
+    NgxSpinnerModule
   ]
 })
 export class ObjectModule { }

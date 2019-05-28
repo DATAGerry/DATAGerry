@@ -16,11 +16,12 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
-import { ShareDataService } from '../../../services/share-data.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { ApiCallService } from '../../../services/api-call.service';
 
 
 @Component({
@@ -28,18 +29,24 @@ import { Router } from '@angular/router';
   templateUrl: './search-results.component.html',
   styleUrls: ['./search-results.component.scss']
 })
-export class SearchResultsComponent implements OnInit, AfterViewInit, OnDestroy {
+
+export class SearchResultsComponent implements OnInit, OnDestroy {
 
   @ViewChild(DataTableDirective)
   public dtElement: DataTableDirective;
 
   public dtOptions: DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
+  public results = [];
+  private url: any;
 
-  results = [];
+  constructor(private apiCallService: ApiCallService, private router: Router, private spinner: NgxSpinnerService,
+              private route: ActivatedRoute) {
 
-  constructor(private sApi: ShareDataService, private router: Router) {
-
+    this.route.queryParams.subscribe(qParams => {
+      this.url = 'search/?value=' + qParams.value;
+      this.callObjects();
+    });
   }
 
   ngOnInit() {
@@ -51,16 +58,19 @@ export class SearchResultsComponent implements OnInit, AfterViewInit, OnDestroy 
         searchPlaceholder: 'Filter...'
       }
     };
-
-    this.sApi.getDataResult().subscribe(temp => {
-      this.results = temp as [];
-      this.rerender();
-      this.dtTrigger.next();
-    });
   }
 
-  ngAfterViewInit(): void {
-
+  private callObjects() {
+    this.apiCallService.callGetRoute(this.url).subscribe(
+      data => {
+        this.spinner.show();
+        setTimeout( () => {
+          this.results = data as [];
+          this.rerender();
+          this.dtTrigger.next();
+          this.spinner.hide();
+        }, 100);
+      });
   }
 
   ngOnDestroy(): void {

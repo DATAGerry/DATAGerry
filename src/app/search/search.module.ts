@@ -26,6 +26,7 @@ import { DataTablesModule } from 'angular-datatables';
 import { SearchResultsComponent } from './components/search-results/search-results.component';
 import { SearchRoutingModule } from './search-routing.module';
 import { LayoutModule } from '../layout/layout.module';
+import { NgxSpinnerModule } from 'ngx-spinner';
 
 
 @NgModule({
@@ -36,7 +37,8 @@ import { LayoutModule } from '../layout/layout.module';
     FormsModule,
     LayoutModule,
     ReactiveFormsModule,
-    DataTablesModule
+    DataTablesModule,
+    NgxSpinnerModule
   ],
 
   providers: [ApiCallService]
