@@ -41,7 +41,7 @@
 
       <div class="list-group" *ngFor="let field of element.match_fields"
            (click)="hiden()"
-           [routerLink]="['/framework/object/', element.object_id]" >
+           [routerLink]="['/framework/object/', element.object_id]" [queryParams]="{value: '#'+element.object_id}" >
 
         <button type="button" class="list-group-item list-group-item-action" >
           <strong>Field</strong> : {{field.name}}<br>
