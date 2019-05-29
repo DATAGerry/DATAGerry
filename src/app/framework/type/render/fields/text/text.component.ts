@@ -16,8 +16,19 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export class ControlSeperator {
-  constructor(private name: string, private label: string) {
+import { Component, Input, OnInit } from '@angular/core';
+import { ComponentsFields } from '../components.fields';
 
+@Component({
+  selector: 'cmdb-text',
+  templateUrl: './text.component.html',
+  styleUrls: ['./text.component.scss']
+})
+export class TextComponent implements OnInit, ComponentsFields {
+
+  @Input() data: any;
+
+  public ngOnInit(): void {
   }
+
 }

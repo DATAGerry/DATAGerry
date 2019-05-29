@@ -1,0 +1,7 @@
+@import "~src/scss/variables";
+
+label {
+  span.required {
+    color: theme-color('primary');
+  }
+}

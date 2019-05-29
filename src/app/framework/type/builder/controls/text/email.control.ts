@@ -16,21 +16,41 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { ControlsCommon, ControlsContent, randomName } from '../controls.common';
 
-@Component({
-  selector: 'cmdb-render',
-  templateUrl: './render.component.html',
-  styleUrls: ['./render.component.scss']
-})
-export class RenderComponent implements OnInit {
+class EmailContent implements ControlsContent {
 
-  @Input() sections: any;
+  access: boolean;
+  helperText: string;
+  name: string;
+  optional: any;
+  placeholder: string;
+  required: boolean;
+  type: string;
+  value: any;
+  label: string;
+  groups: number[];
+  users: number[];
 
-  constructor() {
-  }
-
-  ngOnInit() {
+  public constructor() {
+    this.type = 'email';
+    this.name = randomName(this.type);
+    this.label = 'Email Field';
   }
 
 }
+
+export class EmailControl implements ControlsCommon {
+
+  name = 'email';
+  label = 'Email';
+  icon = 'fa-envelope';
+  dndType: string = 'inputs';
+
+  content() {
+    return new EmailContent();
+  }
+
+}
+
+

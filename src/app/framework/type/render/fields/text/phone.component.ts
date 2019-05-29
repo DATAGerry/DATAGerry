@@ -19,16 +19,14 @@
 import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'cmdb-render',
-  templateUrl: './render.component.html',
-  styleUrls: ['./render.component.scss']
+  selector: 'cmdb-phone',
+  templateUrl: './text.component.html',
+  styleUrls: ['./text.component.scss']
 })
-export class RenderComponent implements OnInit {
+export class PhoneComponent implements OnInit {
 
-  @Input() sections: any;
-
-  constructor() {
-  }
+  @Input() data: any;
+  constructor() { }
 
   ngOnInit() {
   }

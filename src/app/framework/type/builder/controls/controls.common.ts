@@ -31,8 +31,9 @@ export interface ControlsContent {
   helperText: string;
   placeholder: string;
   type: string;
-  subtype?: string;
-  access: [];
+  access: boolean;
+  groups: number[];
+  users: number[];
   value: any;
   optional: any;
 

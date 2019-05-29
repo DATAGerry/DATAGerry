@@ -17,18 +17,18 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
+import { ComponentsFields } from '../components.fields';
 
 @Component({
-  selector: 'cmdb-render',
-  templateUrl: './render.component.html',
-  styleUrls: ['./render.component.scss']
+  selector: 'cmdb-ref',
+  templateUrl: './ref.component.html',
+  styleUrls: ['./ref.component.scss']
 })
-export class RenderComponent implements OnInit {
+export class RefComponent implements OnInit, ComponentsFields {
 
-  @Input() sections: any;
+  @Input() data: any;
 
-  constructor() {
-  }
+  constructor() { }
 
   ngOnInit() {
   }

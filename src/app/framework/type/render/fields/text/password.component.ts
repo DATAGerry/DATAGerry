@@ -16,21 +16,29 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { ComponentsFields } from '../components.fields';
 
 @Component({
-  selector: 'cmdb-render',
-  templateUrl: './render.component.html',
-  styleUrls: ['./render.component.scss']
+  selector: 'cmdb-password',
+  templateUrl: './password.component.html',
+  styleUrls: ['./text.component.scss']
 })
-export class RenderComponent implements OnInit {
+export class PasswordComponent implements OnInit, ComponentsFields {
 
-  @Input() sections: any;
-
-  constructor() {
-  }
+  @Input() data: any;
+  @ViewChild('passWordInput') passWordToggle: ElementRef;
 
   ngOnInit() {
   }
+
+  private toggleInput() {
+    if (this.passWordToggle.nativeElement.type === 'password') {
+      this.passWordToggle.nativeElement.type = 'text';
+    } else {
+      this.passWordToggle.nativeElement.type = 'password';
+    }
+  }
+
 
 }

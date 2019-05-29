@@ -17,15 +17,15 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
+import { ComponentsFields } from '../components.fields';
 
 @Component({
-  selector: 'cmdb-render',
-  templateUrl: './render.component.html',
-  styleUrls: ['./render.component.scss']
+  selector: 'cmdb-checkbox',
+  templateUrl: './checkbox.component.html',
+  styleUrls: ['./checkbox.component.scss']
 })
-export class RenderComponent implements OnInit {
-
-  @Input() sections: any;
+export class CheckboxComponent implements OnInit, ComponentsFields {
+  @Input() data: any;
 
   constructor() {
   }

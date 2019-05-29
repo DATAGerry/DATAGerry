@@ -16,30 +16,21 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ControlsCommon, StructureContent, randomName } from '../controls.common';
+import { Component, Input, OnInit } from '@angular/core';
+import { ComponentsFields } from '../components.fields';
 
-export class SectionControl implements ControlsCommon {
+@Component({
+  selector: 'cmdb-select',
+  templateUrl: './select.component.html',
+  styleUrls: ['./select.component.scss']
+})
+export class SelectComponent implements OnInit, ComponentsFields {
 
-  name = 'section';
-  label = 'Section';
-  icon = 'fa fa-square-o';
-  dndType: string = 'sections';
+  @Input() data: any;
 
-  content() {
-    const section = new SectionContent();
-    section.name = randomName(this.name);
-    section.label = this.label;
-    return section;
+  constructor() { }
+
+  ngOnInit() {
   }
 
-}
-
-class SectionContent implements StructureContent {
-
-  label: string;
-  name: string;
-  position: number;
-  tag: string;
-  fields: [] = [];
-  subSections: [] = [];
 }
