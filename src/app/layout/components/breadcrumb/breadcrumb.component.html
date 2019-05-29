@@ -6,7 +6,9 @@
       <a *ngIf="!last" [routerLink]="hasParams(breadcrumb)">
         {{breadcrumb.label}}
       </a>
-      <span *ngIf="last">{{ breadcrumb.label }}</span>
+      <span *ngIf="last">{{ breadcrumb.label }}
+        <em *ngIf="breadcrumb.params.value" class="text-primary">{{breadcrumb.params.value}}</em>
+      </span>
     </li>
     <div class="custom-control custom-switch ml-auto" data-toggle="tooltip" data-placement="bottom"
          title="Only active objects">

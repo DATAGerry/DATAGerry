@@ -21,6 +21,7 @@ import { filter } from 'rxjs/operators';
 import { BreadcrumbItem } from './breadcrumb.model';
 import { BreadcrumbService } from './breadcrumb.service';
 import { ActivatedRoute, NavigationEnd, PRIMARY_OUTLET, Router } from '@angular/router';
+import { root } from 'rxjs/internal-compatibility';
 
 
 @Component({
@@ -99,7 +100,7 @@ export class BreadcrumbComponent implements OnInit {
           }
           const breadcrumb: BreadcrumbItem = {
             label: breadCrumbLabel,
-            params: route.snapshot.params,
+            params: route.snapshot.queryParams,
             url: url
           };
           if (route.snapshot.data.hasOwnProperty(this.PREFIX_BREADCRUMB)) {
@@ -110,6 +111,7 @@ export class BreadcrumbComponent implements OnInit {
         }
       });
       this.breadcrumbService.store(this.currentBreadcrumbs);
+      console.log(this.currentBreadcrumbs);
     }
   }
 }
