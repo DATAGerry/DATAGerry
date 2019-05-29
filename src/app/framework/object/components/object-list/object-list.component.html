@@ -19,7 +19,7 @@
     <td><a routerLink="/framework/type/{{result.type_id}}">{{result.type_label}}</a></td>
     <td><a routerLink="/user/{{result.author_id}}">{{result.author_name}}</a></td>
     <td>
-      <a [routerLink]="['/framework/object/', result.object_id]" [queryParams]= "{value: '#' + result.object_id}">View</a>
+      <a [routerLink]="['/framework/object/', result.object_id]">View</a>
     </td>
   </tr>
   </tbody>

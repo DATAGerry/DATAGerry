@@ -7,7 +7,7 @@
         {{breadcrumb.label}}
       </a>
       <span *ngIf="last">{{ breadcrumb.label }}
-        <em *ngIf="breadcrumb.params.value" class="text-primary">{{breadcrumb.params.value}}</em>
+        <em *ngIf="breadcrumb.queryParams.value" class="text-primary">{{breadcrumb.queryParams.value}}</em>
       </span>
     </li>
     <div class="custom-control custom-switch ml-auto" data-toggle="tooltip" data-placement="bottom"
