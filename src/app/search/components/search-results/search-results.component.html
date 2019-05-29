@@ -2,9 +2,9 @@
   <thead>
   <tr>
     <th>Active</th>
-    <th>ID</th>
+    <th>Public ID</th>
     <th>Type</th>
-    <th>Description</th>
+    <th>Version</th>
     <th>Author</th>
     <th>Action</th>
   </tr>
@@ -14,7 +14,7 @@
     <td>
       <cmdb-active-badge [activeStatus]="result.type_active"></cmdb-active-badge>
     </td>
-    <td><a routerLink="/framework/type/{{result.type_id}}">{{result.type_id}}</a></td>
+    <td><a routerLink="/framework/object/{{result.object_id}}" [queryParams]="{value: '#'+result.object_id}">{{result.object_id}}</a></td>
     <td>{{result.type_name}}</td>
     <td>
       <div *ngFor="let field of result.match_fields">
