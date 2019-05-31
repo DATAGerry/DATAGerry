@@ -28,6 +28,8 @@ import { AuthModule } from './auth/auth.module';
 import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
 import { HttpErrorInterceptor } from './auth/interceptors/http-error.interceptor.tx';
 import { PreviousRouteService } from './services/previous-route.service';
+import { NgxSpinner } from 'ngx-spinner/lib/ngx-spinner.enum';
+import { NgxSpinnerModule } from 'ngx-spinner';
 
 @NgModule({
   declarations: [
@@ -39,6 +41,7 @@ import { PreviousRouteService } from './services/previous-route.service';
     LayoutModule,
     ConnectionModule,
     AuthModule,
+    NgxSpinnerModule,
     AppRoutingModule
   ],
   providers: [
