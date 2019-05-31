@@ -49,7 +49,7 @@ const routes: Routes = [
   {
     path: ':value',
     data: {
-      breadcrumb: 'Searchvalue'
+      breadcrumb: 'Search for '
     },
     component: SearchResultsComponent
   }

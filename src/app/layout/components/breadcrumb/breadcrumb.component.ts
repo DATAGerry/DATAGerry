@@ -100,6 +100,7 @@ export class BreadcrumbComponent implements OnInit {
           const breadcrumb: BreadcrumbItem = {
             label: breadCrumbLabel,
             params: route.snapshot.params,
+            queryParams: route.snapshot.queryParams,
             url: url
           };
           if (route.snapshot.data.hasOwnProperty(this.PREFIX_BREADCRUMB)) {

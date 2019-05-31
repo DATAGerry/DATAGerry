@@ -4,9 +4,8 @@
   <thead>
   <tr>
     <th>Active</th>
-    <th>Object-ID</th>
+    <th>Public ID</th>
     <th>Type</th>
-    <th>Description</th>
     <th>Author</th>
     <th>Action</th>
   </tr>
@@ -18,15 +17,9 @@
     </td>
     <td>{{result.object_id}}</td>
     <td><a routerLink="/framework/type/{{result.type_id}}">{{result.type_label}}</a></td>
-    <td>
-      <div *ngFor="let field of result.match_fields" >
-        <p class="mb-0">{{field.value}}</p>
-        <footer class="blockquote-footer">Found in <cite title="Source Title">{{field.name}}</cite></footer>
-      </div>
-    </td>
     <td><a routerLink="/user/{{result.author_id}}">{{result.author_name}}</a></td>
     <td>
-      <a routerLink="/framework/object/{{result.object_id}}">View</a>
+      <a [routerLink]="['/framework/object/', result.object_id]">View</a>
     </td>
   </tr>
   </tbody>
