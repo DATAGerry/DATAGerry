@@ -38,18 +38,18 @@ import { TypeAccessStepComponent } from './components/type-builder/type-access-s
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TypeValidationStepComponent } from './components/type-builder/type-validation-step/type-validation-step.component';
 import { RenderModule } from '../render/render.module';
+import { BuilderModule } from './builder/builder.module';
 
 @NgModule({
   declarations: [
     TypeViewComponent,
     TypeListComponent,
     TypeAddComponent,
-    TypeBuilderComponent,
     TypeBasicStepComponent,
     TypeFieldsStepComponent,
+    TypeBuilderComponent,
     TypeHeaderComponent,
     TypeQrComponent,
-    BuilderComponent,
     TypeAccessStepComponent,
     TypeValidationStepComponent
   ],
@@ -60,10 +60,10 @@ import { RenderModule } from '../render/render.module';
     LayoutModule,
     ReactiveFormsModule,
     ArchwizardModule,
-    DndModule,
     QRCodeModule,
     NgSelectModule,
     RenderModule,
+    BuilderModule,
     FormsModule
   ]
 })
