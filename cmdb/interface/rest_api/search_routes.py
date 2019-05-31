@@ -1,4 +1,4 @@
-# Net|CMDB - OpenSource Enterprise CMDB
+# dataGerry - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -57,11 +57,18 @@ def _get_response(args, q_operator='$and', limit=0):
     query_list = []
     result_query = []
 
+    # Collect all match values
+    match_values = []
+
     # remove unnecessary query parameters
     _filter_query(args)
 
     try:
         for key, value in args.items():
+
+            # Collect for later render evaluation
+            match_values.append(value)
+
             for v in value.split(","):
                 if key == "type_id":
                     try:
@@ -73,13 +80,16 @@ def _get_response(args, q_operator='$and', limit=0):
 
         result_query.append({q_operator: query_list})
         query = {"$or": result_query}
-        return make_response(_cm_db_render(obm.search_objects_with_limit(query, limit=limit)))
+
+        render = _cm_db_render(obm.search_objects_with_limit(query, limit=limit), match=match_values)
+        resp = make_response(CmdbRender.result_loop_render(obm, render))
+        return resp
 
     except CMDBError:
         raise traceback.print_exc(file=sys.stdout)
 
 
-def _cm_db_render(all_objects_list) -> list:
+def _cm_db_render(all_objects_list, match=[]) -> list:
     all_objects = []
     type_buffer_list = {}
 
@@ -94,8 +104,8 @@ def _cm_db_render(all_objects_list) -> list:
                 type_buffer_list.update({passed_object_type_id: current_type})
 
             tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
-            tmp_render.set_matched_fieldset(all_objects_list)
-            all_objects.append(tmp_render.result())
+            tmp_render.set_matched_fieldset(_collect_match_fields(passed_object, match))
+            all_objects.append(tmp_render)
     except Exception:
         raise traceback.print_exc(file=sys.stdout)
 
@@ -120,3 +130,13 @@ def _filter_query(args):
     except KeyError:
         # Must be removed, otherwise the search is falsified
         pass
+
+
+def _collect_match_fields(passed_object, match_values):
+    key_match = []
+    for term in match_values:
+        for fields in getattr(passed_object, 'fields'):
+            for key, value in fields.items():
+                if isinstance(value, str) and term in value:
+                    key_match.append(fields['name'])
+    return key_match

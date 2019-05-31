@@ -1,4 +1,4 @@
-# Net|CMDB - OpenSource Enterprise CMDB
+# dataGerry - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -21,6 +21,8 @@ from cmdb.object_framework.cmdb_render import CmdbRender
 from cmdb.object_framework.cmdb_object_manager import object_manager
 from cmdb.utils.interface_wraps import login_required
 from cmdb.interface.route_utils import make_response, RootBlueprint
+from cmdb.user_management.user_manager import get_user_manager
+usm = get_user_manager()
 
 try:
     from cmdb.utils.error import CMDBError
@@ -52,12 +54,71 @@ def get_object_list():
                 except CMDBError as e:
                     continue
             tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
-            all_objects.append(tmp_render.result())
+            all_objects.append(tmp_render)
+
     except CMDBError:
         return abort(400)
 
-    resp = make_response(all_objects)
+    resp = make_response(CmdbRender.result_loop_render(object_manager, all_objects))
     return resp
+
+
+@login_required
+@object_rest.route('/type/<string:type_ids>', methods=['GET'])
+def get_object_by_type(type_ids):
+    """Return all objects by type_id"""
+
+    all_objects = []
+    type_buffer_list = {}
+
+    try:
+        query = _build_query({'type_id': type_ids}, q_operator='$or')
+        all_objects_list = object_manager.get_objects_by(sort="type_id", **query)
+        for passed_object in all_objects_list:
+            current_type = None
+            passed_object_type_id = passed_object.get_type_id()
+            if passed_object_type_id in type_buffer_list:
+                current_type = type_buffer_list[passed_object_type_id]
+            else:
+                try:
+                    current_type = object_manager.get_type(passed_object_type_id)
+                    type_buffer_list.update({passed_object_type_id: current_type})
+                except CMDBError as e:
+                    continue
+            tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
+            all_objects.append(tmp_render)
+
+    except CMDBError:
+        return abort(400)
+
+    resp = make_response(CmdbRender.result_loop_render(object_manager, all_objects))
+    return resp
+
+
+@login_required
+@object_rest.route('/count/<int:type_id>', methods=['GET'])
+def count_object_by_type(type_id):
+    try:
+        count = object_manager.count_objects(type_id)
+        resp = make_response(count)
+    except CMDBError:
+        return abort(400)
+    return resp
+
+
+def _build_query(args, q_operator='$and', limit=0):
+    query_list = []
+    try:
+        for key, value in args.items():
+            for v in value.split(","):
+                try:
+                    query_list.append({key: int(v)})
+                except (ValueError, TypeError):
+                    return abort(400)
+        return {q_operator: query_list}
+
+    except CMDBError:
+        pass
 
 
 @login_required
@@ -169,6 +230,7 @@ def get_newest_objects():
                 LOGGER.warning("Newest object type - error: {}".format(e.message))
                 continue
         tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
-        newest_objects.append(tmp_render.result())
-    resp = make_response(newest_objects)
+        newest_objects.append(tmp_render)
+
+    resp = make_response(CmdbRender.result_loop_render(object_manager, newest_objects))
     return resp

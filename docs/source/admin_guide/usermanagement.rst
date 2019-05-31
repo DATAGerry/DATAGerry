@@ -1,7 +1,7 @@
 ###############
 User Management
 ###############
-User management regulates the access to individual modules of the CMDB.
+User management regulates the access to individual modules of dataGerry.
 
 Users
 *****

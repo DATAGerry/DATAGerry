@@ -1,4 +1,4 @@
-# Net|CMDB - OpenSource Enterprise CMDB
+# dataGerry - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -213,33 +213,78 @@ class CmdbRender:
             author_id=self.object_instance.author_id,
             author_name=get_user_manager().get_user(self.object_instance.author_id).get_name(),
             type_id=self.type_instance.get_public_id(),
-            type_name=self.type_instance.get_name()
+            type_name=self.type_instance.get_name(),
+            type_active=self.type_instance.active,
         )
+        if self.matched_fields:
+            render_result.match_fields = self.matched_fields
+        if self.object_instance and self.object_instance.fields:
+            render_result.obj_fields = self.object_instance.fields
         if self.has_summaries():
-            pass  # render_result.set_summaries(self.get_summaries(True))
+            render_result.set_summaries(self.get_summaries(True))
         if self.has_externals():
-            pass  # render_result.set_externals(self.get_externals(True))
+            render_result.set_externals(self.get_externals(True))
+
         return render_result
+
+
+    @staticmethod
+    def result_loop_render(object_manager, instances: list) -> list:
+        from cmdb.user_management.user_manager import UserManagement
+        all_user = UserManagement.get_all_users_as_dict(object_manager)
+        render_list = []
+
+        for element in instances:
+            render_result = RenderResult(
+                object_id=element.object_instance.get_public_id(),
+                author_id=element.object_instance.author_id,
+                author_name=None,
+                type_id=element.type_instance.get_public_id(),
+                type_name=element.type_instance.get_name(),
+                type_active=element.type_instance.active,
+            )
+            if element.matched_fields:
+                render_result.match_fields = element.matched_fields
+            if element.object_instance and element.object_instance.fields:
+                render_result.obj_fields = element.object_instance.fields
+            if element.has_summaries():
+                render_result.set_summaries(element.get_summaries(True))
+            if element.has_externals():
+                render_result.set_externals(element.get_externals(True))
+
+            dic = [i for i in all_user if (i['public_id'] == element.object_instance.author_id)]
+            render_result.set_author_name('{} {}'.format(dic[0]['first_name'], dic[0]['last_name']))
+            render_list.append(render_result)
+
+        return render_list
+
+
 
 
 class RenderResult:
 
-    def __init__(self, object_id: int, author_id: int, author_name: str, type_id: int, type_name: str,
-                 type_label: str = None):
+    def __init__(self, object_id: int, author_id: int, author_name: str, type_id: int, type_active: bool,
+                 type_name: str, type_label: str = None):
         self.object_id = object_id
         self.author_id = author_id
         self.author_name = author_name
+        self.type_active = type_active
         self.type_id = type_id
         self.type_name = type_name
         self.type_label = type_label or type_name.title()
         self.summaries = None
         self.externals = None
+        self.match_fields = None
+        self.obj_fields = None
 
     def set_summaries(self, summary_list: list):
         self.summaries = summary_list
 
     def set_externals(self, external_list: list):
         self.externals = external_list
+
+    def set_author_name(self, new_value):
+        self.author_name = new_value
 
     def to_json(self):
         return self.__dict__

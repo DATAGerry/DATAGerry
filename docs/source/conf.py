@@ -15,9 +15,9 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'NetCMDB'
-copyright = '2018, Nethinks GmbH'
-author = 'Nethinks GmbH'
+project = 'dataGerry'
+copyright = '2019, NETHINKS GmbH'
+author = 'NETHINKS GmbH'
 
 # The short X.Y version
 version = '1.0'
@@ -115,7 +115,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'NetCMDBdoc'
+htmlhelp_basename = 'dataGerrydoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -142,8 +142,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'NetCMDB.tex', 'NetCMDB Documentation',
-     'Nethinks GmbH', 'manual'),
+    (master_doc, 'dataGerry.tex', 'dataGerry Documentation',
+     'NETHINKS GmbH', 'manual'),
 ]
 
 
@@ -152,7 +152,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'netcmdb', 'NetCMDB Documentation',
+    (master_doc, 'datagerry', 'dataGerry Documentation',
      [author], 1)
 ]
 
@@ -163,8 +163,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'NetCMDB', 'NetCMDB Documentation',
-     author, 'NetCMDB', 'One line description of project.',
+    (master_doc, 'dataGerry', 'dataGerry Documentation',
+     author, 'dataGerry', 'One line description of project.',
      'Miscellaneous'),
 ]
 

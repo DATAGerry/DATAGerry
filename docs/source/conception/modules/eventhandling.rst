@@ -1,6 +1,6 @@
 Event Handling
 ==============
-NetCMDB uses an event based communication between its daemons. Each daemon can publish and 
+dataGerry uses an event based communication between its daemons. Each daemon can publish and 
 subscribe events to a message broker. The message broker (currently, RabbitMQ is supported) 
 will route events to the different daemons. 
 
@@ -40,7 +40,7 @@ definitions. In these definitions, wildcards can be used::
 
 list of event types
 -------------------
-The following event types are defined in NetCMDB:
+The following event types are defined in dataGerry:
 
 cmdb.core.objects:
 ^^^^^^^^^^^^^^^^^^

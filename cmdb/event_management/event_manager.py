@@ -1,4 +1,4 @@
-# Net|CMDB - OpenSource Enterprise CMDB
+# dataGerry - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -154,7 +154,7 @@ class EventSenderAmqp(threading.Thread):
         self.__config_port = self.__config_mq.get("port", "5672")
         self.__config_username = self.__config_mq.get("username", "guest")
         self.__config_password = self.__config_mq.get("password", "guest")
-        self.__config_exchange = self.__config_mq.get("exchange", "netcmdb.eventbus")
+        self.__config_exchange = self.__config_mq.get("exchange", "datagerry.eventbus")
         self.__config_retries = int(self.__config_mq.get("connection_attempts", "5"))
         self.__config_retrydelay = int(self.__config_mq.get("retry_delay", "6"))
         self.__config_tls = False
@@ -239,7 +239,7 @@ class EventReceiverAmqp(threading.Thread):
         self.__config_port = self.__config_mq.get("port", "5672")
         self.__config_username = self.__config_mq.get("username", "guest")
         self.__config_password = self.__config_mq.get("password", "guest")
-        self.__config_exchange = self.__config_mq.get("exchange", "netcmdb.eventbus")
+        self.__config_exchange = self.__config_mq.get("exchange", "datagerry.eventbus")
         self.__config_retries = int(self.__config_mq.get("connection_attempts", "5"))
         self.__config_retrydelay = int(self.__config_mq.get("retry_delay", "6"))
         self.__config_tls = False

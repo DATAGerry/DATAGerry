@@ -1,4 +1,4 @@
-# Net|CMDB - OpenSource Enterprise CMDB
+# dataGerry - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -66,6 +66,13 @@ class UserManagement:
             raise NoUserFoundExceptions(public_id)
         return User(**result)
 
+    @staticmethod
+    def get_user_by_id(self, public_id: int):
+        result = self.dbm.find_one(collection=User.COLLECTION, public_id=public_id)
+        if not result:
+            raise NoUserFoundExceptions(public_id)
+        return result
+
     def get_all_users(self):
         user_list = []
         for founded_user in self.dbm.find_all(collection=User.COLLECTION):
@@ -75,6 +82,10 @@ class UserManagement:
                 LOGGER.debug("Error while user parser: {}".format(founded_user))
                 continue
         return user_list
+
+    @staticmethod
+    def get_all_users_as_dict(self) -> dict:
+        return self.dbm.find_all(collection=User.COLLECTION, )
 
     def get_user_by_name(self, user_name) -> User:
         formatted_filter = {'user_name': user_name}
