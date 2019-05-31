@@ -16,33 +16,17 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ControlsCommon, StructureContent, randomName } from './controls.common';
 
-export class SectionControl implements ControlsCommon {
+import { TextFieldEditComponent } from './edits/text-field-edit.component';
+import { DummyFieldEditComponent } from './edits/dummy-field-edit.component';
+import { SectionFieldEditComponent } from './edits/section-field-edit.component';
 
-  name = 'section';
-  label = 'Section';
-  icon = 'fa fa-square-o';
-  dndType: string = 'sections';
-
-  content() {
-    const section = new SectionContent();
-    section.name = randomName(this.name);
-    section.label = this.label;
-    return section;
-  }
-
-}
-
-class SectionContent implements StructureContent {
-
-  label: string;
-  name: string;
-  position: number;
-  access: boolean;
-  groups: number[];
-  users: number[];
-  fields: [] = [];
-  type: string = 'section';
-
-}
+export const configComponents: { [type: string]: any } = {
+  text: TextFieldEditComponent,
+  password: TextFieldEditComponent,
+  email: TextFieldEditComponent,
+  href: TextFieldEditComponent,
+  tel: TextFieldEditComponent,
+  section: SectionFieldEditComponent,
+  debug: DummyFieldEditComponent
+};

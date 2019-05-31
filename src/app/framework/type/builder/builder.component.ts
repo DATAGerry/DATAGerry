@@ -18,7 +18,7 @@
 
 import { Component, Input, OnInit } from '@angular/core';
 import { Controller, ControlsContent } from './controls/controls.common';
-import { DndDropEvent } from 'ngx-drag-drop';
+import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import { SectionControl } from './controls/section.control';
 import { UserService } from '../../../user/services/user.service';
 import { Group } from '../../../user/models/group';
@@ -66,10 +66,6 @@ export class BuilderComponent implements OnInit {
   ];
 
   public constructor(private userService: UserService) {
-  }
-
-  ngOnInit() {
-    this.sections = [];
     this.userService.getGroupList().subscribe((gList: Group[]) => {
       this.groupList = gList;
     });
@@ -78,17 +74,32 @@ export class BuilderComponent implements OnInit {
     });
   }
 
-  private onDrop(event: DndDropEvent, list: any[]) {
-    let index = event.index;
-    if (typeof index === 'undefined') {
-      index = list.length;
-    }
-    list.splice(index, 0, event.data);
+  ngOnInit() {
+    this.sections = [];
   }
 
-  private onDragged(item: any, list: any[]) {
-    const index = list.indexOf(item);
-    list.splice(index, 1);
+  private onDrop(event: DndDropEvent, list: any[]) {
+    if (list
+      && (event.dropEffect === 'copy'
+        || event.dropEffect === 'move')) {
+
+      let index = event.index;
+
+      if (typeof index === 'undefined') {
+
+        index = list.length;
+      }
+
+      list.splice(index, 0, event.data);
+    }
+  }
+
+  private onDragged(item: any, list: any[], effect: DropEffect) {
+
+    if (effect === 'move') {
+      const index = list.indexOf(item);
+      list.splice(index, 1);
+    }
   }
 
 
@@ -98,6 +109,5 @@ export class BuilderComponent implements OnInit {
       list.splice(index, 1);
     }
   }
-
 
 }

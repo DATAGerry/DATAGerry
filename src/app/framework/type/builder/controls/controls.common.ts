@@ -43,6 +43,7 @@ export interface StructureContent {
   name: string;
   label: string;
   position: number;
+  type: string;
 }
 
 export function randomName(desc: string) {
