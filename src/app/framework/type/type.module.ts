@@ -37,7 +37,7 @@ import { DndModule } from 'ngx-drag-drop';
 import { TypeAccessStepComponent } from './components/type-builder/type-access-step/type-access-step.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TypeValidationStepComponent } from './components/type-builder/type-validation-step/type-validation-step.component';
-import { RenderModule } from './render/render.module';
+import { RenderModule } from '../render/render.module';
 
 @NgModule({
   declarations: [

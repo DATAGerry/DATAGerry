@@ -31,7 +31,7 @@ import { SelectComponent } from './fields/choice/select.component';
 import { RefComponent } from './fields/special/ref.component';
 import { CheckboxComponent } from './fields/choice/checkbox.component';
 import { TextareaComponent } from './fields/textarea/textarea.component';
-import { LayoutModule } from '../../../layout/layout.module';
+import { LayoutModule } from '../../layout/layout.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 
