@@ -47,7 +47,7 @@ export interface StructureContent {
 }
 
 export function randomName(desc: string) {
-  return `${desc}-${Math.floor(Math.random() * 10000) + 99999}`;
+  return `${desc}-${Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000}`;
 }
 
 
