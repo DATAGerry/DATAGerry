@@ -469,7 +469,6 @@ class CmdbObjectManager(CmdbManagerBase):
                     'category': cat_child,
                     'children': None
                 })
-            LOGGER.debug(edge)
         return edge
 
     def get_category_tree(self) -> list:

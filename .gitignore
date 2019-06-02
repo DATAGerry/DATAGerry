@@ -3,6 +3,7 @@ cmdb_dev.conf
 cmdb_test.conf
 IDEAS.md
 _env.py
+*.pem
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
