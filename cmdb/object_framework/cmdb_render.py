@@ -26,6 +26,7 @@ except ImportError:
 from cmdb.object_framework.cmdb_object import CmdbObject
 from cmdb.object_framework.cmdb_object_type import CmdbType
 import logging
+from datetime import datetime
 
 LOGGER = logging.getLogger(__name__)
 
@@ -210,6 +211,8 @@ class CmdbRender:
 
         render_result = RenderResult(
             object_id=self.object_instance.get_public_id(),
+            object_creation_time=self.object_instance.creation_time,
+            object_last_edit_time=self.object_instance.last_edit_time,
             author_id=self.object_instance.author_id,
             author_name=get_user_manager().get_user(self.object_instance.author_id).get_name(),
             type_id=self.type_instance.get_public_id(),
@@ -237,6 +240,8 @@ class CmdbRender:
         for element in instances:
             render_result = RenderResult(
                 object_id=element.object_instance.get_public_id(),
+                object_creation_time=element.object_instance.creation_time,
+                object_last_edit_time=element.object_instance.last_edit_time,
                 author_id=element.object_instance.author_id,
                 author_name=None,
                 type_id=element.type_instance.get_public_id(),
@@ -263,9 +268,12 @@ class CmdbRender:
 
 class RenderResult:
 
-    def __init__(self, object_id: int, author_id: int, author_name: str, type_id: int, type_active: bool,
-                 type_name: str, type_label: str = None):
+    def __init__(self, object_id: int, object_creation_time: datetime, object_last_edit_time: datetime,
+                 author_id: int, author_name: str,
+                 type_id: int, type_active: bool, type_name: str, type_label: str = None):
         self.object_id = object_id
+        self.object_creation_time = object_creation_time
+        self.object_last_edit_time = object_last_edit_time
         self.author_id = author_id
         self.author_name = author_name
         self.type_active = type_active
