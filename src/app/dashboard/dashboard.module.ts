@@ -23,13 +23,17 @@ import { DashboardRoutingModule } from './dashboard-routing.module';
 import { DashboardComponent } from './dashboard.component';
 import { LayoutModule } from '../layout/layout.module';
 import { DashcardComponent } from './components/dashcard/dashcard.component';
+import { NewestViewComponent } from './components/newest-view/newest-view.component';
+import { DataTablesModule } from 'angular-datatables';
+import { LatestChangesViewComponent } from './components/latest-changes-view/latest-changes-view.component';
 
 @NgModule({
-  declarations: [DashboardComponent, DashcardComponent],
+  declarations: [DashboardComponent, DashcardComponent, NewestViewComponent, LatestChangesViewComponent],
   imports: [
     CommonModule,
     LayoutModule,
-    DashboardRoutingModule
+    DashboardRoutingModule,
+    DataTablesModule
   ]
 })
 export class DashboardModule { }
