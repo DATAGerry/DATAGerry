@@ -20,6 +20,7 @@
 import { TextFieldEditComponent } from './edits/text-field-edit.component';
 import { DummyFieldEditComponent } from './edits/dummy-field-edit.component';
 import { SectionFieldEditComponent } from './edits/section-field-edit.component';
+import { TextareaEditComponent } from './edits/textarea-edit.component';
 
 export const configComponents: { [type: string]: any } = {
   text: TextFieldEditComponent,
@@ -28,5 +29,6 @@ export const configComponents: { [type: string]: any } = {
   href: TextFieldEditComponent,
   tel: TextFieldEditComponent,
   section: SectionFieldEditComponent,
+  textarea: TextareaEditComponent,
   debug: DummyFieldEditComponent
 };
