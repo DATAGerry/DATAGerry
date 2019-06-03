@@ -17,6 +17,7 @@
 */
 
 import { Component, OnInit } from '@angular/core';
+import { CmdbType } from '../../../models/cmdb-type';
 
 @Component({
   selector: 'cmdb-type-add',
@@ -24,8 +25,11 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./type-add.component.scss']
 })
 export class TypeAddComponent implements OnInit {
+  private typeInstance: CmdbType;
 
-  constructor() { }
+  constructor() {
+    this.typeInstance = new CmdbType();
+  }
 
   ngOnInit() {
   }

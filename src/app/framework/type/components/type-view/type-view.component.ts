@@ -35,7 +35,7 @@ export class TypeViewComponent implements OnInit {
     this.route.params.subscribe((id) => this.typeID = id.publicID);
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
     this.api.callGetRoute<CmdbType>('type/' + `${this.typeID}`)
       .subscribe((typeInstance: CmdbType) => this.typeInstance = typeInstance);
   }

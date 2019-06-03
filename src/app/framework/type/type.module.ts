@@ -32,13 +32,12 @@ import { TypeFieldsStepComponent } from './components/type-builder/type-fields-s
 import { TypeHeaderComponent } from './components/type-header/type-header.component';
 import { TypeQrComponent } from './components/type-qr/type-qr.component';
 import { QRCodeModule } from 'angularx-qrcode';
-import { BuilderComponent } from './builder/builder.component';
-import { DndModule } from 'ngx-drag-drop';
 import { TypeAccessStepComponent } from './components/type-builder/type-access-step/type-access-step.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TypeValidationStepComponent } from './components/type-builder/type-validation-step/type-validation-step.component';
 import { RenderModule } from '../render/render.module';
 import { BuilderModule } from './builder/builder.module';
+import { TypeEditComponent } from './components/type-edit/type-edit.component';
 
 @NgModule({
   declarations: [
@@ -51,7 +50,8 @@ import { BuilderModule } from './builder/builder.module';
     TypeHeaderComponent,
     TypeQrComponent,
     TypeAccessStepComponent,
-    TypeValidationStepComponent
+    TypeValidationStepComponent,
+    TypeEditComponent
   ],
   imports: [
     CommonModule,

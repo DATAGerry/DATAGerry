@@ -26,12 +26,20 @@ import { ApiCallService } from '../../services/api-call.service';
 export class TypeService {
 
   private servicePrefix: string = 'type';
+  private typeList: CmdbType[];
 
   constructor(private api: ApiCallService) {
-
+    this.getTypeList().subscribe((respTypeList: CmdbType[]) => {
+      this.typeList = respTypeList;
+    });
   }
 
   public getTypeList() {
     return this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/');
   }
+
+  public async validateTypeName(name: string) {
+    return this.typeList.find(type => type.name === name) === undefined;
+  }
 }
+

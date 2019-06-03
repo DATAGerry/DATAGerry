@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { TypeBasicStepComponent } from './type-basic-step/type-basic-step.component';
 import { CmdbType } from '../../../models/cmdb-type';
 import { TypeFieldsStepComponent } from './type-fields-step/type-fields-step.component';
@@ -28,7 +28,7 @@ import { TypeFieldsStepComponent } from './type-fields-step/type-fields-step.com
 })
 export class TypeBuilderComponent implements OnInit {
 
-  private readonly typeInstance: CmdbType;
+  @Input() private typeInstance?: CmdbType;
 
   @ViewChild(TypeBasicStepComponent)
   private basicStep: TypeBasicStepComponent;
@@ -37,7 +37,7 @@ export class TypeBuilderComponent implements OnInit {
   private fieldStep: TypeFieldsStepComponent;
 
   constructor() {
-    this.typeInstance = new CmdbType();
+
   }
 
   ngOnInit() {
