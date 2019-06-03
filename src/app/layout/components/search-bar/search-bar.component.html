@@ -28,13 +28,13 @@
 </div>
 
 <div class="card overflow-auto" *ngIf="searchCtrl.value" style="position: absolute; max-height: 250px; z-index: 100">
-  <ng-container *ngFor="let element of autoResult">
+  <div class="list-group" *ngFor="let element of autoResult">
 
     <div class="card-header" *ngIf="element.object">
       {{element.object}}
     </div>
 
-    <ng-container *ngIf="!element.object">
+    <div class="list-group" *ngIf="!element.object">
       <div class="card-header">
         {{element.type_label}} #{{element.object_id}} <span class="badge badge-primary pull-right">{{element.type_active}}</span>
       </div>
@@ -49,9 +49,8 @@
           <small class="text-muted pull-right">more ...</small>
         </button>
       </div>
-    </ng-container>
+    </div>
 
-
-  </ng-container>
+  </div>
 </div>
 
