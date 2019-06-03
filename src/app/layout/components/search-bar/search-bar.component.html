@@ -28,29 +28,26 @@
 </div>
 
 <div class="card overflow-auto" *ngIf="searchCtrl.value" style="position: absolute; max-height: 250px; z-index: 100">
-  <div class="card-body" *ngFor="let element of autoResult">
+
+  <ng-container *ngFor="let element of autoResult">
 
     <div class="card-header" *ngIf="element.object">
       {{element.object}}
     </div>
 
-    <div class="card-body" *ngIf="!element.object">
-      <div class="card-title">
-        {{element.type_label}} #{{element.object_id}} <span class="badge badge-primary pull-right">{{element.type_active}}</span>
-      </div>
-
-      <div class="card-group" *ngFor="let field of element.match_fields"
-           (click)="hiden()"
-           [routerLink]="['/framework/object/', element.object_id]" [queryParams]="{value: '#'+element.object_id}" >
-
-        <button type="button" class="list-group-item list-group-item-action" >
-          <strong>Field</strong> : {{field.name}}<br>
-          <strong>Value</strong> : <span [innerHTML]="highlight(field.value)"></span><br>
-          <small class="text-muted pull-right">more ...</small>
-        </button>
-      </div>
+    <div class="card-header" *ngIf="!element.object">
+      {{element.type_label}} #{{element.object_id}}
+      <span class="badge badge-primary pull-right">{{element.type_active}}</span>
     </div>
 
-  </div>
+    <div class="card-body" *ngFor="let field of element.match_fields"
+         (click)="hiden()"
+         [routerLink]="['/framework/object/', element.object_id]" [queryParams]="{value: '#'+element.object_id}" >
+      <strong>Field</strong> : {{field.name}}<br>
+      <strong>Value</strong> : <span [innerHTML]="highlight(field.value)"></span><br>
+      <small class="text-muted pull-right">more ...</small>
+    </div>
+
+  </ng-container>
 </div>
 
