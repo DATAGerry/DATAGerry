@@ -28,18 +28,18 @@
 </div>
 
 <div class="card overflow-auto" *ngIf="searchCtrl.value" style="position: absolute; max-height: 250px; z-index: 100">
-  <div class="list-group" *ngFor="let element of autoResult">
+  <div class="card-body" *ngFor="let element of autoResult">
 
     <div class="card-header" *ngIf="element.object">
       {{element.object}}
     </div>
 
-    <div class="list-group" *ngIf="!element.object">
-      <div class="card-header">
+    <div class="card-body" *ngIf="!element.object">
+      <div class="card-title">
         {{element.type_label}} #{{element.object_id}} <span class="badge badge-primary pull-right">{{element.type_active}}</span>
       </div>
 
-      <div class="list-group" *ngFor="let field of element.match_fields"
+      <div class="card-group" *ngFor="let field of element.match_fields"
            (click)="hiden()"
            [routerLink]="['/framework/object/', element.object_id]" [queryParams]="{value: '#'+element.object_id}" >
 
