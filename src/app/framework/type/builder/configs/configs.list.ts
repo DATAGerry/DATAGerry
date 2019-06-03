@@ -21,6 +21,7 @@ import { TextFieldEditComponent } from './edits/text-field-edit.component';
 import { DummyFieldEditComponent } from './edits/dummy-field-edit.component';
 import { SectionFieldEditComponent } from './edits/section-field-edit.component';
 import { TextareaEditComponent } from './edits/textarea-edit.component';
+import { RefFieldEditComponent } from './edits/ref-field-edit.component';
 
 export const configComponents: { [type: string]: any } = {
   text: TextFieldEditComponent,
@@ -30,5 +31,6 @@ export const configComponents: { [type: string]: any } = {
   tel: TextFieldEditComponent,
   section: SectionFieldEditComponent,
   textarea: TextareaEditComponent,
+  ref: RefFieldEditComponent,
   debug: DummyFieldEditComponent
 };

@@ -16,23 +16,12 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Injectable } from '@angular/core';
-import { ApiCallService } from '../../services/api-call.service';
-import { CmdbObject } from '../models/cmdb-object';
+import { CmdbDao } from './cmdb-dao';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class ObjectService {
 
-  private servicePrefix: string = 'object';
-  constructor(private api: ApiCallService) { }
+export class CmdbObject implements CmdbDao {
 
-  public getObjectList() {
-    return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/');
-  }
+  readonly object_id: number;
+  readonly public_id: number;
 
-  public getObjectsByType(typeID: number) {
-    return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/type/' + typeID);
-  }
 }

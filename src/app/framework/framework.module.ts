@@ -20,12 +20,18 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FrameworkRoutingModule } from './framework-routing.module';
 import { LayoutModule } from '../layout/layout.module';
+import { TypeService } from './services/type.service';
+import { ObjectService } from './services/object.service';
 
 @NgModule({
   imports: [
     CommonModule,
     LayoutModule,
     FrameworkRoutingModule
+  ],
+  providers: [
+    TypeService,
+    ObjectService
   ]
 })
 export class FrameworkModule { }

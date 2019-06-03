@@ -28,12 +28,14 @@ import { TextFieldEditComponent } from './configs/edits/text-field-edit.componen
 import { DummyFieldEditComponent } from './configs/edits/dummy-field-edit.component';
 import { SectionFieldEditComponent } from './configs/edits/section-field-edit.component';
 import { TextareaEditComponent } from './configs/edits/textarea-edit.component';
+import { RefFieldEditComponent } from './configs/edits/ref-field-edit.component';
 
 @NgModule({
   entryComponents: [
     SectionFieldEditComponent,
     TextFieldEditComponent,
     TextareaEditComponent,
+    RefFieldEditComponent,
     DummyFieldEditComponent
   ],
   declarations: [
@@ -42,7 +44,8 @@ import { TextareaEditComponent } from './configs/edits/textarea-edit.component';
     TextFieldEditComponent,
     DummyFieldEditComponent,
     SectionFieldEditComponent,
-    TextareaEditComponent
+    TextareaEditComponent,
+    RefFieldEditComponent
   ],
   imports: [
     CommonModule,

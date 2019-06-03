@@ -31,7 +31,6 @@ export class TypeService {
 
   }
 
-
   public getTypeList() {
     return this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/');
   }

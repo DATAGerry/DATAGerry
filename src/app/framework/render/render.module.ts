@@ -33,6 +33,8 @@ import { CheckboxComponent } from './fields/choice/checkbox.component';
 import { TextareaComponent } from './fields/textarea/textarea.component';
 import { LayoutModule } from '../../layout/layout.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgSelectModule } from '@ng-select/ng-select';
+import { FormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -47,7 +49,9 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
   imports: [
     CommonModule,
     LayoutModule,
-    NgbModule
+    NgbModule,
+    NgSelectModule,
+    FormsModule
   ]
 })
 export class RenderModule {
