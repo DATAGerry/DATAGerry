@@ -38,6 +38,7 @@ import { TypeValidationStepComponent } from './components/type-builder/type-vali
 import { RenderModule } from '../render/render.module';
 import { BuilderModule } from './builder/builder.module';
 import { TypeEditComponent } from './components/type-edit/type-edit.component';
+import { TypeMetaStepComponent } from './components/type-builder/type-meta-step/type-meta-step.component';
 
 @NgModule({
   declarations: [
@@ -51,7 +52,8 @@ import { TypeEditComponent } from './components/type-edit/type-edit.component';
     TypeQrComponent,
     TypeAccessStepComponent,
     TypeValidationStepComponent,
-    TypeEditComponent
+    TypeEditComponent,
+    TypeMetaStepComponent
   ],
   imports: [
     CommonModule,

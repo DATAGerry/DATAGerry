@@ -48,7 +48,7 @@ export class TypeBuilderComponent implements OnInit {
   }
 
   private exitFieldStep() {
-
+    this.assignToType({sections: this.fieldStep.typeBuilder.sections});
   }
 
   public assignToType(data: any) {

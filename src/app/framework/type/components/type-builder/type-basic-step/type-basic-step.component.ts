@@ -51,7 +51,7 @@ export class TypeBasicStepComponent implements OnInit {
   constructor(private typeNameValidator: TypeNameValidator) {
 
     this.basicForm = new FormGroup({
-      name: new FormControl('', Validators.required, this.typeNameValidator.checkName.bind(this.typeNameValidator)),
+      name: new FormControl('', [Validators.required], this.typeNameValidator.checkName.bind(this.typeNameValidator)),
       label: new FormControl('', Validators.required),
       description: new FormControl(''),
       active: new FormControl(true),

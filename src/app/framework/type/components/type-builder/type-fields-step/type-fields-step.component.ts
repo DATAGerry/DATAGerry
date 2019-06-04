@@ -16,7 +16,8 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { BuilderComponent } from '../../../builder/builder.component';
 
 @Component({
   selector: 'cmdb-type-fields-step',
@@ -25,7 +26,8 @@ import { Component, OnInit } from '@angular/core';
 })
 export class TypeFieldsStepComponent implements OnInit {
 
-  private fieldDefinitions: any = [];
+  @ViewChild(BuilderComponent)
+  public typeBuilder: BuilderComponent;
 
   ngOnInit() {
   }

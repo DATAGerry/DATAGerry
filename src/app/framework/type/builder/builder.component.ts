@@ -41,7 +41,7 @@ import { CheckboxControl } from './controls/choice/checkbox.control';
 })
 export class BuilderComponent implements OnInit {
 
-  private sections: any[];
+  public sections: any[];
   private userList: User[] = [];
   private groupList: Group[] = [];
 
