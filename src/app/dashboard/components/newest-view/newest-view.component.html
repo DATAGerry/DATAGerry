@@ -28,7 +28,7 @@
       <a class="ml-1 text-dark" routerLink="/framework/object/{{element.object_id}}/edit">
         <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
       </a>
-      <a class="ml-1 text-dark" routerLink="/framework/object/{{element.object_id}}/delete">
+      <a class="ml-1 text-dark" (click)="delObject(element.object_id)">
         <i class="fa fa-trash-o" aria-hidden="true"></i>
       </a>
     </td>

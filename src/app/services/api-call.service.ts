@@ -19,8 +19,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { debounceTime } from 'rxjs/internal/operators/debounceTime';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -52,6 +50,13 @@ export class ApiCallService {
 
   public callPostRoute(route: string, data) {
     return this.http.post<any>(this.apiURL + route, data, httpOptions);
+  }
+
+  public callDeleteRoute<T>(route: string, params?: any): Observable<any> {
+    if (window.confirm('Are you sure, you want to delete?')) {
+      return this.http.delete<T>(this.apiURL + route, params);
+    }
+    return new Observable<any>();
   }
 
   public handleErrorPromise(error: Response | any) {
