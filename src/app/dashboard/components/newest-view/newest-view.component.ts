@@ -35,6 +35,8 @@ export class NewestViewComponent implements OnInit, OnDestroy {
 
   public newest: [];
 
+  readonly url = 'object/newest/';
+
   constructor(private api: ApiCallService) { }
 
   ngOnInit() {
@@ -47,8 +49,13 @@ export class NewestViewComponent implements OnInit, OnDestroy {
       },
     };
 
-    this.api.callGetRoute('object/newest/').subscribe( data => {
+    this.callObjects();
+  }
+
+  private callObjects() {
+    this.api.callGetRoute(this.url).subscribe( data => {
       this.newest = data as [];
+      this.rerender();
       this.dtTrigger.next();
     });
   }
@@ -56,6 +63,21 @@ export class NewestViewComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     // Do not forget to unsubscribe the event
     this.dtTrigger.unsubscribe();
+  }
+
+  public rerender(): void {
+    if (typeof this.dtElement.dtInstance !== 'undefined') {
+      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        // Destroy the table first
+        dtInstance.destroy();
+      });
+    }
+  }
+
+  public delObject(id: number) {
+    this.api.callDeleteRoute('object/' + id).subscribe(data => {
+      this.callObjects();
+    });
   }
 
 }

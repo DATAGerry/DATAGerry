@@ -33,7 +33,8 @@ export class LatestChangesViewComponent implements OnInit, OnDestroy {
   public dtTrigger: Subject<any> = new Subject();
   public dtOptions: DataTables.Settings = {};
 
-  public latestchanges: [];
+  public latestChanges: [];
+  readonly url = 'object/latest/';
 
   constructor(private api: ApiCallService) { }
 
@@ -47,8 +48,13 @@ export class LatestChangesViewComponent implements OnInit, OnDestroy {
       },
     };
 
-    this.api.callGetRoute('object/latest/').subscribe( data => {
-      this.latestchanges = data as [];
+    this.callObjects();
+  }
+
+  private callObjects() {
+    this.api.callGetRoute(this.url).subscribe( data => {
+      this.latestChanges = data as [];
+      this.rerender();
       this.dtTrigger.next();
     });
   }
@@ -58,5 +64,19 @@ export class LatestChangesViewComponent implements OnInit, OnDestroy {
     this.dtTrigger.unsubscribe();
   }
 
+  public rerender(): void {
+    if (typeof this.dtElement.dtInstance !== 'undefined') {
+      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        // Destroy the table first
+        dtInstance.destroy();
+      });
+    }
+  }
+
+  public delObject(id: number) {
+    this.api.callDeleteRoute('object/' + id).subscribe(data => {
+      this.callObjects();
+    });
+  }
 }
 

@@ -94,4 +94,10 @@ export class ObjectListComponent implements OnDestroy, OnInit {
       });
     }
   }
+
+  public delObject(id: number) {
+    this.apiCallService.callDeleteRoute('object/' + id).subscribe(data => {
+      this.callObjects();
+    });
+  }
 }
