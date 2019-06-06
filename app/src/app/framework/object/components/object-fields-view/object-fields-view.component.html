@@ -1,0 +1,11 @@
+
+<ng-container *ngIf="objectInstance?.externals && objectInstance?.externals.length>0">
+  <div class="row" *ngFor="let obj of objectInstance?.obj_fields">
+    <div class="col">
+      {{obj.name}}
+    </div>
+    <div class="col">
+      {{obj.value}}
+    </div>
+  </div>
+</ng-container>

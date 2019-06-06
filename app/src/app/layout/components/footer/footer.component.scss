@@ -1,0 +1,33 @@
+@import "~src/scss/variables";
+
+$footer-height: 50px !default;
+$footer-bg: darken($white, 5%) !default;
+$footer-color: $body-color !default;
+$footer-borders: (
+  top: (size: 2px, style: solid, color: theme-color('primary'))
+) !default;
+
+footer#footer {
+  display: flex;
+  flex: 0 0 50px;
+  flex-grow: 1;
+  align-items: center;
+  padding: 0 $spacer;
+  color: $footer-color;
+  background: $footer-bg;
+  height: $footer-height;
+
+  @include borders($footer-borders);
+
+  #footerLinks {
+    a {
+      margin-right: 5px;
+
+      &:last-child {
+        margin-right: 0px;
+      }
+    }
+
+  }
+}
+

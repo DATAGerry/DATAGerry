@@ -1,0 +1,30 @@
+@import 'bootstrap_variables';
+@import '~bootstrap/scss/functions';
+@import '~bootstrap/scss/variables';
+@import 'mixins';
+
+$navbar-height: calc(48px + #{$navbar-padding-y});
+
+$content-min-width: 0;
+$content-padding-x: 16px !default;
+$content-padding-y: 16px !default;
+$content-font-size: 0.875rem !default;
+$content-line-height: 1.5 !default;
+
+$sidebar-width: 230px !default;
+
+$scrollbar-button-background: darken($white, 15%);
+$scrollbar-button-background-hover: darken($white, 15%);
+$scrollbar-thumb-radius: 3px;
+$scrollbar-thumb-background: theme-color('primary');
+$scrollbar-thumb-background-hover: darken($scrollbar-thumb-background, 10%);
+$scrollbar-track-background: darken($white, 5%);
+$scrollbar-track-background-hover: darken($white, 10%);
+$scrollbar-width: 4px;
+
+$footer-height: 50px !default;
+$footer-bg: darken($white, 5%) !default;
+$footer-color: $body-color !default;
+$footer-borders: (
+  top: (size: 2px, style: solid, color: theme-color('primary'))
+) !default;

@@ -1,0 +1,7 @@
+::selection {
+  background: lighten(theme-color('primary'), 10%);
+}
+
+::-moz-selection{
+  background: lighten(theme-color('primary'), 10%);
+}

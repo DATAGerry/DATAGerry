@@ -1,0 +1,53 @@
+
+<div class="input-group">
+
+  <div class="input-group-prepend">
+    <div class="dropdown">
+      <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+        <span id="caret" >{{category}} </span>
+      </button>
+
+      <ul class="dropdown-menu" role="menu">
+        <li *ngFor="let element of categoryList" [value]="element.label" (click)="dropdownMenu(element)">
+          {{element.label}}
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <input class="form-control" type="search" placeholder="Search for..." aria-label="Search"
+         [formControl]="searchCtrl"
+         (blur)="hiden()"
+         (keyup.enter)="getResponse()">
+
+  <button class="btn btn-default" type="button" (click)="getResponse()">
+    <i class="fa fa-search" aria-hidden="true"></i>
+  </button>
+
+</div>
+
+<div class="card overflow-auto" *ngIf="searchCtrl.value" style="position: absolute; max-height: 250px; z-index: 100">
+
+  <ng-container *ngFor="let element of autoResult">
+
+    <div class="card-header" *ngIf="element.object">
+      {{element.object}}
+    </div>
+
+    <div class="card-header" *ngIf="!element.object">
+      {{element.type_label}} #{{element.object_id}}
+      <span class="badge badge-primary pull-right">{{element.type_active}}</span>
+    </div>
+
+    <div class="card-body" *ngFor="let field of element.match_fields"
+         (click)="hiden()"
+         [routerLink]="['/framework/object/', element.object_id]" [queryParams]="{value: '#'+element.object_id}" >
+      <strong>Field</strong> : {{field.name}}<br>
+      <strong>Value</strong> : <span [innerHTML]="highlight(field.value)"></span><br>
+      <small class="text-muted pull-right">more ...</small>
+    </div>
+
+  </ng-container>
+</div>
+
