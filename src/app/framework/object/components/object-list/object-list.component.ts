@@ -17,68 +17,84 @@
 */
 
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import { ApiCallService } from '../../../../services/api-call.service';
 import { ActivatedRoute } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { map } from 'rxjs/operators';
+import { DatePipe } from '@angular/common';
+import { element } from 'protractor';
 
 @Component({
   selector: 'cmdb-object-list',
   templateUrl: './object-list.component.html',
-  styleUrls: ['./object-list.component.scss']
+  styleUrls: ['./object-list.component.scss'],
+  providers: [DatePipe]
 })
-export class ObjectListComponent implements OnDestroy, OnInit {
+export class ObjectListComponent implements OnDestroy {
 
   @ViewChild(DataTableDirective)
   public dtElement: DataTableDirective;
-
-  dtOptions: DataTables.Settings = {};
-  objectLists = [];
-  private url: string = 'object/';
-  private objID: number;
-
-  // Use this trigger because fetching the list of objects can be quite long,
-  // this ensure the data is fetched before rendering
+  public dtOptions: any = {}; // : DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
 
+  private summaries: [];
+  private items: [];
+  public objectLists: {};
+  public isCategorized: boolean = false;
+  readonly $date: string = '$date';
+
   constructor(private apiCallService: ApiCallService, private route: ActivatedRoute,
-              private spinner: NgxSpinnerService) {
+              private spinner: NgxSpinnerService, private dateFormatPipe: DatePipe) {
+
     this.route.params.subscribe((id) => {
-      this.objID = id.publicID;
-      if ( typeof this.objID !== 'undefined') {
-        this.url = 'object/type/' + id.publicID;
-        this.callObjects();
-      } else {
-        this.url = 'object/';
-        this.callObjects();
-      }
+      this.init(id);
     });
   }
 
-  ngOnInit() {
+  private init(id) {
+    this.getRouteObjects(id.publicID);
+  }
+
+  private buildDtOptions() {
     this.dtOptions = {
       ordering: true,
       order: [[1, 'asc']],
+      retrieve: true,
       language: {
         search: '',
         searchPlaceholder: 'Filter...'
-      },
+      }
     };
   }
 
-  private callObjects() {
-    this.apiCallService.callGetRoute(this.url).subscribe(
+  private getRouteObjects(id) {
+    let url = 'object/';
+    if ( typeof id !== 'undefined') {
+      url = url + 'type/' + id;
+      this.isCategorized = true;
+    }
+
+    this.apiCallService.callGetRoute(url)
+      .pipe(
+        map( dataArray => {
+          this.summaries = dataArray[0].summaries;
+          this.items = dataArray;
+          return[ {items: this.items, sums: this.summaries} ];
+        })
+      )
+      .subscribe(
       data => {
-        this.spinner.show();
         setTimeout( () => {
-          this.objectLists = data as [];
+          this.objectLists = data;
           this.rerender();
           this.dtTrigger.next();
           this.spinner.hide();
         }, 100);
       });
+    this.buildDtOptions();
   }
 
   ngOnDestroy(): void {
@@ -95,9 +111,48 @@ export class ObjectListComponent implements OnDestroy, OnInit {
     }
   }
 
+  public checkType(value) {
+    if (value.hasOwnProperty('$date')) {
+      return '<span>' + this.dateFormatPipe.transform(value[this.$date], 'dd/mm/yyyy - hh:mm:ss') + '</span>';
+    }
+    return '<span>' + value + '</span>';
+  }
+
+  public selectAll() {
+    const overall: any = document.getElementsByClassName('select-all-checkbox')[0];
+    const allCheckbox: any = document.getElementsByClassName('select-checkbox');
+    const checking = overall.checked;
+    for (const box of allCheckbox) {
+      box.checked = checking;
+    }
+  }
+
+  public updateDisplay() {
+    const overall: any = document.getElementsByClassName('select-all-checkbox')[0];
+    const allCheckbox: any = document.getElementsByClassName('select-checkbox');
+    let checkedCount = 0;
+
+    for (const box of allCheckbox) {
+      if (box.checked) {
+        checkedCount++;
+        console.log(checkedCount);
+      }
+    }
+
+    if (checkedCount === 0) {
+      overall.checked = false;
+      overall.indeterminate = false;
+    } else if (checkedCount === allCheckbox.length) {
+      overall.checked = true;
+      overall.indeterminate = false;
+    } else {
+      overall.checked = false;
+      overall.indeterminate = true;
+    }
+  }
+
   public delObject(id: number) {
     this.apiCallService.callDeleteRoute('object/' + id).subscribe(data => {
-      this.callObjects();
     });
   }
 }

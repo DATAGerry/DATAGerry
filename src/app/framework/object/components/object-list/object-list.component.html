@@ -1,34 +1,60 @@
 <cmdb-content-header title="Object list"></cmdb-content-header>
 
 <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table">
-  <thead>
-  <tr>
-    <th>Active</th>
-    <th>Public ID</th>
-    <th>Type</th>
-    <th>Author</th>
-    <th>Action</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr *ngFor="let result of objectLists">
-    <td>
-      <cmdb-active-badge [activeStatus]="result.type_active"></cmdb-active-badge>
-    </td>
-    <td>{{result.object_id}}</td>
-    <td><a routerLink="/framework/type/{{result.type_id}}">{{result.type_label}}</a></td>
-    <td><a routerLink="/user/{{result.author_id}}">{{result.author_name}}</a></td>
-    <td>
-      <a class="text-dark"[routerLink]="['/framework/object/', result.object_id]">
-        <i class="fa fa-eye" aria-hidden="true"></i>
-      </a>
-      <a class="ml-1 text-dark" routerLink="/framework/object/{{result.object_id}}/edit">
-        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-      </a>
-      <a class="ml-1 text-dark" (click)="delObject(result.object_id)">
-        <i class="fa fa-trash-o" aria-hidden="true"></i>
-      </a>
-    </td>
-  </tr>
-  </tbody>
+  <ng-container *ngFor="let results of objectLists">
+    <thead>
+    <tr>
+      <th><input type="checkbox" class="select-all-checkbox" (click)="selectAll()">
+      </th>
+
+      <th>Active</th>
+      <th>ID</th>
+      <th>Type</th>
+      <!-- BEGIN: summarie fields : show only if objects are categorized -->
+      <ng-container *ngIf="isCategorized">
+        <ng-container *ngFor="let summaries of results.sums">
+          <th *ngFor="let el of summaries.fields">{{el}}</th>
+        </ng-container>
+      </ng-container>
+      <!-- END: summarie fields -->
+      <th>Author</th>
+      <th>Creation time</th>
+      <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let result of results.items">
+
+      <td><input  class="select-checkbox" type="checkbox" (click)="updateDisplay()"></td>
+
+      <td>
+        <cmdb-active-badge [activeStatus]="result.type_active"></cmdb-active-badge>
+      </td>
+      <td>{{result.object_id}}</td>
+      <td><a routerLink="/framework/type/{{result.type_id}}">{{result.type_label}}</a></td>
+
+      <!-- BEGIN: summarie contens : show only if objects are categorized  -->
+      <ng-container *ngIf="isCategorized" >
+        <ng-container *ngFor="let sum of result.summaries">
+          <td *ngFor="let el of sum.contens"><span [innerHTML]="checkType(el)">{{el}}</span></td>
+        </ng-container>
+      </ng-container>
+      <!-- END: summarie contens -->
+
+      <td>{{result.author_name}}</td>
+      <td>{{result.object_creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
+      <td>
+        <a class="text-dark"[routerLink]="['/framework/object/', result.object_id]">
+          <i class="fa fa-eye" aria-hidden="true"></i>
+        </a>
+        <a class="ml-1 text-dark" routerLink="/framework/object/{{result.object_id}}/edit">
+          <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+        </a>
+        <a class="ml-1 text-dark" (click)="delObject(result.object_id)">
+          <i class="fa fa-trash-o" aria-hidden="true"></i>
+        </a>
+      </td>
+    </tr>
+    </tbody>
+  </ng-container>
 </table>
