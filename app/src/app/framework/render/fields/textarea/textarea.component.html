@@ -1,0 +1,10 @@
+<div class="form-group">
+  <label>
+    <i class="fa fa-info-circle" *ngIf="data?.helperText" placement="right" [ngbTooltip]="data?.helperText"></i>
+    {{data.label}}
+    <span class="required" *ngIf="data?.required">*</span>
+  </label>
+  <textarea class="form-control" name="{{data.name}}" placeholder="{{data?.placeholder}}"
+            rows="{{data?.rows ? data?.rows : 3}}">{{data?.value}}</textarea>
+  <small class="form-text text-muted">{{data?.description}}</small>
+</div>

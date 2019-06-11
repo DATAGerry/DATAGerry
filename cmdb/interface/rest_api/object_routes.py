@@ -16,7 +16,8 @@
 
 import logging
 
-from flask import abort
+from flask import abort, jsonify
+from cmdb.object_framework.cmdb_errors import ObjectDeleteError, ObjectNotFoundError
 from cmdb.object_framework.cmdb_render import CmdbRender
 from cmdb.object_framework.cmdb_object_manager import object_manager
 from cmdb.utils.interface_wraps import login_required
@@ -107,6 +108,8 @@ def get_native_object_list():
 def get_object(public_id):
     try:
         object_instance = object_manager.get_object(public_id)
+    except ObjectNotFoundError as e:
+        return jsonify(message='Not Found', error=e.message)
     except CMDBError:
         return make_response("error object", 404)
 
@@ -170,12 +173,12 @@ def update_object(public_id):
 @object_rest.route('/<int:public_id>', methods=['DELETE'])
 def delete_object(public_id):
     try:
-        object_instance_ack = object_manager.delete_object(public_id)
+        ack = object_manager.delete_object(public_id)
+        return make_response(ack.raw_result)
+    except ObjectDeleteError as e:
+        return jsonify(message='Delete Error', error=e.message)
     except CMDBError:
-        return abort(400)
-    resp = make_response(object_instance_ack)
-    return resp
-
+        return abort(500)
 
 # SPECIAL ROUTES
 @login_required

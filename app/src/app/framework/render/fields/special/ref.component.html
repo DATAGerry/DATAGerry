@@ -1,0 +1,14 @@
+<div class="form-group">
+  <label>
+    <i class="fa fa-info-circle" *ngIf="data?.helperText" placement="right" [ngbTooltip]="data?.helperText"></i>
+    {{data.label}}
+    <span class="required" *ngIf="data?.required">*</span>
+  </label>
+  <ng-select [items]="objectList | async"
+             bindLabel="object_id"
+             [multiple]="data?.ref_multi ? data.ref_multi : false"
+             bindValue="object_id"
+             [(ngModel)]="data.value">
+  </ng-select>
+  <small class="form-text text-muted">{{data?.description}}</small>
+</div>

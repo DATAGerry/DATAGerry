@@ -28,7 +28,7 @@ from cmdb.object_framework import *
 from cmdb.object_framework import CmdbObjectStatus
 from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
 from cmdb.object_framework.cmdb_errors import WrongInputFormatError, UpdateError, TypeInsertError, TypeAlreadyExists, \
-    TypeNotFoundError, ObjectInsertError, NoRootCategories
+    TypeNotFoundError, ObjectInsertError, ObjectNotFoundError, ObjectDeleteError, NoRootCategories
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import timing
 from cmdb.event_management.event import Event
@@ -182,12 +182,15 @@ class CmdbObjectManager(CmdbManagerBase):
         Returns:
 
         """
-        return CmdbObject(
-            **self._get(
-                collection=CmdbObject.COLLECTION,
-                public_id=public_id
+        try:
+            return CmdbObject(
+                **self._get(
+                    collection=CmdbObject.COLLECTION,
+                    public_id=public_id
+                )
             )
-        )
+        except (CMDBError, Exception):
+            raise ObjectNotFoundError(obj_id=public_id)
 
     def get_objects(self, public_ids: list):
         object_list = []
@@ -355,12 +358,11 @@ class CmdbObjectManager(CmdbManagerBase):
         return matched_objects
 
     def delete_object(self, public_id: int):
-        ack = self._delete(CmdbObject.COLLECTION, public_id)
-        # create cmdb.core.object.deleted event
-        if self._event_queue:
-            event = Event("cmdb.core.object.deleted", {"id": public_id})
-            self._event_queue.put(event)
-        return ack
+        try:
+            ack = self._delete(CmdbObject.COLLECTION, public_id)
+            return ack
+        except (CMDBError, Exception):
+            raise ObjectDeleteError(obj_id=public_id)
 
     def delete_many_objects(self, public_ids: list):
         ack = []

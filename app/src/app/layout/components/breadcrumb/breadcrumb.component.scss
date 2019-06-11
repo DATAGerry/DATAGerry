@@ -1,0 +1,18 @@
+@import "~src/scss/variables";
+
+$breadcrumb-border-radius: 0px;
+$breadcrumb-bg: darken($white, 5%);
+$breadcrumb-borders: (
+  bottom: (size: 1px, style: solid, color: $border-color)
+) !default;
+$breadcrumb-height: 46px;
+.breadcrumb {
+  position: relative;
+  height: $breadcrumb-height;
+  @include border-radius($breadcrumb-border-radius);
+  @include borders($breadcrumb-borders);
+
+  li {
+    line-height: 1.8;
+  }
+}

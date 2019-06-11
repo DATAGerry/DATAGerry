@@ -1,0 +1,183 @@
+<div class="row">
+
+  <div id="builder-controls" class="col-3">
+    <div class="accordion" id="controlsPanel">
+      <div class="card">
+        <div class="card-header">
+          <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#structureControls">
+            Structure Controls
+          </button>
+        </div>
+        <div id="structureControls" class="collapse show" data-parent="#controlsPanel">
+          <div class="card-body">
+            <div class="list-group">
+              <a *ngFor="let control of structureControls" [dndType]="control.typeController.dndType"
+                 [dndDraggable]="control.typeController.content()" type="button"
+                 class="list-group-item list-group-item-action">
+                <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#basicControls">
+            Basic Controls
+          </button>
+        </div>
+        <div id="basicControls" class="collapse" data-parent="#controlsPanel">
+          <div class="card-body">
+            <div class="list-group">
+              <a *ngFor="let control of basicControls" [dndType]="control.typeController.dndType"
+                 [dndDraggable]="control.typeController.content()" type="button"
+                 class="list-group-item list-group-item-action">
+                <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#specialControls">
+            Special Controls
+          </button>
+        </div>
+        <div id="specialControls" class="collapse" data-parent="#controlsPanel">
+          <div class="card-body">
+            <div class="list-group">
+              <a *ngFor="let control of specialControls" [dndType]="control.typeController.dndType"
+                 [dndDraggable]="control.typeController.content()" type="button"
+                 class="list-group-item list-group-item-action">
+                <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="builder-controls-action" class="btn-group btn-group-sm mt-2 justify-content-md-center" role="group"
+         aria-label="Controls helper buttons">
+      <button id="builder-controls-action-preview" type="button" class="btn btn-secondary"
+              data-toggle="modal" [attr.data-target]="'#renderPreview'">
+        Preview
+      </button>
+      <div class="modal fade" id="renderPreview" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-xl" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Render Preview</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <cmdb-render [sections]="sections"></cmdb-render>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button id="builder-controls-action-diagnostic" type="button" class="btn btn-secondary"
+              data-toggle="modal" [attr.data-target]="'#renderDiagnostic'">
+        Diagnostic
+      </button>
+      <div class="modal fade" id="renderDiagnostic" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Render Diagnostic</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <pre>
+                <code>{{ sections | json }}</code>
+              </pre>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="form-container" class="col-9">
+    <div id="form-content" data-content="Drop field here" [ngClass]="{'empty': sections.length == 0 }"
+         [dndDropzone]="['sections']" (dndDrop)="onDrop($event, sections)">
+      <div style="border: 1px green solid; border-radius: 5px; padding: 15px;"
+           dndPlaceholderRef>
+        Drop section here
+      </div>
+      <section *ngFor="let section of sections" dndEffectAllowed="copyMove" dndType="sections" [dndDraggable]="section"
+               (dndMoved)="onDragged(section, sections, 'move')">
+        <div class="card">
+          <div class="card-header">
+            {{section.label}}
+            <span class="float-right">
+              <button class="btn btn-link" type="button" data-toggle="collapse"
+                      [attr.data-target]="'#section_' + section.name">
+                <i class="fa fa-pencil-square"></i>
+              </button>
+              <button class="btn btn-link" type="button" dndHandle>
+                <i class="fa fa-arrows"></i>
+              </button>
+              <button class="btn btn-link" type="button" (click)="remove(section, sections)">
+                <i class="fa fa-window-close-o"></i>
+              </button>
+            </span>
+          </div>
+          <div class="collapse" id="section_{{section.name}}">
+            <div class="card-body">
+              <cmdb-config-edit [groupList]="groupList" [userList]="userList" [data]="section"></cmdb-config-edit>
+            </div>
+          </div>
+          <div class="card-body" [dndDropzone]="['inputs']"
+               (dndDrop)="onDrop($event, section.fields)">
+            <div style="border: 1px red solid; border-radius: 5px; padding: 15px;"
+                 dndPlaceholderRef>
+              Drop field here
+            </div>
+            <ng-container *ngFor="let field of section.fields" dndEffectAllowed="copyMove" dndType="inputs"
+                          [dndDraggable]="field"
+                          (dndMoved)="onDragged(field, section.fields, 'move')">
+
+              <div class="fields card">
+                <div class="card-header">
+                  {{field.label}}
+                  <span class="float-right">
+                    <button class="btn btn-link" type="button" data-toggle="collapse"
+                            [attr.data-target]="'#field_' + field.name">
+                      <i class="fa fa-pencil-square"></i>
+                    </button>
+                    <button class="btn btn-link" type="button">
+                      <i class="fa fa-arrows"></i>
+                    </button>
+                    <button class="btn btn-link" type="button" (click)="remove(field, section.fields)">
+                      <i class="fa fa-window-close-o"></i>
+                    </button>
+                  </span>
+                </div>
+                <div class="card-body">
+                  <div class="collapse" id="field_{{field.name}}">
+                    <cmdb-config-edit [groupList]="groupList" [userList]="userList" [data]="field"></cmdb-config-edit>
+                  </div>
+                  <cmdb-render-element [data]="field"></cmdb-render-element>
+                </div>
+              </div>
+            </ng-container>
+
+          </div>
+        </div>
+
+
+      </section>
+    </div>
+  </div>
+</div>

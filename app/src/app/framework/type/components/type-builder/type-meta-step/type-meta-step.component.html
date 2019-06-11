@@ -1,0 +1,80 @@
+<div class="row">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">
+        Summaries
+      </div>
+      <div class="card-body">
+
+      </div>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">
+        External Links
+      </div>
+      <div id="external-link-add" class="card-body">
+        <form [formGroup]="externalForm" (ngSubmit)="addExternal()">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" formControlName="name" class="form-control" lowercase>
+          </div>
+          <div class="form-group">
+            <label>Label</label>
+            <input type="text" formControlName="label" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Icon</label>
+            <ng-select [items]="icons" groupBy="avatar" formControlName="icon">
+              <ng-template ng-label-tmp let-item="item">
+                <i class="fa {{item}}"></i> {{item}}
+              </ng-template>
+              <ng-template ng-optgroup-tmp let-item="item" let-index="index">
+                <i class="fa {{item}}"></i> {{item}}
+              </ng-template>
+              <ng-template ng-option-tmp let-item="item" let-index="index" let-search="searchTerm">
+                <i class="fa {{item}}"></i> {{item}}
+              </ng-template>
+            </ng-select>
+          </div>
+          <div class="form-group">
+            <label>Link</label>
+            <input type="text" formControlName="href" class="form-control">
+            <small class="form-text text-muted">enter curved brackets for field interpolation <br />
+              example: <b>http://example.org/{{"{}"}}/example/</b>
+            </small>
+          </div>
+          <div class="form-group">
+            <div class="form-group" *ngFor="let field of hrefInterpolCounter">
+              <label>Field of interpolation: {{field + 1}}</label>
+              <select class="custom-select">
+                <option selected></option>
+                <option *ngFor=""></option>
+              </select>
+            </div>
+          </div>
+
+          <button [disabled]="!externalForm.valid" type="submit" class="btn btn-primary">Add</button>
+        </form>
+      </div>
+      <div class="card-body">
+        <div id="external-link-accordion" class="accordion">
+          <div *ngFor="let external of externalLinks" class="card mt-2">
+            <div class="card-header">
+              <button class="btn btn-link" type="button" data-toggle="collapse"
+                      [attr.data-target]="'#collapse_'+external.name">
+                {{external.label}}
+              </button>
+            </div>
+            <div id="collapse_{{external.name}}" class="collapse">
+              <div class="card-body">
+                {{external | json}}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

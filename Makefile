@@ -15,15 +15,20 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # set environment variables
-BIN_PYINSTALLER="/usr/bin/pyinstaller"
-BIN_SPHINX="/usr/bin/sphinx-build"
-BIN_PYTEST="/usr/bin/pytest"
-BIN_PIP="/usr/bin/pip"
-DIR_BUILD="./target"
-DIR_BIN_BUILD="${DIR_BUILD}/bin"
-DIR_TEMP="${DIR_BUILD}/temp"
-DIR_DOCS_SOURCE="docs/source"
-DIR_DOCS_BUILD="${DIR_BUILD}/docs"
+BIN_PYINSTALLER = /usr/bin/pyinstaller
+BIN_SPHINX = /usr/bin/sphinx-build
+BIN_PYTEST = /usr/bin/pytest
+BIN_PIP = /usr/bin/pip
+BIN_NPM = npm
+DIR_BUILD = ./target
+DIR_BIN_BUILD = ${DIR_BUILD}/bin
+DIR_TEMP= ${DIR_BUILD}/temp
+DIR_DOCS_SOURCE = docs/source
+DIR_DOCS_BUILD = ${DIR_BUILD}/docs
+DIR_DOCS_TARGET = cmdb/interface/net_app/docs
+DIR_WEB_SOURCE = app
+DIR_WEB_BUILD = app/dist/dataGerryApp
+DIR_WEB_TARGET = cmdb/interface/net_app/dataGerryApp
 
 # set default goal
 .DEFAULT_GOAL := bin
@@ -39,20 +44,30 @@ requirements:
 .PHONY: docs
 docs: requirements
 	${BIN_SPHINX} -b html -a ${DIR_DOCS_SOURCE} ${DIR_DOCS_BUILD}
+	cp -R ${DIR_DOCS_BUILD}/* ${DIR_DOCS_TARGET}
+
+
+# create webapp
+.PHONY: webapp
+webapp:
+	${BIN_NPM} install --prefix ${DIR_WEB_SOURCE}
+	${BIN_NPM} run build --prefix ${DIR_WEB_SOURCE}
+	cp -R ${DIR_WEB_BUILD}/* ${DIR_WEB_TARGET}
 
 
 # create onefile binary of dataGerry
 .PHONY: bin
-bin: requirements
+bin: requirements docs webapp
 	${BIN_PYINSTALLER} --name datagerry --onefile \
 		--distpath ${DIR_BIN_BUILD} \
 		--workpath ${DIR_TEMP} \
-		--specpath ${DIR_TEMP} \
 		--hidden-import cmdb.exportd \
 		--hidden-import cmdb.exportd.service \
 		--hidden-import cmdb.interface.gunicorn \
 		--hidden-import gunicorn.glogging \
 		--hidden-import gunicorn.workers.sync \
+		--add-data cmdb/interface/net_app/docs:cmdb/interface/net_app/docs \
+		--add-data cmdb/interface/net_app/dataGerryApp:cmdb/interface/net_app/dataGerryApp \
 		cmdb/__main__.py
 
 
@@ -66,3 +81,6 @@ tests: requirements
 .PHONY: clean
 clean:
 	rm -Rf ${DIR_BUILD}
+	rm -Rf ${DIR_DOCS_TARGET}/*
+	rm -Rf ${DIR_WEB_TARGET}/*
+	rm -f datagerry.spec

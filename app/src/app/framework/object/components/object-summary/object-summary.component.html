@@ -1,0 +1,20 @@
+
+<div class="card" *ngIf="objectInstance?.summaries && objectInstance?.summaries.length>0">
+  <div class="card-body">
+    <h5 class="card-title" data-toggle="collapse" href="#collapseSummary" role="button" aria-expanded="true" aria-controls="collapseSummary">
+      Summary
+      <span class="pull-right"><i class="fa fa-angle-down rotate-icon"></i></span>
+    </h5>
+  <form *ngIf="objectInstance?.summaries && objectInstance?.summaries.length>0">
+    <div class="form-group" *ngFor="let sum of objectInstance?.summaries" class="collapse show" id="collapseSummary">
+      <h6 class="card-subtitle mb-2 text-muted" style="margin-top: 1.25em">{{sum.label}}</h6>
+      <fieldset disabled>
+        <div class="form-group" *ngFor="let field of sum.fields; let i= index">
+          <label for="fieldInput">{{field}}</label>
+          <input type="text" class="form-control" id="fieldInput" value = "{{sum.contens[i]}}">
+        </div>
+      </fieldset>
+    </div>
+  </form>
+  </div>
+</div>

@@ -42,6 +42,11 @@ class TypeNotFoundError(CMDBError):
         self.message = 'Type with ID: {} not found!'.format(type_id)
 
 
+class ObjectNotFoundError(CMDBError):
+    def __init__(self, obj_id):
+        self.message = 'Object with ID: {} not found!'.format(obj_id)
+
+
 class ObjectInsertError(CMDBError):
     def __init__(self, error):
         self.message = 'Object could not be inserted | Error {} \n show into logs for details'.format(error.message)
@@ -50,6 +55,11 @@ class ObjectInsertError(CMDBError):
 class ObjectUpdateError(CMDBError):
     def __init__(self, msg):
         self.message = 'Something went wrong during update: {}'.format(msg)
+
+
+class ObjectDeleteError(CMDBError):
+    def __init__(self, msg):
+        self.message = 'Something went wrong during delete: {}'.format(msg)
 
 
 class NoRootCategories(CMDBError):

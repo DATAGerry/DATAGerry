@@ -1,0 +1,46 @@
+@import "~src/scss/variables";
+
+.dash-card{
+  box-shadow: 2px 2px 10px #DADADA;
+  margin: 5px;
+  padding: 20px 10px;
+  background-color: #fff;
+  height: 100px;
+  border-radius: 5px;
+  transition: .3s linear all;
+}
+
+.dash-card:hover{
+  box-shadow: 4px 4px 20px #DADADA;
+  transition: .3s linear all;
+}
+
+.dash-card i{
+  font-size: 5em;
+  opacity: 0.2;
+}
+
+.dash-card.primary{
+  background-color: theme-color('primary');
+  color: $white;
+}
+
+
+.dash-card .count-numbers{
+  position: absolute;
+  right: 35px;
+  top: 20px;
+  font-size: 32px;
+  display: block;
+}
+
+.dash-card .count-name{
+  position: absolute;
+  right: 35px;
+  top: 65px;
+  font-style: italic;
+  text-transform: capitalize;
+  opacity: 0.5;
+  display: block;
+  font-size: 18px;
+}
