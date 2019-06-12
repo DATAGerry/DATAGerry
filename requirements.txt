@@ -33,6 +33,8 @@ requests==2.18.4
 requirements-parser==0.2.0
 sentinels==1.0.0
 six==1.12.0
+sphinx==2.1.1
+sphinx_rtd_theme==0.4.3
 termcolor==1.1.0
 text-unidecode==1.2
 Werkzeug==0.15.2

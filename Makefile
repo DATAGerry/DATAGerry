@@ -15,10 +15,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # set environment variables
-BIN_PYINSTALLER = /usr/bin/pyinstaller
-BIN_SPHINX = /usr/bin/sphinx-build
-BIN_PYTEST = /usr/bin/pytest
-BIN_PIP = /usr/bin/pip
+BIN_PYINSTALLER = pyinstaller
+BIN_SPHINX = sphinx-build
+BIN_PYTEST = pytest
+BIN_PIP = pip
 BIN_NPM = npm
 DIR_BUILD = ./target
 DIR_BIN_BUILD = ${DIR_BUILD}/bin
