@@ -131,20 +131,30 @@ export class ObjectListComponent implements OnDestroy {
     if(this.isCategorized) {
       buttons.push(
         {
-          // edit columns
-          extend: 'colvis',
+          extend: 'collection',
           className: 'btn btn-light dropdown-toggle',
           text: '<i class="fa fa-cog" aria-hidden="true"></i>',
           collectionLayout: 'dropdown-menu overflow-auto',
-          columns: ':gt(3):not(:last-child)',
-
-          postfixButtons: [
-            {
-              extend: 'colvisRestore',
-              text: 'Restore',
-              className: 'btn btn-secondary btn-lg btn-block'
+          buttons: function ( e, dt, node, config ) {
+            const columnButton = [];
+            for(let i = 0; i<this.columnFields.length; i++){
+              {
+                columnButton.push(
+                  {
+                  text: this.columnFields[i].label,
+                  extend: 'columnToggle',
+                  columns: '.toggle-'+this.columnFields[i].name,
+                  className: 'dropdown-item '+ this.columnFields[i].name,
+                })
+              }
             }
-          ],
+            columnButton.push({
+                  extend: 'colvisRestore',
+                  text: 'Restore',
+                  className: 'btn btn-secondary btn-lg btn-block'
+                });
+            return columnButton;
+          }.bind(this),
         },
       );
     }

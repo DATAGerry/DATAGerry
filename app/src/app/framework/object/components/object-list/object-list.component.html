@@ -4,22 +4,22 @@
   <ng-container *ngFor="let results of objectLists">
     <thead>
     <tr>
-      <th><input type="checkbox" class="select-all-checkbox" (click)="selectAll()">
+      <th class="toggle-check"><input type="checkbox" class="select-all-checkbox toggle" (click)="selectAll()">
       </th>
 
-      <th>Active</th>
-      <th>ID</th>
-      <th>Type</th>
+      <th class="toggle-active">Active</th>
+      <th class="toggle-id">ID</th>
+      <th class="toggle-type">Type</th>
       <!-- BEGIN: summarie fields : show only if objects are categorized -->
       <ng-container *ngIf="isCategorized">
-        <ng-container *ngFor="let obj of results.columnFields">
-            <th>{{obj.label}}</th>
+        <ng-container *ngFor="let obj of results.columnFields;">
+            <th class="toggle-{{obj.name}}">{{obj.label}}</th>
         </ng-container>
       </ng-container>
       <!-- END: summarie fields -->
-      <th>Author</th>
-      <th>Creation time</th>
-      <th>Action</th>
+      <th class="toggle-autor">Author</th>
+      <th class="toggle-create-time">Creation time</th>
+      <th class="toggle-action">Action</th>
     </tr>
     </thead>
     <tbody>
