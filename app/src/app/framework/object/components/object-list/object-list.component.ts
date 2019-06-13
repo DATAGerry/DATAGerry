@@ -26,6 +26,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { map } from 'rxjs/operators';
 import { DatePipe } from '@angular/common';
 import { element } from 'protractor';
+import {getClassName} from "codelyzer/util/utils";
 
 @Component({
   selector: 'cmdb-object-list',
@@ -41,6 +42,7 @@ export class ObjectListComponent implements OnDestroy {
   public dtTrigger: Subject<any> = new Subject();
 
   private summaries: [];
+  private columnFields: [];
   private items: [];
   public objectLists: {};
   public isCategorized: boolean = false;
@@ -59,6 +61,94 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   private buildDtOptions() {
+    let buttons = [];
+
+    buttons.push(
+      {
+        // add new
+        text: '<i class="fa fa-file-o" aria-hidden="true"></i>',
+        className: 'btn btn-light',
+        action: function (e, dt, node, config) {
+          console.log('New');
+        }
+      }
+    );
+
+    buttons.push(
+      {
+        // edit
+        text: '<i class="fa fa-pencil-square-o" aria-hidden="true"></i>',
+        className: 'btn btn-light',
+        action: function (e, dt, node, config) {
+          console.log('Edit');
+        }
+      }
+    );
+
+    buttons.push(
+      {
+        // delete
+        text: '<i class="fa fa-trash-o" aria-hidden="true"></i>',
+        className: 'btn btn-light',
+        action: function () {
+          const allCheckbox: any = document.getElementsByClassName('select-checkbox');
+          for (const box of allCheckbox) {
+            if (box.checked) {
+              console.log('Delete');
+            }
+          }
+        }.bind(this)
+      }
+    );
+
+    buttons.push(
+      {
+        // copy
+        text: '<i class="fa fa-files-o" aria-hidden="true"></i>',
+        extend: 'copy',
+        className: 'btn btn-light'
+      }
+    );
+
+    buttons.push(
+      {
+        // print
+        text: '<i class="fa fa-print" aria-hidden="true"></i>',
+        extend: 'print',
+        className: 'btn btn-light'
+      }
+    );
+
+    buttons.push(
+      {
+        // export to exel
+        text: '<i class="fa fa-file-excel-o" aria-hidden="true"></i>',
+        extend: 'excel',
+        className: 'btn btn-light'
+      }
+    );
+
+    if(this.isCategorized) {
+      buttons.push(
+        {
+          // edit columns
+          extend: 'colvis',
+          className: 'btn btn-light dropdown-toggle',
+          text: '<i class="fa fa-cog" aria-hidden="true"></i>',
+          collectionLayout: 'dropdown-menu overflow-auto',
+          columns: ':gt(3):not(:last-child)',
+
+          postfixButtons: [
+            {
+              extend: 'colvisRestore',
+              text: 'Restore',
+              className: 'btn btn-secondary btn-lg btn-block'
+            }
+          ],
+        },
+      );
+    }
+
     this.dtOptions = {
       ordering: true,
       order: [[1, 'asc']],
@@ -66,8 +156,32 @@ export class ObjectListComponent implements OnDestroy {
       language: {
         search: '',
         searchPlaceholder: 'Filter...'
-      }
+      },dom:
+        "<'row' <'col-sm-3' l> <'col-sm-3' B > <'col' f> >" +
+        "<'row' <'col-sm-12'tr>>" +
+        "<'row' <'col-sm-12 col-md-5'i> <'col-sm-12 col-md-7'p> >",
+      // Configure the buttons
+      // Declare the use of the extension in the dom parameter
+      buttons: {
+        dom: {
+          container: {
+            className: 'dt-buttons btn-group btn-group-sm'
+          }
+        },
+        buttons,
+      },
     };
+
+    if(this.isCategorized) {
+      let visTargets: any[] = [0,1,2,3,-1];
+      for (let i = 0; i<this.summaries.length; i++) {
+        visTargets.push(i+4);
+      }
+      this.dtOptions['columnDefs'] = [
+        { visible: true, targets: visTargets },
+        { targets: '_all', visible: false }
+      ]
+    }
   }
 
   private getRouteObjects(id) {
@@ -81,12 +195,17 @@ export class ObjectListComponent implements OnDestroy {
       .pipe(
         map( dataArray => {
           this.summaries = dataArray[0].summaries;
+          this.columnFields = dataArray[0].obj_fields;
           this.items = dataArray;
-          return[ {items: this.items, sums: this.summaries} ];
+          return[ {items: this.items, columnFields: this.columnFields} ];
         })
       )
       .subscribe(
       data => {
+
+        this.spinner.show();
+        this.buildDtOptions();
+
         setTimeout( () => {
           this.objectLists = data;
           this.rerender();
@@ -94,7 +213,7 @@ export class ObjectListComponent implements OnDestroy {
           this.spinner.hide();
         }, 100);
       });
-    this.buildDtOptions();
+
   }
 
   ngOnDestroy(): void {
@@ -135,7 +254,6 @@ export class ObjectListComponent implements OnDestroy {
     for (const box of allCheckbox) {
       if (box.checked) {
         checkedCount++;
-        console.log(checkedCount);
       }
     }
 
