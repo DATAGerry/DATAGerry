@@ -151,7 +151,11 @@ export class ObjectListComponent implements OnDestroy {
             columnButton.push({
                   extend: 'colvisRestore',
                   text: 'Restore',
-                  className: 'btn btn-secondary btn-lg btn-block'
+                  className: 'btn btn-secondary btn-lg btn-block',
+                  action: function () {
+                    this.rerender();
+                    this.dtTrigger.next();
+                  }.bind(this)
                 });
             return columnButton;
           }.bind(this),
@@ -162,6 +166,10 @@ export class ObjectListComponent implements OnDestroy {
     this.dtOptions = {
       ordering: true,
       order: [[1, 'asc']],
+      columnDefs: [ {
+        targets: 'nosort',
+        orderable: false,
+      } ],
       retrieve: true,
       language: {
         search: '',
@@ -188,8 +196,9 @@ export class ObjectListComponent implements OnDestroy {
         visTargets.push(i+4);
       }
       this.dtOptions['columnDefs'] = [
+        { orderable: false, targets: 'nosort' },
         { visible: true, targets: visTargets },
-        { targets: '_all', visible: false }
+        { visible: false, targets: '_all' }
       ]
     }
   }
