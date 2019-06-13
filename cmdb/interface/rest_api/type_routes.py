@@ -47,7 +47,7 @@ def get_type_list():
 
 
 @type_routes.route('/<int:public_id>', methods=['GET'])
-@login_required
+
 def get_type(public_id: int):
     try:
         type_instance = object_manager.get_type(public_id)

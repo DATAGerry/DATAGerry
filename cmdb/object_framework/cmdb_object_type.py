@@ -221,11 +221,12 @@ class _ExternalLink:
 
 class _Summary:
 
-    def __init__(self, name: str, label: str = None, fields: list = None, values: list = None):
+    def __init__(self, name: str, label: str = None, labels: [] = None, fields: list = None, values: list = None):
         self.name = name
         self.label = label or self.name.title()
+        self.labels = labels or []
         self.fields = fields or []
-        self.contens = values
+        self.values = values
 
     def has_fields(self):
         if len(self.fields) > 0:
@@ -233,8 +234,11 @@ class _Summary:
         return False
 
     def set_values(self, values):
-        self.contens = values
+        self.values = values
+
+    def set_labels(self, labels):
+        self.labels = labels
 
     def __repr__(self):
-        output_string = "{}: {}".format(self.label, self.contens)
+        output_string = "{}: {}".format(self.label, self.values)
         return output_string
