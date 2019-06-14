@@ -92,11 +92,20 @@ export class ObjectListComponent implements OnDestroy {
         className: 'btn btn-light',
         action: function () {
           const allCheckbox: any = document.getElementsByClassName('select-checkbox');
+          let public_ids: number[] = [];
           for (const box of allCheckbox) {
-            if (box.checked) {
-              console.log('Delete');
+            if (box.checked && box.id) {
+              public_ids.push(box.id);
             }
           }
+          if(public_ids.length>0){
+            this.apiCallService.callDeleteManyRoute('object/delete/' + public_ids ).subscribe(data => {
+              this.route.params.subscribe((id) => {
+                this.init(id);
+              });
+            });
+          }
+
         }.bind(this)
       }
     );

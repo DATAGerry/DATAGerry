@@ -461,6 +461,26 @@ class DatabaseManagerMongo(DatabaseManager):
             raise DocumentCouldNotBeDeleted(collection, public_id)
         return result
 
+    def delete_many(self, collection: str,  **requirements: dict) -> DeleteResult:
+        """removes all documents that match the filter from a collection.
+
+        Args:
+            collection (str): name of database collection
+            filter (dict): Specifies deletion criteria using query operators.
+
+        Returns:
+            A boolean acknowledged as true if the operation ran with write concern or false if write concern was disabled
+
+        """
+        requirements_filter = {}
+        for k, req in requirements.items():
+            requirements_filter.update({k: req})
+
+        result = self.database_connector.get_collection(collection).delete_many(requirements_filter)
+        if not result.acknowledged:
+            raise DocumentCouldNotBeDeleted(collection)
+        return result
+
     def create(self, db_name: str):
         """create database/collection
 

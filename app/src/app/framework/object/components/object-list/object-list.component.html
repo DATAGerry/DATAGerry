@@ -25,7 +25,7 @@
     <tbody>
     <tr *ngFor="let result of results.items">
 
-      <td style="text-align: center" ><input  class="select-checkbox" type="checkbox" (click)="updateDisplay()"></td>
+      <td style="text-align: center"><input id="{{result.object_id}}" class="select-checkbox" type="checkbox" (click)="updateDisplay()"></td>
 
       <td>
         <cmdb-active-badge [activeStatus]="result.type_active"></cmdb-active-badge>
