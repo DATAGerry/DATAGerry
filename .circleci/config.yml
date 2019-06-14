@@ -11,6 +11,7 @@ jobs:
       # run tests (temp. disabled for redesign, see NET-71)
       #- run: make tests
       # copy datagerry to webserver
-      - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/bin/datagerry $SCP_USER@$SCP_HOST:$SCP_PATH
+      - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$CIRCLE_BRANCH/bin"
+      - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/bin/datagerry $SCP_USER@$SCP_HOST:$SCP_PATH/$CIRCLE_BRANCH/bin
       - store_artifacts:
           path: target/bin
