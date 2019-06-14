@@ -4,6 +4,13 @@ jobs:
     docker:
       - image: nethinks/datagerry_ci
     steps:
+      # checkout the source code
       - checkout
+      # build datagerry
       - run: make
-      #- run: make tests # disable tests for redesign (see NET-71)
+      # run tests (temp. disabled for redesign, see NET-71)
+      #- run: make tests
+      # copy datagerry to webserver
+      - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/bin/datagerry $SCP_USER@$SCP_HOST:$SCP_PATH
+      - store_artifacts:
+          path: target/bin
