@@ -154,6 +154,21 @@ class CmdbManagerBase:
             public_id=public_id
         )
 
+    def _delete_many(self, collection: str, filter_query: dict):
+        """
+        removes all documents that match the filter from a collection.
+        Args:
+            collection (str): name of the database collection
+            filter (dict): Specifies deletion criteria using query operators.
+
+        Returns:
+            acknowledgment of database
+        """
+        return self.dbm.delete_many(
+            collection=collection,
+            **filter_query
+        )
+
     def _search(self, collection: str, requirements, limit=0):
         return self._get_all(collection, limit=limit, **requirements)
 
@@ -364,13 +379,8 @@ class CmdbObjectManager(CmdbManagerBase):
         except (CMDBError, Exception):
             raise ObjectDeleteError(obj_id=public_id)
 
-    def delete_many_objects(self, public_ids: list):
-        ack = []
-        for public_id in public_ids:
-            if isinstance(public_id, CmdbObject):
-                ack.append(self.delete_object(public_id.get_public_id()))
-            else:
-                ack.append(self.delete_object(public_id))
+    def delete_many_objects(self, public_ids: dict):
+        ack = self._delete_many(CmdbObject.COLLECTION, public_ids)
         return ack
 
     def get_all_types(self):

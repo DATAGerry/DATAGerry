@@ -1,11 +1,15 @@
 
-<ng-container *ngIf="objectInstance?.externals && objectInstance?.externals.length>0">
-  <div class="row" *ngFor="let obj of objectInstance?.obj_fields">
-    <div class="col">
-      {{obj.name}}
-    </div>
-    <div class="col">
-      {{obj.value}}
-    </div>
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">{{objectInstance?.type_label}}</h5>
+
+    <form *ngIf="objectInstance?.obj_fields && objectInstance?.obj_fields.length>0">
+      <div class="form-group" *ngFor="let obj of objectInstance?.obj_fields">
+        <label for="{{obj.label}}">{{obj.label}}</label>
+        <input type="text" class="form-control" id="{{obj.label}}" value = "{{obj.value}}">
+      </div>
+    </form>
+
   </div>
-</ng-container>
+</div>
+

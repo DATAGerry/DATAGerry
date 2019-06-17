@@ -16,7 +16,7 @@
 
 import logging
 
-from flask import abort, jsonify
+from flask import abort, jsonify, request
 from cmdb.object_framework.cmdb_errors import ObjectDeleteError, ObjectNotFoundError
 from cmdb.object_framework.cmdb_render import CmdbRender
 from cmdb.object_framework.cmdb_object_manager import object_manager
@@ -174,6 +174,32 @@ def update_object(public_id):
 def delete_object(public_id):
     try:
         ack = object_manager.delete_object(public_id)
+        return make_response(ack.raw_result)
+    except ObjectDeleteError as e:
+        return jsonify(message='Delete Error', error=e.message)
+    except CMDBError:
+        return abort(500)
+
+
+@login_required
+@object_rest.route('/delete/<string:public_ids>', methods=['GET'])
+def delete_many_objects(public_ids):
+    try:
+
+        ids = []
+        operator_in = {'$in': []}
+        filter_public_ids = {'public_id': {}}
+
+        for v in public_ids.split(","):
+            try:
+                ids.append(int(v))
+            except (ValueError, TypeError):
+                return abort(400)
+
+        operator_in.update({'$in': ids})
+        filter_public_ids.update({'public_id': operator_in})
+
+        ack = object_manager.delete_many_objects(filter_public_ids)
         return make_response(ack.raw_result)
     except ObjectDeleteError as e:
         return jsonify(message='Delete Error', error=e.message)

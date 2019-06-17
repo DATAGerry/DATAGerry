@@ -122,14 +122,21 @@ class CmdbRender:
                 curr_sum = self.type_instance.get_summary(sum['name'])
                 # get field data for this summary
                 curr_sum_fields = curr_sum.fields
+                # get label data for this summary
+                curr_label_list = []
                 for cs_field in curr_sum_fields:
                     try:
+                        type_fields = self.type_instance.get_fields()
+                        for fields in type_fields:
+                            if fields.get('name') == cs_field:
+                                curr_label_list.append(fields.get('label'))
                         # check data
                         field_data = self.object_instance.get_value(cs_field)
                         value_list.append(field_data)
                     except CMDBError:
                         # if error while loading continue
                         continue
+                curr_sum.set_labels(curr_label_list)
                 curr_sum.set_values(value_list)
             except CMDBError:
                 # if error with summary continue
@@ -219,17 +226,9 @@ class CmdbRender:
             type_name=self.type_instance.get_name(),
             type_active=self.type_instance.active,
         )
-        if self.matched_fields:
-            render_result.match_fields = self.matched_fields
-        if self.object_instance and self.object_instance.fields:
-            render_result.obj_fields = self.object_instance.fields
-        if self.has_summaries():
-            render_result.set_summaries(self.get_summaries(True))
-        if self.has_externals():
-            render_result.set_externals(self.get_externals(True))
+        self.__add_extended_render_results(render_result)
 
         return render_result
-
 
     @staticmethod
     def result_loop_render(object_manager, instances: list) -> list:
@@ -248,14 +247,7 @@ class CmdbRender:
                 type_name=element.type_instance.get_name(),
                 type_active=element.type_instance.active,
             )
-            if element.matched_fields:
-                render_result.match_fields = element.matched_fields
-            if element.object_instance and element.object_instance.fields:
-                render_result.obj_fields = element.object_instance.fields
-            if element.has_summaries():
-                render_result.set_summaries(element.get_summaries(True))
-            if element.has_externals():
-                render_result.set_externals(element.get_externals(True))
+            element.__add_extended_render_results(render_result)
 
             dic = [i for i in all_user if (i['public_id'] == element.object_instance.author_id)]
             render_result.set_author_name('{} {}'.format(dic[0]['first_name'], dic[0]['last_name']))
@@ -263,7 +255,20 @@ class CmdbRender:
 
         return render_list
 
-
+    def __add_extended_render_results(self, render_result):
+        if self.matched_fields:
+            render_result.match_fields = self.matched_fields
+        if self.object_instance and self.object_instance.fields:
+            if self.type_instance.public_id == self.object_instance.type_id:
+                for type_field in self.type_instance.fields:
+                    for object_field in self.object_instance.fields:
+                        if object_field.get('name') == type_field.get('name'):
+                            object_field['label'] = type_field.get('label')
+                            render_result.obj_fields = self.object_instance.fields
+        if self.has_summaries():
+            render_result.set_summaries(self.get_summaries(True))
+        if self.has_externals():
+            render_result.set_externals(self.get_externals(True))
 
 
 class RenderResult:

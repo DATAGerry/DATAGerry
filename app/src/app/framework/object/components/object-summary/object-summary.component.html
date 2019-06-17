@@ -9,9 +9,9 @@
     <div class="form-group" *ngFor="let sum of objectInstance?.summaries" class="collapse show" id="collapseSummary">
       <h6 class="card-subtitle mb-2 text-muted" style="margin-top: 1.25em">{{sum.label}}</h6>
       <fieldset disabled>
-        <div class="form-group" *ngFor="let field of sum.fields; let i= index">
-          <label for="fieldInput">{{field}}</label>
-          <input type="text" class="form-control" id="fieldInput" value = "{{sum.contens[i]}}">
+        <div class="form-group" *ngFor="let label of sum.labels; let i= index">
+          <label for="fieldInput">{{label}}</label>
+          <input type="text" class="form-control" id="fieldInput" value = "{{sum.values[i]}}">
         </div>
       </fieldset>
     </div>
