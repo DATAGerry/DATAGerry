@@ -25,8 +25,6 @@ import { ActivatedRoute } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { map } from 'rxjs/operators';
 import { DatePipe } from '@angular/common';
-import { element } from 'protractor';
-import {getClassName} from "codelyzer/util/utils";
 
 @Component({
   selector: 'cmdb-object-list',
