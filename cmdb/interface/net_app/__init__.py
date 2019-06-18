@@ -39,7 +39,7 @@ system_config_reader = SystemConfigReader()
 
 def create_app(event_queue):
     import cmdb
-    from cmdb.interface.net_app.app_routes import app_pages
+    from cmdb.interface.net_app.app_routes import app_pages, redirect_index
     from cmdb.interface.net_app.doc_routes import doc_pages
 
     if cmdb.__MODE__ == 'DEBUG':
@@ -52,7 +52,8 @@ def create_app(event_queue):
         LOGGER.info('NetAPP starting with config mode {}'.format(app.config.get("ENV")))
 
     # add static routes
-    app.register_blueprint(app_pages)
+    app.register_blueprint(app_pages, url_prefix='/')
+    app.register_error_handler(404, redirect_index)
     app.register_blueprint(doc_pages, url_prefix="/docs")
 
     return app

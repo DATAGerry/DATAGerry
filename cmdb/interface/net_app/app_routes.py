@@ -21,6 +21,12 @@ from flask import Blueprint
 
 app_pages = Blueprint("app_pages", __name__, static_folder="dataGerryApp", static_url_path="")
 
-@app_pages.route("/")
+
+@app_pages.route('/')
 def default_page():
+    return app_pages.send_static_file("index.html")
+
+
+@app_pages.errorhandler(404)
+def redirect_index(error):
     return app_pages.send_static_file("index.html")
