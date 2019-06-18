@@ -43,6 +43,18 @@ def get_users():
 
 
 @login_required
+@user_routes.route('/<string:token>', methods=['GET'])
+def get_user_from_token(token):
+    LOGGER.debug(f'Used token: {token}')
+    try:
+        user = user_manager.get_user_from_token(token)
+    except (CMDBError, Exception) as e:
+        LOGGER.debug(e)
+        return abort(404)
+    resp = make_response(user)
+    return resp
+
+@login_required
 @user_routes.route('/<int:public_id>', methods=['GET'])
 def get_user(public_id):
     try:
