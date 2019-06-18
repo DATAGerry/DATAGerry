@@ -42,7 +42,7 @@ export class NewestViewComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.dtOptions = {
       ordering: true,
-      order: [[1, 'asc']],
+      order: [[4, 'asc']],
       language: {
         search: '',
         searchPlaceholder: 'Filter...'
