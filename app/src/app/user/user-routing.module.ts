@@ -46,6 +46,13 @@ const routes: Routes = [
     outlet: 'footer'
   },
   {
+    path: '',
+    data: {
+      breadcrumb: 'User'
+    },
+    component: UserViewComponent
+  },
+  {
     path: ':publicID',
     data: {
       breadcrumb: 'View'
@@ -59,4 +66,5 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class UserRoutingModule { }
+export class UserRoutingModule {
+}

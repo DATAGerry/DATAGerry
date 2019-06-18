@@ -16,7 +16,8 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { CmdbType } from '../../../../models/cmdb-type';
 
 @Component({
   selector: 'cmdb-type-validation-step',
@@ -24,6 +25,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./type-validation-step.component.scss']
 })
 export class TypeValidationStepComponent implements OnInit {
+
+  @Input() private typeInstance?: CmdbType;
 
   constructor() { }
 

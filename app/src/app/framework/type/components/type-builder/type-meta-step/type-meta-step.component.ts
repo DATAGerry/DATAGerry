@@ -8,18 +8,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 })
 export class TypeMetaStepComponent implements OnInit {
 
-  @Input() fields: any[];
-
-  constructor() {
-    const hrefValidationPattern = '(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?';
-    this.externalForm = new FormGroup({
-      name: new FormControl('', Validators.required),
-      label: new FormControl('', Validators.required),
-      icon: new FormControl(''),
-      href: new FormControl('', [Validators.required])
-      // href: new FormControl('', [Validators.required, Validators.pattern(hrefValidationPattern)])
-    });
-  }
+  @Input() fields: any[] = [];
 
   private icons = [
     'fa-glass',
@@ -608,12 +597,30 @@ export class TypeMetaStepComponent implements OnInit {
     'fa-black-tie',
     'fa-fonticons'
   ];
-  private summariesSections = [];
 
-
-  public externalForm: FormGroup;
-  private externalLinks = [];
+  private summariesForm: FormGroup;
+  public summariesSections = [];
+  private externalsForm: FormGroup;
+  public externalLinks = [];
   private hrefInterpolCounter;
+
+  constructor() {
+    this.summariesForm = new FormGroup({
+      name: new FormControl('', Validators.required),
+      label: new FormControl('', Validators.required),
+      fields: new FormControl('', Validators.required)
+    });
+
+    const hrefValidationPattern = '(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?';
+    this.externalsForm = new FormGroup({
+      name: new FormControl('', Validators.required),
+      label: new FormControl('', Validators.required),
+      icon: new FormControl(''),
+      href: new FormControl('', [Validators.required]),
+      fields: new FormControl('')
+      // href: new FormControl('', [Validators.required, Validators.pattern(hrefValidationPattern)])
+    });
+  }
 
   private static occurrences(s, subString): number {
     s += '';
@@ -638,15 +645,19 @@ export class TypeMetaStepComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.externalForm.get('href').valueChanges.subscribe((href: string) => {
+    this.externalsForm.get('href').valueChanges.subscribe((href: string) => {
       this.hrefInterpolCounter = Array(TypeMetaStepComponent.occurrences(href, '{}')).fill(0).map((x, i) => i);
-      console.log(this.hrefInterpolCounter);
     });
   }
 
+  private addSummary() {
+    this.summariesSections.push(this.summariesForm.value);
+    this.summariesForm.reset();
+  }
+
   private addExternal() {
-    this.externalLinks.push(this.externalForm.value);
-    this.externalForm.reset();
+    this.externalLinks.push(this.externalsForm.value);
+    this.externalsForm.reset();
   }
 
 }

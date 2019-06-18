@@ -19,6 +19,9 @@
 import { Component, Injectable, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TypeService } from '../../../../services/type.service';
+import { CategoryService } from '../../../../services/category.service';
+import { CmdbCategory } from '../../../../models/cmdb-category';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class TypeNameValidator {
@@ -47,6 +50,7 @@ export class TypeBasicStepComponent implements OnInit {
   }
 
   public basicForm: FormGroup;
+  // private categoryList: Observable<CmdbCategory[]>;
 
   constructor(private typeNameValidator: TypeNameValidator) {
 
@@ -55,13 +59,16 @@ export class TypeBasicStepComponent implements OnInit {
       label: new FormControl('', Validators.required),
       description: new FormControl(''),
       active: new FormControl(true),
+      // category_id: new FormControl('')
     });
+
+
   }
 
   public ngOnInit(): void {
+    // this.categoryList = this.categoryService.getCategoryList();
     this.basicForm.get('name').valueChanges.subscribe(val => {
       this.basicForm.get('label').setValue(val.toString().charAt(0).toUpperCase() + val.toString().slice(1));
-
     });
   }
 

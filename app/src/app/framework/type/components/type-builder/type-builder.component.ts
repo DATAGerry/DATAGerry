@@ -20,13 +20,18 @@ import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { TypeBasicStepComponent } from './type-basic-step/type-basic-step.component';
 import { CmdbType } from '../../../models/cmdb-type';
 import { TypeFieldsStepComponent } from './type-fields-step/type-fields-step.component';
+import { TypeMetaStepComponent } from './type-meta-step/type-meta-step.component';
+import { TypeAccessStepComponent } from './type-access-step/type-access-step.component';
+import { TypeService } from '../../../services/type.service';
+import { UserService } from '../../../../user/services/user.service';
+import { User } from '../../../../user/models/user';
 
 @Component({
   selector: 'cmdb-type-builder',
   templateUrl: './type-builder.component.html',
   styleUrls: ['./type-builder.component.scss']
 })
-export class TypeBuilderComponent implements OnInit {
+export class TypeBuilderComponent implements OnInit{
 
   @Input() private typeInstance?: CmdbType;
 
@@ -36,11 +41,20 @@ export class TypeBuilderComponent implements OnInit {
   @ViewChild(TypeFieldsStepComponent)
   private fieldStep: TypeFieldsStepComponent;
 
-  constructor() {
+  @ViewChild(TypeMetaStepComponent)
+  private metaStep: TypeMetaStepComponent;
 
-  }
+  @ViewChild(TypeAccessStepComponent)
+  private accessStep: TypeAccessStepComponent;
 
-  ngOnInit() {
+  public constructor(private typeService: TypeService, private userService: UserService) {}
+
+  public ngOnInit(): void {
+    this.typeInstance = new CmdbType();
+    this.typeInstance.version = '1.0.0';
+    this.userService.getCurrentUser().subscribe((currentUser: User) => {
+      this.typeInstance.author_id = currentUser.public_id;
+    });
   }
 
   private exitBasicStep() {
@@ -48,12 +62,45 @@ export class TypeBuilderComponent implements OnInit {
   }
 
   private exitFieldStep() {
-    this.assignToType({sections: this.fieldStep.typeBuilder.sections});
+    let fieldBuffer = [];
+    let sectionBuffer = [];
+    const sectionOrigin = this.fieldStep.typeBuilder.sections;
+    for (const section of sectionOrigin) {
+      const sectionGlobe = Object.assign({}, section);
+      fieldBuffer = fieldBuffer.concat(sectionGlobe.fields);
+      const sectionFieldNames = new Set(sectionGlobe.fields.map(f => f.name));
+      delete sectionGlobe.fields;
+      sectionGlobe.fields = sectionFieldNames;
+      sectionBuffer = sectionBuffer.concat(sectionGlobe);
+    }
+    this.assignToType({fields: fieldBuffer});
+    this.assignToType({sections: sectionBuffer}, 'render_meta');
   }
 
-  public assignToType(data: any) {
-    Object.assign(this.typeInstance, data);
-    console.log(this.typeInstance);
+  private exitMetaStep() {
+    this.assignToType({summary: this.metaStep.summariesSections}, 'render_meta');
+    this.assignToType({external: this.metaStep.externalLinks}, 'render_meta');
+  }
+
+  private exitAccessStep() {
+    this.assignToType(this.accessStep.accessForm.value, 'access');
+  }
+
+  private saveType() {
+    this.typeService.postType(this.typeInstance).subscribe(res => {
+      console.log(res);
+    });
+  }
+
+  public assignToType(data: any, optional: any = null) {
+    if (optional !== null) {
+      if (this.typeInstance[optional] === undefined) {
+        this.typeInstance[optional] = {};
+      }
+      Object.assign(this.typeInstance[optional], data);
+    } else {
+      Object.assign(this.typeInstance, data);
+    }
   }
 
 }

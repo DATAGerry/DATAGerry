@@ -8,20 +8,20 @@
     <button class="btn btn-primary" type="button" awPreviousStep>Go to previous step</button>
     <button class="btn btn-primary" type="button" awNextStep>Go to next step</button>
   </aw-wizard-step>
-  <aw-wizard-step stepId="3" stepTitle="Meta data">
-    <cmdb-type-meta-step [fields]=""></cmdb-type-meta-step>
+  <aw-wizard-step (stepExit)="exitMetaStep()" stepId="3" stepTitle="Meta data">
+    <cmdb-type-meta-step [fields]="typeInstance.fields"></cmdb-type-meta-step>
     <button class="btn btn-primary" type="button" awPreviousStep>Previous Step</button>
     <button class="btn btn-primary" type="button" awNextStep>Go to next step</button>
   </aw-wizard-step>
-  <aw-wizard-step stepId="4" stepTitle="Access">
+  <aw-wizard-step (stepExit)="exitAccessStep()" stepId="4" stepTitle="Access">
     <cmdb-type-access-step></cmdb-type-access-step>
     <button class="btn btn-primary" type="button" awPreviousStep>Previous Step</button>
     <button class="btn btn-primary" type="button" awNextStep>Go to next step</button>
   </aw-wizard-step>
-  <aw-wizard-completion-step stepId="5" stepTitle="Validation">
-    <cmdb-type-validation-step></cmdb-type-validation-step>
+  <aw-wizard-step stepId="5" stepTitle="Validation">
+    <cmdb-type-validation-step [typeInstance]="typeInstance"></cmdb-type-validation-step>
     <button class="btn btn-primary" type="button" awPreviousStep>Previous Step</button>
-    <button class="btn btn-primary" type="button">Finish</button>
-  </aw-wizard-completion-step>
+    <button class="btn btn-success" type="button" (click)="saveType()">Save</button>
+  </aw-wizard-step>
 </aw-wizard>
 <!--[disabled]="!basicStep.basicForm.valid"-->

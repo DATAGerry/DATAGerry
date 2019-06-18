@@ -41,5 +41,10 @@ export class TypeService {
   public async validateTypeName(name: string) {
     return this.typeList.find(type => type.name === name) === undefined;
   }
+
+  public postType(typeInstance: CmdbType) {
+    return this.api.callPostRoute<CmdbType>(this.servicePrefix + '/', typeInstance);
+  }
+
 }
 

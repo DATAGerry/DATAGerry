@@ -11,11 +11,17 @@
         <div id="structureControls" class="collapse show" data-parent="#controlsPanel">
           <div class="card-body">
             <div class="list-group">
-              <a *ngFor="let control of structureControls" [dndType]="control.typeController.dndType"
-                 [dndDraggable]="control.typeController.content()" type="button"
+              <div *ngFor="let control of structureControls" [dndType]="control.typeController.dndType"
+                 [dndDraggable]="control.typeController.content()"
                  class="list-group-item list-group-item-action">
-                <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
-              </a>
+                <span>
+                  <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
+                </span>
+                <button type="button" class="btn btn-primary btn-sm float-right" dndHandle>
+                  <i class="fa fa-bars" aria-hidden="true"></i>
+                </button>
+                <div class="clearfix"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -29,11 +35,17 @@
         <div id="basicControls" class="collapse" data-parent="#controlsPanel">
           <div class="card-body">
             <div class="list-group">
-              <a *ngFor="let control of basicControls" [dndType]="control.typeController.dndType"
-                 [dndDraggable]="control.typeController.content()" type="button"
-                 class="list-group-item list-group-item-action">
-                <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
-              </a>
+              <div *ngFor="let control of basicControls" [dndType]="control.typeController.dndType"
+                   [dndDraggable]="control.typeController.content()"
+                   class="list-group-item list-group-item-action">
+                <span>
+                  <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
+                </span>
+                <button type="button" class="btn btn-primary btn-sm float-right" dndHandle>
+                  <i class="fa fa-bars" aria-hidden="true"></i>
+                </button>
+                <div class="clearfix"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -47,11 +59,17 @@
         <div id="specialControls" class="collapse" data-parent="#controlsPanel">
           <div class="card-body">
             <div class="list-group">
-              <a *ngFor="let control of specialControls" [dndType]="control.typeController.dndType"
-                 [dndDraggable]="control.typeController.content()" type="button"
-                 class="list-group-item list-group-item-action">
-                <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
-              </a>
+              <div *ngFor="let control of specialControls" [dndType]="control.typeController.dndType"
+                   [dndDraggable]="control.typeController.content()"
+                   class="list-group-item list-group-item-action">
+                <span>
+                  <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
+                </span>
+                <button type="button" class="btn btn-primary btn-sm float-right" dndHandle>
+                  <i class="fa fa-bars" aria-hidden="true"></i>
+                </button>
+                <div class="clearfix"></div>
+              </div>
             </div>
           </div>
         </div>

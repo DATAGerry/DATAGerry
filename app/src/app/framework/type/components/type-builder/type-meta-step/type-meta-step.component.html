@@ -5,7 +5,47 @@
         Summaries
       </div>
       <div class="card-body">
-
+        <form [formGroup]="summariesForm" (ngSubmit)="addSummary()">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" formControlName="name" class="form-control" lowercase>
+          </div>
+          <div class="form-group">
+            <label>Label</label>
+            <input type="text" formControlName="label" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Fields</label>
+            <ng-select
+              [items]="fields"
+              [multiple]="true"
+              [closeOnSelect]="false"
+              [searchable]="false"
+              bindLabel="label"
+              bindValue="name"
+              placeholder="Select fields"
+              formControlName="fields">
+            </ng-select>
+          </div>
+          <button [disabled]="!summariesForm.valid" type="submit" class="btn btn-primary">Add</button>
+        </form>
+      </div>
+      <div class="card-body">
+        <div id="summary-link-accordion" class="accordion">
+          <div *ngFor="let summary of summariesSections" class="card mt-2">
+            <div class="card-header">
+              <button class="btn btn-link" type="button" data-toggle="collapse"
+                      [attr.data-target]="'#collapse_'+summary.name">
+                {{summary.label}}
+              </button>
+            </div>
+            <div id="collapse_{{summary.name}}" class="collapse">
+              <div class="card-body">
+                {{summary | json}}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -15,7 +55,7 @@
         External Links
       </div>
       <div id="external-link-add" class="card-body">
-        <form [formGroup]="externalForm" (ngSubmit)="addExternal()">
+        <form [formGroup]="externalsForm" (ngSubmit)="addExternal()">
           <div class="form-group">
             <label>Name</label>
             <input type="text" formControlName="name" class="form-control" lowercase>
@@ -41,21 +81,27 @@
           <div class="form-group">
             <label>Link</label>
             <input type="text" formControlName="href" class="form-control">
-            <small class="form-text text-muted">enter curved brackets for field interpolation <br />
+            <small class="form-text text-muted">enter curved brackets for field interpolation <br/>
               example: <b>http://example.org/{{"{}"}}/example/</b>
             </small>
           </div>
           <div class="form-group">
             <div class="form-group" *ngFor="let field of hrefInterpolCounter">
               <label>Field of interpolation: {{field + 1}}</label>
-              <select class="custom-select">
-                <option selected></option>
-                <option *ngFor=""></option>
-              </select>
+              <ng-select
+                [items]="fields"
+                [multiple]="true"
+                [closeOnSelect]="false"
+                [searchable]="false"
+                bindLabel="label"
+                bindValue="name"
+                placeholder="Select fields"
+                formControlName="fields">
+              </ng-select>
             </div>
           </div>
 
-          <button [disabled]="!externalForm.valid" type="submit" class="btn btn-primary">Add</button>
+          <button [disabled]="!externalsForm.valid" type="submit" class="btn btn-primary">Add</button>
         </form>
       </div>
       <div class="card-body">

@@ -9,15 +9,15 @@
           </div>
         </div>
         <div class="form-group">
-          <label for="typeNameInput">Name</label>
+          <label for="typeNameInput">Name <span class="required">*</span></label>
           <input type="text" formControlName="name" class="form-control" id="typeNameInput"
-                 aria-describedby="typeNameInputHelp" lowercase required="">
+                 aria-describedby="typeNameInputHelp" lowercase required>
           <small id="typeNameInputHelp" class="form-text text-muted">Type name must be lowercase unique</small>
         </div>
         <div class="form-group">
-          <label for="typeLabelInput">Label</label>
+          <label for="typeLabelInput">Label <span class="required">*</span></label>
           <input type="text" formControlName="label" class="form-control" id="typeLabelInput"
-                 aria-describedby="typeLabelInputHelp" required="">
+                 aria-describedby="typeLabelInputHelp" required>
           <small id="typeLabelInputHelp" class="form-text text-muted">only a display name</small>
         </div>
         <div class="form-group">
@@ -26,10 +26,32 @@
                     aria-describedby="typeDescriptionInputHelp"></textarea>
           <small id="typeDescriptionInputHelp" class="form-text text-muted">Small description of the type</small>
         </div>
-
       </form>
     </div>
+
     <div class="col-4">
+      <!--
+        <div class="card">
+          <div class="card-header">
+            Category:
+            <div *ngIf="basicForm.get('category_id').value; then categorySelected else categoryUnselected"></div>
+            <ng-template #categorySelected><span class="text-success">SELECTED</span></ng-template>
+            <ng-template #categoryUnselected><span class="text-danger">UNSELECTED</span></ng-template>
+          </div>
+          <div class="card-body">
+            <form [formGroup]="basicForm">
+              <ng-select
+                [items]="categoryList | async"
+
+                bindLabel="label"
+                bindValue="public_id"
+                placeholder="Select category"
+                formControlName="category_id">
+              </ng-select>
+            </form>
+          </div>
+      </div>
+      -->
       <div class="card">
         <div class="card-header">
           Validation: <span [className]="basicForm.valid ? 'text-success' : 'text-danger'">{{basicForm.status}}</span>
@@ -41,4 +63,3 @@
     </div>
   </div>
 </div>
-

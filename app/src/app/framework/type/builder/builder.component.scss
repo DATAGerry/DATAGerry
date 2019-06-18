@@ -1,5 +1,11 @@
 @import "~src/scss/variables";
 
+#controlsPanel{
+  button{
+    line-height: 0.1;
+  }
+}
+
 #form-container {
 
   section {

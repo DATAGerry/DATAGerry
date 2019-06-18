@@ -48,8 +48,9 @@ export class ApiCallService {
     return await this.http.get<T>(this.apiURL + route).toPromise<T>();
   }
 
-  public callPostRoute(route: string, data) {
-    return this.http.post<any>(this.apiURL + route, data, httpOptions);
+  public callPostRoute<T>(route: string, data) {
+    console.log(data);
+    return this.http.post<T>(this.apiURL + route, data, httpOptions);
   }
 
   public callDeleteManyRoute<T>(route: string, params?: any): Observable<any> {
