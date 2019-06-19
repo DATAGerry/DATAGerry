@@ -29,8 +29,8 @@
       </li>
       <div id="sidebar-categories">
         <li class="nav-title">Categories</li>
-        <input id="category_filter" class="form-control form-control-sm" type="text" placeholder="Filter..">
-        <div class="list-group panel">
+        <input id="category_filter" class="form-control form-control-sm" type="text" placeholder="Filter.." [formControl]="filterTerm">
+        <div class="list-group panel category_list">
           <cmdb-sidebar-category *ngFor="let category of categoryTree;"
                                  [categoryData]="category"></cmdb-sidebar-category>
         </div>
