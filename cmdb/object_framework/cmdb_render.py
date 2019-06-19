@@ -224,6 +224,7 @@ class CmdbRender:
             author_name=get_user_manager().get_user(self.object_instance.author_id).get_name(),
             type_id=self.type_instance.get_public_id(),
             type_name=self.type_instance.get_name(),
+            type_label=self.type_instance.get_label(),
             type_active=self.type_instance.active,
         )
         self.__add_extended_render_results(render_result)
@@ -245,6 +246,7 @@ class CmdbRender:
                 author_name=None,
                 type_id=element.type_instance.get_public_id(),
                 type_name=element.type_instance.get_name(),
+                type_label=element.type_instance.get_label(),
                 type_active=element.type_instance.active,
             )
             element.__add_extended_render_results(render_result)
