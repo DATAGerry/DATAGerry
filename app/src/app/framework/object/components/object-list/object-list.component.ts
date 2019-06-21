@@ -257,7 +257,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   public checkType(value) {
-    if (value.hasOwnProperty('$date')) {
+    if (value!=null && value.hasOwnProperty('$date')) {
       return '<span>' + this.dateFormatPipe.transform(value[this.$date], 'dd/mm/yyyy - hh:mm:ss') + '</span>';
     }
     return '<span>' + value + '</span>';
