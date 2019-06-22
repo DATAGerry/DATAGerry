@@ -49,7 +49,6 @@ export class ApiCallService {
   }
 
   public callPostRoute<T>(route: string, data) {
-    console.log(data);
     return this.http.post<T>(this.apiURL + route, data, httpOptions);
   }
 

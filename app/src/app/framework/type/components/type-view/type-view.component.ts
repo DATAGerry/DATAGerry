@@ -20,6 +20,7 @@ import { Component, OnInit } from '@angular/core';
 import { ApiCallService } from '../../../../services/api-call.service';
 import { ActivatedRoute } from '@angular/router';
 import { CmdbType } from '../../../models/cmdb-type';
+import { CmdbObject } from '../../../models/cmdb-object';
 
 @Component({
   selector: 'cmdb-type-view',

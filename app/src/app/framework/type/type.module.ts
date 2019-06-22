@@ -39,6 +39,7 @@ import { RenderModule } from '../render/render.module';
 import { BuilderModule } from './builder/builder.module';
 import { TypeEditComponent } from './components/type-edit/type-edit.component';
 import { TypeMetaStepComponent } from './components/type-builder/type-meta-step/type-meta-step.component';
+import { TypeTabObjectListComponent } from './components/type-view/tabs/type-tab-object-list/type-tab-object-list.component';
 
 @NgModule({
   declarations: [
@@ -53,7 +54,8 @@ import { TypeMetaStepComponent } from './components/type-builder/type-meta-step/
     TypeAccessStepComponent,
     TypeValidationStepComponent,
     TypeEditComponent,
-    TypeMetaStepComponent
+    TypeMetaStepComponent,
+    TypeTabObjectListComponent
   ],
   imports: [
     CommonModule,
