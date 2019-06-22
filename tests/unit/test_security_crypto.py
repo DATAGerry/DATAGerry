@@ -20,19 +20,20 @@ from cmdb.security.crypto import RSADecryption
 
 def test_aes_crypto():
     from Crypto.Random import get_random_bytes
-    from cmdb.security.crypto import AESEncryption, AESDecryption
+    from cmdb.security.crypto import AESCipher
 
     key = get_random_bytes(32)
 
-    aes_crypter = AESEncryption(key=key)
-    aes_decrypter = AESDecryption(key=key)
+    aes_cipher = AESCipher(key=key)
 
     test_dict = {'test': 'test'}
 
-    encrypted_test_data = aes_crypter.encrypt(test_dict)
+    encrypted_test_data = aes_cipher.encrypt(test_dict)
     assert encrypted_test_data != test_dict
-    decrypted_test_data = aes_decrypter.decrypt(encrypted_test_data)
+    decrypted_test_data = aes_cipher.decrypt(encrypted_test_data.get_encrypted())
+    decrypted_test_data_str = aes_cipher.decrypt(encrypted_test_data.__str__())
     assert decrypted_test_data == test_dict
+    assert decrypted_test_data_str == test_dict
 
 
 @pytest.mark.usefixtures("key_holder")

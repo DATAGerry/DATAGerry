@@ -23,6 +23,7 @@ Default asymmetric algorithm is RSA `Rivest–Shamir–Adleman <https://en.wikip
 """
 
 import json
+import base64
 from Crypto import Random
 from Crypto.Cipher import AES, PKCS1_OAEP
 from Crypto.PublicKey import RSA
@@ -30,11 +31,29 @@ from Crypto.PublicKey import RSA
 PADDING_CHARACTER_CODING = 'UTF-8'
 
 
-class AESEncryption:
+class AESCipher:
     """
-    AES cipher - using a 32bit key it first serializes a dictionary and returns an encrypted byte string
+    AES cipher
     """
     BS = 16
+
+    class AESEncrypted:
+        """
+        AES encryption result - just a wrapper function
+        """
+
+        def __init__(self, iv: bytes, encrypted: bytes):
+            self.iv = iv
+            self.encrypted = encrypted
+
+        def get_encrypted(self) -> bytes:
+            return self.iv + self.encrypted
+
+        def __str__(self):
+            return self.__repr__()
+
+        def __repr__(self):
+            return base64.b64encode(self.iv + self.encrypted).decode(PADDING_CHARACTER_CODING)
 
     def __init__(self, key):
         """
@@ -42,7 +61,7 @@ class AESEncryption:
         Args:
             key: encryption key, must have this specification length (16,24,32 bit)
         """
-        self.iv = Random.new().read(AESEncryption.BS)
+        self.iv = Random.new().read(AESCipher.BS)
         self.key = key
 
     @classmethod
@@ -59,7 +78,12 @@ class AESEncryption:
         return p + (cls.BS - len(p) % cls.BS) * chr(
             cls.BS - len(p) % cls.BS)
 
-    def encrypt(self, data: dict) -> bytes:
+    @classmethod
+    def _unpad(cls, p):
+        """removes the block size padding"""
+        return p[:-ord(p[len(p) - 1:])]
+
+    def encrypt(self, data: dict) -> AESEncrypted:
         """
         encrypt the dictionary - returns an encrypted byte string
         Args:
@@ -71,42 +95,25 @@ class AESEncryption:
         serialize_data = json.dumps(data)
         raw = self._pad(serialize_data).encode(PADDING_CHARACTER_CODING)
         cipher = AES.new(self.key, AES.MODE_CBC, self.iv)
-        # return base64.b64encode(self.iv + cipher.encrypt(raw))
-        return self.iv + cipher.encrypt(raw)
+        return AESCipher.AESEncrypted(self.iv, cipher.encrypt(raw))
 
-
-class AESDecryption:
-    """
-    AES Cipher - decrypts the given data. Returns a dictionary.
-    """
-
-    def __init__(self, key):
-        """
-        Init the symmetric key
-        Args:
-            key: symmetric key
-        """
-        self.key = key
-
-    @classmethod
-    def _unpad(cls, p):
-        """removes the block size padding"""
-        return p[:-ord(p[len(p) - 1:])]
-
-    def decrypt(self, data: bytes) -> dict:
+    def decrypt(self, data: (str, bytes)) -> dict:
         """
         decrypt the byte string back to a dictionary
         Args:
-            data: encrypted byte string
+            data: encrypted byte string or string
 
         Returns:
             plaintext dict
         """
-        # data = base64.b64decode(data)
-        iv = data[:AESEncryption.BS]
-        encrypted_msg = data[AESEncryption.BS:]
-        cipher = AES.new(self.key, AES.MODE_CBC, iv)
-        return json.loads(self._unpad(cipher.decrypt(encrypted_msg)).decode(PADDING_CHARACTER_CODING))
+        if type(data) == str:
+            data = base64.b64decode(data)
+
+        iv = data[:AESCipher.BS]
+        encrypted_data = data[AESCipher.BS:]
+        aes_encrypted = AESCipher.AESEncrypted(iv, encrypted_data)
+        cipher = AES.new(self.key, AES.MODE_CBC, aes_encrypted.iv)
+        return json.loads(self._unpad(cipher.decrypt(aes_encrypted.encrypted)).decode(PADDING_CHARACTER_CODING))
 
 
 class RSAEncryption:
