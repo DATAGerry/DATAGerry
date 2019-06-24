@@ -73,7 +73,18 @@ def get_object_by_type(type_ids):
 @object_rest.route('/count/<int:type_id>', methods=['GET'])
 def count_object_by_type(type_id):
     try:
-        count = object_manager.count_objects(type_id)
+        count = object_manager.count_objects_by_type(type_id)
+        resp = make_response(count)
+    except CMDBError:
+        return abort(400)
+    return resp
+
+
+@login_required
+@object_rest.route('/count/', methods=['GET'])
+def count_objects():
+    try:
+        count = object_manager.count_objects()
         resp = make_response(count)
     except CMDBError:
         return abort(400)

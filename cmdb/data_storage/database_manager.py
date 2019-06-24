@@ -339,7 +339,7 @@ class DatabaseManagerMongo(DatabaseManager):
 
         return list(self.__find(collection=collection, *args, **kwargs))
 
-    def count(self, collection: str, type_id: int, *args, **kwargs):
+    def count_by_type(self, collection: str, type_id: int, *args, **kwargs):
         """This method does not actually
         performs the find() operation
         but instead returns
@@ -357,6 +357,23 @@ class DatabaseManagerMongo(DatabaseManager):
 
         formatted_type_id = {'type_id': type_id}
         result = self._count(collection, formatted_type_id, *args, **kwargs)
+        return result
+
+    def count(self, collection: str, *args, **kwargs):
+        """This method does not actually
+        performs the find() operation
+        but instead returns
+        a numerical count of the documents that meet the selection criteria.
+
+        Args:
+            collection (str): name of database collection
+            *args: arguments for search operation
+            **kwargs:
+
+        Returns:
+            returns the count of the documents
+        """
+        result = self._count(collection, *args, **kwargs)
         return result
 
     def _count(self, collection: str, *args, **kwargs):

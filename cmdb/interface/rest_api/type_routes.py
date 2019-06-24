@@ -121,3 +121,14 @@ def delete_type(public_id: int):
         return abort(500)
     resp = make_response(ack)
     return resp
+
+
+@login_required
+@type_routes.route('/count/', methods=['GET'])
+def count_objects():
+    try:
+        count = object_manager.count_types()
+        resp = make_response(count)
+    except CMDBError:
+        return abort(400)
+    return resp

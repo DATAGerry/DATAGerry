@@ -233,6 +233,9 @@ class UserManagement:
         except (CMDBError, Exception):
             return False
 
+    def count_user(self):
+        return self.dbm.count(collection=User.COLLECTION)
+
 
 class GroupDeleteError(CMDBError):
     def __init__(self, name):
