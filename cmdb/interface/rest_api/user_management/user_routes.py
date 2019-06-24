@@ -82,3 +82,14 @@ def update_user(public_id: int):
 @user_routes.route('/<int:public_id>', methods=['DELETE'])
 def delete_user(public_id: int):
     raise NotImplementedError
+
+
+@login_required
+@user_routes.route('/count/', methods=['GET'])
+def count_objects():
+    try:
+        count = user_manager.count_user()
+        resp = make_response(count)
+    except CMDBError:
+        return abort(400)
+    return resp

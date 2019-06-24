@@ -50,7 +50,7 @@
         <a class="ml-1 text-dark" routerLink="/framework/object/{{result.object_id}}/edit">
           <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
         </a>
-        <a class="ml-1 text-dark" (click)="delObject(result.object_id)">
+        <a class="ml-1 text-dark" (click)="delObject(result)">
           <i class="fa fa-trash-o" aria-hidden="true"></i>
         </a>
       </td>
@@ -58,3 +58,6 @@
     </tbody>
   </ng-container>
 </table>
+
+<!-- Modal : insert new object-->
+<cmdb-object-insert></cmdb-object-insert>

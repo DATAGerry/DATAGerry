@@ -31,17 +31,21 @@ import { ObjectSummaryComponent } from './components/object-summary/object-summa
 import { ObjectExternalsComponent } from './components/object-externals/object-externals.component';
 import { ObjectFieldsViewComponent } from './components/object-fields-view/object-fields-view.component';
 import { NgxSpinnerModule } from 'ngx-spinner';
+import { ObjectInsertComponent } from './components/object-insert/object-insert.component';
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 
 @NgModule({
   declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent, ObjectSummaryComponent,
-    ObjectExternalsComponent, ObjectFieldsViewComponent],
+    ObjectExternalsComponent, ObjectFieldsViewComponent, ObjectInsertComponent],
   imports: [
     CommonModule,
     ObjectRoutingModule,
     DataTablesModule,
     LayoutModule,
     QRCodeModule,
-    NgxSpinnerModule
+    NgxSpinnerModule,
+    FormsModule,
+    ReactiveFormsModule
   ]
 })
 export class ObjectModule { }

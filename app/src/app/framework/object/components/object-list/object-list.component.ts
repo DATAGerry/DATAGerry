@@ -41,7 +41,7 @@ export class ObjectListComponent implements OnDestroy {
 
   private summaries: [];
   private columnFields: [];
-  private items: [];
+  private items: [] ;
   public objectLists: {};
   public isCategorized: boolean = false;
   readonly $date: string = '$date';
@@ -59,15 +59,16 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   private buildDtOptions() {
-    let buttons = [];
+    const buttons = [];
 
     buttons.push(
       {
         // add new
         text: '<i class="fa fa-file-o" aria-hidden="true"></i>',
         className: 'btn btn-light',
-        action: function (e, dt, node, config) {
-          console.log('New');
+        attr: {
+          'data-toggle': 'modal',
+          'data-target': '#insertModal'
         }
       }
     );
@@ -77,9 +78,6 @@ export class ObjectListComponent implements OnDestroy {
         // edit
         text: '<i class="fa fa-pencil-square-o" aria-hidden="true"></i>',
         className: 'btn btn-light',
-        action: function (e, dt, node, config) {
-          console.log('Edit');
-        }
       }
     );
 
@@ -88,22 +86,8 @@ export class ObjectListComponent implements OnDestroy {
         // delete
         text: '<i class="fa fa-trash-o" aria-hidden="true"></i>',
         className: 'btn btn-light',
-        action: function () {
-          const allCheckbox: any = document.getElementsByClassName('select-checkbox');
-          let public_ids: number[] = [];
-          for (const box of allCheckbox) {
-            if (box.checked && box.id) {
-              public_ids.push(box.id);
-            }
-          }
-          if(public_ids.length>0){
-            this.apiCallService.callDeleteManyRoute('object/delete/' + public_ids ).subscribe(data => {
-              this.route.params.subscribe((id) => {
-                this.init(id);
-              });
-            });
-          }
-
+        action: function() {
+          this.delManyObjects();
         }.bind(this)
       }
     );
@@ -135,31 +119,32 @@ export class ObjectListComponent implements OnDestroy {
       }
     );
 
-    if(this.isCategorized) {
+    if (this.isCategorized) {
       buttons.push(
         {
           extend: 'collection',
           className: 'btn btn-light dropdown-toggle',
           text: '<i class="fa fa-cog" aria-hidden="true"></i>',
           collectionLayout: 'dropdown-menu overflow-auto',
-          buttons: function ( e, dt, node, config ) {
+          buttons: function() {
             const columnButton = [];
-            for(let i = 0; i<this.columnFields.length; i++){
+            // tslint:disable-next-line:prefer-for-of
+            for (let i = 0; i < this.columnFields.length; i++) {
               {
                 columnButton.push(
                   {
                   text: this.columnFields[i].label,
                   extend: 'columnToggle',
-                  columns: '.toggle-'+this.columnFields[i].name,
-                  className: 'dropdown-item '+ this.columnFields[i].name,
-                })
+                  columns: '.toggle-' + this.columnFields[i].name,
+                  className: 'dropdown-item ' + this.columnFields[i].name,
+                });
               }
             }
             columnButton.push({
                   extend: 'colvisRestore',
                   text: 'Restore',
                   className: 'btn btn-secondary btn-lg btn-block',
-                  action: function () {
+                  action: function() {
                     this.rerender();
                     this.dtTrigger.next();
                   }.bind(this)
@@ -181,10 +166,11 @@ export class ObjectListComponent implements OnDestroy {
       language: {
         search: '',
         searchPlaceholder: 'Filter...'
-      },dom:
-        "<'row' <'col-sm-3' l> <'col-sm-3' B > <'col' f> >" +
-        "<'row' <'col-sm-12'tr>>" +
-        "<'row' <'col-sm-12 col-md-5'i> <'col-sm-12 col-md-7'p> >",
+      },
+      dom:
+        '<"row" <"col-sm-3" l> <"col-sm-3" B > <"col" f> >' +
+        '<"row" <"col-sm-12"tr>>' +
+        '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
       // Configure the buttons
       // Declare the use of the extension in the dom parameter
       buttons: {
@@ -197,16 +183,16 @@ export class ObjectListComponent implements OnDestroy {
       },
     };
 
-    if(this.isCategorized) {
-      let visTargets: any[] = [0,1,2,3,-1];
-      for (let i = 0; i<this.summaries.length; i++) {
-        visTargets.push(i+4);
+    if (this.isCategorized) {
+      const visTargets: any[] = [0, 1, 2 , 3, -1];
+      for (let i = 0; i < this.summaries.length; i++) {
+        visTargets.push(i + 4);
       }
-      this.dtOptions['columnDefs'] = [
+      this.dtOptions.columnDefs = [
         { orderable: false, targets: 'nosort' },
         { visible: true, targets: visTargets },
         { visible: false, targets: '_all' }
-      ]
+      ];
     }
   }
 
@@ -220,15 +206,16 @@ export class ObjectListComponent implements OnDestroy {
     this.apiCallService.callGetRoute(url)
       .pipe(
         map( dataArray => {
-          this.summaries = dataArray[0].summaries;
-          this.columnFields = dataArray[0].obj_fields;
-          this.items = dataArray;
+          const length = dataArray.length;
+          this.summaries = length > 0 ? dataArray[0].summaries : [];
+          this.columnFields = length > 0 ? dataArray[0].obj_fields : [];
+          this.items = length > 0 ? dataArray : [];
+
           return[ {items: this.items, columnFields: this.columnFields} ];
         })
       )
       .subscribe(
       data => {
-
         this.spinner.show();
         this.buildDtOptions();
 
@@ -257,7 +244,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   public checkType(value) {
-    if (value!=null && value.hasOwnProperty('$date')) {
+    if (value != null && value.hasOwnProperty('$date')) {
       return '<span>' + this.dateFormatPipe.transform(value[this.$date], 'dd/mm/yyyy - hh:mm:ss') + '</span>';
     }
     return '<span>' + value + '</span>';
@@ -295,8 +282,29 @@ export class ObjectListComponent implements OnDestroy {
     }
   }
 
-  public delObject(id: number) {
+  public delObject(value: any) {
+    const id = value.object_id;
     this.apiCallService.callDeleteRoute('object/' + id).subscribe(data => {
+      this.route.params.subscribe((typeId) => {
+        this.init(typeId);
+      });
     });
+  }
+
+  public delManyObjects() {
+    const allCheckbox: any = document.getElementsByClassName('select-checkbox');
+    const publicIds: number[] = [];
+    for (const box of allCheckbox) {
+      if (box.checked && box.id) {
+        publicIds.push(box.id);
+      }
+    }
+    if (publicIds.length > 0) {
+      this.apiCallService.callDeleteManyRoute('object/delete/' + publicIds ).subscribe(data => {
+        this.route.params.subscribe((id) => {
+          this.init(id);
+        });
+      });
+    }
   }
 }

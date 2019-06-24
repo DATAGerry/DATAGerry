@@ -17,6 +17,7 @@
 */
 
 import { Component, OnInit } from '@angular/core';
+import {ApiCallService} from '../services/api-call.service';
 
 @Component({
   selector: 'cmdb-dashboard',
@@ -25,9 +26,24 @@ import { Component, OnInit } from '@angular/core';
 })
 export class DashboardComponent implements OnInit {
 
-  constructor() { }
+  public objectCount: number;
+  public typeCount: number;
+  public userCount: number;
+
+  constructor(private api: ApiCallService) { }
 
   ngOnInit() {
+    this.api.callGetRoute('object/count/' ).subscribe((count) => {
+      this.objectCount = count;
+    });
+
+    this.api.callGetRoute('type/count/' ).subscribe((count) => {
+      this.typeCount = count;
+    });
+
+    this.api.callGetRoute('user/count/' ).subscribe((count) => {
+      this.userCount = count;
+    });
   }
 
 }

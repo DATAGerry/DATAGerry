@@ -230,8 +230,11 @@ class CmdbObjectManager(CmdbManagerBase):
     def get_objects_by_type(self, type_id: int):
         return self.get_objects_by(type_id=type_id)
 
-    def count_objects(self, public_id: int):
-        return self.dbm.count(collection=CmdbObject.COLLECTION, type_id=public_id)
+    def count_objects_by_type(self, public_id: int):
+        return self.dbm.count_by_type(collection=CmdbObject.COLLECTION, type_id=public_id)
+
+    def count_objects(self):
+        return self.dbm.count(collection=CmdbObject.COLLECTION)
 
     def _find_query_fields(self, query, match_fields=list()):
         for key, items in query.items():
@@ -436,6 +439,9 @@ class CmdbObjectManager(CmdbManagerBase):
             data=update_type.to_database()
         )
         return ack
+
+    def count_types(self):
+        return self.dbm.count(collection=CmdbType.COLLECTION)
 
     def delete_type(self, public_id: int):
         ack = self._delete(CmdbType.COLLECTION, public_id)
