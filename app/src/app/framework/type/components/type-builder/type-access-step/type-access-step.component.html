@@ -40,9 +40,11 @@
         Validation: <span [className]="accessForm.valid ? 'text-success' : 'text-danger'">{{accessForm.status}}</span>
       </div>
       <div class="card-body">
-        {{ accessForm.value | json}}
+        <ul class="list-group list-group-flush">
+          <li *ngFor="let validateFormValue of accessForm.value | keyvalue"
+              class="list-group-item">{{validateFormValue.key}}: {{validateFormValue?.value}}</li>
+        </ul>
       </div>
     </div>
-
   </div>
 </div>

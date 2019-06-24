@@ -34,6 +34,14 @@ export class TypeService {
     });
   }
 
+  public findType(publicID: number): CmdbType {
+    return this.typeList.find(id => id.public_id === publicID);
+  }
+
+  public getType(publicID: number) {
+    return this.api.callGetRoute<CmdbType>(this.servicePrefix + '/' + publicID);
+  }
+
   public getTypeList() {
     return this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/');
   }

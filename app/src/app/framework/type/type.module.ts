@@ -29,8 +29,8 @@ import { TypeBuilderComponent } from './components/type-builder/type-builder.com
 import { TypeBasicStepComponent } from './components/type-builder/type-basic-step/type-basic-step.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TypeFieldsStepComponent } from './components/type-builder/type-fields-step/type-fields-step.component';
-import { TypeHeaderComponent } from './components/type-header/type-header.component';
-import { TypeQrComponent } from './components/type-qr/type-qr.component';
+import { TypeViewHeaderComponent } from './components/type-view/type-header/type-view-header.component';
+import { TypeQrComponent } from './components/type-view/type-qr/type-qr.component';
 import { QRCodeModule } from 'angularx-qrcode';
 import { TypeAccessStepComponent } from './components/type-builder/type-access-step/type-access-step.component';
 import { NgSelectModule } from '@ng-select/ng-select';
@@ -40,6 +40,7 @@ import { BuilderModule } from './builder/builder.module';
 import { TypeEditComponent } from './components/type-edit/type-edit.component';
 import { TypeMetaStepComponent } from './components/type-builder/type-meta-step/type-meta-step.component';
 import { TypeTabObjectListComponent } from './components/type-view/tabs/type-tab-object-list/type-tab-object-list.component';
+import { TypeMetaDataComponent } from './components/type-view/type-meta-data/type-meta-data.component';
 
 @NgModule({
   declarations: [
@@ -49,13 +50,14 @@ import { TypeTabObjectListComponent } from './components/type-view/tabs/type-tab
     TypeBasicStepComponent,
     TypeFieldsStepComponent,
     TypeBuilderComponent,
-    TypeHeaderComponent,
+    TypeViewHeaderComponent,
     TypeQrComponent,
     TypeAccessStepComponent,
     TypeValidationStepComponent,
     TypeEditComponent,
     TypeMetaStepComponent,
-    TypeTabObjectListComponent
+    TypeTabObjectListComponent,
+    TypeMetaDataComponent
   ],
   imports: [
     CommonModule,

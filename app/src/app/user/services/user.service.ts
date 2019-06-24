@@ -21,7 +21,6 @@ import { ApiCallService } from '../../services/api-call.service';
 import { User } from '../models/user';
 import { Group } from '../models/group';
 import { AuthService } from '../../auth/services/auth.service';
-import { BehaviorSubject, Observable } from 'rxjs';
 import { UserToken } from '../../auth/models/user-token';
 
 @Injectable({
@@ -60,7 +59,7 @@ export class UserService {
   }
 
   public findUser(publicID: number): User {
-    return this.userList.find(id => id.public_id === publicID);
+    return this.userList.find(user => user.public_id === publicID);
   }
 
   public getUserAsync(publicID: number) {

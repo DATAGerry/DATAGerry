@@ -32,32 +32,34 @@ export class SidebarCategoryComponent implements OnInit {
   private typeList: CmdbType[] = [];
   private objectCount = [];
 
-  constructor(private api: ApiCallService) {}
+  constructor(private api: ApiCallService) {
+  }
 
-  ngOnInit() {}
+  ngOnInit() {
+  }
 
   public get_objects_by_type(categoryTypeList) {
     this.typeList = [];
 
     for (const typ of categoryTypeList) {
       this.api.callGetRoute('type/' + typ).subscribe((list: CmdbType[]) => {
-          this.typeList = this.typeList.concat(list);
-        }, error => {
-        }, () => {
-          this.count_objects(typ);
-        });
+        this.typeList = this.typeList.concat(list);
+      }, error => {
+      }, () => {
+        this.count_objects(typ);
+      });
     }
   }
 
   private count_objects(typ) {
     this.api.callGetRoute('object/count/' + typ).subscribe((count) => {
-        this.objectCount.push(count);
-      }, error => {
-      }, () => {
-        const c = this.objectCount.values();
-        for (const typ2 of this.typeList) {
-          typ2.countObjects = c.next().value;
-        }
-      });
+      this.objectCount.push(count);
+    }, error => {
+    }, () => {
+      const c = this.objectCount.values();
+      for (const typ2 of this.typeList) {
+        typ2['countObjects'] = c.next().value;
+      }
+    });
   }
 }

@@ -1,20 +1,25 @@
 <div class="row">
   <div class="col-9">
-    <cmdb-type-header [typeInstance]="typeInstance"></cmdb-type-header>
+    <cmdb-type-view-header [typeInstance]="typeInstance"></cmdb-type-view-header>
+    <div class="mt-3 card">
+      <div class="card-header">
+        Form render preview:
+      </div>
+      <div class="card-body">
+
+      </div>
+    </div>
   </div>
   <div class="col-3">
     <cmdb-type-qr></cmdb-type-qr>
     <hr/>
-    <div id="type-view-meta-data" class="card">
-      <div class="card-body">
-      </div>
-    </div>
+    <cmdb-type-meta-data [typeInstance]="typeInstance"></cmdb-type-meta-data>
     <hr/>
     <div id="type-view-action-list" class="card">
       <div class="card-body">
         <div class="list-group list-group-flush">
-          <a href="#" class="list-group-item list-group-item-action"><i class="fa fa-th-list"></i> List objects</a>
-          <a href="#" class="list-group-item list-group-item-action"><i class="fa fa-clone"></i> Copy type</a>
+          <a routerLink="/framework/object/type/{{typeID}}"
+             class="list-group-item list-group-item-action"><i class="fa fa-th-list"></i> List objects</a>
           <a href="#" class="list-group-item list-group-item-action list-group-item-warning"><i
             class="fa fa-pencil-square-o"></i> Edit type</a>
           <a href="#" class="list-group-item list-group-item-action list-group-item-danger"><i

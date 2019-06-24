@@ -21,6 +21,7 @@ import { CmdbDao } from './cmdb-dao';
 
 export class CmdbType implements CmdbDao {
 
+  // tslint:disable:variable-name
   readonly public_id: number;
   public active: boolean = true;
   public description?: string;
@@ -28,7 +29,16 @@ export class CmdbType implements CmdbDao {
   public label: string;
   public author_id: number;
   public version: string;
-  public author_name: string;
-  public countObjects: number;
+  public creation_time: string;
+  public last_edit_time: string;
+  public render_meta: object;
+  public fields: [];
+  // tslint:enable:variable-name
+
+  public get sections() {
+    // @ts-ignore
+    return this.render_meta.sections;
+
+  }
 
 }

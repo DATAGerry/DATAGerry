@@ -70,8 +70,11 @@ export class TypeBuilderComponent implements OnInit{
       fieldBuffer = fieldBuffer.concat(sectionGlobe.fields);
       const sectionFieldNames = new Set(sectionGlobe.fields.map(f => f.name));
       delete sectionGlobe.fields;
-      sectionGlobe.fields = sectionFieldNames;
+
+      sectionGlobe.fields = Array.from(sectionFieldNames);
+
       sectionBuffer = sectionBuffer.concat(sectionGlobe);
+      console.log(sectionBuffer);
     }
     this.assignToType({fields: fieldBuffer});
     this.assignToType({sections: sectionBuffer}, 'render_meta');

@@ -21,6 +21,7 @@ import { ApiCallService } from '../../../../services/api-call.service';
 import { ActivatedRoute } from '@angular/router';
 import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbObject } from '../../../models/cmdb-object';
+import { TypeService } from '../../../services/type.service';
 
 @Component({
   selector: 'cmdb-type-view',
@@ -29,16 +30,19 @@ import { CmdbObject } from '../../../models/cmdb-object';
 })
 export class TypeViewComponent implements OnInit {
 
-  private typeID: number;
-  private typeInstance: CmdbType;
+  public typeID: number;
+  public typeInstance: CmdbType;
 
-  constructor(private api: ApiCallService, private route: ActivatedRoute) {
-    this.route.params.subscribe((id) => this.typeID = id.publicID);
+  constructor(private typeService: TypeService, private route: ActivatedRoute) {
+    this.route.params.subscribe((id) => {
+      this.typeID = id.publicID;
+    });
   }
 
   public ngOnInit(): void {
-    this.api.callGetRoute<CmdbType>('type/' + `${this.typeID}`)
-      .subscribe((typeInstance: CmdbType) => this.typeInstance = typeInstance);
+    this.typeService.getType(this.typeID).subscribe((typeInstanceResp: CmdbType) => {
+      this.typeInstance = typeInstanceResp;
+    });
   }
 
 }

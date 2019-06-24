@@ -1,0 +1,23 @@
+<div id="type-view-meta-data" class="card">
+  <div class="card-header">Meta-Data</div>
+  <div class="card-body">
+    <div class="list-group list-group-flush">
+      <dl class="list-group-item">
+        <dt>Public ID:</dt>
+        <dd>{{typeInstance?.public_id}}</dd>
+      </dl>
+      <dl class="list-group-item">
+        <dt>Time:</dt>
+        <dd>{{typeInstance?.creation_time?.$date | date:"dd/MM/yy - hh:mm:ss" }}</dd>
+      </dl>
+      <dl class="list-group-item">
+        <dt>Edit:</dt>
+        <dd>{{typeInstance?.last_edit_time?.$date | date:"dd/MM/yy - hh:mm:ss" }}</dd>
+      </dl>
+      <dl class="list-group-item">
+        <dt>Author:</dt>
+        <dd><a routerLink="/user/{{author?.public_id}}">{{author?.user_name}}</a></dd>
+      </dl>
+    </div>
+  </div>
+</div>

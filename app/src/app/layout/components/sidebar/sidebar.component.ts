@@ -18,8 +18,8 @@
 
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
-import {FormControl} from "@angular/forms";
-import {CmdbType} from "../../../framework/models/cmdb-type";
+import { FormControl } from '@angular/forms';
+import { CmdbType } from '../../../framework/models/cmdb-type';
 
 @Component({
   selector: 'cmdb-sidebar',
@@ -43,7 +43,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       this._defaultCategoryTree = tree;
     });
 
-    this.filterTerm.statusChanges.subscribe( () => {
+    this.filterTerm.statusChanges.subscribe(() => {
       this._filterCategoryTree = [];
       this.categoryTree = this.transform(this.categoryTree, this.filterTerm.value);
     });
@@ -58,22 +58,30 @@ export class SidebarComponent implements OnInit, OnDestroy {
     });
   }
 
-  private transform(filterList:any[], searchText: string): any[] {
-    if(!filterList) return [];
-    if(!searchText) return this._defaultCategoryTree;
+  private transform(filterList: any[], searchText: string): any[] {
+    if (!filterList) {
+      return [];
+    }
+    if (!searchText) {
+      return this._defaultCategoryTree;
+    }
 
     searchText = searchText.toLowerCase();
 
-    for(let it of filterList){
+    for (const it of filterList) {
       let isAvailable = it['category'].label.toLowerCase().includes(searchText);
-      if(isAvailable){
-        if (this._filterCategoryTree.includes(it) === false) this._filterCategoryTree.push(it);
-      }else{
-        for(let typ of it['category'].type_list){
+      if (isAvailable) {
+        if (this._filterCategoryTree.includes(it) === false) {
+          this._filterCategoryTree.push(it);
+        }
+      } else {
+        for (const typ of it['category'].type_list) {
           this.api.callGetRoute('type/' + typ).subscribe((obj: CmdbType) => {
             isAvailable = obj.label.toLowerCase().includes(searchText);
-            if(isAvailable){
-              if (this._filterCategoryTree.includes(it) === false) this._filterCategoryTree.push(it);
+            if (isAvailable) {
+              if (this._filterCategoryTree.includes(it) === false) {
+                this._filterCategoryTree.push(it);
+              }
             }
           });
         }

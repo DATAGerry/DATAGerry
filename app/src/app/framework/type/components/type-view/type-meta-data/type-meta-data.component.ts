@@ -17,19 +17,35 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
+import { UserService } from '../../../../../user/services/user.service';
+import { CmdbType } from '../../../../models/cmdb-type';
+import { User } from '../../../../../user/models/user';
 
 @Component({
-  selector: 'cmdb-render',
-  templateUrl: './render.component.html',
-  styleUrls: ['./render.component.scss']
+  selector: 'cmdb-type-meta-data',
+  templateUrl: './type-meta-data.component.html',
+  styleUrls: ['./type-meta-data.component.scss']
 })
-export class RenderComponent {
+export class TypeMetaDataComponent {
 
-  @Input() sections: any = [];
-  @Input() fields: any = [];
+  public currentTypeInstance: CmdbType;
+  public author: User = null;
 
-  public getFieldByName(name: string) {
-    return this.fields.find(field => field.name === name);
+  constructor(private userService: UserService) {
+
   }
+
+  @Input()
+  public set typeInstance(typeInstance: CmdbType) {
+    this.currentTypeInstance = typeInstance;
+    if (typeInstance !== undefined) {
+      this.author = this.userService.findUser(this.typeInstance.author_id);
+    }
+  }
+
+  public get typeInstance() {
+    return this.currentTypeInstance;
+  }
+
 
 }
