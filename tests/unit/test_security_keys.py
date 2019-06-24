@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import pytest
-import os
 from cmdb.security.keys import KeyHolder
 
 KEY_TEST_DIRECTORY = 'keys'
@@ -58,10 +57,13 @@ dvLkzddLVovdVO6ItmTL3Nh+awt8/1IFdiZ6wfCcRfciHVfzj2cs8g==
 -----END RSA PRIVATE KEY-----"""
 
 
-@pytest.fixture(autouse=True)
-def write_down_keys(tmp_path):
-    key_dir = tmp_path / f'{KEY_TEST_DIRECTORY}'
-    key_dir.mkdir()
+@pytest.fixture(scope='session', autouse=True)
+def key_dir(tmpdir_factory):
+    return tmpdir_factory.mktemp(f'{KEY_TEST_DIRECTORY}')
+
+
+@pytest.fixture(scope='session')
+def key_holder(key_dir):
     with open(f'{key_dir}/token_public.pem', "w+") as fpu:
         fpu.write(PUBLIC_KEY)
         fpu.close()
@@ -69,12 +71,7 @@ def write_down_keys(tmp_path):
     with open(f'{key_dir}/token_private.pem', "w+") as fpr:
         fpr.write(PRIVATE_KEY)
         fpr.close()
-    yield
 
-
-@pytest.fixture
-def key_holder(tmp_path):
-    key_dir = tmp_path / f'{KEY_TEST_DIRECTORY}/'
     return KeyHolder(key_directory=key_dir)
 
 

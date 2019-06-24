@@ -1,7 +1,7 @@
 <aw-wizard>
   <aw-wizard-step (stepExit)="exitBasicStep()" stepId="1" stepTitle="Basic informations">
     <cmdb-type-basic-step [preData]="typeInstance"></cmdb-type-basic-step>
-    <button class="btn btn-primary" type="button" awNextStep>Next Step</button>
+    <button class="btn btn-primary" type="button" awNextStep [disabled]="!basicStep.basicForm.valid">Next Step</button>
   </aw-wizard-step>
   <aw-wizard-step (stepExit)="exitFieldStep()" stepId="2" stepTitle="Field definitions">
     <cmdb-type-fields-step></cmdb-type-fields-step>
@@ -24,4 +24,3 @@
     <button class="btn btn-success" type="button" (click)="saveType()">Save</button>
   </aw-wizard-step>
 </aw-wizard>
-<!--[disabled]="!basicStep.basicForm.valid"-->

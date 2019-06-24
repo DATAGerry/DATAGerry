@@ -1,24 +1,24 @@
 <div class="row">
   <div class="col-9">
     <cmdb-type-header [typeInstance]="typeInstance"></cmdb-type-header>
-
   </div>
   <div class="col-3">
     <cmdb-type-qr></cmdb-type-qr>
-    <hr />
+    <hr/>
     <div id="type-view-meta-data" class="card">
       <div class="card-body">
-
       </div>
     </div>
-    <hr />
+    <hr/>
     <div id="type-view-action-list" class="card">
       <div class="card-body">
         <div class="list-group list-group-flush">
-          <a href="#" class="list-group-item list-group-item-action">List objects</a>
-          <a href="#" class="list-group-item list-group-item-action">Copy type</a>
-          <a href="#" class="list-group-item list-group-item-action list-group-item-warning">Edit type</a>
-          <a href="#" class="list-group-item list-group-item-action list-group-item-danger">Delete type</a>
+          <a href="#" class="list-group-item list-group-item-action"><i class="fa fa-th-list"></i> List objects</a>
+          <a href="#" class="list-group-item list-group-item-action"><i class="fa fa-clone"></i> Copy type</a>
+          <a href="#" class="list-group-item list-group-item-action list-group-item-warning"><i
+            class="fa fa-pencil-square-o"></i> Edit type</a>
+          <a href="#" class="list-group-item list-group-item-action list-group-item-danger"><i
+            class="fa fa-trash-o"></i> Delete type</a>
         </div>
       </div>
     </div>
@@ -26,44 +26,47 @@
   <div class="col-12">
     <ul class="nav nav-tabs" id="typeViewTab" role="tablist">
       <li class="nav-item">
-        <a class="nav-link active" id="logs-tab" data-toggle="tab" href="#logs" role="tab" aria-controls="logs" aria-selected="true">Logs</a>
+        <a class="nav-link active" id="logs-tab" data-toggle="tab" href="#logs" role="tab" aria-controls="logs"
+           aria-selected="true">Logs</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="objects-tab" data-toggle="tab" href="#objects" role="tab" aria-controls="objects" aria-selected="true">Objects</a>
+        <a class="nav-link" id="objects-tab" data-toggle="tab" href="#objects" role="tab" aria-controls="objects"
+           aria-selected="true">Objects</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="categories-tab" data-toggle="tab" href="#categories" role="tab" aria-controls="categories" aria-selected="false">Categories</a>
+        <a class="nav-link" id="categories-tab" data-toggle="tab" href="#categories" role="tab"
+           aria-controls="categories" aria-selected="false">Categories</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="collections-tab" data-toggle="tab" href="#collections" role="tab" aria-controls="collections" aria-selected="false">Collections</a>
+        <a class="nav-link" id="collections-tab" data-toggle="tab" href="#collections" role="tab"
+           aria-controls="collections" aria-selected="false">Collections</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="diagnostic-tab" data-toggle="tab" href="#diagnostic" role="tab" aria-controls="diagnostic" aria-selected="false">Diagnostic</a>
+        <a class="nav-link" id="diagnostic-tab" data-toggle="tab" href="#diagnostic" role="tab"
+           aria-controls="diagnostic" aria-selected="false">Diagnostic</a>
       </li>
     </ul>
     <div class="tab-content" id="typeViewTabContent">
-      <div class="tab-pane fade show active" id="logs" role="tabpanel" aria-labelledby="logs-tab">
+      <div class="tab-pane fade show active" id="logs" role="tabpanel">
         <div class="alert alert-info" role="alert">
           Not implemented yet
         </div>
       </div>
-      <div class="tab-pane fade" id="objects" role="tabpanel" aria-labelledby="categories-tab">
+      <div class="tab-pane fade" id="objects" role="tabpanel">
+        <cmdb-type-tab-object-list [typeID]="typeID"></cmdb-type-tab-object-list>
+      </div>
+      <div class="tab-pane fade" id="categories" role="tabpanel">
         <div class="alert alert-info" role="alert">
           Not implemented yet
         </div>
       </div>
-      <div class="tab-pane fade" id="categories" role="tabpanel" aria-labelledby="categories-tab">
+      <div class="tab-pane fade" id="collections" role="tabpanel">
         <div class="alert alert-info" role="alert">
           Not implemented yet
         </div>
       </div>
-      <div class="tab-pane fade" id="collections" role="tabpanel" aria-labelledby="collections-tab">
-        <div class="alert alert-info" role="alert">
-          Not implemented yet
-        </div>
-      </div>
-      <div class="tab-pane fade" id="diagnostic" role="tabpanel" aria-labelledby="diagnostic-tab">
-        {{ typeInstance | json }}
+      <div class="tab-pane fade" id="diagnostic" role="tabpanel">
+        <pre>{{ typeInstance | json }}</pre>
       </div>
     </div>
   </div>

@@ -13,11 +13,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import pytest
 
 
-def test_key_gen():
+@pytest.mark.usefixtures("key_holder")
+def test_key_gen(key_holder):
     from cmdb.security.token import TokenGenerator
-    token_gen = TokenGenerator()
+    token_gen = TokenGenerator(key_holder=key_holder)
     token = token_gen.generate_token({'test': 'test'})
     token_gen.validate_token_claims(token)
     assert 1 == 1

@@ -17,7 +17,7 @@
 */
 
 import { Component, Injectable, Input, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { TypeService } from '../../../../services/type.service';
 import { CategoryService } from '../../../../services/category.service';
 import { CmdbCategory } from '../../../../models/cmdb-category';
@@ -26,11 +26,12 @@ import { Observable } from 'rxjs';
 @Injectable()
 export class TypeNameValidator {
 
-  constructor(private typeService: TypeService) {
-  }
-
-  checkName(control: FormControl): any {
-    return this.typeService.validateTypeName(control.value);
+  static createValidator(typeService: TypeService) {
+    return (control: AbstractControl) => {
+      return typeService.validateTypeName(control.value).then(res => {
+        return res ? null : {nameAlreadyTaken: true};
+      });
+    };
   }
 }
 
@@ -50,25 +51,33 @@ export class TypeBasicStepComponent implements OnInit {
   }
 
   public basicForm: FormGroup;
+
   // private categoryList: Observable<CmdbCategory[]>;
 
-  constructor(private typeNameValidator: TypeNameValidator) {
-
+  constructor(private typeService: TypeService) {
     this.basicForm = new FormGroup({
-      name: new FormControl('', [Validators.required], this.typeNameValidator.checkName.bind(this.typeNameValidator)),
+      name: new FormControl('', [Validators.required], TypeNameValidator.createValidator(typeService)),
       label: new FormControl('', Validators.required),
       description: new FormControl(''),
       active: new FormControl(true),
       // category_id: new FormControl('')
     });
+  }
 
+  public get name() {
+    return this.basicForm.get('name');
+  }
 
+  public get label() {
+    return this.basicForm.get('label');
   }
 
   public ngOnInit(): void {
     // this.categoryList = this.categoryService.getCategoryList();
     this.basicForm.get('name').valueChanges.subscribe(val => {
       this.basicForm.get('label').setValue(val.toString().charAt(0).toUpperCase() + val.toString().slice(1));
+      this.basicForm.get('label').markAsDirty({onlySelf: true});
+      this.basicForm.get('label').markAsTouched({onlySelf: true});
     });
   }
 

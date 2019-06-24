@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { BuilderComponent } from '../../../builder/builder.component';
 
 @Component({
@@ -24,12 +24,19 @@ import { BuilderComponent } from '../../../builder/builder.component';
   templateUrl: './type-fields-step.component.html',
   styleUrls: ['./type-fields-step.component.scss']
 })
-export class TypeFieldsStepComponent implements OnInit {
+export class TypeFieldsStepComponent implements AfterContentInit {
+
 
   @ViewChild(BuilderComponent)
   public typeBuilder: BuilderComponent;
 
-  ngOnInit() {
+  public constructor(private cdr: ChangeDetectorRef){
+
+  }
+
+
+  public ngAfterContentInit(): void {
+    this.cdr.detectChanges();
   }
 
 }

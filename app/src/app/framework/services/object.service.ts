@@ -26,7 +26,13 @@ import { CmdbObject } from '../models/cmdb-object';
 export class ObjectService {
 
   private servicePrefix: string = 'object';
-  constructor(private api: ApiCallService) { }
+  public objectList: CmdbObject[];
+
+  constructor(private api: ApiCallService) {
+    this.getObjectList().subscribe((resObjectList: CmdbObject[]) => {
+      this.objectList = resObjectList;
+    });
+  }
 
   public getObjectList() {
     return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/');

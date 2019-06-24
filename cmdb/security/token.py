@@ -23,6 +23,7 @@ Implementation is based on authlib https://authlib.org/
 import logging
 import datetime
 from authlib import jose
+from cmdb.security.keys import KeyHolder
 
 LOGGER = logging.getLogger(__name__)
 
@@ -45,12 +46,12 @@ class TokenGenerator:
         }
     }
 
-    def __init__(self, timeout: int = None):
+    def __init__(self, timeout: int = None, key_holder: KeyHolder = None):
         self.timeout = (timeout or TokenGenerator.TIMEOUT) * 60
-        from cmdb.security.keys import KeyHolder
-        key_holder = KeyHolder()
-        self.private_key = key_holder.get_private_key()
-        self.public_key = key_holder.get_public_key()
+
+        key_holder_instance = key_holder or KeyHolder()
+        self.private_key = key_holder_instance.get_private_key()
+        self.public_key = key_holder_instance.get_public_key()
 
     def generate_token(self, payload: dict, sub: str = None):
         """Generate a JWT Token"""

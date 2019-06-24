@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-Keys
+Key generation and holding system
 """
 
 try:
@@ -28,8 +28,15 @@ from authlib.jose import JWK_ALGORITHMS
 
 
 class KeyHolder:
+    """
+    Loads/Holds the key which are required from the crypto and token modules
+    """
 
     def __init__(self, key_directory=None):
+        """
+        Args:
+            key_directory: key based directory
+        """
         self.key_directory = key_directory or SystemConfigReader.DEFAULT_CONFIG_LOCATION + "/keys"
         self.rsa_public = self._load_rsa_public_key()
         self.rsa_private = self._load_rsa_private_key()
@@ -40,8 +47,7 @@ class KeyHolder:
     def get_private_key(self):
         return self.rsa_private
 
-    def _load_rsa_public_key(self):
-        rsa_p_jwk = JWK(algorithms=JWK_ALGORITHMS)
+    def get_public_pem(self):
         try:
             public_pem_render = open(f'{self.key_directory}/token_public.pem', "r")
         except (FileNotFoundError, FileExistsError):
@@ -49,20 +55,27 @@ class KeyHolder:
 
         public_pem = public_pem_render.read()
         public_pem_render.close()
-        public_pem = rsa_p_jwk.dumps(public_pem, kty='RSA')
         return public_pem
 
-    def _load_rsa_private_key(self):
-        rsa_p_jwk = JWK(algorithms=JWK_ALGORITHMS)
+    def get_private_pem(self):
         try:
-            public_pem_render = open(f'{self.key_directory}/token_private.pem', "r")
+            private_pem_reader = open(f'{self.key_directory}/token_private.pem', "r")
         except (FileNotFoundError, FileExistsError):
             raise RSATokenKeysNotExists()
 
-        public_pem = public_pem_render.read()
-        public_pem_render.close()
-        public_pem = rsa_p_jwk.dumps(public_pem, kty='RSA')
-        return public_pem
+        private_pem = private_pem_reader.read()
+        private_pem_reader.close()
+        return private_pem
+
+    def _load_rsa_public_key(self):
+        rsa_p_jwk = JWK(algorithms=JWK_ALGORITHMS)
+        rsa_pri = rsa_p_jwk.dumps(self.get_public_pem(), kty='RSA')
+        return rsa_pri
+
+    def _load_rsa_private_key(self):
+        rsa_p_jwk = JWK(algorithms=JWK_ALGORITHMS)
+        rsa_prv = rsa_p_jwk.dumps(self.get_private_pem(), kty='RSA')
+        return rsa_prv
 
 
 def _generate_rsa_keypair():

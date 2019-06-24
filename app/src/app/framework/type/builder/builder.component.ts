@@ -42,8 +42,8 @@ import { CheckboxControl } from './controls/choice/checkbox.control';
 export class BuilderComponent implements OnInit {
 
   public sections: any[];
-  private userList: User[] = [];
-  private groupList: Group[] = [];
+  public userList: User[] = [];
+  public groupList: Group[] = [];
 
   @Input() builderConfig: any = {};
 
@@ -74,7 +74,7 @@ export class BuilderComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
     this.sections = [];
   }
 
