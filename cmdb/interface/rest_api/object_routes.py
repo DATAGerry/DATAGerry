@@ -15,9 +15,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+import json
 
 from flask import abort, jsonify, request
-from cmdb.object_framework.cmdb_errors import ObjectDeleteError, ObjectNotFoundError
+
+from cmdb.object_framework import CmdbObject
+from cmdb.object_framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectNotFoundError
 from cmdb.object_framework.cmdb_render import CmdbRender
 from cmdb.object_framework.cmdb_object_manager import object_manager
 from cmdb.utils.interface_wraps import login_required
@@ -155,8 +158,29 @@ def get_object_by(requirements):
 @login_required
 @object_rest.route('/', methods=['POST'])
 def add_object():
-    pass
+    from bson import json_util
+    from datetime import datetime
+    add_data_dump = json.dumps(request.json)
+    try:
+        new_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
+        new_object_data['public_id'] = object_manager.get_highest_id(CmdbObject.COLLECTION) + 1
+        new_object_data['creation_time'] = datetime.utcnow()
+        new_object_data['last_edit_time'] = datetime.utcnow()
+    except TypeError as e:
+        LOGGER.warning(e)
+        abort(400)
+    try:
+        object_instance = CmdbObject(**new_object_data)
+    except CMDBError as e:
+        LOGGER.debug(e)
+        return abort(400)
+    try:
+        ack = object_manager.insert_object(object_instance)
+    except ObjectInsertError:
+        return abort(500)
 
+    resp = make_response(ack)
+    return resp
 
 @login_required
 @object_rest.route('/<int:public_id>', methods=['PUT'])
