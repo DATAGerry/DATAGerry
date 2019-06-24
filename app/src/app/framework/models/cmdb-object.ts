@@ -21,7 +21,14 @@ import { CmdbDao } from './cmdb-dao';
 
 export class CmdbObject implements CmdbDao {
 
-  readonly object_id: number;
   readonly public_id: number;
+  public type_id: number;
+  public status: boolean = true;
+  public version: string;
+  public author_id: string;
+  public active: string;
+  public views: number = 0;
+  public logs: any[] = [];
+  public fields: any[];
 
 }

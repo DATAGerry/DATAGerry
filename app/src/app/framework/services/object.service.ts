@@ -35,4 +35,8 @@ export class ObjectService {
   public getObjectsByType(typeID: number) {
     return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/type/' + typeID);
   }
+
+  public postObject(objectInstance: CmdbObject) {
+    return this.api.callPostRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
+  }
 }
