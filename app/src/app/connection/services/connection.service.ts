@@ -43,7 +43,7 @@ export class ConnectionService {
 
   constructor(private http: HttpClient) {
     this.connectionSubject = new BehaviorSubject(JSON.parse(localStorage.getItem('connection')));
-    this.connectionResultSubject = new BehaviorSubject(JSON.parse(localStorage.getItem('connection-result')));
+    this.connectionResultSubject = new BehaviorSubject(JSON.parse(localStorage.getItem('connection-objInstance')));
     this.connection = this.connectionSubject.asObservable();
     this.connectionResult = this.connectionResultSubject.asObservable();
   }
@@ -56,7 +56,7 @@ export class ConnectionService {
         const newConnection = new Connection(host, port);
         localStorage.setItem('connection', JSON.stringify(newConnection));
         this.connectionSubject.next(newConnection);
-        localStorage.setItem('connection-result', JSON.stringify(connectionResult));
+        localStorage.setItem('connection-objInstance', JSON.stringify(connectionResult));
         this.connectionResultSubject.next(connectionResult);
         return connectionResult;
       },
@@ -70,7 +70,7 @@ export class ConnectionService {
   public disconnect() {
     localStorage.removeItem('connection');
     this.connectionSubject.next(null);
-    localStorage.removeItem('connection-result');
+    localStorage.removeItem('connection-objInstance');
     this.connectionResultSubject.next(null);
   }
 

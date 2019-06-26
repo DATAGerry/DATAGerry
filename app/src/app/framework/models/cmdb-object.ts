@@ -25,8 +25,8 @@ export class CmdbObject implements CmdbDao {
   public type_id: number;
   public status: boolean = true;
   public version: string;
-  public author_id: string;
-  public active: string;
+  public author_id: number;
+  public active: boolean;
   public views: number = 0;
   public logs: any[] = [];
   public fields: any[];
