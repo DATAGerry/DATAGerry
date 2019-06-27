@@ -184,7 +184,7 @@ def get_object_by(requirements):
 
 
 @login_required
-@object_rest.route('/', methods=['POST'])
+@object_rest.route('/add', methods=['POST'])
 def add_object():
     from bson import json_util
     from datetime import datetime

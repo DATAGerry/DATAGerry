@@ -33,7 +33,6 @@ export class ObjectInsertComponent implements OnInit {
   public typeList: CmdbType[];
   public formType: FormGroup;
   public formFields: FormGroup;
-  private objInstance?: CmdbObject;
 
   constructor(private typeService: TypeService, private objService: ObjectService) {
     this.formType = new FormGroup({
@@ -60,22 +59,23 @@ export class ObjectInsertComponent implements OnInit {
   }
 
   onCreate() {
-    this.objInstance = new CmdbObject();
-    this.objInstance.version = '1.0.0';
-    this.objInstance.type_id = this.type.public_id;
-    this.objInstance.author_id = this.type.author_id;
-    this.objInstance.active = this.type.active;
+    const objInstance = new CmdbObject();
+    objInstance.version = '1.0.0';
+    objInstance.type_id = this.type.public_id;
+    objInstance.author_id = this.type.author_id;
+    objInstance.active = this.type.active;
 
     const fieldsList: any[] = [];
-    Object.entries(this.formFields.value).forEach(
-      ([key, value]) => {
-        fieldsList.push({name: key, value});
+    Object.entries(this.formFields.controls).forEach(
+      ([key]) => {
+        const text: any = document.getElementsByName(key)[0];
+        fieldsList.push({name: key, value: text.value});
       }
     );
-    this.objInstance.fields = fieldsList;
+    objInstance.fields = fieldsList;
 
-    this.objService.postObject(this.objInstance).subscribe(res => {
+    this.objService.postAddObject(objInstance).subscribe(res => {
       console.log(res);
-    });
+     });
   }
 }

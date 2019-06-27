@@ -251,35 +251,36 @@ class DataGenerator:
                             "input_type": "checkbox",
                             "label": "State",
                             "name": "state",
-                            "className": "form-control"
+                            "className": "form-control",
+                            "type": "checkbox"
                         },
                         {
                             "input_type": "text",
                             "label": "Product Name",
                             "className": "form-control",
                             "name": "product_name",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Transfer Rate",
                             "className": "form-control",
                             "name": "transfer_rate",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Company Name A",
                             "className": "form-control",
                             "name": "company_name_a",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Street A",
                             "className": "form-control",
                             "name": "street_a",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "number",
@@ -289,35 +290,36 @@ class DataGenerator:
                             "name": "zip_a",
                             "min": 10000,
                             "max": 99999,
-                            "step": 1
+                            "step": 1,
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "City A",
                             "className": "form-control",
                             "name": "city_a",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Location Details A",
                             "className": "form-control",
                             "name": "location_details_a",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Company Name B",
                             "className": "form-control",
                             "name": "company_name_b",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Street B",
                             "className": "form-control",
                             "name": "street_b",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "number",
@@ -327,21 +329,22 @@ class DataGenerator:
                             "name": "zip_b",
                             "min": 10000,
                             "max": 99999,
-                            "step": 1
+                            "step": 1,
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "City B",
                             "className": "form-control",
                             "name": "city_b",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Location Details B",
                             "className": "form-control",
                             "name": "location_details_b",
-                            "subtype": "text"
+                            "type": "text"
                         },
 
                     ],
@@ -430,42 +433,42 @@ class DataGenerator:
                             "label": "Management IP",
                             "className": "form-control",
                             "name": "management_ip",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Hostname",
                             "className": "form-control",
                             "name": "hostname",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "checkbox",
                             "label": "Monitoring",
                             "className": "form-control",
                             "name": "monitoring",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Operating System",
                             "className": "form-control",
                             "name": "os",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Username",
                             "className": "form-control",
                             "name": "username",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Password",
                             "className": "form-control",
                             "name": "password",
-                            "subtype": "password",
+                            "type": "password",
                             "required": True,
                         },
                         {
@@ -473,63 +476,63 @@ class DataGenerator:
                             "label": "Address",
                             "className": "form-control",
                             "name": "address",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Building",
                             "className": "form-control",
                             "name": "building",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Room",
                             "className": "form-control",
                             "name": "room",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Rack",
                             "className": "form-control",
                             "name": "rack",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Manufacturer",
                             "className": "form-control",
                             "name": "manufacturer",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Supplier",
                             "className": "form-control",
                             "name": "supplier",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Model",
                             "className": "form-control",
                             "name": "model",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Serial Number",
                             "className": "form-control",
                             "name": "serial_number",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Software Version",
                             "className": "form-control",
                             "name": "software_version",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
 
                     ],
@@ -617,42 +620,42 @@ class DataGenerator:
                             "label": "Management IP",
                             "className": "form-control",
                             "name": "management_ip",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Hostname",
                             "className": "form-control",
                             "name": "hostname",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "checkbox",
                             "label": "Monitoring",
                             "className": "form-control",
                             "name": "monitoring",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Operating System",
                             "className": "form-control",
                             "name": "os",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Username",
                             "className": "form-control",
                             "name": "username",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Password",
                             "className": "form-control",
                             "name": "password",
-                            "subtype": "password",
+                            "type": "password",
                             "required": True,
                         },
                         {
@@ -660,63 +663,63 @@ class DataGenerator:
                             "label": "Address",
                             "className": "form-control",
                             "name": "address",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Building",
                             "className": "form-control",
                             "name": "building",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Room",
                             "className": "form-control",
                             "name": "room",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Rack",
                             "className": "form-control",
                             "name": "rack",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Manufacturer",
                             "className": "form-control",
                             "name": "manufacturer",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Supplier",
                             "className": "form-control",
                             "name": "supplier",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Model",
                             "className": "form-control",
                             "name": "model",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Serial Number",
                             "className": "form-control",
                             "name": "serial_number",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Software Version",
                             "className": "form-control",
                             "name": "software_version",
-                            "subinput_type": "text"
+                            "type": "text"
                         },
 
                     ],
@@ -802,14 +805,14 @@ class DataGenerator:
                             "placeholder": "Calling name",
                             "className": "form-control",
                             "name": "naming",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "textarea",
                             "label": "Description",
                             "className": "form-control",
                             "name": "description",
-                            "subtype": "textarea",
+                            "type": "textarea",
                             "maxlength": 120,
                             "rows": 3
                         },
@@ -818,13 +821,14 @@ class DataGenerator:
                             "label": "Entrance",
                             "className": "form-control",
                             "name": "entrance",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "ref",
                             "label": "Person in Charge",
                             "className": "form-control",
                             "name": "person_in_charge",
+                            "type": "text",
                             "type_id": 2
                         },
                         {
@@ -832,7 +836,7 @@ class DataGenerator:
                             "label": "Street",
                             "className": "form-control",
                             "name": "street",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "number",
@@ -842,14 +846,15 @@ class DataGenerator:
                             "name": "zip",
                             "min": 10000,
                             "max": 99999,
-                            "step": 1
+                            "step": 1,
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Entrance",
                             "className": "form-control",
                             "name": "city",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
@@ -857,7 +862,7 @@ class DataGenerator:
                             "required": True,
                             "className": "form-control",
                             "name": "map-lang",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
@@ -865,7 +870,7 @@ class DataGenerator:
                             "required": True,
                             "className": "form-control",
                             "name": "map-long",
-                            "subtype": "text"
+                            "type": "text"
                         }
                     ],
                     "logs": [
@@ -934,7 +939,7 @@ class DataGenerator:
                             "label": "Hostname",
                             "className": "form-control",
                             "name": "hostname",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
@@ -943,7 +948,7 @@ class DataGenerator:
                             "placeholder": "127.0.0.1",
                             "className": "form-control",
                             "name": "ipv4",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
@@ -953,21 +958,21 @@ class DataGenerator:
                             "name": "ipv4_network_class",
                             "description": "An IPv4 address class is a categorical division of internet protocol "
                                            "addresses in IPv4-based routing",
-                            "subtype": "text"
+                            "type": "text"
                         }, {
                             "input_type": "text",
                             "label": "IPv4 Private",
                             "placeholder": "127.0.0.1",
                             "className": "form-control",
                             "name": "ipv4_intranet",
-                            "subtype": "text"
+                            "type": "text"
                         }, {
                             "input_type": "text",
                             "label": "IPv6",
                             "placeholder": "[2001:0db8:85a3:08d3::0370:7344]",
                             "className": "form-control",
                             "name": "ipv6",
-                            "subtype": "text"
+                            "type": "text"
                         }
                     ],
                     "logs": [
