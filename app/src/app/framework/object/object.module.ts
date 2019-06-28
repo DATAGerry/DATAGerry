@@ -33,6 +33,7 @@ import { ObjectFieldsViewComponent } from './components/object-fields-view/objec
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { ObjectInsertComponent } from './components/object-insert/object-insert.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {RenderModule} from "../render/render.module";
 
 @NgModule({
   declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent, ObjectSummaryComponent,
@@ -45,7 +46,8 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
     QRCodeModule,
     NgxSpinnerModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    RenderModule
   ]
 })
 export class ObjectModule { }

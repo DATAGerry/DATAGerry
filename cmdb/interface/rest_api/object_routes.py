@@ -71,6 +71,23 @@ def get_object_by_type(type_ids):
 
 
 @login_required
+@object_rest.route('/many/<string:public_ids>', methods=['GET'])
+def get_objects_by_public_id(public_ids):
+    """Return all objects by public_ids"""
+
+    try:
+        query = _build_query({'public_id': public_ids}, q_operator='$or')
+        all_objects_list = object_manager.get_objects_by(sort="public_id", **query)
+        all_objects = preparation_for_render(all_objects_list)
+
+    except CMDBError:
+        return abort(400)
+
+    resp = make_response(CmdbRender.result_loop_render(object_manager, all_objects))
+    return resp
+
+
+@login_required
 @object_rest.route('/count/<int:type_id>', methods=['GET'])
 def count_object_by_type(type_id):
     try:
@@ -168,7 +185,7 @@ def get_object_by(requirements):
 
 
 @login_required
-@object_rest.route('/', methods=['POST'])
+@object_rest.route('/add', methods=['POST'])
 def add_object():
     from bson import json_util
     from datetime import datetime

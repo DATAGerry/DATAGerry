@@ -19,6 +19,7 @@
 import { Injectable } from '@angular/core';
 import { ApiCallService } from '../../services/api-call.service';
 import { CmdbObject } from '../models/cmdb-object';
+import {Observable} from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -46,7 +47,7 @@ export class ObjectService {
     return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/type/' + typeID);
   }
 
-  public postObject(objectInstance: CmdbObject) {
-    return this.api.callPostRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
+  public postAddObject(objectInstance: CmdbObject): Observable<any>{
+    return this.api.callPostRoute<CmdbObject>(this.servicePrefix + '/add', objectInstance);
   }
 }

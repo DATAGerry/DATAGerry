@@ -266,6 +266,7 @@ class CmdbRender:
                     for object_field in self.object_instance.fields:
                         if object_field.get('name') == type_field.get('name'):
                             object_field['label'] = type_field.get('label')
+                            object_field['type'] = type_field.get('type')
                             render_result.obj_fields = self.object_instance.fields
         if self.has_summaries():
             render_result.set_summaries(self.get_summaries(True))

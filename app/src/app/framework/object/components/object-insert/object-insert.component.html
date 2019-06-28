@@ -34,8 +34,7 @@
               <div class="card-body">
                 <form [formGroup]="formFields">
                   <div class="form-group" *ngFor="let field of formType.value.type.fields">
-                    <label for="fieldInput">{{field.label}}</label>
-                    <input formControlName="{{field.name}}" type="text" class="form-control" id="fieldInput" placeholder="{{field.placeholder}}">
+                    <cmdb-render-element [data]="field"></cmdb-render-element>
                   </div>
                 </form>
               </div>
