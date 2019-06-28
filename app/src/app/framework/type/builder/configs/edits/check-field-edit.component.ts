@@ -19,11 +19,11 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'cmdb-section-field-edit',
-  templateUrl: './section-field-edit.component.html',
-  styleUrls: ['./section-field-edit.component.scss']
+  selector: 'cmdb-check-field-edit',
+  templateUrl: './check-field-edit.component.html',
+  styleUrls: ['./check-field-edit.component.scss']
 })
-export class SectionFieldEditComponent implements OnInit {
+export class CheckFieldEditComponent implements OnInit {
 
   constructor() { }
 

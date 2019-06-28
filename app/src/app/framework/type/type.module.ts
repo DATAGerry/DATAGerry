@@ -41,8 +41,11 @@ import { TypeEditComponent } from './components/type-edit/type-edit.component';
 import { TypeMetaStepComponent } from './components/type-builder/type-meta-step/type-meta-step.component';
 import { TypeTabObjectListComponent } from './components/type-view/tabs/type-tab-object-list/type-tab-object-list.component';
 import { TypeMetaDataComponent } from './components/type-view/type-meta-data/type-meta-data.component';
+import { TypeDeleteComponent, TypeDeleteConfirmModalComponent } from './components/type-delete/type-delete.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
+  entryComponents: [TypeDeleteConfirmModalComponent],
   declarations: [
     TypeViewComponent,
     TypeListComponent,
@@ -57,7 +60,9 @@ import { TypeMetaDataComponent } from './components/type-view/type-meta-data/typ
     TypeEditComponent,
     TypeMetaStepComponent,
     TypeTabObjectListComponent,
-    TypeMetaDataComponent
+    TypeMetaDataComponent,
+    TypeDeleteComponent,
+    TypeDeleteConfirmModalComponent
   ],
   imports: [
     CommonModule,
@@ -70,7 +75,8 @@ import { TypeMetaDataComponent } from './components/type-view/type-meta-data/typ
     NgSelectModule,
     RenderModule,
     BuilderModule,
-    FormsModule
+    FormsModule,
+    NgbModule
   ]
 })
 export class TypeModule {

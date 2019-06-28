@@ -1,3 +1,10 @@
-<p>
-  checkbox works!
-</p>
+<div class="form-check">
+
+  <input class="form-check-input" type="checkbox" name="{{data.name}}" value="{{data?.value}}">
+  <label>
+    <i class="fa fa-info-circle" *ngIf="data?.helperText" placement="right" [ngbTooltip]="data?.helperText"></i>
+    {{data.label}}
+    <span class="required" *ngIf="data?.required">*</span>
+  </label>
+  <small class="form-text text-muted">{{data?.description}}</small>
+</div>

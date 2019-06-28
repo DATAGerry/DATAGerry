@@ -34,6 +34,10 @@ export class ObjectService {
     });
   }
 
+  public countObjectsByType(typeID: number) {
+    return this.api.callGetRoute<number>(this.servicePrefix + '/count/' + typeID);
+  }
+
   public getObjectList() {
     return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/');
   }

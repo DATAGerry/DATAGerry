@@ -16,7 +16,15 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, ComponentFactoryResolver, ComponentRef, Input, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import {
+  Component,
+  ComponentFactoryResolver,
+  ComponentRef,
+  Input,
+  OnInit,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
 import { configComponents } from './configs.list';
 import { Group } from '../../../../user/models/group';
 import { User } from '../../../../user/models/user';
@@ -38,7 +46,7 @@ export class ConfigEditComponent implements OnInit {
   constructor(private resolver: ComponentFactoryResolver) {
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
 
     this.container.clear();
 
@@ -50,5 +58,4 @@ export class ConfigEditComponent implements OnInit {
     this.componentRef.instance.groupList = this.groupList;
     this.componentRef.instance.userList = this.userList;
   }
-
 }
