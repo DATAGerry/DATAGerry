@@ -49,14 +49,15 @@ class CmdbType(CmdbDAO):
     ]
 
     def __init__(self, name: str, active: bool, author_id: int, creation_time: datetime,
-                 render_meta: dict, fields: list, version: str = '1.0.0', label: str = None, status: list = None,
-                 description: str = None, logs: dict = None, **kwargs):
+                 render_meta: dict, fields: list, version: str = '1.0.0', access: list = None, label: str = None,
+                 status: list = None, description: str = None, logs: dict = None, **kwargs):
         self.name = name
         self.label = label or self.name.title()
         self.description = description
         self.version = version
         self.status = status
         self.active = active
+        self.access = access or []
         self.author_id = author_id
         self.creation_time = creation_time
         self.render_meta = render_meta
@@ -221,11 +222,12 @@ class _ExternalLink:
 
 class _Summary:
 
-    def __init__(self, name: str, label: str = None, fields: list = None, values: list = None):
+    def __init__(self, name: str, label: str = None, labels: [] = None, fields: list = None, values: list = None):
         self.name = name
         self.label = label or self.name.title()
+        self.labels = labels or []
         self.fields = fields or []
-        self.contens = values
+        self.values = values
 
     def has_fields(self):
         if len(self.fields) > 0:
@@ -233,8 +235,11 @@ class _Summary:
         return False
 
     def set_values(self, values):
-        self.contens = values
+        self.values = values
+
+    def set_labels(self, labels):
+        self.labels = labels
 
     def __repr__(self):
-        output_string = "{}: {}".format(self.label, self.contens)
+        output_string = "{}: {}".format(self.label, self.values)
         return output_string

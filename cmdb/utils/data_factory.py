@@ -141,12 +141,10 @@ class DataGenerator:
             CmdbType(
                 **{
                     "public_id": 1,
-                    "label": "Example",
-                    "name": "example",
-                    "description": "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, \
-                         sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. \
-                         At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata\
-                         sanctus est Lorem ipsum dolor sit amet.",
+                    "label": "Leased Lines",
+                    "name": "leased_lines",
+                    "description": "A leased line is a private bidirectional or symmetric telecommunications circuit "
+                                   "between two or more locations provided according to a commercial contract.",
                     "version": "1.0.0",
                     "active": True,
                     "author_id": 1,
@@ -167,213 +165,188 @@ class DataGenerator:
                         ],
                         "summary": [
                             {
-                                "label": "Summary",
+                                "label": "Connection State",
                                 "fields": [
-                                    "text-1",
-                                    "text-2",
-                                    "textarea-1"
+                                    "state",
                                 ],
-                                "name": "example_summary"
+                                "name": "connection_state"
                             },
                             {
-                                "label": "Date",
+                                "label": "Linedetails",
                                 "fields": [
-                                    "date-1"
+                                    "product_name",
+                                    "transfer_rate"
                                 ],
-                                "name": "example_date"
+                                "name": "linedetails"
+                            },
+                            {
+                                "label": "Location A",
+                                "fields": [
+                                    "company_name_a",
+                                    "zip_a",
+                                    "city_a"
+                                ],
+                                "name": "location_a"
+                            },
+                            {
+                                "label": "Location B",
+                                "fields": [
+                                    "company_name_b",
+                                    "zip_b",
+                                    "city_b"
+                                ],
+                                "name": "location_b"
                             }
                         ],
                         "sections": [
                             {
                                 "tag": "h1",
-                                "name": "text_fields",
-                                "label": "Text Fields",
+                                "name": "connection state",
+                                "label": "Connection State",
                                 "fields": [
-                                    "text-1",
-                                    "text-2"
+                                    "state",
                                 ],
                                 "position": 1
                             },
                             {
                                 "tag": "h2",
-                                "name": "text_fields_special",
-                                "label": "Special Fields",
+                                "name": "linedetails",
+                                "label": "Linedetails",
                                 "fields": [
-                                    "password-1",
-                                    "textarea-1"
+                                    "product_name"
+                                    "transfer_rate"
                                 ],
                                 "position": 2
                             },
                             {
                                 "tag": "h1",
-                                "name": "check_fields",
-                                "label": "Check Fields",
+                                "name": "location_a",
+                                "label": "Location A",
                                 "fields": [
-                                    "radio-group-1",
-                                    "checkbox-group-1",
-                                    "select-1",
-                                    "select-2"
+                                    "company_name_a",
+                                    "street_a",
+                                    "zip_a",
+                                    "city_a",
+                                    "location_details_a"
                                 ],
                                 "position": 3
                             },
                             {
                                 "tag": "h1",
-                                "name": "other_fields",
-                                "label": "Other Fields",
+                                "name": "location_b",
+                                "label": "Location B",
                                 "fields": [
-                                    "date-1",
-                                    "number-1",
-                                    "number-2",
-                                    "text-3"
+                                    "company_name_b",
+                                    "street_b",
+                                    "zip_b",
+                                    "city_b",
+                                    "location_details_b"
                                 ],
                                 "position": 4
-                            }
+                            },
                         ]
                     },
                     "fields": [
                         {
-                            "input_type": "text",
-                            "label": "Basic Text Field",
+                            "input_type": "checkbox",
+                            "label": "State",
+                            "name": "state",
                             "className": "form-control",
-                            "name": "text-1",
-                            "subtype": "text"
-                        },
-                        {
-                            "input_type": "text",
-                            "required": True,
-                            "label": "Full Text Field",
-                            "description": "example text field with all possible options",
-                            "placeholder": "example",
-                            "className": "form-control",
-                            "name": "text-2",
-                            "access": True,
-                            "subtype": "text",
-                            "maxlength": 120,
-                            "role": 1
+                            "type": "checkbox"
                         },
                         {
                             "input_type": "text",
-                            "subtype": "password",
-                            "required": True,
-                            "label": "Password Field",
+                            "label": "Product Name",
                             "className": "form-control",
-                            "name": "password-1"
+                            "name": "product_name",
+                            "type": "text"
                         },
                         {
-                            "input_type": "textarea",
-                            "label": "Basic Text Area",
+                            "input_type": "text",
+                            "label": "Transfer Rate",
                             "className": "form-control",
-                            "name": "textarea-1",
-                            "subtype": "textarea",
-                            "maxlength": 120,
-                            "rows": 3
+                            "name": "transfer_rate",
+                            "type": "text"
                         },
                         {
-                            "input_type": "radio-group",
-                            "label": "Basic Radio Group",
-                            "name": "radio-group-1",
-                            "values": [
-                                {
-                                    "label": "Option 1",
-                                    "value": "option-1"
-                                },
-                                {
-                                    "label": "Option 2",
-                                    "value": "option-2"
-                                },
-                                {
-                                    "label": "Option 3",
-                                    "value": "option-3"
-                                }
-                            ]
-                        },
-                        {
-                            "input_type": "checkbox-group",
-                            "label": "Basic Checkbox Group",
-                            "name": "checkbox-group-1",
-                            "values": [
-                                {
-                                    "label": "Option 1",
-                                    "value": "option-1",
-                                    "selected": True
-                                },
-                                {
-                                    "label": "Option 2",
-                                    "value": "option-2"
-                                }
-                            ]
-                        },
-                        {
-                            "input_type": "select",
-                            "label": "Basic Select",
+                            "input_type": "text",
+                            "label": "Company Name A",
                             "className": "form-control",
-                            "name": "select-1",
-                            "values": [
-                                {
-                                    "label": "Option 1",
-                                    "value": "option-1",
-                                    "selected": True
-                                },
-                                {
-                                    "label": "Option 2",
-                                    "value": "option-2"
-                                },
-                                {
-                                    "label": "Option 3",
-                                    "value": "option-3"
-                                }
-                            ]
+                            "name": "company_name_a",
+                            "type": "text"
                         },
                         {
-                            "input_type": "select",
-                            "label": "Multi Select",
+                            "input_type": "text",
+                            "label": "Street A",
                             "className": "form-control",
-                            "name": "select-2",
-                            "multiple": True,
-                            "values": [
-                                {
-                                    "label": "Option 1",
-                                    "value": "option-1"
-                                },
-                                {
-                                    "label": "Option 2",
-                                    "value": "option-2"
-                                },
-                                {
-                                    "label": "Option 3",
-                                    "value": "option-3"
-                                }
-                            ]
-                        },
-                        {
-                            "input_type": "date",
-                            "label": "Basic Date Field",
-                            "className": "form-control",
-                            "name": "date-1"
+                            "name": "street_a",
+                            "type": "text"
                         },
                         {
                             "input_type": "number",
-                            "label": "Basic Number",
+                            "label": "ZIP A",
+                            "required": True,
                             "className": "form-control",
-                            "name": "number-1"
-                        },
-                        {
-                            "input_type": "number",
-                            "label": "Limited Number",
-                            "className": "form-control",
-                            "name": "number-2",
-                            "min": 10,
-                            "max": 100,
-                            "step": 10
+                            "name": "zip_a",
+                            "min": 10000,
+                            "max": 99999,
+                            "step": 1,
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
-                            "label": "N - Text Field",
-                            "n-field": True,
+                            "label": "City A",
                             "className": "form-control",
-                            "name": "text-3",
-                            "subtype": "text"
-                        }
+                            "name": "city_a",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Location Details A",
+                            "className": "form-control",
+                            "name": "location_details_a",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Company Name B",
+                            "className": "form-control",
+                            "name": "company_name_b",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Street B",
+                            "className": "form-control",
+                            "name": "street_b",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "number",
+                            "label": "ZIP B",
+                            "required": True,
+                            "className": "form-control",
+                            "name": "zip_b",
+                            "min": 10000,
+                            "max": 99999,
+                            "step": 1,
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "City B",
+                            "className": "form-control",
+                            "name": "city_b",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Location Details B",
+                            "className": "form-control",
+                            "name": "location_details_b",
+                            "type": "text"
+                        },
+
                     ],
                     "logs": [
                         {
@@ -390,181 +363,178 @@ class DataGenerator:
             CmdbType(
                 **{
                     "public_id": 2,
-                    "title": "Employees",
-                    "name": "employees",
-                    "description": "Company employees",
+                    "title": "Switch",
+                    "name": "switch",
+                    "description": "A switch (also called switching hub, bridging hub, officially MAC bridge) "
+                                   "is a computer networking device that connects devices on a computer network "
+                                   "by using packet switching to receive, process, "
+                                   "and forward data to the destination device. ",
                     "version": "1.0.0",
                     "active": True,
                     "author_id": 1,
                     "creation_time": generation_date,
                     "render_meta": {
-                        "external": [
-                            {
-                                "href": "https://www.xing.com/profile/{0}",
-                                "icon": "fab fa-xing",
-                                "fields": [
-                                    "xing"
-                                ],
-                                "name": "xing",
-                                "label": "XING"
-                            }
-                        ],
+                        "external": [],
                         "summary": [
                             {
-                                "label": "Name",
+                                "label": "Management",
                                 "fields": [
-                                    "first_name",
-                                    "last_name"
+                                    "management_ip",
+                                    "hostname"
                                 ],
-                                "name": "name"
-                            },
-                            {
-                                "label": "Job",
-                                "fields": [
-                                    "job"
-                                ],
-                                "name": "job"
+                                "name": "management"
                             }
                         ],
                         "sections": [
                             {
                                 "tag": "h1",
-                                "name": "employee_details",
-                                "label": "Employee Details",
+                                "name": "management",
+                                "label": "Management",
                                 "fields": [
-                                    "employee_number",
-                                    "first_name",
-                                    "last_name",
-                                    "department",
-                                    "job"
+                                    "management_ip",
+                                    "hostname",
+                                    "monitoring",
+                                    "os",
+                                    "username",
+                                    "password"
                                 ],
                                 "position": 1
                             },
                             {
-                                "tag": "h2",
-                                "name": "personal_details",
-                                "label": "Personal Details",
+                                "tag": "h1",
+                                "name": "location",
+                                "label": "Location",
                                 "fields": [
                                     "address",
-                                    "birthday"
+                                    "building",
+                                    "room",
+                                    "rack",
                                 ],
                                 "position": 2
                             },
                             {
                                 "tag": "h1",
-                                "name": "account_data",
-                                "label": "Account Data",
+                                "name": "hardware",
+                                "label": "Hardware",
                                 "fields": [
-                                    "user_name",
-                                    "email_address",
-                                    "cmdb_user"
+                                    "manufacturer",
+                                    "supplier",
+                                    "model",
+                                    "serial_number",
+                                    "software_version"
                                 ],
                                 "position": 3
-                            },
-                            {
-                                "tag": "h2",
-                                "name": "external_accounts",
-                                "label": "External Accounts",
-                                "fields": [
-                                    "xing",
-                                    "linked_in",
-                                    "website"
-                                ],
-                                "position": 4
                             }
                         ]
                     },
                     "fields": [
                         {
                             "input_type": "text",
+                            "label": "Management IP",
+                            "className": "form-control",
+                            "name": "management_ip",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Hostname",
+                            "className": "form-control",
+                            "name": "hostname",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "checkbox",
+                            "label": "Monitoring",
+                            "className": "form-control",
+                            "name": "monitoring",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Operating System",
+                            "className": "form-control",
+                            "name": "os",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Username",
+                            "className": "form-control",
+                            "name": "username",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Password",
+                            "className": "form-control",
+                            "name": "password",
+                            "type": "password",
                             "required": True,
-                            "label": "Employee Number",
-                            "className": "form-control",
-                            "name": "employee_number",
-                            "access": True,
-                            "subinput_type": "text",
-                            "maxlength": "4",
-                            "role": "1"
-                        },
-                        {
-                            "input_type": "text",
-                            "label": "Firstname",
-                            "className": "form-control",
-                            "name": "first_name",
-                            "subinput_type": "text"
-                        }, {
-                            "input_type": "text",
-                            "label": "Job",
-                            "className": "form-control",
-                            "name": "job",
-                            "subinput_type": "text"
-                        },
-                        {
-                            "input_type": "text",
-                            "required": True,
-                            "label": "Lastname",
-                            "className": "form-control",
-                            "name": "last_name",
-                            "subinput_type": "text"
-                        },
-                        {
-                            "input_type": "ref",
-                            "label": "Department",
-                            "className": "form-control",
-                            "name": "department",
-                            "type_id": 3
                         },
                         {
                             "input_type": "text",
                             "label": "Address",
                             "className": "form-control",
                             "name": "address",
-                            "subinput_type": "text"
-                        },
-                        {
-                            "input_type": "date",
-                            "label": "Birthday",
-                            "className": "form-control",
-                            "name": "birthday"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
-                            "required": True,
-                            "label": "Username",
+                            "label": "Building",
                             "className": "form-control",
-                            "name": "user_name",
-                            "subinput_type": "text"
+                            "name": "building",
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
-                            "subinput_type": "email",
-                            "required": True,
-                            "label": "Email Adress",
-                            "placeholder": "example@example.org",
+                            "label": "Room",
                             "className": "form-control",
-                            "name": "email_address"
+                            "name": "room",
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
-                            "label": "XING Name",
-                            "description": "Profile name inside https://www.xing.com/profile/<br>USERNAME</br>/",
+                            "label": "Rack",
                             "className": "form-control",
-                            "name": "xing",
-                            "subinput_type": "text"
+                            "name": "rack",
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
-                            "label": "Linked In",
+                            "label": "Manufacturer",
                             "className": "form-control",
-                            "name": "linked_in",
-                            "subinput_type": "text"
+                            "name": "manufacturer",
+                            "type": "text"
                         },
                         {
-                            "input_type": "href",
-                            "label": "Website",
+                            "input_type": "text",
+                            "label": "Supplier",
                             "className": "form-control",
-                            "name": "website"
-                        }
+                            "name": "supplier",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Model",
+                            "className": "form-control",
+                            "name": "model",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Serial Number",
+                            "className": "form-control",
+                            "name": "serial_number",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Software Version",
+                            "className": "form-control",
+                            "name": "software_version",
+                            "type": "text"
+                        },
+
                     ],
                     "logs": [
                         {
@@ -582,9 +552,10 @@ class DataGenerator:
             CmdbType(
                 **{
                     "public_id": 3,
-                    "title": "Departments",
-                    "name": "departments",
-                    "description": "Company departments",
+                    "title": "Router",
+                    "name": "router",
+                    "description": "A router is a networking device that forwards data packets "
+                                   "between computer networks.",
                     "version": "1.0.0",
                     "active": True,
                     "author_id": 1,
@@ -593,41 +564,164 @@ class DataGenerator:
                         "external": [],
                         "summary": [
                             {
-                                "label": "Name",
+                                "label": "Management",
                                 "fields": [
-                                    "name"
+                                    "management_ip",
+                                    "hostname"
                                 ],
-                                "name": "name"
+                                "name": "management"
                             }
                         ],
                         "sections": [
                             {
                                 "tag": "h1",
-                                "name": "informations",
-                                "label": "Informations of department",
+                                "name": "management",
+                                "label": "Management",
                                 "fields": [
-                                    "name",
-                                    "department_head"
+                                    "management_ip",
+                                    "hostname",
+                                    "monitoring",
+                                    "os",
+                                    "username",
+                                    "password"
                                 ],
                                 "position": 1
+                            },
+                            {
+                                "tag": "h1",
+                                "name": "location",
+                                "label": "Location",
+                                "fields": [
+                                    "address",
+                                    "building",
+                                    "room",
+                                    "rack",
+                                ],
+                                "position": 2
+                            },
+                            {
+                                "tag": "h1",
+                                "name": "hardware",
+                                "label": "Hardware",
+                                "fields": [
+                                    "manufacturer",
+                                    "supplier",
+                                    "model",
+                                    "serial_number",
+                                    "software_version"
+                                ],
+                                "position": 3
                             }
                         ]
                     },
                     "fields": [
                         {
                             "input_type": "text",
-                            "label": "Name",
+                            "label": "Management IP",
                             "className": "form-control",
-                            "name": "name",
-                            "subinput_type": "text"
+                            "name": "management_ip",
+                            "type": "text"
                         },
                         {
-                            "input_type": "ref",
-                            "label": "Head of department",
+                            "input_type": "text",
+                            "label": "Hostname",
                             "className": "form-control",
-                            "name": "department_head",
-                            "type_id": 2
-                        }
+                            "name": "hostname",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "checkbox",
+                            "label": "Monitoring",
+                            "className": "form-control",
+                            "name": "monitoring",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Operating System",
+                            "className": "form-control",
+                            "name": "os",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Username",
+                            "className": "form-control",
+                            "name": "username",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Password",
+                            "className": "form-control",
+                            "name": "password",
+                            "type": "password",
+                            "required": True,
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Address",
+                            "className": "form-control",
+                            "name": "address",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Building",
+                            "className": "form-control",
+                            "name": "building",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Room",
+                            "className": "form-control",
+                            "name": "room",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Rack",
+                            "className": "form-control",
+                            "name": "rack",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Manufacturer",
+                            "className": "form-control",
+                            "name": "manufacturer",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Supplier",
+                            "className": "form-control",
+                            "name": "supplier",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Model",
+                            "className": "form-control",
+                            "name": "model",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Serial Number",
+                            "className": "form-control",
+                            "name": "serial_number",
+                            "type": "text"
+                        },
+                        {
+                            "input_type": "text",
+                            "label": "Software Version",
+                            "className": "form-control",
+                            "name": "software_version",
+                            "type": "text"
+                        },
+
                     ],
                     "logs": [
                         {
@@ -711,14 +805,14 @@ class DataGenerator:
                             "placeholder": "Calling name",
                             "className": "form-control",
                             "name": "naming",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "textarea",
                             "label": "Description",
                             "className": "form-control",
                             "name": "description",
-                            "subtype": "textarea",
+                            "type": "textarea",
                             "maxlength": 120,
                             "rows": 3
                         },
@@ -727,13 +821,14 @@ class DataGenerator:
                             "label": "Entrance",
                             "className": "form-control",
                             "name": "entrance",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "ref",
                             "label": "Person in Charge",
                             "className": "form-control",
                             "name": "person_in_charge",
+                            "type": "text",
                             "type_id": 2
                         },
                         {
@@ -741,7 +836,7 @@ class DataGenerator:
                             "label": "Street",
                             "className": "form-control",
                             "name": "street",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "number",
@@ -751,14 +846,15 @@ class DataGenerator:
                             "name": "zip",
                             "min": 10000,
                             "max": 99999,
-                            "step": 1
+                            "step": 1,
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
                             "label": "Entrance",
                             "className": "form-control",
                             "name": "city",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
@@ -766,7 +862,7 @@ class DataGenerator:
                             "required": True,
                             "className": "form-control",
                             "name": "map-lang",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
@@ -774,7 +870,7 @@ class DataGenerator:
                             "required": True,
                             "className": "form-control",
                             "name": "map-long",
-                            "subtype": "text"
+                            "type": "text"
                         }
                     ],
                     "logs": [
@@ -843,7 +939,7 @@ class DataGenerator:
                             "label": "Hostname",
                             "className": "form-control",
                             "name": "hostname",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
@@ -852,7 +948,7 @@ class DataGenerator:
                             "placeholder": "127.0.0.1",
                             "className": "form-control",
                             "name": "ipv4",
-                            "subtype": "text"
+                            "type": "text"
                         },
                         {
                             "input_type": "text",
@@ -862,21 +958,21 @@ class DataGenerator:
                             "name": "ipv4_network_class",
                             "description": "An IPv4 address class is a categorical division of internet protocol "
                                            "addresses in IPv4-based routing",
-                            "subtype": "text"
+                            "type": "text"
                         }, {
                             "input_type": "text",
                             "label": "IPv4 Private",
                             "placeholder": "127.0.0.1",
                             "className": "form-control",
                             "name": "ipv4_intranet",
-                            "subtype": "text"
+                            "type": "text"
                         }, {
                             "input_type": "text",
                             "label": "IPv6",
                             "placeholder": "[2001:0db8:85a3:08d3::0370:7344]",
                             "className": "form-control",
                             "name": "ipv6",
-                            "subtype": "text"
+                            "type": "text"
                         }
                     ],
                     "logs": [
@@ -902,7 +998,13 @@ class DataGenerator:
         location_list = list()
         servers_list = list()
 
-        def gen_example_object():
+        def gen_leased_line_object():
+            try:
+                location_id_a = random.choice(location_list).get_public_id()
+                location_id_b = random.choice(location_list).get_public_id()
+            except Exception:
+                location_id_a = None
+                location_id_b = None
             return CmdbObject(
                 **{
                     "public_id": public_id_counter,
@@ -919,62 +1021,67 @@ class DataGenerator:
                     ],
                     "fields": [
                         {
-                            "name": "text-1",
-                            "value": self._faker.word()
+                            "name": "state",
+                            "value": self._faker.boolean()
                         },
                         {
-                            "name": "text-2",
-                            "value": self._faker.words()
+                            "name": "product_name",
+                            "value": self._faker.last_name() + " " + self._faker.company_suffix()
                         },
                         {
-                            "name": "password-1",
-                            "value": self._security_manager.encrypt_aes(self._faker.password())
+                            "name": "transfer_rate",
+                            "value": str(self._faker.random_int(max=1000)) + " Mbit/s"
                         },
                         {
-                            "name": "textarea-1",
-                            "value": self._faker.paragraph()
+                            "name": "company_name_a",
+                            "value": self._faker.first_name() + " " + self._faker.company_suffix()
                         },
                         {
-                            "name": "radio-group-1",
-                            "value": random.randint(1, 3)
+                            "name": "street_a",
+                            "value": self._faker.street_name()
                         },
                         {
-                            "name": "checkbox-group-1",
-                            "value": random.randint(1, 3)
+                            "name": "zip_a",
+                            "value": self._faker.zipcode()
                         },
                         {
-                            "name": "select-1",
-                            "value": random.randint(1, 3)
+                            "name": "city_a",
+                            "value": self._faker.city()
                         },
                         {
-                            "name": "select-2",
-                            "value": random.randint(1, 3)
+                            "name": "location_details_a",
+                            "value": location_id_a
                         },
                         {
-                            "name": "date-1",
-                            "value": self._faker.date_time_between(start_date="-30d")
+                            "name": "company_name_b",
+                            "value": self._faker.first_name() + " " + self._faker.company_suffix()
                         },
                         {
-                            "name": "number-1",
-                            "value": random.randint(1, 99)
+                            "name": "street_b",
+                            "value": self._faker.street_name()
                         },
                         {
-                            "name": "number-2",
-                            "value": random.randint(1, 99)
+                            "name": "zip_b",
+                            "value": self._faker.zipcode()
                         },
                         {
-                            "name": "text-3",
-                            "value": self._faker.text()
+                            "name": "city_b",
+                            "value": self._faker.city()
+                        },
+                        {
+                            "name": "location_details_b",
+                            "value": location_id_b
                         }
+
                     ]
                 }
             )
 
-        def gen_employee_object():
+        def gen_switch_object():
             try:
-                department_id = random.choice(department_list).get_public_id()
+                location = random.choice(location_list).get_public_id()
             except Exception:
-                department_id = None
+                location = None
             return CmdbObject(
                 **{
                     "public_id": public_id_counter,
@@ -991,62 +1098,74 @@ class DataGenerator:
                     ],
                     "fields": [
                         {
-                            "name": "employee_number",
-                            "value": self._faker.itin()
+                            "name": "management_ip",
+                            "value": self._faker.ipv4()
                         },
                         {
-                            "name": "first_name",
-                            "value": self._faker.first_name()
+                            "name": "hostname",
+                            "value": self._faker.hostname()
                         },
                         {
-                            "name": "last_name",
-                            "value": self._faker.last_name()
+                            "name": "monitoring",
+                            "value": self._faker.boolean()
                         },
                         {
-                            "name": "department",
-                            "value": department_id
+                            "name": "os",
+                            "value": self._faker.word()
                         },
                         {
-                            "name": "job",
-                            "value": self._faker.job()
+                            "name": "username",
+                            "value": self._faker.user_name()
+                        },
+                        {
+                            "name": "password",
+                            "value": self._security_manager.encrypt_aes(self._faker.password())
                         },
                         {
                             "name": "address",
-                            "value": self._faker.address()
+                            "value": location
                         },
                         {
-                            "name": "birthday",
-                            "value": self._faker.past_datetime(start_date="-50y")
+                            "name": "building",
+                            "value": self._faker.word()
                         },
                         {
-                            "name": "user_name",
-                            "value": self._faker.user_name()
+                            "name": "room",
+                            "value": self._faker.word()
                         },
                         {
-                            "name": "email_address",
-                            "value": self._faker.email()
+                            "name": "rack",
+                            "value": self._faker.word()
                         },
                         {
-                            "name": "xing",
-                            "value": self._faker.user_name()
+                            "name": "manufacturer",
+                            "value": self._faker.first_name() + self._faker.company_suffix()
                         },
                         {
-                            "name": "linked_in",
-                            "value": self._faker.user_name()
+                            "name": "supplier",
+                            "value": self._faker.last_name() + self._faker.company_suffix()
                         },
                         {
-                            "name": "website",
-                            "value": self._faker.url()
-                        }
+                            "name": "model",
+                            "value": self._faker.word()
+                        },
+                        {
+                            "name": "serial_number",
+                            "value": self._faker.random_number()
+                        },
+                        {
+                            "name": "software_version",
+                            "value": self._faker.random_number()
+                        },
                     ]
                 }
             )
 
-        def gen_department_object():
+        def gen_router_object():
             try:
-                employee_id = random.choice(employee_list).get_public_id()
+                location = random.choice(location_list).get_public_id()
             except Exception:
-                employee_id = None
+                location = None
             return CmdbObject(
                 **{
                     "public_id": public_id_counter,
@@ -1063,13 +1182,65 @@ class DataGenerator:
                     ],
                     "fields": [
                         {
-                            "name": "name",
-                            "value": self._faker.company_suffix()
+                            "name": "management_ip",
+                            "value": self._faker.ipv4()
                         },
                         {
-                            "name": "department_head",
-                            "value": employee_id
-                        }
+                            "name": "hostname",
+                            "value": self._faker.hostname()
+                        },
+                        {
+                            "name": "monitoring",
+                            "value": self._faker.boolean()
+                        },
+                        {
+                            "name": "os",
+                            "value": self._faker.word()
+                        },
+                        {
+                            "name": "username",
+                            "value": self._faker.user_name()
+                        },
+                        {
+                            "name": "password",
+                            "value": self._security_manager.encrypt_aes(self._faker.password())
+                        },
+                        {
+                            "name": "address",
+                            "value": location
+                        },
+                        {
+                            "name": "building",
+                            "value": self._faker.word()
+                        },
+                        {
+                            "name": "room",
+                            "value": self._faker.word()
+                        },
+                        {
+                            "name": "rack",
+                            "value": self._faker.word()
+                        },
+                        {
+                            "name": "manufacturer",
+                            "value": self._faker.first_name() + self._faker.company_suffix()
+                        },
+                        {
+                            "name": "supplier",
+                            "value": self._faker.last_name() + self._faker.company_suffix()
+                        },
+                        {
+                            "name": "model",
+                            "value": self._faker.word()
+                        },
+                        {
+                            "name": "serial_number",
+                            "value": self._faker.random_number()
+                        },
+                        {
+                            "name": "software_version",
+                            "value": self._faker.random_number()
+                        },
                     ]
                 }
             )
@@ -1176,11 +1347,11 @@ class DataGenerator:
 
         def select(type_id: int):
             if type_id == 1:
-                example_object_list.append(gen_example_object())
+                example_object_list.append(gen_leased_line_object())
             elif type_id == 2:
-                employee_list.append(gen_employee_object())
+                employee_list.append(gen_switch_object())
             elif type_id == 3:
-                department_list.append(gen_department_object()),
+                department_list.append(gen_router_object()),
             elif type_id == 4:
                 location_list.append(gen_location_object()),
             elif type_id == 5:
@@ -1199,38 +1370,23 @@ class DataGenerator:
         category_list = [
             CmdbCategory(**{
                 "public_id": 1,
-                "name": "example_category",
-                "label": "Example",
-                "icon": "fas fa-book",
-                "type_list": [
-                    1
-                ]
-            }),
-            CmdbCategory(**{
-                "public_id": 2,
-                "name": "company",
-                "label": "Company",
-                "icon": "fas fa-building",
-                "type_list": [
-                    2,
-                    3
-                ]
-            }),
-            CmdbCategory(**{
-                "public_id": 3,
                 "name": "infrastructure",
                 "label": "Infrastructure",
-                "parent_id": 2,
+                # "parent_id": 2,
                 "type_list": [
+                    1,
                     4
                 ]
             }),
             CmdbCategory(**{
-                "public_id": 4,
-                "name": "hardware",
+                "public_id": 2,
+                "name": "devices",
+                "label": "Devices",
                 "icon": "fas fa-memory",
-                "parent_id": 3,
+                # "parent_id": 3,
                 "type_list": [
+                    2,
+                    3,
                     5
                 ]
             }),

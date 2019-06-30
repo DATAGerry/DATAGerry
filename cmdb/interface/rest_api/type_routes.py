@@ -47,7 +47,6 @@ def get_type_list():
 
 
 @type_routes.route('/<int:public_id>', methods=['GET'])
-@login_required
 def get_type(public_id: int):
     try:
         type_instance = object_manager.get_type(public_id)
@@ -60,19 +59,21 @@ def get_type(public_id: int):
 
 
 @type_routes.route('/', methods=['POST'])
-@login_required
-@json_required
 def add_type():
     from bson import json_util
+    from datetime import datetime
     add_data_dump = json.dumps(request.json)
     try:
         new_type_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
+        new_type_data['public_id'] = object_manager.get_highest_id(CmdbType.COLLECTION) + 1
+        new_type_data['creation_time'] = datetime.utcnow()
     except TypeError as e:
         LOGGER.warning(e)
         abort(400)
     try:
         type_instance = CmdbType(**new_type_data)
-    except CMDBError:
+    except CMDBError as e:
+        LOGGER.debug(e)
         return abort(400)
     try:
         ack = object_manager.insert_type(type_instance)
@@ -119,4 +120,15 @@ def delete_type(public_id: int):
     except CMDBError:
         return abort(500)
     resp = make_response(ack)
+    return resp
+
+
+@login_required
+@type_routes.route('/count/', methods=['GET'])
+def count_objects():
+    try:
+        count = object_manager.count_types()
+        resp = make_response(count)
+    except CMDBError:
+        return abort(400)
     return resp

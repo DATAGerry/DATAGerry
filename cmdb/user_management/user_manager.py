@@ -94,6 +94,11 @@ class UserManagement:
         except NoDocumentFound:
             raise NoUserFoundExceptions(user_name)
 
+    def get_user_from_token(self, token) -> User:
+        import json
+        decrypted_token = json.loads(self.scm.decrypt_token(token).decode('UTF-8'))
+        return self.get_user(decrypted_token['public_id'])
+
     def insert_user(self, user: User) -> int:
         try:
             self.get_group(public_id=user.group_id)
@@ -227,6 +232,9 @@ class UserManagement:
             return self.group_has_right(user.get_group(), right_name)
         except (CMDBError, Exception):
             return False
+
+    def count_user(self):
+        return self.dbm.count(collection=User.COLLECTION)
 
 
 class GroupDeleteError(CMDBError):

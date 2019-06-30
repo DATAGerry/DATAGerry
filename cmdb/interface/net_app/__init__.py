@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-Init module for rest routes
+Init module for static routes
 """
 import logging
 from flask_cors import CORS
@@ -39,6 +39,8 @@ system_config_reader = SystemConfigReader()
 
 def create_app(event_queue):
     import cmdb
+    from cmdb.interface.net_app.app_routes import app_pages, redirect_index
+    from cmdb.interface.net_app.doc_routes import doc_pages
 
     if cmdb.__MODE__ == 'DEBUG':
         app.config.from_object(app_config['rest_development'])
@@ -48,6 +50,11 @@ def create_app(event_queue):
     else:
         app.config.from_object(app_config['rest'])
         LOGGER.info('NetAPP starting with config mode {}'.format(app.config.get("ENV")))
+
+    # add static routes
+    app.register_blueprint(app_pages, url_prefix='/')
+    app.register_error_handler(404, redirect_index)
+    app.register_blueprint(doc_pages, url_prefix="/docs")
 
     return app
 

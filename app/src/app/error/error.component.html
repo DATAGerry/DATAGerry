@@ -1,0 +1,32 @@
+<div class="row">
+  <div class="col-6 offset-3">
+    <div class="card text-center">
+      <div class="card-header">
+        {{statusCode}}: {{statusText}}
+      </div>
+      <div class="card-body text-left">
+        <h5 class="card-title">{{statusText}}</h5>
+        <p class="card-text">{{message}}</p>
+        <a routerLink="{{previousUrl}}" class="btn btn-primary">Back to previous page</a>
+        <a routerLink="/" class="btn btn-outline-secondary ml-2">To dashboard</a>
+      </div>
+      <div class="card-footer text-muted">
+        {{ now | date: 'dd/MM/yy - hh:mm:ss' }}
+        <div class="d-block">
+          <button class="btn btn-sm btn-light mt-2" type="button" data-toggle="collapse" data-target="#contactPanel"
+                  aria-expanded="false" aria-controls="contactPanel">
+            Contact
+          </button>
+        </div>
+        <div class="collapse mt-2" id="contactPanel">
+          <div class="card card-body">
+            If you think this error message is incorrect please contact your system administrator.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<p>
+
+</p>

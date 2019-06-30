@@ -1,0 +1,21 @@
+
+<ng-container *ngIf="objectInstance?.externals && objectInstance?.externals.length>0">
+  <div class="card">
+    <div class="card-header">
+      Externals
+    </div>
+    <ul class="list-group list-group-flush" *ngFor="let ext of objectInstance?.externals">
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col">
+            {{ext.label}}
+          </div>
+          <div class="col">
+            {{ext.href}}
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <hr />
+</ng-container>

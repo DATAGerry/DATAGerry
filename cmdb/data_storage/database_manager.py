@@ -339,7 +339,7 @@ class DatabaseManagerMongo(DatabaseManager):
 
         return list(self.__find(collection=collection, *args, **kwargs))
 
-    def count(self, collection: str, type_id: int, *args, **kwargs):
+    def count_by_type(self, collection: str, type_id: int, *args, **kwargs):
         """This method does not actually
         performs the find() operation
         but instead returns
@@ -357,6 +357,23 @@ class DatabaseManagerMongo(DatabaseManager):
 
         formatted_type_id = {'type_id': type_id}
         result = self._count(collection, formatted_type_id, *args, **kwargs)
+        return result
+
+    def count(self, collection: str, *args, **kwargs):
+        """This method does not actually
+        performs the find() operation
+        but instead returns
+        a numerical count of the documents that meet the selection criteria.
+
+        Args:
+            collection (str): name of database collection
+            *args: arguments for search operation
+            **kwargs:
+
+        Returns:
+            returns the count of the documents
+        """
+        result = self._count(collection, *args, **kwargs)
         return result
 
     def _count(self, collection: str, *args, **kwargs):
@@ -459,6 +476,26 @@ class DatabaseManagerMongo(DatabaseManager):
         result = self.database_connector.get_collection(collection).delete_one(formatted_public_id)
         if result.deleted_count != 1:
             raise DocumentCouldNotBeDeleted(collection, public_id)
+        return result
+
+    def delete_many(self, collection: str,  **requirements: dict) -> DeleteResult:
+        """removes all documents that match the filter from a collection.
+
+        Args:
+            collection (str): name of database collection
+            filter (dict): Specifies deletion criteria using query operators.
+
+        Returns:
+            A boolean acknowledged as true if the operation ran with write concern or false if write concern was disabled
+
+        """
+        requirements_filter = {}
+        for k, req in requirements.items():
+            requirements_filter.update({k: req})
+
+        result = self.database_connector.get_collection(collection).delete_many(requirements_filter)
+        if not result.acknowledged:
+            raise DocumentCouldNotBeDeleted(collection)
         return result
 
     def create(self, db_name: str):

@@ -1,0 +1,19 @@
+<nav aria-label="breadcrumb">
+  <ol [ngClass]="{ 'breadcrumb d-flex': allowBootstrap}"
+      class="{{addClass ? '' + addClass : ''}}">
+    <li *ngFor="let breadcrumb of breadcrumbs; let last = last"
+        [ngClass]="{ 'breadcrumb-item': allowBootstrap, 'list': true, 'active': last }">
+      <a *ngIf="!last" [routerLink]="hasParams(breadcrumb)">
+        {{breadcrumb.label}}
+      </a>
+      <span *ngIf="last">{{ breadcrumb.label }}
+        <em *ngIf="breadcrumb.queryParams.value" class="text-primary">{{breadcrumb.queryParams.value}}</em>
+      </span>
+    </li>
+    <div class="custom-control custom-switch ml-auto" data-toggle="tooltip" data-placement="bottom"
+         title="Only active objects">
+      <input type="checkbox" class="custom-control-input" name="active_cookiee" id="active_cookiee" checked/>
+      <label class="custom-control-label" for="active_cookiee"></label>
+    </div>
+  </ol>
+</nav>
