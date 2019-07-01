@@ -25,6 +25,8 @@ import { ActivatedRoute } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { map } from 'rxjs/operators';
 import { DatePipe } from '@angular/common';
+import {CmdbObject} from '../../../models/cmdb-object';
+import {ObjectService} from '../../../services/object.service';
 
 @Component({
   selector: 'cmdb-object-list',
@@ -46,7 +48,7 @@ export class ObjectListComponent implements OnDestroy {
   public isCategorized: boolean = false;
   readonly $date: string = '$date';
 
-  constructor(private apiCallService: ApiCallService, private route: ActivatedRoute,
+  constructor(private apiCallService: ApiCallService, private objService: ObjectService, private route: ActivatedRoute,
               private spinner: NgxSpinnerService, private dateFormatPipe: DatePipe) {
 
     this.route.params.subscribe((id) => {
@@ -306,5 +308,28 @@ export class ObjectListComponent implements OnDestroy {
         });
       });
     }
+  }
+
+  public update(instance: any) {
+
+    const updateInstance = new CmdbObject();
+    updateInstance.public_id = Number(instance.object_id);
+    updateInstance.type_id = instance.type_id;
+    updateInstance.version = '1.0.0';
+    updateInstance.creation_time = instance.object_creation_time;
+    updateInstance.author_id = instance.author_id;
+    updateInstance.active = instance.type_active;
+
+    const fieldsList: any[] = [];
+    for (const field of instance.obj_fields) {
+      const text: any = document.getElementsByName(field.name)[0];
+      fieldsList.push({name: field.name, value: text.value });
+    }
+
+    updateInstance.fields = fieldsList;
+    console.log(updateInstance);
+    this.objService.postUpdateObject(updateInstance).subscribe(res => {
+      console.log(res);
+    });
   }
 }
