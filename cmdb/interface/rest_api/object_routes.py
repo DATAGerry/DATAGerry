@@ -213,13 +213,31 @@ def add_object():
 
 
 @login_required
-@object_rest.route('/<int:public_id>', methods=['PUT'])
-def update_object(public_id):
+@object_rest.route('/', methods=['PUT'])
+def update_object():
+    from bson import json_util
+    from datetime import datetime
+    add_data_dump = json.dumps(request.json)
+
+    request_args = request.args.to_dict()
+
     try:
-        object_instance = object_manager.get_object(public_id)
+        up_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
+        up_object_data['last_edit_time'] = datetime.utcnow()
+    except TypeError as e:
+        LOGGER.warning(e)
+        abort(400)
+    try:
+        update_object_instance = CmdbObject(**up_object_data)
     except CMDBError:
-        return abort(404)
-    resp = make_response(object_instance)
+        return abort(400)
+
+    try:
+        object_manager.update_object(update_object_instance)
+    except CMDBError:
+        return abort(500)
+
+    resp = make_response(update_object_instance)
     return resp
 
 

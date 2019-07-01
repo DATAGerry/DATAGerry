@@ -50,4 +50,8 @@ export class ObjectService {
   public postAddObject(objectInstance: CmdbObject): Observable<any>{
     return this.api.callPostRoute<CmdbObject>(this.servicePrefix + '/add', objectInstance);
   }
+
+  public postUpdateObject(objectInstance: CmdbObject): Observable<any>{
+    return this.api.callPutRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
+  }
 }
