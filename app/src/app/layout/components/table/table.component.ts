@@ -40,6 +40,11 @@ export class TableComponent implements OnInit, OnDestroy, OnChanges {
   @Input() entryLists: any[] = [];
 
   /**
+   * Create advanced fields and only display if extended fields exist
+   */
+  @Input() extendedFields: any[] = [];
+
+  /**
    * overwrite default value for add Button (table-toolbar)
    */
   @Input() add: {} = {

@@ -256,11 +256,11 @@ class CmdbRender:
         if self.object_instance and self.object_instance.fields:
             if self.type_instance.public_id == self.object_instance.type_id:
                 for type_field in self.type_instance.fields:
-                    for object_field in self.object_instance.fields:
-                        if object_field.get('name') == type_field.get('name'):
-                            object_field['label'] = type_field.get('label')
-                            object_field['type'] = type_field.get('type')
-                            render_result.obj_fields = self.object_instance.fields
+                    for fields in self.object_instance.fields:
+                        if fields.get('name') == type_field.get('name'):
+                            fields['label'] = type_field.get('label')
+                            fields['type'] = type_field.get('type')
+                            render_result.fields = self.object_instance.fields
         if self.has_summaries():
             render_result.set_summaries(self.get_summaries(True))
         if self.has_externals():
@@ -284,7 +284,7 @@ class RenderResult:
         self.summaries = None
         self.externals = None
         self.match_fields = None
-        self.obj_fields = None
+        self.fields = None
 
     def set_summaries(self, summary_list: list):
         self.summaries = summary_list

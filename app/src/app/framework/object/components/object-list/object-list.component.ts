@@ -221,10 +221,10 @@ export class ObjectListComponent implements OnDestroy {
     this.apiCallService.callGetRoute(url)
       .pipe(
         map( dataArray => {
-          const length = dataArray.length;
-          this.summaries = length > 0 ? dataArray[0].summaries : [];
-          this.columnFields = length > 0 ? dataArray[0].obj_fields : [];
-          this.items = length > 0 ? dataArray : [];
+          const len = dataArray.length;
+          this.summaries = len > 0 ? dataArray[0].summaries : [];
+          this.columnFields = len > 0 ? dataArray[0].fields : [];
+          this.items = len > 0 ? dataArray : [];
 
           return[ {items: this.items, columnFields: this.columnFields} ];
         })
@@ -250,7 +250,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   public rerender(): void {
-    if (typeof this.dtElement.dtInstance !== 'undefined') {
+    if (typeof this.dtElement !== 'undefined' && typeof this.dtElement.dtInstance !== 'undefined') {
       this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
         // Destroy the table first
         dtInstance.destroy();
@@ -334,7 +334,7 @@ export class ObjectListComponent implements OnDestroy {
     updateInstance.active = instance.active;
 
     const fieldsList: any[] = [];
-    for (const field of instance.obj_fields) {
+    for (const field of instance.fields) {
       const text: any = document.getElementsByName(field.name)[0];
       fieldsList.push({name: field.name, value: text.value });
     }

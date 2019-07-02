@@ -51,7 +51,7 @@ export class ObjectFieldsViewComponent {
     updateInstance.active = instance.active;
 
     const fieldsList: any[] = [];
-    for (const field of instance.obj_fields) {
+    for (const field of instance.fields) {
       const text: any = document.getElementsByName(field.name)[0];
       fieldsList.push({name: field.name, value: text.value });
     }
