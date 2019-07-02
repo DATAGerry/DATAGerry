@@ -16,9 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { DataTableDirective } from 'angular-datatables';
-import { Subject } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
 
 @Component({
@@ -26,12 +24,7 @@ import { ApiCallService } from '../../../services/api-call.service';
   templateUrl: './latest-changes-view.component.html',
   styleUrls: ['./latest-changes-view.component.scss']
 })
-export class LatestChangesViewComponent implements OnInit, OnDestroy {
-
-  @ViewChild(DataTableDirective)
-  public dtElement: DataTableDirective;
-  public dtTrigger: Subject<any> = new Subject();
-  public dtOptions: DataTables.Settings = {};
+export class LatestChangesViewComponent implements OnInit {
 
   public latestChanges: [];
   readonly url = 'object/latest/';
@@ -39,38 +32,13 @@ export class LatestChangesViewComponent implements OnInit, OnDestroy {
   constructor(private api: ApiCallService) { }
 
   ngOnInit() {
-    this.dtOptions = {
-      ordering: true,
-      order: [[1, 'asc']],
-      language: {
-        search: '',
-        searchPlaceholder: 'Filter...'
-      },
-    };
-
     this.callObjects();
   }
 
   private callObjects() {
     this.api.callGetRoute(this.url).subscribe( data => {
       this.latestChanges = data as [];
-      this.rerender();
-      this.dtTrigger.next();
     });
-  }
-
-  ngOnDestroy(): void {
-    // Do not forget to unsubscribe the event
-    this.dtTrigger.unsubscribe();
-  }
-
-  public rerender(): void {
-    if (typeof this.dtElement.dtInstance !== 'undefined') {
-      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-        // Destroy the table first
-        dtInstance.destroy();
-      });
-    }
   }
 
   public delObject(id: number) {

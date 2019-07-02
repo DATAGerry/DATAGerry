@@ -32,12 +32,15 @@ import { ObjectExternalsComponent } from './components/object-externals/object-e
 import { ObjectFieldsViewComponent } from './components/object-fields-view/object-fields-view.component';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { ObjectInsertComponent } from './components/object-insert/object-insert.component';
-import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {RenderModule} from "../render/render.module";
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RenderModule } from '../render/render.module';
 
 @NgModule({
   declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent, ObjectSummaryComponent,
     ObjectExternalsComponent, ObjectFieldsViewComponent, ObjectInsertComponent],
+  exports: [
+    ObjectInsertComponent
+  ],
   imports: [
     CommonModule,
     ObjectRoutingModule,

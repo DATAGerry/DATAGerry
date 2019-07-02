@@ -31,23 +31,24 @@ export class ObjectFieldsViewComponent {
 
   @Input() objectInstance: any;
   @Input() isDisable: boolean;
+  public showToast: boolean = false;
   public formFields: FormGroup = new FormGroup({});
 
   constructor(private api: ApiCallService, private objService: ObjectService) {  }
 
   public revert() {
-    console.log('revert');
+    this.isDisable = true;
   }
 
   public update(instance: any) {
 
     const updateInstance = new CmdbObject();
-    updateInstance.public_id = Number(instance.object_id);
+    updateInstance.public_id = Number(instance.public_id);
     updateInstance.type_id = instance.type_id;
     updateInstance.version = '1.0.0';
-    updateInstance.creation_time = instance.object_creation_time;
+    updateInstance.creation_time = instance.creation_time;
     updateInstance.author_id = instance.author_id;
-    updateInstance.active = instance.type_active;
+    updateInstance.active = instance.active;
 
     const fieldsList: any[] = [];
     for (const field of instance.obj_fields) {
@@ -56,9 +57,10 @@ export class ObjectFieldsViewComponent {
     }
 
     updateInstance.fields = fieldsList;
-    console.log(updateInstance);
     this.objService.postUpdateObject(updateInstance).subscribe(res => {
       console.log(res);
+      this.showToast = true;
+      this.isDisable = true;
     });
   }
 

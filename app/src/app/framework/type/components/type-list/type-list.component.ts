@@ -23,6 +23,7 @@ import { Subject } from 'rxjs';
 import { UserService } from '../../../../user/services/user.service';
 import { User } from '../../../../user/models/user';
 import { DataTableDirective } from 'angular-datatables';
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'cmdb-type-list',
@@ -37,8 +38,17 @@ export class TypeListComponent implements OnInit, OnDestroy {
   private typeList: CmdbType[] = [];
   public dtOptions: DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
+  public linkRoute: string = '/framework/type/'
+  public addNewType: {} = {
+    // addNewType
+    text: '<i class="fa fa-file-o" aria-hidden="true"></i>',
+    className: 'btn btn-light',
+    action: function() {
+      this.callTypeBuilder();
+    }.bind(this)
+  }
 
-  constructor(private typeService: TypeService, private userService: UserService) {
+  constructor(private typeService: TypeService, private router: Router) {
   }
 
   public ngOnInit(): void {
@@ -66,5 +76,7 @@ export class TypeListComponent implements OnInit, OnDestroy {
     this.dtTrigger.unsubscribe();
   }
 
-
+  public callTypeBuilder() {
+    this.router.navigate(['/framework/type/add']);
+  }
 }
