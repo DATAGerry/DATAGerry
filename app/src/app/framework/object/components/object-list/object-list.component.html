@@ -47,7 +47,7 @@
         <a class="text-dark"[routerLink]="['/framework/object/', result.public_id]">
           <i class="fa fa-eye" aria-hidden="true"></i>
         </a>
-        <a class="ml-1 text-dark" routerLink="/framework/object/{{result.public_id}}/edit">
+        <a class="ml-1 text-dark" [routerLink]="['/framework/object/', result.public_id]">
           <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
         </a>
         <a class="ml-1 text-dark" (click)="delObject(result)">
