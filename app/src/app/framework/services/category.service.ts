@@ -38,4 +38,13 @@ export class CategoryService {
     return this.api.callGetRoute<CmdbCategory[]>(this.servicePrefix + '/');
   }
 
+  public updateCategory(data) {
+    return this.api.callPutRoute<CmdbCategory>(this.servicePrefix + '/', data);
+  }
+
+  public addTypeToCategory(typeID: number, categoryID: number) {
+
+  }
+
+
 }

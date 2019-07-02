@@ -43,7 +43,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     ContentHeaderComponent,
     ActiveBadgeComponent,
     LowercaseDirective,
-    SearchBarComponent,
+    SearchBarComponent
   ],
   exports: [
     NavigationComponent,

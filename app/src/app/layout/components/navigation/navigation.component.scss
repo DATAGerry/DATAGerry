@@ -73,6 +73,10 @@ $navbar-dropdown-header-background: theme-color('primary');
         font-size: $navbar-dropdown-font-size;
         padding: $navbar-dropdown-padding;
 
+        &:active {
+          color: $white;
+        }
+
         i, svg {
           margin-right: 10px;
         }

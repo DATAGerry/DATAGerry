@@ -57,6 +57,13 @@ const routes: Routes = [
       breadcrumb: 'Object'
     },
     loadChildren: './object/object.module#ObjectModule',
+  },
+  {
+    path: 'category',
+    data: {
+      breadcrumb: 'Category'
+    },
+    loadChildren: './category/category.module#CategoryModule',
   }
 ];
 

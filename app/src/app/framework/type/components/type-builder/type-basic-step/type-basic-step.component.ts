@@ -22,13 +22,18 @@ import { TypeService } from '../../../../services/type.service';
 import { CategoryService } from '../../../../services/category.service';
 import { CmdbCategory } from '../../../../models/cmdb-category';
 import { Observable } from 'rxjs';
+import { Modes } from '../../../builder/modes.enum';
+
 
 @Injectable()
 export class TypeNameValidator {
 
-  static createValidator(typeService: TypeService) {
+  static createValidator(typeService: TypeService, mode: number) {
     return (control: AbstractControl) => {
       return typeService.validateTypeName(control.value).then(res => {
+        if (mode === Modes.Edit) {
+          return null;
+        }
         return res ? null : {nameAlreadyTaken: true};
       });
     };
@@ -50,17 +55,21 @@ export class TypeBasicStepComponent implements OnInit {
     }
   }
 
+  @Input() mode: number;
+
   public basicForm: FormGroup;
+  public basicCategoryForm: FormGroup;
+  private categoryList: Observable<CmdbCategory[]>;
 
-  // private categoryList: Observable<CmdbCategory[]>;
-
-  constructor(private typeService: TypeService) {
+  constructor(private typeService: TypeService, private categoryService: CategoryService) {
     this.basicForm = new FormGroup({
-      name: new FormControl('', [Validators.required], TypeNameValidator.createValidator(typeService)),
+      name: new FormControl('', [Validators.required], TypeNameValidator.createValidator(typeService, this.mode)),
       label: new FormControl('', Validators.required),
       description: new FormControl(''),
-      active: new FormControl(true),
-      // category_id: new FormControl('')
+      active: new FormControl(true)
+    });
+    this.basicCategoryForm = new FormGroup({
+      category_id: new FormControl(null)
     });
   }
 
@@ -73,7 +82,7 @@ export class TypeBasicStepComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    // this.categoryList = this.categoryService.getCategoryList();
+    this.categoryList = this.categoryService.getCategoryList();
     this.basicForm.get('name').valueChanges.subscribe(val => {
       this.basicForm.get('label').setValue(val.toString().charAt(0).toUpperCase() + val.toString().slice(1));
       this.basicForm.get('label').markAsDirty({onlySelf: true});

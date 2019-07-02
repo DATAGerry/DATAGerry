@@ -25,15 +25,20 @@ import { TypeAccessStepComponent } from './type-access-step/type-access-step.com
 import { TypeService } from '../../../services/type.service';
 import { UserService } from '../../../../user/services/user.service';
 import { User } from '../../../../user/models/user';
+import { CategoryService } from '../../../services/category.service';
+import { Modes } from '../../builder/modes.enum';
+
 
 @Component({
   selector: 'cmdb-type-builder',
   templateUrl: './type-builder.component.html',
   styleUrls: ['./type-builder.component.scss']
 })
-export class TypeBuilderComponent implements OnInit{
+export class TypeBuilderComponent implements OnInit {
+
 
   @Input() private typeInstance?: CmdbType;
+  @Input() private mode: number = Modes.Create;
 
   @ViewChild(TypeBasicStepComponent)
   private basicStep: TypeBasicStepComponent;
@@ -47,7 +52,11 @@ export class TypeBuilderComponent implements OnInit{
   @ViewChild(TypeAccessStepComponent)
   private accessStep: TypeAccessStepComponent;
 
-  public constructor(private typeService: TypeService, private userService: UserService) {}
+  private categorySelected: boolean = false;
+  private selectedCategoryID: number = 0;
+
+  public constructor(private typeService: TypeService, private userService: UserService, private categoryService: CategoryService) {
+  }
 
   public ngOnInit(): void {
     this.typeInstance = new CmdbType();
@@ -58,6 +67,10 @@ export class TypeBuilderComponent implements OnInit{
   }
 
   private exitBasicStep() {
+    this.categorySelected = this.basicStep.basicCategoryForm.value !== null;
+    if (this.categorySelected !== false) {
+      this.selectedCategoryID = this.basicStep.basicCategoryForm.value;
+    }
     this.assignToType(this.basicStep.basicForm.value);
   }
 
@@ -74,7 +87,6 @@ export class TypeBuilderComponent implements OnInit{
       sectionGlobe.fields = Array.from(sectionFieldNames);
 
       sectionBuffer = sectionBuffer.concat(sectionGlobe);
-      console.log(sectionBuffer);
     }
     this.assignToType({fields: fieldBuffer});
     this.assignToType({sections: sectionBuffer}, 'render_meta');
@@ -91,8 +103,17 @@ export class TypeBuilderComponent implements OnInit{
 
   private saveType() {
     this.typeService.postType(this.typeInstance).subscribe(res => {
-      console.log(res);
-    });
+        if (this.categorySelected) {
+          this.categoryService
+        }
+      },
+      (error) => {
+
+      },
+      () => {
+
+      });
+
   }
 
   public assignToType(data: any, optional: any = null) {
