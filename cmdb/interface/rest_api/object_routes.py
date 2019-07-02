@@ -26,6 +26,7 @@ from cmdb.object_framework.cmdb_object_manager import object_manager
 from cmdb.utils.interface_wraps import login_required
 from cmdb.interface.route_utils import make_response, RootBlueprint
 from cmdb.user_management.user_manager import get_user_manager
+
 usm = get_user_manager()
 
 try:
@@ -276,6 +277,7 @@ def delete_many_objects(public_ids):
         return jsonify(message='Delete Error', error=e.message)
     except CMDBError:
         return abort(500)
+
 
 # SPECIAL ROUTES
 @login_required

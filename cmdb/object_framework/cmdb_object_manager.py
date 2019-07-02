@@ -152,7 +152,7 @@ class CmdbManagerBase:
         return self.dbm.delete(
             collection=collection,
             public_id=public_id
-        )
+        ).acknowledged
 
     def _delete_many(self, collection: str, filter_query: dict):
         """
@@ -231,7 +231,23 @@ class CmdbObjectManager(CmdbManagerBase):
         return self.get_objects_by(type_id=type_id)
 
     def count_objects_by_type(self, public_id: int):
-        return self.dbm.count_by_type(collection=CmdbObject.COLLECTION, type_id=public_id)
+        """This method does not actually
+               performs the find() operation
+               but instead returns
+               a numerical count of the documents that meet the selection criteria.
+
+               Args:
+                   collection (str): name of database collection
+                   public_id (int): public id of document
+                   *args: arguments for search operation
+                   **kwargs:
+
+               Returns:
+                   returns the count of the documents
+               """
+
+        formatted_type_id = {'type_id': public_id}
+        return self.dbm.count(CmdbType.COLLECTION, formatted_type_id)
 
     def count_objects(self):
         return self.dbm.count(collection=CmdbObject.COLLECTION)
@@ -517,12 +533,15 @@ class CmdbObjectManager(CmdbManagerBase):
 
         return self._insert(collection=CmdbCategory.COLLECTION, data=new_category.to_database())
 
-    def update_category(self, data: dict):
-        update_type = CmdbCategory(**data)
+    def update_category(self, data: (CmdbCategory, dict)):
+        if isinstance(data, CmdbCategory):
+            update_category = data
+        elif isinstance(data, dict):
+            update_category = CmdbCategory(**data)
         ack = self.dbm.update(
             collection=CmdbCategory.COLLECTION,
-            public_id=update_type.get_public_id(),
-            data=update_type.to_database()
+            public_id=update_category.get_public_id() or update_category.public_id,
+            data=update_category.to_database()
         )
         return ack
 

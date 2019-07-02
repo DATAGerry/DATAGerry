@@ -46,7 +46,7 @@ import { DataTablesModule } from 'angular-datatables';
     ActiveBadgeComponent,
     LowercaseDirective,
     SearchBarComponent,
-    TableComponent,
+    TableComponent
   ],
   exports: [
     NavigationComponent,

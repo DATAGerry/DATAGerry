@@ -27,7 +27,7 @@ import { ComponentsFields } from '../components.fields';
 export class PasswordComponent implements OnInit, ComponentsFields {
 
   @Input() data: any;
-  @ViewChild('passWordInput') passWordToggle: ElementRef;
+  @ViewChild('passWordInput', {static: false}) passWordToggle: ElementRef;
 
   ngOnInit() {
   }

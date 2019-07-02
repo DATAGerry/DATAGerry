@@ -27,7 +27,7 @@ import { BuilderComponent } from '../../../builder/builder.component';
 export class TypeFieldsStepComponent implements AfterContentInit {
 
 
-  @ViewChild(BuilderComponent)
+  @ViewChild(BuilderComponent, {static: false})
   public typeBuilder: BuilderComponent;
 
   public constructor(private cdr: ChangeDetectorRef){

@@ -29,7 +29,7 @@ import {UserService} from '../../../user/services/user.service';
 })
 export class TableComponent implements OnInit, OnDestroy, OnChanges {
 
-  @ViewChild(DataTableDirective)
+  @ViewChild(DataTableDirective, {static: false})
   public dtElement: DataTableDirective;
   public dtOptions: any = {}; // : DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();

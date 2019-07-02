@@ -33,9 +33,9 @@ class RadioContent implements ControlsContent {
   users: number[];
 
   public constructor() {
-    this.type = 'checkbox';
+    this.type = 'radio';
     this.name = randomName(this.type);
-    this.label = 'Checkbox Field';
+    this.label = 'Radio Field';
   }
 
 }

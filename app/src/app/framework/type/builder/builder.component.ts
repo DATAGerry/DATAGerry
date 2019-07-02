@@ -17,7 +17,7 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { Controller, ControlsContent } from './controls/controls.common';
+import { Controller } from './controls/controls.common';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import { SectionControl } from './controls/section.control';
 import { UserService } from '../../../user/services/user.service';
@@ -89,7 +89,6 @@ export class BuilderComponent implements OnInit {
 
         index = list.length;
       }
-
       list.splice(index, 0, event.data);
     }
   }
@@ -109,5 +108,4 @@ export class BuilderComponent implements OnInit {
       list.splice(index, 1);
     }
   }
-
 }

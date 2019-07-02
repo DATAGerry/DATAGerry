@@ -32,7 +32,7 @@ import {Router} from "@angular/router";
 })
 export class TypeListComponent implements OnInit, OnDestroy {
 
-  @ViewChild(DataTableDirective)
+  @ViewChild(DataTableDirective, {static: false})
   public dtElement: DataTableDirective;
 
   private typeList: CmdbType[] = [];

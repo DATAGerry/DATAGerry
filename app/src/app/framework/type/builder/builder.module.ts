@@ -29,6 +29,7 @@ import { DummyFieldEditComponent } from './configs/edits/dummy-field-edit.compon
 import { SectionFieldEditComponent } from './configs/edits/section-field-edit.component';
 import { TextareaEditComponent } from './configs/edits/textarea-edit.component';
 import { RefFieldEditComponent } from './configs/edits/ref-field-edit.component';
+import { CheckFieldEditComponent } from './configs/edits/check-field-edit.component';
 
 @NgModule({
   entryComponents: [
@@ -36,7 +37,8 @@ import { RefFieldEditComponent } from './configs/edits/ref-field-edit.component'
     TextFieldEditComponent,
     TextareaEditComponent,
     RefFieldEditComponent,
-    DummyFieldEditComponent
+    DummyFieldEditComponent,
+    CheckFieldEditComponent
   ],
   declarations: [
     BuilderComponent,
@@ -45,7 +47,8 @@ import { RefFieldEditComponent } from './configs/edits/ref-field-edit.component'
     DummyFieldEditComponent,
     SectionFieldEditComponent,
     TextareaEditComponent,
-    RefFieldEditComponent
+    RefFieldEditComponent,
+    CheckFieldEditComponent
   ],
   imports: [
     CommonModule,

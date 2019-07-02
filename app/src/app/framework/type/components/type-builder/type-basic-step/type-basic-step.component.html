@@ -52,16 +52,15 @@
     </div>
 
     <div class="col-4">
-      <!--
         <div class="card">
           <div class="card-header">
             Category:
-            <div *ngIf="basicForm.get('category_id').value; then categorySelected else categoryUnselected"></div>
+            <div *ngIf="basicCategoryForm.get('category_id').value; then categorySelected else categoryUnselected"></div>
             <ng-template #categorySelected><span class="text-success">SELECTED</span></ng-template>
             <ng-template #categoryUnselected><span class="text-danger">UNSELECTED</span></ng-template>
           </div>
           <div class="card-body">
-            <form [formGroup]="basicForm">
+            <form [formGroup]="basicCategoryForm">
               <ng-select
                 [items]="categoryList | async"
 
@@ -73,8 +72,8 @@
             </form>
           </div>
       </div>
-      -->
-      <div class="card">
+
+      <div class="card mt-3">
         <div class="card-header">
           Validation: <span [className]="basicForm.valid ? 'text-success' : 'text-danger'">{{basicForm.status}}</span>
         </div>

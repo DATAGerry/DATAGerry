@@ -6,7 +6,7 @@
         Form render preview:
       </div>
       <div class="card-body">
-
+        <cmdb-render [sections]="typeInstance?.render_meta?.sections" [fields]="typeInstance?.fields"></cmdb-render>
       </div>
     </div>
   </div>
@@ -22,8 +22,10 @@
              class="list-group-item list-group-item-action"><i class="fa fa-th-list"></i> List objects</a>
           <a href="#" class="list-group-item list-group-item-action list-group-item-warning"><i
             class="fa fa-pencil-square-o"></i> Edit type</a>
-          <a href="#" class="list-group-item list-group-item-action list-group-item-danger"><i
-            class="fa fa-trash-o"></i> Delete type</a>
+          <a routerLink="/framework/type/delete/{{typeID}}"
+             class="list-group-item list-group-item-action list-group-item-danger">
+            <i class="fa fa-trash-o"></i> Delete type
+          </a>
         </div>
       </div>
     </div>

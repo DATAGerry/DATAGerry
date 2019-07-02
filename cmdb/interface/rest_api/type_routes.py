@@ -113,6 +113,7 @@ def update_type():
 @type_routes.route('/<int:public_id>', methods=['DELETE'])
 @login_required
 def delete_type(public_id: int):
+
     try:
         ack = object_manager.delete_type(public_id=public_id)
     except TypeNotFoundError:

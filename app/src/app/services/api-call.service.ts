@@ -64,10 +64,7 @@ export class ApiCallService {
   }
 
   public callDeleteRoute<T>(route: string, params?: any): Observable<any> {
-    if (window.confirm('Are you sure, you want to delete?')) {
-      return this.http.delete<T>(this.apiURL + route, params);
-    }
-    return new Observable<any>();
+    return this.http.delete<T>(this.apiURL + route, params);
   }
 
   public handleErrorPromise(error: Response | any) {
