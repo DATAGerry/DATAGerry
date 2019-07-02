@@ -11,7 +11,7 @@
       <th class="toggle-id">ID</th>
       <th class="toggle-type">Type</th>
       <!-- BEGIN: summarie fields : show only if objects are categorized -->
-      <ng-container *ngIf="isCategorized">
+      <ng-container *ngIf="hasSummaries">
         <ng-container *ngFor="let obj of results.columnFields;">
             <th class="toggle-{{obj.name}}">{{obj.label}}</th>
         </ng-container>
@@ -25,29 +25,29 @@
     <tbody>
     <tr *ngFor="let result of results.items">
 
-      <td style="text-align: center"><input id="{{result.object_id}}" class="select-checkbox" type="checkbox" (click)="updateDisplay()"></td>
+      <td style="text-align: center"><input id="{{result.public_id}}" class="select-checkbox" type="checkbox" (click)="updateDisplay()"></td>
 
       <td>
-        <cmdb-active-badge [activeStatus]="result.type_active"></cmdb-active-badge>
+        <cmdb-active-badge [activeStatus]="result.active"></cmdb-active-badge>
       </td>
-      <td>{{result.object_id}}</td>
-      <td><a routerLink="/framework/type/{{result.type_id}}">{{result.type_label}}</a></td>
+      <td>{{result.public_id}}</td>
+      <td><a routerLink="/framework/type/{{result.type_id}}">{{result.label}}</a></td>
 
       <!-- BEGIN: summarie contens : show only if objects are categorized  -->
-      <ng-container *ngIf="isCategorized" >
-        <ng-container *ngFor="let field of result.obj_fields">
+      <ng-container *ngIf="hasSummaries" >
+        <ng-container *ngFor="let field of result.fields">
           <td><span [innerHTML]="checkType(field.value)">{{field.value}}</span></td>
         </ng-container>
       </ng-container>
       <!-- END: summarie contens -->
 
       <td>{{result.author_name}}</td>
-      <td>{{result.object_creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
+      <td>{{result.creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
       <td>
-        <a class="text-dark"[routerLink]="['/framework/object/', result.object_id]">
+        <a class="text-dark"[routerLink]="['/framework/object/', result.public_id]">
           <i class="fa fa-eye" aria-hidden="true"></i>
         </a>
-        <a class="ml-1 text-dark" routerLink="/framework/object/{{result.object_id}}/edit">
+        <a class="ml-1 text-dark" routerLink="/framework/object/{{result.public_id}}/edit">
           <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
         </a>
         <a class="ml-1 text-dark" (click)="delObject(result)">

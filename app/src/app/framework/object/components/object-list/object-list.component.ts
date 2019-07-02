@@ -41,11 +41,12 @@ export class ObjectListComponent implements OnDestroy {
   public dtOptions: any = {}; // : DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
 
+  public objectLists: {};
   private summaries: [];
   private columnFields: [];
   private items: [] ;
-  public objectLists: {};
-  public isCategorized: boolean = false;
+  public hasSummaries: boolean = false;
+  readonly dtButtons: any[] = [];
   readonly $date: string = '$date';
 
   constructor(private apiCallService: ApiCallService, private objService: ObjectService, private route: ActivatedRoute,
@@ -60,10 +61,8 @@ export class ObjectListComponent implements OnDestroy {
     this.getRouteObjects(id.publicID);
   }
 
-  private buildDtOptions() {
-    const buttons = [];
-
-    buttons.push(
+  private buildDefaultDtButtons() {
+    this.dtButtons.push(
       {
         // add new
         text: '<i class="fa fa-file-o" aria-hidden="true"></i>',
@@ -75,7 +74,7 @@ export class ObjectListComponent implements OnDestroy {
       }
     );
 
-    buttons.push(
+    this.dtButtons.push(
       {
         // edit
         text: '<i class="fa fa-pencil-square-o" aria-hidden="true"></i>',
@@ -83,7 +82,7 @@ export class ObjectListComponent implements OnDestroy {
       }
     );
 
-    buttons.push(
+    this.dtButtons.push(
       {
         // delete
         text: '<i class="fa fa-trash-o" aria-hidden="true"></i>',
@@ -94,7 +93,7 @@ export class ObjectListComponent implements OnDestroy {
       }
     );
 
-    buttons.push(
+    this.dtButtons.push(
       {
         // copy
         text: '<i class="fa fa-files-o" aria-hidden="true"></i>',
@@ -103,7 +102,7 @@ export class ObjectListComponent implements OnDestroy {
       }
     );
 
-    buttons.push(
+    this.dtButtons.push(
       {
         // print
         text: '<i class="fa fa-print" aria-hidden="true"></i>',
@@ -112,7 +111,7 @@ export class ObjectListComponent implements OnDestroy {
       }
     );
 
-    buttons.push(
+    this.dtButtons.push(
       {
         // export to exel
         text: '<i class="fa fa-file-excel-o" aria-hidden="true"></i>',
@@ -120,9 +119,11 @@ export class ObjectListComponent implements OnDestroy {
         className: 'btn btn-light'
       }
     );
+  }
 
-    if (this.isCategorized) {
-      buttons.push(
+  private buildAdvancedButtons() {
+    if (this.hasSummaries) {
+      this.dtButtons.push(
         {
           extend: 'collection',
           className: 'btn btn-light dropdown-toggle',
@@ -156,7 +157,10 @@ export class ObjectListComponent implements OnDestroy {
         },
       );
     }
+  }
 
+  private buildDefaultDtOptions() {
+    const buttons = this.dtButtons;
     this.dtOptions = {
       ordering: true,
       order: [[1, 'asc']],
@@ -184,8 +188,10 @@ export class ObjectListComponent implements OnDestroy {
         buttons,
       },
     };
+  }
 
-    if (this.isCategorized) {
+  private buildAdvancedDtOptions() {
+    if (this.hasSummaries) {
       const visTargets: any[] = [0, 1, 2 , 3, -1];
       for (let i = 0; i < this.summaries.length; i++) {
         visTargets.push(i + 4);
@@ -198,20 +204,27 @@ export class ObjectListComponent implements OnDestroy {
     }
   }
 
+  private buildDtTable() {
+    this.buildDefaultDtButtons();
+    this.buildAdvancedButtons();
+    this.buildDefaultDtOptions();
+    this.buildAdvancedDtOptions();
+  }
+
   private getRouteObjects(id) {
     let url = 'object/';
     if ( typeof id !== 'undefined') {
       url = url + 'type/' + id;
-      this.isCategorized = true;
+      this.hasSummaries = true;
     }
 
     this.apiCallService.callGetRoute(url)
       .pipe(
         map( dataArray => {
-          const length = dataArray.length;
-          this.summaries = length > 0 ? dataArray[0].summaries : [];
-          this.columnFields = length > 0 ? dataArray[0].obj_fields : [];
-          this.items = length > 0 ? dataArray : [];
+          const len = dataArray.length;
+          this.summaries = len > 0 ? dataArray[0].summaries : [];
+          this.columnFields = len > 0 ? dataArray[0].fields : [];
+          this.items = len > 0 ? dataArray : [];
 
           return[ {items: this.items, columnFields: this.columnFields} ];
         })
@@ -219,7 +232,7 @@ export class ObjectListComponent implements OnDestroy {
       .subscribe(
       data => {
         this.spinner.show();
-        this.buildDtOptions();
+        this.buildDtTable();
 
         setTimeout( () => {
           this.objectLists = data;
@@ -237,7 +250,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   public rerender(): void {
-    if (typeof this.dtElement.dtInstance !== 'undefined') {
+    if (typeof this.dtElement !== 'undefined' && typeof this.dtElement.dtInstance !== 'undefined') {
       this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
         // Destroy the table first
         dtInstance.destroy();
@@ -285,7 +298,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   public delObject(value: any) {
-    const id = value.object_id;
+    const id = value.public_id;
     this.apiCallService.callDeleteRoute('object/' + id).subscribe(data => {
       this.route.params.subscribe((typeId) => {
         this.init(typeId);
@@ -313,21 +326,20 @@ export class ObjectListComponent implements OnDestroy {
   public update(instance: any) {
 
     const updateInstance = new CmdbObject();
-    updateInstance.public_id = Number(instance.object_id);
+    updateInstance.public_id = Number(instance.public_id);
     updateInstance.type_id = instance.type_id;
     updateInstance.version = '1.0.0';
-    updateInstance.creation_time = instance.object_creation_time;
+    updateInstance.creation_time = instance.creation_time;
     updateInstance.author_id = instance.author_id;
-    updateInstance.active = instance.type_active;
+    updateInstance.active = instance.active;
 
     const fieldsList: any[] = [];
-    for (const field of instance.obj_fields) {
+    for (const field of instance.fields) {
       const text: any = document.getElementsByName(field.name)[0];
       fieldsList.push({name: field.name, value: text.value });
     }
 
     updateInstance.fields = fieldsList;
-    console.log(updateInstance);
     this.objService.postUpdateObject(updateInstance).subscribe(res => {
       console.log(res);
     });

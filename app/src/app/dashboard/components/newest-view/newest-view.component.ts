@@ -1,4 +1,4 @@
-/*
+ /*
 * dataGerry - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
@@ -16,22 +16,16 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
-import { DataTableDirective } from 'angular-datatables';
-import { Subject } from 'rxjs';
 
 @Component({
   selector: 'cmdb-newest-view',
   templateUrl: './newest-view.component.html',
   styleUrls: ['./newest-view.component.scss']
 })
-export class NewestViewComponent implements OnInit, OnDestroy {
 
-  @ViewChild(DataTableDirective)
-  public dtElement: DataTableDirective;
-  public dtTrigger: Subject<any> = new Subject();
-  public dtOptions: DataTables.Settings = {};
+export class NewestViewComponent implements OnInit {
 
   public newest: [];
 
@@ -40,38 +34,13 @@ export class NewestViewComponent implements OnInit, OnDestroy {
   constructor(private api: ApiCallService) { }
 
   ngOnInit() {
-    this.dtOptions = {
-      ordering: true,
-      order: [[4, 'desc']],
-      language: {
-        search: '',
-        searchPlaceholder: 'Filter...'
-      },
-    };
-
     this.callObjects();
   }
 
   private callObjects() {
     this.api.callGetRoute(this.url).subscribe( data => {
       this.newest = data as [];
-      this.rerender();
-      this.dtTrigger.next();
     });
-  }
-
-  ngOnDestroy(): void {
-    // Do not forget to unsubscribe the event
-    this.dtTrigger.unsubscribe();
-  }
-
-  public rerender(): void {
-    if (typeof this.dtElement.dtInstance !== 'undefined') {
-      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-        // Destroy the table first
-        dtInstance.destroy();
-      });
-    }
   }
 
   public delObject(id: number) {

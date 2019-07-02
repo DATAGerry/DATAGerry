@@ -32,6 +32,8 @@ import { SearchBarComponent } from './components/search-bar/search-bar.component
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { TableComponent } from './components/table/table.component';
+import { DataTablesModule } from 'angular-datatables';
 
 @NgModule({
   declarations: [
@@ -43,7 +45,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     ContentHeaderComponent,
     ActiveBadgeComponent,
     LowercaseDirective,
-    SearchBarComponent
+    SearchBarComponent,
+    TableComponent
   ],
   exports: [
     NavigationComponent,
@@ -52,7 +55,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     ContentHeaderComponent,
     ActiveBadgeComponent,
     SearchBarComponent,
-    LowercaseDirective
+    LowercaseDirective,
+    TableComponent
   ],
   imports: [
     CommonModule,
@@ -60,7 +64,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     NgSelectModule,
     ReactiveFormsModule,
     NgbModule,
-    FormsModule
+    FormsModule,
+    DataTablesModule
   ],
   providers: [
     BreadcrumbService
