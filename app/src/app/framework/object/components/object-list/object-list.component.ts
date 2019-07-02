@@ -36,7 +36,7 @@ import {ObjectService} from '../../../services/object.service';
 })
 export class ObjectListComponent implements OnDestroy {
 
-  @ViewChild(DataTableDirective)
+  @ViewChild(DataTableDirective, {static: false})
   public dtElement: DataTableDirective;
   public dtOptions: any = {}; // : DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();

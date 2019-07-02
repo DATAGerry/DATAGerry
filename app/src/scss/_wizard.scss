@@ -1,4 +1,4 @@
-@import './src/scss/variables';
+@import 'variables';
 
 // color definitions
 $wz-color-default:  theme-color('primary') !default;
@@ -81,10 +81,10 @@ aw-wizard-completion-step {
 // - https://github.com/sass/sass/issues/871
 
 // indicator state: 'default' or 'hover'
-$wz-param-indicator-state: null !global;
+$wz-param-indicator-state: null;
 
 // base color for one of possible wizard step states (default, current, done etc.).
-$wz-param-indicator-color: null !global;
+$wz-param-indicator-color: null;
 
 
 @mixin wz-horizontal-line($dot-width, $dot-height, $line-color) {
@@ -171,12 +171,16 @@ $wz-param-indicator-color: null !global;
 //   - $wz-param-indicator-height - equals to $height argument of the `define-style` mixin
 //   - $wz-param-indicator-border-width - equals to $border-width argument of the `define-style` mixin
 //
+$wz-param-indicator-width: null;
+$wz-param-indicator-height: null;
+$wz-param-indicator-border-width: null;
+
 @mixin wz-define-style($layout, $width: $wz-big-dot-height, $height: $wz-big-dot-height, $border-width: $wz-dot-border-width) {
 
   // Make variables accessible from the content block
-  $wz-param-indicator-width: $width !global;
-  $wz-param-indicator-height: $height !global;
-  $wz-param-indicator-border-width: $border-width !global;
+  $wz-param-indicator-width: $width;
+  $wz-param-indicator-height: $height;
+  $wz-param-indicator-border-width: $border-width;
 
   @if ($layout == 'horizontal') {
     padding: ($height + $wz-text-padding-bottom) 0 $wz-text-padding-bottom 0;

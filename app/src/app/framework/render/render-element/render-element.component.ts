@@ -27,7 +27,7 @@ import { fieldComponents } from '../fields/fields.list';
 export class RenderElementComponent implements OnInit {
 
   @Input() data: any;
-  @ViewChild('fieldContainer', {read: ViewContainerRef}) container;
+  @ViewChild('fieldContainer', {read: ViewContainerRef, static: true}) container;
   private component: any;
   private componentRef: ComponentRef<any>;
 

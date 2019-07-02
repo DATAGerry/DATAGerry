@@ -32,7 +32,7 @@ import { ApiCallService } from '../../../services/api-call.service';
 
 export class SearchResultsComponent implements OnInit, OnDestroy {
 
-  @ViewChild(DataTableDirective)
+  @ViewChild(DataTableDirective, {static: false})
   public dtElement: DataTableDirective;
 
   public dtOptions: DataTables.Settings = {};

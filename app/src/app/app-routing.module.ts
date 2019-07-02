@@ -30,7 +30,7 @@ const routes: Routes = [
     data: {
       breadcrumb: 'Dashboard'
     },
-    loadChildren: './dashboard/dashboard.module#DashboardModule'
+    loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
   },
   {
     path: 'connection',
@@ -47,7 +47,7 @@ const routes: Routes = [
       breadcrumb: 'Search'
     },
     canActivate: [ConnectionGuard],
-    loadChildren: './search/search.module#SearchModule'
+    loadChildren: () => import('./search/search.module').then(m => m.SearchModule)
   },
   {
     path: 'framework',
@@ -55,18 +55,18 @@ const routes: Routes = [
       breadcrumb: 'Framework'
     },
     canActivate: [ConnectionGuard],
-    loadChildren: './framework/framework.module#FrameworkModule'
+    loadChildren: () => import('./framework/framework.module').then(m => m.FrameworkModule)
   },
   {
     path: 'user',
     data: {
       breadcrumb: 'User'
     },
-    loadChildren: './user/user.module#UserModule',
+    loadChildren: () => import('./user/user.module').then(m => m.UserModule),
   },
   {
     path: 'error',
-    loadChildren: './error/error.module#ErrorModule'
+    loadChildren: () => import('./error/error.module').then(m => m.ErrorModule)
   },
   {
     path: '**',

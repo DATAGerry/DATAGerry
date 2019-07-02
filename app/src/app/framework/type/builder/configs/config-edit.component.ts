@@ -39,7 +39,7 @@ export class ConfigEditComponent implements OnInit {
   @Input() data: any;
   @Input() groupList: Group[];
   @Input() userList: User[];
-  @ViewChild('fieldConfig', {read: ViewContainerRef}) container;
+  @ViewChild('fieldConfig', {read: ViewContainerRef, static: true}) container;
   private component: any;
   private componentRef: ComponentRef<any>;
 

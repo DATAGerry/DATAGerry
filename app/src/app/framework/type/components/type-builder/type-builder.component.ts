@@ -40,16 +40,16 @@ export class TypeBuilderComponent implements OnInit {
   @Input() private typeInstance?: CmdbType;
   @Input() private mode: number = Modes.Create;
 
-  @ViewChild(TypeBasicStepComponent)
+  @ViewChild(TypeBasicStepComponent, {static: true})
   private basicStep: TypeBasicStepComponent;
 
-  @ViewChild(TypeFieldsStepComponent)
+  @ViewChild(TypeFieldsStepComponent, {static: true})
   private fieldStep: TypeFieldsStepComponent;
 
-  @ViewChild(TypeMetaStepComponent)
+  @ViewChild(TypeMetaStepComponent, {static: true})
   private metaStep: TypeMetaStepComponent;
 
-  @ViewChild(TypeAccessStepComponent)
+  @ViewChild(TypeAccessStepComponent, {static: true})
   private accessStep: TypeAccessStepComponent;
 
   private categorySelected: boolean = false;
