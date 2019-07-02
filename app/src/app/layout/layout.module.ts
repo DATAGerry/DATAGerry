@@ -34,6 +34,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TableComponent } from './components/table/table.component';
 import { DataTablesModule } from 'angular-datatables';
+import { ToastContainerComponent } from './helpers/toast/toast-container.component';
 
 @NgModule({
   declarations: [
@@ -46,7 +47,8 @@ import { DataTablesModule } from 'angular-datatables';
     ActiveBadgeComponent,
     LowercaseDirective,
     SearchBarComponent,
-    TableComponent
+    TableComponent,
+    ToastContainerComponent
   ],
   exports: [
     NavigationComponent,
@@ -56,7 +58,8 @@ import { DataTablesModule } from 'angular-datatables';
     ActiveBadgeComponent,
     SearchBarComponent,
     LowercaseDirective,
-    TableComponent
+    TableComponent,
+    ToastContainerComponent
   ],
   imports: [
     CommonModule,
