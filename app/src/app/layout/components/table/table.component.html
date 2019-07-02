@@ -27,7 +27,9 @@
       <td style="text-align: center"><input id="{{entry.public_id}}" class="select-checkbox" type="checkbox" (click)="updateDisplay()"></td>
       <td><cmdb-active-badge [activeStatus]="entry.active"></cmdb-active-badge></td>
       <td>{{entry.public_id}}</td>
-      <td><a routerLink="{{linkRoute}}{{entry.public_id}}">{{entry.label}}</a></td>
+
+      <td *ngIf="entry.type_id === undefined"><a routerLink="{{linkRoute}}{{entry.public_id}}">{{entry.label}}</a></td>
+      <td *ngIf="entry.type_id !== undefined"><a routerLink="/framework/type/{{entry.type_id}}">{{entry.label}}</a></td>
 
       <!-- BEGIN: Advanced contens : Show only if extended fields exist  -->
       <ng-container *ngIf="extendedFields?.length > 0" >
@@ -47,7 +49,7 @@
           <i class="fa fa-eye" aria-hidden="true"></i>
         </a>
         <!-- edit -->
-        <a class="ml-1 text-dark" routerLink="{{linkRoute}}+{{entry.public_id}}">
+        <a class="ml-1 text-dark" routerLink="{{linkRoute}}{{entry.public_id}}">
           <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
         </a>
         <!-- delete -->

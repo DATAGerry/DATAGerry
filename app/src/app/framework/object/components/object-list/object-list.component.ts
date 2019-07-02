@@ -62,6 +62,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   private buildDefaultDtButtons() {
+    this.dtButtons.length = 0;
     this.dtButtons.push(
       {
         // add new
