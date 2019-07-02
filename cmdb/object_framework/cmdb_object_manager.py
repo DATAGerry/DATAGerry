@@ -533,12 +533,15 @@ class CmdbObjectManager(CmdbManagerBase):
 
         return self._insert(collection=CmdbCategory.COLLECTION, data=new_category.to_database())
 
-    def update_category(self, data: dict):
-        update_type = CmdbCategory(**data)
+    def update_category(self, data: (CmdbCategory, dict)):
+        if isinstance(data, CmdbCategory):
+            update_category = data
+        elif isinstance(data, dict):
+            update_category = CmdbCategory(**data)
         ack = self.dbm.update(
             collection=CmdbCategory.COLLECTION,
-            public_id=update_type.get_public_id(),
-            data=update_type.to_database()
+            public_id=update_category.get_public_id() or update_category.public_id,
+            data=update_category.to_database()
         )
         return ack
 
