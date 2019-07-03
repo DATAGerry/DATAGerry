@@ -213,7 +213,7 @@ class DataGenerator:
                                 "name": "linedetails",
                                 "label": "Linedetails",
                                 "fields": [
-                                    "product_name"
+                                    "product_name",
                                     "transfer_rate"
                                 ],
                                 "position": 2

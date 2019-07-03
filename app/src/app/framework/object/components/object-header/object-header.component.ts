@@ -7,7 +7,7 @@ import { Component, Input } from '@angular/core';
 })
 export class ObjectHeaderComponent {
 
-  @Input() objectInstance: any = [];
+  @Input() objectInstance: any;
   constructor() { }
 
 }

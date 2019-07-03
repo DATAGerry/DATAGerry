@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input} from '@angular/core';
+import {Component, Input } from '@angular/core';
 import {CmdbObject} from '../../../models/cmdb-object';
 import {ApiCallService} from '../../../../services/api-call.service';
 import {ObjectService} from '../../../services/object.service';
@@ -31,7 +31,7 @@ export class ObjectFieldsViewComponent {
 
   @Input() objectInstance: any;
   @Input() isDisable: boolean;
-  public showToast: boolean = false;
+  @Input() typeInstance: any;
   public formFields: FormGroup = new FormGroup({});
 
   constructor(private api: ApiCallService, private objService: ObjectService) {  }
@@ -59,9 +59,7 @@ export class ObjectFieldsViewComponent {
     updateInstance.fields = fieldsList;
     this.objService.postUpdateObject(updateInstance).subscribe(res => {
       console.log(res);
-      this.showToast = true;
       this.isDisable = true;
     });
   }
-
 }

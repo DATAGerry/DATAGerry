@@ -12,10 +12,21 @@
       </div>
       <div class="card-body">
         <ul class="list-group list-group-flush">
-          <li class="list-group-item list-group-item-action" routerLink="/framework/object/">List objects</li>
-          <li class="list-group-item list-group-item-action" (click)="copy(objectInstance)">Copy object</li>
-          <li class="list-group-item list-group-item-action list-group-item-warning" (click)="isEditable()">Edit object</li>
-          <li class="list-group-item list-group-item-action list-group-item-danger" (click)="delObject(objectInstance)">Delete object</li>
+          <li class="list-group-item list-group-item-action" routerLink="/framework/object/">
+            <i class="fa fa-th-list"></i> List objects
+          </li>
+          <li class="list-group-item list-group-item-action" data-toggle="modal" data-target="#insertModal">
+            <i class="fa fa-file-o" aria-hidden="true"></i> Create object
+          </li>
+          <li class="list-group-item list-group-item-action" (click)="copy(objectInstance)">
+            <i class="fa fa-files-o" aria-hidden="true"></i> Copy object
+          </li>
+          <li class="list-group-item list-group-item-action list-group-item-warning" (click)="isEditable()">
+            <i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit object
+          </li>
+          <li class="list-group-item list-group-item-action list-group-item-danger" (click)="delObject(objectInstance)">
+            <i class="fa fa-trash-o" aria-hidden="true"></i> Delete object
+          </li>
         </ul>
       </div>
     </div>
@@ -37,13 +48,15 @@
     </ul>
     <div class="tab-content" id="typeViewTabContent">
       <div class="tab-pane fade show active" id="fields" role="tabpanel" aria-labelledby="field-tab">
-        <cmdb-object-fields-view [isDisable]="editDisable" [objectInstance]="objectInstance"></cmdb-object-fields-view>
+        <cmdb-object-fields-view [isDisable]="editDisable" [typeInstance]="typeInstance" [objectInstance]="objectInstance"></cmdb-object-fields-view>
       </div>
       <div class="tab-pane fade" id="referenced_by" role="tabpanel" aria-labelledby="referenced-tab"></div>
       <div class="tab-pane fade" id="links" role="tabpanel" aria-labelledby="links-tab"></div>
       <div class="tab-pane fade" id="logs" role="tabpanel" aria-labelledby="logs-tab"></div>
     </div>
   </div>
-
 </div>
+
+<!-- Modal : insert new object-->
+<cmdb-object-insert></cmdb-object-insert>
 

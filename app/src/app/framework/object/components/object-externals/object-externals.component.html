@@ -4,18 +4,13 @@
     <div class="card-header">
       Externals
     </div>
-    <ul class="list-group list-group-flush" *ngFor="let ext of objectInstance?.externals">
-      <li class="list-group-item">
-        <div class="row">
-          <div class="col">
-            {{ext.label}}
-          </div>
-          <div class="col">
-            {{ext.href}}
-          </div>
-        </div>
-      </li>
-    </ul>
+    <div class="card-body">
+      <ul class="fa-ul" >
+        <li *ngFor="let ext of objectInstance?.externals">
+          <i class="fa-li fa {{ext.icon}}" aria-hidden="true"></i> <a class="card-link" href="{{ext.href}}">{{ext.label}}</a>
+        </li>
+      </ul>
+    </div>
   </div>
   <hr />
 </ng-container>

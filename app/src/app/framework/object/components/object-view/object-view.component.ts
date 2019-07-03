@@ -18,22 +18,25 @@
 
 import { Component, OnInit } from '@angular/core';
 import { ApiCallService } from '../../../../services/api-call.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {CmdbObject} from '../../../models/cmdb-object';
-import {ObjectService} from '../../../services/object.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CmdbObject } from '../../../models/cmdb-object';
+import { ObjectService } from '../../../services/object.service';
+import { CmdbType } from '../../../models/cmdb-type';
+import { TypeService } from '../../../services/type.service';
 
 @Component({
-  selector: 'cmdb-type-view',
+  selector: 'cmdb-object-view',
   templateUrl: './object-view.component.html',
   styleUrls: ['./object-view.component.scss']
 })
 export class ObjectViewComponent implements OnInit {
 
   private objID: number;
-  private objectInstance: any;
+  public objectInstance: any;
+  public typeInstance: any;
   public editDisable: boolean = true;
 
-  constructor(private api: ApiCallService, private objService: ObjectService,
+  constructor(private api: ApiCallService, private objService: ObjectService, private typeService: TypeService,
               private activRoute: ActivatedRoute, private route: Router) {
     this.activRoute.params.subscribe((id) => {
       this.objID = id.publicID;
@@ -43,7 +46,12 @@ export class ObjectViewComponent implements OnInit {
 
   ngOnInit() {
     this.api.callGetRoute<any>('object/' + `${this.objID}`)
-      .subscribe(obj => this.objectInstance = obj);
+      .subscribe(obj => {
+        this.typeService.getType(obj.type_id).subscribe((typeInstanceResp: CmdbType) => {
+          this.typeInstance = typeInstanceResp;
+          this.objectInstance = obj;
+        });
+      });
   }
 
   public delObject(value: any) {

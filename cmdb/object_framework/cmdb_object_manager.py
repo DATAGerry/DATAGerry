@@ -247,7 +247,7 @@ class CmdbObjectManager(CmdbManagerBase):
                """
 
         formatted_type_id = {'type_id': public_id}
-        return self.dbm.count(CmdbType.COLLECTION, formatted_type_id)
+        return self.dbm.count(CmdbObject.COLLECTION, formatted_type_id)
 
     def count_objects(self):
         return self.dbm.count(collection=CmdbObject.COLLECTION)
