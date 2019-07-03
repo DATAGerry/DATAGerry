@@ -29,7 +29,7 @@ import { ContentHeaderComponent } from './components/content-header/content-head
 import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.component';
 import { LowercaseDirective } from './directives/lowercase.directive';
 import { SearchBarComponent } from './components/search-bar/search-bar.component';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TableComponent } from './components/table/table.component';

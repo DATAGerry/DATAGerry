@@ -43,10 +43,15 @@
 
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-success" (click)="onCreate()">Create new</button>
-        <button type="submit" class="btn btn-primary" data-dismiss="modal">Done</button>
+        <fieldset [disabled]="!formType.value.type">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-success" (click)="onCreate(isInserted)">Create new</button>
+        </fieldset>
       </div>
     </div>
   </div>
 </div>
+
+<ng-template #isInserted>
+  <i class="fa fa-plus" aria-hidden="true"></i> New object created
+</ng-template>

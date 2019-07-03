@@ -55,7 +55,7 @@ export class ObjectViewComponent implements OnInit {
   }
 
   public delObject(value: any) {
-    const id = value.object_id;
+    const id = value.public_id;
     this.api.callDeleteRoute('object/' + id).subscribe(data => {
       this.route.navigate(['/']);
     });

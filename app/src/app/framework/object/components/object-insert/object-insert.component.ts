@@ -22,6 +22,7 @@ import { TypeService } from '../../../services/type.service';
 import { FormControl, FormGroup} from '@angular/forms';
 import { CmdbObject } from '../../../models/cmdb-object';
 import { ObjectService } from '../../../services/object.service';
+import {ToastService} from '../../../../layout/services/toast.service';
 
 @Component({
   selector: 'cmdb-object-insert',
@@ -34,7 +35,7 @@ export class ObjectInsertComponent implements OnInit {
   public formType: FormGroup;
   public formFields: FormGroup;
 
-  constructor(private typeService: TypeService, private objService: ObjectService) {
+  constructor(private typeService: TypeService, private objService: ObjectService, private toastService: ToastService) {
     this.formType = new FormGroup({
       type: new FormControl()
     });
@@ -58,7 +59,7 @@ export class ObjectInsertComponent implements OnInit {
     this.formFields = new FormGroup(group);
   }
 
-  onCreate() {
+  onCreate(isInserted) {
     const objInstance = new CmdbObject();
     objInstance.version = '1.0.0';
     objInstance.type_id = this.type.public_id;
@@ -76,6 +77,7 @@ export class ObjectInsertComponent implements OnInit {
 
     this.objService.postAddObject(objInstance).subscribe(res => {
       console.log(res);
+      this.toastService.show(isInserted, { classname: 'bg-success text-light'});
      });
   }
 }

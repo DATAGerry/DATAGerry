@@ -29,7 +29,6 @@ import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor
 import { HttpErrorInterceptor } from './auth/interceptors/http-error.interceptor.tx';
 import { PreviousRouteService } from './services/previous-route.service';
 import { NgxSpinnerModule } from 'ngx-spinner';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [

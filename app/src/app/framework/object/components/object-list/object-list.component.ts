@@ -214,6 +214,7 @@ export class ObjectListComponent implements OnDestroy {
 
   private getRouteObjects(id) {
     let url = 'object/';
+    this.hasSummaries = false;
     if ( typeof id !== 'undefined') {
       url = url + 'type/' + id;
       this.hasSummaries = true;
