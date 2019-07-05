@@ -353,16 +353,15 @@ def export_csv():
     all_objects = preparation_for_render(object_data)
     json_resp = CmdbRender.result_loop_render(object_manager, all_objects)
 
+    csv_data = open('temp.csv', 'w')
+    writer = csv.writer(csv_data)
     object_parsed = []
+
     for resp in json_resp:
         obj_dict = resp.__dict__
         object_parsed.append(obj_dict)
 
-    csv_data = open('temp.csv', 'w')
-    writer = csv.writer(csv_data)
-
-    count = 0
-    for emp in object_parsed:
+    for count, emp in object_parsed:
         if count == 0:
             header = emp.keys()
             writer.writerow(header)
@@ -377,3 +376,39 @@ def export_csv():
                      attachment_filename=timestamp + '.csv')
 
 
+@login_required
+@object_rest.route('/export/xml', methods=['GET'])
+def export_xml():
+    object_data = object_manager.get_all_objects()
+    all_objects = preparation_for_render(object_data)
+    json_resp = CmdbRender.result_loop_render(object_manager, all_objects)
+
+    object_parsed = []
+    for resp in json_resp:
+        obj_dict = resp.__dict__
+        object_parsed.append(obj_dict)
+
+    print(parse_to_xml(object_parsed))
+
+    response = make_response(parse_to_xml(object_parsed))
+    response.headers['Content-Disposition'] = "attachment; filename=test.xml"
+    return response
+
+
+def parse_to_xml(json_obj, line_spacing=""):
+    result_list = list()
+    json_obj_type = type(json_obj)
+
+    if json_obj_type is list:
+        for sub_elem in json_obj:
+            result_list.append(parse_to_xml(sub_elem, line_spacing))
+        return "\n".join(result_list)
+
+    if json_obj_type is dict:
+        for tag_name in json_obj:
+            sub_obj = json_obj[tag_name]
+            result_list.append("%s<%s>" % (line_spacing, tag_name))
+            result_list.append(parse_to_xml(sub_obj, "\t" + line_spacing))
+            result_list.append("%s</%s>" % (line_spacing, tag_name))
+        return "\n".join(result_list)
+    return "%s%s" % (line_spacing, json_obj)
