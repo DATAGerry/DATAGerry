@@ -18,7 +18,7 @@
       </ng-container>
       <!-- END: summarie fields -->
       <th class="toggle-autor">Author</th>
-      <th class="toggle-create-time">Creation time</th>
+      <th class="toggle-last-modified">Last modified</th>
       <th class="toggle-action">Action</th>
     </tr>
     </thead>
@@ -42,7 +42,7 @@
       <!-- END: summarie contens -->
 
       <td>{{result.author_name}}</td>
-      <td>{{result.creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
+      <td>{{result.last_edit_time?.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
       <td>
         <a class="text-dark"[routerLink]="['/framework/object/', result.public_id]">
           <i class="fa fa-eye" aria-hidden="true"></i>

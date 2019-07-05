@@ -136,7 +136,7 @@ export class TableComponent implements OnInit, OnDestroy, OnChanges {
   private buildOptions(buttons) {
     this.dtOptions = {
       ordering: true,
-      order: [[1, 'asc']],
+      order: [[2, 'asc']],
       columnDefs: [{
         targets: 'nosort',
         orderable: false,

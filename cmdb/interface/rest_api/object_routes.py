@@ -17,7 +17,7 @@
 import logging
 import json
 
-from flask import abort, jsonify, request
+from flask import abort, jsonify, request, send_file, Response, send_from_directory
 
 from cmdb.object_framework import CmdbObject
 from cmdb.object_framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectNotFoundError
@@ -243,14 +243,15 @@ def update_object():
 
 @login_required
 @object_rest.route('/<int:public_id>', methods=['DELETE'])
-def delete_object(public_id):
+def delete_object(public_id: int):
     try:
-        ack = object_manager.delete_object(public_id)
-        return make_response(ack.raw_result)
-    except ObjectDeleteError as e:
-        return jsonify(message='Delete Error', error=e.message)
+        ack = object_manager.delete_object(public_id=public_id)
+    except ObjectDeleteError:
+        return abort(400)
     except CMDBError:
         return abort(500)
+    resp = make_response(ack)
+    return resp
 
 
 @login_required
@@ -322,3 +323,57 @@ def preparation_for_render(objects_list):
         tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
         preparation_objects.append(tmp_render)
     return preparation_objects
+
+
+@login_required
+@object_rest.route('/export/json', methods=['GET'])
+def export_json():
+    import datetime
+    import time
+
+    object_data = object_manager.get_all_objects()
+    all_objects = preparation_for_render(object_data)
+    json_resp = CmdbRender.result_loop_render(object_manager, all_objects)
+
+    timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
+
+    response = make_response(json_resp)
+    response.headers['Content-Disposition'] = "attachment; filename=" + timestamp + ".txt"
+    return response
+
+
+@login_required
+@object_rest.route('/export/csv', methods=['GET'])
+def export_csv():
+    import csv
+    from datetime import datetime
+    import os
+
+    object_data = object_manager.get_all_objects()
+    all_objects = preparation_for_render(object_data)
+    json_resp = CmdbRender.result_loop_render(object_manager, all_objects)
+
+    object_parsed = []
+    for resp in json_resp:
+        obj_dict = resp.__dict__
+        object_parsed.append(obj_dict)
+
+    csv_data = open('temp.csv', 'w')
+    writer = csv.writer(csv_data)
+
+    count = 0
+    for emp in object_parsed:
+        if count == 0:
+            header = emp.keys()
+            writer.writerow(header)
+            count += 1
+        writer.writerow(emp.values())
+    # csv_data.close()
+
+    timestamp = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
+    return send_file(os.getcwd() + '/temp.csv',
+                     mimetype='text/csv',
+                     as_attachment=True,
+                     attachment_filename=timestamp + '.csv')
+
+

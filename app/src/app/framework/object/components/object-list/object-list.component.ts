@@ -164,7 +164,7 @@ export class ObjectListComponent implements OnDestroy {
     const buttons = this.dtButtons;
     this.dtOptions = {
       ordering: true,
-      order: [[1, 'asc']],
+      order: [[5, 'asc']],
       columnDefs: [ {
         targets: 'nosort',
         orderable: false,
@@ -193,7 +193,7 @@ export class ObjectListComponent implements OnDestroy {
 
   private buildAdvancedDtOptions() {
     if (this.hasSummaries) {
-      const visTargets: any[] = [0, 1, 2 , 3, -1];
+      const visTargets: any[] = [0, 1, 2 , 3, -3, -2, -1];
       for (let i = 0; i < this.summaries.length; i++) {
         visTargets.push(i + 4);
       }
@@ -202,6 +202,7 @@ export class ObjectListComponent implements OnDestroy {
         { visible: true, targets: visTargets },
         { visible: false, targets: '_all' }
       ];
+      this.dtOptions.order = [[2, 'asc']];
     }
   }
 
