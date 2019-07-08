@@ -17,6 +17,7 @@
 */
 
 import { Injectable } from '@angular/core';
+import { map } from 'rxjs/operators';
 import { ApiCallService } from '../../services/api-call.service';
 import { CmdbCategory } from '../models/cmdb-category';
 
@@ -42,8 +43,10 @@ export class CategoryService {
     return this.api.callPutRoute<CmdbCategory>(this.servicePrefix + '/', data);
   }
 
-  public addTypeToCategory(typeID: number, categoryID: number) {
-
+  public async addTypeToCategory(categoryID: number, typeID: number) {
+    const category = await this.api.callAsyncGetRoute<CmdbCategory>(this.servicePrefix + '/' + categoryID);
+    category.type_list.push(typeID);
+    this.updateCategory(category);
   }
 
 

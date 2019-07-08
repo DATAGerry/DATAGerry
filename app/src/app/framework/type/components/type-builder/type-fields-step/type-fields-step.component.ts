@@ -30,7 +30,7 @@ export class TypeFieldsStepComponent implements AfterContentInit {
   @ViewChild(BuilderComponent, {static: false})
   public typeBuilder: BuilderComponent;
 
-  public constructor(private cdr: ChangeDetectorRef){
+  public constructor(private cdr: ChangeDetectorRef) {
 
   }
 

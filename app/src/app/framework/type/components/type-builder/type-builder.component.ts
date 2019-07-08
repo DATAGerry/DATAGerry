@@ -27,6 +27,7 @@ import { UserService } from '../../../../user/services/user.service';
 import { User } from '../../../../user/models/user';
 import { CategoryService } from '../../../services/category.service';
 import { Modes } from '../../builder/modes.enum';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -52,10 +53,9 @@ export class TypeBuilderComponent implements OnInit {
   @ViewChild(TypeAccessStepComponent, {static: true})
   private accessStep: TypeAccessStepComponent;
 
-  private categorySelected: boolean = false;
   private selectedCategoryID: number = 0;
 
-  public constructor(private typeService: TypeService, private userService: UserService, private categoryService: CategoryService) {
+  public constructor(private router: Router, private typeService: TypeService, private userService: UserService, private categoryService: CategoryService) {
   }
 
   public ngOnInit(): void {
@@ -67,10 +67,7 @@ export class TypeBuilderComponent implements OnInit {
   }
 
   private exitBasicStep() {
-    this.categorySelected = this.basicStep.basicCategoryForm.value !== null;
-    if (this.categorySelected !== false) {
-      this.selectedCategoryID = this.basicStep.basicCategoryForm.value;
-    }
+    this.selectedCategoryID = this.basicStep.basicCategoryForm.value.category_id;
     this.assignToType(this.basicStep.basicForm.value);
   }
 
@@ -102,16 +99,18 @@ export class TypeBuilderComponent implements OnInit {
   }
 
   private saveType() {
-    this.typeService.postType(this.typeInstance).subscribe(res => {
-        if (this.categorySelected) {
-          this.categoryService
+    let newTypeID = null;
+    this.typeService.postType(this.typeInstance).subscribe(typeIDResp => {
+        newTypeID = typeIDResp;
+        if (this.selectedCategoryID !== null) {
+          this.categoryService.addTypeToCategory(this.selectedCategoryID, newTypeID);
         }
       },
       (error) => {
 
       },
       () => {
-
+        this.router.navigate(['/framework/type/'], {queryParams: {typeAddSuccess: newTypeID}});
       });
 
   }

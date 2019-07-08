@@ -16,14 +16,13 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CmdbType } from '../../../models/cmdb-type';
 import { TypeService } from '../../../services/type.service';
 import { Subject } from 'rxjs';
-import { UserService } from '../../../../user/services/user.service';
-import { User } from '../../../../user/models/user';
 import { DataTableDirective } from 'angular-datatables';
-import {Router} from "@angular/router";
+import { ActivatedRoute, Router } from '@angular/router';
+import { ToastService } from '../../../../layout/services/toast.service';
 
 @Component({
   selector: 'cmdb-type-list',
@@ -38,17 +37,16 @@ export class TypeListComponent implements OnInit, OnDestroy {
   private typeList: CmdbType[] = [];
   public dtOptions: DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
-  public linkRoute: string = '/framework/type/'
+  public linkRoute: string = '/framework/type/';
   public addNewType: {} = {
-    // addNewType
     text: '<i class="fa fa-file-o" aria-hidden="true"></i>',
     className: 'btn btn-light',
     action: function() {
       this.callTypeBuilder();
     }.bind(this)
-  }
+  };
 
-  constructor(private typeService: TypeService, private router: Router) {
+  constructor(private typeService: TypeService, private toastService: ToastService, private router: Router, private route: ActivatedRoute) {
   }
 
   public ngOnInit(): void {
@@ -60,6 +58,10 @@ export class TypeListComponent implements OnInit, OnDestroy {
         searchPlaceholder: 'Filter...'
       },
     };
+
+    this.route.params.subscribe((param) => {
+      this.toastService.show('A new type was added with ID: ' + param.typeAddSuccess);
+    });
 
     this.typeService.getTypeList().subscribe((list: CmdbType[]) => {
         this.typeList = this.typeList.concat(list);

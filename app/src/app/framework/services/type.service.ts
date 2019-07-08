@@ -51,7 +51,7 @@ export class TypeService {
   }
 
   public postType(typeInstance: CmdbType) {
-    return this.api.callPostRoute<CmdbType>(this.servicePrefix + '/', typeInstance);
+    return this.api.callPostRoute<number>(this.servicePrefix + '/', typeInstance);
   }
 
   public deleteType(publicID: number) {
