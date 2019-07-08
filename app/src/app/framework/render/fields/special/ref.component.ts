@@ -28,7 +28,7 @@ import { ObjectService } from '../../../services/object.service';
 export class RefComponent implements OnInit, OnChanges, ComponentsFields {
 
   @Input() data: any;
-  private objectList;
+  public objectList;
 
   constructor(private obj: ObjectService) {
   }

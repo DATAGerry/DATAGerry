@@ -34,7 +34,6 @@ export class TypeFieldsStepComponent implements AfterContentInit {
 
   }
 
-
   public ngAfterContentInit(): void {
     this.cdr.detectChanges();
   }

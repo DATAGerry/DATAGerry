@@ -25,8 +25,8 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class RenderComponent {
 
-  @Input() sections: any = [];
-  @Input() fields: any = [];
+  @Input() public sections: any = [];
+  @Input() public fields: any = [];
 
   public getFieldByName(name: string) {
     return this.fields.find(field => field.name === name);

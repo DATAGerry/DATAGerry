@@ -19,6 +19,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from './services/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-auth',
@@ -27,25 +29,51 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class AuthComponent implements OnInit {
 
-  userName: string;
-  userPassword: string;
+  loginForm: FormGroup;
+  loading = false;
+  submitted = false;
   returnUrl: string;
-  error = '';
-  shake: any;
 
-  constructor(private authService: AuthService, private router: Router, private route: ActivatedRoute) {
+
+  constructor(
+    private formBuilder: FormBuilder,
+    private route: ActivatedRoute,
+    private router: Router,
+    private authenticationService: AuthService,
+  ) {
+    // redirect to home if already logged in
+    if (this.authenticationService.currentUserValue) {
+      this.router.navigate(['/']);
+    }
   }
 
   ngOnInit() {
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    this.loginForm = this.formBuilder.group({
+      username: ['', Validators.required],
+      password: ['', Validators.required]
+    });
+
+    // get return url from route parameters or default to '/'
+    this.returnUrl = this.route.snapshot.queryParams.returnUrl || '/';
   }
 
-  public onLogin() {
-    this.authService.login(this.userName, this.userPassword).subscribe(loginResult => {
-        this.router.navigate([this.returnUrl]);
-      },
-      error => {
-        this.error = error;
-      });
+  get controls() {
+    return this.loginForm.controls;
+  }
+
+  onSubmit() {
+    this.submitted = true;
+
+    this.loading = true;
+    this.authenticationService.login(this.loginForm.controls.username.value, this.loginForm.controls.password.value)
+      .pipe(first())
+      .subscribe(
+        data => {
+          this.router.navigate([this.returnUrl]);
+        },
+        error => {
+          console.log(error);
+          this.loading = false;
+        });
   }
 }

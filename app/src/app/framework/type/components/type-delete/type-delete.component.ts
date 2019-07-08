@@ -111,7 +111,7 @@ export class TypeDeleteComponent implements OnInit {
   public numberOfObjects: number;
 
   constructor(private typeService: TypeService, private objectService: ObjectService, private router: Router,
-              private route: ActivatedRoute, private prevRoute: PreviousRouteService, private modalService: NgbModal) {
+              private route: ActivatedRoute, public prevRoute: PreviousRouteService, private modalService: NgbModal) {
     this.route.params.subscribe((id) => {
       this.typeID = id.publicID;
     });

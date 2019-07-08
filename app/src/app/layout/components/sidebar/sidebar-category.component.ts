@@ -29,7 +29,7 @@ export class SidebarCategoryComponent implements OnInit {
 
   @Input() categoryData: any;
 
-  private typeList: any[] = [];
+  public typeList: any[] = [];
   private objectCount = [];
 
   constructor(private api: ApiCallService) {

@@ -11,8 +11,8 @@ import { Modes } from '../../builder/modes.enum';
 })
 export class TypeEditComponent implements OnInit {
 
-  private typeID: number;
-  private typeInstance: CmdbType;
+  public typeID: number;
+  public typeInstance: CmdbType;
   public mode: number = Modes.Edit;
 
   constructor(private api: ApiCallService, private route: ActivatedRoute) {

@@ -25,7 +25,7 @@ import { CmdbType } from '../../../models/cmdb-type';
   styleUrls: ['./type-add.component.scss']
 })
 export class TypeAddComponent implements OnInit {
-  private typeInstance: CmdbType;
+  public typeInstance: CmdbType;
 
   constructor() {
     this.typeInstance = new CmdbType();

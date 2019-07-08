@@ -32,7 +32,7 @@ export class PasswordComponent implements OnInit, ComponentsFields {
   ngOnInit() {
   }
 
-  private toggleInput() {
+  public toggleInput() {
     if (this.passWordToggle.nativeElement.type === 'password') {
       this.passWordToggle.nativeElement.type = 'text';
     } else {

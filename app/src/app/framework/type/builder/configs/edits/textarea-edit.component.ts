@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'cmdb-textarea-edit',
@@ -24,8 +24,12 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./textarea-edit.component.scss']
 })
 export class TextareaEditComponent implements OnInit {
+  @Input() groupList: any;
+  @Input() userList: any;
+  @Input() data: any;
 
-  constructor() { }
+  constructor() {
+  }
 
   ngOnInit() {
   }

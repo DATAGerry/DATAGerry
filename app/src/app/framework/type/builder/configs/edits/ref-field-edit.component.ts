@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { TypeService } from '../../../../services/type.service';
 
 @Component({
@@ -25,8 +25,10 @@ import { TypeService } from '../../../../services/type.service';
   styleUrls: ['./ref-field-edit.component.scss']
 })
 export class RefFieldEditComponent implements OnInit {
-
-  private typeList;
+  @Input() groupList: any;
+  @Input() userList: any;
+  @Input() data: any;
+  public typeList;
 
   constructor(private typeService: TypeService) {
   }

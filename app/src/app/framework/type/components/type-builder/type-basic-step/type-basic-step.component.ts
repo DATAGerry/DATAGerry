@@ -55,11 +55,11 @@ export class TypeBasicStepComponent implements OnInit {
     }
   }
 
-  @Input() mode: number;
+  @Input() public mode: number;
 
   public basicForm: FormGroup;
   public basicCategoryForm: FormGroup;
-  private categoryList: Observable<CmdbCategory[]>;
+  public categoryList: Observable<CmdbCategory[]>;
 
   constructor(private typeService: TypeService, private categoryService: CategoryService) {
     this.basicForm = new FormGroup({

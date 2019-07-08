@@ -33,6 +33,7 @@ export class TypeViewComponent implements OnInit {
   public typeID: number;
   public typeInstance: CmdbType;
 
+
   constructor(private typeService: TypeService, private route: ActivatedRoute) {
     this.route.params.subscribe((id) => {
       this.typeID = id.publicID;

@@ -30,8 +30,8 @@ import { FormControl, FormGroup } from '@angular/forms';
 export class TypeAccessStepComponent implements OnInit {
 
   public accessForm: FormGroup;
-  private userList: User[] = [];
-  private groupList: Group[] = [];
+  public userList: User[] = [];
+  public groupList: Group[] = [];
 
   constructor(private userService: UserService) {
     this.accessForm = new FormGroup({

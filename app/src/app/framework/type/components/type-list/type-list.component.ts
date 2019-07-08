@@ -34,7 +34,7 @@ export class TypeListComponent implements OnInit, OnDestroy {
   @ViewChild(DataTableDirective, {static: false})
   public dtElement: DataTableDirective;
 
-  private typeList: CmdbType[] = [];
+  public typeList: CmdbType[] = [];
   public dtOptions: DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
   public linkRoute: string = '/framework/type/';
@@ -42,7 +42,7 @@ export class TypeListComponent implements OnInit, OnDestroy {
     text: '<i class="fa fa-file-o" aria-hidden="true"></i>',
     className: 'btn btn-light',
     action: function() {
-      this.callTypeBuilder();
+      this.router.navigate(['/framework/type/add']);
     }.bind(this)
   };
 
@@ -60,7 +60,9 @@ export class TypeListComponent implements OnInit, OnDestroy {
     };
 
     this.route.params.subscribe((param) => {
-      this.toastService.show('A new type was added with ID: ' + param.typeAddSuccess);
+      if (param.typeAddSuccess !== undefined) {
+        this.toastService.show('A new type was added with ID: ' + param.typeAddSuccess);
+      }
     });
 
     this.typeService.getTypeList().subscribe((list: CmdbType[]) => {
@@ -78,7 +80,4 @@ export class TypeListComponent implements OnInit, OnDestroy {
     this.dtTrigger.unsubscribe();
   }
 
-  public callTypeBuilder() {
-    this.router.navigate(['/framework/type/add']);
-  }
 }

@@ -21,14 +21,15 @@ import { CommonModule } from '@angular/common';
 import { AuthComponent } from './auth.component';
 import { RouterModule } from '@angular/router';
 import { AuthService } from './services/auth.service';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [AuthComponent],
   imports: [
     CommonModule,
     FormsModule,
-    RouterModule
+    RouterModule,
+    ReactiveFormsModule
   ],
   providers: [AuthService]
 })

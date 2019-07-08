@@ -47,10 +47,10 @@ export class BuilderComponent implements OnInit {
 
   @Input() builderConfig: any = {};
 
-  private structureControls = [
+  public structureControls = [
     new Controller('section', SectionControl)
   ];
-  private basicControls = [
+  public basicControls = [
     new Controller('text', TextControl),
     new Controller('password', PasswordControl),
     new Controller('email', EmailControl),
@@ -61,7 +61,7 @@ export class BuilderComponent implements OnInit {
     new Controller('radio', RadioControl),
     new Controller('select', SelectControl),
   ];
-  private specialControls = [
+  public specialControls = [
     new Controller('ref', ReferenceControl)
   ];
 
@@ -78,7 +78,7 @@ export class BuilderComponent implements OnInit {
     this.sections = [];
   }
 
-  private onDrop(event: DndDropEvent, list: any[]) {
+  public onDrop(event: DndDropEvent, list: any[]) {
     if (list
       && (event.dropEffect === 'copy'
         || event.dropEffect === 'move')) {
@@ -93,7 +93,7 @@ export class BuilderComponent implements OnInit {
     }
   }
 
-  private onDragged(item: any, list: any[], effect: DropEffect) {
+  public onDragged(item: any, list: any[], effect: DropEffect) {
 
     if (effect === 'move') {
       const index = list.indexOf(item);
@@ -102,7 +102,7 @@ export class BuilderComponent implements OnInit {
   }
 
 
-  private remove(item: any, list: any[]) {
+  public remove(item: any, list: any[]) {
     const index: number = list.indexOf(item);
     if (index !== -1) {
       list.splice(index, 1);

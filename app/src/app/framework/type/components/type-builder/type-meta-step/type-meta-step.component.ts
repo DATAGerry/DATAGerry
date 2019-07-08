@@ -44,7 +44,7 @@ export class TypeMetaStepComponent implements OnInit {
 
   @Input() fields: any[] = [];
 
-  private icons = [
+  public icons = [
     'fa-glass',
     'fa-music',
     'fa-search',
@@ -632,11 +632,11 @@ export class TypeMetaStepComponent implements OnInit {
     'fa-fonticons'
   ];
 
-  private summariesForm: FormGroup;
+  public summariesForm: FormGroup;
   public summariesSections = [];
-  private externalsForm: FormGroup;
+  public externalsForm: FormGroup;
   public externalLinks = [];
-  private hrefInterpolCounter;
+  public hrefInterpolCounter;
 
   private static occurrences(s, subString): number {
     s += '';
@@ -689,7 +689,7 @@ export class TypeMetaStepComponent implements OnInit {
     });
   }
 
-  private addSummary() {
+  public addSummary() {
     this.summariesSections.push(this.summariesForm.value);
     this.summariesForm.reset();
   }
@@ -708,7 +708,7 @@ export class TypeMetaStepComponent implements OnInit {
     }
   }
 
-  private addExternal() {
+  public addExternal() {
     this.externalLinks.push(this.externalsForm.value);
     this.externalsForm.reset();
   }

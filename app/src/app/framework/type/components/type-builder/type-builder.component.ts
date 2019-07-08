@@ -38,22 +38,22 @@ import { Router } from '@angular/router';
 export class TypeBuilderComponent implements OnInit {
 
 
-  @Input() private typeInstance?: CmdbType;
-  @Input() private mode: number = Modes.Create;
+  @Input() public typeInstance?: CmdbType;
+  @Input() public mode: number = Modes.Create;
 
   @ViewChild(TypeBasicStepComponent, {static: true})
-  private basicStep: TypeBasicStepComponent;
+  public basicStep: TypeBasicStepComponent;
 
   @ViewChild(TypeFieldsStepComponent, {static: true})
-  private fieldStep: TypeFieldsStepComponent;
+  public fieldStep: TypeFieldsStepComponent;
 
   @ViewChild(TypeMetaStepComponent, {static: true})
-  private metaStep: TypeMetaStepComponent;
+  public metaStep: TypeMetaStepComponent;
 
   @ViewChild(TypeAccessStepComponent, {static: true})
-  private accessStep: TypeAccessStepComponent;
+  public accessStep: TypeAccessStepComponent;
 
-  private selectedCategoryID: number = 0;
+  public selectedCategoryID: number = 0;
 
   public constructor(private router: Router, private typeService: TypeService, private userService: UserService, private categoryService: CategoryService) {
   }
@@ -66,12 +66,12 @@ export class TypeBuilderComponent implements OnInit {
     });
   }
 
-  private exitBasicStep() {
+  public exitBasicStep() {
     this.selectedCategoryID = this.basicStep.basicCategoryForm.value.category_id;
     this.assignToType(this.basicStep.basicForm.value);
   }
 
-  private exitFieldStep() {
+  public exitFieldStep() {
     let fieldBuffer = [];
     let sectionBuffer = [];
     const sectionOrigin = this.fieldStep.typeBuilder.sections;
@@ -89,16 +89,16 @@ export class TypeBuilderComponent implements OnInit {
     this.assignToType({sections: sectionBuffer}, 'render_meta');
   }
 
-  private exitMetaStep() {
+  public exitMetaStep() {
     this.assignToType({summary: this.metaStep.summariesSections}, 'render_meta');
     this.assignToType({external: this.metaStep.externalLinks}, 'render_meta');
   }
 
-  private exitAccessStep() {
+  public exitAccessStep() {
     this.assignToType(this.accessStep.accessForm.value, 'access');
   }
 
-  private saveType() {
+  public saveType() {
     let newTypeID = null;
     this.typeService.postType(this.typeInstance).subscribe(typeIDResp => {
         newTypeID = typeIDResp;
