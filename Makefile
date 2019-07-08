@@ -51,7 +51,7 @@ docs: requirements
 .PHONY: webapp
 webapp:
 	${BIN_NPM} install --prefix ${DIR_WEB_SOURCE}
-	${BIN_NPM} run build --prefix ${DIR_WEB_SOURCE}
+	${BIN_NPM} run prod --prefix ${DIR_WEB_SOURCE}
 	cp -R ${DIR_WEB_BUILD}/* ${DIR_WEB_TARGET}
 
 
