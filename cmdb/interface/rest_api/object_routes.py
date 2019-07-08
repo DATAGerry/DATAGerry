@@ -334,12 +334,17 @@ def export_json():
     object_data = object_manager.get_all_objects()
     all_objects = preparation_for_render(object_data)
     json_resp = CmdbRender.result_loop_render(object_manager, all_objects)
+    json_data = make_response(json_resp).data
 
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
-
-    response = make_response(json_resp)
-    response.headers['Content-Disposition'] = "attachment; filename=" + timestamp + ".txt"
-    return response
+    return Response(
+            json_data,
+            mimetype="application/json",
+            headers={
+                "Content-Disposition":
+                "attachment;filename=%s.txt" % timestamp
+            }
+        )
 
 
 @login_required
@@ -361,7 +366,8 @@ def export_csv():
         obj_dict = resp.__dict__
         object_parsed.append(obj_dict)
 
-    for count, emp in object_parsed:
+    count = 0
+    for emp in object_parsed:
         if count == 0:
             header = emp.keys()
             writer.writerow(header)
@@ -379,6 +385,9 @@ def export_csv():
 @login_required
 @object_rest.route('/export/xml', methods=['GET'])
 def export_xml():
+    import datetime
+    import time
+
     object_data = object_manager.get_all_objects()
     all_objects = preparation_for_render(object_data)
     json_resp = CmdbRender.result_loop_render(object_manager, all_objects)
@@ -388,11 +397,15 @@ def export_xml():
         obj_dict = resp.__dict__
         object_parsed.append(obj_dict)
 
-    print(parse_to_xml(object_parsed))
-
-    response = make_response(parse_to_xml(object_parsed))
-    response.headers['Content-Disposition'] = "attachment; filename=test.xml"
-    return response
+    timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
+    return Response(
+            parse_to_xml(object_parsed),
+            mimetype="text/xml",
+            headers={
+                "Content-Disposition":
+                "attachment;filename=%s.xml" % timestamp
+            }
+        )
 
 
 def parse_to_xml(json_obj, line_spacing=""):
