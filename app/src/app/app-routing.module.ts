@@ -18,35 +18,26 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { ConnectionComponent } from './connection/connection.component';
-import { AuthComponent } from './auth/auth.component';
-import { ConnectionGuard } from './connection/guards/connection.guard';
+import { AuthGuard } from './auth/guards/auth.guard';
 
 const routes: Routes = [
   {
     path: '',
-    pathMatch: 'full',
-    canActivate: [ConnectionGuard],
     data: {
       breadcrumb: 'Dashboard'
     },
+    canActivate: [AuthGuard],
     loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
   },
   {
-    path: 'connection',
-    component: ConnectionComponent
-  },
-  {
-    path: 'login',
-    canActivate: [ConnectionGuard],
-    component: AuthComponent
+    path: 'auth',
+    loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
   },
   {
     path: 'search',
     data: {
       breadcrumb: 'Search'
     },
-    canActivate: [ConnectionGuard],
     loadChildren: () => import('./search/search.module').then(m => m.SearchModule)
   },
   {
@@ -54,7 +45,6 @@ const routes: Routes = [
     data: {
       breadcrumb: 'Framework'
     },
-    canActivate: [ConnectionGuard],
     loadChildren: () => import('./framework/framework.module').then(m => m.FrameworkModule)
   },
   {

@@ -18,9 +18,9 @@
 
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { UserToken } from '../models/user-token';
 import { map } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { User } from '../../user/models/user';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -36,36 +36,45 @@ export class AuthService {
 
   private restPrefix: string = 'rest';
   private servicePrefix: string = 'auth';
-  private currentUserSubject: BehaviorSubject<UserToken>;
-  public currentUser: Observable<UserToken>;
+  private currentUserSubject: BehaviorSubject<User>;
+  public currentUser: Observable<User>;
+  private currentUserTokenSubject: BehaviorSubject<string>;
+  public currentUserToken: Observable<string>;
 
   constructor(private http: HttpClient) {
-    this.currentUserSubject = new BehaviorSubject<UserToken>(JSON.parse(localStorage.getItem('access-token')));
+    this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('current-user')));
     this.currentUser = this.currentUserSubject.asObservable();
+    this.currentUserTokenSubject = new BehaviorSubject<string>(JSON.parse(localStorage.getItem('access-token')));
+    this.currentUserToken = this.currentUserTokenSubject.asObservable();
   }
 
-  public get currentUserValue(): UserToken {
+  public get currentUserValue(): User {
     return this.currentUserSubject.value;
   }
 
+  public get currentUserTokenValue(): string {
+    return this.currentUserTokenSubject.value;
+  }
+
   public login(username: string, password: string) {
-    console.log(username);
-    console.log(password);
     const data = {
       user_name: username,
       password
     };
-    return this.http.post<UserToken>(`http://localhost:4000/${this.restPrefix}/${this.servicePrefix}/login`, data, httpOptions)
-      .pipe(map(userToken => {
-        console.log(userToken);
+    return this.http.post<User>(`http://localhost:4000/${this.restPrefix}/${this.servicePrefix}/login`, data, httpOptions)
+      .pipe(map(user => {
         // store user details and jwt token in local storage to keep user logged in between page refreshes
-        localStorage.setItem('access-token', JSON.stringify(userToken));
-        this.currentUserSubject.next(userToken);
-        return userToken;
+
+        localStorage.setItem('current-user', JSON.stringify(user));
+        localStorage.setItem('access-token', JSON.stringify(user.token));
+        this.currentUserSubject.next(user);
+        this.currentUserTokenSubject.next(user.token);
+        return user;
       }));
   }
 
   public logout() {
+    localStorage.removeItem('current-user');
     localStorage.removeItem('access-token');
     this.currentUserSubject.next(null);
   }

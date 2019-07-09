@@ -19,6 +19,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ConnectionService } from './connection.service';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -31,13 +32,11 @@ const httpOptions = {
 })
 export class ApiCallService {
 
-  hostAddress = 'localhost';
-  hostPort = 4000;
   private readonly apiPrefix = 'rest';
   private readonly apiURL;
 
-  constructor(private http: HttpClient) {
-    this.apiURL = 'http://' + this.hostAddress + ':' + this.hostPort + '/' + this.apiPrefix + '/';
+  constructor(private http: HttpClient, private connectionService: ConnectionService) {
+    this.apiURL = `${this.connectionService.connectionURL}${this.apiPrefix}/`;
   }
 
   public callGetRoute<T>(route: string, params?: any): Observable<any> {

@@ -17,28 +17,35 @@
 */
 
 import { Injectable } from '@angular/core';
-import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { AuthService } from '../services/auth.service';
+import { isDevMode } from '@angular/core';
 
-@Injectable()
-export class BasicAuthInterceptor implements HttpInterceptor {
+@Injectable({
+  providedIn: 'root'
+})
+export class ConnectionService {
 
-  constructor(private authenticationService: AuthService) {
-  }
+  private readonly host: string;
+  private readonly port: number;
+  private readonly protocol: string;
+  private readonly href: string;
 
-  public intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const currentUser = this.authenticationService.currentUserValue;
-    const currentUserToken = this.authenticationService.currentUserTokenValue;
-
-    if (currentUser && currentUserToken) {
-      request = request.clone({
-        setHeaders: {
-          Authorization: `${currentUserToken}`
-        }
-      });
+  constructor() {
+    if (isDevMode()) {
+      this.host = 'localhost';
+      this.port = 4000; // fixed dev port
+      this.protocol = 'http:';
+      this.href = `${this.protocol}//${this.host}:${this.port}/`;
+    } else {
+      this.host = window.location.hostname;
+      this.port = +window.location.port;
+      this.protocol = window.location.protocol;
+      this.href = window.location.href;
     }
-
-    return next.handle(request);
   }
+
+  public get connectionURL() {
+    return this.href;
+  }
+
+
 }

@@ -21,13 +21,13 @@ import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/c
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { NavigationExtras, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Injectable()
 export class HttpErrorInterceptor implements HttpInterceptor {
 
   private readonly possibleStatusCodeList = [
     400,
-    401,
     403,
     404,
     405,
@@ -37,10 +37,10 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     501
   ];
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private authService: AuthService) {
   }
 
-  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  public intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(catchError(err => {
       const errorExtras: NavigationExtras = {
         queryParams: {
@@ -52,7 +52,11 @@ export class HttpErrorInterceptor implements HttpInterceptor {
         }
       };
 
-      if (this.possibleStatusCodeList.includes(err.status)) {
+      if (err.status === 401) {
+        // auto logout if 401 response returned from api
+        this.authService.logout();
+        this.router.navigate(['/auth/login']);
+      } else if (this.possibleStatusCodeList.includes(err.status)) {
         this.router.navigate([`/error/${err.status}`], errorExtras);
       }
 

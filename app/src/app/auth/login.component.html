@@ -18,8 +18,7 @@
         </div>
       </div>
       <div class="form-group">
-        <button [disabled]="loading" class="btn btn-primary">
-          <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+        <button [disabled]="!loginForm.valid" class="btn btn-primary">
           Login
         </button>
       </div>

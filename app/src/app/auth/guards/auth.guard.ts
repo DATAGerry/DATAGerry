@@ -19,35 +19,29 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { ConnectionService } from '../services/connection.service';
-import { connectableObservableDescriptor } from 'rxjs/internal/observable/ConnectableObservable';
+import { AuthService } from '../services/auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ConnectionGuard implements CanActivate {
+export class AuthGuard implements CanActivate {
 
-  private connectionIntervalTime: number = 10;
-  private interval: any;
-
-  constructor(private router: Router, private connectionService: ConnectionService) {
-    // check if connection exists
-    /*
-    this.interval = setInterval(() => {
-      if (!this.connectionService.isConnected) {
-        this.router.navigate(['/connection']);
-      }
-    }, this.connectionIntervalTime * 1000);*/
+  constructor(
+    private router: Router,
+    private authenticationService: AuthService
+  ) {
   }
 
-  canActivate(
+
+  public canActivate(
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    const currentConnection = this.connectionService.currentConnection;
-    if (currentConnection) {
+    const currentUser = this.authenticationService.currentUserValue;
+    const currentUserToken = this.authenticationService.currentUserTokenValue;
+    if (currentUser && currentUserToken) {
       return true;
     }
-    this.router.navigate(['/connection'], {queryParams: {returnUrl: state.url}});
+    this.router.navigate(['/auth/login']);
     return false;
   }
 

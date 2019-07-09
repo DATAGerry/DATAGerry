@@ -24,7 +24,6 @@ import { TypeMetaStepComponent } from './type-meta-step/type-meta-step.component
 import { TypeAccessStepComponent } from './type-access-step/type-access-step.component';
 import { TypeService } from '../../../services/type.service';
 import { UserService } from '../../../../user/services/user.service';
-import { User } from '../../../../user/models/user';
 import { CategoryService } from '../../../services/category.service';
 import { Modes } from '../../builder/modes.enum';
 import { Router } from '@angular/router';
@@ -55,15 +54,14 @@ export class TypeBuilderComponent implements OnInit {
 
   public selectedCategoryID: number = 0;
 
-  public constructor(private router: Router, private typeService: TypeService, private userService: UserService, private categoryService: CategoryService) {
+  public constructor(private router: Router, private typeService: TypeService,
+                     private userService: UserService, private categoryService: CategoryService) {
   }
 
   public ngOnInit(): void {
     this.typeInstance = new CmdbType();
     this.typeInstance.version = '1.0.0';
-    this.userService.getCurrentUser().subscribe((currentUser: User) => {
-      this.typeInstance.author_id = currentUser.public_id;
-    });
+    this.typeInstance.author_id = this.userService.getCurrentUser().public_id;
   }
 
   public exitBasicStep() {

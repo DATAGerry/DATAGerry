@@ -22,6 +22,7 @@ export class User {
   public user_name: string;
   first_name?: string;
   last_name?: string;
+  public token?: string;
 
   public getName() {
     if (typeof this.first_name != 'undefined' || typeof this.last_name != 'undefined') {
