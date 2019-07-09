@@ -34,6 +34,8 @@ import { RadioControl } from './controls/choice/radio.control';
 import { SelectControl } from './controls/choice/select.control';
 import { CheckboxControl } from './controls/choice/checkbox.control';
 
+declare var $: any;
+
 @Component({
   selector: 'cmdb-builder',
   templateUrl: './builder.component.html',
@@ -88,6 +90,11 @@ export class BuilderComponent implements OnInit {
       if (typeof index === 'undefined') {
 
         index = list.length;
+      }
+      for (const el of list) {
+        // close all other collapse
+        const collapseCard = ($('#' + el.name) as any);
+        collapseCard.collapse('hide');
       }
       list.splice(index, 0, event.data);
     }

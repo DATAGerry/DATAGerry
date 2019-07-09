@@ -1,123 +1,125 @@
 <div class="row">
   <div id="builder-controls" class="col-3">
-    <div class="accordion" id="controlsPanel">
-      <div class="card">
-        <div class="card-header">
-          <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#structureControls">
-            Structure Controls
-          </button>
-        </div>
-        <div id="structureControls" class="collapse show" data-parent="#controlsPanel">
-          <div class="card-body">
-            <div class="list-group">
-              <div *ngFor="let control of structureControls" [dndType]="control.typeController.dndType"
-                 [dndDraggable]="control.typeController.content()"
-                 class="list-group-item list-group-item-action">
+    <div id="controlWrapper">
+      <div class="accordion" id="controlsPanel">
+        <div class="card">
+          <div class="card-header">
+            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#structureControls">
+              Structure Controls
+            </button>
+          </div>
+          <div id="structureControls" class="collapse show" data-parent="#controlsPanel">
+            <div class="card-body">
+              <div class="list-group">
+                <div *ngFor="let control of structureControls" [dndType]="control.typeController.dndType"
+                     [dndDraggable]="control.typeController.content()"
+                     class="list-group-item list-group-item-action">
                 <span>
                   <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
                 </span>
-                <button type="button" class="btn btn-primary btn-sm float-right" dndHandle>
-                  <i class="fa fa-bars" aria-hidden="true"></i>
-                </button>
-                <div class="clearfix"></div>
+                  <button type="button" class="btn btn-primary btn-sm float-right">
+                    <i class="fa fa-bars" aria-hidden="true"></i>
+                  </button>
+                  <div class="clearfix"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#basicControls">
+              Basic Controls
+            </button>
+          </div>
+          <div id="basicControls" class="collapse" data-parent="#controlsPanel">
+            <div class="card-body">
+              <div class="list-group">
+                <div *ngFor="let control of basicControls" [dndType]="control.typeController.dndType"
+                     [dndDraggable]="control.typeController.content()"
+                     class="list-group-item list-group-item-action">
+                <span>
+                  <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
+                </span>
+                  <button type="button" class="btn btn-primary btn-sm float-right">
+                    <i class="fa fa-bars" aria-hidden="true"></i>
+                  </button>
+                  <div class="clearfix"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#specialControls">
+              Special Controls
+            </button>
+          </div>
+          <div id="specialControls" class="collapse" data-parent="#controlsPanel">
+            <div class="card-body">
+              <div class="list-group">
+                <div *ngFor="let control of specialControls" [dndType]="control.typeController.dndType"
+                     [dndDraggable]="control.typeController.content()"
+                     class="list-group-item list-group-item-action">
+                <span>
+                  <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
+                </span>
+                  <button type="button" class="btn btn-primary btn-sm float-right">
+                    <i class="fa fa-bars" aria-hidden="true"></i>
+                  </button>
+                  <div class="clearfix"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-header">
-          <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#basicControls">
-            Basic Controls
-          </button>
-        </div>
-        <div id="basicControls" class="collapse" data-parent="#controlsPanel">
-          <div class="card-body">
-            <div class="list-group">
-              <div *ngFor="let control of basicControls" [dndType]="control.typeController.dndType"
-                   [dndDraggable]="control.typeController.content()"
-                   class="list-group-item list-group-item-action">
-                <span>
-                  <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
-                </span>
-                <button type="button" class="btn btn-primary btn-sm float-right" dndHandle>
-                  <i class="fa fa-bars" aria-hidden="true"></i>
+      <div id="builder-controls-action" class="btn-group btn-group-sm mt-2 justify-content-md-center" role="group"
+           aria-label="Controls helper buttons">
+        <button id="builder-controls-action-preview" type="button" class="btn btn-secondary"
+                data-toggle="modal" [attr.data-target]="'#renderPreview'">
+          Preview
+        </button>
+        <div class="modal fade" id="renderPreview" tabindex="-1" role="dialog">
+          <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Render Preview</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
                 </button>
-                <div class="clearfix"></div>
+              </div>
+              <div class="modal-body">
+                Not working right now!
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="card">
-        <div class="card-header">
-          <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#specialControls">
-            Special Controls
-          </button>
-        </div>
-        <div id="specialControls" class="collapse" data-parent="#controlsPanel">
-          <div class="card-body">
-            <div class="list-group">
-              <div *ngFor="let control of specialControls" [dndType]="control.typeController.dndType"
-                   [dndDraggable]="control.typeController.content()"
-                   class="list-group-item list-group-item-action">
-                <span>
-                  <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
-                </span>
-                <button type="button" class="btn btn-primary btn-sm float-right" dndHandle>
-                  <i class="fa fa-bars" aria-hidden="true"></i>
+        <button id="builder-controls-action-diagnostic" type="button" class="btn btn-secondary"
+                data-toggle="modal" [attr.data-target]="'#renderDiagnostic'">
+          Diagnostic
+        </button>
+        <div class="modal fade" id="renderDiagnostic" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Render Diagnostic</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
                 </button>
-                <div class="clearfix"></div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="builder-controls-action" class="btn-group btn-group-sm mt-2 justify-content-md-center" role="group"
-         aria-label="Controls helper buttons">
-      <button id="builder-controls-action-preview" type="button" class="btn btn-secondary"
-              data-toggle="modal" [attr.data-target]="'#renderPreview'">
-        Preview
-      </button>
-      <div class="modal fade" id="renderPreview" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-xl" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Render Preview</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              Not working right now!
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <button id="builder-controls-action-diagnostic" type="button" class="btn btn-secondary"
-              data-toggle="modal" [attr.data-target]="'#renderDiagnostic'">
-        Diagnostic
-      </button>
-      <div class="modal fade" id="renderDiagnostic" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Render Diagnostic</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
+              <div class="modal-body">
               <pre>
                 <code>{{ sections | json }}</code>
               </pre>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
             </div>
           </div>
         </div>
@@ -138,7 +140,7 @@
             {{section.label}}
             <span class="float-right">
               <button class="btn btn-link" type="button" data-toggle="collapse"
-                      [attr.data-target]="'#section_' + section.name">
+                      [attr.data-target]="'#' + section.name">
                 <i class="fa fa-pencil-square"></i>
               </button>
               <button class="btn btn-link" type="button" dndHandle>
@@ -149,7 +151,7 @@
               </button>
             </span>
           </div>
-          <div class="collapse" id="section_{{section.name}}">
+          <div class="collapse show" id="{{section.name}}">
             <div class="card-body">
               <cmdb-config-edit [groupList]="groupList" [userList]="userList" [data]="section"></cmdb-config-edit>
             </div>
@@ -169,7 +171,7 @@
                   {{field.label}}
                   <span class="float-right">
                     <button class="btn btn-link" type="button" data-toggle="collapse"
-                            [attr.data-target]="'#field_' + field.name">
+                            [attr.data-target]="'#' + field.name">
                       <i class="fa fa-pencil-square"></i>
                     </button>
                     <button class="btn btn-link" type="button">
@@ -181,7 +183,7 @@
                   </span>
                 </div>
                 <div class="card-body">
-                  <div class="collapse" id="field_{{field.name}}">
+                  <div class="collapse" id="{{field.name}}">
                     <cmdb-config-edit [groupList]="groupList" [userList]="userList" [data]="field"></cmdb-config-edit>
                   </div>
                   <cmdb-render-element [data]="field"></cmdb-render-element>
