@@ -17,17 +17,14 @@
 import logging
 import json
 
-from flask import abort, jsonify, request, send_file, Response, send_from_directory
-
+from flask import abort, jsonify, request
 from cmdb.object_framework import CmdbObject
 from cmdb.object_framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectNotFoundError
 from cmdb.object_framework.cmdb_render import CmdbRender
 from cmdb.object_framework.cmdb_object_manager import object_manager
 from cmdb.utils.interface_wraps import login_required
 from cmdb.interface.route_utils import make_response, RootBlueprint
-from cmdb.user_management.user_manager import get_user_manager
 
-usm = get_user_manager()
 
 try:
     from cmdb.utils.error import CMDBError
@@ -109,7 +106,7 @@ def count_objects():
     return resp
 
 
-def _build_query(args, q_operator='$and', limit=0):
+def _build_query(args, q_operator='$and'):
     query_list = []
     try:
         for key, value in args.items():
@@ -143,18 +140,18 @@ def get_object(public_id):
     except ObjectNotFoundError as e:
         return jsonify(message='Not Found', error=e.message)
     except CMDBError:
-        return make_response("error object", 404)
+        return abort(404)
 
     try:
         type_instance = object_manager.get_type(object_instance.get_type_id())
     except CMDBError:
-        return make_response("error type", 404)
+        return abort(404)
 
     try:
         render = CmdbRender(object_instance=object_instance, type_instance=type_instance)
         render_result = render.result()
     except CMDBError:
-        return make_response("render type", 404)
+        return abort(404)
 
     resp = make_response(render_result)
     return resp
@@ -168,19 +165,6 @@ def get_navtive_object(public_id: int):
     except CMDBError:
         return abort(404)
     resp = make_response(object_instance)
-    return resp
-
-
-@login_required
-@object_rest.route('/by/<dict:requirements>', methods=['GET'])
-def get_object_by(requirements):
-    """TODO Implement"""
-    requirements_dict = None
-    try:
-        pass  # requirements_dict = dict(requirements)
-    except ValueError:
-        return abort(400)
-    resp = make_response(requirements_dict)
     return resp
 
 
@@ -218,8 +202,6 @@ def update_object():
     from bson import json_util
     from datetime import datetime
     add_data_dump = json.dumps(request.json)
-
-    request_args = request.args.to_dict()
 
     try:
         up_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
@@ -323,105 +305,3 @@ def preparation_for_render(objects_list):
         tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
         preparation_objects.append(tmp_render)
     return preparation_objects
-
-
-@login_required
-@object_rest.route('/export/json', methods=['GET'])
-def export_json():
-    import datetime
-    import time
-
-    object_data = object_manager.get_all_objects()
-    all_objects = preparation_for_render(object_data)
-    json_resp = CmdbRender.result_loop_render(object_manager, all_objects)
-    json_data = make_response(json_resp).data
-
-    timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
-    return Response(
-            json_data,
-            mimetype="application/json",
-            headers={
-                "Content-Disposition":
-                "attachment;filename=%s.txt" % timestamp
-            }
-        )
-
-
-@login_required
-@object_rest.route('/export/csv', methods=['GET'])
-def export_csv():
-    import csv
-    from datetime import datetime
-    import os
-
-    object_data = object_manager.get_all_objects()
-    all_objects = preparation_for_render(object_data)
-    json_resp = CmdbRender.result_loop_render(object_manager, all_objects)
-
-    csv_data = open('temp.csv', 'w')
-    writer = csv.writer(csv_data)
-    object_parsed = []
-
-    for resp in json_resp:
-        obj_dict = resp.__dict__
-        object_parsed.append(obj_dict)
-
-    count = 0
-    for emp in object_parsed:
-        if count == 0:
-            header = emp.keys()
-            writer.writerow(header)
-            count += 1
-        writer.writerow(emp.values())
-    # csv_data.close()
-
-    timestamp = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
-    return send_file(os.getcwd() + '/temp.csv',
-                     mimetype='text/csv',
-                     as_attachment=True,
-                     attachment_filename=timestamp + '.csv')
-
-
-@login_required
-@object_rest.route('/export/xml', methods=['GET'])
-def export_xml():
-    import datetime
-    import time
-
-    object_data = object_manager.get_all_objects()
-    all_objects = preparation_for_render(object_data)
-    json_resp = CmdbRender.result_loop_render(object_manager, all_objects)
-
-    object_parsed = []
-    for resp in json_resp:
-        obj_dict = resp.__dict__
-        object_parsed.append(obj_dict)
-
-    timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
-    return Response(
-            parse_to_xml(object_parsed),
-            mimetype="text/xml",
-            headers={
-                "Content-Disposition":
-                "attachment;filename=%s.xml" % timestamp
-            }
-        )
-
-
-def parse_to_xml(json_obj, line_spacing=""):
-    result_list = list()
-    json_obj_type = type(json_obj)
-
-    if json_obj_type is list:
-        for sub_elem in json_obj:
-            result_list.append(parse_to_xml(sub_elem, line_spacing))
-        return "\n".join(result_list)
-
-    if json_obj_type is dict:
-        for tag_name in json_obj:
-            sub_obj = json_obj[tag_name]
-            result_list.append("%s<%s>" % (line_spacing, tag_name))
-            result_list.append(parse_to_xml(sub_obj, "\t" + line_spacing))
-            result_list.append("%s</%s>" % (line_spacing, tag_name))
-        return "\n".join(result_list)
-    return "%s%s" % (line_spacing, json_obj)
