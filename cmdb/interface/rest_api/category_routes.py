@@ -44,7 +44,11 @@ def get_categories():
 @login_required
 @categories_routes.route('/tree', methods=['GET'])
 def get_category_tree():
-    category_tree = object_manager.get_category_tree()
+    from cmdb.object_framework.cmdb_errors import NoRootCategories
+    try:
+        category_tree = object_manager.get_category_tree()
+    except NoRootCategories:
+        category_tree = []
     return make_response(category_tree)
 
 

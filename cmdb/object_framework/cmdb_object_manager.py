@@ -505,7 +505,7 @@ class CmdbObjectManager(CmdbManagerBase):
                 })
         return edge
 
-    def get_category_tree(self) -> list:
+    def get_category_tree(self) -> dict:
         tree = list()
         root_categories = self.get_categories_by(_filter={
             '$or': [
