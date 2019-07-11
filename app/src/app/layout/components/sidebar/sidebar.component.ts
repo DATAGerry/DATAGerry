@@ -53,11 +53,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.renderer.removeClass(document.body, 'sidebar-fixed');
   }
 
-  public get_all_Objects() {
-    this.api.callGetRoute('object/').subscribe(data => {
-    });
-  }
-
   private transform(filterList: any[], searchText: string): any[] {
     if (!filterList) {
       return [];

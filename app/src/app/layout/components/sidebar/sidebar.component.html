@@ -3,28 +3,28 @@
     <ul class="nav">
       <li class="nav-title">Navigation</li>
       <li class="nav-item">
-        <a class="nav-link" routerLink="/">
+        <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           <i class="fa fa-tachometer" aria-hidden="true"></i> Dashboard</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" routerLink="/framework/object/most-viewed/">
+        <a class="nav-link" routerLink="/framework/object/most-viewed/" routerLinkActive="active">
           <i class="fa fa-eye" aria-hidden="true"></i>Most viewed</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" routerLink="/framework/object/newest/">
+        <a class="nav-link" routerLink="/framework/object/newest/" routerLinkActive="active">
           <i class="fa fa-envelope" aria-hidden="true"></i> Newest</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" routerLink="/framework/object/latest/">
+        <a class="nav-link" routerLink="/framework/object/latest/" routerLinkActive="active">
           <i class="fa fa-pencil-square-o" aria-hidden="true"></i> Latest changes</a>
       </li>
       <li class="nav-title">Assets</li>
       <li class="nav-item">
-        <a class="nav-link" routerLink="/framework/object/" (click)="get_all_Objects()">
+        <a class="nav-link" routerLink="/framework/object/" routerLinkActive="active">
           <i class="fa fa-list" aria-hidden="true"></i> List objects</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" routerLink="/framework/type/">
+        <a class="nav-link" routerLink="/framework/type/" routerLinkActive="active">
           <i class="fa fa-file-code-o" aria-hidden="true"></i> Show types</a>
       </li>
       <div id="sidebar-categories">
