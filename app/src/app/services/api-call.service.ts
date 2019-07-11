@@ -66,6 +66,16 @@ export class ApiCallService {
     return this.http.delete<T>(this.apiURL + route, params);
   }
 
+  public callExportRoute<T>(route: string, httpHeader) {
+    const REQUEST_HEADERS = httpHeader;
+    const REQUEST_URI = this.apiURL + route;
+
+    return this.http.get(REQUEST_URI,  {
+      headers: REQUEST_HEADERS,
+      responseType: 'text'
+    });
+  }
+
   public handleErrorPromise(error: Response | any) {
     console.error(error.message || error);
     return Promise.reject(error.message || error);

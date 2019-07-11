@@ -240,7 +240,6 @@ def delete_object(public_id: int):
 @object_rest.route('/delete/<string:public_ids>', methods=['GET'])
 def delete_many_objects(public_ids):
     try:
-
         ids = []
         operator_in = {'$in': []}
         filter_public_ids = {'public_id': {}}

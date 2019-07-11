@@ -66,7 +66,7 @@ export class ObjectViewComponent implements OnInit {
     newInstance.version = '1.0.0';
     newInstance.type_id = clone.type_id;
     newInstance.author_id = clone.author_id;
-    newInstance.active = clone.type_active;
+    newInstance.active = clone.active;
     newInstance.fields = clone.fields;
 
     this.objService.postAddObject(newInstance).subscribe(res => {

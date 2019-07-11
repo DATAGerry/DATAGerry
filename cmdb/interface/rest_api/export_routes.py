@@ -18,7 +18,6 @@ import logging
 import datetime
 import time
 import json
-import csv
 
 from flask import abort, jsonify, Response
 from cmdb.object_framework.cmdb_errors import ObjectNotFoundError, TypeNotFoundError
@@ -142,7 +141,8 @@ def get_db_result(collection: str, public_id, type_id):
 
         if collection == 'type':
             try:
-                return object_manager.get_type(public_id)
+                idx = public_id is None and type_id or public_id
+                return object_manager.get_type(idx)
             except TypeNotFoundError as e:
                 return jsonify(message='Not Found', error=e.message)
 

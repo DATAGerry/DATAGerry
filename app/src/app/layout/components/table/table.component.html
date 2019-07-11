@@ -1,4 +1,40 @@
-<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-striped table-bordered">
+
+<div clas="card">
+  <div class="card-title" style="padding-top: 1em">
+    <cmdb-content-header title="{{pageTitle}}"></cmdb-content-header>
+  </div>
+
+  <div class="card-body" style="padding: 0 0 1em 0;">
+    <button type="button" class="btn btn-danger btn-sm" (click)="delManyObjects()">Delete All</button>
+
+    <span class="card-group float-right">
+      <div class="dropdown">
+        <button class="btn btn-warning dropdown-toggle btn-sm mr-1"
+                type="button" id="importButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fa fa-upload" aria-hidden="true"></i> Import
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="importButton">
+          <li class="dropdown-item"><i class="fa fa-file-excel-o" aria-hidden="true"></i> CSV</li>
+          <li class="dropdown-item"><i class="fa fa-file-text-o" aria-hidden="true"></i> JSON</li>
+          <li class="dropdown-item"><i class="fa fa-code" aria-hidden="true"></i> XML</li>
+        </ul>
+      </div>
+
+      <div class="dropdown">
+        <button class="btn btn-warning dropdown-toggle btn-sm mr-1"
+                type="button" id="exportButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fa fa-download" aria-hidden="true"></i> Export
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="exportButton">
+          <li class="dropdown-item" (click)="export('csv')"><i class="fa fa-file-excel-o" aria-hidden="true"></i> CSV</li>
+          <li class="dropdown-item" (click)="export('json')"><i class="fa fa-file-text-o" aria-hidden="true"></i> JSON</li>
+          <li class="dropdown-item" (click)="export('xml')"><i class="fa fa-code" aria-hidden="true"></i> XML</li>
+        </ul>
+      </div>
+    </span>
+  </div>
+
+  <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-striped table-bordered">
     <thead>
     <tr>
       <th class="toggle-check nosort" style="text-align: center"><input type="checkbox" class="select-all-checkbox" (click)="selectAll()">
@@ -8,9 +44,9 @@
       <th class="toggle-type">Type</th>
 
       <!-- BEGIN: Advanced contens : Show only if extended fields exist  -->
-      <ng-container *ngIf="extendedFields?.length > 0" >
-        <ng-container *ngFor="let field of extendedFields">
-          <td>{{field.label}}</td>
+      <ng-container *ngIf="extendedFields != undefined && extendedFields?.length > 0" >
+        <ng-container >
+          <th class="toggle-{{field.name}}" *ngFor="let field of extendedFields">{{field.label}}</th>
         </ng-container>
       </ng-container>
       <!-- END: Advanced contens -->
@@ -28,7 +64,7 @@
       <td><cmdb-active-badge [activeStatus]="entry.active"></cmdb-active-badge></td>
       <td>{{entry.public_id}}</td>
 
-      <td *ngIf="entry.type_id === undefined"><a routerLink="{{linkRoute}}{{entry.public_id}}">{{entry.label}}</a></td>
+      <td *ngIf="entry.type_id === undefined"><a routerLink="/framework/{{linkRoute}}{{entry.public_id}}">{{entry.label}}</a></td>
       <td *ngIf="entry.type_id !== undefined"><a routerLink="/framework/type/{{entry.type_id}}">{{entry.label}}</a></td>
 
       <!-- BEGIN: Advanced contens : Show only if extended fields exist  -->
@@ -39,17 +75,17 @@
       </ng-container>
       <!-- END: Advanced contens -->
 
-      <td><a routerLink="/user/{{entry.author_id}}">{{userService.findUser(entry.author_id).user_name }}</a></td>
+      <td><a routerLink="/user/{{entry.author_id}}">{{userService?.findUser(entry.author_id).user_name }}</a></td>
       <td>{{entry.creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
 
       <!-- action buttons -->
       <td>
         <!-- view -->
-        <a class="text-dark"routerLink="{{linkRoute}}{{entry.public_id}}">
+        <a class="text-dark"routerLink="/framework/{{linkRoute}}{{entry.public_id}}">
           <i class="fa fa-eye" aria-hidden="true"></i>
         </a>
         <!-- edit -->
-        <a class="ml-1 text-dark" routerLink="{{linkRoute}}{{entry.public_id}}">
+        <a class="ml-1 text-dark" routerLink="/framework/{{linkRoute}}{{entry.public_id}}">
           <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
         </a>
         <!-- delete -->
@@ -59,4 +95,5 @@
       </td>
     </tr>
     </tbody>
-</table>
+  </table>
+</div>

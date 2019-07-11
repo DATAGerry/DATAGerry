@@ -37,10 +37,10 @@ export class TypeListComponent implements OnInit, OnDestroy {
   public typeList: CmdbType[] = [];
   public dtOptions: DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
-  public linkRoute: string = '/framework/type/';
+  public linkRoute: string = 'type/';
   public addNewType: {} = {
-    text: '<i class="fa fa-file-o" aria-hidden="true"></i>',
-    className: 'btn btn-light',
+    text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
+    className: 'btn btn-success btn-sm mr-1',
     action: function() {
       this.router.navigate(['/framework/type/add']);
     }.bind(this)

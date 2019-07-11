@@ -463,6 +463,10 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = self._delete(CmdbType.COLLECTION, public_id)
         return ack
 
+    def delete_many_types(self, public_ids: dict):
+        ack = self._delete_many(CmdbType.COLLECTION, public_ids)
+        return ack
+
     def get_all_categories(self):
         ack = []
         cats = self.dbm.find_all(collection=CmdbCategory.COLLECTION, sort=[('public_id', 1)])
