@@ -22,7 +22,7 @@ import { ApiCallService } from '../../../../services/api-call.service';
 import { ActivatedRoute } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { DatePipe } from '@angular/common';
-import {ObjectService} from '../../../services/object.service';
+import { ObjectService } from '../../../services/object.service';
 
 @Component({
   selector: 'cmdb-object-list',
@@ -33,43 +33,42 @@ import {ObjectService} from '../../../services/object.service';
 export class ObjectListComponent {
 
   public pageTitle: string = 'Object list';
-  public summaries: [];
-  public columnFields: [] = [];
   public items: [] ;
   public hasSummaries: boolean = false;
+  public currentRoutID: any;
 
   constructor(private apiCallService: ApiCallService, private objService: ObjectService, private route: ActivatedRoute,
               private spinner: NgxSpinnerService) {
     this.route.params.subscribe((id) => {
-      this.init(id);
+      this.currentRoutID = id.publicID;
+      this.routeObjects();
     });
   }
 
-  private init(id) {
-    this.getRouteObjects(id.publicID);
+  public get tableData() {
+    return this.items;
   }
 
-  private getRouteObjects(id) {
+  public set tableData(value) {
+    this.items = value;
+  }
+
+  public routeObjects() {
     let url = 'object/';
     this.pageTitle = 'Object list';
     this.hasSummaries = false;
 
-    if ( typeof id !== 'undefined') {
-      url = url + 'type/' + id;
+    if ( typeof this.currentRoutID !== 'undefined') {
+      url = url + 'type/' + this.currentRoutID;
       this.hasSummaries = true;
-      this.pageTitle = 'Object list typeID: ' + id;
+      this.pageTitle = 'Object list typeID: ' + this.currentRoutID;
     }
 
+    this.spinner.show();
     this.apiCallService.callGetRoute(url)
       .subscribe(
         dataArray => {
-          this.spinner.show();
-          const len = dataArray.length;
-          if (this.hasSummaries) {
-            this.summaries = len > 0 ? dataArray[0].summaries : [];
-            this.columnFields = len > 0 ? dataArray[0].fields : [];
-          }
-          this.items = len > 0 ? dataArray : [];
+          this.tableData = dataArray.length > 0 ? dataArray : [];
           this.spinner.hide();
       });
   }

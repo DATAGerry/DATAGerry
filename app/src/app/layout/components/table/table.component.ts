@@ -17,14 +17,15 @@
 */
 
 
-import { Component, OnDestroy, OnInit, ViewChild, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnDestroy, ViewChild, Input } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject} from 'rxjs';
 import { UserService } from '../../../user/services/user.service';
 import { ApiCallService } from '../../../services/api-call.service';
 import { map } from 'rxjs/operators';
 import { HttpHeaders } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
+import { ExportService } from '../../../services/export.service';
 
 @Component({
   selector: 'cmdb-table',
@@ -32,27 +33,12 @@ import { DatePipe } from '@angular/common';
   styleUrls: ['./table.component.scss'],
   providers: [DatePipe]
 })
-export class TableComponent implements OnInit, OnDestroy, OnChanges {
+export class TableComponent implements OnDestroy {
 
   @ViewChild(DataTableDirective, {static: false})
   public dtElement: DataTableDirective;
   public dtOptions: any = {}; // : DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
-
-  /**
-   * iterable entries for table. Type independent
-   */
-  @Input() entryLists: any[] = [];
-
-  /**
-   * Create advanced fields and only display if extended fields exist
-   */
-  @Input() extendedFields: any[] = [];
-
-  /**
-   * Create advanced fields and only display if extended fields exist
-   */
-  @Input() summaries: any[] = [];
 
   /**
    * overwrite default value for edit Button (table-toolbar)
@@ -92,70 +78,21 @@ export class TableComponent implements OnInit, OnDestroy, OnChanges {
    */
   @Input() linkRoute: string = 'object/';
 
-  constructor(private userService: UserService, private apiCallService: ApiCallService, private datePipe: DatePipe) {
+  public items: any = new BehaviorSubject<any[]>([]);
+
+  constructor(private userService: UserService, private apiCallService: ApiCallService,
+              private exportService: ExportService, private datePipe: DatePipe) {
   }
 
-  ngOnInit() {
+  @Input() set entryLists(value: any[]) {
+    this.items.next(value);
     this.buildTable();
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
     this.rerender();
-    this.buildTable();
     this.dtTrigger.next();
   }
 
-  private buildAdvancedDtOptions() {
-    if (this.summaries !== undefined
-      && this.summaries.length > 0
-      && this.extendedFields !== undefined
-      && this.extendedFields.length > 0) {
-      const colVis = {
-        extend: 'collection',
-        className: 'btn btn-info btn-sm mr-1 dropdown-toggle',
-        text: '<i class="fa fa-cog" aria-hidden="true"></i>',
-        collectionLayout: 'dropdown-menu overflow-auto',
-        buttons: function() {
-          const columnButton = [];
-          // tslint:disable-next-line:prefer-for-of
-          for (let i = 0; i < this.extendedFields.length; i++) {
-            {
-              columnButton.push(
-                {
-                  text: this.extendedFields[i].label,
-                  extend: 'columnToggle',
-                  columns: '.toggle-' + this.extendedFields[i].name,
-                  className: 'dropdown-item ' + this.extendedFields[i].name,
-                });
-            }
-          }
-          columnButton.push({
-            extend: 'colvisRestore',
-            text: 'Restore',
-            className: 'btn btn-secondary btn-lg btn-block',
-            action: function() {
-              this.rerender();
-              this.dtTrigger.next();
-            }.bind(this)
-          });
-          return columnButton;
-        }.bind(this),
-      };
-
-      // create optional Options
-      const visTargets: any[] = [0, 1, 2 , 3, -3, -2, -1];
-      for (let i = 0; i < this.summaries.length; i++) {
-        visTargets.push(i + 4);
-      }
-
-      this.dtOptions.columnDefs = [
-        { orderable: false, targets: 'nosort' },
-        { visible: true, targets: visTargets },
-        { visible: false, targets: '_all' }
-      ];
-      this.dtOptions.order = [[2, 'asc']];
-      this.dtButtons.push(colVis);
-    }
+  get entryLists(): any[] {
+    return this.items.getValue();
   }
 
   private buildButtons() {
@@ -165,7 +102,6 @@ export class TableComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private buildOptions(buttons) {
-    this.dtOptions = {};
     this.dtOptions = {
       ordering: true,
       order: [[2, 'asc']],
@@ -198,12 +134,12 @@ export class TableComponent implements OnInit, OnDestroy, OnChanges {
   private buildTable() {
     this.buildButtons();
     this.buildOptions(this.dtButtons);
-    this.buildAdvancedDtOptions();
   }
 
   ngOnDestroy(): void {
     // Do not forget to unsubscribe the event
     this.dtTrigger.unsubscribe();
+    console.log('ngOnDestroy');
   }
 
   public rerender(): void {
@@ -276,7 +212,7 @@ export class TableComponent implements OnInit, OnDestroy, OnChanges {
         'Content-Type': 'application/' + fileExtension
       });
 
-    this.apiCallService.callExportRoute('export/' + fileExtension + '/' + this.linkRoute + 'type/' + 1, httpHeader)
+    this.exportService.callExportRoute('export/' + fileExtension + '/' + this.linkRoute + 'type/' + 1, httpHeader)
       .pipe(
         map(res => {
           const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
