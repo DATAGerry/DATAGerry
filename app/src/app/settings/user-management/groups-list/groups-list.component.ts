@@ -16,18 +16,18 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 
-import { SettingsRoutingModule } from './settings-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-
-@NgModule({
-  declarations: [],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    SettingsRoutingModule
-  ]
+@Component({
+  selector: 'cmdb-groups-list',
+  templateUrl: './groups-list.component.html',
+  styleUrls: ['./groups-list.component.scss']
 })
-export class SettingsModule { }
+export class GroupsListComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

@@ -18,43 +18,36 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { NavigationComponent } from '../layout/components/navigation/navigation.component';
-import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
-import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';
-import { FooterComponent } from '../layout/components/footer/footer.component';
+import { UsersListComponent } from './users-list/users-list.component';
+import { GroupsListComponent } from './groups-list/groups-list.component';
+import { RightsListComponent } from './rights-list/rights-list.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: NavigationComponent,
-    outlet: 'navigation'
-  },
-  {
-    path: '',
-    component: SidebarComponent,
-    outlet: 'sidebar'
-  },
-  {
-    path: '',
-    component: BreadcrumbComponent,
-    outlet: 'breadcrumb'
-  },
-  {
-    path: '',
-    component: FooterComponent,
-    outlet: 'footer'
-  },
-  {
-    path: 'user-management',
     data: {
-      breadcrumb: 'User Management'
+      breadcrumb: 'List'
     },
-    loadChildren: () => import('./user-management/user-management.module').then(m => m.UserManagementModule),
+    component: UsersListComponent
   },
+  {
+    path: 'groups',
+    data: {
+      breadcrumb: 'List'
+    },
+    component: GroupsListComponent
+  },
+  {
+    path: 'rights',
+    data: {
+      breadcrumb: 'List'
+    },
+    component: RightsListComponent
+  }
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class SettingsRoutingModule { }
+export class UserManagementRoutingModule { }

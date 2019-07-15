@@ -139,7 +139,6 @@ export class TableComponent implements OnDestroy {
   ngOnDestroy(): void {
     // Do not forget to unsubscribe the event
     this.dtTrigger.unsubscribe();
-    console.log('ngOnDestroy');
   }
 
   public rerender(): void {

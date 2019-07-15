@@ -19,15 +19,16 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { SettingsRoutingModule } from './settings-routing.module';
-import { LayoutModule } from '../layout/layout.module';
+import { UserManagementRoutingModule } from './user-management-routing.module';
+import { RightsListComponent } from './rights-list/rights-list.component';
+import { GroupsListComponent } from './groups-list/groups-list.component';
+import { UsersListComponent } from './users-list/users-list.component';
 
 @NgModule({
-  declarations: [],
+  declarations: [RightsListComponent, GroupsListComponent, UsersListComponent],
   imports: [
     CommonModule,
-    LayoutModule,
-    SettingsRoutingModule
+    UserManagementRoutingModule
   ]
 })
-export class SettingsModule { }
+export class UserManagementModule { }

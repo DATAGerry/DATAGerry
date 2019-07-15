@@ -16,18 +16,24 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { UserService } from '../../../user/services/user.service';
+import { User } from '../../../user/models/user';
 
-import { SettingsRoutingModule } from './settings-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-
-@NgModule({
-  declarations: [],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    SettingsRoutingModule
-  ]
+@Component({
+  selector: 'cmdb-users-list',
+  templateUrl: './users-list.component.html',
+  styleUrls: ['./users-list.component.scss']
 })
-export class SettingsModule { }
+export class UsersListComponent implements OnInit {
+
+  public userList: User[];
+  constructor(private userService: UserService) { }
+
+  public ngOnInit(): void {
+    this.userService.getUserList().subscribe((userListResp: User[]) => {
+      this.userList = userListResp;
+    });
+  }
+
+}

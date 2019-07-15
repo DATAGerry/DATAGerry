@@ -54,18 +54,19 @@ def _check_database():
 
     from cmdb.utils.system_reader import SystemConfigReader
     from cmdb.data_storage import get_pre_init_database
-    LOGGER.info("Checking database connection with {} data".format(SystemConfigReader.DEFAULT_CONFIG_NAME))
+    LOGGER.info(f'Checking database connection with {SystemConfigReader.DEFAULT_CONFIG_NAME} data').format()
     dbm = get_pre_init_database()
     connection_test = dbm.database_connector.is_connected()
-    LOGGER.debug("Database status is {}".format(connection_test))
+    LOGGER.debug(f'Database status is {connection_test}')
     if connection_test is True:
         dbm.database_connector.disconnect()
         return connection_test
     retries = 0
     while retries < 3:
         retries += 1
-        LOGGER.warning("Retry {}: Checking database connection with {} data".format(retries,
-                                                                                    SystemConfigReader.DEFAULT_CONFIG_NAME))
+        LOGGER.warning(
+            f'Retry {retries}: Checking database connection with {SystemConfigReader.DEFAULT_CONFIG_NAME} data')
+
         connection_test = dbm.database_connector.is_connected()
         if connection_test:
             dbm.database_connector.disconnect()
@@ -87,7 +88,7 @@ def _start_app():
     # start app
     app_manager = cmdb.process_management.process_manager.ProcessManager()
     app_status = app_manager.start_app()
-    LOGGER.info("Process manager started: {}".format(app_status))
+    LOGGER.info(f'Process manager started: {app_status}')
 
 
 def _stop_app(signum, frame):
@@ -165,7 +166,7 @@ def main(args):
 
         _factory_database_manager = get_pre_init_database()
         db_name = _factory_database_manager.get_database_name()
-        LOGGER.warning("Inserting test-data into: {}".format(db_name))
+        LOGGER.warning(f'Inserting test-data into: {db_name}')
         try:
             factory = DataFactory(database_manager=_factory_database_manager)
             ack = factory.insert_data()
