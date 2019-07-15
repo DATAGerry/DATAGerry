@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import logging
+
 from datetime import datetime
 from enum import Enum
 
@@ -22,6 +24,10 @@ try:
 except ImportError:
     CMDBError = Exception
 from cmdb.object_framework.cmdb_dao import CmdbDAO
+from cmdb.object_framework.cmdb_object import CmdbObject
+from cmdb.object_framework.cmdb_object_type import CmdbType
+
+LOGGER = logging.getLogger(__name__)
 
 
 class LogCommands(Enum):
@@ -32,7 +38,9 @@ class LogCommands(Enum):
 
 
 class LogModels(Enum):
-    OBJECT = 'Cmd'
+    OBJECT = CmdbObject.__class__.__name__
+    TYPE = CmdbType.__class__.__name__
+
 
 class CmdbLog(CmdbDAO):
     """
@@ -48,10 +56,29 @@ class CmdbLog(CmdbDAO):
         'state'
     ]
 
-    def __init__(self, model: str, user_id: int, time: datetime, meta: dict = {}, state: bytearray = None, **kwargs):
+    def __init__(self, model: str, action: LogCommands, user_id: int, time: datetime, meta: dict = None,
+                 state: bytearray = None, **kwargs):
         self.model = model
+        self.action = action
         self.user_id = user_id
         self.time = time
-        self.meta = meta
-        self.state = state
+        self.meta = meta or {}
+        self.state = state or None
         super(CmdbLog, self).__init__(**kwargs)
+
+    def get_decrypted_state(self) -> (LogModels.OBJECT, LogModels.TYPE):
+        from cmdb.security.keys import KeyHolder
+        from cmdb.security.crypto import RSADecryption
+        key_holder = KeyHolder()
+        rsa_dec = RSADecryption(private_key_pem=key_holder.get_private_pem())
+        rsa_decrypted = rsa_dec.decrypt(self.state)
+        LOGGER.debug(rsa_decrypted)
+        return rsa_decrypted
+
+    def encrypt_state(self, data: (LogModels.OBJECT, LogModels.TYPE)):
+        from cmdb.security.keys import KeyHolder
+        from cmdb.security.crypto import RSAEncryption
+        key_holder = KeyHolder()
+        rsa_enc = RSAEncryption(public_key_pem=key_holder.get_public_pem())
+        LOGGER.debug(rsa_enc)
+        self.state = rsa_enc.encrypt(data.to_database())

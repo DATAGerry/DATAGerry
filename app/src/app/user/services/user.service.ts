@@ -45,6 +45,10 @@ export class UserService {
     return this.api.callGetRoute<User[]>(this.prefix + '/');
   }
 
+  public changeUserPassword(userID: number, newPassword: string) {
+    return this.api.callPutRoute<boolean>(this.prefix + '/' + userID + '/passwd', {password: newPassword});
+  }
+
   public getUser(publicID: number) {
     return this.api.callGetRoute<User>(this.prefix + '/' + publicID);
   }

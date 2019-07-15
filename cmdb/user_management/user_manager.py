@@ -112,6 +112,13 @@ class UserManagement:
                 LOGGER.error(e.message)
             raise UserInsertError(user.get_username())
 
+    def update_user(self, update_user: User) -> bool:
+        ack = self.dbm.update(collection=User.COLLECTION, public_id=update_user.get_public_id(),
+                              data=update_user.to_database())
+        if ack.modified_count > 0:
+            return True
+        return False
+
     def delete_user(self, public_id: int) -> DeleteResult:
         try:
             return self.dbm.delete(collection=User.COLLECTION, public_id=public_id)

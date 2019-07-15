@@ -16,7 +16,7 @@
 
 import logging
 
-from flask import abort
+from flask import abort, request
 from cmdb.utils.interface_wraps import login_required
 from cmdb.interface.route_utils import RootBlueprint, make_response
 from cmdb.user_management.user_manager import user_manager
@@ -93,3 +93,18 @@ def count_objects():
     except CMDBError:
         return abort(400)
     return resp
+
+
+"""SPEACIAL ROUTES"""
+@login_required
+@user_routes.route('/<int:public_id>/passwd', methods=['PUT'])
+def change_user_password(public_id: int):
+    from cmdb.data_storage import get_pre_init_database
+    from cmdb.utils import get_security_manager
+    try:
+        user = user_manager.get_user(public_id=public_id)
+    except CMDBError:
+        return abort(404)
+    user.password = get_security_manager(get_pre_init_database()).generate_hmac(request.json.get('password'))
+    ack = user_manager.update_user(user)
+    return make_response(ack)

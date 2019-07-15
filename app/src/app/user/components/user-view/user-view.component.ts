@@ -22,6 +22,8 @@ import { User } from '../../models/user';
 import { UserService } from '../../services/user.service';
 import { GroupService } from '../../services/group.service';
 import { Group } from '../../models/group';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { ToastService } from '../../../layout/services/toast.service';
 
 @Component({
   selector: 'cmdb-user-view',
@@ -33,12 +35,18 @@ export class UserViewComponent implements OnInit {
   public userID: number;
   public userInstance: User;
   public userGroup: Group;
+  public profileForm: FormGroup;
+  public passwordChangeForm: FormGroup;
 
-  constructor(private route: ActivatedRoute, private userService: UserService, private groupService: GroupService) {
+  constructor(private route: ActivatedRoute, private userService: UserService, private groupService: GroupService, private toastService: ToastService) {
     this.route.params.subscribe((id) => this.userID = id.publicID);
+    this.profileForm = new FormGroup({});
+    this.passwordChangeForm = new FormGroup({
+      password: new FormControl('', Validators.required)
+    });
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
     this.userService.getUser(this.userID).subscribe((user: User) => {
         this.userInstance = user;
       },
@@ -50,6 +58,17 @@ export class UserViewComponent implements OnInit {
           this.userGroup = groupResp;
         });
       });
+  }
+
+  public onPasswordChange(): void {
+    const newPassword = this.passwordChangeForm.get('password').value;
+    this.userService.changeUserPassword(this.userInstance.public_id, newPassword).subscribe(res => {
+      if (res) {
+        this.toastService.show('Password changed!');
+        this.passwordChangeForm.reset();
+      }
+
+    });
   }
 
 }

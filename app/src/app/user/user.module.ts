@@ -23,13 +23,15 @@ import { UserRoutingModule } from './user-routing.module';
 import { UserService } from './services/user.service';
 import { UserViewComponent } from './components/user-view/user-view.component';
 import { LayoutModule } from '../layout/layout.module';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [UserViewComponent],
   imports: [
     CommonModule,
     UserRoutingModule,
-    LayoutModule
+    LayoutModule,
+    ReactiveFormsModule
   ],
   providers: [
     UserService
