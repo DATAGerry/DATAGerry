@@ -21,6 +21,7 @@ import { UserService } from '../../../../../user/services/user.service';
 import { User } from '../../../../../user/models/user';
 import { Group } from '../../../../../user/models/group';
 import { FormControl, FormGroup } from '@angular/forms';
+import { GroupService } from '../../../../../user/services/group.service';
 
 @Component({
   selector: 'cmdb-type-access-step',
@@ -33,7 +34,7 @@ export class TypeAccessStepComponent implements OnInit {
   public userList: User[] = [];
   public groupList: Group[] = [];
 
-  constructor(private userService: UserService) {
+  constructor(private userService: UserService, private groupeService: GroupService) {
     this.accessForm = new FormGroup({
       groups: new FormControl(''),
       users: new FormControl('')
@@ -41,7 +42,7 @@ export class TypeAccessStepComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.userService.getGroupList().subscribe((gList: Group[]) => {
+    this.groupeService.getGroupList().subscribe((gList: Group[]) => {
       this.groupList = gList;
     });
     this.userService.getUserList().subscribe((uList: User[]) => {

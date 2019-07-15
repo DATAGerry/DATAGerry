@@ -31,7 +31,7 @@ export class ConnectionService {
 
   constructor() {
     if (isDevMode()) {
-      this.host = 'localhost';
+      this.host = '127.0.0.1';
       this.port = 4000; // fixed dev port
       this.protocol = 'http:';
       this.href = `${this.protocol}//${this.host}:${this.port}/`;
