@@ -34,13 +34,12 @@ export class ConnectionService {
       this.host = '127.0.0.1';
       this.port = 4000; // fixed dev port
       this.protocol = 'http:';
-      this.href = `${this.protocol}//${this.host}:${this.port}/`;
     } else {
       this.host = window.location.hostname;
       this.port = +window.location.port;
       this.protocol = window.location.protocol;
-      this.href = window.location.href;
     }
+    this.href = `${this.protocol}//${this.host}:${this.port}/`;
   }
 
   public get connectionURL() {
