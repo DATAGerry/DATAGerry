@@ -34,7 +34,7 @@ export class TypeAccessStepComponent implements OnInit {
   public userList: User[] = [];
   public groupList: Group[] = [];
 
-  constructor(private userService: UserService, private groupeService: GroupService) {
+  constructor(private userService: UserService, private groupService: GroupService) {
     this.accessForm = new FormGroup({
       groups: new FormControl(''),
       users: new FormControl('')
@@ -42,7 +42,7 @@ export class TypeAccessStepComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.groupeService.getGroupList().subscribe((gList: Group[]) => {
+    this.groupService.getGroupList().subscribe((gList: Group[]) => {
       this.groupList = gList;
     });
     this.userService.getUserList().subscribe((uList: User[]) => {
