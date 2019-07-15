@@ -39,7 +39,9 @@ export class ConnectionService {
       this.port = +window.location.port;
       this.protocol = window.location.protocol;
     }
-    this.href = `${this.protocol}//${this.host}:${this.port}/`;
+    if (this.port === 0) {
+      this.href = `${this.protocol}//${this.host}/`;
+    }
   }
 
   public get connectionURL() {
