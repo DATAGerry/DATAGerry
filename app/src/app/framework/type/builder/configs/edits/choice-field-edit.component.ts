@@ -19,11 +19,11 @@
 import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'cmdb-check-field-edit',
-  templateUrl: './check-field-edit.component.html',
-  styleUrls: ['./check-field-edit.component.scss']
+  selector: 'cmdb-choice-field-edit',
+  templateUrl: './choice-field-edit.component.html',
+  styleUrls: ['./choice-field-edit.component.scss']
 })
-export class CheckFieldEditComponent implements OnInit {
+export class ChoiceFieldEditComponent implements OnInit {
 
   @Input() groupList: any;
   @Input() userList: any;
