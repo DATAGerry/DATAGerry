@@ -16,12 +16,26 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export class Group {
-  /* tslint:disable */
-  private readonly public_id: number;
-  public name: string;
-  public label: string;
-  public rights: any[];
+import { Injectable } from '@angular/core';
+import { ApiCallService } from '../../services/api-call.service';
+import { AuthService } from '../../auth/services/auth.service';
+import { Group } from '../models/group';
 
-  /* tslint:enable */
+@Injectable({
+  providedIn: 'root'
+})
+export class GroupService {
+
+  private readonly prefix: string = 'group';
+
+  constructor(private api: ApiCallService, private authService: AuthService) {
+  }
+
+  public getGroup(publicID: number) {
+    return this.api.callGetRoute<Group>(this.prefix + '/' + publicID);
+  }
+
+  public getGroupList() {
+    return this.api.callGetRoute<Group[]>(this.prefix + '/');
+  }
 }

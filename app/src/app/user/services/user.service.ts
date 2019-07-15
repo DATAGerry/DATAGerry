@@ -29,7 +29,6 @@ export class UserService {
 
   private readonly prefix: string = 'user';
   private userList: User[] = [];
-  private groupList: Group[] = [];
 
   constructor(private api: ApiCallService, private authService: AuthService) {
 
@@ -44,10 +43,6 @@ export class UserService {
 
   public getUserList() {
     return this.api.callGetRoute<User[]>(this.prefix + '/');
-  }
-
-  public getGroupList() {
-    return this.api.callGetRoute<Group[]>('group/');
   }
 
   public getUser(publicID: number) {

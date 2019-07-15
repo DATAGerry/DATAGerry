@@ -33,6 +33,7 @@ import { ReferenceControl } from './controls/specials/ref.control';
 import { RadioControl } from './controls/choice/radio.control';
 import { SelectControl } from './controls/choice/select.control';
 import { CheckboxControl } from './controls/choice/checkbox.control';
+import { GroupService } from '../../../user/services/group.service';
 
 declare var $: any;
 
@@ -67,8 +68,8 @@ export class BuilderComponent implements OnInit {
     new Controller('ref', ReferenceControl)
   ];
 
-  public constructor(private userService: UserService) {
-    this.userService.getGroupList().subscribe((gList: Group[]) => {
+  public constructor(private userService: UserService, private groupService: GroupService) {
+    this.groupService.getGroupList().subscribe((gList: Group[]) => {
       this.groupList = gList;
     });
     this.userService.getUserList().subscribe((uList: User[]) => {

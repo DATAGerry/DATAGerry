@@ -16,12 +16,16 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export class Group {
-  /* tslint:disable */
-  private readonly public_id: number;
-  public name: string;
-  public label: string;
-  public rights: any[];
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
-  /* tslint:enable */
-}
+import { GroupRoutingModule } from './group-routing.module';
+
+@NgModule({
+  declarations: [],
+  imports: [
+    CommonModule,
+    GroupRoutingModule
+  ]
+})
+export class GroupModule { }

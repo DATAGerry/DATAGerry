@@ -1,22 +1,77 @@
-<div id="user-page-header" class="mw-100 bg-primary">
-  <div class="user-profile-image">
-  </div>
-</div>
 <div class="row">
-
   <div class="col-3">
-
+    <div id="profile-picture" class="text-center">
+      <img src="/assets/img/avatar.png" class="avatar rounded-circle img-thumbnail" alt="avatar">
+    </div>
+    <ul id="profile-meta-data" class="mt-3 list-group">
+      <li class="list-group-item text-muted">Framework</li>
+      <li class="list-group-item text-right"><span class="pull-left"><strong>Objects</strong></span> 0</li>
+      <li class="list-group-item text-right"><span class="pull-left"><strong>Types</strong></span> 0</li>
+      <li class="list-group-item text-right"><span class="pull-left"><strong>Edits</strong></span> 0</li>
+    </ul>
   </div>
   <div class="col-9">
-    <div id="user-data" class="card">
-      <div class="card-header">
-        User: {{userInstance?.user_name}}
+    <nav>
+      <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <a class="nav-item nav-link active" id="profile-tab" data-toggle="tab" href="#nav-profile" role="tab">Profile</a>
+        <a class="nav-item nav-link" id="meta-tab" data-toggle="tab" href="#nav-meta" role="tab">Meta</a>
+        <a class="nav-item nav-link" id="group-tab" data-toggle="tab" href="#nav-group" role="tab">Group</a>
       </div>
-      <div class="card-body">
-        {{ userInstance | json }}
+    </nav>
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="nav-profile" role="tabpanel">
+        <form class="mt-3">
+          <div class="form-row">
+            <div class="col-md-6 form-group">
+              <label>Username</label>
+              <input type="text" class="form-control" value="{{userInstance?.user_name}}">
+            </div>
+            <div class="col-md-6 form-group">
+              <label>E-Mail</label>
+              <input type="text" class="form-control" value="{{userInstance?.email}}">
+            </div>
+            <div class="col-md-6 form-group">
+              <label>Firstname</label>
+              <input type="text" class="form-control" value="{{userInstance?.first_name}}">
+            </div>
+            <div class="col-md-6 form-group">
+              <label>Lastname</label>
+              <input type="text" class="form-control" value="{{userInstance?.last_name}}">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="tab-pane fade" id="nav-meta" role="tabpanel">
+        <dl class="mt-3 row">
+          <dt class="col-3">Public ID:</dt>
+          <dd class="col-9">{{userInstance?.public_id}}</dd>
+          <dt class="col-3">Registration Time:</dt>
+          <dd class="col-9">{{userInstance?.registration_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</dd>
+          <dt class="col-3">Authenticator</dt>
+          <dd class="col-9">{{userInstance?.authenticator}}</dd>
+        </dl>
+      </div>
+      <div class="tab-pane fade" id="nav-group" role="tabpanel">
+        <dl class="mt-3 row">
+          <dt class="col-sm-3">Group:</dt>
+          <dd class="col-sm-9">{{userGroup?.label}}</dd>
+        </dl>
+        <table class="table table-striped">
+          <tbody>
+          <tr *ngFor="let right of userGroup?.rights">
+            <th scope="row">{{right}}</th>
+          </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-
+    <div id="recent-activity">
+      <hr />
+      <h2>Recent Activity</h2>
+      <div class="alert alert-info" role="alert">
+        Not implemented yet!
+      </div>
+    </div>
   </div>
 
 </div>
