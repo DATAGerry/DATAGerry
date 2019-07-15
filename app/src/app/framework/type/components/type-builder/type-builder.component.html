@@ -1,26 +1,26 @@
 <aw-wizard>
   <aw-wizard-step (stepExit)="exitBasicStep()" stepId="1" stepTitle="Basic informations">
     <cmdb-type-basic-step [preData]="typeInstance" [mode]="mode"></cmdb-type-basic-step>
-    <button class="btn btn-primary" type="button" awNextStep [disabled]="!basicStep.basicForm.valid">Next Step</button>
+    <button class="btn btn-primary next" type="button" awNextStep [disabled]="!basicStep.basicForm.valid">Next Step</button>
   </aw-wizard-step>
   <aw-wizard-step (stepExit)="exitFieldStep()" stepId="2" stepTitle="Field definitions">
     <cmdb-type-fields-step></cmdb-type-fields-step>
-    <button class="btn btn-primary" type="button" awPreviousStep>Go to previous step</button>
-    <button class="btn btn-primary" type="button" awNextStep>Go to next step</button>
+    <button class="btn btn-primary prev" type="button" awPreviousStep>Go to previous step</button>
+    <button class="btn btn-primary next" type="button" awNextStep>Go to next step</button>
   </aw-wizard-step>
   <aw-wizard-step (stepExit)="exitMetaStep()" stepId="3" stepTitle="Meta data">
     <cmdb-type-meta-step [fields]="typeInstance.fields"></cmdb-type-meta-step>
-    <button class="btn btn-primary" type="button" awPreviousStep>Previous Step</button>
-    <button class="btn btn-primary" type="button" awNextStep>Go to next step</button>
+    <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
+    <button class="btn btn-primary next" type="button" awNextStep>Go to next step</button>
   </aw-wizard-step>
   <aw-wizard-step (stepExit)="exitAccessStep()" stepId="4" stepTitle="Access">
     <cmdb-type-access-step></cmdb-type-access-step>
-    <button class="btn btn-primary" type="button" awPreviousStep>Previous Step</button>
-    <button class="btn btn-primary" type="button" awNextStep>Go to next step</button>
+    <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
+    <button class="btn btn-primary next" type="button" awNextStep>Go to next step</button>
   </aw-wizard-step>
   <aw-wizard-step stepId="5" stepTitle="Validation">
     <cmdb-type-validation-step [typeInstance]="typeInstance"></cmdb-type-validation-step>
-    <button class="btn btn-primary" type="button" awPreviousStep>Previous Step</button>
-    <button class="btn btn-success" type="button" (click)="saveType()">Save</button>
+    <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
+    <button class="btn btn-success next" type="button" (click)="saveType()">Save</button>
   </aw-wizard-step>
 </aw-wizard>
