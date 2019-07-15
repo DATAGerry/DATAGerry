@@ -41,6 +41,8 @@ export class ConnectionService {
     }
     if (this.port === 0) {
       this.href = `${this.protocol}//${this.host}/`;
+    } else {
+      this.href = `${this.protocol}//${this.host}:${this.port}/`;
     }
   }
 
