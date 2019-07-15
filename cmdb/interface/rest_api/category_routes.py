@@ -33,16 +33,16 @@ LOGGER = logging.getLogger(__name__)
 categories_routes = RootBlueprint('categories_rest', __name__, url_prefix='/category')
 
 
-@login_required
 @categories_routes.route('/', methods=['GET'])
+@login_required
 def get_categories():
     categories_list = object_manager.get_all_categories()
     resp = make_response(categories_list)
     return resp
 
 
-@login_required
 @categories_routes.route('/tree', methods=['GET'])
+@login_required
 def get_category_tree():
     from cmdb.object_framework.cmdb_errors import NoRootCategories
     try:
@@ -52,21 +52,21 @@ def get_category_tree():
     return make_response(category_tree)
 
 
-@login_required
 @categories_routes.route('/<int:public_id>', methods=['GET'])
+@login_required
 def get_category(public_id):
     category_instance = object_manager.get_category(public_id)
     return make_response(category_instance)
 
 
-@login_required
 @categories_routes.route('/', methods=['POST'])
+@login_required
 def add_category():
     pass
 
 
-@login_required
 @categories_routes.route('/', methods=['PUT'])
+@login_required
 def update_category():
     from bson import json_util
     http_put_request_data = json.dumps(request.json)
@@ -91,8 +91,8 @@ def update_category():
     return resp
 
 
-@login_required
 @categories_routes.route('/<int:public_id>', methods=['DELETE'])
+@login_required
 def delete_category(public_id):
     delete_response = object_manager.delete_category(public_id)
     return make_response(delete_response)

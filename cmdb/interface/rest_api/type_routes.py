@@ -47,6 +47,7 @@ def get_type_list():
 
 
 @type_routes.route('/<int:public_id>', methods=['GET'])
+@login_required
 def get_type(public_id: int):
     try:
         type_instance = object_manager.get_type(public_id)
@@ -59,6 +60,7 @@ def get_type(public_id: int):
 
 
 @type_routes.route('/', methods=['POST'])
+@login_required
 def add_type():
     from bson import json_util
     from datetime import datetime
@@ -124,8 +126,8 @@ def delete_type(public_id: int):
     return resp
 
 
-@login_required
 @type_routes.route('/delete/<string:public_ids>', methods=['GET'])
+@login_required
 def delete_many_types(public_ids):
     try:
         ids = []
@@ -149,8 +151,8 @@ def delete_many_types(public_ids):
         return abort(500)
 
 
-@login_required
 @type_routes.route('/count/', methods=['GET'])
+@login_required
 def count_objects():
     try:
         count = object_manager.count_types()

@@ -52,25 +52,25 @@
     </div>
 
     <div class="col-4">
-        <div class="card">
-          <div class="card-header">
-            Category:
-            <div *ngIf="basicCategoryForm.get('category_id').value; then categorySelected else categoryUnselected"></div>
-            <ng-template #categorySelected><span class="text-success">SELECTED</span></ng-template>
-            <ng-template #categoryUnselected><span class="text-danger">UNSELECTED</span></ng-template>
-          </div>
-          <div class="card-body">
-            <form [formGroup]="basicCategoryForm">
-              <ng-select
-                [items]="categoryList | async"
+      <div class="card">
+        <div class="card-header">
+          Category:
+          <div *ngIf="basicCategoryForm.get('category_id').value; then categorySelected else categoryUnselected"></div>
+          <ng-template #categorySelected><span class="text-success">SELECTED</span></ng-template>
+          <ng-template #categoryUnselected><span class="text-danger">UNSELECTED</span></ng-template>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="basicCategoryForm">
+            <ng-select
+              [items]="categoryList | async"
 
-                bindLabel="label"
-                bindValue="public_id"
-                placeholder="Select category"
-                formControlName="category_id">
-              </ng-select>
-            </form>
-          </div>
+              bindLabel="label"
+              bindValue="public_id"
+              placeholder="Select category"
+              formControlName="category_id">
+            </ng-select>
+          </form>
+        </div>
       </div>
 
       <div class="card mt-3">

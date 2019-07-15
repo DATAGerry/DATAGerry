@@ -34,8 +34,8 @@ LOGGER = logging.getLogger(__name__)
 export_route = RootBlueprint('export_rest', __name__, url_prefix='/export')
 
 
-@login_required
 @export_route.route('/csv/<string:collection>/<int:public_id>', methods=['GET'])
+@login_required
 def export_csv(collection, public_id):
 
     data_list = [get_db_result(collection, public_id, None)]
@@ -44,8 +44,8 @@ def export_csv(collection, public_id):
     return response_file(csv_data, mime_type='text/csv', file_extension='csv')
 
 
-@login_required
 @export_route.route('/csv/<string:collection>/type/<int:type_id>', methods=['GET'])
+@login_required
 def export_csv_by_object_type(collection, type_id):
 
     data_list = get_db_result(collection, None, type_id)
@@ -54,8 +54,8 @@ def export_csv_by_object_type(collection, type_id):
     return response_file(csv_data, mime_type='text/csv', file_extension='csv')
 
 
-@login_required
 @export_route.route('/json/<string:collection>/<int:public_id>', methods=['GET'])
+@login_required
 def export_json(collection, public_id):
 
     data = get_db_result(collection, public_id, None)
@@ -64,8 +64,8 @@ def export_json(collection, public_id):
     return response_file(json_data, mime_type='application/json', file_extension='txt')
 
 
-@login_required
 @export_route.route('/json/<string:collection>/type/<int:type_id>', methods=['GET'])
+@login_required
 def export_json_by_object_type(collection, type_id):
 
     data = get_db_result(collection, None, type_id)
@@ -74,8 +74,8 @@ def export_json_by_object_type(collection, type_id):
     return response_file(json_data, mime_type='application/json', file_extension='txt')
 
 
-@login_required
 @export_route.route('/xml/<string:collection>/<int:public_id>', methods=['GET'])
+@login_required
 def export_xml(collection, public_id):
     data = get_db_result(collection, public_id, None)
     xml_data = json.loads(make_response(data).data)
@@ -83,8 +83,8 @@ def export_xml(collection, public_id):
     return response_file(parse_to_xml(xml_data), mime_type="text/xml", file_extension="xml")
 
 
-@login_required
 @export_route.route('/xml/<string:collection>/type/<int:type_id>', methods=['GET'])
+@login_required
 def export_xml_by_object_type(collection, type_id):
     data = get_db_result(collection, None, type_id)
     xml_data = json.loads(make_response(data).data)

@@ -37,8 +37,8 @@ object_rest = RootBlueprint('object_rest', __name__, url_prefix='/object')
 
 # DEFAULT ROUTES
 
-@login_required
 @object_rest.route('/', methods=['GET'])
+@login_required
 def get_object_list():
     try:
         all_objects_list = object_manager.get_all_objects()
@@ -51,8 +51,8 @@ def get_object_list():
     return resp
 
 
-@login_required
 @object_rest.route('/type/<string:type_ids>', methods=['GET'])
+@login_required
 def get_object_by_type(type_ids):
     """Return all objects by type_id"""
     try:
@@ -67,8 +67,8 @@ def get_object_by_type(type_ids):
     return resp
 
 
-@login_required
 @object_rest.route('/many/<string:public_ids>', methods=['GET'])
+@login_required
 def get_objects_by_public_id(public_ids):
     """Return all objects by public_ids"""
 
@@ -84,8 +84,8 @@ def get_objects_by_public_id(public_ids):
     return resp
 
 
-@login_required
 @object_rest.route('/count/<int:type_id>', methods=['GET'])
+@login_required
 def count_object_by_type(type_id):
     try:
         count = object_manager.count_objects_by_type(type_id)
@@ -95,8 +95,8 @@ def count_object_by_type(type_id):
     return resp
 
 
-@login_required
 @object_rest.route('/count/', methods=['GET'])
+@login_required
 def count_objects():
     try:
         count = object_manager.count_objects()
@@ -121,8 +121,8 @@ def _build_query(args, q_operator='$and'):
         pass
 
 
-@login_required
 @object_rest.route('/native', methods=['GET'])
+@login_required
 def get_native_object_list():
     try:
         object_list = object_manager.get_all_objects()
@@ -132,8 +132,8 @@ def get_native_object_list():
     return resp
 
 
-@login_required
 @object_rest.route('/<int:public_id>', methods=['GET'])
+@login_required
 def get_object(public_id):
     try:
         object_instance = object_manager.get_object(public_id)
@@ -157,8 +157,8 @@ def get_object(public_id):
     return resp
 
 
-@login_required
 @object_rest.route('<int:public_id>/native/', methods=['GET'])
+@login_required
 def get_navtive_object(public_id: int):
     try:
         object_instance = object_manager.get_object(public_id)
@@ -168,8 +168,8 @@ def get_navtive_object(public_id: int):
     return resp
 
 
-@login_required
 @object_rest.route('/add', methods=['POST'])
+@login_required
 def add_object():
     from bson import json_util
     from datetime import datetime
@@ -196,8 +196,8 @@ def add_object():
     return resp
 
 
-@login_required
 @object_rest.route('/', methods=['PUT'])
+@login_required
 def update_object():
     from bson import json_util
     from datetime import datetime
@@ -223,8 +223,8 @@ def update_object():
     return resp
 
 
-@login_required
 @object_rest.route('/<int:public_id>', methods=['DELETE'])
+@login_required
 def delete_object(public_id: int):
     try:
         ack = object_manager.delete_object(public_id=public_id)
@@ -236,8 +236,8 @@ def delete_object(public_id: int):
     return resp
 
 
-@login_required
 @object_rest.route('/delete/<string:public_ids>', methods=['GET'])
+@login_required
 def delete_many_objects(public_ids):
     try:
         ids = []
@@ -262,8 +262,8 @@ def delete_many_objects(public_ids):
 
 
 # SPECIAL ROUTES
-@login_required
 @object_rest.route('/newest/', methods=['GET'])
+@login_required
 def get_newest_objects():
     newest_objects_list = object_manager.get_objects_by(sort='creation_time',
                                                         limit=25,
@@ -274,8 +274,8 @@ def get_newest_objects():
     return resp
 
 
-@login_required
 @object_rest.route('/latest/', methods=['GET'])
+@login_required
 def get_latest_objects():
     last_objects_list = object_manager.get_objects_by(sort='last_edit_time',
                                                       limit=25,

@@ -30,8 +30,8 @@ LOGGER = logging.getLogger(__name__)
 user_routes = RootBlueprint('user_rest', __name__, url_prefix='/user')
 
 
-@login_required
 @user_routes.route('/', methods=['GET'])
+@login_required
 def get_users():
     try:
         users = user_manager.get_all_users()
@@ -43,6 +43,7 @@ def get_users():
 
 
 @user_routes.route('/<string:token>', methods=['GET'])
+@login_required
 def get_user_from_token(token):
     try:
         user = user_manager.get_user_from_token(token)
@@ -53,8 +54,8 @@ def get_user_from_token(token):
     return resp
 
 
-@login_required
 @user_routes.route('/<int:public_id>', methods=['GET'])
+@login_required
 def get_user(public_id):
     try:
         user = user_manager.get_user(public_id=public_id)
@@ -65,14 +66,14 @@ def get_user(public_id):
     return resp
 
 
-@login_required
 @user_routes.route('/', methods=['POST'])
+@login_required
 def add_user():
     raise NotImplementedError
 
 
-@login_required
 @user_routes.route('/<int:public_id>', methods=['PUT'])
+@login_required
 def update_user(public_id: int):
     raise NotImplementedError
 
@@ -83,8 +84,8 @@ def delete_user(public_id: int):
     raise NotImplementedError
 
 
-@login_required
 @user_routes.route('/count/', methods=['GET'])
+@login_required
 def count_objects():
     try:
         count = user_manager.count_user()

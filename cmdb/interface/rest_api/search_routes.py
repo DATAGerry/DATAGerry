@@ -19,6 +19,7 @@ from flask import abort, current_app as app, request
 from cmdb.object_framework.cmdb_render import CmdbRender
 from cmdb.interface.route_utils import make_response, RootBlueprint
 from cmdb.object_framework.cmdb_object_manager import object_manager as obm
+from cmdb.utils.interface_wraps import login_required
 
 
 try:
@@ -31,6 +32,7 @@ search_routes = RootBlueprint('search_rest', __name__, url_prefix='/search')
 
 
 @search_routes.route("/", methods=['GET'])
+@login_required
 def get_search():
     request_args = request.args.to_dict()
 
@@ -49,6 +51,7 @@ def get_search():
 
 
 @search_routes.route("/<string:search_input>", methods=['GET'])
+@login_required
 def text_search(search_input):
     return _get_response({'value': search_input}, q_operator = '$or')
 

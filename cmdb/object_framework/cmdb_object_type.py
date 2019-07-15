@@ -16,7 +16,6 @@
 
 import logging
 
-from cmdb.object_framework.cmdb_log import CmdbLog
 from cmdb.object_framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
 from cmdb.object_framework.cmdb_errors import ExternalFillError, FieldInitError
 from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType, FieldNotFoundError
@@ -50,7 +49,7 @@ class CmdbType(CmdbDAO):
 
     def __init__(self, name: str, active: bool, author_id: int, creation_time: datetime,
                  render_meta: dict, fields: list, version: str = '1.0.0', access: list = None, label: str = None,
-                 status: list = None, description: str = None, logs: dict = None, **kwargs):
+                 status: list = None, description: str = None, **kwargs):
         self.name = name
         self.label = label or self.name.title()
         self.description = description
@@ -62,7 +61,6 @@ class CmdbType(CmdbDAO):
         self.creation_time = creation_time
         self.render_meta = render_meta
         self.fields = fields or []
-        self.logs = logs
         super(CmdbType, self).__init__(**kwargs)
 
     def __truediv__(self, other):
@@ -152,25 +150,6 @@ class CmdbType(CmdbDAO):
                 LOGGER.warning(e.message)
                 raise FieldInitError(name)
         raise FieldNotFoundError(name, self.get_name())
-
-    def get_logs(self):
-        return self.logs
-
-    def last_log(self) -> CmdbLog:
-        try:
-            last_log = CmdbLog(**self.logs[-1])
-        except CMDBError:
-            return None
-        return last_log
-
-    def add_last_log_state(self, state):
-        last_log = CmdbLog(**self.logs[-1])
-        last_log.set_state(state)
-        self.logs[-1] = last_log.__dict__
-
-    def add_log(self, log: CmdbLog):
-        self.logs.append(log.__dict__)
-
 
 class _ExternalLink:
 
