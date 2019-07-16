@@ -6,7 +6,7 @@
     <form [formGroup]="formFields" *ngIf="objectInstance?.fields && objectInstance?.fields.length>0">
         <fieldset [disabled]="isDisable">
           <div class="card-body">
-            <cmdb-render [sections]="typeInstance?.render_meta?.sections" [fields]="objectInstance?.fields"></cmdb-render>
+            <cmdb-render [typeInstance]="typeInstance"></cmdb-render>
           </div>
         </fieldset>
     </form>

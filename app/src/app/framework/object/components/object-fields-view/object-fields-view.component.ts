@@ -57,7 +57,7 @@ export class ObjectFieldsViewComponent {
     }
 
     updateInstance.fields = fieldsList;
-    this.objService.postUpdateObject(updateInstance).subscribe(res => {
+    this.objService.putObject(updateInstance).subscribe(res => {
       console.log(res);
       this.isDisable = true;
     });

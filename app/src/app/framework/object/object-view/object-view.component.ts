@@ -17,12 +17,12 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { ApiCallService } from '../../../../services/api-call.service';
+import { ApiCallService } from '../../../services/api-call.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CmdbObject } from '../../../models/cmdb-object';
-import { ObjectService } from '../../../services/object.service';
-import { CmdbType } from '../../../models/cmdb-type';
-import { TypeService } from '../../../services/type.service';
+import { CmdbObject } from '../../models/cmdb-object';
+import { ObjectService } from '../../services/object.service';
+import { CmdbType } from '../../models/cmdb-type';
+import { TypeService } from '../../services/type.service';
 
 @Component({
   selector: 'cmdb-object-view',
@@ -69,7 +69,7 @@ export class ObjectViewComponent implements OnInit {
     newInstance.active = clone.active;
     newInstance.fields = clone.fields;
 
-    this.objService.postAddObject(newInstance).subscribe(res => {
+    this.objService.postObject(newInstance).subscribe(res => {
       this.route.navigate(['framework/object/' + res]);
     });
   }

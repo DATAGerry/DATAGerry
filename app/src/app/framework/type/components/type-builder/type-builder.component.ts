@@ -25,7 +25,7 @@ import { TypeAccessStepComponent } from './type-access-step/type-access-step.com
 import { TypeService } from '../../../services/type.service';
 import { UserService } from '../../../../user/services/user.service';
 import { CategoryService } from '../../../services/category.service';
-import { Modes } from '../../builder/modes.enum';
+import { CmdbMode } from '../../../modes.enum';
 import { Router } from '@angular/router';
 
 
@@ -38,7 +38,7 @@ export class TypeBuilderComponent implements OnInit {
 
 
   @Input() public typeInstance?: CmdbType;
-  @Input() public mode: number = Modes.Create;
+  @Input() public mode: number = CmdbMode.Create;
 
   @ViewChild(TypeBasicStepComponent, {static: true})
   public basicStep: TypeBasicStepComponent;

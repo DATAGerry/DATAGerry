@@ -22,7 +22,7 @@ import { TypeService } from '../../../../services/type.service';
 import { CategoryService } from '../../../../services/category.service';
 import { CmdbCategory } from '../../../../models/cmdb-category';
 import { Observable } from 'rxjs';
-import { Modes } from '../../../builder/modes.enum';
+import { CmdbMode } from '../../../../modes.enum';
 
 
 @Injectable()
@@ -31,7 +31,7 @@ export class TypeNameValidator {
   static createValidator(typeService: TypeService, mode: number) {
     return (control: AbstractControl) => {
       return typeService.validateTypeName(control.value).then(res => {
-        if (mode === Modes.Edit) {
+        if (mode === CmdbMode.Edit) {
           return null;
         }
         return res ? null : {nameAlreadyTaken: true};

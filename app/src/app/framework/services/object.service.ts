@@ -47,11 +47,11 @@ export class ObjectService {
     return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/type/' + typeID);
   }
 
-  public postAddObject(objectInstance: CmdbObject): Observable<any> {
-    return this.api.callPostRoute<CmdbObject>(this.servicePrefix + '/add', objectInstance);
+  public postObject(objectInstance: CmdbObject): Observable<any> {
+    return this.api.callPostRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
   }
 
-  public postUpdateObject(objectInstance: CmdbObject): Observable<any> {
+  public putObject(objectInstance: CmdbObject): Observable<any> {
     return this.api.callPutRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
   }
 }

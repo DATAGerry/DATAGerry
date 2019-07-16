@@ -16,19 +16,17 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { RenderField } from '../components.fields';
 
 @Component({
-  selector: 'cmdb-phone',
   templateUrl: './text.component.html',
   styleUrls: ['./text.component.scss']
 })
-export class PhoneComponent implements OnInit {
+export class PhoneComponent extends RenderField {
 
-  @Input() data: any;
-  constructor() { }
-
-  ngOnInit() {
+  public constructor() {
+    super();
   }
 
 }

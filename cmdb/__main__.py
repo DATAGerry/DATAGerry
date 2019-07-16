@@ -54,7 +54,7 @@ def _check_database():
 
     from cmdb.utils.system_reader import SystemConfigReader
     from cmdb.data_storage import get_pre_init_database
-    LOGGER.info(f'Checking database connection with {SystemConfigReader.DEFAULT_CONFIG_NAME} data').format()
+    LOGGER.info(f'Checking database connection with {SystemConfigReader.DEFAULT_CONFIG_NAME} data')
     dbm = get_pre_init_database()
     connection_test = dbm.database_connector.is_connected()
     LOGGER.debug(f'Database status is {connection_test}')
@@ -158,6 +158,8 @@ def main(args):
     except CMDBError as conn_error:
         LOGGER.critical(conn_error.message)
         exit(1)
+    if args.setup:
+        pass
 
     if args.test_data:
         _activate_debug()
