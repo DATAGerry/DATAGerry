@@ -33,7 +33,7 @@ export class RenderComponent {
   public fieldsGroups: FormGroup;
 
   @Input() public mode: CmdbMode;
-  @Output() onParentSubmit = new EventEmitter<any>();
+  @Output() parentSubmit = new EventEmitter<any>();
 
   @Input('typeInstance')
   public set typeInstance(type: CmdbType) {
@@ -69,7 +69,7 @@ export class RenderComponent {
   }
 
   public onSubmit() {
-    this.onParentSubmit.emit();
+    this.parentSubmit.emit();
   }
 
   public getFieldByName(name: string) {

@@ -45,7 +45,8 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
   @ViewChild(RenderComponent, {static: false}) render: RenderComponent;
 
 
-  constructor(private router: Router, private typeService: TypeService, private objectService: ObjectService, private userService: UserService) {
+  constructor(private router: Router, private typeService: TypeService,
+              private objectService: ObjectService, private userService: UserService) {
     this.objectInstance = new CmdbObject();
     this.typeIDSubject = new BehaviorSubject<number>(null);
     this.typeID = this.typeIDSubject.asObservable();

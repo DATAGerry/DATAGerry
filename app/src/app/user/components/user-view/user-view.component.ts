@@ -38,7 +38,8 @@ export class UserViewComponent implements OnInit {
   public profileForm: FormGroup;
   public passwordChangeForm: FormGroup;
 
-  constructor(private route: ActivatedRoute, private userService: UserService, private groupService: GroupService, private toastService: ToastService) {
+  constructor(private route: ActivatedRoute, private userService: UserService,
+              private groupService: GroupService, private toastService: ToastService) {
     this.route.params.subscribe((id) => this.userID = id.publicID);
     this.profileForm = new FormGroup({});
     this.passwordChangeForm = new FormGroup({

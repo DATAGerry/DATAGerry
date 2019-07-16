@@ -18,6 +18,19 @@
 
 import { ControlsCommon, StructureContent, randomName } from './controls.common';
 
+class SectionContent implements StructureContent {
+
+  label: string;
+  name: string;
+  position: number;
+  access: boolean;
+  groups: number[];
+  users: number[];
+  fields: [] = [];
+  type: string = 'section';
+
+}
+
 export class SectionControl implements ControlsCommon {
 
   name = 'section';
@@ -31,18 +44,5 @@ export class SectionControl implements ControlsCommon {
     section.label = this.label;
     return section;
   }
-
-}
-
-class SectionContent implements StructureContent {
-
-  label: string;
-  name: string;
-  position: number;
-  access: boolean;
-  groups: number[];
-  users: number[];
-  fields: [] = [];
-  type: string = 'section';
 
 }
