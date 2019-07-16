@@ -28,6 +28,7 @@ import { HttpErrorInterceptor } from './auth/interceptors/http-error.interceptor
 import { PreviousRouteService } from './services/previous-route.service';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { ConnectionService } from './services/connection.service';
+import { DatePipe } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -43,6 +44,7 @@ import { ConnectionService } from './services/connection.service';
   providers: [
     PreviousRouteService,
     ConnectionService,
+    DatePipe,
     {provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true},
   ],
