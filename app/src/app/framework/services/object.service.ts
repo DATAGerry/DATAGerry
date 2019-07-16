@@ -19,7 +19,7 @@
 import { Injectable } from '@angular/core';
 import { ApiCallService } from '../../services/api-call.service';
 import { CmdbObject } from '../models/cmdb-object';
-import {Observable} from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'

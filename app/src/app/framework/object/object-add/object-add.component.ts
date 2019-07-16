@@ -24,7 +24,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { CmdbMode } from '../../modes.enum';
 import { RenderComponent } from '../../render/render.component';
 import { CmdbObject } from '../../models/cmdb-object';
-import { AuthService } from '../../../auth/services/auth.service';
 import { UserService } from '../../../user/services/user.service';
 import { ObjectService } from '../../services/object.service';
 import { Router } from '@angular/router';

@@ -1,14 +1,14 @@
-
 <div class="card" *ngIf="objectInstance?.summaries && objectInstance?.summaries.length>0">
   <div class="card-body">
     <form>
       <div class="form-group" *ngFor="let sum of objectInstance?.summaries; let i = index">
-        <h4 data-toggle="collapse" [attr.href]="'#collapse'+i" role="button" aria-expanded="true" aria-controls="collapseSummary" style="margin-top: 1.25em">{{sum.label}}</h4>
-        <hr />
+        <h4 data-toggle="collapse" [attr.href]="'#collapse'+i" role="button" aria-expanded="true"
+            aria-controls="collapseSummary" style="margin-top: 1.25em">{{sum.label}}</h4>
+        <hr/>
         <fieldset disabled>
-          <div id="collapse{{i}}" class="form-group collapse show"  *ngFor="let label of sum.labels; let c = index ">
+          <div id="collapse{{i}}" class="form-group collapse show" *ngFor="let label of sum.labels; let c = index ">
             <label for="fieldInput">{{label}}</label>
-            <input type="text" class="form-control" id="fieldInput" value = "{{sum.values[c]}}">
+            <input type="text" class="form-control" id="fieldInput" value="{{sum.values[c]}}">
           </div>
         </fieldset>
       </div>

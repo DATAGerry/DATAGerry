@@ -17,7 +17,7 @@
 */
 
 
-import {Component, OnDestroy, ViewChild} from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { ApiCallService } from '../../../../services/api-call.service';
 import { ActivatedRoute } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
@@ -25,10 +25,10 @@ import { DatePipe } from '@angular/common';
 import { ObjectService } from '../../../services/object.service';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
-import {CmdbObject} from '../../../models/cmdb-object';
-import {map} from 'rxjs/operators';
-import {HttpHeaders} from '@angular/common/http';
-import {ExportService} from '../../../../services/export.service';
+import { CmdbObject } from '../../../models/cmdb-object';
+import { map } from 'rxjs/operators';
+import { HttpHeaders } from '@angular/common/http';
+import { ExportService } from '../../../../services/export.service';
 
 @Component({
   selector: 'cmdb-object-list',
@@ -46,7 +46,7 @@ export class ObjectListComponent implements OnDestroy {
 
   private summaries: [];
   private columnFields: [];
-  private items: [] ;
+  private items: [];
   public pageTitle: string = 'List';
   public objectLists: {};
   public hasSummaries: boolean = false;
@@ -68,14 +68,14 @@ export class ObjectListComponent implements OnDestroy {
     let url = 'object/';
     this.pageTitle = 'Object List';
     this.hasSummaries = false;
-    if ( typeof id !== 'undefined') {
+    if (typeof id !== 'undefined') {
       url = url + 'type/' + id;
       this.hasSummaries = true;
     }
 
     this.apiCallService.callGetRoute(url)
       .pipe(
-        map( dataArray => {
+        map(dataArray => {
           const lenx = dataArray.length;
           this.summaries = lenx > 0 ? dataArray[0].summaries : [];
           this.columnFields = lenx > 0 ? dataArray[0].fields : [];
@@ -85,7 +85,7 @@ export class ObjectListComponent implements OnDestroy {
             this.pageTitle = dataArray[0].label + ' List';
           }
 
-          return[ {items: this.items, columnFields: this.columnFields} ];
+          return [{items: this.items, columnFields: this.columnFields}];
         })
       )
       .subscribe(
@@ -93,7 +93,7 @@ export class ObjectListComponent implements OnDestroy {
           this.spinner.show();
           this.buildDtTable();
 
-          setTimeout( () => {
+          setTimeout(() => {
             this.objectLists = data;
             this.rerender();
             this.dtTrigger.next();
@@ -153,22 +153,22 @@ export class ObjectListComponent implements OnDestroy {
               {
                 columnButton.push(
                   {
-                  text: this.columnFields[i].label,
-                  extend: 'columnToggle',
-                  columns: '.toggle-' + this.columnFields[i].name,
-                  className: 'dropdown-item ' + this.columnFields[i].name,
-                });
+                    text: this.columnFields[i].label,
+                    extend: 'columnToggle',
+                    columns: '.toggle-' + this.columnFields[i].name,
+                    className: 'dropdown-item ' + this.columnFields[i].name,
+                  });
               }
             }
             columnButton.push({
-                  extend: 'colvisRestore',
-                  text: 'Restore',
-                  className: 'btn btn-secondary btn-lg btn-block',
-                  action: function() {
-                    this.rerender();
-                    this.dtTrigger.next();
-                  }.bind(this)
-                });
+              extend: 'colvisRestore',
+              text: 'Restore',
+              className: 'btn btn-secondary btn-lg btn-block',
+              action: function() {
+                this.rerender();
+                this.dtTrigger.next();
+              }.bind(this)
+            });
             return columnButton;
           }.bind(this),
         },
@@ -181,10 +181,10 @@ export class ObjectListComponent implements OnDestroy {
     this.dtOptions = {
       ordering: true,
       order: [[5, 'asc']],
-      columnDefs: [ {
+      columnDefs: [{
         targets: 'nosort',
         orderable: false,
-      } ],
+      }],
       retrieve: true,
       language: {
         search: '',
@@ -209,14 +209,14 @@ export class ObjectListComponent implements OnDestroy {
 
   private buildAdvancedDtOptions() {
     if (this.hasSummaries) {
-      const visTargets: any[] = [0, 1, 2 , 3, -3, -2, -1];
+      const visTargets: any[] = [0, 1, 2, 3, -3, -2, -1];
       for (let i = 0; i < this.summaries.length; i++) {
         visTargets.push(i + 4);
       }
       this.dtOptions.columnDefs = [
-        { orderable: false, targets: 'nosort' },
-        { visible: true, targets: visTargets },
-        { visible: false, targets: '_all' }
+        {orderable: false, targets: 'nosort'},
+        {visible: true, targets: visTargets},
+        {visible: false, targets: '_all'}
       ];
       this.dtOptions.order = [[2, 'asc']];
     }
@@ -297,7 +297,7 @@ export class ObjectListComponent implements OnDestroy {
       }
     }
     if (publicIds.length > 0) {
-      this.apiCallService.callDeleteManyRoute('object/delete/' + publicIds ).subscribe(data => {
+      this.apiCallService.callDeleteManyRoute('object/delete/' + publicIds).subscribe(data => {
         this.route.params.subscribe((id) => {
           this.init(id);
         });
@@ -318,18 +318,18 @@ export class ObjectListComponent implements OnDestroy {
     const fieldsList: any[] = [];
     for (const field of instance.fields) {
       const text: any = document.getElementsByName(field.name)[0];
-      fieldsList.push({name: field.name, value: text.value });
+      fieldsList.push({name: field.name, value: text.value});
     }
 
     updateInstance.fields = fieldsList;
-    this.objService.postUpdateObject(updateInstance).subscribe(res => {
+    this.objService.postObject(updateInstance).subscribe(res => {
       console.log(res);
     });
   }
 
   public export(fileExtension: string) {
 
-    const httpHeader =  new HttpHeaders({
+    const httpHeader = new HttpHeaders({
       'Content-Type': 'application/' + fileExtension
     });
 

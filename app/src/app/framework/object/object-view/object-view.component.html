@@ -4,7 +4,7 @@
   </div>
   <div class="col-3">
     <cmdb-object-qr></cmdb-object-qr>
-    <hr />
+    <hr/>
     <cmdb-object-externals [objectInstance]="objectInstance"></cmdb-object-externals>
     <div class="card">
       <div class="card-header">
@@ -34,21 +34,26 @@
   <div class="col-12">
     <ul class="nav nav-tabs" id="typeViewTab" role="tablist">
       <li class="nav-item">
-        <a class="nav-link active" id="field-tab" data-toggle="tab" href="#fields" role="tab" aria-controls="logs" aria-selected="true">ComponentsFields</a>
+        <a class="nav-link active" id="field-tab" data-toggle="tab" href="#fields" role="tab" aria-controls="logs"
+           aria-selected="true">ComponentsFields</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="referenced-tab" data-toggle="tab" href="#referenced_by" role="tab" aria-controls="categories" aria-selected="false">Referenced by</a>
+        <a class="nav-link" id="referenced-tab" data-toggle="tab" href="#referenced_by" role="tab"
+           aria-controls="categories" aria-selected="false">Referenced by</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="links-tab" data-toggle="tab" href="#links" role="tab" aria-controls="collections" aria-selected="false">Links</a>
+        <a class="nav-link" id="links-tab" data-toggle="tab" href="#links" role="tab" aria-controls="collections"
+           aria-selected="false">Links</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="logs-tab" data-toggle="tab" href="#logs" role="tab" aria-controls="diagnostic" aria-selected="false">Logs</a>
+        <a class="nav-link" id="logs-tab" data-toggle="tab" href="#logs" role="tab" aria-controls="diagnostic"
+           aria-selected="false">Logs</a>
       </li>
     </ul>
     <div class="tab-content" id="typeViewTabContent">
       <div class="tab-pane fade show active" id="fields" role="tabpanel" aria-labelledby="field-tab">
-        <cmdb-object-fields-view [isDisable]="editDisable" [typeInstance]="typeInstance" [objectInstance]="objectInstance"></cmdb-object-fields-view>
+        <cmdb-object-fields-view [isDisable]="editDisable" [typeInstance]="typeInstance"
+                                 [objectInstance]="objectInstance"></cmdb-object-fields-view>
       </div>
       <div class="tab-pane fade" id="referenced_by" role="tabpanel" aria-labelledby="referenced-tab"></div>
       <div class="tab-pane fade" id="links" role="tabpanel" aria-labelledby="links-tab"></div>

@@ -1,16 +1,16 @@
-
 <ng-container *ngIf="objectInstance?.externals && objectInstance?.externals.length>0">
   <div class="card">
     <div class="card-header">
       Externals
     </div>
     <div class="card-body">
-      <ul class="fa-ul" >
+      <ul class="fa-ul">
         <li *ngFor="let ext of objectInstance?.externals">
-          <i class="fa-li fa {{ext.icon}}" aria-hidden="true"></i> <a class="card-link" href="{{ext.href}}">{{ext.label}}</a>
+          <i class="fa-li fa {{ext.icon}}" aria-hidden="true"></i> <a class="card-link"
+                                                                      href="{{ext.href}}">{{ext.label}}</a>
         </li>
       </ul>
     </div>
   </div>
-  <hr />
+  <hr/>
 </ng-container>

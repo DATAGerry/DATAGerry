@@ -11,4 +11,5 @@ import { CategoryListComponent } from './components/category-list/category-list.
     CategoryRoutingModule
   ]
 })
-export class CategoryModule { }
+export class CategoryModule {
+}

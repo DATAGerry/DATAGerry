@@ -16,11 +16,11 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input } from '@angular/core';
-import {CmdbObject} from '../../../models/cmdb-object';
-import {ApiCallService} from '../../../../services/api-call.service';
-import {ObjectService} from '../../../services/object.service';
-import {FormGroup} from '@angular/forms';
+import { Component, Input } from '@angular/core';
+import { CmdbObject } from '../../../models/cmdb-object';
+import { ApiCallService } from '../../../../services/api-call.service';
+import { ObjectService } from '../../../services/object.service';
+import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-object-fields-view',
@@ -34,7 +34,8 @@ export class ObjectFieldsViewComponent {
   @Input() typeInstance: any;
   public formFields: FormGroup = new FormGroup({});
 
-  constructor(private api: ApiCallService, private objService: ObjectService) {  }
+  constructor(private api: ApiCallService, private objService: ObjectService) {
+  }
 
   public revert() {
     this.isDisable = true;
@@ -53,7 +54,7 @@ export class ObjectFieldsViewComponent {
     const fieldsList: any[] = [];
     for (const field of instance.fields) {
       const text: any = document.getElementsByName(field.name)[0];
-      fieldsList.push({name: field.name, value: text.value });
+      fieldsList.push({name: field.name, value: text.value});
     }
 
     updateInstance.fields = fieldsList;
