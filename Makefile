@@ -21,7 +21,7 @@ BIN_PYTEST = pytest
 BIN_PIP = pip
 BIN_NPM = npm
 BIN_RPMBUILD = rpmbuild
-DIR_BUILD = ./target
+DIR_BUILD = $(CURDIR)/target
 DIR_BIN_BUILD = ${DIR_BUILD}/bin
 DIR_TEMP= ${DIR_BUILD}/temp
 DIR_DOCS_SOURCE = docs/source
@@ -33,7 +33,11 @@ DIR_WEB_BUILD = app/dist/dataGerryApp
 DIR_WEB_TARGET = cmdb/interface/net_app/dataGerryApp
 
 # set default goal
-.DEFAULT_GOAL := bin
+.DEFAULT_GOAL := all
+
+# build whole application
+.PHONY: all
+all: bin rpm
 
 
 # install Python requirements
@@ -82,7 +86,7 @@ rpm: bin
 	cp contrib/systemd/datagerry.service ${DIR_RPM_BUILD}/SOURCES
 	cp etc/cmdb.conf ${DIR_RPM_BUILD}/SOURCES
 	cp contrib/rpm/datagerry.spec ${DIR_RPM_BUILD}
-	${BIN_RPMBUILD} --define '_topdir ${DIR_RPM_BUILD}' -bb datagerry.spec
+	${BIN_RPMBUILD} --define '_topdir ${DIR_RPM_BUILD}' -bb ${DIR_RPM_BUILD}/datagerry.spec
 
 
 # execute tests
