@@ -139,7 +139,6 @@ export class TableComponent implements OnDestroy {
   ngOnDestroy(): void {
     // Do not forget to unsubscribe the event
     this.dtTrigger.unsubscribe();
-    console.log('ngOnDestroy');
   }
 
   public rerender(): void {
@@ -194,15 +193,19 @@ export class TableComponent implements OnDestroy {
 
     if (publicIds.length > 0) {
       this.apiCallService.callDeleteManyRoute(this.linkRoute + 'delete/' + publicIds ).subscribe(data => {
-        console.log(data);
+        this.apiCallService.callGetRoute(this.linkRoute).subscribe(objs => {
+          this.entryLists = objs;
+        });
       });
     }
   }
 
   public delObject(value: any) {
     const id = value.public_id;
-    this.apiCallService.callDeleteRoute('object/' + id).subscribe(data => {
-      console.log(data);
+    this.apiCallService.callDeleteRoute(this.linkRoute + id).subscribe(data => {
+      this.apiCallService.callGetRoute(this.linkRoute).subscribe(objs => {
+        this.entryLists = objs;
+      });
     });
   }
 
@@ -212,31 +215,9 @@ export class TableComponent implements OnDestroy {
         'Content-Type': 'application/' + fileExtension
       });
 
-    this.exportService.callExportRoute('export/' + fileExtension + '/' + this.linkRoute + 'type/' + 1, httpHeader)
-      .pipe(
-        map(res => {
-          const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
-          return {
-            filename: timestamp + '.' + fileExtension,
-            data: res
-          };
-        })
-      ).subscribe(res => {
-        const blob = new Blob([res.data], {type: 'application/xml'});
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-
-        document.body.appendChild(a);
-        a.setAttribute('style', 'display: none');
-        a.href = url;
-        a.download = res.filename;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        a.remove(); // remove the element
-      }, error => {
-        console.log('download error:', JSON.stringify(error));
-      }, () => {
-        console.log('Completed file download.');
-      });
+    this.exportService.callExportRoute(
+      'export/' + fileExtension + '/' + this.linkRoute + 'type/' + 1,
+      fileExtension,
+      httpHeader);
   }
 }

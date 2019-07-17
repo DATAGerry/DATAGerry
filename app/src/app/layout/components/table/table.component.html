@@ -25,11 +25,11 @@
                 type="button" id="exportButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fa fa-download" aria-hidden="true"></i> Export
         </button>
-        <ul class="dropdown-menu" aria-labelledby="exportButton">
-          <li class="dropdown-item" (click)="export('csv')"><i class="fa fa-file-excel-o" aria-hidden="true"></i> CSV</li>
-          <li class="dropdown-item" (click)="export('json')"><i class="fa fa-file-text-o" aria-hidden="true"></i> JSON</li>
-          <li class="dropdown-item" (click)="export('xml')"><i class="fa fa-code" aria-hidden="true"></i> XML</li>
-        </ul>
+        <div class="dropdown-menu" aria-labelledby="exportButton">
+          <a class="dropdown-item" routerLink="/file/export" ><i class="fa fa-file-excel-o" aria-hidden="true"></i> CSV</a>
+          <a class="dropdown-item" routerLink="/file/export" ><i class="fa fa-file-text-o" aria-hidden="true"></i> JSON</a>
+          <a class="dropdown-item" routerLink="/file/export" ><i class="fa fa-code" aria-hidden="true"></i> XML</a>
+        </div>
       </div>
     </span>
   </div>
@@ -62,16 +62,16 @@
       <!-- action buttons -->
       <td>
         <!-- view -->
-        <a class="text-dark"routerLink="/framework/{{linkRoute}}{{entry.public_id}}">
+        <a class="text-dark" routerLink="/framework/{{linkRoute}}{{entry.public_id}}">
           <i class="fa fa-eye" aria-hidden="true"></i>
         </a>
         <!-- edit -->
-        <a class="ml-1 text-dark" routerLink="/framework/{{linkRoute}}{{entry.public_id}}">
+        <a class="ml-1 text-dark" routerLink="/framework/{{linkRoute}}edit/{{entry.public_id}}">
           <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
         </a>
         <!-- delete -->
         <a class="ml-1 text-dark" >
-          <i class="fa fa-trash-o" aria-hidden="true"></i>
+          <i class="fa fa-trash-o" aria-hidden="true" (click)="delObject(entry)"></i>
         </a>
       </td>
     </tr>

@@ -41,6 +41,13 @@ const routes: Routes = [
     loadChildren: () => import('./search/search.module').then(m => m.SearchModule)
   },
   {
+    path: 'file',
+    data: {
+      breadcrumb: 'File'
+    },
+    loadChildren: () => import('./export/export.module').then(m => m.ExportModule)
+  },
+  {
     path: 'framework',
     data: {
       breadcrumb: 'Framework'
@@ -55,9 +62,14 @@ const routes: Routes = [
     loadChildren: () => import('./user/user.module').then(m => m.UserModule),
   },
   {
+    path: 'settings',
+    loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule)
+  },
+  {
     path: 'error',
     loadChildren: () => import('./error/error.module').then(m => m.ErrorModule)
   },
+
   {
     path: '**',
     redirectTo: 'error/404'

@@ -1,0 +1,39 @@
+
+<form [formGroup]="formExport" (ngSubmit)="exportObjectByTypeID()">
+  <div class="card">
+    <div class="card-header">Export</div>
+
+    <div class="card-body">
+
+      <div class="form-group">
+        <label for="typeChooser">Object Type <span class="required">*</span></label>
+        <select id="typeChooser" class="form-control" formControlName="type" (change)="changeType($event)">
+          <option value="" disabled selected>Choose your option</option>
+          <option *ngFor="let type of typeList" [ngValue]="type">
+            {{type.label}}
+          </option>
+        </select>
+        <!-- error block -->
+        <div class="text-danger float-right" *ngIf="isSubmitted && !type.touched">
+          <small><sup>*</sup>Please enter type</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="formatChooser">Output format <span class="required">*</span></label>
+        <select id="formatChooser" class="form-control" formControlName="format" (change)="changeFormat($event)">
+          <option value="" disabled selected>Choose your option</option>
+          <option> XML </option>
+          <option> CSV </option>
+          <option> JSON </option>
+        </select>
+        <!-- error block -->
+        <div class="text-danger float-right" *ngIf="isSubmitted && !format.touched">
+          <small><sup>*</sup>Please enter format</small>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary float-right">Go!</button>
+    </div>
+  </div>
+</form>
