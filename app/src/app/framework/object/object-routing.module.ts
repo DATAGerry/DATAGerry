@@ -19,7 +19,8 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { ObjectListComponent } from './components/object-list/object-list.component';
-import { ObjectViewComponent } from './components/object-view/object-view.component';
+import { ObjectViewComponent } from './object-view/object-view.component';
+import { ObjectAddComponent } from './object-add/object-add.component';
 
 const routes: Routes = [
   {
@@ -28,6 +29,13 @@ const routes: Routes = [
       breadcrumb: 'List'
     },
     component: ObjectListComponent
+  },
+  {
+    path: 'add',
+    data: {
+      breadcrumb: 'New'
+    },
+    component: ObjectAddComponent
   },
   {
     path: 'type/:publicID',

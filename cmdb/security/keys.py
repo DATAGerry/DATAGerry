@@ -78,22 +78,31 @@ class KeyHolder:
         return rsa_prv
 
 
-def _generate_rsa_keypair():
-    from Crypto.PublicKey import RSA
-    key = RSA.generate(2048)
-    private_key = key.export_key()
-    public_key = key.publickey().export_key()
+class KeyGenerator:
 
-    from pathlib import Path
-    Path(f'{SystemConfigReader.DEFAULT_CONFIG_LOCATION}keys/').mkdir(parents=True, exist_ok=True)
+    def __init__(self, key_directory=None):
+        """
+        Args:
+            key_directory: key based directory
+        """
+        self.key_directory = key_directory or SystemConfigReader.DEFAULT_CONFIG_LOCATION + "/keys"
 
-    file_out = open(SystemConfigReader.DEFAULT_CONFIG_LOCATION + "/keys/token_private.pem", "wb")
-    file_out.write(private_key)
-    file_out.close()
+    def generate_rsa_keypair(self):
+        from Crypto.PublicKey import RSA
+        key = RSA.generate(2048)
+        private_key = key.export_key()
+        public_key = key.publickey().export_key()
 
-    file_out = open(SystemConfigReader.DEFAULT_CONFIG_LOCATION + "/keys/token_public.pem", "wb")
-    file_out.write(public_key)
-    file_out.close()
+        from pathlib import Path
+        Path(f'{self.key_directory}/').mkdir(parents=True, exist_ok=True)
+
+        file_out = open(f'{self.key_directory}/token_private.pem', "wb")
+        file_out.write(private_key)
+        file_out.close()
+
+        file_out = open(f'{self.key_directory}/token_public.pem', "wb")
+        file_out.write(public_key)
+        file_out.close()
 
 
 class RSATokenKeysNotExists(CMDBError):

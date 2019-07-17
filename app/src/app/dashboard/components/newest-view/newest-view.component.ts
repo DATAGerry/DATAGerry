@@ -1,4 +1,4 @@
- /*
+/*
 * dataGerry - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
@@ -31,21 +31,16 @@ export class NewestViewComponent implements OnInit {
 
   readonly url = 'object/newest/';
 
-  constructor(private api: ApiCallService) { }
+  constructor(private api: ApiCallService) {
+  }
 
   ngOnInit() {
     this.callObjects();
   }
 
   private callObjects() {
-    this.api.callGetRoute(this.url).subscribe( data => {
+    this.api.callGetRoute(this.url).subscribe(data => {
       this.newest = data as [];
-    });
-  }
-
-  public delObject(id: number) {
-    this.api.callDeleteRoute('object/' + id).subscribe(data => {
-      this.callObjects();
     });
   }
 

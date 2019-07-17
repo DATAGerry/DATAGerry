@@ -32,7 +32,8 @@ export class CmdbType implements CmdbDao {
   public creation_time: any;
   public last_edit_time: any;
   public render_meta: any;
-  public fields: [];
+  public fields: any[];
+
   // tslint:enable:variable-name
 
   public get sections() {

@@ -16,28 +16,23 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { ComponentsFields } from '../components.fields';
+import { Component, OnChanges, SimpleChanges } from '@angular/core';
+import { RenderField } from '../components.fields';
 import { ObjectService } from '../../../services/object.service';
 
 @Component({
-  selector: 'cmdb-ref',
   templateUrl: './ref.component.html',
   styleUrls: ['./ref.component.scss']
 })
-export class RefComponent implements OnInit, OnChanges, ComponentsFields {
+export class RefComponent extends RenderField implements OnChanges {
 
-  @Input() data: any;
   public objectList;
 
-  constructor(private obj: ObjectService) {
+  public constructor(private obj: ObjectService) {
+    super();
   }
 
-  ngOnInit() {
-
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
+  public ngOnChanges(changes: SimpleChanges): void {
     console.log('test');
     if (this.data.ref_types !== 'undefined') {
       this.objectList = this.obj.getObjectsByType(this.data.ref_types);

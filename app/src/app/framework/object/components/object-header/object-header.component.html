@@ -1,16 +1,14 @@
 <div class="card">
-
   <div class="card-header">
     <h6 class="card-title">
-      <a routerLink="/framework/type/{{objectInstance?.type_id}}">{{objectInstance?.label}}</a> #{{objectInstance?.public_id}}
+      <a routerLink="/framework/type/{{objectInstance?.type_id}}">{{objectInstance?.label}}</a>
+      #{{objectInstance?.public_id}}
       <span class="badge badge-primary pull-right">
         {{objectInstance?.active}}
       </span>
     </h6>
   </div>
-
   <div class="card-body">
     <cmdb-object-summary [objectInstance]="objectInstance"></cmdb-object-summary>
   </div>
-
 </div>

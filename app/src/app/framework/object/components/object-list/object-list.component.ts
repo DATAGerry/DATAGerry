@@ -17,7 +17,7 @@
 */
 
 
-import {Component, OnDestroy, ViewChild} from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { ApiCallService } from '../../../../services/api-call.service';
 import { ActivatedRoute } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
@@ -296,7 +296,7 @@ export class ObjectListComponent implements OnDestroy {
       }
     }
     if (publicIds.length > 0) {
-      this.apiCallService.callDeleteManyRoute('object/delete/' + publicIds ).subscribe(data => {
+      this.apiCallService.callDeleteManyRoute('object/delete/' + publicIds).subscribe(data => {
         this.route.params.subscribe((id) => {
           this.init(id);
         });

@@ -1,8 +1,26 @@
-<form>
-  <section *ngFor="let section of sections">
-    <h4>{{section.label}}</h4><hr />
-    <div *ngFor="let field of section?.fields">
-      <cmdb-render-element [data]="getFieldByName(field)"></cmdb-render-element>
+<form [formGroup]="renderForm" id="renderForm" (ngSubmit)="onSubmit()">
+  <section>
+    <h1>Object status</h1>
+    <div class="form-group row">
+      <label class="col-sm-2 col-form-label">
+       Active:
+      </label>
+      <div class="col-sm-10">
+        <div class="custom-control custom-checkbox">
+          <input type="checkbox" formControlName="active" class="custom-control-input" id="active" checked>
+          <label class="custom-control-label" for="active"></label>
+        </div>
+      </div>
     </div>
   </section>
+  <section *ngFor="let section of typeInstance.render_meta.sections">
+    <h1>{{section.label}}</h1>
+    <div *ngFor="let field of section?.fields">
+      <cmdb-render-element [parentFormGroup]="fieldsGroups" [data]="getFieldByName(field)"></cmdb-render-element>
+    </div>
+  </section>
+  <div class="btn-group" role="group">
+    <button type="reset" class="btn btn-outline-secondary">RESET</button>
+    <button class="btn btn-outline-success pull-right" type="submit" [disabled]="!renderForm.valid">SAVE</button>
+  </div>
 </form>

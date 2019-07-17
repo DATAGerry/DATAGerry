@@ -21,7 +21,7 @@ import { CommonModule } from '@angular/common';
 
 import { ObjectRoutingModule } from './object-routing.module';
 import { ObjectListComponent } from './components/object-list/object-list.component';
-import { ObjectViewComponent } from './components/object-view/object-view.component';
+import { ObjectViewComponent } from './object-view/object-view.component';
 import { DataTablesModule } from 'angular-datatables';
 import { LayoutModule } from '../../layout/layout.module';
 import { ObjectHeaderComponent } from './components/object-header/object-header.component';
@@ -31,16 +31,14 @@ import { ObjectSummaryComponent } from './components/object-summary/object-summa
 import { ObjectExternalsComponent } from './components/object-externals/object-externals.component';
 import { ObjectFieldsViewComponent } from './components/object-fields-view/object-fields-view.component';
 import { NgxSpinnerModule } from 'ngx-spinner';
-import { ObjectInsertComponent } from './components/object-insert/object-insert.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RenderModule } from '../render/render.module';
+import { ObjectAddComponent } from './object-add/object-add.component';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @NgModule({
   declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent, ObjectSummaryComponent,
-    ObjectExternalsComponent, ObjectFieldsViewComponent, ObjectInsertComponent],
-  exports: [
-    ObjectInsertComponent
-  ],
+    ObjectExternalsComponent, ObjectFieldsViewComponent, ObjectAddComponent],
   imports: [
     CommonModule,
     ObjectRoutingModule,
@@ -50,7 +48,8 @@ import { RenderModule } from '../render/render.module';
     NgxSpinnerModule,
     FormsModule,
     ReactiveFormsModule,
-    RenderModule
+    RenderModule,
+    NgSelectModule
   ]
 })
 export class ObjectModule { }

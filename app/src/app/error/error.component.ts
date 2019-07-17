@@ -32,7 +32,6 @@ export class ErrorComponent implements OnInit {
   public message: string;
   public readonly now: number = Date.now();
   public previousUrl: string;
-  public currentUrl: string;
 
 
   constructor(private route: ActivatedRoute, private prevRouteService: PreviousRouteService) {

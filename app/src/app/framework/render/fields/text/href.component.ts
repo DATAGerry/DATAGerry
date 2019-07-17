@@ -16,22 +16,17 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { ComponentsFields } from '../components.fields';
+import { Component } from '@angular/core';
+import { RenderField } from '../components.fields';
 
 @Component({
-  selector: 'cmdb-href',
   templateUrl: './text.component.html',
   styleUrls: ['./text.component.scss']
 })
-export class HrefComponent implements OnInit, ComponentsFields {
+export class HrefComponent extends RenderField {
 
-  @Input() data: any;
-
-  constructor() {
-  }
-
-  ngOnInit() {
+  public constructor() {
+    super();
   }
 
 }

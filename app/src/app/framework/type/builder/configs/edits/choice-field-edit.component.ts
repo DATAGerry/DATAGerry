@@ -28,9 +28,24 @@ export class ChoiceFieldEditComponent implements OnInit {
   @Input() groupList: any;
   @Input() userList: any;
   @Input() data: any;
-  constructor() { }
+  public options = [];
 
-  ngOnInit() {
+  constructor() {
+    this.options.push({
+      name: 'option-1',
+      label: 'Option 1'
+    });
+  }
+
+  public ngOnInit(): void {
+    this.data.options = this.options;
+  }
+
+  public addOption() {
+    this.options.push({
+      name: `option-${(this.options.length + 1)}`,
+      label: `Option ${(this.options.length + 1)}`
+    });
   }
 
 }

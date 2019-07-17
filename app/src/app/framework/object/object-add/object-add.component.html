@@ -1,0 +1,28 @@
+<h1>Add new object:</h1>
+<hr/>
+<ng-template [ngIf]="!typeInstance" [ngIfElse]="renderTemplate">
+  <form [formGroup]="typeIDForm" novalidate>
+    <div class="input-group mb-3">
+      <ng-select [items]="typeList" formControlName="typeID" bindLabel="label" bindValue="public_id" required>
+        <ng-template ng-option-tmp let-item="item" let-index="index" let-search="searchTerm">
+          <div style="margin: 10px 0;" class="card">
+            <div class="card-body">
+              <h5 class="card-title">{{item.label}}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">Name: {{item.name}}</h6>
+              <p class="card-text">
+                {{item.description}}
+              </p>
+            </div>
+          </div>
+        </ng-template>
+      </ng-select>
+      <div class="input-group-append">
+        <button class="btn btn-outline-primary" type="submit" [disabled]="!typeIDForm.valid" (click)="useTypeID()">Add
+        </button>
+      </div>
+    </div>
+  </form>
+</ng-template>
+<ng-template #renderTemplate>
+  <cmdb-render [mode]="mode" [typeInstance]="typeInstance" (parentSubmit)="saveObject()"></cmdb-render>
+</ng-template>

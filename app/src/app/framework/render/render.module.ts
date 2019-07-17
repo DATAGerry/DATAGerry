@@ -34,7 +34,7 @@ import { TextareaComponent } from './fields/textarea/textarea.component';
 import { LayoutModule } from '../../layout/layout.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -51,7 +51,8 @@ import { FormsModule } from '@angular/forms';
     LayoutModule,
     NgbModule,
     NgSelectModule,
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule
   ]
 })
 export class RenderModule {

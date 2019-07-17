@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/opt/datagerry/bin/datagerry -c /opt/datagerry/etc/cmdb.conf -s
+ExecStart=/usr/bin/datagerry -c /etc/datagerry/cmdb.conf -s
 KillMode=process
 Restart=on-failure
 
