@@ -22,10 +22,10 @@ import { DataTableDirective } from 'angular-datatables';
 import { BehaviorSubject, Subject} from 'rxjs';
 import { UserService } from '../../../user/services/user.service';
 import { ApiCallService } from '../../../services/api-call.service';
-import { map } from 'rxjs/operators';
 import { HttpHeaders } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { ExportService } from '../../../services/export.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'cmdb-table',
@@ -51,11 +51,7 @@ export class TableComponent implements OnDestroy {
   @Input() add: {} = {
     // add new
     text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
-    className: 'btn btn-success btn-sm mr-1',
-    attr: {
-      'data-toggle': 'modal',
-      'data-target': '#insertModal'
-    }
+    className: 'btn btn-success btn-sm mr-1'
   };
 
   /**
@@ -81,7 +77,15 @@ export class TableComponent implements OnDestroy {
   public items: any = new BehaviorSubject<any[]>([]);
 
   constructor(private userService: UserService, private apiCallService: ApiCallService,
-              private exportService: ExportService, private datePipe: DatePipe) {
+              private exportService: ExportService, private router: Router) {
+    this.add = {
+      // add new
+      text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
+      className: 'btn btn-success btn-sm mr-1',
+      action: function() {
+        this.router.navigate(['/framework/' + this.linkRoute + 'add']);
+      }.bind(this)
+    };
   }
 
   @Input() set entryLists(value: any[]) {
@@ -209,15 +213,25 @@ export class TableComponent implements OnDestroy {
     });
   }
 
-  public export(fileExtension: string) {
+  public exporter(fileExtension: string) {
 
-    const httpHeader =  new HttpHeaders({
-        'Content-Type': 'application/' + fileExtension
-      });
+    const allCheckbox: any = document.getElementsByClassName('select-checkbox');
+    const publicIds: string[] = [];
 
-    this.exportService.callExportRoute(
-      'export/' + fileExtension + '/' + this.linkRoute + 'type/' + 1,
-      fileExtension,
-      httpHeader);
+    for (const box of allCheckbox) {
+      if (box.checked && box.id) {
+        publicIds.push(box.id);
+      }
+    }
+
+    const httpHeader = new HttpHeaders({
+      'Content-Type': 'application/' + fileExtension
+    });
+
+    if (publicIds.length > 0) {
+      this.exportService.callExportRoute('export/' + fileExtension + '/' + this.linkRoute + publicIds,
+        fileExtension,
+        httpHeader);
+    }
   }
 }

@@ -19,7 +19,7 @@
 
 import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { ApiCallService } from '../../../../services/api-call.service';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { DatePipe } from '@angular/common';
 import { ObjectService } from '../../../services/object.service';
@@ -52,7 +52,7 @@ export class ObjectListComponent implements OnDestroy {
   readonly $date: string = '$date';
 
   constructor(private apiCallService: ApiCallService, private objService: ObjectService,
-              private exportService: ExportService, private route: ActivatedRoute,
+              private exportService: ExportService, private route: ActivatedRoute, private router: Router,
               private spinner: NgxSpinnerService, private datePipe: DatePipe) {
     this.route.params.subscribe((id) => {
       this.init(id);
@@ -120,10 +120,9 @@ export class ObjectListComponent implements OnDestroy {
         // add new
         text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
         className: 'btn btn-success btn-sm mr-1',
-        attr: {
-          'data-toggle': 'modal',
-          'data-target': '#insertModal'
-        }
+        action: function() {
+          this.router.navigate(['/framework/object/add']);
+        }.bind(this)
       }
     );
 
@@ -304,14 +303,24 @@ export class ObjectListComponent implements OnDestroy {
     }
   }
 
-  public export(fileExtension: string) {
+  public exporter(fileExtension: string) {
+    const allCheckbox: any = document.getElementsByClassName('select-checkbox');
+    const publicIds: string[] = [];
+
+    for (const box of allCheckbox) {
+      if (box.checked && box.id) {
+        publicIds.push(box.id);
+      }
+    }
 
     const httpHeader = new HttpHeaders({
       'Content-Type': 'application/' + fileExtension
     });
 
-    this.exportService.callExportRoute('export/' + fileExtension + '/' + 'object/type/' + 1,
-      fileExtension,
-      httpHeader);
+    if (publicIds.length > 0) {
+      this.exportService.callExportRoute('export/' + fileExtension + '/' + 'object/' + publicIds,
+        fileExtension,
+        httpHeader);
+    }
   }
 }
