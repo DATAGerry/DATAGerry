@@ -18,20 +18,22 @@
 
 import { Component, ComponentFactoryResolver, ComponentRef, Injector, Input, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { fieldComponents } from '../fields/fields.list';
+import { FormControl, FormGroup } from '@angular/forms';
+import { RenderField } from '../fields/components.fields';
 
 @Component({
   selector: 'cmdb-render-element',
   templateUrl: './render-element.component.html',
   styleUrls: ['./render-element.component.scss']
 })
-export class RenderElementComponent implements OnInit {
+export class RenderElementComponent extends RenderField implements OnInit {
 
-  @Input() data: any;
   @ViewChild('fieldContainer', {read: ViewContainerRef, static: true}) container;
   private component: any;
   private componentRef: ComponentRef<any>;
 
   constructor(private resolver: ComponentFactoryResolver) {
+    super();
   }
 
   ngOnInit() {
@@ -41,6 +43,7 @@ export class RenderElementComponent implements OnInit {
     const factory = this.resolver.resolveComponentFactory(this.component);
     this.componentRef = this.container.createComponent(factory);
     this.componentRef.instance.data = this.data;
+    this.componentRef.instance.parentFormGroup = this.parentFormGroup;
 
   }
 

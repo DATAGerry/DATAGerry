@@ -1,10 +1,14 @@
-<div class="form-check">
-
-  <input class="form-check-input" type="checkbox" name="{{data.name}}" value="{{data?.value}}">
-  <label>
-    <i class="fa fa-info-circle" *ngIf="data?.helperText" placement="right" [ngbTooltip]="data?.helperText"></i>
-    {{data.label}}
-    <span class="required" *ngIf="data?.required">*</span>
+<div class="form-group row" [formGroup]="parentFormGroup">
+  <label class="col-sm-2 col-form-label">
+    <i class="fa fa-info-circle" *ngIf="data?.helperText" placement="top" [ngbTooltip]="data?.helperText"></i>
+    {{data.label}}: <span class="required" *ngIf="data?.required">*</span>
   </label>
-  <small class="form-text text-muted">{{data?.description}}</small>
+  <div class="col-sm-10">
+    <div class="custom-control custom-checkbox">
+      <input type="checkbox" class="custom-control-input" id="{{data.name}}" name="{{data.name}}"
+             [formControlName]="data.name">
+      <label class="custom-control-label" for="{{data.name}}"></label>
+    </div>
+    <small class="form-text text-muted">{{data?.description}}</small>
+  </div>
 </div>

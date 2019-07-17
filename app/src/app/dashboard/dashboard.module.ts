@@ -38,4 +38,5 @@ import { ObjectModule } from '../framework/object/object.module';
     ObjectModule
   ]
 })
-export class DashboardModule { }
+export class DashboardModule {
+}

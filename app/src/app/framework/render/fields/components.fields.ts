@@ -17,7 +17,32 @@
 */
 
 import { Input } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
 
+// deprecated
 export interface ComponentsFields {
   data: Input;
+}
+
+export class RenderField {
+  private innerData: any;
+
+  @Input() parentFormGroup: FormGroup;
+
+  @Input('data')
+  public set data(value: any) {
+    this.innerData = value;
+    this.parentFormGroup.addControl(
+      this.data.name, new FormControl('')
+    );
+  }
+
+  public get data(): any {
+    return this.innerData;
+  }
+
+  public constructor() {
+    this.parentFormGroup = new FormGroup({});
+  }
+
 }

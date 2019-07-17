@@ -57,15 +57,9 @@
           <a routerLink="/user/{{authService.currentUserValue.public_id}}" class="dropdown-item">
             <i class="fa fa-user"></i> Profile
           </a>
-          <div class="dropdown-header">Settings</div>
-          <a routerLink="/connection" class="dropdown-item">
-            <i class="fa fa-wrench"></i> Connect
-          </a>
+          <div class="dropdown-header">Auth</div>
           <a routerLink="/login" class="dropdown-item">
             <i class="fa fa-sign-in"></i> Login
-          </a>
-          <a href="#" class="dropdown-item">
-            <i class="fa fa-lock"></i> Lock
           </a>
           <a class="dropdown-item" (click)="logout()">
             <i class="fa fa-power-off"></i> Logout

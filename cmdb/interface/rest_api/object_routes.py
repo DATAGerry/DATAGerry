@@ -168,24 +168,26 @@ def get_navtive_object(public_id: int):
     return resp
 
 
-@object_rest.route('/add', methods=['POST'])
+@object_rest.route('/', methods=['POST'])
 @login_required
 def add_object():
     from bson import json_util
     from datetime import datetime
     add_data_dump = json.dumps(request.json)
+    LOGGER.debug(add_data_dump)
     try:
         new_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
         new_object_data['public_id'] = object_manager.get_highest_id(CmdbObject.COLLECTION) + 1
         new_object_data['creation_time'] = datetime.utcnow()
         new_object_data['last_edit_time'] = datetime.utcnow()
+        new_object_data['views'] = 0
     except TypeError as e:
         LOGGER.warning(e)
         abort(400)
     try:
         object_instance = CmdbObject(**new_object_data)
     except CMDBError as e:
-        LOGGER.debug(e)
+        LOGGER.debug(e.message)
         return abort(400)
     try:
         ack = object_manager.insert_object(object_instance)
@@ -236,7 +238,7 @@ def delete_object(public_id: int):
     return resp
 
 
-@object_rest.route('/delete/<string:public_ids>', methods=['GET'])
+@object_rest.route('/delete/<string:public_ids>', methods=['DELETE'])
 @login_required
 def delete_many_objects(public_ids):
     try:

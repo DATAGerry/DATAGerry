@@ -55,9 +55,14 @@ const routes: Routes = [
     loadChildren: () => import('./user/user.module').then(m => m.UserModule),
   },
   {
+    path: 'settings',
+    loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule)
+  },
+  {
     path: 'error',
     loadChildren: () => import('./error/error.module').then(m => m.ErrorModule)
   },
+
   {
     path: '**',
     redirectTo: 'error/404'

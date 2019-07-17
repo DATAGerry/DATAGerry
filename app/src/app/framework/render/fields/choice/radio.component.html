@@ -1,3 +1,14 @@
-<p>
-  radio works!
-</p>
+<div class="form-group row" [formGroup]="parentFormGroup">
+  <label class="col-sm-2 col-form-label">
+    <i class="fa fa-info-circle" *ngIf="data?.helperText" placement="top" [ngbTooltip]="data?.helperText"></i>
+    {{data.label}}: <span class="required" *ngIf="data?.required">*</span>
+  </label>
+  <div class="col-sm-10">
+    <div class="custom-control custom-radio" *ngFor="let option of data.options">
+      <input type="radio" id="{{option.name}}" [attr.name]="data.name" class="custom-control-input"
+             [formControlName]="data.name">
+      <label class="custom-control-label" [htmlFor]="option.name">{{option.label}}</label>
+    </div>
+    <small class="form-text text-muted">{{data?.description}}</small>
+  </div>
+</div>

@@ -29,22 +29,18 @@ export class LatestChangesViewComponent implements OnInit {
   public latestChanges: [];
   readonly url = 'object/latest/';
 
-  constructor(private api: ApiCallService) { }
+  constructor(private api: ApiCallService) {
+  }
 
   ngOnInit() {
     this.callObjects();
   }
 
   private callObjects() {
-    this.api.callGetRoute(this.url).subscribe( data => {
+    this.api.callGetRoute(this.url).subscribe(data => {
       this.latestChanges = data as [];
     });
   }
 
-  public delObject(id: number) {
-    this.api.callDeleteRoute('object/' + id).subscribe(data => {
-      this.callObjects();
-    });
-  }
 }
 
