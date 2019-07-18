@@ -238,7 +238,7 @@ def delete_object(public_id: int):
     return resp
 
 
-@object_rest.route('/delete/<string:public_ids>', methods=['DELETE'])
+@object_rest.route('/delete/<string:public_ids>', methods=['GET'])
 @login_required
 def delete_many_objects(public_ids):
     try:
