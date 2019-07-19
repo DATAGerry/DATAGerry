@@ -28,7 +28,6 @@ import { ExportService } from '../../../services/export.service';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from '../../helpers/modal/modal.component';
-import {connectableObservableDescriptor} from 'rxjs/internal/observable/ConnectableObservable';
 
 @Component({
   selector: 'cmdb-table',

@@ -23,6 +23,8 @@ import { CmdbObject } from '../../models/cmdb-object';
 import { ObjectService } from '../../services/object.service';
 import { CmdbType } from '../../models/cmdb-type';
 import { TypeService } from '../../services/type.service';
+import { ModalComponent } from '../../../layout/helpers/modal/modal.component';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'cmdb-object-view',
@@ -37,7 +39,7 @@ export class ObjectViewComponent implements OnInit {
   public editDisable: boolean = true;
 
   constructor(private api: ApiCallService, private objService: ObjectService, private typeService: TypeService,
-              private activRoute: ActivatedRoute, private route: Router) {
+              private activRoute: ActivatedRoute, private route: Router, private modalService: NgbModal) {
     this.activRoute.params.subscribe((id) => {
       this.objID = id.publicID;
       this.ngOnInit();
@@ -55,9 +57,21 @@ export class ObjectViewComponent implements OnInit {
   }
 
   public delObject(value: any) {
-    const id = value.public_id;
-    this.api.callDeleteRoute('object/' + id).subscribe(data => {
-      this.route.navigate(['/']);
+    const modalComponent = this.createModal(
+      'Delete Object',
+      'Are you sure you want to delete this Object?',
+      'Cancel',
+      'Delete');
+
+    modalComponent.result.then((result) => {
+      if (result) {
+        const id = value.public_id;
+        this.api.callDeleteRoute('object/' + id).subscribe(data => {
+          this.route.navigate(['/']);
+        });
+      }
+    }, (reason) => {
+      // ToDO:
     });
   }
 
@@ -76,5 +90,14 @@ export class ObjectViewComponent implements OnInit {
 
   public isEditable() {
     return this.editDisable = !this.editDisable;
+  }
+
+  private createModal(title: string, modalMessage: string, buttonDeny: string, buttonAccept: string) {
+    const modalComponent = this.modalService.open(ModalComponent);
+    modalComponent.componentInstance.title = title;
+    modalComponent.componentInstance.modalMessage = modalMessage;
+    modalComponent.componentInstance.buttonDeny = buttonDeny;
+    modalComponent.componentInstance.buttonAccept = buttonAccept;
+    return modalComponent;
   }
 }

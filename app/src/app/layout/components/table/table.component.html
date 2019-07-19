@@ -76,7 +76,11 @@
           <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
         </a>
         <!-- delete -->
-        <a class="ml-1 text-dark" >
+        <a class="ml-1 text-dark" *ngIf="entry.type_id === undefined"
+           routerLink="/framework/type/delete/{{entry.public_id}}">
+          <i class="fa fa-trash-o" aria-hidden="true"></i>
+        </a>
+        <a class="ml-1 text-dark" *ngIf="entry.type_id !== undefined">
           <i class="fa fa-trash-o" aria-hidden="true" (click)="delObject(entry)"></i>
         </a>
       </td>
