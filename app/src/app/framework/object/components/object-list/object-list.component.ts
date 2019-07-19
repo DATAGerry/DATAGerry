@@ -28,6 +28,8 @@ import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpHeaders } from '@angular/common/http';
 import { ExportService } from '../../../../services/export.service';
+import {ModalComponent} from "../../../../layout/helpers/modal/modal.component";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'cmdb-object-list',
@@ -53,7 +55,7 @@ export class ObjectListComponent implements OnDestroy {
 
   constructor(private apiCallService: ApiCallService, private objService: ObjectService,
               private exportService: ExportService, private route: ActivatedRoute, private router: Router,
-              private spinner: NgxSpinnerService, private datePipe: DatePipe) {
+              private spinner: NgxSpinnerService, private datePipe: DatePipe, private modalService: NgbModal) {
     this.route.params.subscribe((id) => {
       this.init(id);
     });
@@ -278,11 +280,23 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   public delObject(value: any) {
-    const id = value.public_id;
-    this.apiCallService.callDeleteRoute('object/' + id).subscribe(data => {
-      this.route.params.subscribe((typeId) => {
-        this.init(typeId);
-      });
+    const modalComponent = this.createModal(
+      'Delete Object',
+      'Are you sure you want to delete this Object?',
+      'Cancel',
+      'Delete');
+
+    modalComponent.result.then((result) => {
+      if (result) {
+        const id = value.public_id;
+        this.apiCallService.callDeleteRoute('object/' + id).subscribe(data => {
+          this.route.params.subscribe((typeId) => {
+            this.init(typeId);
+          });
+        });
+      }
+    }, (reason) => {
+      // ToDO:
     });
   }
 
@@ -294,11 +308,26 @@ export class ObjectListComponent implements OnDestroy {
         publicIds.push(box.id);
       }
     }
+
     if (publicIds.length > 0) {
-      this.apiCallService.callDeleteManyRoute('object/delete/' + publicIds).subscribe(data => {
-        this.route.params.subscribe((id) => {
-          this.init(id);
-        });
+      const modalComponent = this.createModal(
+        'Delete selected Objects',
+        'Are you sure, you want to delete all selected objects?',
+        'Cancel',
+        'Delete');
+
+      modalComponent.result.then((result) => {
+        if (result) {
+          if (publicIds.length > 0) {
+            this.apiCallService.callDeleteManyRoute('object/delete/' + publicIds).subscribe(data => {
+              this.route.params.subscribe((id) => {
+                this.init(id);
+              });
+            });
+          }
+        }
+      }, (reason) => {
+        // ToDO:
       });
     }
   }
@@ -322,5 +351,14 @@ export class ObjectListComponent implements OnDestroy {
         fileExtension,
         httpHeader);
     }
+  }
+
+  private createModal(title: string, modalMessage: string, buttonDeny: string, buttonAccept: string) {
+    const modalComponent = this.modalService.open(ModalComponent);
+    modalComponent.componentInstance.title = title;
+    modalComponent.componentInstance.modalMessage = modalMessage;
+    modalComponent.componentInstance.buttonDeny = buttonDeny;
+    modalComponent.componentInstance.buttonAccept = buttonAccept;
+    return modalComponent;
   }
 }
