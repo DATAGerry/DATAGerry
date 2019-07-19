@@ -56,10 +56,7 @@ export class ApiCallService {
   }
 
   public callDeleteManyRoute<T>(route: string, params?: any): Observable<any> {
-    if (window.confirm('Are you sure, you want to delete all selected objects?')) {
       return this.http.get<T>(this.apiURL + route, params);
-    }
-    return new Observable<any>();
   }
 
   public callDeleteRoute<T>(route: string, params?: any): Observable<any> {

@@ -26,6 +26,9 @@ import { HttpHeaders } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { ExportService } from '../../../services/export.service';
 import { Router } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ModalComponent } from '../../helpers/modal/modal.component';
+import {connectableObservableDescriptor} from 'rxjs/internal/observable/ConnectableObservable';
 
 @Component({
   selector: 'cmdb-table',
@@ -77,7 +80,8 @@ export class TableComponent implements OnDestroy {
   public items: any = new BehaviorSubject<any[]>([]);
 
   constructor(private userService: UserService, private apiCallService: ApiCallService,
-              private exportService: ExportService, private router: Router) {
+              private exportService: ExportService, private router: Router,
+              private modalService: NgbModal) {
     this.add = {
       // add new
       text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
@@ -196,20 +200,45 @@ export class TableComponent implements OnDestroy {
     }
 
     if (publicIds.length > 0) {
-      this.apiCallService.callDeleteManyRoute(this.linkRoute + 'delete/' + publicIds ).subscribe(data => {
-        this.apiCallService.callGetRoute(this.linkRoute).subscribe(objs => {
-          this.entryLists = objs;
-        });
+      const modalComponent = this.createModal(
+        'Delete selected Objects',
+        'Are you sure, you want to delete all selected objects?',
+        'Cancel',
+        'Delete');
+
+      modalComponent.result.then((result) => {
+        if (result) {
+          this.apiCallService.callDeleteManyRoute(this.linkRoute + 'delete/' + publicIds ).subscribe(data => {
+            this.apiCallService.callGetRoute(this.linkRoute).subscribe(objs => {
+              this.entryLists = objs;
+            });
+          });
+        }
+      }, (reason) => {
+        // ToDO:
       });
     }
   }
 
   public delObject(value: any) {
-    const id = value.public_id;
-    this.apiCallService.callDeleteRoute(this.linkRoute + id).subscribe(data => {
-      this.apiCallService.callGetRoute(this.linkRoute).subscribe(objs => {
-        this.entryLists = objs;
-      });
+
+    const modalComponent = this.createModal(
+      'Delete Object',
+      'Are you sure you want to delete this Object?',
+      'Cancel',
+      'Delete');
+
+    modalComponent.result.then((result) => {
+      if (result) {
+        const id = value.public_id;
+        this.apiCallService.callDeleteRoute(this.linkRoute + id).subscribe(data => {
+          this.apiCallService.callGetRoute(this.linkRoute).subscribe(objs => {
+            this.entryLists = objs;
+          });
+        });
+      }
+    }, (reason) => {
+      // ToDO:
     });
   }
 
@@ -233,5 +262,14 @@ export class TableComponent implements OnDestroy {
         fileExtension,
         httpHeader);
     }
+  }
+
+  private createModal(title: string, modalMessage: string, buttonDeny: string, buttonAccept: string) {
+    const modalComponent = this.modalService.open(ModalComponent);
+    modalComponent.componentInstance.title = title;
+    modalComponent.componentInstance.modalMessage = modalMessage;
+    modalComponent.componentInstance.buttonDeny = buttonDeny;
+    modalComponent.componentInstance.buttonAccept = buttonAccept;
+    return modalComponent;
   }
 }
