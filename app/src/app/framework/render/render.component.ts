@@ -20,6 +20,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
 import { CmdbMode } from '../modes.enum';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { CmdbObject } from '../models/cmdb-object';
 
 @Component({
   selector: 'cmdb-render',
@@ -29,11 +30,9 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 export class RenderComponent {
 
   private typeInstanceBack: CmdbType;
-  public renderForm: FormGroup;
-  public fieldsGroups: FormGroup;
-
+  @Input() public renderForm: FormGroup = new FormGroup({});
+  @Input() public fieldsGroups: FormGroup = new FormGroup({});
   @Input() public mode: CmdbMode;
-  @Output() parentSubmit = new EventEmitter<any>();
 
   @Input('typeInstance')
   public set typeInstance(type: CmdbType) {
@@ -56,20 +55,15 @@ export class RenderComponent {
     return this.typeInstanceBack;
   }
 
-  public constructor() {
-    this.fieldsGroups = new FormGroup({});
-    this.renderForm = new FormGroup({
-      active: new FormControl(true),
-      fields: this.fieldsGroups
-    });
-  }
+  @Input() public objectInstance: CmdbObject = null;
 
   public get fields() {
     return this.renderForm.get('fields');
   }
 
-  public onSubmit() {
-    this.parentSubmit.emit();
+  public constructor() {
+    this.renderForm = new FormGroup({});
+    this.fieldsGroups = new FormGroup({});
   }
 
   public getFieldByName(name: string) {

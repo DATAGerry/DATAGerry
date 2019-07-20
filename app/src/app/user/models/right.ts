@@ -16,15 +16,11 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
-
-@Component({
-  selector: 'cmdb-active-badge',
-  templateUrl: './active-badge.component.html',
-  styleUrls: ['./active-badge.component.scss']
-})
-export class ActiveBadgeComponent {
-
-  @Input() activeStatus: boolean;
-
+export class Right {
+  public _MASTER: boolean;
+  // tslint:disable-next-line:variable-name
+  public _level: number;
+  public name: string;
+  public label: string;
+  public description: string;
 }

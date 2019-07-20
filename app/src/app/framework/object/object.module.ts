@@ -20,7 +20,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { ObjectRoutingModule } from './object-routing.module';
-import { ObjectListComponent } from './components/object-list/object-list.component';
+import { ObjectListComponent } from './object-list/object-list.component';
 import { ObjectViewComponent } from './object-view/object-view.component';
 import { DataTablesModule } from 'angular-datatables';
 import { LayoutModule } from '../../layout/layout.module';
@@ -29,16 +29,17 @@ import { ObjectQrComponent } from './components/object-qr/object-qr.component';
 import { QRCodeModule } from 'angularx-qrcode';
 import { ObjectSummaryComponent } from './components/object-summary/object-summary.component';
 import { ObjectExternalsComponent } from './components/object-externals/object-externals.component';
-import { ObjectFieldsViewComponent } from './components/object-fields-view/object-fields-view.component';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RenderModule } from '../render/render.module';
 import { ObjectAddComponent } from './object-add/object-add.component';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { ObjectRenderComponent } from './components/object-render/object-render.component';
+import { ObjectFooterComponent } from './components/object-footer/object-footer.component';
 
 @NgModule({
   declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent, ObjectSummaryComponent,
-    ObjectExternalsComponent, ObjectFieldsViewComponent, ObjectAddComponent],
+    ObjectExternalsComponent, ObjectAddComponent, ObjectRenderComponent, ObjectFooterComponent],
   imports: [
     CommonModule,
     ObjectRoutingModule,

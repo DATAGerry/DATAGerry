@@ -28,7 +28,7 @@ export class GroupService {
 
   private readonly prefix: string = 'group';
 
-  constructor(private api: ApiCallService, private authService: AuthService) {
+  constructor(private api: ApiCallService) {
   }
 
   public getGroup(publicID: number) {

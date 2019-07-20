@@ -17,6 +17,8 @@
 */
 
 import { Component, OnInit } from '@angular/core';
+import { RightService } from '../../../user/services/right.service';
+import { Right } from '../../../user/models/right';
 
 @Component({
   selector: 'cmdb-rights-list',
@@ -25,9 +27,19 @@ import { Component, OnInit } from '@angular/core';
 })
 export class RightsListComponent implements OnInit {
 
-  constructor() { }
+  public rightList: Right[];
+  public rightLevels: { [key: number]: string };
 
-  ngOnInit() {
+  constructor(private rightService: RightService) {
+  }
+
+  public ngOnInit(): void {
+    this.rightService.getRightList().subscribe((rights: Right[]) => {
+      this.rightList = rights;
+    });
+    this.rightService.getRightLevels().subscribe((levels) => {
+      this.rightLevels = levels;
+    });
   }
 
 }

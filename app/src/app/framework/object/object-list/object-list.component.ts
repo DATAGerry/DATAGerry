@@ -18,16 +18,16 @@
 
 
 import { Component, OnDestroy, ViewChild } from '@angular/core';
-import { ApiCallService } from '../../../../services/api-call.service';
+import { ApiCallService } from '../../../services/api-call.service';
 import { ActivatedRoute } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { DatePipe } from '@angular/common';
-import { ObjectService } from '../../../services/object.service';
+import { ObjectService } from '../../services/object.service';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpHeaders } from '@angular/common/http';
-import { ExportService } from '../../../../services/export.service';
+import { ExportService } from '../../../services/export.service';
 
 @Component({
   selector: 'cmdb-object-list',

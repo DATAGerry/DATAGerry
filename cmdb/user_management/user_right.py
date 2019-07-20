@@ -85,7 +85,7 @@ class BaseRight:
 
     @classmethod
     def get_levels(cls):
-        return cls._nameToLevel
+        return cls._levelToName
 
     @property
     def level(self):

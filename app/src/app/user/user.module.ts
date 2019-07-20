@@ -24,6 +24,7 @@ import { UserService } from './services/user.service';
 import { UserViewComponent } from './components/user-view/user-view.component';
 import { LayoutModule } from '../layout/layout.module';
 import { ReactiveFormsModule } from '@angular/forms';
+import { GroupService } from './services/group.service';
 
 @NgModule({
   declarations: [UserViewComponent],
@@ -34,7 +35,9 @@ import { ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule
   ],
   providers: [
-    UserService
+    UserService,
+    GroupService,
+
   ],
 })
 export class UserModule { }

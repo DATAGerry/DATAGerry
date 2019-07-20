@@ -17,14 +17,18 @@
 */
 
 import { Component, Input } from '@angular/core';
+import { CmdbMode } from '../../../modes.enum';
+import { CmdbType } from '../../../models/cmdb-type';
 
 @Component({
-  selector: 'cmdb-active-badge',
-  templateUrl: './active-badge.component.html',
-  styleUrls: ['./active-badge.component.scss']
+  selector: 'cmdb-object-render',
+  templateUrl: './object-render.component.html',
+  styleUrls: ['./object-render.component.scss']
 })
-export class ActiveBadgeComponent {
+export class ObjectRenderComponent {
 
-  @Input() activeStatus: boolean;
+  public mode: CmdbMode = CmdbMode.View;
+  @Input() objectInstance;
+  @Input() typeInstance: CmdbType;
 
 }

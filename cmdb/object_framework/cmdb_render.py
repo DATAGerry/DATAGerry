@@ -214,9 +214,7 @@ class CmdbRender:
             return False
 
     def result(self):
-        from cmdb.user_management.user_manager import get_user_manager
-
-        render_result = self.build_render_result();
+        render_result = self.build_render_result()
         self.__add_extended_render_results(render_result)
 
         return render_result
@@ -248,6 +246,7 @@ class CmdbRender:
             type_name=self.type_instance.get_name(),
             label=self.type_instance.get_label(),
             active=self.type_instance.active,
+            version=self.object_instance.version
         )
 
     def __add_extended_render_results(self, render_result):
@@ -270,7 +269,7 @@ class CmdbRender:
 class RenderResult:
 
     def __init__(self, public_id: int, creation_time: datetime, last_edit_time: datetime,
-                 author_id: int, author_name: str,
+                 author_id: int, author_name: str, version: str,
                  type_id: int, active: bool, type_name: str, label: str = None):
         self.public_id = public_id
         self.creation_time = creation_time
@@ -280,6 +279,7 @@ class RenderResult:
         self.active = active
         self.type_id = type_id
         self.type_name = type_name
+        self.version = version
         self.label = label or type_name.title()
         self.summaries = None
         self.externals = None

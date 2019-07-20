@@ -23,6 +23,7 @@ from cmdb.utils.interface_wraps import login_required
 from cmdb.interface.route_utils import make_response, RootBlueprint
 
 from flask import request, abort
+from bson import json_util
 
 try:
     from cmdb.utils.error import CMDBError
@@ -62,16 +63,29 @@ def get_category(public_id):
 @categories_routes.route('/', methods=['POST'])
 @login_required
 def add_category():
-    pass
+    http_post_request_data = json.dumps(request.json)
+    ack = None
+    modified_category_data = None
+    try:
+        modified_category_data = json.loads(http_post_request_data, object_hook=json_util.object_hook)
+    except TypeError as e:
+        LOGGER.warning(e)
+        abort(400)
+    try:
+        modified_category_data['public_id'] = int(object_manager.get_highest_id(CmdbCategory.COLLECTION) + 1)
+        ack = object_manager.insert_category(modified_category_data)
+    except CMDBError as e:
+        LOGGER.debug(e.message)
+    return make_response(ack)
 
 
 @categories_routes.route('/', methods=['PUT'])
 @login_required
 def update_category():
-    from bson import json_util
     http_put_request_data = json.dumps(request.json)
     ack = None
     modified_category_data = None
+    LOGGER.debug(http_put_request_data)
     try:
         modified_category_data = json.loads(http_put_request_data, object_hook=json_util.object_hook)
     except TypeError as e:
@@ -87,7 +101,7 @@ def update_category():
     except CMDBError:
         return abort(500)
 
-    resp = make_response(ack)
+    resp = make_response(ack.modified_count)
     return resp
 
 

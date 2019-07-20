@@ -16,15 +16,27 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { ApiCallService } from '../../services/api-call.service';
+import { AuthService } from '../../auth/services/auth.service';
+import { Group } from '../models/group';
 
-@Component({
-  selector: 'cmdb-active-badge',
-  templateUrl: './active-badge.component.html',
-  styleUrls: ['./active-badge.component.scss']
+@Injectable({
+  providedIn: 'root'
 })
-export class ActiveBadgeComponent {
+export class RightService {
 
-  @Input() activeStatus: boolean;
+  private readonly prefix: string = 'right';
+
+  constructor(private api: ApiCallService) {
+  }
+
+  public getRightList() {
+    return this.api.callGetRoute<Group[]>(this.prefix + '/');
+  }
+
+  public getRightLevels() {
+    return this.api.callGetRoute<Group[]>(this.prefix + '/levels');
+  }
 
 }

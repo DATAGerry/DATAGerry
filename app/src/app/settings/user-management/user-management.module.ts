@@ -23,9 +23,11 @@ import { UserManagementRoutingModule } from './user-management-routing.module';
 import { RightsListComponent } from './rights-list/rights-list.component';
 import { GroupsListComponent } from './groups-list/groups-list.component';
 import { UsersListComponent } from './users-list/users-list.component';
+import { MasterBadgeComponent } from './rights-list/master-badge/master-badge.component';
+import { LevelHighlightComponent } from './rights-list/level-highlight/level-highlight.component';
 
 @NgModule({
-  declarations: [RightsListComponent, GroupsListComponent, UsersListComponent],
+  declarations: [RightsListComponent, GroupsListComponent, UsersListComponent, MasterBadgeComponent, LevelHighlightComponent],
   imports: [
     CommonModule,
     UserManagementRoutingModule

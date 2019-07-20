@@ -16,9 +16,8 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, ComponentFactoryResolver, ComponentRef, Injector, Input, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ComponentFactoryResolver, ComponentRef, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { fieldComponents } from '../fields/fields.list';
-import { FormControl, FormGroup } from '@angular/forms';
 import { RenderField } from '../fields/components.fields';
 
 @Component({
@@ -36,15 +35,15 @@ export class RenderElementComponent extends RenderField implements OnInit {
     super();
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
     this.container.clear();
     this.component = fieldComponents[this.data.type];
 
     const factory = this.resolver.resolveComponentFactory(this.component);
     this.componentRef = this.container.createComponent(factory);
     this.componentRef.instance.data = this.data;
+    this.componentRef.instance.mode = this.mode;
     this.componentRef.instance.parentFormGroup = this.parentFormGroup;
-
   }
 
 }

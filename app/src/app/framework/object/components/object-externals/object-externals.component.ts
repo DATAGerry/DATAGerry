@@ -27,7 +27,4 @@ export class ObjectExternalsComponent {
 
   @Input() objectInstance: any = [];
 
-  constructor() {
-  }
-
 }

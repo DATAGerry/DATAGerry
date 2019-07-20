@@ -22,7 +22,7 @@ import { CmdbDao } from './cmdb-dao';
 export class CmdbCategory implements CmdbDao {
 
   // tslint:disable: variable-name
-  readonly public_id: number;
+  public public_id: number;
   public name: string;
   public label: string;
   public icon: number;

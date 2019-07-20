@@ -27,7 +27,7 @@ export class GroupsListComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {
+  public ngOnInit(): void {
   }
 
 }

@@ -47,6 +47,13 @@ export class ObjectService {
     return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/type/' + typeID);
   }
 
+  public getObject(publicID: number, native: boolean = false) {
+    if (native) {
+      return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/' + publicID + '/native');
+    }
+    return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/' + publicID);
+  }
+
   public postObject(objectInstance: CmdbObject): Observable<any> {
     return this.api.callPostRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
   }

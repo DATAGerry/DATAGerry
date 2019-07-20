@@ -16,15 +16,23 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Component, HostBinding, Input, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'cmdb-active-badge',
-  templateUrl: './active-badge.component.html',
-  styleUrls: ['./active-badge.component.scss']
+  // tslint:disable-next-line:component-selector
+  selector: '[cmdb-master-badge]',
+  templateUrl: './master-badge.component.html',
+  styleUrls: ['./master-badge.component.scss']
 })
-export class ActiveBadgeComponent {
+export class MasterBadgeComponent implements OnInit {
 
-  @Input() activeStatus: boolean;
+  @HostBinding('class') backgroundClass;
+  @Input() isMaster: boolean = false;
+
+  public ngOnInit(): void {
+    if (this.isMaster) {
+      this.backgroundClass = '';
+    }
+  }
 
 }

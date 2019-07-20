@@ -17,7 +17,8 @@
 */
 
 import { Input } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { AbstractControl, Form, FormControl, FormGroup } from '@angular/forms';
+import { CmdbMode } from '../../modes.enum';
 
 // deprecated
 export interface ComponentsFields {
@@ -26,6 +27,8 @@ export interface ComponentsFields {
 
 export class RenderField {
   private innerData: any;
+  public MODES = CmdbMode;
+  @Input() public mode: CmdbMode;
 
   @Input() parentFormGroup: FormGroup;
 
@@ -39,6 +42,10 @@ export class RenderField {
 
   public get data(): any {
     return this.innerData;
+  }
+
+  public get controller(): AbstractControl {
+    return this.parentFormGroup.get(this.data.name);
   }
 
   public constructor() {

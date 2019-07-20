@@ -17,17 +17,29 @@
 */
 
 import { Component, OnInit } from '@angular/core';
+import { CategoryService } from '../../services/category.service';
+import { CmdbCategory } from '../../models/cmdb-category';
+import { TypeService } from '../../services/type.service';
+import { CmdbType } from '../../models/cmdb-type';
 
 @Component({
-  selector: 'cmdb-object-qr',
-  templateUrl: './object-qr.component.html',
-  styleUrls: ['./object-qr.component.scss']
+  selector: 'cmdb-category-list',
+  templateUrl: './category-list.component.html',
+  styleUrls: ['./category-list.component.scss']
 })
-export class ObjectQrComponent implements OnInit {
-  public urlContent: string = null;
+export class CategoryListComponent implements OnInit {
+
+  public categoryList: CmdbCategory[];
+  public typeList: CmdbType[];
+
+  constructor(public categoryService: CategoryService, public typeService: TypeService) {
+
+  }
 
   public ngOnInit(): void {
-    this.urlContent = window.location.href;
+    this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
+      this.categoryList = list;
+    });
   }
 
 }

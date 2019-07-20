@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { TypeService } from '../../services/type.service';
 import { CmdbType } from '../../models/cmdb-type';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
@@ -27,6 +27,9 @@ import { CmdbObject } from '../../models/cmdb-object';
 import { UserService } from '../../../user/services/user.service';
 import { ObjectService } from '../../services/object.service';
 import { Router } from '@angular/router';
+import { CategoryService } from '../../services/category.service';
+import { error } from 'selenium-webdriver';
+import { CmdbCategory } from '../../models/cmdb-category';
 
 @Component({
   selector: 'cmdb-object-add',
@@ -36,16 +39,20 @@ import { Router } from '@angular/router';
 export class ObjectAddComponent implements OnInit, OnDestroy {
 
   public typeList: CmdbType[];
+  public preperatedTypeList: any[];
   public typeIDForm: FormGroup;
   private typeIDSubject: BehaviorSubject<number>;
   public typeID: Observable<number>;
   public typeInstance: CmdbType;
   public mode: CmdbMode = CmdbMode.Create;
   public objectInstance: CmdbObject;
+  public renderForm: FormGroup;
+  public fieldsGroups: FormGroup;
+  @Output() parentSubmit = new EventEmitter<any>();
   @ViewChild(RenderComponent, {static: false}) render: RenderComponent;
 
 
-  constructor(private router: Router, private typeService: TypeService,
+  constructor(private router: Router, private typeService: TypeService, private categoryService: CategoryService,
               private objectService: ObjectService, private userService: UserService) {
     this.objectInstance = new CmdbObject();
     this.typeIDSubject = new BehaviorSubject<number>(null);
@@ -57,20 +64,41 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
         });
       }
     });
+    this.fieldsGroups = new FormGroup({});
+    this.renderForm = new FormGroup({
+      active: new FormControl(true),
+      fields: this.fieldsGroups
+    });
   }
 
   public ngOnInit(): void {
     this.typeService.getTypeList().subscribe((typeList: CmdbType[]) => {
       this.typeList = typeList;
+    }, (e) => {
+      console.error(e);
+    }, () => {
+      this.categoryService.getCategoryList().subscribe((categoryList: CmdbCategory[]) => {
+        for (const category of categoryList) {
+          for (const typeSelectedID of category.type_list) {
+            this.typeList.find(type => type.public_id === typeSelectedID).category_name = category.name;
+          }
+        }
+      });
     });
     this.typeIDForm = new FormGroup({
       typeID: new FormControl(null, Validators.required)
     });
+
   }
 
   public ngOnDestroy(): void {
     this.typeIDSubject.unsubscribe();
   }
+
+  groupByFn = (item) => item.category_id;
+
+  groupValueFn = (_: string, children: any[]) => ({name: children[0].category_name, total: children.length});
+
 
   public get formTypeID() {
     return this.typeIDForm.get('typeID').value;
@@ -101,7 +129,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
         ack = newObjectID;
       },
       (error) => {
-
+        console.error(error);
       }, () => {
         this.router.navigate(['/framework/object/' + ack]);
       });

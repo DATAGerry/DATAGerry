@@ -63,6 +63,9 @@ const routes: Routes = [
   },
   {
     path: 'settings',
+    data: {
+      breadcrumb: 'Settings'
+    },
     loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule)
   },
   {

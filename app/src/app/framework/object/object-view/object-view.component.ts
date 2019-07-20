@@ -31,50 +31,33 @@ import { TypeService } from '../../services/type.service';
 })
 export class ObjectViewComponent implements OnInit {
 
-  private objID: number;
+  private objectID: number;
+  public renderResult: any;
   public objectInstance: any;
   public typeInstance: any;
-  public editDisable: boolean = true;
 
-  constructor(private api: ApiCallService, private objService: ObjectService, private typeService: TypeService,
-              private activRoute: ActivatedRoute, private route: Router) {
-    this.activRoute.params.subscribe((id) => {
-      this.objID = id.publicID;
-      this.ngOnInit();
+  constructor(private api: ApiCallService, private objectService: ObjectService, private typeService: TypeService,
+              private router: ActivatedRoute, private route: Router) {
+    this.router.params.subscribe((params) => {
+      this.objectID = params.publicID;
     });
   }
 
-  ngOnInit() {
-    this.api.callGetRoute<any>('object/' + `${this.objID}`)
-      .subscribe(obj => {
-        this.typeService.getType(obj.type_id).subscribe((typeInstanceResp: CmdbType) => {
-          this.typeInstance = typeInstanceResp;
-          this.objectInstance = obj;
-        });
+  public ngOnInit(): void {
+    // RenderResult
+    this.objectService.getObject(this.objectID).subscribe((renderResultResp: any) => {
+      this.renderResult = renderResultResp;
+    });
+    // NativeObject
+    this.objectService.getObject(this.objectID).subscribe((objectInstanceResp: CmdbObject) => {
+      this.objectInstance = objectInstanceResp;
+    }, (error) => {
+      console.error(error);
+    }, () => {
+      this.typeService.getType(this.objectInstance.type_id).subscribe((typeInstanceResp: CmdbType) => {
+        this.typeInstance = typeInstanceResp;
       });
-  }
-
-  public delObject(value: any) {
-    const id = value.public_id;
-    this.api.callDeleteRoute('object/' + id).subscribe(data => {
-      this.route.navigate(['/']);
     });
   }
 
-  public copy(clone: any) {
-    const newInstance = new CmdbObject();
-    newInstance.version = '1.0.0';
-    newInstance.type_id = clone.type_id;
-    newInstance.author_id = clone.author_id;
-    newInstance.active = clone.active;
-    newInstance.fields = clone.fields;
-
-    this.objService.postObject(newInstance).subscribe(res => {
-      this.route.navigate(['framework/object/' + res]);
-    });
-  }
-
-  public isEditable() {
-    return this.editDisable = !this.editDisable;
-  }
 }
