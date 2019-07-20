@@ -38,15 +38,17 @@ export class TypeListComponent implements OnInit, OnDestroy {
   public dtOptions: DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
   public linkRoute: string = 'type/';
-  public addNewType: {} = {
-    text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
-    className: 'btn btn-success btn-sm mr-1',
-    action: function() {
-      this.router.navigate(['/framework/type/add']);
-    }.bind(this)
-  };
+  public addNewType: {};
 
-  constructor(private typeService: TypeService, private toastService: ToastService, private router: Router, private route: ActivatedRoute) {
+  constructor(private typeService: TypeService, private toastService: ToastService,
+              private router: Router, private route: ActivatedRoute) {
+    this.addNewType = {
+      text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
+      className: 'btn btn-success btn-sm mr-1',
+      action: function() {
+        this.router.navigate(['/framework/type/add']);
+      }.bind(this)
+    };
   }
 
   public ngOnInit(): void {

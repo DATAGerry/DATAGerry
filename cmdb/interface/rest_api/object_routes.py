@@ -159,7 +159,7 @@ def get_object(public_id):
 
 @object_rest.route('<int:public_id>/native/', methods=['GET'])
 @login_required
-def get_navtive_object(public_id: int):
+def get_native_object(public_id: int):
     try:
         object_instance = object_manager.get_object(public_id)
     except CMDBError:
@@ -238,7 +238,7 @@ def delete_object(public_id: int):
     return resp
 
 
-@object_rest.route('/delete/<string:public_ids>', methods=['DELETE'])
+@object_rest.route('/delete/<string:public_ids>', methods=['GET'])
 @login_required
 def delete_many_objects(public_ids):
     try:

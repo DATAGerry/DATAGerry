@@ -32,21 +32,31 @@ import { TypeService } from '../../framework/services/type.service';
 export class ExportComponent implements OnInit {
 
   public typeList: CmdbType[];
+  public formatList;
+  public selectedFormat: number = null;
   public formExport: FormGroup;
   public isSubmitted = false;
   readonly URL: string = '/object/type/';
 
   constructor(private exportService: ExportService, private datePipe: DatePipe, private typeService: TypeService) {
     this.formExport = new FormGroup({
-      type: new FormControl(null, Validators.required),
-      format: new FormControl('', Validators.required)
+      type: new FormControl( null, Validators.required),
+      format: new FormControl(null, Validators.required)
     });
   }
 
   ngOnInit() {
-    this.typeService.getTypeList().subscribe((list: CmdbType[]) => {
-      this.typeList = list;
+    this.typeService.getTypeList().subscribe(data => {
+      this.typeList = data;
     });
+
+    this.formatList = [
+      {id: 'xml', label: 'XML', icon: 'fa-code'},
+      {id: 'csv', label: 'CSV', icon: 'fa-file-excel-o'},
+      {id: 'json', label: 'JSON', icon: 'fa-file-text-o'},
+    ];
+
+    this.selectedFormat = this.formatList[0].id;
   }
 
   get type() {
@@ -57,35 +67,17 @@ export class ExportComponent implements OnInit {
     return this.formExport.get('format');
   }
 
-  changeType(e) {
-    this.type.setValue(e.target.value, {
-      onlySelf: true
-    });
-  }
-
-  changeFormat(e) {
-    this.format.setValue(e.target.value, {
-      onlySelf: true
-    });
-  }
-
   public exportObjectByTypeID() {
-
-    console.log(this.type);
-
     this.isSubmitted = true;
     if (!this.formExport.valid) {
       return false;
     }
 
-    const typeID: any = this.formExport.get('type').value;
+    const typeID = this.formExport.get('type').value;
     let fileExtension: string = this.formExport.get('format').value;
-
-    console.log(typeID);
 
     if (fileExtension != null && typeID != null) {
       fileExtension = fileExtension.toLocaleLowerCase();
-
       const httpHeader = new HttpHeaders({
         'Content-Type': 'application/' + fileExtension
       });

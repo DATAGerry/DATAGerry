@@ -1,0 +1,14 @@
+
+<div class="modal-content">
+  <div class="modal-header">
+    <h4 class="modal-title"><i class="fa fa-trash-o" aria-hidden="true"></i> {{title}}</h4>
+    <button type="button" class="close" aria-hidden="true" (click)="activeModal.dismiss('Cross click')">×</button>
+  </div>
+  <div class="modal-body text-center">
+    <strong>{{modalMessage}}</strong>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary mr-1" (click)="activeModal.close(false)">{{buttonDeny}}</button>
+    <button type="button" class="btn btn-primary"  (click)="activeModal.close(true)">{{buttonAccept}}</button>
+  </div>
+</div>

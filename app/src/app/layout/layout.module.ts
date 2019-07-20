@@ -31,10 +31,11 @@ import { LowercaseDirective } from './directives/lowercase.directive';
 import { SearchBarComponent } from './components/search-bar/search-bar.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { TableComponent } from './components/table/table.component';
 import { DataTablesModule } from 'angular-datatables';
 import { ToastContainerComponent } from './helpers/toast/toast-container.component';
+import { NgbActiveModal, NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import { ModalComponent } from './helpers/modal/modal.component';
 
 @NgModule({
   declarations: [
@@ -48,7 +49,8 @@ import { ToastContainerComponent } from './helpers/toast/toast-container.compone
     LowercaseDirective,
     SearchBarComponent,
     TableComponent,
-    ToastContainerComponent
+    ToastContainerComponent,
+    ModalComponent
   ],
   exports: [
     NavigationComponent,
@@ -71,7 +73,11 @@ import { ToastContainerComponent } from './helpers/toast/toast-container.compone
     DataTablesModule
   ],
   providers: [
-    BreadcrumbService
+    BreadcrumbService,
+    NgbActiveModal
+  ],
+  entryComponents: [
+    ModalComponent
   ]
 })
 export class LayoutModule {

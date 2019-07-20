@@ -24,6 +24,7 @@ import { ExportComponent } from './export/export.component';
 import { LayoutModule } from '../layout/layout.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RenderModule } from '../framework/render/render.module';
+import {NgSelectModule} from "@ng-select/ng-select";
 
 @NgModule({
   declarations: [ExportComponent],
@@ -33,7 +34,8 @@ import { RenderModule } from '../framework/render/render.module';
     FormsModule,
     ReactiveFormsModule,
     RenderModule,
-    ExportRoutingModule
+    ExportRoutingModule,
+    NgSelectModule
   ]
 })
 export class ExportModule { }

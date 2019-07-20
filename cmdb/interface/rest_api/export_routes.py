@@ -92,6 +92,36 @@ def export_xml_by_object_type(collection, type_id):
     return response_file(parse_to_xml(xml_data), mime_type="text/xml", file_extension="xml")
 
 
+@export_route.route('/csv/object/<string:public_ids>', methods=['GET'])
+@login_required
+def export_csv_by_public_ids(public_ids):
+    query = _build_query({'public_id': public_ids}, q_operator='$or')
+    data_list = object_manager.get_objects_by(sort="public_id", **query)
+
+    csv_data = parse_to_csv(data_list)
+    return response_file(parse_to_xml(csv_data), mime_type="text/csv", file_extension="csv")
+
+
+@export_route.route('/xml/object/<string:public_ids>', methods=['GET'])
+@login_required
+def export_xml_by_public_ids(public_ids):
+    query = _build_query({'public_id': public_ids}, q_operator='$or')
+    data = object_manager.get_objects_by(sort="public_id", **query)
+
+    xml_data = json.loads(make_response(data).data)
+    return response_file(parse_to_xml(xml_data), mime_type="text/xml", file_extension="xml")
+
+
+@export_route.route('/json/object/<string:public_ids>', methods=['GET'])
+@login_required
+def export_json_by_public_ids(public_ids):
+    query = _build_query({'public_id': public_ids}, q_operator='$or')
+    data = object_manager.get_objects_by(sort="public_id", **query)
+
+    json_data = make_response(data).data
+    return response_file(parse_to_xml(json_data), mime_type="application/json", file_extension="text")
+
+
 def parse_to_xml(json_obj, line_spacing=""):
     result_list = list()
     json_obj_type = type(json_obj)
@@ -160,3 +190,18 @@ def response_file(file, mime_type: str, file_extension: str):
                 "attachment; filename=%s.%s" % (timestamp, file_extension)
         }
     )
+
+
+def _build_query(args, q_operator='$and'):
+    query_list = []
+    try:
+        for key, value in args.items():
+            for v in value.split(","):
+                try:
+                    query_list.append({key: int(v)})
+                except (ValueError, TypeError):
+                    return abort(400)
+        return {q_operator: query_list}
+
+    except CMDBError:
+        pass
