@@ -36,7 +36,7 @@ export class ExportComponent implements OnInit {
   public selectedFormat: number = null;
   public formExport: FormGroup;
   public isSubmitted = false;
-  readonly URL: string = '/object/type/';
+  readonly URL: string = 'object/type/';
 
   constructor(private exportService: ExportService, private datePipe: DatePipe, private typeService: TypeService) {
     this.formExport = new FormGroup({
@@ -81,7 +81,10 @@ export class ExportComponent implements OnInit {
       const httpHeader = new HttpHeaders({
         'Content-Type': 'application/' + fileExtension
       });
-      this.exportService.callExportRoute('export/' + fileExtension + this.URL + typeID, fileExtension, httpHeader);
+
+      //http://127.0.0.1:4000/rest/export/xml/object/type/5
+      //'/object/type/<int:public_id>/<string:extension>'
+      this.exportService.callExportRoute('export/' + this.URL + typeID + '/' + fileExtension , fileExtension, httpHeader);
     }
   }
 }

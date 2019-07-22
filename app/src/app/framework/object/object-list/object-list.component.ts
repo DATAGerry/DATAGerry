@@ -347,7 +347,7 @@ export class ObjectListComponent implements OnDestroy {
     });
 
     if (publicIds.length > 0) {
-      this.exportService.callExportRoute('export/' + fileExtension + '/' + 'object/' + publicIds,
+      this.exportService.callExportRoute('export/' + 'object/' + publicIds + '/' + fileExtension,
         fileExtension,
         httpHeader);
     }
