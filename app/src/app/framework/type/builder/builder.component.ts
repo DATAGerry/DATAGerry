@@ -34,6 +34,8 @@ import { RadioControl } from './controls/choice/radio.control';
 import { SelectControl } from './controls/choice/select.control';
 import { CheckboxControl } from './controls/choice/checkbox.control';
 import { GroupService } from '../../../user/services/group.service';
+import { CmdbMode } from '../../modes.enum';
+import { FormGroup } from '@angular/forms';
 
 declare var $: any;
 
@@ -47,6 +49,7 @@ export class BuilderComponent implements OnInit {
   public sections: any[];
   public userList: User[] = [];
   public groupList: Group[] = [];
+  public mode = CmdbMode.Create;
 
   @Input() builderConfig: any = {};
 
@@ -68,6 +71,8 @@ export class BuilderComponent implements OnInit {
     new Controller('ref', ReferenceControl)
   ];
 
+  public builderFormGroup: FormGroup;
+
   public constructor(private userService: UserService, private groupService: GroupService) {
     this.groupService.getGroupList().subscribe((gList: Group[]) => {
       this.groupList = gList;
@@ -79,6 +84,7 @@ export class BuilderComponent implements OnInit {
 
   public ngOnInit(): void {
     this.sections = [];
+    this.builderFormGroup = new FormGroup({});
   }
 
   public onDrop(event: DndDropEvent, list: any[]) {

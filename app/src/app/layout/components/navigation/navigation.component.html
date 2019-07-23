@@ -21,6 +21,8 @@
           <i class="fa fa-map-o"></i>
         </a>
         <div class="dropdown-menu dropdown-menu-right">
+          <div class="dropdown-header">Object</div>
+          <a class="dropdown-item" routerLink="/framework/object/test">Rendertest</a>
           <div class="dropdown-header">Type</div>
           <a class="dropdown-item" routerLink="/framework/type">List all types</a>
           <a class="dropdown-item" routerLink="/framework/type/add">Add a new type</a>
@@ -58,9 +60,6 @@
             <i class="fa fa-user"></i> Profile
           </a>
           <div class="dropdown-header">Auth</div>
-          <a routerLink="/login" class="dropdown-item">
-            <i class="fa fa-sign-in"></i> Login
-          </a>
           <a class="dropdown-item" (click)="logout()">
             <i class="fa fa-power-off"></i> Logout
           </a>

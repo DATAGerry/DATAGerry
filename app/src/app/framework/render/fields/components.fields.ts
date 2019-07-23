@@ -19,6 +19,7 @@
 import { Input } from '@angular/core';
 import { AbstractControl, Form, FormControl, FormGroup } from '@angular/forms';
 import { CmdbMode } from '../../modes.enum';
+import { ToastService } from '../../../layout/services/toast.service';
 
 // deprecated
 export interface ComponentsFields {
@@ -28,16 +29,18 @@ export interface ComponentsFields {
 export class RenderField {
   private innerData: any;
   public MODES = CmdbMode;
-  @Input() public mode: CmdbMode;
+  public toast: ToastService;
 
+  @Input() public mode: CmdbMode;
   @Input() parentFormGroup: FormGroup;
 
   @Input('data')
   public set data(value: any) {
     this.innerData = value;
-    this.parentFormGroup.addControl(
+    // POSSIBLE DEPRECATED
+    /*this.parentFormGroup.addControl(
       this.data.name, new FormControl('')
-    );
+    );*/
   }
 
   public get data(): any {
@@ -49,7 +52,21 @@ export class RenderField {
   }
 
   public constructor() {
-    this.parentFormGroup = new FormGroup({});
+  }
+
+  public copyToClipboard() {
+    const selBox = document.createElement('textarea');
+    selBox.style.position = 'fixed';
+    selBox.style.left = '0';
+    selBox.style.top = '0';
+    selBox.style.opacity = '0';
+    selBox.value = this.data.value;
+    document.body.appendChild(selBox);
+    selBox.focus();
+    selBox.select();
+    document.execCommand('copy');
+    document.body.removeChild(selBox);
+    this.toast.show('Content was copied to clipboard');
   }
 
 }

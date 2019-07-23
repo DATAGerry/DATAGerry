@@ -28,7 +28,7 @@ import { Right } from '../../../user/models/right';
 export class RightsListComponent implements OnInit {
 
   public rightList: Right[];
-  public rightLevels: { [key: number]: string };
+  public rightLevels: { [key: number]: string }[];
 
   constructor(private rightService: RightService) {
   }

@@ -69,7 +69,7 @@ export class TypeBasicStepComponent implements OnInit {
       active: new FormControl(true)
     });
     this.basicCategoryForm = new FormGroup({
-      category_id: new FormControl(null)
+      category_id: new FormControl(null, Validators.required)
     });
   }
 

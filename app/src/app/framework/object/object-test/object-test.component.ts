@@ -17,33 +17,34 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { ApiCallService } from '../../../../services/api-call.service';
-import { ActivatedRoute } from '@angular/router';
-import { CmdbType } from '../../../models/cmdb-type';
-import { CmdbObject } from '../../../models/cmdb-object';
-import { TypeService } from '../../../services/type.service';
+import { CmdbType } from '../../models/cmdb-type';
+import { TypeService } from '../../services/type.service';
+import { CmdbMode } from '../../modes.enum';
+import { CmdbObject } from '../../models/cmdb-object';
+import { ObjectService } from '../../services/object.service';
 
 @Component({
-  selector: 'cmdb-type-view',
-  templateUrl: './type-view.component.html',
-  styleUrls: ['./type-view.component.scss']
+  selector: 'cmdb-object-test',
+  templateUrl: './object-test.component.html',
+  styleUrls: ['./object-test.component.scss']
 })
-export class TypeViewComponent implements OnInit {
+export class ObjectTestComponent implements OnInit {
 
-  public typeID: number;
   public typeInstance: CmdbType;
+  public objectInstance: CmdbObject;
+  public modes = CmdbMode;
 
-
-  constructor(private typeService: TypeService, private route: ActivatedRoute) {
-    this.route.params.subscribe((id) => {
-      this.typeID = id.publicID;
-    });
+  constructor(private typeService: TypeService, private objectService: ObjectService) {
   }
 
-  public ngOnInit(): void {
-    this.typeService.getType(this.typeID).subscribe((typeInstanceResp: CmdbType) => {
-      this.typeInstance = typeInstanceResp;
+  ngOnInit() {
+    this.typeService.getType(3).subscribe((res: CmdbType) => {
+      this.typeInstance = res;
     });
+    this.objectService.getObject(1, true).subscribe((res: CmdbObject) => {
+      this.objectInstance = res;
+    });
+
   }
 
 }

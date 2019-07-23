@@ -30,5 +30,7 @@ export class CmdbObject implements CmdbDao {
   public active: boolean;
   public fields: any[];
   public creation_time: any;
+  public last_edit_time: any;
+  public author_name?: string;
   // tslint:enable
 }

@@ -15,16 +15,17 @@ export class TypeMetaStepComponent implements OnInit {
       label: new FormControl('', Validators.required),
       fields: new FormControl('', Validators.required)
     });
-
+    // Deprecated
     const URL_REGEXP = '/^(http?|[a-zA-Z0-9.-]+):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)' +
       '(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.' +
       '(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*' +
       '(\/($|[a-zA-Z0-9.,?\'\\+&{}%$#=~_-]+))*$/;';
+    const URL_REGEXP_2 = '^(http?|[a-zA-Z0-9.-]+)?(://)?([a-zA-Z0-9.-]+)?.?[a-z0-9-]+(.|:)([a-z0-9-]+)+([/?].*)?$';
     this.externalsForm = new FormGroup({
       name: new FormControl('', [Validators.required, this.listNameValidator(this.externalLinks)]),
       label: new FormControl('', Validators.required),
       icon: new FormControl(''),
-      href: new FormControl('', [Validators.required, Validators.pattern(URL_REGEXP)]),
+      href: new FormControl('', [Validators.required, Validators.pattern(URL_REGEXP_2)]),
       fields: new FormControl('')
     });
   }

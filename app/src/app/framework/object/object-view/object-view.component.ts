@@ -23,6 +23,7 @@ import { CmdbObject } from '../../models/cmdb-object';
 import { ObjectService } from '../../services/object.service';
 import { CmdbType } from '../../models/cmdb-type';
 import { TypeService } from '../../services/type.service';
+import { CmdbMode } from '../../modes.enum';
 
 @Component({
   selector: 'cmdb-object-view',
@@ -31,10 +32,10 @@ import { TypeService } from '../../services/type.service';
 })
 export class ObjectViewComponent implements OnInit {
 
+  public mode: CmdbMode = CmdbMode.View;
   private objectID: number;
-  public renderResult: any;
-  public objectInstance: any;
-  public typeInstance: any;
+  public objectInstance: CmdbObject;
+  public typeInstance: CmdbType;
 
   constructor(private api: ApiCallService, private objectService: ObjectService, private typeService: TypeService,
               private router: ActivatedRoute, private route: Router) {
@@ -45,10 +46,6 @@ export class ObjectViewComponent implements OnInit {
 
   public ngOnInit(): void {
     // RenderResult
-    this.objectService.getObject(this.objectID).subscribe((renderResultResp: any) => {
-      this.renderResult = renderResultResp;
-    });
-    // NativeObject
     this.objectService.getObject(this.objectID).subscribe((objectInstanceResp: CmdbObject) => {
       this.objectInstance = objectInstanceResp;
     }, (error) => {

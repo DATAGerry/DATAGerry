@@ -55,11 +55,5 @@ export class CategoryService {
     return this.api.callPutRoute<number>(this.servicePrefix + '/', data);
   }
 
-  public async addTypeToCategory(categoryID: number, typeID: number) {
-    const category = await this.api.callAsyncGetRoute<CmdbCategory>(this.servicePrefix + '/' + categoryID);
-    category.type_list.push(typeID);
-    this.updateCategory(category);
-  }
-
 
 }

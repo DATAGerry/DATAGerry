@@ -6,7 +6,7 @@
 </div>
 <div class="form-group">
   <label>Reference type selections:</label>
-  <ng-select [items]="typeList | async"
+  <ng-select [items]="typeList"
              bindLabel="label"
              bindValue="public_id"
              [(ngModel)]="data.ref_types">
@@ -78,4 +78,3 @@
     </div>
   </div>
 </div>
-<hr/>

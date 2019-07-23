@@ -21,6 +21,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { ObjectListComponent } from './object-list/object-list.component';
 import { ObjectViewComponent } from './object-view/object-view.component';
 import { ObjectAddComponent } from './object-add/object-add.component';
+import { ObjectTestComponent } from './object-test/object-test.component';
 
 const routes: Routes = [
   {
@@ -36,6 +37,13 @@ const routes: Routes = [
       breadcrumb: 'New'
     },
     component: ObjectAddComponent
+  },
+  {
+    path: 'test',
+    data: {
+      breadcrumb: 'Test'
+    },
+    component: ObjectTestComponent
   },
   {
     path: 'type/:publicID',

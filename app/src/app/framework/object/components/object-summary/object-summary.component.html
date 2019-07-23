@@ -2,7 +2,16 @@
   <tbody>
   <tr *ngFor="let sum of objectInstance?.summaries; let i = index">
     <th scope="row">{{sum.label}}</th>
-    <td>{{sum.values | json}}</td>
+    <td>
+      <ng-container *ngFor="let vals of sum.values">
+        {{vals}}
+      </ng-container>
+    </td>
+    <td class="clearfix">
+      <button type="button" class="btn btn-outline-secondary btn-sm float-right" (click)="clipBoardSummary(sum.values)">
+        <i class="fa fa-clipboard"></i>
+      </button>
+    </td>
   </tr>
   </tbody>
 </table>

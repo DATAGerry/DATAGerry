@@ -16,10 +16,10 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
 import { CmdbMode } from '../modes.enum';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 import { CmdbObject } from '../models/cmdb-object';
 
 @Component({
@@ -30,24 +30,15 @@ import { CmdbObject } from '../models/cmdb-object';
 export class RenderComponent {
 
   private typeInstanceBack: CmdbType;
+  private objectInstanceBack: CmdbObject;
   @Input() public renderForm: FormGroup = new FormGroup({});
   @Input() public fieldsGroups: FormGroup = new FormGroup({});
   @Input() public mode: CmdbMode;
 
   @Input('typeInstance')
   public set typeInstance(type: CmdbType) {
-    this.typeInstanceBack = type;
-    for (const section of this.typeInstance.render_meta.sections) {
-
-      for (const field of this.typeInstance.fields) {
-        let fieldControl = new FormControl('');
-        if (field.required) {
-          fieldControl = new FormControl('', Validators.required);
-        }
-        this.fieldsGroups.addControl(
-          field.name, fieldControl
-        );
-      }
+    if (type !== undefined) {
+      this.typeInstanceBack = type;
     }
   }
 
@@ -55,7 +46,21 @@ export class RenderComponent {
     return this.typeInstanceBack;
   }
 
-  @Input() public objectInstance: CmdbObject = null;
+  @Input('objectInstance')
+  public set objectInstance(data: CmdbObject) {
+    if (data !== undefined) {
+      this.objectInstanceBack = data;
+      for (const fieldData of this.objectInstance.fields) {
+        if (fieldData.value !== undefined) {
+          this.fieldsGroups.get(fieldData.name).setValue(fieldData.value);
+        }
+      }
+    }
+  }
+
+  public get objectInstance(): CmdbObject {
+    return this.objectInstanceBack;
+  }
 
   public get fields() {
     return this.renderForm.get('fields');
@@ -64,6 +69,9 @@ export class RenderComponent {
   public constructor() {
     this.renderForm = new FormGroup({});
     this.fieldsGroups = new FormGroup({});
+    if (this.mode === CmdbMode.View) {
+      this.fieldsGroups.disable();
+    }
   }
 
   public getFieldByName(name: string) {
