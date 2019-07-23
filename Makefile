@@ -28,6 +28,7 @@ DIR_DOCS_SOURCE = docs/source
 DIR_DOCS_BUILD = ${DIR_BUILD}/docs
 DIR_DOCS_TARGET = cmdb/interface/net_app/docs
 DIR_RPM_BUILD = ${DIR_BUILD}/rpm
+DIR_TARGZ_BUILD = ${DIR_BUILD}/targz
 DIR_WEB_SOURCE = app
 DIR_WEB_BUILD = app/dist/dataGerryApp
 DIR_WEB_TARGET = cmdb/interface/net_app/dataGerryApp
@@ -37,7 +38,7 @@ DIR_WEB_TARGET = cmdb/interface/net_app/dataGerryApp
 
 # build whole application
 .PHONY: all
-all: bin rpm
+all: bin rpm targz
 
 
 # install Python requirements
@@ -87,6 +88,20 @@ rpm: bin
 	cp etc/cmdb.conf ${DIR_RPM_BUILD}/SOURCES
 	cp contrib/rpm/datagerry.spec ${DIR_RPM_BUILD}
 	${BIN_RPMBUILD} --define '_topdir ${DIR_RPM_BUILD}' -bb ${DIR_RPM_BUILD}/datagerry.spec
+
+
+# create tar.gz package
+.PHONY: targz
+targz: bin
+	mkdir -p ${DIR_TARGZ_BUILD}
+	mkdir -p ${DIR_TARGZ_BUILD}/src/datagerry/
+	mkdir -p ${DIR_TARGZ_BUILD}/src/datagerry/files
+	cp ${DIR_BIN_BUILD}/datagerry ${DIR_TARGZ_BUILD}/src/datagerry/files
+	cp contrib/systemd/datagerry.service ${DIR_TARGZ_BUILD}/src/datagerry/files
+	cp etc/cmdb.conf ${DIR_TARGZ_BUILD}/src/datagerry/files
+	cp LICENSE ${DIR_TARGZ_BUILD}/src/datagerry
+	cp contrib/setup/setup.sh ${DIR_TARGZ_BUILD}/src/datagerry
+	tar -czvf ${DIR_TARGZ_BUILD}/datagerry.tar.gz -C ${DIR_TARGZ_BUILD}/src datagerry
 
 
 # execute tests
