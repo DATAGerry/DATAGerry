@@ -25,6 +25,12 @@ or a reporting. All functions are implemented with the generic and
 the custom definition of object types in mind. With a plugin system, 
 dataGerry can be extended easily - also by experienced users.
 
+
+%pre
+/usr/bin/getent group datagerry || /usr/sbin/groupadd -r datagerry
+/usr/bin/getent passwd datagerry || /usr/sbin/useradd -r -d /home/datagerry -s /sbin/nologin -g datagerry datagerry
+
+
 %install
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_unitdir}
@@ -38,4 +44,3 @@ install -D %{_sourcedir}/cmdb.conf %{buildroot}%{_sysconfdir}/datagerry/cmdb.con
 %{_bindir}/datagerry
 %{_unitdir}/datagerry.service
 %{_sysconfdir}/datagerry/cmdb.conf
-
