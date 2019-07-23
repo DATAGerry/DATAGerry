@@ -257,7 +257,7 @@ export class TableComponent implements OnDestroy {
     });
 
     if (publicIds.length > 0) {
-      this.exportService.callExportRoute('export/' + fileExtension + '/' + this.linkRoute + publicIds,
+      this.exportService.callExportRoute('export/' + this.linkRoute + publicIds + '/' + fileExtension,
         fileExtension,
         httpHeader);
     }

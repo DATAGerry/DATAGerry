@@ -62,7 +62,7 @@
       <!-- action buttons -->
       <td>
         <!-- view -->
-        <a class="text-dark" routerLink="/framework/{{linkRoute}}{{entry.public_id}}">
+        <a class="text-dark" routerLink="/framework/{{linkRoute}}{{entry.public_id}}" *ngIf="entry.type_id !== undefined">
           <i class="fa fa-eye" aria-hidden="true"></i>
         </a>
         <!-- edit -->
