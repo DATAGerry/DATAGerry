@@ -21,12 +21,4 @@ from cmdb.interface.route_utils import make_response
 class JsonFileExporter(FileExporter):
 
     def main(self):
-        file_type = self.get_object_type()
-        if file_type == 'object':
-            data_list = self.get_object_by_id()
-        elif file_type == 'type':
-            data_list = self.get_type_by_id()
-        else:
-            data_list = self.get_all_objects_by_type_id()
-
-        self.set_object_list(make_response(data_list).data)
+        self.set_response(make_response(self.get_object_list()).data)

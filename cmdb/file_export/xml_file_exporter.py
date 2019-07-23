@@ -22,15 +22,7 @@ import json
 class XmlFileExporter(FileExporter):
 
     def main(self):
-        file_type = self.get_object_type()
-        if file_type == 'object':
-            data_type = self.get_object_by_id()
-        elif file_type == 'type':
-            data_type = self.get_type_by_id()
-        else:
-            data_type = self.get_all_objects_by_type_id()
-
-        self.set_object_list(self.parse_to_xml(json.loads(make_response(data_type).data)))
+        self.set_response(self.parse_to_xml(json.loads(make_response(self.get_object_list()).data)))
 
     def parse_to_xml(self, json_obj, line_spacing=""):
         result_list = list()

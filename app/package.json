@@ -38,6 +38,7 @@
     "jquery": "^3.4.1",
     "jszip": "^3.2.1",
     "ngx-drag-drop": "^2.0.0",
+    "ngx-filesaver": "^8.0.0",
     "ngx-spinner": "^7.1.4",
     "rxjs": "~6.5.2",
     "tslib": "^1.10.0",

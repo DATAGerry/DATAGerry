@@ -9,32 +9,27 @@
 
     <span class="card-group float-right">
       <div class="btn-group">
-        <button type="button" class="btn btn-warning btn-sm">
+        <button type="button" id="importButton" class="btn btn-warning btn-sm dropdown-toggle mr-1"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fa fa-upload" aria-hidden="true"></i> Import
         </button>
-        <button type="button" class="btn btn-warning btn-sm mr-1 dropdown-toggle dropdown-toggle-split"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <span class="sr-only">Toggle Dropdown</span>
-        </button>
         <ul class="dropdown-menu" aria-labelledby="importButton">
-          <li class="dropdown-item"><i class="fa fa-file-excel-o" aria-hidden="true"></i> CSV</li>
-          <li class="dropdown-item"><i class="fa fa-file-text-o" aria-hidden="true"></i> JSON</li>
-          <li class="dropdown-item"><i class="fa fa-code" aria-hidden="true"></i> XML</li>
+          <li class="dropdown-item" *ngFor="let item of formatList">
+            <i class="fa {{item.icon}}"></i> {{item.label}}
+          </li>
         </ul>
       </div>
 
       <div class="btn-group">
-        <button type="button" class="btn btn-warning btn-sm" [routerLink]="['/file/export']">
+        <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fa fa-download" aria-hidden="true"></i> Export
         </button>
-        <button type="button" class="btn btn-warning btn-sm dropdown-toggle dropdown-toggle-split"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <span class="sr-only">Toggle Dropdown</span>
-        </button>
         <ul class="dropdown-menu" aria-labelledby="exportButton">
-          <li class="dropdown-item" (click)="exporter('csv')"><i class="fa fa-file-excel-o"></i> CSV</li>
-          <li class="dropdown-item" (click)="exporter('json')"><i class="fa fa-file-text-o"></i> JSON</li>
-          <li class="dropdown-item" (click)="exporter('xml')"><i class="fa fa-code"></i> XML</li>
+          <li class="dropdown-item" *ngFor="let item of formatList"
+              (click)="exporter(item.id)">
+            <i class="fa {{item.icon}}"></i> {{item.label}}
+          </li>
         </ul>
       </div>
     </span>

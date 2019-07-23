@@ -17,12 +17,11 @@
 */
 
 
-import { Component, OnDestroy, ViewChild, Input } from '@angular/core';
+import { Component, OnDestroy, ViewChild, Input, OnInit } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
 import { BehaviorSubject, Subject} from 'rxjs';
 import { UserService } from '../../../user/services/user.service';
 import { ApiCallService } from '../../../services/api-call.service';
-import { HttpHeaders } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
 import { ExportService } from '../../../services/export.service';
 import { Router } from '@angular/router';
@@ -35,7 +34,7 @@ import { ModalComponent } from '../../helpers/modal/modal.component';
   styleUrls: ['./table.component.scss'],
   providers: [DatePipe]
 })
-export class TableComponent implements OnDestroy {
+export class TableComponent implements OnInit, OnDestroy {
 
   @ViewChild(DataTableDirective, {static: false})
   public dtElement: DataTableDirective;
@@ -76,7 +75,13 @@ export class TableComponent implements OnDestroy {
    */
   @Input() linkRoute: string = 'object/';
 
+  /**
+   * overwrite default value for routeLink (defaul : '/framework/object/')
+   */
+  @Input() showExport: boolean = true;
+
   public items: any = new BehaviorSubject<any[]>([]);
+  public formatList: any[] = [];
 
   constructor(private userService: UserService, private apiCallService: ApiCallService,
               private exportService: ExportService, private router: Router,
@@ -89,6 +94,14 @@ export class TableComponent implements OnDestroy {
         this.router.navigate(['/framework/' + this.linkRoute + 'add']);
       }.bind(this)
     };
+  }
+
+  ngOnInit(): void {
+    if (this.showExport) {
+      this.exportService.callFileFormatRoute('export/').subscribe( data => {
+        this.formatList = data;
+      });
+    }
   }
 
   @Input() set entryLists(value: any[]) {
@@ -251,15 +264,9 @@ export class TableComponent implements OnDestroy {
         publicIds.push(box.id);
       }
     }
-
-    const httpHeader = new HttpHeaders({
-      'Content-Type': 'application/' + fileExtension
-    });
-
     if (publicIds.length > 0) {
       this.exportService.callExportRoute('export/' + this.linkRoute + publicIds + '/' + fileExtension,
-        fileExtension,
-        httpHeader);
+        fileExtension);
     }
   }
 

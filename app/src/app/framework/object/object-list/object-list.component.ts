@@ -52,6 +52,7 @@ export class ObjectListComponent implements OnDestroy {
   public objectLists: {};
   public hasSummaries: boolean = false;
   readonly $date: string = '$date';
+  public formatList: any[] = [];
 
   constructor(private apiCallService: ApiCallService, private objService: ObjectService,
               private exportService: ExportService, private route: ActivatedRoute, private router: Router,
@@ -62,6 +63,9 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   private init(id) {
+    this.exportService.callFileFormatRoute('export/').subscribe( data => {
+      this.formatList = data;
+    });
     this.getRouteObjects(id.publicID);
   }
 
@@ -341,15 +345,8 @@ export class ObjectListComponent implements OnDestroy {
         publicIds.push(box.id);
       }
     }
-
-    const httpHeader = new HttpHeaders({
-      'Content-Type': 'application/' + fileExtension
-    });
-
     if (publicIds.length > 0) {
-      this.exportService.callExportRoute('export/' + 'object/' + publicIds + '/' + fileExtension,
-        fileExtension,
-        httpHeader);
+      this.exportService.callExportRoute('export/' + 'object/' + publicIds + '/' + fileExtension, fileExtension);
     }
   }
 

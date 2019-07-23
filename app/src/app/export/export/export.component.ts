@@ -32,8 +32,7 @@ import { TypeService } from '../../framework/services/type.service';
 export class ExportComponent implements OnInit {
 
   public typeList: CmdbType[];
-  public formatList;
-  public selectedFormat: number = null;
+  public formatList: any[] = [];
   public formExport: FormGroup;
   public isSubmitted = false;
   readonly URL: string = 'object/type/';
@@ -50,13 +49,9 @@ export class ExportComponent implements OnInit {
       this.typeList = data;
     });
 
-    this.formatList = [
-      {id: 'xml', label: 'XML', icon: 'fa-code'},
-      {id: 'csv', label: 'CSV', icon: 'fa-file-excel-o'},
-      {id: 'json', label: 'JSON', icon: 'fa-file-text-o'},
-    ];
-
-    this.selectedFormat = this.formatList[0].id;
+    this.exportService.callFileFormatRoute('export/').subscribe( data => {
+      this.formatList = data;
+    });
   }
 
   get type() {
@@ -78,13 +73,7 @@ export class ExportComponent implements OnInit {
 
     if (fileExtension != null && typeID != null) {
       fileExtension = fileExtension.toLocaleLowerCase();
-      const httpHeader = new HttpHeaders({
-        'Content-Type': 'application/' + fileExtension
-      });
-
-      //http://127.0.0.1:4000/rest/export/xml/object/type/5
-      //'/object/type/<int:public_id>/<string:extension>'
-      this.exportService.callExportRoute('export/' + this.URL + typeID + '/' + fileExtension , fileExtension, httpHeader);
+      this.exportService.callExportRoute('export/' + this.URL + typeID + '/' + fileExtension , fileExtension);
     }
   }
 }

@@ -47,10 +47,7 @@ def export_file(collection, public_ids, extension):
                                    + extension + '_file_exporter.'
                                    + extension.capitalize() + 'FileExporter')
         file_export = curr_exporter(collection, extension, public_ids)
-        if 'xls' == extension:
-            return file_export.main()
-        else:
-            file_export.main()
+        file_export.main()
     except TypeNotFoundError as e:
         return abort(400, e.message)
     except ModuleNotFoundError as e:
@@ -69,10 +66,7 @@ def export_file_by_type_id(public_id, extension):
                                    + extension + '_file_exporter.'
                                    + extension.capitalize() + 'FileExporter')
         file_export = curr_exporter(None, extension, public_id)
-        if 'xls' == extension:
-            return file_export.main()
-        else:
-            file_export.main()
+        file_export.main()
     except TypeNotFoundError as e:
         return abort(400, e.message)
     except ModuleNotFoundError as e:

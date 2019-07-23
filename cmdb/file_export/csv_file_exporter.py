@@ -25,30 +25,22 @@ except ImportError:
 class CsvFileExporter(FileExporter):
 
     def main(self):
-        file_type = self.get_object_type()
-        if file_type == 'object':
-            data_list = self.get_object_by_id()
-        elif file_type == 'type':
-            data_list = self.get_type_by_id()
-        else:
-            data_list = self.get_all_objects_by_type_id()
-
-        self.set_object_list(self.parse_to_csv(data_list=data_list))
+        self.set_response(self.parse_to_csv(data_list=self.get_object_list()))
 
     def parse_to_csv(self, data_list):
-        header = ['public_id']
+        header = ['public_id', 'active']
         rows = [',']
-        i = 0
+        run_into = True
 
         for obj in data_list:
             fields = obj.fields
-            row = [str(obj.public_id)]
+            row = [str(obj.public_id), str(obj.active)]
 
             for key in fields:
-                if i == 0:
+                if run_into:
                     header.append(key.get('name'))
                 row.append(str(key.get('value')))
             rows.append(','.join(row))
-            i = i + 1
+            run_into = False
 
         return ','.join(header) + '\n'.join(rows)

@@ -21,6 +21,8 @@ import { HttpClient } from '@angular/common/http';
 import { ConnectionService } from './connection.service';
 import { map } from 'rxjs/operators';
 import { DatePipe } from '@angular/common';
+import { FileSaverService } from 'ngx-filesaver';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -30,17 +32,21 @@ export class ExportService {
   private readonly apiPrefix = 'rest';
   private readonly apiURL;
 
-  constructor(private http: HttpClient, private connectionService: ConnectionService, private datePipe: DatePipe) {
+  constructor(private http: HttpClient, private connectionService: ConnectionService, private datePipe: DatePipe,
+              private fileSaverService: FileSaverService) {
     this.apiURL = `${this.connectionService.connectionURL}${this.apiPrefix}/`;
   }
 
-  public callExportRoute<T>(route: string, fileExtension: string, httpHeader) {
-    const REQUEST_HEADERS = httpHeader;
+  public callFileFormatRoute<T>(route: string, params?: any): Observable<any> {
+    return this.http.get<T>(this.apiURL + route, params);
+  }
+
+  public callExportRoute<T>(route: string, fileExtension: string) {
     const REQUEST_URI = this.apiURL + route;
 
-    return this.http.get(REQUEST_URI,  {
-      headers: REQUEST_HEADERS,
-      responseType: 'text'
+    return this.http.get(REQUEST_URI, {
+      observe: 'response',
+      responseType: 'blob'
     }).pipe(
       map(res => {
         const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
@@ -50,17 +56,7 @@ export class ExportService {
         };
       })
     ).subscribe(res => {
-      const blob = new Blob([res.data], {type: 'application/' + fileExtension});
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-
-      document.body.appendChild(a);
-      a.setAttribute('style', 'display: none');
-      a.href = url;
-      a.download = res.filename;
-      a.click();
-      window.URL.revokeObjectURL(url);
-      a.remove(); // remove the element
+      this.fileSaverService.save(res.data.body, res.filename);
     }, error => {
       console.log('download error:', JSON.stringify(error));
     }, () => {

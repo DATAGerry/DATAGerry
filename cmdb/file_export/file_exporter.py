@@ -47,6 +47,7 @@ class FileExporter:
 
         # object_list: list of objects e.g CmdbObject or CmdbType
         self.object_list = []
+        self.response = None
         super(FileExporter, self).__init__(**kwargs)
 
     #
@@ -67,10 +68,23 @@ class FileExporter:
         Returns: list of objects e.g CmdbObject or CmdbType
 
         """
-        return self.object_list
+        file_type = self.get_object_type()
+        if 'object' == file_type:
+            return self.get_object_by_id()
+        elif 'type' == file_type:
+            return self.get_type_by_id()
+        return self.get_all_objects_by_type_id()
 
-    def set_object_list(self, value):
-        self.object_list = value
+    def get_response(self):
+        """
+
+        Returns: Response element
+
+        """
+        return self.response
+
+    def set_response(self, value):
+        self.response = value
 
     # TODO Check which formats are allowed for users
     def get_extension_list(self):
@@ -144,7 +158,7 @@ class FileExporter:
 
         timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
         return Response(
-            self.object_list,
+            self.response,
             mimetype=mime_type,
             headers={
                 "Content-Disposition":

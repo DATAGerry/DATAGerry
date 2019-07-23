@@ -29,6 +29,7 @@ import { PreviousRouteService } from './services/previous-route.service';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { ConnectionService } from './services/connection.service';
 import { DatePipe } from '@angular/common';
+import { FileSaverModule } from 'ngx-filesaver';
 
 @NgModule({
   declarations: [
@@ -39,7 +40,8 @@ import { DatePipe } from '@angular/common';
     HttpClientModule,
     LayoutModule,
     NgxSpinnerModule,
-    AppRoutingModule
+    AppRoutingModule,
+    FileSaverModule
   ],
   providers: [
     PreviousRouteService,

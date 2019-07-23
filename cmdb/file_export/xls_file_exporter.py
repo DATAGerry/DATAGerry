@@ -8,7 +8,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from cmdb.file_export.file_exporter import FileExporter
-from flask import send_file
+from cmdb.object_framework.cmdb_object_manager import object_manager
 import openpyxl
 import tempfile
 
@@ -16,14 +16,15 @@ import tempfile
 class XlsFileExporter(FileExporter):
 
     def main(self):
-        file_type = self.get_object_type()
-        if file_type == 'object':
-            data_list = self.get_object_by_id()
-        elif file_type == 'type':
-            data_list = self.get_type_by_id()
-        else:
-            data_list = self.get_all_objects_by_type_id()
+        workbook = self.create_xls_object()
 
+        # save workbook
+        with tempfile.NamedTemporaryFile() as tmp:
+            workbook.save(tmp.name)
+            tmp.seek(0)
+            self.set_response(tmp.read())
+
+    def create_xls_object(self):
         # create workbook
         workbook = openpyxl.Workbook()
 
@@ -36,14 +37,14 @@ class XlsFileExporter(FileExporter):
         types = []
 
         # get type_id's from data_list
-        for obj in data_list:
+        for obj in self.get_object_list():
             if obj.type_id not in types:
                 types.append(obj.type_id)
         types.sort()
 
         # sort data_list by types in sorted_list
         for type_id in types:
-            for obj in data_list:
+            for obj in self.get_object_list():
                 if obj.type_id == type_id:
                     sorted_list.append(obj)
 
@@ -60,11 +61,14 @@ class XlsFileExporter(FileExporter):
             # insert header value
             if run_header:
                 # get active worksheet and rename it
-
-                sheet = workbook.create_sheet('Mappe' + str(obj.type_id), p)
+                title = object_manager.get_type(obj.type_id).label
+                sheet = workbook.create_sheet(title, p)
                 header = sheet.cell(row=1, column=1)
                 header.value = 'public_id'
-                c = 2
+                header = sheet.cell(row=1, column=2)
+                header.value = 'active'
+
+                c = 3
                 for v in fields:
                     header = sheet.cell(row=1, column=c)
                     header.value = v.get('name')
@@ -72,10 +76,12 @@ class XlsFileExporter(FileExporter):
                 run_header = False
 
             # insert row values
-            c = 2
+            c = 3
             for key in fields:
                 header = sheet.cell(row=i, column=1)
                 header.value = str(obj.public_id)
+                header = sheet.cell(row=i, column=2)
+                header.value = str(obj.active)
 
                 rows = sheet.cell(row=i, column=c)
                 rows.value = str(key.get('value'))
@@ -84,9 +90,4 @@ class XlsFileExporter(FileExporter):
             i = i + 1
             p = p + 1
 
-        # save workbook
-        with tempfile.NamedTemporaryFile() as tmp:
-            workbook.save(tmp.name)
-            tmp.seek(0)
-            return send_file(tmp.name, attachment_filename="demo.xlsx")
-
+        return workbook
