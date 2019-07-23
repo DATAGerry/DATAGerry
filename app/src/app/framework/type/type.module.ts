@@ -18,7 +18,6 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TypeViewComponent } from './components/type-view/type-view.component';
 import { TypeListComponent } from './components/type-list/type-list.component';
 import { TypeRoutingModule } from './type-routing.module';
 import { LayoutModule } from '../../layout/layout.module';
@@ -29,8 +28,6 @@ import { TypeBuilderComponent } from './components/type-builder/type-builder.com
 import { TypeBasicStepComponent } from './components/type-builder/type-basic-step/type-basic-step.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TypeFieldsStepComponent } from './components/type-builder/type-fields-step/type-fields-step.component';
-import { TypeViewHeaderComponent } from './components/type-view/type-header/type-view-header.component';
-import { TypeQrComponent } from './components/type-view/type-qr/type-qr.component';
 import { QRCodeModule } from 'angularx-qrcode';
 import { TypeAccessStepComponent } from './components/type-builder/type-access-step/type-access-step.component';
 import { NgSelectModule } from '@ng-select/ng-select';
@@ -39,28 +36,21 @@ import { RenderModule } from '../render/render.module';
 import { BuilderModule } from './builder/builder.module';
 import { TypeEditComponent } from './components/type-edit/type-edit.component';
 import { TypeMetaStepComponent } from './components/type-builder/type-meta-step/type-meta-step.component';
-import { TypeTabObjectListComponent } from './components/type-view/tabs/type-tab-object-list/type-tab-object-list.component';
-import { TypeMetaDataComponent } from './components/type-view/type-meta-data/type-meta-data.component';
 import { TypeDeleteComponent, TypeDeleteConfirmModalComponent } from './components/type-delete/type-delete.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   entryComponents: [TypeDeleteConfirmModalComponent],
   declarations: [
-    TypeViewComponent,
     TypeListComponent,
     TypeAddComponent,
     TypeBasicStepComponent,
     TypeFieldsStepComponent,
     TypeBuilderComponent,
-    TypeViewHeaderComponent,
-    TypeQrComponent,
     TypeAccessStepComponent,
     TypeValidationStepComponent,
     TypeEditComponent,
     TypeMetaStepComponent,
-    TypeTabObjectListComponent,
-    TypeMetaDataComponent,
     TypeDeleteComponent,
     TypeDeleteConfirmModalComponent
   ],

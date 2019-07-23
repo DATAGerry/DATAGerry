@@ -16,7 +16,8 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input} from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { ToastService } from '../../../../layout/services/toast.service';
 
 @Component({
   selector: 'cmdb-object-summary',
@@ -26,6 +27,23 @@ import {Component, Input} from '@angular/core';
 export class ObjectSummaryComponent {
 
   @Input() objectInstance: any = [];
-  constructor() { }
 
+  public constructor(private toast: ToastService) {}
+
+  public clipBoardSummary(data) {
+    const selBox = document.createElement('textarea');
+    selBox.style.position = 'fixed';
+    selBox.style.left = '0';
+    selBox.style.top = '0';
+    selBox.style.opacity = '0';
+    selBox.value = data;
+    document.body.appendChild(selBox);
+    selBox.focus();
+    selBox.select();
+    document.execCommand('copy');
+    document.body.removeChild(selBox);
+    this.toast.show('Summary was copied to clipboard');
+  }
 }
+
+

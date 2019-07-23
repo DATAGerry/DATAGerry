@@ -33,8 +33,10 @@ export class RefFieldEditComponent implements OnInit {
   constructor(private typeService: TypeService) {
   }
 
-  ngOnInit() {
-    this.typeList = this.typeService.getTypeList();
+  public ngOnInit(): void {
+    this.typeService.getTypeList().subscribe(res => {
+      this.typeList = res;
+    });
   }
 
 }

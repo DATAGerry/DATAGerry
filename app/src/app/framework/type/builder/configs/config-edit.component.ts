@@ -47,9 +47,7 @@ export class ConfigEditComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-
     this.container.clear();
-
     this.component = configComponents[this.data.type];
 
     const factory = this.resolver.resolveComponentFactory(this.component);

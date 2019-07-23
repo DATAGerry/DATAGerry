@@ -100,15 +100,16 @@ export class TypeBuilderComponent implements OnInit {
     let newTypeID = null;
     this.typeService.postType(this.typeInstance).subscribe(typeIDResp => {
         newTypeID = typeIDResp;
-        if (this.selectedCategoryID !== null) {
-          this.categoryService.addTypeToCategory(this.selectedCategoryID, newTypeID);
-        }
-      },
-      (error) => {
+
+        const selectedCategory = this.categoryService.findCategory(this.selectedCategoryID);
+        selectedCategory.type_list.push(newTypeID);
+        this.categoryService.updateCategory(selectedCategory).subscribe((ack: number) => {
+          this.router.navigate(['/framework/type/'], {queryParams: {typeAddSuccess: newTypeID}});
+        });
 
       },
-      () => {
-        this.router.navigate(['/framework/type/'], {queryParams: {typeAddSuccess: newTypeID}});
+      (error) => {
+        console.error(error);
       });
 
   }

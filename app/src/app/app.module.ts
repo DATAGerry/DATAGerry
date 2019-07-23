@@ -29,6 +29,7 @@ import { PreviousRouteService } from './services/previous-route.service';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { ConnectionService } from './services/connection.service';
 import { DatePipe } from '@angular/common';
+import { ToastService } from './layout/services/toast.service';
 
 @NgModule({
   declarations: [

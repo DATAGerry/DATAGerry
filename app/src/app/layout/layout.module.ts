@@ -36,6 +36,7 @@ import { DataTablesModule } from 'angular-datatables';
 import { ToastContainerComponent } from './helpers/toast/toast-container.component';
 import { NgbActiveModal, NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from './helpers/modal/modal.component';
+import { ToastService } from './services/toast.service';
 
 @NgModule({
   declarations: [

@@ -19,6 +19,7 @@
 import { Component, Input } from '@angular/core';
 import { CmdbMode } from '../../../modes.enum';
 import { CmdbType } from '../../../models/cmdb-type';
+import { CmdbObject } from '../../../models/cmdb-object';
 
 @Component({
   selector: 'cmdb-object-render',
@@ -27,8 +28,8 @@ import { CmdbType } from '../../../models/cmdb-type';
 })
 export class ObjectRenderComponent {
 
-  public mode: CmdbMode = CmdbMode.View;
-  @Input() objectInstance;
-  @Input() typeInstance: CmdbType;
+  @Input() public mode: CmdbMode = CmdbMode.View;
+  @Input() public objectInstance: CmdbObject;
+  @Input() public typeInstance: CmdbType;
 
 }

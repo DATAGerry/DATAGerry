@@ -174,7 +174,7 @@
                             [attr.data-target]="'#' + field.name">
                       <i class="fa fa-pencil-square"></i>
                     </button>
-                    <button class="btn btn-link" type="button">
+                    <button class="btn btn-link" type="button" dndHandle>
                       <i class="fa fa-arrows"></i>
                     </button>
                     <button class="btn btn-link" type="button" (click)="remove(field, section.fields)">
@@ -182,11 +182,14 @@
                     </button>
                   </span>
                 </div>
-                <div class="card-body">
-                  <div class="collapse" id="{{field.name}}">
+                <div class="card-body collapse" id="{{field.name}}">
                     <cmdb-config-edit [groupList]="groupList" [userList]="userList" [data]="field"></cmdb-config-edit>
-                  </div>
-                  <cmdb-render-element [data]="field"></cmdb-render-element>
+                    <hr />
+                    <p><strong>Render Preview:</strong></p>
+                    <cmdb-render-element [parentFormGroup]="builderFormGroup" [mode]="mode"
+                                         [data]="field"></cmdb-render-element>
+
+
                 </div>
               </div>
             </ng-container>

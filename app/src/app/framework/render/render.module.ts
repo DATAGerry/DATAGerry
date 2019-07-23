@@ -35,13 +35,14 @@ import { LayoutModule } from '../../layout/layout.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ModeErrorComponent } from './components/mode-error/mode-error.component';
 
 
 @NgModule({
   entryComponents: [TextComponent, PasswordComponent, DummyComponent, EmailComponent, PhoneComponent, HrefComponent, RadioComponent,
     SelectComponent, RefComponent, CheckboxComponent, TextareaComponent],
   declarations: [RenderComponent, TextComponent, DummyComponent, RenderElementComponent, PasswordComponent, EmailComponent, PhoneComponent,
-    HrefComponent, RadioComponent, SelectComponent, RefComponent, CheckboxComponent, TextareaComponent],
+    HrefComponent, RadioComponent, SelectComponent, RefComponent, CheckboxComponent, TextareaComponent, ModeErrorComponent],
   exports: [
     RenderElementComponent,
     RenderComponent

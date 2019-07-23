@@ -49,7 +49,7 @@ export class ObjectService {
 
   public getObject(publicID: number, native: boolean = false) {
     if (native) {
-      return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/' + publicID + '/native');
+      return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/' + publicID + '/native/');
     }
     return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/' + publicID);
   }

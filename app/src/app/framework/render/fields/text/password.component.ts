@@ -25,7 +25,7 @@ import { ComponentsFields, RenderField } from '../components.fields';
 })
 export class PasswordComponent extends RenderField {
 
-  @ViewChild('passWordInput', {static: true}) public passWordToggle: ElementRef;
+  @ViewChild('passWordInput', {static: false}) public passWordToggle: ElementRef;
 
   public constructor() {
     super();
@@ -40,5 +40,9 @@ export class PasswordComponent extends RenderField {
     }
   }
 
+  public generatePassword() {
+    this.passWordToggle.nativeElement.value = Math.random().toString(36).slice(-8);
+    this.controller.setValue(this.passWordToggle.nativeElement.value);
+  }
 
 }

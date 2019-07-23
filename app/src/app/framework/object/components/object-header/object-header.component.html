@@ -16,16 +16,14 @@
       <li class="nav-item">
         <a class="nav-link" id="profile-tab" data-toggle="tab" href="#meta-tab" role="tab">Metadata</a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" id="contact-tab" data-toggle="tab" href="#type-tab" role="tab">Type Overview</a>
-      </li>
     </ul>
     <div class="tab-content">
       <div class="tab-pane fade show active" id="summaries-tab" role="tabpanel">
         <cmdb-object-summary [objectInstance]="objectInstance"></cmdb-object-summary>
       </div>
-      <div class="tab-pane fade" id="meta-tab" role="tabpanel">...</div>
-      <div class="tab-pane fade" id="type-tab" role="tabpanel">...</div>
+      <div class="tab-pane fade" id="meta-tab" role="tabpanel">
+        <cmdb-object-view-meta [objectInstance]="objectInstance"></cmdb-object-view-meta>
+      </div>
     </div>
   </div>
 </div>

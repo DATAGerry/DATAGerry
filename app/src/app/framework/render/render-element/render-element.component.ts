@@ -19,6 +19,9 @@
 import { Component, ComponentFactoryResolver, ComponentRef, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { fieldComponents } from '../fields/fields.list';
 import { RenderField } from '../fields/components.fields';
+import { ToastService } from '../../../layout/services/toast.service';
+import { FormControl, Validators } from '@angular/forms';
+import { CmdbMode } from '../../modes.enum';
 
 @Component({
   selector: 'cmdb-render-element',
@@ -31,7 +34,7 @@ export class RenderElementComponent extends RenderField implements OnInit {
   private component: any;
   private componentRef: ComponentRef<any>;
 
-  constructor(private resolver: ComponentFactoryResolver) {
+  constructor(private resolver: ComponentFactoryResolver, public toast: ToastService) {
     super();
   }
 
@@ -43,7 +46,18 @@ export class RenderElementComponent extends RenderField implements OnInit {
     this.componentRef = this.container.createComponent(factory);
     this.componentRef.instance.data = this.data;
     this.componentRef.instance.mode = this.mode;
+    this.componentRef.instance.toast = this.toast;
     this.componentRef.instance.parentFormGroup = this.parentFormGroup;
+    const fieldControl = new FormControl('');
+    if (this.data.required) {
+      fieldControl.setValidators(Validators.required);
+    }
+    if (this.mode === CmdbMode.View) {
+      fieldControl.disable();
+    }
+    this.componentRef.instance.parentFormGroup.addControl(
+      this.data.name, fieldControl
+    );
   }
 
 }
