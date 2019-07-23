@@ -16,6 +16,7 @@
 
 import logging
 
+from cmdb.utils.interface_wraps import login_required
 from flask import abort, jsonify
 from cmdb.object_framework.cmdb_errors import TypeNotFoundError
 from cmdb.interface.route_utils import make_response, RootBlueprint
@@ -31,6 +32,7 @@ export_route = RootBlueprint('export_rest', __name__, url_prefix='/export')
 
 
 @export_route.route('/', methods=['GET'])
+@login_required
 def get_extension_list():
     # TODO Check which formats are allowed for users
     from cmdb.file_export.file_exporter import FileExporter
@@ -38,6 +40,7 @@ def get_extension_list():
 
 
 @export_route.route('<string:collection>/<string:public_ids>/<string:extension>', methods=['GET'])
+@login_required
 def export_file(collection, public_ids, extension):
     try:
         curr_exporter = load_class('cmdb.file_export.'
@@ -59,6 +62,7 @@ def export_file(collection, public_ids, extension):
 
 
 @export_route.route('/object/type/<int:public_id>/<string:extension>', methods=['GET'])
+@login_required
 def export_file_by_type_id(public_id, extension):
     try:
         curr_exporter = load_class('cmdb.file_export.'
