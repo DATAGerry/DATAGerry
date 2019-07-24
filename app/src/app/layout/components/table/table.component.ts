@@ -76,9 +76,14 @@ export class TableComponent implements OnInit, OnDestroy {
   @Input() linkRoute: string = 'object/';
 
   /**
-   * overwrite default value for routeLink (defaul : '/framework/object/')
+   * overwrite default value
    */
   @Input() showExport: boolean = true;
+
+  /**
+   * overwrite default value
+   */
+  @Input() showDeleteSelected: boolean = true;
 
   public items: any = new BehaviorSubject<any[]>([]);
   public formatList: any[] = [];
@@ -117,8 +122,12 @@ export class TableComponent implements OnInit, OnDestroy {
 
   private buildButtons() {
     this.dtButtons.length = 0;
-    this.dtButtons.push(this.add);
-    this.dtButtons.push(this.print);
+    if (Object.keys(this.add).length !== 0) {
+      this.dtButtons.push(this.add);
+    }
+    if (Object.keys(this.print).length !== 0) {
+      this.dtButtons.push(this.print);
+    }
   }
 
   private buildOptions(buttons) {
@@ -183,7 +192,6 @@ export class TableComponent implements OnInit, OnDestroy {
     const overall: any = document.getElementsByClassName('select-all-checkbox')[0];
     const allCheckbox: any = document.getElementsByClassName('select-checkbox');
     let checkedCount = 0;
-
     for (const box of allCheckbox) {
       if (box.checked) {
         checkedCount++;

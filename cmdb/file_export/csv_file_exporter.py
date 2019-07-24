@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from cmdb.file_export.file_exporter import FileExporter
+from flask import abort
 
 try:
     from cmdb.utils.error import CMDBError
@@ -31,8 +32,13 @@ class CsvFileExporter(FileExporter):
         header = ['public_id', 'active']
         rows = [',']
         run_into = True
+        publ_id = data_list[0].type_id
 
         for obj in data_list:
+
+            if publ_id != obj.type_id:
+                raise abort(400, {'message': 'CSV can export only object of the same type'})
+
             fields = obj.fields
             row = [str(obj.public_id), str(obj.active)]
 

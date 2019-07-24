@@ -40,6 +40,7 @@ import { ObjectActionsComponent } from './components/object-actions/object-actio
 import { ObjectViewMetaComponent } from './components/object-view-meta/object-view-meta.component';
 import { ObjectEditComponent } from './object-edit/object-edit.component';
 import { ObjectTestComponent } from './object-test/object-test.component';
+import {NgbTooltipModule} from "@ng-bootstrap/ng-bootstrap";
 
 @NgModule({
   declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent, ObjectSummaryComponent,
@@ -57,7 +58,8 @@ import { ObjectTestComponent } from './object-test/object-test.component';
     FormsModule,
     ReactiveFormsModule,
     RenderModule,
-    NgSelectModule
+    NgSelectModule,
+    NgbTooltipModule
   ]
 })
 export class ObjectModule {

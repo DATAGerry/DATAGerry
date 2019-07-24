@@ -30,7 +30,7 @@ class FileExporter:
         """init of FileExporter
 
         Args:
-            object_type: type of object e.g. CmdbObject, CmdbType or CmdbObject by CmdbType ID (object, type, object/type)
+            object_type: type of object e.g. CmdbObject or CmdbObject by CmdbType ID
             file_extension: current file file_extension for download file
             public_id: public id which implements the object / type
             **kwargs: additional data
@@ -40,10 +40,12 @@ class FileExporter:
         self.public_id = public_id
 
         # extension_list: filled with allowed formats for user/s
-        self.extension_list = [{'id': 'xml', 'label': 'XML', 'icon': 'fa-code'},
-                               {'id': 'csv', 'label': 'CSV', 'icon': 'fa-table'},
-                               {'id': 'json', 'label': 'JSON', 'icon': 'fa-file-text-o'},
-                               {'id': 'xls', 'label': 'XLS', 'icon': 'fa-file-excel-o'}]
+        self.extension_list = [
+            {'id': 'xml', 'label': 'XML', 'icon': 'fa-code', 'helperText': 'Export as XML', 'active': True},
+            {'id': 'csv', 'label': 'CSV', 'icon': 'fa-table', 'helperText': 'Export as CSV (only of the same type)', 'active': True},
+            {'id': 'json', 'label': 'JSON', 'icon': 'fa-file-text-o', 'helperText': 'Export as JSON', 'active': True},
+            {'id': 'xls', 'label': 'XLS', 'icon': 'fa-file-excel-o', 'helperText': 'Export as XLS', 'active': True}
+        ]
 
         # object_list: list of objects e.g CmdbObject or CmdbType
         self.object_list = []

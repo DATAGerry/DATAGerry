@@ -53,6 +53,7 @@ export class ObjectListComponent implements OnDestroy {
   public hasSummaries: boolean = false;
   readonly $date: string = '$date';
   public formatList: any[] = [];
+  private selectedObjects: number = 0;
 
   constructor(private apiCallService: ApiCallService, private objService: ObjectService,
               private exportService: ExportService, private route: ActivatedRoute, private router: Router,
@@ -255,8 +256,15 @@ export class ObjectListComponent implements OnDestroy {
     const overall: any = document.getElementsByClassName('select-all-checkbox')[0];
     const allCheckbox: any = document.getElementsByClassName('select-checkbox');
     const checking = overall.checked;
+    this.selectedObjects = 0;
     for (const box of allCheckbox) {
       box.checked = checking;
+      if (checking) {
+        this.selectedObjects++;
+      }
+    }
+    if (!checking) {
+      this.selectedObjects = 0;
     }
   }
 
@@ -264,12 +272,14 @@ export class ObjectListComponent implements OnDestroy {
     const overall: any = document.getElementsByClassName('select-all-checkbox')[0];
     const allCheckbox: any = document.getElementsByClassName('select-checkbox');
     let checkedCount = 0;
+    this.selectedObjects = 0;
 
     for (const box of allCheckbox) {
       if (box.checked) {
         checkedCount++;
       }
     }
+    this.selectedObjects = checkedCount;
 
     if (checkedCount === 0) {
       overall.checked = false;
@@ -348,6 +358,30 @@ export class ObjectListComponent implements OnDestroy {
     if (publicIds.length > 0) {
       this.exportService.callExportRoute('export/' + 'object/' + publicIds + '/' + fileExtension, fileExtension);
     }
+  }
+
+  public verifyExport() {
+    const overall: any = document.getElementsByClassName('select-all-checkbox')[0];
+    const allCheckbox: any = document.getElementsByClassName('select-checkbox');
+    const checking = overall.checked;
+    // TODO:
+    /* for (const box of allCheckbox) {
+    if (checking) {
+        this.checkSelectedType.push(box.id.split('-')[1]);
+      }
+    }
+    const unique = this.checkSelectedType.filter( this.onlyUnique);
+    if (unique.length !== this.checkSelectedType.length) {
+      for (const f of this.formatList) {
+        if (f.id === 'csv') {
+          f.active = false;
+        }
+      }
+    }*/
+  }
+
+  public onlyUnique(value, index, self) {
+    return self.indexOf(value) === index;
   }
 
   private createModal(title: string, modalMessage: string, buttonDeny: string, buttonAccept: string) {
