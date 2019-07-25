@@ -46,7 +46,7 @@ export class ObjectListComponent implements OnDestroy {
   readonly dtButtons: any[] = [];
 
   private summaries: [] = [];
-  private columnFields: [];
+  private columnFields: [] = [];
   private items: any[] = [];
   public pageTitle: string = 'List';
   public objectLists: {};
@@ -154,7 +154,11 @@ export class ObjectListComponent implements OnDestroy {
           buttons: function() {
             const columnButton = [];
             // tslint:disable-next-line:prefer-for-of
-            for (let i = 0; i < this.columnFields.length; i++) {
+            if (this.columnFields == null) {
+              this.columnFields = [];
+            }
+            let i = 0;
+            for (const obj of this.columnFields) {
               {
                 columnButton.push(
                   {
@@ -164,6 +168,7 @@ export class ObjectListComponent implements OnDestroy {
                     className: 'dropdown-item ' + this.columnFields[i].name,
                   });
               }
+              i++;
             }
             columnButton.push({
               extend: 'colvisRestore',
