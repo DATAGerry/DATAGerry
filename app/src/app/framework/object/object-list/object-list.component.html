@@ -7,7 +7,7 @@
   <div class="card-body" style="padding: 0 0 1em 0;">
     <button type="button" class="btn btn-danger btn-sm" (click)="delManyObjects()">Delete Selected</button>
 
-    <span class="card-group float-right">
+    <span class="card-group float-right" *ngIf="hasSummaries">
       <div class="btn-group">
         <button type="button" id="importButton" class="btn btn-warning btn-sm dropdown-toggle mr-1"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -69,7 +69,7 @@
           <cmdb-active-badge [activeStatus]="result.active"></cmdb-active-badge>
         </td>
         <td>{{result.public_id}}</td>
-        <td><a routerLink="/framework/type/{{result.type_id}}">{{result.label}}</a></td>
+        <td>{{result.label}}</td>
 
         <!-- BEGIN: summarie contens : show only if objects are categorized  -->
         <ng-container *ngIf="hasSummaries" >
