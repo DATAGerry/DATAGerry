@@ -13,7 +13,7 @@ import openpyxl
 import tempfile
 
 
-class XlsFileExporter(FileExporter):
+class XlsxFileExporter(FileExporter):
 
     def main(self):
         workbook = self.create_xls_object()
@@ -27,6 +27,9 @@ class XlsFileExporter(FileExporter):
     def create_xls_object(self):
         # create workbook
         workbook = openpyxl.Workbook()
+
+        # delete default sheet
+        workbook.remove(workbook.active)
 
         # insert data into worksheet
         run_header = True

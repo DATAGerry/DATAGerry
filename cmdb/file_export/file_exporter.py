@@ -44,7 +44,7 @@ class FileExporter:
             {'id': 'xml', 'label': 'XML', 'icon': 'fa-code', 'helperText': 'Export as XML', 'active': True},
             {'id': 'csv', 'label': 'CSV', 'icon': 'fa-table', 'helperText': 'Export as CSV (only of the same type)', 'active': True},
             {'id': 'json', 'label': 'JSON', 'icon': 'fa-file-text-o', 'helperText': 'Export as JSON', 'active': True},
-            {'id': 'xls', 'label': 'XLS', 'icon': 'fa-file-excel-o', 'helperText': 'Export as XLS', 'active': True}
+            {'id': 'xlsx', 'label': 'XLS', 'icon': 'fa-file-excel-o', 'helperText': 'Export as XLS', 'active': True}
         ]
 
         # object_list: list of objects e.g CmdbObject or CmdbType

@@ -74,7 +74,7 @@ bin: requirements docs webapp
 		--hidden-import cmdb.file_export.file_exporter \
 		--hidden-import cmdb.file_export.csv_file_exporter \
 		--hidden-import cmdb.file_export.json_file_exporter \
-		--hidden-import cmdb.file_export.xls_file_exporter \
+		--hidden-import cmdb.file_export.xlsx_file_exporter \
 		--hidden-import cmdb.file_export.xml_file_exporter \
 		--hidden-import cmdb.interface.gunicorn \
 		--hidden-import gunicorn.glogging \
