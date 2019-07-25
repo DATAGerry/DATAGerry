@@ -45,7 +45,7 @@ export class ObjectListComponent implements OnDestroy {
   public dtTrigger: Subject<any> = new Subject();
   readonly dtButtons: any[] = [];
 
-  private summaries: [];
+  private summaries: [] = [];
   private columnFields: [];
   private items: any[] = [];
   public pageTitle: string = 'List';
@@ -213,7 +213,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   private buildAdvancedDtOptions() {
-    if (this.hasSummaries) {
+    if (this.hasSummaries && this.summaries != null) {
       const visTargets: any[] = [0, 1, 2, 3, -3, -2, -1];
       for (let i = 0; i < this.summaries.length; i++) {
         visTargets.push(i + 4);
