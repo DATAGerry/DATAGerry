@@ -9,18 +9,6 @@
 
     <span class="card-group float-right" *ngIf="hasSummaries">
       <div class="btn-group">
-        <button type="button" id="importButton" class="btn btn-warning btn-sm dropdown-toggle mr-1"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fa fa-upload" aria-hidden="true"></i> Import
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="importButton">
-          <li class="dropdown-item" *ngFor="let item of formatList">
-            <i class="fa {{item.icon}}"></i> {{item.label}}
-          </li>
-        </ul>
-      </div>
-
-      <div class="btn-group">
         <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle" (click)="verifyExport()"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fa fa-download" aria-hidden="true"></i> Export
