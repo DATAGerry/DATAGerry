@@ -15,7 +15,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from cmdb.file_export.file_exporter import FileExporter
-from flask import abort
+import csv
+import io
 
 try:
     from cmdb.utils.error import CMDBError
@@ -30,23 +31,35 @@ class CsvFileExporter(FileExporter):
 
     def parse_to_csv(self, data_list):
         header = ['public_id', 'active']
-        rows = [',']
+        rows = []
+        row = {}
         run_into = True
-        publ_id = data_list[0].type_id
+        public_id = data_list[0].type_id
 
         for obj in data_list:
 
-            if publ_id != obj.type_id:
-                raise abort(400, {'message': 'CSV can export only object of the same type'})
+            if public_id != obj.type_id:
+                raise Exception({'message': 'CSV can export only object of the same type'})
 
             fields = obj.fields
-            row = [str(obj.public_id), str(obj.active)]
+            row.update({'public_id': str(obj.public_id), 'active': str(obj.active)})
 
             for key in fields:
                 if run_into:
                     header.append(key.get('name'))
-                row.append(str(key.get('value')))
-            rows.append(','.join(row))
+                row.update({key.get('name'): str(key.get('value'))})
             run_into = False
+            rows.append(row)
+            row = {}
 
-        return ','.join(header) + '\n'.join(rows)
+        return self.csv_writer(header, rows)
+
+    def csv_writer(self, header, rows):
+        csv_file = io.StringIO()
+        writer = csv.DictWriter(csv_file, fieldnames=header, dialect='excel')
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(row)
+
+        csv_file.seek(0)
+        return csv_file
