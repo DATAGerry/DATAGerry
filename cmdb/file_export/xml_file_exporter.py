@@ -14,32 +14,45 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import json
+import xml.etree.ElementTree as ET
+import xml.dom.minidom
 from cmdb.file_export.file_exporter import FileExporter
 from cmdb.interface.route_utils import make_response
-import json
+from cmdb.object_framework.cmdb_object_manager import object_manager
 
 
 class XmlFileExporter(FileExporter):
 
     def main(self):
-        self.set_response(self.new_parser(json.loads(make_response(self.get_object_list()).data)))
+        self.set_response(self.parse_to_xml(json.loads(make_response(self.get_object_list()).data)))
 
     def parse_to_xml(self, json_obj):
+        # object list
+        cmdb_object_list = ET.Element('objects')
 
-        # toDo: write as xml.etree.ElementTree
-        header_tag = list()
-
+        # objects
         for obj in json_obj:
-            public_id_tag = "<%s>%s</%s>\n" % ('public_id', obj['public_id'], 'public_id')
-            active_tag = "<%s>%s</%s>\n" % ('active', obj['active'], 'active')
-            type_tag = "<%s>%s</%s>\n" % ('type', str(obj['type_id']), 'type')
-            meta_tag = ("<%s>%s</%s>\n" % ('meta', '\n\t' + public_id_tag + active_tag + type_tag, 'meta'))
-
+            # object
+            cmdb_object = ET.SubElement(cmdb_object_list, 'object')
+            cmdb_object_meta = ET.SubElement(cmdb_object, 'meta')
+            # meta: public
+            cmdb_object_meta_id = ET.SubElement(cmdb_object_meta, 'public_id')
+            cmdb_object_meta_id.text = str(obj['public_id'])
+            # meta: active
+            cmdb_object_meta_active = ET.SubElement(cmdb_object_meta, 'active')
+            cmdb_object_meta_active.text = str(obj['active'])
+            # meta: type
+            cmdb_object_meta_type = ET.SubElement(cmdb_object_meta, 'type')
+            cmdb_object_meta_type.text = object_manager.get_type(obj['type_id']).label
+            # fields
+            cmdb_object_fields = ET.SubElement(cmdb_object, 'fields')
             for curr in obj['fields']:
-                field = "<%s name='%s' value='%s' />\n" % ('field', curr['name'], curr['value'])
-                fields_tag = ("<%s>%s</%s>\n" % ('fields', '\n\t' + field, 'fields'))
+                # fields: content
+                field_attribs = {}
+                field_attribs["name"] = str(curr['name'])
+                field_attribs["value"] = str(curr['value'])
+                ET.SubElement(cmdb_object_fields, "field", field_attribs)
 
-            object_tag = ("<%s>%s</%s>\n" % ('object', '\n\t' + meta_tag + fields_tag, 'object'))
-
-        header_tag.append("<?xml version='1.0'?> \n <%s>%s</%s>" % ('objects', '\n\t' + object_tag, 'objects'))
-        return header_tag
+        # return xml as string (pretty printed)
+        return xml.dom.minidom.parseString(ET.tostring(cmdb_object_list, encoding='unicode', method='xml')).toprettyxml()
