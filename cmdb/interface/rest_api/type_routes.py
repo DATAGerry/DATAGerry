@@ -17,11 +17,11 @@
 import logging
 import json
 
-from flask import abort, request
+from flask import abort, request, jsonify
 from cmdb.utils.interface_wraps import login_required, json_required
 from cmdb.object_framework.cmdb_object_manager import object_manager as obm
 from cmdb.interface.route_utils import make_response, RootBlueprint
-from cmdb.object_framework.cmdb_errors import TypeNotFoundError, TypeInsertError
+from cmdb.object_framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError
 from cmdb.object_framework.cmdb_object_type import CmdbType
 
 try:
@@ -47,6 +47,7 @@ def get_type_list():
 
 
 @type_routes.route('/<int:public_id>', methods=['GET'])
+@login_required
 def get_type(public_id: int):
     try:
         type_instance = object_manager.get_type(public_id)
@@ -59,6 +60,7 @@ def get_type(public_id: int):
 
 
 @type_routes.route('/', methods=['POST'])
+@login_required
 def add_type():
     from bson import json_util
     from datetime import datetime
@@ -114,7 +116,18 @@ def update_type():
 @login_required
 def delete_type(public_id: int):
     try:
+
+        # delete all objects by typeID
+        object_manager.delete_many_objects({'type_id': public_id})
+
+        # update category
+        categories = object_manager.get_categories_by({'type_list': {'$in': [public_id]}})
+        for category in categories:
+            category.type_list = [x for x in category.type_list if x != public_id]
+            object_manager.update_category(category)
+
         ack = object_manager.delete_type(public_id=public_id)
+
     except TypeNotFoundError:
         return abort(400)
     except CMDBError:
@@ -123,8 +136,35 @@ def delete_type(public_id: int):
     return resp
 
 
+@type_routes.route('/delete/<string:public_ids>', methods=['GET'])
 @login_required
+def delete_many_types(public_ids):
+    try:
+        ids = []
+        operator_in = {'$in': []}
+        filter_public_ids = {'public_id': {}}
+
+        for v in public_ids.split(","):
+            try:
+                ids.append(int(v))
+            except (ValueError, TypeError):
+                return abort(400)
+
+        operator_in.update({'$in': ids})
+        filter_public_ids.update({'public_id': operator_in})
+
+        ack = object_manager.delete_many_types(filter_public_ids)
+        return make_response(ack.raw_result)
+    except TypeNotFoundError as e:
+        return jsonify(message='Delete Error', error=e.message)
+    except ObjectDeleteError as e:
+        return jsonify(message='Delete Error', error=e.message)
+    except CMDBError:
+        return abort(500)
+
+
 @type_routes.route('/count/', methods=['GET'])
+@login_required
 def count_objects():
     try:
         count = object_manager.count_types()

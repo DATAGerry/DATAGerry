@@ -17,7 +17,56 @@
 */
 
 import { Input } from '@angular/core';
+import { AbstractControl, Form, FormControl, FormGroup } from '@angular/forms';
+import { CmdbMode } from '../../modes.enum';
+import { ToastService } from '../../../layout/services/toast.service';
 
+// deprecated
 export interface ComponentsFields {
   data: Input;
+}
+
+export class RenderField {
+  private innerData: any;
+  public MODES = CmdbMode;
+  public toast: ToastService;
+
+  @Input() public mode: CmdbMode;
+  @Input() parentFormGroup: FormGroup;
+
+  @Input('data')
+  public set data(value: any) {
+    this.innerData = value;
+    // POSSIBLE DEPRECATED
+    /*this.parentFormGroup.addControl(
+      this.data.name, new FormControl('')
+    );*/
+  }
+
+  public get data(): any {
+    return this.innerData;
+  }
+
+  public get controller(): AbstractControl {
+    return this.parentFormGroup.get(this.data.name);
+  }
+
+  public constructor() {
+  }
+
+  public copyToClipboard() {
+    const selBox = document.createElement('textarea');
+    selBox.style.position = 'fixed';
+    selBox.style.left = '0';
+    selBox.style.top = '0';
+    selBox.style.opacity = '0';
+    selBox.value = this.data.value;
+    document.body.appendChild(selBox);
+    selBox.focus();
+    selBox.select();
+    document.execCommand('copy');
+    document.body.removeChild(selBox);
+    this.toast.show('Content was copied to clipboard');
+  }
+
 }

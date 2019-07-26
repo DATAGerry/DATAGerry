@@ -20,18 +20,25 @@ BIN_SPHINX = sphinx-build
 BIN_PYTEST = pytest
 BIN_PIP = pip
 BIN_NPM = npm
-DIR_BUILD = ./target
+BIN_RPMBUILD = rpmbuild
+DIR_BUILD = $(CURDIR)/target
 DIR_BIN_BUILD = ${DIR_BUILD}/bin
 DIR_TEMP= ${DIR_BUILD}/temp
 DIR_DOCS_SOURCE = docs/source
 DIR_DOCS_BUILD = ${DIR_BUILD}/docs
 DIR_DOCS_TARGET = cmdb/interface/net_app/docs
+DIR_RPM_BUILD = ${DIR_BUILD}/rpm
+DIR_TARGZ_BUILD = ${DIR_BUILD}/targz
 DIR_WEB_SOURCE = app
 DIR_WEB_BUILD = app/dist/dataGerryApp
 DIR_WEB_TARGET = cmdb/interface/net_app/dataGerryApp
 
 # set default goal
-.DEFAULT_GOAL := bin
+.DEFAULT_GOAL := all
+
+# build whole application
+.PHONY: all
+all: bin rpm targz
 
 
 # install Python requirements
@@ -51,7 +58,7 @@ docs: requirements
 .PHONY: webapp
 webapp:
 	${BIN_NPM} install --prefix ${DIR_WEB_SOURCE}
-	${BIN_NPM} run build --prefix ${DIR_WEB_SOURCE}
+	${BIN_NPM} run prod --prefix ${DIR_WEB_SOURCE}
 	cp -R ${DIR_WEB_BUILD}/* ${DIR_WEB_TARGET}
 
 
@@ -63,12 +70,44 @@ bin: requirements docs webapp
 		--workpath ${DIR_TEMP} \
 		--hidden-import cmdb.exportd \
 		--hidden-import cmdb.exportd.service \
+		--hidden-import cmdb.file_export \
+		--hidden-import cmdb.file_export.file_exporter \
+		--hidden-import cmdb.file_export.csv_file_exporter \
+		--hidden-import cmdb.file_export.json_file_exporter \
+		--hidden-import cmdb.file_export.xlsx_file_exporter \
+		--hidden-import cmdb.file_export.xml_file_exporter \
 		--hidden-import cmdb.interface.gunicorn \
 		--hidden-import gunicorn.glogging \
 		--hidden-import gunicorn.workers.sync \
 		--add-data cmdb/interface/net_app/docs:cmdb/interface/net_app/docs \
 		--add-data cmdb/interface/net_app/dataGerryApp:cmdb/interface/net_app/dataGerryApp \
 		cmdb/__main__.py
+
+
+# create RPM package
+.PHONY: rpm
+rpm: bin
+	mkdir -p ${DIR_RPM_BUILD}
+	mkdir -p ${DIR_RPM_BUILD}/SOURCES
+	cp ${DIR_BIN_BUILD}/datagerry ${DIR_RPM_BUILD}/SOURCES
+	cp contrib/systemd/datagerry.service ${DIR_RPM_BUILD}/SOURCES
+	cp etc/cmdb.conf ${DIR_RPM_BUILD}/SOURCES
+	cp contrib/rpm/datagerry.spec ${DIR_RPM_BUILD}
+	${BIN_RPMBUILD} --define '_topdir ${DIR_RPM_BUILD}' -bb ${DIR_RPM_BUILD}/datagerry.spec
+
+
+# create tar.gz package
+.PHONY: targz
+targz: bin
+	mkdir -p ${DIR_TARGZ_BUILD}
+	mkdir -p ${DIR_TARGZ_BUILD}/src/datagerry/
+	mkdir -p ${DIR_TARGZ_BUILD}/src/datagerry/files
+	cp ${DIR_BIN_BUILD}/datagerry ${DIR_TARGZ_BUILD}/src/datagerry/files
+	cp contrib/systemd/datagerry.service ${DIR_TARGZ_BUILD}/src/datagerry/files
+	cp etc/cmdb.conf ${DIR_TARGZ_BUILD}/src/datagerry/files
+	cp LICENSE ${DIR_TARGZ_BUILD}/src/datagerry
+	cp contrib/setup/setup.sh ${DIR_TARGZ_BUILD}/src/datagerry
+	tar -czvf ${DIR_TARGZ_BUILD}/datagerry.tar.gz -C ${DIR_TARGZ_BUILD}/src datagerry
 
 
 # execute tests

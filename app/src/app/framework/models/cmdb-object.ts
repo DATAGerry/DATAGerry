@@ -21,14 +21,16 @@ import { CmdbDao } from './cmdb-dao';
 
 export class CmdbObject implements CmdbDao {
 
-  readonly public_id: number;
+  // tslint:disable:variable-name
+  public public_id: number;
   public type_id: number;
   public status: boolean = true;
   public version: string;
   public author_id: number;
   public active: boolean;
-  public views: number = 0;
-  public logs: any[] = [];
   public fields: any[];
-
+  public creation_time: any;
+  public last_edit_time: any;
+  public author_name?: string;
+  // tslint:enable
 }

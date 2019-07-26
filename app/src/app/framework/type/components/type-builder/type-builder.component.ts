@@ -24,44 +24,52 @@ import { TypeMetaStepComponent } from './type-meta-step/type-meta-step.component
 import { TypeAccessStepComponent } from './type-access-step/type-access-step.component';
 import { TypeService } from '../../../services/type.service';
 import { UserService } from '../../../../user/services/user.service';
-import { User } from '../../../../user/models/user';
+import { CategoryService } from '../../../services/category.service';
+import { CmdbMode } from '../../../modes.enum';
+import { Router } from '@angular/router';
+
 
 @Component({
   selector: 'cmdb-type-builder',
   templateUrl: './type-builder.component.html',
   styleUrls: ['./type-builder.component.scss']
 })
-export class TypeBuilderComponent implements OnInit{
+export class TypeBuilderComponent implements OnInit {
 
-  @Input() private typeInstance?: CmdbType;
 
-  @ViewChild(TypeBasicStepComponent)
-  private basicStep: TypeBasicStepComponent;
+  @Input() public typeInstance?: CmdbType;
+  @Input() public mode: number = CmdbMode.Create;
 
-  @ViewChild(TypeFieldsStepComponent)
-  private fieldStep: TypeFieldsStepComponent;
+  @ViewChild(TypeBasicStepComponent, {static: true})
+  public basicStep: TypeBasicStepComponent;
 
-  @ViewChild(TypeMetaStepComponent)
-  private metaStep: TypeMetaStepComponent;
+  @ViewChild(TypeFieldsStepComponent, {static: true})
+  public fieldStep: TypeFieldsStepComponent;
 
-  @ViewChild(TypeAccessStepComponent)
-  private accessStep: TypeAccessStepComponent;
+  @ViewChild(TypeMetaStepComponent, {static: true})
+  public metaStep: TypeMetaStepComponent;
 
-  public constructor(private typeService: TypeService, private userService: UserService) {}
+  @ViewChild(TypeAccessStepComponent, {static: true})
+  public accessStep: TypeAccessStepComponent;
+
+  public selectedCategoryID: number = 0;
+
+  public constructor(private router: Router, private typeService: TypeService,
+                     private userService: UserService, private categoryService: CategoryService) {
+  }
 
   public ngOnInit(): void {
     this.typeInstance = new CmdbType();
     this.typeInstance.version = '1.0.0';
-    this.userService.getCurrentUser().subscribe((currentUser: User) => {
-      this.typeInstance.author_id = currentUser.public_id;
-    });
+    this.typeInstance.author_id = this.userService.getCurrentUser().public_id;
   }
 
-  private exitBasicStep() {
+  public exitBasicStep() {
+    this.selectedCategoryID = this.basicStep.basicCategoryForm.value.category_id;
     this.assignToType(this.basicStep.basicForm.value);
   }
 
-  private exitFieldStep() {
+  public exitFieldStep() {
     let fieldBuffer = [];
     let sectionBuffer = [];
     const sectionOrigin = this.fieldStep.typeBuilder.sections;
@@ -74,25 +82,36 @@ export class TypeBuilderComponent implements OnInit{
       sectionGlobe.fields = Array.from(sectionFieldNames);
 
       sectionBuffer = sectionBuffer.concat(sectionGlobe);
-      console.log(sectionBuffer);
     }
     this.assignToType({fields: fieldBuffer});
     this.assignToType({sections: sectionBuffer}, 'render_meta');
   }
 
-  private exitMetaStep() {
+  public exitMetaStep() {
     this.assignToType({summary: this.metaStep.summariesSections}, 'render_meta');
     this.assignToType({external: this.metaStep.externalLinks}, 'render_meta');
   }
 
-  private exitAccessStep() {
+  public exitAccessStep() {
     this.assignToType(this.accessStep.accessForm.value, 'access');
   }
 
-  private saveType() {
-    this.typeService.postType(this.typeInstance).subscribe(res => {
-      console.log(res);
-    });
+  public saveType() {
+    let newTypeID = null;
+    this.typeService.postType(this.typeInstance).subscribe(typeIDResp => {
+        newTypeID = typeIDResp;
+
+        const selectedCategory = this.categoryService.findCategory(this.selectedCategoryID);
+        selectedCategory.type_list.push(newTypeID);
+        this.categoryService.updateCategory(selectedCategory).subscribe((ack: number) => {
+          this.router.navigate(['/framework/type/'], {queryParams: {typeAddSuccess: newTypeID}});
+        });
+
+      },
+      (error) => {
+        console.error(error);
+      });
+
   }
 
   public assignToType(data: any, optional: any = null) {

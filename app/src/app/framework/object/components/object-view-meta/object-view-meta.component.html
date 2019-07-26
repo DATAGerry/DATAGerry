@@ -1,0 +1,13 @@
+<table class="table table-hover">
+  <tbody>
+  <tr *ngFor="let metaData of meteObject?.headerLine">
+    <ng-container *ngFor="let meta of metaData | keyvalue">
+      <th scope="row">{{meta?.key}}</th>
+      <td *ngIf="!isObject(meta?.value); else dateTmpl">{{meta?.value}}</td>
+      <ng-template #dateTmpl>
+        <td>{{meta?.value.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
+      </ng-template>
+    </ng-container>
+  </tr>
+  </tbody>
+</table>

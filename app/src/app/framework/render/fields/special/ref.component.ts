@@ -16,31 +16,28 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { ComponentsFields } from '../components.fields';
+import { Component, OnInit } from '@angular/core';
+import { RenderField } from '../components.fields';
 import { ObjectService } from '../../../services/object.service';
+import { CmdbObject } from '../../../models/cmdb-object';
 
 @Component({
-  selector: 'cmdb-ref',
   templateUrl: './ref.component.html',
   styleUrls: ['./ref.component.scss']
 })
-export class RefComponent implements OnInit, OnChanges, ComponentsFields {
+export class RefComponent extends RenderField implements OnInit {
 
-  @Input() data: any;
-  private objectList;
+  public objectList: CmdbObject[];
 
-  constructor(private obj: ObjectService) {
+  public constructor(private obj: ObjectService) {
+    super();
   }
 
-  ngOnInit() {
-
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    console.log('test');
-    if (this.data.ref_types !== 'undefined') {
-      this.objectList = this.obj.getObjectsByType(this.data.ref_types);
+  public ngOnInit(): void {
+    if (this.data.ref_types !== undefined) {
+      this.obj.getObjectsByType(this.data.ref_types).subscribe((list: CmdbObject[]) => {
+        this.objectList = list;
+      });
     }
   }
 

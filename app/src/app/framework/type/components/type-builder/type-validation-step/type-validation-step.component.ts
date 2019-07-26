@@ -26,7 +26,7 @@ import { CmdbType } from '../../../../models/cmdb-type';
 })
 export class TypeValidationStepComponent implements OnInit {
 
-  @Input() private typeInstance?: CmdbType;
+  @Input() public typeInstance: CmdbType = null;
 
   constructor() { }
 

@@ -1,0 +1,31 @@
+<h1>Category list</h1>
+<div class="row">
+  <div class="col-12">
+    <table class="table">
+      <thead>
+      <tr>
+        <th scope="col">Public ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Label</th>
+        <th scope="col">Parent</th>
+        <th scope="col">Type List</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let category of categoryList">
+        <th scope="row">{{category.public_id}}</th>
+        <td>{{category.name}}</td>
+        <td>{{category.label}}</td>
+        <td>{{categoryService.findCategory(category.parent_id)?.name}}</td>
+        <td>
+          <ul class="list-unstyled">
+            <li *ngFor="let typeID of category.type_list">
+              <a routerLink="/framework/type/{{typeID}}">{{typeService.findType(typeID).label}}</a>
+            </li>
+          </ul>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

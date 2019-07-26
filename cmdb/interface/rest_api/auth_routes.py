@@ -15,24 +15,25 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+
+from flask import request, abort
 from cmdb.user_management.user_manager import user_manager
 from cmdb.data_storage import get_pre_init_database
 from cmdb.utils import get_security_manager
-from flask import Blueprint, jsonify, request, abort
+from cmdb.interface.route_utils import make_response, RootBlueprint
 
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
     CMDBError = Exception
 
-auth_routes = Blueprint('auth_rest', __name__, url_prefix='/auth')
+auth_routes = RootBlueprint('auth_rest', __name__, url_prefix='/auth')
 LOGGER = logging.getLogger(__name__)
 
 
 @auth_routes.route('/login', methods=['POST'])
 def login_call():
     login_data = request.json
-
     LOGGER.debug(f"Login try for user {login_data['user_name']}")
     login_user = None
     login_user_name = login_data['user_name']
@@ -48,5 +49,6 @@ def login_call():
     except CMDBError as e:
         abort(401, e)
     if correct:
-        return jsonify(get_security_manager(get_pre_init_database()).encrypt_token(login_user))
+        login_user.token = get_security_manager(get_pre_init_database()).encrypt_token(login_user)
+        return make_response(login_user)
     abort(401)

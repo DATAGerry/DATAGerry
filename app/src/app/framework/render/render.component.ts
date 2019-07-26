@@ -16,7 +16,11 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { CmdbType } from '../models/cmdb-type';
+import { CmdbMode } from '../modes.enum';
+import { FormGroup } from '@angular/forms';
+import { CmdbObject } from '../models/cmdb-object';
 
 @Component({
   selector: 'cmdb-render',
@@ -25,11 +29,53 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class RenderComponent {
 
-  @Input() sections: any = [];
-  @Input() fields: any = [];
+  private typeInstanceBack: CmdbType;
+  private objectInstanceBack: CmdbObject;
+  @Input() public renderForm: FormGroup = new FormGroup({});
+  @Input() public fieldsGroups: FormGroup = new FormGroup({});
+  @Input() public mode: CmdbMode;
+
+  @Input('typeInstance')
+  public set typeInstance(type: CmdbType) {
+    if (type !== undefined) {
+      this.typeInstanceBack = type;
+    }
+  }
+
+  public get typeInstance(): CmdbType {
+    return this.typeInstanceBack;
+  }
+
+  @Input('objectInstance')
+  public set objectInstance(data: CmdbObject) {
+    if (data !== undefined) {
+      this.objectInstanceBack = data;
+      for (const fieldData of this.objectInstance.fields) {
+        if (fieldData.value !== undefined) {
+          this.fieldsGroups.get(fieldData.name).setValue(fieldData.value);
+        }
+      }
+    }
+  }
+
+  public get objectInstance(): CmdbObject {
+    return this.objectInstanceBack;
+  }
+
+  public get fields() {
+    return this.renderForm.get('fields');
+  }
+
+  public constructor() {
+    this.renderForm = new FormGroup({});
+    this.fieldsGroups = new FormGroup({});
+    if (this.mode === CmdbMode.View) {
+      this.fieldsGroups.disable();
+    }
+  }
 
   public getFieldByName(name: string) {
-    return this.fields.find(field => field.name === name);
+    return this.typeInstance.fields.find(field => field.name === name);
   }
 
 }

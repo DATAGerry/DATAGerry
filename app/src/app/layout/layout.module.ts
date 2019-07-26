@@ -29,9 +29,14 @@ import { ContentHeaderComponent } from './components/content-header/content-head
 import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.component';
 import { LowercaseDirective } from './directives/lowercase.directive';
 import { SearchBarComponent } from './components/search-bar/search-bar.component';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { TableComponent } from './components/table/table.component';
+import { DataTablesModule } from 'angular-datatables';
+import { ToastContainerComponent } from './helpers/toast/toast-container.component';
+import { NgbActiveModal, NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import { ModalComponent } from './helpers/modal/modal.component';
+import { ToastService } from './services/toast.service';
 
 @NgModule({
   declarations: [
@@ -44,6 +49,9 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     ActiveBadgeComponent,
     LowercaseDirective,
     SearchBarComponent,
+    TableComponent,
+    ToastContainerComponent,
+    ModalComponent
   ],
   exports: [
     NavigationComponent,
@@ -52,7 +60,9 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     ContentHeaderComponent,
     ActiveBadgeComponent,
     SearchBarComponent,
-    LowercaseDirective
+    LowercaseDirective,
+    TableComponent,
+    ToastContainerComponent
   ],
   imports: [
     CommonModule,
@@ -60,10 +70,15 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     NgSelectModule,
     ReactiveFormsModule,
     NgbModule,
-    FormsModule
+    FormsModule,
+    DataTablesModule
   ],
   providers: [
-    BreadcrumbService
+    BreadcrumbService,
+    NgbActiveModal
+  ],
+  entryComponents: [
+    ModalComponent
   ]
 })
 export class LayoutModule {

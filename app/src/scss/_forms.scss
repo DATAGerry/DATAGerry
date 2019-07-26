@@ -1,0 +1,32 @@
+#renderForm{
+  /*
+  .col-form-label{
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }*/
+  fieldset {
+    border: 1px solid #ddd;
+    margin-bottom: 15px;
+    min-width: 0;
+    padding: 10px;
+    position: relative;
+    border-radius: 4px;
+
+    legend {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 0px;
+      width: 35%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 5px 5px 5px 10px;
+      background-color: #ffffff;
+    }
+
+    label{
+      padding-left: 25px;
+    }
+  }
+
+}

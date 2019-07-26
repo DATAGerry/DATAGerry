@@ -16,32 +16,48 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, ComponentFactoryResolver, ComponentRef, Injector, Input, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ComponentFactoryResolver, ComponentRef, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { fieldComponents } from '../fields/fields.list';
+import { RenderField } from '../fields/components.fields';
+import { ToastService } from '../../../layout/services/toast.service';
+import { FormControl, Validators } from '@angular/forms';
+import { CmdbMode } from '../../modes.enum';
 
 @Component({
   selector: 'cmdb-render-element',
   templateUrl: './render-element.component.html',
   styleUrls: ['./render-element.component.scss']
 })
-export class RenderElementComponent implements OnInit {
+export class RenderElementComponent extends RenderField implements OnInit {
 
-  @Input() data: any;
-  @ViewChild('fieldContainer', {read: ViewContainerRef}) container;
+  @ViewChild('fieldContainer', {read: ViewContainerRef, static: true}) container;
   private component: any;
   private componentRef: ComponentRef<any>;
 
-  constructor(private resolver: ComponentFactoryResolver) {
+  constructor(private resolver: ComponentFactoryResolver, public toast: ToastService) {
+    super();
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
     this.container.clear();
     this.component = fieldComponents[this.data.type];
 
     const factory = this.resolver.resolveComponentFactory(this.component);
     this.componentRef = this.container.createComponent(factory);
     this.componentRef.instance.data = this.data;
-
+    this.componentRef.instance.mode = this.mode;
+    this.componentRef.instance.toast = this.toast;
+    this.componentRef.instance.parentFormGroup = this.parentFormGroup;
+    const fieldControl = new FormControl('');
+    if (this.data.required) {
+      fieldControl.setValidators(Validators.required);
+    }
+    if (this.mode === CmdbMode.View) {
+      fieldControl.disable();
+    }
+    this.componentRef.instance.parentFormGroup.addControl(
+      this.data.name, fieldControl
+    );
   }
 
 }

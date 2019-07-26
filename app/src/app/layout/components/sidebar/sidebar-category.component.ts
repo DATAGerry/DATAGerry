@@ -29,7 +29,7 @@ export class SidebarCategoryComponent implements OnInit {
 
   @Input() categoryData: any;
 
-  private typeList: CmdbType[] = [];
+  public typeList: any[] = [];
   private objectCount = [];
 
   constructor(private api: ApiCallService) {
@@ -58,7 +58,7 @@ export class SidebarCategoryComponent implements OnInit {
     }, () => {
       const c = this.objectCount.values();
       for (const typ2 of this.typeList) {
-        typ2['countObjects'] = c.next().value;
+        typ2.countObjects = c.next().value;
       }
     });
   }

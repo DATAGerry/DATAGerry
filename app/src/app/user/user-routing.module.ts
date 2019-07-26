@@ -46,13 +46,6 @@ const routes: Routes = [
     outlet: 'footer'
   },
   {
-    path: '',
-    data: {
-      breadcrumb: 'User'
-    },
-    component: UserViewComponent
-  },
-  {
     path: ':publicID',
     data: {
       breadcrumb: 'View'

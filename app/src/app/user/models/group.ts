@@ -21,7 +21,7 @@ export class Group {
   private readonly public_id: number;
   public name: string;
   public label: string;
-  private rights: any;
+  public rights: any[];
 
   /* tslint:enable */
 }

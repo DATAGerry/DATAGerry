@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+
 
 @Component({
   selector: 'cmdb-type-meta-step',
@@ -8,9 +9,46 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 })
 export class TypeMetaStepComponent implements OnInit {
 
+  constructor() {
+    this.summariesForm = new FormGroup({
+      name: new FormControl('', [Validators.required, this.listNameValidator(this.summariesSections)]),
+      label: new FormControl('', Validators.required),
+      fields: new FormControl('', Validators.required)
+    });
+    // Deprecated
+    const URL_REGEXP = '/^(http?|[a-zA-Z0-9.-]+):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)' +
+      '(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.' +
+      '(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*' +
+      '(\/($|[a-zA-Z0-9.,?\'\\+&{}%$#=~_-]+))*$/;';
+    const URL_REGEXP_2 = '^(http?|[a-zA-Z0-9.-]+)?(://)?([a-zA-Z0-9.-]+)?.?[a-z0-9-]+(.|:)([a-z0-9-]+)+([/?].*)?$';
+    this.externalsForm = new FormGroup({
+      name: new FormControl('', [Validators.required, this.listNameValidator(this.externalLinks)]),
+      label: new FormControl('', Validators.required),
+      icon: new FormControl(''),
+      href: new FormControl('', [Validators.required, Validators.pattern(URL_REGEXP_2)]),
+      fields: new FormControl('')
+    });
+  }
+
+  public get summary_name() {
+    return this.summariesForm.get('name');
+  }
+
+  public get summary_label() {
+    return this.summariesForm.get('label');
+  }
+
+  public get external_name() {
+    return this.externalsForm.get('name');
+  }
+
+  public get external_label() {
+    return this.externalsForm.get('label');
+  }
+
   @Input() fields: any[] = [];
 
-  private icons = [
+  public icons = [
     'fa-glass',
     'fa-music',
     'fa-search',
@@ -598,29 +636,11 @@ export class TypeMetaStepComponent implements OnInit {
     'fa-fonticons'
   ];
 
-  private summariesForm: FormGroup;
+  public summariesForm: FormGroup;
   public summariesSections = [];
-  private externalsForm: FormGroup;
+  public externalsForm: FormGroup;
   public externalLinks = [];
-  private hrefInterpolCounter;
-
-  constructor() {
-    this.summariesForm = new FormGroup({
-      name: new FormControl('', Validators.required),
-      label: new FormControl('', Validators.required),
-      fields: new FormControl('', Validators.required)
-    });
-
-    const hrefValidationPattern = '(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?';
-    this.externalsForm = new FormGroup({
-      name: new FormControl('', Validators.required),
-      label: new FormControl('', Validators.required),
-      icon: new FormControl(''),
-      href: new FormControl('', [Validators.required]),
-      fields: new FormControl('')
-      // href: new FormControl('', [Validators.required, Validators.pattern(hrefValidationPattern)])
-    });
-  }
+  public hrefInterpolCounter;
 
   private static occurrences(s, subString): number {
     s += '';
@@ -644,20 +664,72 @@ export class TypeMetaStepComponent implements OnInit {
     return n;
   }
 
+  public listNameValidator(list: any[]) {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      const nameInList = list.find(el => el.name === control.value);
+      return nameInList ? {nameAlreadyTaken: {value: control.value}} : null;
+    };
+  }
+
   public ngOnInit(): void {
+    this.summariesForm.get('name').valueChanges.subscribe(val => {
+      if (this.summariesForm.get('name').value !== null) {
+        this.summariesForm.get('label').setValue(val.charAt(0).toUpperCase() + val.toString().slice(1));
+        this.summariesForm.get('label').markAsDirty({onlySelf: true});
+        this.summariesForm.get('label').markAsTouched({onlySelf: true});
+      }
+    });
+
+    this.externalsForm.get('name').valueChanges.subscribe(val => {
+      if (this.externalsForm.get('name').value !== null) {
+        this.externalsForm.get('label').setValue(val.charAt(0).toUpperCase() + val.toString().slice(1));
+        this.externalsForm.get('label').markAsDirty({onlySelf: true});
+        this.externalsForm.get('label').markAsTouched({onlySelf: true});
+      }
+    });
+
     this.externalsForm.get('href').valueChanges.subscribe((href: string) => {
       this.hrefInterpolCounter = Array(TypeMetaStepComponent.occurrences(href, '{}')).fill(0).map((x, i) => i);
     });
   }
 
-  private addSummary() {
+  public addSummary() {
     this.summariesSections.push(this.summariesForm.value);
     this.summariesForm.reset();
   }
 
-  private addExternal() {
+  public editSummary(data) {
+    const rawSummaryData = this.summariesSections[this.summariesSections.indexOf(data)];
+    this.summariesForm.reset();
+    this.summariesForm.patchValue(rawSummaryData);
+    this.deleteSummary(data);
+  }
+
+  public deleteSummary(data) {
+    const index: number = this.summariesSections.indexOf(data);
+    if (index !== -1) {
+      this.summariesSections.splice(index, 1);
+    }
+  }
+
+  public addExternal() {
     this.externalLinks.push(this.externalsForm.value);
     this.externalsForm.reset();
+  }
+
+  public editExternal(data) {
+    const rawExternalData = this.externalLinks[this.externalLinks.indexOf(data)];
+    this.externalsForm.reset();
+    this.externalsForm.patchValue(rawExternalData);
+    this.deleteExternal(data);
+  }
+
+  public deleteExternal(data) {
+    const index: number = this.externalLinks.indexOf(data);
+    if (index !== -1) {
+      this.externalLinks.splice(index, 1);
+    }
+
   }
 
 }

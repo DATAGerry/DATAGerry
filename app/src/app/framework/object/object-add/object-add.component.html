@@ -1,0 +1,48 @@
+<h1>Add new object:</h1>
+<hr/>
+<ng-template [ngIf]="!typeInstance" [ngIfElse]="renderTemplate">
+  <form [formGroup]="typeIDForm" novalidate>
+    <div class="form-group row">
+      <label class="col-sm-2 col-form-label">Select type:</label>
+      <div class="col-sm-10">
+        <div class="input-group mb-3">
+          <ng-select [items]="typeList" [groupBy]="groupByFn" [groupValue]="groupValueFn" formControlName="typeID"
+                     bindLabel="label" bindValue="public_id" required>
+            <ng-template ng-optgroup-tmp let-item="item">
+              <span style="vertical-align: middle;">{{item.name}}</span>
+              <span class="ml-1 badge badge-secondary">{{item.total}}</span>
+            </ng-template>
+          </ng-select>
+          <div class="input-group-append">
+            <button class="btn btn-outline-primary" type="submit" [disabled]="!typeIDForm.valid" (click)="useTypeID()">Add
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</ng-template>
+<ng-template #renderTemplate>
+  <form [formGroup]="renderForm" id="renderForm" class="needs-validation" novalidate autocomplete="off" (ngSubmit)="saveObject()">
+    <fieldset>
+      <legend>Object status</legend>
+      <div class="form-group row">
+        <label class="col-sm-3 col-form-label">
+          Active:
+        </label>
+        <div class="col-sm-9">
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" formControlName="active" class="custom-control-input" id="active" checked>
+            <label class="custom-control-label" for="active"></label>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+    <cmdb-render [mode]="mode" [fieldsGroups]="fieldsGroups" [renderForm]="renderForm"
+                 [typeInstance]="typeInstance"></cmdb-render>
+    <div class="btn-group" role="group">
+      <button type="reset" class="btn btn-outline-secondary">RESET</button>
+      <button class="btn btn-outline-success pull-right" type="submit" [disabled]="!renderForm.valid">SAVE</button>
+    </div>
+  </form>
+</ng-template>

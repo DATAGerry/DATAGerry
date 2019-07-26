@@ -26,6 +26,7 @@ import { DashcardComponent } from './components/dashcard/dashcard.component';
 import { NewestViewComponent } from './components/newest-view/newest-view.component';
 import { DataTablesModule } from 'angular-datatables';
 import { LatestChangesViewComponent } from './components/latest-changes-view/latest-changes-view.component';
+import { ObjectModule } from '../framework/object/object.module';
 
 @NgModule({
   declarations: [DashboardComponent, DashcardComponent, NewestViewComponent, LatestChangesViewComponent],
@@ -33,7 +34,9 @@ import { LatestChangesViewComponent } from './components/latest-changes-view/lat
     CommonModule,
     LayoutModule,
     DashboardRoutingModule,
-    DataTablesModule
+    DataTablesModule,
+    ObjectModule
   ]
 })
-export class DashboardModule { }
+export class DashboardModule {
+}

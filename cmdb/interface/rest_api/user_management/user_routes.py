@@ -16,7 +16,7 @@
 
 import logging
 
-from flask import abort
+from flask import abort, request
 from cmdb.utils.interface_wraps import login_required
 from cmdb.interface.route_utils import RootBlueprint, make_response
 from cmdb.user_management.user_manager import user_manager
@@ -30,8 +30,8 @@ LOGGER = logging.getLogger(__name__)
 user_routes = RootBlueprint('user_rest', __name__, url_prefix='/user')
 
 
-@login_required
 @user_routes.route('/', methods=['GET'])
+@login_required
 def get_users():
     try:
         users = user_manager.get_all_users()
@@ -42,10 +42,9 @@ def get_users():
     return resp
 
 
-@login_required
 @user_routes.route('/<string:token>', methods=['GET'])
+@login_required
 def get_user_from_token(token):
-    LOGGER.debug(f'Used token: {token}')
     try:
         user = user_manager.get_user_from_token(token)
     except (CMDBError, Exception) as e:
@@ -54,8 +53,9 @@ def get_user_from_token(token):
     resp = make_response(user)
     return resp
 
-@login_required
+
 @user_routes.route('/<int:public_id>', methods=['GET'])
+@login_required
 def get_user(public_id):
     try:
         user = user_manager.get_user(public_id=public_id)
@@ -66,14 +66,14 @@ def get_user(public_id):
     return resp
 
 
-@login_required
 @user_routes.route('/', methods=['POST'])
+@login_required
 def add_user():
     raise NotImplementedError
 
 
-@login_required
 @user_routes.route('/<int:public_id>', methods=['PUT'])
+@login_required
 def update_user(public_id: int):
     raise NotImplementedError
 
@@ -84,8 +84,8 @@ def delete_user(public_id: int):
     raise NotImplementedError
 
 
-@login_required
 @user_routes.route('/count/', methods=['GET'])
+@login_required
 def count_objects():
     try:
         count = user_manager.count_user()
@@ -93,3 +93,18 @@ def count_objects():
     except CMDBError:
         return abort(400)
     return resp
+
+
+"""SPEACIAL ROUTES"""
+@login_required
+@user_routes.route('/<int:public_id>/passwd', methods=['PUT'])
+def change_user_password(public_id: int):
+    from cmdb.data_storage import get_pre_init_database
+    from cmdb.utils import get_security_manager
+    try:
+        user = user_manager.get_user(public_id=public_id)
+    except CMDBError:
+        return abort(404)
+    user.password = get_security_manager(get_pre_init_database()).generate_hmac(request.json.get('password'))
+    ack = user_manager.update_user(user)
+    return make_response(ack)

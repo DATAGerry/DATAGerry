@@ -17,22 +17,22 @@
 */
 
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { ComponentsFields } from '../components.fields';
+import { ComponentsFields, RenderField } from '../components.fields';
 
 @Component({
-  selector: 'cmdb-password',
   templateUrl: './password.component.html',
   styleUrls: ['./text.component.scss']
 })
-export class PasswordComponent implements OnInit, ComponentsFields {
+export class PasswordComponent extends RenderField {
 
-  @Input() data: any;
-  @ViewChild('passWordInput') passWordToggle: ElementRef;
+  @ViewChild('passWordInput', {static: false}) public passWordToggle: ElementRef;
 
-  ngOnInit() {
+  public constructor() {
+    super();
   }
 
-  private toggleInput() {
+
+  public toggleInput() {
     if (this.passWordToggle.nativeElement.type === 'password') {
       this.passWordToggle.nativeElement.type = 'text';
     } else {
@@ -40,5 +40,9 @@ export class PasswordComponent implements OnInit, ComponentsFields {
     }
   }
 
+  public generatePassword() {
+    this.passWordToggle.nativeElement.value = Math.random().toString(36).slice(-8);
+    this.controller.setValue(this.passWordToggle.nativeElement.value);
+  }
 
 }

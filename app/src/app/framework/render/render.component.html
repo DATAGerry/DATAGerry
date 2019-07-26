@@ -1,8 +1,6 @@
-<form>
-  <section *ngFor="let section of sections">
-    <h4>{{section.label}}</h4><hr />
-    <div *ngFor="let field of section?.fields">
-      <cmdb-render-element [data]="getFieldByName(field)"></cmdb-render-element>
-    </div>
-  </section>
-</form>
+<fieldset *ngFor="let section of typeInstance?.render_meta?.sections">
+  <legend>{{section?.label}}</legend>
+  <div *ngFor="let field of section?.fields">
+    <cmdb-render-element [mode]="mode" [parentFormGroup]="fieldsGroups" [data]="getFieldByName(field)"></cmdb-render-element>
+  </div>
+</fieldset>

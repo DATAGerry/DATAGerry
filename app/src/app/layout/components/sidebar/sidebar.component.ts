@@ -28,8 +28,8 @@ import { CmdbType } from '../../../framework/models/cmdb-type';
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   public categoryTree: any;
-  private _defaultCategoryTree: any[];
-  private _filterCategoryTree: any[];
+  private defaultCategoryTree: any[];
+  private filterCategoryTree: any[];
   public filterTerm: FormControl = new FormControl('');
 
   constructor(private api: ApiCallService, private renderer: Renderer2) {
@@ -40,11 +40,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
     const categoryTreeObserver = this.api.callGetRoute('category/tree');
     categoryTreeObserver.subscribe(tree => {
       this.categoryTree = tree;
-      this._defaultCategoryTree = tree;
+      this.defaultCategoryTree = tree;
     });
 
     this.filterTerm.statusChanges.subscribe(() => {
-      this._filterCategoryTree = [];
+      this.filterCategoryTree = [];
       this.categoryTree = this.transform(this.categoryTree, this.filterTerm.value);
     });
   }
@@ -53,41 +53,36 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.renderer.removeClass(document.body, 'sidebar-fixed');
   }
 
-  public get_all_Objects() {
-    this.api.callGetRoute('object/').subscribe(data => {
-    });
-  }
-
   private transform(filterList: any[], searchText: string): any[] {
     if (!filterList) {
       return [];
     }
     if (!searchText) {
-      return this._defaultCategoryTree;
+      return this.defaultCategoryTree;
     }
 
     searchText = searchText.toLowerCase();
 
     for (const it of filterList) {
-      let isAvailable = it['category'].label.toLowerCase().includes(searchText);
+      let isAvailable = it.category.label.toLowerCase().includes(searchText);
       if (isAvailable) {
-        if (this._filterCategoryTree.includes(it) === false) {
-          this._filterCategoryTree.push(it);
+        if (this.filterCategoryTree.includes(it) === false) {
+          this.filterCategoryTree.push(it);
         }
       } else {
-        for (const typ of it['category'].type_list) {
+        for (const typ of it.category.type_list) {
           this.api.callGetRoute('type/' + typ).subscribe((obj: CmdbType) => {
             isAvailable = obj.label.toLowerCase().includes(searchText);
             if (isAvailable) {
-              if (this._filterCategoryTree.includes(it) === false) {
-                this._filterCategoryTree.push(it);
+              if (this.filterCategoryTree.includes(it) === false) {
+                this.filterCategoryTree.push(it);
               }
             }
           });
         }
       }
-      this.transform(it['children'], searchText);
+      this.transform(it.children, searchText);
     }
-    return this._filterCategoryTree;
+    return this.filterCategoryTree;
   }
 }

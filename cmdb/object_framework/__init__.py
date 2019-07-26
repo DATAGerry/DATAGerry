@@ -31,12 +31,14 @@ from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType
 from cmdb.object_framework.cmdb_object_status import CmdbObjectStatus
 from cmdb.object_framework.cmdb_object_link import CmdbObjectLink
 from cmdb.object_framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplates
+from cmdb.object_framework.cmdb_log import CmdbLog
 
 # List of init collections
 __COLLECTIONS__ = [
     CmdbObject,
     CmdbType,
     CmdbCategory,
+    CmdbLog,
     CmdbObjectStatus,
     CmdbObjectLink,
     CmdbCollection,

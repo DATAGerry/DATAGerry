@@ -192,20 +192,6 @@ class CmdbDAO:
         """
         return self.__dict__
 
-    def get_logs(self) -> list:
-        from cmdb.object_framework.cmdb_log import CmdbLog
-        if self.logs is None:
-            raise NoLogInstance()
-        else:
-            log_list = []
-            for log in self.logs:
-                try:
-                    tmp_log = CmdbLog(**log)
-                    log_list.append(tmp_log)
-                except CMDBError:
-                    continue
-            return log_list
-
     def to_json(self) -> dict:
         """
         converts attribute dict to json - maybe later for database updates

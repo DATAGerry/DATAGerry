@@ -17,6 +17,7 @@
 from cmdb.user_management.user_right import GLOBAL_IDENTIFIER, BaseRight
 from cmdb.user_management.rights.system_rights import SystemRight, ManagementRight, UserRight, GroupRight
 from cmdb.user_management.rights.framework_rights import FrameworkRight, ObjectRight, TypeRight, CategoryRight
+from cmdb.user_management.rights.export_rights import ExportRight
 
 SYSTEM_RIGHTS = (
     SystemRight(GLOBAL_IDENTIFIER, description='system settings rights'),
@@ -69,7 +70,12 @@ FRAMEWORK_RIGHTS = (
     )
 )
 
+EXPORT_RIGHTS = (
+    ExportRight(GLOBAL_IDENTIFIER, description='export rights'),
+)
+
 __all__ = (
     SYSTEM_RIGHTS,
-    FRAMEWORK_RIGHTS
+    FRAMEWORK_RIGHTS,
+    EXPORT_RIGHTS
 )

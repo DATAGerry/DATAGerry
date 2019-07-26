@@ -213,7 +213,7 @@ class DataGenerator:
                                 "name": "linedetails",
                                 "label": "Linedetails",
                                 "fields": [
-                                    "product_name"
+                                    "product_name",
                                     "transfer_rate"
                                 ],
                                 "position": 2
@@ -1012,7 +1012,7 @@ class DataGenerator:
                     "type_id": 1,
                     "views": self._faker.random_number(4),
                     "version": "1.0.0",
-                    "last_edit_time": None,
+                    "last_edit_time": self._faker.date_time_between(start_date="-30d"),
                     "active": self._faker.boolean(chance_of_getting_true=80),
                     "creation_time": self._faker.date_time_between(start_date="-30d"),
                     "status": None,
@@ -1089,7 +1089,7 @@ class DataGenerator:
                     "type_id": 2,
                     "views": self._faker.random_number(4),
                     "version": "1.0.0",
-                    "last_edit_time": None,
+                    "last_edit_time": self._faker.date_time_between(start_date="-30d"),
                     "active": self._faker.boolean(chance_of_getting_true=80),
                     "creation_time": self._faker.date_time_between(start_date="-30d"),
                     "status": None,
@@ -1173,7 +1173,7 @@ class DataGenerator:
                     "type_id": 3,
                     "views": self._faker.random_number(4),
                     "version": "1.0.0",
-                    "last_edit_time": None,
+                    "last_edit_time": self._faker.date_time_between(start_date="-30d"),
                     "active": self._faker.boolean(chance_of_getting_true=80),
                     "creation_time": self._faker.date_time_between(start_date="-30d"),
                     "status": None,
@@ -1257,7 +1257,7 @@ class DataGenerator:
                     "type_id": 4,
                     "views": self._faker.random_number(4),
                     "version": "1.0.0",
-                    "last_edit_time": None,
+                    "last_edit_time": self._faker.date_time_between(start_date="-30d"),
                     "active": self._faker.boolean(chance_of_getting_true=80),
                     "creation_time": self._faker.date_time_between(start_date="-30d"),
                     "status": None,
@@ -1313,7 +1313,7 @@ class DataGenerator:
                     "type_id": 5,
                     "views": self._faker.random_number(4),
                     "version": "1.0.0",
-                    "last_edit_time": None,
+                    "last_edit_time": self._faker.date_time_between(start_date="-30d"),
                     "active": self._faker.boolean(chance_of_getting_true=80),
                     "creation_time": self._faker.date_time_between(start_date="-30d"),
                     "status": None,

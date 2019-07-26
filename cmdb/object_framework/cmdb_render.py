@@ -214,19 +214,7 @@ class CmdbRender:
             return False
 
     def result(self):
-        from cmdb.user_management.user_manager import get_user_manager
-
-        render_result = RenderResult(
-            object_id=self.object_instance.get_public_id(),
-            object_creation_time=self.object_instance.creation_time,
-            object_last_edit_time=self.object_instance.last_edit_time,
-            author_id=self.object_instance.author_id,
-            author_name=get_user_manager().get_user(self.object_instance.author_id).get_name(),
-            type_id=self.type_instance.get_public_id(),
-            type_name=self.type_instance.get_name(),
-            type_label=self.type_instance.get_label(),
-            type_active=self.type_instance.active,
-        )
+        render_result = self.build_render_result()
         self.__add_extended_render_results(render_result)
 
         return render_result
@@ -238,17 +226,7 @@ class CmdbRender:
         render_list = []
 
         for element in instances:
-            render_result = RenderResult(
-                object_id=element.object_instance.get_public_id(),
-                object_creation_time=element.object_instance.creation_time,
-                object_last_edit_time=element.object_instance.last_edit_time,
-                author_id=element.object_instance.author_id,
-                author_name=None,
-                type_id=element.type_instance.get_public_id(),
-                type_name=element.type_instance.get_name(),
-                type_label=element.type_instance.get_label(),
-                type_active=element.type_instance.active,
-            )
+            render_result = element.build_render_result()
             element.__add_extended_render_results(render_result)
 
             dic = [i for i in all_user if (i['public_id'] == element.object_instance.author_id)]
@@ -257,17 +235,31 @@ class CmdbRender:
 
         return render_list
 
+    def build_render_result(self):
+        return RenderResult(
+            public_id=self.object_instance.get_public_id(),
+            creation_time=self.object_instance.creation_time,
+            last_edit_time=self.object_instance.last_edit_time,
+            author_id=self.object_instance.author_id,
+            author_name='',
+            type_id=self.type_instance.get_public_id(),
+            type_name=self.type_instance.get_name(),
+            label=self.type_instance.get_label(),
+            active=self.type_instance.active,
+            version=self.object_instance.version
+        )
+
     def __add_extended_render_results(self, render_result):
         if self.matched_fields:
             render_result.match_fields = self.matched_fields
         if self.object_instance and self.object_instance.fields:
             if self.type_instance.public_id == self.object_instance.type_id:
                 for type_field in self.type_instance.fields:
-                    for object_field in self.object_instance.fields:
-                        if object_field.get('name') == type_field.get('name'):
-                            object_field['label'] = type_field.get('label')
-                            object_field['type'] = type_field.get('type')
-                            render_result.obj_fields = self.object_instance.fields
+                    for fields in self.object_instance.fields:
+                        if fields.get('name') == type_field.get('name'):
+                            fields['label'] = type_field.get('label')
+                            fields['type'] = type_field.get('type')
+                            render_result.fields = self.object_instance.fields
         if self.has_summaries():
             render_result.set_summaries(self.get_summaries(True))
         if self.has_externals():
@@ -276,22 +268,23 @@ class CmdbRender:
 
 class RenderResult:
 
-    def __init__(self, object_id: int, object_creation_time: datetime, object_last_edit_time: datetime,
-                 author_id: int, author_name: str,
-                 type_id: int, type_active: bool, type_name: str, type_label: str = None):
-        self.object_id = object_id
-        self.object_creation_time = object_creation_time
-        self.object_last_edit_time = object_last_edit_time
+    def __init__(self, public_id: int, creation_time: datetime, last_edit_time: datetime,
+                 author_id: int, author_name: str, version: str,
+                 type_id: int, active: bool, type_name: str, label: str = None):
+        self.public_id = public_id
+        self.creation_time = creation_time
+        self.last_edit_time = last_edit_time
         self.author_id = author_id
         self.author_name = author_name
-        self.type_active = type_active
+        self.active = active
         self.type_id = type_id
         self.type_name = type_name
-        self.type_label = type_label or type_name.title()
+        self.version = version
+        self.label = label or type_name.title()
         self.summaries = None
         self.externals = None
         self.match_fields = None
-        self.obj_fields = None
+        self.fields = None
 
     def set_summaries(self, summary_list: list):
         self.summaries = summary_list

@@ -17,7 +17,7 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { Controller, ControlsContent } from './controls/controls.common';
+import { Controller } from './controls/controls.common';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import { SectionControl } from './controls/section.control';
 import { UserService } from '../../../user/services/user.service';
@@ -33,6 +33,11 @@ import { ReferenceControl } from './controls/specials/ref.control';
 import { RadioControl } from './controls/choice/radio.control';
 import { SelectControl } from './controls/choice/select.control';
 import { CheckboxControl } from './controls/choice/checkbox.control';
+import { GroupService } from '../../../user/services/group.service';
+import { CmdbMode } from '../../modes.enum';
+import { FormGroup } from '@angular/forms';
+
+declare var $: any;
 
 @Component({
   selector: 'cmdb-builder',
@@ -44,13 +49,14 @@ export class BuilderComponent implements OnInit {
   public sections: any[];
   public userList: User[] = [];
   public groupList: Group[] = [];
+  public mode = CmdbMode.Create;
 
   @Input() builderConfig: any = {};
 
-  private structureControls = [
+  public structureControls = [
     new Controller('section', SectionControl)
   ];
-  private basicControls = [
+  public basicControls = [
     new Controller('text', TextControl),
     new Controller('password', PasswordControl),
     new Controller('email', EmailControl),
@@ -61,12 +67,14 @@ export class BuilderComponent implements OnInit {
     new Controller('radio', RadioControl),
     new Controller('select', SelectControl),
   ];
-  private specialControls = [
+  public specialControls = [
     new Controller('ref', ReferenceControl)
   ];
 
-  public constructor(private userService: UserService) {
-    this.userService.getGroupList().subscribe((gList: Group[]) => {
+  public builderFormGroup: FormGroup;
+
+  public constructor(private userService: UserService, private groupService: GroupService) {
+    this.groupService.getGroupList().subscribe((gList: Group[]) => {
       this.groupList = gList;
     });
     this.userService.getUserList().subscribe((uList: User[]) => {
@@ -76,9 +84,10 @@ export class BuilderComponent implements OnInit {
 
   public ngOnInit(): void {
     this.sections = [];
+    this.builderFormGroup = new FormGroup({});
   }
 
-  private onDrop(event: DndDropEvent, list: any[]) {
+  public onDrop(event: DndDropEvent, list: any[]) {
     if (list
       && (event.dropEffect === 'copy'
         || event.dropEffect === 'move')) {
@@ -89,12 +98,16 @@ export class BuilderComponent implements OnInit {
 
         index = list.length;
       }
-
+      for (const el of list) {
+        // close all other collapse
+        const collapseCard = ($('#' + el.name) as any);
+        collapseCard.collapse('hide');
+      }
       list.splice(index, 0, event.data);
     }
   }
 
-  private onDragged(item: any, list: any[], effect: DropEffect) {
+  public onDragged(item: any, list: any[], effect: DropEffect) {
 
     if (effect === 'move') {
       const index = list.indexOf(item);
@@ -103,11 +116,10 @@ export class BuilderComponent implements OnInit {
   }
 
 
-  private remove(item: any, list: any[]) {
+  public remove(item: any, list: any[]) {
     const index: number = list.indexOf(item);
     if (index !== -1) {
       list.splice(index, 1);
     }
   }
-
 }

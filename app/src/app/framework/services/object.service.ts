@@ -19,7 +19,7 @@
 import { Injectable } from '@angular/core';
 import { ApiCallService } from '../../services/api-call.service';
 import { CmdbObject } from '../models/cmdb-object';
-import {Observable} from "rxjs";
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +35,10 @@ export class ObjectService {
     });
   }
 
+  public countObjectsByType(typeID: number) {
+    return this.api.callGetRoute<number>(this.servicePrefix + '/count/' + typeID);
+  }
+
   public getObjectList() {
     return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/');
   }
@@ -43,7 +47,18 @@ export class ObjectService {
     return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/type/' + typeID);
   }
 
-  public postAddObject(objectInstance: CmdbObject): Observable<any>{
-    return this.api.callPostRoute<CmdbObject>(this.servicePrefix + '/add', objectInstance);
+  public getObject(publicID: number, native: boolean = false) {
+    if (native) {
+      return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/' + publicID + '/native/');
+    }
+    return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/' + publicID);
+  }
+
+  public postObject(objectInstance: CmdbObject): Observable<any> {
+    return this.api.callPostRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
+  }
+
+  public putObject(objectInstance: CmdbObject): Observable<any> {
+    return this.api.callPutRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
   }
 }

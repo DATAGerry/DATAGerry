@@ -21,12 +21,13 @@ import { CmdbDao } from './cmdb-dao';
 
 export class CmdbCategory implements CmdbDao {
 
-  readonly public_id: number;
+  // tslint:disable: variable-name
+  public public_id: number;
   public name: string;
   public label: string;
   public icon: number;
   public type_list: number[];
   public parent_id: number;
-
+  // tslint:enable
 }
 

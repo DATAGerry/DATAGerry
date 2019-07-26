@@ -16,20 +16,15 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'cmdb-active-badge',
   templateUrl: './active-badge.component.html',
   styleUrls: ['./active-badge.component.scss']
 })
-export class ActiveBadgeComponent implements OnInit {
+export class ActiveBadgeComponent {
 
   @Input() activeStatus: boolean;
-
-  constructor() { }
-
-  ngOnInit() {
-  }
 
 }

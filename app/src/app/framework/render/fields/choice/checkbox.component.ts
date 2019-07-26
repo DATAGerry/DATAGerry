@@ -16,21 +16,17 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { ComponentsFields } from '../components.fields';
+import { Component } from '@angular/core';
+import { RenderField } from '../components.fields';
 
 @Component({
-  selector: 'cmdb-checkbox',
   templateUrl: './checkbox.component.html',
   styleUrls: ['./checkbox.component.scss']
 })
-export class CheckboxComponent implements OnInit, ComponentsFields {
-  @Input() data: any;
+export class CheckboxComponent extends RenderField {
 
-  constructor() {
-  }
-
-  ngOnInit() {
+  public constructor() {
+    super();
   }
 
 }

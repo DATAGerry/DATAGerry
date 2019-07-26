@@ -1,0 +1,86 @@
+
+
+  <div class="card-title" style="padding-top: 1em">
+    <cmdb-content-header title="{{pageTitle}}"></cmdb-content-header>
+  </div>
+
+  <div class="card-body" style="padding: 0 0 1em 0;">
+    <button type="button" class="btn btn-danger btn-sm" (click)="delManyObjects()">Delete Selected</button>
+
+    <span class="card-group float-right" *ngIf="hasSummaries">
+      <div class="btn-group">
+        <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle" (click)="verifyExport()"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fa fa-download" aria-hidden="true"></i> Export
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left" aria-labelledby="exportButton">
+          <li id="export-{{item.id}}" [className]="item.active ? 'dropdown-item' : 'dropdown-item disabled'"
+              *ngFor="let item of formatList" style="text-align: center;"
+              (click)="exporter(item.id)"
+              [ngbTooltip]="item.helperText">
+            <i class="fa {{item.icon}}"></i> {{item.label}} ({{selectedObjects}})
+          </li>
+        </ul>
+      </div>
+    </span>
+  </div>
+
+  <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-striped table-bordered">
+    <ng-container *ngFor="let results of objectLists">
+      <thead>
+      <tr>
+        <th class="toggle-check nosort" style="text-align: center">
+          <input type="checkbox" class="select-all-checkbox" (click)="selectAll()">
+        </th>
+
+        <th class="toggle-active">Active</th>
+        <th class="toggle-id">ID</th>
+        <th class="toggle-type">Type</th>
+        <!-- BEGIN: summarie fields : show only if objects are categorized -->
+        <ng-container *ngIf="hasSummaries">
+          <ng-container *ngFor="let obj of results.columnFields;">
+              <th class="toggle-{{obj.name}}">{{obj.label}}</th>
+          </ng-container>
+        </ng-container>
+        <!-- END: summarie fields -->
+        <th class="toggle-autor">Author</th>
+        <th class="toggle-last-modified">Last modified</th>
+        <th class="toggle-action">Action</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let result of results.items">
+        <td style="text-align: center">
+          <input id="{{result.public_id}}" class="select-checkbox" type="checkbox" (click)="updateDisplay()">
+        </td>
+        <td>
+          <cmdb-active-badge [activeStatus]="result.active"></cmdb-active-badge>
+        </td>
+        <td>{{result.public_id}}</td>
+        <td>{{result.label}}</td>
+
+        <!-- BEGIN: summarie contens : show only if objects are categorized  -->
+        <ng-container *ngIf="hasSummaries" >
+          <ng-container *ngFor="let field of result.fields">
+            <td><span [innerHTML]="checkType(field.value)">{{field.value}}</span></td>
+          </ng-container>
+        </ng-container>
+        <!-- END: summarie contens -->
+
+        <td>{{result.author_name}}</td>
+        <td>{{result.last_edit_time?.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
+        <td>
+          <a class="text-dark"[routerLink]="['/framework/object/', result.public_id]">
+            <i class="fa fa-eye" aria-hidden="true"></i>
+          </a>
+          <a class="ml-1 text-dark" [routerLink]="['/framework/object/', result.public_id]">
+            <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+          </a>
+          <a class="ml-1 text-dark" (click)="delObject(result)">
+            <i class="fa fa-trash-o" aria-hidden="true"></i>
+          </a>
+        </td>
+      </tr>
+      </tbody>
+    </ng-container>
+  </table>

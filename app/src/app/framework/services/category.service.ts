@@ -17,6 +17,7 @@
 */
 
 import { Injectable } from '@angular/core';
+import { map } from 'rxjs/operators';
 import { ApiCallService } from '../../services/api-call.service';
 import { CmdbCategory } from '../models/cmdb-category';
 
@@ -29,13 +30,30 @@ export class CategoryService {
   private categoryList: CmdbCategory[];
 
   constructor(private api: ApiCallService) {
-    this.getCategoryList().subscribe((respCategoryList: CmdbCategory[]) => {
-      this.categoryList = respCategoryList;
+    this.getCategoryList().subscribe((list: CmdbCategory[]) => {
+      this.categoryList = list;
     });
+  }
+
+  public findCategory(publicID: number): CmdbCategory {
+    return this.categoryList.find(category => category.public_id === publicID);
   }
 
   public getCategoryList() {
     return this.api.callGetRoute<CmdbCategory[]>(this.servicePrefix + '/');
   }
+
+  public getCategoryTree() {
+    return this.api.callGetRoute<CmdbCategory[]>(this.servicePrefix + '/tree');
+  }
+
+  public postCategory(data: CmdbCategory) {
+    return this.api.callPostRoute<CmdbCategory>(this.servicePrefix + '/', data);
+  }
+
+  public updateCategory(data) {
+    return this.api.callPutRoute<number>(this.servicePrefix + '/', data);
+  }
+
 
 }

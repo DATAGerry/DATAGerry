@@ -19,6 +19,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ConnectionService } from './connection.service';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -31,13 +32,11 @@ const httpOptions = {
 })
 export class ApiCallService {
 
-  hostAddress = 'localhost';
-  hostPort = 4000;
   private readonly apiPrefix = 'rest';
   private readonly apiURL;
 
-  constructor(private http: HttpClient) {
-    this.apiURL = 'http://' + this.hostAddress + ':' + this.hostPort + '/' + this.apiPrefix + '/';
+  constructor(private http: HttpClient, private connectionService: ConnectionService) {
+    this.apiURL = `${this.connectionService.connectionURL}${this.apiPrefix}/`;
   }
 
   public callGetRoute<T>(route: string, params?: any): Observable<any> {
@@ -52,18 +51,16 @@ export class ApiCallService {
     return this.http.post<T>(this.apiURL + route, data, httpOptions);
   }
 
+  public callPutRoute<T>(route: string, data) {
+    return this.http.put<T>(this.apiURL + route, data, httpOptions);
+  }
+
   public callDeleteManyRoute<T>(route: string, params?: any): Observable<any> {
-    if (window.confirm('Are you sure, you want to delete all selected objects?')) {
       return this.http.get<T>(this.apiURL + route, params);
-    }
-    return new Observable<any>();
   }
 
   public callDeleteRoute<T>(route: string, params?: any): Observable<any> {
-    if (window.confirm('Are you sure, you want to delete?')) {
-      return this.http.delete<T>(this.apiURL + route, params);
-    }
-    return new Observable<any>();
+    return this.http.delete<T>(this.apiURL + route, params);
   }
 
   public handleErrorPromise(error: Response | any) {

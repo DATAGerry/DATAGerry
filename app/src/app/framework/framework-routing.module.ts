@@ -49,14 +49,21 @@ const routes: Routes = [
     data: {
       breadcrumb: 'Type'
     },
-    loadChildren: './type/type.module#TypeModule',
+    loadChildren: () => import('./type/type.module').then(m => m.TypeModule),
   },
   {
     path: 'object',
     data: {
       breadcrumb: 'Object'
     },
-    loadChildren: './object/object.module#ObjectModule',
+    loadChildren: () => import('./object/object.module').then(m => m.ObjectModule),
+  },
+  {
+    path: 'category',
+    data: {
+      breadcrumb: 'Category'
+    },
+    loadChildren: () => import('./category/category.module').then(m => m.CategoryModule),
   }
 ];
 

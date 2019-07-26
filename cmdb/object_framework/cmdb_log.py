@@ -14,51 +14,71 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import logging
+
 from datetime import datetime
+from enum import Enum
 
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
     CMDBError = Exception
+from cmdb.object_framework.cmdb_dao import CmdbDAO
+from cmdb.object_framework.cmdb_object import CmdbObject
+from cmdb.object_framework.cmdb_object_type import CmdbType
+
+LOGGER = logging.getLogger(__name__)
 
 
-class CmdbLog:
-    """Definition of an object log - list of state changes. """
-    POSSIBLE_COMMANDS = ('create', 'edit', 'active', 'deactivate')
+class LogCommands(Enum):
+    CREATE = 1
+    EDIT = 2
+    ACTIVE = 3
+    DEACTIVATE = 4
 
-    def __init__(self, author_id: int, action: str, message: str, state: str = None, date: (str, datetime) = None):
-        """TODO: Security manager encrypt log"""
-        self.author_id = author_id
+
+class LogModels(Enum):
+    OBJECT = CmdbObject.__class__.__name__
+    TYPE = CmdbType.__class__.__name__
+
+
+class CmdbLog(CmdbDAO):
+    """
+    State control of objects and types.
+    """
+
+    COLLECTION = "objects.logs"
+    REQUIRED_INIT_KEYS = [
+        'model',
+        'user_id',
+        'time',
+        'meta',
+        'state'
+    ]
+
+    def __init__(self, model: str, action: LogCommands, user_id: int, time: datetime, meta: dict = None,
+                 state: bytearray = None, **kwargs):
+        self.model = model
         self.action = action
-        self.message = message
-        self.date = date or datetime.today()
-        if state is None:
-            self.state = None
-        else:
-            self.state = state
+        self.user_id = user_id
+        self.time = time
+        self.meta = meta or {}
+        self.state = state or None
+        super(CmdbLog, self).__init__(**kwargs)
 
-    def get_date(self) -> datetime:
-        return self.date
+    def get_decrypted_state(self) -> (LogModels.OBJECT, LogModels.TYPE):
+        from cmdb.security.keys import KeyHolder
+        from cmdb.security.crypto import RSADecryption
+        key_holder = KeyHolder()
+        rsa_dec = RSADecryption(private_key_pem=key_holder.get_private_pem())
+        rsa_decrypted = rsa_dec.decrypt(self.state)
+        LOGGER.debug(rsa_decrypted)
+        return rsa_decrypted
 
-    def get_action(self) -> str:
-        return self.action
-
-    def get_message(self) -> str:
-        return self.message
-
-    def get_state(self) -> str:
-        return self.state
-
-    def set_state(self, state):
-        self.state = state
-
-    def __repr__(self):
-        from cmdb.utils.helpers import debug_print
-        return debug_print(self)
-
-
-class ActionNotPossibleError(CMDBError):
-
-    def __init__(self, action):
-        super().__init__()
-        self.message = 'Object log could not be set - wrong action {}'.format(action)
+    def encrypt_state(self, data: (LogModels.OBJECT, LogModels.TYPE)):
+        from cmdb.security.keys import KeyHolder
+        from cmdb.security.crypto import RSAEncryption
+        key_holder = KeyHolder()
+        rsa_enc = RSAEncryption(public_key_pem=key_holder.get_public_pem())
+        LOGGER.debug(rsa_enc)
+        self.state = rsa_enc.encrypt(data.to_database())

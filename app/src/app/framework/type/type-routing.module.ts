@@ -18,10 +18,10 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { TypeViewComponent } from './components/type-view/type-view.component';
 import { TypeListComponent } from './components/type-list/type-list.component';
 import { TypeAddComponent } from './components/type-add/type-add.component';
 import { TypeEditComponent } from './components/type-edit/type-edit.component';
+import { TypeDeleteComponent } from './components/type-delete/type-delete.component';
 
 const routes: Routes = [
   {
@@ -39,12 +39,12 @@ const routes: Routes = [
     component: TypeAddComponent
   },
   {
-    path: ':publicID',
-    component: TypeViewComponent
-  },
-  {
     path: 'edit/:publicID',
     component: TypeEditComponent
+  },
+  {
+    path: 'delete/:publicID',
+    component: TypeDeleteComponent
   }
 ];
 

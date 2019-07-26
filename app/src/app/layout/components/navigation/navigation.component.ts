@@ -17,6 +17,8 @@
 */
 
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
+import { AuthService } from '../../../auth/services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'cmdb-navigation',
@@ -25,9 +27,9 @@ import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 })
 export class NavigationComponent implements OnInit, OnDestroy {
 
-  public readonly title: string = 'dataGerryApp';
+  public readonly title: string = 'dataGerry';
 
-  constructor(private renderer: Renderer2) {
+  constructor(private renderer: Renderer2, public authService: AuthService, private router: Router) {
   }
 
   public ngOnInit(): void {
@@ -36,6 +38,11 @@ export class NavigationComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy(): void {
     this.renderer.removeClass(document.body, 'header-fixed');
+  }
+
+  public logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/auth/login']);
   }
 
 }

@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'cmdb-object-externals',
@@ -26,6 +26,5 @@ import {Component, Input } from '@angular/core';
 export class ObjectExternalsComponent {
 
   @Input() objectInstance: any = [];
-  constructor() { }
 
 }

@@ -20,8 +20,13 @@ export class User {
   /* tslint:disable */
   readonly public_id: number;
   public user_name: string;
-  first_name?: string;
-  last_name?: string;
+  public first_name?: string;
+  public last_name?: string;
+  public email: string;
+  public token?: string;
+  public registration_time: any;
+  public authenticator: string;
+  public group_id: number;
 
   public getName() {
     if (typeof this.first_name != 'undefined' || typeof this.last_name != 'undefined') {

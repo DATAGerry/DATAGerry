@@ -16,21 +16,17 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { ComponentsFields } from '../components.fields';
+import { Component } from '@angular/core';
+import { RenderField } from '../components.fields';
 
 @Component({
-  selector: 'cmdb-radio',
   templateUrl: './radio.component.html',
   styleUrls: ['./radio.component.scss']
 })
-export class RadioComponent implements OnInit, ComponentsFields {
+export class RadioComponent extends RenderField {
 
-  @Input() data: any;
-
-  constructor() { }
-
-  ngOnInit() {
+  public constructor() {
+    super();
   }
 
 }

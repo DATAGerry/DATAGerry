@@ -1,0 +1,34 @@
+<div class="row">
+  <div class="col-sm-9">
+    <table class="table">
+      <thead>
+      <tr>
+        <th scope="col">MASTER</th>
+        <th scope="col">name</th>
+        <th scope="col">label</th>
+        <th scope="col">description</th>
+        <th scope="col">Level</th>
+      </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let right of rightList">
+          <td cmdb-master-badge [isMaster]="right?._MASTER"></td>
+          <th scope="row">{{right.name}}</th>
+          <td>{{right.label}}</td>
+          <td>{{right?.description}}</td>
+          <td cmdb-level-highlight [level]="right?._level" [rightLevels]="rightLevels"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-sm-3">
+    <div id="right-levels" class="card">
+      <div class="card-header">
+        Security right levels
+      </div>
+      <div class="card-body">
+        {{rightLevels | json}}
+      </div>
+    </div>
+  </div>
+</div>

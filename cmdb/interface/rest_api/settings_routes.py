@@ -17,6 +17,7 @@
 import logging
 from flask import current_app
 from cmdb.interface.route_utils import RootBlueprint
+from cmdb.utils.interface_wraps import login_required
 
 LOGGER = logging.getLogger(__name__)
 try:
@@ -32,5 +33,6 @@ with current_app.app_context():
 
 
 @settings_rest.route('/', methods=['GET'])
+@login_required
 def get_settings():
-    return "Test"
+    return None

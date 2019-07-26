@@ -22,13 +22,14 @@ import { NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LayoutModule } from './layout/layout.module';
-import { ConnectionModule } from './connection/connection.module';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { AuthModule } from './auth/auth.module';
 import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
 import { HttpErrorInterceptor } from './auth/interceptors/http-error.interceptor.tx';
 import { PreviousRouteService } from './services/previous-route.service';
 import { NgxSpinnerModule } from 'ngx-spinner';
+import { ConnectionService } from './services/connection.service';
+import { DatePipe } from '@angular/common';
+import { FileSaverModule } from 'ngx-filesaver';
 
 @NgModule({
   declarations: [
@@ -38,13 +39,14 @@ import { NgxSpinnerModule } from 'ngx-spinner';
     BrowserModule,
     HttpClientModule,
     LayoutModule,
-    ConnectionModule,
-    AuthModule,
     NgxSpinnerModule,
-    AppRoutingModule
+    AppRoutingModule,
+    FileSaverModule
   ],
   providers: [
     PreviousRouteService,
+    ConnectionService,
+    DatePipe,
     {provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true},
   ],

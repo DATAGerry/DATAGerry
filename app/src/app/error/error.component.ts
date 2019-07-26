@@ -26,13 +26,12 @@ import { PreviousRouteService } from '../services/previous-route.service';
   styleUrls: ['./error.component.scss']
 })
 export class ErrorComponent implements OnInit {
-  private readonly statusCode: number = 501;
-  private statusText: string;
-  private response: string;
-  private message: string;
-  private readonly now: number = Date.now();
-  private previousUrl: string;
-  private currentUrl: string;
+  public readonly statusCode: number = 501;
+  public statusText: string;
+  public response: string;
+  public message: string;
+  public readonly now: number = Date.now();
+  public previousUrl: string;
 
 
   constructor(private route: ActivatedRoute, private prevRouteService: PreviousRouteService) {

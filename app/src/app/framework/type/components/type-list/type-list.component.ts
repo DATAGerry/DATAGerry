@@ -16,13 +16,13 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CmdbType } from '../../../models/cmdb-type';
 import { TypeService } from '../../../services/type.service';
 import { Subject } from 'rxjs';
-import { UserService } from '../../../../user/services/user.service';
-import { User } from '../../../../user/models/user';
 import { DataTableDirective } from 'angular-datatables';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ToastService } from '../../../../layout/services/toast.service';
 
 @Component({
   selector: 'cmdb-type-list',
@@ -31,14 +31,24 @@ import { DataTableDirective } from 'angular-datatables';
 })
 export class TypeListComponent implements OnInit, OnDestroy {
 
-  @ViewChild(DataTableDirective)
+  @ViewChild(DataTableDirective, {static: false})
   public dtElement: DataTableDirective;
 
-  private typeList: CmdbType[] = [];
+  public typeList: CmdbType[] = [];
   public dtOptions: DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
+  public linkRoute: string = 'type/';
+  public addNewType: {};
 
-  constructor(private typeService: TypeService, private userService: UserService) {
+  constructor(private typeService: TypeService, private toastService: ToastService,
+              private router: Router, private route: ActivatedRoute) {
+    this.addNewType = {
+      text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
+      className: 'btn btn-success btn-sm mr-1',
+      action: function() {
+        this.router.navigate(['/framework/type/add']);
+      }.bind(this)
+    };
   }
 
   public ngOnInit(): void {
@@ -50,6 +60,12 @@ export class TypeListComponent implements OnInit, OnDestroy {
         searchPlaceholder: 'Filter...'
       },
     };
+
+    this.route.params.subscribe((param) => {
+      if (param.typeAddSuccess !== undefined) {
+        this.toastService.show('A new type was added with ID: ' + param.typeAddSuccess);
+      }
+    });
 
     this.typeService.getTypeList().subscribe((list: CmdbType[]) => {
         this.typeList = this.typeList.concat(list);
@@ -65,6 +81,5 @@ export class TypeListComponent implements OnInit, OnDestroy {
   public ngOnDestroy(): void {
     this.dtTrigger.unsubscribe();
   }
-
 
 }

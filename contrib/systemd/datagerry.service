@@ -3,8 +3,10 @@ Description=dataGerry - Enterprise grade OpenSource CMDB
 After=network.target
 
 [Service]
+User=datagerry
+Group=datagerry
 Type=simple
-ExecStart=/opt/datagerry/bin/datagerry -c /opt/datagerry/etc/cmdb.conf -s
+ExecStart=/usr/bin/datagerry -c /etc/datagerry/cmdb.conf -s
 KillMode=process
 Restart=on-failure
 

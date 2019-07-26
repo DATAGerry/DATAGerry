@@ -31,4 +31,5 @@ import { LayoutModule } from '../layout/layout.module';
     LayoutModule
   ]
 })
-export class ErrorModule { }
+export class ErrorModule {
+}

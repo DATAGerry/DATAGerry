@@ -21,7 +21,6 @@ import { ApiCallService } from '../../services/api-call.service';
 import { User } from '../models/user';
 import { Group } from '../models/group';
 import { AuthService } from '../../auth/services/auth.service';
-import { UserToken } from '../../auth/models/user-token';
 
 @Injectable({
   providedIn: 'root'
@@ -30,28 +29,24 @@ export class UserService {
 
   private readonly prefix: string = 'user';
   private userList: User[] = [];
-  private groupList: Group[] = [];
-
-  private readonly currentUserToken: UserToken;
 
   constructor(private api: ApiCallService, private authService: AuthService) {
-    this.currentUserToken = this.authService.currentUserValue;
 
     this.getUserList().subscribe((respUserList: User[]) => {
       this.userList = respUserList;
     });
   }
 
-  public getCurrentUser() {
-    return this.api.callGetRoute<User>(this.prefix + '/' + this.currentUserToken);
+  public getCurrentUser(): User {
+    return this.authService.currentUserValue;
   }
 
   public getUserList() {
     return this.api.callGetRoute<User[]>(this.prefix + '/');
   }
 
-  public getGroupList() {
-    return this.api.callGetRoute<Group[]>('group/');
+  public changeUserPassword(userID: number, newPassword: string) {
+    return this.api.callPutRoute<boolean>(this.prefix + '/' + userID + '/passwd', {password: newPassword});
   }
 
   public getUser(publicID: number) {
