@@ -39,6 +39,13 @@ const routes: Routes = [
     component: ObjectAddComponent
   },
   {
+    path: 'add/:publicID',
+    data: {
+      breadcrumb: 'New'
+    },
+    component: ObjectAddComponent
+  },
+  {
     path: 'edit/:publicID',
     data: {
       breadcrumb: 'Edit'

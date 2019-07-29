@@ -54,6 +54,7 @@ export class ObjectListComponent implements OnDestroy {
   readonly $date: string = '$date';
   public formatList: any[] = [];
   private selectedObjects: string = 'all';
+  public typeID: number = null;
 
   constructor(private apiCallService: ApiCallService, private objService: ObjectService,
               private exportService: ExportService, private route: ActivatedRoute, private router: Router,
@@ -64,7 +65,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   private init(id) {
-    this.exportService.callFileFormatRoute('export/').subscribe( data => {
+    this.exportService.callFileFormatRoute('export/').subscribe(data => {
       this.formatList = data;
     });
     this.getRouteObjects(id.publicID);
@@ -76,6 +77,7 @@ export class ObjectListComponent implements OnDestroy {
     this.hasSummaries = false;
     if (typeof id !== 'undefined') {
       url = url + 'type/' + id;
+      this.typeID = id;
       this.hasSummaries = true;
     }
 
@@ -128,7 +130,12 @@ export class ObjectListComponent implements OnDestroy {
         text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
         className: 'btn btn-success btn-sm mr-1',
         action: function() {
-          this.router.navigate(['/framework/object/add']);
+          if (this.typeID === null) {
+            this.router.navigate(['/framework/object/add']);
+          } else {
+            this.router.navigate(['/framework/object/add/' + this.typeID]);
+          }
+
         }.bind(this)
       }
     );
@@ -371,7 +378,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   public exportByTypeID(fileExtension: string) {
-    this.exportService.callExportRoute('export/' + 'object/type/' + this.items[0].type_id + '/' + fileExtension , fileExtension);
+    this.exportService.callExportRoute('export/' + 'object/type/' + this.items[0].type_id + '/' + fileExtension, fileExtension);
   }
 
   public verifyExport() {

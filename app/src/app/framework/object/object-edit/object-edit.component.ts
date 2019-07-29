@@ -63,6 +63,7 @@ export class ObjectEditComponent implements OnInit {
     this.renderForm.markAllAsTouched();
     if (this.renderForm.valid) {
       const patchValue = [];
+      this.renderForm.removeControl('active');
       Object.keys(this.renderForm.value).forEach((key: string) => {
         patchValue.push({
           name: key,

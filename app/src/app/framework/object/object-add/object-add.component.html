@@ -1,4 +1,4 @@
-<h1>Add new object:</h1>
+<h1>Add new object: <strong>{{typeInstance?.label}}</strong></h1>
 <hr/>
 <ng-template [ngIf]="!typeInstance" [ngIfElse]="renderTemplate">
   <form [formGroup]="typeIDForm" novalidate>
@@ -14,7 +14,8 @@
             </ng-template>
           </ng-select>
           <div class="input-group-append">
-            <button class="btn btn-outline-primary" type="submit" [disabled]="!typeIDForm.valid" (click)="useTypeID()">Add
+            <button class="btn btn-outline-primary" type="submit" [disabled]="!typeIDForm.valid" (click)="useTypeID()">
+              Add
             </button>
           </div>
         </div>
@@ -23,7 +24,8 @@
   </form>
 </ng-template>
 <ng-template #renderTemplate>
-  <form [formGroup]="renderForm" class="renderForm needs-validation" novalidate autocomplete="off" (ngSubmit)="saveObject()">
+  <form [formGroup]="renderForm" class="renderForm needs-validation" novalidate autocomplete="off"
+        (ngSubmit)="saveObject()">
     <fieldset>
       <legend>Object status</legend>
       <div class="form-group row">
