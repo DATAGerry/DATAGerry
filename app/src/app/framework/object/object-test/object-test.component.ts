@@ -38,7 +38,7 @@ export class ObjectTestComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.typeService.getType(3).subscribe((res: CmdbType) => {
+    this.typeService.getType(1).subscribe((res: CmdbType) => {
       this.typeInstance = res;
     });
     this.objectService.getObject(1, true).subscribe((res: CmdbObject) => {

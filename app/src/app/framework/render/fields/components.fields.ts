@@ -37,6 +37,13 @@ export class RenderField {
   @Input('data')
   public set data(value: any) {
     this.innerData = value;
+    if (this.innerData.value !== undefined || this.innerData.value !== null) {
+      if (this.controller !== null
+      ) {
+
+        this.controller.setValue(this.innerData.value);
+      }
+    }
     // POSSIBLE DEPRECATED
     /*this.parentFormGroup.addControl(
       this.data.name, new FormControl('')

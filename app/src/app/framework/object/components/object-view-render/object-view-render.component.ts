@@ -20,16 +20,25 @@ import { Component, Input } from '@angular/core';
 import { CmdbMode } from '../../../modes.enum';
 import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbObject } from '../../../models/cmdb-object';
+import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-object-render',
-  templateUrl: './object-render.component.html',
-  styleUrls: ['./object-render.component.scss']
+  templateUrl: './object-view-render.component.html',
+  styleUrls: ['./object-view-render.component.scss']
 })
-export class ObjectRenderComponent {
+export class ObjectViewRenderComponent {
 
   @Input() public mode: CmdbMode = CmdbMode.View;
   @Input() public objectInstance: CmdbObject;
   @Input() public typeInstance: CmdbType;
+  public renderForm: FormGroup;
+  public fieldsGroups: FormGroup;
+
+  public constructor() {
+    this.renderForm = new FormGroup({});
+    this.fieldsGroups = new FormGroup({});
+  }
+
 
 }

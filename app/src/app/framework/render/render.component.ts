@@ -51,9 +51,7 @@ export class RenderComponent {
     if (data !== undefined) {
       this.objectInstanceBack = data;
       for (const fieldData of this.objectInstance.fields) {
-        if (fieldData.value !== undefined) {
-          this.fieldsGroups.get(fieldData.name).setValue(fieldData.value);
-        }
+        
       }
     }
   }

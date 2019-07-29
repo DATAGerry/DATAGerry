@@ -34,7 +34,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RenderModule } from '../render/render.module';
 import { ObjectAddComponent } from './object-add/object-add.component';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { ObjectRenderComponent } from './components/object-render/object-render.component';
+import { ObjectViewRenderComponent } from './components/object-view-render/object-view-render.component';
 import { ObjectFooterComponent } from './components/object-footer/object-footer.component';
 import { ObjectActionsComponent } from './components/object-actions/object-actions.component';
 import { ObjectViewMetaComponent } from './components/object-view-meta/object-view-meta.component';
@@ -43,7 +43,7 @@ import { ObjectTestComponent } from './object-test/object-test.component';
 
 @NgModule({
   declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent, ObjectSummaryComponent,
-    ObjectExternalsComponent, ObjectAddComponent, ObjectRenderComponent, ObjectFooterComponent, ObjectActionsComponent,
+    ObjectExternalsComponent, ObjectAddComponent, ObjectViewRenderComponent, ObjectFooterComponent, ObjectActionsComponent,
     ObjectViewMetaComponent,
     ObjectEditComponent,
     ObjectTestComponent],

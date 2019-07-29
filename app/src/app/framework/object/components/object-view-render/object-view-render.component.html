@@ -1,22 +1,4 @@
-<form [formGroup]="renderForm" id="renderForm" class="needs-validation" novalidate autocomplete="off" (ngSubmit)="saveObject()">
-  <fieldset>
-    <legend>Object status</legend>
-    <div class="form-group row">
-      <label class="col-sm-3 col-form-label">
-        Active:
-      </label>
-      <div class="col-sm-9">
-        <div class="custom-control custom-checkbox">
-          <input type="checkbox" formControlName="active" class="custom-control-input" id="active" checked>
-          <label class="custom-control-label" for="active"></label>
-        </div>
-      </div>
-    </div>
-  </fieldset>
+<form [formGroup]="renderForm" id="renderForm" class="needs-validation" novalidate autocomplete="off">
   <cmdb-render [mode]="mode" [fieldsGroups]="fieldsGroups" [renderForm]="renderForm"
-               [typeInstance]="typeInstance"></cmdb-render>
-  <div class="btn-group" role="group">
-    <button type="reset" class="btn btn-outline-secondary">RESET</button>
-    <button class="btn btn-outline-success pull-right" type="submit" [disabled]="!renderForm.valid">SAVE</button>
-  </div>
+               [typeInstance]="typeInstance" [objectInstance]="objectInstance"></cmdb-render>
 </form>
