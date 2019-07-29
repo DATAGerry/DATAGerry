@@ -59,7 +59,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
     this.typeIDSubject = new BehaviorSubject<number>(null);
     this.route.params.subscribe((params) => {
       if (params.publicID !== undefined) {
-        this.typeIDSubject.next(params.publicID);
+        this.typeIDSubject.next(+params.publicID);
       }
     });
     this.typeID = this.typeIDSubject.asObservable();
@@ -122,7 +122,6 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
     if (this.renderForm.valid) {
       this.objectInstance.type_id = this.currentTypeID;
       this.objectInstance.active = this.render.renderForm.get('active').value;
-      console.log(this.objectInstance.active);
       this.objectInstance.version = '1.0.0';
       this.objectInstance.author_id = this.userService.getCurrentUser().public_id;
       this.objectInstance.fields = [];
