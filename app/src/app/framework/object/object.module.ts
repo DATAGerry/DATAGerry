@@ -34,19 +34,17 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RenderModule } from '../render/render.module';
 import { ObjectAddComponent } from './object-add/object-add.component';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { ObjectViewRenderComponent } from './components/object-view-render/object-view-render.component';
 import { ObjectFooterComponent } from './components/object-footer/object-footer.component';
 import { ObjectActionsComponent } from './components/object-actions/object-actions.component';
 import { ObjectViewMetaComponent } from './components/object-view-meta/object-view-meta.component';
 import { ObjectEditComponent } from './object-edit/object-edit.component';
-import { ObjectTestComponent } from './object-test/object-test.component';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { ObjectViewRenderComponent } from './components/object-view-render/object-view-render.component';
 
 @NgModule({
   declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent, ObjectSummaryComponent,
-    ObjectExternalsComponent, ObjectAddComponent, ObjectViewRenderComponent, ObjectFooterComponent, ObjectActionsComponent,
-    ObjectViewMetaComponent,
-    ObjectEditComponent,
-    ObjectTestComponent],
+    ObjectExternalsComponent, ObjectAddComponent, ObjectFooterComponent, ObjectActionsComponent, ObjectViewRenderComponent,
+    ObjectViewMetaComponent, ObjectEditComponent],
   imports: [
     CommonModule,
     ObjectRoutingModule,
@@ -57,7 +55,8 @@ import { ObjectTestComponent } from './object-test/object-test.component';
     FormsModule,
     ReactiveFormsModule,
     RenderModule,
-    NgSelectModule
+    NgSelectModule,
+    NgbTooltipModule
   ]
 })
 export class ObjectModule {

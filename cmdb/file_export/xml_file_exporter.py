@@ -14,9 +14,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import json
+import xml.etree.ElementTree as ET
+import xml.dom.minidom
 from cmdb.file_export.file_exporter import FileExporter
 from cmdb.interface.route_utils import make_response
-import json
+from cmdb.object_framework.cmdb_object_manager import object_manager
 
 
 class XmlFileExporter(FileExporter):
@@ -24,20 +27,32 @@ class XmlFileExporter(FileExporter):
     def main(self):
         self.set_response(self.parse_to_xml(json.loads(make_response(self.get_object_list()).data)))
 
-    def parse_to_xml(self, json_obj, line_spacing=""):
-        result_list = list()
-        json_obj_type = type(json_obj)
+    def parse_to_xml(self, json_obj):
+        # object list
+        cmdb_object_list = ET.Element('objects')
 
-        if json_obj_type is list:
-            for sub_elem in json_obj:
-                result_list.append(self.parse_to_xml(sub_elem, line_spacing))
-            return "\n".join(result_list)
+        # objects
+        for obj in json_obj:
+            # object
+            cmdb_object = ET.SubElement(cmdb_object_list, 'object')
+            cmdb_object_meta = ET.SubElement(cmdb_object, 'meta')
+            # meta: public
+            cmdb_object_meta_id = ET.SubElement(cmdb_object_meta, 'public_id')
+            cmdb_object_meta_id.text = str(obj['public_id'])
+            # meta: active
+            cmdb_object_meta_active = ET.SubElement(cmdb_object_meta, 'active')
+            cmdb_object_meta_active.text = str(obj['active'])
+            # meta: type
+            cmdb_object_meta_type = ET.SubElement(cmdb_object_meta, 'type')
+            cmdb_object_meta_type.text = object_manager.get_type(obj['type_id']).label
+            # fields
+            cmdb_object_fields = ET.SubElement(cmdb_object, 'fields')
+            for curr in obj['fields']:
+                # fields: content
+                field_attribs = {}
+                field_attribs["name"] = str(curr['name'])
+                field_attribs["value"] = str(curr['value'])
+                ET.SubElement(cmdb_object_fields, "field", field_attribs)
 
-        if json_obj_type is dict:
-            for tag_name in json_obj:
-                sub_obj = json_obj[tag_name]
-                result_list.append("%s<%s>" % (line_spacing, tag_name))
-                result_list.append(self.parse_to_xml(sub_obj, "\t" + line_spacing))
-                result_list.append("%s</%s>" % (line_spacing, tag_name))
-            return "\n".join(result_list)
-        return "%s%s" % (line_spacing, json_obj)
+        # return xml as string (pretty printed)
+        return xml.dom.minidom.parseString(ET.tostring(cmdb_object_list, encoding='unicode', method='xml')).toprettyxml()

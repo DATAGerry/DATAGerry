@@ -337,7 +337,7 @@ class CmdbObjectManager(CmdbManagerBase):
         if self._event_queue:
             event = Event("cmdb.core.object.updated", {"id": update_object.get_public_id()})
             self._event_queue.put(event)
-        return ack
+        return ack.acknowledged
 
     def update_many_objects(self, objects: list):
         ack = []

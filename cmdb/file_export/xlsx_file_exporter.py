@@ -13,7 +13,7 @@ import openpyxl
 import tempfile
 
 
-class XlsFileExporter(FileExporter):
+class XlsxFileExporter(FileExporter):
 
     def main(self):
         workbook = self.create_xls_object()
@@ -28,40 +28,34 @@ class XlsFileExporter(FileExporter):
         # create workbook
         workbook = openpyxl.Workbook()
 
+        # delete default sheet
+        workbook.remove(workbook.active)
+
         # insert data into worksheet
         run_header = True
         i = 2
 
         # sorts data_list by type_id
-        sorted_list = []
-        types = []
 
-        # get type_id's from data_list
-        for obj in self.get_object_list():
-            if obj.type_id not in types:
-                types.append(obj.type_id)
-        types.sort()
+        type_id = "type_id"
+        decorated = [(dict_.__dict__[type_id], dict_.__dict__) for dict_ in self.get_object_list()]
+        decorated = sorted(decorated, key=lambda x: x[0], reverse=False)
+        sorted_list = [dict_ for (key, dict_) in decorated]
 
-        # sort data_list by types in sorted_list
-        for type_id in types:
-            for obj in self.get_object_list():
-                if obj.type_id == type_id:
-                    sorted_list.append(obj)
-
-        current_type_id = sorted_list[0].type_id
+        current_type_id = sorted_list[0][type_id]
         p = 0
         for obj in sorted_list:
-            fields = obj.fields
+            fields = obj["fields"]
 
-            if current_type_id != obj.type_id:
-                current_type_id = obj.type_id
+            if current_type_id != obj[type_id]:
+                current_type_id = obj[type_id]
                 run_header = True
                 i = 2
 
             # insert header value
             if run_header:
                 # get active worksheet and rename it
-                title = object_manager.get_type(obj.type_id).label
+                title = object_manager.get_type(obj[type_id]).label
                 sheet = workbook.create_sheet(title, p)
                 header = sheet.cell(row=1, column=1)
                 header.value = 'public_id'
@@ -79,9 +73,9 @@ class XlsFileExporter(FileExporter):
             c = 3
             for key in fields:
                 header = sheet.cell(row=i, column=1)
-                header.value = str(obj.public_id)
+                header.value = str(obj["public_id"])
                 header = sheet.cell(row=i, column=2)
-                header.value = str(obj.active)
+                header.value = str(obj["active"])
 
                 rows = sheet.cell(row=i, column=c)
                 rows.value = str(key.get('value'))

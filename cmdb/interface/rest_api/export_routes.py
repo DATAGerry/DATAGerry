@@ -39,14 +39,14 @@ def get_extension_list():
     return make_response(FileExporter(None, None, None).get_extension_list())
 
 
-@export_route.route('<string:collection>/<string:public_ids>/<string:extension>', methods=['GET'])
+@export_route.route('/object/<string:public_ids>/<string:extension>', methods=['GET'])
 @login_required
-def export_file(collection, public_ids, extension):
+def export_file(public_ids, extension):
     try:
         curr_exporter = load_class('cmdb.file_export.'
                                    + extension + '_file_exporter.'
                                    + extension.capitalize() + 'FileExporter')
-        file_export = curr_exporter(collection, extension, public_ids)
+        file_export = curr_exporter('object', extension, public_ids)
         file_export.main()
     except TypeNotFoundError as e:
         return abort(400, e.message)

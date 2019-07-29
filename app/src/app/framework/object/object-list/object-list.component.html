@@ -7,28 +7,18 @@
   <div class="card-body" style="padding: 0 0 1em 0;">
     <button type="button" class="btn btn-danger btn-sm" (click)="delManyObjects()">Delete Selected</button>
 
-    <span class="card-group float-right">
+    <span class="card-group float-right" *ngIf="hasSummaries">
       <div class="btn-group">
-        <button type="button" id="importButton" class="btn btn-warning btn-sm dropdown-toggle mr-1"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fa fa-upload" aria-hidden="true"></i> Import
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="importButton">
-          <li class="dropdown-item" *ngFor="let item of formatList">
-            <i class="fa {{item.icon}}"></i> {{item.label}}
-          </li>
-        </ul>
-      </div>
-
-      <div class="btn-group">
-        <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle"
+        <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle" (click)="verifyExport()"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fa fa-download" aria-hidden="true"></i> Export
         </button>
-        <ul class="dropdown-menu" aria-labelledby="exportButton">
-          <li class="dropdown-item" *ngFor="let item of formatList"
-              (click)="exporter(item.id)">
-            <i class="fa {{item.icon}}"></i> {{item.label}}
+        <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left" aria-labelledby="exportButton">
+          <li id="export-{{item.id}}" [className]="item.active ? 'dropdown-item' : 'dropdown-item disabled'"
+              *ngFor="let item of formatList" style="text-align: center;"
+              (click)="exporter(item.id)"
+              [ngbTooltip]="item.helperText">
+            <i class="fa {{item.icon}}"></i> {{item.label}} ({{selectedObjects}})
           </li>
         </ul>
       </div>
@@ -67,7 +57,7 @@
           <cmdb-active-badge [activeStatus]="result.active"></cmdb-active-badge>
         </td>
         <td>{{result.public_id}}</td>
-        <td><a routerLink="/framework/type/{{result.type_id}}">{{result.label}}</a></td>
+        <td>{{result.label}}</td>
 
         <!-- BEGIN: summarie contens : show only if objects are categorized  -->
         <ng-container *ngIf="hasSummaries" >

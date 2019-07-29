@@ -31,8 +31,7 @@ export class RenderComponent {
 
   private typeInstanceBack: CmdbType;
   private objectInstanceBack: CmdbObject;
-  @Input() public renderForm: FormGroup = new FormGroup({});
-  @Input() public fieldsGroups: FormGroup = new FormGroup({});
+  @Input() public renderForm: FormGroup;
   @Input() public mode: CmdbMode;
 
   @Input('typeInstance')
@@ -50,9 +49,6 @@ export class RenderComponent {
   public set objectInstance(data: CmdbObject) {
     if (data !== undefined) {
       this.objectInstanceBack = data;
-      for (const fieldData of this.objectInstance.fields) {
-        
-      }
     }
   }
 
@@ -65,15 +61,19 @@ export class RenderComponent {
   }
 
   public constructor() {
-    this.renderForm = new FormGroup({});
-    this.fieldsGroups = new FormGroup({});
     if (this.mode === CmdbMode.View) {
-      this.fieldsGroups.disable();
+      this.renderForm.disable();
     }
   }
 
   public getFieldByName(name: string) {
     return this.typeInstance.fields.find(field => field.name === name);
+  }
+
+  public getValueByName(name: string) {
+    if (this.objectInstance !== undefined) {
+      return this.objectInstance.fields.find(field => field.name === name).value;
+    }
   }
 
 }

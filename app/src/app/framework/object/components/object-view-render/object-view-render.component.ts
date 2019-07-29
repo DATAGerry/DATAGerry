@@ -23,7 +23,7 @@ import { CmdbObject } from '../../../models/cmdb-object';
 import { FormGroup } from '@angular/forms';
 
 @Component({
-  selector: 'cmdb-object-render',
+  selector: 'cmdb-object-view-render',
   templateUrl: './object-view-render.component.html',
   styleUrls: ['./object-view-render.component.scss']
 })

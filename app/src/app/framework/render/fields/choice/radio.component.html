@@ -3,39 +3,36 @@
     {{data.label}}: <span class="required" *ngIf="data?.required">*</span>
   </label>
   <div class="col-sm-9">
-    <div class="input-group">
-      <ng-container [ngSwitch]="true">
-        <ng-container *ngSwitchCase="mode == MODES.View">
-          <div class="form-check" *ngFor="let option of data.options">
-            <input type="radio" name="{{data.name}}" value="{{option.value}}" class="form-check-input"
-                   [formControlName]="data.name" />
-              {{option.label}}
-          </div>
-        </ng-container>
-        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
-          <div class="form-check" *ngFor="let option of data.options">
-            <input type="radio" [attr.name]="data.name" [name]="data.name" class="form-check-input"
-                   [formControlName]="data.name" [id]="option.name" [value]="option.value"
-                   [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
-                 'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"/>
-            <label [for]="option.name">{{option.label}}</label>
-          </div>
-          <div *ngIf="data?.helperText" class="input-group-append">
+    <ng-container [ngSwitch]="true">
+      <ng-container *ngSwitchCase="mode == MODES.View">
+        <div class="custom-control custom-radio" *ngFor="let option of data.options">
+          <input type="radio" [formControlName]="data.name" name="{{data.name}}" id="{{option.name}}"
+                 value="{{option.name}}" class="custom-control-input"/><label class="custom-control-label"
+                                                                              for="{{option.name}}"> {{option.label}}</label>
+        </div>
+      </ng-container>
+      <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
+        <div class="custom-control custom-radio" *ngFor="let option of data.options">
+          <input type="radio" [formControlName]="data.name" name="{{data.name}}" [attr.id]="option.name"
+                 value="{{option.name}}" class="custom-control-input" [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
+                 'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"/><label
+          class="custom-control-label" for="{{option.name}}"> {{option.label}}</label>
+        </div>
+        <div *ngIf="data?.helperText" class="input-group-append">
             <span class="input-group-text">
               <i class="fa fa-info-circle" placement="left" [ngbTooltip]="data?.helperText"></i>
             </span>
-          </div>
-        </ng-container>
-        <div *ngSwitchDefault>
-          <cmdb-mode-error></cmdb-mode-error>
         </div>
       </ng-container>
-      <div *ngIf="controller.invalid && (controller.dirty || controller.touched)" class="invalid-feedback">
-        <div class="float-right" *ngIf="controller.errors.required">
-          {{data.label}} is a required field.
-        </div>
-        <div class="clearfix"></div>
+      <div *ngSwitchDefault>
+        <cmdb-mode-error></cmdb-mode-error>
       </div>
+    </ng-container>
+    <div *ngIf="controller.invalid && (controller.dirty || controller.touched)" class="invalid-feedback">
+      <div class="float-right" *ngIf="controller.errors.required">
+        {{data.label}} is a required field.
+      </div>
+      <div class="clearfix"></div>
     </div>
   </div>
 </div>

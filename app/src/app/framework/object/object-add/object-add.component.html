@@ -23,7 +23,7 @@
   </form>
 </ng-template>
 <ng-template #renderTemplate>
-  <form [formGroup]="renderForm" id="renderForm" class="needs-validation" novalidate autocomplete="off" (ngSubmit)="saveObject()">
+  <form [formGroup]="renderForm" class="renderForm needs-validation" novalidate autocomplete="off" (ngSubmit)="saveObject()">
     <fieldset>
       <legend>Object status</legend>
       <div class="form-group row">
@@ -38,7 +38,7 @@
         </div>
       </div>
     </fieldset>
-    <cmdb-render [mode]="mode" [fieldsGroups]="fieldsGroups" [renderForm]="renderForm"
+    <cmdb-render [mode]="mode" [renderForm]="renderForm"
                  [typeInstance]="typeInstance"></cmdb-render>
     <div class="btn-group" role="group">
       <button type="reset" class="btn btn-outline-secondary">RESET</button>

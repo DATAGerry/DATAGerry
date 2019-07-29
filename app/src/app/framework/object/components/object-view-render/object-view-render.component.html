@@ -1,4 +1,6 @@
-<form [formGroup]="renderForm" id="renderForm" class="needs-validation" novalidate autocomplete="off">
-  <cmdb-render [mode]="mode" [fieldsGroups]="fieldsGroups" [renderForm]="renderForm"
-               [typeInstance]="typeInstance" [objectInstance]="objectInstance"></cmdb-render>
-</form>
+<div id="object-view-render" class="card">
+  <div class="card-body renderForm">
+    <cmdb-render [mode]="mode" [renderForm]="renderForm" [objectInstance]="objectInstance"
+                 [typeInstance]="typeInstance"></cmdb-render>
+  </div>
+</div>

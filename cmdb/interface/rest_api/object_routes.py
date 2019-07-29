@@ -203,8 +203,9 @@ def add_object():
 def update_object():
     from bson import json_util
     from datetime import datetime
-    add_data_dump = json.dumps(request.json)
 
+    add_data_dump = json.dumps(request.json)
+    ack = None
     try:
         up_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
         up_object_data['last_edit_time'] = datetime.utcnow()
@@ -213,15 +214,17 @@ def update_object():
         abort(400)
     try:
         update_object_instance = CmdbObject(**up_object_data)
-    except CMDBError:
+    except CMDBError as e:
+        LOGGER.warning(e)
         return abort(400)
 
     try:
-        object_manager.update_object(update_object_instance)
-    except CMDBError:
+        ack = object_manager.update_object(update_object_instance)
+    except CMDBError as e:
+        LOGGER.warning(e)
         return abort(500)
 
-    resp = make_response(update_object_instance)
+    resp = make_response(ack)
     return resp
 
 

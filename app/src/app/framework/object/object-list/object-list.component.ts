@@ -45,14 +45,15 @@ export class ObjectListComponent implements OnDestroy {
   public dtTrigger: Subject<any> = new Subject();
   readonly dtButtons: any[] = [];
 
-  private summaries: [];
-  private columnFields: [];
-  private items: [];
+  private summaries: [] = [];
+  private columnFields: [] = [];
+  private items: any[] = [];
   public pageTitle: string = 'List';
   public objectLists: {};
   public hasSummaries: boolean = false;
   readonly $date: string = '$date';
   public formatList: any[] = [];
+  private selectedObjects: string = 'all';
 
   constructor(private apiCallService: ApiCallService, private objService: ObjectService,
               private exportService: ExportService, private route: ActivatedRoute, private router: Router,
@@ -153,7 +154,11 @@ export class ObjectListComponent implements OnDestroy {
           buttons: function() {
             const columnButton = [];
             // tslint:disable-next-line:prefer-for-of
-            for (let i = 0; i < this.columnFields.length; i++) {
+            if (this.columnFields == null) {
+              this.columnFields = [];
+            }
+            let i = 0;
+            for (const obj of this.columnFields) {
               {
                 columnButton.push(
                   {
@@ -163,6 +168,7 @@ export class ObjectListComponent implements OnDestroy {
                     className: 'dropdown-item ' + this.columnFields[i].name,
                   });
               }
+              i++;
             }
             columnButton.push({
               extend: 'colvisRestore',
@@ -184,7 +190,7 @@ export class ObjectListComponent implements OnDestroy {
     const buttons = this.dtButtons;
     this.dtOptions = {
       ordering: true,
-      order: [[5, 'asc']],
+      order: [[2, 'asc']],
       columnDefs: [{
         targets: 'nosort',
         orderable: false,
@@ -212,7 +218,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   private buildAdvancedDtOptions() {
-    if (this.hasSummaries) {
+    if (this.hasSummaries && this.summaries != null) {
       const visTargets: any[] = [0, 1, 2, 3, -3, -2, -1];
       for (let i = 0; i < this.summaries.length; i++) {
         visTargets.push(i + 4);
@@ -255,8 +261,16 @@ export class ObjectListComponent implements OnDestroy {
     const overall: any = document.getElementsByClassName('select-all-checkbox')[0];
     const allCheckbox: any = document.getElementsByClassName('select-checkbox');
     const checking = overall.checked;
+    this.selectedObjects = 'all';
+
     for (const box of allCheckbox) {
       box.checked = checking;
+    }
+    if (checking) {
+      this.selectedObjects = String(allCheckbox.length);
+    }
+    if (!checking) {
+      this.selectedObjects = 'all';
     }
   }
 
@@ -264,12 +278,14 @@ export class ObjectListComponent implements OnDestroy {
     const overall: any = document.getElementsByClassName('select-all-checkbox')[0];
     const allCheckbox: any = document.getElementsByClassName('select-checkbox');
     let checkedCount = 0;
+    this.selectedObjects = 'all';
 
     for (const box of allCheckbox) {
       if (box.checked) {
         checkedCount++;
       }
     }
+    this.selectedObjects = String(checkedCount);
 
     if (checkedCount === 0) {
       overall.checked = false;
@@ -337,6 +353,10 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   public exporter(fileExtension: string) {
+    if ('all' === this.selectedObjects) {
+      this.exportByTypeID(fileExtension);
+      return;
+    }
     const allCheckbox: any = document.getElementsByClassName('select-checkbox');
     const publicIds: string[] = [];
 
@@ -348,6 +368,14 @@ export class ObjectListComponent implements OnDestroy {
     if (publicIds.length > 0) {
       this.exportService.callExportRoute('export/' + 'object/' + publicIds + '/' + fileExtension, fileExtension);
     }
+  }
+
+  public exportByTypeID(fileExtension: string) {
+    this.exportService.callExportRoute('export/' + 'object/type/' + this.items[0].type_id + '/' + fileExtension , fileExtension);
+  }
+
+  public verifyExport() {
+    // toDo: checked if CSV objects from same type
   }
 
   private createModal(title: string, modalMessage: string, buttonDeny: string, buttonAccept: string) {

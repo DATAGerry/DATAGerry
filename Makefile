@@ -70,6 +70,12 @@ bin: requirements docs webapp
 		--workpath ${DIR_TEMP} \
 		--hidden-import cmdb.exportd \
 		--hidden-import cmdb.exportd.service \
+		--hidden-import cmdb.file_export \
+		--hidden-import cmdb.file_export.file_exporter \
+		--hidden-import cmdb.file_export.csv_file_exporter \
+		--hidden-import cmdb.file_export.json_file_exporter \
+		--hidden-import cmdb.file_export.xlsx_file_exporter \
+		--hidden-import cmdb.file_export.xml_file_exporter \
 		--hidden-import cmdb.interface.gunicorn \
 		--hidden-import gunicorn.glogging \
 		--hidden-import gunicorn.workers.sync \

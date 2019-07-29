@@ -21,7 +21,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { ObjectListComponent } from './object-list/object-list.component';
 import { ObjectViewComponent } from './object-view/object-view.component';
 import { ObjectAddComponent } from './object-add/object-add.component';
-import { ObjectTestComponent } from './object-test/object-test.component';
+import { ObjectEditComponent } from './object-edit/object-edit.component';
 
 const routes: Routes = [
   {
@@ -39,11 +39,11 @@ const routes: Routes = [
     component: ObjectAddComponent
   },
   {
-    path: 'test',
+    path: 'edit/:publicID',
     data: {
-      breadcrumb: 'Test'
+      breadcrumb: 'Edit'
     },
-    component: ObjectTestComponent
+    component: ObjectEditComponent
   },
   {
     path: 'type/:publicID',
@@ -62,4 +62,5 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class ObjectRoutingModule { }
+export class ObjectRoutingModule {
+}

@@ -38,8 +38,8 @@ export class ObjectViewComponent implements OnInit {
   public typeInstance: CmdbType;
 
   constructor(private api: ApiCallService, private objectService: ObjectService, private typeService: TypeService,
-              private router: ActivatedRoute, private route: Router) {
-    this.router.params.subscribe((params) => {
+              private route: ActivatedRoute) {
+    this.route.params.subscribe((params) => {
       this.objectID = params.publicID;
     });
   }

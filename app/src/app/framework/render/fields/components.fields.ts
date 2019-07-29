@@ -17,7 +17,7 @@
 */
 
 import { Input } from '@angular/core';
-import { AbstractControl, Form, FormControl, FormGroup } from '@angular/forms';
+import { AbstractControl, FormGroup } from '@angular/forms';
 import { CmdbMode } from '../../modes.enum';
 import { ToastService } from '../../../layout/services/toast.service';
 
@@ -28,30 +28,29 @@ export interface ComponentsFields {
 
 export class RenderField {
   private innerData: any;
+  private innerValue: any;
   public MODES = CmdbMode;
   public toast: ToastService;
 
   @Input() public mode: CmdbMode;
-  @Input() parentFormGroup: FormGroup;
+  @Input() public parentFormGroup: FormGroup;
 
   @Input('data')
   public set data(value: any) {
     this.innerData = value;
-    if (this.innerData.value !== undefined || this.innerData.value !== null) {
-      if (this.controller !== null
-      ) {
-
-        this.controller.setValue(this.innerData.value);
-      }
-    }
-    // POSSIBLE DEPRECATED
-    /*this.parentFormGroup.addControl(
-      this.data.name, new FormControl('')
-    );*/
   }
 
   public get data(): any {
     return this.innerData;
+  }
+
+  @Input('value')
+  public set value(valueList: any) {
+    this.innerValue = valueList;
+  }
+
+  public get value(): any {
+    return this.innerValue;
   }
 
   public get controller(): AbstractControl {

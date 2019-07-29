@@ -118,18 +118,18 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
     this.objectInstance.version = '1.0.0';
     this.objectInstance.author_id = this.userService.getCurrentUser().public_id;
     this.objectInstance.fields = [];
-    Object.keys(this.render.fieldsGroups.controls).forEach(field => {
+    Object.keys(this.render.renderForm.controls).forEach(field => {
       this.objectInstance.fields.push({
         name: field,
-        value: this.render.fieldsGroups.get(field).value
+        value: this.render.renderForm.get(field).value
       });
     });
     let ack = null;
     this.objectService.postObject(this.objectInstance).subscribe(newObjectID => {
         ack = newObjectID;
       },
-      (error) => {
-        console.error(error);
+      (e) => {
+        console.error(e);
       }, () => {
         this.router.navigate(['/framework/object/' + ack]);
       });
