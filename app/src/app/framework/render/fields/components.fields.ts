@@ -66,7 +66,7 @@ export class RenderField {
     selBox.style.left = '0';
     selBox.style.top = '0';
     selBox.style.opacity = '0';
-    selBox.value = this.data.value;
+    selBox.value = this.controller.value;
     document.body.appendChild(selBox);
     selBox.focus();
     selBox.select();
