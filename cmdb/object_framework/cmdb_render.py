@@ -245,7 +245,7 @@ class CmdbRender:
             type_id=self.type_instance.get_public_id(),
             type_name=self.type_instance.get_name(),
             label=self.type_instance.get_label(),
-            active=self.type_instance.active,
+            active=self.object_instance.active,
             version=self.object_instance.version
         )
 
