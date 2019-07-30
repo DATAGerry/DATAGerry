@@ -44,14 +44,15 @@ export class ObjectEditComponent implements OnInit {
     this.route.params.subscribe((params) => {
       this.objectID = params.publicID;
     });
+    this.renderForm = new FormGroup({
+      active: new FormControl( false)
+    });
   }
 
   public ngOnInit(): void {
     this.objectService.getObject(this.objectID, true).subscribe((objectInstanceResp: CmdbObject) => {
       this.objectInstance = objectInstanceResp;
-      this.renderForm = new FormGroup({
-        active: new FormControl(objectInstanceResp.active)
-      });
+      this.renderForm.get('active').setValue(objectInstanceResp.active);
     }, (error) => {
       console.error(error);
     }, () => {
