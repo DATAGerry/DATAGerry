@@ -24,7 +24,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CmdbMode } from '../../modes.enum';
 import { CmdbObject } from '../../models/cmdb-object';
 import { CmdbType } from '../../models/cmdb-type';
-import { FormGroup } from '@angular/forms';
+import {FormControl, FormGroup} from '@angular/forms';
 
 @Component({
   selector: 'cmdb-object-edit',
@@ -44,12 +44,14 @@ export class ObjectEditComponent implements OnInit {
     this.route.params.subscribe((params) => {
       this.objectID = params.publicID;
     });
-    this.renderForm = new FormGroup({});
   }
 
   public ngOnInit(): void {
     this.objectService.getObject(this.objectID, true).subscribe((objectInstanceResp: CmdbObject) => {
       this.objectInstance = objectInstanceResp;
+      this.renderForm = new FormGroup({
+        active: new FormControl(objectInstanceResp.active)
+      });
     }, (error) => {
       console.error(error);
     }, () => {
@@ -63,6 +65,7 @@ export class ObjectEditComponent implements OnInit {
     this.renderForm.markAllAsTouched();
     if (this.renderForm.valid) {
       const patchValue = [];
+      this.objectInstance.active = this.renderForm.get('active').value;
       this.renderForm.removeControl('active');
       Object.keys(this.renderForm.value).forEach((key: string) => {
         patchValue.push({
