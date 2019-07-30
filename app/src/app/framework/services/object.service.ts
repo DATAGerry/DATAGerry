@@ -20,6 +20,8 @@ import { Injectable } from '@angular/core';
 import { ApiCallService } from '../../services/api-call.service';
 import { CmdbObject } from '../models/cmdb-object';
 import { Observable } from 'rxjs';
+import { ModalComponent } from '../../layout/helpers/modal/modal.component';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +31,7 @@ export class ObjectService {
   private servicePrefix: string = 'object';
   public objectList: CmdbObject[];
 
-  constructor(private api: ApiCallService) {
+  constructor(private api: ApiCallService, private modalService: NgbModal) {
     this.getObjectList().subscribe((resObjectList: CmdbObject[]) => {
       this.objectList = resObjectList;
     });
@@ -60,5 +62,18 @@ export class ObjectService {
 
   public putObject(objectInstance: CmdbObject): Observable<any> {
     return this.api.callPutRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
+  }
+
+  public openModalComponent(title: string,
+                            modalMessage: string,
+                            buttonDeny: string,
+                            buttonAccept: string) {
+
+    const modalComponent = this.modalService.open(ModalComponent);
+    modalComponent.componentInstance.title = title;
+    modalComponent.componentInstance.modalMessage = modalMessage;
+    modalComponent.componentInstance.buttonDeny = buttonDeny;
+    modalComponent.componentInstance.buttonAccept = buttonAccept;
+    return modalComponent;
   }
 }

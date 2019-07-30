@@ -8,8 +8,7 @@
          class="list-group-item list-group-item-action list-group-item-warning">
         <i class="fa fa-pencil-square-o"></i> Edit object
       </a>
-      <a routerLink="/framework/object/{{objectID}}"
-         class="list-group-item list-group-item-action list-group-item-danger">
+      <a class="list-group-item list-group-item-action list-group-item-danger" (click)="deleteObject(objectID)">
         <i class="fa fa-trash-o"></i> Delete object
       </a>
     </div>

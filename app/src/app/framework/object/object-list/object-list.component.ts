@@ -26,10 +26,7 @@ import { ObjectService } from '../../services/object.service';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { HttpHeaders } from '@angular/common/http';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ExportService } from '../../../services/export.service';
-import { ModalComponent } from '../../../layout/helpers/modal/modal.component';
 
 @Component({
   selector: 'cmdb-object-list',
@@ -58,7 +55,7 @@ export class ObjectListComponent implements OnDestroy {
 
   constructor(private apiCallService: ApiCallService, private objService: ObjectService,
               private exportService: ExportService, private route: ActivatedRoute, private router: Router,
-              private spinner: NgxSpinnerService, private datePipe: DatePipe, private modalService: NgbModal) {
+              private spinner: NgxSpinnerService, private datePipe: DatePipe) {
     this.route.params.subscribe((id) => {
       this.init(id);
     });
@@ -307,7 +304,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   public delObject(value: any) {
-    const modalComponent = this.createModal(
+    const modalComponent = this.objService.openModalComponent(
       'Delete Object',
       'Are you sure you want to delete this Object?',
       'Cancel',
@@ -322,8 +319,6 @@ export class ObjectListComponent implements OnDestroy {
           });
         });
       }
-    }, (reason) => {
-      // ToDO:
     });
   }
 
@@ -337,7 +332,7 @@ export class ObjectListComponent implements OnDestroy {
     }
 
     if (publicIds.length > 0) {
-      const modalComponent = this.createModal(
+      const modalComponent = this.objService.openModalComponent(
         'Delete selected Objects',
         'Are you sure, you want to delete all selected objects?',
         'Cancel',
@@ -353,8 +348,6 @@ export class ObjectListComponent implements OnDestroy {
             });
           }
         }
-      }, (reason) => {
-        // ToDO:
       });
     }
   }
@@ -381,16 +374,4 @@ export class ObjectListComponent implements OnDestroy {
     this.exportService.callExportRoute('export/' + 'object/type/' + this.items[0].type_id + '/' + fileExtension, fileExtension);
   }
 
-  public verifyExport() {
-    // toDo: checked if CSV objects from same type
-  }
-
-  private createModal(title: string, modalMessage: string, buttonDeny: string, buttonAccept: string) {
-    const modalComponent = this.modalService.open(ModalComponent);
-    modalComponent.componentInstance.title = title;
-    modalComponent.componentInstance.modalMessage = modalMessage;
-    modalComponent.componentInstance.buttonDeny = buttonDeny;
-    modalComponent.componentInstance.buttonAccept = buttonAccept;
-    return modalComponent;
-  }
 }
