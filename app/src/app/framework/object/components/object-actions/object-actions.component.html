@@ -1,14 +1,19 @@
 <div id="object-action-list" class="card">
   <div class="card-body">
     <div class="list-group list-group-flush">
-      <a routerLink="/framework/object/type/{{objectID}}" class="list-group-item list-group-item-action">
+      <a routerLink="/framework/object/type/{{objectInstance?.type_id}}" class="list-group-item list-group-item-action">
         <i class="fa fa-th-list"></i> List objects
       </a>
-      <a routerLink="/framework/object/edit/{{objectID}}"
-         class="list-group-item list-group-item-action list-group-item-warning">
+      <a routerLink="/framework/object/add/{{objectInstance?.type_id}}"
+         class="list-group-item list-group-item-action list-group-item-action">
+        <i class="fa fa-plus"></i> Add new {{typeInstance?.label}} object
+      </a>
+      <a routerLink="/framework/object/edit/{{objectInstance?.public_id}}"
+         class="list-group-item list-group-item-action list-group-item-action">
         <i class="fa fa-pencil-square-o"></i> Edit object
       </a>
-      <a class="list-group-item list-group-item-action list-group-item-danger" (click)="deleteObject(objectID)">
+      <a class="list-group-item list-group-item-action list-group-item-action"
+         (click)="deleteObject(objectInstance?.public_id)">
         <i class="fa fa-trash-o"></i> Delete object
       </a>
     </div>

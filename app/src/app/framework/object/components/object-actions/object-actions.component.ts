@@ -2,6 +2,8 @@ import { Component, Input } from '@angular/core';
 import { ObjectService } from '../../../services/object.service';
 import { Router } from '@angular/router';
 import { ApiCallService } from '../../../../services/api-call.service';
+import { CmdbObject } from '../../../models/cmdb-object';
+import { CmdbType } from '../../../models/cmdb-type';
 
 @Component({
   selector: 'cmdb-object-actions',
@@ -10,7 +12,8 @@ import { ApiCallService } from '../../../../services/api-call.service';
 })
 export class ObjectActionsComponent {
 
-  @Input() objectID: number = 0;
+  @Input() objectInstance: CmdbObject;
+  @Input() typeInstance: CmdbType;
 
   constructor(private api: ApiCallService, private objectService: ObjectService,  private router: Router) {
 
