@@ -43,8 +43,9 @@
     <cmdb-render [mode]="mode" [renderForm]="renderForm"
                  [typeInstance]="typeInstance"></cmdb-render>
     <div class="btn-group" role="group">
-      <button type="reset" class="btn btn-outline-secondary">RESET</button>
-      <button class="btn btn-outline-success pull-right" type="submit" [disabled]="!renderForm.valid">SAVE</button>
+      <button class="btn btn-outline-success pull-right mr-2" type="submit" [disabled]="!renderForm.valid">Save</button>
+      <button class="btn btn-outline-danger mr-2"
+              routerLink="/framework/object/type/{{typeInstance?.public_id}}">Cancel</button>
     </div>
   </form>
 </ng-template>
