@@ -33,6 +33,7 @@ export class RenderComponent {
   private objectInstanceBack: CmdbObject;
   @Input() public renderForm: FormGroup;
   @Input() public mode: CmdbMode;
+  @Input() public currentField: any;
 
   @Input('typeInstance')
   public set typeInstance(type: CmdbType) {

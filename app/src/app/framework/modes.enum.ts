@@ -1,5 +1,6 @@
 export enum CmdbMode {
   View,
   Create,
-  Edit
+  Edit,
+  Simple
 }

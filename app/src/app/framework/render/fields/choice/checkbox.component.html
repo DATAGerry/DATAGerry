@@ -1,4 +1,5 @@
-<div class="form-group row" [formGroup]="parentFormGroup">
+<ng-container *ngIf="mode != MODES.Simple">
+  <div class="form-group row" [formGroup]="parentFormGroup">
   <label class="col-sm-3 col-check-label">
     {{data.label}}: <span class="required" *ngIf="data?.required">*</span>
   </label>
@@ -39,3 +40,9 @@
     </div>
   </div>
 </div>
+</ng-container>
+
+<ng-container *ngIf="mode == MODES.Simple">
+  <span class="badge"
+        [ngClass]="data.value === true ? 'badge-success' : 'badge-danger'">{{ data.value ? 'A' : 'D' }}</span>
+</ng-container>

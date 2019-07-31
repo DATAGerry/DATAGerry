@@ -5,3 +5,8 @@
                          [value]="getValueByName(field)"></cmdb-render-element>
   </div>
 </fieldset>
+
+<ng-container *ngIf="typeInstance == null">
+  <cmdb-render-element [mode]="mode" [data]="currentField"
+                       [value]="currentField?.value"></cmdb-render-element>
+</ng-container>

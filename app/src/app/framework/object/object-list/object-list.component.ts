@@ -17,22 +17,21 @@
 */
 
 
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import {Component, OnDestroy, ViewChild} from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { DatePipe } from '@angular/common';
 import { ObjectService } from '../../services/object.service';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ExportService } from '../../../services/export.service';
+import { CmdbMode } from '../../modes.enum';
 
 @Component({
   selector: 'cmdb-object-list',
   templateUrl: './object-list.component.html',
   styleUrls: ['./object-list.component.scss'],
-  providers: [DatePipe]
 })
 export class ObjectListComponent implements OnDestroy {
 
@@ -48,14 +47,14 @@ export class ObjectListComponent implements OnDestroy {
   public pageTitle: string = 'List';
   public objectLists: {};
   public hasSummaries: boolean = false;
-  readonly $date: string = '$date';
   public formatList: any[] = [];
   private selectedObjects: string = 'all';
   public typeID: number = null;
+  public mode: CmdbMode = CmdbMode.Simple;
 
   constructor(private apiCallService: ApiCallService, private objService: ObjectService,
               private exportService: ExportService, private route: ActivatedRoute, private router: Router,
-              private spinner: NgxSpinnerService, private datePipe: DatePipe) {
+              private spinner: NgxSpinnerService) {
     this.route.params.subscribe((id) => {
       this.init(id);
     });
@@ -253,13 +252,6 @@ export class ObjectListComponent implements OnDestroy {
   /*
     Table action events
    */
-
-  public checkType(value) {
-    if (value != null && value.hasOwnProperty('$date')) {
-      return '<span>' + this.datePipe.transform(value[this.$date], 'dd/mm/yyyy - hh:mm:ss') + '</span>';
-    }
-    return '<span>' + value + '</span>';
-  }
 
   public selectAll() {
     const overall: any = document.getElementsByClassName('select-all-checkbox')[0];

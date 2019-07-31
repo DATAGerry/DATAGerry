@@ -16,12 +16,12 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, ComponentFactoryResolver, ComponentRef, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
-import { fieldComponents } from '../fields/fields.list';
-import { RenderField } from '../fields/components.fields';
-import { ToastService } from '../../../layout/services/toast.service';
-import { FormControl, Validators } from '@angular/forms';
-import { CmdbMode } from '../../modes.enum';
+import {Component, ComponentFactoryResolver, ComponentRef, OnInit, ViewChild, ViewContainerRef} from '@angular/core';
+import {fieldComponents} from '../fields/fields.list';
+import {RenderField} from '../fields/components.fields';
+import {ToastService} from '../../../layout/services/toast.service';
+import {FormControl, Validators} from '@angular/forms';
+import {CmdbMode} from '../../modes.enum';
 
 @Component({
   selector: 'cmdb-render-element',
@@ -52,15 +52,16 @@ export class RenderElementComponent extends RenderField implements OnInit {
     if (this.data.required) {
       fieldControl.setValidators(Validators.required);
     }
-    if (this.mode === CmdbMode.View) {
+    if (this.mode === CmdbMode.View || this.mode === CmdbMode.Simple) {
       fieldControl.disable();
     }
     if (this.mode === CmdbMode.View || this.mode === CmdbMode.Edit) {
       fieldControl.patchValue(this.value);
     }
-    this.componentRef.instance.parentFormGroup.addControl(
-      this.data.name, fieldControl
-    );
+    if (this.mode !== CmdbMode.Simple) {
+      this.componentRef.instance.parentFormGroup.addControl(
+        this.data.name, fieldControl
+      );
+    }
   }
-
 }

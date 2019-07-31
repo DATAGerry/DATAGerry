@@ -1,4 +1,5 @@
-<div class="form-group row" [formGroup]="parentFormGroup">
+<ng-container *ngIf="mode != MODES.Simple">
+  <div class="form-group row" [formGroup]="parentFormGroup">
   <label class="col-sm-3 col-form-label">
     {{data.label}}: <span class="required" *ngIf="data?.required">*</span>
   </label>
@@ -40,3 +41,8 @@
     <small class="description form-text text-muted">{{data?.description}}</small>
   </div>
 </div>
+</ng-container>
+
+<span *ngIf="mode == MODES.Simple">
+  {{data.value}}
+</span>
