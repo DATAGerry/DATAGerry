@@ -3,7 +3,7 @@
 @import '~bootstrap/scss/variables';
 @import 'mixins';
 
-$navbar-height: calc(48px + #{$navbar-padding-y});
+$navbar-height: calc(80px + #{$navbar-padding-y});
 
 $content-min-width: 0;
 $content-padding-x: 16px !default;
