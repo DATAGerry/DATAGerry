@@ -6,7 +6,7 @@
   </div>
 </fieldset>
 
-<ng-container *ngIf="typeInstance == null">
+<ng-container *ngIf="mode === MODES.Simple">
   <cmdb-render-element [mode]="mode" [data]="currentField"
                        [value]="currentField?.value"></cmdb-render-element>
 </ng-container>

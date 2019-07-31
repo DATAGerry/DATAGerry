@@ -33,7 +33,8 @@ export class RenderComponent {
   private objectInstanceBack: CmdbObject;
   @Input() public renderForm: FormGroup;
   @Input() public mode: CmdbMode;
-  @Input() public currentField: any;
+  public MODES = CmdbMode;
+  private field: any;
 
   @Input('typeInstance')
   public set typeInstance(type: CmdbType) {
@@ -55,6 +56,15 @@ export class RenderComponent {
 
   public get objectInstance(): CmdbObject {
     return this.objectInstanceBack;
+  }
+
+  @Input('currentField')
+  public get currentField() {
+    return this.field;
+  }
+
+  public set currentField(value) {
+    this.field = value;
   }
 
   public get fields() {
