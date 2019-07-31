@@ -43,6 +43,6 @@
 </ng-container>
 
 <ng-container *ngIf="mode == MODES.Simple">
-  <span class="badge"
-        [ngClass]="data.value === true ? 'badge-success' : 'badge-danger'">{{ data.value ? 'A' : 'D' }}</span>
+  <i [ngClass]=" data.value == true ? 'fa fa-check-square-o':'fa fa-square-o'" aria-hidden="true"></i>
+  <span style="display: none">{{data.value}}</span>
 </ng-container>
