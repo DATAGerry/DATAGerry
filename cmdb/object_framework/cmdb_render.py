@@ -259,11 +259,18 @@ class CmdbRender:
                         if fields.get('name') == type_field.get('name'):
                             fields['label'] = type_field.get('label')
                             fields['type'] = type_field.get('type')
+                            fields['selected'] = self.add_selected_option([fields.get('value')],
+                                                                          type_field.get('options'))
                             render_result.fields = self.object_instance.fields
         if self.has_summaries():
             render_result.set_summaries(self.get_summaries(True))
         if self.has_externals():
             render_result.set_externals(self.get_externals(True))
+
+    def add_selected_option(self, keys: list, options: list):
+        if keys is not None and len(keys) > 0 and options is not None and len(options) > 0:
+            return [d for d in options if d['name'] in keys]
+        return []
 
 
 class RenderResult:

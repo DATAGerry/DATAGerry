@@ -39,6 +39,8 @@
 </div>
 </ng-container>
 
-<span *ngIf="mode == MODES.Simple">
-  {{data.value}}
-</span>
+<ng-container *ngIf="mode == MODES.Simple">
+  <span *ngFor="let radio of data?.selected">
+    {{radio?.label}}
+  </span>
+</ng-container>
