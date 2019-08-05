@@ -62,7 +62,8 @@
         <!-- BEGIN: summarie contens : show only if objects are categorized  -->
         <ng-container *ngIf="hasSummaries" >
             <td *ngFor="let field of result.fields">
-              <cmdb-render [mode]="mode" [currentField]="field"></cmdb-render>
+              <cmdb-render-element [mode]="mode" [data]="field"
+                                   [value]="field?.value"></cmdb-render-element>
             </td>
         </ng-container>
         <!-- END: summarie contens -->
