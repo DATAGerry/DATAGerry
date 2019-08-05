@@ -25,7 +25,7 @@ import { ObjectService } from '../../services/object.service';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ExportService } from '../../../services/export.service';
+import { ExportService } from '../../../export/export.service';
 import { CmdbMode } from '../../modes.enum';
 
 @Component({
@@ -61,7 +61,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   private init(id) {
-    this.exportService.callFileFormatRoute('export/').subscribe(data => {
+    this.exportService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
     this.getRouteObjects(id.publicID);
@@ -363,7 +363,21 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   public exportByTypeID(fileExtension: string) {
-    this.exportService.callExportRoute('export/' + 'object/type/' + this.items[0].type_id + '/' + fileExtension, fileExtension);
+    this.exportService.getObjectFileByType(this.items[0].type_id, fileExtension).subscribe(res => this.downLoadFile(res));
+  }
+
+  public downLoadFile(data: any) {
+    const blob = new Blob([data], {type: 'application/' + 'csv'});
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+
+    document.body.appendChild(a);
+    a.setAttribute('style', 'display: none');
+    a.href = url;
+    a.download = 'test';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove(); // remove the element
   }
 
 }

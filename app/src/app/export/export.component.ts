@@ -18,11 +18,11 @@
 
 import { Component, OnInit } from '@angular/core';
 import { HttpHeaders } from '@angular/common/http';
-import { ExportService } from '../../services/export.service';
+import { ExportService } from './export.service';
 import { DatePipe } from '@angular/common';
-import { CmdbType } from '../../framework/models/cmdb-type';
+import { CmdbType } from '../framework/models/cmdb-type';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { TypeService } from '../../framework/services/type.service';
+import { TypeService } from '../framework/services/type.service';
 
 @Component({
   selector: 'cmdb-export',
@@ -49,7 +49,7 @@ export class ExportComponent implements OnInit {
       this.typeList = data;
     });
 
-    this.exportService.callFileFormatRoute('export/').subscribe( data => {
+    this.exportService.callFileFormatRoute().subscribe( data => {
       this.formatList = data;
     });
   }

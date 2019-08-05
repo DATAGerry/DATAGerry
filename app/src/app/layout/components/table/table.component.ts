@@ -23,7 +23,7 @@ import { BehaviorSubject, Subject} from 'rxjs';
 import { UserService } from '../../../user/services/user.service';
 import { ApiCallService } from '../../../services/api-call.service';
 import { DatePipe } from '@angular/common';
-import { ExportService } from '../../../services/export.service';
+import { ExportService } from '../../../export/export.service';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from '../../helpers/modal/modal.component';
@@ -103,7 +103,7 @@ export class TableComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.showExport) {
-      this.exportService.callFileFormatRoute('export/').subscribe( data => {
+      this.exportService.callFileFormatRoute().subscribe( data => {
         this.formatList = data;
       });
     }
