@@ -17,17 +17,16 @@
 */
 
 import { Component, OnInit } from '@angular/core';
+import { RenderField } from '../../fields/components.fields';
 
 @Component({
-  selector: 'cmdb-mode-error',
-  templateUrl: './mode-error.component.html',
-  styleUrls: ['./mode-error.component.scss']
+  templateUrl: './radio-simple.component.html',
+  styleUrls: ['./radio-simple.component.scss']
 })
-export class ModeErrorComponent implements OnInit {
+export class RadioSimpleComponent extends RenderField {
 
-  constructor() { }
-
-  ngOnInit() {
+  constructor() {
+    super();
   }
 
 }

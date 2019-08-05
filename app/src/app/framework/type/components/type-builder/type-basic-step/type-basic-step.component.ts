@@ -28,12 +28,9 @@ import { CmdbMode } from '../../../../modes.enum';
 @Injectable()
 export class TypeNameValidator {
 
-  static createValidator(typeService: TypeService, mode: number) {
+  static createValidator(typeService: TypeService) {
     return (control: AbstractControl) => {
       return typeService.validateTypeName(control.value).then(res => {
-        if (mode === CmdbMode.Edit) {
-          return null;
-        }
         return res ? null : {nameAlreadyTaken: true};
       });
     };
@@ -52,6 +49,8 @@ export class TypeBasicStepComponent implements OnInit {
   set preData(data: any) {
     if (data !== undefined) {
       this.basicForm.patchValue(data);
+      console.log(data);
+      this.basicCategoryForm.patchValue(data);
     }
   }
 
@@ -63,7 +62,7 @@ export class TypeBasicStepComponent implements OnInit {
 
   constructor(private typeService: TypeService, private categoryService: CategoryService) {
     this.basicForm = new FormGroup({
-      name: new FormControl('', [Validators.required], TypeNameValidator.createValidator(typeService, this.mode)),
+      name: new FormControl('', Validators.required),
       label: new FormControl('', Validators.required),
       description: new FormControl(''),
       active: new FormControl(true)
@@ -82,11 +81,16 @@ export class TypeBasicStepComponent implements OnInit {
   }
 
   public ngOnInit(): void {
+    if (this.mode === CmdbMode.Create) {
+      this.basicForm.get('name').setAsyncValidators(TypeNameValidator.createValidator(this.typeService));
+    } else if (this.mode === CmdbMode.Edit) {
+      this.basicForm.markAllAsTouched();
+    }
     this.categoryList = this.categoryService.getCategoryList();
-    this.basicForm.get('name').valueChanges.subscribe(val => {
-      this.basicForm.get('label').setValue(val.toString().charAt(0).toUpperCase() + val.toString().slice(1));
-      this.basicForm.get('label').markAsDirty({onlySelf: true});
-      this.basicForm.get('label').markAsTouched({onlySelf: true});
+    this.basicForm.get('label').valueChanges.subscribe(val => {
+      this.basicForm.get('name').setValue(val.toString().charAt(0).toLowerCase() + val.toString().slice(1));
+      this.basicForm.get('name').markAsDirty({onlySelf: true});
+      this.basicForm.get('name').markAsTouched({onlySelf: true});
     });
   }
 

@@ -16,18 +16,24 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { RenderField } from '../../fields/components.fields';
 
 @Component({
-  selector: 'cmdb-mode-error',
-  templateUrl: './mode-error.component.html',
-  styleUrls: ['./mode-error.component.scss']
+  templateUrl: './password-simple.component.html',
+  styleUrls: ['./password-simple.component.scss']
 })
-export class ModeErrorComponent implements OnInit {
+export class PasswordSimpleComponent extends RenderField {
 
-  constructor() { }
+  public showData: boolean = false;
 
-  ngOnInit() {
+  public toggle() {
+    this.showData = true;
   }
+
+  constructor() {
+    super();
+  }
+
 
 }

@@ -16,18 +16,17 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { RenderField } from '../../fields/components.fields';
 
 @Component({
-  selector: 'cmdb-mode-error',
-  templateUrl: './mode-error.component.html',
-  styleUrls: ['./mode-error.component.scss']
+  templateUrl: './checkbox-simple.component.html',
+  styleUrls: ['./checkbox-simple.component.scss']
 })
-export class ModeErrorComponent implements OnInit {
+export class CheckboxSimpleComponent extends RenderField {
 
-  constructor() { }
-
-  ngOnInit() {
+  constructor() {
+    super();
   }
 
 }
