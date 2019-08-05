@@ -17,6 +17,7 @@
 from flask import abort, Response
 from cmdb.object_framework.cmdb_errors import ObjectNotFoundError, TypeNotFoundError
 from cmdb.object_framework.cmdb_object_manager import object_manager
+from cmdb.file_export.export_types import ExportType
 
 try:
     from cmdb.utils.error import CMDBError
@@ -26,35 +27,28 @@ except ImportError:
 
 class FileExporter:
 
-    def __init__(self, object_type, file_extension: str, public_id: str, **kwargs):
+    @staticmethod
+    def get_filetypes():
+        filetypes = ["CsvExportType", "JsonExportType", "XlsxExportType", "XmlExportType"]
+        return filetypes
+
+    def __init__(self, object_type, export_type: ExportType, public_id: str, **kwargs):
         """init of FileExporter
 
         Args:
             object_type: type of object e.g. CmdbObject or CmdbObject by CmdbType ID
-            file_extension: current file file_extension for download file
+            export_type: the ExportType object
             public_id: public id which implements the object / type
             **kwargs: additional data
         """
         self.object_type = object_type
-        self.file_extension = file_extension
+        self.export_type = export_type
         self.public_id = public_id
-
-        # extension_list: filled with allowed formats for user/s
-        self.extension_list = [
-            {'id': 'xml', 'label': 'XML', 'icon': 'fa-code', 'helperText': 'Export as XML', 'active': True},
-            {'id': 'csv', 'label': 'CSV', 'icon': 'fa-table', 'helperText': 'Export as CSV (only of the same type)', 'active': True},
-            {'id': 'json', 'label': 'JSON', 'icon': 'fa-file-text-o', 'helperText': 'Export as JSON', 'active': True},
-            {'id': 'xlsx', 'label': 'XLS', 'icon': 'fa-file-excel-o', 'helperText': 'Export as XLS', 'active': True}
-        ]
 
         # object_list: list of objects e.g CmdbObject or CmdbType
         self.object_list = []
         self.response = None
-        super(FileExporter, self).__init__(**kwargs)
 
-    #
-    #   Getter and Setter
-    #
 
     def get_object_type(self):
         """
@@ -88,21 +82,9 @@ class FileExporter:
     def set_response(self, value):
         self.response = value
 
-    # TODO Check which formats are allowed for users
-    def get_extension_list(self):
-        """
-
-        Returns: allowed formats (xml, csv, json etc.) for user/s
-
-        """
-        return self.extension_list
-
-    # TODO Check which formats are allowed for users
-    def set_extension_list(self, value):
-        self.extension_list = value
 
     #
-    #   Get values​from the database
+    #   Get values from the database
     #
 
     def get_object_by_id(self):
@@ -148,22 +130,19 @@ class FileExporter:
         except CMDBError as e:
             abort(400, e)
 
-    def add_to_extension_list(self, value):
-        self.extension_list.append(value)
-
     def add_to_object_list(self, value):
         self.object_list.append(value)
 
-    def export(self, mime_type: str, file_extension: str):
+    def export(self):
         import datetime
         import time
 
         timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
         return Response(
-            self.response,
-            mimetype=mime_type,
+            self.export_type.export(self.get_object_list()),
+            mimetype="text/" + self.export_type.__class__.FILE_EXTENSION,
             headers={
                 "Content-Disposition":
-                    "attachment; filename=%s.%s" % (timestamp, file_extension)
+                    "attachment; filename=%s.%s" % (timestamp, self.export_type.__class__.FILE_EXTENSION)
             }
         )
