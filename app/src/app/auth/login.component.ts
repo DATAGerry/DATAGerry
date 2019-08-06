@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { AuthService } from './services/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -27,7 +27,7 @@ import { first } from 'rxjs/operators';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
 
   public loginForm: FormGroup;
   public submitted = false;
@@ -37,14 +37,20 @@ export class LoginComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private authenticationService: AuthService,
+    private render: Renderer2
   ) {
   }
 
   public ngOnInit(): void {
+    this.render.addClass(document.body, 'embedded');
     this.loginForm = this.formBuilder.group({
       username: ['', Validators.required],
       password: ['', Validators.required]
     });
+  }
+
+  public ngOnDestroy(): void {
+    this.render.removeClass(document.body, 'embedded');
   }
 
   get controls() {
@@ -63,4 +69,6 @@ export class LoginComponent implements OnInit {
           console.log(error);
         });
   }
+
+
 }

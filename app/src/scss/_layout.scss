@@ -22,6 +22,13 @@
   min-height: 100%;
 }
 
+.embedded {
+  overflow: hidden;
+  #main {
+    margin-top: 0px;
+  }
+}
+
 #content {
   padding: $content-padding-y $content-padding-x;
   min-width: $content-min-width;

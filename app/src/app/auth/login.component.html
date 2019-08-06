@@ -1,32 +1,32 @@
-<div class="row align-items-center">
-  <div class="col-6 offset-3">
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label>Username</label>
-        <input type="text" formControlName="username" class="form-control"
-               [ngClass]="{ 'is-invalid': submitted && controls.username.errors }"/>
-        <div *ngIf="submitted && controls.username.errors" class="invalid-feedback">
-          <div *ngIf="controls.username.errors.required">Username is required</div>
+<div id="login-container">
+  <div id="login-wrapper" class="row">
+    <div id="datagerry-logo" class="d-none d-md-block col-md-6">
+      <img src="assets/img/RZ_Datagerry_RGB_w.svg" class="mx-auto d-block" alt="datagerry logo"/>
+    </div>
+    <div id="login-form" class="col-sm-12 col-md-6">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" formControlName="username" class="form-control"
+                 [ngClass]="{ 'is-invalid': submitted && controls.username.errors }"/>
+          <div *ngIf="submitted && controls.username.errors" class="invalid-feedback">
+            <div *ngIf="controls.username.errors.required">Username is required</div>
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" formControlName="password" class="form-control"
-               [ngClass]="{ 'is-invalid': submitted && controls.password.errors }"/>
-        <div *ngIf="submitted && controls.password.errors" class="invalid-feedback">
-          <div *ngIf="controls.password.errors.required">Password is required</div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" formControlName="password" class="form-control"
+                 [ngClass]="{ 'is-invalid': submitted && controls.password.errors }"/>
+          <div *ngIf="submitted && controls.password.errors" class="invalid-feedback">
+            <div *ngIf="controls.password.errors.required">Password is required</div>
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <button [disabled]="!loginForm.valid" class="btn btn-primary">
-          Login
-        </button>
-      </div>
-    </form>
-  </div>
-  <div id="nethinks-logo" class="col-6 offset-3 row">
-    <div class="col-6 offset-3">
-      <img src="/assets/img/datagerry_logo.svg" class="img-fluid" alt="DATAGERRY"/>
+        <div class="form-group">
+          <button [disabled]="!loginForm.valid" class="btn btn-primary">
+            Login
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
