@@ -60,6 +60,14 @@ class UserManagementBase:
             raise NoUserIDError(self.public_id)
         return self.public_id
 
+    @classmethod
+    def get_index_keys(cls):
+        from pymongo import IndexModel
+        index_list = list()
+        for index in cls.INDEX_KEYS + cls.__SUPER_INDEX_KEYS:
+            index_list.append(IndexModel(**index))
+        return index_list
+
     def to_json(self) -> dict:
         """
         converts attribute dict to json - maybe later for database updates

@@ -159,7 +159,20 @@ def main(args):
         LOGGER.critical(conn_error.message)
         exit(1)
     if args.setup:
-        pass
+        from cmdb.__setup__ import SetupRoutine
+        setup_routine = SetupRoutine()
+        setup_status = None
+        try:
+            setup_status = setup_routine.setup()
+        except RuntimeError as err:
+            LOGGER.error(err)
+            setup_status = setup_routine.get_setup_status()
+            LOGGER.warning(f'The setup did not go through as expected - Status {setup_status}')
+
+        if setup_status == SetupRoutine.SetupStatus.FINISHED:
+            exit(0)
+        else:
+            exit(1)
 
     if args.test_data:
         _activate_debug()

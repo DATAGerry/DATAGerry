@@ -15,26 +15,107 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+from enum import Enum
 
 LOGGER = logging.getLogger(__name__)
 
 
-def initial_setup_routine():
-    # check if settings are loaded
-    from cmdb.utils.system_reader import SystemConfigReader
-    system_config_reader_status = SystemConfigReader().status()
-    if system_config_reader_status is not True:
-        raise RuntimeError(
-            f'The system configuration files were loaded incorrectly or nothing has been loaded at all. - \
-            system config reader status: {system_config_reader_status}')
+class SetupRoutine:
+    class SetupStatus(Enum):
+        NOT = 0
+        RUNNING = 1
+        ERROR = 2
+        FINISHED = 3
 
-    # connect to database
-    pass
-    # check if database already initialized
-    pass
-    # generate collections
-    pass
-    # set unique indexes
-    pass
-    # generate key
-    pass
+    def __init__(self):
+        self.status = SetupRoutine.SetupStatus.NOT
+        # check if settings are loaded
+        from cmdb.utils.system_reader import SystemConfigReader
+        self.setup_system_config_reader = SystemConfigReader()
+        system_config_reader_status = self.setup_system_config_reader.status()
+        if system_config_reader_status is not True:
+            self.status = SetupRoutine.SetupStatus.ERROR
+            raise RuntimeError(
+                f'The system configuration files were loaded incorrectly or nothing has been loaded at all. - \
+                    system config reader status: {system_config_reader_status}')
+
+    def get_setup_status(self):
+        return self.status
+
+    def setup(self) -> SetupStatus:
+        LOGGER.info('SETUP ROUTINE: STARTED...')
+        self.status = SetupRoutine.SetupStatus.RUNNING
+        # check database
+        if not self.__check_database():
+            self.status = SetupRoutine.SetupStatus.ERROR
+            raise RuntimeError(
+                'The database manager could not be initialized. Perhaps the database cannot be reached, \
+                or the database was already initialized.'
+            )
+        # init database
+        try:
+            self.__init_database()
+        except Exception as err:
+            self.status = SetupRoutine.SetupStatus.ERROR
+            raise RuntimeError(
+                f'Something went wrong during the initialization of the database. \n Error: {err}'
+            )
+
+        # generate keys
+        LOGGER.info('SETUP ROUTINE: Generate rsa key pair')
+        from cmdb.security.keys import KeyGenerator
+        try:
+            KeyGenerator().generate_rsa_keypair()
+        except Exception as err:
+            self.status = SetupRoutine.SetupStatus.ERROR
+            raise RuntimeError(
+                f'Something went wrong during the generation of the rsa keypair. \n Error: {err}'
+            )
+
+        self.status = SetupRoutine.SetupStatus.FINISHED
+        LOGGER.info('SETUP ROUTINE: FINISHED!')
+        return self.status
+
+    def __check_database(self):
+        LOGGER.info('SETUP ROUTINE: Checking database connection')
+        from cmdb.data_storage.database_manager import DatabaseManagerMongo
+        from cmdb.data_storage.database_connection import MongoConnector, ServerSelectionTimeoutError
+        try:
+            self.setup_database_manager = DatabaseManagerMongo(
+                connector=MongoConnector(
+                    host=self.setup_system_config_reader.get_value('host', 'Database'),
+                    port=int(self.setup_system_config_reader.get_value('port', 'Database')),
+                    database_name=self.setup_system_config_reader.get_value('database_name', 'Database'),
+                    timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT
+                )
+            )
+
+            connection_test = self.setup_database_manager.database_connector.is_connected()
+        except ServerSelectionTimeoutError:
+            connection_test = False
+        LOGGER.info(f'SETUP ROUTINE: Database connection status {connection_test}')
+        return connection_test
+
+    def __init_database(self):
+        database_name = self.setup_system_config_reader.get_value('database_name', 'Database')
+        LOGGER.info(f'SETUP ROUTINE: initialize database {database_name}')
+        # delete database
+        self.setup_database_manager.drop(database_name)
+        # create new database
+        self.setup_database_manager.create(database_name)
+
+        # generate collections
+        # framework collections
+        from cmdb.object_framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
+        for collection in FRAMEWORK_CLASSES:
+            self.setup_database_manager.create_collection(collection.COLLECTION)
+            # set unique indexes
+            self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+        # user management collections
+        from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
+        for collection in USER_MANAGEMENT_COLLECTION:
+            self.setup_database_manager.create_collection(collection.COLLECTION)
+            # set unique indexes
+            self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+
+        LOGGER.info('SETUP ROUTINE: initialize finished')
