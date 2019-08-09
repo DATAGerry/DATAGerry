@@ -1,0 +1,16 @@
+<div class="sidebar-header">
+    <img src="{{ pathto('_static/img/' + logo, 1) }}" class="d-inline-block align-top"/>
+</div>
+{{ sidebartoc }}
+{% block navigation %}
+    <div id="navigation" role="navigation">
+        {% block menu %}
+            {% set global_toc = toctree(includehidden=false, maxdepth=2) %}
+            {% if global_toc %}
+                {{ global_toc }}
+            {% else %}
+                {{ toc }}
+            {% endif %}
+        {% endblock %}
+    </div>
+{% endblock %}

@@ -1,0 +1,88 @@
+/*
+* dataGerry - OpenSource Enterprise CMDB
+* Copyright (C) 2019 NETHINKS GmbH
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as
+* published by the Free Software Foundation, either version 3 of the
+* License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+
+* You should have received a copy of the GNU Affero General Public License
+* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+// relative import from datagerry app
+@import '../../../app/src/scss/bootstrap_variables';
+// bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+// LAYOUT
+#document {
+  display: flex;
+  width: 100%;
+
+  .sidebar {
+    background: $gray-900;
+    width: 300px;
+    min-height: 100vh;
+
+    .sidebar-header {
+      background: theme-color('primary');
+      padding: 20px;
+    }
+
+  }
+
+  .documentwrapper {
+    padding: 20px;
+    min-height: 100vh;
+    width: calc(100% - 300px);
+  }
+
+}
+
+// NAVIGATION
+#navigation {
+  padding-top: 20px;
+
+  p.caption {
+    padding-left: 20px;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: theme-color('primary');
+  }
+
+  ul {
+    font-size: 14px;
+    padding: 0px;
+
+    li {
+      a {
+        display: block;
+        padding-left: 20px;
+        color: white;
+        padding-top: 3px;
+        padding-bottom: 3px;
+
+        &:hover {
+          text-decoration: none;
+        }
+      }
+    }
+  }
+
+  ul {
+    &.current {
+      > li > a.current {
+        background: white;
+        color: $gray-900;
+      }
+    }
+  }
+
+}
