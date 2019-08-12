@@ -20,12 +20,13 @@
 // bootstrap
 @import '~bootstrap/scss/bootstrap';
 
+
 // LAYOUT
 #document {
   display: flex;
   width: 100%;
 
-  .sidebar {
+  #sidebar {
     background: $gray-900;
     width: 300px;
     min-height: 100vh;
@@ -62,6 +63,8 @@
     padding: 0px;
 
     li {
+
+
       a {
         display: block;
         padding-left: 20px;
@@ -71,8 +74,17 @@
 
         &:hover {
           text-decoration: none;
+          color: $black;
         }
+
+        &.current:has(ul) {
+          &:before {
+            content: 'test';
+          }
+        }
+
       }
+
     }
   }
 
@@ -82,6 +94,14 @@
         background: white;
         color: $gray-900;
       }
+    }
+
+    > li {
+      &:hover {
+        background: $gray-500;
+
+      }
+
     }
   }
 

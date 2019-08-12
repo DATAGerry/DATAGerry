@@ -1,5 +1,6 @@
 <div class="sidebar-header">
-    <img src="{{ pathto('_static/img/' + logo, 1) }}" class="d-inline-block align-top"/>
+    <a href="{{ pathto(master_doc) }}"><img src="{{ pathto('_static/img/' + logo, 1) }}"
+                                            class="d-inline-block align-top"/></a>
 </div>
 {{ sidebartoc }}
 {% block navigation %}

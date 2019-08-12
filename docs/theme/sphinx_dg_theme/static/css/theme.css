@@ -7367,11 +7367,11 @@ a.text-nethinks:hover, a.text-nethinks:focus {
 #document {
   display: flex;
   width: 100%; }
-  #document .sidebar {
+  #document #sidebar {
     background: #212529;
     width: 300px;
     min-height: 100vh; }
-    #document .sidebar .sidebar-header {
+    #document #sidebar .sidebar-header {
       background: #e94d18;
       padding: 20px; }
   #document .documentwrapper {
@@ -7397,8 +7397,13 @@ a.text-nethinks:hover, a.text-nethinks:focus {
       padding-top: 3px;
       padding-bottom: 3px; }
       #navigation ul li a:hover {
-        text-decoration: none; }
+        text-decoration: none;
+        color: #000; }
+      #navigation ul li a.current:has(ul):before {
+        content: 'test'; }
   #navigation ul.current > li > a.current {
     background: white;
     color: #212529; }
+  #navigation ul > li:hover {
+    background: #adb5bd; }
 
