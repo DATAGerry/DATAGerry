@@ -15,8 +15,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-from cmdb.object_framework.cmdb_dao import CmdbDAO
-from cmdb.object_framework.cmdb_object_field_type import FieldNotFoundError
+from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.framework.cmdb_object_field_type import FieldNotFoundError
 
 try:
     from cmdb.utils.error import CMDBError

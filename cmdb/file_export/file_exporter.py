@@ -15,8 +15,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from flask import abort, Response
-from cmdb.object_framework.cmdb_errors import ObjectNotFoundError, TypeNotFoundError
-from cmdb.object_framework.cmdb_object_manager import object_manager
+from cmdb.framework.cmdb_errors import ObjectNotFoundError, TypeNotFoundError
+from cmdb.framework.cmdb_object_manager import object_manager
 from cmdb.file_export.export_types import ExportType
 
 try:

@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from cmdb.object_framework.cmdb_dao import CmdbDAO
+from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.utils.error import CMDBError
 
 

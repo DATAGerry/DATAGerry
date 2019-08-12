@@ -17,8 +17,8 @@
 import logging
 import json
 
-from cmdb.object_framework.cmdb_object_manager import object_manager
-from cmdb.object_framework.cmdb_object_category import CmdbCategory
+from cmdb.framework.cmdb_object_manager import object_manager
+from cmdb.framework.cmdb_object_category import CmdbCategory
 from cmdb.utils.interface_wraps import login_required
 from cmdb.interface.route_utils import make_response, RootBlueprint
 
@@ -45,7 +45,7 @@ def get_categories():
 @categories_routes.route('/tree', methods=['GET'])
 @login_required
 def get_category_tree():
-    from cmdb.object_framework.cmdb_errors import NoRootCategories
+    from cmdb.framework.cmdb_errors import NoRootCategories
     try:
         category_tree = object_manager.get_category_tree()
     except NoRootCategories:

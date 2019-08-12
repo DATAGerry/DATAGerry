@@ -16,9 +16,9 @@
 
 import cmdb,logging, ast, sys, traceback
 from flask import abort, current_app as app, request
-from cmdb.object_framework.cmdb_render import CmdbRender
+from cmdb.framework.cmdb_render import CmdbRender
 from cmdb.interface.route_utils import make_response, RootBlueprint
-from cmdb.object_framework.cmdb_object_manager import object_manager as obm
+from cmdb.framework.cmdb_object_manager import object_manager as obm
 from cmdb.utils.interface_wraps import login_required
 
 

@@ -18,8 +18,8 @@ import pytest
 
 from datetime import datetime
 
-from cmdb.object_framework.cmdb_object_type import CmdbType
-from cmdb.object_framework.cmdb_errors import TypeAlreadyExists, TypeNotFoundError
+from cmdb.framework.cmdb_object_type import CmdbType
+from cmdb.framework.cmdb_errors import TypeAlreadyExists, TypeNotFoundError
 
 
 @pytest.mark.usefixtures("mongodb")
@@ -27,7 +27,7 @@ from cmdb.object_framework.cmdb_errors import TypeAlreadyExists, TypeNotFoundErr
 def object_manager(mongodb):
     from cmdb.data_storage.database_manager import DatabaseManagerMongo
 
-    from cmdb.object_framework.cmdb_object_manager import CmdbObjectManager
+    from cmdb.framework.cmdb_object_manager import CmdbObjectManager
     return CmdbObjectManager(
         database_manager=DatabaseManagerMongo(connector=mongodb)
     )
@@ -37,7 +37,7 @@ def object_manager(mongodb):
     CmdbType
 ])
 def test_cmdb_object_type_init(type_instance_class):
-    from cmdb.object_framework.cmdb_dao import RequiredInitKeyNotFoundError
+    from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
     with pytest.raises(RequiredInitKeyNotFoundError):
         CmdbType(name='example', active=True, author_id=1, creation_time=datetime.utcnow(),
                  render_meta={}, fields=[])

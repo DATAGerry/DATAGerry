@@ -24,10 +24,10 @@ import logging
 import re
 
 from cmdb import __MODE__
-from cmdb.object_framework import *
-from cmdb.object_framework import CmdbObjectStatus
+from cmdb.framework import *
+from cmdb.framework import CmdbObjectStatus
 from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
-from cmdb.object_framework.cmdb_errors import WrongInputFormatError, UpdateError, TypeInsertError, TypeAlreadyExists, \
+from cmdb.framework.cmdb_errors import WrongInputFormatError, UpdateError, TypeInsertError, TypeAlreadyExists, \
     TypeNotFoundError, ObjectInsertError, ObjectNotFoundError, ObjectDeleteError, NoRootCategories
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import timing

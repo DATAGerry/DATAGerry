@@ -106,7 +106,7 @@ class SetupRoutine:
 
         # generate collections
         # framework collections
-        from cmdb.object_framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
+        from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
         for collection in FRAMEWORK_CLASSES:
             self.setup_database_manager.create_collection(collection.COLLECTION)
             # set unique indexes

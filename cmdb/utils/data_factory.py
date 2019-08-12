@@ -19,9 +19,9 @@ CMDB data faker environment
 NOTE: This module is highly experimental and should only be used for development. It still needs a lot of refactoring.
 """
 
-from cmdb.object_framework.cmdb_object import CmdbObject
-from cmdb.object_framework.cmdb_object_type import CmdbType
-from cmdb.object_framework.cmdb_object_category import CmdbCategory
+from cmdb.framework.cmdb_object import CmdbObject
+from cmdb.framework.cmdb_object_type import CmdbType
+from cmdb.framework.cmdb_object_category import CmdbCategory
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user import User
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
@@ -1453,7 +1453,7 @@ class DataFactory:
         """insert data into database"""
         if self._database_manager is None:
             raise NoDatabaseManagerError()
-        from cmdb.object_framework.cmdb_object_manager import CmdbObjectManager
+        from cmdb.framework.cmdb_object_manager import CmdbObjectManager
         from cmdb.user_management.user_manager import UserManagement
         from cmdb.utils.security import SecurityManager
 

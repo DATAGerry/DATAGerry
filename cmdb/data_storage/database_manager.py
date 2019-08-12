@@ -220,7 +220,7 @@ class DatabaseManagerMongo(DatabaseManager):
             acknowledged
 
         """
-        from cmdb.object_framework import __COLLECTIONS__ as cmdb_collection
+        from cmdb.framework import __COLLECTIONS__ as cmdb_collection
         from cmdb.user_management import __COLLECTIONS__ as user_collection
         collection = cmdb_collection + user_collection
 

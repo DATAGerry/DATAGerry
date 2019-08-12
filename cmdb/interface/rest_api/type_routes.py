@@ -19,10 +19,10 @@ import json
 
 from flask import abort, request, jsonify
 from cmdb.utils.interface_wraps import login_required, json_required
-from cmdb.object_framework.cmdb_object_manager import object_manager as obm
+from cmdb.framework.cmdb_object_manager import object_manager as obm
 from cmdb.interface.route_utils import make_response, RootBlueprint
-from cmdb.object_framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError
-from cmdb.object_framework.cmdb_object_type import CmdbType
+from cmdb.framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError
+from cmdb.framework.cmdb_object_type import CmdbType
 
 try:
     from cmdb.utils.error import CMDBError

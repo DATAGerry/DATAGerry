@@ -20,7 +20,7 @@ The collections are made up of a list of types and the number of objects to be c
 This functionality will later be used to represent constructions such as services.
 Integration with the status system should also be possible.
 """
-from cmdb.object_framework.cmdb_dao import CmdbDAO
+from cmdb.framework.cmdb_dao import CmdbDAO
 from typing import Tuple, List
 
 

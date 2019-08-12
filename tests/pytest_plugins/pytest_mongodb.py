@@ -113,7 +113,7 @@ def mongodb(pytestconfig):
 
 
 def generate_collection(db):
-    from cmdb.object_framework import __COLLECTIONS__
+    from cmdb.framework import __COLLECTIONS__
     for collection in __COLLECTIONS__:
         db.create_collection(collection.COLLECTION)
         db.get_collection(collection.COLLECTION).create_indexes(collection.get_index_keys())

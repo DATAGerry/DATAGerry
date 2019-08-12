@@ -13,9 +13,3 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from cmdb.security.crypto.cipher import Cipher, CipherSystem
-from cmdb.security.crypto.providers.aes import AES
-
-def test_aes_crypto():
-    symmetric_cipher = Cipher(CipherSystem.SYMMETRIC, key="test")
-

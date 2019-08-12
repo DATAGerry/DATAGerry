@@ -16,7 +16,7 @@
 
 import logging
 
-from cmdb.object_framework.cmdb_dao import NoPublicIDError, RequiredInitKeyNotFoundError
+from cmdb.framework.cmdb_dao import NoPublicIDError, RequiredInitKeyNotFoundError
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:

@@ -18,10 +18,10 @@ import logging
 import json
 
 from flask import abort, jsonify, request
-from cmdb.object_framework import CmdbObject
-from cmdb.object_framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectNotFoundError
-from cmdb.object_framework.cmdb_render import CmdbRender
-from cmdb.object_framework.cmdb_object_manager import object_manager
+from cmdb.framework import CmdbObject
+from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectNotFoundError
+from cmdb.framework.cmdb_render import CmdbRender
+from cmdb.framework.cmdb_object_manager import object_manager
 from cmdb.utils.interface_wraps import login_required
 from cmdb.interface.route_utils import make_response, RootBlueprint
 

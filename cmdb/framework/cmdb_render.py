@@ -23,8 +23,8 @@ try:
 except ImportError:
     CMDBError = Exception
 
-from cmdb.object_framework.cmdb_object import CmdbObject
-from cmdb.object_framework.cmdb_object_type import CmdbType
+from cmdb.framework.cmdb_object import CmdbObject
+from cmdb.framework.cmdb_object_type import CmdbType
 import logging
 from datetime import datetime
 
@@ -159,7 +159,7 @@ class CmdbRender:
         Returns:
             list of filled external links (_ExternalLink)
         """
-        from cmdb.object_framework.cmdb_errors import ExternalFillError
+        from cmdb.framework.cmdb_errors import ExternalFillError
         # global external list
         external_list = []
         # checks if type has externals defined

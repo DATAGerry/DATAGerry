@@ -16,7 +16,7 @@
 
 import json
 from flask import Blueprint, request
-from cmdb.object_framework.cmdb_dao import CmdbDAO
+from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.utils import json_encoding
 
 DEFAULT_MIME_TYPE = 'Content-Type: application/json'

@@ -16,9 +16,9 @@
 
 import logging
 
-from cmdb.object_framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
-from cmdb.object_framework.cmdb_errors import ExternalFillError, FieldInitError
-from cmdb.object_framework.cmdb_object_field_type import CmdbFieldType, FieldNotFoundError
+from cmdb.framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
+from cmdb.framework.cmdb_errors import ExternalFillError, FieldInitError
+from cmdb.framework.cmdb_object_field_type import CmdbFieldType, FieldNotFoundError
 from datetime import datetime
 
 try:
