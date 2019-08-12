@@ -1,16 +1,26 @@
-Welcome to dataGerry's documentation!
-=====================================
+dataGerry Documentation
+=======================
 
-Content:
-
-.. toctree::
-    instruction/index
-    :caption: Instruction
-    :name: instruction
+DATAGERRY is an enterprise-grade OpenSource CMDB, which completely leaves the
+definition of object types to the user.
 
 .. toctree::
-    user_guide/index
-    admin_guide/index
-    dev_guide/index
+    introduction/getting-started
+    introduction/download
+    :caption: Introduction
+    :name: introduction
+
+.. toctree::
+    guides/user_guide/index
+    guides/admin_guide/index
+    guides/dev_guide/index
     :caption: Guides
     :name: guides
+
+.. toctree::
+    about/release-notes
+    about/license
+    about/team
+    about/contributing
+    :caption: About
+    :name: about

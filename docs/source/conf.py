@@ -93,11 +93,8 @@ html_theme = 'sphinx_dg_theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options = {
-    'github_user': 'NETHINKS',
-    'github_repo': 'dataGerry',
-}
 html_logo = '_static/img/datagerry_logo.svg'
+html_favicon = '_static/img/datagerry_favicon.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

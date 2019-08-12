@@ -29,12 +29,3 @@ manager has to be set to the the respective target engine will be adapted. The s
 Current standard is Python Version 3.7.0 (as of 06.09.2018). Minimum requirement is Python Version 3.4.9. A backward
 compatibility of the Python Versions are decided depending on the release. However we strive to achieve the greatest
 possible compatibility by means of of our versioning (Semantic Versioning 2.0.0).
-
-Modules
-*******
-.. toctree::
-    modules/core
-    modules/logging
-    modules/processmanagement
-    modules/eventhandling
-    modules/interface
