@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { UserService } from '../../../../../user/services/user.service';
 import { User } from '../../../../../user/models/user';
 import { Group } from '../../../../../user/models/group';
@@ -34,6 +34,17 @@ export class TypeAccessStepComponent implements OnInit {
   public userList: User[] = [];
   public groupList: Group[] = [];
 
+  @Input()
+  set preData(data: any) {
+    if (data !== undefined) {
+      if (data.access !== undefined) {
+        this.groups.patchValue(data.access.groups);
+        this.users.patchValue(data.access.users);
+      }
+
+    }
+  }
+
   constructor(private userService: UserService, private groupService: GroupService) {
     this.accessForm = new FormGroup({
       groups: new FormControl(''),
@@ -41,7 +52,16 @@ export class TypeAccessStepComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
+  public get groups() {
+    return this.accessForm.get('groups');
+  }
+
+  public get users() {
+    return this.accessForm.get('users');
+  }
+
+  public ngOnInit(): void {
+
     this.groupService.getGroupList().subscribe((gList: Group[]) => {
       this.groupList = gList;
     });

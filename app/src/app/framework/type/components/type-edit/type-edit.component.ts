@@ -3,6 +3,7 @@ import { CmdbType } from '../../../models/cmdb-type';
 import { ApiCallService } from '../../../../services/api-call.service';
 import { ActivatedRoute } from '@angular/router';
 import { CmdbMode } from '../../../modes.enum';
+import { TypeService } from '../../../services/type.service';
 
 @Component({
   selector: 'cmdb-type-edit',
@@ -15,13 +16,13 @@ export class TypeEditComponent implements OnInit {
   public typeInstance: CmdbType;
   public mode: number = CmdbMode.Edit;
 
-  constructor(private api: ApiCallService, private route: ActivatedRoute) {
+  constructor(private typeService: TypeService, private route: ActivatedRoute) {
     this.route.params.subscribe((id) => this.typeID = id.publicID);
   }
 
   public ngOnInit(): void {
-    this.api.callGetRoute<CmdbType>('type/' + `${this.typeID}`)
-      .subscribe((typeInstance: CmdbType) => this.typeInstance = typeInstance);
+    this.typeService.getType(this.typeID).subscribe((typeInstance: CmdbType) => this.typeInstance = typeInstance);
+
   }
 
 }

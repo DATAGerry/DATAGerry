@@ -49,12 +49,11 @@ export class TypeBasicStepComponent implements OnInit {
   set preData(data: any) {
     if (data !== undefined) {
       this.basicForm.patchValue(data);
-      console.log(data);
-      this.basicCategoryForm.patchValue(data);
     }
   }
 
-  @Input() public mode: number;
+  @Input() public mode: CmdbMode;
+  public modes = CmdbMode;
 
   public basicForm: FormGroup;
   public basicCategoryForm: FormGroup;
@@ -68,7 +67,7 @@ export class TypeBasicStepComponent implements OnInit {
       active: new FormControl(true)
     });
     this.basicCategoryForm = new FormGroup({
-      category_id: new FormControl(null, Validators.required)
+      category_id: new FormControl(null)
     });
   }
 
@@ -83,15 +82,16 @@ export class TypeBasicStepComponent implements OnInit {
   public ngOnInit(): void {
     if (this.mode === CmdbMode.Create) {
       this.basicForm.get('name').setAsyncValidators(TypeNameValidator.createValidator(this.typeService));
+      this.basicForm.get('label').valueChanges.subscribe(val => {
+        this.basicForm.get('name').setValue(val.toString().charAt(0).toLowerCase() + val.toString().slice(1));
+        this.basicForm.get('name').markAsDirty({onlySelf: true});
+        this.basicForm.get('name').markAsTouched({onlySelf: true});
+      });
+      this.basicCategoryForm.get('category_id').setValidators(Validators.required);
     } else if (this.mode === CmdbMode.Edit) {
       this.basicForm.markAllAsTouched();
     }
     this.categoryList = this.categoryService.getCategoryList();
-    this.basicForm.get('label').valueChanges.subscribe(val => {
-      this.basicForm.get('name').setValue(val.toString().charAt(0).toLowerCase() + val.toString().slice(1));
-      this.basicForm.get('name').markAsDirty({onlySelf: true});
-      this.basicForm.get('name').markAsTouched({onlySelf: true});
-    });
   }
 
 }

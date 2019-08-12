@@ -35,12 +35,4 @@ export class CmdbType implements CmdbDao {
   public fields: any[];
   public category_name?: string;
 
-  // tslint:enable:variable-name
-
-  public get sections() {
-    // @ts-ignore
-    return this.render_meta.sections;
-
-  }
-
 }

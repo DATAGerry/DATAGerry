@@ -16,32 +16,20 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AfterContentInit, ChangeDetectorRef, Component, Input, ViewChild } from '@angular/core';
-import { BuilderComponent } from '../../../builder/builder.component';
+import { Component, Input } from '@angular/core';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { CmdbType } from '../../../../models/cmdb-type';
 
 @Component({
-  selector: 'cmdb-type-fields-step',
-  templateUrl: './type-fields-step.component.html',
-  styleUrls: ['./type-fields-step.component.scss']
+  selector: 'cmdb-preview-modal',
+  templateUrl: './preview-modal.component.html',
+  styleUrls: ['./preview-modal.component.scss']
 })
-export class TypeFieldsStepComponent implements AfterContentInit {
+export class PreviewModalComponent {
 
-  @ViewChild(BuilderComponent, {static: false})
-  public typeBuilder: BuilderComponent;
+  @Input() typeInstance: CmdbType;
 
-  @Input()
-  set preData(data: any) {
-    if ((data !== undefined) && (this.typeBuilder !== undefined)) {
-      this.typeBuilder.builderConfig = data;
-    }
-  }
-
-  public constructor(private cdr: ChangeDetectorRef) {
-
-  }
-
-  public ngAfterContentInit(): void {
-    this.cdr.detectChanges();
+  constructor(public activeModal: NgbActiveModal) {
   }
 
 }

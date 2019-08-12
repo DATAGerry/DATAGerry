@@ -16,32 +16,18 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AfterContentInit, ChangeDetectorRef, Component, Input, ViewChild } from '@angular/core';
-import { BuilderComponent } from '../../../builder/builder.component';
+import { Component, Input } from '@angular/core';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-  selector: 'cmdb-type-fields-step',
-  templateUrl: './type-fields-step.component.html',
-  styleUrls: ['./type-fields-step.component.scss']
+  selector: 'cmdb-diagnostic-modal',
+  templateUrl: './diagnostic-modal.component.html',
+  styleUrls: ['./diagnostic-modal.component.scss']
 })
-export class TypeFieldsStepComponent implements AfterContentInit {
+export class DiagnosticModalComponent {
 
-  @ViewChild(BuilderComponent, {static: false})
-  public typeBuilder: BuilderComponent;
+  @Input() data: any;
 
-  @Input()
-  set preData(data: any) {
-    if ((data !== undefined) && (this.typeBuilder !== undefined)) {
-      this.typeBuilder.builderConfig = data;
-    }
-  }
-
-  public constructor(private cdr: ChangeDetectorRef) {
-
-  }
-
-  public ngAfterContentInit(): void {
-    this.cdr.detectChanges();
-  }
+  constructor(public activeModal: NgbActiveModal) { }
 
 }

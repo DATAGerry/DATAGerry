@@ -36,6 +36,9 @@ import { CheckboxControl } from './controls/choice/checkbox.control';
 import { GroupService } from '../../../user/services/group.service';
 import { CmdbMode } from '../../modes.enum';
 import { FormGroup } from '@angular/forms';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
+import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
 
 declare var $: any;
 
@@ -51,7 +54,20 @@ export class BuilderComponent implements OnInit {
   public groupList: Group[] = [];
   public mode = CmdbMode.View;
 
-  @Input() builderConfig: any = {};
+  @Input() set builderConfig(data) {
+    if (data !== undefined) {
+      const preSectionList: any[] = [];
+      for (const section of data.render_meta.sections) {
+        preSectionList.push(section);
+        const fieldBufferList = [];
+        for (const field of section.fields) {
+          fieldBufferList.push(data.fields.find(f => f.name === field));
+        }
+        preSectionList.find(s => s.name === section.name).fields = fieldBufferList;
+      }
+      this.sections = preSectionList;
+    }
+  }
 
   public structureControls = [
     new Controller('section', SectionControl)
@@ -73,7 +89,7 @@ export class BuilderComponent implements OnInit {
 
   public builderFormGroup: FormGroup;
 
-  public constructor(private userService: UserService, private groupService: GroupService) {
+  public constructor(private userService: UserService, private groupService: GroupService, private modalService: NgbModal) {
     this.groupService.getGroupList().subscribe((gList: Group[]) => {
       this.groupList = gList;
     });
@@ -115,11 +131,21 @@ export class BuilderComponent implements OnInit {
     }
   }
 
-
   public remove(item: any, list: any[]) {
     const index: number = list.indexOf(item);
     if (index !== -1) {
       list.splice(index, 1);
     }
   }
+
+  public openPreview() {
+    const previewModal = this.modalService.open(PreviewModalComponent, {scrollable: true});
+    previewModal.componentInstance.typeInstance = {};
+  }
+
+  public openDiagnostic(){
+    const diagnosticModal = this.modalService.open(DiagnosticModalComponent, {scrollable: true});
+    diagnosticModal.componentInstance.data = this.sections;
+  }
+
 }

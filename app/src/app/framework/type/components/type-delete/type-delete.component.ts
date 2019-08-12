@@ -31,7 +31,7 @@ import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from
   styleUrls: ['./type-delete.component.scss'],
   template: `
     <div class="modal-header">
-      <h4 class="modal-title" id="modal-title">Profile deletion</h4>
+      <h4 class="modal-title" id="modal-title">Type deletion</h4>
       <button type="button" class="close" aria-describedby="modal-title" (click)="modal.dismiss('Cross click')">
         <span aria-hidden="true">&times;</span>
       </button>

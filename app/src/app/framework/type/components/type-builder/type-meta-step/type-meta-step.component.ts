@@ -9,6 +9,22 @@ import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/fo
 })
 export class TypeMetaStepComponent implements OnInit {
 
+  public summariesForm: FormGroup;
+  public summariesSections = [];
+  public externalsForm: FormGroup;
+  public externalLinks = [];
+  public hrefInterpolCounter;
+
+  @Input()
+  set preData(data: any) {
+    if (data !== undefined) {
+      if (data.render_meta !== undefined) {
+        this.summariesSections = data.render_meta.summary;
+        this.externalLinks = data.render_meta.external;
+      }
+    }
+  }
+
   constructor() {
     this.summariesForm = new FormGroup({
       name: new FormControl('', [Validators.required, this.listNameValidator(this.summariesSections)]),
@@ -635,12 +651,6 @@ export class TypeMetaStepComponent implements OnInit {
     'fa-black-tie',
     'fa-fonticons'
   ];
-
-  public summariesForm: FormGroup;
-  public summariesSections = [];
-  public externalsForm: FormGroup;
-  public externalLinks = [];
-  public hrefInterpolCounter;
 
   private static occurrences(s, subString): number {
     s += '';

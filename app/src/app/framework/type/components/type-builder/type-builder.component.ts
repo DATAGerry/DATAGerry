@@ -27,6 +27,7 @@ import { UserService } from '../../../../user/services/user.service';
 import { CategoryService } from '../../../services/category.service';
 import { CmdbMode } from '../../../modes.enum';
 import { Router } from '@angular/router';
+import { ToastService } from '../../../../layout/services/toast.service';
 
 
 @Component({
@@ -54,14 +55,17 @@ export class TypeBuilderComponent implements OnInit {
 
   public selectedCategoryID: number = 0;
 
-  public constructor(private router: Router, private typeService: TypeService,
+  public constructor(private router: Router, private typeService: TypeService, private toast: ToastService,
                      private userService: UserService, private categoryService: CategoryService) {
+
   }
 
   public ngOnInit(): void {
-    this.typeInstance = new CmdbType();
-    this.typeInstance.version = '1.0.0';
-    this.typeInstance.author_id = this.userService.getCurrentUser().public_id;
+    if (this.mode === CmdbMode.Create) {
+      this.typeInstance = new CmdbType();
+      this.typeInstance.version = '1.0.0';
+      this.typeInstance.author_id = this.userService.getCurrentUser().public_id;
+    }
   }
 
   public exitBasicStep() {
@@ -97,21 +101,31 @@ export class TypeBuilderComponent implements OnInit {
   }
 
   public saveType() {
-    let newTypeID = null;
-    this.typeService.postType(this.typeInstance).subscribe(typeIDResp => {
-        newTypeID = typeIDResp;
 
-        const selectedCategory = this.categoryService.findCategory(this.selectedCategoryID);
-        selectedCategory.type_list.push(newTypeID);
-        this.categoryService.updateCategory(selectedCategory).subscribe((ack: number) => {
-          this.router.navigate(['/framework/type/'], {queryParams: {typeAddSuccess: newTypeID}});
+    if (this.mode === CmdbMode.Create) {
+      let newTypeID = null;
+      this.typeService.postType(this.typeInstance).subscribe(typeIDResp => {
+          newTypeID = typeIDResp;
+
+          const selectedCategory = this.categoryService.findCategory(this.selectedCategoryID);
+          selectedCategory.type_list.push(newTypeID);
+          this.categoryService.updateCategory(selectedCategory).subscribe((ack: number) => {
+            this.router.navigate(['/framework/type/'], {queryParams: {typeAddSuccess: newTypeID}});
+          });
+
+        },
+        (error) => {
+          console.error(error);
         });
-
-      },
-      (error) => {
-        console.error(error);
-      });
-
+    } else if (this.mode === CmdbMode.Edit) {
+      this.typeService.putType(this.typeInstance).subscribe((updateResp: CmdbType) => {
+          this.toast.show(`Type was successfully edit: TypeID: ${updateResp.public_id}`);
+          this.router.navigate(['/framework/type/'], {queryParams: {typeEditSuccess: updateResp.public_id}});
+        },
+        (error) => {
+          console.log(error);
+        });
+    }
   }
 
   public assignToType(data: any, optional: any = null) {
