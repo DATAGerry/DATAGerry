@@ -16,23 +16,25 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FrameworkRoutingModule } from './framework-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-import { TypeService } from './services/type.service';
-import { ObjectService } from './services/object.service';
-import { StatusService } from './services/status.service';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ApiCallService } from '../../services/api-call.service';
+import { CmdbStatus } from '../models/cmdb-status';
 
-@NgModule({
-  imports: [
-    CommonModule,
-    LayoutModule,
-    FrameworkRoutingModule
-  ],
-  providers: [
-    TypeService,
-    ObjectService
-  ]
+@Injectable({
+  providedIn: 'root'
 })
-export class FrameworkModule { }
+export class StatusService {
+  private servicePrefix: string = 'status';
+
+  constructor(private api: ApiCallService) {
+  }
+
+  public getStatusList(): Observable<CmdbStatus[]> {
+    return this.api.callGetRoute<CmdbStatus[]>(`${this.servicePrefix}/`);
+  }
+
+  public getStatus(publicID: number): Observable<CmdbStatus> {
+    return this.api.callGetRoute<CmdbStatus>(`${this.servicePrefix}/${publicID}`);
+  }
+}

@@ -16,23 +16,18 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FrameworkRoutingModule } from './framework-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-import { TypeService } from './services/type.service';
-import { ObjectService } from './services/object.service';
-import { StatusService } from './services/status.service';
+
+import { StatusRoutingModule } from './status-routing.module';
+import { StatusComponent } from './status.component';
 
 @NgModule({
+  declarations: [StatusComponent],
   imports: [
     CommonModule,
-    LayoutModule,
-    FrameworkRoutingModule
-  ],
-  providers: [
-    TypeService,
-    ObjectService
+    StatusRoutingModule
   ]
 })
-export class FrameworkModule { }
+export class StatusModule { }

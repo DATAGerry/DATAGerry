@@ -16,23 +16,13 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FrameworkRoutingModule } from './framework-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-import { TypeService } from './services/type.service';
-import { ObjectService } from './services/object.service';
-import { StatusService } from './services/status.service';
+import { CmdbDao } from './cmdb-dao';
 
-@NgModule({
-  imports: [
-    CommonModule,
-    LayoutModule,
-    FrameworkRoutingModule
-  ],
-  providers: [
-    TypeService,
-    ObjectService
-  ]
-})
-export class FrameworkModule { }
+export class CmdbStatus implements CmdbDao{
+  // tslint:disable-next-line:variable-name
+  public readonly public_id: number;
+  public name: string;
+  public label: string;
+  public events: [];
+
+}
