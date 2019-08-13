@@ -48,7 +48,7 @@ class CmdbDAO:
 
     DAO_ASCENDING = 1
     DAO_DESCENDING = -1
-    COLLECTION = 'objects.*'
+    COLLECTION = 'framework.*'
     __SUPER_INIT_KEYS = [
         'public_id'
     ]

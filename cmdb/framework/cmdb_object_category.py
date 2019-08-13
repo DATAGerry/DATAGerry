@@ -22,7 +22,7 @@ class CmdbCategory(CmdbDAO):
     """
     Type category
     """
-    COLLECTION = 'objects.categories'
+    COLLECTION = 'framework.categories'
     REQUIRED_INIT_KEYS = [
         'name',
     ]

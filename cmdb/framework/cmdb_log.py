@@ -47,7 +47,7 @@ class CmdbLog(CmdbDAO):
     State control of objects and types.
     """
 
-    COLLECTION = "objects.logs"
+    COLLECTION = "framework.logs"
     REQUIRED_INIT_KEYS = [
         'model',
         'user_id',

@@ -72,9 +72,46 @@ class SetupRoutine:
                 f'Something went wrong during the generation of the rsa keypair. \n Error: {err}'
             )
 
+        # create user management
+        LOGGER.info('SETUP ROUTINE: User management')
+        try:
+            self.__create_user_management()
+        except Exception as err:
+            self.status = SetupRoutine.SetupStatus.ERROR
+            raise RuntimeError(
+                f'Something went wrong during the generation of the user management. \n Error: {err}'
+            )
+
         self.status = SetupRoutine.SetupStatus.FINISHED
         LOGGER.info('SETUP ROUTINE: FINISHED!')
         return self.status
+
+    def __create_user_management(self):
+        from cmdb.user_management.user_manager import UserManagement, User, UserGroup
+        from cmdb.utils.security import SecurityManager
+        scm = SecurityManager(self.setup_database_manager)
+        usm = UserManagement(self.setup_database_manager, scm)
+        admin_group = UserGroup(
+            public_id=1,
+            name='admin',
+            label='admin',
+            rights=[
+                'base.system.*'
+                'base.framework.*'
+            ]
+        )
+        usm.insert_group(admin_group)
+        admin_name = str(input('Admin name: '))
+        admin_pass = str(input('Admin password: '))
+        import datetime
+        admin_user = User(
+            user_name=admin_name,
+            password=scm.generate_hmac(admin_pass),
+            group_id=1,
+            registration_time=datetime.datetime.utcnow()
+        )
+        usm.insert_user(admin_user)
+        return True
 
     def __check_database(self):
         LOGGER.info('SETUP ROUTINE: Checking database connection')

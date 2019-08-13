@@ -15,11 +15,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+from datetime import datetime
 
 from cmdb.framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
-from cmdb.framework.cmdb_errors import ExternalFillError, FieldInitError
-from cmdb.framework.cmdb_object_field_type import CmdbFieldType, FieldNotFoundError
-from datetime import datetime
+from cmdb.framework.cmdb_errors import ExternalFillError, FieldInitError, FieldNotFoundError
 
 try:
     from cmdb.utils.error import CMDBError
@@ -126,14 +125,14 @@ class CmdbType(CmdbDAO):
     def count_fields(self) -> int:
         return len(self.fields)
 
-    def get_field_of_type_with_value(self, input_type: str, _filter: str, value) -> CmdbFieldType:
+    def get_field_of_type_with_value(self, input_type: str, _filter: str, value) -> dict:
         field = [x for x in self.fields if x['input_type'] == input_type and x[_filter] == value]
         if field:
             LOGGER.debug('Field of type {}'.format(input_type))
             LOGGER.debug('Field len'.format(field))
             LOGGER.debug('Field {}'.format(len(field)))
             try:
-                return CmdbFieldType(**field[0])
+                return field[0]
             except (RequiredInitKeyNotFoundError, CMDBError) as e:
                 LOGGER.warning(e.message)
                 raise FieldInitError(value)
@@ -141,15 +140,16 @@ class CmdbType(CmdbDAO):
             LOGGER.debug('Field of type {} NOT found'.format(input_type))
             raise FieldNotFoundError(value, self.get_name())
 
-    def get_field(self, name) -> CmdbFieldType:
+    def get_field(self, name) -> dict:
         field = [x for x in self.fields if x['name'] == name]
         if field:
             try:
-                return CmdbFieldType(**field[0])
+                return field[0]
             except (RequiredInitKeyNotFoundError, CMDBError) as e:
                 LOGGER.warning(e.message)
                 raise FieldInitError(name)
         raise FieldNotFoundError(name, self.get_name())
+
 
 class _ExternalLink:
 

@@ -16,7 +16,6 @@
 
 import logging
 from cmdb.framework.cmdb_dao import CmdbDAO
-from cmdb.framework.cmdb_object_field_type import FieldNotFoundError
 
 try:
     from cmdb.utils.error import CMDBError
@@ -30,7 +29,7 @@ class CmdbObject(CmdbDAO):
     """The CMDB object is the basic data wrapper for storing and holding the pure objects within the CMDB.
     """
 
-    COLLECTION = 'objects.data'
+    COLLECTION = 'framework.objects'
     REQUIRED_INIT_KEYS = [
         'type_id',
         'creation_time',
@@ -130,7 +129,7 @@ class CmdbObject(CmdbDAO):
             if f['name'] == field:
                 return f['value']
             continue
-        raise NoFoundFieldValueError(field)
+        raise ValueError(field)
 
     def get_values(self, fields: list) -> list:
         list_of_values = []

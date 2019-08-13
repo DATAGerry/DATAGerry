@@ -17,24 +17,33 @@
 from cmdb.framework.cmdb_dao import CmdbDAO
 
 
-class CmdbObjectStatus(CmdbDAO):
-    COLLECTION = "objects.status"
+class CmdbStatus(CmdbDAO):
+    MAX_SHORT_LENGTH = 5
+    COLLECTION = "framework.status"
     REQUIRED_INIT_KEYS = [
-        'name',
-        'label',
-        'color'
+        'name'
     ]
     INDEX_KEYS = [
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
-    def __init__(self, name: str, label: str = None, **kwargs):
+    def __init__(self, name: str, label: str = None, short: str = None, events: list = None, **kwargs):
         self.name = name
         self.label = label or self.name.title()
-        super(CmdbObjectStatus, self).__init__(**kwargs)
+        short = short or name
+        self.short = (
+            (short[:CmdbStatus.MAX_SHORT_LENGTH]) if len(short) > CmdbStatus.MAX_SHORT_LENGTH else short).upper()
+        self.events = events or []
+        super(CmdbStatus, self).__init__(**kwargs)
 
     def get_name(self) -> str:
         return self.name
 
     def get_label(self) -> str:
         return self.label
+
+    def get_short(self) -> str:
+        return self.short
+
+    def get_events(self) -> list:
+        return self.events

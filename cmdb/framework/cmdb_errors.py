@@ -89,3 +89,11 @@ class NoSummaryDefinedError(CMDBError):
     def __init__(self, field_name):
         super().__init__()
         self.message = 'Field {} could not be initialized'.format(field_name)
+
+
+class FieldNotFoundError(CMDBError):
+    """Error if field do not exists"""
+
+    def __init__(self, field_name, type_name):
+        super().__init__()
+        self.message = 'Field {} was not found inside input_type: {}'.format(field_name, type_name)

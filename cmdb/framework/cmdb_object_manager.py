@@ -25,7 +25,7 @@ import re
 
 from cmdb import __MODE__
 from cmdb.framework import *
-from cmdb.framework import CmdbObjectStatus
+from cmdb.framework import CmdbStatus
 from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
 from cmdb.framework.cmdb_errors import WrongInputFormatError, UpdateError, TypeInsertError, TypeAlreadyExists, \
     TypeNotFoundError, ObjectInsertError, ObjectNotFoundError, ObjectDeleteError, NoRootCategories
@@ -553,12 +553,19 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = self._delete(CmdbCategory.COLLECTION, public_id)
         return ack
 
-    def get_status(self, public_id) -> (CmdbObjectStatus, None):
+    def get_all_status(self) -> list:
+        ack_list = []
+        resp_status_list = self._get_all(collection=CmdbStatus.COLLECTION, sort='public_id')
+        for status in resp_status_list:
+            ack_list.append(CmdbStatus(**status))
+        return ack_list
+
+    def get_status(self, public_id) -> (CmdbStatus, None):
         try:
-            return CmdbObjectStatus(**self.dbm.find_one(
-                collection=CmdbObjectStatus.COLLECTION,
+            return CmdbStatus(**self.dbm.find_one(
+                collection=CmdbStatus.COLLECTION,
                 public_id=public_id)
-                                    )
+                              )
         except CMDBError:
             return None
 

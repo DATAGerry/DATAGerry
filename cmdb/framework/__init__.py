@@ -27,10 +27,9 @@ from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_object_type import CmdbType
 from cmdb.framework.cmdb_object_category import CmdbCategory
-from cmdb.framework.cmdb_object_field_type import CmdbFieldType
-from cmdb.framework.cmdb_object_status import CmdbObjectStatus
-from cmdb.framework.cmdb_object_link import CmdbObjectLink
-from cmdb.framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplates
+from cmdb.framework.cmdb_status import CmdbStatus
+from cmdb.framework.cmdb_link import CmdbLink
+from cmdb.framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplate
 from cmdb.framework.cmdb_log import CmdbLog
 
 # List of init collections
@@ -39,9 +38,9 @@ __COLLECTIONS__ = [
     CmdbType,
     CmdbCategory,
     CmdbLog,
-    CmdbObjectStatus,
-    CmdbObjectLink,
+    CmdbStatus,
+    CmdbLink,
     CmdbCollection,
-    CmdbCollectionTemplates
+    CmdbCollectionTemplate
 ]
 

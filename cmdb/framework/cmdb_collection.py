@@ -29,7 +29,7 @@ class CmdbCollection(CmdbDAO):
     The collection class contains the template ID, the user ID of the author
     and the list of already initialized objects.
     """
-    COLLECTION = "objects.collection"
+    COLLECTION = "framework.collection"
     REQUIRED_INIT_KEYS = [
         'template_id',
         'user_id'
@@ -39,7 +39,7 @@ class CmdbCollection(CmdbDAO):
         """
         Constructor of CmdbCollection
         Args:
-            template_id: public_id of CmdbCollectionTemplates
+            template_id: public_id of CmdbCollectionTemplate
             user_id: public_id of CmdbUser
             object_list: list of objects which types are defined in the template
         """
@@ -74,13 +74,13 @@ class CmdbCollection(CmdbDAO):
         return self.user_id
 
 
-class CmdbCollectionTemplates(CmdbDAO):
+class CmdbCollectionTemplate(CmdbDAO):
     """
     The collection Template Class defines the structure of the respective collection similar to the CMDB types.
     However to a much smaller extent. Here only the respective types and the number of objects
     to be initialized are defined.
     """
-    COLLECTION = "objects.collection.template"
+    COLLECTION = "framework.collection.template"
     REQUIRED_INIT_KEYS = [
         'name',
         'user_id'
@@ -92,7 +92,7 @@ class CmdbCollectionTemplates(CmdbDAO):
 
     def __init__(self, name: str, user_id: int, type_list: List[TYPE_TUPLE] = None, label: str = None, **kwargs):
         """
-        Constructor of CmdbCollectionTemplates
+        Constructor of CmdbCollectionTemplate
         Args:
             name: name of the collection
             user_id: original public id of the author
@@ -103,7 +103,7 @@ class CmdbCollectionTemplates(CmdbDAO):
         self.label = label or self.name.title()
         self.user_id = user_id
         self.type_list = type_list or List[self.TYPE_TUPLE]
-        super(CmdbCollectionTemplates, self).__init__(**kwargs)
+        super(CmdbCollectionTemplate, self).__init__(**kwargs)
 
     def get_name(self) -> str:
         """
@@ -149,4 +149,4 @@ class CmdbCollectionTemplates(CmdbDAO):
         Returns:
             type tuples based on [TYPE_ID, NUMBER_OF_OBJECTS]
         """
-        return CmdbCollectionTemplates.TYPE_TUPLE[type_id, count]
+        return CmdbCollectionTemplate.TYPE_TUPLE[type_id, count]
