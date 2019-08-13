@@ -123,7 +123,7 @@
                  dndPlaceholderRef>
               Drop field here
             </div>
-            <ng-container *ngFor="let field of section.fields" dndEffectAllowed="copyMove" dndType="inputs"
+            <div *ngFor="let field of section.fields" dndEffectAllowed="move" dndType="inputs"
                           [dndDraggable]="field"
                           (dndMoved)="onDragged(field, section.fields, 'move')">
 
@@ -147,7 +147,7 @@
                   <cmdb-config-edit [groupList]="groupList" [userList]="userList" [data]="field"></cmdb-config-edit>
                 </div>
               </div>
-            </ng-container>
+            </div>
           </div>
         </div>
       </section>

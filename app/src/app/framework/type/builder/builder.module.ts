@@ -33,6 +33,7 @@ import { ChoiceFieldEditComponent } from './configs/edits/choice-field-edit.comp
 import { CheckFieldEditComponent } from './configs/edits/check-field-edit.component';
 import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
 import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
+import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   entryComponents: [
@@ -64,6 +65,7 @@ import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-m
     DndModule,
     RenderModule,
     FormsModule,
+    NgbModalModule,
     NgSelectModule
   ],
   exports: [

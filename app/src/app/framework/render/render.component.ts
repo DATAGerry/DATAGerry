@@ -83,7 +83,11 @@ export class RenderComponent {
 
   public getValueByName(name: string) {
     if (this.objectInstance !== undefined) {
-      return this.objectInstance.fields.find(field => field.name === name).value;
+      const fieldFound = this.objectInstance.fields.find(field => field.name === name);
+      if ( fieldFound === undefined) {
+        return {};
+      }
+      return fieldFound.value;
     }
   }
 

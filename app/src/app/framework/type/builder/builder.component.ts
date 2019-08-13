@@ -39,6 +39,7 @@ import { FormGroup } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
 import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
+import { CmdbType } from '../../models/cmdb-type';
 
 declare var $: any;
 
@@ -75,10 +76,7 @@ export class BuilderComponent implements OnInit {
   public basicControls = [
     new Controller('text', TextControl),
     new Controller('password', PasswordControl),
-    new Controller('email', EmailControl),
-    new Controller('tel', TelControl),
     new Controller('textarea', TextAreaControl),
-    new Controller('href', LinkControl),
     new Controller('checkbox', CheckboxControl),
     new Controller('radio', RadioControl),
     new Controller('select', SelectControl),
@@ -115,7 +113,6 @@ export class BuilderComponent implements OnInit {
         index = list.length;
       }
       for (const el of list) {
-        // close all other collapse
         const collapseCard = ($('#' + el.name) as any);
         collapseCard.collapse('hide');
       }
@@ -140,10 +137,30 @@ export class BuilderComponent implements OnInit {
 
   public openPreview() {
     const previewModal = this.modalService.open(PreviewModalComponent, {scrollable: true});
-    previewModal.componentInstance.typeInstance = {};
+    const cmdbTypePreview = new CmdbType();
+    this.preparePreview(cmdbTypePreview);
+    previewModal.componentInstance.typeInstance = cmdbTypePreview;
   }
 
-  public openDiagnostic(){
+  private preparePreview(prepareType: CmdbType) {
+    let fieldBuffer = [];
+    let sectionBuffer = [];
+    const sectionOrigin = this.sections;
+    for (const section of sectionOrigin) {
+      const sectionGlobe = Object.assign({}, section);
+      fieldBuffer = fieldBuffer.concat(sectionGlobe.fields);
+      const sectionFieldNames = new Set(sectionGlobe.fields.map(f => f.name));
+      delete sectionGlobe.fields;
+
+      sectionGlobe.fields = Array.from(sectionFieldNames);
+
+      sectionBuffer = sectionBuffer.concat(sectionGlobe);
+    }
+    Object.assign(prepareType, {fields: fieldBuffer});
+    Object.assign(prepareType, {render_meta: {sections: sectionBuffer}});
+  }
+
+  public openDiagnostic() {
     const diagnosticModal = this.modalService.open(DiagnosticModalComponent, {scrollable: true});
     diagnosticModal.componentInstance.data = this.sections;
   }

@@ -5,9 +5,7 @@
   </button>
 </div>
 <div class="modal-body">
-  <div class="alert alert-info" role="alert">
-    Not implemented yet
-  </div>
+  <cmdb-render [typeInstance]="typeInstance" [mode]="mode" [renderForm]="renderForm"></cmdb-render>
 </div>
 <div class="modal-footer">
   <button type="button" class="btn btn-outline-primary" (click)="activeModal.close('Close click')">Close</button>

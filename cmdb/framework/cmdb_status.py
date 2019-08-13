@@ -18,7 +18,6 @@ from cmdb.framework.cmdb_dao import CmdbDAO
 
 
 class CmdbObjectStatus(CmdbDAO):
-
     COLLECTION = "objects.status"
     REQUIRED_INIT_KEYS = [
         'name',
@@ -29,11 +28,9 @@ class CmdbObjectStatus(CmdbDAO):
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
-    def __init__(self, name: str, label: str, color: str, icon: str=None, **kwargs):
+    def __init__(self, name: str, label: str = None, **kwargs):
         self.name = name
         self.label = label or self.name.title()
-        self.color = color
-        self.icon = icon
         super(CmdbObjectStatus, self).__init__(**kwargs)
 
     def get_name(self) -> str:
@@ -41,9 +38,3 @@ class CmdbObjectStatus(CmdbDAO):
 
     def get_label(self) -> str:
         return self.label
-
-    def get_color(self) -> str:
-        return self.color
-
-    def get_icon(self) -> str:
-        return self.icon
