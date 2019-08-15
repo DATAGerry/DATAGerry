@@ -150,19 +150,7 @@ class DataGenerator:
                     "author_id": 1,
                     "creation_time": generation_date,
                     "render_meta": {
-                        "external": [
-                            {
-                                "href": "/{2}/{0}/{1}",
-                                "fields": [
-                                    "text-1",
-                                    "text-2",
-                                    "text-3"
-                                ],
-                                "label": "Internal link",
-                                "name": "internal_link",
-                                "icon": None
-                            }
-                        ],
+                        "external": [],
                         "summary": [
                             {
                                 "label": "Connection State",
