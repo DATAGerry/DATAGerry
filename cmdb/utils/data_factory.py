@@ -279,7 +279,7 @@ class DataGenerator:
                             "min": 10000,
                             "max": 99999,
                             "step": 1,
-                            "type": "text"
+                            "type": "number"
                         },
                         {
                             "input_type": "text",
@@ -318,7 +318,7 @@ class DataGenerator:
                             "min": 10000,
                             "max": 99999,
                             "step": 1,
-                            "type": "text"
+                            "type": "number"
                         },
                         {
                             "input_type": "text",
@@ -435,7 +435,7 @@ class DataGenerator:
                             "label": "Monitoring",
                             "className": "form-control",
                             "name": "monitoring",
-                            "type": "text"
+                            "type": "checkbox"
                         },
                         {
                             "input_type": "text",
@@ -452,7 +452,7 @@ class DataGenerator:
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
+                            "input_type": "password",
                             "label": "Password",
                             "className": "form-control",
                             "name": "password",
@@ -622,7 +622,7 @@ class DataGenerator:
                             "label": "Monitoring",
                             "className": "form-control",
                             "name": "monitoring",
-                            "type": "text"
+                            "type": "checkbox"
                         },
                         {
                             "input_type": "text",
@@ -639,7 +639,7 @@ class DataGenerator:
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
+                            "input_type": "password",
                             "label": "Password",
                             "className": "form-control",
                             "name": "password",
@@ -835,7 +835,7 @@ class DataGenerator:
                             "min": 10000,
                             "max": 99999,
                             "step": 1,
-                            "type": "text"
+                            "type": "number"
                         },
                         {
                             "input_type": "text",
