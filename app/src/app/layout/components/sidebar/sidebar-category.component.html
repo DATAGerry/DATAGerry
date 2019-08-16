@@ -2,7 +2,7 @@
 <a href="#{{categoryData.category.name}}" class="list-group-item collapsed" data-toggle="collapse"
    data-parent="#sidebar-categories"
    aria-expanded="false"
-   (focusin)="get_objects_by_type(categoryData.category.type_list)">
+   (click)="get_objects_by_type(categoryData.category.type_list)">
   <span class="hidden-sm-down">{{categoryData.category.label}}</span>
 </a>
 
