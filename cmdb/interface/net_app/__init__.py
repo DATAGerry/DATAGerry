@@ -56,6 +56,12 @@ def create_app(event_queue):
     app.register_error_handler(404, redirect_index)
     app.register_blueprint(doc_pages, url_prefix="/docs")
 
+    @app.route('/favicon.ico')
+    def favicon():
+        from os import path
+        from flask import send_from_directory
+        return send_from_directory(path.join(app.root_path, '_static'), 'favicon.ico')
+
     return app
 
 
