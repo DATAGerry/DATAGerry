@@ -119,7 +119,7 @@ class JsonExportType(ExportType):
 class XlsxExportType(ExportType):
 
     FILE_EXTENSION = "xlsx"
-    LABEL = "XLS"
+    LABEL = "XLSX"
     MULTITYPE_SUPPORT = True
     ICON = "fa-file-excel-o"
     DESCRIPTION = "Export as XLS"
