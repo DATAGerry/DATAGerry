@@ -99,11 +99,11 @@ class JsonExportType(ExportType):
     ACTIVE = True
 
     def export(self, object_list):
-        new_dict = {'public_id': 0, 'active': True, 'type': '', 'fields': []}
         s_keys = ['public_id', 'active', 'type_id', 'fields']
         filter_dict = []
 
         for obj in object_list:
+            new_dict = {'public_id': 0, 'active': True, 'type': '', 'fields': []}
             for k in s_keys:
                 if k in obj.__dict__:
                     if k == 'type_id':
@@ -112,6 +112,7 @@ class JsonExportType(ExportType):
                         new_dict.update({k: obj.__dict__[k]})
 
             filter_dict.append(new_dict)
+
         return json.dumps(filter_dict, default=json_encoding.default, indent=2)
 
 

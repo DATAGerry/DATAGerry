@@ -27,6 +27,8 @@ import { ExportService } from '../../../export/export.service';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from '../../helpers/modal/modal.component';
+import {NgxSpinnerService} from "ngx-spinner";
+import {FileSaverService} from "ngx-filesaver";
 
 @Component({
   selector: 'cmdb-table',
@@ -90,7 +92,8 @@ export class TableComponent implements OnInit, OnDestroy {
 
   constructor(private userService: UserService, private apiCallService: ApiCallService,
               private exportService: ExportService, private router: Router,
-              private modalService: NgbModal) {
+              private modalService: NgbModal, private fileSaverService: FileSaverService,
+              private datePipe: DatePipe) {
     this.add = {
       // add new
       text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
@@ -262,20 +265,23 @@ export class TableComponent implements OnInit, OnDestroy {
     });
   }
 
-  public exporter(fileExtension: string) {
-
+  public exporter(exportType: any) {
     const allCheckbox: any = document.getElementsByClassName('select-checkbox');
     const publicIds: string[] = [];
-
     for (const box of allCheckbox) {
       if (box.checked && box.id) {
         publicIds.push(box.id);
       }
     }
     if (publicIds.length > 0) {
-      this.exportService.callExportRoute('export/' + this.linkRoute + publicIds + '/' + fileExtension,
-        fileExtension);
+      this.exportService.callExportRoute(publicIds.toString(), exportType.id)
+        .subscribe(res => this.downLoadFile(res, exportType));
     }
+  }
+
+  public downLoadFile(data: any, exportType: any) {
+    const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
+    this.fileSaverService.save(data.body, timestamp + '.' + exportType.label);
   }
 
   private createModal(title: string, modalMessage: string, buttonDeny: string, buttonAccept: string) {

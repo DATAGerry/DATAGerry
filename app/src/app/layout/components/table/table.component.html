@@ -27,7 +27,7 @@
         </button>
         <ul class="dropdown-menu" aria-labelledby="exportButton">
           <li class="dropdown-item" *ngFor="let item of formatList"
-              (click)="exporter(item.id)">
+              (click)="exporter(item)">
             <i class="fa {{item.icon}}"></i> {{item.label}}
           </li>
         </ul>

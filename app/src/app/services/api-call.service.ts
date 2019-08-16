@@ -47,8 +47,8 @@ export class ApiCallService {
     return await this.http.get<T>(this.apiURL + route).toPromise<T>();
   }
 
-  public callPostRoute<T>(route: string, data) {
-    return this.http.post<T>(this.apiURL + route, data, httpOptions);
+  public callPostRoute<T>(route: string, data, options: any = httpOptions) {
+    return this.http.post<T>(this.apiURL + route, data, options);
   }
 
   public callPutRoute<T>(route: string, data) {
