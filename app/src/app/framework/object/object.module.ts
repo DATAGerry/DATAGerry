@@ -40,11 +40,12 @@ import { ObjectViewMetaComponent } from './components/object-view-meta/object-vi
 import { ObjectEditComponent } from './object-edit/object-edit.component';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectViewRenderComponent } from './components/object-view-render/object-view-render.component';
+import { ObjectCopyComponent } from './object-copy/object-copy.component';
 
 @NgModule({
   declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent, ObjectSummaryComponent,
     ObjectExternalsComponent, ObjectAddComponent, ObjectFooterComponent, ObjectActionsComponent, ObjectViewRenderComponent,
-    ObjectViewMetaComponent, ObjectEditComponent],
+    ObjectViewMetaComponent, ObjectEditComponent, ObjectCopyComponent],
   imports: [
     CommonModule,
     ObjectRoutingModule,
