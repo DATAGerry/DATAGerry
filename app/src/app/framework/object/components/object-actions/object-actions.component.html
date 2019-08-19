@@ -8,6 +8,10 @@
          class="list-group-item list-group-item-action list-group-item-action">
         <i class="fa fa-plus"></i> Add new {{typeInstance?.label}} object
       </a>
+      <a routerLink="/framework/object/copy/{{objectInstance?.public_id}}"
+         class="list-group-item list-group-item-action list-group-item-action">
+        <i class="fa fa-clone"></i> Copy object
+      </a>
       <a routerLink="/framework/object/edit/{{objectInstance?.public_id}}"
          class="list-group-item list-group-item-action list-group-item-action">
         <i class="fa fa-pencil-square-o"></i> Edit object
