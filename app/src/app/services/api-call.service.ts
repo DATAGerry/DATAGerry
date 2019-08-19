@@ -17,14 +17,26 @@
 */
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { ConnectionService } from './connection.service';
+
 
 const httpOptions = {
   headers: new HttpHeaders({
     'Content-Type': 'application/json'
   })
+};
+
+
+declare type HttpObserve = 'body' | 'events' | 'response';
+const resp: HttpObserve = 'response';
+const httpPostOptions = {
+  headers: new HttpHeaders({
+    'Content-Type': 'application/json'
+  }),
+  observe: resp
 };
 
 @Injectable({
@@ -35,20 +47,42 @@ export class ApiCallService {
   private readonly apiPrefix = 'rest';
   private readonly apiURL;
 
+  public static handleError(err: HttpErrorResponse) {
+    if (err.error instanceof ErrorEvent) {
+      console.error('An error occurred:', err.error.message);
+    } else {
+      console.error(
+        `Backend returned code ${err.status}, ` +
+        `body was: ${err.error}`);
+    }
+    return throwError(
+      'Something bad happened; please try again later.');
+  }
+
   constructor(private http: HttpClient, private connectionService: ConnectionService) {
     this.apiURL = `${this.connectionService.connectionURL}${this.apiPrefix}/`;
   }
 
   public callGetRoute<T>(route: string, params?: any): Observable<any> {
-    return this.http.get<T>(this.apiURL + route, params);
+    return this.http.get<T>(this.apiURL + route, {observe: 'body'}).pipe(
+      map((res) => {
+        return res;
+      }),
+      catchError(ApiCallService.handleError)
+    );
   }
 
-  public async callAsyncGetRoute<T>(route: string): Promise<T> {
-    return await this.http.get<T>(this.apiURL + route).toPromise<T>();
+  public callGet<T>(route: string, params?: any): Observable<any> {
+    return this.http.get<T>(this.apiURL + route, {observe: 'response'}).pipe(catchError(ApiCallService.handleError));
   }
 
   public callPostRoute<T>(route: string, data) {
     return this.http.post<T>(this.apiURL + route, data, httpOptions);
+  }
+
+
+  public callPost<T>(route: string, data) {
+    return this.http.post<T>(this.apiURL + route, data, httpPostOptions);
   }
 
   public callPutRoute<T>(route: string, data) {
@@ -56,15 +90,11 @@ export class ApiCallService {
   }
 
   public callDeleteManyRoute<T>(route: string, params?: any): Observable<any> {
-      return this.http.get<T>(this.apiURL + route, params);
+    return this.http.get<T>(this.apiURL + route, params);
   }
 
   public callDeleteRoute<T>(route: string, params?: any): Observable<any> {
     return this.http.delete<T>(this.apiURL + route, params);
   }
 
-  public handleErrorPromise(error: Response | any) {
-    console.error(error.message || error);
-    return Promise.reject(error.message || error);
-  }
 }

@@ -20,7 +20,7 @@ NOTE: This module is highly experimental and should only be used for development
 """
 
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.cmdb_object_type import CmdbType
+from cmdb.framework.cmdb_type import CmdbType
 from cmdb.framework.cmdb_object_category import CmdbCategory
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user import User
