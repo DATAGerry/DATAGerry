@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import pytest
-from cmdb.security.keys import KeyHolder
+from cmdb.security.key.holder import KeyHolder
 
 KEY_TEST_DIRECTORY = 'keys'
 

@@ -13,9 +13,27 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+from cmdb.utils.system_reader import SystemConfigReader
 
 
 class KeyGenerator:
 
-    def __init__(self):
-        pass
+    def __init__(self, key_directory=None):
+        self.key_directory = key_directory or SystemConfigReader.DEFAULT_CONFIG_LOCATION + "/keys"
+
+    def generate_rsa_keypair(self):
+        from Crypto.PublicKey import RSA
+        key = RSA.generate(2048)
+        private_key = key.export_key()
+        public_key = key.publickey().export_key()
+
+        from pathlib import Path
+        Path(f'{self.key_directory}/').mkdir(parents=True, exist_ok=True)
+
+        file_out = open(f'{self.key_directory}/token_private.pem', "wb")
+        file_out.write(private_key)
+        file_out.close()
+
+        file_out = open(f'{self.key_directory}/token_public.pem', "wb")
+        file_out.write(public_key)
+        file_out.close()

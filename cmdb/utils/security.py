@@ -40,57 +40,6 @@ class SecurityManager:
         self.salt = "cmdb"
         self.expire_time = expire_time or SecurityManager.DEFAULT_EXPIRES
 
-    def _setup(self):
-        pass
-
-    def generate_delete_token(self, data):
-        import json
-        dump = {
-            'public_id': data.get_public_id(),
-            'def_type': str(type(data))
-        }
-        jws_token = jws.JWS(payload=json.dumps(dump))
-        jws_token.add_signature(
-            key=self.get_sym_key(),
-            alg=SecurityManager.DEFAULT_ALG,
-            protected={'alg': SecurityManager.DEFAULT_ALG},
-            header={'kid': self.get_sym_key().thumbprint()}
-        )
-        req_claim = {
-            'exp': int(time.time()) + (120*60)
-        }
-        enc_token = jwt.JWT(header={"alg": "HS512"}, claims=jws_token.serialize(), default_claims=req_claim)
-        enc_token.make_signed_token(self.get_sym_key())
-
-        return enc_token.serialize()
-
-    def encrypt_token(self, payload, timeout: int = (DEFAULT_EXPIRES * 60)) -> str:
-        """TODO: Fix json encoding error - current workaround with direct dump"""
-        user_data = payload.to_json()
-        jws_token = jws.JWS(payload=user_data)
-        jws_token.add_signature(
-            key=self.get_sym_key(),
-            alg=SecurityManager.DEFAULT_ALG,
-            protected={'alg': SecurityManager.DEFAULT_ALG},
-            header={'kid': self.get_sym_key().thumbprint()}
-        )
-        req_claim = {
-            'exp': int(time.time()) + timeout * 60
-        }
-
-        enc_token = jwt.JWT(header={"alg": "HS512"}, claims=jws_token.serialize(), default_claims=req_claim)
-        enc_token.make_signed_token(self.get_sym_key())
-
-        return enc_token.serialize()
-
-    def decrypt_token(self, token):
-        t = jwt.JWT(key=self.get_sym_key(), jwt=token)
-        jsw_token = jws.JWS()
-        jsw_token.deserialize(t.claims)
-        jsw_token.verify(self.get_sym_key())
-
-        return jsw_token.payload
-
     def generate_hmac(self, data):
         import hashlib
         import hmac

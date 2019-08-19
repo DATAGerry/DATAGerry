@@ -13,4 +13,15 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+from authlib.jose import jwt, JWT
 
+from cmdb.security.key.holder import KeyHolder
+
+
+class TokenValidator:
+
+    def __init__(self):
+        self.key_holder = KeyHolder()
+
+    def validate_token(self, token: (JWT, str, dict)):
+        return jwt.decode(s=token, key=self.key_holder.get_public_key())
