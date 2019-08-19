@@ -18,12 +18,11 @@ import pytest
 
 from datetime import datetime
 
-from cmdb.framework.cmdb_object_type import CmdbType
+from cmdb.framework.cmdb_type import CmdbType
 from cmdb.framework.cmdb_errors import TypeAlreadyExists, TypeNotFoundError
 
 
 @pytest.mark.usefixtures("mongodb")
-@pytest.fixture
 def object_manager(mongodb):
     from cmdb.data_storage.database_manager import DatabaseManagerMongo
 

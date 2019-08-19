@@ -31,11 +31,10 @@ class CmdbCollection(CmdbDAO):
     """
     COLLECTION = "framework.collection"
     REQUIRED_INIT_KEYS = [
-        'template_id',
-        'user_id'
+        'template_id'
     ]
 
-    def __init__(self, template_id: int, user_id: int, object_list: list = None, **kwargs):
+    def __init__(self, template_id: int, object_list: list = None, **kwargs):
         """
         Constructor of CmdbCollection
         Args:
@@ -44,7 +43,6 @@ class CmdbCollection(CmdbDAO):
             object_list: list of objects which types are defined in the template
         """
         self.template_id = template_id
-        self.user_id = user_id
         self.object_list = object_list or []
 
         super(CmdbCollection, self).__init__(**kwargs)
@@ -65,14 +63,6 @@ class CmdbCollection(CmdbDAO):
         """
         return self.template_id
 
-    def get_template_user_id(self) -> int:
-        """
-        get the public id of the original author
-        Returns:
-            User ID
-        """
-        return self.user_id
-
 
 class CmdbCollectionTemplate(CmdbDAO):
     """
@@ -82,27 +72,26 @@ class CmdbCollectionTemplate(CmdbDAO):
     """
     COLLECTION = "framework.collection.template"
     REQUIRED_INIT_KEYS = [
-        'name',
-        'user_id'
+        'name'
     ]
     INDEX_KEYS = [
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
-    TYPE_TUPLE = Tuple[int, int]
 
-    def __init__(self, name: str, user_id: int, type_list: List[TYPE_TUPLE] = None, label: str = None, **kwargs):
+    TEMPLATE_TUPLE = Tuple[int, int]
+
+    def __init__(self, name: str, label: str = None, type_tuple_list: List[TEMPLATE_TUPLE] = None, **kwargs):
         """
         Constructor of CmdbCollectionTemplate
         Args:
             name: name of the collection
             user_id: original public id of the author
-            type_list: Tuple of types with numbers of objects
+            type_tuple_list: Tuple of types with numbers of objects
             label: (optional) Label of the name
         """
         self.name = name
         self.label = label or self.name.title()
-        self.user_id = user_id
-        self.type_list = type_list or List[self.TYPE_TUPLE]
+        self.type_tuple_list = type_tuple_list or List[self.TEMPLATE_TUPLE]
         super(CmdbCollectionTemplate, self).__init__(**kwargs)
 
     def get_name(self) -> str:
@@ -122,24 +111,16 @@ class CmdbCollectionTemplate(CmdbDAO):
         """
         return self.label
 
-    def get_user_id(self) -> int:
-        """
-        get public id from the original author
-        Returns:
-            user id
-        """
-        return self.user_id
-
-    def get_type_list(self) -> List[TYPE_TUPLE]:
+    def get_type_tuple_list(self) -> List[TEMPLATE_TUPLE]:
         """
         get list of type tuples
         Returns:
             List of type tuples based on [TYPE_ID, NUMBER_OF_OBJECTS]
         """
-        return self.type_list
+        return self.type_tuple_list
 
     @staticmethod
-    def generate_type_tuple_from(type_id, count) -> TYPE_TUPLE:
+    def generate_type_tuple(type_id: int, count: int) -> TEMPLATE_TUPLE:
         """
         generate a type tuple
         Args:
@@ -149,4 +130,4 @@ class CmdbCollectionTemplate(CmdbDAO):
         Returns:
             type tuples based on [TYPE_ID, NUMBER_OF_OBJECTS]
         """
-        return CmdbCollectionTemplate.TYPE_TUPLE[type_id, count]
+        return type_id, count

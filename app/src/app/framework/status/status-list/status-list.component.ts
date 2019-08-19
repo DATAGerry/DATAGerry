@@ -16,16 +16,26 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { CmdbDao } from './cmdb-dao';
+import { Component, OnInit } from '@angular/core';
+import { StatusService } from '../../services/status.service';
+import { CmdbStatus } from '../../models/cmdb-status';
 
-export class CmdbStatus implements CmdbDao {
-  // tslint:disable-next-line:variable-name
-  public readonly public_id: number;
-  public name: string;
-  public label: string;
-  public short: string;
-  public color?: string;
-  public icon?: string;
-  public events?: [];
+@Component({
+  selector: 'cmdb-status-list',
+  templateUrl: './status-list.component.html',
+  styleUrls: ['./status-list.component.scss']
+})
+export class StatusListComponent implements OnInit {
+
+  public statusList: CmdbStatus[];
+
+  constructor(private statusService: StatusService) {
+  }
+
+  public ngOnInit(): void {
+    this.statusService.getStatusList().subscribe((respList: CmdbStatus[]) => {
+      this.statusList = respList;
+    });
+  }
 
 }

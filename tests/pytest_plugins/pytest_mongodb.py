@@ -101,7 +101,7 @@ def pytest_addoption(parser):
         help='The amount of time that an operation can take before it is aborted with an error')
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope='session')
 def mongodb(pytestconfig):
     db_name = pytestconfig.getoption('mongodb_dbname') or pytestconfig.getini('mongodb_dbname')
     client = make_mongo_client(pytestconfig)
@@ -113,8 +113,11 @@ def mongodb(pytestconfig):
 
 
 def generate_collection(db):
-    from cmdb.framework import __COLLECTIONS__
-    for collection in __COLLECTIONS__:
+
+    from cmdb.framework import __COLLECTIONS__ as __FRAMEWORK_COLLECTIONS
+    from cmdb.user_management import __COLLECTIONS__ as __USER_COLLECTIONS
+    collections = __FRAMEWORK_COLLECTIONS + __USER_COLLECTIONS
+    for collection in collections:
         db.create_collection(collection.COLLECTION)
         db.get_collection(collection.COLLECTION).create_indexes(collection.get_index_keys())
 

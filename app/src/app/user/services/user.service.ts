@@ -57,11 +57,4 @@ export class UserService {
     return this.userList.find(user => user.public_id === publicID);
   }
 
-  public getUserAsync(publicID: number) {
-    return this.api.callAsyncGetRoute<User>(this.prefix + '/' + publicID).then(response => {
-      return response;
-    }).catch(this.api.handleErrorPromise);
-  }
-
-
 }

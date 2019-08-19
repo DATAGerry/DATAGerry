@@ -16,10 +16,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-import pytest
-import requirements
+
 import requests
+import requirements
 from termcolor import colored
+
 
 def test_lib_licenses():
     """Test licenses of libraries
@@ -37,7 +38,8 @@ def test_lib_licenses():
         "BSD",
         "Apache",
         "Dual License",
-        "Artistic License"
+        "Artistic License",
+        "GPL license with a special exception which allows to use PyInstaller"
     ]
 
     # default values

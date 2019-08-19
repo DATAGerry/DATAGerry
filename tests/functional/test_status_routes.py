@@ -1,4 +1,4 @@
-# Net|CMDB - OpenSource Enterprise CMDB
+# dataGerry - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -13,3 +13,14 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import pytest
+
+
+@pytest.mark.usefixtures("client", "init_config_reader")
+class TestStatusRoutes:
+
+    def test_protection(self, client, init_config_reader):
+        print(client.get('/status/'))
+        # assert client.get('status/').status_code == 200
+

@@ -18,23 +18,50 @@
 
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiCallService } from '../../services/api-call.service';
+import { map } from 'rxjs/operators';
+import { ApiCallService, ApiService } from '../../services/api-call.service';
 import { CmdbStatus } from '../models/cmdb-status';
+
 
 @Injectable({
   providedIn: 'root'
 })
-export class StatusService {
-  private servicePrefix: string = 'status';
+export class StatusService<T = CmdbStatus> implements ApiService {
+  public servicePrefix: string = 'status';
 
   constructor(private api: ApiCallService) {
   }
 
-  public getStatusList(): Observable<CmdbStatus[]> {
-    return this.api.callGetRoute<CmdbStatus[]>(`${this.servicePrefix}/`);
+  public getStatusList(): Observable<T[]> {
+    return this.api.callGet<T[]>(`${this.servicePrefix}/`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
   }
 
-  public getStatus(publicID: number): Observable<CmdbStatus> {
-    return this.api.callGetRoute<CmdbStatus>(`${this.servicePrefix}/${publicID}`);
+  public getStatus(publicID: number): Observable<T> {
+    return this.api.callGet<CmdbStatus>(`${this.servicePrefix}/${publicID}`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
   }
+
+  public postStatus(data: CmdbStatus) {
+    return this.api.callPost<CmdbStatus>(`${this.servicePrefix}/`, data).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public putStatus(data: CmdbStatus) {
+    return this.api.callPut<CmdbStatus>(`${this.servicePrefix}/`, data).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
 }

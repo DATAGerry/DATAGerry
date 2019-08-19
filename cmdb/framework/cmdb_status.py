@@ -27,12 +27,15 @@ class CmdbStatus(CmdbDAO):
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
-    def __init__(self, name: str, label: str = None, short: str = None, events: list = None, **kwargs):
+    def __init__(self, name: str, label: str = None, short: str = None, color: str = None, icon: str = None,
+                 events: list = None, **kwargs):
         self.name = name
         self.label = label or self.name.title()
         short = short or name
         self.short = (
             (short[:CmdbStatus.MAX_SHORT_LENGTH]) if len(short) > CmdbStatus.MAX_SHORT_LENGTH else short).upper()
+        self.color = color
+        self.icon = icon
         self.events = events or []
         super(CmdbStatus, self).__init__(**kwargs)
 

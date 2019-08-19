@@ -24,7 +24,7 @@ except ImportError:
     CMDBError = Exception
 
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.cmdb_object_type import CmdbType
+from cmdb.framework.cmdb_type import CmdbType
 import logging
 from datetime import datetime
 
@@ -131,7 +131,10 @@ class CmdbRender:
                             if fields.get('name') == cs_field:
                                 curr_label_list.append(fields.get('label'))
                         # check data
-                        field_data = self.object_instance.get_value(cs_field)
+                        try:
+                            field_data = self.object_instance.get_value(cs_field)
+                        except ValueError:
+                            continue
                         value_list.append(field_data)
                     except CMDBError:
                         # if error while loading continue

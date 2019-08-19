@@ -22,12 +22,19 @@ import { CommonModule } from '@angular/common';
 
 import { StatusRoutingModule } from './status-routing.module';
 import { StatusComponent } from './status.component';
+import { StatusListComponent } from './status-list/status-list.component';
+import { StatusAddComponent } from './status-add/status-add.component';
+import { StatusEditComponent } from './status-edit/status-edit.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { LayoutModule } from '../../layout/layout.module';
 
 @NgModule({
-  declarations: [StatusComponent],
+  declarations: [StatusComponent, StatusListComponent, StatusAddComponent, StatusEditComponent],
   imports: [
     CommonModule,
-    StatusRoutingModule
+    StatusRoutingModule,
+    LayoutModule,
+    ReactiveFormsModule
   ]
 })
 export class StatusModule { }

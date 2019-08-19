@@ -1,0 +1,25 @@
+<h1>Status list</h1>
+
+<table class="table">
+  <thead>
+  <tr>
+    <th scope="col">Public ID</th>
+    <th scope="col">Name</th>
+    <th scope="col">Label</th>
+    <th scope="col">Short</th>
+    <th scope="col">Action</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let status of statusList">
+    <th scope="row">{{status.public_id}}</th>
+    <td>{{status.name}}</td>
+    <td>{{status.label}}</td>
+    <td>{{status.short}}</td>
+    <td>
+      <a routerLink="/framework/status/edit/{{status.public_id}}">Edit</a>
+      <a routerLink="/framework/status/delete/{{status.public_id}}">Delete</a>
+    </td>
+  </tr>
+  </tbody>
+</table>

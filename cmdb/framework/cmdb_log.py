@@ -25,7 +25,7 @@ except ImportError:
     CMDBError = Exception
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.cmdb_object_type import CmdbType
+from cmdb.framework.cmdb_type import CmdbType
 
 LOGGER = logging.getLogger(__name__)
 

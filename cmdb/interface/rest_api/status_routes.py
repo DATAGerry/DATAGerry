@@ -16,8 +16,15 @@
 
 
 import logging
+import json
 
-from cmdb.framework.cmdb_object_manager import object_manager
+from flask import request
+from werkzeug.exceptions import abort
+from bson import json_util
+
+from cmdb.framework.cmdb_object_manager import object_manager, ObjectManagerGetError, ObjectManagerInsertError, \
+    ObjectManagerUpdateError
+from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.interface.route_utils import RootBlueprint, make_response
 
 try:
@@ -30,27 +37,47 @@ status_routes = RootBlueprint('status_rest', __name__, url_prefix='/status')
 
 
 @status_routes.route('/', methods=['GET'])
-def get_status_list():
-    return make_response(object_manager.get_all_status())
+def get_statuses():
+    try:
+        status = object_manager.get_statuses()
+    except ObjectManagerGetError:
+        return abort(404)
+    if len(status) < 1:
+        return make_response(status, 204)
+    return make_response(status)
 
 
 @status_routes.route('/<int:public_id>/', methods=['GET'])
 @status_routes.route('/<int:public_id>', methods=['GET'])
 def get_status(public_id: int):
-    return make_response(public_id)
+    try:
+        status = object_manager.get_status(public_id)
+    except ObjectManagerGetError:
+        return abort(404)
+    return make_response(status)
 
 
 @status_routes.route('/', methods=['POST'])
 def add_status():
-    raise NotImplementedError
+    new_status_params = {**request.json, **{'public_id': int(object_manager.get_highest_id(CmdbStatus.COLLECTION) + 1)}}
+    try:
+        ack = object_manager.insert_status(new_status_params)
+    except ObjectManagerInsertError:
+        return abort(400)
+    return make_response(ack)
 
 
 @status_routes.route('/', methods=['PUT'])
 def update_status():
-    raise NotImplementedError
+    updated_status_params = json.dumps(request.json)
+    try:
+        ack = object_manager.update_status(json.loads(updated_status_params, object_hook=json_util.object_hook))
+    except ObjectManagerUpdateError:
+        return abort(400)
+    return make_response(ack)
 
 
 @status_routes.route('/<int:public_id>/', methods=['DELETE'])
 @status_routes.route('/<int:public_id>', methods=['DELETE'])
 def delete_status(public_id: int):
-    return make_response(public_id)
+    raise NotImplementedError

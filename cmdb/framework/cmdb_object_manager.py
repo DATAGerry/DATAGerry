@@ -23,17 +23,15 @@ The implementation of the manager used is always realized using the respective s
 import logging
 import re
 
-from cmdb import __MODE__
+from cmdb.data_storage import get_pre_init_database
+from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
+from cmdb.event_management.event import Event
 from cmdb.framework import *
 from cmdb.framework import CmdbStatus
-from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
 from cmdb.framework.cmdb_errors import WrongInputFormatError, UpdateError, TypeInsertError, TypeAlreadyExists, \
     TypeNotFoundError, ObjectInsertError, ObjectNotFoundError, ObjectDeleteError, NoRootCategories
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import timing
-from cmdb.event_management.event import Event
-
-from cmdb.data_storage import get_pre_init_database
 
 LOGGER = logging.getLogger(__name__)
 
@@ -553,34 +551,167 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = self._delete(CmdbCategory.COLLECTION, public_id)
         return ack
 
-    def get_all_status(self) -> list:
-        ack_list = []
-        resp_status_list = self._get_all(collection=CmdbStatus.COLLECTION, sort='public_id')
-        for status in resp_status_list:
-            ack_list.append(CmdbStatus(**status))
-        return ack_list
+    # STATUS CRUD
+    def get_statuses(self) -> list:
+        status_list = list()
+        try:
+            collection_resp = self.dbm.find_all(collection=CmdbStatus.COLLECTION)
+        except(CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise ObjectManagerGetError(err)
 
-    def get_status(self, public_id) -> (CmdbStatus, None):
+        for collection in collection_resp:
+            try:
+                status_list.append(CmdbStatus(
+                    **collection
+                ))
+            except(CMDBError, Exception) as err:
+                LOGGER.error(err)
+                continue
+        return status_list
+
+    def get_status(self, public_id) -> CmdbStatus:
         try:
             return CmdbStatus(**self.dbm.find_one(
                 collection=CmdbStatus.COLLECTION,
-                public_id=public_id)
-                              )
-        except CMDBError:
-            return None
+                public_id=public_id
+            ))
+        except (CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise ObjectManagerGetError(err)
 
-    def get_status_by_type(self, type_id: int):
-        status_list = []
-        for status in self.get_type(type_id).status:
-            status_list.append(self.get_status(status))
-        return status_list
+    def insert_status(self, data) -> int:
+        try:
+            new_status = CmdbStatus(**data)
+            ack = self.dbm.insert(CmdbStatus.COLLECTION, new_status.to_database())
+        except (CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise ObjectManagerInsertError(err)
+        return ack
 
-    def generate_log_state(self, state: (list, dict)) -> str:
-        from cmdb.utils.security import SecurityManager
-        scm = SecurityManager(self.dbm)
-        encrypted_state = scm.encrypt_aes(state)
-        LOGGER.debug("Encrypt log state: {}".format(encrypted_state))
-        return encrypted_state
+    def update_status(self, data):
+        try:
+            updated_status = CmdbStatus(**data)
+            ack = self.dbm.update(CmdbStatus.COLLECTION, updated_status.get_public_id(), updated_status.to_database())
+        except (CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise ObjectManagerUpdateError(err)
+        return ack.acknowledged
+
+    def delete_status(self, public_id: int):
+        return NotImplementedError
+
+    # COLLECTIONS/TEMPLATES CRUD
+
+    def get_collections(self) -> list:
+        collection_list = list()
+        try:
+            collection_resp = self.dbm.find_all(collection=CmdbCollection.COLLECTION)
+        except(CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise ObjectManagerGetError(err)
+
+        for collection in collection_resp:
+            try:
+                collection_list.append(CmdbCollection(
+                    **collection
+                ))
+            except(CMDBError, Exception) as err:
+                LOGGER.error(err)
+                continue
+        return collection_list
+
+    def get_collection(self, public_id: int) -> CmdbCollection:
+        try:
+            return CmdbCollection(**self.dbm.find_one(
+                collection=CmdbCollection.COLLECTION,
+                public_id=public_id
+            ))
+        except (CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise ObjectManagerGetError(err)
+
+    def insert_collection(self, data) -> int:
+        try:
+            new_collection = CmdbCollection(**data)
+            ack = self.dbm.insert(CmdbCollection.COLLECTION, new_collection.to_database())
+        except (CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise ObjectManagerInsertError(err)
+        return ack
+
+    def update_collection(self, data):
+        return NotImplementedError
+
+    def delete_collection(self, public_id: int):
+        return NotImplementedError
+
+    def get_collection_templates(self) -> list:
+        collection_template_list = list()
+        try:
+            collection_resp = self.dbm.find_all(collection=CmdbCollectionTemplate.COLLECTION)
+        except(CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise ObjectManagerGetError(err)
+
+        for collection in collection_resp:
+            try:
+                collection_template_list.append(CmdbCollectionTemplate(
+                    **collection
+                ))
+            except(CMDBError, Exception) as err:
+                LOGGER.error(err)
+                continue
+        return collection_template_list
+
+    def get_collection_template(self, public_id: int) -> CmdbCollectionTemplate:
+        try:
+            return CmdbCollectionTemplate(**self.dbm.find_one(
+                collection=CmdbCollectionTemplate.COLLECTION,
+                public_id=public_id
+            ))
+        except (CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise ObjectManagerGetError(err)
+
+    def insert_collection_template(self, data) -> int:
+        try:
+            new_collection_template = CmdbCollectionTemplate(**data)
+            ack = self.dbm.insert(CmdbCollectionTemplate.COLLECTION, new_collection_template.to_database())
+        except (CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise ObjectManagerInsertError(err)
+        return ack
+
+    def update_collection_template(self, data):
+        return NotImplementedError
+
+    def delete_collection_template(self, public_id: int):
+        return NotImplementedError
+
+
+class ObjectManagerGetError(CMDBError):
+
+    def __init__(self, err):
+        self.message = f'Error while GET operation - E: ${err}'
+
+
+class ObjectManagerInsertError(CMDBError):
+
+    def __init__(self, err):
+        self.message = f'Error while INSERT operation - E: ${err}'
+
+
+class ObjectManagerUpdateError(CMDBError):
+
+    def __init__(self, err):
+        self.message = f'Error while UPDATE operation - E: ${err}'
+
+
+class ObjectManagerDeleteError(CMDBError):
+
+    def __init__(self, err):
+        self.message = f'Error while DELETE operation - E: ${err}'
 
 
 object_manager = CmdbObjectManager(
