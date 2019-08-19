@@ -24,7 +24,7 @@ except ImportError:
     CMDBError = Exception
 
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.cmdb_object_type import CmdbType
+from cmdb.framework.cmdb_type import CmdbType
 import logging
 from datetime import datetime
 

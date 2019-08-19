@@ -76,6 +76,9 @@ export class ApiCallService {
     return this.http.get<T>(this.apiURL + route, {observe: 'response'}).pipe(catchError(ApiCallService.handleError));
   }
 
+  public async callAsyncGetRoute<T>(route: string): Promise<T> {
+    return await this.http.get<T>(this.apiURL + route).toPromise<T>();
+  }
   public callPostRoute<T>(route: string, data, options: any = httpOptions) {
     return this.http.post<T>(this.apiURL + route, data, options);
   }
@@ -97,4 +100,8 @@ export class ApiCallService {
     return this.http.delete<T>(this.apiURL + route, params);
   }
 
+  public handleErrorPromise(error: Response | any) {
+    console.error(error.message || error);
+    return Promise.reject(error.message || error);
+  }
 }
