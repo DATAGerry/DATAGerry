@@ -52,7 +52,7 @@ def get_filetypes():
     return make_response(filetype_list)
 
 
-@export_route.route('/object/<string:public_ids>/<string:export_class>', methods=['GET'])
+@export_route.route('/object/<string:public_ids>/<string:export_class>', methods=['POST'])
 @login_required
 def export_file(public_ids, export_class):
     try:
@@ -69,7 +69,7 @@ def export_file(public_ids, export_class):
     return file_export.export()
 
 
-@export_route.route('/object/type/<int:public_id>/<string:export_class>', methods=['GET'])
+@export_route.route('/object/type/<int:public_id>/<string:export_class>', methods=['POST'])
 @login_required
 def export_file_by_type_id(public_id, export_class):
     try:

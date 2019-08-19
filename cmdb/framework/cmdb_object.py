@@ -16,6 +16,7 @@
 
 import logging
 from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.framework.cmdb_errors import FieldNotFoundError
 
 try:
     from cmdb.utils.error import CMDBError

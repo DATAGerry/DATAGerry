@@ -33,12 +33,12 @@
       <div class="form-group">
         <label for="formatChooser">Output format <span class="required">*</span></label>
         <ng-select id="formatChooser"
-           [items]="formatList"
-           required
-           bindLabel="label"
-           bindValue="id"
-           placeholder="Choose your option"
-           formControlName="format">
+                   [items]="formatList"
+                   required
+                   bindLabel="label"
+                   bindValue="id"
+                   placeholder="Choose your option"
+                   formControlName="format">
 
           <ng-template ng-label-tmp let-item="item">
               <i class="fa {{item.icon}}"></i> {{item.label}}

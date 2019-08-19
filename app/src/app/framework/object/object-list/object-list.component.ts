@@ -27,6 +27,8 @@ import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ExportService } from '../../../export/export.service';
 import { CmdbMode } from '../../modes.enum';
+import {FileSaverService} from 'ngx-filesaver';
+import {DatePipe} from '@angular/common';
 
 @Component({
   selector: 'cmdb-object-list',
@@ -54,7 +56,8 @@ export class ObjectListComponent implements OnDestroy {
 
   constructor(private apiCallService: ApiCallService, private objService: ObjectService,
               private exportService: ExportService, private route: ActivatedRoute, private router: Router,
-              private spinner: NgxSpinnerService) {
+              private spinner: NgxSpinnerService, private fileSaverService: FileSaverService,
+              private datePipe: DatePipe) {
     this.route.params.subscribe((id) => {
       this.init(id);
     });
@@ -344,40 +347,28 @@ export class ObjectListComponent implements OnDestroy {
     }
   }
 
-  public exporter(fileExtension: string) {
+  public exportingFiles(exportType: any) {
     if ('all' === this.selectedObjects) {
-      this.exportByTypeID(fileExtension);
+      this.exportService.getObjectFileByType(this.items[0].type_id, exportType.id)
+        .subscribe(res => this.downLoadFile(res, exportType));
       return;
     }
-    const allCheckbox: any = document.getElementsByClassName('select-checkbox');
-    const publicIds: string[] = [];
 
+    const publicIds: string[] = [];
+    const allCheckbox: any = document.getElementsByClassName('select-checkbox');
     for (const box of allCheckbox) {
       if (box.checked && box.id) {
         publicIds.push(box.id);
       }
     }
     if (publicIds.length > 0) {
-      this.exportService.callExportRoute('export/' + 'object/' + publicIds + '/' + fileExtension, fileExtension);
+      this.exportService.callExportRoute(publicIds.toString(), exportType.id)
+        .subscribe(res => this.downLoadFile(res, exportType));
     }
   }
 
-  public exportByTypeID(fileExtension: string) {
-    this.exportService.getObjectFileByType(this.items[0].type_id, fileExtension).subscribe(res => this.downLoadFile(res));
+  public downLoadFile(data: any, exportType: any) {
+    const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
+    this.fileSaverService.save(data.body, timestamp + '.' + exportType.label);
   }
-
-  public downLoadFile(data: any) {
-    const blob = new Blob([data], {type: 'application/' + 'csv'});
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-
-    document.body.appendChild(a);
-    a.setAttribute('style', 'display: none');
-    a.href = url;
-    a.download = 'test';
-    a.click();
-    window.URL.revokeObjectURL(url);
-    a.remove(); // remove the element
-  }
-
 }

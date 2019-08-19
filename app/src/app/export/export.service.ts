@@ -17,13 +17,12 @@
 */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { ConnectionService } from '../services/connection.service';
-import { map } from 'rxjs/operators';
-import { DatePipe } from '@angular/common';
-import { FileSaverService } from 'ngx-filesaver';
-import { Observable } from 'rxjs';
 import { ApiCallService } from '../services/api-call.service';
+
+const httpOptions = {
+  observe: 'response',
+  responseType: 'blob'
+};
 
 @Injectable({
   providedIn: 'root'
@@ -40,36 +39,12 @@ export class ExportService {
   }
 
   public callExportRoute(route: string, exportType: string) {
-    return this.api.callGetRoute<any>(this.servicePrefix + '/object/' + route + '/' + exportType);
+    return this.api.callPostRoute<any>(this.servicePrefix + '/object/' + route + '/' + exportType,
+      null, httpOptions);
   }
 
   public getObjectFileByType(typeID: number, exportType: string) {
-    return this.api.callGetRoute(this.servicePrefix + '/object/type/' + typeID + '/' + exportType);
+    return this.api.callPostRoute(this.servicePrefix + '/object/type/' + typeID + '/' + exportType,
+      null, httpOptions);
   }
-
 }
-
-/*
-public callExportRoute<T>(route: string, fileExtension: string) {
-  const REQUEST_URI = this.apiURL + route;
-
-  return this.http.get(REQUEST_URI, {
-    observe: 'response',
-    responseType: 'blob'
-  }).pipe(
-    map(res => {
-      const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
-      return {
-        filename: timestamp + '.' + fileExtension,
-        data: res
-      };
-    })
-  ).subscribe(res => {
-    this.fileSaverService.save(res.data.body, res.filename);
-  }, error => {
-    console.log('download error:', JSON.stringify(error));
-  }, () => {
-    console.log('Completed file download.');
-  });
-}
-}*/

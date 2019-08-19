@@ -76,8 +76,8 @@ export class ApiCallService {
     return this.http.get<T>(this.apiURL + route, {observe: 'response'}).pipe(catchError(ApiCallService.handleError));
   }
 
-  public callPostRoute<T>(route: string, data) {
-    return this.http.post<T>(this.apiURL + route, data, httpOptions);
+  public callPostRoute<T>(route: string, data, options: any = httpOptions) {
+    return this.http.post<T>(this.apiURL + route, data, options);
   }
 
 

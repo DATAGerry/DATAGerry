@@ -17,12 +17,12 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { HttpHeaders } from '@angular/common/http';
 import { ExportService } from './export.service';
 import { DatePipe } from '@angular/common';
 import { CmdbType } from '../framework/models/cmdb-type';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TypeService } from '../framework/services/type.service';
+import {FileSaverService} from 'ngx-filesaver';
 
 @Component({
   selector: 'cmdb-export',
@@ -35,9 +35,9 @@ export class ExportComponent implements OnInit {
   public formatList: any[] = [];
   public formExport: FormGroup;
   public isSubmitted = false;
-  readonly URL: string = 'object/type/';
 
-  constructor(private exportService: ExportService, private datePipe: DatePipe, private typeService: TypeService) {
+  constructor(private exportService: ExportService, private datePipe: DatePipe, private typeService: TypeService,
+              private fileSaverService: FileSaverService ) {
     this.formExport = new FormGroup({
       type: new FormControl( null, Validators.required),
       format: new FormControl(null, Validators.required)
@@ -69,11 +69,17 @@ export class ExportComponent implements OnInit {
     }
 
     const typeID = this.formExport.get('type').value;
-    let fileExtension: string = this.formExport.get('format').value;
+    const fileExtension: any = this.formExport.get('format').value;
 
     if (fileExtension != null && typeID != null) {
-      fileExtension = fileExtension.toLocaleLowerCase();
-      this.exportService.callExportRoute('export/' + this.URL + typeID + '/' + fileExtension , fileExtension);
+      this.exportService.getObjectFileByType(typeID , fileExtension)
+        .subscribe(res => this.downLoadFile(res, fileExtension));
     }
+  }
+
+  public downLoadFile(data: any, exportType: any) {
+    const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
+    const extension = this.formatList.find(x => x.id === exportType);
+    this.fileSaverService.save(data.body, timestamp + '.' + extension.label);
   }
 }
