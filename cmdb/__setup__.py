@@ -63,7 +63,7 @@ class SetupRoutine:
 
         # generate keys
         LOGGER.info('SETUP ROUTINE: Generate rsa key pair')
-        from cmdb.security.keys import KeyGenerator
+        from cmdb.security.key.generator import KeyGenerator
         try:
             KeyGenerator().generate_rsa_keypair()
         except Exception as err:
