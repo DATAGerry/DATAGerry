@@ -42,6 +42,7 @@ import { PasswordSimpleComponent } from './simple/text/password-simple.component
 import { CheckboxSimpleComponent } from './simple/choice/checkbox-simple.component';
 import { RadioSimpleComponent } from './simple/choice/radio-simple.component';
 import { SelectSimpleComponent } from './simple/choice/select-simple.component';
+import { RouterModule } from '@angular/router';
 
 
 @NgModule({
@@ -61,10 +62,12 @@ import { SelectSimpleComponent } from './simple/choice/select-simple.component';
     PasswordSimpleComponent,
     CheckboxSimpleComponent,
     RadioSimpleComponent,
-    SelectSimpleComponent
+    SelectSimpleComponent,
+    RenderComponent,
+    RenderElementComponent
   ],
   declarations: [
-    RenderComponent, TextComponent, DummyComponent, RenderElementComponent, PasswordComponent, EmailComponent, PhoneComponent,
+    RenderComponent, RenderElementComponent, TextComponent, DummyComponent, PasswordComponent, EmailComponent, PhoneComponent,
     HrefComponent, RadioComponent, SelectComponent, RefComponent, CheckboxComponent, TextareaComponent, ModeErrorComponent,
     RenderErrorComponent, TextSimpleComponent, PasswordSimpleComponent, CheckboxSimpleComponent, RadioSimpleComponent, SelectSimpleComponent
   ],
@@ -78,7 +81,8 @@ import { SelectSimpleComponent } from './simple/choice/select-simple.component';
     NgbModule,
     NgSelectModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    RouterModule
   ]
 })
 export class RenderModule {

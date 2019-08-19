@@ -28,17 +28,24 @@ import { CmdbObject } from '../../../models/cmdb-object';
 export class RefComponent extends RenderField implements OnInit {
 
   public objectList: CmdbObject[];
+  public refObject: CmdbObject;
 
-  public constructor(private obj: ObjectService) {
+  public constructor(private objectService: ObjectService) {
     super();
   }
 
   public ngOnInit(): void {
     if (this.data.ref_types !== undefined) {
-      this.obj.getObjectsByType(this.data.ref_types).subscribe((list: CmdbObject[]) => {
+      this.objectService.getObjectsByType(this.data.ref_types).subscribe((list: CmdbObject[]) => {
         this.objectList = list;
       });
     }
+    if (this.controller.value !== undefined) {
+      this.objectService.getObject(this.controller.value).subscribe((refObject: CmdbObject) => {
+        this.refObject = refObject;
+      });
+    }
   }
+
 
 }
