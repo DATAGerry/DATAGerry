@@ -706,8 +706,8 @@ export class TypeMetaStepComponent implements OnInit {
   public editSummary(data) {
     const rawSummaryData = this.summariesSections[this.summariesSections.indexOf(data)];
     this.summariesForm.reset();
-    this.summariesForm.patchValue(rawSummaryData);
     this.deleteSummary(data);
+    this.summariesForm.patchValue(rawSummaryData);
   }
 
   public deleteSummary(data) {
@@ -715,6 +715,8 @@ export class TypeMetaStepComponent implements OnInit {
     if (index !== -1) {
       this.summariesSections.splice(index, 1);
     }
+    this.summariesForm.get('name').clearValidators();
+    this.summariesForm.get('name').setValidators(this.listNameValidator(this.summariesSections));
   }
 
   public addExternal() {
@@ -725,8 +727,8 @@ export class TypeMetaStepComponent implements OnInit {
   public editExternal(data) {
     const rawExternalData = this.externalLinks[this.externalLinks.indexOf(data)];
     this.externalsForm.reset();
-    this.externalsForm.patchValue(rawExternalData);
     this.deleteExternal(data);
+    this.externalsForm.patchValue(rawExternalData);
   }
 
   public deleteExternal(data) {
@@ -734,7 +736,8 @@ export class TypeMetaStepComponent implements OnInit {
     if (index !== -1) {
       this.externalLinks.splice(index, 1);
     }
-
+    this.externalsForm.get('name').clearValidators();
+    this.externalsForm.get('name').setValidators(this.listNameValidator(this.externalLinks));
   }
 
 }
