@@ -18,7 +18,6 @@
 
 import { Component, Input } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { CmdbType } from '../../../../models/cmdb-type';
 import { CmdbMode } from '../../../../modes.enum';
 import { FormGroup } from '@angular/forms';
 
@@ -29,9 +28,9 @@ import { FormGroup } from '@angular/forms';
 })
 export class PreviewModalComponent {
 
-  @Input() typeInstance: CmdbType;
+  @Input() sections: any[];
   public renderForm: FormGroup;
-  public mode: CmdbMode.Create;
+  public modes = CmdbMode;
 
   constructor(public activeModal: NgbActiveModal) {
     this.renderForm = new FormGroup({});

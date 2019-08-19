@@ -137,27 +137,7 @@ export class BuilderComponent implements OnInit {
 
   public openPreview() {
     const previewModal = this.modalService.open(PreviewModalComponent, {scrollable: true});
-    const cmdbTypePreview = new CmdbType();
-    this.preparePreview(cmdbTypePreview);
-    previewModal.componentInstance.typeInstance = cmdbTypePreview;
-  }
-
-  private preparePreview(prepareType: CmdbType) {
-    let fieldBuffer = [];
-    let sectionBuffer = [];
-    const sectionOrigin = this.sections;
-    for (const section of sectionOrigin) {
-      const sectionGlobe = Object.assign({}, section);
-      fieldBuffer = fieldBuffer.concat(sectionGlobe.fields);
-      const sectionFieldNames = new Set(sectionGlobe.fields.map(f => f.name));
-      delete sectionGlobe.fields;
-
-      sectionGlobe.fields = Array.from(sectionFieldNames);
-
-      sectionBuffer = sectionBuffer.concat(sectionGlobe);
-    }
-    Object.assign(prepareType, {fields: fieldBuffer});
-    Object.assign(prepareType, {render_meta: {sections: sectionBuffer}});
+    previewModal.componentInstance.sections = this.sections;
   }
 
   public openDiagnostic() {

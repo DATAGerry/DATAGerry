@@ -34,6 +34,7 @@ import { CheckFieldEditComponent } from './configs/edits/check-field-edit.compon
 import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
 import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { RenderElementComponent } from '../../render/render-element/render-element.component';
 
 @NgModule({
   entryComponents: [
@@ -45,7 +46,8 @@ import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
     ChoiceFieldEditComponent,
     CheckFieldEditComponent,
     PreviewModalComponent,
-    DiagnosticModalComponent
+    DiagnosticModalComponent,
+    RenderElementComponent
   ],
   declarations: [
     BuilderComponent,
@@ -63,8 +65,8 @@ import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
   imports: [
     CommonModule,
     DndModule,
-    RenderModule,
     FormsModule,
+    RenderModule,
     NgbModalModule,
     NgSelectModule
   ],
