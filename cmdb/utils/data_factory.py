@@ -47,9 +47,7 @@ class DataGenerator:
         self._security_manager = SecurityManager(database_manager)
 
     def generate_settings(self):
-        self._security_manager.generate_sym_key()
         self._security_manager.generate_symmetric_aes_key()
-        self._security_manager.generate_key_pair()
 
     @staticmethod
     def generate_default_groups() -> list:
