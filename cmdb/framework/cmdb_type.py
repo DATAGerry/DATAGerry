@@ -32,7 +32,7 @@ class CmdbType(CmdbDAO):
     """
     Definition of an object type - which fields were created and how.
     """
-    COLLECTION = "objects.types"
+    COLLECTION = "framework.types"
     REQUIRED_INIT_KEYS = [
         'name',
         'active',

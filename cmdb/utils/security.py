@@ -23,7 +23,6 @@ from Crypto.Cipher import AES
 from cmdb.data_storage.database_manager import NoDocumentFound
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
-from jwcrypto import jwk, jwt, jws
 
 
 LOGGER = logging.getLogger(__name__)
@@ -45,7 +44,7 @@ class SecurityManager:
         import hmac
 
         generated_hash = hmac.new(
-            bytes(self.get_sym_key().export_symmetric(), 'utf-8'),
+            self.get_symmetric_aes_key(),
             bytes(data + self.salt, 'utf-8'),
             hashlib.sha256
         )
@@ -84,50 +83,16 @@ class SecurityManager:
     def _unpad(s):
         return s[:-ord(s[len(s) - 1:])]
 
-    def get_sym_key(self):
-        try:
-            symmetric_key = self.ssr.get_value('symmetric_key', 'security')
-        except (KeyError, NoDocumentFound):
-            symmetric_key = self.generate_sym_key()
-        return jwk.JWK(**symmetric_key)
-
     def generate_symmetric_aes_key(self):
-        self.ssw.write('security', {'symmetric_aes_key': Random.get_random_bytes(32)})
+        return self.ssw.write('security', {'symmetric_aes_key': Random.get_random_bytes(32)})
 
     def get_symmetric_aes_key(self):
-        return self.ssr.get_value('symmetric_aes_key', 'security')
-
-    def generate_sym_key(self):
-        symmetric_key = jwk.JWK.generate(kty='oct', size=256).export()
-        symmetric_key = ast.literal_eval(symmetric_key)
-        self.ssw.write('security', {'symmetric_key': symmetric_key})
-        return jwk.JWK(**symmetric_key)
-
-    def get_key_pair(self):
         try:
-            asy_key = self.ssr.get_value('key_pair', 'security')
-        except (KeyError, NoDocumentFound):
-            asy_key = self.generate_key_pair()
-        return asy_key
-
-    def generate_key_pair(self):
-        asy_key = jwk.JWK.generate(kty='EC', crv='P-256')
-        public_key = ast.literal_eval(asy_key.export_public())
-        private_key = ast.literal_eval(asy_key.export_private())
-        insert_key = {
-            'public_key': public_key,
-            'private_key': private_key
-        }
-        self.ssw.write('security', {'key_pair': insert_key})
-        return insert_key
-
-    def get_private_key(self):
-        pub_key = self.get_key_pair()['private_key']
-        return jwk.JWK(**pub_key)
-
-    def get_public_key(self):
-        pub_key = self.get_key_pair()['public_key']
-        return jwk.JWK(**pub_key)
+            symmetric_key = self.ssr.get_value('symmetric_aes_key', 'security')
+        except NoDocumentFound:
+            self.generate_symmetric_aes_key()
+            symmetric_key = self.ssr.get_value('symmetric_aes_key', 'security')
+        return symmetric_key
 
     @staticmethod
     def encode_object_base_64(data: object):

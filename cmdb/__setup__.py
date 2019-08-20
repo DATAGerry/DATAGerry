@@ -105,6 +105,7 @@ class SetupRoutine:
         admin_pass = str(input('Admin password: '))
         import datetime
         admin_user = User(
+            public_id=1,
             user_name=admin_name,
             password=scm.generate_hmac(admin_pass),
             group_id=1,
