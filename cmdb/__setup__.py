@@ -96,7 +96,7 @@ class SetupRoutine:
             name='admin',
             label='admin',
             rights=[
-                'base.system.*'
+                'base.system.*',
                 'base.framework.*'
             ]
         )
