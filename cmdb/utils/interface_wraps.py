@@ -20,8 +20,6 @@ Different wrapper functions for interface module
 import logging
 from functools import wraps
 from flask import request, abort
-from jwcrypto.jwt import JWTExpired, JWTNotYetValid
-from jwcrypto.jws import InvalidJWSSignature, InvalidJWSObject
 
 from cmdb.security.token.validator import TokenValidator
 

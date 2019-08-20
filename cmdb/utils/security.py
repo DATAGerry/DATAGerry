@@ -15,8 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import base64
-import ast
-import time
 import logging
 from Crypto import Random
 from Crypto.Cipher import AES
