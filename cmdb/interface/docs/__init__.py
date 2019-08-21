@@ -16,7 +16,9 @@
 
 import logging
 
+import cmdb
 from cmdb.interface.cmdb_app import BaseCmdbApp
+from cmdb.interface.config import app_config
 from cmdb.interface.docs.doc_routes import doc_pages
 
 try:
@@ -28,6 +30,16 @@ LOGGER = logging.getLogger(__name__)
 app = BaseCmdbApp(__name__)
 
 
-def create_docs_server():
-    app.register_blueprint(doc_pages, url_prefix="/docs")
+def create_docs_server(event_queue):
+    if cmdb.__MODE__ == 'DEBUG':
+        app.config.from_object(app_config['rest_development'])
+        LOGGER.info('Docs starting with config mode {}'.format(app.config.get("ENV")))
+    elif cmdb.__MODE__ == 'TESTING':
+        app.config.from_object(app_config['testing'])
+    else:
+        app.config.from_object(app_config['rest'])
+        LOGGER.info('Docs starting with config mode {}'.format(app.config.get("ENV")))
+
+    app.register_blueprint(doc_pages, url_prefix="/")
+
     return app

@@ -21,8 +21,8 @@ import logging
 import multiprocessing
 from cmdb import __MODE__
 import cmdb.process_management.service
-from cmdb.interface.docs import create_docs_server
 from cmdb.interface.net_app import create_app
+from cmdb.interface.docs import create_docs_server
 from cmdb.interface.rest_api import create_rest_api
 from cmdb.utils.system_reader import SystemConfigReader
 from cmdb.utils.logger import get_logging_conf
@@ -50,8 +50,8 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
         app = DispatcherMiddleware(
             app=create_app(event_queue),
             mounts={
-                '/rest': create_rest_api(event_queue),
-                '/docs': create_docs_server()
+                '/docs': create_docs_server(event_queue),
+                '/rest': create_rest_api(event_queue)
             }
         )
 

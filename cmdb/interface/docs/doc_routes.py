@@ -20,7 +20,7 @@ Blueprint for documentation routes
 
 from cmdb.interface.route_utils import RootBlueprint
 
-doc_pages = RootBlueprint("doc_pages", __name__, static_folder="docs", static_url_path="")
+doc_pages = RootBlueprint("doc_pages", __name__, static_folder="", static_url_path="")
 
 
 @doc_pages.route("/")
