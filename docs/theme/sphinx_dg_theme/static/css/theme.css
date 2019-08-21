@@ -7364,6 +7364,60 @@ a.text-nethinks:hover, a.text-nethinks:focus {
     color: inherit;
     border-color: #dee2e6; } }
 
+.note {
+  background: #e9ecef;
+  border-left: 3px solid #e94d18;
+  padding-left: 20px; }
+
+.warning {
+  background: #e9ecef;
+  border-left: 3px solid;
+  padding-left: 20px; }
+
+h1:hover .headerlink, h2:hover .headerlink, h3:hover .headerlink, h4:hover .headerlink, h5:hover .headerlink {
+  visibility: hidden !important;
+  text-decoration: none; }
+  h1:hover .headerlink:after, h2:hover .headerlink:after, h3:hover .headerlink:after, h4:hover .headerlink:after, h5:hover .headerlink:after {
+    content: '#';
+    visibility: visible; }
+
+blockquote {
+  padding: 10px;
+  background: #e9ecef; }
+  blockquote p {
+    margin: 0; }
+
+#navigation {
+  padding-top: 20px; }
+  #navigation p.caption {
+    padding-left: 20px;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #e94d18; }
+  #navigation ul {
+    font-size: 14px;
+    padding: 0; }
+    #navigation ul li a {
+      display: block;
+      padding-left: 20px;
+      padding-top: 3px;
+      padding-bottom: 3px; }
+      #navigation ul li a:hover {
+        text-decoration: none; }
+    #navigation ul.current > li.current > a {
+      color: #FFFFFF;
+      background: #e94d18; }
+    #navigation ul ul {
+      background: #ced4da; }
+      #navigation ul ul > li.toctree-l2 > a {
+        color: #000; }
+        #navigation ul ul > li.toctree-l2 > a.current {
+          background: #6c757d; }
+  #navigation form {
+    padding-left: 20px;
+    padding-right: 20px; }
+
 #document {
   display: flex;
   width: 100%; }
@@ -7379,31 +7433,8 @@ a.text-nethinks:hover, a.text-nethinks:focus {
     min-height: 100vh;
     width: calc(100% - 300px); }
 
-#navigation {
-  padding-top: 20px; }
-  #navigation p.caption {
-    padding-left: 20px;
-    margin-bottom: 5px;
-    text-transform: uppercase;
-    font-weight: bold;
-    color: #e94d18; }
-  #navigation ul {
-    font-size: 14px;
-    padding: 0px; }
-    #navigation ul li a {
-      display: block;
-      padding-left: 20px;
-      color: white;
-      padding-top: 3px;
-      padding-bottom: 3px; }
-      #navigation ul li a:hover {
-        text-decoration: none;
-        color: #000; }
-      #navigation ul li a.current:has(ul):before {
-        content: 'test'; }
-  #navigation ul.current > li > a.current {
-    background: white;
-    color: #212529; }
-  #navigation ul > li:hover {
-    background: #adb5bd; }
+.footer {
+  margin-top: 1em;
+  padding-top: 11px;
+  background: #e9ecef; }
 

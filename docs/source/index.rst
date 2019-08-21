@@ -1,5 +1,6 @@
++++++++++++++++++++++++
 dataGerry Documentation
-=======================
++++++++++++++++++++++++
 
 DATAGERRY is an enterprise-grade OpenSource CMDB, which completely leaves the
 definition of object types to the user.
@@ -18,9 +19,7 @@ definition of object types to the user.
     :name: guides
 
 .. toctree::
-    about/release-notes
     about/license
     about/team
-    about/contributing
     :caption: About
     :name: about

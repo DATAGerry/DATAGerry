@@ -19,7 +19,9 @@
 @import '../../../app/src/scss/bootstrap_variables';
 // bootstrap
 @import '~bootstrap/scss/bootstrap';
-
+// theme imports
+@import 'scss/theme_rst';
+@import 'scss/navigation';
 
 // LAYOUT
 #document {
@@ -46,63 +48,10 @@
 
 }
 
-// NAVIGATION
-#navigation {
-  padding-top: 20px;
 
-  p.caption {
-    padding-left: 20px;
-    margin-bottom: 5px;
-    text-transform: uppercase;
-    font-weight: bold;
-    color: theme-color('primary');
-  }
-
-  ul {
-    font-size: 14px;
-    padding: 0px;
-
-    li {
-
-
-      a {
-        display: block;
-        padding-left: 20px;
-        color: white;
-        padding-top: 3px;
-        padding-bottom: 3px;
-
-        &:hover {
-          text-decoration: none;
-          color: $black;
-        }
-
-        &.current:has(ul) {
-          &:before {
-            content: 'test';
-          }
-        }
-
-      }
-
-    }
-  }
-
-  ul {
-    &.current {
-      > li > a.current {
-        background: white;
-        color: $gray-900;
-      }
-    }
-
-    > li {
-      &:hover {
-        background: $gray-500;
-
-      }
-
-    }
-  }
-
+// FOOTER
+.footer {
+  margin-top: 1em;
+  padding-top: 11px;
+  background: $gray-200;
 }

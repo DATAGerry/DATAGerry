@@ -20,7 +20,7 @@ Python is a universal, commonly interpreted higher level programming language.
 Its purpose is to improve a readable, concise programming style.
 See at the official documentation for details: `Our Documentation | Python.org <https://www.python.org/doc/>`_
 
-**NOTE:** We are using Python 3.4.x or higher, which is not compatible with Python 2.x.
+**NOTE:** We are using Python 3.6.x or higher, which is not compatible with Python 2.x.
 
 MongoDB
 =======
@@ -52,7 +52,7 @@ This should clone the complete repository with the default master branch.
 Default file is ``etc/cmdb.conf``. But you can change the chosen file with the ``-c`` parameter while starting.
 The default configuration should look like this:
 
-.. include:: ../../../etc/cmdb.conf
+.. include:: ../../../../etc/cmdb.conf
     :literal:
 
 With Docker

@@ -1,6 +1,6 @@
-#######
+*******
 License
-#######
+*******
 
 .. include:: ../../../LICENSE
     :literal:

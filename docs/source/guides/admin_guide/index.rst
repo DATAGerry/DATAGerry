@@ -1,3 +1,5 @@
+.. _admin-guide:
+
 ###########
 Admin Guide
 ###########
@@ -6,5 +8,3 @@ Admin Guide
     :maxdepth: 2
 
     installation
-    interface
-    usermanagement
