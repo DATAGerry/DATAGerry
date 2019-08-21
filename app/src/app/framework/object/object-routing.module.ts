@@ -22,7 +22,7 @@ import { ObjectListComponent } from './object-list/object-list.component';
 import { ObjectViewComponent } from './object-view/object-view.component';
 import { ObjectAddComponent } from './object-add/object-add.component';
 import { ObjectEditComponent } from './object-edit/object-edit.component';
-import {ObjectCopyComponent} from "./object-copy/object-copy.component";
+import { ObjectCopyComponent } from './object-copy/object-copy.component';
 
 const routes: Routes = [
   {
@@ -42,7 +42,7 @@ const routes: Routes = [
   {
     path: 'add/:publicID',
     data: {
-      breadcrumb: 'New'
+      breadcrumb: 'Add'
     },
     component: ObjectAddComponent
   },
@@ -63,7 +63,7 @@ const routes: Routes = [
   {
     path: 'type/:publicID',
     data: {
-      breadcrumb: 'List / Type'
+      breadcrumb: 'List'
     },
     component: ObjectListComponent
   },
