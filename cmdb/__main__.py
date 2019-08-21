@@ -25,6 +25,7 @@ from time import sleep
 from argparse import ArgumentParser, Namespace
 from cmdb.utils.logger import get_logging_conf
 from cmdb.utils.helpers import timing
+from sys import exit
 
 try:
     from cmdb.utils.error import CMDBError
