@@ -75,7 +75,7 @@ bin: requirements docs webapp
 		--hidden-import cmdb.interface.gunicorn \
 		--hidden-import gunicorn.glogging \
 		--hidden-import gunicorn.workers.sync \
-		--add-data cmdb/interface/net_app/docs:cmdb/interface/docs \
+		--add-data cmdb/interface/docs:cmdb/interface/docs \
 		--add-data cmdb/interface/net_app/dataGerryApp:cmdb/interface/net_app/dataGerryApp \
 		cmdb/__main__.py
 
