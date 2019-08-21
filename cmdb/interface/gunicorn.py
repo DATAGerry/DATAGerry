@@ -21,6 +21,7 @@ import logging
 import multiprocessing
 from cmdb import __MODE__
 import cmdb.process_management.service
+from cmdb.interface.docs import create_docs_server
 from cmdb.interface.net_app import create_app
 from cmdb.interface.rest_api import create_rest_api
 from cmdb.utils.system_reader import SystemConfigReader
@@ -48,7 +49,10 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
         # get WSGI app
         app = DispatcherMiddleware(
             app=create_app(event_queue),
-            mounts={'/rest': create_rest_api(event_queue)}
+            mounts={
+                '/rest': create_rest_api(event_queue),
+                '/docs': create_docs_server()
+            }
         )
 
         # get gunicorn options

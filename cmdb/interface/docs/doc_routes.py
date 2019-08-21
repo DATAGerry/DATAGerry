@@ -17,9 +17,11 @@
 """
 Blueprint for documentation routes
 """
-from flask import Blueprint
 
-doc_pages = Blueprint("doc_pages", __name__, static_folder="docs", static_url_path="")
+from cmdb.interface.route_utils import RootBlueprint
+
+doc_pages = RootBlueprint("doc_pages", __name__, static_folder="docs", static_url_path="")
+
 
 @doc_pages.route("/")
 def default_page():

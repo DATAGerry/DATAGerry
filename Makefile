@@ -26,7 +26,7 @@ DIR_BIN_BUILD = ${DIR_BUILD}/bin
 DIR_TEMP= ${DIR_BUILD}/temp
 DIR_DOCS_SOURCE = docs/source
 DIR_DOCS_BUILD = ${DIR_BUILD}/docs
-DIR_DOCS_TARGET = cmdb/interface/net_app/docs
+DIR_DOCS_TARGET = cmdb/interface/docs
 DIR_RPM_BUILD = ${DIR_BUILD}/rpm
 DIR_TARGZ_BUILD = ${DIR_BUILD}/targz
 DIR_WEB_SOURCE = app
@@ -75,7 +75,7 @@ bin: requirements docs webapp
 		--hidden-import cmdb.interface.gunicorn \
 		--hidden-import gunicorn.glogging \
 		--hidden-import gunicorn.workers.sync \
-		--add-data cmdb/interface/net_app/docs:cmdb/interface/net_app/docs \
+		--add-data cmdb/interface/net_app/docs:cmdb/interface/docs \
 		--add-data cmdb/interface/net_app/dataGerryApp:cmdb/interface/net_app/dataGerryApp \
 		cmdb/__main__.py
 

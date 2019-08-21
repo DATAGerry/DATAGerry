@@ -22,8 +22,6 @@ from flask_cors import CORS
 
 from cmdb.interface.cmdb_app import BaseCmdbApp
 from cmdb.interface.config import app_config
-from cmdb.user_management.user_manager import UserManagement
-from cmdb.utils import SecurityManager, SystemSettingsReader, SystemSettingsWriter
 from cmdb.utils.system_reader import SystemConfigReader
 
 try:
@@ -40,7 +38,6 @@ system_config_reader = SystemConfigReader()
 def create_app(event_queue):
     import cmdb
     from cmdb.interface.net_app.app_routes import app_pages, redirect_index
-    from cmdb.interface.net_app.doc_routes import doc_pages
 
     if cmdb.__MODE__ == 'DEBUG':
         app.config.from_object(app_config['rest_development'])
@@ -54,7 +51,6 @@ def create_app(event_queue):
     # add static routes
     app.register_blueprint(app_pages, url_prefix='/')
     app.register_error_handler(404, redirect_index)
-    app.register_blueprint(doc_pages, url_prefix="/docs")
 
     @app.route('/favicon.ico')
     def favicon():
