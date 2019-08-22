@@ -40,10 +40,16 @@ const routes: Routes = [
   },
   {
     path: 'edit/:publicID',
+    data: {
+      breadcrumb: 'Edit'
+    },
     component: TypeEditComponent
   },
   {
     path: 'delete/:publicID',
+    data: {
+      breadcrumb: 'Delete'
+    },
     component: TypeDeleteComponent
   }
 ];

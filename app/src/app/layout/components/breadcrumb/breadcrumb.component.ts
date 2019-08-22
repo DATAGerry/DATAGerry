@@ -36,6 +36,7 @@ export class BreadcrumbComponent implements OnInit {
 
   private currentBreadcrumbs: BreadcrumbItem[];
   public breadcrumbs: BreadcrumbItem[];
+  private lastBreadCrumbRoute: ActivatedRoute = null;
 
   @Input()
   public allowBootstrap: boolean = true;
@@ -68,48 +69,56 @@ export class BreadcrumbComponent implements OnInit {
   }
 
   private generateBreadcrumbTrail() {
-    this.currentBreadcrumbs = [];
-
     let currentRoute: ActivatedRoute = this.activatedRoute.root;
-
-    let url: string = '';
+    this.currentBreadcrumbs = [];
 
     while (currentRoute.children.length > 0) {
       const childrenRoutes: ActivatedRoute[] = currentRoute.children;
-      let breadCrumbLabel: string = '';
 
       childrenRoutes.forEach(route => {
         currentRoute = route;
         if (route.outlet !== PRIMARY_OUTLET) {
           return;
         }
-        const hasData = (route.routeConfig && route.routeConfig.data);
-        const hasDynamicBreadcrumb: boolean = route.snapshot.params.hasOwnProperty(this.ROUTE_PARAM_BREADCRUMB);
-
-        if (hasData || hasDynamicBreadcrumb) {
-          if (hasDynamicBreadcrumb) {
-            breadCrumbLabel = route.snapshot.params[this.ROUTE_PARAM_BREADCRUMB].replace(/_/g, ' ');
-          } else if (route.snapshot.data.hasOwnProperty(this.ROUTE_DATA_BREADCRUMB)) {
-            breadCrumbLabel = route.snapshot.data[this.ROUTE_DATA_BREADCRUMB];
-          }
-          const routeURL: string = route.snapshot.url.map(segment => segment.path).join('/');
-          url += `/${routeURL}`;
-          if (routeURL.length === 0) {
-            route.snapshot.params = {};
-          }
-          const breadcrumb: BreadcrumbItem = {
-            label: breadCrumbLabel,
-            params: route.snapshot.params,
-            queryParams: route.snapshot.queryParams,
-            url
-          };
-          if (route.snapshot.data.hasOwnProperty(this.PREFIX_BREADCRUMB)) {
-            this.breadcrumbService.storePrefixed(breadcrumb);
-          } else {
-            this.currentBreadcrumbs.push(breadcrumb);
-          }
-        }
+        this.buildBreadCrumb(route);
+        this.lastBreadCrumbRoute = route;
       });
+    }
+    if (this.lastBreadCrumbRoute.firstChild) {
+      this.buildBreadCrumb(this.lastBreadCrumbRoute.firstChild);
+    }
+  }
+
+  private buildBreadCrumb(route: ActivatedRoute) {
+    let breadCrumbLabel: string = '';
+    let url: string = '';
+    const hasData = (route.routeConfig && route.routeConfig.data);
+    const hasDynamicBreadcrumb: boolean = route.snapshot.params.hasOwnProperty(this.ROUTE_PARAM_BREADCRUMB);
+
+    if (hasData || hasDynamicBreadcrumb) {
+      if (hasDynamicBreadcrumb) {
+        breadCrumbLabel = route.snapshot.params[this.ROUTE_PARAM_BREADCRUMB].replace(/_/g, ' ');
+      } else if (route.snapshot.data.hasOwnProperty(this.ROUTE_DATA_BREADCRUMB)) {
+        breadCrumbLabel = route.snapshot.data[this.ROUTE_DATA_BREADCRUMB];
+        breadCrumbLabel = breadCrumbLabel === 'Framework' ? 'Dashboard' : breadCrumbLabel;
+      }
+      const routeURL: string = route.snapshot.url.map(segment => segment.path).join('/');
+      url += `/${routeURL}`;
+      if (routeURL.length === 0) {
+        route.snapshot.params = {};
+      }
+      const breadcrumb: BreadcrumbItem = {
+        label: breadCrumbLabel,
+        params: route.snapshot.params,
+        queryParams: route.snapshot.queryParams,
+        url: url === '/framework' ? '' : url
+      };
+
+      if (route.snapshot.data.hasOwnProperty(this.PREFIX_BREADCRUMB)) {
+        this.breadcrumbService.storePrefixed(breadcrumb);
+      } else {
+        this.currentBreadcrumbs.push(breadcrumb);
+      }
       this.breadcrumbService.store(this.currentBreadcrumbs);
     }
   }
