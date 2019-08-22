@@ -57,7 +57,7 @@
 
       <!-- action buttons -->
       <td *ngIf="thColumnsActions.length > 0">
-        <cmdb-actions [data]="thColumnsActions" [publicID]="entry.public_id"></cmdb-actions>
+        <cmdb-actions [data]="thColumnsActions" [publicID]="entry.public_id" (delete)="delObject($event, entry)" ></cmdb-actions>
       </td>
     </tr>
     </tbody>

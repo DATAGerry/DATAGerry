@@ -230,6 +230,34 @@ export class TableComponent implements OnInit, OnDestroy {
     }
   }
 
+  public delObject(route: any, value: any) {
+
+    if ( route === 'delete/') {
+      this.router.navigate([this.router.url + '/' + route + value.public_id]);
+    }
+
+    if ( route === 'object/') {
+      const modalComponent = this.createModal(
+        'Delete Object',
+        'Are you sure you want to delete this Object?',
+        'Cancel',
+        'Delete');
+
+      modalComponent.result.then((result) => {
+        if (result) {
+          const id = value.public_id;
+          this.apiCallService.callDeleteRoute(this.linkRoute + id).subscribe(data => {
+            this.apiCallService.callGetRoute(this.linkRoute).subscribe(objs => {
+              this.entryLists = objs;
+            });
+          });
+        }
+      }, (reason) => {
+        // ToDO:
+      });
+    }
+  }
+
   public exporter(exportType: any) {
     const allCheckbox: any = document.getElementsByClassName('select-checkbox');
     const publicIds: string[] = [];
@@ -249,4 +277,12 @@ export class TableComponent implements OnInit, OnDestroy {
     this.fileSaverService.save(data.body, timestamp + '.' + exportType.label);
   }
 
+  private createModal(title: string, modalMessage: string, buttonDeny: string, buttonAccept: string) {
+    const modalComponent = this.modalService.open(ModalComponent);
+    modalComponent.componentInstance.title = title;
+    modalComponent.componentInstance.modalMessage = modalMessage;
+    modalComponent.componentInstance.buttonDeny = buttonDeny;
+    modalComponent.componentInstance.buttonAccept = buttonAccept;
+    return modalComponent;
+  }
 }
