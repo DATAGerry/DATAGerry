@@ -103,7 +103,7 @@ export class BreadcrumbComponent implements OnInit {
         breadCrumbLabel = breadCrumbLabel === 'Framework' ? 'Dashboard' : breadCrumbLabel;
       }
       const routeURL: string = route.snapshot.url.map(segment => segment.path).join('/');
-      url += `/${routeURL}`;
+      url += `/framework/${routeURL}`;
       if (routeURL.length === 0) {
         route.snapshot.params = {};
       }
@@ -111,7 +111,7 @@ export class BreadcrumbComponent implements OnInit {
         label: breadCrumbLabel,
         params: route.snapshot.params,
         queryParams: route.snapshot.queryParams,
-        url: url === '/framework' ? '' : url
+        url: url === '/framework/framework' ? '' : url
       };
 
       if (route.snapshot.data.hasOwnProperty(this.PREFIX_BREADCRUMB)) {

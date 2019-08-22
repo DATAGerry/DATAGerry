@@ -52,7 +52,9 @@
     <tr *ngFor="let entry of entryLists">
 
       <!-- table entries -->
-      <td *ngIf="showDeleteSelected && showExport" style="text-align: center"><input id="{{entry.public_id}}" class="select-checkbox" type="checkbox" (click)="updateDisplay()"></td>
+      <td *ngIf="showDeleteSelected && showExport" style="text-align: center">
+        <input id="{{entry.public_id}}" class="select-checkbox" type="checkbox" (click)="updateDisplay()">
+      </td>
       <td><cmdb-active-badge [activeStatus]="entry.active"></cmdb-active-badge></td>
       <td>{{entry.public_id}}</td>
       <td>{{entry.label}}</td>
@@ -62,7 +64,9 @@
       <!-- action buttons -->
       <td>
         <!-- view -->
-        <a class="text-dark" routerLink="/framework/{{linkRoute}}{{entry.public_id}}" *ngIf="entry.type_id !== undefined">
+        <a class="text-dark"
+           *ngIf="entry.type_id !== undefined"
+           routerLink="/framework/{{linkRoute}}/view/{{entry.public_id}}">
           <i class="fa fa-eye" aria-hidden="true"></i>
         </a>
         <!-- edit -->

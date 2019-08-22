@@ -68,7 +68,10 @@ const routes: Routes = [
     component: ObjectListComponent
   },
   {
-    path: ':publicID',
+    path: 'view/:publicID',
+    data: {
+      breadcrumb: 'View'
+    },
     component: ObjectViewComponent
   }
 ];
