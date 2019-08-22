@@ -17,21 +17,22 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
+import { ConfigEdit } from '../config.edit';
 
 @Component({
   selector: 'cmdb-textarea-edit',
   templateUrl: './textarea-edit.component.html',
   styleUrls: ['./textarea-edit.component.scss']
 })
-export class TextareaEditComponent implements OnInit {
+export class TextareaEditComponent extends ConfigEdit implements OnInit {
   @Input() groupList: any;
   @Input() userList: any;
-  @Input() data: any;
 
-  constructor() {
+  public constructor() {
+    super();
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
   }
 
 }

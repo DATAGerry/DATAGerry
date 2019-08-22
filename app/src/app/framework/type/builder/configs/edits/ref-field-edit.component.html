@@ -15,12 +15,13 @@
 </div>
 <div class="form-group">
   <label>Name:</label>
-  <input [(ngModel)]="data.name" type="text" class="form-control" value="{{data.name}}" lowercase>
+  <input [(ngModel)]="data.name" type="text" class="form-control" value="{{data.name}}" lowercase disabled>
   <small class="form-text text-muted">Use a unique field-name</small>
 </div>
 <div class="form-group">
   <label>Label:</label>
-  <input [(ngModel)]="data.label" type="text" class="form-control" value="{{data.label}}">
+  <input [(ngModel)]="data.label" type="text" class="form-control" (ngModelChange)="calculateName(data.label)"
+         value="{{data.label}}">
   <small class="form-text text-muted">a static display name</small>
 </div>
 <div class="form-group">
