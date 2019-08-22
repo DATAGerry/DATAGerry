@@ -20,6 +20,7 @@ import { Component } from '@angular/core';
 import { CmdbType } from '../../models/cmdb-type';
 import { ActivatedRoute } from '@angular/router';
 import { TypeService } from '../../services/type.service';
+import { UserService } from '../../../user/services/user.service';
 
 @Component({
   selector: 'cmdb-type-add',
@@ -29,7 +30,7 @@ import { TypeService } from '../../services/type.service';
 export class TypeAddComponent {
   public typeInstance: CmdbType;
 
-  constructor(private route: ActivatedRoute, private typeService: TypeService) {
+  constructor(private route: ActivatedRoute, private typeService: TypeService, private userService: UserService) {
     this.typeInstance = new CmdbType();
     this.route.queryParams.subscribe((query) => {
       if (query.copy !== undefined) {
@@ -40,6 +41,7 @@ export class TypeAddComponent {
           delete copyType._id;
           delete copyType.author_id;
           this.typeInstance = copyType;
+          this.typeInstance.author_id = this.userService.getCurrentUser().public_id;
         });
       }
     });

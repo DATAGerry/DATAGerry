@@ -101,7 +101,6 @@ export class TypeBuilderComponent implements OnInit {
   }
 
   public saveType() {
-
     if (this.mode === CmdbMode.Create) {
       let newTypeID = null;
       this.typeService.postType(this.typeInstance).subscribe(typeIDResp => {
