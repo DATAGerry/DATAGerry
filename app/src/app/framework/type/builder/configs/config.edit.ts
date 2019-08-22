@@ -15,38 +15,24 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+import { Input } from '@angular/core';
 
-import { Component, Input, OnInit } from '@angular/core';
-import { ConfigEdit } from '../config.edit';
+export class ConfigEdit {
+  private innerData: any;
 
-@Component({
-  selector: 'cmdb-choice-field-edit',
-  templateUrl: './choice-field-edit.component.html',
-  styleUrls: ['./choice-field-edit.component.scss']
-})
-export class ChoiceFieldEditComponent extends ConfigEdit implements OnInit {
-
-  @Input() groupList: any;
-  @Input() userList: any;
-  public options = [];
-
-  constructor() {
-    super();
-    this.options.push({
-      name: 'option-1',
-      label: 'Option 1'
-    });
+  public constructor() {
   }
 
-  public ngOnInit(): void {
-    this.data.options = this.options;
+  @Input('data')
+  public set data(value: any) {
+    this.innerData = value;
   }
 
-  public addOption() {
-    this.options.push({
-      name: `option-${(this.options.length + 1)}`,
-      label: `Option ${(this.options.length + 1)}`
-    });
+  public get data(): any {
+    return this.innerData;
   }
 
+  public calculateName(value) {
+    this.data.name = value.replace(/ /g, '-').toLowerCase();
+  }
 }

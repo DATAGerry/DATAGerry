@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { CmdbType } from '../../../models/cmdb-type';
-import { ApiCallService } from '../../../../services/api-call.service';
+import { CmdbType } from '../../models/cmdb-type';
 import { ActivatedRoute } from '@angular/router';
-import { CmdbMode } from '../../../modes.enum';
-import { TypeService } from '../../../services/type.service';
+import { CmdbMode } from '../../modes.enum';
+import { TypeService } from '../../services/type.service';
 
 @Component({
   selector: 'cmdb-type-edit',
