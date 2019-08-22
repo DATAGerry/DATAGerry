@@ -77,7 +77,7 @@ export class ObjectEditComponent implements OnInit {
       this.objectInstance.fields = patchValue;
       this.objectService.putObject(this.objectInstance).subscribe((res: boolean) => {
         if (res) {
-          this.router.navigate(['/framework/object/' + this.objectID]);
+          this.router.navigate(['/framework/object/view/' + this.objectID]);
         }
       });
     }

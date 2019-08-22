@@ -139,7 +139,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
         (e) => {
           console.error(e);
         }, () => {
-          this.router.navigate(['/framework/object/' + ack]);
+          this.router.navigate(['/framework/object/view/' + ack]);
         });
     }
   }

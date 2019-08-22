@@ -86,7 +86,8 @@ export class ObjectCopyComponent implements OnInit {
         (e) => {
           console.error(e);
         }, () => {
-          this.router.navigate(['/framework/object/' + ack]);
+          console.log(ack);
+          this.router.navigate(['/framework/object/view/' + ack]);
         });
     }
   }

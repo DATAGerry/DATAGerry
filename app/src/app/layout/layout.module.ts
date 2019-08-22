@@ -37,6 +37,7 @@ import { ToastContainerComponent } from './helpers/toast/toast-container.compone
 import { NgbActiveModal, NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from './helpers/modal/modal.component';
 import { ToastService } from './services/toast.service';
+import {TableModule} from "./components/table/table.module";
 
 @NgModule({
   declarations: [
@@ -71,7 +72,8 @@ import { ToastService } from './services/toast.service';
     ReactiveFormsModule,
     NgbModule,
     FormsModule,
-    DataTablesModule
+    DataTablesModule,
+    TableModule
   ],
   providers: [
     BreadcrumbService,

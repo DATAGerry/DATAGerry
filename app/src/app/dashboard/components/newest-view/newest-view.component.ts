@@ -16,8 +16,9 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
+import {TableColumnAction} from '../../../layout/components/table/models/table-columns-action';
 
 @Component({
   selector: 'cmdb-newest-view',
@@ -27,8 +28,8 @@ import { ApiCallService } from '../../../services/api-call.service';
 
 export class NewestViewComponent implements OnInit {
 
+  @Input() thColumnsActions: TableColumnAction[];
   public newest: [];
-
   readonly url = 'object/newest/';
 
   constructor(private api: ApiCallService) {
