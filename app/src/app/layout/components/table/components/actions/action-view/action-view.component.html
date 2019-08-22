@@ -1,0 +1,8 @@
+
+<ng-container *ngFor="let action of data">
+  <a *ngIf="action.name === 'view' && action.active !== false"
+    class="{{action.classValue}}"
+    routerLink="{{action.linkRoute}}{{publicID}}">
+    <i class="{{action.fontIcon}}" aria-hidden="true"></i>
+  </a>
+</ng-container>

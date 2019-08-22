@@ -41,11 +41,7 @@
       <th *ngIf="showDeleteSelected && showExport" class="toggle-check nosort" style="text-align: center"><input type="checkbox" class="select-all-checkbox" (click)="selectAll()">
       </th>
       <th class="toggle-active">Active</th>
-      <th class="toggle-id">ID</th>
-      <th class="toggle-type">Type</th>
-      <th class="toggle-autor">Author</th>
-      <th class="toggle-create-time">Creation Time</th>
-      <th class="toggle-action">Action</th>
+      <th *ngFor="let thCol of thColumns" class="toggle-{{thCol.label}}">{{thCol.label}}</th>
     </tr>
     </thead>
     <tbody>
@@ -60,23 +56,8 @@
       <td>{{entry.creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
 
       <!-- action buttons -->
-      <td>
-        <!-- view -->
-        <a class="text-dark" routerLink="/framework/{{linkRoute}}{{entry.public_id}}" *ngIf="entry.type_id !== undefined">
-          <i class="fa fa-eye" aria-hidden="true"></i>
-        </a>
-        <!-- edit -->
-        <a class="ml-1 text-dark" routerLink="/framework/{{linkRoute}}edit/{{entry.public_id}}">
-          <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-        </a>
-        <!-- delete -->
-        <a class="ml-1 text-dark" *ngIf="entry.type_id === undefined"
-           routerLink="/framework/type/delete/{{entry.public_id}}">
-          <i class="fa fa-trash-o" aria-hidden="true"></i>
-        </a>
-        <a class="ml-1 text-dark" *ngIf="entry.type_id !== undefined">
-          <i class="fa fa-trash-o" aria-hidden="true" (click)="delObject(entry)"></i>
-        </a>
+      <td *ngIf="thColumnsActions.length > 0">
+        <cmdb-actions [data]="thColumnsActions" [publicID]="entry.public_id" (delete)="delObject($event, entry)" ></cmdb-actions>
       </td>
     </tr>
     </tbody>

@@ -71,7 +71,7 @@
         <td>{{result.author_name}}</td>
         <td>{{result.last_edit_time?.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
         <td>
-          <a class="text-dark"[routerLink]="['/framework/object/', result.public_id]">
+          <a class="text-dark"[routerLink]="['/framework/object/view', result.public_id]">
             <i class="fa fa-eye" aria-hidden="true"></i>
           </a>
           <a class="ml-1 text-dark" [routerLink]="['/framework/object/edit/', result.public_id]">
