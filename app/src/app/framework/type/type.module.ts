@@ -18,11 +18,11 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TypeListComponent } from './components/type-list/type-list.component';
+import { TypeListComponent } from './type-list/type-list.component';
 import { TypeRoutingModule } from './type-routing.module';
 import { LayoutModule } from '../../layout/layout.module';
 import { DataTablesModule } from 'angular-datatables';
-import { TypeAddComponent } from './components/type-add/type-add.component';
+import { TypeAddComponent } from './type-add/type-add.component';
 import { ArchwizardModule } from 'angular-archwizard';
 import { TypeBuilderComponent } from './components/type-builder/type-builder.component';
 import { TypeBasicStepComponent } from './components/type-builder/type-basic-step/type-basic-step.component';
@@ -34,9 +34,9 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { TypeValidationStepComponent } from './components/type-builder/type-validation-step/type-validation-step.component';
 import { RenderModule } from '../render/render.module';
 import { BuilderModule } from './builder/builder.module';
-import { TypeEditComponent } from './components/type-edit/type-edit.component';
+import { TypeEditComponent } from './type-edit/type-edit.component';
 import { TypeMetaStepComponent } from './components/type-builder/type-meta-step/type-meta-step.component';
-import { TypeDeleteComponent, TypeDeleteConfirmModalComponent } from './components/type-delete/type-delete.component';
+import { TypeDeleteComponent, TypeDeleteConfirmModalComponent } from './type-delete/type-delete.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({

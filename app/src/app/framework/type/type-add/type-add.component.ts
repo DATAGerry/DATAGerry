@@ -17,7 +17,7 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { CmdbType } from '../../../models/cmdb-type';
+import { CmdbType } from '../../models/cmdb-type';
 
 @Component({
   selector: 'cmdb-type-add',

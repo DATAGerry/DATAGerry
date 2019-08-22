@@ -17,12 +17,12 @@
 */
 
 import { Component, Injectable, Input, OnInit } from '@angular/core';
-import { CmdbType } from '../../../models/cmdb-type';
-import { TypeService } from '../../../services/type.service';
+import { CmdbType } from '../../models/cmdb-type';
+import { TypeService } from '../../services/type.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ObjectService } from '../../../services/object.service';
+import { ObjectService } from '../../services/object.service';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { PreviousRouteService } from '../../../../services/previous-route.service';
+import { PreviousRouteService } from '../../../services/previous-route.service';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 
 
