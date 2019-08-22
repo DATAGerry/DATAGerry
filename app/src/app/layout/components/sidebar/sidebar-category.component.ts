@@ -28,9 +28,7 @@ import { ApiCallService } from '../../../services/api-call.service';
 export class SidebarCategoryComponent implements OnInit {
 
   @Input() categoryData: any;
-
-  public typeList: any[] = [];
-  private objectCount = [];
+  public categoryPopUp: any[];
 
   constructor(private api: ApiCallService) {
   }
@@ -39,27 +37,22 @@ export class SidebarCategoryComponent implements OnInit {
   }
 
   public get_objects_by_type(categoryTypeList) {
-    this.typeList = [];
-
-    for (const typ of categoryTypeList) {
-      this.api.callGetRoute('type/' + typ).subscribe((list: CmdbType[]) => {
-        this.typeList = this.typeList.concat(list);
-      }, error => {
-      }, () => {
-        this.count_objects(typ);
+    this.categoryPopUp = [];
+    for (const typeID of categoryTypeList) {
+      let currentTypeLabel = '';
+      let amount = '';
+      this.api.callGetRoute('type/' + typeID).subscribe((data: CmdbType) => {
+        currentTypeLabel = data.label;
+        this.api.callGetRoute('object/count/' + typeID).subscribe(ack => {
+          amount = ack;
+          const popUp = {
+            id: typeID,
+            label: currentTypeLabel,
+            count: amount
+          };
+          this.categoryPopUp.push(popUp);
+        });
       });
     }
-  }
-
-  private count_objects(typ) {
-    this.api.callGetRoute('object/count/' + typ).subscribe((count) => {
-      this.objectCount.push(count);
-    }, error => {
-    }, () => {
-      const c = this.objectCount.values();
-      for (const typ2 of this.typeList) {
-        typ2.countObjects = c.next().value;
-      }
-    });
   }
 }
