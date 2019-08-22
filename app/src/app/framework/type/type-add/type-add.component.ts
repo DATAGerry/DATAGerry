@@ -16,22 +16,33 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CmdbType } from '../../models/cmdb-type';
+import { ActivatedRoute } from '@angular/router';
+import { TypeService } from '../../services/type.service';
 
 @Component({
   selector: 'cmdb-type-add',
   templateUrl: './type-add.component.html',
   styleUrls: ['./type-add.component.scss']
 })
-export class TypeAddComponent implements OnInit {
+export class TypeAddComponent {
   public typeInstance: CmdbType;
 
-  constructor() {
+  constructor(private route: ActivatedRoute, private typeService: TypeService) {
     this.typeInstance = new CmdbType();
-  }
-
-  ngOnInit() {
+    this.route.queryParams.subscribe((query) => {
+      if (query.copy !== undefined) {
+        this.typeService.getType(query.copy).subscribe((copyType: CmdbType) => {
+          // @ts-ignore
+          delete copyType.public_id;
+          // @ts-ignore
+          delete copyType._id;
+          delete copyType.author_id;
+          this.typeInstance = copyType;
+        });
+      }
+    });
   }
 
 }

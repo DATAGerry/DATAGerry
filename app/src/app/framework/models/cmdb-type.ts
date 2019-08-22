@@ -23,6 +23,7 @@ export class CmdbType implements CmdbDao {
 
   // tslint:disable:variable-name
   readonly public_id: number;
+  private readonly _id?: string;
   public active: boolean = true;
   public description?: string;
   public name: string;

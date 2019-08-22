@@ -23,6 +23,7 @@ import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from '../../../layout/services/toast.service';
+import { UserService } from '../../../user/services/user.service';
 
 @Component({
   selector: 'cmdb-type-list',
@@ -35,22 +36,33 @@ export class TypeListComponent implements OnInit, OnDestroy {
   public dtElement: DataTableDirective;
 
   public typeList: CmdbType[] = [];
-  public dtOptions: DataTables.Settings = {};
+  public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();
 
-  constructor(private typeService: TypeService, private toastService: ToastService,
-              private router: Router, private route: ActivatedRoute) {
-
+  constructor(private typeService: TypeService, public userService: UserService, private router: Router) {
   }
 
   public ngOnInit(): void {
     this.dtOptions = {
       ordering: true,
       order: [[1, 'asc']],
+      dom:
+        '<"row" <"col-sm-2" l> <"col-sm-3" B > <"col" f> >' +
+        '<"row" <"col-sm-12"tr>>' +
+        '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
+      buttons: [
+        {
+          text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
+          className: 'btn btn-success btn-sm mr-1',
+          action: function() {
+            this.router.navigate(['/framework/type/add']);
+          }.bind(this)
+        }
+      ],
       language: {
         search: '',
         searchPlaceholder: 'Filter...'
-      },
+      }
     };
 
     this.typeService.getTypeList().subscribe((list: CmdbType[]) => {
