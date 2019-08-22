@@ -129,7 +129,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
       Object.keys(this.render.renderForm.controls).forEach(field => {
         this.objectInstance.fields.push({
           name: field,
-          value: this.render.renderForm.get(field).value
+          value: this.render.renderForm.get(field).value || ''
         });
       });
       let ack = null;
