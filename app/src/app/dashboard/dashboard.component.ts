@@ -18,6 +18,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { ApiCallService } from '../services/api-call.service';
+import { TableColumnAction } from '../layout/components/table/models/table-columns-action';
 
 @Component({
   selector: 'cmdb-dashboard',
@@ -29,6 +30,7 @@ export class DashboardComponent implements OnInit {
   public objectCount: number;
   public typeCount: number;
   public userCount: number;
+  public thColumnsActions: TableColumnAction[];
 
   constructor(private api: ApiCallService) {
   }
@@ -45,6 +47,11 @@ export class DashboardComponent implements OnInit {
     this.api.callGetRoute('user/count/').subscribe((count) => {
       this.userCount = count;
     });
+
+    this.thColumnsActions = [
+      { name: 'view', classValue: 'text-dark ml-1', linkRoute: '/framework/object/view/', fontIcon: 'fa fa-eye'},
+      { name: 'edit', classValue: 'text-dark ml-1', linkRoute: '/framework/object/edit/', fontIcon: 'fa fa-pencil-square-o'},
+      { name: 'delete', classValue: 'text-dark ml-1', linkRoute: 'object/', fontIcon: 'fa fa-trash-o', active: true}];
   }
 
 }

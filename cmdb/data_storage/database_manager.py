@@ -220,7 +220,7 @@ class DatabaseManagerMongo(DatabaseManager):
             acknowledged
 
         """
-        from cmdb.object_framework import __COLLECTIONS__ as cmdb_collection
+        from cmdb.framework import __COLLECTIONS__ as cmdb_collection
         from cmdb.user_management import __COLLECTIONS__ as user_collection
         collection = cmdb_collection + user_collection
 
@@ -261,11 +261,7 @@ class DatabaseManagerMongo(DatabaseManager):
         )
 
     def create_indexes(self, collection: str, indexes: list):
-        from pymongo import IndexModel
-        import_list = []
-        for idx in indexes:
-            import_list.append(IndexModel(idx['keys']))
-        self.database_connector.get_collection(collection).create_indexes(import_list)
+        self.database_connector.get_collection(collection).create_indexes(indexes)
 
     def get_database_name(self):
         return self.database_connector.get_database_name()

@@ -19,14 +19,16 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from './auth/guards/auth.guard';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpErrorInterceptor } from './auth/interceptors/http-error.interceptor.tx';
 
 const routes: Routes = [
   {
     path: '',
+    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Dashboard'
     },
-    canActivate: [AuthGuard],
     loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
   },
   {
@@ -35,6 +37,7 @@ const routes: Routes = [
   },
   {
     path: 'search',
+    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Search'
     },
@@ -42,6 +45,7 @@ const routes: Routes = [
   },
   {
     path: 'file',
+    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'File'
     },
@@ -49,6 +53,7 @@ const routes: Routes = [
   },
   {
     path: 'framework',
+    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Framework'
     },
@@ -56,6 +61,7 @@ const routes: Routes = [
   },
   {
     path: 'user',
+    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'User'
     },
@@ -63,6 +69,7 @@ const routes: Routes = [
   },
   {
     path: 'settings',
+    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Settings'
     },
@@ -81,7 +88,10 @@ const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true },
+  ]
 })
 export class AppRoutingModule {
 }

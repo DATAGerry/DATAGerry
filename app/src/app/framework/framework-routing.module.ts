@@ -64,6 +64,13 @@ const routes: Routes = [
       breadcrumb: 'Category'
     },
     loadChildren: () => import('./category/category.module').then(m => m.CategoryModule),
+  },
+  {
+    path: 'status',
+    data: {
+      breadcrumb: 'Status'
+    },
+    loadChildren: () => import('./status/status.module').then(m => m.StatusModule),
   }
 ];
 

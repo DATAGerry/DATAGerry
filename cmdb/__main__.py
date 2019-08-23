@@ -25,6 +25,7 @@ from time import sleep
 from argparse import ArgumentParser, Namespace
 from cmdb.utils.logger import get_logging_conf
 from cmdb.utils.helpers import timing
+from sys import exit
 
 try:
     from cmdb.utils.error import CMDBError
@@ -123,6 +124,9 @@ def build_arg_parser() -> Namespace:
     _parser.add_argument('--setup', action='store_true', default=False, dest='setup',
                          help="init cmdb")
 
+    _parser.add_argument('--keys', action='store_true', default=False, dest='keys',
+                         help="init keys")
+
     _parser.add_argument('--test', action='store_true', default=False, dest='test_data',
                          help="generate and insert test data")
 
@@ -159,7 +163,35 @@ def main(args):
         LOGGER.critical(conn_error.message)
         exit(1)
     if args.setup:
-        pass
+        from cmdb.__setup__ import SetupRoutine
+        setup_routine = SetupRoutine()
+        setup_status = None
+        try:
+            setup_status = setup_routine.setup()
+        except RuntimeError as err:
+            LOGGER.error(err)
+            setup_status = setup_routine.get_setup_status()
+            LOGGER.warning(f'The setup did not go through as expected - Status {setup_status}')
+
+        if setup_status == SetupRoutine.SetupStatus.FINISHED:
+            exit(0)
+        else:
+            exit(1)
+
+    if args.keys:
+        from cmdb.__setup__ import SetupRoutine
+        setup_routine = SetupRoutine()
+        setup_status = None
+        try:
+            setup_routine.init_keys()
+        except RuntimeError as err:
+            LOGGER.error(err)
+            setup_status = setup_routine.get_setup_status()
+            LOGGER.warning(f'The key generation did not go through as expected - Status {setup_status}')
+        if setup_status == SetupRoutine.SetupStatus.FINISHED:
+            exit(0)
+        else:
+            exit(1)
 
     if args.test_data:
         _activate_debug()
@@ -192,21 +224,19 @@ if __name__ == "__main__":
 
     welcome_string = colored('Welcome to dataGerry \nStarting system with following parameters: \n{}\n', 'yellow')
     brand_string = colored('''
-    ###################################################
-          _       _         ____                      
-       __| | __ _| |_ __ _ / ___| ___ _ __ _ __ _   _ 
-      / _` |/ _` | __/ _` | |  _ / _ \ '__| '__| | | |
-     | (_| | (_| | || (_| | |_| |  __/ |  | |  | |_| |
-      \__,_|\__,_|\__\__,_|\____|\___|_|  |_|   \__, |
-                                                |___/ 
-                        .     .
-                       (>\---/<)
-                       ,'     `.
-                     ./  q   p  \.
-                     (  >(_Y_)<  )
-                      >-' `-' `-<-
+    ########################################################################                                  
+    
+    @@@@@     @   @@@@@@@ @           @@@@@  @@@@@@@ @@@@@   @@@@@  @@    @@
+    @    @    @@     @    @@         @@@@@@@ @@@@@@@ @@@@@@  @@@@@@ @@@  @@@
+    @     @  @  @    @   @  @       @@@   @@ @@@     @@   @@ @@   @@ @@  @@ 
+    @     @  @  @    @   @  @       @@       @@@@@@  @@   @@ @@   @@  @@@@  
+    @     @ @    @   @  @    @      @@   @@@ @@@@@@  @@@@@@  @@@@@@   @@@@  
+    @     @ @@@@@@   @  @@@@@@      @@   @@@ @@@     @@@@@   @@@@@     @@   
+    @     @ @    @   @  @    @      @@@   @@ @@@     @@ @@@  @@ @@@    @@   
+    @    @ @      @  @ @      @      @@@@@@@ @@@@@@@ @@  @@@ @@  @@@   @@   
+    @@@@@  @      @  @ @      @       @@@@@@ @@@@@@@ @@  @@@ @@  @@@   @@   
                         
-    ###################################################\n''', 'green')
+    ########################################################################\n''', 'green')
     license_string = colored('''Copyright (C) 2019 NETHINKS GmbH
 licensed under the terms of the GNU Affero General Public License version 3\n''', 'yellow')
 

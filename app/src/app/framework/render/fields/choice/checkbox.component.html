@@ -1,4 +1,5 @@
-<div class="form-group row" [formGroup]="parentFormGroup">
+<ng-container *ngIf="mode != MODES.Simple">
+  <div class="form-group row" [formGroup]="parentFormGroup">
   <label class="col-sm-3 col-check-label">
     {{data.label}}: <span class="required" *ngIf="data?.required">*</span>
   </label>
@@ -6,22 +7,24 @@
     <div class="input-group">
       <ng-container [ngSwitch]="true">
         <ng-container *ngSwitchCase="mode == MODES.View">
-          <div class="form-check">
-            <input type="checkbox" name="{{data.name}}" placeholder="{{data?.placeholder}}" class="form-check-input"
-                   [formControlName]="data.name"/>
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" name="{{data.name}}" class="custom-control-input"
+                   [formControlName]="data.name" id="{{data.name}}"/>
+            <label class="custom-control-label" for="{{data.name}}"></label>
           </div>
         </ng-container>
         <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
-          <div class="form-check">
-            <input type="checkbox" name="{{data.name}}" placeholder="{{data?.placeholder}}" class="form-check-input"
-                   [formControlName]="data.name"
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" name="{{data.name}}" class="custom-control-input"
+                   [formControlName]="data.name" [attr.id]="data.name"
                    [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
                  'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"/>
-            <div *ngIf="data?.helperText" class="input-group-append">
+            <label class="custom-control-label" for="{{data.name}}"></label>
+          </div>
+          <div *ngIf="data?.helperText" class="input-group-append">
             <span class="input-group-text">
               <i class="fa fa-info-circle" placement="left" [ngbTooltip]="data?.helperText"></i>
             </span>
-            </div>
           </div>
         </ng-container>
         <div *ngSwitchDefault>
@@ -37,3 +40,9 @@
     </div>
   </div>
 </div>
+</ng-container>
+
+<ng-container *ngIf="mode == MODES.Simple">
+  <i [ngClass]=" data.value == true ? 'fa fa-check-square-o':'fa fa-square-o'" aria-hidden="true"></i>
+  <span style="display: none">{{data.value}}</span>
+</ng-container>

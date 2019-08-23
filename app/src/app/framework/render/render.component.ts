@@ -31,9 +31,10 @@ export class RenderComponent {
 
   private typeInstanceBack: CmdbType;
   private objectInstanceBack: CmdbObject;
-  @Input() public renderForm: FormGroup = new FormGroup({});
-  @Input() public fieldsGroups: FormGroup = new FormGroup({});
+  @Input() public renderForm: FormGroup;
   @Input() public mode: CmdbMode;
+  public MODES = CmdbMode;
+  private field: any;
 
   @Input('typeInstance')
   public set typeInstance(type: CmdbType) {
@@ -50,11 +51,6 @@ export class RenderComponent {
   public set objectInstance(data: CmdbObject) {
     if (data !== undefined) {
       this.objectInstanceBack = data;
-      for (const fieldData of this.objectInstance.fields) {
-        if (fieldData.value !== undefined) {
-          this.fieldsGroups.get(fieldData.name).setValue(fieldData.value);
-        }
-      }
     }
   }
 
@@ -62,20 +58,37 @@ export class RenderComponent {
     return this.objectInstanceBack;
   }
 
+  @Input('currentField')
+  public get currentField() {
+    return this.field;
+  }
+
+  public set currentField(value) {
+    this.field = value;
+  }
+
   public get fields() {
     return this.renderForm.get('fields');
   }
 
   public constructor() {
-    this.renderForm = new FormGroup({});
-    this.fieldsGroups = new FormGroup({});
     if (this.mode === CmdbMode.View) {
-      this.fieldsGroups.disable();
+      this.renderForm.disable();
     }
   }
 
   public getFieldByName(name: string) {
     return this.typeInstance.fields.find(field => field.name === name);
+  }
+
+  public getValueByName(name: string) {
+    if (this.objectInstance !== undefined) {
+      const fieldFound = this.objectInstance.fields.find(field => field.name === name);
+      if ( fieldFound === undefined) {
+        return {};
+      }
+      return fieldFound.value;
+    }
   }
 
 }

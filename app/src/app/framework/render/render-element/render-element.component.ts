@@ -18,6 +18,7 @@
 
 import { Component, ComponentFactoryResolver, ComponentRef, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { fieldComponents } from '../fields/fields.list';
+import { simpleComponents } from '../simple/simple.list';
 import { RenderField } from '../fields/components.fields';
 import { ToastService } from '../../../layout/services/toast.service';
 import { FormControl, Validators } from '@angular/forms';
@@ -30,7 +31,9 @@ import { CmdbMode } from '../../modes.enum';
 })
 export class RenderElementComponent extends RenderField implements OnInit {
 
-  @ViewChild('fieldContainer', {read: ViewContainerRef, static: true}) container;
+  @ViewChild('fieldContainer', {read: ViewContainerRef, static: true}) containerField;
+  @ViewChild('simpleContainer', {read: ViewContainerRef, static: true}) containerSimple;
+
   private component: any;
   private componentRef: ComponentRef<any>;
 
@@ -39,25 +42,45 @@ export class RenderElementComponent extends RenderField implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.container.clear();
-    this.component = fieldComponents[this.data.type];
+    this.containerField.clear();
+    this.containerSimple.clear();
 
-    const factory = this.resolver.resolveComponentFactory(this.component);
-    this.componentRef = this.container.createComponent(factory);
-    this.componentRef.instance.data = this.data;
-    this.componentRef.instance.mode = this.mode;
-    this.componentRef.instance.toast = this.toast;
-    this.componentRef.instance.parentFormGroup = this.parentFormGroup;
-    const fieldControl = new FormControl('');
-    if (this.data.required) {
-      fieldControl.setValidators(Validators.required);
+    switch (this.mode) {
+      case CmdbMode.View :
+      case CmdbMode.Create:
+      case CmdbMode.Edit: {
+        this.component = fieldComponents[this.data.type];
+        const factory = this.resolver.resolveComponentFactory(this.component);
+        this.componentRef = this.containerField.createComponent(factory);
+        this.componentRef.instance.parentFormGroup = this.parentFormGroup;
+        this.componentRef.instance.mode = this.mode;
+        this.componentRef.instance.data = this.data;
+        this.componentRef.instance.toast = this.toast;
+        const fieldControl = new FormControl('');
+        if (this.data.required) {
+          fieldControl.setValidators(Validators.required);
+        }
+        if (this.mode === CmdbMode.View) {
+          fieldControl.disable();
+        }
+        if (this.mode === CmdbMode.View || CmdbMode.Edit) {
+          fieldControl.patchValue(this.value);
+        }
+        this.componentRef.instance.parentFormGroup.addControl(
+          this.data.name, fieldControl
+        );
+        break;
+      }
+      case CmdbMode.Simple: {
+        this.component = simpleComponents[this.data.type];
+        const factory = this.resolver.resolveComponentFactory(this.component);
+        this.componentRef = this.containerSimple.createComponent(factory);
+        this.componentRef.instance.mode = this.mode;
+        this.componentRef.instance.data = this.data;
+        this.componentRef.instance.toast = this.toast;
+        break;
+      }
     }
-    if (this.mode === CmdbMode.View) {
-      fieldControl.disable();
-    }
-    this.componentRef.instance.parentFormGroup.addControl(
-      this.data.name, fieldControl
-    );
+
   }
-
 }

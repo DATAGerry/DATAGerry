@@ -19,9 +19,9 @@ CMDB data faker environment
 NOTE: This module is highly experimental and should only be used for development. It still needs a lot of refactoring.
 """
 
-from cmdb.object_framework.cmdb_object import CmdbObject
-from cmdb.object_framework.cmdb_object_type import CmdbType
-from cmdb.object_framework.cmdb_object_category import CmdbCategory
+from cmdb.framework.cmdb_object import CmdbObject
+from cmdb.framework.cmdb_type import CmdbType
+from cmdb.framework.cmdb_object_category import CmdbCategory
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user import User
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
@@ -47,9 +47,7 @@ class DataGenerator:
         self._security_manager = SecurityManager(database_manager)
 
     def generate_settings(self):
-        self._security_manager.generate_sym_key()
         self._security_manager.generate_symmetric_aes_key()
-        self._security_manager.generate_key_pair()
 
     @staticmethod
     def generate_default_groups() -> list:
@@ -150,19 +148,7 @@ class DataGenerator:
                     "author_id": 1,
                     "creation_time": generation_date,
                     "render_meta": {
-                        "external": [
-                            {
-                                "href": "/{2}/{0}/{1}",
-                                "fields": [
-                                    "text-1",
-                                    "text-2",
-                                    "text-3"
-                                ],
-                                "label": "Internal link",
-                                "name": "internal_link",
-                                "icon": None
-                            }
-                        ],
+                        "external": [],
                         "summary": [
                             {
                                 "label": "Connection State",
@@ -291,7 +277,7 @@ class DataGenerator:
                             "min": 10000,
                             "max": 99999,
                             "step": 1,
-                            "type": "text"
+                            "type": "number"
                         },
                         {
                             "input_type": "text",
@@ -330,7 +316,7 @@ class DataGenerator:
                             "min": 10000,
                             "max": 99999,
                             "step": 1,
-                            "type": "text"
+                            "type": "number"
                         },
                         {
                             "input_type": "text",
@@ -447,7 +433,7 @@ class DataGenerator:
                             "label": "Monitoring",
                             "className": "form-control",
                             "name": "monitoring",
-                            "type": "text"
+                            "type": "checkbox"
                         },
                         {
                             "input_type": "text",
@@ -464,7 +450,7 @@ class DataGenerator:
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
+                            "input_type": "password",
                             "label": "Password",
                             "className": "form-control",
                             "name": "password",
@@ -634,7 +620,7 @@ class DataGenerator:
                             "label": "Monitoring",
                             "className": "form-control",
                             "name": "monitoring",
-                            "type": "text"
+                            "type": "checkbox"
                         },
                         {
                             "input_type": "text",
@@ -651,7 +637,7 @@ class DataGenerator:
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
+                            "input_type": "password",
                             "label": "Password",
                             "className": "form-control",
                             "name": "password",
@@ -847,7 +833,7 @@ class DataGenerator:
                             "min": 10000,
                             "max": 99999,
                             "step": 1,
-                            "type": "text"
+                            "type": "number"
                         },
                         {
                             "input_type": "text",
@@ -1453,7 +1439,7 @@ class DataFactory:
         """insert data into database"""
         if self._database_manager is None:
             raise NoDatabaseManagerError()
-        from cmdb.object_framework.cmdb_object_manager import CmdbObjectManager
+        from cmdb.framework.cmdb_object_manager import CmdbObjectManager
         from cmdb.user_management.user_manager import UserManagement
         from cmdb.utils.security import SecurityManager
 

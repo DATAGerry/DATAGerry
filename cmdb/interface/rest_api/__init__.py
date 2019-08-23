@@ -86,9 +86,10 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.user_management.user_routes import user_routes
     from cmdb.interface.rest_api.user_management.right_routes import right_routes
     from cmdb.interface.rest_api.user_management.group_routes import group_routes
-    from cmdb.interface.rest_api.settings_routes import settings_rest
     from cmdb.interface.rest_api.search_routes import search_routes
     from cmdb.interface.rest_api.export_routes import export_route
+    from cmdb.interface.rest_api.status_routes import status_routes
+    from cmdb.interface.rest_api.collection_routes import collection_routes
     app.register_blueprint(auth_routes)
     app.register_blueprint(object_rest)
     app.register_blueprint(type_routes)
@@ -97,9 +98,10 @@ def register_blueprints(app):
     app.register_blueprint(user_routes)
     app.register_blueprint(group_routes)
     app.register_blueprint(right_routes)
-    app.register_blueprint(settings_rest)
     app.register_blueprint(search_routes)
     app.register_blueprint(export_route)
+    app.register_blueprint(status_routes)
+    app.register_blueprint(collection_routes)
 
 
 def register_error_pages(app):

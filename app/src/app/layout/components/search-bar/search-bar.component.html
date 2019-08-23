@@ -8,11 +8,15 @@
         <span id="caret" >{{category}} </span>
       </button>
 
-      <ul class="dropdown-menu" role="menu">
-        <li *ngFor="let element of categoryList" [value]="element.label" (click)="dropdownMenu(element)">
+      <div class="dropdown-menu" role="menu">
+        <button *ngFor="let element of categoryList"
+                class="dropdown-item"
+                type="button"
+                [value]="element.label"
+                (click)="dropdownMenu(element)">
           {{element.label}}
-        </li>
-      </ul>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -36,13 +40,14 @@
     </div>
 
     <div class="card-header" *ngIf="!element.object">
-      {{element.type_label}} #{{element.object_id}}
-      <span class="badge badge-primary pull-right">{{element.type_active}}</span>
+      {{element.label}} #{{element.public_id}}
+      <span class="badge badge-primary pull-right">{{element.active}}</span>
     </div>
 
     <div class="card-body" *ngFor="let field of element.match_fields"
          (click)="hiden()"
-         [routerLink]="['/framework/object/', element.object_id]" [queryParams]="{value: '#'+element.object_id}" >
+         routerLink="/framework/object/{{element.public_id}}" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+
       <strong>Field</strong> : {{field.name}}<br>
       <strong>Value</strong> : <span [innerHTML]="highlight(field.value)"></span><br>
       <small class="text-muted pull-right">more ...</small>

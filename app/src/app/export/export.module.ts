@@ -20,11 +20,12 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { ExportRoutingModule } from './export-routing.module';
-import { ExportComponent } from './export/export.component';
+import { ExportComponent } from './export.component';
 import { LayoutModule } from '../layout/layout.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RenderModule } from '../framework/render/render.module';
-import {NgSelectModule} from "@ng-select/ng-select";
+import { NgSelectModule } from '@ng-select/ng-select';
+import { ExportService } from './export.service';
 
 @NgModule({
   declarations: [ExportComponent],
@@ -36,6 +37,10 @@ import {NgSelectModule} from "@ng-select/ng-select";
     RenderModule,
     ExportRoutingModule,
     NgSelectModule
+  ],
+  providers: [
+    ExportService
   ]
 })
-export class ExportModule { }
+export class ExportModule {
+}

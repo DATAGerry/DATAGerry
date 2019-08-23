@@ -18,7 +18,7 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { ExportComponent } from './export/export.component';
+import { ExportComponent } from './export.component';
 import { NavigationComponent } from '../layout/components/navigation/navigation.component';
 import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
 import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';

@@ -26,7 +26,7 @@ import { RenderComponent } from '../../render/render.component';
 import { CmdbObject } from '../../models/cmdb-object';
 import { UserService } from '../../../user/services/user.service';
 import { ObjectService } from '../../services/object.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryService } from '../../services/category.service';
 import { error } from 'selenium-webdriver';
 import { CmdbCategory } from '../../models/cmdb-category';
@@ -53,9 +53,15 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
 
 
   constructor(private router: Router, private typeService: TypeService, private categoryService: CategoryService,
-              private objectService: ObjectService, private userService: UserService) {
+              private objectService: ObjectService, private userService: UserService, private route: ActivatedRoute) {
+
     this.objectInstance = new CmdbObject();
     this.typeIDSubject = new BehaviorSubject<number>(null);
+    this.route.params.subscribe((params) => {
+      if (params.publicID !== undefined) {
+        this.typeIDSubject.next(+params.publicID);
+      }
+    });
     this.typeID = this.typeIDSubject.asObservable();
     this.typeID.subscribe(selectedTypeID => {
       if (selectedTypeID !== null) {
@@ -66,8 +72,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
     });
     this.fieldsGroups = new FormGroup({});
     this.renderForm = new FormGroup({
-      active: new FormControl(true),
-      fields: this.fieldsGroups
+      active: new FormControl(true)
     });
   }
 
@@ -113,26 +118,30 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
   }
 
   public saveObject() {
-    this.objectInstance.type_id = this.currentTypeID;
-    this.objectInstance.active = this.render.renderForm.get('active').value;
-    this.objectInstance.version = '1.0.0';
-    this.objectInstance.author_id = this.userService.getCurrentUser().public_id;
-    this.objectInstance.fields = [];
-    Object.keys(this.render.fieldsGroups.controls).forEach(field => {
-      this.objectInstance.fields.push({
-        name: field,
-        value: this.render.fieldsGroups.get(field).value
+    this.renderForm.markAllAsTouched();
+    if (this.renderForm.valid) {
+      this.objectInstance.type_id = this.currentTypeID;
+      this.objectInstance.active = this.render.renderForm.get('active').value;
+      this.objectInstance.version = '1.0.0';
+      this.objectInstance.author_id = this.userService.getCurrentUser().public_id;
+      this.objectInstance.fields = [];
+      this.render.renderForm.removeControl('active');
+      Object.keys(this.render.renderForm.controls).forEach(field => {
+        this.objectInstance.fields.push({
+          name: field,
+          value: this.render.renderForm.get(field).value || ''
+        });
       });
-    });
-    let ack = null;
-    this.objectService.postObject(this.objectInstance).subscribe(newObjectID => {
-        ack = newObjectID;
-      },
-      (error) => {
-        console.error(error);
-      }, () => {
-        this.router.navigate(['/framework/object/' + ack]);
-      });
+      let ack = null;
+      this.objectService.postObject(this.objectInstance).subscribe(newObjectID => {
+          ack = newObjectID;
+        },
+        (e) => {
+          console.error(e);
+        }, () => {
+          this.router.navigate(['/framework/object/view/' + ack]);
+        });
+    }
   }
 
 }

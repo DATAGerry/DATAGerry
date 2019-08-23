@@ -1,0 +1,9 @@
+MessageQueueing,Description,Default value,Optional
+host,RabbitMQ host adress,127.0.0.1,-
+port,connection port,5672,-
+username,authentication username,guest,-
+password,authentication username,guest,-
+exchange,used bus,datagerry.eventbus,DONT CHANGE THIS!
+connection_attempts,-,2,-
+retry_delay,time between connection retries,6,-
+use_tls,using tls encryption,false,-

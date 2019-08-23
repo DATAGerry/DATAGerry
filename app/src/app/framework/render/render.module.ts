@@ -36,13 +36,41 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ModeErrorComponent } from './components/mode-error/mode-error.component';
+import { RenderErrorComponent } from './components/render-error/render-error.component';
+import { TextSimpleComponent } from './simple/text/text-simple.component';
+import { PasswordSimpleComponent } from './simple/text/password-simple.component';
+import { CheckboxSimpleComponent } from './simple/choice/checkbox-simple.component';
+import { RadioSimpleComponent } from './simple/choice/radio-simple.component';
+import { SelectSimpleComponent } from './simple/choice/select-simple.component';
+import { RouterModule } from '@angular/router';
 
 
 @NgModule({
-  entryComponents: [TextComponent, PasswordComponent, DummyComponent, EmailComponent, PhoneComponent, HrefComponent, RadioComponent,
-    SelectComponent, RefComponent, CheckboxComponent, TextareaComponent],
-  declarations: [RenderComponent, TextComponent, DummyComponent, RenderElementComponent, PasswordComponent, EmailComponent, PhoneComponent,
-    HrefComponent, RadioComponent, SelectComponent, RefComponent, CheckboxComponent, TextareaComponent, ModeErrorComponent],
+  entryComponents: [
+    TextComponent,
+    PasswordComponent,
+    DummyComponent,
+    EmailComponent,
+    PhoneComponent,
+    HrefComponent,
+    RadioComponent,
+    SelectComponent,
+    RefComponent,
+    CheckboxComponent,
+    TextareaComponent,
+    TextSimpleComponent,
+    PasswordSimpleComponent,
+    CheckboxSimpleComponent,
+    RadioSimpleComponent,
+    SelectSimpleComponent,
+    RenderComponent,
+    RenderElementComponent
+  ],
+  declarations: [
+    RenderComponent, RenderElementComponent, TextComponent, DummyComponent, PasswordComponent, EmailComponent, PhoneComponent,
+    HrefComponent, RadioComponent, SelectComponent, RefComponent, CheckboxComponent, TextareaComponent, ModeErrorComponent,
+    RenderErrorComponent, TextSimpleComponent, PasswordSimpleComponent, CheckboxSimpleComponent, RadioSimpleComponent, SelectSimpleComponent
+  ],
   exports: [
     RenderElementComponent,
     RenderComponent
@@ -53,7 +81,8 @@ import { ModeErrorComponent } from './components/mode-error/mode-error.component
     NgbModule,
     NgSelectModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    RouterModule
   ]
 })
 export class RenderModule {

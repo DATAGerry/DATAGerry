@@ -9,14 +9,14 @@
 
     <span class="card-group float-right" *ngIf="hasSummaries">
       <div class="btn-group">
-        <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle" (click)="verifyExport()"
+        <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <i class="fa fa-download" aria-hidden="true"></i> Export
         </button>
         <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left" aria-labelledby="exportButton">
           <li id="export-{{item.id}}" [className]="item.active ? 'dropdown-item' : 'dropdown-item disabled'"
               *ngFor="let item of formatList" style="text-align: center;"
-              (click)="exporter(item.id)"
+              (click)="exportingFiles(item)"
               [ngbTooltip]="item.helperText">
             <i class="fa {{item.icon}}"></i> {{item.label}} ({{selectedObjects}})
           </li>
@@ -61,19 +61,20 @@
 
         <!-- BEGIN: summarie contens : show only if objects are categorized  -->
         <ng-container *ngIf="hasSummaries" >
-          <ng-container *ngFor="let field of result.fields">
-            <td><span [innerHTML]="checkType(field.value)">{{field.value}}</span></td>
-          </ng-container>
+            <td *ngFor="let field of result.fields">
+              <cmdb-render-element [mode]="mode" [data]="field"
+                                   [value]="field?.value"></cmdb-render-element>
+            </td>
         </ng-container>
         <!-- END: summarie contens -->
 
         <td>{{result.author_name}}</td>
         <td>{{result.last_edit_time?.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
         <td>
-          <a class="text-dark"[routerLink]="['/framework/object/', result.public_id]">
+          <a class="text-dark"[routerLink]="['/framework/object/view', result.public_id]">
             <i class="fa fa-eye" aria-hidden="true"></i>
           </a>
-          <a class="ml-1 text-dark" [routerLink]="['/framework/object/', result.public_id]">
+          <a class="ml-1 text-dark" [routerLink]="['/framework/object/edit/', result.public_id]">
             <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
           </a>
           <a class="ml-1 text-dark" (click)="delObject(result)">

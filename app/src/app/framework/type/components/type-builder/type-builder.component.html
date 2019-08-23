@@ -6,17 +6,17 @@
     </button>
   </aw-wizard-step>
   <aw-wizard-step (stepExit)="exitFieldStep()" stepId="2" stepTitle="Field definitions">
-    <cmdb-type-fields-step></cmdb-type-fields-step>
+    <cmdb-type-fields-step [preData]="typeInstance"></cmdb-type-fields-step>
     <button class="btn btn-primary prev" type="button" awPreviousStep>Go to previous step</button>
     <button class="btn btn-primary next" type="button" awNextStep>Go to next step</button>
   </aw-wizard-step>
   <aw-wizard-step (stepExit)="exitMetaStep()" stepId="3" stepTitle="Meta data">
-    <cmdb-type-meta-step [fields]="typeInstance.fields"></cmdb-type-meta-step>
+    <cmdb-type-meta-step [preData]="typeInstance" [fields]="typeInstance?.fields"></cmdb-type-meta-step>
     <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
     <button class="btn btn-primary next" type="button" awNextStep>Go to next step</button>
   </aw-wizard-step>
   <aw-wizard-step (stepExit)="exitAccessStep()" stepId="4" stepTitle="Access">
-    <cmdb-type-access-step></cmdb-type-access-step>
+    <cmdb-type-access-step [preData]="typeInstance"></cmdb-type-access-step>
     <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
     <button class="btn btn-primary next" type="button" awNextStep>Go to next step</button>
   </aw-wizard-step>

@@ -28,5 +28,6 @@ export class DashcardComponent {
   @Input() icon: string;
   @Input() name: string;
   @Input() numbers: number;
+  @Input() linkRoute: string;
 
 }

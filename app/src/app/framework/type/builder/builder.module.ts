@@ -31,6 +31,10 @@ import { TextareaEditComponent } from './configs/edits/textarea-edit.component';
 import { RefFieldEditComponent } from './configs/edits/ref-field-edit.component';
 import { ChoiceFieldEditComponent } from './configs/edits/choice-field-edit.component';
 import { CheckFieldEditComponent } from './configs/edits/check-field-edit.component';
+import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
+import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
+import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { RenderElementComponent } from '../../render/render-element/render-element.component';
 
 @NgModule({
   entryComponents: [
@@ -40,7 +44,10 @@ import { CheckFieldEditComponent } from './configs/edits/check-field-edit.compon
     RefFieldEditComponent,
     DummyFieldEditComponent,
     ChoiceFieldEditComponent,
-    CheckFieldEditComponent
+    CheckFieldEditComponent,
+    PreviewModalComponent,
+    DiagnosticModalComponent,
+    RenderElementComponent
   ],
   declarations: [
     BuilderComponent,
@@ -51,13 +58,16 @@ import { CheckFieldEditComponent } from './configs/edits/check-field-edit.compon
     TextareaEditComponent,
     RefFieldEditComponent,
     ChoiceFieldEditComponent,
-    CheckFieldEditComponent
+    CheckFieldEditComponent,
+    PreviewModalComponent,
+    DiagnosticModalComponent
   ],
   imports: [
     CommonModule,
     DndModule,
-    RenderModule,
     FormsModule,
+    RenderModule,
+    NgbModalModule,
     NgSelectModule
   ],
   exports: [

@@ -21,7 +21,8 @@ import { Routes, RouterModule } from '@angular/router';
 import { ObjectListComponent } from './object-list/object-list.component';
 import { ObjectViewComponent } from './object-view/object-view.component';
 import { ObjectAddComponent } from './object-add/object-add.component';
-import { ObjectTestComponent } from './object-test/object-test.component';
+import { ObjectEditComponent } from './object-edit/object-edit.component';
+import { ObjectCopyComponent } from './object-copy/object-copy.component';
 
 const routes: Routes = [
   {
@@ -39,21 +40,38 @@ const routes: Routes = [
     component: ObjectAddComponent
   },
   {
-    path: 'test',
+    path: 'add/:publicID',
     data: {
-      breadcrumb: 'Test'
+      breadcrumb: 'Add'
     },
-    component: ObjectTestComponent
+    component: ObjectAddComponent
+  },
+  {
+    path: 'edit/:publicID',
+    data: {
+      breadcrumb: 'Edit'
+    },
+    component: ObjectEditComponent
+  },
+  {
+    path: 'copy/:publicID',
+    data: {
+      breadcrumb: 'Copy'
+    },
+    component: ObjectCopyComponent
   },
   {
     path: 'type/:publicID',
     data: {
-      breadcrumb: 'List / Type'
+      breadcrumb: 'List'
     },
     component: ObjectListComponent
   },
   {
-    path: ':publicID',
+    path: 'view/:publicID',
+    data: {
+      breadcrumb: 'View'
+    },
     component: ObjectViewComponent
   }
 ];
@@ -62,4 +80,5 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class ObjectRoutingModule { }
+export class ObjectRoutingModule {
+}

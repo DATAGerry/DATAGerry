@@ -1,0 +1,43 @@
+{%- extends "basic/layout.html" %}
+
+{# VARIABLES #}
+{%- set lang_attr = 'en' if language == None else (language | replace('_', '-')) %}
+{%- set html_tag=  '<html lang="' + lang_attr + '">' %}
+{% set script_files = script_files + ["_static/js/theme.js"] %}
+{% set css_files = css_files + ["_static/basic.css"] %}
+
+{# SILENCE BLOCKS #}
+{%- block relbar1 %}{% endblock %}
+{%- block relbar2 %}{% endblock %}
+{%- block sidebar1 %}{% endblock %}
+{%- block sidebar2 %}{% endblock %}
+{%- block footer %}{% endblock %}
+
+{%- block doctype -%}
+    <!DOCTYPE html>
+{%- endblock %}
+
+{%- block extrahead %}
+    {{ super() }}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+{% endblock %}
+
+{% block content %}
+    <div id="document">
+        {%- block document %}
+            <div id="sidebar">
+                {% include '_navigation.html' %}
+            </div>
+            <div class="documentwrapper">
+                <div class="bodywrapper">
+                    <div id="content" role="main">
+                        {% include '_breadcrumb.html' %}
+                        {% block body %} {% endblock %}
+                    </div>
+                </div>
+               {% include '_footer.html' %}
+            </div>
+        {%- endblock %}
+    </div>
+{% endblock %}

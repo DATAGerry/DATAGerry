@@ -15,10 +15,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import jinja2
-import cmdb.object_framework
+import cmdb.framework
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import load_class
-from cmdb.object_framework.cmdb_object_manager import object_manager
+from cmdb.framework.cmdb_object_manager import object_manager
 
 
 class ExportJob:

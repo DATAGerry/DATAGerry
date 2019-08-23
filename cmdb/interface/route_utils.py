@@ -15,8 +15,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import json
+
 from flask import Blueprint, request
-from cmdb.object_framework.cmdb_dao import CmdbDAO
+
+from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.utils import json_encoding
 
 DEFAULT_MIME_TYPE = 'Content-Type: application/json'
@@ -35,16 +37,20 @@ class NestedBlueprint:
 
 class RootBlueprint(Blueprint):
 
+    def __init__(self, *args, **kwargs):
+        super(RootBlueprint, self).__init__(*args, **kwargs)
+        self.nested_blueprints = []
+
     def register_nested_blueprint(self, nested_blueprint):
-        pass
+        self.nested_blueprints.append(nested_blueprint)
 
 
-def make_response(instance: (CmdbDAO, list, dict)):
+def make_response(instance: (CmdbDAO, list, dict), status_code=200):
     """
     make json http response with indent settings and auto encoding
     Args:
         instance: instance of a cmdbDao instance or instance of the subclass
-
+        status_code: optional status code
     Returns:
         http valid response
     """
@@ -52,7 +58,7 @@ def make_response(instance: (CmdbDAO, list, dict)):
     # set indent to None of min value exists in the request - DEFAULT: 2 steps
     indent = None if 'min' in request.args else 2
     # encode the dict data from the object to json data
-    resp = flask_response(json.dumps(instance, default=json_encoding.default, indent=indent))
+    resp = flask_response(json.dumps(instance, default=json_encoding.default, indent=indent), status_code)
     # add header informations
     resp.mimetype = DEFAULT_MIME_TYPE
     return resp

@@ -18,10 +18,10 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { TypeListComponent } from './components/type-list/type-list.component';
-import { TypeAddComponent } from './components/type-add/type-add.component';
-import { TypeEditComponent } from './components/type-edit/type-edit.component';
-import { TypeDeleteComponent } from './components/type-delete/type-delete.component';
+import { TypeListComponent } from './type-list/type-list.component';
+import { TypeAddComponent } from './type-add/type-add.component';
+import { TypeEditComponent } from './type-edit/type-edit.component';
+import { TypeDeleteComponent } from './type-delete/type-delete.component';
 
 const routes: Routes = [
   {
@@ -40,10 +40,16 @@ const routes: Routes = [
   },
   {
     path: 'edit/:publicID',
+    data: {
+      breadcrumb: 'Edit'
+    },
     component: TypeEditComponent
   },
   {
     path: 'delete/:publicID',
+    data: {
+      breadcrumb: 'Delete'
+    },
     component: TypeDeleteComponent
   }
 ];

@@ -23,10 +23,13 @@ import { BehaviorSubject, Subject} from 'rxjs';
 import { UserService } from '../../../user/services/user.service';
 import { ApiCallService } from '../../../services/api-call.service';
 import { DatePipe } from '@angular/common';
-import { ExportService } from '../../../services/export.service';
+import { ExportService } from '../../../export/export.service';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from '../../helpers/modal/modal.component';
+import { FileSaverService } from 'ngx-filesaver';
+import { TableColumn} from './models/table-column';
+import { TableColumnAction} from './models/table-columns-action';
 
 @Component({
   selector: 'cmdb-table',
@@ -38,51 +41,18 @@ export class TableComponent implements OnInit, OnDestroy {
 
   @ViewChild(DataTableDirective, {static: false})
   public dtElement: DataTableDirective;
-  public dtOptions: any = {}; // : DataTables.Settings = {};
+  public dtOptions: any;
   public dtTrigger: Subject<any> = new Subject();
 
-  /**
-   * overwrite default value for edit Button (table-toolbar)
-   */
+  @Input() thColumns: TableColumn[];
+  @Input() thColumnsActions: TableColumnAction[];
+  @Input() add: {};
+  @Input() print: {};
+  @Input() dtButtons: any[];
+
   @Input() pageTitle: string = 'List';
-
-  /**
-   * overwrite default value for add Button (table-toolbar)
-   */
-  @Input() add: {} = {
-    // add new
-    text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
-    className: 'btn btn-success btn-sm mr-1'
-  };
-
-  /**
-   * overwrite default value for print Button (table-toolbar)
-   */
-  @Input() print: {} = {
-    // print
-    text: 'Print <i class="fa fa-print" aria-hidden="true"></i>',
-    extend: 'print',
-    className: 'btn btn-info btn-sm mr-1'
-  };
-
-  /**
-   * overwrite default value for all Buttons (table-toolbar)
-   */
-  @Input() dtButtons: any[] = [];
-
-  /**
-   * overwrite default value for routeLink (defaul : '/framework/object/')
-   */
   @Input() linkRoute: string = 'object/';
-
-  /**
-   * overwrite default value
-   */
   @Input() showExport: boolean = true;
-
-  /**
-   * overwrite default value
-   */
   @Input() showDeleteSelected: boolean = true;
 
   public items: any = new BehaviorSubject<any[]>([]);
@@ -90,7 +60,8 @@ export class TableComponent implements OnInit, OnDestroy {
 
   constructor(private userService: UserService, private apiCallService: ApiCallService,
               private exportService: ExportService, private router: Router,
-              private modalService: NgbModal) {
+              private modalService: NgbModal, private fileSaverService: FileSaverService,
+              private datePipe: DatePipe) {
     this.add = {
       // add new
       text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
@@ -99,11 +70,30 @@ export class TableComponent implements OnInit, OnDestroy {
         this.router.navigate(['/framework/' + this.linkRoute + 'add']);
       }.bind(this)
     };
+
+    this.print = {
+      // print
+      text: 'Print <i class="fa fa-print" aria-hidden="true"></i>',
+      extend: 'print',
+      className: 'btn btn-info btn-sm mr-1'
+    };
+
+    this.thColumns = [
+      { name: 'id', label: 'ID'},
+      { name: 'type', label: 'Type'},
+      { name: 'author', label: 'Author'},
+      { name: 'create_time', label: 'Creation Time'},
+      { name: 'action', label: 'Action'}];
+
+    this.thColumnsActions = [
+      { name: 'view', classValue: 'text-dark ml-1', linkRoute: '', fontIcon: 'fa fa-eye', active: false},
+      { name: 'edit', classValue: 'text-dark ml-1', linkRoute: 'edit/', fontIcon: 'fa fa-pencil-square-o'},
+      { name: 'delete', classValue: 'text-dark ml-1', linkRoute: 'delete/', fontIcon: 'fa fa-trash-o'}];
   }
 
   ngOnInit(): void {
     if (this.showExport) {
-      this.exportService.callFileFormatRoute('export/').subscribe( data => {
+      this.exportService.callFileFormatRoute().subscribe( data => {
         this.formatList = data;
       });
     }
@@ -121,7 +111,7 @@ export class TableComponent implements OnInit, OnDestroy {
   }
 
   private buildButtons() {
-    this.dtButtons.length = 0;
+    this.dtButtons = [];
     if (Object.keys(this.add).length !== 0) {
       this.dtButtons.push(this.add);
     }
@@ -220,11 +210,11 @@ export class TableComponent implements OnInit, OnDestroy {
     }
 
     if (publicIds.length > 0) {
-      const modalComponent = this.createModal(
-        'Delete selected Objects',
-        'Are you sure, you want to delete all selected objects?',
-        'Cancel',
-        'Delete');
+      const modalComponent = this.modalService.open(ModalComponent);
+      modalComponent.componentInstance.title = 'Delete selected Objects';
+      modalComponent.componentInstance.modalMessage = 'Are you sure, you want to delete all selected objects?';
+      modalComponent.componentInstance.buttonDeny = 'Cancel';
+      modalComponent.componentInstance.buttonAccept = 'Delete';
 
       modalComponent.result.then((result) => {
         if (result) {
@@ -240,42 +230,51 @@ export class TableComponent implements OnInit, OnDestroy {
     }
   }
 
-  public delObject(value: any) {
+  public delObject(route: any, value: any) {
 
-    const modalComponent = this.createModal(
-      'Delete Object',
-      'Are you sure you want to delete this Object?',
-      'Cancel',
-      'Delete');
+    if ( route === 'delete/') {
+      this.router.navigate([this.router.url + '/' + route + value.public_id]);
+    }
 
-    modalComponent.result.then((result) => {
-      if (result) {
-        const id = value.public_id;
-        this.apiCallService.callDeleteRoute(this.linkRoute + id).subscribe(data => {
-          this.apiCallService.callGetRoute(this.linkRoute).subscribe(objs => {
-            this.entryLists = objs;
+    if ( route === 'object/') {
+      const modalComponent = this.createModal(
+        'Delete Object',
+        'Are you sure you want to delete this Object?',
+        'Cancel',
+        'Delete');
+
+      modalComponent.result.then((result) => {
+        if (result) {
+          const id = value.public_id;
+          this.apiCallService.callDeleteRoute(this.linkRoute + id).subscribe(data => {
+            this.apiCallService.callGetRoute(this.linkRoute).subscribe(objs => {
+              this.entryLists = objs;
+            });
           });
-        });
-      }
-    }, (reason) => {
-      // ToDO:
-    });
+        }
+      }, (reason) => {
+        // ToDO:
+      });
+    }
   }
 
-  public exporter(fileExtension: string) {
-
+  public exporter(exportType: any) {
     const allCheckbox: any = document.getElementsByClassName('select-checkbox');
     const publicIds: string[] = [];
-
     for (const box of allCheckbox) {
       if (box.checked && box.id) {
         publicIds.push(box.id);
       }
     }
     if (publicIds.length > 0) {
-      this.exportService.callExportRoute('export/' + this.linkRoute + publicIds + '/' + fileExtension,
-        fileExtension);
+      this.exportService.callExportRoute(publicIds.toString(), exportType.id)
+        .subscribe(res => this.downLoadFile(res, exportType));
     }
+  }
+
+  public downLoadFile(data: any, exportType: any) {
+    const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
+    this.fileSaverService.save(data.body, timestamp + '.' + exportType.label);
   }
 
   private createModal(title: string, modalMessage: string, buttonDeny: string, buttonAccept: string) {

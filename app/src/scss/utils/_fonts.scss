@@ -1,42 +1,94 @@
 /*
- * GOOGLE FONTS - https://fonts.google.com/specimen/Fira+Sans
+ * GOOGLE FONTS - https://fonts.googleapis.com/css?family=Raleway
  */
+
+/* latin-ext */
 @font-face {
-  font-family: 'Fira Sans';
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: local('Raleway ExtraLight'), local('Raleway-ExtraLight'), url(assets/fonts/Raleway-ExtraLight-Ext.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: local('Raleway ExtraLight'), local('Raleway-ExtraLight'), url(assets/fonts/Raleway-ExtraLight.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Raleway';
   font-style: normal;
   font-weight: 300;
-  src: local('Fira Sans Light'), local('FiraSans-Light'), url('assets/fonts/FiraSans-Light.ttf') format('truetype');
+  font-display: swap;
+  src: local('Raleway Light'), local('Raleway-Light'), url(assets/fonts/Raleway-Light-Ext.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: local('Raleway Light'), local('Raleway-Light'), url(assets/fonts/Raleway-Light.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-
+/* latin-ext */
 @font-face {
-  font-family: 'Fira Sans';
+  font-family: 'Raleway';
   font-style: normal;
   font-weight: 400;
-  src: local('Fira Sans Regular'), local('FiraSans-Regular'), url('assets/fonts/FiraSans-Regular.ttf') format('truetype');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  font-display: swap;
+  src: local('Raleway'), local('Raleway-Regular'), url(assets/fonts/Raleway-Regular-Ext.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
-
+/* latin */
 @font-face {
-  font-family: 'Fira Sans';
+  font-family: 'Raleway';
   font-style: normal;
-  font-weight: 500;
-  src: local('Fira Sans Medium'), local('FiraSans-Medium'), url('assets/fonts/FiraSans-Medium.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+  src: local('Raleway'), local('Raleway-Regular'), url(assets/fonts/Raleway-Regular.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-
+/* latin-ext */
 @font-face {
-  font-family: 'Fira Sans';
+  font-family: 'Raleway';
   font-style: normal;
   font-weight: 600;
-  src: local('Fira Sans SemiBold'), local('FiraSans-SemiBold'), url('assets/fonts/FiraSans-SemiBold.ttf') format('truetype');
+  font-display: swap;
+  src: local('Raleway SemiBold'), local('Raleway-SemiBold'), url(assets/fonts/Raleway-SemiBold-Ext.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Raleway SemiBold'), local('Raleway-SemiBold'), url(assets/fonts/Raleway-SemiBold.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-
+/* latin-ext */
 @font-face {
-  font-family: 'Fira Sans';
+  font-family: 'Raleway';
   font-style: normal;
   font-weight: 700;
-  src: local('Fira Sans Bold'), local('FiraSans-Bold'), url('assets/fonts/FiraSans-Bold.ttf') format('truetype');
+  font-display: swap;
+  src: local('Raleway Bold'), local('Raleway-Bold'), url(assets/fonts/Raleway-Bold-Ext.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Raleway';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Raleway Bold'), local('Raleway-Bold'), url(assets/fonts/Raleway-Bold.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }

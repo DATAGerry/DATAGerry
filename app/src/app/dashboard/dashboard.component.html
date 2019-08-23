@@ -1,14 +1,23 @@
 <div class="row">
   <div class="col-4">
-    <cmdb-dashcard name="Objects" [numbers]=objectCount icon="fa fa-cube"></cmdb-dashcard>
+    <cmdb-dashcard name="Objects"
+                   [numbers]=objectCount
+                   linkRoute="/framework/object/"
+                   icon="fa fa-cube"></cmdb-dashcard>
   </div>
   <div class="col-4">
-    <cmdb-dashcard name="Types" [numbers]=typeCount icon="fa fa-cubes"></cmdb-dashcard>
+    <cmdb-dashcard name="Types"
+                   [numbers]=typeCount
+                   linkRoute="/framework/type/"
+                   icon="fa fa-cubes"></cmdb-dashcard>
   </div>
   <div class="col-4">
-    <cmdb-dashcard name="Users" [numbers]=userCount icon="fa fa-users"></cmdb-dashcard>
+    <cmdb-dashcard name="Users"
+                   [numbers]=userCount
+                   linkRoute="/settings/user-management"
+                   icon="fa fa-users"></cmdb-dashcard>
   </div>
 </div>
 
-<cmdb-newest-view></cmdb-newest-view>
-<cmdb-latest-changes-view></cmdb-latest-changes-view>
+<cmdb-newest-view [thColumnsActions]="thColumnsActions"></cmdb-newest-view>
+<cmdb-latest-changes-view [thColumnsActions]="thColumnsActions"></cmdb-latest-changes-view>

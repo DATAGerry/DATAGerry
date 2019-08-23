@@ -17,25 +17,25 @@
 */
 
 
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import {Component, OnDestroy, ViewChild} from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { DatePipe } from '@angular/common';
 import { ObjectService } from '../../services/object.service';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { HttpHeaders } from '@angular/common/http';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ExportService } from '../../../services/export.service';
-import { ModalComponent } from '../../../layout/helpers/modal/modal.component';
+import { ExportService } from '../../../export/export.service';
+import { CmdbMode } from '../../modes.enum';
+import { FileSaverService } from 'ngx-filesaver';
+import { DatePipe } from '@angular/common';
+import { CmdbType } from '../../models/cmdb-type';
+import { TypeService } from '../../services/type.service';
 
 @Component({
   selector: 'cmdb-object-list',
   templateUrl: './object-list.component.html',
   styleUrls: ['./object-list.component.scss'],
-  providers: [DatePipe]
 })
 export class ObjectListComponent implements OnDestroy {
 
@@ -51,20 +51,22 @@ export class ObjectListComponent implements OnDestroy {
   public pageTitle: string = 'List';
   public objectLists: {};
   public hasSummaries: boolean = false;
-  readonly $date: string = '$date';
   public formatList: any[] = [];
   private selectedObjects: string = 'all';
+  public typeID: number = null;
+  public mode: CmdbMode = CmdbMode.Simple;
 
   constructor(private apiCallService: ApiCallService, private objService: ObjectService,
               private exportService: ExportService, private route: ActivatedRoute, private router: Router,
-              private spinner: NgxSpinnerService, private datePipe: DatePipe, private modalService: NgbModal) {
+              private spinner: NgxSpinnerService, private fileSaverService: FileSaverService,
+              private datePipe: DatePipe, private typeService: TypeService) {
     this.route.params.subscribe((id) => {
       this.init(id);
     });
   }
 
   private init(id) {
-    this.exportService.callFileFormatRoute('export/').subscribe( data => {
+    this.exportService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
     this.getRouteObjects(id.publicID);
@@ -76,7 +78,9 @@ export class ObjectListComponent implements OnDestroy {
     this.hasSummaries = false;
     if (typeof id !== 'undefined') {
       url = url + 'type/' + id;
+      this.typeID = id;
       this.hasSummaries = true;
+      this.typeService.getType(id).subscribe((data: CmdbType) => this.pageTitle = data.label + ' list');
     }
 
     this.apiCallService.callGetRoute(url)
@@ -86,11 +90,6 @@ export class ObjectListComponent implements OnDestroy {
           this.summaries = lenx > 0 ? dataArray[0].summaries : [];
           this.columnFields = lenx > 0 ? dataArray[0].fields : [];
           this.items = lenx > 0 ? dataArray : [];
-
-          if (this.hasSummaries && lenx > 0) {
-            this.pageTitle = dataArray[0].label + ' List';
-          }
-
           return [{items: this.items, columnFields: this.columnFields}];
         })
       )
@@ -128,7 +127,12 @@ export class ObjectListComponent implements OnDestroy {
         text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
         className: 'btn btn-success btn-sm mr-1',
         action: function() {
-          this.router.navigate(['/framework/object/add']);
+          if (this.typeID === null) {
+            this.router.navigate(['/framework/object/add']);
+          } else {
+            this.router.navigate(['/framework/object/add/' + this.typeID]);
+          }
+
         }.bind(this)
       }
     );
@@ -250,13 +254,6 @@ export class ObjectListComponent implements OnDestroy {
     Table action events
    */
 
-  public checkType(value) {
-    if (value != null && value.hasOwnProperty('$date')) {
-      return '<span>' + this.datePipe.transform(value[this.$date], 'dd/mm/yyyy - hh:mm:ss') + '</span>';
-    }
-    return '<span>' + value + '</span>';
-  }
-
   public selectAll() {
     const overall: any = document.getElementsByClassName('select-all-checkbox')[0];
     const allCheckbox: any = document.getElementsByClassName('select-checkbox');
@@ -300,7 +297,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   public delObject(value: any) {
-    const modalComponent = this.createModal(
+    const modalComponent = this.objService.openModalComponent(
       'Delete Object',
       'Are you sure you want to delete this Object?',
       'Cancel',
@@ -315,8 +312,6 @@ export class ObjectListComponent implements OnDestroy {
           });
         });
       }
-    }, (reason) => {
-      // ToDO:
     });
   }
 
@@ -330,7 +325,7 @@ export class ObjectListComponent implements OnDestroy {
     }
 
     if (publicIds.length > 0) {
-      const modalComponent = this.createModal(
+      const modalComponent = this.objService.openModalComponent(
         'Delete selected Objects',
         'Are you sure, you want to delete all selected objects?',
         'Cancel',
@@ -346,44 +341,32 @@ export class ObjectListComponent implements OnDestroy {
             });
           }
         }
-      }, (reason) => {
-        // ToDO:
       });
     }
   }
 
-  public exporter(fileExtension: string) {
+  public exportingFiles(exportType: any) {
     if ('all' === this.selectedObjects) {
-      this.exportByTypeID(fileExtension);
+      this.exportService.getObjectFileByType(this.items[0].type_id, exportType.id)
+        .subscribe(res => this.downLoadFile(res, exportType));
       return;
     }
-    const allCheckbox: any = document.getElementsByClassName('select-checkbox');
-    const publicIds: string[] = [];
 
+    const publicIds: string[] = [];
+    const allCheckbox: any = document.getElementsByClassName('select-checkbox');
     for (const box of allCheckbox) {
       if (box.checked && box.id) {
         publicIds.push(box.id);
       }
     }
     if (publicIds.length > 0) {
-      this.exportService.callExportRoute('export/' + 'object/' + publicIds + '/' + fileExtension, fileExtension);
+      this.exportService.callExportRoute(publicIds.toString(), exportType.id)
+        .subscribe(res => this.downLoadFile(res, exportType));
     }
   }
 
-  public exportByTypeID(fileExtension: string) {
-    this.exportService.callExportRoute('export/' + 'object/type/' + this.items[0].type_id + '/' + fileExtension , fileExtension);
-  }
-
-  public verifyExport() {
-    // toDo: checked if CSV objects from same type
-  }
-
-  private createModal(title: string, modalMessage: string, buttonDeny: string, buttonAccept: string) {
-    const modalComponent = this.modalService.open(ModalComponent);
-    modalComponent.componentInstance.title = title;
-    modalComponent.componentInstance.modalMessage = modalMessage;
-    modalComponent.componentInstance.buttonDeny = buttonDeny;
-    modalComponent.componentInstance.buttonAccept = buttonAccept;
-    return modalComponent;
+  public downLoadFile(data: any, exportType: any) {
+    const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
+    this.fileSaverService.save(data.body, timestamp + '.' + exportType.label);
   }
 }

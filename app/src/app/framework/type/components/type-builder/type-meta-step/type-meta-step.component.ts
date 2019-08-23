@@ -9,23 +9,34 @@ import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/fo
 })
 export class TypeMetaStepComponent implements OnInit {
 
+  public summariesForm: FormGroup;
+  public summariesSections = [];
+  public externalsForm: FormGroup;
+  public externalLinks = [];
+  public hrefInterpolCounter;
+
+  @Input()
+  set preData(data: any) {
+    if (data !== undefined) {
+      if (data.render_meta !== undefined) {
+        this.summariesSections = data.render_meta.summary;
+        this.externalLinks = data.render_meta.external;
+      }
+    }
+  }
+
   constructor() {
     this.summariesForm = new FormGroup({
       name: new FormControl('', [Validators.required, this.listNameValidator(this.summariesSections)]),
       label: new FormControl('', Validators.required),
       fields: new FormControl('', Validators.required)
     });
-    // Deprecated
-    const URL_REGEXP = '/^(http?|[a-zA-Z0-9.-]+):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)' +
-      '(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.' +
-      '(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*' +
-      '(\/($|[a-zA-Z0-9.,?\'\\+&{}%$#=~_-]+))*$/;';
-    const URL_REGEXP_2 = '^(http?|[a-zA-Z0-9.-]+)?(://)?([a-zA-Z0-9.-]+)?.?[a-z0-9-]+(.|:)([a-z0-9-]+)+([/?].*)?$';
+
     this.externalsForm = new FormGroup({
       name: new FormControl('', [Validators.required, this.listNameValidator(this.externalLinks)]),
       label: new FormControl('', Validators.required),
       icon: new FormControl(''),
-      href: new FormControl('', [Validators.required, Validators.pattern(URL_REGEXP_2)]),
+      href: new FormControl('', [Validators.required]),
       fields: new FormControl('')
     });
   }
@@ -636,12 +647,6 @@ export class TypeMetaStepComponent implements OnInit {
     'fa-fonticons'
   ];
 
-  public summariesForm: FormGroup;
-  public summariesSections = [];
-  public externalsForm: FormGroup;
-  public externalLinks = [];
-  public hrefInterpolCounter;
-
   private static occurrences(s, subString): number {
     s += '';
     subString += '';
@@ -701,8 +706,8 @@ export class TypeMetaStepComponent implements OnInit {
   public editSummary(data) {
     const rawSummaryData = this.summariesSections[this.summariesSections.indexOf(data)];
     this.summariesForm.reset();
-    this.summariesForm.patchValue(rawSummaryData);
     this.deleteSummary(data);
+    this.summariesForm.patchValue(rawSummaryData);
   }
 
   public deleteSummary(data) {
@@ -710,6 +715,8 @@ export class TypeMetaStepComponent implements OnInit {
     if (index !== -1) {
       this.summariesSections.splice(index, 1);
     }
+    this.summariesForm.get('name').clearValidators();
+    this.summariesForm.get('name').setValidators(this.listNameValidator(this.summariesSections));
   }
 
   public addExternal() {
@@ -720,8 +727,8 @@ export class TypeMetaStepComponent implements OnInit {
   public editExternal(data) {
     const rawExternalData = this.externalLinks[this.externalLinks.indexOf(data)];
     this.externalsForm.reset();
-    this.externalsForm.patchValue(rawExternalData);
     this.deleteExternal(data);
+    this.externalsForm.patchValue(rawExternalData);
   }
 
   public deleteExternal(data) {
@@ -729,7 +736,8 @@ export class TypeMetaStepComponent implements OnInit {
     if (index !== -1) {
       this.externalLinks.splice(index, 1);
     }
-
+    this.externalsForm.get('name').clearValidators();
+    this.externalsForm.get('name').setValidators(this.listNameValidator(this.externalLinks));
   }
 
 }

@@ -18,7 +18,8 @@ import logging
 
 from cmdb.utils.interface_wraps import login_required
 from flask import abort, jsonify
-from cmdb.object_framework.cmdb_errors import TypeNotFoundError
+from cmdb.framework.cmdb_errors import TypeNotFoundError
+from cmdb.file_export.file_exporter import FileExporter
 from cmdb.interface.route_utils import make_response, RootBlueprint
 from cmdb.utils.helpers import load_class
 
@@ -33,21 +34,31 @@ export_route = RootBlueprint('export_rest', __name__, url_prefix='/export')
 
 @export_route.route('/', methods=['GET'])
 @login_required
-def get_extension_list():
-    # TODO Check which formats are allowed for users
-    from cmdb.file_export.file_exporter import FileExporter
-    return make_response(FileExporter(None, None, None).get_extension_list())
+def get_filetypes():
+    filetypes = FileExporter.get_filetypes()
+    filetype_list = []
+    for filetype in filetypes:
+        filetype_class = load_class('cmdb.file_export.export_types.' + filetype)
+        filetype_properties = {
+                'id': filetype,
+                'label': filetype_class.LABEL,
+                'icon': filetype_class.ICON,
+                'multiTypeSupport': filetype_class.MULTITYPE_SUPPORT,
+                'helperText': filetype_class.DESCRIPTION,
+                'active': filetype_class.ACTIVE
+        }
+        filetype_list.append(filetype_properties)
+
+    return make_response(filetype_list)
 
 
-@export_route.route('/object/<string:public_ids>/<string:extension>', methods=['GET'])
+@export_route.route('/object/<string:public_ids>/<string:export_class>', methods=['POST'])
 @login_required
-def export_file(public_ids, extension):
+def export_file(public_ids, export_class):
     try:
-        curr_exporter = load_class('cmdb.file_export.'
-                                   + extension + '_file_exporter.'
-                                   + extension.capitalize() + 'FileExporter')
-        file_export = curr_exporter('object', extension, public_ids)
-        file_export.main()
+        export_type_class = load_class('cmdb.file_export.export_types.' + export_class)
+        export_type = export_type_class()
+        file_export = FileExporter('object', export_type, public_ids)
     except TypeNotFoundError as e:
         return abort(400, e.message)
     except ModuleNotFoundError as e:
@@ -55,18 +66,16 @@ def export_file(public_ids, extension):
     except CMDBError as e:
         return abort(404, jsonify(message='Not Found', error=e.message))
 
-    return file_export.export(mime_type='text/' + extension, file_extension=extension)
+    return file_export.export()
 
 
-@export_route.route('/object/type/<int:public_id>/<string:extension>', methods=['GET'])
+@export_route.route('/object/type/<int:public_id>/<string:export_class>', methods=['POST'])
 @login_required
-def export_file_by_type_id(public_id, extension):
+def export_file_by_type_id(public_id, export_class):
     try:
-        curr_exporter = load_class('cmdb.file_export.'
-                                   + extension + '_file_exporter.'
-                                   + extension.capitalize() + 'FileExporter')
-        file_export = curr_exporter(None, extension, public_id)
-        file_export.main()
+        export_type_class = load_class('cmdb.file_export.export_types.' + export_class)
+        export_type = export_type_class()
+        file_export = FileExporter(None, export_type, public_id)
     except TypeNotFoundError as e:
         return abort(400, e.message)
     except ModuleNotFoundError as e:
@@ -74,5 +83,5 @@ def export_file_by_type_id(public_id, extension):
     except CMDBError as e:
         return abort(404, jsonify(message='Not Found', error=e.message))
 
-    return file_export.export(mime_type='text/' + extension, file_extension=extension)
+    return file_export.export()
 

@@ -36,6 +36,10 @@ import { CheckboxControl } from './controls/choice/checkbox.control';
 import { GroupService } from '../../../user/services/group.service';
 import { CmdbMode } from '../../modes.enum';
 import { FormGroup } from '@angular/forms';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
+import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
+import { CmdbType } from '../../models/cmdb-type';
 
 declare var $: any;
 
@@ -49,9 +53,22 @@ export class BuilderComponent implements OnInit {
   public sections: any[];
   public userList: User[] = [];
   public groupList: Group[] = [];
-  public mode = CmdbMode.Create;
+  public mode = CmdbMode.View;
 
-  @Input() builderConfig: any = {};
+  @Input() set builderConfig(data) {
+    if (data !== undefined) {
+      const preSectionList: any[] = [];
+      for (const section of data.render_meta.sections) {
+        preSectionList.push(section);
+        const fieldBufferList = [];
+        for (const field of section.fields) {
+          fieldBufferList.push(data.fields.find(f => f.name === field));
+        }
+        preSectionList.find(s => s.name === section.name).fields = fieldBufferList;
+      }
+      this.sections = preSectionList;
+    }
+  }
 
   public structureControls = [
     new Controller('section', SectionControl)
@@ -59,10 +76,7 @@ export class BuilderComponent implements OnInit {
   public basicControls = [
     new Controller('text', TextControl),
     new Controller('password', PasswordControl),
-    new Controller('email', EmailControl),
-    new Controller('tel', TelControl),
     new Controller('textarea', TextAreaControl),
-    new Controller('href', LinkControl),
     new Controller('checkbox', CheckboxControl),
     new Controller('radio', RadioControl),
     new Controller('select', SelectControl),
@@ -73,7 +87,7 @@ export class BuilderComponent implements OnInit {
 
   public builderFormGroup: FormGroup;
 
-  public constructor(private userService: UserService, private groupService: GroupService) {
+  public constructor(private userService: UserService, private groupService: GroupService, private modalService: NgbModal) {
     this.groupService.getGroupList().subscribe((gList: Group[]) => {
       this.groupList = gList;
     });
@@ -99,7 +113,6 @@ export class BuilderComponent implements OnInit {
         index = list.length;
       }
       for (const el of list) {
-        // close all other collapse
         const collapseCard = ($('#' + el.name) as any);
         collapseCard.collapse('hide');
       }
@@ -115,11 +128,21 @@ export class BuilderComponent implements OnInit {
     }
   }
 
-
   public remove(item: any, list: any[]) {
     const index: number = list.indexOf(item);
     if (index !== -1) {
       list.splice(index, 1);
     }
   }
+
+  public openPreview() {
+    const previewModal = this.modalService.open(PreviewModalComponent, {scrollable: true});
+    previewModal.componentInstance.sections = this.sections;
+  }
+
+  public openDiagnostic() {
+    const diagnosticModal = this.modalService.open(DiagnosticModalComponent, {scrollable: true});
+    diagnosticModal.componentInstance.data = this.sections;
+  }
+
 }

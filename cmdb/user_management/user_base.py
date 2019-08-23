@@ -16,7 +16,7 @@
 
 import logging
 
-from cmdb.object_framework.cmdb_dao import NoPublicIDError, RequiredInitKeyNotFoundError
+from cmdb.framework.cmdb_dao import NoPublicIDError, RequiredInitKeyNotFoundError
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
@@ -59,6 +59,14 @@ class UserManagementBase:
         if self.public_id == 0 or self.public_id is None:
             raise NoUserIDError(self.public_id)
         return self.public_id
+
+    @classmethod
+    def get_index_keys(cls):
+        from pymongo import IndexModel
+        index_list = list()
+        for index in cls.INDEX_KEYS + cls.__SUPER_INDEX_KEYS:
+            index_list.append(IndexModel(**index))
+        return index_list
 
     def to_json(self) -> dict:
         """

@@ -1,0 +1,39 @@
+@import '../../../../app/src/scss/bootstrap_variables';
+
+.note {
+  background: $gray-200;
+  border-left: 3px solid theme-color('primary');
+  padding-left: 20px;
+}
+
+.warning {
+  background: $gray-200;
+  border-left: 3px solid theme-color('danger');
+  padding-left: 20px;
+}
+
+h1, h2, h3, h4, h5 {
+
+  &:hover {
+    .headerlink {
+      visibility: hidden !important;
+
+      text-decoration: none;
+
+      &:after {
+        content: '#';
+        visibility: visible;
+
+      }
+    }
+  }
+
+}
+
+blockquote{
+  padding: 10px;
+  background: $gray-200;
+  p{
+    margin: 0;
+  }
+}

@@ -23,6 +23,7 @@ export class CmdbType implements CmdbDao {
 
   // tslint:disable:variable-name
   readonly public_id: number;
+  private readonly _id?: string;
   public active: boolean = true;
   public description?: string;
   public name: string;
@@ -34,13 +35,5 @@ export class CmdbType implements CmdbDao {
   public render_meta: any;
   public fields: any[];
   public category_name?: string;
-
-  // tslint:enable:variable-name
-
-  public get sections() {
-    // @ts-ignore
-    return this.render_meta.sections;
-
-  }
 
 }

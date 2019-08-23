@@ -17,6 +17,8 @@
 import logging
 
 from flask import request, abort
+
+from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management.user_manager import user_manager
 from cmdb.data_storage import get_pre_init_database
 from cmdb.utils import get_security_manager
@@ -34,7 +36,6 @@ LOGGER = logging.getLogger(__name__)
 @auth_routes.route('/login', methods=['POST'])
 def login_call():
     login_data = request.json
-    LOGGER.debug(f"Login try for user {login_data['user_name']}")
     login_user = None
     login_user_name = login_data['user_name']
     login_password = login_data['password']
@@ -49,6 +50,8 @@ def login_call():
     except CMDBError as e:
         abort(401, e)
     if correct:
-        login_user.token = get_security_manager(get_pre_init_database()).encrypt_token(login_user)
+        login_user.token = TokenGenerator().generate_token(payload={'user': {
+            'public_id': login_user.get_public_id()
+        }})
         return make_response(login_user)
     abort(401)

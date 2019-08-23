@@ -19,9 +19,9 @@ Different wrapper functions for interface module
 """
 import logging
 from functools import wraps
-from flask import request, abort, redirect, url_for, jsonify
-from jwcrypto.jwt import JWTExpired, JWTNotYetValid
-from jwcrypto.jws import InvalidJWSSignature, InvalidJWSObject
+from flask import request, abort
+
+from cmdb.security.token.validator import TokenValidator
 
 try:
     from cmdb.utils.error import CMDBError
@@ -57,11 +57,8 @@ def login_required(f):
         if auth is None and 'Authorization' in request.headers:
             token = request.headers['Authorization']
             try:
-                from cmdb.utils import get_security_manager
-                from cmdb.data_storage import get_pre_init_database
-                security_manager = get_security_manager(get_pre_init_database())
-                security_manager.decrypt_token(token)
-            except (JWTExpired, JWTNotYetValid, InvalidJWSSignature, InvalidJWSObject):
+                TokenValidator().validate_token(token)
+            except Exception:
                 return abort(401)
             except CMDBError:
                 return abort(401)

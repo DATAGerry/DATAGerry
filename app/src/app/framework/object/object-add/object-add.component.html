@@ -1,4 +1,4 @@
-<h1>Add new object:</h1>
+<h1>Add new object: <strong>{{typeInstance?.label}}</strong></h1>
 <hr/>
 <ng-template [ngIf]="!typeInstance" [ngIfElse]="renderTemplate">
   <form [formGroup]="typeIDForm" novalidate>
@@ -14,7 +14,8 @@
             </ng-template>
           </ng-select>
           <div class="input-group-append">
-            <button class="btn btn-outline-primary" type="submit" [disabled]="!typeIDForm.valid" (click)="useTypeID()">Add
+            <button class="btn btn-outline-primary" type="submit" [disabled]="!typeIDForm.valid" (click)="useTypeID()">
+              Add
             </button>
           </div>
         </div>
@@ -23,7 +24,8 @@
   </form>
 </ng-template>
 <ng-template #renderTemplate>
-  <form [formGroup]="renderForm" id="renderForm" class="needs-validation" novalidate autocomplete="off" (ngSubmit)="saveObject()">
+  <form [formGroup]="renderForm" class="renderForm needs-validation" novalidate autocomplete="off"
+        (ngSubmit)="saveObject()">
     <fieldset>
       <legend>Object status</legend>
       <div class="form-group row">
@@ -38,11 +40,12 @@
         </div>
       </div>
     </fieldset>
-    <cmdb-render [mode]="mode" [fieldsGroups]="fieldsGroups" [renderForm]="renderForm"
+    <cmdb-render [mode]="mode" [renderForm]="renderForm"
                  [typeInstance]="typeInstance"></cmdb-render>
     <div class="btn-group" role="group">
-      <button type="reset" class="btn btn-outline-secondary">RESET</button>
-      <button class="btn btn-outline-success pull-right" type="submit" [disabled]="!renderForm.valid">SAVE</button>
+      <button class="btn btn-outline-success pull-right mr-2" type="submit">Save</button>
+      <button class="btn btn-outline-danger mr-2"
+              routerLink="/framework/object/type/{{typeInstance?.public_id}}">Cancel</button>
     </div>
   </form>
 </ng-template>

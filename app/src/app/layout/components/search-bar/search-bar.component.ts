@@ -48,18 +48,9 @@ export class SearchBarComponent implements OnInit {
     this.typeService.getTypeList().subscribe((list) => {
       this.categoryList = this.categoryList.concat(list);
     }, error => {
-      /*
-      * Here it must be considered how this should be treated
-      * */
       this.route.navigate(['login/']);
     });
     this.autoSearch();
-  }
-
-  public hiden() {
-    setTimeout(() => {
-      this.searchCtrl.setValue('');
-    }, 300);
   }
 
   public autoSearch() {
@@ -92,6 +83,12 @@ export class SearchBarComponent implements OnInit {
         return '<span class="badge badge-secondary">' + match + '</span>';
       });
     }
+  }
+
+  public hiden() {
+    setTimeout(() => {
+      this.searchCtrl.setValue('');
+    }, 300);
   }
 
   public dropdownMenu(element) {

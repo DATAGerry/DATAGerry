@@ -1,0 +1,28 @@
+@import '../../../src/scss/variables';
+
+#login-container {
+  background: #f2f2f2;
+  display: flex;
+  flex-wrap: wrap;
+
+  #login-wrapper {
+    width: 100%;
+    padding-top: 50px;
+    padding-bottom: 50px;
+
+    #login-form{
+      padding: 30px;
+    }
+
+    #datagerry-logo {
+      margin-top: -50px;
+      margin-bottom: -50px;
+      padding: 50px;
+      background: theme-color('primary');
+      img {
+        width: 70%;
+      }
+    }
+
+  }
+}

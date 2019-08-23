@@ -22,7 +22,7 @@ class User(UserManagementBase):
     COLLECTION = 'management.users'
     REQUIRED_INIT_KEYS = ['user_name']
     INDEX_KEYS = [
-        {'keys': [('user_name', UserManagementBase.ASCENDING)], 'user_name': 'user_name', 'unique': True}
+        {'keys': [('user_name', UserManagementBase.ASCENDING)], 'name': 'user_name', 'unique': True}
     ]
 
     def __init__(self, user_name, group_id, registration_time, password=None,

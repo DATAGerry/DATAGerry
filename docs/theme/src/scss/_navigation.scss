@@ -1,0 +1,63 @@
+$sidebar-padding: 20px;
+
+#navigation {
+  padding-top: 20px;
+
+  p.caption {
+    padding-left: $sidebar-padding;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: theme-color('primary');
+  }
+
+  ul {
+    font-size: 14px;
+    padding: 0;
+
+    li {
+      a {
+        display: block;
+        padding-left: $sidebar-padding;
+
+        &:hover {
+          text-decoration: none;
+
+        }
+
+        padding-top: 3px;
+        padding-bottom: 3px;
+      }
+    }
+
+    &.current {
+      > li.current {
+        > a {
+          color: $white;
+          background: theme-color('primary');
+        }
+      }
+    }
+
+    ul {
+      background: $gray-400;
+
+      > li.toctree-l2 {
+        > a {
+          color: $black;
+
+          &.current{
+            background: $gray-600;
+          }
+        }
+      }
+    }
+
+  }
+
+  form{
+    padding-left: $sidebar-padding;
+    padding-right: $sidebar-padding;
+  }
+
+}

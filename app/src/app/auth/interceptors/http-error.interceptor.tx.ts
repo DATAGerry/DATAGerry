@@ -26,16 +26,6 @@ import { AuthService } from '../services/auth.service';
 @Injectable()
 export class HttpErrorInterceptor implements HttpInterceptor {
 
-  private readonly possibleStatusCodeList = [
-    400,
-    403,
-    404,
-    405,
-    406,
-    410,
-    500,
-    501
-  ];
 
   constructor(private router: Router, private authService: AuthService) {
   }
@@ -56,10 +46,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
         // auto logout if 401 response returned from api
         this.authService.logout();
         this.router.navigate(['/auth/login']);
-      } else if (this.possibleStatusCodeList.includes(err.status)) {
-        this.router.navigate([`/error/${err.status}`], errorExtras);
       }
-
       const error = err.error.message || err.statusText;
       return throwError(error);
     }));

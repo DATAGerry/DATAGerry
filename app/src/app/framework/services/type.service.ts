@@ -54,6 +54,10 @@ export class TypeService {
     return this.api.callPostRoute<number>(this.servicePrefix + '/', typeInstance);
   }
 
+  public putType(typeInstance: CmdbType) {
+    return this.api.callPutRoute(this.servicePrefix + '/', typeInstance);
+  }
+
   public deleteType(publicID: number) {
     return this.api.callDeleteRoute<number>(this.servicePrefix + '/' + publicID);
   }

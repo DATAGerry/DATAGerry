@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AfterContentInit, ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { AfterContentInit, ChangeDetectorRef, Component, Input, ViewChild } from '@angular/core';
 import { BuilderComponent } from '../../../builder/builder.component';
 
 @Component({
@@ -26,9 +26,15 @@ import { BuilderComponent } from '../../../builder/builder.component';
 })
 export class TypeFieldsStepComponent implements AfterContentInit {
 
-
   @ViewChild(BuilderComponent, {static: false})
   public typeBuilder: BuilderComponent;
+
+  @Input()
+  set preData(data: any) {
+    if ((data !== undefined) && (this.typeBuilder !== undefined)) {
+      this.typeBuilder.builderConfig = data;
+    }
+  }
 
   public constructor(private cdr: ChangeDetectorRef) {
 

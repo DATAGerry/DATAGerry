@@ -18,19 +18,20 @@
 
 import { Component, Input, OnInit } from '@angular/core';
 import { TypeService } from '../../../../services/type.service';
+import { ConfigEdit } from '../config.edit';
 
 @Component({
   selector: 'cmdb-ref-field-edit',
   templateUrl: './ref-field-edit.component.html',
   styleUrls: ['./ref-field-edit.component.scss']
 })
-export class RefFieldEditComponent implements OnInit {
+export class RefFieldEditComponent extends ConfigEdit implements OnInit {
   @Input() groupList: any;
   @Input() userList: any;
-  @Input() data: any;
   public typeList;
 
   constructor(private typeService: TypeService) {
+    super();
   }
 
   public ngOnInit(): void {

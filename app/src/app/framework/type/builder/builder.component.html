@@ -4,9 +4,9 @@
       <div class="accordion" id="controlsPanel">
         <div class="card">
           <div class="card-header">
-            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#structureControls">
+            <a href="#" class="btn btn-link" data-toggle="collapse" data-target="#structureControls">
               Structure Controls
-            </button>
+            </a>
           </div>
           <div id="structureControls" class="collapse show" data-parent="#controlsPanel">
             <div class="card-body">
@@ -28,9 +28,9 @@
         </div>
         <div class="card">
           <div class="card-header">
-            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#basicControls">
+            <a href="#" class="btn btn-link" data-toggle="collapse" data-target="#basicControls">
               Basic Controls
-            </button>
+            </a>
           </div>
           <div id="basicControls" class="collapse" data-parent="#controlsPanel">
             <div class="card-body">
@@ -52,9 +52,9 @@
         </div>
         <div class="card">
           <div class="card-header">
-            <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#specialControls">
+            <a href="#" class="btn btn-link" data-toggle="collapse" data-target="#specialControls">
               Special Controls
-            </button>
+            </a>
           </div>
           <div id="specialControls" class="collapse" data-parent="#controlsPanel">
             <div class="card-body">
@@ -77,52 +77,13 @@
       </div>
       <div id="builder-controls-action" class="btn-group btn-group-sm mt-2 justify-content-md-center" role="group"
            aria-label="Controls helper buttons">
-        <button id="builder-controls-action-preview" type="button" class="btn btn-secondary"
-                data-toggle="modal" [attr.data-target]="'#renderPreview'">
+        <button id="builder-controls-action-preview" type="button" class="btn btn-secondary" (click)="openPreview()">
           Preview
         </button>
-        <div class="modal fade" id="renderPreview" tabindex="-1" role="dialog">
-          <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">Render Preview</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                Not working right now!
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
         <button id="builder-controls-action-diagnostic" type="button" class="btn btn-secondary"
-                data-toggle="modal" [attr.data-target]="'#renderDiagnostic'">
+                (click)="openDiagnostic()">
           Diagnostic
         </button>
-        <div class="modal fade" id="renderDiagnostic" tabindex="-1" role="dialog">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">Render Diagnostic</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-              <pre>
-                <code>{{ sections | json }}</code>
-              </pre>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -162,7 +123,7 @@
                  dndPlaceholderRef>
               Drop field here
             </div>
-            <ng-container *ngFor="let field of section.fields" dndEffectAllowed="copyMove" dndType="inputs"
+            <div *ngFor="let field of section.fields" dndEffectAllowed="move" dndType="inputs"
                           [dndDraggable]="field"
                           (dndMoved)="onDragged(field, section.fields, 'move')">
 
@@ -183,16 +144,10 @@
                   </span>
                 </div>
                 <div class="card-body collapse" id="{{field.name}}">
-                    <cmdb-config-edit [groupList]="groupList" [userList]="userList" [data]="field"></cmdb-config-edit>
-                    <hr />
-                    <p><strong>Render Preview:</strong></p>
-                    <cmdb-render-element [parentFormGroup]="builderFormGroup" [mode]="mode"
-                                         [data]="field"></cmdb-render-element>
-
-
+                  <cmdb-config-edit [groupList]="groupList" [userList]="userList" [data]="field"></cmdb-config-edit>
                 </div>
               </div>
-            </ng-container>
+            </div>
           </div>
         </div>
       </section>

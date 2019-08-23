@@ -1,21 +1,21 @@
-$cmdb: #b71717; //FABC04 - 6FB31A - b71717 - 893168
+$cmdb-primary: rgb(233, 77, 24);
+$cmdb-secondary: rgb(251, 186, 0);
 $nethinks: #6fb31a;
 $theme-colors: (
-  'primary': $cmdb,
-  'cmdb': $cmdb,
+  'primary': $cmdb-primary,
+  'secondary': $cmdb-secondary,
+  'cmdb-primary': $cmdb-primary,
+  'cmdb-secondary': $cmdb-secondary,
   'nethinks': $nethinks
 );
 $white: #FFFFFF;
-
 
 $border-radius: 0px;
 $border-radius-lg: 0px;
 $border-radius-sm: 0px;
 
-$font-family-sans-serif: 'Fira Sans', 'Helvetica Neue', Arial, sans-serif;
+$font-family-sans-serif: 'Raleway', sans-serif;
 $headings-font-weight: 300;
 
 $alert-border-width: 2px;
 $alert-border-radius: 0px;
-
-//$input-font-size: 1rem * .875

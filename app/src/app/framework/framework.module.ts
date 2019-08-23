@@ -22,6 +22,7 @@ import { FrameworkRoutingModule } from './framework-routing.module';
 import { LayoutModule } from '../layout/layout.module';
 import { TypeService } from './services/type.service';
 import { ObjectService } from './services/object.service';
+import { StatusService } from './services/status.service';
 
 @NgModule({
   imports: [

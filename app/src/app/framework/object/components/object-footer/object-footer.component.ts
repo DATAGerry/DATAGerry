@@ -1,15 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'cmdb-object-footer',
   templateUrl: './object-footer.component.html',
   styleUrls: ['./object-footer.component.scss']
 })
-export class ObjectFooterComponent implements OnInit {
+export class ObjectFooterComponent {
 
-  constructor() { }
-
-  ngOnInit() {
-  }
+  @Input() publicID: number;
 
 }

@@ -110,7 +110,7 @@ def default(obj):
         Returns:
             json format
         """
-    from cmdb.object_framework.cmdb_dao import CmdbDAO
+    from cmdb.framework.cmdb_dao import CmdbDAO
     if isinstance(obj, CmdbDAO):
         return obj.__dict__
     if isinstance(obj, ObjectId):
