@@ -63,9 +63,9 @@ class SetupRoutine:
 
         # generate keys
         LOGGER.info('SETUP ROUTINE: Generate rsa key pair')
-        from cmdb.security.key.generator import KeyGenerator
+
         try:
-            KeyGenerator().generate_rsa_keypair()
+            self.init_keys()
         except Exception as err:
             self.status = SetupRoutine.SetupStatus.ERROR
             raise RuntimeError(
@@ -85,6 +85,36 @@ class SetupRoutine:
         self.status = SetupRoutine.SetupStatus.FINISHED
         LOGGER.info('SETUP ROUTINE: FINISHED!')
         return self.status
+
+    def init_keys(self):
+        from cmdb.security.key.generator import KeyGenerator
+        kg = KeyGenerator()
+        LOGGER.info('KEY ROUTINE: Generate RSA keypair')
+        kg.generate_rsa_keypair()
+        LOGGER.info('KEY ROUTINE: Generate aes key')
+        kg.generate_symmetric_aes_key()
+
+        self.__check_database()
+
+        from cmdb.user_management.user_manager import UserManagement
+        from cmdb.utils.security import SecurityManager
+        scm = SecurityManager(self.setup_database_manager)
+        usm = UserManagement(self.setup_database_manager, scm)
+
+        try:
+            admin_user = usm.get_user(1)
+            LOGGER.warning('KEY ROUTINE: Admin user detected')
+            LOGGER.info(f'KEY ROUTINE: Enter new password for user: {admin_user.get_username()}')
+            admin_pass = str(input('New admin password: '))
+            new_password = scm.generate_hmac(admin_pass)
+            admin_user.password = new_password
+            usm.update_user(admin_user)
+            LOGGER.info(f'KEY ROUTINE: Password was updated for user: {admin_user.get_username()}')
+        except Exception:
+            pass
+
+
+        LOGGER.info('KEY ROUTINE: FINISHED')
 
     def __create_user_management(self):
         from cmdb.user_management.user_manager import UserManagement, User, UserGroup

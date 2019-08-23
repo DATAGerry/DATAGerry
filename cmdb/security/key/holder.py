@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from cmdb.utils.error import CMDBError
-from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.utils.system_reader import SystemConfigReader, SystemSettingsReader
 
 
 class KeyHolder:
@@ -24,35 +24,16 @@ class KeyHolder:
         Args:
             key_directory: key based directory
         """
-        self.key_directory = key_directory or SystemConfigReader.DEFAULT_CONFIG_LOCATION + "/keys"
-        self.rsa_public = self.get_public_pem()
-        self.rsa_private = self.get_private_pem()
+        from cmdb.data_storage import get_pre_init_database
+        self.ssr = SystemSettingsReader(get_pre_init_database())
+        self.rsa_public = self.get_public_key()
+        self.rsa_private = self.get_private_key()
 
     def get_public_key(self):
-        return self.rsa_public
+        return self.ssr.get_value('asymmetric_key', 'security')['public']
 
     def get_private_key(self):
-        return self.rsa_private
-
-    def get_public_pem(self):
-        try:
-            public_pem_render = open(f'{self.key_directory}/token_public.pem', "r")
-        except (FileNotFoundError, FileExistsError):
-            raise RSAKeyNotExists()
-
-        public_pem = public_pem_render.read()
-        public_pem_render.close()
-        return public_pem
-
-    def get_private_pem(self):
-        try:
-            private_pem_reader = open(f'{self.key_directory}/token_private.pem', "r")
-        except (FileNotFoundError, FileExistsError):
-            raise RSAKeyNotExists()
-
-        private_pem = private_pem_reader.read()
-        private_pem_reader.close()
-        return private_pem
+        return self.ssr.get_value('asymmetric_key', 'security')['private']
 
 
 class RSAKeyNotExists(CMDBError):

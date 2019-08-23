@@ -689,6 +689,20 @@ class CmdbObjectManager(CmdbManagerBase):
     def delete_collection_template(self, public_id: int):
         return NotImplementedError
 
+    # Link CRUDS
+
+    def get_links_by_partner(self, public_id: int):
+        return NotImplementedError
+
+    def insert_link(self, data):
+        try:
+            new_link = CmdbLink(**data)
+            ack = self.dbm.insert(CmdbLink.COLLECTION, new_link.to_database())
+        except (CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise ObjectManagerInsertError(err)
+        return ack
+
 
 class ObjectManagerGetError(CMDBError):
 

@@ -14,17 +14,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
 import json
+import logging
 
-from flask import abort, jsonify, request
+from flask import abort, jsonify, request, current_app
+
 from cmdb.framework import CmdbObject
 from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectNotFoundError
-from cmdb.framework.cmdb_render import CmdbRender
 from cmdb.framework.cmdb_object_manager import object_manager
-from cmdb.utils.interface_wraps import login_required
+from cmdb.framework.cmdb_render import CmdbRender
 from cmdb.interface.route_utils import make_response, RootBlueprint
-
+from cmdb.utils.interface_wraps import login_required
 
 try:
     from cmdb.utils.error import CMDBError
@@ -33,6 +33,10 @@ except ImportError:
 
 LOGGER = logging.getLogger(__name__)
 object_rest = RootBlueprint('object_rest', __name__, url_prefix='/object')
+with current_app.app_context():
+    from cmdb.interface.rest_api.object_link_routes import link_rest
+
+    object_rest.register_nested_blueprint(link_rest)
 
 
 # DEFAULT ROUTES

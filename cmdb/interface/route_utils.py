@@ -37,8 +37,12 @@ class NestedBlueprint:
 
 class RootBlueprint(Blueprint):
 
+    def __init__(self, *args, **kwargs):
+        super(RootBlueprint, self).__init__(*args, **kwargs)
+        self.nested_blueprints = []
+
     def register_nested_blueprint(self, nested_blueprint):
-        pass
+        self.nested_blueprints.append(nested_blueprint)
 
 
 def make_response(instance: (CmdbDAO, list, dict), status_code=200):

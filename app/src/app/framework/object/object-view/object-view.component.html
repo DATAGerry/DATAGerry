@@ -3,7 +3,7 @@
     <cmdb-object-header [objectInstance]="objectInstance" [typeInstance]="typeInstance"></cmdb-object-header>
     <cmdb-object-view-render [mode]="mode" [objectInstance]="objectInstance"
                         [typeInstance]="typeInstance"></cmdb-object-view-render>
-    <cmdb-object-footer></cmdb-object-footer>
+    <cmdb-object-footer [publicID]="objectInstance?.public_id"></cmdb-object-footer>
   </div>
   <div id="object-view-sidebar" class="col-md-3">
     <cmdb-object-qr></cmdb-object-qr>
