@@ -23,6 +23,7 @@ import { AuthGuard } from './auth/guards/auth.guard';
 const routes: Routes = [
   {
     path: '',
+    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Dashboard'
     },
@@ -34,6 +35,7 @@ const routes: Routes = [
   },
   {
     path: 'search',
+    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Search'
     },
@@ -41,6 +43,7 @@ const routes: Routes = [
   },
   {
     path: 'file',
+    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'File'
     },
@@ -48,6 +51,7 @@ const routes: Routes = [
   },
   {
     path: 'framework',
+    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Framework'
     },
@@ -55,6 +59,7 @@ const routes: Routes = [
   },
   {
     path: 'user',
+    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'User'
     },
@@ -62,6 +67,7 @@ const routes: Routes = [
   },
   {
     path: 'settings',
+    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Settings'
     },
