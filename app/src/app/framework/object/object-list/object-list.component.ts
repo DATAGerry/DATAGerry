@@ -27,8 +27,10 @@ import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ExportService } from '../../../export/export.service';
 import { CmdbMode } from '../../modes.enum';
-import {FileSaverService} from 'ngx-filesaver';
-import {DatePipe} from '@angular/common';
+import { FileSaverService } from 'ngx-filesaver';
+import { DatePipe } from '@angular/common';
+import { CmdbType } from '../../models/cmdb-type';
+import { TypeService } from '../../services/type.service';
 
 @Component({
   selector: 'cmdb-object-list',
@@ -57,7 +59,7 @@ export class ObjectListComponent implements OnDestroy {
   constructor(private apiCallService: ApiCallService, private objService: ObjectService,
               private exportService: ExportService, private route: ActivatedRoute, private router: Router,
               private spinner: NgxSpinnerService, private fileSaverService: FileSaverService,
-              private datePipe: DatePipe) {
+              private datePipe: DatePipe, private typeService: TypeService) {
     this.route.params.subscribe((id) => {
       this.init(id);
     });
@@ -78,6 +80,7 @@ export class ObjectListComponent implements OnDestroy {
       url = url + 'type/' + id;
       this.typeID = id;
       this.hasSummaries = true;
+      this.typeService.getType(id).subscribe((data: CmdbType) => this.pageTitle = data.label + ' list');
     }
 
     this.apiCallService.callGetRoute(url)
@@ -87,11 +90,6 @@ export class ObjectListComponent implements OnDestroy {
           this.summaries = lenx > 0 ? dataArray[0].summaries : [];
           this.columnFields = lenx > 0 ? dataArray[0].fields : [];
           this.items = lenx > 0 ? dataArray : [];
-
-          if (this.hasSummaries && lenx > 0) {
-            this.pageTitle = dataArray[0].label + ' List';
-          }
-
           return [{items: this.items, columnFields: this.columnFields}];
         })
       )
