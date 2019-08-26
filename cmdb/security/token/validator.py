@@ -13,9 +13,16 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 from authlib.jose import jwt, JWT
+from authlib.jose.errors import BadSignatureError
 
 from cmdb.security.key.holder import KeyHolder
+
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
 
 
 class TokenValidator:
@@ -24,4 +31,14 @@ class TokenValidator:
         self.key_holder = KeyHolder()
 
     def validate_token(self, token: (JWT, str, dict)):
-        return jwt.decode(s=token, key=self.key_holder.get_public_key())
+        try:
+            decoded_token = jwt.decode(s=token, key=self.key_holder.get_public_key())
+        except BadSignatureError as err:
+            raise ValidationError(err)
+        return decoded_token
+
+
+class ValidationError(CMDBError):
+
+    def __init__(self, message):
+        self.message = f'Error while decode the token operation - E: ${message}'
