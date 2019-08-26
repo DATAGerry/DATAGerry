@@ -1,0 +1,8 @@
+<form [formGroup]="linkAddForm" (ngSubmit)="addLink()" class="form-inline">
+  <div class="form-group">
+    <label >Add new object link to object with ID:</label>
+    <input type="text" formControlName="secondary" class="form-control mx-sm-3">
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
+</form>
+
