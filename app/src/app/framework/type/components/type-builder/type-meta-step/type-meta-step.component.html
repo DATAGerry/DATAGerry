@@ -5,43 +5,15 @@
         Summaries
       </div>
       <div class="card-body">
-        <form [formGroup]="summariesForm" (ngSubmit)="addSummary()" class="needs-validation" novalidate
+        <form [formGroup]="summariesForm"  class="needs-validation" novalidate
               autocomplete="off">
-          <div class="form-group">
-            <label>Name</label>
-            <input type="text" formControlName="name" class="form-control"
-                   [ngClass]="{ 'is-valid': summary_name.valid && (summary_name.dirty || summary_name.touched),
-                 'is-invalid': summary_name.invalid && (summary_name.dirty || summary_name.touched)}" lowercase
-                   required>
-            <div *ngIf="summary_name.invalid && (summary_name.dirty || summary_name.touched)"
-                 class="invalid-feedback">
-              <div class="float-right" *ngIf="summary_name.errors.required">
-                Name is required.
-              </div>
-              <div class="float-right" *ngIf="summary_name.errors.nameAlreadyTaken">
-                A summary with this name already exists.
-              </div>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Label</label>
-            <input type="text" formControlName="label" class="form-control"
-                   [ngClass]="{ 'is-valid': summary_label.valid && (summary_label.dirty || summary_label.touched),
-                 'is-invalid': summary_label.invalid && (summary_label.dirty || summary_label.touched)}" required>
-            <div *ngIf="summary_label.invalid && (summary_label.dirty || summary_label.touched)"
-                 class="invalid-feedback">
-              <div class="float-right" *ngIf="summary_label.errors.required">
-                Label is required.
-              </div>
-            </div>
-          </div>
           <div class="form-group">
             <label>Fields</label>
             <ng-select [items]="fields" [multiple]="true" [searchable]="false" bindLabel="label"
-                       bindValue="name" placeholder="Select fields" formControlName="fields">
+                       bindValue="name" placeholder="Select fields" formControlName="fields"
+                       (blur)="addSummary()">
             </ng-select>
           </div>
-          <button [disabled]="!summariesForm.valid" type="submit" class="btn btn-primary">Add</button>
         </form>
       </div>
     </div>
