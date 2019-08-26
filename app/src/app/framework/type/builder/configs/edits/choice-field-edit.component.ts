@@ -28,18 +28,21 @@ export class ChoiceFieldEditComponent extends ConfigEdit implements OnInit {
 
   @Input() groupList: any;
   @Input() userList: any;
-  public options = [];
+  public options: any[] = [];
 
   constructor() {
     super();
-    this.options.push({
-      name: 'option-1',
-      label: 'Option 1'
-    });
   }
 
   public ngOnInit(): void {
-    this.data.options = this.options;
+    if (this.data.options === undefined || !Array.isArray(this.data.options)) {
+      this.options.push({
+        name: `option-${(this.options.length + 1)}`,
+        label: `Option ${(this.options.length + 1)}`
+      });
+      this.data.options = this.options;
+    }
+    this.options = this.data.options;
   }
 
   public addOption() {
@@ -47,6 +50,15 @@ export class ChoiceFieldEditComponent extends ConfigEdit implements OnInit {
       name: `option-${(this.options.length + 1)}`,
       label: `Option ${(this.options.length + 1)}`
     });
+  }
+
+  public delOption(value: any) {
+    if (this.options.length > 1) {
+      const index = this.options.indexOf(value, 0);
+      if (index > -1) {
+        this.options.splice(index, 1);
+      }
+    }
   }
 
 }
