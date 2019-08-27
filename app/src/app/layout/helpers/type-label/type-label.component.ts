@@ -16,27 +16,47 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { CmdbType } from '../../../framework/models/cmdb-type';
 
 @Component({
-  selector: 'cmdb-content-header',
-  templateUrl: './content-header.component.html',
-  styleUrls: ['./content-header.component.scss']
+  selector: 'cmdb-type-label',
+  templateUrl: './type-label.component.html',
+  styleUrls: ['./type-label.component.scss']
 })
-export class ContentHeaderComponent {
+export class TypeLabelComponent implements OnInit {
 
-  @Input() public title: string;
-  @Input() public separator: boolean = true;
+  private label: string;
+  private icon: string;
+  private type: CmdbType;
 
-  public currentIcon: string;
+  ngOnInit() {
+  }
+
+  @Input()
+  public set typeInstance(value: CmdbType) {
+    this.type = value;
+  }
+
+  public get typeInstance(): CmdbType {
+    return this.type;
+  }
+
+  @Input()
+  public set title(value: string) {
+    this.label = value === undefined ? '' : value;
+  }
+
+  public get title(): string {
+    return this.label;
+  }
 
   @Input()
   public set faIcon(value: string) {
-    this.currentIcon = value === undefined ? 'fa-cube' : value;
+    this.icon = value === undefined ? 'fa-cube' : value;
   }
 
   public get faIcon(): string {
-    return this.currentIcon;
+    return this.icon;
   }
-
 }

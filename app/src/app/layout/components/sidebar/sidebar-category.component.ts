@@ -40,15 +40,18 @@ export class SidebarCategoryComponent implements OnInit {
     this.categoryPopUp = [];
     for (const typeID of categoryTypeList) {
       let currentTypeLabel = '';
+      let currentTypeIcon = '';
       let amount = '';
       this.api.callGetRoute('type/' + typeID).subscribe((data: CmdbType) => {
         currentTypeLabel = data.label;
+        currentTypeIcon = data.render_meta.icon;
         this.api.callGetRoute('object/count/' + typeID).subscribe(ack => {
           amount = ack;
           const popUp = {
             id: typeID,
             label: currentTypeLabel,
-            count: amount
+            count: amount,
+            icon: currentTypeIcon
           };
           this.categoryPopUp.push(popUp);
         });

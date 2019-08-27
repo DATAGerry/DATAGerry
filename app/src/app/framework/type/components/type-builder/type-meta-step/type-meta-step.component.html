@@ -68,7 +68,7 @@
           </div>
           <div class="form-group">
             <label>Icon</label>
-            <ng-select [items]="icons" groupBy="avatar" formControlName="icon">
+            <ng-select [items]="icons" formControlName="icon">
               <ng-template ng-label-tmp let-item="item">
                 <i class="fa {{item}}"></i> {{item}}
               </ng-template>

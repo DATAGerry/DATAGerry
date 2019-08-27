@@ -6,7 +6,7 @@
     <cmdb-object-footer [publicID]="objectInstance?.public_id"></cmdb-object-footer>
   </div>
   <div id="object-view-sidebar" class="col-md-3">
-    <cmdb-object-qr></cmdb-object-qr>
+    <cmdb-object-type-label [typeInstance]="typeInstance"></cmdb-object-type-label>
     <cmdb-object-externals [objectInstance]="objectInstance"></cmdb-object-externals>
     <cmdb-object-actions [objectInstance]="objectInstance" [typeInstance]="typeInstance"></cmdb-object-actions>
   </div>

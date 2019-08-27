@@ -17,26 +17,24 @@
 */
 
 import { Component, Input } from '@angular/core';
+import { CmdbType } from '../../../models/cmdb-type';
 
 @Component({
-  selector: 'cmdb-content-header',
-  templateUrl: './content-header.component.html',
-  styleUrls: ['./content-header.component.scss']
+  selector: 'cmdb-object-type-label',
+  templateUrl: './object-type-label.component.html',
+  styleUrls: ['./object-type-label.component.scss']
 })
-export class ContentHeaderComponent {
+export class ObjectTypeLabelComponent {
 
-  @Input() public title: string;
-  @Input() public separator: boolean = true;
-
-  public currentIcon: string;
+  private currentType: CmdbType;
 
   @Input()
-  public set faIcon(value: string) {
-    this.currentIcon = value === undefined ? 'fa-cube' : value;
+  public set typeInstance(value: CmdbType) {
+    this.currentType = value;
   }
 
-  public get faIcon(): string {
-    return this.currentIcon;
+  public get typeInstance() {
+    return this.currentType;
   }
 
 }

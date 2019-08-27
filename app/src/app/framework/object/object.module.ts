@@ -42,11 +42,12 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectViewRenderComponent } from './components/object-view-render/object-view-render.component';
 import { ObjectCopyComponent } from './object-copy/object-copy.component';
 import { ObjectLinksComponent } from './components/object-links/object-links.component';
+import { ObjectTypeLabelComponent } from './components/object-type-label/object-type-label.component';
 
 @NgModule({
   declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent, ObjectSummaryComponent,
     ObjectExternalsComponent, ObjectAddComponent, ObjectFooterComponent, ObjectActionsComponent, ObjectViewRenderComponent,
-    ObjectViewMetaComponent, ObjectEditComponent, ObjectCopyComponent, ObjectLinksComponent],
+    ObjectViewMetaComponent, ObjectEditComponent, ObjectCopyComponent, ObjectLinksComponent, ObjectTypeLabelComponent],
   imports: [
     CommonModule,
     ObjectRoutingModule,

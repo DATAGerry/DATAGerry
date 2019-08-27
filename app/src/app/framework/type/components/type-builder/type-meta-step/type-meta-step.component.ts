@@ -38,18 +38,10 @@ export class TypeMetaStepComponent implements OnInit {
     this.externalsForm = new FormGroup({
       name: new FormControl('', [Validators.required, this.listNameValidator(this.externalLinks)]),
       label: new FormControl('', Validators.required),
-      icon: new FormControl(''),
+      icon: new FormControl('fa-external-link'),
       href: new FormControl('', [Validators.required]),
       fields: new FormControl('')
     });
-  }
-
-  public get summary_name() {
-    return this.summariesForm.get('name');
-  }
-
-  public get summary_label() {
-    return this.summariesForm.get('label');
   }
 
   public get external_name() {
