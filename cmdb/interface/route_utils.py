@@ -81,7 +81,7 @@ def insert_request_user(func):
         except ValidationError:
             return abort(401)
         try:
-            user_id = decrypted_token['dataGerry']['value']['user']['public_id']
+            user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
         except ValueError:
             return abort(401)
         user = user_manager.get_user(user_id)
