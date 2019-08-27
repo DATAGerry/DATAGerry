@@ -26,15 +26,6 @@ import { CmdbType } from '../../../models/cmdb-type';
 })
 export class ObjectTypeLabelComponent {
 
-  private currentType: CmdbType;
-
-  @Input()
-  public set typeInstance(value: CmdbType) {
-    this.currentType = value;
-  }
-
-  public get typeInstance() {
-    return this.currentType;
-  }
+  @Input() public typeInformation: any;
 
 }

@@ -26,8 +26,8 @@ import { CmdbType } from '../../../framework/models/cmdb-type';
 })
 export class TypeLabelComponent implements OnInit {
 
-  private label: string;
-  private icon: string;
+  public label: string;
+  public icon: string;
   private type: CmdbType;
 
   ngOnInit() {
