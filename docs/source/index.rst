@@ -1,5 +1,5 @@
 +++++++++++++++++++++++
-dataGerry Documentation
+DATAGERRY Documentation
 +++++++++++++++++++++++
 
 DATAGERRY is an enterprise-grade OpenSource CMDB, which completely leaves the

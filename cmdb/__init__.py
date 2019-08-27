@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,11 +15,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-dataGerry is a flexible asset management tool and
+DATAGERRY is a flexible asset management tool and
 open-source configurable management database
 """
 
-__title__ = 'dataGerry'
+__title__ = 'DATAGERRY'
 __version__ = '1.0.0'
 __author__ = 'NETHINKS GmbH'
 __license__ = 'AGPLv3'

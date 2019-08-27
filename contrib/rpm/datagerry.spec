@@ -1,13 +1,13 @@
-Name:       dataGerry
+Name:       DATAGERRY
 Version:	1.0.0
 Release:	1%{?dist}
-Summary:	dataGerry is an enterprise-grade OpenSource CMDB, which completely leaves the definition of object types to the user.
+Summary:	DATAGERRY is an enterprise-grade OpenSource CMDB, which completely leaves the definition of object types to the user.
 
 Group:		Applications/Databases
 License:	AGPLv3
 URL:		https://www.datagerry.org
 Vendor:     NETHINKS GmbH
-Source0:	https://github.com/NETHINKS/dataGerry
+Source0:	https://github.com/NETHINKS/DATAGERRY
 
 %description
 A CMDB is a database which includes all informations about objects 
@@ -17,13 +17,13 @@ between objects are stored (i.e. server a is placed on location b).
 Available solutions tend to be shipped with predefined object types, 
 that often can only be customized with big efforts.
 
-dataGerry is an enterprise-grade OpenSource CMDB, where object types 
+DATAGERRY is an enterprise-grade OpenSource CMDB, where object types
 can be completely defined by the user and can be adapted at runtime. 
 The stored data can be used in different ways, i.e. for automated 
 export to external systems, an intelligent search within the data, 
 or a reporting. All functions are implemented with the generic and 
 the custom definition of object types in mind. With a plugin system, 
-dataGerry can be extended easily - also by experienced users.
+DATAGERRY can be extended easily - also by experienced users.
 
 
 %pre

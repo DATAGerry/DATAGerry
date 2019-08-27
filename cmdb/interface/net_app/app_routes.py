@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,11 +15,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-Blueprint for dataGerryApp routes
+Blueprint for DATAGERRYApp routes
 """
 from flask import Blueprint
 
-app_pages = Blueprint("app_pages", __name__, static_folder="dataGerryApp", static_url_path="")
+app_pages = Blueprint("app_pages", __name__, static_folder="DATAGERRYApp", static_url_path="")
 
 
 @app_pages.route('/')

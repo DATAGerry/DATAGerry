@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -36,8 +36,8 @@ import { DataTablesModule } from 'angular-datatables';
 import { ToastContainerComponent } from './helpers/toast/toast-container.component';
 import { NgbActiveModal, NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from './helpers/modal/modal.component';
-import { ToastService } from './services/toast.service';
-import {TableModule} from "./components/table/table.module";
+import { TableModule } from './components/table/table.module';
+import { TypeLabelComponent } from './helpers/type-label/type-label.component';
 
 @NgModule({
   declarations: [
@@ -52,7 +52,8 @@ import {TableModule} from "./components/table/table.module";
     SearchBarComponent,
     TableComponent,
     ToastContainerComponent,
-    ModalComponent
+    ModalComponent,
+    TypeLabelComponent
   ],
   exports: [
     NavigationComponent,
@@ -63,7 +64,8 @@ import {TableModule} from "./components/table/table.module";
     SearchBarComponent,
     LowercaseDirective,
     TableComponent,
-    ToastContainerComponent
+    ToastContainerComponent,
+    TypeLabelComponent
   ],
   imports: [
     CommonModule,

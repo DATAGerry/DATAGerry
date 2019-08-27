@@ -20,6 +20,9 @@ export class TypeMetaStepComponent implements OnInit {
     if (data !== undefined) {
       if (data.render_meta !== undefined) {
         this.summariesSections = data.render_meta.summary;
+        if (this.summariesSections != null && this.summariesSections.length > 0) {
+          this.summariesForm.disable();
+        }
         this.externalLinks = data.render_meta.external;
       }
     }
@@ -27,26 +30,18 @@ export class TypeMetaStepComponent implements OnInit {
 
   constructor() {
     this.summariesForm = new FormGroup({
-      name: new FormControl('', [Validators.required, this.listNameValidator(this.summariesSections)]),
-      label: new FormControl('', Validators.required),
+      name: new FormControl('summaries', [Validators.required, this.listNameValidator(this.summariesSections)]),
+      label: new FormControl('Summaries', Validators.required),
       fields: new FormControl('', Validators.required)
     });
 
     this.externalsForm = new FormGroup({
       name: new FormControl('', [Validators.required, this.listNameValidator(this.externalLinks)]),
       label: new FormControl('', Validators.required),
-      icon: new FormControl(''),
+      icon: new FormControl('fa-external-link'),
       href: new FormControl('', [Validators.required]),
       fields: new FormControl('')
     });
-  }
-
-  public get summary_name() {
-    return this.summariesForm.get('name');
-  }
-
-  public get summary_label() {
-    return this.summariesForm.get('label');
   }
 
   public get external_name() {
@@ -699,7 +694,11 @@ export class TypeMetaStepComponent implements OnInit {
   }
 
   public addSummary() {
+    this.summariesSections = [];
+    this.summariesForm.get('name').setValue('summaries');
+    this.summariesForm.get('label').setValue('Summaries');
     this.summariesSections.push(this.summariesForm.value);
+    this.summariesForm.disable();
     this.summariesForm.reset();
   }
 
@@ -717,6 +716,7 @@ export class TypeMetaStepComponent implements OnInit {
     }
     this.summariesForm.get('name').clearValidators();
     this.summariesForm.get('name').setValidators(this.listNameValidator(this.summariesSections));
+    this.summariesForm.enable();
   }
 
   public addExternal() {

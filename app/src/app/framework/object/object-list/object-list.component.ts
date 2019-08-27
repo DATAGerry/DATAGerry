@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -49,6 +49,7 @@ export class ObjectListComponent implements OnDestroy {
   private columnFields: [] = [];
   private items: any[] = [];
   public pageTitle: string = 'List';
+  public faIcon: string;
   public objectLists: {};
   public hasSummaries: boolean = false;
   public formatList: any[] = [];
@@ -80,7 +81,10 @@ export class ObjectListComponent implements OnDestroy {
       url = url + 'type/' + id;
       this.typeID = id;
       this.hasSummaries = true;
-      this.typeService.getType(id).subscribe((data: CmdbType) => this.pageTitle = data.label + ' list');
+      this.typeService.getType(id).subscribe((data: CmdbType) => {
+        this.faIcon = data.render_meta.icon;
+        this.pageTitle = data.label + ' list';
+      });
     }
 
     this.apiCallService.callGetRoute(url)

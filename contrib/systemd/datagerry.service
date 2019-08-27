@@ -1,5 +1,5 @@
 [Unit]
-Description=dataGerry - Enterprise grade OpenSource CMDB
+Description=DATAGERRY - Enterprise grade OpenSource CMDB
 After=network.target
 
 [Service]
