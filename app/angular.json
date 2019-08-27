@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "dataGerryApp": {
+    "DATAGERRYApp": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/dataGerryApp",
+            "outputPath": "dist/DATAGERRYApp",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -76,18 +76,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "dataGerryApp:build"
+            "browserTarget": "DATAGERRYApp:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "dataGerryApp:build:production"
+              "browserTarget": "DATAGERRYApp:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "dataGerryApp:build"
+            "browserTarget": "DATAGERRYApp:build"
           }
         },
         "test": {
@@ -121,7 +121,7 @@
         }
       }
     },
-    "dataGerryApp-e2e": {
+    "DATAGERRYApp-e2e": {
       "root": "e2e/",
       "projectType": "application",
       "prefix": "",
@@ -130,11 +130,11 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "dataGerryApp:serve"
+            "devServerTarget": "DATAGERRYApp:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "dataGerryApp:serve:production"
+              "devServerTarget": "DATAGERRYApp:serve:production"
             }
           }
         },
@@ -150,5 +150,5 @@
       }
     }
   },
-  "defaultProject": "dataGerryApp"
+  "defaultProject": "DATAGERRYApp"
 }
