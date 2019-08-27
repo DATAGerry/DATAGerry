@@ -1,0 +1,36 @@
+<h1>Latest</h1>
+<hr/>
+
+<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-center table-striped table-bordered">
+  <thead>
+  <tr>
+    <th>Active</th>
+    <th>Public ID</th>
+    <th>Type</th>
+    <th>Author</th>
+    <th>Creation time</th>
+    <th>Action</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let latestItem of latest">
+    <td>
+      <cmdb-active-badge [activeStatus]="latestItem.object_information.active"></cmdb-active-badge>
+    </td>
+    <th scope="row">{{latestItem.object_information.object_id}}</th>
+    <td>{{latestItem.type_information.type_name}}</td>
+    <td>{{latestItem.object_information.author_name}}</td>
+    <td>{{latestItem.object_information.creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
+    <td class="action-button-column">
+      <a class="text-dark" routerLink="/framework/object/view/{{latestItem.object_information.object_id}}">
+        <i class="fa fa-eye"></i>
+      </a>
+      <a class="ml-1 text-dark" routerLink="/framework/object/edit/{{latestItem.object_information.object_id}}">
+        <i class="fa fa-pencil-square-o"></i>
+      </a>
+      <a class="ml-1 text-dark" routerLink="/framework/object/delete/{{latestItem.object_information.object_id}}">
+        <i class="fa fa-trash-o"></i></a>
+    </td>
+  </tr>
+  </tbody>
+</table>

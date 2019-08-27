@@ -16,16 +16,28 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
-import { RenderResult } from '../../../models/cmdb-render';
+import { Injectable } from '@angular/core';
+import { ApiCallService, ApiService } from '../../../services/api-call.service';
+import { RenderResult } from '../../models/cmdb-render';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-@Component({
-  selector: 'cmdb-object-externals',
-  templateUrl: './object-externals.component.html',
-  styleUrls: ['./object-externals.component.scss']
+@Injectable({
+  providedIn: 'root'
 })
-export class ObjectExternalsComponent {
+export class RenderService<T = RenderResult> implements ApiService {
 
-  @Input() renderResult: RenderResult = undefined;
+  public servicePrefix: string = 'render';
+
+  public constructor(private api: ApiCallService) {
+  }
+
+  public getRenderResult(publicID: number): Observable<T> {
+    return this.api.callGet<T>(`${this.servicePrefix}/${publicID}`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
 
 }

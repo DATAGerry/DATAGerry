@@ -26,7 +26,7 @@ import { ToastService } from '../../../../layout/services/toast.service';
 })
 export class ObjectSummaryComponent {
 
-  @Input() objectInstance: any = [];
+  @Input() summaries: any = [];
 
   public constructor(private toast: ToastService) {}
 

@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.cmdb_errors import FieldNotFoundError
 
@@ -39,12 +40,11 @@ class CmdbObject(CmdbDAO):
         'fields',
         'status',
         'version',
-        'last_edit_time',
-        'views'
+        'last_edit_time'
     ]
 
     def __init__(self, type_id, creation_time, author_id, active, fields, last_edit_time=None, status: int = None,
-                 views: int = 0, version: str = '1.0.0', **kwargs):
+                 version: str = '1.0.0', **kwargs):
         """init of object
 
         Args:
@@ -54,7 +54,6 @@ class CmdbObject(CmdbDAO):
             author_id: public id of author
             last_edit_time: last date of editing
             active: object activation status
-            views: numbers of views
             fields: data inside fields
             logs: object log
             **kwargs: additional data
@@ -66,7 +65,6 @@ class CmdbObject(CmdbDAO):
         self.author_id = author_id
         self.last_edit_time = last_edit_time
         self.active = active
-        self.views = int(views)
         self.fields = fields
         super(CmdbObject, self).__init__(**kwargs)
 

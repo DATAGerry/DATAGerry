@@ -46,12 +46,11 @@ with current_app.app_context():
 def get_object_list():
     try:
         all_objects_list = object_manager.get_all_objects()
-        all_objects = preparation_for_render(all_objects_list)
 
     except CMDBError:
         return abort(400)
 
-    resp = make_response(CmdbRender.result_loop_render(object_manager, all_objects))
+    resp = make_response(all_objects_list)
     return resp
 
 
@@ -268,48 +267,3 @@ def delete_many_objects(public_ids):
         return jsonify(message='Delete Error', error=e.message)
     except CMDBError:
         return abort(500)
-
-
-# SPECIAL ROUTES
-@object_rest.route('/newest/', methods=['GET'])
-@login_required
-def get_newest_objects():
-    newest_objects_list = object_manager.get_objects_by(sort='creation_time',
-                                                        limit=25,
-                                                        active={"$eq": True},
-                                                        creation_time={'$ne': None})
-    newest_objects = preparation_for_render(newest_objects_list)
-    resp = make_response(CmdbRender.result_loop_render(object_manager, newest_objects))
-    return resp
-
-
-@object_rest.route('/latest/', methods=['GET'])
-@login_required
-def get_latest_objects():
-    last_objects_list = object_manager.get_objects_by(sort='last_edit_time',
-                                                      limit=25,
-                                                      active={"$eq": True},
-                                                      last_edit_time={'$ne': None})
-    last_objects = preparation_for_render(last_objects_list)
-    resp = make_response(CmdbRender.result_loop_render(object_manager, last_objects))
-    return resp
-
-
-def preparation_for_render(objects_list):
-    type_buffer_list = {}
-    preparation_objects = []
-    for passed_object in objects_list:
-        global current_type
-        current_type = None
-        passed_object_type_id = passed_object.get_type_id()
-        if passed_object_type_id in type_buffer_list:
-            current_type = type_buffer_list[passed_object_type_id]
-        else:
-            try:
-                current_type = object_manager.get_type(passed_object_type_id)
-                type_buffer_list.update({passed_object_type_id: current_type})
-            except CMDBError:
-                return abort(400)
-        tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
-        preparation_objects.append(tmp_render)
-    return preparation_objects

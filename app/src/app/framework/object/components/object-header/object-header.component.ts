@@ -17,8 +17,7 @@
 */
 
 import { Component, Input } from '@angular/core';
-import { CmdbObject } from '../../../models/cmdb-object';
-import { CmdbType } from '../../../models/cmdb-type';
+import { RenderResult } from '../../../models/cmdb-render';
 
 @Component({
   selector: 'cmdb-object-header',
@@ -27,7 +26,6 @@ import { CmdbType } from '../../../models/cmdb-type';
 })
 export class ObjectHeaderComponent {
 
-  @Input() public objectInstance: CmdbObject;
-  @Input() public typeInstance: CmdbType;
+  @Input() public renderResult: RenderResult;
 
 }

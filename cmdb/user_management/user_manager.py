@@ -66,13 +66,6 @@ class UserManagement:
             raise NoUserFoundExceptions(public_id)
         return User(**result)
 
-    @staticmethod
-    def get_user_by_id(self, public_id: int):
-        result = self.dbm.find_one(collection=User.COLLECTION, public_id=public_id)
-        if not result:
-            raise NoUserFoundExceptions(public_id)
-        return result
-
     def get_all_users(self):
         user_list = []
         for founded_user in self.dbm.find_all(collection=User.COLLECTION):
@@ -83,21 +76,12 @@ class UserManagement:
                 continue
         return user_list
 
-    @staticmethod
-    def get_all_users_as_dict(self) -> dict:
-        return self.dbm.find_all(collection=User.COLLECTION, )
-
     def get_user_by_name(self, user_name) -> User:
         formatted_filter = {'user_name': user_name}
         try:
             return User(**self.dbm.find_one_by(collection=User.COLLECTION, filter=formatted_filter))
         except NoDocumentFound:
             raise NoUserFoundExceptions(user_name)
-
-    def get_user_from_token(self, token) -> User:
-        import json
-        decrypted_token = json.loads(self.scm.decrypt_token(token).decode('UTF-8'))
-        return self.get_user(decrypted_token['public_id'])
 
     def insert_user(self, user: User) -> int:
         try:

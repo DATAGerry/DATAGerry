@@ -24,6 +24,8 @@ import { ObjectService } from '../../services/object.service';
 import { CmdbType } from '../../models/cmdb-type';
 import { TypeService } from '../../services/type.service';
 import { CmdbMode } from '../../modes.enum';
+import { RenderService } from '../../render/service/render.service';
+import { RenderResult } from '../../models/cmdb-render';
 
 @Component({
   selector: 'cmdb-object-view',
@@ -34,10 +36,9 @@ export class ObjectViewComponent implements OnInit {
 
   public mode: CmdbMode = CmdbMode.View;
   private objectID: number;
-  public objectInstance: CmdbObject;
-  public typeInstance: CmdbType;
+  public renderResult: RenderResult;
 
-  constructor(private api: ApiCallService, private objectService: ObjectService, private typeService: TypeService,
+  constructor(private api: ApiCallService, public renderService: RenderService,
               private activateRoute: ActivatedRoute) {
     this.activateRoute.params.subscribe((params) => {
       this.objectID = params.publicID;
@@ -47,14 +48,10 @@ export class ObjectViewComponent implements OnInit {
 
   public ngOnInit(): void {
     // RenderResult
-    this.objectService.getObject(this.objectID).subscribe((objectInstanceResp: CmdbObject) => {
-      this.objectInstance = objectInstanceResp;
+    this.renderService.getRenderResult(this.objectID).subscribe((result: RenderResult) => {
+      this.renderResult = result;
     }, (error) => {
       console.error(error);
-    }, () => {
-      this.typeService.getType(this.objectInstance.type_id).subscribe((typeInstanceResp: CmdbType) => {
-        this.typeInstance = typeInstanceResp;
-      });
     });
   }
 

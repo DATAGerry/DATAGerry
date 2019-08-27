@@ -23,9 +23,9 @@ import { DashboardRoutingModule } from './dashboard-routing.module';
 import { DashboardComponent } from './dashboard.component';
 import { LayoutModule } from '../layout/layout.module';
 import { DashcardComponent } from './components/dashcard/dashcard.component';
-import { NewestViewComponent } from './components/newest-view/newest-view.component';
+import { NewestViewComponent } from './newest-view/newest-view.component';
 import { DataTablesModule } from 'angular-datatables';
-import { LatestChangesViewComponent } from './components/latest-changes-view/latest-changes-view.component';
+import { LatestChangesViewComponent } from './latest-changes-view/latest-changes-view.component';
 import { ObjectModule } from '../framework/object/object.module';
 
 @NgModule({

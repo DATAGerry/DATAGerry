@@ -1,6 +1,6 @@
 <table id="summaries-table" class="table table-hover">
   <tbody>
-  <tr *ngFor="let sum of objectInstance?.summaries; let i = index">
+  <tr *ngFor="let sum of summaries; let i = index">
     <th scope="row">{{sum.label}}</th>
     <td>
       <ng-container *ngFor="let vals of sum.values">

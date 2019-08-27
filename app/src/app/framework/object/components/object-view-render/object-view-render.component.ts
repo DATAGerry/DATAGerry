@@ -21,6 +21,7 @@ import { CmdbMode } from '../../../modes.enum';
 import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbObject } from '../../../models/cmdb-object';
 import { FormGroup } from '@angular/forms';
+import { RenderResult } from '../../../models/cmdb-render';
 
 @Component({
   selector: 'cmdb-object-view-render',
@@ -30,8 +31,8 @@ import { FormGroup } from '@angular/forms';
 export class ObjectViewRenderComponent {
 
   @Input() public mode: CmdbMode = CmdbMode.View;
-  @Input() public objectInstance: CmdbObject;
-  @Input() public typeInstance: CmdbType;
+  @Input() public renderResult: RenderResult;
+
   public renderForm: FormGroup;
   public fieldsGroups: FormGroup;
 

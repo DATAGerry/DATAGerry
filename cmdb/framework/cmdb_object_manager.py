@@ -202,8 +202,8 @@ class CmdbObjectManager(CmdbManagerBase):
                     public_id=public_id
                 )
             )
-        except (CMDBError, Exception):
-            raise ObjectNotFoundError(obj_id=public_id)
+        except (CMDBError, Exception) as err:
+            raise ObjectManagerGetError(err.message)
 
     def get_objects(self, public_ids: list):
         object_list = []

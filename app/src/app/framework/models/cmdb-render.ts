@@ -16,16 +16,31 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
-import { RenderResult } from '../../../models/cmdb-render';
-
-@Component({
-  selector: 'cmdb-object-externals',
-  templateUrl: './object-externals.component.html',
-  styleUrls: ['./object-externals.component.scss']
-})
-export class ObjectExternalsComponent {
-
-  @Input() renderResult: RenderResult = undefined;
-
+export class RenderResult {
+  // tslint:disable:variable-name
+  public current_render_time: string;
+  public object_information: {
+    object_id: number;
+    creation_time: string;
+    author_id: number;
+    author_name: string;
+    active: boolean;
+    version: string;
+  };
+  public type_information: {
+    type_id: number;
+    type_name: string;
+    type_label: string;
+    creation_time: string;
+    author_id: number;
+    author_name: string;
+    active: boolean;
+    version: string;
+  };
+  public render_information: {};
+  public fields: any[];
+  public sections: any[];
+  public summaries: any[];
+  public externals: any[];
+  // tslint:enable:variable-name
 }

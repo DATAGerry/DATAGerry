@@ -16,33 +16,36 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnInit} from '@angular/core';
-import { ApiCallService } from '../../../services/api-call.service';
-import {TableColumnAction} from '../../../layout/components/table/models/table-columns-action';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { ApiCallService, ApiService } from '../../services/api-call.service';
+import { CmdbDao } from '../models/cmdb-dao';
 
-@Component({
-  selector: 'cmdb-newest-view',
-  templateUrl: './newest-view.component.html',
-  styleUrls: ['./newest-view.component.scss']
+
+@Injectable({
+  providedIn: 'root'
 })
-
-export class NewestViewComponent implements OnInit {
-
-  @Input() thColumnsActions: TableColumnAction[];
-  public newest: [];
-  readonly url = 'object/newest/';
+export class SpecialService<T = CmdbDao> implements ApiService {
+  public servicePrefix: string = '/';
 
   constructor(private api: ApiCallService) {
   }
 
-  ngOnInit() {
-    this.callObjects();
+  public getNewestObjects(): Observable<T[]> {
+    return this.api.callGet<T[]>(`render/newest/`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
   }
 
-  private callObjects() {
-    this.api.callGetRoute(this.url).subscribe(data => {
-      this.newest = data as [];
-    });
+  public getLatestObjects(): Observable<T[]> {
+    return this.api.callGet<T[]>(`render/latest/`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
   }
 
 }

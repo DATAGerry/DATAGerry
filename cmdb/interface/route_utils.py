@@ -13,12 +13,18 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+import functools
 import json
 
-from flask import Blueprint, request
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
+
+from flask import Blueprint, request, abort
 
 from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.security.token.validator import TokenValidator, ValidationError
 from cmdb.utils import json_encoding
 
 DEFAULT_MIME_TYPE = 'Content-Type: application/json'
@@ -62,3 +68,24 @@ def make_response(instance: (CmdbDAO, list, dict), status_code=200):
     # add header informations
     resp.mimetype = DEFAULT_MIME_TYPE
     return resp
+
+
+def insert_request_user(func):
+    @functools.wraps(func)
+    def get_user(*args, **kwargs):
+        from flask import request
+        from cmdb.user_management.user_manager import user_manager
+        token = request.headers['Authorization']
+        try:
+            decrypted_token = TokenValidator().validate_token(token)
+        except ValidationError:
+            return abort(401)
+        try:
+            user_id = decrypted_token['dataGerry']['value']['user']['public_id']
+        except ValueError:
+            return abort(401)
+        user = user_manager.get_user(user_id)
+        kwargs.update({'request_user': user})
+        return func(*args, **kwargs)
+
+    return get_user
