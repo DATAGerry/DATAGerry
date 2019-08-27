@@ -149,6 +149,10 @@ class CmdbRender:
         except CMDBError as err:
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
             LOGGER.error(err.message)
+        try:
+            self.type_instance.render_meta['icon']
+        except KeyError:
+            self.type_instance.render_meta['icon'] = ''
         render_result.type_information = {
             'type_id': self.type_instance.get_public_id(),
             'type_name': self.type_instance.name,
@@ -156,6 +160,7 @@ class CmdbRender:
             'creation_time': self.type_instance.creation_time,
             'author_id': self.type_instance.author_id,
             'author_name': author_name,
+            'icon': self.type_instance.render_meta['icon'],
             'active': self.type_instance.active,
             'version': self.type_instance.version
         }
