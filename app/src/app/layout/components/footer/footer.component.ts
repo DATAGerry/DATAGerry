@@ -27,15 +27,26 @@ import { AuthService } from '../../../auth/services/auth.service';
 })
 export class FooterComponent implements OnInit {
 
-  public today: number = Date.now();
-  public docUrl: string = 'localhost';
-  private userTokenExpire: number = 0;
-  public tokenRemainingTime: number = 0;
-  public count;
-
 
   public constructor(private connectionService: ConnectionService, private authService: AuthService) {
     this.docUrl = `${connectionService.connectionURL}docs`;
+  }
+
+  public today: number = Date.now();
+  public docUrl: string = 'localhost';
+  public userTokenExpire: number = 0;
+  public count;
+
+  public static convertToDate(secs) {
+    const secsInt = parseInt(secs, 10);
+    const days = Math.floor(secsInt / 86400) % 7;
+    const hours = Math.floor(secsInt / 3600) % 24;
+    const minutes = Math.floor(secsInt / 60) % 60;
+    const seconds = secsInt % 60;
+    return [days, hours, minutes, seconds]
+      .map(v => v < 10 ? '0' + v : v)
+      .filter((v, i) => v !== '00' || i > 0)
+      .join(':');
   }
 
   public ngOnInit(): void {
@@ -50,19 +61,7 @@ export class FooterComponent implements OnInit {
       return 'EXPIRED';
     }
 
-    return this.convertToDate(distance);
-  }
-
-  public convertToDate(secs) {
-    const secsInt = parseInt(secs, 10);
-    const days = Math.floor(secsInt / 86400) % 7;
-    const hours = Math.floor(secsInt / 3600) % 24;
-    const minutes = Math.floor(secsInt / 60) % 60;
-    const seconds = secsInt % 60;
-    return [days, hours, minutes, seconds]
-      .map(v => v < 10 ? '0' + v : v)
-      .filter((v, i) => v !== '00' || i > 0)
-      .join(':');
+    return FooterComponent.convertToDate(distance);
   }
 
 }
