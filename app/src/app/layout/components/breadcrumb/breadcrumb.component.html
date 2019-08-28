@@ -10,9 +10,9 @@
         <em *ngIf="breadcrumb.queryParams.value" class="text-primary">{{breadcrumb.queryParams.value}}</em>
       </span>
     </li>
-    <div class="custom-control custom-switch ml-auto" data-toggle="tooltip" data-placement="bottom"
-         title="Only active objects">
-      <input type="checkbox" class="custom-control-input" name="active_cookiee" id="active_cookiee" checked/>
+    <div class="custom-control custom-switch ml-auto">
+      <input type="checkbox" [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']"
+             class="custom-control-input" name="active_cookiee" id="active_cookiee" checked/>
       <label class="custom-control-label" for="active_cookiee"></label>
     </div>
   </ol>

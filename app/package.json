@@ -24,6 +24,7 @@
     "@angular/router": "~8.0.3",
     "@ng-bootstrap/ng-bootstrap": "^5.0.0-rc.1",
     "@ng-select/ng-select": "^2.20.3",
+    "@sweetalert2/ngx-sweetalert2": "^5.1.0",
     "angular-archwizard": "^4.0.0",
     "angular-datatables": "^8.0.0",
     "angularx-qrcode": "^1.6.1",
@@ -42,6 +43,7 @@
     "ngx-filesaver": "^8.0.0",
     "ngx-spinner": "^7.1.4",
     "rxjs": "~6.5.2",
+    "sweetalert2": "^8.16.3",
     "tslib": "^1.10.0",
     "zone.js": "~0.9.1"
   },

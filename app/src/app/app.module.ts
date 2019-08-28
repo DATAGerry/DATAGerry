@@ -24,12 +24,13 @@ import { AppComponent } from './app.component';
 import { LayoutModule } from './layout/layout.module';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
-import { HttpErrorInterceptor } from './auth/interceptors/http-error.interceptor.tx';
 import { PreviousRouteService } from './services/previous-route.service';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { ConnectionService } from './services/connection.service';
 import { DatePipe } from '@angular/common';
 import { FileSaverModule } from 'ngx-filesaver';
+import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
+
 
 @NgModule({
   declarations: [
@@ -41,14 +42,19 @@ import { FileSaverModule } from 'ngx-filesaver';
     LayoutModule,
     NgxSpinnerModule,
     AppRoutingModule,
-    FileSaverModule
+    FileSaverModule,
+    SweetAlert2Module.forRoot({
+      buttonsStyling: false,
+      customClass: 'modal-content',
+      confirmButtonClass: 'btn btn-primary',
+      cancelButtonClass: 'btn'
+    })
   ],
   providers: [
     PreviousRouteService,
     ConnectionService,
     DatePipe,
     {provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true},
-    //{provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true},
   ],
   bootstrap: [AppComponent]
 })

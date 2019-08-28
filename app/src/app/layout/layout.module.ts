@@ -38,6 +38,7 @@ import { NgbActiveModal, NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from './helpers/modal/modal.component';
 import { TableModule } from './components/table/table.module';
 import { TypeLabelComponent } from './helpers/type-label/type-label.component';
+import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 
 @NgModule({
   declarations: [
@@ -75,7 +76,8 @@ import { TypeLabelComponent } from './helpers/type-label/type-label.component';
     NgbModule,
     FormsModule,
     DataTablesModule,
-    TableModule
+    TableModule,
+    SweetAlert2Module
   ],
   providers: [
     BreadcrumbService,
