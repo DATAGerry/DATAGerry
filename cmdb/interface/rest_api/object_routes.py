@@ -61,12 +61,11 @@ def get_object_by_type(type_ids):
     try:
         query = _build_query({'type_id': type_ids}, q_operator='$or')
         all_objects_list = object_manager.get_objects_by(sort="type_id", **query)
-        all_objects = preparation_for_render(all_objects_list)
 
     except CMDBError:
         return abort(400)
 
-    resp = make_response(CmdbRender.result_loop_render(object_manager, all_objects))
+    resp = make_response(all_objects_list)
     return resp
 
 
@@ -78,12 +77,11 @@ def get_objects_by_public_id(public_ids):
     try:
         query = _build_query({'public_id': public_ids}, q_operator='$or')
         all_objects_list = object_manager.get_objects_by(sort="public_id", **query)
-        all_objects = preparation_for_render(all_objects_list)
 
     except CMDBError:
         return abort(400)
 
-    resp = make_response(CmdbRender.result_loop_render(object_manager, all_objects))
+    resp = make_response(all_objects_list)
     return resp
 
 
