@@ -45,8 +45,8 @@ export class ObjectListComponent implements OnDestroy {
   public dtTrigger: Subject<any> = new Subject();
   readonly dtButtons: any[] = [];
 
-  private summaries: [] = [];
-  private columnFields: [] = [];
+  private summaries: any[] = [];
+  private columnFields: any[] = [];
   private items: any[] = [];
   public pageTitle: string = 'List';
   public faIcon: string;
@@ -74,7 +74,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   private getRouteObjects(id) {
-    let url = 'object/';
+    let url = 'render/';
     this.pageTitle = 'Object List';
     this.hasSummaries = false;
     if (typeof id !== 'undefined') {
@@ -89,8 +89,8 @@ export class ObjectListComponent implements OnDestroy {
 
     this.apiCallService.callGetRoute(url)
       .pipe(
-        map(dataArray => {
-          const lenx = dataArray.length;
+        map((dataArray: any[]) => {
+          const lenx = dataArray === null ? 0 : dataArray.length;
           this.summaries = lenx > 0 ? dataArray[0].summaries : [];
           this.columnFields = lenx > 0 ? dataArray[0].fields : [];
           this.items = lenx > 0 ? dataArray : [];
@@ -226,10 +226,10 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   private buildAdvancedDtOptions() {
-    if (this.hasSummaries && this.summaries != null) {
+    if (this.hasSummaries && this.summaries != null && this.summaries[0] !== undefined) {
       const visTargets: any[] = [0, 1, 2, 3, -3, -2, -1];
-      for (let i = 0; i < this.summaries.length; i++) {
-        visTargets.push(i + 4);
+      for (let i = 0; i < this.summaries[0].fields.length; i++) {
+        visTargets.push(i + 6);
       }
       this.dtOptions.columnDefs = [
         {orderable: false, targets: 'nosort'},
@@ -309,7 +309,7 @@ export class ObjectListComponent implements OnDestroy {
 
     modalComponent.result.then((result) => {
       if (result) {
-        const id = value.public_id;
+        const id = value.object_information.object_id;
         this.apiCallService.callDeleteRoute('object/' + id).subscribe(data => {
           this.route.params.subscribe((typeId) => {
             this.init(typeId);
