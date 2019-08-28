@@ -27,7 +27,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class TokenGenerator:
-    DEFAULT_EXPIRE_TIME = 60
+    DEFAULT_EXPIRE_TIME = 1400
 
     DEFAULT_CLAIMS = {
         'iss': {
@@ -37,7 +37,6 @@ class TokenGenerator:
     }
 
     def __init__(self):
-        self.token_expire = 30
         self.key_holder = KeyHolder()
         self.header = {
             'alg': 'RS512'
