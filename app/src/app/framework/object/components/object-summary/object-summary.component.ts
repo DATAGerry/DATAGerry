@@ -18,6 +18,8 @@
 
 import { Component, Input } from '@angular/core';
 import { ToastService } from '../../../../layout/services/toast.service';
+import {RenderResult} from "../../../models/cmdb-render";
+import {CmdbMode} from "../../../modes.enum";
 
 @Component({
   selector: 'cmdb-object-summary',
@@ -27,8 +29,14 @@ import { ToastService } from '../../../../layout/services/toast.service';
 export class ObjectSummaryComponent {
 
   @Input() summaries: any = [];
+  @Input() renderResult: RenderResult;
+  public mode: CmdbMode = CmdbMode.Simple;
 
   public constructor(private toast: ToastService) {}
+
+  public mergeData(value: string) {
+    return this.renderResult.fields.find(term => term.name === value);
+  }
 
   public clipBoardSummary(data) {
     const selBox = document.createElement('textarea');
