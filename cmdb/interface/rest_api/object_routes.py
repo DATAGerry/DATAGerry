@@ -65,7 +65,7 @@ def get_object_by_type(type_ids):
     except CMDBError:
         return abort(400)
 
-    resp = make_response(CmdbRender.result_loop_render(object_manager, all_objects))
+    resp = make_response(all_objects_list)
     return resp
 
 
