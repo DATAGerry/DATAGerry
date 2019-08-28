@@ -18,7 +18,6 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FooterComponent } from './components/footer/footer.component';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { RouterModule } from '@angular/router';
 import { BreadcrumbComponent } from './components/breadcrumb/breadcrumb.component';
@@ -28,7 +27,9 @@ import { SidebarCategoryComponent } from './components/sidebar/sidebar-category.
 import { ContentHeaderComponent } from './components/content-header/content-header.component';
 import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.component';
 import { LowercaseDirective } from './directives/lowercase.directive';
+import { CounterDirective } from './directives/counter.directive';
 import { SearchBarComponent } from './components/search-bar/search-bar.component';
+import { FooterComponent } from './components/footer/footer.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TableComponent } from './components/table/table.component';
@@ -42,28 +43,30 @@ import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 
 @NgModule({
   declarations: [
+    LowercaseDirective,
+    CounterDirective,
     BreadcrumbComponent,
     NavigationComponent,
-    FooterComponent,
     SidebarComponent,
     SidebarCategoryComponent,
     ContentHeaderComponent,
     ActiveBadgeComponent,
-    LowercaseDirective,
     SearchBarComponent,
     TableComponent,
     ToastContainerComponent,
     ModalComponent,
-    TypeLabelComponent
+    TypeLabelComponent,
+    FooterComponent
   ],
   exports: [
+    LowercaseDirective,
+    CounterDirective,
     NavigationComponent,
     BreadcrumbComponent,
     FooterComponent,
     ContentHeaderComponent,
     ActiveBadgeComponent,
     SearchBarComponent,
-    LowercaseDirective,
     TableComponent,
     ToastContainerComponent,
     TypeLabelComponent
@@ -77,7 +80,12 @@ import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
     FormsModule,
     DataTablesModule,
     TableModule,
-    SweetAlert2Module
+    SweetAlert2Module.forRoot({
+      buttonsStyling: false,
+      customClass: 'modal-content',
+      confirmButtonClass: 'btn btn-primary',
+      cancelButtonClass: 'btn'
+    })
   ],
   providers: [
     BreadcrumbService,

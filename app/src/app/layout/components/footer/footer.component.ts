@@ -16,13 +16,58 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { ConnectionService } from '../../../services/connection.service';
+import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'cmdb-footer',
   templateUrl: './footer.component.html',
   styleUrls: ['./footer.component.scss']
 })
-export class FooterComponent {
-  today: number = Date.now();
+export class FooterComponent implements OnInit {
+
+  public today: number = Date.now();
+  public docUrl: string = 'localhost';
+  private userTokenExpire: number = 0;
+  public tokenRemainingTime: number = 0;
+  public count;
+
+
+  public constructor(private connectionService: ConnectionService, private authService: AuthService) {
+    this.docUrl = `${connectionService.connectionURL}docs`;
+  }
+
+  public ngOnInit(): void {
+    this.userTokenExpire = this.authService.currentUserValue.token_expire;
+  }
+
+  public interval(countDownDate) {
+    const now = Math.floor(Date.now() / 1000);
+    const distance = countDownDate - now;
+
+    if (distance < 0) {
+      return 'EXPIRED';
+    }
+
+    return this.convertToDate(distance);
+  }
+
+  public convertToDate(secs) {
+    const secsInt = parseInt(secs, 10);
+    const days = Math.floor(secsInt / 86400) % 7;
+    const hours = Math.floor(secsInt / 3600) % 24;
+    const minutes = Math.floor(secsInt / 60) % 60;
+    const seconds = secsInt % 60;
+    return [days, hours, minutes, seconds]
+      .map(v => v < 10 ? '0' + v : v)
+      .filter((v, i) => v !== '00' || i > 0)
+      .join(':');
+  }
+
 }
+
+
+
+
+

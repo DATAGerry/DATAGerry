@@ -14,14 +14,21 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import logging
+from datetime import datetime, timedelta
+
 from authlib.jose import jwt, JWT
-from datetime import datetime
 
 from cmdb import __title__
 from cmdb.security.key.holder import KeyHolder
+from cmdb.utils.system_reader import SectionError, SystemConfigReader
+
+LOGGER = logging.getLogger(__name__)
 
 
 class TokenGenerator:
+    DEFAULT_EXPIRE_TIME = 60
+
     DEFAULT_CLAIMS = {
         'iss': {
             'essential': True,
@@ -36,13 +43,18 @@ class TokenGenerator:
             'alg': 'RS512'
         }
 
+    def get_expire_time(self) -> datetime:
+        try:
+            expire_time = int(SystemConfigReader().get_value('expire', 'Token'))
+        except (KeyError, SectionError):
+            expire_time = self.DEFAULT_EXPIRE_TIME
+        return datetime.now() + timedelta(minutes=expire_time)
+
     def generate_token(self, payload: dict, optional_claims: dict = None) -> JWT:
         optional_claims = optional_claims or {}
+
         token_claims = {
-            'exp': {
-                'essential': True,
-                'value': datetime.utcnow().timestamp()
-            }
+            'exp': int(self.get_expire_time().timestamp())
         }
         payload_claims = {
             'DATAGERRY': {
@@ -52,4 +64,5 @@ class TokenGenerator:
         }
         claims = {**self.DEFAULT_CLAIMS, **token_claims, **payload_claims, **optional_claims}
         token = jwt.encode(self.header, claims, self.key_holder.get_private_key())
+
         return token

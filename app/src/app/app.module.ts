@@ -29,7 +29,6 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { ConnectionService } from './services/connection.service';
 import { DatePipe } from '@angular/common';
 import { FileSaverModule } from 'ngx-filesaver';
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 
 
 @NgModule({
@@ -43,12 +42,6 @@ import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
     NgxSpinnerModule,
     AppRoutingModule,
     FileSaverModule,
-    SweetAlert2Module.forRoot({
-      buttonsStyling: false,
-      customClass: 'modal-content',
-      confirmButtonClass: 'btn btn-primary',
-      cancelButtonClass: 'btn'
-    })
   ],
   providers: [
     PreviousRouteService,

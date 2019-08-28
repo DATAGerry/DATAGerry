@@ -28,11 +28,12 @@ export class ConnectionService {
   private readonly port: number;
   private readonly protocol: string;
   private readonly href: string;
+  private readonly devPort: number = 4000;  // fixed dev port
 
   constructor() {
     if (isDevMode()) {
       this.host = '127.0.0.1';
-      this.port = 4000; // fixed dev port
+      this.port = this.devPort;
       this.protocol = 'http:';
     } else {
       this.host = window.location.hostname;

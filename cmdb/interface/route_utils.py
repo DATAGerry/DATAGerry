@@ -77,7 +77,7 @@ def insert_request_user(func):
         from cmdb.user_management.user_manager import user_manager
         token = request.headers['Authorization']
         try:
-            decrypted_token = TokenValidator().validate_token(token)
+            decrypted_token = TokenValidator().decode_token(token)
         except ValidationError:
             return abort(401)
         try:

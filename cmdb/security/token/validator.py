@@ -14,8 +14,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import logging
+
 from authlib.jose import jwt, JWT
-from authlib.jose.errors import BadSignatureError
+from authlib.jose.errors import BadSignatureError, InvalidClaimError
 
 from cmdb.security.key.holder import KeyHolder
 
@@ -24,18 +26,27 @@ try:
 except ImportError:
     CMDBError = Exception
 
+LOGGER = logging.getLogger(__name__)
+
 
 class TokenValidator:
 
     def __init__(self):
         self.key_holder = KeyHolder()
 
-    def validate_token(self, token: (JWT, str, dict)):
+    def decode_token(self, token: (JWT, str, dict)):
         try:
             decoded_token = jwt.decode(s=token, key=self.key_holder.get_public_key())
         except BadSignatureError as err:
             raise ValidationError(err)
         return decoded_token
+
+    def validate_token(self, token: (JWT, str, dict)):
+        try:
+            import time
+            token.validate(time.time())
+        except InvalidClaimError as err:
+            raise ValidationError(err)
 
 
 class ValidationError(CMDBError):

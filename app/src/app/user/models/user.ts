@@ -24,6 +24,7 @@ export class User {
   public last_name?: string;
   public email: string;
   public token?: string;
+  public token_expire?: number;
   public registration_time: any;
   public authenticator: string;
   public group_id: number;

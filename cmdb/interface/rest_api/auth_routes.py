@@ -50,8 +50,11 @@ def login_call():
     except CMDBError as e:
         abort(401, e)
     if correct:
-        login_user.token = TokenGenerator().generate_token(payload={'user': {
+        tg = TokenGenerator()
+        token = tg.generate_token(payload={'user': {
             'public_id': login_user.get_public_id()
         }})
+        login_user.token = token
+        login_user.token_expire = int(tg.get_expire_time().timestamp())
         return make_response(login_user)
     abort(401)

@@ -1,8 +1,18 @@
 <footer class="mt-3" id="footer">
   <div>
-    <span>copyright {{ today | date: 'yyyy' }} @ NETHINKS GmbH</span>
+    <span>copyright {{ today | date: 'yyyy' }} @
+      <a href="https://nethinks.com" target="_blank">NETHINKS GmbH</a>
+    </span>
+  </div>
+  <div class="ml-auto">
+    Session timeout in:
+    <span token [counter]="userTokenExpire" [interval]="1000" (value)="count = $event">
+      {{interval(count)}}
+    </span>
   </div>
   <div id="footerLinks" class="ml-auto">
-    <a href="https://github.com/NETHINKS/DATAGERRY">DATAGERRY</a>
+    <a href="{{docUrl}}" target="_blank"><i class="fa fa-book"></i></a>
+    <a href="https://github.com/NETHINKS/DATAGERRY" target="_blank"><i class="fa fa-github"></i></a>
+    <a href="https://datagerry.com" target="_blank"><i class="fa fa-home"></i></a>
   </div>
 </footer>

@@ -19,9 +19,10 @@ Different wrapper functions for interface module
 """
 import logging
 from functools import wraps
+
 from flask import request, abort
 
-from cmdb.security.token.validator import TokenValidator
+from cmdb.security.token.validator import TokenValidator, ValidationError
 
 try:
     from cmdb.utils.error import CMDBError
@@ -57,8 +58,11 @@ def login_required(f):
         if auth is None and 'Authorization' in request.headers:
             token = request.headers['Authorization']
             try:
-                TokenValidator().validate_token(token)
-            except Exception:
+                tv = TokenValidator()
+                decoded_token = tv.decode_token(token)
+                tv.validate_token(decoded_token)
+            except ValidationError as err:
+                LOGGER.error(err)
                 return abort(401)
             except CMDBError:
                 return abort(401)
