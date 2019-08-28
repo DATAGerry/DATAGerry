@@ -49,6 +49,7 @@ export class TypeBasicStepComponent implements OnInit {
   set preData(data: any) {
     if (data !== undefined) {
       this.basicForm.patchValue(data);
+      this.basicMetaIconForm.patchValue(data.render_meta === undefined ? 'fa-cube' : data.render_meta);
     }
   }
 
@@ -56,6 +57,7 @@ export class TypeBasicStepComponent implements OnInit {
   public modes = CmdbMode;
 
   public basicForm: FormGroup;
+  public basicMetaIconForm: FormGroup;
   public basicCategoryForm: FormGroup;
   public categoryList: Observable<CmdbCategory[]>;
   public icons = [
@@ -650,9 +652,11 @@ export class TypeBasicStepComponent implements OnInit {
     this.basicForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl('', Validators.required),
-      icon: new FormControl('fa-cube'),
       description: new FormControl(''),
       active: new FormControl(true)
+    });
+    this.basicMetaIconForm = new FormGroup({
+      icon: new FormControl('fa-cube'),
     });
     this.basicCategoryForm = new FormGroup({
       category_id: new FormControl(null)

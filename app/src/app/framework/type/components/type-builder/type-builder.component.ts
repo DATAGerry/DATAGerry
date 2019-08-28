@@ -70,12 +70,9 @@ export class TypeBuilderComponent implements OnInit {
 
   public exitBasicStep() {
     this.selectedCategoryID = this.basicStep.basicCategoryForm.value.category_id;
-    if ( this.basicStep.basicForm.contains('icon') ) {
-      const currentIcon = this.basicStep.basicForm.get('icon').value === undefined
-        ? 'fa-cube' : this.basicStep.basicForm.get('icon').value;
-      this.assignToType({icon: currentIcon}, 'render_meta');
-      this.basicStep.basicForm.removeControl('icon');
-    }
+    const defaultIcon = this.basicStep.basicMetaIconForm.get('icon').value === null ?
+      'fa-cube' : this.basicStep.basicMetaIconForm.get('icon').value;
+    this.assignToType({icon: defaultIcon}, 'render_meta');
     this.assignToType(this.basicStep.basicForm.value);
   }
 

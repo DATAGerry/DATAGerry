@@ -42,22 +42,24 @@
           </div>
           <div class="clearfix"></div>
         </div>
-        <div class="form-group">
-          <label>Icon</label>
-          <ng-select [items]="icons" formControlName="icon">
-            <ng-template ng-label-tmp let-item="item">
-              <i class="fa {{item}}"></i> {{item}}
-            </ng-template>
-            <ng-template ng-optgroup-tmp let-item="item" let-index="index">
-              <i class="fa {{item}}"></i> {{item}}
-            </ng-template>
-            <ng-template ng-option-tmp let-item="item" let-index="index" let-search="searchTerm">
-              <i class="fa {{item}}"></i> {{item}}
-            </ng-template>
-          </ng-select>
-          <small id="typeIconInputHelp" class="form-text text-muted">Symbol for the type label</small>
-          <div class="clearfix"></div>
-        </div>
+        <form [formGroup]="basicMetaIconForm">
+          <div class="form-group">
+            <label>Icon</label>
+            <ng-select [items]="icons" formControlName="icon">
+              <ng-template ng-label-tmp let-item="item">
+                <i class="fa {{item}}"></i> {{item}}
+              </ng-template>
+              <ng-template ng-optgroup-tmp let-item="item" let-index="index">
+                <i class="fa {{item}}"></i> {{item}}
+              </ng-template>
+              <ng-template ng-option-tmp let-item="item" let-index="index" let-search="searchTerm">
+                <i class="fa {{item}}"></i> {{item}}
+              </ng-template>
+            </ng-select>
+            <small id="typeIconInputHelp" class="form-text text-muted">Symbol for the type label</small>
+            <div class="clearfix"></div>
+          </div>
+        </form>
         <div class="form-group">
           <label for="typeDescriptionInput">Description:</label>
           <textarea class="form-control" formControlName="description" id="typeDescriptionInput" rows="3"
