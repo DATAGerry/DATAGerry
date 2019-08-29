@@ -350,8 +350,8 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   public exportingFiles(exportType: any) {
-    if ('all' === this.selectedObjects) {
-      this.exportService.getObjectFileByType(this.items[0].type_id, exportType.id)
+    if ('all' === this.selectedObjects && this.items[0] !== undefined) {
+      this.exportService.getObjectFileByType(this.items[0].type_information.type_id, exportType.id)
         .subscribe(res => this.downLoadFile(res, exportType));
       return;
     }
