@@ -28,7 +28,7 @@ export class PasswordSimpleComponent extends RenderField {
   public showData: boolean = false;
 
   public toggle() {
-    this.showData = true;
+    this.showData = !this.showData;
   }
 
   constructor() {
