@@ -54,7 +54,7 @@
           <input id="{{result.type_information.type_id}}" class="select-checkbox" type="checkbox" (click)="updateDisplay()">
         </td>
         <td>
-          <cmdb-active-badge [activeStatus]="result.active"></cmdb-active-badge>
+          <cmdb-active-badge [activeStatus]="result?.type_information.active"></cmdb-active-badge>
         </td>
         <td>{{result?.object_information.object_id}}</td>
         <td>{{result?.type_information.type_label}}</td>
