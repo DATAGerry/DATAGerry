@@ -107,6 +107,7 @@ def get_rendered_objects_by_type(type_id: int, request_user: User):
         return abort(404)
     try:
         rendered_list = RenderList(object_list, request_user).render_result_list()
+
     except RenderError as err:
         LOGGER.error(err.message)
         return abort(500)

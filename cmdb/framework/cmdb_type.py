@@ -62,12 +62,6 @@ class CmdbType(CmdbDAO):
         self.fields = fields or []
         super(CmdbType, self).__init__(**kwargs)
 
-    def __truediv__(self, other):
-        if not isinstance(other, CmdbType):
-            raise TypeError("Not a CmdbType instance")
-        from deepdiff import DeepDiff
-        return DeepDiff(self, other, ignore_order=True)
-
     def get_name(self):
         return self.name
 

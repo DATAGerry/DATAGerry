@@ -25,7 +25,6 @@ except ImportError:
 
 import logging
 from datetime import datetime
-from typing import List
 
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_type import CmdbType
@@ -279,8 +278,8 @@ class CmdbRender:
 
 class RenderList:
 
-    def __init__(self, object_list: List[CmdbObject], request_user: User):
-        self.object_list: List[CmdbObject] = object_list
+    def __init__(self, object_list: list, request_user: User):
+        self.object_list = object_list
         self.request_user = request_user
 
     def render_result_list(self):
@@ -288,20 +287,11 @@ class RenderList:
         type_buffer_list = {}
         preparation_objects = []
         for passed_object in self.object_list:
-            global current_type
-            current_type = None
-            passed_object_type_id = passed_object.get_type_id()
-            if passed_object_type_id in type_buffer_list:
-                current_type = type_buffer_list[passed_object_type_id]
-            else:
-                try:
-                    current_type = object_manager.get_type(passed_object_type_id)
-                    type_buffer_list.update({passed_object_type_id: current_type})
-                except CMDBError:
-                    continue
-            tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object,
+            tmp_render = CmdbRender(type_instance=object_manager.get_type(passed_object.type_id),
+                                    object_instance=passed_object,
                                     render_user=self.request_user)
-            preparation_objects.append(tmp_render.result())
+            current_render_result = tmp_render.result()
+            preparation_objects.append(current_render_result)
         return preparation_objects
 
 
