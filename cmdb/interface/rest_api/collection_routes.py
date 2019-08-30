@@ -18,7 +18,8 @@ import logging
 
 from werkzeug.exceptions import abort
 
-from cmdb.framework.cmdb_object_manager import object_manager, ObjectManagerGetError
+from cmdb.framework.cmdb_object_manager import object_manager
+from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.interface.route_utils import RootBlueprint, make_response, NestedBlueprint
 
 try:

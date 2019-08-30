@@ -10,7 +10,6 @@ cffi==1.12.2
 chardet==3.0.4
 Click==7.0
 cryptography==2.6.1
-deepdiff==4.0.5
 docutils==0.15.2
 et-xmlfile==1.0.1
 Faker==1.0.4

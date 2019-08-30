@@ -68,6 +68,12 @@ class CmdbObject(CmdbDAO):
         self.fields = fields
         super(CmdbObject, self).__init__(**kwargs)
 
+    def __truediv__(self, other):
+        if not isinstance(other, self.__class__):
+            raise TypeError("Not the same class")
+        from deepdiff import DeepDiff
+        return DeepDiff(self.fields, other.fields, ignore_order=True)
+
     def get_type_id(self) -> int:
         """get input_type if of this object
 

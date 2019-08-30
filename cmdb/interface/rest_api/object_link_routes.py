@@ -19,7 +19,8 @@ import logging
 from flask import abort, request
 
 from cmdb.framework.cmdb_link import CmdbLink
-from cmdb.framework.cmdb_object_manager import ObjectManagerGetError, ObjectManagerInsertError, object_manager
+from cmdb.framework.cmdb_object_manager import object_manager
+from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError
 from cmdb.interface.rest_api.object_routes import object_rest
 from cmdb.interface.route_utils import make_response, NestedBlueprint
 

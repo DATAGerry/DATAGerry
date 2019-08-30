@@ -22,162 +22,30 @@ The implementation of the manager used is always realized using the respective s
 """
 import logging
 import re
+from datetime import datetime
 
 from cmdb.data_storage import get_pre_init_database
 from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
 from cmdb.event_management.event import Event
-from cmdb.framework import *
-from cmdb.framework import CmdbStatus
+from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb.framework.cmdb_category import CmdbCategory
+from cmdb.framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplate
 from cmdb.framework.cmdb_errors import WrongInputFormatError, UpdateError, TypeInsertError, TypeAlreadyExists, \
-    TypeNotFoundError, ObjectInsertError, ObjectNotFoundError, ObjectDeleteError, NoRootCategories
+    TypeNotFoundError, ObjectInsertError, ObjectDeleteError, NoRootCategories, ObjectManagerGetError, \
+    ObjectManagerInsertError, ObjectManagerUpdateError
+from cmdb.framework.cmdb_link import CmdbLink
+from cmdb.framework.cmdb_object import CmdbObject
+from cmdb.framework.cmdb_status import CmdbStatus
+from cmdb.framework.cmdb_type import CmdbType
+from cmdb.user_management import User
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import timing
 
 LOGGER = logging.getLogger(__name__)
 
 
-class CmdbManagerBase:
-    """Represents the base class for object managers. A respective implementation is always adapted to the
-       respective database manager :class:`cmdb.data_storage.DatabaseManager` or the used functionalities.
-       But should always use at least the super functions listed here.
-
-    """
-
-    def __init__(self, database_manager):
-        """Example:
-            Depending on the condition or whether a fork process is used, the database manager can also be seen
-            directly in the declaration of the object manager
-
-        .. code-block:: python
-               :linenos:
-
-                system_config_reader = get_system_config_reader()
-                object_manager = CmdbObjectManager(
-                    database_manager = DatabaseManagerMongo(
-                        connector=MongoConnector(
-                            host=system_config_reader.get_value('host', 'Database'),
-                            port=int(system_config_reader.get_value('port', 'Database')),
-                            database_name=system_config_reader.get_value('database_name', 'Database'),
-                            timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT
-                        )
-                    )
-                )
-
-        Args:
-            database_manager (DatabaseManager): initialisation of an database manager
-
-        """
-        if database_manager:
-            self.dbm = database_manager
-
-    def _get(self, collection: str, public_id: int) -> (object, dict):
-        """get document from the database by their public id
-
-        Args:
-            collection (str): name of the database collection
-            public_id (int): public id of the document/entry
-
-        Returns:
-            str: founded document in json format
-        """
-        return self.dbm.find_one(
-            collection=collection,
-            public_id=public_id
-        )
-
-    def _get_all(self, collection: str, sort='public_id', limit=0, **requirements: dict) -> list:
-        """get all documents from the database which have the passing requirements
-
-        Args:
-            collection (str): name of the database collection
-            sort (str): sort by given key - default public_id
-            **requirements (dict): dictionary of key value requirement
-
-        Returns:
-            list: list of all documents
-
-        """
-        requirements_filter = {}
-        formatted_sort = [(sort, self.dbm.DESCENDING)]
-        for k, req in requirements.items():
-            requirements_filter.update({k: req})
-        return self.dbm.find_all(collection=collection, limit=limit, filter=requirements_filter, sort=formatted_sort)
-
-    def _insert(self, collection: str, data: dict) -> (int, None):
-        """insert document/object into database
-
-        Args:
-            collection (str): name of the database collection
-            data (dict): dictionary of object or the data
-
-        Returns:
-            int: new public_id of inserted document
-            None: if anything goes wrong
-
-        """
-        return self.dbm.insert(
-            collection=collection,
-            data=data
-        )
-
-    def _update(self, collection: str, public_id: int, data: dict) -> object:
-        """
-        update document/object in database
-        Args:
-            collection (str): name of the database collection
-            public_id (int): public id of object
-            data: changed data/object
-
-        Returns:
-            acknowledgment of database
-        """
-        return self.dbm.update(
-            collection=collection,
-            public_id=public_id,
-            data=data
-        )
-
-    def _delete(self, collection: str, public_id: int):
-        """
-        delete document/object inside database
-        Args:
-            collection (str): name of the database collection
-            public_id (int): public id of object
-
-        Returns:
-            acknowledgment of database
-        """
-        return self.dbm.delete(
-            collection=collection,
-            public_id=public_id
-        ).acknowledged
-
-    def _delete_many(self, collection: str, filter_query: dict):
-        """
-        removes all documents that match the filter from a collection.
-        Args:
-            collection (str): name of the database collection
-            filter (dict): Specifies deletion criteria using query operators.
-
-        Returns:
-            acknowledgment of database
-        """
-        return self.dbm.delete_many(
-            collection=collection,
-            **filter_query
-        )
-
-    def _search(self, collection: str, requirements, limit=0):
-        return self._get_all(collection, limit=limit, **requirements)
-
-
 class CmdbObjectManager(CmdbManagerBase):
     def __init__(self, database_manager=None, event_queue=None):
-        """
-
-        Args:
-            database_manager:
-        """
         self._event_queue = event_queue
         super(CmdbObjectManager, self).__init__(database_manager)
 
@@ -188,13 +56,6 @@ class CmdbObjectManager(CmdbManagerBase):
         return self.dbm.get_highest_id(collection)
 
     def get_object(self, public_id: int):
-        """get object by public id
-        Args:
-            public_id:
-
-        Returns:
-
-        """
         try:
             return CmdbObject(
                 **self._get(
@@ -702,30 +563,6 @@ class CmdbObjectManager(CmdbManagerBase):
             LOGGER.error(err)
             raise ObjectManagerInsertError(err)
         return ack
-
-
-class ObjectManagerGetError(CMDBError):
-
-    def __init__(self, err):
-        self.message = f'Error while GET operation - E: ${err}'
-
-
-class ObjectManagerInsertError(CMDBError):
-
-    def __init__(self, err):
-        self.message = f'Error while INSERT operation - E: ${err}'
-
-
-class ObjectManagerUpdateError(CMDBError):
-
-    def __init__(self, err):
-        self.message = f'Error while UPDATE operation - E: ${err}'
-
-
-class ObjectManagerDeleteError(CMDBError):
-
-    def __init__(self, err):
-        self.message = f'Error while DELETE operation - E: ${err}'
 
 
 object_manager = CmdbObjectManager(

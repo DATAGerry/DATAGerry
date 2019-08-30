@@ -18,7 +18,7 @@ import logging
 import json
 
 from cmdb.framework.cmdb_object_manager import object_manager
-from cmdb.framework.cmdb_object_category import CmdbCategory
+from cmdb.framework.cmdb_category import CmdbCategory
 from cmdb.utils.interface_wraps import login_required
 from cmdb.interface.route_utils import make_response, RootBlueprint
 

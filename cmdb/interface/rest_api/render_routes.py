@@ -22,7 +22,8 @@ import logging
 
 from werkzeug.exceptions import abort
 
-from cmdb.framework.cmdb_object_manager import ObjectManagerGetError, object_manager
+from cmdb.framework.cmdb_object_manager import object_manager
+from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.cmdb_render import CmdbRender, RenderError, RenderList
 from cmdb.interface.route_utils import RootBlueprint, make_response, insert_request_user
 from cmdb.user_management.user import User

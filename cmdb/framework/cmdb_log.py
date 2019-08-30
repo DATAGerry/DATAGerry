@@ -15,70 +15,117 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-
+from abc import abstractclassmethod
 from datetime import datetime
 from enum import Enum
+
+from cmdb.data_storage import get_pre_init_database
+from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError
 
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
     CMDBError = Exception
-from cmdb.framework.cmdb_dao import CmdbDAO
-from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.cmdb_type import CmdbType
 
 LOGGER = logging.getLogger(__name__)
 
 
-class LogCommands(Enum):
+class LogAction(Enum):
     CREATE = 1
     EDIT = 2
-    ACTIVE = 3
+    ACTIVATE = 3
     DEACTIVATE = 4
 
 
-class LogModels(Enum):
-    OBJECT = CmdbObject.__class__.__name__
-    TYPE = CmdbType.__class__.__name__
-
-
-class CmdbLog(CmdbDAO):
-    """
-    State control of objects and types.
-    """
-
-    COLLECTION = "framework.logs"
+class CmdbMetaLog(CmdbDAO):
+    COLLECTION = 'framework.logs'
     REQUIRED_INIT_KEYS = [
-        'model',
-        'user_id',
-        'time',
-        'meta',
-        'state'
+        'log_type',
+        'log_time',
+        'action',
+        'changes'
     ]
 
-    def __init__(self, model: str, action: LogCommands, user_id: int, time: datetime, meta: dict = None,
-                 state: bytearray = None, **kwargs):
-        self.model = model
-        self.action = action
+    def __init__(self, log_type, log_time: datetime, action: LogAction, **kwargs):
+        self.log_type = log_type
+        self.log_time: datetime = log_time
+        self.action: LogAction = action
+        super(CmdbMetaLog, self).__init__(**kwargs)
+
+
+class CmdbObjectLog(CmdbMetaLog):
+    UNKNOWN_USER_STRING = 'Unknown'
+    REQUIRED_INIT_KEYS = [
+                             'object_id',
+                             'version',
+                             'user_id',
+                             'changes'
+                         ] + CmdbMetaLog.REQUIRED_INIT_KEYS
+
+    def __init__(self, object_id: int, version, user_id: int, user_name: str = None, comment: str = None, **kwargs):
+        self.object_id = object_id
+        self.version = version
         self.user_id = user_id
-        self.time = time
-        self.meta = meta or {}
-        self.state = state or None
-        super(CmdbLog, self).__init__(**kwargs)
+        self.user_name = user_name or self.UNKNOWN_USER_STRING
+        self.comment = comment
+        super(CmdbObjectLog, self).__init__(**kwargs)
 
-    def get_decrypted_state(self) -> (LogModels.OBJECT, LogModels.TYPE):
-        from cmdb.security.keys import KeyHolder
-        from cmdb.security.crypto import RSADecryption
-        key_holder = KeyHolder()
-        rsa_dec = RSADecryption(private_key_pem=key_holder.get_private_pem())
-        rsa_decrypted = rsa_dec.decrypt(self.state)
-        LOGGER.debug(rsa_decrypted)
-        return rsa_decrypted
 
-    def encrypt_state(self, data: (LogModels.OBJECT, LogModels.TYPE)):
-        from cmdb.security.keys import KeyHolder
-        from cmdb.security.crypto import RSAEncryption
-        key_holder = KeyHolder()
-        rsa_enc = RSAEncryption(public_key_pem=key_holder.get_public_pem())
-        LOGGER.debug(rsa_enc)
-        self.state = rsa_enc.encrypt(data.to_database())
+class CmdbLog:
+    REGISTERED_LOG_TYPE = {}
+    DEFAULT_LOG_TYPE = CmdbObjectLog
+
+    @abstractclassmethod
+    def register_log_type(cls, log_name, log_class):
+        cls.REGISTERED_LOG_TYPE[log_name] = log_class
+
+    def __new__(cls, *args, **kwargs):
+        try:
+            _log_class = cls.REGISTERED_LOG_TYPE[kwargs['log_type']]
+        except (KeyError, ValueError):
+            _log_class = cls.DEFAULT_LOG_TYPE
+        return _log_class(*args, **kwargs)
+
+
+class CmdbLogManager(CmdbManagerBase):
+    def __init__(self, database_manager=None):
+        super(CmdbLogManager, self).__init__(database_manager)
+
+    def get_log(self, public_id: int):
+        try:
+            return CmdbLog(**self._get(
+                collection=CmdbMetaLog.COLLECTION,
+                public_id=public_id
+            ))
+        except (CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise LogManagerGetError(err)
+
+    def insert_log(self, data) -> int:
+
+        try:
+            new_log = CmdbLog(**data)
+            ack = self._insert(CmdbMetaLog.COLLECTION, new_log.to_database())
+        except (CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise LogManagerInsertError(err)
+        return ack
+
+
+class LogManagerGetError(ObjectManagerGetError):
+
+    def __init__(self, err):
+        super(LogManagerGetError, self).__init__(err)
+
+
+class LogManagerInsertError(ObjectManagerInsertError):
+
+    def __init__(self, err):
+        super(LogManagerInsertError, self).__init__(err)
+
+
+log_manager = CmdbLogManager(
+    database_manager=get_pre_init_database()
+)

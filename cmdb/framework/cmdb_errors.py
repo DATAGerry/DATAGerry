@@ -97,3 +97,27 @@ class FieldNotFoundError(CMDBError):
     def __init__(self, field_name, type_name):
         super().__init__()
         self.message = 'Field {} was not found inside input_type: {}'.format(field_name, type_name)
+
+
+class ObjectManagerGetError(CMDBError):
+
+    def __init__(self, err):
+        self.message = f'Error while GET operation - E: ${err}'
+
+
+class ObjectManagerInsertError(CMDBError):
+
+    def __init__(self, err):
+        self.message = f'Error while INSERT operation - E: ${err}'
+
+
+class ObjectManagerUpdateError(CMDBError):
+
+    def __init__(self, err):
+        self.message = f'Error while UPDATE operation - E: ${err}'
+
+
+class ObjectManagerDeleteError(CMDBError):
+
+    def __init__(self, err):
+        self.message = f'Error while DELETE operation - E: ${err}'

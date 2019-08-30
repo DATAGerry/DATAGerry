@@ -26,19 +26,21 @@ the elements for the database.
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_type import CmdbType
-from cmdb.framework.cmdb_object_category import CmdbCategory
+from cmdb.framework.cmdb_category import CmdbCategory
 from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplate
-from cmdb.framework.cmdb_log import CmdbLog
+from cmdb.framework.cmdb_log import CmdbLog, CmdbObjectLog, CmdbMetaLog
+
+CmdbLog.register_log_type(CmdbObjectLog.__name__, CmdbObjectLog)
 
 # List of init collections
 __COLLECTIONS__ = [
     CmdbObject,
     CmdbType,
     CmdbCategory,
-    CmdbLog,
     CmdbStatus,
+    CmdbMetaLog,
     CmdbLink,
     CmdbCollection,
     CmdbCollectionTemplate

@@ -21,9 +21,11 @@ from flask import abort, jsonify, request, current_app
 
 from cmdb.framework import CmdbObject
 from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectNotFoundError
+from cmdb.framework.cmdb_log import LogAction, log_manager, CmdbMetaLog, CmdbObjectLog, LogManagerInsertError
 from cmdb.framework.cmdb_object_manager import object_manager
 from cmdb.framework.cmdb_render import CmdbRender
-from cmdb.interface.route_utils import make_response, RootBlueprint
+from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user
+from cmdb.user_management import User
 from cmdb.utils.interface_wraps import login_required
 
 try:
@@ -175,7 +177,7 @@ def add_object():
     from bson import json_util
     from datetime import datetime
     add_data_dump = json.dumps(request.json)
-    LOGGER.debug(add_data_dump)
+
     try:
         new_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
         new_object_data['public_id'] = object_manager.get_highest_id(CmdbObject.COLLECTION) + 1
@@ -201,29 +203,51 @@ def add_object():
 
 @object_rest.route('/', methods=['PUT'])
 @login_required
-def update_object():
+@insert_request_user
+def update_object(request_user: User):
     from bson import json_util
     from datetime import datetime
-
     add_data_dump = json.dumps(request.json)
-    ack = None
     try:
         up_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
         up_object_data['last_edit_time'] = datetime.utcnow()
     except TypeError as e:
         LOGGER.warning(e)
         abort(400)
+
     try:
         update_object_instance = CmdbObject(**up_object_data)
     except CMDBError as e:
         LOGGER.warning(e)
         return abort(400)
+    old_object = object_manager.get_object(update_object_instance.get_public_id())
+    changes = old_object / update_object_instance
+    # Generate log
+    try:
+        update_log = {
+            'public_id': object_manager.get_highest_id(CmdbMetaLog.COLLECTION) + 1,
+            'object_id': old_object.get_public_id(),
+            'log_type': CmdbObjectLog.__name__,
+            'log_time': datetime.utcnow(),
+            'version': old_object.get_version(),
+            'user_id': request_user.get_public_id(),
+            'user_name': request_user.get_name(),
+            'changes': changes,
+            'action': LogAction.EDIT.value,
+        }
+    except CMDBError as err:
+        LOGGER.error(err.message)
 
     try:
         ack = object_manager.update_object(update_object_instance)
     except CMDBError as e:
         LOGGER.warning(e)
         return abort(500)
+
+    try:
+        log_manager.insert_log(update_log)
+    except LogManagerInsertError as err:
+        LOGGER.error(err.message)
 
     resp = make_response(ack)
     return resp

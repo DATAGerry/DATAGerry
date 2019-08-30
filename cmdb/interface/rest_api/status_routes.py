@@ -22,8 +22,8 @@ from flask import request
 from werkzeug.exceptions import abort
 from bson import json_util
 
-from cmdb.framework.cmdb_object_manager import object_manager, ObjectManagerGetError, ObjectManagerInsertError, \
-    ObjectManagerUpdateError
+from cmdb.framework.cmdb_object_manager import object_manager
+from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerUpdateError
 from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.interface.route_utils import RootBlueprint, make_response
 

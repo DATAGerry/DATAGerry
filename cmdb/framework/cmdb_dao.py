@@ -72,12 +72,6 @@ class CmdbDAO:
         for key in kwargs:
             setattr(self, key, kwargs[key])
 
-    def __truediv__(self, other):
-        if not isinstance(other, self.__class__):
-            raise TypeError("Not the same class")
-        from deepdiff import DeepDiff
-        return DeepDiff(self, other, ignore_order=True)
-
     def get_public_id(self) -> int:
         """
         get the public id of current element
