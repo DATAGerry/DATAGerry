@@ -1,1 +1,8 @@
-
+#search-area-box {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  min-width: 250px;
+  max-height: 250px;
+  z-index: 100
+}

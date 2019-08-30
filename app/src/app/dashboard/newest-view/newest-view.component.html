@@ -18,7 +18,7 @@
       <cmdb-active-badge [activeStatus]="newestItem.object_information.active"></cmdb-active-badge>
     </td>
     <th scope="row">{{newestItem.object_information.object_id}}</th>
-    <td>{{newestItem.type_information.type_name}}</td>
+    <td>{{newestItem.type_information.type_label}}</td>
     <td>{{newestItem.object_information.author_name}}</td>
     <td>{{newestItem.object_information.creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
     <td class="action-button-column">

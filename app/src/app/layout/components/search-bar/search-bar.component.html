@@ -20,39 +20,38 @@
     </div>
   </div>
 
-  <input class="form-control" type="search" placeholder="Search for..." aria-label="Search"
-         [formControl]="searchCtrl"
-         (blur)="hiden()"
-         (keyup.enter)="getResponse()">
+  <div class="input-group-prepend">
+    <input class="form-control" type="search" placeholder="Search for..." aria-label="Search"
+           [formControl]="searchCtrl"
+           (blur)="hiden()"
+           (keyup.enter)="getResponse()">
 
-  <button class="btn btn-default" type="button" (click)="getResponse()">
-    <i class="fa fa-search" aria-hidden="true"></i>
-  </button>
+    <button class="btn btn-default" type="button" (click)="getResponse()">
+      <i class="fa fa-search" aria-hidden="true"></i>
+    </button>
+  </div>
 
-</div>
-
-<div class="card overflow-auto" *ngIf="searchCtrl.value" style="position: absolute; max-height: 250px; z-index: 100">
-
-  <ng-container *ngFor="let element of autoResult">
-
-    <div class="card-header" *ngIf="element.object">
-      {{element.object}}
+  <div id="search-area-box" class="card overflow-auto" *ngIf="searchCtrl.value">
+    <div class="card-header" *ngIf="autoResult.length === 0">
+      No objects found
     </div>
 
-    <div class="card-header" *ngIf="!element.object">
-      {{element.label}} #{{element.public_id}}
-      <span class="badge badge-primary pull-right">{{element.active}}</span>
-    </div>
+    <ng-container *ngFor="let element of autoResult">
+      <div class="card-header">
+        {{element?.type_information.type_label}}#{{element?.object_information.object_id}}
+        <span class="badge badge-primary pull-right">{{element?.object_information.active}}</span>
+      </div>
 
-    <div class="card-body" *ngFor="let field of element.match_fields"
-         (click)="hiden()"
-         routerLink="/framework/object/{{element.public_id}}" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+      <div class="card-body" *ngFor="let field of element?.match_fields"
+           (click)="hiden()"
+           routerLink="/framework/object/view/{{element?.object_information.object_id}}"
+           routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <strong>Field</strong> : {{field.label}}<br>
+        <strong>Value</strong> : <span [innerHTML]="highlight(field.value)"></span><br>
+        <small class="text-muted pull-right">more ...</small>
+      </div>
+    </ng-container>
+  </div>
 
-      <strong>Field</strong> : {{field.name}}<br>
-      <strong>Value</strong> : <span [innerHTML]="highlight(field.value)"></span><br>
-      <small class="text-muted pull-right">more ...</small>
-    </div>
-
-  </ng-container>
 </div>
 
