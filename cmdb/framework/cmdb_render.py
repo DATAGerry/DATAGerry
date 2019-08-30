@@ -56,12 +56,17 @@ class RenderResult(RenderVisualization):
         self.sections: list = []
         self.summaries: list = []
         self.externals: list = []
+        self.match_fields: list = []
 
 
 class CmdbRender:
     AUTHOR_ANONYMOUS_NAME = 'anonymous'
 
-    def __init__(self, object_instance: CmdbObject, type_instance: CmdbType, render_user: (int, User)):
+    def __init__(self, object_instance: CmdbObject,
+                 type_instance: CmdbType,
+                 render_user: (int, User),
+                 match_values: [] = None):
+
         from cmdb.user_management.user_manager import user_manager
         self.object_instance: CmdbObject = object_instance
         self.type_instance: CmdbType = type_instance
@@ -70,6 +75,7 @@ class CmdbRender:
         if isinstance(render_user, int):
             self.render_user: User = self.__usm.get_user(render_user)
         self.render_user: User = render_user
+        self.match_values: [] = match_values if match_values is not None else []
 
     @property
     def object_instance(self) -> CmdbObject:
@@ -122,6 +128,7 @@ class CmdbRender:
             render_result = self.__set_sections(render_result)
             render_result = self.__set_summaries(render_result)
             render_result = self.__set_external(render_result)
+            render_result = self.__set_matched_fieldset(render_result)
         except CMDBError as err:
             raise RenderError(f'Error while generating a CMDBResult: {err.message}')
         return render_result
@@ -185,6 +192,17 @@ class CmdbRender:
                 continue
             field_map.append(field)
         return field_map
+
+    def __set_matched_fieldset(self, render_result: RenderResult) -> RenderResult:
+        tmp = []
+        for matched_field in self.match_values:
+            try:
+                tmp.append(self.type_instance.get_field(matched_field))
+            except CMDBError:
+                LOGGER.warning("Could not parse matched field {}".format(matched_field))
+                continue
+        render_result.match_fields = tmp
+        return render_result
 
     def __set_summaries(self, render_result: RenderResult) -> RenderResult:
         # global summary list
@@ -283,12 +301,15 @@ class RenderList:
         self.request_user = request_user
 
     def render_result_list(self):
+        self.render_result_list(search_fields=None)
+
+    def render_result_list(self, search_fields=None):
         from cmdb.framework.cmdb_object_manager import object_manager
-        type_buffer_list = {}
         preparation_objects = []
         for passed_object in self.object_list:
             tmp_render = CmdbRender(type_instance=object_manager.get_type(passed_object.type_id),
                                     object_instance=passed_object,
+                                    match_values=search_fields,
                                     render_user=self.request_user)
             current_render_result = tmp_render.result()
             preparation_objects.append(current_render_result)

@@ -22,6 +22,7 @@ import { TypeService } from '../../../framework/services/type.service';
 import { Router } from '@angular/router';
 import { debounceTime, map } from 'rxjs/operators';
 import { ApiCallService } from '../../../services/api-call.service';
+import {RenderResult} from "../../../framework/models/cmdb-render";
 
 @Component({
   selector: 'cmdb-search-bar',
@@ -32,9 +33,11 @@ import { ApiCallService } from '../../../services/api-call.service';
 export class SearchBarComponent implements OnInit {
 
   public searchCtrl: FormControl = new FormControl('');
-  public autoResult: any[] = [];
+  public autoResult: RenderResult[] = [];
+
   public categoryList = [{label: 'Categories'}];
   public category = 'Categories';
+
   private typeID: string = 'undefined';
   private url: string = '/search/?value=';
 
@@ -58,15 +61,9 @@ export class SearchBarComponent implements OnInit {
       if (typeof this.searchCtrl.value === 'string' && this.searchCtrl.value.length > 0) {
         this.api.callGetRoute(this.url + this.searchCtrl.value + '&type_id=' + this.typeID, {params: {limit: '5'}})
           .pipe(
-            debounceTime(500),  // WAIT FOR 500 MILISECONDS AFTER EACH KEY STROKE.
-            map(
-              (data: any) => {
-                return (
-                  data.length > 0 ? data as any[] : [{object: 'No Object Found'} as any]
-                );
-              }
-            )).subscribe( value => {
-                this.autoResult = value as [];
+            debounceTime(100)  // WAIT FOR 500 MILISECONDS AFTER EACH KEY STROKE.
+            ).subscribe( (data: RenderResult[]) => {
+                this.autoResult = data;
         });
       }
     });

@@ -42,5 +42,6 @@ export class RenderResult {
   public sections: any[];
   public summaries: any[];
   public externals: any[];
+  public match_fields: any[];
   // tslint:enable:variable-name
 }

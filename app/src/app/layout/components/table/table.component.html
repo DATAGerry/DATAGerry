@@ -38,7 +38,8 @@
   <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"  class="table table-striped table-bordered">
     <thead>
     <tr>
-      <th *ngIf="showDeleteSelected && showExport" class="toggle-check nosort" style="text-align: center"><input type="checkbox" class="select-all-checkbox" (click)="selectAll()">
+      <th *ngIf="showDeleteSelected && showExport" class="toggle-check nosort" style="text-align: center">
+        <input type="checkbox" class="select-all-checkbox" (click)="selectAll()">
       </th>
       <th class="toggle-active">Active</th>
       <th *ngFor="let thCol of thColumns" class="toggle-{{thCol.label}}">{{thCol.label}}</th>
@@ -46,18 +47,22 @@
     </thead>
     <tbody>
     <tr *ngFor="let entry of entryLists">
-
       <!-- table entries -->
-      <td *ngIf="showDeleteSelected && showExport" style="text-align: center"><input id="{{entry.public_id}}" class="select-checkbox" type="checkbox" (click)="updateDisplay()"></td>
-      <td><cmdb-active-badge [activeStatus]="entry.active"></cmdb-active-badge></td>
-      <td>{{entry.public_id}}</td>
-      <td>{{entry.label}}</td>
-      <td>{{userService?.findUser(entry.author_id).user_name }}</td>
-      <td>{{entry.creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
+      <td *ngIf="showDeleteSelected && showExport" style="text-align: center">
+        <input id="{{entry?.object_information.object_id}}" class="select-checkbox" type="checkbox" (click)="updateDisplay()">
+      </td>
+      <td><cmdb-active-badge [activeStatus]="entry?.object_information.active"></cmdb-active-badge></td>
+      <td>{{entry?.object_information.object_id}}</td>
+      <td>{{entry?.type_information.type_label}}</td>
+      <td>{{entry?.object_information.author_name }}</td>
+      <td>{{entry?.object_information.creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
 
       <!-- action buttons -->
       <td *ngIf="thColumnsActions.length > 0">
-        <cmdb-actions [data]="thColumnsActions" [publicID]="entry.public_id" (delete)="delObject($event, entry)" ></cmdb-actions>
+        <cmdb-actions [data]="thColumnsActions"
+                      publicID="{{entry?.object_information.object_id}}"
+                      (delete)="delObject($event, entry)" >
+        </cmdb-actions>
       </td>
     </tr>
     </tbody>

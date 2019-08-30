@@ -30,6 +30,7 @@ import { ModalComponent } from '../../helpers/modal/modal.component';
 import { FileSaverService } from 'ngx-filesaver';
 import { TableColumn} from './models/table-column';
 import { TableColumnAction} from './models/table-columns-action';
+import { RenderResult } from '../../../framework/models/cmdb-render';
 
 @Component({
   selector: 'cmdb-table',
@@ -55,7 +56,7 @@ export class TableComponent implements OnInit, OnDestroy {
   @Input() showExport: boolean = true;
   @Input() showDeleteSelected: boolean = true;
 
-  public items: any = new BehaviorSubject<any[]>([]);
+  public items: any = new BehaviorSubject<RenderResult[]>([]);
   public formatList: any[] = [];
 
   constructor(private userService: UserService, private apiCallService: ApiCallService,
@@ -99,14 +100,13 @@ export class TableComponent implements OnInit, OnDestroy {
     }
   }
 
-  @Input() set entryLists(value: any[]) {
+  @Input() set entryLists(value: RenderResult[]) {
     this.items.next(value);
     this.buildTable();
-    this.rerender();
     this.dtTrigger.next();
   }
 
-  get entryLists(): any[] {
+  get entryLists(): RenderResult[] {
     return this.items.getValue();
   }
 

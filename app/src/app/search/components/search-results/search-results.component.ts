@@ -16,12 +16,12 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { DataTableDirective } from 'angular-datatables';
-import { Subject } from 'rxjs';
+import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ApiCallService } from '../../../services/api-call.service';
+import {RenderResult} from '../../../framework/models/cmdb-render';
+import { TableColumnAction } from '../../../layout/components/table/models/table-columns-action';
 
 
 @Component({
@@ -30,14 +30,10 @@ import { ApiCallService } from '../../../services/api-call.service';
   styleUrls: ['./search-results.component.scss']
 })
 
-export class SearchResultsComponent implements OnInit, OnDestroy {
+export class SearchResultsComponent {
 
-  @ViewChild(DataTableDirective, {static: false})
-  public dtElement: DataTableDirective;
-
-  public dtOptions: DataTables.Settings = {};
-  public dtTrigger: Subject<any> = new Subject();
-  public results = [];
+  public results: RenderResult[] = [];
+  public thColumnsActions: TableColumnAction[];
   private url: any;
 
   constructor(private apiCallService: ApiCallService, private router: Router, private spinner: NgxSpinnerService,
@@ -49,43 +45,17 @@ export class SearchResultsComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit() {
-    this.dtOptions = {
-      ordering: true,
-      order: [[1, 'asc']],
-      language: {
-        search: '',
-        searchPlaceholder: 'Filter...'
-      }
-    };
-  }
-
   private callObjects() {
     this.apiCallService.callGetRoute(this.url).subscribe(
-      data => {
+      (data: RenderResult[]) => {
         this.spinner.show();
         setTimeout( () => {
-          this.results = data as [];
-          this.rerender();
-          this.dtTrigger.next();
+          this.results = data;
           this.spinner.hide();
         }, 100);
       });
-  }
-
-  ngOnDestroy(): void {
-    // Do not forget to unsubscribe the event
-    this.dtTrigger.unsubscribe();
-  }
-
-  public rerender(): void {
-    if (typeof this.dtElement.dtInstance !== 'undefined') {
-      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-        // Destroy the table first
-        dtInstance.destroy();
-      });
-    }
-
+    this.thColumnsActions = [
+      { name: 'view', classValue: 'text-dark ml-1', linkRoute: '/framework/object/view/', fontIcon: 'fa fa-eye', active: true}];
   }
 
 }

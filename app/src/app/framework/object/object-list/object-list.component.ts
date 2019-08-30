@@ -31,6 +31,7 @@ import { FileSaverService } from 'ngx-filesaver';
 import { DatePipe } from '@angular/common';
 import { CmdbType } from '../../models/cmdb-type';
 import { TypeService } from '../../services/type.service';
+import {RenderResult} from "../../models/cmdb-render";
 
 @Component({
   selector: 'cmdb-object-list',
@@ -89,7 +90,7 @@ export class ObjectListComponent implements OnDestroy {
 
     this.apiCallService.callGetRoute(url)
       .pipe(
-        map((dataArray: any[]) => {
+        map((dataArray: RenderResult[]) => {
           const lenx = dataArray === null ? 0 : dataArray.length;
           this.summaries = lenx > 0 ? dataArray[0].summaries : [];
           this.columnFields = lenx > 0 ? dataArray[0].fields : [];
