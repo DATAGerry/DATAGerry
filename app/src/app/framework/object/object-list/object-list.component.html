@@ -11,14 +11,14 @@
       <div class="btn-group">
         <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <i class="fa fa-download" aria-hidden="true"></i> Export
+          <fa-icon icon="file-export"></fa-icon> Export
         </button>
         <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left" aria-labelledby="exportButton">
           <li id="export-{{item.id}}" [className]="item.active ? 'dropdown-item' : 'dropdown-item disabled'"
               *ngFor="let item of formatList" style="text-align: center;"
               (click)="exportingFiles(item)"
               [ngbTooltip]="item.helperText">
-            <i class="fa {{item.icon}}"></i> {{item.label}} ({{selectedObjects}})
+            <fa-icon icon="{{item.icon}}"></fa-icon> {{item.label}} ({{selectedObjects}})
           </li>
         </ul>
       </div>
@@ -71,13 +71,13 @@
         <td>{{result?.object_information.creation_time?.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
         <td>
           <a class="text-dark"[routerLink]="['/framework/object/view', result?.object_information.object_id]">
-            <i class="fa fa-eye" aria-hidden="true"></i>
+            <fa-icon icon="eye"></fa-icon>
           </a>
           <a class="ml-1 text-dark" [routerLink]="['/framework/object/edit/', result?.object_information.object_id]">
-            <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+            <fa-icon icon="edit"></fa-icon>
           </a>
           <a class="ml-1 text-dark" (click)="delObject(result)">
-            <i class="fa fa-trash-o" aria-hidden="true"></i>
+            <fa-icon icon="trash"></fa-icon>
           </a>
         </td>
       </tr>

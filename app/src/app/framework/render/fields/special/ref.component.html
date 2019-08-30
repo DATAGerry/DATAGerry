@@ -11,7 +11,7 @@
           <div class="input-group-append">
             <span class="input-group-text">
               <a [routerLink]="'/framework/object/view/'+ controller.value">
-                <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                <fa-icon icon="arrow-right"></fa-icon>
               </a>
             </span>
           </div>
@@ -27,7 +27,7 @@
           </select>
           <div *ngIf="data?.helperText" class="input-group-append">
             <span class="input-group-text">
-              <i class="fa fa-info-circle" placement="left" [ngbTooltip]="data?.helperText"></i>
+              <fa-icon icon="info-circle" placement="left" [ngbTooltip]="data?.helperText"></fa-icon>
             </span>
           </div>
         </ng-container>

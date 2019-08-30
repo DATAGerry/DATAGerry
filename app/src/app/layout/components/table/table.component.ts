@@ -65,7 +65,7 @@ export class TableComponent implements OnInit, OnDestroy {
               private datePipe: DatePipe) {
     this.add = {
       // add new
-      text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
+      text: '<fa-icon icon="plus"></fa-icon> Add',
       className: 'btn btn-success btn-sm mr-1',
       action: function() {
         this.router.navigate(['/framework/' + this.linkRoute + 'add']);
@@ -74,7 +74,7 @@ export class TableComponent implements OnInit, OnDestroy {
 
     this.print = {
       // print
-      text: 'Print <i class="fa fa-print" aria-hidden="true"></i>',
+      text: 'Print <fa-icon icon="print"></fa-icon>',
       extend: 'print',
       className: 'btn btn-info btn-sm mr-1'
     };
@@ -87,9 +87,9 @@ export class TableComponent implements OnInit, OnDestroy {
       { name: 'action', label: 'Action'}];
 
     this.thColumnsActions = [
-      { name: 'view', classValue: 'text-dark ml-1', linkRoute: '', fontIcon: 'fa fa-eye', active: false},
-      { name: 'edit', classValue: 'text-dark ml-1', linkRoute: 'edit/', fontIcon: 'fa fa-pencil-square-o'},
-      { name: 'delete', classValue: 'text-dark ml-1', linkRoute: 'delete/', fontIcon: 'fa fa-trash-o'}];
+      { name: 'view', classValue: 'text-dark ml-1', linkRoute: '', fontIcon: 'eye', active: false},
+      { name: 'edit', classValue: 'text-dark ml-1', linkRoute: 'edit/', fontIcon: 'edit'},
+      { name: 'delete', classValue: 'text-dark ml-1', linkRoute: 'delete/', fontIcon: 'trash'}];
   }
 
   ngOnInit(): void {

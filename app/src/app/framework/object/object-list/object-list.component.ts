@@ -129,7 +129,7 @@ export class ObjectListComponent implements OnDestroy {
     this.dtButtons.push(
       {
         // add new
-        text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
+        text: '<fa-icon icon="plus"></fa-icon> Add',
         className: 'btn btn-success btn-sm mr-1',
         action: function() {
           if (this.typeID === null) {
@@ -145,7 +145,7 @@ export class ObjectListComponent implements OnDestroy {
     this.dtButtons.push(
       {
         // print
-        text: 'Print <i class="fa fa-print" aria-hidden="true"></i>',
+        text: 'Print <fa-icon icon="print"></fa-icon>',
         extend: 'print',
         className: 'btn btn-info btn-sm mr-1'
       }
@@ -158,7 +158,7 @@ export class ObjectListComponent implements OnDestroy {
         {
           extend: 'collection',
           className: 'btn btn-secondary btn-sm mr-1 dropdown-toggle',
-          text: '<i class="fa fa-cog" aria-hidden="true"></i>',
+          text: '<fa-icon icon="edit"></fa-icon>',
           collectionLayout: 'dropdown-menu overflow-auto',
           buttons: function() {
             const columnButton = [];

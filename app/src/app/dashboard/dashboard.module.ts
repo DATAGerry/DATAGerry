@@ -27,6 +27,7 @@ import { NewestViewComponent } from './newest-view/newest-view.component';
 import { DataTablesModule } from 'angular-datatables';
 import { LatestChangesViewComponent } from './latest-changes-view/latest-changes-view.component';
 import { ObjectModule } from '../framework/object/object.module';
+import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 
 @NgModule({
   declarations: [DashboardComponent, DashcardComponent, NewestViewComponent, LatestChangesViewComponent],
@@ -35,7 +36,8 @@ import { ObjectModule } from '../framework/object/object.module';
     LayoutModule,
     DashboardRoutingModule,
     DataTablesModule,
-    ObjectModule
+    ObjectModule,
+    FontAwesomeModule
   ]
 })
 export class DashboardModule {

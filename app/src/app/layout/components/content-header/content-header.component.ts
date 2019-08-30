@@ -32,7 +32,7 @@ export class ContentHeaderComponent {
 
   @Input()
   public set faIcon(value: string) {
-    this.currentIcon = value === undefined ? 'fa-cube' : value;
+    this.currentIcon = value === undefined ? 'cube' : value;
   }
 
   public get faIcon(): string {

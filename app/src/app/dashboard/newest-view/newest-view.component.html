@@ -23,13 +23,14 @@
     <td>{{newestItem.object_information.creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
     <td class="action-button-column">
       <a class="text-dark" routerLink="/framework/object/view/{{newestItem.object_information.object_id}}">
-        <i class="fa fa-eye"></i>
+        <fa-icon icon="eye"></fa-icon>
       </a>
       <a class="ml-1 text-dark" routerLink="/framework/object/edit/{{newestItem.object_information.object_id}}">
-        <i class="fa fa-pencil-square-o"></i>
+        <fa-icon icon="edit"></fa-icon>
       </a>
       <a class="ml-1 text-dark" routerLink="/framework/object/delete/{{newestItem.object_information.object_id}}">
-        <i class="fa fa-trash-o"></i></a>
+        <fa-icon icon="trash"></fa-icon>
+      </a>
     </td>
   </tr>
   </tbody>

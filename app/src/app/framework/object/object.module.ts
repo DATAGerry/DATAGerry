@@ -43,6 +43,7 @@ import { ObjectViewRenderComponent } from './components/object-view-render/objec
 import { ObjectCopyComponent } from './object-copy/object-copy.component';
 import { ObjectLinksComponent } from './components/object-links/object-links.component';
 import { ObjectTypeLabelComponent } from './components/object-type-label/object-type-label.component';
+import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 
 @NgModule({
   declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent, ObjectSummaryComponent,
@@ -59,7 +60,8 @@ import { ObjectTypeLabelComponent } from './components/object-type-label/object-
     ReactiveFormsModule,
     RenderModule,
     NgSelectModule,
-    NgbTooltipModule
+    NgbTooltipModule,
+    FontAwesomeModule
   ]
 })
 export class ObjectModule {

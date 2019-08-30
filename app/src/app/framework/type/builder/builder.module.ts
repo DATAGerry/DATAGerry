@@ -35,6 +35,7 @@ import { PreviewModalComponent } from './modals/preview-modal/preview-modal.comp
 import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
 import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { RenderElementComponent } from '../../render/render-element/render-element.component';
+import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 
 @NgModule({
   entryComponents: [
@@ -68,7 +69,8 @@ import { RenderElementComponent } from '../../render/render-element/render-eleme
     FormsModule,
     RenderModule,
     NgbModalModule,
-    NgSelectModule
+    NgSelectModule,
+    FontAwesomeModule
   ],
   exports: [
     BuilderComponent

@@ -2,23 +2,23 @@
   <div class="card-body">
     <div class="list-group list-group-flush">
       <a routerLink="/framework/object/type/{{renderResult?.type_information?.type_id}}" class="list-group-item list-group-item-action">
-        <i class="fa fa-th-list"></i> List objects
+        <fa-icon icon="list"></fa-icon> List objects
       </a>
       <a routerLink="/framework/object/add/{{renderResult?.type_information?.type_id}}"
          class="list-group-item list-group-item-action list-group-item-action">
-        <i class="fa fa-plus"></i> Add new {{renderResult?.type_information?.type_label}} object
+        <fa-icon icon="plus"></fa-icon> Add new {{renderResult?.type_information?.type_label}} object
       </a>
       <a routerLink="/framework/object/copy/{{renderResult?.object_information?.object_id}}"
          class="list-group-item list-group-item-action list-group-item-action">
-        <i class="fa fa-clone"></i> Copy object
+        <fa-icon icon="clone"></fa-icon> Copy object
       </a>
       <a routerLink="/framework/object/edit/{{renderResult?.object_information?.object_id}}"
          class="list-group-item list-group-item-action list-group-item-action">
-        <i class="fa fa-pencil-square-o"></i> Edit object
+        <fa-icon icon="edit"></fa-icon> Edit object
       </a>
       <a class="list-group-item list-group-item-action list-group-item-action"
          (click)="deleteObject(renderResult?.object_information?.object_id)">
-        <i class="fa fa-trash-o"></i> Delete object
+        <fa-icon icon="trash"></fa-icon> Delete object
       </a>
     </div>
   </div>

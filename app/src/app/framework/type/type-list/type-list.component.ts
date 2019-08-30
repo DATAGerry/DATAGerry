@@ -52,7 +52,7 @@ export class TypeListComponent implements OnInit, OnDestroy {
         '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
       buttons: [
         {
-          text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
+          text: '<fa-icon icon="plus"></fa-icon> Add',
           className: 'btn btn-success btn-sm mr-1',
           action: function() {
             this.router.navigate(['/framework/type/add']);

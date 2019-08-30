@@ -43,6 +43,7 @@ import { CheckboxSimpleComponent } from './simple/choice/checkbox-simple.compone
 import { RadioSimpleComponent } from './simple/choice/radio-simple.component';
 import { SelectSimpleComponent } from './simple/choice/select-simple.component';
 import { RouterModule } from '@angular/router';
+import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 
 
 @NgModule({
@@ -82,7 +83,8 @@ import { RouterModule } from '@angular/router';
     NgSelectModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterModule
+    RouterModule,
+    FontAwesomeModule
   ]
 })
 export class RenderModule {

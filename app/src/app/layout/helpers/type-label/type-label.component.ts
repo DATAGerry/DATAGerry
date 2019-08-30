@@ -53,7 +53,7 @@ export class TypeLabelComponent implements OnInit {
 
   @Input()
   public set faIcon(value: string) {
-    this.icon = value === undefined ? 'fa-cube' : value;
+    this.icon = value === undefined ? 'cube' : value;
   }
 
   public get faIcon(): string {

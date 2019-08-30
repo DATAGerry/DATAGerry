@@ -26,6 +26,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RenderModule } from '../framework/render/render.module';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { ExportService } from './export.service';
+import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 
 @NgModule({
   declarations: [ExportComponent],
@@ -36,7 +37,8 @@ import { ExportService } from './export.service';
     ReactiveFormsModule,
     RenderModule,
     ExportRoutingModule,
-    NgSelectModule
+    NgSelectModule,
+    FontAwesomeModule
   ],
   providers: [
     ExportService
