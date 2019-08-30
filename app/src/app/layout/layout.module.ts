@@ -35,11 +35,16 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { TableComponent } from './components/table/table.component';
 import { DataTablesModule } from 'angular-datatables';
 import { ToastContainerComponent } from './helpers/toast/toast-container.component';
-import { NgbActiveModal, NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from './helpers/modal/modal.component';
 import { TableModule } from './components/table/table.module';
 import { TypeLabelComponent } from './helpers/type-label/type-label.component';
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
+
+import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { fas } from '@fortawesome/free-solid-svg-icons';
+import { far } from '@fortawesome/free-regular-svg-icons';
+import { fab } from '@fortawesome/free-brands-svg-icons';
 
 @NgModule({
   declarations: [
@@ -85,7 +90,8 @@ import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
       customClass: 'modal-content',
       confirmButtonClass: 'btn btn-primary',
       cancelButtonClass: 'btn'
-    })
+    }),
+    FontAwesomeModule
   ],
   providers: [
     BreadcrumbService,
@@ -96,4 +102,7 @@ import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
   ]
 })
 export class LayoutModule {
+  constructor(private iconLibrary: FaIconLibrary) {
+    iconLibrary.addIconPacks(fas, far, fab);
+  }
 }

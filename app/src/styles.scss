@@ -28,10 +28,6 @@
 /* import ng-select */
 @import "~@ng-select/ng-select/themes/default.theme.css";
 
-/* import fontawesome */
-$fa-font-path: "../node_modules/font-awesome/fonts";
-@import "~font-awesome/scss/font-awesome";
-
 /* custom global modules */
 @import "scss/variables";
 @import "scss/mixins";
