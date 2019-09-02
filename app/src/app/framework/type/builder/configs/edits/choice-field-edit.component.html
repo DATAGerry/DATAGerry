@@ -46,7 +46,7 @@
       </td>
       <td>
         <button type="button" class="btn btn-outline-primary" [disabled]="options.length == 1" (click)="delOption(data.options[i])">
-          <fa-icon icon="trash"></fa-icon>
+          <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
         </button>
       </td>
     </tr>

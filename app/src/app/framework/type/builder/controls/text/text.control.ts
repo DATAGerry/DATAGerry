@@ -44,7 +44,7 @@ export class TextControl implements ControlsCommon {
 
   name = 'text';
   label = 'Text';
-  icon = 'fa-font';
+  icon = 'font';
   dndType: string = 'inputs';
 
   content() {

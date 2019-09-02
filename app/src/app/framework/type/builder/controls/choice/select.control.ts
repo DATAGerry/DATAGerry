@@ -44,7 +44,7 @@ export class SelectControl implements ControlsCommon {
 
   name = 'select';
   label = 'Select';
-  icon = 'fa-list-ul';
+  icon = 'list';
   dndType: string = 'inputs';
 
   content() {

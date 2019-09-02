@@ -10,7 +10,7 @@
                  [formControlName]="data.name"/>
           <div class="input-group-append">
             <span class="input-group-text" (click)="copyToClipboard()">
-              <fa-icon icon="clipboard"></fa-icon>
+              <fa-icon [icon]="['far', 'clipboard']"></fa-icon>
             </span>
           </div>
         </ng-container>

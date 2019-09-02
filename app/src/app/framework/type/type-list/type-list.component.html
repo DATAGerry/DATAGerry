@@ -17,19 +17,19 @@
     <td>
       <cmdb-active-badge [activeStatus]="typeInstance.active"></cmdb-active-badge>
     </td>
-    <th scope="row">{{typeInstance.public_id}}</th>
+    <td scope="row">{{typeInstance.public_id}}</td>
     <td><cmdb-type-label [faIcon]="typeInstance?.render_meta?.icon" [title]="typeInstance.label"></cmdb-type-label></td>
     <td>{{userService?.findUser(typeInstance?.author_id).user_name }}</td>
     <td>{{typeInstance.creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
     <td>
       <a class="text-dark" routerLink="/framework/type/edit/{{typeInstance.public_id}}">
-        <fa-icon icon="edit"></fa-icon>
+        <fa-icon [icon]="['far', 'edit']"></fa-icon>
       </a>
       <a class="ml-1 text-dark" [routerLink]="['/framework/type/add/']" [queryParams]="{copy: typeInstance.public_id}">
-        <fa-icon icon="clone"></fa-icon>
+        <fa-icon [icon]="['far', 'clone']"></fa-icon>
       </a>
       <a class="ml-1 text-dark" routerLink="/framework/type/delete/{{typeInstance.public_id}}">
-        <fa-icon icon="trash"></fa-icon>
+        <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
       </a>
     </td>
   </tr>

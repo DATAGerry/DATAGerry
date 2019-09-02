@@ -3,6 +3,6 @@
      class="{{action.classValue}}"
      type="button"
      (click)="delete(action.linkRoute)">
-    <fa-icon icon="{{action.fontIcon}}"></fa-icon>
+    <fa-icon [icon]="['far', action.fontIcon]"></fa-icon>
   </a>
 </ng-container>

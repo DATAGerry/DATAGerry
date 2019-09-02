@@ -15,7 +15,7 @@
                      [dndDraggable]="control.typeController.content()"
                      class="list-group-item list-group-item-action">
                 <span>
-                  <fa-icon icon="{{ control.typeController.icon }}"></fa-icon>{{ control.typeController.label }}
+                  <fa-icon [icon]="['far', control.typeController.icon]"></fa-icon> {{ control.typeController.label }}
                 </span>
                   <button type="button" class="btn btn-primary btn-sm float-right">
                     <fa-icon icon="bars"></fa-icon>
@@ -39,7 +39,7 @@
                      [dndDraggable]="control.typeController.content()"
                      class="list-group-item list-group-item-action">
                 <span>
-                  <fa-icon icon="{{ control.typeController.icon }}"></fa-icon>{{ control.typeController.label }}
+                  <fa-icon icon="{{control.typeController.icon}}"></fa-icon> {{ control.typeController.label }}
                 </span>
                   <button type="button" class="btn btn-primary btn-sm float-right">
                     <fa-icon icon="bars"></fa-icon>
@@ -63,7 +63,7 @@
                      [dndDraggable]="control.typeController.content()"
                      class="list-group-item list-group-item-action">
                 <span>
-                  <fa-icon icon="{{ control.typeController.icon }}"></fa-icon>{{ control.typeController.label }}
+                  <fa-icon [icon]="['fas', control.typeController.icon]"></fa-icon> {{ control.typeController.label }}
                 </span>
                   <button type="button" class="btn btn-primary btn-sm float-right">
                     <fa-icon icon="bars"></fa-icon>
@@ -98,17 +98,17 @@
                (dndMoved)="onDragged(section, sections, 'move')">
         <div class="card">
           <div class="card-header">
-            {{section.label}}
+            <fa-icon [icon]="['far', 'object-group']"></fa-icon> {{section.label}}
             <span class="float-right">
-              <button class="btn btn-link" type="button" data-toggle="collapse"
+              <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
                       [attr.data-target]="'#' + section.name">
-                <fa-icon icon="edit"></fa-icon>
+                <fa-icon [icon]="['far', 'edit']"></fa-icon>
               </button>
-              <button class="btn btn-link" type="button" dndHandle>
-                <fa-icon icon="arrows-alt"></fa-icon>
+              <button class="btn btn-link mr-1" type="button" dndHandle>
+                <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
               </button>
               <button class="btn btn-link" type="button" (click)="remove(section, sections)">
-                <fa-icon icon="window-close"></fa-icon>
+                <fa-icon [icon]="['far', 'window-close']"></fa-icon>
               </button>
             </span>
           </div>
@@ -129,17 +129,17 @@
 
               <div class="fields card">
                 <div class="card-header">
-                  {{field.label}}
+                  <fa-icon [icon]="['fas', matchedType(field.type)]"></fa-icon> {{field.label}}
                   <span class="float-right">
-                    <button class="btn btn-link" type="button" data-toggle="collapse"
+                    <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
                             [attr.data-target]="'#' + field.name">
-                      <fa-icon icon="edit"></fa-icon>
+                      <fa-icon [icon]="['far', 'edit']"></fa-icon>
                     </button>
-                    <button class="btn btn-link" type="button" dndHandle>
-                      <fa-icon icon="arrows-alt"></fa-icon>
+                    <button class="btn btn-link mr-1" type="button" dndHandle>
+                      <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
                     </button>
                     <button class="btn btn-link" type="button" (click)="remove(field, section.fields)">
-                      <fa-icon icon="window-close"></fa-icon>
+                      <fa-icon [icon]="['far', 'window-close']"></fa-icon>
                     </button>
                   </span>
                 </div>

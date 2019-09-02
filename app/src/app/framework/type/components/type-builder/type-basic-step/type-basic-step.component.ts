@@ -49,7 +49,7 @@ export class TypeBasicStepComponent implements OnInit {
   set preData(data: any) {
     if (data !== undefined) {
       this.basicForm.patchValue(data);
-      this.basicMetaIconForm.patchValue(data.render_meta === undefined ? 'fa-cube' : data.render_meta);
+      this.basicMetaIconForm.patchValue(data.render_meta === undefined ? 'cube' : data.render_meta);
     }
   }
 
@@ -656,7 +656,7 @@ export class TypeBasicStepComponent implements OnInit {
       active: new FormControl(true)
     });
     this.basicMetaIconForm = new FormGroup({
-      icon: new FormControl('fa-cube'),
+      icon: new FormControl('cube'),
     });
     this.basicCategoryForm = new FormGroup({
       category_id: new FormControl(null)

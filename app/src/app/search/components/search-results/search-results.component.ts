@@ -55,7 +55,7 @@ export class SearchResultsComponent {
         }, 100);
       });
     this.thColumnsActions = [
-      { name: 'view', classValue: 'text-dark ml-1', linkRoute: '/framework/object/view/', fontIcon: 'fa fa-eye', active: true}];
+      { name: 'view', classValue: 'text-dark ml-1', linkRoute: '/framework/object/view/', fontIcon: 'eye', active: true}];
   }
 
 }

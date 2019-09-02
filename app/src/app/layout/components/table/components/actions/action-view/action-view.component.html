@@ -3,6 +3,6 @@
   <a *ngIf="action.name === 'view' && action.active !== false"
     class="{{action.classValue}}"
     routerLink="{{action.linkRoute}}{{publicID}}">
-    <fa-icon icon="{{action.fontIcon}}"></fa-icon>
+    <fa-icon [icon]="['far', action.fontIcon]"></fa-icon>
   </a>
 </ng-container>

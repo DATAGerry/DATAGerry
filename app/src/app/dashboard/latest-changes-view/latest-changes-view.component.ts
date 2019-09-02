@@ -29,6 +29,7 @@ import { SpecialService } from '../../framework/services/special.service';
 export class LatestChangesViewComponent implements OnInit, OnDestroy {
 
   public latest: RenderResult[] = [];
+  public thColumnsActions: any[] = [];
   public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();
 
@@ -53,6 +54,11 @@ export class LatestChangesViewComponent implements OnInit, OnDestroy {
       () => {
         this.dtTrigger.next();
       });
+
+    this.thColumnsActions = [
+      { name: 'view', classValue: 'text-dark ml-1', linkRoute: 'view/', fontIcon: 'eye', active: true},
+      { name: 'edit', classValue: 'text-dark ml-1', linkRoute: 'edit/', fontIcon: 'edit'},
+      { name: 'delete', classValue: 'text-dark ml-1', linkRoute: 'object/', fontIcon: 'trash-alt'}];
   }
 
   public ngOnDestroy(): void {

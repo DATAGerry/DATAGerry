@@ -44,7 +44,7 @@ export class TelControl implements ControlsCommon {
 
   name = 'phone';
   label = 'Phone';
-  icon = 'fa-phone';
+  icon = 'phone';
   dndType: string = 'inputs';
 
   content() {

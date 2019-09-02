@@ -44,7 +44,7 @@ export class RadioControl implements ControlsCommon {
 
   name = 'radio';
   label = 'Radio';
-  icon = 'fa-bullseye';
+  icon = 'check-circle';
   dndType: string = 'inputs';
 
   content() {

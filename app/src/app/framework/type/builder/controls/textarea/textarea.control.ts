@@ -44,7 +44,7 @@ export class TextAreaControl implements ControlsCommon {
 
   name = 'textarea';
   label = 'Textarea';
-  icon = 'fa-font';
+  icon = 'align-left';
   dndType: string = 'inputs';
 
   content() {

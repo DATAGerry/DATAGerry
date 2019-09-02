@@ -36,7 +36,7 @@ export class ContentHeaderComponent {
   }
 
   public get faIcon(): string {
-    return this.currentIcon;
+    return this.currentIcon === undefined ? 'cube' : this.currentIcon;
   }
 
 }

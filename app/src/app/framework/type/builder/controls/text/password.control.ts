@@ -44,7 +44,7 @@ export class PasswordControl implements ControlsCommon {
 
   name = 'password';
   label = 'Password';
-  icon = 'fa-lock';
+  icon = 'lock';
   dndType: string = 'inputs';
 
   content() {

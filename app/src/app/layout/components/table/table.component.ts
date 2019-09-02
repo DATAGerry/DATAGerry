@@ -65,7 +65,7 @@ export class TableComponent implements OnInit, OnDestroy {
               private datePipe: DatePipe) {
     this.add = {
       // add new
-      text: '<fa-icon icon="plus"></fa-icon> Add',
+      text: '<i class="fas fa-plus"></i> Add',
       className: 'btn btn-success btn-sm mr-1',
       action: function() {
         this.router.navigate(['/framework/' + this.linkRoute + 'add']);
@@ -74,7 +74,7 @@ export class TableComponent implements OnInit, OnDestroy {
 
     this.print = {
       // print
-      text: 'Print <fa-icon icon="print"></fa-icon>',
+      text: 'Print <i class="fas fa-print"></i>',
       extend: 'print',
       className: 'btn btn-info btn-sm mr-1'
     };
@@ -219,8 +219,8 @@ export class TableComponent implements OnInit, OnDestroy {
       modalComponent.result.then((result) => {
         if (result) {
           this.apiCallService.callDeleteManyRoute(this.linkRoute + 'delete/' + publicIds ).subscribe(data => {
-            this.apiCallService.callGetRoute(this.linkRoute).subscribe(objs => {
-              this.entryLists = objs;
+            this.apiCallService.callGetRoute('render/').subscribe((objs: RenderResult[]) => {
+              this.items.next(objs);
             });
           });
         }
@@ -230,10 +230,9 @@ export class TableComponent implements OnInit, OnDestroy {
     }
   }
 
-  public delObject(route: any, value: any) {
-
+  public delObject(route: any, value: RenderResult) {
     if ( route === 'delete/') {
-      this.router.navigate([this.router.url + '/' + route + value.public_id]);
+      this.router.navigate([this.router.url + '/' + route + value.type_information.type_id]);
     }
 
     if ( route === 'object/') {
@@ -245,10 +244,10 @@ export class TableComponent implements OnInit, OnDestroy {
 
       modalComponent.result.then((result) => {
         if (result) {
-          const id = value.public_id;
+          const id = value.object_information.object_id;
           this.apiCallService.callDeleteRoute(this.linkRoute + id).subscribe(data => {
-            this.apiCallService.callGetRoute(this.linkRoute).subscribe(objs => {
-              this.entryLists = objs;
+            this.apiCallService.callGetRoute('render/').subscribe((objs: RenderResult[]) => {
+              this.items.next(objs);
             });
           });
         }

@@ -45,7 +45,7 @@ export class ReferenceControl implements ControlsCommon {
 
   name = 'ref';
   label = 'Reference';
-  icon = 'fa-retweet';
+  icon = 'retweet';
   dndType: string = 'inputs';
 
   content() {

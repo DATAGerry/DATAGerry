@@ -44,7 +44,7 @@ export class CheckboxControl implements ControlsCommon {
 
   name = 'checkbox';
   label = 'Checkbox';
-  icon = 'fa-font';
+  icon = 'check-square';
   dndType: string = 'inputs';
 
   content() {

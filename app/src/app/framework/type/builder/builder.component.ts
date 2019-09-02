@@ -145,4 +145,22 @@ export class BuilderComponent implements OnInit {
     diagnosticModal.componentInstance.data = this.sections;
   }
 
+  public matchedType(value: string) {
+    switch (value) {
+      case 'textarea':
+        return 'align-left';
+      case 'password':
+        return 'key';
+      case 'checkbox':
+        return 'check-square';
+      case 'radio':
+        return 'check-circle';
+      case 'select':
+        return 'list';
+      case 'ref':
+        return 'retweet';
+      default:
+        return 'font';
+    }
+  }
 }
