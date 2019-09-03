@@ -16,22 +16,28 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { CmdbDao } from './cmdb-dao';
+import { Injectable } from '@angular/core';
+import { ApiCallService, ApiService } from '../../services/api-call.service';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { CmdbLog } from '../models/cmdb-log';
 
+@Injectable({
+  providedIn: 'root'
+})
+export class LogService<T = CmdbLog> implements ApiService  {
 
-export class CmdbObject implements CmdbDao {
+  public servicePrefix: string = 'log';
 
-  // tslint:disable:variable-name
-  public public_id: number;
-  public type_id: number;
-  public status: boolean = true;
-  public version: string;
-  public author_id: number;
-  public active: boolean;
-  public fields: any[];
-  public creation_time: any;
-  public last_edit_time: any;
-  public author_name?: string;
-  public comment?: string;
-  // tslint:enable
+  constructor(private api: ApiCallService) {
+  }
+
+  public getLogsByObject(publicID: number) {
+    return this.api.callGet<T>(`${this.servicePrefix}/object/${publicID}/`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
 }

@@ -24,7 +24,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CmdbMode } from '../../modes.enum';
 import { CmdbObject } from '../../models/cmdb-object';
 import { CmdbType } from '../../models/cmdb-type';
-import {FormControl, FormGroup} from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
+import { ToastService } from '../../../layout/services/toast.service';
+import { RenderResult } from '../../models/cmdb-render';
+import { RenderService } from '../../render/service/render.service';
 
 @Component({
   selector: 'cmdb-object-edit',
@@ -35,29 +38,30 @@ export class ObjectEditComponent implements OnInit {
 
   public mode: CmdbMode = CmdbMode.Edit;
   private objectID: number;
+  public renderResult: RenderResult;
   public objectInstance: CmdbObject;
-  public typeInstance: CmdbType;
   public renderForm: FormGroup;
+  public commitForm: FormGroup;
 
-  constructor(private api: ApiCallService, private objectService: ObjectService, private typeService: TypeService,
-              private route: ActivatedRoute, private router: Router) {
+  constructor(private api: ApiCallService, private renderService: RenderService, private objectService: ObjectService,
+              private route: ActivatedRoute, private router: Router, private toastService: ToastService) {
     this.route.params.subscribe((params) => {
       this.objectID = params.publicID;
     });
-    this.renderForm = new FormGroup({
-      active: new FormControl( false)
+    this.renderForm = new FormGroup({});
+    this.commitForm = new FormGroup({
+      comment: new FormControl('')
     });
   }
 
   public ngOnInit(): void {
-    this.objectService.getObject(this.objectID, true).subscribe((objectInstanceResp: CmdbObject) => {
-      this.objectInstance = objectInstanceResp;
-      this.renderForm.get('active').setValue(objectInstanceResp.active);
+    this.renderService.getRenderResult(this.objectID).subscribe((rr: RenderResult) => {
+      this.renderResult = rr;
     }, (error) => {
       console.error(error);
     }, () => {
-      this.typeService.getType(this.objectInstance.type_id).subscribe((typeInstanceResp: CmdbType) => {
-        this.typeInstance = typeInstanceResp;
+      this.objectService.getObject(this.objectID, true).subscribe(ob => {
+        this.objectInstance = ob;
       });
     });
   }
@@ -66,17 +70,19 @@ export class ObjectEditComponent implements OnInit {
     this.renderForm.markAllAsTouched();
     if (this.renderForm.valid) {
       const patchValue = [];
-      this.objectInstance.active = this.renderForm.get('active').value;
-      this.renderForm.removeControl('active');
+
       Object.keys(this.renderForm.value).forEach((key: string) => {
         patchValue.push({
           name: key,
           value: this.renderForm.value[key]
         });
       });
+
       this.objectInstance.fields = patchValue;
-      this.objectService.putObject(this.objectInstance).subscribe((res: boolean) => {
+      this.objectInstance.comment = this.commitForm.get('comment').value;
+      this.objectService.putObject(this.objectID, this.objectInstance).subscribe((res: boolean) => {
         if (res) {
+          this.toastService.show('Object was updated!');
           this.router.navigate(['/framework/object/view/' + this.objectID]);
         }
       });

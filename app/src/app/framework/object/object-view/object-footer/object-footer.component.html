@@ -14,17 +14,15 @@
   </div>
   <div class="card-body tab-content">
     <div class="tab-pane fade show active" id="logs" role="tabpanel">
-      <div class="alert alert-info" role="alert">
-        Not implemented yet
-      </div>
+      <cmdb-object-log-list [publicID]="publicID"></cmdb-object-log-list>
     </div>
     <div class="tab-pane fade" id="reference" role="tabpanel">
+      <cmdb-object-reference-list [publicID]="publicID"></cmdb-object-reference-list>
+    </div>
+    <div class="tab-pane fade" id="connections" role="tabpanel">
       <div class="alert alert-info" role="alert">
         Not implemented yet
       </div>
-    </div>
-    <div class="tab-pane fade" id="connections" role="tabpanel">
-      <cmdb-object-links [partnerID]="publicID"></cmdb-object-links>
     </div>
   </div>
 </div>

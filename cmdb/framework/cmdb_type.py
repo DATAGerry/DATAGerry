@@ -120,11 +120,8 @@ class CmdbType(CmdbDAO):
         return len(self.fields)
 
     def get_field_of_type_with_value(self, input_type: str, _filter: str, value) -> dict:
-        field = [x for x in self.fields if x['input_type'] == input_type and x[_filter] == value]
+        field = [x for x in self.fields if x['type'] == input_type and x[_filter] == value]
         if field:
-            LOGGER.debug('Field of type {}'.format(input_type))
-            LOGGER.debug('Field len'.format(field))
-            LOGGER.debug('Field {}'.format(len(field)))
             try:
                 return field[0]
             except (RequiredInitKeyNotFoundError, CMDBError) as e:

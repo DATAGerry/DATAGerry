@@ -188,8 +188,8 @@ class CmdbRender:
         for field in self.type_instance.fields:
             try:
                 field['value'] = [x for x in self.object_instance.fields if x['name'] == field['name']][0]['value']
-            except ValueError:
-                continue
+            except (ValueError, IndexError):
+                field['value'] = None
             field_map.append(field)
         return field_map
 

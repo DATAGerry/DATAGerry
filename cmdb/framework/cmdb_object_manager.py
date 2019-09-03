@@ -22,7 +22,6 @@ The implementation of the manager used is always realized using the respective s
 """
 import logging
 import re
-from datetime import datetime
 
 from cmdb.data_storage import get_pre_init_database
 from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
@@ -37,7 +36,6 @@ from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.framework.cmdb_type import CmdbType
-from cmdb.user_management import User
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import timing
 
@@ -148,7 +146,15 @@ class CmdbObjectManager(CmdbManagerBase):
                 continue
         return result_list
 
-    def insert_object(self, data: (CmdbObject, dict)):
+    def insert_object(self, data: (CmdbObject, dict)) -> int:
+        """
+        Insert new CMDB Object
+        Args:
+            data: init data
+
+        Returns:
+            Public ID of the new object in database
+        """
         if isinstance(data, dict):
             try:
                 new_object = CmdbObject(**data)
@@ -161,7 +167,6 @@ class CmdbObjectManager(CmdbManagerBase):
                 collection=CmdbObject.COLLECTION,
                 data=new_object.to_database()
             )
-            # create cmdb.core.object.added event
             if self._event_queue:
                 event = Event("cmdb.core.object.added", {"id": new_object.get_public_id()})
                 self._event_queue.put(event)
@@ -209,46 +214,36 @@ class CmdbObjectManager(CmdbManagerBase):
                 raise Exception
         return ack
 
-    @timing("Object references loading time took ")
     def get_object_references(self, public_id: int) -> list:
         # Type of given object id
         type_id = self.get_object(public_id=public_id).get_type_id()
-        LOGGER.debug("Type ID: {}".format(type_id))
+
         # query for all types with ref input type with value of type id
-        req_type_query = {"fields": {"$elemMatch": {"input_type": "ref", "$and": [{"type_id": int(type_id)}]}}}
-        LOGGER.debug("Query: {}".format(req_type_query))
-        # get type list
-        req_type_list = self.dbm.find_all(collection=CmdbType.COLLECTION, filter=req_type_query)
-        LOGGER.debug("Req type list: {}".format(req_type_list))
+        req_type_query = {"fields": {"$elemMatch": {"type": "ref", "$and": [{"ref_types": int(type_id)}]}}}
+
+        # get type list with given query
+        req_type_list = self.get_types_by(**req_type_query)
+
         type_init_list = []
         for new_type_init in req_type_list:
             try:
-                current_loop_type = self.get_type(new_type_init['public_id'])
-                ref_field = current_loop_type.get_field_of_type_with_value(input_type='ref', _filter='type_id',
+                current_loop_type = new_type_init
+                ref_field = current_loop_type.get_field_of_type_with_value(input_type='ref', _filter='ref_types',
                                                                            value=type_id)
-                LOGGER.debug("Current reference field {}".format(ref_field))
                 type_init_list.append(
-                    {"type_id": current_loop_type.get_public_id(), "field_name": ref_field.get_name()})
+                    {"type_id": current_loop_type.get_public_id(), "field_name": ref_field['name']})
             except CMDBError as e:
                 LOGGER.warning('Unsolvable type reference with type {}'.format(e.message))
                 continue
-        LOGGER.debug("Init type list: {}".format(type_init_list))
 
         referenced_by_objects = []
         for possible_object_types in type_init_list:
             referenced_query = {"type_id": possible_object_types['type_id'], "fields": {
                 "$elemMatch": {"$and": [{"name": possible_object_types['field_name']}],
-                               "$or": [{"value": int(public_id)}]}}}
-            referenced_by_objects = referenced_by_objects + self.dbm.find_all(collection=CmdbObject.COLLECTION,
-                                                                              filter=referenced_query)
-        matched_objects = []
-        for matched_object in referenced_by_objects:
-            matched_objects.append(CmdbObject(
-                **matched_object
-            ))
-        LOGGER.debug("matched objects count: {}".format(len(matched_objects)))
-        LOGGER.debug("matched objects: {}".format(matched_objects))
-        return matched_objects
+                               "$or": [{"value": int(public_id)}, {"value": str(public_id)}]}}}
+            referenced_by_objects = referenced_by_objects + self.get_objects_by(**referenced_query)
+
+        return referenced_by_objects
 
     def delete_object(self, public_id: int):
         try:

@@ -1,31 +1,36 @@
 .renderForm{
-  /*
-  .col-form-label{
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-  }*/
+
   fieldset {
     border: 1px solid #ddd;
     margin-bottom: 15px;
     min-width: 0;
-    padding: 10px;
+    padding: 5px 15px 5px 0;
     position: relative;
-    border-radius: 4px;
 
     legend {
       font-size: 14px;
       font-weight: bold;
-      margin-bottom: 0px;
+      margin-bottom: 10px;
       width: 35%;
       border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 5px 5px 5px 10px;
+      border-radius: 0;
+      padding: 7px 7px 7px 15px;
       background-color: #ffffff;
     }
 
     label{
-      padding-left: 25px;
+      padding-left: 30px;
+    }
+  }
+
+  .log-comment{
+    padding-bottom: 15px;
+    textarea{
+      margin: 15px 0 15px 15px;
+    }
+    small {
+      margin-left: 15px;
+      margin-top: -10px;
     }
   }
 

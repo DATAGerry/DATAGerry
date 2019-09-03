@@ -2,11 +2,13 @@
   <div id="object-view" class="col-md-9">
     <cmdb-object-header [renderResult]="renderResult"></cmdb-object-header>
     <cmdb-object-view-render [mode]="mode" [renderResult]="renderResult"></cmdb-object-view-render>
-<!--    <cmdb-object-footer [publicID]="objectInstance?.public_id"></cmdb-object-footer>-->
   </div>
   <div id="object-view-sidebar" class="col-md-3">
     <cmdb-object-type-label [typeInformation]="renderResult?.type_information"></cmdb-object-type-label>
     <cmdb-object-externals [renderResult]="renderResult"></cmdb-object-externals>
     <cmdb-object-actions [renderResult]="renderResult"></cmdb-object-actions>
+  </div>
+  <div id="object-view-footer" class="col-12">
+    <cmdb-object-footer [publicID]="renderResult?.object_information?.object_id"></cmdb-object-footer>
   </div>
 </div>

@@ -16,14 +16,16 @@
 
 import json
 import logging
+from datetime import datetime
 
 from flask import abort, jsonify, request, current_app
 
 from cmdb.framework import CmdbObject
-from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectNotFoundError
-from cmdb.framework.cmdb_log import LogAction, log_manager, CmdbMetaLog, CmdbObjectLog, LogManagerInsertError
+from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError, \
+    ObjectManagerUpdateError
+from cmdb.framework.cmdb_log import LogAction, log_manager, CmdbObjectLog, LogManagerInsertError
 from cmdb.framework.cmdb_object_manager import object_manager
-from cmdb.framework.cmdb_render import CmdbRender
+from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
 from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user
 from cmdb.user_management import User
 from cmdb.utils.interface_wraps import login_required
@@ -137,24 +139,26 @@ def get_native_object_list():
 
 @object_rest.route('/<int:public_id>', methods=['GET'])
 @login_required
-def get_object(public_id):
+@insert_request_user
+def get_object(public_id, request_user: User):
     try:
         object_instance = object_manager.get_object(public_id)
-    except ObjectNotFoundError as e:
-        return jsonify(message='Not Found', error=e.message)
-    except CMDBError:
+    except ObjectManagerGetError as err:
+        LOGGER.error(err)
         return abort(404)
 
     try:
         type_instance = object_manager.get_type(object_instance.get_type_id())
-    except CMDBError:
+    except ObjectManagerGetError as err:
+        LOGGER.error(err)
         return abort(404)
 
     try:
-        render = CmdbRender(object_instance=object_instance, type_instance=type_instance)
+        render = CmdbRender(object_instance=object_instance, type_instance=type_instance, render_user=request_user)
         render_result = render.result()
-    except CMDBError:
-        return abort(404)
+    except RenderError as err:
+        LOGGER.error(err)
+        return abort(500)
 
     resp = make_response(render_result)
     return resp
@@ -171,9 +175,25 @@ def get_native_object(public_id: int):
     return resp
 
 
+@object_rest.route('/reference/<int:public_id>/', methods=['GET'])
+@object_rest.route('/reference/<int:public_id>', methods=['GET'])
+@insert_request_user
+def get_objects_by_reference(public_id: int, request_user: User):
+    try:
+        reference_list: list = object_manager.get_object_references(public_id=public_id)
+        rendered_reference_list = RenderList(reference_list, request_user).render_result_list()
+    except ObjectManagerGetError as err:
+        LOGGER.error(err)
+        return abort(404)
+    if len(reference_list) < 1:
+        return make_response(rendered_reference_list, 204)
+    return make_response(rendered_reference_list)
+
+
 @object_rest.route('/', methods=['POST'])
 @login_required
-def add_object():
+@insert_request_user
+def insert_object(request_user):
     from bson import json_util
     from datetime import datetime
     add_data_dump = json.dumps(request.json)
@@ -184,6 +204,7 @@ def add_object():
         new_object_data['creation_time'] = datetime.utcnow()
         new_object_data['last_edit_time'] = datetime.utcnow()
         new_object_data['views'] = 0
+        new_object_data['version'] = '1.0.0'  # default init version
     except TypeError as e:
         LOGGER.warning(e)
         abort(400)
@@ -193,64 +214,112 @@ def add_object():
         LOGGER.debug(e.message)
         return abort(400)
     try:
-        ack = object_manager.insert_object(object_instance)
+        new_object_id = object_manager.insert_object(object_instance)
     except ObjectInsertError:
         return abort(500)
 
-    resp = make_response(ack)
+    # Generate new insert log
+    try:
+        log_params = {
+            'object_id': new_object_id,
+            'user_id': request_user.get_public_id(),
+            'user_name': request_user.get_name(),
+            'comment': 'Object was created',
+            'version': object_instance.version
+        }
+        log_ack = log_manager.insert_log(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
+        LOGGER.debug(log_ack)
+    except LogManagerInsertError as err:
+        LOGGER.error(err)
+
+    resp = make_response(new_object_id)
     return resp
 
 
-@object_rest.route('/', methods=['PUT'])
+@object_rest.route('/<int:public_id>/', methods=['PUT'])
+@object_rest.route('/<int:public_id>', methods=['PUT'])
 @login_required
 @insert_request_user
-def update_object(request_user: User):
-    from bson import json_util
-    from datetime import datetime
-    add_data_dump = json.dumps(request.json)
+def update_object(public_id: int, request_user: User):
+    from cmdb.data_storage.database_utils import object_hook, default
+
+    # get current object state
     try:
-        up_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
-        up_object_data['last_edit_time'] = datetime.utcnow()
+        current_object_instance = object_manager.get_object(public_id)
+        current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
+        current_object_render_result = CmdbRender(object_instance=current_object_instance,
+                                                  type_instance=current_type_instance,
+                                                  render_user=request_user).result()
+    except ObjectManagerGetError as err:
+        LOGGER.error(err)
+        return abort(404)
+    except RenderError as err:
+        LOGGER.error(err)
+        return abort(500)
+
+    update_comment = ''
+    # load put data
+    try:
+        # get data as str
+        add_data_dump = json.dumps(request.json)
+
+        # convert into python dict
+        put_data = json.loads(add_data_dump, object_hook=object_hook)
+        # check for comment
+        try:
+            update_comment = put_data['comment']
+            del put_data['comment']
+        except (KeyError, IndexError, ValueError):
+            update_comment = ''
     except TypeError as e:
         LOGGER.warning(e)
-        abort(400)
-
-    try:
-        update_object_instance = CmdbObject(**up_object_data)
-    except CMDBError as e:
-        LOGGER.warning(e)
         return abort(400)
-    old_object = object_manager.get_object(update_object_instance.get_public_id())
-    changes = old_object / update_object_instance
-    # Generate log
-    try:
-        update_log = {
-            'public_id': object_manager.get_highest_id(CmdbMetaLog.COLLECTION) + 1,
-            'object_id': old_object.get_public_id(),
-            'log_type': CmdbObjectLog.__name__,
-            'log_time': datetime.utcnow(),
-            'version': old_object.get_version(),
-            'user_id': request_user.get_public_id(),
-            'user_name': request_user.get_name(),
-            'changes': changes,
-            'action': LogAction.EDIT.value,
-        }
-    except CMDBError as err:
-        LOGGER.error(err.message)
+
+    # update edit time
+    put_data['last_edit_time'] = datetime.utcnow()
 
     try:
-        ack = object_manager.update_object(update_object_instance)
+        update_object_instance = CmdbObject(**put_data)
+    except ObjectManagerUpdateError as err:
+        LOGGER.error(err)
+        return abort(400)
+
+    # calc version
+
+    changes = current_object_instance / update_object_instance
+
+    if len(changes['new']) == 1:
+        update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
+    elif len(changes['new']) == len(update_object_instance.fields):
+        update_object_instance.update_version(update_object_instance.VERSIONING_MAJOR)
+    elif len(changes['new']) > (len(update_object_instance.fields)/2):
+        update_object_instance.update_version(update_object_instance.VERSIONING_MINOR)
+    else:
+        update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
+
+    # insert object
+    try:
+        update_ack = object_manager.update_object(update_object_instance)
     except CMDBError as e:
         LOGGER.warning(e)
         return abort(500)
 
     try:
-        log_manager.insert_log(update_log)
-    except LogManagerInsertError as err:
-        LOGGER.error(err.message)
+        # generate log
+        log_data = {
+            'object_id': public_id,
+            'version': current_object_render_result.object_information['version'],
+            'user_id': request_user.get_public_id(),
+            'user_name': request_user.get_name(),
+            'comment': update_comment,
+            'changes': changes,
+            'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
+        }
+        log_manager.insert_log(action=LogAction.EDIT, log_type=CmdbObjectLog.__name__, **log_data)
+    except (CMDBError, LogManagerInsertError) as err:
+        LOGGER.error(err)
 
-    resp = make_response(ack)
-    return resp
+    return make_response(update_ack)
 
 
 @object_rest.route('/<int:public_id>', methods=['DELETE'])

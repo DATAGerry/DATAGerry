@@ -332,8 +332,8 @@ class DatabaseManagerMongo(DatabaseManager):
             list: list of founded documents
 
         """
-
-        return list(self.__find(collection=collection, *args, **kwargs))
+        founded_documents = self.__find(collection=collection, *args, **kwargs)
+        return list(founded_documents)
 
     def count(self, collection: str, *args, **kwargs):
         """This method does not actually

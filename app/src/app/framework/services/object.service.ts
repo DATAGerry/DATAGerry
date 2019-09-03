@@ -22,6 +22,9 @@ import { CmdbObject } from '../models/cmdb-object';
 import { Observable } from 'rxjs';
 import { ModalComponent } from '../../layout/helpers/modal/modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { CmdbStatus } from '../models/cmdb-status';
+import { map } from 'rxjs/operators';
+import { RenderResult } from '../models/cmdb-render';
 
 @Injectable({
   providedIn: 'root'
@@ -37,9 +40,7 @@ export class ObjectService {
     });
   }
 
-  public countObjectsByType(typeID: number) {
-    return this.api.callGetRoute<number>(this.servicePrefix + '/count/' + typeID);
-  }
+  // Find calls
 
   public getObjectList() {
     return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/');
@@ -56,13 +57,32 @@ export class ObjectService {
     return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/' + publicID);
   }
 
+  // CRUD calls
+
   public postObject(objectInstance: CmdbObject): Observable<any> {
     return this.api.callPostRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
   }
 
-  public putObject(objectInstance: CmdbObject): Observable<any> {
-    return this.api.callPutRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
+  public putObject(publicID: number, objectInstance: CmdbObject): Observable<any> {
+    return this.api.callPutRoute<CmdbObject>(`${this.servicePrefix}/${publicID}/`, objectInstance);
   }
+
+  // Count calls
+
+  public countObjectsByType(typeID: number) {
+    return this.api.callGetRoute<number>(this.servicePrefix + '/count/' + typeID);
+  }
+
+  // Custom calls
+
+  public getObjectReferences(publicID: number) {
+    return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/reference/${publicID}`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
 
   public openModalComponent(title: string,
                             modalMessage: string,

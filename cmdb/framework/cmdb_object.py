@@ -71,8 +71,8 @@ class CmdbObject(CmdbDAO):
     def __truediv__(self, other):
         if not isinstance(other, self.__class__):
             raise TypeError("Not the same class")
-        from deepdiff import DeepDiff
-        return DeepDiff(self.fields, other.fields, ignore_order=True)
+        return {**{'old': [i for i in self.fields if i not in other.fields]},
+                **{'new': [j for j in other.fields if j not in self.fields]}}
 
     def get_type_id(self) -> int:
         """get input_type if of this object

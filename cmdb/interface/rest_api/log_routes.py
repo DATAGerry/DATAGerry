@@ -15,15 +15,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import json
 
-from flask import request
 from werkzeug.exceptions import abort
-from bson import json_util
 
-from cmdb.framework.cmdb_object_manager import object_manager
-from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerUpdateError
-from cmdb.framework.cmdb_status import CmdbStatus
+from cmdb.framework.cmdb_errors import ObjectManagerGetError
+from cmdb.framework.cmdb_log import log_manager
 from cmdb.interface.route_utils import RootBlueprint, make_response
 
 try:
@@ -32,14 +28,52 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-log_routes = RootBlueprint('status_rest', __name__, url_prefix='/log')
+log_routes = RootBlueprint('log_rest', __name__, url_prefix='/log')
 
 
+# CRUD routes
 @log_routes.route('/<int:public_id>', methods=['GET'])
 @log_routes.route('/<int:public_id>/', methods=['GET'])
 def get_log(public_id: int):
+    raise NotImplementedError
+
+
+@log_routes.route('/', methods=['POST'])
+def insert_log(*args, **kwargs):
+    """
+    It is not planned to insert a log
+    Returns:
+        always a 405 Method Not Allowed	error
+    """
+    return abort(405)
+
+
+@log_routes.route('/<int:public_id>', methods=['PUT'])
+@log_routes.route('/<int:public_id>/', methods=['PUT'])
+def update_log(public_id, *args, **kwargs):
+    """
+    It is not planned to update a log
+    Returns:
+        always a 405 Method Not Allowed	error
+    """
+    return abort(405)
+
+
+@log_routes.route('/<int:public_id>', methods=['DELETE'])
+@log_routes.route('/<int:public_id>/', methods=['DELETE'])
+def delete_log(public_id: int):
+    raise NotImplementedError
+
+
+# FIND routes
+@log_routes.route('/object/<int:public_id>', methods=['GET'])
+@log_routes.route('/object/<int:public_id>/', methods=['GET'])
+def get_logs_by_objects(public_id: int):
     try:
-        status = object_manager.get_status(public_id)
-    except ObjectManagerGetError:
+        object_logs = log_manager.get_object_logs(public_id=public_id)
+    except ObjectManagerGetError as err:
+        LOGGER.error(f'Error in get_logs_by_objects: {err}')
         return abort(404)
-    return make_response(status)
+    if len(object_logs) < 1:
+        return make_response(object_logs, 204)
+    return make_response(object_logs)

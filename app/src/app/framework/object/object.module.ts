@@ -34,7 +34,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RenderModule } from '../render/render.module';
 import { ObjectAddComponent } from './object-add/object-add.component';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { ObjectFooterComponent } from './components/object-footer/object-footer.component';
+import { ObjectFooterComponent } from './object-view/object-footer/object-footer.component';
 import { ObjectActionsComponent } from './components/object-actions/object-actions.component';
 import { ObjectViewMetaComponent } from './components/object-view-meta/object-view-meta.component';
 import { ObjectEditComponent } from './object-edit/object-edit.component';
@@ -43,12 +43,29 @@ import { ObjectViewRenderComponent } from './components/object-view-render/objec
 import { ObjectCopyComponent } from './object-copy/object-copy.component';
 import { ObjectLinksComponent } from './components/object-links/object-links.component';
 import { ObjectTypeLabelComponent } from './components/object-type-label/object-type-label.component';
-import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { ObjectLogListComponent } from './object-view/object-log-list/object-log-list.component';
+import { ObjectReferenceListComponent } from './object-view/object-reference-list/object-reference-list.component';
 
 @NgModule({
-  declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent, ObjectSummaryComponent,
-    ObjectExternalsComponent, ObjectAddComponent, ObjectFooterComponent, ObjectActionsComponent, ObjectViewRenderComponent,
-    ObjectViewMetaComponent, ObjectEditComponent, ObjectCopyComponent, ObjectLinksComponent, ObjectTypeLabelComponent],
+  declarations: [
+    ObjectListComponent,
+    ObjectViewComponent,
+    ObjectHeaderComponent,
+    ObjectQrComponent,
+    ObjectSummaryComponent,
+    ObjectExternalsComponent,
+    ObjectAddComponent,
+    ObjectFooterComponent,
+    ObjectActionsComponent,
+    ObjectViewRenderComponent,
+    ObjectViewMetaComponent,
+    ObjectEditComponent,
+    ObjectCopyComponent,
+    ObjectLinksComponent,
+    ObjectTypeLabelComponent,
+    ObjectLogListComponent,
+    ObjectReferenceListComponent],
   imports: [
     CommonModule,
     ObjectRoutingModule,

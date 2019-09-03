@@ -140,7 +140,7 @@ class CmdbDAO:
             index_list.append(IndexModel(**index))
         return index_list
 
-    def _update_version(self, update) -> str:
+    def update_version(self, update) -> str:
         """
         Update the version number of the object
 

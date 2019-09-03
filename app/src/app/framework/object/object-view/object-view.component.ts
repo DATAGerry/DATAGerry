@@ -26,6 +26,8 @@ import { TypeService } from '../../services/type.service';
 import { CmdbMode } from '../../modes.enum';
 import { RenderService } from '../../render/service/render.service';
 import { RenderResult } from '../../models/cmdb-render';
+import { LogService } from '../../services/log.service';
+import { CmdbLog } from '../../models/cmdb-log';
 
 @Component({
   selector: 'cmdb-object-view',

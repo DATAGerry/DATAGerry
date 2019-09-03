@@ -22,7 +22,8 @@ from enum import Enum
 from cmdb.data_storage import get_pre_init_database
 from cmdb.framework.cmdb_base import CmdbManagerBase
 from cmdb.framework.cmdb_dao import CmdbDAO
-from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError
+from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerUpdateError, \
+    ObjectManagerDeleteError
 
 try:
     from cmdb.utils.error import CMDBError
@@ -45,7 +46,6 @@ class CmdbMetaLog(CmdbDAO):
         'log_type',
         'log_time',
         'action',
-        'changes'
     ]
 
     def __init__(self, log_type, log_time: datetime, action: LogAction, **kwargs):
@@ -60,16 +60,19 @@ class CmdbObjectLog(CmdbMetaLog):
     REQUIRED_INIT_KEYS = [
                              'object_id',
                              'version',
-                             'user_id',
-                             'changes'
+                             'changes',
+                             'user_id'
                          ] + CmdbMetaLog.REQUIRED_INIT_KEYS
 
-    def __init__(self, object_id: int, version, user_id: int, user_name: str = None, comment: str = None, **kwargs):
+    def __init__(self, object_id: int, version, user_id: int, user_name: str = None, changes: list = None,
+                 comment: str = None, render_state=None, **kwargs):
         self.object_id = object_id
         self.version = version
         self.user_id = user_id
         self.user_name = user_name or self.UNKNOWN_USER_STRING
         self.comment = comment
+        self.changes = changes or []
+        self.render_state = render_state
         super(CmdbObjectLog, self).__init__(**kwargs)
 
 
@@ -93,6 +96,7 @@ class CmdbLogManager(CmdbManagerBase):
     def __init__(self, database_manager=None):
         super(CmdbLogManager, self).__init__(database_manager)
 
+    # CRUD functions
     def get_log(self, public_id: int):
         try:
             return CmdbLog(**self._get(
@@ -103,15 +107,53 @@ class CmdbLogManager(CmdbManagerBase):
             LOGGER.error(err)
             raise LogManagerGetError(err)
 
-    def insert_log(self, data) -> int:
+    def insert_log(self, action: LogAction, log_type: str, **kwargs) -> int:
+        # Get possible public id
+        log_init = {}
+        available_id = self.dbm.get_highest_id(collection=CmdbMetaLog.COLLECTION) + 1
+        log_init['public_id'] = available_id
+
+        # set static values
+        log_init['action'] = action.name
+        log_init['log_type'] = log_type
+        log_init['log_time'] = datetime.utcnow()
+
+        log_data = {**log_init, **kwargs}
 
         try:
-            new_log = CmdbLog(**data)
+            new_log = CmdbLog(**log_data)
             ack = self._insert(CmdbMetaLog.COLLECTION, new_log.to_database())
         except (CMDBError, Exception) as err:
-            LOGGER.error(err)
+            LOGGER.error(err.message)
             raise LogManagerInsertError(err)
         return ack
+
+    def update_log(self, data) -> int:
+        raise NotImplementedError
+
+    def delete_log(self, data) -> int:
+        raise NotImplementedError
+
+    # FIND functions
+    def get_object_logs(self, public_id: int) -> list:
+        """
+        Get corresponding logs to object.
+        Args:
+            public_id: Public id for logs
+
+        Returns:
+            List of object-logs
+        """
+        object_list: list = []
+        try:
+            query = {'filter': {'log_type': str(CmdbObjectLog.__name__), 'object_id': public_id}}
+            founded_logs = self.dbm.find_all(CmdbMetaLog.COLLECTION, **query)
+            for _ in founded_logs:
+                object_list.append(CmdbLog(**_))
+        except (CMDBError, Exception) as err:
+            LOGGER.error(f'Error in get_object_logs: {err}')
+            raise LogManagerGetError(err)
+        return object_list
 
 
 class LogManagerGetError(ObjectManagerGetError):
@@ -124,6 +166,18 @@ class LogManagerInsertError(ObjectManagerInsertError):
 
     def __init__(self, err):
         super(LogManagerInsertError, self).__init__(err)
+
+
+class LogManagerUpdateError(ObjectManagerUpdateError):
+
+    def __init__(self, err):
+        super(LogManagerUpdateError, self).__init__(err)
+
+
+class LogManagerDeleteError(ObjectManagerDeleteError):
+
+    def __init__(self, err):
+        super(LogManagerDeleteError, self).__init__(err)
 
 
 log_manager = CmdbLogManager(

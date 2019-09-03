@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+from cmdb.data_storage import DatabaseManagerMongo
 
 
 class CmdbManagerBase:
@@ -22,7 +23,7 @@ class CmdbManagerBase:
 
     """
 
-    def __init__(self, database_manager):
+    def __init__(self, database_manager: DatabaseManagerMongo):
         """Example:
             Depending on the condition or whether a fork process is used, the database manager can also be seen
             directly in the declaration of the object manager
@@ -47,9 +48,9 @@ class CmdbManagerBase:
 
         """
         if database_manager:
-            self.dbm = database_manager
+            self.dbm: DatabaseManagerMongo = database_manager
 
-    def _get(self, collection: str, public_id: int):
+    def _get(self, collection: str, public_id: int) -> (dict, object):
         """get document from the database by their public id
 
         Args:
