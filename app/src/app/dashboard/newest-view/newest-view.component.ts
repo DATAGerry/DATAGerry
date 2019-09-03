@@ -60,8 +60,8 @@ export class NewestViewComponent implements OnInit, OnDestroy {
       });
 
     this.thColumnsActions = [
-      { name: 'view', classValue: 'text-dark ml-1', linkRoute: 'view/', fontIcon: 'eye', active: true},
-      { name: 'edit', classValue: 'text-dark ml-1', linkRoute: 'edit/', fontIcon: 'edit'},
+      { name: 'view', classValue: 'text-dark ml-1', linkRoute: 'framework/object/view/', fontIcon: 'eye', active: true},
+      { name: 'edit', classValue: 'text-dark ml-1', linkRoute: 'framework/object/edit/', fontIcon: 'edit'},
       { name: 'delete', classValue: 'text-dark ml-1', linkRoute: 'object/', fontIcon: 'trash-alt'}];
   }
 

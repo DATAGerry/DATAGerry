@@ -66,20 +66,11 @@
               </div>
             </div>
           </div>
-          <div class="form-group">
-            <label>Icon</label>
-            <ng-select [items]="icons" formControlName="icon">
-              <ng-template ng-label-tmp let-item="item">
-                <fa-icon icon="{{item}}"></fa-icon> {{item}}
-              </ng-template>
-              <ng-template ng-optgroup-tmp let-item="item" let-index="index">
-                <fa-icon icon="{{item}}"></fa-icon> {{item}}
-              </ng-template>
-              <ng-template ng-option-tmp let-item="item" let-index="index" let-search="searchTerm">
-                <fa-icon icon="{{item}}"></fa-icon> {{item}}
-              </ng-template>
-            </ng-select>
-          </div>
+          <!-- BEGIN: Icon picker -->
+          <cmdb-icon-picker [iconFormGroup]="externalsForm"
+                            [fallbackIcon]="'fas fa-external-link-alt'"
+                            [inputDescription]="'Symbol for the external link label'"></cmdb-icon-picker>
+          <!-- END: Icon picker -->
           <div class="form-group">
             <label>Link</label>
             <input type="text" formControlName="href" class="form-control">

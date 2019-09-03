@@ -6,7 +6,7 @@
     <div class="card-body">
       <ul class="fa-ul">
         <li *ngFor="let ext of renderResult?.externals">
-          <fa-icon icon="{{ext.icon}}"></fa-icon>
+          <i class="{{ext.icon}} mr-1" aria-hidden="true"></i>
           <a class="card-link" href="{{ext.href}}">{{ext.label}}</a>
         </li>
       </ul>

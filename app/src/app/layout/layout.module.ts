@@ -45,6 +45,8 @@ import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontaweso
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { far } from '@fortawesome/free-regular-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
+import { IconPickerModule } from 'ngx-icon-picker';
+import { IconPickerComponent } from './helpers/icon-picker/icon-picker.component';
 
 @NgModule({
   declarations: [
@@ -61,7 +63,8 @@ import { fab } from '@fortawesome/free-brands-svg-icons';
     ToastContainerComponent,
     ModalComponent,
     TypeLabelComponent,
-    FooterComponent
+    FooterComponent,
+    IconPickerComponent
   ],
   exports: [
     LowercaseDirective,
@@ -74,7 +77,8 @@ import { fab } from '@fortawesome/free-brands-svg-icons';
     SearchBarComponent,
     TableComponent,
     ToastContainerComponent,
-    TypeLabelComponent
+    TypeLabelComponent,
+    IconPickerComponent
   ],
   imports: [
     CommonModule,
@@ -91,7 +95,8 @@ import { fab } from '@fortawesome/free-brands-svg-icons';
       confirmButtonClass: 'btn btn-primary',
       cancelButtonClass: 'btn'
     }),
-    FontAwesomeModule
+    FontAwesomeModule,
+    IconPickerModule
   ],
   providers: [
     BreadcrumbService,

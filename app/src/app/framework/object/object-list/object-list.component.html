@@ -15,7 +15,7 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left" aria-labelledby="exportButton">
           <li id="export-{{item.id}}" [className]="item.active ? 'dropdown-item' : 'dropdown-item disabled'"
-              *ngFor="let item of formatList" style="text-align: center;"
+              *ngFor="let item of formatList"
               (click)="exportingFiles(item)"
               [ngbTooltip]="item.helperText">
             <fa-icon icon="{{item.icon}}"></fa-icon> {{item.label}} ({{selectedObjects}})
