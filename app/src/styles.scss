@@ -28,6 +28,12 @@
 /* import ng-select */
 @import "~@ng-select/ng-select/themes/default.theme.css";
 
+/* import font-awesome*/
+@import "~@fortawesome/fontawesome-free-webfonts/css/fontawesome.css";
+@import "~@fortawesome/fontawesome-free-webfonts/css/fa-regular.css";
+@import "~@fortawesome/fontawesome-free-webfonts/css/fa-brands.css";
+@import "~@fortawesome/fontawesome-free-webfonts/css/fa-solid.css";
+
 /* custom global modules */
 @import "scss/variables";
 @import "scss/mixins";
