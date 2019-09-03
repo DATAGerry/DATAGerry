@@ -31,7 +31,7 @@ import { FileSaverService } from 'ngx-filesaver';
 import { DatePipe } from '@angular/common';
 import { CmdbType } from '../../models/cmdb-type';
 import { TypeService } from '../../services/type.service';
-import {RenderResult} from "../../models/cmdb-render";
+import { RenderResult } from '../../models/cmdb-render';
 
 @Component({
   selector: 'cmdb-object-list',

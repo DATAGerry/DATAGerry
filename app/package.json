@@ -46,6 +46,7 @@
     "jszip": "^3.2.1",
     "ngx-drag-drop": "^2.0.0",
     "ngx-filesaver": "^8.0.0",
+    "ngx-icon-picker": "0.0.10",
     "ngx-spinner": "^7.1.4",
     "rxjs": "~6.5.2",
     "sweetalert2": "^8.16.3",

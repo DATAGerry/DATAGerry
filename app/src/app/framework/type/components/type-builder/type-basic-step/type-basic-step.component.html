@@ -42,24 +42,9 @@
           </div>
           <div class="clearfix"></div>
         </div>
-        <form [formGroup]="basicMetaIconForm">
-          <div class="form-group">
-            <label>Icon</label>
-            <ng-select [items]="icons" formControlName="icon">
-              <ng-template ng-label-tmp let-item="item">
-                <fa-icon icon="{{item}}"></fa-icon> {{item}}
-              </ng-template>
-              <ng-template ng-optgroup-tmp let-item="item" let-index="index">
-                <fa-icon icon="{{item}}"></fa-icon> {{item}}
-              </ng-template>
-              <ng-template ng-option-tmp let-item="item" let-index="index" let-search="searchTerm">
-                <fa-icon icon="{{item}}"></fa-icon> {{item}}
-              </ng-template>
-            </ng-select>
-            <small id="typeIconInputHelp" class="form-text text-muted">Symbol for the type label</small>
-            <div class="clearfix"></div>
-          </div>
-        </form>
+        <cmdb-icon-picker [iconFormGroup]="basicMetaIconForm"
+                          [fallbackIcon]="basicMetaIconForm.get('icon').value"></cmdb-icon-picker>
+        <div class="clearfix"></div>
         <div class="form-group">
           <label for="typeDescriptionInput">Description:</label>
           <textarea class="form-control" formControlName="description" id="typeDescriptionInput" rows="3"
