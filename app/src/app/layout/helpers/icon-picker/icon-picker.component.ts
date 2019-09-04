@@ -19,6 +19,7 @@
 import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
+
 @Component({
   selector: 'cmdb-icon-picker',
   templateUrl: './icon-picker.component.html',
