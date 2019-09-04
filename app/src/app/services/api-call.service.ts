@@ -20,7 +20,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { ConnectionService } from './connection.service';
+import { ConnectionService } from '../connect/connection.service';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -59,7 +59,7 @@ export class ApiCallService {
   }
 
   constructor(private http: HttpClient, private connectionService: ConnectionService) {
-    this.apiURL = `${this.connectionService.connectionURL}${this.apiPrefix}/`;
+    this.apiURL = `${this.connectionService.currentConnection}/${this.apiPrefix}/`;
   }
 
   public callGet<T>(route: string, params?: any): Observable<any> {

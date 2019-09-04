@@ -20,7 +20,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { HttpErrorInterceptor } from './auth/interceptors/http-error.interceptor.tx';
+import { HttpErrorInterceptor } from './error/interceptors/http-error.interceptor.tx';
 
 const routes: Routes = [
   {
@@ -30,6 +30,10 @@ const routes: Routes = [
       breadcrumb: 'Dashboard'
     },
     loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
+  },
+  {
+    path: 'connect',
+    loadChildren: () => import('./connect/connect.module').then(m => m.ConnectModule)
   },
   {
     path: 'auth',
@@ -90,7 +94,7 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
   providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true },
+    {provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true},
   ]
 })
 export class AppRoutingModule {

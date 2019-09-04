@@ -26,7 +26,6 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
 import { PreviousRouteService } from './services/previous-route.service';
 import { NgxSpinnerModule } from 'ngx-spinner';
-import { ConnectionService } from './services/connection.service';
 import { DatePipe } from '@angular/common';
 import { FileSaverModule } from 'ngx-filesaver';
 
@@ -45,7 +44,6 @@ import { FileSaverModule } from 'ngx-filesaver';
   ],
   providers: [
     PreviousRouteService,
-    ConnectionService,
     DatePipe,
     {provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true},
   ],

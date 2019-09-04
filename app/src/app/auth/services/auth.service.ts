@@ -21,7 +21,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { User } from '../../user/models/user';
-import { ConnectionService } from '../../services/connection.service';
+import { ConnectionService } from '../../connect/connection.service';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -62,7 +62,7 @@ export class AuthService {
       user_name: username,
       password
     };
-    return this.http.post<User>(`${this.connectionService.connectionURL}${this.restPrefix}/${this.servicePrefix}/login`, data, httpOptions)
+    return this.http.post<User>(`${this.connectionService.currentConnection}/${this.restPrefix}/${this.servicePrefix}/login`, data, httpOptions)
       .pipe(map(user => {
         // store user details and jwt token in local storage to keep user logged in between page refreshes
 

@@ -21,34 +21,41 @@ import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/c
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { NavigationExtras, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../../auth/services/auth.service';
 
 @Injectable()
 export class HttpErrorInterceptor implements HttpInterceptor {
 
+  CONNECTION_REFUSED: number = 0;
 
   constructor(private router: Router, private authService: AuthService) {
   }
 
   public intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return next.handle(request).pipe(catchError(err => {
+    return next.handle(request).pipe(catchError(error => {
       const errorExtras: NavigationExtras = {
         queryParams: {
-          statusText: err.statusText,
-          message: err.message,
+          statusText: error.statusText,
+          message: error.message,
           response: JSON.stringify({
-            err
+            error
           })
         }
       };
+      const statusCode = error.status;
+      switch (statusCode) {
+        case this.CONNECTION_REFUSED:
+          this.router.navigate(['/connect']);
+          break;
+      }
 
-      if (err.status === 401) {
+      if (error.status === 401) {
         // auto logout if 401 response returned from api
         this.authService.logout();
         this.router.navigate(['/auth/login']);
       }
-      const error = err.error.message || err.statusText;
-      return throwError(error);
+      const err = error.error.message || error.statusText;
+      return throwError(err);
     }));
   }
 }

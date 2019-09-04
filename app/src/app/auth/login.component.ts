@@ -66,7 +66,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           this.router.navigate(['/']);
         },
         error => {
-          console.log(error);
+          console.error(error);
         });
   }
 

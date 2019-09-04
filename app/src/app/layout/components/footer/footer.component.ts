@@ -17,7 +17,7 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { ConnectionService } from '../../../services/connection.service';
+import { ConnectionService } from '../../../connect/connection.service';
 import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
@@ -29,7 +29,7 @@ export class FooterComponent implements OnInit {
 
 
   public constructor(private connectionService: ConnectionService, private authService: AuthService) {
-    this.docUrl = `${connectionService.connectionURL}docs`;
+    this.docUrl = `${connectionService.currentConnection}docs`;
   }
 
   public today: number = Date.now();
