@@ -22,7 +22,7 @@
                    [renderForm]="renderForm"></cmdb-render>
       <button type="submit" class="btn btn-outline-success mr-2" [disabled]="!renderForm.valid">Save</button>
       <button class="btn btn-outline-danger"
-              routerLink="/framework/object/{{objectInstance?.public_id}}">Cancel</button>
+              routerLink="/framework/object/view/{{objectInstance?.public_id}}">Cancel</button>
     </form>
   </div>
 </div>
