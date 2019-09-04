@@ -19,7 +19,7 @@ import logging
 from werkzeug.exceptions import abort
 
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
-from cmdb.framework.cmdb_log import log_manager, LogManagerGetError
+from cmdb.framework.cmdb_log import log_manager, LogManagerGetError, CmdbObjectLog
 from cmdb.interface.route_utils import RootBlueprint, make_response
 
 try:
@@ -90,7 +90,7 @@ def get_corresponding_object_logs(public_id: int):
     try:
         selected_log = log_manager.get_log(public_id=public_id)
         query = {
-            'log_type': 'CmdbObjectLog',
+            'log_type': CmdbObjectLog.__name__,
             'object_id': selected_log.object_id,
             'render_state': {
                 '$ne': None
