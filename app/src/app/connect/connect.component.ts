@@ -42,7 +42,6 @@ export class ConnectComponent implements OnInit, OnDestroy {
       port: new FormControl(this.defaultPort, Validators.required),
       protocol: new FormControl(this.defaultProtocol)
     });
-    this.connectionForm.get('protocol').disable();
   }
 
   public ngOnInit(): void {
