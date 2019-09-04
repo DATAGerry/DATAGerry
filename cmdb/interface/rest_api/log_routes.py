@@ -19,7 +19,7 @@ import logging
 from werkzeug.exceptions import abort
 
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
-from cmdb.framework.cmdb_log import log_manager
+from cmdb.framework.cmdb_log import log_manager, LogManagerGetError
 from cmdb.interface.route_utils import RootBlueprint, make_response
 
 try:
@@ -32,10 +32,15 @@ log_routes = RootBlueprint('log_rest', __name__, url_prefix='/log')
 
 
 # CRUD routes
-@log_routes.route('/<int:public_id>', methods=['GET'])
 @log_routes.route('/<int:public_id>/', methods=['GET'])
+@log_routes.route('/<int:public_id>', methods=['GET'])
 def get_log(public_id: int):
-    raise NotImplementedError
+    try:
+        selected_log = log_manager.get_log(public_id=public_id)
+    except LogManagerGetError as err:
+        LOGGER.error(err)
+        return abort(404)
+    return make_response(selected_log)
 
 
 @log_routes.route('/', methods=['POST'])
@@ -48,8 +53,8 @@ def insert_log(*args, **kwargs):
     return abort(405)
 
 
-@log_routes.route('/<int:public_id>', methods=['PUT'])
 @log_routes.route('/<int:public_id>/', methods=['PUT'])
+@log_routes.route('/<int:public_id>', methods=['PUT'])
 def update_log(public_id, *args, **kwargs):
     """
     It is not planned to update a log
@@ -59,15 +64,15 @@ def update_log(public_id, *args, **kwargs):
     return abort(405)
 
 
-@log_routes.route('/<int:public_id>', methods=['DELETE'])
 @log_routes.route('/<int:public_id>/', methods=['DELETE'])
+@log_routes.route('/<int:public_id>', methods=['DELETE'])
 def delete_log(public_id: int):
     raise NotImplementedError
 
 
 # FIND routes
-@log_routes.route('/object/<int:public_id>', methods=['GET'])
 @log_routes.route('/object/<int:public_id>/', methods=['GET'])
+@log_routes.route('/object/<int:public_id>', methods=['GET'])
 def get_logs_by_objects(public_id: int):
     try:
         object_logs = log_manager.get_object_logs(public_id=public_id)
@@ -77,3 +82,30 @@ def get_logs_by_objects(public_id: int):
     if len(object_logs) < 1:
         return make_response(object_logs, 204)
     return make_response(object_logs)
+
+
+@log_routes.route('/<int:public_id>/corresponding/', methods=['GET'])
+@log_routes.route('/<int:public_id>/corresponding', methods=['GET'])
+def get_corresponding_object_logs(public_id: int):
+    try:
+        selected_log = log_manager.get_log(public_id=public_id)
+        query = {
+            'log_type': 'CmdbObjectLog',
+            'object_id': selected_log.object_id,
+            'render_state': {
+                '$ne': None
+            },
+            '$nor': [{
+                'public_id': public_id
+            }]
+        }
+        LOGGER.debug(f'Corresponding query: {query}')
+        corresponding_logs = log_manager.get_logs_by(**query)
+    except LogManagerGetError as err:
+        LOGGER.error(err)
+        return abort(404)
+    LOGGER.debug(f'Corresponding logs: {corresponding_logs}')
+    if len(corresponding_logs) < 1:
+        return make_response(corresponding_logs, 204)
+
+    return make_response(corresponding_logs)

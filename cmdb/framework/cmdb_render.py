@@ -39,7 +39,6 @@ class RenderVisualization:
         self.current_render_time = datetime.utcnow()
         self.object_information: dict = {}
         self.type_information: dict = {}
-        self.render_information: dict = {}
 
     def get_object_information(self, idx):
         return self.object_information[idx]

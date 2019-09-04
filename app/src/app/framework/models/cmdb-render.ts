@@ -37,7 +37,6 @@ export class RenderResult {
     active: boolean;
     version: string;
   };
-  public render_information: {};
   public fields: any[];
   public sections: any[];
   public summaries: any[];

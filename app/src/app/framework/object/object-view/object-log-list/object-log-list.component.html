@@ -8,6 +8,7 @@
     <th>Comment</th>
     <th>Author</th>
     <th>Version</th>
+    <th>Action</th>
   </tr>
   </thead>
   <tbody>
@@ -28,6 +29,7 @@
     <td>{{log.comment}}</td>
     <td><a routerLink="/user/{{log.user_id}}">{{log.user_name}}</a></td>
     <td>{{log.version}}</td>
+    <td><a *ngIf="log.render_state" routerLink="/framework/object/log/{{log.public_id}}">View</a></td>
   </tr>
   </tbody>
 </table>

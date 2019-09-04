@@ -40,8 +40,7 @@ export class ObjectViewComponent implements OnInit {
   private objectID: number;
   public renderResult: RenderResult;
 
-  constructor(private api: ApiCallService, public renderService: RenderService,
-              private activateRoute: ActivatedRoute) {
+  constructor(public renderService: RenderService, private activateRoute: ActivatedRoute) {
     this.activateRoute.params.subscribe((params) => {
       this.objectID = params.publicID;
       this.ngOnInit();

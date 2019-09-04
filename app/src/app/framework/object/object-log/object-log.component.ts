@@ -1,0 +1,99 @@
+/*
+* DATAGERRY - OpenSource Enterprise CMDB
+* Copyright (C) 2019 NETHINKS GmbH
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as
+* published by the Free Software Foundation, either version 3 of the
+* License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+
+* You should have received a copy of the GNU Affero General Public License
+* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import { Component, OnInit, Renderer2 } from '@angular/core';
+import { LogService } from '../../services/log.service';
+import { ActivatedRoute } from '@angular/router';
+import { CmdbLog } from '../../models/cmdb-log';
+import { RenderResult } from '../../models/cmdb-render';
+import { CmdbMode } from '../../modes.enum';
+import { FormGroup } from '@angular/forms';
+
+@Component({
+  selector: 'cmdb-object-log',
+  templateUrl: './object-log.component.html',
+  styleUrls: ['./object-log.component.scss']
+})
+export class ObjectLogComponent implements OnInit {
+
+  private logID: number;
+  private log: CmdbLog;
+  public completeLogList: CmdbLog[];
+  public mode: CmdbMode.View;
+  public renderForm: FormGroup;
+  public compareForm: FormGroup;
+  public renderResult: RenderResult;
+  public compareResult: RenderResult;
+
+  constructor(private logService: LogService, private activateRoute: ActivatedRoute, private render: Renderer2) {
+    this.renderForm = new FormGroup({});
+    this.compareForm = new FormGroup({});
+    this.activateRoute.params.subscribe((params) => {
+      this.logID = params.publicID;
+    });
+  }
+
+  public ngOnInit(): void {
+    this.logService.getLog(this.logID).subscribe((log: CmdbLog) => {
+        this.log = log;
+        this.renderResult = JSON.parse(this.log.render_state);
+      },
+      (error) => {
+        console.error(error);
+      },
+      () => {
+        this.logService.getCorrespondingLogs(this.logID).subscribe((logs: CmdbLog[]) => {
+          this.completeLogList = logs;
+        });
+      });
+  }
+
+  public loadCompareRender(logID: number) {
+    // tslint:disable-next-line:triple-equals
+    const selectedCompareLog: CmdbLog = this.completeLogList.filter(compareLog => compareLog.public_id == logID)[0];
+    if (selectedCompareLog.render_state !== undefined) {
+      this.compareForm = new FormGroup({});
+      this.compareResult = JSON.parse(selectedCompareLog.render_state);
+    }
+    this.markDifferences();
+  }
+
+  private markDifferences() {
+    const changedInField = this.renderResult.fields.filter(this.comparer(this.compareResult.fields));
+
+    Object.keys(this.renderForm.controls).forEach(key => {
+      const currentSelector = `input[name='${key}']`;
+      document.querySelector(currentSelector).classList.remove('bg-success');
+      document.querySelector(currentSelector).classList.remove('text-white');
+      if (changedInField.some((item) => item.name === key)) {
+        document.querySelector(currentSelector).classList.add('bg-success');
+        document.querySelector(currentSelector).classList.add('text-white');
+      }
+    });
+  }
+
+  private comparer(otherArray) {
+    return (current) => {
+      return otherArray.filter((other) => {
+        return other.value === current.value && other.name === current.name;
+      }).length === 0;
+    };
+  }
+
+
+}

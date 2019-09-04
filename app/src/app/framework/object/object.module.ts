@@ -46,6 +46,7 @@ import { ObjectTypeLabelComponent } from './components/object-type-label/object-
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ObjectLogListComponent } from './object-view/object-log-list/object-log-list.component';
 import { ObjectReferenceListComponent } from './object-view/object-reference-list/object-reference-list.component';
+import { ObjectLogComponent } from './object-log/object-log.component';
 
 @NgModule({
   declarations: [
@@ -65,7 +66,8 @@ import { ObjectReferenceListComponent } from './object-view/object-reference-lis
     ObjectLinksComponent,
     ObjectTypeLabelComponent,
     ObjectLogListComponent,
-    ObjectReferenceListComponent],
+    ObjectReferenceListComponent,
+    ObjectLogComponent],
   imports: [
     CommonModule,
     ObjectRoutingModule,

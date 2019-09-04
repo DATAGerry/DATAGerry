@@ -32,8 +32,24 @@ export class LogService<T = CmdbLog> implements ApiService  {
   constructor(private api: ApiCallService) {
   }
 
+  public getLog(publicID: number): Observable<T> {
+    return this.api.callGet<T>(`${this.servicePrefix}/${publicID}/`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
   public getLogsByObject(publicID: number) {
     return this.api.callGet<T>(`${this.servicePrefix}/object/${publicID}/`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public getCorrespondingLogs(publicID: number) {
+    return this.api.callGet<T>(`${this.servicePrefix}/${publicID}/corresponding/`).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })

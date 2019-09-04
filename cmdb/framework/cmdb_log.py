@@ -60,7 +60,6 @@ class CmdbObjectLog(CmdbMetaLog):
     REQUIRED_INIT_KEYS = [
                              'object_id',
                              'version',
-                             'changes',
                              'user_id'
                          ] + CmdbMetaLog.REQUIRED_INIT_KEYS
 
@@ -106,6 +105,17 @@ class CmdbLogManager(CmdbManagerBase):
         except (CMDBError, Exception) as err:
             LOGGER.error(err)
             raise LogManagerGetError(err)
+
+    def get_logs_by(self, sort='public_id', **requirements):
+        ack = []
+        try:
+            logs = self._get_all(collection=CmdbMetaLog.COLLECTION, sort=sort, **requirements)
+            for log in logs:
+                ack.append(CmdbLog(**log))
+        except (CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise LogManagerGetError(err)
+        return ack
 
     def insert_log(self, action: LogAction, log_type: str, **kwargs) -> int:
         # Get possible public id
