@@ -36,8 +36,7 @@ LOGGER = logging.getLogger(__name__)
 class LogAction(Enum):
     CREATE = 1
     EDIT = 2
-    ACTIVATE = 3
-    DEACTIVATE = 4
+    ACTIVE_CHANGE = 3
 
 
 class CmdbMetaLog(CmdbDAO):

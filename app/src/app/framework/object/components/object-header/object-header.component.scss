@@ -6,3 +6,12 @@
   max-width: 200px;
   margin: 15px auto 0;
 }
+
+.active-control {
+
+  &:checked ~ .custom-control-label::before {
+    background-color: green;
+    border-color: green;
+  }
+
+}

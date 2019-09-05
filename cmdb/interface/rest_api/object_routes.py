@@ -190,6 +190,8 @@ def get_objects_by_reference(public_id: int, request_user: User):
     return make_response(rendered_reference_list)
 
 
+# CRUD routes
+
 @object_rest.route('/', methods=['POST'])
 @login_required
 @insert_request_user
@@ -292,7 +294,7 @@ def update_object(public_id: int, request_user: User):
         update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
     elif len(changes['new']) == len(update_object_instance.fields):
         update_object_instance.update_version(update_object_instance.VERSIONING_MAJOR)
-    elif len(changes['new']) > (len(update_object_instance.fields)/2):
+    elif len(changes['new']) > (len(update_object_instance.fields) / 2):
         update_object_instance.update_version(update_object_instance.VERSIONING_MINOR)
     else:
         update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
@@ -358,3 +360,58 @@ def delete_many_objects(public_ids):
         return jsonify(message='Delete Error', error=e.message)
     except CMDBError:
         return abort(500)
+
+
+# Special routes
+@object_rest.route('/<int:public_id>/state/', methods=['GET'])
+@object_rest.route('/<int:public_id>/state', methods=['GET'])
+def get_object_state(public_id: int):
+    try:
+        founded_object = object_manager.get_object(public_id=public_id)
+    except ObjectManagerGetError as err:
+        LOGGER.debug(err)
+        return abort(404)
+    return make_response(founded_object.active)
+
+
+@object_rest.route('/<int:public_id>/state/', methods=['PUT'])
+@object_rest.route('/<int:public_id>/state', methods=['PUT'])
+@insert_request_user
+def update_object_state(public_id: int, request_user: User):
+    if isinstance(request.json, bool):
+        state = request.json
+    else:
+        return abort(400)
+    try:
+        founded_object = object_manager.get_object(public_id=public_id)
+    except ObjectManagerGetError as err:
+        LOGGER.error(err)
+        return abort(404)
+    if founded_object.active == state:
+        return make_response(False, 204)
+    try:
+        founded_object.active = state
+        update_ack = object_manager.update_object(founded_object)
+    except ObjectManagerUpdateError as err:
+        LOGGER.error(err)
+        return abort(500)
+
+    try:
+        # generate log
+        change = {
+            'old': not state,
+            'new': state
+        }
+        log_data = {
+            'object_id': public_id,
+            'version': founded_object.version,
+            'user_id': request_user.get_public_id(),
+            'user_name': request_user.get_name(),
+            'comment': 'Active status has changed',
+            'changes': change,
+        }
+        log_manager.insert_log(action=LogAction.ACTIVE_CHANGE, log_type=CmdbObjectLog.__name__, **log_data)
+    except (CMDBError, LogManagerInsertError) as err:
+        LOGGER.error(err)
+
+    return make_response(update_ack)

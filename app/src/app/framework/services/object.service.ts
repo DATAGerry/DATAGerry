@@ -41,7 +41,6 @@ export class ObjectService {
   }
 
   // Find calls
-
   public getObjectList() {
     return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/');
   }
@@ -58,7 +57,6 @@ export class ObjectService {
   }
 
   // CRUD calls
-
   public postObject(objectInstance: CmdbObject): Observable<any> {
     return this.api.callPostRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
   }
@@ -67,14 +65,20 @@ export class ObjectService {
     return this.api.callPutRoute<CmdbObject>(`${this.servicePrefix}/${publicID}/`, objectInstance);
   }
 
-  // Count calls
+  public changeState(publicID: number, status: boolean) {
+    return this.api.callPut<boolean>(`${this.servicePrefix}/${publicID}/state/`, status).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
 
+  // Count calls
   public countObjectsByType(typeID: number) {
     return this.api.callGetRoute<number>(this.servicePrefix + '/count/' + typeID);
   }
 
   // Custom calls
-
   public getObjectReferences(publicID: number) {
     return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/reference/${publicID}`).pipe(
       map((apiResponse) => {
