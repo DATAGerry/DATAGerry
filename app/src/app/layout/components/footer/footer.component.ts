@@ -29,7 +29,7 @@ export class FooterComponent implements OnInit {
 
 
   public constructor(private connectionService: ConnectionService, private authService: AuthService) {
-    this.docUrl = `${connectionService.currentConnection}docs`;
+    this.docUrl = `${connectionService.currentConnection}/docs`;
   }
 
   public today: number = Date.now();
