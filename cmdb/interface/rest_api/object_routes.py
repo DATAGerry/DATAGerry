@@ -20,6 +20,7 @@ from datetime import datetime
 
 from flask import abort, jsonify, request, current_app
 
+from cmdb.data_storage.database_utils import object_hook, default
 from cmdb.framework import CmdbObject
 from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError, \
     ObjectManagerUpdateError
@@ -221,6 +222,19 @@ def insert_object(request_user):
     except ObjectInsertError:
         return abort(500)
 
+    # get current object state
+    try:
+        current_type_instance = object_manager.get_type(object_instance.get_type_id())
+        current_object_render_result = CmdbRender(object_instance=object_instance,
+                                                  type_instance=current_type_instance,
+                                                  render_user=request_user).result()
+    except ObjectManagerGetError as err:
+        LOGGER.error(err)
+        return abort(404)
+    except RenderError as err:
+        LOGGER.error(err)
+        return abort(500)
+
     # Generate new insert log
     try:
         log_params = {
@@ -228,6 +242,7 @@ def insert_object(request_user):
             'user_id': request_user.get_public_id(),
             'user_name': request_user.get_name(),
             'comment': 'Object was created',
+            'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
             'version': object_instance.version
         }
         log_ack = log_manager.insert_log(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
@@ -244,8 +259,6 @@ def insert_object(request_user):
 @login_required
 @insert_request_user
 def update_object(public_id: int, request_user: User):
-    from cmdb.data_storage.database_utils import object_hook, default
-
     # get current object state
     try:
         current_object_instance = object_manager.get_object(public_id)
@@ -397,6 +410,18 @@ def update_object_state(public_id: int, request_user: User):
         LOGGER.error(err)
         return abort(500)
 
+        # get current object state
+    try:
+        current_type_instance = object_manager.get_type(founded_object.get_type_id())
+        current_object_render_result = CmdbRender(object_instance=founded_object,
+                                                  type_instance=current_type_instance,
+                                                  render_user=request_user).result()
+    except ObjectManagerGetError as err:
+        LOGGER.error(err)
+        return abort(404)
+    except RenderError as err:
+        LOGGER.error(err)
+        return abort(500)
     try:
         # generate log
         change = {
@@ -408,6 +433,7 @@ def update_object_state(public_id: int, request_user: User):
             'version': founded_object.version,
             'user_id': request_user.get_public_id(),
             'user_name': request_user.get_name(),
+            'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
             'comment': 'Active status has changed',
             'changes': change,
         }

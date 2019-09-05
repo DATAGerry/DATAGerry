@@ -49,8 +49,15 @@ const routes: Routes = [
     data: {
       breadcrumb: 'User Management'
     },
-    loadChildren: () => import('./user-management/user-management.module').then(m => m.UserManagementModule),
+    loadChildren: () => import('./user-management/user-management.module').then(m => m.UserManagementModule)
   },
+  {
+    path: 'logs',
+    data: {
+      breadcrumb: 'Logs'
+    },
+    loadChildren: () => import('./log-settings/log-settings.module').then(m => m.LogSettingsModule)
+  }
 ];
 
 @NgModule({

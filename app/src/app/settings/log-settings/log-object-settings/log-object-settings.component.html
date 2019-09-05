@@ -1,0 +1,30 @@
+<div class="row">
+  <div id="complete-log-list" class="col-6">
+    <div class="card">
+      <div class="card-header">
+        Active log list <span class="badge badge-success float-right">Existing {{activeLength}}</span>
+      </div>
+      <div class="card-body"></div>
+      <ul class="list-group list-group-flush" *ngFor="let activeLog of activeLogList">
+        <li class="list-group-item">LogID: {{activeLog.public_id}}</li>
+      </ul>
+      <div class="card-footer text-center text-muted">
+        Logs with existing objects
+      </div>
+    </div>
+  </div>
+  <div id="deleted-log-list" class="col-6">
+    <div class="card">
+      <div class="card-header">
+        Logs of deleted objects <span class="badge badge-danger float-right">Deleted {{deleteLength}}</span>
+      </div>
+      <div class="card-body"></div>
+      <ul class="list-group list-group-flush" *ngFor="let deleteLog of deletedLogList">
+        <li class="list-group-item">LogID: {{deleteLog.public_id}}</li>
+      </ul>
+      <div class="card-footer text-center text-muted">
+        Logs with deleted objects
+      </div>
+    </div>
+  </div>
+</div>
