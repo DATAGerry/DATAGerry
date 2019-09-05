@@ -34,9 +34,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 class LogAction(Enum):
-    CREATE = 1
-    EDIT = 2
-    ACTIVE_CHANGE = 3
+    CREATE = 0
+    EDIT = 1
+    ACTIVE_CHANGE = 2
 
 
 class CmdbMetaLog(CmdbDAO):
@@ -123,7 +123,8 @@ class CmdbLogManager(CmdbManagerBase):
         log_init['public_id'] = available_id
 
         # set static values
-        log_init['action'] = action.name
+        log_init['action'] = action.value
+        log_init['action_name'] = action.name
         log_init['log_type'] = log_type
         log_init['log_time'] = datetime.utcnow()
 

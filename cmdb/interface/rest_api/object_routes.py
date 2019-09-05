@@ -203,6 +203,7 @@ def insert_object(request_user):
     try:
         new_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
         new_object_data['public_id'] = object_manager.get_highest_id(CmdbObject.COLLECTION) + 1
+        new_object_data['active'] = True
         new_object_data['creation_time'] = datetime.utcnow()
         new_object_data['last_edit_time'] = datetime.utcnow()
         new_object_data['views'] = 0

@@ -121,7 +121,6 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
     this.renderForm.markAllAsTouched();
     if (this.renderForm.valid) {
       this.objectInstance.type_id = this.currentTypeID;
-      this.objectInstance.active = this.render.renderForm.get('active').value;
       this.objectInstance.version = '1.0.0';
       this.objectInstance.author_id = this.userService.getCurrentUser().public_id;
       this.objectInstance.fields = [];

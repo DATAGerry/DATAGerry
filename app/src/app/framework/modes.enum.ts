@@ -4,3 +4,9 @@ export enum CmdbMode {
   Edit,
   Simple
 }
+
+export enum LogMode {
+  CREATE,
+  EDIT,
+  ACTIVE_CHANGE
+}

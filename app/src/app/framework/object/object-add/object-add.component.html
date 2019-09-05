@@ -26,20 +26,6 @@
 <ng-template #renderTemplate>
   <form [formGroup]="renderForm" class="renderForm needs-validation" novalidate autocomplete="off"
         (ngSubmit)="saveObject()">
-    <fieldset>
-      <legend>Object status</legend>
-      <div class="form-group row">
-        <label class="col-sm-3 col-form-label">
-          Active:
-        </label>
-        <div class="col-sm-9">
-          <div class="custom-control custom-checkbox">
-            <input type="checkbox" formControlName="active" class="custom-control-input" id="active" checked>
-            <label class="custom-control-label" for="active"></label>
-          </div>
-        </div>
-      </div>
-    </fieldset>
     <cmdb-render [mode]="mode" [renderForm]="renderForm"
                  [typeInstance]="typeInstance"></cmdb-render>
     <div class="btn-group" role="group">
