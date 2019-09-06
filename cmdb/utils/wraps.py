@@ -33,6 +33,16 @@ except ImportError:
 LOGGER = logging.getLogger(__name__)
 
 
+def deprecated(f):
+    @wraps(f)
+    def _deprecated(*args, **kwargs):
+        LOGGER.warning('This method is likely to be deprecated soon!')
+
+        return f(*args, **kwargs)
+
+    return _deprecated
+
+
 def json_required(f):
     @wraps(f)
     def _json_required(*args, **kwargs):

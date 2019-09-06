@@ -50,8 +50,8 @@ class CmdbObjectManager(CmdbManagerBase):
     def is_ready(self) -> bool:
         return self.dbm.status()
 
-    def get_highest_id(self, collection: str):
-        return self.dbm.get_highest_id(collection)
+    def get_new_id(self, collection: str) -> int:
+        return self.dbm.get_next_public_id(collection)
 
     def get_object(self, public_id: int):
         try:

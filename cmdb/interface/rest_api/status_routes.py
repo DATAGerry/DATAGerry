@@ -59,7 +59,7 @@ def get_status(public_id: int):
 
 @status_routes.route('/', methods=['POST'])
 def add_status():
-    new_status_params = {**request.json, **{'public_id': int(object_manager.get_highest_id(CmdbStatus.COLLECTION) + 1)}}
+    new_status_params = {**request.json, **{'public_id': int(object_manager.get_new_id(CmdbStatus.COLLECTION) + 1)}}
     try:
         ack = object_manager.insert_status(new_status_params)
     except ObjectManagerInsertError:

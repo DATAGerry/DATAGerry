@@ -16,7 +16,7 @@
 
 import logging
 
-from cmdb.utils.interface_wraps import login_required, right_required
+from cmdb.utils.wraps import login_required, right_required
 from cmdb.interface.route_utils import make_response, RootBlueprint
 from cmdb.user_management.user_manager import user_manager
 

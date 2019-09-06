@@ -1,30 +1,26 @@
-<div class="row">
-  <div id="complete-log-list" class="col-6">
-    <div class="card">
-      <div class="card-header">
-        Active log list <span class="badge badge-success float-right">Existing {{activeLength}}</span>
-      </div>
-      <div class="card-body"></div>
-      <ul class="list-group list-group-flush" *ngFor="let activeLog of activeLogList">
-        <li class="list-group-item">LogID: {{activeLog.public_id}}</li>
-      </ul>
-      <div class="card-footer text-center text-muted">
-        Logs with existing objects
-      </div>
-    </div>
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active" id="log-object-activate-tab" data-toggle="tab" href="#activate" role="tab">
+      Activate log list <span class="badge badge-secondary">{{activeLength}}</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="log-object-deactivate-tab" data-toggle="tab" href="#deactivate" role="tab">
+      Deactivate log list <span class="badge badge-secondary">{{deleteLength}}</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="log-object-delete-tab" data-toggle="tab" href="#delete-logs" role="tab">
+      Delete logs
+    </a>
+  </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="activate" role="tabpanel">
+    <cmdb-activate-tab [activeLogList]="activeLogList"></cmdb-activate-tab>
   </div>
-  <div id="deleted-log-list" class="col-6">
-    <div class="card">
-      <div class="card-header">
-        Logs of deleted objects <span class="badge badge-danger float-right">Deleted {{deleteLength}}</span>
-      </div>
-      <div class="card-body"></div>
-      <ul class="list-group list-group-flush" *ngFor="let deleteLog of deletedLogList">
-        <li class="list-group-item">LogID: {{deleteLog.public_id}}</li>
-      </ul>
-      <div class="card-footer text-center text-muted">
-        Logs with deleted objects
-      </div>
-    </div>
+  <div class="tab-pane fade" id="deactivate" role="tabpanel">
+    <cmdb-deactivate-tab [deletedLogList]="deletedLogList"></cmdb-deactivate-tab>
   </div>
+  <div class="tab-pane fade" id="delete-logs" role="tabpanel">...</div>
 </div>

@@ -119,7 +119,7 @@ class CmdbLogManager(CmdbManagerBase):
     def insert_log(self, action: LogAction, log_type: str, **kwargs) -> int:
         # Get possible public id
         log_init = {}
-        available_id = self.dbm.get_highest_id(collection=CmdbMetaLog.COLLECTION) + 1
+        available_id = self.dbm.get_next_public_id(collection=CmdbMetaLog.COLLECTION)
         log_init['public_id'] = available_id
 
         # set static values

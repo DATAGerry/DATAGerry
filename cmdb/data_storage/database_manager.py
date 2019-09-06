@@ -19,11 +19,15 @@ Database Management instance for database actions
 
 """
 import logging
+
 from pymongo.errors import DuplicateKeyError
 from pymongo.results import DeleteResult
+
 from cmdb.data_storage.database_connection import Connector
-from cmdb.utils.error import CMDBError
 from cmdb.data_storage.database_connection import MongoConnector
+from cmdb.data_storage.database_framework_counter import IDCounter
+from cmdb.utils.error import CMDBError
+from cmdb.utils.wraps import deprecated
 
 LOGGER = logging.getLogger(__name__)
 
@@ -454,7 +458,7 @@ class DatabaseManagerMongo(DatabaseManager):
             raise DocumentCouldNotBeDeleted(collection, public_id)
         return result
 
-    def delete_many(self, collection: str,  **requirements: dict) -> DeleteResult:
+    def delete_many(self, collection: str, **requirements: dict) -> DeleteResult:
         """removes all documents that match the filter from a collection.
 
         Args:
@@ -528,6 +532,7 @@ class DatabaseManagerMongo(DatabaseManager):
         """
         return self.database_connector.delete_collection(collection_name)
 
+    @deprecated
     def get_document_with_highest_id(self, collection: str) -> str:
         """get the document with the highest public id inside a collection
 
@@ -540,6 +545,7 @@ class DatabaseManagerMongo(DatabaseManager):
         formatted_sort = [('public_id', self.DESCENDING)]
         return self.find_one_by(collection=collection, sort=formatted_sort)
 
+    @deprecated
     def get_highest_id(self, collection: str) -> int:
         """wrapper function
         calls get_document_with_highest_id() and returns the public_id
@@ -556,6 +562,35 @@ class DatabaseManagerMongo(DatabaseManager):
         except NoDocumentFound:
             return 0
         return highest
+
+    def get_next_public_id(self, collection: str) -> int:
+        try:
+            founded_counter = self.database_connector.get_collection(IDCounter.COLLECTION).find_one(filter={
+                '_id': collection
+            })
+            new_id = founded_counter['counter'] + 1
+        except (NoDocumentFound, Exception) as err:
+            LOGGER.error(err)
+
+            LOGGER.warning(f'Counter for collection {collection} wasn´t found - setup new with data from {collection}')
+            docs_count = self.get_highest_id(collection)
+            self.database_connector.get_collection(IDCounter.COLLECTION).insert({
+                '_id': collection,
+                'counter': docs_count
+            })
+            new_id = docs_count + 1
+        finally:
+            self._update_public_id_counter(collection)
+        return new_id
+
+    def _update_public_id_counter(self, collection: str):
+        working_collection = self.database_connector.get_collection(IDCounter.COLLECTION)
+        query = {
+            '_id': collection
+        }
+        counter_doc = working_collection.find_one(query)
+        counter_doc['counter'] = counter_doc['counter'] + 1
+        self.database_connector.get_collection(IDCounter.COLLECTION).update(query, counter_doc)
 
 
 class InsertError(CMDBError):

@@ -17,7 +17,7 @@
 import logging
 from flask import current_app
 from cmdb.interface.route_utils import RootBlueprint
-from cmdb.utils.interface_wraps import login_required
+from cmdb.utils.wraps import login_required
 
 LOGGER = logging.getLogger(__name__)
 try:

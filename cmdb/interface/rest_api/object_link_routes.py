@@ -59,7 +59,7 @@ def get_link_by_partner(public_id: int):
 
 @link_rest.route('/', methods=['POST'])
 def add_link():
-    new_link_params = {**request.json, **{'public_id': int(object_manager.get_highest_id(CmdbLink.COLLECTION) + 1)}}
+    new_link_params = {**request.json, **{'public_id': int(object_manager.get_new_id(CmdbLink.COLLECTION) + 1)}}
     try:
         ack = object_manager.insert_link(new_link_params)
     except ObjectManagerInsertError:

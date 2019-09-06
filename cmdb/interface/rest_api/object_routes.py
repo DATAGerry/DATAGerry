@@ -29,7 +29,7 @@ from cmdb.framework.cmdb_object_manager import object_manager
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
 from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user
 from cmdb.user_management import User
-from cmdb.utils.interface_wraps import login_required
+from cmdb.utils.wraps import login_required
 
 try:
     from cmdb.utils.error import CMDBError
@@ -203,7 +203,7 @@ def insert_object(request_user):
 
     try:
         new_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
-        new_object_data['public_id'] = object_manager.get_highest_id(CmdbObject.COLLECTION) + 1
+        new_object_data['public_id'] = object_manager.get_new_id(CmdbObject.COLLECTION)
         new_object_data['active'] = True
         new_object_data['creation_time'] = datetime.utcnow()
         new_object_data['last_edit_time'] = datetime.utcnow()
@@ -215,11 +215,12 @@ def insert_object(request_user):
     try:
         object_instance = CmdbObject(**new_object_data)
     except CMDBError as e:
-        LOGGER.debug(e.message)
+        LOGGER.debug(e)
         return abort(400)
     try:
         new_object_id = object_manager.insert_object(object_instance)
-    except ObjectInsertError:
+    except ObjectInsertError as oie:
+        LOGGER.error(oie)
         return abort(500)
 
     # get current object state
@@ -246,7 +247,6 @@ def insert_object(request_user):
             'version': object_instance.version
         }
         log_ack = log_manager.insert_log(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
-        LOGGER.debug(log_ack)
     except LogManagerInsertError as err:
         LOGGER.error(err)
 

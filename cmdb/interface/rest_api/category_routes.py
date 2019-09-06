@@ -19,7 +19,7 @@ import json
 
 from cmdb.framework.cmdb_object_manager import object_manager
 from cmdb.framework.cmdb_category import CmdbCategory
-from cmdb.utils.interface_wraps import login_required
+from cmdb.utils.wraps import login_required
 from cmdb.interface.route_utils import make_response, RootBlueprint
 
 from flask import request, abort
@@ -72,7 +72,7 @@ def add_category():
         LOGGER.warning(e)
         abort(400)
     try:
-        modified_category_data['public_id'] = int(object_manager.get_highest_id(CmdbCategory.COLLECTION) + 1)
+        modified_category_data['public_id'] = int(object_manager.get_new_id(CmdbCategory.COLLECTION) + 1)
         ack = object_manager.insert_category(modified_category_data)
     except CMDBError as e:
         LOGGER.debug(e.message)
