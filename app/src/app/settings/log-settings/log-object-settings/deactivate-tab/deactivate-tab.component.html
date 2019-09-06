@@ -1,0 +1,34 @@
+  <div class="card">
+    <div class="card-body"></div>
+    <table class="table table-hover table-striped">
+      <thead>
+      <tr>
+        <th scope="col">
+          <input type="checkbox" value="">
+        </th>
+        <th scope="col">Log ID</th>
+        <th scope="col">Object ID</th>
+        <th scope="col">Action</th>
+        <th scope="col">User</th>
+        <th scope="col">Version</th>
+        <th scope="col">Date</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let deleteLog of deletedLogList">
+        <td>
+          <input type="checkbox" value=""/>
+        </td>
+        <th scope="row">{{deleteLog.public_id}}</th>
+        <td>{{deleteLog.object_id}}</td>
+        <td>{{deleteLog.action_name}}</td>
+        <td>{{deleteLog.user_name}}</td>
+        <td>{{deleteLog.version}}</td>
+        <td>{{deleteLog.log_time.$date | date: "dd/MM/yy - hh:mm:ss"}}</td>
+      </tr>
+      </tbody>
+    </table>
+    <div class="card-footer text-center text-muted">
+      Logs with deleted objects
+    </div>
+  </div>

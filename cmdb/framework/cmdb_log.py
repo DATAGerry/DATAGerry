@@ -34,10 +34,9 @@ LOGGER = logging.getLogger(__name__)
 
 
 class LogAction(Enum):
-    CREATE = 1
-    EDIT = 2
-    ACTIVATE = 3
-    DEACTIVATE = 4
+    CREATE = 0
+    EDIT = 1
+    ACTIVE_CHANGE = 2
 
 
 class CmdbMetaLog(CmdbDAO):
@@ -120,11 +119,12 @@ class CmdbLogManager(CmdbManagerBase):
     def insert_log(self, action: LogAction, log_type: str, **kwargs) -> int:
         # Get possible public id
         log_init = {}
-        available_id = self.dbm.get_highest_id(collection=CmdbMetaLog.COLLECTION) + 1
+        available_id = self.dbm.get_next_public_id(collection=CmdbMetaLog.COLLECTION)
         log_init['public_id'] = available_id
 
         # set static values
-        log_init['action'] = action.name
+        log_init['action'] = action.value
+        log_init['action_name'] = action.name
         log_init['log_type'] = log_type
         log_init['log_time'] = datetime.utcnow()
 

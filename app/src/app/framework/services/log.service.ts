@@ -48,6 +48,22 @@ export class LogService<T = CmdbLog> implements ApiService  {
     );
   }
 
+  public getLogsWithExistingObject() {
+    return this.api.callGet<T>(`${this.servicePrefix}/object/exists/`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public getLogsWithDeletedObject() {
+    return this.api.callGet<T>(`${this.servicePrefix}/object/deleted/`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
   public getCorrespondingLogs(publicID: number) {
     return this.api.callGet<T>(`${this.servicePrefix}/${publicID}/corresponding/`).pipe(
       map((apiResponse) => {

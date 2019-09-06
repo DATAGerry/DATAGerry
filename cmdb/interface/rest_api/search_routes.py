@@ -23,7 +23,7 @@ from cmdb.framework.cmdb_object_manager import object_manager as obm
 from cmdb.framework.cmdb_render import CmdbRender, RenderError, RenderList
 from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user
 from cmdb.user_management.user import User
-from cmdb.utils.interface_wraps import login_required
+from cmdb.utils.wraps import login_required
 
 try:
     from cmdb.utils.error import CMDBError

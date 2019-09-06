@@ -49,7 +49,7 @@ class UserManagement:
         }
 
     def get_highest_id(self, collection: str):
-        return self.dbm.get_highest_id(collection)
+        return self.dbm.get_next_public_id(collection)
 
     def get_authentication_provider(self, name: str):
         if issubclass(self._authentication_providers[name], AuthenticationProvider):

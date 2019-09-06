@@ -1,0 +1,31 @@
+<div [ngSwitch]="action">
+  <div *ngSwitchCase="modes.ACTIVE_CHANGE">
+    <cmdb-active-badge [activeStatus]="changes['old']"></cmdb-active-badge>
+    <i class="fas fa-arrow-right"></i>
+    <cmdb-active-badge [activeStatus]="changes['new']"></cmdb-active-badge>
+  </div>
+  <div *ngSwitchCase="modes.CREATE">
+    -
+  </div>
+  <div *ngSwitchCase="modes.EDIT">
+    <dl class="row" *ngFor="let change of changes.old; let i = index">
+      <dt class="col-3">
+        {{change.name}}
+      </dt>
+      <dd class="col-9">
+        {{change.value}} <i class="fas fa-arrow-right"></i> {{changes.new[i].value}}
+      </dd>
+    </dl>
+  </div>
+  <div *ngSwitchDefault>
+    Unknown action
+  </div>
+</div>
+<!--<dl class="row" *ngFor="let change of log.changes.old; let i = index">-->
+<!--  <dt class="col-3">-->
+<!--    {{change.name}}-->
+<!--  </dt>-->
+<!--  <dd class="col-9">-->
+<!--    {{change.value}} -> {{log.changes.new[i].value}}-->
+<!--  </dd>-->
+<!--</dl>-->

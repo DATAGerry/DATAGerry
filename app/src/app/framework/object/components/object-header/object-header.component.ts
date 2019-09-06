@@ -16,8 +16,10 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RenderResult } from '../../../models/cmdb-render';
+import { ObjectService } from '../../../services/object.service';
+import { ToastService } from '../../../../layout/services/toast.service';
 
 @Component({
   selector: 'cmdb-object-header',
@@ -26,6 +28,36 @@ import { RenderResult } from '../../../models/cmdb-render';
 })
 export class ObjectHeaderComponent {
 
-  @Input() public renderResult: RenderResult;
+  public activeState: boolean = true;
+  private result: RenderResult;
+  private objectID: number;
+
+  @Output() stateChange = new EventEmitter<boolean>();
+
+  @Input('renderResult')
+  public set renderResult(result) {
+    if (result !== undefined) {
+      this.result = result;
+      this.activeState = this.result.object_information.active;
+      this.objectID = this.result.object_information.object_id;
+    }
+  }
+
+  public get renderResult(): RenderResult {
+    return this.result;
+  }
+
+  public constructor(private objectService: ObjectService, private toastService: ToastService) {
+
+  }
+
+  public toggleChange() {
+    this.activeState = this.activeState !== true;
+    this.objectService.changeState(this.objectID, this.activeState).subscribe((resp: boolean) =>{
+      this.toastService.show(`Changed active state to ${this.activeState}`);
+      this.stateChange.emit(true);
+    });
+  }
+
 
 }

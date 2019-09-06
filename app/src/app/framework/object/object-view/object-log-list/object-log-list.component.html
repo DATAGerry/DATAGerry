@@ -8,23 +8,16 @@
     <th>Comment</th>
     <th>Author</th>
     <th>Version</th>
-    <th>Action</th>
+    <th>Links</th>
   </tr>
   </thead>
   <tbody>
   <tr *ngFor="let log of logList">
     <th scope="row">{{log.log_time.$date | date:'MM.dd.yyyy HH:mm:ss'}}</th>
     <td>{{log.public_id}}</td>
-    <td>{{log.action}}</td>
+    <td>{{log.action_name}}</td>
     <td>
-      <dl class="row" *ngFor="let change of log.changes.old; let i = index">
-        <dt class="col-3">
-          {{change.name}}
-        </dt>
-        <dd class="col-9">
-          {{change.value}} -> {{log.changes.new[i].value}}
-        </dd>
-      </dl>
+      <cmdb-object-log-change-view [action]="log.action" [changes]="log.changes"></cmdb-object-log-change-view>
     </td>
     <td>{{log.comment}}</td>
     <td><a routerLink="/user/{{log.user_id}}">{{log.user_name}}</a></td>

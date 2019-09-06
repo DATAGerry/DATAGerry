@@ -17,7 +17,7 @@
 import logging
 
 from flask import abort, request
-from cmdb.utils.interface_wraps import login_required
+from cmdb.utils.wraps import login_required
 from cmdb.interface.route_utils import RootBlueprint, make_response
 from cmdb.user_management.user_manager import user_manager
 

@@ -19,14 +19,16 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { CollectionRoutingModule } from './collection-routing.module';
-import { CollectionComponent } from './collection.component';
+import { LogSettingsRoutingModule } from './log-settings-routing.module';
+import { LogObjectSettingsComponent } from './log-object-settings/log-object-settings.component';
+import { ActivateTabComponent } from './log-object-settings/activate-tab/activate-tab.component';
+import { DeactivateTabComponent } from './log-object-settings/deactivate-tab/deactivate-tab.component';
 
 @NgModule({
-  declarations: [CollectionComponent],
+  declarations: [LogObjectSettingsComponent, ActivateTabComponent, DeactivateTabComponent],
   imports: [
     CommonModule,
-    CollectionRoutingModule
+    LogSettingsRoutingModule
   ]
 })
-export class CollectionModule { }
+export class LogSettingsModule { }

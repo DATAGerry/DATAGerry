@@ -18,38 +18,15 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { CategoryListComponent } from './category-list/category-list.component';
-import { CategoryManagementComponent } from './category-management/category-management.component';
-import { CategoryAddComponent } from './category-add/category-add.component';
+import { LogObjectSettingsComponent } from './log-object-settings/log-object-settings.component';
 
 const routes: Routes = [
   {
-    path: '',
+    path: 'objects',
     data: {
-      breadcrumb: 'List'
+      breadcrumb: 'Objects'
     },
-    component: CategoryListComponent
-  },
-  {
-    path: 'management',
-    data: {
-      breadcrumb: 'Manage'
-    },
-    component: CategoryManagementComponent
-  },
-  {
-    path: 'add',
-    data: {
-      breadcrumb: 'Add'
-    },
-    component: CategoryAddComponent
-  },
-  {
-    path: 'edit/:publicID',
-    data: {
-      breadcrumb: 'Edit'
-    },
-    component: CategoryAddComponent
+    component: LogObjectSettingsComponent
   }
 ];
 
@@ -57,5 +34,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class CategoryRoutingModule {
-}
+export class LogSettingsRoutingModule { }

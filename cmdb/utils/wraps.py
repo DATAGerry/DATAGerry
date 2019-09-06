@@ -20,6 +20,7 @@ Different wrapper functions for interface module
 import logging
 from functools import wraps
 
+from authlib.jose.errors import ExpiredTokenError
 from flask import request, abort
 
 from cmdb.security.token.validator import TokenValidator, ValidationError
@@ -30,6 +31,16 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
+
+
+def deprecated(f):
+    @wraps(f)
+    def _deprecated(*args, **kwargs):
+        LOGGER.warning('This method is likely to be deprecated soon!')
+
+        return f(*args, **kwargs)
+
+    return _deprecated
 
 
 def json_required(f):
@@ -61,10 +72,8 @@ def login_required(f):
                 tv = TokenValidator()
                 decoded_token = tv.decode_token(token)
                 tv.validate_token(decoded_token)
-            except ValidationError as err:
+            except (ValidationError, ExpiredTokenError, CMDBError) as err:
                 LOGGER.error(err)
-                return abort(401)
-            except CMDBError:
                 return abort(401)
         else:
             return abort(401)

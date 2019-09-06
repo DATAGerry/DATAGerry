@@ -19,7 +19,8 @@ import logging
 from werkzeug.exceptions import abort
 
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
-from cmdb.framework.cmdb_log import log_manager, LogManagerGetError
+from cmdb.framework.cmdb_log import log_manager, LogManagerGetError, CmdbObjectLog, LogAction
+from cmdb.framework.cmdb_object_manager import object_manager
 from cmdb.interface.route_utils import RootBlueprint, make_response
 
 try:
@@ -71,6 +72,74 @@ def delete_log(public_id: int):
 
 
 # FIND routes
+@log_routes.route('/object/exists/', methods=['GET'])
+@log_routes.route('/object/exists', methods=['GET'])
+def get_logs_with_existing_objects():
+    existing_list = []
+    deleted_list = []
+    passed_objects = []
+    try:
+        query = {
+            'log_type': CmdbObjectLog.__name__
+        }
+        object_logs = log_manager.get_logs_by(**query)
+    except ObjectManagerGetError as err:
+        LOGGER.error(f'Error in get_logs_with_existing_objects: {err}')
+        return abort(404)
+    if len(object_logs) < 1:
+        return make_response(object_logs, 204)
+    for log in object_logs:
+        current_object_id: int = log.object_id
+        if current_object_id in existing_list:
+            passed_objects.append(log)
+            continue
+        elif current_object_id in deleted_list:
+            continue
+        else:
+            try:
+                object_manager.get_object(current_object_id)
+                existing_list.append(current_object_id)
+                passed_objects.append(log)
+            except ObjectManagerGetError:
+                deleted_list.append(current_object_id)
+                continue
+    return make_response(passed_objects)
+
+
+@log_routes.route('/object/deleted/', methods=['GET'])
+@log_routes.route('/object/deleted', methods=['GET'])
+def get_logs_with_deleted_objects():
+    existing_list = []
+    deleted_list = []
+    passed_objects = []
+    try:
+        query = {
+            'log_type': CmdbObjectLog.__name__
+        }
+        object_logs = log_manager.get_logs_by(**query)
+    except ObjectManagerGetError as err:
+        LOGGER.error(f'Error in get_logs_with_existing_objects: {err}')
+        return abort(404)
+    if len(object_logs) < 1:
+        return make_response(object_logs, 204)
+    for log in object_logs:
+        current_object_id: int = log.object_id
+        if current_object_id in existing_list:
+            continue
+        elif current_object_id in deleted_list:
+            passed_objects.append(log)
+            continue
+        else:
+            try:
+                object_manager.get_object(current_object_id)
+                existing_list.append(current_object_id)
+            except ObjectManagerGetError:
+                deleted_list.append(current_object_id)
+                passed_objects.append(log)
+                continue
+    return make_response(passed_objects)
+
+
 @log_routes.route('/object/<int:public_id>/', methods=['GET'])
 @log_routes.route('/object/<int:public_id>', methods=['GET'])
 def get_logs_by_objects(public_id: int):
@@ -90,11 +159,9 @@ def get_corresponding_object_logs(public_id: int):
     try:
         selected_log = log_manager.get_log(public_id=public_id)
         query = {
-            'log_type': 'CmdbObjectLog',
+            'log_type': CmdbObjectLog.__name__,
             'object_id': selected_log.object_id,
-            'render_state': {
-                '$ne': None
-            },
+            'action': LogAction.EDIT.value,
             '$nor': [{
                 'public_id': public_id
             }]

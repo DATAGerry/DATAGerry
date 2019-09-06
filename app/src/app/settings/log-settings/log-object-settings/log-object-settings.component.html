@@ -1,0 +1,26 @@
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active" id="log-object-activate-tab" data-toggle="tab" href="#activate" role="tab">
+      Activate log list <span class="badge badge-secondary">{{activeLength}}</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="log-object-deactivate-tab" data-toggle="tab" href="#deactivate" role="tab">
+      Deactivate log list <span class="badge badge-secondary">{{deleteLength}}</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="log-object-delete-tab" data-toggle="tab" href="#delete-logs" role="tab">
+      Delete logs
+    </a>
+  </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="activate" role="tabpanel">
+    <cmdb-activate-tab [activeLogList]="activeLogList"></cmdb-activate-tab>
+  </div>
+  <div class="tab-pane fade" id="deactivate" role="tabpanel">
+    <cmdb-deactivate-tab [deletedLogList]="deletedLogList"></cmdb-deactivate-tab>
+  </div>
+  <div class="tab-pane fade" id="delete-logs" role="tabpanel">...</div>
+</div>

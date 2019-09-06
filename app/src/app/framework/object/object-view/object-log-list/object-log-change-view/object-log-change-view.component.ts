@@ -16,17 +16,22 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input } from '@angular/core';
+import { LogMode } from '../../../../modes.enum';
 
-import { CollectionRoutingModule } from './collection-routing.module';
-import { CollectionComponent } from './collection.component';
-
-@NgModule({
-  declarations: [CollectionComponent],
-  imports: [
-    CommonModule,
-    CollectionRoutingModule
-  ]
+@Component({
+  selector: 'cmdb-object-log-change-view',
+  templateUrl: './object-log-change-view.component.html',
+  styleUrls: ['./object-log-change-view.component.scss']
 })
-export class CollectionModule { }
+export class ObjectLogChangeViewComponent {
+
+  public modes = LogMode;
+  @Input() action: LogMode;
+  @Input() changes: any[];
+
+  public constructor() {
+
+  }
+
+}

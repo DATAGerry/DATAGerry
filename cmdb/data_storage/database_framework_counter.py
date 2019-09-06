@@ -15,24 +15,19 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-from flask import current_app
-from cmdb.interface.route_utils import RootBlueprint
-from cmdb.utils.wraps import login_required
 
-LOGGER = logging.getLogger(__name__)
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
     CMDBError = Exception
 
-settings_rest = RootBlueprint('settings_rest', __name__, url_prefix='/settings')
-
-with current_app.app_context():
-    from cmdb.interface.rest_api.settings.user_management import user_management_routes
-    settings_rest.register_nested_blueprint(user_management_routes)
+LOGGER = logging.getLogger(__name__)
 
 
-@settings_rest.route('/', methods=['GET'])
-@login_required
-def get_settings():
-    return None
+class IDCounter:
+
+    COLLECTION = 'datastorage.counter'
+
+    def __init__(self, _id: str, counter: int):
+        self._id = _id
+        self.counter = counter

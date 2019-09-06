@@ -18,7 +18,7 @@ import logging
 import json
 
 from flask import abort, request, jsonify
-from cmdb.utils.interface_wraps import login_required, json_required
+from cmdb.utils.wraps import login_required, json_required
 from cmdb.framework.cmdb_object_manager import object_manager as obm
 from cmdb.interface.route_utils import make_response, RootBlueprint
 from cmdb.framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError
@@ -67,7 +67,7 @@ def add_type():
     add_data_dump = json.dumps(request.json)
     try:
         new_type_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
-        new_type_data['public_id'] = object_manager.get_highest_id(CmdbType.COLLECTION) + 1
+        new_type_data['public_id'] = object_manager.get_new_id(CmdbType.COLLECTION) + 1
         new_type_data['creation_time'] = datetime.utcnow()
     except TypeError as e:
         LOGGER.warning(e)
