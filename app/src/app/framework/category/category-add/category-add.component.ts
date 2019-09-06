@@ -18,67 +18,96 @@
 
 import { Component, OnInit } from '@angular/core';
 import { CmdbCategory } from '../../models/cmdb-category';
-import { CategoryService } from '../../services/category.service';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { TypeService } from '../../services/type.service';
 import { CmdbType } from '../../models/cmdb-type';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { CategoryService } from '../../services/category.service';
+import { TypeService } from '../../services/type.service';
 import { ToastService } from '../../../layout/services/toast.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ModalComponent } from '../../../layout/helpers/modal/modal.component';
+import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 
 @Component({
-  selector: 'cmdb-category-management',
-  templateUrl: './category-management.component.html',
-  styleUrls: ['./category-management.component.scss']
+  selector: 'cmdb-category-add',
+  templateUrl: './category-add.component.html',
+  styleUrls: ['./category-add.component.scss']
 })
-export class CategoryManagementComponent implements OnInit {
+export class CategoryAddComponent implements OnInit {
 
   public categoryList: CmdbCategory[];
   public typeList: CmdbType[];
   public categoryAddForm: FormGroup;
-  public categoryEditForm: FormGroup;
-  public selectedEditCategory: CmdbCategory;
+  public parentCategories: CmdbCategory[];
+  public assignedTypes: CmdbType[];
+  public filterCategories: string = '';
+  public filterTypes: string = '';
 
   constructor(private categoryService: CategoryService, private typeService: TypeService,
               private toast: ToastService, private modalService: NgbModal) {
     this.categoryAddForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl('', Validators.required),
-      parent_id: new FormControl(null),
-      type_list: new FormControl(null)
     });
-
-    this.categoryEditForm = new FormGroup({
-      public_id: new FormControl(null),
-      name: new FormControl('', Validators.required),
-      label: new FormControl('', Validators.required),
-      parent_id: new FormControl(null),
-      type_list: new FormControl(null)
-    });
-
   }
 
-  public ngOnInit(): void {
+  ngOnInit() {
     this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
       this.categoryList = list;
     });
     this.typeService.getTypeList().subscribe((typeList: CmdbType[]) => {
       this.typeList = typeList;
     });
+    this.parentCategories = [];
+    this.assignedTypes = [];
 
     this.categoryAddForm.get('label').valueChanges.subscribe(value => {
+      value = value == null ? '' : value;
       this.categoryAddForm.get('name').setValue(value.replace(/ /g, '-').toLowerCase());
       this.categoryAddForm.get('name').markAsDirty({onlySelf: true});
       this.categoryAddForm.get('name').markAsTouched({onlySelf: true});
     });
+
+    const parent: any = document.getElementsByClassName('category-form')[0];
+    const first: any = document.getElementsByClassName('drag-items')[0];
+    const second: any = document.getElementsByClassName('drag-items')[1];
+    first.style.height = parent.offsetHeight / 2 + 'px';
+    second.style.height = parent.offsetHeight / 2 + 'px';
+  }
+
+  public onDraggedParent(item: DndDropEvent, list: any[], effect: DropEffect) {
+    if (list.length !== 0) {
+      this.categoryList.push(list.pop());
+    }
+
+    list.push(item.data);
+    this.categoryList = this.categoryList.filter(category => category.public_id !== item.data.public_id);
+  }
+
+  public removeParent(item: CmdbCategory): void {
+    this.parentCategories.length = 0;
+    this.categoryList.push(item);
+  }
+
+  public onDraggedAssignedTypes(item: DndDropEvent, list: any[], effect: DropEffect) {
+    list.push(item.data);
+    this.typeList = this.typeList.filter(value => value.public_id !== item.data.public_id);
+  }
+
+  public removeAssignedType(item: CmdbType): void {
+    this.typeList.push(item);
+    this.assignedTypes = this.assignedTypes.filter(value => value.public_id !== item.public_id);
   }
 
   public addCategory(): void {
     const tmpCategory: CmdbCategory = new CmdbCategory();
     tmpCategory.name = this.categoryAddForm.get('name').value;
     tmpCategory.label = this.categoryAddForm.get('label').value;
-    tmpCategory.parent_id = this.categoryAddForm.get('parent_id').value;
-    tmpCategory.type_list = this.categoryAddForm.get('type_list').value;
+
+    while (this.parentCategories.length > 0) {
+      tmpCategory.parent_id = this.parentCategories.pop().public_id;
+    }
+    /*while (this.assignedTypes.length > 0) {
+      tmpCategory.type_list.push(this.assignedTypes.pop().public_id);
+    }*/
 
     this.categoryService.postCategory(tmpCategory).subscribe(resp => {
         tmpCategory.public_id = +resp;
@@ -91,47 +120,5 @@ export class CategoryManagementComponent implements OnInit {
         });
       });
     this.categoryAddForm.reset();
-  }
-
-  public selectCategory(publicID: number): void {
-    this.categoryEditForm.reset();
-    this.selectedEditCategory = this.categoryList.find(category => category.public_id === publicID);
-    this.categoryEditForm.patchValue(this.selectedEditCategory);
-  }
-
-  public editCategory(): void {
-    this.categoryService.updateCategory(this.categoryEditForm.value).subscribe((resp: number) => {
-      if (resp > 0) {
-        this.toast.show('Category was updated');
-      }
-    }, (error) => {
-      console.error(error);
-    }, () => {
-      this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
-        this.categoryList = list;
-      });
-    });
-  }
-
-  public deleteCategory(publicID: number): void {
-    const deleteModal = this.modalService.open(ModalComponent);
-    deleteModal.componentInstance.title = 'Delete Category # ' + publicID;
-    deleteModal.componentInstance.modalMessage = 'Are you sure you want to delete this Category?';
-    deleteModal.componentInstance.buttonDeny = 'Cancel';
-    deleteModal.componentInstance.buttonAccept = 'Delete';
-    deleteModal.result.then((result) => {
-      if (result) {
-        this.categoryService.deleteCategory(publicID).subscribe((confirm) => {
-          if (confirm === true) {
-            this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
-              this.categoryList = list;
-            });
-          }
-        });
-      }
-      console.log(result);
-    }, (reason) => {
-      console.log(reason);
-    });
   }
 }

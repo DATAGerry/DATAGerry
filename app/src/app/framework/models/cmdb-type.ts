@@ -35,5 +35,6 @@ export class CmdbType implements CmdbDao {
   public render_meta: any;
   public fields: any[];
   public category_name?: string;
+  public category_id: number;
 
 }

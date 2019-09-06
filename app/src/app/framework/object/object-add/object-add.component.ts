@@ -84,9 +84,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
     }, () => {
       this.categoryService.getCategoryList().subscribe((categoryList: CmdbCategory[]) => {
         for (const category of categoryList) {
-          for (const typeSelectedID of category.type_list) {
-            this.typeList.find(type => type.public_id === typeSelectedID).category_name = category.name;
-          }
+          this.typeList.find(type => type.public_id === category.public_id).category_name = category.name;
         }
       });
     });

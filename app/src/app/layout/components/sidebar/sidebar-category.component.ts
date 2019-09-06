@@ -19,6 +19,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { ApiCallService } from '../../../services/api-call.service';
+import {TypeService} from "../../../framework/services/type.service";
+import {CmdbCategory} from "../../../framework/models/cmdb-category";
 
 @Component({
   selector: 'cmdb-sidebar-category',
@@ -29,16 +31,26 @@ export class SidebarCategoryComponent implements OnInit {
 
   @Input() categoryData: any;
   public categoryPopUp: any[];
+  public categoryTypeList: CmdbType[];
 
-  constructor(private api: ApiCallService) {
+  constructor(private api: ApiCallService, private typeService: TypeService) {
   }
 
   ngOnInit() {
+    this.typeService.getTypeListbyCategory(this.categoryData.category.public_id).subscribe((data: CmdbType[]) => {
+      this.categoryTypeList = data;
+    });
   }
 
-  public get_objects_by_type(categoryTypeList) {
+  public get_objects_by_type() {
     this.categoryPopUp = [];
-    for (const typeID of categoryTypeList) {
+
+    this.typeService.getTypeListbyCategory(this.categoryData.category.public_id).subscribe((data: CmdbType[]) => {
+      this.categoryTypeList = data;
+    });
+
+    for (const type of this.categoryTypeList) {
+      const typeID = type.public_id;
       let currentTypeLabel = '';
       let currentTypeIcon = '';
       let amount = '';

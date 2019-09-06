@@ -46,6 +46,10 @@ export class TypeService {
     return this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/');
   }
 
+  public getTypeListbyCategory(publicID: number) {
+    return this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/category/' + publicID);
+  }
+
   public async validateTypeName(name: string) {
     return this.typeList.find(type => type.name === name) === undefined;
   }

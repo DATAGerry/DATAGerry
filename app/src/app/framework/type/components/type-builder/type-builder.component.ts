@@ -106,15 +106,10 @@ export class TypeBuilderComponent implements OnInit {
   public saveType() {
     if (this.mode === CmdbMode.Create) {
       let newTypeID = null;
+      this.typeInstance.category_id = this.selectedCategoryID;
       this.typeService.postType(this.typeInstance).subscribe(typeIDResp => {
           newTypeID = typeIDResp;
-
-          const selectedCategory = this.categoryService.findCategory(this.selectedCategoryID);
-          selectedCategory.type_list.push(newTypeID);
-          this.categoryService.updateCategory(selectedCategory).subscribe((ack: number) => {
-            this.router.navigate(['/framework/type/'], {queryParams: {typeAddSuccess: newTypeID}});
-          });
-
+          this.router.navigate(['/framework/type/'], {queryParams: {typeAddSuccess: newTypeID}});
         },
         (error) => {
           console.error(error);

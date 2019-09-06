@@ -1358,23 +1358,12 @@ class DataGenerator:
                 "public_id": 1,
                 "name": "infrastructure",
                 "label": "Infrastructure",
-                # "parent_id": 2,
-                "type_list": [
-                    1,
-                    4
-                ]
             }),
             CmdbCategory(**{
                 "public_id": 2,
                 "name": "devices",
                 "label": "Devices",
                 "icon": "fas fa-memory",
-                # "parent_id": 3,
-                "type_list": [
-                    2,
-                    3,
-                    5
-                ]
             }),
         ]
         return category_list

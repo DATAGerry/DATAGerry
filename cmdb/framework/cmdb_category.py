@@ -27,12 +27,11 @@ class CmdbCategory(CmdbDAO):
         'name',
     ]
 
-    def __init__(self, name: str, label: str = None, icon: str = None, type_list: list = None, parent_id=None,
+    def __init__(self, name: str, label: str = None, icon: str = None, parent_id=None,
                  **kwargs):
         self.name = name
         self.label = label or self.name.title()
         self.icon = icon or ''
-        self.type_list = type_list or []
         self.parent_id = parent_id or None
         super(CmdbCategory, self).__init__(**kwargs)
 
@@ -47,14 +46,6 @@ class CmdbCategory(CmdbDAO):
 
     def has_icon(self) -> bool:
         if self.icon:
-            return True
-        return False
-
-    def get_types(self) -> list:
-        return self.type_list
-
-    def has_types(self) -> bool:
-        if len(self.type_list) > 0:
             return True
         return False
 

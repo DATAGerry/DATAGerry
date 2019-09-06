@@ -109,4 +109,11 @@ def update_category():
 @login_required
 def delete_category(public_id):
     delete_response = object_manager.delete_category(public_id)
+
+    # update category
+    categories = object_manager.get_categories_by({'parent_id': public_id})
+    for category in categories:
+        category.parent_id = None
+        object_manager.update_category(category)
+
     return make_response(delete_response)

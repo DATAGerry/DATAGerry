@@ -55,5 +55,8 @@ export class CategoryService {
     return this.api.callPutRoute<number>(this.servicePrefix + '/', data);
   }
 
+  public deleteCategory(publicID: number) {
+    return this.api.callDeleteRoute<number>(this.servicePrefix + '/' + publicID);
+  }
 
 }

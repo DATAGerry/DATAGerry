@@ -116,16 +116,8 @@ def update_type():
 @login_required
 def delete_type(public_id: int):
     try:
-
         # delete all objects by typeID
         object_manager.delete_many_objects({'type_id': public_id})
-
-        # update category
-        categories = object_manager.get_categories_by({'type_list': {'$in': [public_id]}})
-        for category in categories:
-            category.type_list = [x for x in category.type_list if x != public_id]
-            object_manager.update_category(category)
-
         ack = object_manager.delete_type(public_id=public_id)
 
     except TypeNotFoundError:
@@ -171,4 +163,15 @@ def count_objects():
         resp = make_response(count)
     except CMDBError:
         return abort(400)
+    return resp
+
+
+@type_routes.route('/category/<int:public_id>', methods=['GET'])
+@login_required
+def get_type_by_category(public_id):
+    try:
+        type_list = object_manager.get_types_by(**{'category_id': public_id})
+    except CMDBError:
+        return abort(500)
+    resp = make_response(type_list)
     return resp
