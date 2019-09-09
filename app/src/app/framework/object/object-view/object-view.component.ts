@@ -42,13 +42,11 @@ export class ObjectViewComponent implements OnInit {
 
   public ngOnInit(): void {
     this.objectService.getObject(this.objectID).subscribe((result: RenderResult) => {
-      this.renderResult = undefined;
       this.renderResult = result;
     }, (error) => {
       console.error(error);
     });
   }
-
 
   public logChange(event) {
     // TODO: Update log list after object changed

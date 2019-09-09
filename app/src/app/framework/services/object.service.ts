@@ -37,7 +37,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
 
   // Find calls
   public getObjectList(native: boolean = false): Observable<T[]> {
-    if (native) {
+    if (native === true) {
       return this.api.callGet<CmdbObject[]>(`${this.servicePrefix}/native/`).pipe(
         map((apiResponse) => {
           return apiResponse.body;
@@ -60,14 +60,14 @@ export class ObjectService<T = RenderResult> implements ApiService {
   }
 
   public getObject<R>(publicID: number, native: boolean = false): Observable<R> {
-    if (native) {
-      return this.api.callGet<CmdbObject[]>(`${this.servicePrefix}/${publicID}/`).pipe(
+    if (native === true) {
+      return this.api.callGet<CmdbObject[]>(`${this.servicePrefix}/${publicID}/native/`).pipe(
         map((apiResponse) => {
           return apiResponse.body;
         })
       );
     }
-    return this.api.callGet<R[]>(`${this.servicePrefix}/${publicID}/native/`).pipe(
+    return this.api.callGet<R[]>(`${this.servicePrefix}/${publicID}/`).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
