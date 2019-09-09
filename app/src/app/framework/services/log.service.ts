@@ -25,7 +25,7 @@ import { CmdbLog } from '../models/cmdb-log';
 @Injectable({
   providedIn: 'root'
 })
-export class LogService<T = CmdbLog> implements ApiService  {
+export class LogService<T = CmdbLog> implements ApiService {
 
   public servicePrefix: string = 'log';
 
@@ -56,7 +56,15 @@ export class LogService<T = CmdbLog> implements ApiService  {
     );
   }
 
-  public getLogsWithDeletedObject() {
+  public getLogsWithNotExistingObject() {
+    return this.api.callGet<T>(`${this.servicePrefix}/object/notexists/`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public getDeleteLogs() {
     return this.api.callGet<T>(`${this.servicePrefix}/object/deleted/`).pipe(
       map((apiResponse) => {
         return apiResponse.body;
@@ -66,6 +74,14 @@ export class LogService<T = CmdbLog> implements ApiService  {
 
   public getCorrespondingLogs(publicID: number) {
     return this.api.callGet<T>(`${this.servicePrefix}/${publicID}/corresponding/`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public deleteLog(publicID: number) {
+    return this.api.callDelete<boolean>(`${this.servicePrefix}/${publicID}/`).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })

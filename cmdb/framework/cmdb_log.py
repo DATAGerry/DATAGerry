@@ -37,6 +37,7 @@ class LogAction(Enum):
     CREATE = 0
     EDIT = 1
     ACTIVE_CHANGE = 2
+    DELETE = 3
 
 
 class CmdbMetaLog(CmdbDAO):
@@ -141,8 +142,13 @@ class CmdbLogManager(CmdbManagerBase):
     def update_log(self, data) -> int:
         raise NotImplementedError
 
-    def delete_log(self, data) -> int:
-        raise NotImplementedError
+    def delete_log(self, public_id):
+        try:
+            ack = self._delete(CmdbMetaLog.COLLECTION, public_id)
+        except CMDBError as err:
+            LOGGER.error(err)
+            raise LogManagerDeleteError(err)
+        return ack
 
     # FIND functions
     def get_object_logs(self, public_id: int) -> list:

@@ -22,11 +22,11 @@ import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 
 @Component({
-  selector: 'cmdb-deactivate-tab',
-  templateUrl: './deactivate-tab.component.html',
-  styleUrls: ['./deactivate-tab.component.scss']
+  selector: 'cmdb-delete-tab',
+  templateUrl: './delete-tab.component.html',
+  styleUrls: ['./delete-tab.component.scss']
 })
-export class DeactivateTabComponent implements OnInit, OnDestroy, AfterContentInit {
+export class DeleteTabComponent implements OnInit, OnDestroy, AfterContentInit {
 
   @ViewChild(DataTableDirective, {static: true})
   dtElement: DataTableDirective;
@@ -34,16 +34,16 @@ export class DeactivateTabComponent implements OnInit, OnDestroy, AfterContentIn
   dtOptions: DataTables.Settings = {};
 
   // tslint:disable-next-line:variable-name
-  private _deActiveLogList: CmdbLog[];
+  private _deleteLogList: CmdbLog[];
 
-  @Input('deActiveLogList')
-  public set deActiveLogList(logList: CmdbLog[]) {
-    this._deActiveLogList = logList;
+  @Input('deleteLogList')
+  public set deleteLogList(logList: CmdbLog[]) {
+    this._deleteLogList = logList;
     this.dtTrigger.next();
   }
 
-  public get deActiveLogList() {
-    return this._deActiveLogList;
+  public get deleteLogList() {
+    return this._deleteLogList;
   }
 
   @Output() deleteEmitter = new EventEmitter<number>();
@@ -68,7 +68,6 @@ export class DeactivateTabComponent implements OnInit, OnDestroy, AfterContentIn
   public ngAfterContentInit(): void {
     this.dtTrigger.next();
   }
-
   public rerender() {
     this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
       dtInstance.destroy();
@@ -77,10 +76,9 @@ export class DeactivateTabComponent implements OnInit, OnDestroy, AfterContentIn
 
   public cleanup() {
     const idList: number[] = [];
-    for (const log of this.deActiveLogList) {
+    for (const log of this.deleteLogList) {
       idList.push(log.public_id);
     }
     this.cleanUpEmitter.emit(idList);
   }
-
 }
