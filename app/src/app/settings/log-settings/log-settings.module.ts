@@ -20,15 +20,25 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { LogSettingsRoutingModule } from './log-settings-routing.module';
-import { LogObjectSettingsComponent } from './log-object-settings/log-object-settings.component';
+import { DeleteModalComponent, LogObjectSettingsComponent } from './log-object-settings/log-object-settings.component';
 import { ActivateTabComponent } from './log-object-settings/activate-tab/activate-tab.component';
 import { DeactivateTabComponent } from './log-object-settings/deactivate-tab/deactivate-tab.component';
+import { DeleteTabComponent } from './log-object-settings/delete-tab/delete-tab.component';
+import { DataTablesModule } from 'angular-datatables';
+import { LayoutModule } from '../../layout/layout.module';
+import { NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
-  declarations: [LogObjectSettingsComponent, ActivateTabComponent, DeactivateTabComponent],
+  entryComponents: [DeleteModalComponent],
+  declarations: [DeleteModalComponent, LogObjectSettingsComponent, ActivateTabComponent, DeactivateTabComponent, DeleteTabComponent],
   imports: [
     CommonModule,
-    LogSettingsRoutingModule
+    LayoutModule,
+    LogSettingsRoutingModule,
+    DataTablesModule,
+    NgbTooltipModule,
+    NgbProgressbarModule
   ]
 })
-export class LogSettingsModule { }
+export class LogSettingsModule {
+}

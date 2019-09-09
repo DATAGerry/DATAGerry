@@ -340,13 +340,44 @@ def update_object(public_id: int, request_user: User):
 
 @object_rest.route('/<int:public_id>', methods=['DELETE'])
 @login_required
-def delete_object(public_id: int):
+@insert_request_user
+def delete_object(public_id: int, request_user: User):
+
+    try:
+        current_object_instance = object_manager.get_object(public_id)
+        current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
+        current_object_render_result = CmdbRender(object_instance=current_object_instance,
+                                                  type_instance=current_type_instance,
+                                                  render_user=request_user).result()
+    except ObjectManagerGetError as err:
+        LOGGER.error(err)
+        return abort(404)
+    except RenderError as err:
+        LOGGER.error(err)
+        return abort(500)
+
+
     try:
         ack = object_manager.delete_object(public_id=public_id)
     except ObjectDeleteError:
         return abort(400)
     except CMDBError:
         return abort(500)
+
+    try:
+        # generate log
+        log_data = {
+            'object_id': public_id,
+            'version': current_object_render_result.object_information['version'],
+            'user_id': request_user.get_public_id(),
+            'user_name': request_user.get_name(),
+            'comment': 'Object was deleted',
+            'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
+        }
+        log_manager.insert_log(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
+    except (CMDBError, LogManagerInsertError) as err:
+        LOGGER.error(err)
+
     resp = make_response(ack)
     return resp
 
