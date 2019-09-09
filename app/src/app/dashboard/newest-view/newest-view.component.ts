@@ -16,10 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { ApiCallService } from '../../services/api-call.service';
-import { TableColumnAction } from '../../layout/components/table/models/table-columns-action';
-import { RenderService } from '../../framework/render/service/render.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SpecialService } from '../../framework/services/special.service';
 import { RenderResult } from '../../framework/models/cmdb-render';
 import { Subject } from 'rxjs';

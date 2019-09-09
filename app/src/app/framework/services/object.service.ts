@@ -17,43 +17,61 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService } from '../../services/api-call.service';
+import { ApiCallService, ApiService } from '../../services/api-call.service';
 import { CmdbObject } from '../models/cmdb-object';
 import { Observable } from 'rxjs';
 import { ModalComponent } from '../../layout/helpers/modal/modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { CmdbStatus } from '../models/cmdb-status';
 import { map } from 'rxjs/operators';
 import { RenderResult } from '../models/cmdb-render';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ObjectService {
+export class ObjectService<T = RenderResult> implements ApiService {
 
-  private servicePrefix: string = 'object';
-  public objectList: CmdbObject[];
+  public servicePrefix: string = 'object';
 
   constructor(private api: ApiCallService, private modalService: NgbModal) {
-    this.getObjectList().subscribe((resObjectList: CmdbObject[]) => {
-      this.objectList = resObjectList;
-    });
   }
 
   // Find calls
-  public getObjectList() {
-    return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/');
-  }
-
-  public getObjectsByType(typeID: number) {
-    return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/type/' + typeID);
-  }
-
-  public getObject(publicID: number, native: boolean = false) {
+  public getObjectList(native: boolean = false): Observable<T[]> {
     if (native) {
-      return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/' + publicID + '/native/');
+      return this.api.callGet<CmdbObject[]>(`${this.servicePrefix}/native/`).pipe(
+        map((apiResponse) => {
+          return apiResponse.body;
+        })
+      );
     }
-    return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/' + publicID);
+    return this.api.callGet<T[]>(`${this.servicePrefix}/`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public getObjectsByType(typeID: number): Observable<T[]> {
+    return this.api.callGet<T[]>(`${this.servicePrefix}/type/${typeID}`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public getObject<R>(publicID: number, native: boolean = false): Observable<R> {
+    if (native) {
+      return this.api.callGet<CmdbObject[]>(`${this.servicePrefix}/${publicID}/`).pipe(
+        map((apiResponse) => {
+          return apiResponse.body;
+        })
+      );
+    }
+    return this.api.callGet<R[]>(`${this.servicePrefix}/${publicID}/native/`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
   }
 
   // CRUD calls
@@ -74,6 +92,7 @@ export class ObjectService {
   }
 
   // Count calls
+
   public countObjectsByType(typeID: number) {
     return this.api.callGetRoute<number>(this.servicePrefix + '/count/' + typeID);
   }

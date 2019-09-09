@@ -33,7 +33,7 @@ export class SpecialService<T = CmdbDao> implements ApiService {
   }
 
   public getNewestObjects(): Observable<T[]> {
-    return this.api.callGet<T[]>(`render/newest/`).pipe(
+    return this.api.callGet<T[]>(`object/newest/`).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -41,7 +41,7 @@ export class SpecialService<T = CmdbDao> implements ApiService {
   }
 
   public getLatestObjects(): Observable<T[]> {
-    return this.api.callGet<T[]>(`render/latest/`).pipe(
+    return this.api.callGet<T[]>(`object/latest/`).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })

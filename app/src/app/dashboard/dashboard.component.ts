@@ -19,6 +19,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiCallService } from '../services/api-call.service';
 import { TableColumnAction } from '../layout/components/table/models/table-columns-action';
+import { ObjectService } from '../framework/services/object.service';
 
 @Component({
   selector: 'cmdb-dashboard',

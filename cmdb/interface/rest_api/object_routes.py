@@ -48,21 +48,62 @@ with current_app.app_context():
 
 @object_rest.route('/', methods=['GET'])
 @login_required
-def get_object_list():
+@insert_request_user
+def get_object_list(request_user: User):
+    """
+    get all objects in database
+    Args:
+        request_user: auto inserted user who made the request.
+    Returns:
+        list of rendered objects
+    """
     try:
-        all_objects_list = object_manager.get_all_objects()
+        object_list = object_manager.get_all_objects()
+    except ObjectManagerGetError as err:
+        LOGGER.error(err.message)
+        return abort(404)
+    if len(object_list) < 1:
+        return make_response(object_list, 204)
 
+    rendered_list = RenderList(object_list, request_user).render_result_list()
+
+    return make_response(rendered_list)
+
+
+@object_rest.route('/native', methods=['GET'])
+@login_required
+def get_native_object_list():
+    try:
+        object_list = object_manager.get_all_objects()
+    except CMDBError:
+        return abort(404)
+    resp = make_response(object_list)
+    return resp
+
+
+@object_rest.route('/type/<int:public_id>', methods=['GET'])
+@login_required
+@insert_request_user
+def get_objects_by_type(public_id, request_user: User):
+    """Return all objects by type_id"""
+    try:
+        object_list = object_manager.get_objects_by(sort="type_id", type_id=public_id)
     except CMDBError:
         return abort(400)
 
-    resp = make_response(all_objects_list)
+    if len(object_list) < 1:
+        return make_response(object_list, 204)
+
+    rendered_list = RenderList(object_list, request_user).render_result_list()
+    resp = make_response(rendered_list)
     return resp
 
 
 @object_rest.route('/type/<string:type_ids>', methods=['GET'])
 @login_required
-def get_object_by_type(type_ids):
-    """Return all objects by type_id"""
+def get_objects_by_types(type_ids):
+    """Return all objects by type_id
+    TODO: Refactore to render results"""
     try:
         query = _build_query({'type_id': type_ids}, q_operator='$or')
         all_objects_list = object_manager.get_objects_by(sort="type_id", **query)
@@ -77,7 +118,8 @@ def get_object_by_type(type_ids):
 @object_rest.route('/many/<string:public_ids>', methods=['GET'])
 @login_required
 def get_objects_by_public_id(public_ids):
-    """Return all objects by public_ids"""
+    """Return all objects by public_ids
+    TODO: Refactore to render results"""
 
     try:
         query = _build_query({'public_id': public_ids}, q_operator='$or')
@@ -127,17 +169,7 @@ def _build_query(args, q_operator='$and'):
         pass
 
 
-@object_rest.route('/native', methods=['GET'])
-@login_required
-def get_native_object_list():
-    try:
-        object_list = object_manager.get_all_objects()
-    except CMDBError:
-        return abort(404)
-    resp = make_response(object_list)
-    return resp
-
-
+@object_rest.route('/<int:public_id>/', methods=['GET'])
 @object_rest.route('/<int:public_id>', methods=['GET'])
 @login_required
 @insert_request_user
@@ -342,7 +374,6 @@ def update_object(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 def delete_object(public_id: int, request_user: User):
-
     try:
         current_object_instance = object_manager.get_object(public_id)
         current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
@@ -355,7 +386,6 @@ def delete_object(public_id: int, request_user: User):
     except RenderError as err:
         LOGGER.error(err)
         return abort(500)
-
 
     try:
         ack = object_manager.delete_object(public_id=public_id)
@@ -473,3 +503,45 @@ def update_object_state(public_id: int, request_user: User):
         LOGGER.error(err)
 
     return make_response(update_ack)
+
+# SPECIAL ROUTES
+@object_rest.route('/newest', methods=['GET'])
+@object_rest.route('/newest/', methods=['GET'])
+@insert_request_user
+def get_newest(request_user: User):
+    """
+    get object with newest creation time
+    Args:
+        request_user: auto inserted user who made the request.
+    Returns:
+        list of rendered objects
+    """
+    newest_objects_list = object_manager.get_objects_by(sort='creation_time',
+                                                        limit=25,
+                                                        active={"$eq": True},
+                                                        creation_time={'$ne': None})
+    rendered_list = RenderList(newest_objects_list, request_user).render_result_list()
+    if len(rendered_list) < 1:
+        return make_response(rendered_list, 204)
+    return make_response(rendered_list)
+
+
+@object_rest.route('/latest', methods=['GET'])
+@object_rest.route('/latest/', methods=['GET'])
+@insert_request_user
+def get_latest(request_user: User):
+    """
+    get object with newest last edit time
+    Args:
+        request_user: auto inserted user who made the request.
+    Returns:
+        list of rendered objects
+    """
+    last_objects_list = object_manager.get_objects_by(sort='last_edit_time',
+                                                      limit=25,
+                                                      active={"$eq": True},
+                                                      last_edit_time={'$ne': None})
+    rendered_list = RenderList(last_objects_list, request_user).render_result_list()
+    if len(rendered_list) < 1:
+        return make_response(rendered_list, 204)
+    return make_response(rendered_list)

@@ -90,7 +90,6 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.export_routes import export_route
     from cmdb.interface.rest_api.status_routes import status_routes
     from cmdb.interface.rest_api.collection_routes import collection_routes
-    from cmdb.interface.rest_api.render_routes import render_routes
     from cmdb.interface.rest_api.log_routes import log_routes
 
     app.register_blueprint(auth_routes)
@@ -105,7 +104,6 @@ def register_blueprints(app):
     app.register_blueprint(export_route)
     app.register_blueprint(status_routes)
     app.register_blueprint(collection_routes)
-    app.register_blueprint(render_routes)
     app.register_blueprint(log_routes)
 
 

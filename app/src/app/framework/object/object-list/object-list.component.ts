@@ -75,7 +75,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   private getRouteObjects(id) {
-    let url = 'render/';
+    let url = 'object/';
     this.pageTitle = 'Object List';
     this.hasSummaries = false;
     if (typeof id !== 'undefined') {

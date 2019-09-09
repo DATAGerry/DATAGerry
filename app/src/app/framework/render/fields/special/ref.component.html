@@ -7,7 +7,8 @@
       <ng-container [ngSwitch]="true">
         <ng-container *ngSwitchCase="mode == MODES.View">
           <input type="text" name="{{data.name}}" class="form-control"
-                 value=" {{refObject?.public_id}}# {{refObject?.label}}" disabled/>
+                 value=" {{refObject?.object_information?.object_id}}# {{refObject?.type_information?.type_label}}"
+                 disabled/>
           <div class="input-group-append">
             <span class="input-group-text">
               <a [routerLink]="'/framework/object/view/'+ controller.value">
@@ -21,8 +22,8 @@
                  'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"
                   [formControlName]="data.name">
             <option value="" disabled>Choose a reference</option>
-            <option *ngFor="let instanceObject of objectList" value="{{instanceObject.public_id}}">
-              {{instanceObject.public_id}}# {{instanceObject?.label}}
+            <option *ngFor="let instanceObject of objectList" value="{{instanceObject?.object_information?.object_id}}">
+              {{instanceObject?.object_information?.object_id}}# {{instanceObject?.type_information?.type_label}}
             </option>
           </select>
           <div *ngIf="data?.helperText" class="input-group-append">

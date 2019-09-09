@@ -19,15 +19,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
 import { ObjectService } from '../../services/object.service';
-import { TypeService } from '../../services/type.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CmdbMode } from '../../modes.enum';
 import { CmdbObject } from '../../models/cmdb-object';
-import { CmdbType } from '../../models/cmdb-type';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ToastService } from '../../../layout/services/toast.service';
 import { RenderResult } from '../../models/cmdb-render';
-import { RenderService } from '../../render/service/render.service';
 
 @Component({
   selector: 'cmdb-object-edit',
@@ -38,12 +35,12 @@ export class ObjectEditComponent implements OnInit {
 
   public mode: CmdbMode = CmdbMode.Edit;
   private objectID: number;
-  public renderResult: RenderResult;
   public objectInstance: CmdbObject;
+  public renderResult: RenderResult;
   public renderForm: FormGroup;
   public commitForm: FormGroup;
 
-  constructor(private api: ApiCallService, private renderService: RenderService, private objectService: ObjectService,
+  constructor(private api: ApiCallService, private objectService: ObjectService,
               private route: ActivatedRoute, private router: Router, private toastService: ToastService) {
     this.route.params.subscribe((params) => {
       this.objectID = params.publicID;
@@ -55,15 +52,17 @@ export class ObjectEditComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.renderService.getRenderResult(this.objectID).subscribe((rr: RenderResult) => {
-      this.renderResult = rr;
-    }, (error) => {
-      console.error(error);
-    }, () => {
-      this.objectService.getObject(this.objectID, true).subscribe(ob => {
-        this.objectInstance = ob;
+    this.objectService.getObject(this.objectID).subscribe((rr: RenderResult) => {
+        this.renderResult = rr;
+      },
+      error => {
+        console.error(error);
+      },
+      () => {
+        this.objectService.getObject<CmdbObject>(this.objectID, true).subscribe(ob => {
+            this.objectInstance = ob;
+          });
       });
-    });
   }
 
   public editObject(): void {

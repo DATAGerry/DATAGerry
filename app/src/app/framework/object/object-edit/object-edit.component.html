@@ -1,4 +1,4 @@
-<h1>Edit of {{renderResult?.type_information?.type_label}} #{{objectInstance?.public_id}}</h1>
+<h1>Edit of {{renderResult?.type_information?.type_label}} #{{renderResult?.object_information?.object_id}}</h1>
 <hr/>
 <div id="object-edit" class="card">
   <div class="card-body">
@@ -20,7 +20,7 @@
       </form>
       <button type="submit" class="btn btn-outline-success mr-2" [disabled]="!renderForm.dirty">Save</button>
       <button class="btn btn-outline-danger"
-              routerLink="/framework/object/view/{{objectInstance?.public_id}}">Cancel
+              routerLink="/framework/object/view/{{renderResult?.object_information?.object_id}}">Cancel
       </button>
     </form>
   </div>
