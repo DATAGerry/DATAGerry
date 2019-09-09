@@ -1,4 +1,13 @@
-<cmdb-content-header title="Add new category" xmlns="http://www.w3.org/1999/html"></cmdb-content-header>
+
+<ng-container [ngSwitch]="mode">
+  <span *ngSwitchCase="1">
+    <cmdb-content-header title="Add new Category" xmlns="http://www.w3.org/1999/html"></cmdb-content-header>
+  </span>
+  <span *ngSwitchDefault>
+    <cmdb-content-header title="Edit Category #{{categoryID}}" xmlns="http://www.w3.org/1999/html"></cmdb-content-header>
+  </span>
+</ng-container>
+
 
 <div class="row">
   <div class="col-sm-4">
