@@ -18,7 +18,9 @@
 
 export class RenderResult {
   // tslint:disable:variable-name
-  public current_render_time: string;
+  public current_render_time: {
+    $date: string
+  };
   public object_information: {
     object_id: number;
     creation_time: string;

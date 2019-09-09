@@ -32,7 +32,7 @@ import { FormGroup } from '@angular/forms';
 export class ObjectLogComponent implements OnInit {
 
   private logID: number;
-  private log: CmdbLog;
+  public log: CmdbLog;
   public completeLogList: CmdbLog[];
   public mode: CmdbMode.View;
   public renderForm: FormGroup;

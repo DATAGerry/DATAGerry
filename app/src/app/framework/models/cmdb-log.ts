@@ -22,5 +22,9 @@ export class CmdbLog implements CmdbDao {
   // tslint:disable:variable-name
   public readonly public_id: number;
   public render_state: string;
+  public user_name: string;
+  public user_id: number;
+  public version: string;
+  public comment: string;
   // tslint:enable
 }
