@@ -76,13 +76,17 @@
                           </span>
                     </div>
                     <div *ngIf="parentCategories.length === 0"
+                         class="list-group-item list-group-item-action"
                          style="border: 1px orangered dashed; border-radius: 5px; padding: 15px;">
-                      Drop parent here
+                      <span class="d-flex justify-content-between align-items-center ">
+                            Drop parent here
+                        <fa-icon icon="code"></fa-icon>
+                      </span>
                     </div>
                   </section>
                 </div>
               </div>
-              <small class="form-text text-muted">Each category has only a parent category</small>
+              <small class="form-text text-muted">Each category has only a parent category. <b>Default: Root #0</b></small>
             </div>
             <div class="form-group col-md-12">
               <label>Assigned types</label>
@@ -92,7 +96,7 @@
                            (dndDrop)="onDraggedAssignedTypes($event, assignedTypes, 'copy')">
                     <div style="border: 1px green solid; border-radius: 5px; padding: 15px;"
                          dndPlaceholderRef>
-                      Drop parent here
+                      Drop type here
                     </div>
                     <div *ngFor="let type of assignedTypes"
                          class="list-group-item list-group-item-action">
@@ -103,7 +107,10 @@
                     </div>
                     <div *ngIf="assignedTypes.length === 0"
                          style="border: 1px orangered dashed; border-radius: 5px; padding: 15px;">
-                      Drop parent here
+                      <span class="d-flex justify-content-between align-items-center ">
+                            Drop type here
+                        <fa-icon icon="code"></fa-icon>
+                      </span>
                     </div>
                   </section>
                 </div>
