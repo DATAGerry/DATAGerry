@@ -24,7 +24,8 @@ from cmdb.data_storage.database_utils import object_hook, default
 from cmdb.framework import CmdbObject
 from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError, \
     ObjectManagerUpdateError
-from cmdb.framework.cmdb_log import LogAction, log_manager, CmdbObjectLog, LogManagerInsertError
+from cmdb.framework.cmdb_log import LogAction, CmdbObjectLog
+from cmdb.framework.cmdb_log_manager import LogManagerInsertError, log_manager
 from cmdb.framework.cmdb_object_manager import object_manager
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
 from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user

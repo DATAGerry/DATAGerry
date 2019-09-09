@@ -14,9 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""
-Data access object for all core objects that are to be stored in the database.
-"""
 import logging
 
 try:
@@ -28,8 +25,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class CmdbDAO:
-    """
-    The data access object is the basic presentation if objects and
+    """The data access object is the basic presentation if objects and
     their necessary dependent classes are to be stored in the database.
 
     Attributes;

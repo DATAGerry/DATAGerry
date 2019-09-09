@@ -37,7 +37,6 @@ from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.framework.cmdb_type import CmdbType
 from cmdb.utils.error import CMDBError
-from cmdb.utils.helpers import timing
 
 LOGGER = logging.getLogger(__name__)
 
@@ -560,7 +559,10 @@ class CmdbObjectManager(CmdbManagerBase):
         return ack
 
 
-object_manager = CmdbObjectManager(
-    database_manager=get_pre_init_database(),
-    event_queue=None
-)
+try:
+    object_manager = CmdbObjectManager(
+        database_manager=get_pre_init_database(),
+        event_queue=None
+    )
+except ImportError:
+    pass

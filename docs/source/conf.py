@@ -18,8 +18,6 @@ import sys
 sys.path.insert(0, os.path.abspath('../../cmdb/'))
 sys.path.insert(0, os.path.abspath('../../cmdb/framework/'))
 
-import cmdb
-cmdb.__MODE__ = 'DOCS'
 # -- Project information -----------------------------------------------------
 
 project = 'DATAGERRY'

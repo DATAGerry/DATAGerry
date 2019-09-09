@@ -13,14 +13,16 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from cmdb.data_storage import DatabaseManagerMongo
+try:
+    from cmdb.data_storage import DatabaseManagerMongo
+except ImportError:
+    DatabaseManagerMongo = object
 
 
 class CmdbManagerBase:
     """Represents the base class for object managers. A respective implementation is always adapted to the
        respective database manager :class:`cmdb.data_storage.DatabaseManager` or the used functionalities.
        But should always use at least the super functions listed here.
-
     """
 
     def __init__(self, database_manager: DatabaseManagerMongo):

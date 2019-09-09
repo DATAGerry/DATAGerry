@@ -19,7 +19,8 @@ import logging
 from werkzeug.exceptions import abort
 
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
-from cmdb.framework.cmdb_log import log_manager, LogManagerGetError, CmdbObjectLog, LogAction, LogManagerDeleteError
+from cmdb.framework.cmdb_log import CmdbObjectLog, LogAction
+from cmdb.framework.cmdb_log_manager import LogManagerGetError, LogManagerDeleteError, log_manager
 from cmdb.framework.cmdb_object_manager import object_manager
 from cmdb.interface.route_utils import RootBlueprint, make_response
 

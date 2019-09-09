@@ -300,9 +300,6 @@ class RenderList:
         self.object_list = object_list
         self.request_user = request_user
 
-    def render_result_list(self):
-        self.render_result_list(search_fields=None)
-
     def render_result_list(self, search_fields=None):
         from cmdb.framework.cmdb_object_manager import object_manager
         preparation_objects = []
