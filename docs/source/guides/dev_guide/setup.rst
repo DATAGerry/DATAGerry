@@ -106,7 +106,7 @@ Generate clean database
 ^^^^^^^^^^^^^^^^^^^^^^^
 To generate an empty database, start the CMDB with the ``--setup`` parameter.
 This starts a startup routine. During the startup, the database structure is created and a query to the
-admin user is started. In addition, the asymmetric key pair is generated under ``/etc/keys/``.
+admin user is started. In addition, the asymmetric key pair is generated and stored in the database`.
 
 .. note::
     Datagerry is terminated after successful setup, no matter which parameter is used to start it.

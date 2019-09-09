@@ -19,7 +19,19 @@ definition of object types to the user.
     :name: guides
 
 .. toctree::
+    api/rest/index
+    api/framework/index
+    :caption: API
+    :name: api
+
+.. toctree::
     about/license
     about/team
     :caption: About
     :name: about
+
+Indices and tables
+==================
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

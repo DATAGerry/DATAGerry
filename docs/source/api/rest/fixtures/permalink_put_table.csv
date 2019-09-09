@@ -1,0 +1,4 @@
+Route, Description, Options, Example
+``/``, Bulk update of data, data list with id , http://localhost/<module>/
+``/many/``, same as root route ``/``, data list with id , http://localhost/<module>/many/
+``/<int:public_id>``, Update a specific object from this module, public id: generic public id identifier , http://localhost/<module>/1

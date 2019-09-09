@@ -12,7 +12,14 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import os
+import sys
 
+sys.path.insert(0, os.path.abspath('../../cmdb/'))
+sys.path.insert(0, os.path.abspath('../../cmdb/framework/'))
+
+import cmdb
+cmdb.__MODE__ = 'DOCS'
 # -- Project information -----------------------------------------------------
 
 project = 'DATAGERRY'
@@ -149,7 +156,6 @@ texinfo_documents = [
 ]
 
 # -- Extension configuration -------------------------------------------------
-
 
 # -- Options for todo extension ----------------------------------------------
 # If true, `todo` and `todoList` produce output, else they produce nothing.

@@ -6,7 +6,7 @@
 {% block navigation %}
     <div id="navigation" role="navigation">
         {% block menu %}
-            {% set global_toc = toctree(includehidden=false, maxdepth=2) %}
+            {% set global_toc = toctree(includehidden=false, maxdepth=3) %}
             {% if global_toc %}
                 {{ global_toc }}
             {% else %}
