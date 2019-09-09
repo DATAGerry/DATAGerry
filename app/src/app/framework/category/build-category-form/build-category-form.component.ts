@@ -61,7 +61,20 @@ export class BuildCategoryFormComponent implements OnInit {
   }
 
   ngOnInit() {
-    if (this.categoryID !== undefined) {
+    // Create mode
+    if (this.mode === CmdbMode.Create) {
+      this.categoryForm.get('label').valueChanges.subscribe(value => {
+        value = value == null ? '' : value;
+        this.categoryForm.get('name').setValue(value.replace(/ /g, '-').toLowerCase());
+        this.categoryForm.get('name').markAsDirty({onlySelf: true});
+        this.categoryForm.get('name').markAsTouched({onlySelf: true});
+      });
+      this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
+        this.categoryList = list;
+      });
+    }
+    // Edit mode
+    if (this.mode === CmdbMode.Edit) {
       this.categoryService.getCategory(this.categoryID).subscribe(value => {
         this.category = value;
       }, error => { console.log(error); },
@@ -77,29 +90,19 @@ export class BuildCategoryFormComponent implements OnInit {
             this.parentCategories.push(value);
           });
         }
+        // filter category list
+        this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
+          this.categoryList = list;
+          if (this.categoryID !== undefined && this.category !== undefined) {
+            list = list.filter(item => item.public_id !== this.category.public_id);
+            this.categoryList = list.filter(item => item.public_id !== this.category.parent_id);
+          }
+        });
       });
     }
-
-    this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
-      this.categoryList = list;
-      if (this.categoryID !== undefined && this.category !== undefined) {
-        list = list.filter(item => item.public_id !== this.category.public_id);
-        this.categoryList = list.filter(item => item.public_id !== this.category.parent_id);
-      }
-    });
-
     this.typeService.getTypeListByCategory(0).subscribe((typeList: CmdbType[]) => {
       this.typeList = typeList;
     });
-
-    if (this.mode === CmdbMode.Create) {
-      this.categoryForm.get('label').valueChanges.subscribe(value => {
-        value = value == null ? '' : value;
-        this.categoryForm.get('name').setValue(value.replace(/ /g, '-').toLowerCase());
-        this.categoryForm.get('name').markAsDirty({onlySelf: true});
-        this.categoryForm.get('name').markAsTouched({onlySelf: true});
-      });
-    }
 
     const parent: any = document.getElementsByClassName('category-form')[0];
     const first: any = document.getElementsByClassName('drag-items')[0];
