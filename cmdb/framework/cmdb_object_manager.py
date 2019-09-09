@@ -368,7 +368,7 @@ class CmdbObjectManager(CmdbManagerBase):
         root_categories = self.get_categories_by(_filter={
             '$or': [
                 {'parent_id': {'$exists': False}},
-                {'parent_id': None}
+                {'parent_id': 0}
             ]
         })
         if len(root_categories) > 0:

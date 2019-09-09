@@ -19,8 +19,8 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { CategoryListComponent } from './category-list/category-list.component';
-import { CategoryManagementComponent } from './category-management/category-management.component';
 import { CategoryAddComponent } from './category-add/category-add.component';
+import { CategoryEditComponent } from './category-edit/category-edit.component';
 
 const routes: Routes = [
   {
@@ -29,13 +29,6 @@ const routes: Routes = [
       breadcrumb: 'List'
     },
     component: CategoryListComponent
-  },
-  {
-    path: 'management',
-    data: {
-      breadcrumb: 'Manage'
-    },
-    component: CategoryManagementComponent
   },
   {
     path: 'add',
@@ -49,7 +42,7 @@ const routes: Routes = [
     data: {
       breadcrumb: 'Edit'
     },
-    component: CategoryAddComponent
+    component: CategoryEditComponent
   }
 ];
 

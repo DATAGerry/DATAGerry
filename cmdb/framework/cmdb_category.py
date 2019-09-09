@@ -27,12 +27,12 @@ class CmdbCategory(CmdbDAO):
         'name',
     ]
 
-    def __init__(self, name: str, label: str = None, icon: str = None, parent_id=None,
+    def __init__(self, name: str, label: str = None, icon: str = None, parent_id: int = None,
                  **kwargs):
         self.name = name
         self.label = label or self.name.title()
         self.icon = icon or ''
-        self.parent_id = parent_id or None
+        self.parent_id = parent_id or 0
         super(CmdbCategory, self).__init__(**kwargs)
 
     def get_name(self) -> str:

@@ -37,7 +37,7 @@ export class SidebarCategoryComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.typeService.getTypeListbyCategory(this.categoryData.category.public_id).subscribe((data: CmdbType[]) => {
+    this.typeService.getTypeListByCategory(this.categoryData.category.public_id).subscribe((data: CmdbType[]) => {
       this.categoryTypeList = data;
     });
   }
@@ -45,7 +45,7 @@ export class SidebarCategoryComponent implements OnInit {
   public get_objects_by_type() {
     this.categoryPopUp = [];
 
-    this.typeService.getTypeListbyCategory(this.categoryData.category.public_id).subscribe((data: CmdbType[]) => {
+    this.typeService.getTypeListByCategory(this.categoryData.category.public_id).subscribe((data: CmdbType[]) => {
       this.categoryTypeList = data;
     });
 

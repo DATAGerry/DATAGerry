@@ -20,6 +20,7 @@ import { Injectable } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { ApiCallService } from '../../services/api-call.service';
 import { CmdbCategory } from '../models/cmdb-category';
+import {CmdbType} from "../models/cmdb-type";
 
 @Injectable({
   providedIn: 'root'
@@ -37,6 +38,10 @@ export class CategoryService {
 
   public findCategory(publicID: number): CmdbCategory {
     return this.categoryList.find(category => category.public_id === publicID);
+  }
+
+  public getCategory(publicID: number) {
+    return this.api.callGetRoute<CmdbCategory>(this.servicePrefix + '/' + publicID);
   }
 
   public getCategoryList() {

@@ -38,6 +38,10 @@ export class TypeService {
     return this.typeList.find(id => id.public_id === publicID);
   }
 
+  public filterTypeByCategoryID(publicID: number): CmdbType[] {
+    return this.typeList.filter(id => id.category_id === publicID);
+  }
+
   public getType(publicID: number) {
     return this.api.callGetRoute<CmdbType>(this.servicePrefix + '/' + publicID);
   }
@@ -46,7 +50,7 @@ export class TypeService {
     return this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/');
   }
 
-  public getTypeListbyCategory(publicID: number) {
+  public getTypeListByCategory(publicID: number) {
     return this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/category/' + publicID);
   }
 

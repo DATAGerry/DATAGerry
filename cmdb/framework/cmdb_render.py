@@ -167,7 +167,8 @@ class CmdbRender:
             'author_name': author_name,
             'icon': self.type_instance.render_meta['icon'],
             'active': self.type_instance.active,
-            'version': self.type_instance.version
+            'version': self.type_instance.version,
+            'category_id': self.type_instance.category_id
         }
         return render_result
 

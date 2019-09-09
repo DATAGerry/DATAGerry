@@ -17,23 +17,23 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {CmdbMode} from "../../modes.enum";
 
 @Component({
-  selector: 'cmdb-category-add',
-  templateUrl: './category-add.component.html',
-  styleUrls: ['./category-add.component.scss']
+  selector: 'cmdb-category-edit',
+  templateUrl: './category-edit.component.html',
+  styleUrls: ['./category-edit.component.scss']
 })
-export class CategoryAddComponent implements OnInit {
+export class CategoryEditComponent implements OnInit {
 
-  public categoryAddForm: FormGroup;
-  public mode = CmdbMode.Create;
+  public categoryEditForm: FormGroup;
+  public mode = CmdbMode.Edit;
 
   constructor() {}
 
   ngOnInit() {
-    this.categoryAddForm = new FormGroup({
+    this.categoryEditForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl('', Validators.required),
     });
