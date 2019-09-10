@@ -21,6 +21,8 @@ definition of object types to the user.
 .. toctree::
     api/rest/index
     api/framework/index
+    api/data_storage/index
+    api/event_management/index
     :caption: API
     :name: api
 

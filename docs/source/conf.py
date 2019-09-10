@@ -17,6 +17,8 @@ import sys
 
 sys.path.insert(0, os.path.abspath('../../cmdb/'))
 sys.path.insert(0, os.path.abspath('../../cmdb/framework/'))
+sys.path.insert(0, os.path.abspath('../../cmdb/data_storage/'))
+sys.path.insert(0, os.path.abspath('../../cmdb/event_management/'))
 
 # -- Project information -----------------------------------------------------
 

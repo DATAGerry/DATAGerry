@@ -55,7 +55,6 @@ class CmdbObject(CmdbDAO):
             last_edit_time: last date of editing
             active: object activation status
             fields: data inside fields
-            logs: object log
             **kwargs: additional data
         """
         self.type_id = type_id
