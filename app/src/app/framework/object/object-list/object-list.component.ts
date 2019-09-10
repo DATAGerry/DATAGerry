@@ -229,8 +229,8 @@ export class ObjectListComponent implements OnDestroy {
   private buildAdvancedDtOptions() {
     if (this.hasSummaries && this.summaries != null) {
       const visTargets: any[] = [0, 1, 2, 3, -3, -2, -1];
-      for (const name of this.summaries) {
-        visTargets.push(this.columnFields.findIndex(i => i.name === name) + 4);
+      for (const summary of this.summaries) {
+        visTargets.push(this.columnFields.findIndex(i => i.name === summary.name) + 4);
       }
       this.dtOptions.columnDefs = [
         {orderable: false, targets: 'nosort'},
