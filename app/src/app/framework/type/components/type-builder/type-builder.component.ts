@@ -95,7 +95,7 @@ export class TypeBuilderComponent implements OnInit {
   }
 
   public exitMetaStep() {
-    this.assignToType({summary: this.metaStep.summariesSections}, 'render_meta');
+    this.assignToType({summary: this.metaStep.summaryForm.getRawValue()}, 'render_meta');
     this.assignToType({external: this.metaStep.externalLinks}, 'render_meta');
   }
 

@@ -54,6 +54,7 @@ class RenderResult(RenderVisualization):
         self.fields: list = []
         self.sections: list = []
         self.summaries: list = []
+        self.summary_line: str = ''
         self.externals: list = []
         self.match_fields: list = []
 
@@ -207,41 +208,16 @@ class CmdbRender:
     def __set_summaries(self, render_result: RenderResult) -> RenderResult:
         # global summary list
         summary_list = []
-        # check if type has summary definition
+        summary_line = ""
         if not self.type_instance.has_summaries():
             render_result.summaries = summary_list
+            render_result.summary_line = f'{self.object_instance.public_id}# {self.type_instance.get_label()} '
             return render_result
-        for summary in self.type_instance.get_summaries():
-            value_list = []
-            try:
-                # load summary
-                curr_sum = self.type_instance.get_summary(summary['name'])
-                # get field data for this summary
-                curr_sum_fields = curr_sum.fields
-                # get label data for this summary
-                curr_label_list = []
-                for cs_field in curr_sum_fields:
-                    try:
-                        type_fields = self.type_instance.get_fields()
-                        for fields in type_fields:
-                            if fields.get('name') == cs_field:
-                                curr_label_list.append(fields.get('label'))
-                        # check data
-                        try:
-                            field_data = self.object_instance.get_value(cs_field)
-                        except ValueError:
-                            continue
-                        value_list.append(field_data)
-                    except CMDBError:
-                        # if error while loading continue
-                        continue
-                curr_sum.set_labels(curr_label_list)
-                curr_sum.set_values(value_list)
-            except CMDBError:
-                # if error with summary continue
-                continue
-            summary_list.append(curr_sum.__dict__)
+        summary_list = self.type_instance.get_summary().fields
         render_result.summaries = summary_list
+        for line in summary_list:
+            summary_line += f'{line["label"]}: {line["value"]} | '
+        render_result.summary_line = summary_line
         return render_result
 
     def __set_external(self, render_result: RenderResult) -> RenderResult:

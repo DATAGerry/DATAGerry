@@ -48,7 +48,8 @@ class CmdbType(CmdbDAO):
     ]
 
     def __init__(self, name: str, active: bool, author_id: int, creation_time: datetime,
-                 render_meta: dict, fields: list, category_id: int, version: str = '1.0.0', access: list = None, label: str = None,
+                 render_meta: dict, fields: list, category_id: int, version: str = '1.0.0', access: list = None,
+                 label: str = None,
                  status: list = None, description: str = None, **kwargs):
         self.name = name
         self.label = label or self.name.title()
@@ -86,20 +87,16 @@ class CmdbType(CmdbDAO):
         ext_data = next(ext for ext in self.render_meta['external'] if ext["name"] == name)
         return _ExternalLink(**ext_data)
 
-    def get_summaries(self):
-        return self.render_meta['summary']
-
     def has_summaries(self):
-        if len(self.render_meta['summary']) > 0:
+        if len(self.render_meta['summary'].get('fields')) > 0:
             return True
         return False
 
-    def get_summary_fields(self, name):
-        return self.get_summary(name)['fields']
-
-    def get_summary(self, name):
-        sum_data = next(sum for sum in self.render_meta['summary'] if sum["name"] == name)
-        return _Summary(**sum_data)
+    def get_summary(self):
+        complete_field_list = []
+        for field_name in self.render_meta['summary']['fields']:
+            complete_field_list.append(self.get_field(field_name))
+        return _Summary(fields=complete_field_list)
 
     def get_sections(self):
         return sorted(self.render_meta['sections'], key=lambda k: k['position'])
@@ -194,24 +191,13 @@ class _ExternalLink:
 
 class _Summary:
 
-    def __init__(self, name: str, label: str = None, labels: [] = None, fields: list = None, values: list = None):
-        self.name = name
-        self.label = label or self.name.title()
-        self.labels = labels or []
+    def __init__(self, fields: list = None):
         self.fields = fields or []
-        self.values = values
 
     def has_fields(self):
         if len(self.fields) > 0:
             return True
         return False
 
-    def set_values(self, values):
-        self.values = values
-
-    def set_labels(self, labels):
-        self.labels = labels
-
-    def __repr__(self):
-        output_string = "{}: {}".format(self.label, self.values)
-        return output_string
+    def set_fields(self, fields):
+        self.fields = fields

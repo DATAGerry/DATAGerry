@@ -9,8 +9,7 @@ import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/fo
 })
 export class TypeMetaStepComponent implements OnInit {
 
-  public summariesForm: FormGroup;
-  public summariesSections = [];
+  public summaryForm: FormGroup;
   public externalsForm: FormGroup;
   public externalLinks = [];
   public hrefInterpolCounter;
@@ -19,19 +18,14 @@ export class TypeMetaStepComponent implements OnInit {
   set preData(data: any) {
     if (data !== undefined) {
       if (data.render_meta !== undefined) {
-        this.summariesSections = data.render_meta.summary;
-        if (this.summariesSections != null && this.summariesSections.length > 0) {
-          this.summariesForm.disable();
-        }
+        this.summaryForm.patchValue(data.render_meta.summary);
         this.externalLinks = data.render_meta.external;
       }
     }
   }
 
   constructor() {
-    this.summariesForm = new FormGroup({
-      name: new FormControl('summaries', [Validators.required, this.listNameValidator(this.summariesSections)]),
-      label: new FormControl('Summaries', Validators.required),
+    this.summaryForm = new FormGroup({
       fields: new FormControl('', Validators.required)
     });
 
@@ -84,13 +78,6 @@ export class TypeMetaStepComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.summariesForm.get('name').valueChanges.subscribe(val => {
-      if (this.summariesForm.get('name').value !== null) {
-        this.summariesForm.get('label').setValue(val.charAt(0).toUpperCase() + val.toString().slice(1));
-        this.summariesForm.get('label').markAsDirty({onlySelf: true});
-        this.summariesForm.get('label').markAsTouched({onlySelf: true});
-      }
-    });
 
     this.externalsForm.get('name').valueChanges.subscribe(val => {
       if (this.externalsForm.get('name').value !== null) {
@@ -103,32 +90,6 @@ export class TypeMetaStepComponent implements OnInit {
     this.externalsForm.get('href').valueChanges.subscribe((href: string) => {
       this.hrefInterpolCounter = Array(TypeMetaStepComponent.occurrences(href, '{}')).fill(0).map((x, i) => i);
     });
-  }
-
-  public addSummary() {
-    this.summariesSections = [];
-    this.summariesForm.get('name').setValue('summaries');
-    this.summariesForm.get('label').setValue('Summaries');
-    this.summariesSections.push(this.summariesForm.value);
-    this.summariesForm.disable();
-    this.summariesForm.reset();
-  }
-
-  public editSummary(data) {
-    const rawSummaryData = this.summariesSections[this.summariesSections.indexOf(data)];
-    this.summariesForm.reset();
-    this.deleteSummary(data);
-    this.summariesForm.patchValue(rawSummaryData);
-  }
-
-  public deleteSummary(data) {
-    const index: number = this.summariesSections.indexOf(data);
-    if (index !== -1) {
-      this.summariesSections.splice(index, 1);
-    }
-    this.summariesForm.get('name').clearValidators();
-    this.summariesForm.get('name').setValidators(this.listNameValidator(this.summariesSections));
-    this.summariesForm.enable();
   }
 
   public addExternal() {

@@ -67,7 +67,7 @@ def add_type():
     add_data_dump = json.dumps(request.json)
     try:
         new_type_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
-        new_type_data['public_id'] = object_manager.get_new_id(CmdbType.COLLECTION) + 1
+        new_type_data['public_id'] = object_manager.get_new_id(CmdbType.COLLECTION)
         new_type_data['creation_time'] = datetime.utcnow()
     except TypeError as e:
         LOGGER.warning(e)

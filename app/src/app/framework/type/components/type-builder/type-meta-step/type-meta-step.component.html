@@ -2,32 +2,19 @@
   <div class="col-6">
     <div class="card">
       <div class="card-header">
-        Summaries
+        Summary
       </div>
       <div class="card-body">
-        <form [formGroup]="summariesForm"  class="needs-validation" novalidate
+        <form [formGroup]="summaryForm" class="needs-validation" novalidate
               autocomplete="off">
           <div class="form-group">
             <label>Fields</label>
             <ng-select [items]="fields" [multiple]="true" [searchable]="false" bindLabel="label"
-                       bindValue="name" placeholder="Select fields" formControlName="fields"
-                       (blur)="addSummary()">
+                       bindValue="name" placeholder="Select fields" formControlName="fields">
             </ng-select>
           </div>
         </form>
       </div>
-    </div>
-    <div id="summary-link-accordion" class="list-group">
-      <button *ngFor="let summary of summariesSections" type="button" class="list-group-item list-group-item-action">
-        <div class="d-flex w-100 justify-content-between">
-          <h5 class="mb-1">{{summary.label}}</h5>
-          <small class="summary-buttons">
-            <span class="badge badge-primary badge-pill" (click)="editSummary(summary)">EDIT</span>
-            <span class="badge badge-primary badge-pill" (click)="deleteSummary(summary)">DELETE</span>
-          </small>
-        </div>
-        <small class="mb-1">{{summary.fields | json}}</small>
-      </button>
     </div>
   </div>
   <div class="col-6">
