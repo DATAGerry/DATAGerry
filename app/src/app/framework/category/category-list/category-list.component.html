@@ -4,31 +4,29 @@
   <thead>
   <tr>
     <th scope="col">ID</th>
-    <th scope="col">Name</th>
+    <th scope="col">State</th>
     <th scope="col">Label</th>
     <th scope="col">Parent</th>
-    <th scope="col">Type List</th>
     <th scope="col">Action</th>
   </tr>
   </thead>
   <tbody>
   <tr *ngFor="let category of categoryList">
     <th scope="row">{{category.public_id}}</th>
-    <td>{{category.name}}</td>
+    <td><span [className]="category.root == true ? 'badge badge-primary' : ' badge badge-secondary'">
+      {{category.root == true ? 'root' : 'basic'}}</span>
+    </td>
     <td>{{category.label}}</td>
     <td>{{categoryService.findCategory(category.parent_id)?.name}}</td>
-    <td>
-      <ul class="list-unstyled">
-        <li *ngFor="let type of typeService.filterTypeByCategoryID(category.public_id)">
-          <a routerLink="/framework/type/{{type.public_id}}">{{type.label}}</a>
-        </li>
-      </ul>
-    </td>
     <td>
       <a class="ml-1 text-dark" [routerLink]="['/framework/category/edit/', category?.public_id]">
         <fa-icon [icon]="['far', 'edit']"></fa-icon>
       </a>
-      <a class="ml-1 text-dark" (click)="onDelete(category.public_id)">
+
+      <a class="ml-1 text-dark" *ngIf="category.root" [swal]="['Oops!', 'Sry root can not be deleted', 'warning']">
+        <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
+      </a>
+      <a class="ml-1 text-dark" *ngIf="!category.root" (click)="onDelete(category.public_id)">
         <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
       </a>
     </td>

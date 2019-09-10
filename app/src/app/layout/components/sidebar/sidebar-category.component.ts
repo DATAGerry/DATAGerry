@@ -19,8 +19,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { ApiCallService } from '../../../services/api-call.service';
-import {TypeService} from "../../../framework/services/type.service";
-import {CmdbCategory} from "../../../framework/models/cmdb-category";
+import { TypeService } from '../../../framework/services/type.service';
 
 @Component({
   selector: 'cmdb-sidebar-category',
@@ -37,17 +36,24 @@ export class SidebarCategoryComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.typeService.getTypeListByCategory(this.categoryData.category.public_id).subscribe((data: CmdbType[]) => {
-      this.categoryTypeList = data;
-    });
+    this.initCategoryTypeList();
+  }
+
+  private initCategoryTypeList() {
+    if (this.categoryData.category.root) {
+      this.typeService.getTypeListByCategory(0).subscribe((data: CmdbType[]) => {
+        this.categoryTypeList = data;
+      });
+    } else {
+      this.typeService.getTypeListByCategory(this.categoryData.category.public_id).subscribe((data: CmdbType[]) => {
+        this.categoryTypeList = data;
+      });
+    }
   }
 
   public get_objects_by_type() {
     this.categoryPopUp = [];
-
-    this.typeService.getTypeListByCategory(this.categoryData.category.public_id).subscribe((data: CmdbType[]) => {
-      this.categoryTypeList = data;
-    });
+    this.initCategoryTypeList();
 
     for (const type of this.categoryTypeList) {
       const typeID = type.public_id;

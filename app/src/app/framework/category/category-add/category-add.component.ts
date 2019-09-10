@@ -18,7 +18,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import {CmdbMode} from "../../modes.enum";
+import { CmdbMode } from '../../modes.enum';
 
 @Component({
   selector: 'cmdb-category-add',
@@ -36,6 +36,7 @@ export class CategoryAddComponent implements OnInit {
     this.categoryAddForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl('', Validators.required),
+      root: new FormControl(false)
     });
   }
 

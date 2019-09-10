@@ -64,16 +64,22 @@
           <ng-template #categoryUnselected><span class="text-danger">UNSELECTED</span></ng-template>
         </div>
         <div class="card-body">
-          <form [formGroup]="basicCategoryForm">
-            <ng-select
-              [items]="categoryList | async"
+          <ng-template  [ngIf]="(categoryList | async)?.length" [ngIfElse]="createNew">
+            <form [formGroup]="basicCategoryForm">
+              <ng-select
+                [items]="categoryList | async"
 
-              bindLabel="label"
-              bindValue="public_id"
-              placeholder="Select category"
-              formControlName="category_id">
-            </ng-select>
-          </form>
+                bindLabel="label"
+                bindValue="public_id"
+                placeholder="Select category"
+                formControlName="category_id">
+              </ng-select>
+            </form>
+          </ng-template>
+          <ng-template #createNew>
+            <a class="list-group-item list-group-item-action active" [routerLink]="['/framework/category']">
+              <fa-icon icon="plus"></fa-icon> Add new Category</a>
+          </ng-template>
         </div>
       </div>
 

@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CategoryService } from '../../services/category.service';
 import { CmdbCategory } from '../../models/cmdb-category';
 import { TypeService } from '../../services/type.service';
@@ -24,9 +24,9 @@ import { CmdbType } from '../../models/cmdb-type';
 import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
 import { Router } from '@angular/router';
-import {ToastService} from "../../../layout/services/toast.service";
-import {ModalComponent} from "../../../layout/helpers/modal/modal.component";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import { ToastService } from '../../../layout/services/toast.service';
+import { ModalComponent } from '../../../layout/helpers/modal/modal.component';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'cmdb-category-list',
@@ -50,7 +50,7 @@ export class CategoryListComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.dtOptions = {
       ordering: true,
-      order: [[0, 'asc']],
+      order: [[1, 'desc']],
       dom:
         '<"row" <"col-sm-2" l> <"col-sm-3" B > <"col" f> >' +
         '<"row" <"col-sm-12"tr>>' +
