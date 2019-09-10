@@ -19,9 +19,9 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { UserRoutingModule } from './user-routing.module';
+import { ManagementRoutingModule } from './management-routing.module';
 import { UserService } from './services/user.service';
-import { UserViewComponent } from './components/user-view/user-view.component';
+import { UserViewComponent } from './user-view/user-view.component';
 import { LayoutModule } from '../layout/layout.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { GroupService } from './services/group.service';
@@ -30,7 +30,7 @@ import { GroupService } from './services/group.service';
   declarations: [UserViewComponent],
   imports: [
     CommonModule,
-    UserRoutingModule,
+    ManagementRoutingModule,
     LayoutModule,
     ReactiveFormsModule
   ],
@@ -40,4 +40,4 @@ import { GroupService } from './services/group.service';
 
   ],
 })
-export class UserModule { }
+export class ManagementModule { }

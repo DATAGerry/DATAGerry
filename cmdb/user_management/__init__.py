@@ -14,6 +14,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""
+Basic user functions such as create, change and delete are implemented here.
+In addition, the rights management, group administration and access rights are defined here.
+"""
 from cmdb.user_management.user_base import UserManagementBase
 from cmdb.user_management.user_manager import UserManagement
 from cmdb.user_management.user_group import UserGroup

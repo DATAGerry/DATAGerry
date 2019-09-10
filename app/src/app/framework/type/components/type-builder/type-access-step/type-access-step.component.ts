@@ -17,11 +17,11 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { UserService } from '../../../../../user/services/user.service';
-import { User } from '../../../../../user/models/user';
-import { Group } from '../../../../../user/models/group';
+import { UserService } from '../../../../../management/services/user.service';
+import { User } from '../../../../../management/models/user';
+import { Group } from '../../../../../management/models/group';
 import { FormControl, FormGroup } from '@angular/forms';
-import { GroupService } from '../../../../../user/services/group.service';
+import { GroupService } from '../../../../../management/services/group.service';
 
 @Component({
   selector: 'cmdb-type-access-step',

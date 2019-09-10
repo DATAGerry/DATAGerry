@@ -18,12 +18,12 @@
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { User } from '../../models/user';
-import { UserService } from '../../services/user.service';
-import { GroupService } from '../../services/group.service';
-import { Group } from '../../models/group';
+import { User } from '../models/user';
+import { UserService } from '../services/user.service';
+import { GroupService } from '../services/group.service';
+import { Group } from '../models/group';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ToastService } from '../../../layout/services/toast.service';
+import { ToastService } from '../../layout/services/toast.service';
 
 @Component({
   selector: 'cmdb-user-view',

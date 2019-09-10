@@ -20,7 +20,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { User } from '../../user/models/user';
+import { User } from '../../management/models/user';
 import { ConnectionService } from '../../connect/connection.service';
 
 const httpOptions = {
@@ -43,7 +43,7 @@ export class AuthService {
   public currentUserToken: Observable<string>;
 
   constructor(private http: HttpClient, private connectionService: ConnectionService) {
-    this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('current-user')));
+    this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('current-management')));
     this.currentUser = this.currentUserSubject.asObservable();
     this.currentUserTokenSubject = new BehaviorSubject<string>(JSON.parse(localStorage.getItem('access-token')));
     this.currentUserToken = this.currentUserTokenSubject.asObservable();
@@ -64,9 +64,9 @@ export class AuthService {
     };
     return this.http.post<User>(`${this.connectionService.currentConnection}/${this.restPrefix}/${this.servicePrefix}/login`, data, httpOptions)
       .pipe(map(user => {
-        // store user details and jwt token in local storage to keep user logged in between page refreshes
+        // store management details and jwt token in local storage to keep management logged in between page refreshes
 
-        localStorage.setItem('current-user', JSON.stringify(user));
+        localStorage.setItem('current-management', JSON.stringify(user));
         localStorage.setItem('access-token', JSON.stringify(user.token));
         this.currentUserSubject.next(user);
         this.currentUserTokenSubject.next(user.token);
@@ -75,7 +75,7 @@ export class AuthService {
   }
 
   public logout() {
-    localStorage.removeItem('current-user');
+    localStorage.removeItem('current-management');
     localStorage.removeItem('access-token');
     this.currentUserSubject.next(null);
   }

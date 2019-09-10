@@ -25,7 +25,7 @@ import { CmdbMode } from '../../modes.enum';
 import { CmdbObject } from '../../models/cmdb-object';
 import { CmdbType } from '../../models/cmdb-type';
 import {FormControl, FormGroup} from '@angular/forms';
-import {UserService} from '../../../user/services/user.service';
+import {UserService} from '../../../management/services/user.service';
 
 @Component({
   selector: 'cmdb-object-copy',

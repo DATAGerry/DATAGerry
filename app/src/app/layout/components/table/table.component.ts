@@ -20,7 +20,7 @@
 import { Component, OnDestroy, ViewChild, Input, OnInit } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
 import { BehaviorSubject, Subject} from 'rxjs';
-import { UserService } from '../../../user/services/user.service';
+import { UserService } from '../../../management/services/user.service';
 import { ApiCallService } from '../../../services/api-call.service';
 import { DatePipe } from '@angular/common';
 import { ExportService } from '../../../export/export.service';

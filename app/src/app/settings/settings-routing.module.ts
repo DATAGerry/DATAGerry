@@ -45,7 +45,7 @@ const routes: Routes = [
     outlet: 'footer'
   },
   {
-    path: 'user-management',
+    path: 'management-management',
     data: {
       breadcrumb: 'User Management'
     },

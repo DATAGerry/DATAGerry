@@ -20,7 +20,7 @@ import { Component } from '@angular/core';
 import { CmdbType } from '../../models/cmdb-type';
 import { ActivatedRoute } from '@angular/router';
 import { TypeService } from '../../services/type.service';
-import { UserService } from '../../../user/services/user.service';
+import { UserService } from '../../../management/services/user.service';
 
 @Component({
   selector: 'cmdb-type-add',
