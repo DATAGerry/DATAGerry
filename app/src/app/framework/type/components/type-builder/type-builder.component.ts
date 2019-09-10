@@ -23,7 +23,7 @@ import { TypeFieldsStepComponent } from './type-fields-step/type-fields-step.com
 import { TypeMetaStepComponent } from './type-meta-step/type-meta-step.component';
 import { TypeAccessStepComponent } from './type-access-step/type-access-step.component';
 import { TypeService } from '../../../services/type.service';
-import { UserService } from '../../../../user/services/user.service';
+import { UserService } from '../../../../management/services/user.service';
 import { CategoryService } from '../../../services/category.service';
 import { CmdbMode } from '../../../modes.enum';
 import { Router } from '@angular/router';

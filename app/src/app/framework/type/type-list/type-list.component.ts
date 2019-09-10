@@ -23,7 +23,7 @@ import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from '../../../layout/services/toast.service';
-import { UserService } from '../../../user/services/user.service';
+import { UserService } from '../../../management/services/user.service';
 
 @Component({
   selector: 'cmdb-type-list',

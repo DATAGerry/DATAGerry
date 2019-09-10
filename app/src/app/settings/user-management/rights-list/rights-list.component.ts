@@ -17,8 +17,8 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { RightService } from '../../../user/services/right.service';
-import { Right } from '../../../user/models/right';
+import { RightService } from '../../../management/services/right.service';
+import { Right } from '../../../management/models/right';
 
 @Component({
   selector: 'cmdb-rights-list',

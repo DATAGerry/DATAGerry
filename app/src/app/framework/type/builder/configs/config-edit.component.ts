@@ -26,8 +26,8 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import { configComponents } from './configs.list';
-import { Group } from '../../../../user/models/group';
-import { User } from '../../../../user/models/user';
+import { Group } from '../../../../management/models/group';
+import { User } from '../../../../management/models/user';
 
 @Component({
   selector: 'cmdb-config-edit',

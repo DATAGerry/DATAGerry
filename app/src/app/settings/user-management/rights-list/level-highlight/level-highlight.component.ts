@@ -1,5 +1,5 @@
 import { Component, HostBinding, Input, OnInit } from '@angular/core';
-import { Right } from '../../../../user/models/right';
+import { Right } from '../../../../management/models/right';
 
 @Component({
   // tslint:disable-next-line:component-selector

@@ -22,7 +22,7 @@ import { NavigationComponent } from '../layout/components/navigation/navigation.
 import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
 import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';
 import { FooterComponent } from '../layout/components/footer/footer.component';
-import { UserViewComponent } from './components/user-view/user-view.component';
+import { UserViewComponent } from './user-view/user-view.component';
 
 const routes: Routes = [
   {
@@ -59,5 +59,5 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class UserRoutingModule {
+export class ManagementRoutingModule {
 }

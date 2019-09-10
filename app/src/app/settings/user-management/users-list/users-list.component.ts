@@ -17,8 +17,8 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { UserService } from '../../../user/services/user.service';
-import { User } from '../../../user/models/user';
+import { UserService } from '../../../management/services/user.service';
+import { User } from '../../../management/models/user';
 
 @Component({
   selector: 'cmdb-users-list',

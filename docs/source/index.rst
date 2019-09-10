@@ -23,6 +23,7 @@ definition of object types to the user.
     api/framework/index
     api/data_storage/index
     api/event_management/index
+    api/user_management/index
     :caption: API
     :name: api
 
