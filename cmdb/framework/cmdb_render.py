@@ -215,8 +215,13 @@ class CmdbRender:
             return render_result
         summary_list = self.type_instance.get_summary().fields
         render_result.summaries = summary_list
+        first = True
         for line in summary_list:
-            summary_line += f'{line["label"]}: {line["value"]} | '
+            if first:
+                summary_line += f'{line["label"]}: {line["value"]}'
+                first = False
+            else:
+                summary_line += f' | {line["label"]}: {line["value"]}'
         render_result.summary_line = summary_line
         return render_result
 

@@ -44,6 +44,7 @@ import { RadioSimpleComponent } from './simple/choice/radio-simple.component';
 import { SelectSimpleComponent } from './simple/choice/select-simple.component';
 import { RouterModule } from '@angular/router';
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
+import { RefSimpleComponent } from './simple/special/ref-simple.component';
 
 
 @NgModule({
@@ -64,13 +65,14 @@ import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
     CheckboxSimpleComponent,
     RadioSimpleComponent,
     SelectSimpleComponent,
+    RefSimpleComponent,
     RenderComponent,
     RenderElementComponent
   ],
   declarations: [
     RenderComponent, RenderElementComponent, TextComponent, DummyComponent, PasswordComponent, EmailComponent, PhoneComponent,
     HrefComponent, RadioComponent, SelectComponent, RefComponent, CheckboxComponent, TextareaComponent, ModeErrorComponent,
-    RenderErrorComponent, TextSimpleComponent, PasswordSimpleComponent, CheckboxSimpleComponent, RadioSimpleComponent, SelectSimpleComponent
+    RenderErrorComponent, TextSimpleComponent, PasswordSimpleComponent, CheckboxSimpleComponent, RadioSimpleComponent, SelectSimpleComponent, RefSimpleComponent
   ],
   exports: [
     RenderElementComponent,

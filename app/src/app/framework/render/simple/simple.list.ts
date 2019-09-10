@@ -21,6 +21,7 @@ import { PasswordSimpleComponent } from './text/password-simple.component';
 import { CheckboxSimpleComponent } from './choice/checkbox-simple.component';
 import { RadioSimpleComponent } from './choice/radio-simple.component';
 import { SelectSimpleComponent } from './choice/select-simple.component';
+import { RefSimpleComponent } from './special/ref-simple.component';
 
 export const simpleComponents: {[type: string]: any} = {
   text: TextSimpleComponent,
@@ -32,6 +33,6 @@ export const simpleComponents: {[type: string]: any} = {
   checkbox: CheckboxSimpleComponent,
   radio: RadioSimpleComponent,
   select: SelectSimpleComponent,
-  ref: TextSimpleComponent,
+  ref: RefSimpleComponent,
   debug: TextSimpleComponent
 };

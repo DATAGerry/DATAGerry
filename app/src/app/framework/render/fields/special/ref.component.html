@@ -7,7 +7,7 @@
       <ng-container [ngSwitch]="true">
         <ng-container *ngSwitchCase="mode == MODES.View">
           <input type="text" name="{{data.name}}" class="form-control"
-                 value=" {{refObject?.object_information?.object_id}}# {{refObject?.type_information?.type_label}}"
+                 value="{{refObject?.summary_line}}"
                  disabled/>
           <div class="input-group-append">
             <span class="input-group-text">
@@ -24,6 +24,7 @@
             <option value="" disabled>Choose a reference</option>
             <option *ngFor="let instanceObject of objectList" value="{{instanceObject?.object_information?.object_id}}">
               {{instanceObject?.object_information?.object_id}}# {{instanceObject?.type_information?.type_label}}
+              - {{refObject?.summary_line}}
             </option>
           </select>
           <div *ngIf="data?.helperText" class="input-group-append">
