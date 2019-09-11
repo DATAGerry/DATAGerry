@@ -72,7 +72,7 @@ export class TypeBasicStepComponent implements OnInit {
       icon: new FormControl(''),
     });
     this.basicCategoryForm = new FormGroup({
-      category_id: new FormControl(null)
+      category_id: new FormControl(0)
     });
   }
 
