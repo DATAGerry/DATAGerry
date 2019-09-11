@@ -39,8 +39,7 @@ class CmdbObject(CmdbDAO):
         'active',
         'fields',
         'status',
-        'version',
-        'last_edit_time'
+        'version'
     ]
 
     def __init__(self, type_id, creation_time, author_id, active, fields, last_edit_time=None, status: int = None,

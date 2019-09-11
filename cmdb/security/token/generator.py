@@ -53,6 +53,7 @@ class TokenGenerator:
         optional_claims = optional_claims or {}
 
         token_claims = {
+            'iat': int(datetime.now().timestamp()),
             'exp': int(self.get_expire_time().timestamp())
         }
         payload_claims = {

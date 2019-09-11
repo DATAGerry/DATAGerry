@@ -17,11 +17,10 @@
 import logging
 
 from flask import request, abort
+from datetime import datetime
 
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management.user_manager import user_manager
-from cmdb.data_storage import get_pre_init_database
-from cmdb.utils import get_security_manager
 from cmdb.interface.route_utils import make_response, RootBlueprint
 
 try:
@@ -50,11 +49,14 @@ def login_call():
     except CMDBError as e:
         abort(401, e)
     if correct:
+        login_user.last_login_time = datetime.utcnow()
+        user_manager.update_user(login_user)
         tg = TokenGenerator()
         token = tg.generate_token(payload={'user': {
             'public_id': login_user.get_public_id()
         }})
         login_user.token = token
+        login_user.token_issued_at = int(datetime.now().timestamp())
         login_user.token_expire = int(tg.get_expire_time().timestamp())
         return make_response(login_user)
     abort(401)
