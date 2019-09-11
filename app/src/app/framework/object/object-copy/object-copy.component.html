@@ -4,20 +4,6 @@
   <div class="card-body">
     <form [formGroup]="renderForm" class="renderForm needs-validation" novalidate autocomplete="off"
           (ngSubmit)="copyObject()">
-      <fieldset>
-        <legend>Object status</legend>
-        <div class="form-group row">
-          <label class="col-sm-3 col-form-label">
-            Active:
-          </label>
-          <div class="col-sm-9">
-            <div class="custom-control custom-checkbox">
-              <input type="checkbox" formControlName="active" class="custom-control-input" id="active">
-              <label class="custom-control-label" for="active"></label>
-            </div>
-          </div>
-        </div>
-      </fieldset>
       <cmdb-render [typeInstance]="typeInstance" [objectInstance]="objectInstance" [mode]="mode"
                    [renderForm]="renderForm"></cmdb-render>
       <button type="submit" class="btn btn-outline-success mr-2" [disabled]="!renderForm.valid">Save</button>

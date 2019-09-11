@@ -46,14 +46,12 @@ export class ObjectCopyComponent implements OnInit {
       this.objectID = params.publicID;
     });
     this.renderForm = new FormGroup({
-      active: new FormControl( false)
     });
   }
 
   public ngOnInit(): void {
     this.objectService.getObject(this.objectID, true).subscribe((objectInstanceResp: CmdbObject) => {
       this.objectInstance = objectInstanceResp;
-      this.renderForm.get('active').setValue(objectInstanceResp.active);
     }, (error) => {
       console.error(error);
     }, () => {
@@ -68,11 +66,10 @@ export class ObjectCopyComponent implements OnInit {
     if (this.renderForm.valid) {
       const newObjectInstance = new CmdbObject();
       newObjectInstance.type_id = this.objectInstance.type_id;
-      newObjectInstance.active = this.renderForm.get('active').value;
+      newObjectInstance.active = this.typeInstance.active;
       newObjectInstance.version = '1.0.0';
       newObjectInstance.author_id = this.userService.getCurrentUser().public_id;
       newObjectInstance.fields = [];
-      this.renderForm.removeControl('active');
       Object.keys(this.renderForm.controls).forEach(field => {
         newObjectInstance.fields.push({
           name: field,
