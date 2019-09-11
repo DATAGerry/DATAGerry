@@ -93,6 +93,11 @@ export class TypeBasicStepComponent implements OnInit {
         this.basicForm.get('name').markAsTouched({onlySelf: true});
       });
       this.basicCategoryForm.get('category_id').setValidators(Validators.required);
+      this.categoryService.getRootCategory().subscribe( (category: CmdbCategory[]) => {
+        if (category.length) {
+          this.basicCategoryForm.get('category_id').setValue(category[0].public_id);
+        }
+      });
     } else if (this.mode === CmdbMode.Edit) {
       this.basicForm.markAllAsTouched();
     }

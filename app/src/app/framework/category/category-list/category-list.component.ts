@@ -39,7 +39,7 @@ export class CategoryListComponent implements OnInit, OnDestroy {
   public dtElement: DataTableDirective;
   public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();
-  public categoryList: CmdbCategory[];
+  public categoryList: CmdbCategory[] = [];
   public typeList: CmdbType[];
 
   constructor(public categoryService: CategoryService, public typeService: TypeService,
@@ -84,15 +84,20 @@ export class CategoryListComponent implements OnInit, OnDestroy {
     removeModal.componentInstance.buttonAccept = 'Delete';
     removeModal.result.then((result) => {
       if (result) {
-        this.categoryService.deleteCategory(publicID).subscribe((confirm) => {
-          if (confirm === true) {
-            this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
-              this.categoryList = list;
+        this.typeService.updateTypeByCategoryID(publicID).subscribe((value) => {
+          console.log(value);
+        }, (error) => { console.log(error); },
+          () => {
+            this.categoryService.deleteCategory(publicID).subscribe((confirm) => {
+              if (confirm === true) {
+                this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
+                  this.categoryList = list;
+                }, (error) => { console.log(error); },
+                  () => { this.toast.show('Category was deleted'); });
+              }
             });
-          }
-        });
+          });
       }
-      this.toast.show('Category was deleted');
     }, (reason) => {
       console.log(reason);
     });

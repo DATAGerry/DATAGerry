@@ -19,6 +19,8 @@
 import { Injectable } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
 import { ApiCallService } from '../../services/api-call.service';
+import {CmdbStatus} from "../models/cmdb-status";
+import {map} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -38,20 +40,12 @@ export class TypeService {
     return this.typeList.find(id => id.public_id === publicID);
   }
 
-  public filterTypeByCategoryID(publicID: number): CmdbType[] {
-    return this.typeList.filter(id => id.category_id === publicID);
-  }
-
   public getType(publicID: number) {
     return this.api.callGetRoute<CmdbType>(this.servicePrefix + '/' + publicID);
   }
 
   public getTypeList() {
     return this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/');
-  }
-
-  public getTypeListByCategory(publicID: number) {
-    return this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/category/' + publicID);
   }
 
   public async validateTypeName(name: string) {
@@ -70,5 +64,16 @@ export class TypeService {
     return this.api.callDeleteRoute<number>(this.servicePrefix + '/' + publicID);
   }
 
+  public filterTypeByCategoryID(publicID: number): CmdbType[] {
+    return this.typeList.filter(id => id.category_id === publicID);
+  }
+
+  public getTypeListByCategory(publicID: number) {
+    return this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/category/' + publicID);
+  }
+
+  public updateTypeByCategoryID(publicID: number) {
+    return this.api.callPutRoute(this.servicePrefix + '/category/' + publicID, null);
+  }
 }
 

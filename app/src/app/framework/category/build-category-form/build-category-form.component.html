@@ -4,7 +4,7 @@
 </cmdb-content-header>
 
 <div class="row">
-  <div class="col-sm-4">
+  <div [className]="categoryForm.get('root').value ? 'd-none' : 'col-sm-4'">
     <div class="card drag-items">
       <div class="card-header">
         <input class="form-control mr-sm-2" type="search" placeholder="Search Categories" aria-label="Search"
@@ -38,7 +38,7 @@
       </div>
     </div>
   </div>
-  <div class="col-sm-8">
+  <div [className]="categoryForm.get('root').value ? 'col-sm' : 'col-sm-8'">
     <div class="card category-form">
       <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
         <div class="card-header">
