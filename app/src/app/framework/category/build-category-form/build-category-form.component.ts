@@ -217,12 +217,12 @@ export class BuildCategoryFormComponent implements OnInit, AfterContentInit {
     }, (error) => {
       console.log(error);
     }, () => {
-      for (const type of this.toUpdateTypes) {
+      this.toUpdateTypes.forEach( type => {
         type.category_id = type.category_id === undefined ? this.category.public_id : type.category_id;
         this.typeService.putType(type).subscribe((updateResp: CmdbType) => {
           console.log(updateResp.public_id);
         });
-      }
+      });
       this.toast.show(toastMessage);
       this.router.navigate(['/framework/category/']);
     });
