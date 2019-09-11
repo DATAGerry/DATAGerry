@@ -25,7 +25,13 @@ export class User {
   public email: string;
   public token?: string;
   public token_expire?: number;
-  public registration_time: any;
+  public token_issued_at?: number;
+  public registration_time: {
+    $date: string;
+  };
+  public last_login_time: {
+    $date: string;
+  };
   public authenticator: string;
   public group_id: number;
 

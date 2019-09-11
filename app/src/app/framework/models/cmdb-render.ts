@@ -23,7 +23,12 @@ export class RenderResult {
   };
   public object_information: {
     object_id: number;
-    creation_time: string;
+    creation_time: {
+      $date: string
+    },
+    last_edit_time: {
+      $date: string
+    },
     author_id: number;
     author_name: string;
     active: boolean;
@@ -33,7 +38,9 @@ export class RenderResult {
     type_id: number;
     type_name: string;
     type_label: string;
-    creation_time: string;
+    creation_time: {
+      $date: string
+    },
     author_id: number;
     author_name: string;
     active: boolean;
@@ -45,5 +52,5 @@ export class RenderResult {
   public summary_line: string;
   public externals: any[];
   public match_fields: any[];
-  // tslint:enable:variable-name
+// tslint:enable:variable-name
 }
