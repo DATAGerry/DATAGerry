@@ -81,7 +81,14 @@ const routes: Routes = [
       breadcrumb: 'View Log'
     },
     component: ObjectLogComponent
-  }
+  },
+  {
+    path: 'user',
+    data: {
+      breadcrumb: 'User'
+    },
+    loadChildren: () => import('./user-object/user-object.module').then(m => m.UserObjectModule),
+  },
 ];
 
 @NgModule({

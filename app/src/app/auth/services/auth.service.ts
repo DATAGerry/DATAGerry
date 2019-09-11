@@ -43,7 +43,7 @@ export class AuthService {
   public currentUserToken: Observable<string>;
 
   constructor(private http: HttpClient, private connectionService: ConnectionService) {
-    this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('current-management')));
+    this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('current-user')));
     this.currentUser = this.currentUserSubject.asObservable();
     this.currentUserTokenSubject = new BehaviorSubject<string>(JSON.parse(localStorage.getItem('access-token')));
     this.currentUserToken = this.currentUserTokenSubject.asObservable();
@@ -66,7 +66,7 @@ export class AuthService {
       .pipe(map(user => {
         // store management details and jwt token in local storage to keep management logged in between page refreshes
 
-        localStorage.setItem('current-management', JSON.stringify(user));
+        localStorage.setItem('current-user', JSON.stringify(user));
         localStorage.setItem('access-token', JSON.stringify(user.token));
         this.currentUserSubject.next(user);
         this.currentUserTokenSubject.next(user.token);
@@ -75,7 +75,7 @@ export class AuthService {
   }
 
   public logout() {
-    localStorage.removeItem('current-management');
+    localStorage.removeItem('current-user');
     localStorage.removeItem('access-token');
     this.currentUserSubject.next(null);
   }

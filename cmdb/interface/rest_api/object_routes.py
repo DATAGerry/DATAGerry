@@ -18,6 +18,7 @@ import json
 import logging
 from datetime import datetime
 
+import pytz
 from flask import abort, jsonify, request, current_app
 
 from cmdb.data_storage.database_utils import object_hook, default
@@ -155,21 +156,6 @@ def count_objects():
     return resp
 
 
-def _build_query(args, q_operator='$and'):
-    query_list = []
-    try:
-        for key, value in args.items():
-            for v in value.split(","):
-                try:
-                    query_list.append({key: int(v)})
-                except (ValueError, TypeError):
-                    return abort(400)
-        return {q_operator: query_list}
-
-    except CMDBError:
-        pass
-
-
 @object_rest.route('/<int:public_id>/', methods=['GET'])
 @object_rest.route('/<int:public_id>', methods=['GET'])
 @login_required
@@ -224,6 +210,70 @@ def get_objects_by_reference(public_id: int, request_user: User):
     return make_response(rendered_reference_list)
 
 
+@object_rest.route('/user/<int:public_id>/', methods=['GET'])
+@object_rest.route('/user/<int:public_id>', methods=['GET'])
+@insert_request_user
+def get_objects_by_user(public_id: int, request_user: User):
+    try:
+        object_list = object_manager.get_objects_by(sort="type_id", author_id=public_id)
+    except ObjectManagerGetError as err:
+        LOGGER.error(err)
+        return abort(400)
+
+    if len(object_list) < 1:
+        return make_response(object_list, 204)
+
+    rendered_list = RenderList(object_list, request_user).render_result_list()
+    return make_response(rendered_list)
+
+
+@object_rest.route('/user/new/<int:timestamp>/', methods=['GET'])
+@object_rest.route('/user/new/<int:timestamp>', methods=['GET'])
+@insert_request_user
+def get_new_objects_since(timestamp: int, request_user: User):
+    request_date = datetime.fromtimestamp(timestamp, pytz.utc)
+    query = {
+        'creation_time': {
+            '$gt': request_date
+        }
+    }
+    try:
+        object_list = object_manager.get_objects_by(sort="creation_time", **query)
+    except ObjectManagerGetError as err:
+        LOGGER.error(err)
+        return abort(400)
+
+    if len(object_list) < 1:
+        return make_response(object_list, 204)
+
+    rendered_list = RenderList(object_list, request_user).render_result_list()
+    return make_response(rendered_list)
+
+
+@object_rest.route('/user/changed/<int:timestamp>/', methods=['GET'])
+@object_rest.route('/user/changed/<int:timestamp>', methods=['GET'])
+@insert_request_user
+def get_changed_objects_since(timestamp: int, request_user: User):
+    request_date = datetime.fromtimestamp(timestamp, pytz.utc)
+    query = {
+        'last_edit_time': {
+            '$gt': request_date,
+            '$ne': None
+        }
+    }
+    try:
+        object_list = object_manager.get_objects_by(sort="creation_time", **query)
+    except ObjectManagerGetError as err:
+        LOGGER.error(err)
+        return abort(400)
+
+    if len(object_list) < 1:
+        return make_response(object_list, 204)
+
+    rendered_list = RenderList(object_list, request_user).render_result_list()
+    return make_response(rendered_list)
+
+
 # CRUD routes
 
 @object_rest.route('/', methods=['POST'])
@@ -239,7 +289,6 @@ def insert_object(request_user):
         new_object_data['public_id'] = object_manager.get_new_id(CmdbObject.COLLECTION)
         new_object_data['active'] = True
         new_object_data['creation_time'] = datetime.utcnow()
-        new_object_data['last_edit_time'] = datetime.utcnow()
         new_object_data['views'] = 0
         new_object_data['version'] = '1.0.0'  # default init version
     except TypeError as e:
@@ -505,6 +554,7 @@ def update_object_state(public_id: int, request_user: User):
 
     return make_response(update_ack)
 
+
 # SPECIAL ROUTES
 @object_rest.route('/newest', methods=['GET'])
 @object_rest.route('/newest/', methods=['GET'])
@@ -546,3 +596,18 @@ def get_latest(request_user: User):
     if len(rendered_list) < 1:
         return make_response(rendered_list, 204)
     return make_response(rendered_list)
+
+
+def _build_query(args, q_operator='$and'):
+    query_list = []
+    try:
+        for key, value in args.items():
+            for v in value.split(","):
+                try:
+                    query_list.append({key: int(v)})
+                except (ValueError, TypeError):
+                    return abort(400)
+        return {q_operator: query_list}
+
+    except CMDBError:
+        pass

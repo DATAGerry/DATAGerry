@@ -58,7 +58,7 @@ export class ObjectViewMetaComponent {
         this.renderResult.object_information.object_id,
         this.renderResult.type_information.type_id,
         this.renderResult.type_information.type_label,
-        this.renderResult.object_information.creation_time,
+        this.renderResult.object_information.creation_time.$date,
         this.renderResult.object_information.author_id,
         this.renderResult.object_information.author_name,
       );

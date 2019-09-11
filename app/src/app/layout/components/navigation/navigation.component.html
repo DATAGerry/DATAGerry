@@ -27,9 +27,6 @@
           <div class="dropdown-header">Categories</div>
           <a class="dropdown-item" routerLink="/framework/category">List all categories</a>
           <a class="dropdown-item" routerLink="/framework/category/management">Manage categories</a>
-          <div class="dropdown-header">Status</div>
-          <a class="dropdown-item" routerLink="/framework/status">List all status</a>
-          <a class="dropdown-item" routerLink="/framework/status/management">Manage status</a>
         </div>
       </li>
       <li class="nav-item dropdown">
@@ -39,13 +36,13 @@
         </a>
         <div class="dropdown-menu dropdown-menu-right">
           <div class="dropdown-header">Objects modified</div>
-          <a href="#" class="dropdown-item">
+          <a routerLink="/framework/object/user/new/" class="dropdown-item">
             <fa-icon icon="plus"></fa-icon> New
           </a>
-          <a href="#" class="dropdown-item">
+          <a routerLink="/framework/object/user/changed/" href="#" class="dropdown-item">
             <fa-icon icon="reply"></fa-icon> Changed
           </a>
-          <a href="#" class="dropdown-item">
+          <a routerLink="/framework/object/user/own/" class="dropdown-item">
             <fa-icon icon="briefcase"></fa-icon> Your items
           </a>
         </div>

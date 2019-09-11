@@ -41,10 +41,14 @@ export class RefComponent extends RenderField implements OnInit {
         this.objectList = list;
       });
     }
-    if (this.controller.value !== undefined) {
+    if (this.controller.value !== '' && this.data.value !== undefined) {
       this.objectService.getObject(this.controller.value).subscribe((refObject: RenderResult) => {
-        this.refObject = refObject;
-      });
+          console.log(refObject);
+          this.refObject = refObject;
+        },
+        (error) => {
+          console.error(error);
+        });
     }
   }
 

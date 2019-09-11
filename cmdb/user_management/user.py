@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from cmdb.user_management.user_base import UserManagementBase
-
+from datetime import datetime
 
 class User(UserManagementBase):
     """
@@ -27,7 +27,7 @@ class User(UserManagementBase):
         {'keys': [('user_name', UserManagementBase.ASCENDING)], 'name': 'user_name', 'unique': True}
     ]
 
-    def __init__(self, user_name, group_id, registration_time, password=None,
+    def __init__(self, user_name, group_id, registration_time, password=None, last_login_time=None,
                  first_name=None, last_name=None, email=None, authenticator='LocalAuthenticationProvider', **kwargs):
         """
 
@@ -44,6 +44,7 @@ class User(UserManagementBase):
         """
         self.user_name = user_name
         self.password = password
+        self.last_login_time = last_login_time or datetime.utcnow()
         self.group_id = group_id
         self.authenticator = authenticator
         if email is None or email == "" or not self.is_valid_email(email):

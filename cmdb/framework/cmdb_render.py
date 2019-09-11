@@ -142,6 +142,7 @@ class CmdbRender:
         render_result.object_information = {
             'object_id': self.object_instance.get_public_id(),
             'creation_time': self.object_instance.creation_time,
+            'last_edit_time': self.object_instance.last_edit_time,
             'author_id': self.object_instance.author_id,
             'author_name': author_name,
             'active': self.object_instance.active,

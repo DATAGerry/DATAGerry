@@ -43,6 +43,9 @@ export class LogService<T = CmdbLog> implements ApiService {
   public getLogsByObject(publicID: number) {
     return this.api.callGet<T>(`${this.servicePrefix}/object/${publicID}/`).pipe(
       map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
         return apiResponse.body;
       })
     );
@@ -51,6 +54,9 @@ export class LogService<T = CmdbLog> implements ApiService {
   public getLogsWithExistingObject() {
     return this.api.callGet<T>(`${this.servicePrefix}/object/exists/`).pipe(
       map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
         return apiResponse.body;
       })
     );
@@ -59,6 +65,9 @@ export class LogService<T = CmdbLog> implements ApiService {
   public getLogsWithNotExistingObject() {
     return this.api.callGet<T>(`${this.servicePrefix}/object/notexists/`).pipe(
       map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
         return apiResponse.body;
       })
     );
@@ -67,6 +76,9 @@ export class LogService<T = CmdbLog> implements ApiService {
   public getDeleteLogs() {
     return this.api.callGet<T>(`${this.servicePrefix}/object/deleted/`).pipe(
       map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
         return apiResponse.body;
       })
     );
@@ -75,6 +87,9 @@ export class LogService<T = CmdbLog> implements ApiService {
   public getCorrespondingLogs(publicID: number) {
     return this.api.callGet<T>(`${this.servicePrefix}/${publicID}/corresponding/`).pipe(
       map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
         return apiResponse.body;
       })
     );

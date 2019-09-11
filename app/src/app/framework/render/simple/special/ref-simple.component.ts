@@ -16,7 +16,7 @@ export class RefSimpleComponent extends RenderField implements OnInit {
   }
 
   public ngOnInit(): void {
-    if (this.data.value !== undefined) {
+    if (this.data.value !== '' && this.data.value !== undefined) {
       this.objectService.getObject(this.data.value).subscribe((refObject: RenderResult) => {
         this.refObject = refObject;
       });

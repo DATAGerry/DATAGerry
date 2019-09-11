@@ -40,12 +40,18 @@ export class ObjectService<T = RenderResult> implements ApiService {
     if (native === true) {
       return this.api.callGet<CmdbObject[]>(`${this.servicePrefix}/native/`).pipe(
         map((apiResponse) => {
+          if (apiResponse.status === 204) {
+            return [];
+          }
           return apiResponse.body;
         })
       );
     }
     return this.api.callGet<T[]>(`${this.servicePrefix}/`).pipe(
       map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
         return apiResponse.body;
       })
     );
@@ -54,6 +60,9 @@ export class ObjectService<T = RenderResult> implements ApiService {
   public getObjectsByType(typeID: number): Observable<T[]> {
     return this.api.callGet<T[]>(`${this.servicePrefix}/type/${typeID}`).pipe(
       map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
         return apiResponse.body;
       })
     );
@@ -101,6 +110,42 @@ export class ObjectService<T = RenderResult> implements ApiService {
   public getObjectReferences(publicID: number) {
     return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/reference/${publicID}`).pipe(
       map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public getObjectsByUser(publicID: number) {
+    return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/user/${publicID}`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public getNewObjectsSince(timestamp: number) {
+    return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/user/new/${timestamp}`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public getChangedObjectsSince(timestamp: number) {
+    return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/user/changed/${timestamp}`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
         return apiResponse.body;
       })
     );

@@ -23,6 +23,8 @@ The implementation of the manager used is always realized using the respective s
 import logging
 import re
 
+from datetime import datetime
+
 from cmdb.data_storage import get_pre_init_database
 from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
 from cmdb.event_management.event import Event
@@ -191,6 +193,7 @@ class CmdbObjectManager(CmdbManagerBase):
             update_object = data
         else:
             raise UpdateError(CmdbObject.__class__, data, 'Wrong CmdbObject init format - expecting CmdbObject or dict')
+        update_object.last_edit_time = datetime.utcnow()
         ack = self.dbm.update(
             collection=CmdbObject.COLLECTION,
             public_id=update_object.get_public_id(),
