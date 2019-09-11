@@ -175,3 +175,13 @@ def get_type_by_category(public_id):
         return abort(500)
     resp = make_response(type_list)
     return resp
+
+
+@type_routes.route('/category/<int:public_id>', methods=['PUT'])
+@login_required
+def update_type_by_category(public_id):
+    try:
+        ack = object_manager.update_many_types(filter={'category_id': public_id}, update={'$set': {'category_id': 0}})
+    except CMDBError:
+        return abort(500)
+    return make_response(ack.raw_result)

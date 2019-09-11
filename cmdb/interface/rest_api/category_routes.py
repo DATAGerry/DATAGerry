@@ -60,6 +60,14 @@ def get_category(public_id):
     return make_response(category_instance)
 
 
+@categories_routes.route('/root', methods=['GET'])
+@categories_routes.route('/root/', methods=['GET'])
+@login_required
+def get_root_category():
+    category_instance = object_manager.get_categories_by(_filter={'root': True})
+    return make_response(category_instance)
+
+
 @categories_routes.route('/', methods=['POST'])
 @login_required
 def add_category():

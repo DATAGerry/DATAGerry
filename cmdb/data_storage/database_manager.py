@@ -21,7 +21,7 @@ Database Management instance for database actions
 import logging
 
 from pymongo.errors import DuplicateKeyError
-from pymongo.results import DeleteResult
+from pymongo.results import DeleteResult, UpdateResult
 
 from cmdb.data_storage.database_connection import Connector
 from cmdb.data_storage.database_connection import MongoConnector
@@ -417,6 +417,23 @@ class DatabaseManagerMongo(DatabaseManager):
         formatted_public_id = {'public_id': public_id}
         formatted_data = {'$set': data}
         return self.database_connector.get_collection(collection).update_one(formatted_public_id, formatted_data)
+
+    def update_many(self, collection: str, query: dict, update: dict) -> UpdateResult:
+        """update all documents that match the filter from a collection.
+
+        Args:
+            collection (str): name of database collection
+            query (dict): A query that matches the documents to update.
+            update (dict): The modifications to apply.
+
+        Returns:
+            A boolean acknowledged as true if the operation ran with write concern or false if write concern was disabled
+
+        """
+        result = self.database_connector.get_collection(collection).update_many(filter=query, update=update)
+        if not result.acknowledged:
+            raise DocumentCouldNotBeDeleted(collection)
+        return result
 
     def insert_with_internal(self, collection: str, _id: int or str, data: dict):
         formatted_id = {'_id': _id}

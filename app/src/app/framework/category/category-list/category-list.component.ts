@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CategoryService } from '../../services/category.service';
 import { CmdbCategory } from '../../models/cmdb-category';
 import { TypeService } from '../../services/type.service';
@@ -24,9 +24,9 @@ import { CmdbType } from '../../models/cmdb-type';
 import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
 import { Router } from '@angular/router';
-import {ToastService} from "../../../layout/services/toast.service";
-import {ModalComponent} from "../../../layout/helpers/modal/modal.component";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import { ToastService } from '../../../layout/services/toast.service';
+import { ModalComponent } from '../../../layout/helpers/modal/modal.component';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'cmdb-category-list',
@@ -39,7 +39,7 @@ export class CategoryListComponent implements OnInit, OnDestroy {
   public dtElement: DataTableDirective;
   public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();
-  public categoryList: CmdbCategory[];
+  public categoryList: CmdbCategory[] = [];
   public typeList: CmdbType[];
 
   constructor(public categoryService: CategoryService, public typeService: TypeService,
@@ -50,7 +50,7 @@ export class CategoryListComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.dtOptions = {
       ordering: true,
-      order: [[0, 'asc']],
+      order: [[1, 'desc']],
       dom:
         '<"row" <"col-sm-2" l> <"col-sm-3" B > <"col" f> >' +
         '<"row" <"col-sm-12"tr>>' +
@@ -84,15 +84,20 @@ export class CategoryListComponent implements OnInit, OnDestroy {
     removeModal.componentInstance.buttonAccept = 'Delete';
     removeModal.result.then((result) => {
       if (result) {
-        this.categoryService.deleteCategory(publicID).subscribe((confirm) => {
-          if (confirm === true) {
-            this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
-              this.categoryList = list;
+        this.typeService.updateTypeByCategoryID(publicID).subscribe((value) => {
+          console.log(value);
+        }, (error) => { console.log(error); },
+          () => {
+            this.categoryService.deleteCategory(publicID).subscribe((confirm) => {
+              if (confirm === true) {
+                this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
+                  this.categoryList = list;
+                }, (error) => { console.log(error); },
+                  () => { this.toast.show('Category was deleted'); });
+              }
             });
-          }
-        });
+          });
       }
-      this.toast.show('Category was deleted');
     }, (reason) => {
       console.log(reason);
     });

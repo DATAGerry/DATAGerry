@@ -1,16 +1,10 @@
 
-<ng-container [ngSwitch]="mode">
-  <span *ngSwitchCase="1">
-    <cmdb-content-header title="Add new Category" xmlns="http://www.w3.org/1999/html"></cmdb-content-header>
-  </span>
-  <span *ngSwitchDefault>
-    <cmdb-content-header title="Edit Category #{{categoryID}}" xmlns="http://www.w3.org/1999/html"></cmdb-content-header>
-  </span>
-</ng-container>
-
+<cmdb-content-header
+  title="{{mode==1 ? 'Add new Category' : 'Edit Category#' + category?.public_id}}">
+</cmdb-content-header>
 
 <div class="row">
-  <div class="col-sm-4">
+  <div [className]="categoryForm.get('root').value ? 'd-none' : 'col-sm-4'">
     <div class="card drag-items">
       <div class="card-header">
         <input class="form-control mr-sm-2" type="search" placeholder="Search Categories" aria-label="Search"
@@ -44,85 +38,93 @@
       </div>
     </div>
   </div>
-  <div class="col-sm-8">
+  <div [className]="categoryForm.get('root').value ? 'col-sm' : 'col-sm-8'">
     <div class="card category-form">
-      <div class="card-header">New Category</div>
-      <div class="card-body">
-        <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
-          <div class="form-row">
-            <div class="form-group col-md-6">
-              <label>Label</label>
-              <input type="text" formControlName="label" class="form-control" placeholder="Label">
-            </div>
-            <div class="form-group col-md-6">
-              <label>Name</label>
-              <input type="text" formControlName="name" class="form-control" placeholder="Name" lowercase readonly>
-            </div>
-            <div class="form-group col-md-12">
-              <label>Parent Category</label>
-              <div class="card">
-                <div class="card-body">
-                  <section [dndDropzone]="['parentCategory']"
-                           (dndDrop)="onDraggedParent($event, parentCategories, 'copy')">
-                    <div style="border: 1px green solid; border-radius: 5px; padding: 15px;"
-                         dndPlaceholderRef>
-                      Drop parent here
-                    </div>
-                    <div *ngFor="let parent of parentCategories"
-                         class="list-group-item list-group-item-action">
-                          <span class="d-flex justify-content-between align-items-center ">
-                            {{parent.label}} # {{parent.public_id}}
-                            <fa-icon icon="trash-alt" (click)="removeParent(parent)"></fa-icon>
-                          </span>
-                    </div>
-                    <div *ngIf="parentCategories.length === 0"
-                         class="list-group-item list-group-item-action"
-                         style="border: 1px orangered dashed; border-radius: 5px; padding: 15px;">
-                      <span class="d-flex justify-content-between align-items-center ">
-                            Drop parent here
-                        <fa-icon icon="code"></fa-icon>
-                      </span>
-                    </div>
-                  </section>
-                </div>
-              </div>
-              <small class="form-text text-muted">Each category has only a parent category. <b>Default: Root #0</b></small>
-            </div>
-            <div class="form-group col-md-12">
-              <label>Assigned types</label>
-              <div class="card">
-                <div class="card-body">
-                  <section [dndDropzone]="['assignedTypes']"
-                           (dndDrop)="onDraggedAssignedTypes($event, assignedTypes, 'copy')">
-                    <div style="border: 1px green solid; border-radius: 5px; padding: 15px;"
-                         dndPlaceholderRef>
-                      Drop type here
-                    </div>
-                    <div *ngFor="let type of assignedTypes"
-                         class="list-group-item list-group-item-action">
-                          <span class="d-flex justify-content-between align-items-center ">
-                            {{type.label}} # {{type.public_id}}
-                            <fa-icon icon="trash-alt" (click)="removeAssignedType(type)"></fa-icon>
-                          </span>
-                    </div>
-                    <div *ngIf="assignedTypes.length === 0"
-                         style="border: 1px orangered dashed; border-radius: 5px; padding: 15px;">
-                      <span class="d-flex justify-content-between align-items-center ">
-                            Drop type here
-                        <fa-icon icon="code"></fa-icon>
-                      </span>
-                    </div>
-                  </section>
-                </div>
-              </div>
-              <small class="form-text text-muted">Each object type must be part of one (and only one) category</small>
-            </div>
+      <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
+        <div class="card-header">
+          {{mode == 1 ? 'Add new Category' : 'Edit Category'}}
+          <div class="custom-switch float-right">
+            <input class="custom-control-input" id="typeActiveInput" type="checkbox" formControlName="root">
+            <label class ="custom-control-label" for="typeActiveInput">Root</label>
           </div>
-          <button type="submit" class="btn btn-primary pull-right mr-1" [disabled]="!categoryForm.valid">Save</button>
-          <button class="btn btn-secondary" routerLink="/framework/category/">Cancel</button>
           <div class="clearfix"></div>
-        </form>
-      </div>
+        </div>
+
+        <div class="card-body">
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label>Label</label>
+                <input type="text" formControlName="label" class="form-control" placeholder="Label">
+              </div>
+              <div class="form-group col-md-6">
+                <label>Name</label>
+                <input type="text" formControlName="name" class="form-control" placeholder="Name" lowercase readonly>
+              </div>
+              <div class="form-group col-md-12" *ngIf="!categoryForm.get('root').value">
+                <label>Parent Category</label>
+                <div class="card">
+                  <div class="card-body">
+                    <section [dndDropzone]="['parentCategory']"
+                             (dndDrop)="onDraggedParent($event, parentCategories, 'copy')">
+                      <div style="border: 1px green solid; border-radius: 5px; padding: 15px;"
+                           dndPlaceholderRef>
+                        Drop parent here
+                      </div>
+                      <div *ngFor="let parent of parentCategories"
+                           class="list-group-item list-group-item-action">
+                            <span class="d-flex justify-content-between align-items-center ">
+                              {{parent.label}} # {{parent.public_id}}
+                              <fa-icon icon="trash-alt" (click)="removeParent(parent)"></fa-icon>
+                            </span>
+                      </div>
+                      <div *ngIf="parentCategories.length === 0"
+                           class="list-group-item list-group-item-action"
+                           style="border: 1px orangered dashed; border-radius: 5px; padding: 15px;">
+                        <span class="d-flex justify-content-between align-items-center ">
+                              Drop parent here
+                          <fa-icon icon="code"></fa-icon>
+                        </span>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+                <small class="form-text text-muted">Each category has only a parent category. <b>Default: Root #0</b></small>
+              </div>
+              <div class="form-group col-md-12">
+                <label>Assigned types</label>
+                <div class="card">
+                  <div class="card-body">
+                    <section [dndDropzone]="['assignedTypes']"
+                             (dndDrop)="onDraggedAssignedTypes($event, assignedTypes, 'copy')">
+                      <div style="border: 1px green solid; border-radius: 5px; padding: 15px;"
+                           dndPlaceholderRef>
+                        Drop type here
+                      </div>
+                      <div *ngFor="let type of assignedTypes"
+                           class="list-group-item list-group-item-action">
+                            <span class="d-flex justify-content-between align-items-center ">
+                              {{type.label}} # {{type.public_id}}
+                              <fa-icon icon="trash-alt" (click)="removeAssignedType(type)"></fa-icon>
+                            </span>
+                      </div>
+                      <div *ngIf="assignedTypes.length === 0"
+                           style="border: 1px orangered dashed; border-radius: 5px; padding: 15px;">
+                        <span class="d-flex justify-content-between align-items-center ">
+                              Drop type here
+                          <fa-icon icon="code"></fa-icon>
+                        </span>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+                <small class="form-text text-muted">Each object type must be part of one (and only one) category</small>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary pull-right mr-1" [disabled]="!categoryForm.valid">Save</button>
+            <button class="btn btn-secondary" routerLink="/framework/category/">Cancel</button>
+            <div class="clearfix"></div>
+        </div>
+      </form>
     </div>
   </div>
 </div>

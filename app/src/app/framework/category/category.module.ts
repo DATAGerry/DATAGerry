@@ -31,6 +31,7 @@ import { FilterPipe } from './filter.pipe';
 import { DataTablesModule } from 'angular-datatables';
 import { CategoryEditComponent } from './category-edit/category-edit.component';
 import { BuildCategoryFormComponent } from './build-category-form/build-category-form.component';
+import {SweetAlert2Module} from "@sweetalert2/ngx-sweetalert2";
 
 @NgModule({
   declarations: [
@@ -48,7 +49,8 @@ import { BuildCategoryFormComponent } from './build-category-form/build-category
     NgSelectModule,
     FontAwesomeModule,
     FormsModule,
-    DataTablesModule
+    DataTablesModule,
+    SweetAlert2Module
   ]
 })
 export class CategoryModule {

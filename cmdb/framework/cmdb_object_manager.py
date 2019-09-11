@@ -312,6 +312,10 @@ class CmdbObjectManager(CmdbManagerBase):
         )
         return ack
 
+    def update_many_types(self, filter: dict, update: dict):
+        ack = self._update_many(CmdbType.COLLECTION, filter, update)
+        return ack
+
     def count_types(self):
         return self.dbm.count(collection=CmdbType.COLLECTION)
 

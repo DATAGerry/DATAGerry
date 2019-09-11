@@ -44,6 +44,10 @@ export class CategoryService {
     return this.api.callGetRoute<CmdbCategory>(this.servicePrefix + '/' + publicID);
   }
 
+  public getRootCategory() {
+    return this.api.callGetRoute<CmdbCategory>(this.servicePrefix + '/root/');
+  }
+
   public getCategoryList() {
     return this.api.callGetRoute<CmdbCategory[]>(this.servicePrefix + '/');
   }

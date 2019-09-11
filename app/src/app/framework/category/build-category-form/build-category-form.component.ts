@@ -16,27 +16,28 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnInit} from '@angular/core';
-import {CmdbCategory} from '../../models/cmdb-category';
-import {CmdbType} from '../../models/cmdb-type';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {CategoryService} from '../../services/category.service';
-import {TypeService} from '../../services/type.service';
-import {ToastService} from '../../../layout/services/toast.service';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
-import {DndDropEvent, DropEffect} from 'ngx-drag-drop';
-import {ActivatedRoute, Router} from '@angular/router';
-import {CmdbMode} from '../../modes.enum';
+import { Component, Input, OnInit, AfterContentInit } from '@angular/core';
+import { CmdbCategory } from '../../models/cmdb-category';
+import { CmdbType } from '../../models/cmdb-type';
+import { FormGroup } from '@angular/forms';
+import { CategoryService } from '../../services/category.service';
+import { TypeService } from '../../services/type.service';
+import { ToastService } from '../../../layout/services/toast.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CategoryMode } from '../../modes.enum';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'cmdb-build-category-form',
   templateUrl: './build-category-form.component.html',
   styleUrls: ['./build-category-form.component.scss']
 })
-export class BuildCategoryFormComponent implements OnInit {
+export class BuildCategoryFormComponent implements OnInit, AfterContentInit {
 
   @Input() categoryForm: FormGroup;
-  @Input() mode: CmdbMode = CmdbMode.Create;
+  @Input() mode: CategoryMode = CategoryMode.Create;
   public category: CmdbCategory;
   public categoryList: CmdbCategory[];
   public categoryID: number;
@@ -48,43 +49,55 @@ export class BuildCategoryFormComponent implements OnInit {
   private toUpdateTypes: CmdbType[] = [];
 
   constructor(private categoryService: CategoryService, private typeService: TypeService, private router: Router,
-              private toast: ToastService, private modalService: NgbModal, private activateRoute: ActivatedRoute) {
+              private toast: ToastService, private modalService: NgbModal, private activateRoute: ActivatedRoute,
+              private spinner: NgxSpinnerService) {
 
     this.activateRoute.params.subscribe(params => {
       this.categoryID = params.publicID;
-    });
-
-    this.categoryForm = new FormGroup({
-      name: new FormControl('', Validators.required),
-      label: new FormControl('', Validators.required),
     });
   }
 
   ngOnInit() {
     // Create mode
-    if (this.mode === CmdbMode.Create) {
+    if (this.mode === CategoryMode.Create) {
+      this.category = new CmdbCategory();
       this.categoryForm.get('label').valueChanges.subscribe(value => {
         value = value == null ? '' : value;
         this.categoryForm.get('name').setValue(value.replace(/ /g, '-').toLowerCase());
         this.categoryForm.get('name').markAsDirty({onlySelf: true});
         this.categoryForm.get('name').markAsTouched({onlySelf: true});
       });
+
       this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
+        this.spinner.show();
         this.categoryList = list;
-      });
+      }, error => {},
+        () => this.spinner.hide());
     }
     // Edit mode
-    if (this.mode === CmdbMode.Edit) {
+    if (this.mode === CategoryMode.Edit) {
       this.categoryService.getCategory(this.categoryID).subscribe(value => {
         this.category = value;
+        this.spinner.show();
       }, error => { console.log(error); },
       () => {
         this.categoryForm.get('label').setValue(this.category.label);
         this.categoryForm.get('name').setValue(this.category.name);
-        this.typeService.getTypeListByCategory(this.categoryID).subscribe((typeList: CmdbType[]) => {
-          this.assignedTypes = typeList;
-          this.toUpdateTypes = typeList;
-        });
+        this.categoryForm.get('root').setValue(this.category.root);
+
+        if (this.category.root) {
+          this.typeService.getTypeListByCategory(0).subscribe((typeList: CmdbType[]) => {
+            this.typeList = [];
+            this.categoryList = [];
+            this.assignedTypes = typeList;
+            this.toUpdateTypes = typeList;
+          });
+        } else {
+          this.typeService.getTypeListByCategory(this.categoryID).subscribe((typeList: CmdbType[]) => {
+            this.assignedTypes = typeList;
+            this.toUpdateTypes = typeList;
+          });
+        }
         if (this.category.parent_id !== 0) {
           this.categoryService.getCategory(this.category.parent_id).subscribe((value: CmdbCategory) => {
             this.parentCategories.push(value);
@@ -98,24 +111,26 @@ export class BuildCategoryFormComponent implements OnInit {
             this.categoryList = list.filter(item => item.public_id !== this.category.parent_id);
           }
         });
+        this.spinner.hide();
       });
     }
     this.typeService.getTypeListByCategory(0).subscribe((typeList: CmdbType[]) => {
       this.typeList = typeList;
     });
+  }
 
+  ngAfterContentInit(): void {
     const parent: any = document.getElementsByClassName('category-form')[0];
     const first: any = document.getElementsByClassName('drag-items')[0];
     const second: any = document.getElementsByClassName('drag-items')[1];
-    first.style.height = parent.offsetHeight / 2 + 'px';
-    second.style.height = parent.offsetHeight / 2 + 'px';
+    first.style.height = parent.offsetHeight / 1.5 + 'px';
+    second.style.height = parent.offsetHeight / 1.5 + 'px';
   }
 
   public onDraggedParent(item: DndDropEvent, list: any[], effect: DropEffect) {
     if (list.length !== 0) {
       this.categoryList.push(list.pop());
     }
-
     list.push(item.data);
     this.categoryList = this.categoryList.filter(category => category.public_id !== item.data.public_id);
   }
@@ -153,28 +168,37 @@ export class BuildCategoryFormComponent implements OnInit {
   }
 
   public onSubmit(): void {
-    const tmpCategory: CmdbCategory = this.mode === CmdbMode.Create ? new CmdbCategory() : this.category;
+    const tmpCategory: CmdbCategory = this.category;
     tmpCategory.name = this.categoryForm.get('name').value;
     tmpCategory.label = this.categoryForm.get('label').value;
+    tmpCategory.root = this.categoryForm.get('root').value;
     tmpCategory.parent_id = this.parentCategories.length > 0 ? this.parentCategories.pop().public_id : 0;
+    tmpCategory.parent_id = tmpCategory.root ? 0 : tmpCategory.parent_id;
 
-    if (this.mode === CmdbMode.Create) {
+    if (this.mode === CategoryMode.Create) {
       this.addCategory(tmpCategory);
-    } else if (this.mode === CmdbMode.Edit) {
+    } else if (this.mode === CategoryMode.Edit) {
       this.editCategory(tmpCategory);
     }
   }
 
   public addCategory(tmpCategory: CmdbCategory): void {
-    this.categoryService.postCategory(tmpCategory).subscribe(resp => {
-      tmpCategory.public_id = +resp;
-    }, (error) => {
-      console.error(error);
-    },
-    () => {
-      this.reloadData('Category was created');
-    });
-    this.categoryForm.reset();
+    this.categoryService.getRootCategory().subscribe( (root: CmdbCategory[]) => {
+      if (root.length) {
+        tmpCategory.parent_id = tmpCategory.parent_id === 0 ? root[0].public_id : tmpCategory.parent_id;
+      }
+    }, (error) => {console.log(error)},
+      () => {
+        this.categoryService.postCategory(tmpCategory).subscribe(resp => {
+            tmpCategory.public_id = +resp;
+          }, (error) => {
+            console.error(error);
+          },
+          () => {
+            this.reloadData('Category was created');
+          });
+        this.categoryForm.reset();
+      });
   }
 
   public editCategory(tmpCategory: CmdbCategory): void {
@@ -194,8 +218,9 @@ export class BuildCategoryFormComponent implements OnInit {
       console.log(error);
     }, () => {
       for (const type of this.toUpdateTypes) {
+        type.category_id = type.category_id === undefined ? this.category.public_id : type.category_id;
         this.typeService.putType(type).subscribe((updateResp: CmdbType) => {
-          console.log('');
+          console.log(updateResp.public_id);
         });
       }
       this.toast.show(toastMessage);

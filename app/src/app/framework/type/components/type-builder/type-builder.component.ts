@@ -28,7 +28,7 @@ import { CategoryService } from '../../../services/category.service';
 import { CmdbMode } from '../../../modes.enum';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../../layout/services/toast.service';
-
+import { CmdbCategory } from '../../../models/cmdb-category';
 
 @Component({
   selector: 'cmdb-type-builder',
@@ -69,7 +69,12 @@ export class TypeBuilderComponent implements OnInit {
   }
 
   public exitBasicStep() {
-    this.selectedCategoryID = this.basicStep.basicCategoryForm.value.category_id;
+    const catID: number = this.basicStep.basicCategoryForm.value.category_id;
+    if (catID !== 0) {
+      this.categoryService.getCategory(catID).subscribe((item: CmdbCategory) => {
+        this.selectedCategoryID = item.root ? 0 : catID;
+      });
+    }
     const defaultIcon = this.basicStep.basicMetaIconForm.get('icon').value === '' ?
       'fas fa-cube' : this.basicStep.basicMetaIconForm.get('icon').value;
     this.assignToType({icon: defaultIcon}, 'render_meta');

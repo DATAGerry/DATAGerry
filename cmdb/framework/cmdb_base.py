@@ -119,6 +119,23 @@ class CmdbManagerBase:
             data=data
         )
 
+    def _update_many(self, collection: str, query: dict, update: dict):
+        """
+        update all documents that match the filter from a collection.
+        Args:
+            collection (str): name of the database collection
+            query (dict): A query that matches the documents to update.
+            update (dict): The modifications to apply.
+
+        Returns:
+            acknowledgment of database
+        """
+        return self.dbm.update_many(
+            collection=collection,
+            query=query,
+            update=update
+        )
+
     def _delete(self, collection: str, public_id: int):
         """
         delete document/object inside database

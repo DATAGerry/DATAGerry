@@ -18,7 +18,9 @@
 
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import {CmdbMode} from "../../modes.enum";
+import { CategoryMode } from '../../modes.enum';
+import { CategoryService } from '../../services/category.service';
+import { CmdbCategory } from '../../models/cmdb-category';
 
 @Component({
   selector: 'cmdb-category-add',
@@ -28,14 +30,19 @@ import {CmdbMode} from "../../modes.enum";
 export class CategoryAddComponent implements OnInit {
 
   public categoryAddForm: FormGroup;
-  public mode = CmdbMode.Create;
+  public mode = CategoryMode.Create;
 
-  constructor() {}
+  constructor(private categoryService: CategoryService) {}
 
   ngOnInit() {
     this.categoryAddForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl('', Validators.required),
+      root: new FormControl({value: false, disabled: true}, Validators.required)
+    });
+
+    this.categoryService.getRootCategory().subscribe((category: CmdbCategory[]) => {
+      this.categoryAddForm.get('root').setValue(!category.length);
     });
   }
 

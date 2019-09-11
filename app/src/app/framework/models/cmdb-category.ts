@@ -28,6 +28,7 @@ export class CmdbCategory implements CmdbDao {
   public icon: number;
   public type_list: number[];
   public parent_id: number;
+  public root: boolean;
   // tslint:enable
 }
 
