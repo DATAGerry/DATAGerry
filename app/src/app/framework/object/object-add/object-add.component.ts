@@ -79,13 +79,26 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.typeService.getTypeList().subscribe((typeList: CmdbType[]) => {
       this.typeList = typeList;
+      this.preperatedTypeList = [];
     }, (e) => {
       console.error(e);
     }, () => {
       this.categoryService.getCategoryList().subscribe((categoryList: CmdbCategory[]) => {
-        for (const category of categoryList) {
-          this.typeList.find(type => type.public_id === category.public_id).category_name = category.name;
-        }
+        categoryList.forEach( category => {
+          for ( const type of this.typeList ) {
+            if (type.category_id === category.public_id) {
+              type.category_name = category.label;
+              this.preperatedTypeList.push(type);
+            } else if (category.root && type.category_id === 0) {
+              type.category_name = category.label;
+              this.preperatedTypeList.push(type);
+            }
+          }
+        });
+      }, (e) => {
+        console.log(e);
+      }, () => {
+        this.typeList = this.preperatedTypeList;
       });
     });
     this.typeIDForm = new FormGroup({
@@ -98,7 +111,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
     this.typeIDSubject.unsubscribe();
   }
 
-  groupByFn = (item) => item.category_id;
+  groupByFn = (item) => item.category_name;
 
   groupValueFn = (_: string, children: any[]) => ({name: children[0].category_name, total: children.length});
 
