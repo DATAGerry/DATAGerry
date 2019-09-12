@@ -86,10 +86,8 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
       this.categoryService.getCategoryList().subscribe((categoryList: CmdbCategory[]) => {
         categoryList.forEach( category => {
           for ( const type of this.typeList ) {
-            if (type.category_id === category.public_id) {
-              type.category_name = category.label;
-              this.preperatedTypeList.push(type);
-            } else if (category.root && type.category_id === 0) {
+            if ((type.category_id === category.public_id)
+              || (category.root && type.category_id === 0) ) {
               type.category_name = category.label;
               this.preperatedTypeList.push(type);
             }
