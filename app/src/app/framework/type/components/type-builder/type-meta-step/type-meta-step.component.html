@@ -66,8 +66,8 @@
             </small>
           </div>
           <div class="form-group">
-            <div class="form-group" *ngFor="let field of hrefInterpolCounter">
-              <label>Field of interpolation: {{field + 1}}</label>
+            <div class="form-group" *ngIf="hrefInterpolCounter">
+              <label>Field of interpolation</label>
               <ng-select
                 [items]="fields"
                 [multiple]="true"
