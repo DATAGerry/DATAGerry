@@ -17,11 +17,9 @@
 */
 
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
-import { ApiCallService } from '../../../services/api-call.service';
 import { FormControl } from '@angular/forms';
-import { CmdbType } from '../../../framework/models/cmdb-type';
-import {TypeService} from "../../../framework/services/type.service";
-import {SidebarService} from "../../services/sidebar.service";
+import { TypeService } from '../../../framework/services/type.service';
+import { SidebarService } from '../../services/sidebar.service';
 
 @Component({
   selector: 'cmdb-sidebar',
@@ -65,26 +63,26 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
     searchText = searchText.toLowerCase();
 
-    for (const it of filterList) {
+    filterList.forEach(it => {
       let isAvailable = it.category.label.toLowerCase().includes(searchText);
       if (isAvailable) {
         if (this.filterCategoryTree.includes(it) === false) {
           this.filterCategoryTree.push(it);
         }
       } else {
-        for (const typ of it.category.type_list) {
-          this.typeService.getType(typ).subscribe((obj: CmdbType) => {
+        this.typeService.getTypeListByCategory(it.category.public_id).subscribe(typeList => {
+          for (const obj of typeList) {
             isAvailable = obj.label.toLowerCase().includes(searchText);
             if (isAvailable) {
               if (this.filterCategoryTree.includes(it) === false) {
                 this.filterCategoryTree.push(it);
               }
             }
-          });
-        }
+          }
+        });
       }
       this.transform(it.children, searchText);
-    }
+    });
     return this.filterCategoryTree;
   }
 }
