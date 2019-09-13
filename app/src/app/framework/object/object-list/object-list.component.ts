@@ -71,6 +71,7 @@ export class ObjectListComponent implements OnDestroy {
     this.exportService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
+    this.spinner.show();
     this.getRouteObjects(id.publicID);
   }
 
@@ -100,7 +101,6 @@ export class ObjectListComponent implements OnDestroy {
       )
       .subscribe(
         data => {
-          this.spinner.show();
           this.buildDtTable();
 
           setTimeout(() => {
