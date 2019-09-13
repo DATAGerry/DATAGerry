@@ -46,7 +46,7 @@ const routes: Routes = [
     outlet: 'footer'
   },
   {
-    path: ':publicID',
+    path: 'view/:publicID',
     data: {
       breadcrumb: 'View'
     },
