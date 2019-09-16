@@ -22,7 +22,7 @@ import { NavigationComponent } from '../layout/components/navigation/navigation.
 import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
 import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';
 import { FooterComponent } from '../layout/components/footer/footer.component';
-import { UserViewComponent } from './user-view/user-view.component';
+import { UserViewComponent } from './users/user-view/user-view.component';
 
 const routes: Routes = [
   {
@@ -46,12 +46,19 @@ const routes: Routes = [
     outlet: 'footer'
   },
   {
-    path: ':publicID',
+    path: 'groups',
     data: {
-      breadcrumb: 'View'
+      breadcrumb: 'Groups'
     },
-    component: UserViewComponent
-  }
+    loadChildren: () => import('./groups/groups.module').then(m => m.GroupsModule)
+  },
+  {
+    path: 'users',
+    data: {
+      breadcrumb: 'Users'
+    },
+    loadChildren: () => import('./users/users.module').then(m => m.UsersModule)
+  },
 ];
 
 

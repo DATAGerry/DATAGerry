@@ -13,6 +13,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+from cmdb.utils.error import CMDBError
+
 try:
     from cmdb.data_storage import DatabaseManagerMongo
 except ImportError:
@@ -168,3 +170,27 @@ class CmdbManagerBase:
 
     def _search(self, collection: str, requirements, limit=0):
         return self._get_all(collection, limit=limit, **requirements)
+
+
+class ManagerGetError(CMDBError):
+
+    def __init__(self, err):
+        self.message = f'Error while GET operation - E: ${err}'
+
+
+class ManagerInsertError(CMDBError):
+
+    def __init__(self, err):
+        self.message = f'Error while INSERT operation - E: ${err}'
+
+
+class ManagerUpdateError(CMDBError):
+
+    def __init__(self, err):
+        self.message = f'Error while UPDATE operation - E: ${err}'
+
+
+class ManagerDeleteError(CMDBError):
+
+    def __init__(self, err):
+        self.message = f'Error while DELETE operation - E: ${err}'

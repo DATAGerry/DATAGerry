@@ -57,6 +57,14 @@ export class AuthService {
     return this.currentUserTokenSubject.value;
   }
 
+  public getAuthProviders() {
+    return this.http.get(`${this.connectionService.currentConnection}/${this.restPrefix}/${this.servicePrefix}/providers`).pipe(
+      map((apiResponse) => {
+        return apiResponse;
+      })
+    );
+  }
+
   public login(username: string, password: string) {
     const data = {
       user_name: username,

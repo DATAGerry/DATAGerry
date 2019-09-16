@@ -16,21 +16,24 @@
 
 import logging
 
-from cmdb.user_management.user_group import UserGroup
-from cmdb.user_management.user import User
-from cmdb.user_management.user_right import BaseRight, GLOBAL_IDENTIFIER
-from cmdb.user_management.user_authentication import AuthenticationProvider, LocalAuthenticationProvider, \
-    NoValidAuthenticationProviderError
+import cmdb
 from cmdb.data_storage import NoDocumentFound, DatabaseManagerMongo
 from cmdb.data_storage.database_manager import DeleteResult
-from cmdb.utils.security import SecurityManager
+from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
+    ManagerDeleteError
+from cmdb.user_management.user import User
+from cmdb.user_management.user_authentication import AuthenticationProvider, LocalAuthenticationProvider, \
+    NoValidAuthenticationProviderError
+from cmdb.user_management.user_group import UserGroup
+from cmdb.user_management.user_right import BaseRight, GLOBAL_IDENTIFIER
 from cmdb.utils.error import CMDBError
-import cmdb
+from cmdb.utils.security import SecurityManager
+from cmdb.utils.wraps import deprecated
 
 LOGGER = logging.getLogger(__name__)
 
 
-class UserManagement:
+class UserManagement(CmdbManagerBase):
     MANAGEMENT_CLASSES = {
         'GROUP_CLASSES': UserGroup,
         'USER_CLASSES': User,
@@ -42,13 +45,14 @@ class UserManagement:
         self.scm = security_manager
         self._authentication_providers = self._load_authentication_providers()
         self.rights = self._load_rights()
+        super().__init__(database_manager)
 
     def _load_authentication_providers(self) -> dict:
         return {
             'LocalAuthenticationProvider': LocalAuthenticationProvider
         }
 
-    def get_highest_id(self, collection: str):
+    def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
 
     def get_authentication_provider(self, name: str):
@@ -61,9 +65,11 @@ class UserManagement:
         return self.dbm.find_one(collection=User.COLLECTION, public_id=public_id)
 
     def get_user(self, public_id: int) -> User:
-        result = self._get_user(public_id)
-        if not result:
-            raise NoUserFoundExceptions(public_id)
+        try:
+            result = self._get_user(public_id)
+        except (CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise UserManagerGetError(err)
         return User(**result)
 
     def get_all_users(self):
@@ -83,18 +89,19 @@ class UserManagement:
         except NoDocumentFound:
             raise NoUserFoundExceptions(user_name)
 
+    def get_user_by(self, sort='public_id', **requirements) -> list:
+        ack = []
+        users = self._get_all(collection=User.COLLECTION, sort=sort, **requirements)
+        for user in users:
+            ack.append(User(**user))
+        return ack
+
     def insert_user(self, user: User) -> int:
-        try:
-            self.get_group(public_id=user.group_id)
-        except GroupNotExistsError as e:
-            LOGGER.error(e.message)
-            raise UserInsertError(user.get_username())
         try:
             return self.dbm.insert(collection=User.COLLECTION, data=user.to_database())
         except (CMDBError, Exception) as e:
-            if cmdb.__MODE__ is not 'TESTING':
-                LOGGER.error(e.message)
-            raise UserInsertError(user.get_username())
+            LOGGER.error(e)
+            raise UserManagerInsertError(f'Could not insert {user.get_username()}')
 
     def update_user(self, update_user: User) -> bool:
         ack = self.dbm.update(collection=User.COLLECTION, public_id=update_user.get_public_id(),
@@ -140,7 +147,7 @@ class UserManagement:
         try:
             return self.dbm.insert(collection=UserGroup.COLLECTION, data=insert_group.to_database())
         except Exception as e:
-            raise GroupInsertError(insert_group.get_name())
+            raise UserManagerInsertError(insert_group.get_name())
 
     def delete_group(self, public_id) -> DeleteResult:
         try:
@@ -228,6 +235,31 @@ class UserManagement:
         return self.dbm.count(collection=User.COLLECTION)
 
 
+class UserManagerGetError(ManagerGetError):
+
+    def __init__(self, err):
+        super(UserManagerGetError, self).__init__(err)
+
+
+class UserManagerInsertError(ManagerInsertError):
+
+    def __init__(self, err):
+        super(UserManagerInsertError, self).__init__(err)
+
+
+class UserManagerUpdateError(ManagerUpdateError):
+
+    def __init__(self, err):
+        super(UserManagerUpdateError, self).__init__(err)
+
+
+class UserManagerDeleteError(ManagerDeleteError):
+
+    def __init__(self, err):
+        super(UserManagerDeleteError, self).__init__(err)
+
+
+# DEPRECATED @ HERE
 class GroupDeleteError(CMDBError):
     def __init__(self, name):
         super().__init__()
@@ -275,33 +307,6 @@ class GroupInsertError(CMDBError):
     def __init__(self, name):
         super().__init__()
         self.message = "The following group could not be added: {}".format(name)
-
-
-class UserInsertError(CMDBError):
-    def __init__(self, name):
-        super().__init__()
-        self.message = "The following user could not be added: {}".format(name)
-
-
-class WrongTypeException(Exception):
-    """Exception if input_type was wrong"""
-
-    def __init__(self):
-        super().__init__()
-
-
-class WrongPassException(Exception):
-    """Exception if wrong password"""
-
-    def __init__(self):
-        super().__init__()
-
-
-class UserHasNotRequiredRight(Exception):
-    """Exception if user has not the right for an action"""
-
-    def __init__(self, user, right):
-        self.message = "The user {} has not the required right level {} to view this page".format(user.user_name, right)
 
 
 def get_user_manager():

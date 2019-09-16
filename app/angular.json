@@ -33,6 +33,8 @@
               "./node_modules/bootstrap/dist/js/bootstrap.bundle.js",
               "./node_modules/datatables.net/js/jquery.dataTables.js",
               "./node_modules/datatables.net-bs4/js/dataTables.bootstrap4.js",
+              "./node_modules/datatables.net-rowgroup/js/dataTables.rowGroup.js",
+              "./node_modules/datatables.net-rowgroup-bs4/js/rowGroup.bootstrap4.js",
               "./node_modules/datatables.net-fixedheader/js/dataTables.fixedHeader.js",
               "./node_modules/datatables.net-fixedheader-bs4/js/fixedHeader.bootstrap4.js",
               "./node_modules/datatables.net-responsive/js/dataTables.responsive.js",

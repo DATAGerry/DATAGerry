@@ -35,7 +35,7 @@ export class SectionControl implements ControlsCommon {
 
   name = 'section';
   label = 'Section';
-  icon = 'object-group';
+  icon = 'object-groups';
   dndType: string = 'sections';
 
   content() {

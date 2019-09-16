@@ -1,0 +1,31 @@
+<h1>Group list
+  <div class="float-right">
+    <button routerLink="/management/groups/add/" type="button" class="btn btn-primary">
+      <i class="fas fa-plus-circle"></i> Add new group
+    </button>
+  </div>
+  <div class="clearfix"></div>
+</h1>
+<hr/>
+<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table">
+  <thead>
+  <tr>
+    <th scope="col"></th>
+    <th scope="col">Public ID</th>
+    <th scope="col">Name</th>
+    <th scope="col">Label</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let group of groupList" id="tr_{{group.name}}">
+    <td>
+      <button type="button" class="btn btn-link p-0" (click)="toggle(group)">
+        <i class="fas fa-arrow-alt-circle-down"></i>
+      </button>
+    </td>
+    <th scope="row">{{group.public_id}}</th>
+    <td>{{group.name}}</td>
+    <td>{{group.label}}</td>
+  </tr>
+  </tbody>
+</table>

@@ -17,25 +17,59 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService } from '../../services/api-call.service';
+import { ApiCallService, ApiService } from '../../services/api-call.service';
 import { AuthService } from '../../auth/services/auth.service';
 import { Group } from '../models/group';
+import { CmdbStatus } from '../../framework/models/cmdb-status';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { User } from '../models/user';
 
 @Injectable({
   providedIn: 'root'
 })
-export class GroupService {
+export class GroupService<T = Group> implements ApiService {
 
-  private readonly prefix: string = 'group';
+  public servicePrefix: string = 'group';
+  private groups: any[];
 
   constructor(private api: ApiCallService) {
+    this.getGroupList().subscribe((groups: T[]) => {
+      this.groups = groups;
+    });
   }
 
-  public getGroup(publicID: number) {
-    return this.api.callGetRoute<Group>(this.prefix + '/' + publicID);
+  // Find calls
+  public findGroup(publicID: number): Group {
+    return this.groups.find(g => g.public_id === publicID);
   }
 
-  public getGroupList() {
-    return this.api.callGetRoute<Group[]>(this.prefix + '/');
+  // CRUD calls
+  public getGroupList(): Observable<T[]> {
+    return this.api.callGet<T[]>(`${this.servicePrefix}/`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
+
+  public getGroup(publicID: number): Observable<T> {
+    return this.api.callGet<T>(`${this.servicePrefix}/${publicID}`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public postGroup(data: T) {
+    return this.api.callPost<T>(`${this.servicePrefix}/`, data).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
 }

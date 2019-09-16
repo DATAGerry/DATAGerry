@@ -15,13 +15,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-
-from flask import request, abort
 from datetime import datetime
 
+from flask import request, abort
+
+from cmdb.interface.route_utils import make_response, RootBlueprint
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management.user_manager import user_manager
-from cmdb.interface.route_utils import make_response, RootBlueprint
 
 try:
     from cmdb.utils.error import CMDBError
@@ -30,6 +30,13 @@ except ImportError:
 
 auth_routes = RootBlueprint('auth_rest', __name__, url_prefix='/auth')
 LOGGER = logging.getLogger(__name__)
+
+
+@auth_routes.route('/providers/', methods=['GET'])
+@auth_routes.route('/providers', methods=['GET'])
+def get_auth_providers():
+    from cmdb.user_management import __AUTH_PROVIDERS__
+    return make_response(__AUTH_PROVIDERS__)
 
 
 @auth_routes.route('/login', methods=['POST'])

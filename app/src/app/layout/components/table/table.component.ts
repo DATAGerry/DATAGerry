@@ -142,7 +142,7 @@ export class TableComponent implements OnInit, OnDestroy {
       buttons: {
         dom: {
           container: {
-            className: 'dt-buttons btn-group btn-group-sm'
+            className: 'dt-buttons btn-groups btn-groups-sm'
           }
         },
         buttons,

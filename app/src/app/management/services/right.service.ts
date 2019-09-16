@@ -17,26 +17,36 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService } from '../../services/api-call.service';
-import { AuthService } from '../../auth/services/auth.service';
+import { ApiCallService, ApiService } from '../../services/api-call.service';
 import { Group } from '../models/group';
+import { Right } from '../models/right';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
-export class RightService {
+export class RightService<T = Right> implements ApiService {
 
-  private readonly prefix: string = 'right';
+  public readonly servicePrefix: string = 'right';
 
   constructor(private api: ApiCallService) {
   }
 
-  public getRightList() {
-    return this.api.callGetRoute<Group[]>(this.prefix + '/');
+  public getRightList(): Observable<T[]> {
+    return this.api.callGet<T[]>(`${this.servicePrefix}/`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
   public getRightLevels() {
-    return this.api.callGetRoute<Group[]>(this.prefix + '/levels');
+    return this.api.callGetRoute<Group[]>(this.servicePrefix + '/levels');
   }
+
 
 }

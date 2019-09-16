@@ -53,14 +53,11 @@
         </a>
         <div class="dropdown-menu dropdown-menu-right">
           <div class="dropdown-header">User-Management</div>
-          <a routerLink="/settings/user-management" class="dropdown-item">
+          <a routerLink="/management/users" class="dropdown-item">
             <fa-icon icon="user-friends"></fa-icon> Users
           </a>
-          <a routerLink="/settings/user-management/groups" class="dropdown-item">
+          <a routerLink="/management/groups" class="dropdown-item">
             <fa-icon icon="users"></fa-icon> Groups
-          </a>
-          <a routerLink="/settings/user-management/rights" class="dropdown-item">
-            <fa-icon icon="user-shield"></fa-icon> Rights
           </a>
         </div>
       </li>
@@ -82,7 +79,7 @@
         </a>
         <div class="dropdown-menu dropdown-menu-right">
           <div class="dropdown-header">Account</div>
-          <a routerLink="/user/{{authService.currentUserValue.public_id}}" class="dropdown-item">
+          <a routerLink="/management/users/view/{{authService.currentUserValue.public_id}}" class="dropdown-item">
             <fa-icon icon="user-edit"></fa-icon> Profile
           </a>
           <div class="dropdown-header">Auth</div>

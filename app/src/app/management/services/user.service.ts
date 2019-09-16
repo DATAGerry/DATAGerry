@@ -17,22 +17,25 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService } from '../../services/api-call.service';
+import { ApiCallService, ApiService } from '../../services/api-call.service';
 import { User } from '../models/user';
 import { Group } from '../models/group';
 import { AuthService } from '../../auth/services/auth.service';
+import { Right } from '../models/right';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { CmdbStatus } from '../../framework/models/cmdb-status';
 
 @Injectable({
   providedIn: 'root'
 })
-export class UserService {
+export class UserService<T = User> implements ApiService {
 
-  private readonly prefix: string = 'user';
-  private userList: User[] = [];
+  public readonly servicePrefix: string = 'user';
+  private userList: any[] = [];
 
   constructor(private api: ApiCallService, private authService: AuthService) {
-
-    this.getUserList().subscribe((respUserList: User[]) => {
+    this.getUserList().subscribe((respUserList: T[]) => {
       this.userList = respUserList;
     });
   }
@@ -41,20 +44,52 @@ export class UserService {
     return this.authService.currentUserValue;
   }
 
-  public getUserList() {
-    return this.api.callGetRoute<User[]>(this.prefix + '/');
+  public getUserList(): Observable<T[]> {
+    return this.api.callGet<T>(`${this.servicePrefix}/`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
   public changeUserPassword(userID: number, newPassword: string) {
-    return this.api.callPutRoute<boolean>(this.prefix + '/' + userID + '/passwd', {password: newPassword});
+    return this.api.callPutRoute<boolean>(this.servicePrefix + '/' + userID + '/passwd', {password: newPassword});
   }
 
-  public getUser(publicID: number) {
-    return this.api.callGetRoute<User>(this.prefix + '/' + publicID);
+  public getUser(publicID: number): Observable<T> {
+    return this.api.callGet<T>(`${this.servicePrefix}/${publicID}`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
   }
 
-  public findUser(publicID: number): User {
+  // tslint:disable-next-line:no-shadowed-variable
+  public findUser(publicID: number): User | T {
     return this.userList.find(user => user.public_id === publicID);
+  }
+
+  public getUserByGroup(publicID: number): Observable<T[]> {
+    return this.api.callGet<T>(`${this.servicePrefix}/group/${publicID}`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
+  }
+
+  // CRUD functions
+  public postUser(data: User) {
+    return this.api.callPost<User>(`${this.servicePrefix}/`, data).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
   }
 
 }

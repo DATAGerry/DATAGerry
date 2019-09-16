@@ -1,0 +1,25 @@
+<div class="row">
+  <div class="col-6">
+    <h2>Users in this group</h2>
+    <table class="table">
+      <thead>
+      <tr>
+        <th scope="col">Public ID</th>
+        <th scope="col">Username</th>
+        <th scope="col">Firstname</th>
+        <th scope="col">Lastname</th>
+      </tr></thead>
+      <tbody>
+      <tr *ngFor="let user of groupUsers">
+        <th scope="row">{{user?.public_id}}</th>
+        <td>{{user?.user_name}}</td>
+        <td>{{user?.first_name}}</td>
+        <td>{{user?.last_name}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-6">
+    <h2>Rights in this group</h2>
+  </div>
+</div>

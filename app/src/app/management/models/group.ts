@@ -16,9 +16,11 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export class Group {
+import { CmdbDao } from '../../framework/models/cmdb-dao';
+
+export class Group implements CmdbDao {
   /* tslint:disable */
-  private readonly public_id: number;
+  public readonly public_id: number;
   public name: string;
   public label: string;
   public rights: any[];

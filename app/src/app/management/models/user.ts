@@ -23,6 +23,7 @@ export class User {
   public first_name?: string;
   public last_name?: string;
   public email: string;
+  public image?: string;
   public token?: string;
   public token_expire?: number;
   public token_issued_at?: number;
@@ -35,11 +36,5 @@ export class User {
   public authenticator: string;
   public group_id: number;
 
-  public getName() {
-    if (typeof this.first_name != 'undefined' || typeof this.last_name != 'undefined') {
-      return this.user_name;
-    }
-    return this.first_name + ' ' + this.last_name;
-  }
   /* tslint:enable */
 }

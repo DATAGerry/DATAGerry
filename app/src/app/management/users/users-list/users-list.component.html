@@ -1,0 +1,31 @@
+<h1>User list
+  <div class="float-right">
+    <button routerLink="/management/users/add/" type="button" class="btn btn-primary">
+      <i class="fas fa-plus-circle"></i> Add new user
+    </button>
+  </div>
+  <div class="clearfix"></div>
+</h1>
+<hr/>
+<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table">
+  <thead>
+  <tr>
+    <th scope="col">Public ID</th>
+    <th scope="col">Username</th>
+    <th scope="col">Display</th>
+    <th scope="col">Firstname</th>
+    <th scope="col">Lastname</th>
+    <th scope="col">Group</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let user of userList">
+    <th scope="row">{{user.public_id}}</th>
+    <td>{{user.user_name}}</td>
+    <td><cmdb-user-display [user]="user"></cmdb-user-display></td>
+    <td>{{user.first_name}}</td>
+    <td>{{user.last_name}}</td>
+    <td>{{groupService.findGroup(user.group_id).label}}</td>
+  </tr>
+  </tbody>
+</table>

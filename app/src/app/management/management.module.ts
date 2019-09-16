@@ -21,13 +21,13 @@ import { CommonModule } from '@angular/common';
 
 import { ManagementRoutingModule } from './management-routing.module';
 import { UserService } from './services/user.service';
-import { UserViewComponent } from './user-view/user-view.component';
+import { UserViewComponent } from './users/user-view/user-view.component';
 import { LayoutModule } from '../layout/layout.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { GroupService } from './services/group.service';
 
 @NgModule({
-  declarations: [UserViewComponent],
+  declarations: [],
   imports: [
     CommonModule,
     ManagementRoutingModule,
@@ -37,7 +37,6 @@ import { GroupService } from './services/group.service';
   providers: [
     UserService,
     GroupService,
-
   ],
 })
 export class ManagementModule { }

@@ -14,21 +14,24 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from cmdb.user_management.user_base import UserManagementBase
 from datetime import datetime
+
+from cmdb.user_management.user_base import UserManagementBase
+
 
 class User(UserManagementBase):
     """
     User class
     """
     COLLECTION = 'management.users'
-    REQUIRED_INIT_KEYS = ['user_name']
+    REQUIRED_INIT_KEYS = ['user_name', 'registration_time', 'group_id']
     INDEX_KEYS = [
         {'keys': [('user_name', UserManagementBase.ASCENDING)], 'name': 'user_name', 'unique': True}
     ]
 
-    def __init__(self, user_name, group_id, registration_time, password=None, last_login_time=None,
-                 first_name=None, last_name=None, email=None, authenticator='LocalAuthenticationProvider', **kwargs):
+    def __init__(self, user_name, group_id, registration_time, active=True, password=None, last_login_time=None,
+                 image=None, first_name=None, last_name=None, email=None, authenticator='LocalAuthenticationProvider',
+                 **kwargs):
         """
 
         Args:
@@ -45,12 +48,11 @@ class User(UserManagementBase):
         self.user_name = user_name
         self.password = password
         self.last_login_time = last_login_time or datetime.utcnow()
+        self.image = image
+        self.active = active
         self.group_id = group_id
         self.authenticator = authenticator
-        if email is None or email == "" or not self.is_valid_email(email):
-            self.email = email
-        else:
-            self.email = None
+        self.email = email
         self.registration_time = registration_time
         self.first_name = first_name
         self.last_name = last_name
@@ -102,22 +104,6 @@ class User(UserManagementBase):
         if self.email is None or self.email == "":
             return None
         return self.email
-
-    @staticmethod
-    def is_valid_email(email) -> bool:
-        """
-        Checks if email is longer than 7 chars and a valid email address
-        Args:
-            email: email address
-
-        Returns:
-            bool: true if valid | false if not
-        """
-        import re
-        if len(email) > 7:
-            return re.match('^.+@(\[?)[a-zA-Z0-9-.]+.([a-zA-Z]{2,3}|[0-9]{1,3})(]?)$', email)
-        else:
-            return False
 
     def get_password(self) -> (str, bytes):
         """
