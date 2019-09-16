@@ -27,6 +27,7 @@ import { Router } from '@angular/router';
 import { ToastService } from '../../../layout/services/toast.service';
 import { ModalComponent } from '../../../layout/helpers/modal/modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {SidebarService} from "../../../layout/services/sidebar.service";
 
 @Component({
   selector: 'cmdb-category-list',
@@ -43,8 +44,8 @@ export class CategoryListComponent implements OnInit, OnDestroy {
   public typeList: CmdbType[];
 
   constructor(public categoryService: CategoryService, public typeService: TypeService,
-              private toast: ToastService, private modalService: NgbModal, private router: Router) {
-
+              private sidebarService: SidebarService, private toast: ToastService,
+              private modalService: NgbModal, private router: Router) {
   }
 
   public ngOnInit(): void {
@@ -84,8 +85,8 @@ export class CategoryListComponent implements OnInit, OnDestroy {
     removeModal.componentInstance.buttonAccept = 'Delete';
     removeModal.result.then((result) => {
       if (result) {
-        this.typeService.updateTypeByCategoryID(publicID).subscribe((value) => {
-          console.log(value);
+        this.typeService.updateTypeByCategoryID(publicID).subscribe((resp) => {
+          console.log(resp);
         }, (error) => { console.log(error); },
           () => {
             this.categoryService.deleteCategory(publicID).subscribe((confirm) => {
@@ -93,7 +94,10 @@ export class CategoryListComponent implements OnInit, OnDestroy {
                 this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
                   this.categoryList = list;
                 }, (error) => { console.log(error); },
-                  () => { this.toast.show('Category was deleted'); });
+                  () => {
+                    this.sidebarService.updateCategoryTree();
+                    this.toast.show('Category was deleted');
+                });
               }
             });
           });
@@ -102,7 +106,6 @@ export class CategoryListComponent implements OnInit, OnDestroy {
       console.log(reason);
     });
   }
-
 
   ngOnDestroy(): void {
     // Do not forget to unsubscribe the event

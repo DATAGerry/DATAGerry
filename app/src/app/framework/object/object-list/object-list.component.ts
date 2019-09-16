@@ -71,6 +71,7 @@ export class ObjectListComponent implements OnDestroy {
     this.exportService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
+    this.spinner.show();
     this.getRouteObjects(id.publicID);
   }
 
@@ -100,7 +101,6 @@ export class ObjectListComponent implements OnDestroy {
       )
       .subscribe(
         data => {
-          this.spinner.show();
           this.buildDtTable();
 
           setTimeout(() => {
@@ -182,7 +182,7 @@ export class ObjectListComponent implements OnDestroy {
             columnButton.push({
               extend: 'colvisRestore',
               text: 'Restore',
-              className: 'btn btn-secondary btn-lg btn-block',
+              className: 'btn btn-secondary btn-sm btn-block',
               action: function() {
                 this.rerender();
                 this.dtTrigger.next();

@@ -28,6 +28,7 @@ import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryMode } from '../../modes.enum';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { SidebarService } from "../../../layout/services/sidebar.service";
 
 @Component({
   selector: 'cmdb-build-category-form',
@@ -50,7 +51,7 @@ export class BuildCategoryFormComponent implements OnInit, AfterContentInit {
 
   constructor(private categoryService: CategoryService, private typeService: TypeService, private router: Router,
               private toast: ToastService, private modalService: NgbModal, private activateRoute: ActivatedRoute,
-              private spinner: NgxSpinnerService) {
+              private spinner: NgxSpinnerService, private sidebarService: SidebarService) {
 
     this.activateRoute.params.subscribe(params => {
       this.categoryID = params.publicID;
@@ -223,6 +224,7 @@ export class BuildCategoryFormComponent implements OnInit, AfterContentInit {
           console.log(updateResp.public_id);
         });
       });
+      this.sidebarService.updateCategoryTree();
       this.toast.show(toastMessage);
       this.router.navigate(['/framework/category/']);
     });

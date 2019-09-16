@@ -9,7 +9,7 @@
           <ng-select [items]="typeList" [groupBy]="groupByFn" [groupValue]="groupValueFn" formControlName="typeID"
                      bindLabel="label" bindValue="public_id" required>
             <ng-template ng-optgroup-tmp let-item="item">
-              <span style="vertical-align: middle;">{{item.category_name}}</span>
+              <span style="vertical-align: middle;">{{item.name}}</span>
               <span class="ml-1 badge badge-secondary">{{item.total}}</span>
             </ng-template>
           </ng-select>

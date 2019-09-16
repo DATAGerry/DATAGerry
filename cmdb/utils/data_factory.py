@@ -145,67 +145,45 @@ class DataGenerator:
                                    "between two or more locations provided according to a commercial contract.",
                     "version": "1.0.0",
                     "active": True,
+                    "access": {
+                        "groups": "",
+                        "users": ""
+                    },
+                    "category_id": 2,
                     "author_id": 1,
                     "creation_time": generation_date,
                     "render_meta": {
+                        "icon": "fas fa-cube",
                         "external": [],
-                        "summary": [
+                        "summary":
                             {
-                                "label": "Connection State",
                                 "fields": [
                                     "state",
-                                ],
-                                "name": "connection_state"
-                            },
-                            {
-                                "label": "Linedetails",
-                                "fields": [
                                     "product_name",
                                     "transfer_rate"
-                                ],
-                                "name": "linedetails"
-                            },
-                            {
-                                "label": "Location A",
-                                "fields": [
-                                    "company_name_a",
-                                    "zip_a",
-                                    "city_a"
-                                ],
-                                "name": "location_a"
-                            },
-                            {
-                                "label": "Location B",
-                                "fields": [
-                                    "company_name_b",
-                                    "zip_b",
-                                    "city_b"
-                                ],
-                                "name": "location_b"
+                                ]
                             }
-                        ],
+                        ,
                         "sections": [
                             {
-                                "tag": "h1",
+                                "type": "section",
                                 "name": "connection state",
                                 "label": "Connection State",
                                 "fields": [
                                     "state",
-                                ],
-                                "position": 1
+                                ]
                             },
                             {
-                                "tag": "h2",
+                                "type": "section",
                                 "name": "linedetails",
                                 "label": "Linedetails",
                                 "fields": [
                                     "product_name",
                                     "transfer_rate"
-                                ],
-                                "position": 2
+                                ]
                             },
                             {
-                                "tag": "h1",
+                                "type": "section",
                                 "name": "location_a",
                                 "label": "Location A",
                                 "fields": [
@@ -214,11 +192,10 @@ class DataGenerator:
                                     "zip_a",
                                     "city_a",
                                     "location_details_a"
-                                ],
-                                "position": 3
+                                ]
                             },
                             {
-                                "tag": "h1",
+                                "type": "section",
                                 "name": "location_b",
                                 "label": "Location B",
                                 "fields": [
@@ -227,121 +204,80 @@ class DataGenerator:
                                     "zip_b",
                                     "city_b",
                                     "location_details_b"
-                                ],
-                                "position": 4
+                                ]
                             },
                         ]
                     },
                     "fields": [
                         {
-                            "input_type": "checkbox",
                             "label": "State",
                             "name": "state",
-                            "className": "form-control",
                             "type": "checkbox"
                         },
                         {
-                            "input_type": "text",
                             "label": "Product Name",
-                            "className": "form-control",
                             "name": "product_name",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Transfer Rate",
-                            "className": "form-control",
                             "name": "transfer_rate",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Company Name A",
-                            "className": "form-control",
                             "name": "company_name_a",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Street A",
-                            "className": "form-control",
                             "name": "street_a",
                             "type": "text"
                         },
                         {
-                            "input_type": "number",
                             "label": "ZIP A",
                             "required": True,
-                            "className": "form-control",
                             "name": "zip_a",
-                            "min": 10000,
-                            "max": 99999,
-                            "step": 1,
                             "type": "number"
                         },
                         {
-                            "input_type": "text",
                             "label": "City A",
-                            "className": "form-control",
                             "name": "city_a",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Location Details A",
-                            "className": "form-control",
                             "name": "location_details_a",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Company Name B",
-                            "className": "form-control",
                             "name": "company_name_b",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Street B",
-                            "className": "form-control",
                             "name": "street_b",
                             "type": "text"
                         },
                         {
-                            "input_type": "number",
                             "label": "ZIP B",
                             "required": True,
-                            "className": "form-control",
                             "name": "zip_b",
-                            "min": 10000,
-                            "max": 99999,
-                            "step": 1,
                             "type": "number"
                         },
                         {
-                            "input_type": "text",
                             "label": "City B",
-                            "className": "form-control",
                             "name": "city_b",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Location Details B",
-                            "className": "form-control",
                             "name": "location_details_b",
                             "type": "text"
                         },
 
                     ],
-                    "logs": [
-                        {
-                            "author_id": 1,
-                            "action": "create",
-                            "message": "Auto-generation of example type",
-                            "date": generation_date
-                        }
-                    ]
                 }
             )
         )
@@ -357,23 +293,26 @@ class DataGenerator:
                                    "and forward data to the destination device. ",
                     "version": "1.0.0",
                     "active": True,
+                    "access": {
+                        "groups": "",
+                        "users": ""
+                    },
                     "author_id": 1,
+                    "category_id": 3,
                     "creation_time": generation_date,
                     "render_meta": {
+                        "icon": "fas fa-cube",
                         "external": [],
-                        "summary": [
+                        "summary":
                             {
-                                "label": "Management",
                                 "fields": [
                                     "management_ip",
                                     "hostname"
-                                ],
-                                "name": "management"
-                            }
-                        ],
+                                ]
+                            },
                         "sections": [
                             {
-                                "tag": "h1",
+                                "type": "section",
                                 "name": "management",
                                 "label": "Management",
                                 "fields": [
@@ -383,11 +322,10 @@ class DataGenerator:
                                     "os",
                                     "username",
                                     "password"
-                                ],
-                                "position": 1
+                                ]
                             },
                             {
-                                "tag": "h1",
+                                "type": "section",
                                 "name": "location",
                                 "label": "Location",
                                 "fields": [
@@ -395,11 +333,10 @@ class DataGenerator:
                                     "building",
                                     "room",
                                     "rack",
-                                ],
-                                "position": 2
+                                ]
                             },
                             {
-                                "tag": "h1",
+                                "type": "section",
                                 "name": "hardware",
                                 "label": "Hardware",
                                 "fields": [
@@ -408,127 +345,88 @@ class DataGenerator:
                                     "model",
                                     "serial_number",
                                     "software_version"
-                                ],
-                                "position": 3
+                                ]
                             }
                         ]
                     },
                     "fields": [
                         {
-                            "input_type": "text",
                             "label": "Management IP",
-                            "className": "form-control",
                             "name": "management_ip",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Hostname",
-                            "className": "form-control",
                             "name": "hostname",
                             "type": "text"
                         },
                         {
-                            "input_type": "checkbox",
                             "label": "Monitoring",
-                            "className": "form-control",
                             "name": "monitoring",
                             "type": "checkbox"
                         },
                         {
-                            "input_type": "text",
                             "label": "Operating System",
-                            "className": "form-control",
                             "name": "os",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Username",
-                            "className": "form-control",
                             "name": "username",
                             "type": "text"
                         },
                         {
-                            "input_type": "password",
                             "label": "Password",
-                            "className": "form-control",
                             "name": "password",
                             "type": "password",
                             "required": True,
                         },
                         {
-                            "input_type": "text",
                             "label": "Address",
-                            "className": "form-control",
                             "name": "address",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Building",
-                            "className": "form-control",
                             "name": "building",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Room",
-                            "className": "form-control",
                             "name": "room",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Rack",
-                            "className": "form-control",
                             "name": "rack",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Manufacturer",
-                            "className": "form-control",
                             "name": "manufacturer",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Supplier",
-                            "className": "form-control",
                             "name": "supplier",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Model",
-                            "className": "form-control",
                             "name": "model",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Serial Number",
-                            "className": "form-control",
                             "name": "serial_number",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Software Version",
-                            "className": "form-control",
                             "name": "software_version",
                             "type": "text"
                         },
 
-                    ],
-                    "logs": [
-                        {
-                            "author_id": 1,
-                            "action": "create",
-                            "message": "Auto-generation of employee type",
-                            "date": generation_date
-                        }
                     ]
                 }
             )
@@ -545,22 +443,26 @@ class DataGenerator:
                     "version": "1.0.0",
                     "active": True,
                     "author_id": 1,
+                    "access": {
+                        "groups": "",
+                        "users": ""
+                    },
+                    "category_id": 3,
                     "creation_time": generation_date,
                     "render_meta": {
+                        "icon": "fas fa-cube",
                         "external": [],
-                        "summary": [
+                        "summary":
                             {
-                                "label": "Management",
                                 "fields": [
                                     "management_ip",
                                     "hostname"
-                                ],
-                                "name": "management"
+                                ]
                             }
-                        ],
+                        ,
                         "sections": [
                             {
-                                "tag": "h1",
+                                "type": "section",
                                 "name": "management",
                                 "label": "Management",
                                 "fields": [
@@ -570,11 +472,10 @@ class DataGenerator:
                                     "os",
                                     "username",
                                     "password"
-                                ],
-                                "position": 1
+                                ]
                             },
                             {
-                                "tag": "h1",
+                                "type": "section",
                                 "name": "location",
                                 "label": "Location",
                                 "fields": [
@@ -582,11 +483,10 @@ class DataGenerator:
                                     "building",
                                     "room",
                                     "rack",
-                                ],
-                                "position": 2
+                                ]
                             },
                             {
-                                "tag": "h1",
+                                "type": "section",
                                 "name": "hardware",
                                 "label": "Hardware",
                                 "fields": [
@@ -595,127 +495,88 @@ class DataGenerator:
                                     "model",
                                     "serial_number",
                                     "software_version"
-                                ],
-                                "position": 3
+                                ]
                             }
                         ]
                     },
                     "fields": [
                         {
-                            "input_type": "text",
                             "label": "Management IP",
-                            "className": "form-control",
                             "name": "management_ip",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Hostname",
-                            "className": "form-control",
                             "name": "hostname",
                             "type": "text"
                         },
                         {
-                            "input_type": "checkbox",
                             "label": "Monitoring",
-                            "className": "form-control",
                             "name": "monitoring",
                             "type": "checkbox"
                         },
                         {
-                            "input_type": "text",
                             "label": "Operating System",
-                            "className": "form-control",
                             "name": "os",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Username",
-                            "className": "form-control",
                             "name": "username",
                             "type": "text"
                         },
                         {
-                            "input_type": "password",
                             "label": "Password",
-                            "className": "form-control",
                             "name": "password",
                             "type": "password",
                             "required": True,
                         },
                         {
-                            "input_type": "text",
                             "label": "Address",
-                            "className": "form-control",
                             "name": "address",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Building",
-                            "className": "form-control",
                             "name": "building",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Room",
-                            "className": "form-control",
                             "name": "room",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Rack",
-                            "className": "form-control",
                             "name": "rack",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Manufacturer",
-                            "className": "form-control",
                             "name": "manufacturer",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Supplier",
-                            "className": "form-control",
                             "name": "supplier",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Model",
-                            "className": "form-control",
                             "name": "model",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Serial Number",
-                            "className": "form-control",
                             "name": "serial_number",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Software Version",
-                            "className": "form-control",
                             "name": "software_version",
                             "type": "text"
                         },
 
-                    ],
-                    "logs": [
-                        {
-                            "author_id": 1,
-                            "action": "create",
-                            "message": "Auto-generation of departments type",
-                            "date": generation_date
-                        }
                     ]
                 }
             )
@@ -730,33 +591,26 @@ class DataGenerator:
                     "version": "1.0.0",
                     "active": True,
                     "author_id": 1,
+                    "access": {
+                        "groups": "",
+                        "users": ""
+                    },
+                    "category_id": 0,
                     "creation_time": generation_date,
                     "render_meta": {
-                        "external": [
+                        "icon": "fas fa-cube",
+                        "external": [],
+                        "summary":
                             {
-                                "href": "/{2}/{0}/{1}",
-                                "fields": [
-                                    "map-lang",
-                                    "map-long"
-                                ],
-                                "label": "Google Maps",
-                                "name": "g_maps",
-                                "icon": "fas fa-map-marked-alt"
-                            }
-                        ],
-                        "summary": [
-                            {
-                                "label": "Address",
                                 "fields": [
                                     "street",
                                     "city"
-                                ],
-                                "name": "address"
+                                ]
                             }
-                        ],
+                        ,
                         "sections": [
                             {
-                                "tag": "h1",
+                                "type": "section",
                                 "name": "location_details",
                                 "label": "Location-Details",
                                 "fields": [
@@ -764,11 +618,10 @@ class DataGenerator:
                                     "description",
                                     "entrance",
                                     "person_in_charge"
-                                ],
-                                "position": 1
+                                ]
                             },
                             {
-                                "tag": "h2",
+                                "type": "section",
                                 "name": "address",
                                 "label": "Address",
                                 "fields": [
@@ -777,94 +630,62 @@ class DataGenerator:
                                     "city",
                                     "map-lang",
                                     "map-long"
-                                ],
-                                "position": 2
+                                ]
                             }
                         ]
                     },
                     "fields": [
                         {
-                            "input_type": "text",
                             "required": True,
                             "label": "Naming",
                             "description": "Short name of the location",
                             "placeholder": "Calling name",
-                            "className": "form-control",
                             "name": "naming",
                             "type": "text"
                         },
                         {
-                            "input_type": "textarea",
                             "label": "Description",
-                            "className": "form-control",
                             "name": "description",
                             "type": "textarea",
-                            "maxlength": 120,
-                            "rows": 3
                         },
                         {
-                            "input_type": "text",
                             "label": "Entrance",
-                            "className": "form-control",
                             "name": "entrance",
                             "type": "text"
                         },
                         {
-                            "input_type": "ref",
                             "label": "Person in Charge",
-                            "className": "form-control",
                             "name": "person_in_charge",
-                            "type": "text",
-                            "type_id": 2
+                            "type": "ref",
+                            "ref_types": 2
                         },
                         {
-                            "input_type": "text",
                             "label": "Street",
-                            "className": "form-control",
                             "name": "street",
                             "type": "text"
                         },
                         {
-                            "input_type": "number",
                             "label": "ZIP",
                             "required": True,
-                            "className": "form-control",
                             "name": "zip",
-                            "min": 10000,
-                            "max": 99999,
-                            "step": 1,
-                            "type": "number"
+                            "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Entrance",
-                            "className": "form-control",
                             "name": "city",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Latitude",
                             "required": True,
-                            "className": "form-control",
                             "name": "map-lang",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "Longitude",
                             "required": True,
-                            "className": "form-control",
                             "name": "map-long",
                             "type": "text"
-                        }
-                    ],
-                    "logs": [
-                        {
-                            "author_id": 1,
-                            "action": "create",
-                            "message": "Auto-generation",
-                            "date": generation_date
                         }
                     ]
                 }
@@ -880,11 +701,17 @@ class DataGenerator:
                     "version": "1.0.0",
                     "active": True,
                     "author_id": 1,
+                    "access": {
+                        "groups": "",
+                        "users": ""
+                    },
+                    "category_id": 0,
                     "creation_time": generation_date,
                     "render_meta": {
+                        "icon": "fas fa-cube",
                         "external": [
                             {
-                                "href": "ssh:/{0}/",
+                                "href": "ssh:/{}/",
                                 "fields": [
                                     "ipv4"
                                 ],
@@ -893,18 +720,15 @@ class DataGenerator:
                                 "icon": "fas fa-ethernet"
                             }
                         ],
-                        "summary": [
+                        "summary":
                             {
-                                "label": "Name",
                                 "fields": [
                                     "hostname"
-                                ],
-                                "name": "hostname"
-                            }
-                        ],
+                                ]
+                            },
                         "sections": [
                             {
-                                "tag": "h1",
+                                "type": "section",
                                 "name": "management",
                                 "label": "Management",
                                 "fields": [
@@ -913,60 +737,43 @@ class DataGenerator:
                                     "ipv4_network_class",
                                     "ipv4_intranet",
                                     "ipv6",
-                                ],
-                                "position": 1
+                                ]
                             }
                         ]
                     },
                     "fields": [
                         {
-                            "input_type": "text",
                             "required": True,
                             "label": "Hostname",
-                            "className": "form-control",
                             "name": "hostname",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "required": True,
                             "label": "IPv4 Public",
                             "placeholder": "127.0.0.1",
-                            "className": "form-control",
                             "name": "ipv4",
                             "type": "text"
                         },
                         {
-                            "input_type": "text",
                             "label": "IPv4 Network Class",
                             "placeholder": "A",
-                            "className": "form-control",
                             "name": "ipv4_network_class",
                             "description": "An IPv4 address class is a categorical division of internet protocol "
                                            "addresses in IPv4-based routing",
                             "type": "text"
-                        }, {
-                            "input_type": "text",
+                        },
+                        {
                             "label": "IPv4 Private",
                             "placeholder": "127.0.0.1",
-                            "className": "form-control",
                             "name": "ipv4_intranet",
                             "type": "text"
-                        }, {
-                            "input_type": "text",
+                        },
+                        {
                             "label": "IPv6",
                             "placeholder": "[2001:0db8:85a3:08d3::0370:7344]",
-                            "className": "form-control",
                             "name": "ipv6",
                             "type": "text"
-                        }
-                    ],
-                    "logs": [
-                        {
-                            "author_id": 1,
-                            "action": "create",
-                            "message": "Auto-generation",
-                            "date": generation_date
                         }
                     ]
                 }
@@ -1001,10 +808,7 @@ class DataGenerator:
                     "last_edit_time": self._faker.date_time_between(start_date="-30d"),
                     "active": self._faker.boolean(chance_of_getting_true=80),
                     "creation_time": self._faker.date_time_between(start_date="-30d"),
-                    "status": None,
-                    "logs": [
-
-                    ],
+                    "status": True,
                     "fields": [
                         {
                             "name": "state",
@@ -1078,10 +882,7 @@ class DataGenerator:
                     "last_edit_time": self._faker.date_time_between(start_date="-30d"),
                     "active": self._faker.boolean(chance_of_getting_true=80),
                     "creation_time": self._faker.date_time_between(start_date="-30d"),
-                    "status": None,
-                    "logs": [
-
-                    ],
+                    "status": True,
                     "fields": [
                         {
                             "name": "management_ip",
@@ -1162,10 +963,7 @@ class DataGenerator:
                     "last_edit_time": self._faker.date_time_between(start_date="-30d"),
                     "active": self._faker.boolean(chance_of_getting_true=80),
                     "creation_time": self._faker.date_time_between(start_date="-30d"),
-                    "status": None,
-                    "logs": [
-
-                    ],
+                    "status": True,
                     "fields": [
                         {
                             "name": "management_ip",
@@ -1246,10 +1044,7 @@ class DataGenerator:
                     "last_edit_time": self._faker.date_time_between(start_date="-30d"),
                     "active": self._faker.boolean(chance_of_getting_true=80),
                     "creation_time": self._faker.date_time_between(start_date="-30d"),
-                    "status": None,
-                    "logs": [
-
-                    ],
+                    "status": True,
                     "fields": [
                         {
                             "name": "naming",
@@ -1302,10 +1097,7 @@ class DataGenerator:
                     "last_edit_time": self._faker.date_time_between(start_date="-30d"),
                     "active": self._faker.boolean(chance_of_getting_true=80),
                     "creation_time": self._faker.date_time_between(start_date="-30d"),
-                    "status": None,
-                    "logs": [
-
-                    ],
+                    "status": True,
                     "fields": [
                         {
                             "name": "hostname",
@@ -1356,14 +1148,24 @@ class DataGenerator:
         category_list = [
             CmdbCategory(**{
                 "public_id": 1,
-                "name": "infrastructure",
-                "label": "Infrastructure",
+                "name": "product_categories",
+                "label": "Product Categories",
+                "root": True,
+                "parent_id": 0,
             }),
             CmdbCategory(**{
                 "public_id": 2,
+                "name": "infrastructure",
+                "label": "Infrastructure",
+                "root": False,
+                "parent_id": 1,
+            }),
+            CmdbCategory(**{
+                "public_id": 3,
                 "name": "devices",
                 "label": "Devices",
-                "icon": "fas fa-memory",
+                "root": False,
+                "parent_id": 1,
             }),
         ]
         return category_list

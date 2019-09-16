@@ -1,7 +1,8 @@
-.table-center{
+.table-center {
   thead th, thead td {
     text-align: center;
   }
+
   tbody th, tbody td {
     text-align: center;
   }
@@ -12,7 +13,7 @@ table.dataTable tr.dtrg-group td {
   background-color: $gray-200;
 }
 
-table.dataTable tr.dtrg-end td{
+table.dataTable tr.dtrg-end td {
   background-color: $gray-300;
 }
 
@@ -31,4 +32,24 @@ table.dataTable tr.dtrg-group.dtrg-level-2 td {
 
 table.dataTable tr.dtrg-group.dtrg-level-2 td {
   background-color: #f3f3f3;
+
+}
+
+.dataTables_wrapper {
+
+  .table {
+    width: 100% !important;
+
+    thead th, thead td {
+      text-align: center;
+    }
+
+    tbody th, tbody td {
+      text-align: center;
+    }
+  }
+
+  .dt-button-collection {
+    padding-bottom: 0 !important;
+  }
 }
