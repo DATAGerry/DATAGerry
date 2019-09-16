@@ -182,7 +182,7 @@ export class ObjectListComponent implements OnDestroy {
             columnButton.push({
               extend: 'colvisRestore',
               text: 'Restore',
-              className: 'btn btn-secondary btn-lg btn-block',
+              className: 'btn btn-secondary btn-sm btn-block',
               action: function() {
                 this.rerender();
                 this.dtTrigger.next();
