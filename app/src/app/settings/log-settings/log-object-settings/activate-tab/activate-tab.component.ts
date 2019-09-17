@@ -31,7 +31,7 @@ export class ActivateTabComponent implements AfterContentInit, OnDestroy, OnInit
   @ViewChild(DataTableDirective, {static: true})
   dtElement: DataTableDirective;
   dtTrigger: Subject<any> = new Subject();
-  dtOptions: DataTables.Settings = {};
+  dtOptions: any = {};
 
   // tslint:disable-next-line:variable-name
   private _activeLogList: CmdbLog[];
@@ -45,16 +45,21 @@ export class ActivateTabComponent implements AfterContentInit, OnDestroy, OnInit
   public get activeLogList() {
     return this._activeLogList;
   }
+
   @Output() deleteEmitter = new EventEmitter<number>();
 
   public constructor() {
   }
-
   public ngOnInit(): void {
     this.dtOptions = {
       retrieve: true,
       ordering: true,
       order: [0, 'desc'],
+      rowGroup: {
+        dataSrc: (data) => {
+          return new Date(data[5]).toDateString();
+        }
+      },
       language: {
         search: '',
         searchPlaceholder: 'Filter...'

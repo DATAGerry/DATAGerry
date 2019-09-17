@@ -31,7 +31,7 @@ export class DeleteTabComponent implements OnInit, OnDestroy, AfterContentInit {
   @ViewChild(DataTableDirective, {static: true})
   dtElement: DataTableDirective;
   dtTrigger: Subject<any> = new Subject();
-  dtOptions: DataTables.Settings = {};
+  dtOptions: any = {};
 
   // tslint:disable-next-line:variable-name
   private _deleteLogList: CmdbLog[];
@@ -54,6 +54,11 @@ export class DeleteTabComponent implements OnInit, OnDestroy, AfterContentInit {
       retrieve: true,
       ordering: true,
       order: [0, 'desc'],
+      rowGroup: {
+        dataSrc: (data) => {
+          return new Date(data[5]).toDateString();
+        }
+      },
       language: {
         search: '',
         searchPlaceholder: 'Filter...'

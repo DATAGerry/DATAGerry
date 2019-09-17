@@ -19,7 +19,7 @@
         <td>{{activeLog.action_name}}</td>
         <td>{{activeLog.user_name}}</td>
         <td>{{activeLog.version}}</td>
-        <td>{{activeLog.log_time.$date | date: "dd/MM/yy - hh:mm:ss"}}</td>
+        <td>{{activeLog.log_time.$date | date: "MM-dd-yyyy hh:mm:ss"}}</td>
         <td>
           <a class="text-dark" routerLink="/framework/object/log/{{activeLog.public_id}}">
             <i class="fas fa-eye"></i>
