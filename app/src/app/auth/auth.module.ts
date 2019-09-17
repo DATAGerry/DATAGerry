@@ -23,6 +23,7 @@ import { RouterModule } from '@angular/router';
 import { AuthService } from './services/auth.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthRoutingModule } from './auth-routing.module';
+import { InlineSVGModule } from 'ng-inline-svg';
 
 @NgModule({
   declarations: [LoginComponent],
@@ -32,6 +33,7 @@ import { AuthRoutingModule } from './auth-routing.module';
     RouterModule,
     AuthRoutingModule,
     ReactiveFormsModule,
+    InlineSVGModule,
   ]
 })
 export class AuthModule {

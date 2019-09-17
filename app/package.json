@@ -45,6 +45,7 @@
     "file-saver": "^2.0.2",
     "jquery": "^3.4.1",
     "jszip": "^3.2.1",
+    "ng-inline-svg": "^9.0.1",
     "ngx-drag-drop": "^2.0.0",
     "ngx-filesaver": "^8.0.0",
     "ngx-icon-picker": "0.0.10",
