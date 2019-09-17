@@ -81,7 +81,7 @@ export class ApiCallService {
   /* DEPRECATED API METHODS - ONLY USE TOP METHODS */
 
   public callGetRoute<T>(route: string, params?: any): Observable<any> {
-    return this.http.get<T>(this.apiURL + route, {observe: 'body'}).pipe(
+    return this.http.get<T>(this.apiURL + route, params).pipe(
       map((res) => {
         return res;
       }),
