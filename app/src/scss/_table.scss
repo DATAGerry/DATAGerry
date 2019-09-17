@@ -34,22 +34,3 @@ table.dataTable tr.dtrg-group.dtrg-level-2 td {
   background-color: #f3f3f3;
 
 }
-
-.dataTables_wrapper {
-
-  .table {
-    width: 100% !important;
-
-    thead th, thead td {
-      text-align: center;
-    }
-
-    tbody th, tbody td {
-      text-align: center;
-    }
-  }
-
-  .dt-button-collection {
-    padding-bottom: 0 !important;
-  }
-}

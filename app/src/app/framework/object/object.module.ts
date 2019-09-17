@@ -48,6 +48,7 @@ import { ObjectLogListComponent } from './object-view/object-log-list/object-log
 import { ObjectReferenceListComponent } from './object-view/object-reference-list/object-reference-list.component';
 import { ObjectLogComponent } from './object-log/object-log.component';
 import { ObjectLogChangeViewComponent } from './object-view/object-log-list/object-log-change-view/object-log-change-view.component';
+import { ObjectLogUserComponent } from './object-view/object-log-list/object-log-user/object-log-user.component';
 
 @NgModule({
   declarations: [
@@ -69,7 +70,8 @@ import { ObjectLogChangeViewComponent } from './object-view/object-log-list/obje
     ObjectLogListComponent,
     ObjectReferenceListComponent,
     ObjectLogComponent,
-    ObjectLogChangeViewComponent],
+    ObjectLogChangeViewComponent,
+    ObjectLogUserComponent],
   imports: [
     CommonModule,
     ObjectRoutingModule,

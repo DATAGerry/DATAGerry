@@ -20,9 +20,9 @@
       <cmdb-object-log-change-view [action]="log.action" [changes]="log.changes"></cmdb-object-log-change-view>
     </td>
     <td>{{log.comment}}</td>
-    <td><a routerLink="/user/{{log.user_id}}">{{log.user_name}}</a></td>
+    <td><cmdb-object-log-user [userID]="log.user_id" [userName]="log.user_name"></cmdb-object-log-user></td>
     <td>{{log.version}}</td>
-    <td><a *ngIf="log.render_state" routerLink="/framework/object/log/{{log.public_id}}">View</a></td>
+    <td><a routerLink="/framework/object/log/{{log.public_id}}">View</a></td>
   </tr>
   </tbody>
 </table>

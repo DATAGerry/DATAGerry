@@ -72,7 +72,7 @@ export class AuthService {
     };
     return this.http.post<User>(`${this.connectionService.currentConnection}/${this.restPrefix}/${this.servicePrefix}/login`, data, httpOptions)
       .pipe(map(user => {
-        // store management details and jwt token in local storage to keep management logged in between page refreshes
+        console.log(user);
 
         localStorage.setItem('current-user', JSON.stringify(user));
         localStorage.setItem('access-token', JSON.stringify(user.token));

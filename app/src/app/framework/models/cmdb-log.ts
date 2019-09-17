@@ -26,5 +26,11 @@ export class CmdbLog implements CmdbDao {
   public user_id: number;
   public version: string;
   public comment: string;
+  public action: number;
+  public action_name: string;
+  public log_time: {
+    $date: string
+  };
+  public changes: any;
   // tslint:enable
 }

@@ -1,5 +1,9 @@
 @import 'variables';
 
+html{
+  min-height: 100vh;
+}
+
 @media all and (-ms-high-contrast: none) {
   html {
     display: flex;
@@ -25,7 +29,13 @@
 .embedded {
   overflow: hidden;
   #main {
-    margin-top: 0px;
+    margin-top: 0;
+  }
+  #content {
+    padding: 0;
+  }
+  .container-fluid{
+    padding: 0;
   }
 }
 
