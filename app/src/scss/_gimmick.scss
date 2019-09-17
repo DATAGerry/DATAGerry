@@ -14,10 +14,11 @@
     width: 20px;
     height: 20px;
     animation: animate 25s linear infinite;
+    animation-direction: reverse;
     bottom: -150px;
 
     svg{
-      fill: rgba(theme-color('primary'), 0.2);
+      fill: rgba(theme-color('primary'), 0.4);
     }
   }
 }
