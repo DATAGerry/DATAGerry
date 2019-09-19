@@ -97,9 +97,11 @@ export class DashboardComponent implements OnInit {
       }, error => {},
       () => {
         values.forEach(type => {
-          this.labelsObject.push(type.label);
-          this.colorsObject.push(this.getRandomColor());
-          this.objectService.countObjectsByType(type.public_id).subscribe(count => this.itemsObject.push(count));
+          this.objectService.countObjectsByType(type.public_id).subscribe(count => {
+            this.labelsObject.push(type.label);
+            this.colorsObject.push(this.getRandomColor());
+            this.itemsObject.push(count);
+          });
         });
       });
   }
@@ -129,9 +131,9 @@ export class DashboardComponent implements OnInit {
       }, (error) => {},
       () => {
         values.forEach(group => {
-          this.labelsGroup.push(group.label);
-          this.colorsGroup.push(this.getRandomColor());
           this.userService.getUserByGroup(group.public_id).subscribe((users: User[]) => {
+            this.labelsGroup.push(group.label);
+            this.colorsGroup.push(this.getRandomColor());
             this.itemsGroup.push(users.length);
           });
         });
