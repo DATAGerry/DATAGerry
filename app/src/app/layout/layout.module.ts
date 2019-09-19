@@ -49,6 +49,7 @@ import { IconPickerModule } from 'ngx-icon-picker';
 import { IconPickerComponent } from './helpers/icon-picker/icon-picker.component';
 import { UserImageComponent } from './components/user-image/user-image.component';
 import { UserDisplayComponent } from './components/user-display/user-display.component';
+import { ChartsComponent } from './components/charts/charts.component';
 
 @NgModule({
   declarations: [
@@ -68,7 +69,8 @@ import { UserDisplayComponent } from './components/user-display/user-display.com
     FooterComponent,
     IconPickerComponent,
     UserImageComponent,
-    UserDisplayComponent
+    UserDisplayComponent,
+    ChartsComponent
   ],
   exports: [
     LowercaseDirective,
@@ -84,7 +86,8 @@ import { UserDisplayComponent } from './components/user-display/user-display.com
     TypeLabelComponent,
     IconPickerComponent,
     UserImageComponent,
-    UserDisplayComponent
+    UserDisplayComponent,
+    ChartsComponent
   ],
   imports: [
     CommonModule,
