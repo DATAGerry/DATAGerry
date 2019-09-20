@@ -8,7 +8,7 @@ import { SystemService } from '../system.service';
 })
 export class InformationComponent implements OnInit {
 
-  public systemInfos: any[];
+  public systemInfos: any;
 
   constructor(private systemService: SystemService) {
   }
