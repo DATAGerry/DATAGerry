@@ -656,8 +656,7 @@ class DataGenerator:
                         {
                             "label": "Person in Charge",
                             "name": "person_in_charge",
-                            "type": "ref",
-                            "ref_types": 2
+                            "type": "ref"
                         },
                         {
                             "label": "Street",
