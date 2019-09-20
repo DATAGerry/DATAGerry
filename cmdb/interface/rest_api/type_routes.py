@@ -30,12 +30,12 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-type_routes = RootBlueprint('type_routes', __name__, url_prefix='/type')
+type_blueprint = RootBlueprint('type_blueprint', __name__, url_prefix='/type')
 
 object_manager = obm
 
 
-@type_routes.route('/', methods=['GET'])
+@type_blueprint.route('/', methods=['GET'])
 @login_required
 def get_type_list():
     try:
@@ -46,7 +46,7 @@ def get_type_list():
     return resp
 
 
-@type_routes.route('/<int:public_id>', methods=['GET'])
+@type_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
 def get_type(public_id: int):
     try:
@@ -59,7 +59,7 @@ def get_type(public_id: int):
     return resp
 
 
-@type_routes.route('/', methods=['POST'])
+@type_blueprint.route('/', methods=['POST'])
 @login_required
 def add_type():
     from bson import json_util
@@ -86,7 +86,7 @@ def add_type():
     return resp
 
 
-@type_routes.route('/', methods=['PUT'])
+@type_blueprint.route('/', methods=['PUT'])
 @login_required
 @json_required
 def update_type():
@@ -112,7 +112,7 @@ def update_type():
     return resp
 
 
-@type_routes.route('/<int:public_id>', methods=['DELETE'])
+@type_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @login_required
 def delete_type(public_id: int):
     try:
@@ -128,7 +128,7 @@ def delete_type(public_id: int):
     return resp
 
 
-@type_routes.route('/delete/<string:public_ids>', methods=['GET'])
+@type_blueprint.route('/delete/<string:public_ids>', methods=['GET'])
 @login_required
 def delete_many_types(public_ids):
     try:
@@ -155,7 +155,7 @@ def delete_many_types(public_ids):
         return abort(500)
 
 
-@type_routes.route('/count/', methods=['GET'])
+@type_blueprint.route('/count/', methods=['GET'])
 @login_required
 def count_objects():
     try:
@@ -166,7 +166,7 @@ def count_objects():
     return resp
 
 
-@type_routes.route('/category/<int:public_id>', methods=['GET'])
+@type_blueprint.route('/category/<int:public_id>', methods=['GET'])
 @login_required
 def get_type_by_category(public_id):
     try:
@@ -177,7 +177,7 @@ def get_type_by_category(public_id):
     return resp
 
 
-@type_routes.route('/category/<int:public_id>', methods=['PUT'])
+@type_blueprint.route('/category/<int:public_id>', methods=['PUT'])
 @login_required
 def update_type_by_category(public_id):
     try:

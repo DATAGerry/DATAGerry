@@ -66,9 +66,19 @@
           <fa-icon icon="cogs"></fa-icon>
         </a>
         <div class="dropdown-menu dropdown-menu-right">
+          <div class="dropdown-header">System</div>
+          <a routerLink="/settings/system/" class="dropdown-item">
+            <i class="fas fa-info-circle"></i> Information
+          </a>
+          <a [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']" class="dropdown-item">
+            <i class="fas fa-server"></i> Server
+          </a>
+          <a routerLink="/settings/system/properties" class="dropdown-item">
+            <i class="fas fa-tasks"></i> Properties
+          </a>
           <div class="dropdown-header">Logs</div>
           <a routerLink="/settings/logs/objects" class="dropdown-item">
-            <fa-icon icon="clipboard-list"></fa-icon> Object logs
+            <i class="fas fa-clipboard-list"></i> Object log
           </a>
         </div>
       </li>

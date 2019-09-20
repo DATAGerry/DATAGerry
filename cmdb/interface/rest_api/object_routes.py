@@ -39,16 +39,16 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-object_rest = RootBlueprint('object_rest', __name__, url_prefix='/object')
+object_blueprint = RootBlueprint('object_blueprint', __name__, url_prefix='/object')
 with current_app.app_context():
     from cmdb.interface.rest_api.object_link_routes import link_rest
 
-    object_rest.register_nested_blueprint(link_rest)
+    object_blueprint.register_nested_blueprint(link_rest)
 
 
 # DEFAULT ROUTES
 
-@object_rest.route('/', methods=['GET'])
+@object_blueprint.route('/', methods=['GET'])
 @login_required
 @insert_request_user
 def get_object_list(request_user: User):
@@ -72,7 +72,7 @@ def get_object_list(request_user: User):
     return make_response(rendered_list)
 
 
-@object_rest.route('/native', methods=['GET'])
+@object_blueprint.route('/native', methods=['GET'])
 @login_required
 def get_native_object_list():
     try:
@@ -83,7 +83,7 @@ def get_native_object_list():
     return resp
 
 
-@object_rest.route('/type/<int:public_id>', methods=['GET'])
+@object_blueprint.route('/type/<int:public_id>', methods=['GET'])
 @login_required
 @insert_request_user
 def get_objects_by_type(public_id, request_user: User):
@@ -101,7 +101,7 @@ def get_objects_by_type(public_id, request_user: User):
     return resp
 
 
-@object_rest.route('/type/<string:type_ids>', methods=['GET'])
+@object_blueprint.route('/type/<string:type_ids>', methods=['GET'])
 @login_required
 def get_objects_by_types(type_ids):
     """Return all objects by type_id
@@ -117,7 +117,7 @@ def get_objects_by_types(type_ids):
     return resp
 
 
-@object_rest.route('/many/<string:public_ids>', methods=['GET'])
+@object_blueprint.route('/many/<string:public_ids>', methods=['GET'])
 @login_required
 def get_objects_by_public_id(public_ids):
     """Return all objects by public_ids
@@ -134,7 +134,7 @@ def get_objects_by_public_id(public_ids):
     return resp
 
 
-@object_rest.route('/count/<int:type_id>', methods=['GET'])
+@object_blueprint.route('/count/<int:type_id>', methods=['GET'])
 @login_required
 def count_object_by_type(type_id):
     try:
@@ -145,7 +145,7 @@ def count_object_by_type(type_id):
     return resp
 
 
-@object_rest.route('/count/', methods=['GET'])
+@object_blueprint.route('/count/', methods=['GET'])
 @login_required
 def count_objects():
     try:
@@ -156,8 +156,8 @@ def count_objects():
     return resp
 
 
-@object_rest.route('/<int:public_id>/', methods=['GET'])
-@object_rest.route('/<int:public_id>', methods=['GET'])
+@object_blueprint.route('/<int:public_id>/', methods=['GET'])
+@object_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
 @insert_request_user
 def get_object(public_id, request_user: User):
@@ -184,7 +184,7 @@ def get_object(public_id, request_user: User):
     return resp
 
 
-@object_rest.route('<int:public_id>/native/', methods=['GET'])
+@object_blueprint.route('<int:public_id>/native/', methods=['GET'])
 @login_required
 def get_native_object(public_id: int):
     try:
@@ -195,8 +195,8 @@ def get_native_object(public_id: int):
     return resp
 
 
-@object_rest.route('/reference/<int:public_id>/', methods=['GET'])
-@object_rest.route('/reference/<int:public_id>', methods=['GET'])
+@object_blueprint.route('/reference/<int:public_id>/', methods=['GET'])
+@object_blueprint.route('/reference/<int:public_id>', methods=['GET'])
 @insert_request_user
 def get_objects_by_reference(public_id: int, request_user: User):
     try:
@@ -210,8 +210,8 @@ def get_objects_by_reference(public_id: int, request_user: User):
     return make_response(rendered_reference_list)
 
 
-@object_rest.route('/user/<int:public_id>/', methods=['GET'])
-@object_rest.route('/user/<int:public_id>', methods=['GET'])
+@object_blueprint.route('/user/<int:public_id>/', methods=['GET'])
+@object_blueprint.route('/user/<int:public_id>', methods=['GET'])
 @insert_request_user
 def get_objects_by_user(public_id: int, request_user: User):
     try:
@@ -227,8 +227,8 @@ def get_objects_by_user(public_id: int, request_user: User):
     return make_response(rendered_list)
 
 
-@object_rest.route('/user/new/<int:timestamp>/', methods=['GET'])
-@object_rest.route('/user/new/<int:timestamp>', methods=['GET'])
+@object_blueprint.route('/user/new/<int:timestamp>/', methods=['GET'])
+@object_blueprint.route('/user/new/<int:timestamp>', methods=['GET'])
 @insert_request_user
 def get_new_objects_since(timestamp: int, request_user: User):
     request_date = datetime.fromtimestamp(timestamp, pytz.utc)
@@ -250,8 +250,8 @@ def get_new_objects_since(timestamp: int, request_user: User):
     return make_response(rendered_list)
 
 
-@object_rest.route('/user/changed/<int:timestamp>/', methods=['GET'])
-@object_rest.route('/user/changed/<int:timestamp>', methods=['GET'])
+@object_blueprint.route('/user/changed/<int:timestamp>/', methods=['GET'])
+@object_blueprint.route('/user/changed/<int:timestamp>', methods=['GET'])
 @insert_request_user
 def get_changed_objects_since(timestamp: int, request_user: User):
     request_date = datetime.fromtimestamp(timestamp, pytz.utc)
@@ -276,7 +276,7 @@ def get_changed_objects_since(timestamp: int, request_user: User):
 
 # CRUD routes
 
-@object_rest.route('/', methods=['POST'])
+@object_blueprint.route('/', methods=['POST'])
 @login_required
 @insert_request_user
 def insert_object(request_user):
@@ -336,8 +336,8 @@ def insert_object(request_user):
     return resp
 
 
-@object_rest.route('/<int:public_id>/', methods=['PUT'])
-@object_rest.route('/<int:public_id>', methods=['PUT'])
+@object_blueprint.route('/<int:public_id>/', methods=['PUT'])
+@object_blueprint.route('/<int:public_id>', methods=['PUT'])
 @login_required
 @insert_request_user
 def update_object(public_id: int, request_user: User):
@@ -420,7 +420,7 @@ def update_object(public_id: int, request_user: User):
     return make_response(update_ack)
 
 
-@object_rest.route('/<int:public_id>', methods=['DELETE'])
+@object_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @login_required
 @insert_request_user
 def delete_object(public_id: int, request_user: User):
@@ -462,7 +462,7 @@ def delete_object(public_id: int, request_user: User):
     return resp
 
 
-@object_rest.route('/delete/<string:public_ids>', methods=['GET'])
+@object_blueprint.route('/delete/<string:public_ids>', methods=['GET'])
 @login_required
 def delete_many_objects(public_ids):
     try:
@@ -488,8 +488,8 @@ def delete_many_objects(public_ids):
 
 
 # Special routes
-@object_rest.route('/<int:public_id>/state/', methods=['GET'])
-@object_rest.route('/<int:public_id>/state', methods=['GET'])
+@object_blueprint.route('/<int:public_id>/state/', methods=['GET'])
+@object_blueprint.route('/<int:public_id>/state', methods=['GET'])
 def get_object_state(public_id: int):
     try:
         founded_object = object_manager.get_object(public_id=public_id)
@@ -499,8 +499,8 @@ def get_object_state(public_id: int):
     return make_response(founded_object.active)
 
 
-@object_rest.route('/<int:public_id>/state/', methods=['PUT'])
-@object_rest.route('/<int:public_id>/state', methods=['PUT'])
+@object_blueprint.route('/<int:public_id>/state/', methods=['PUT'])
+@object_blueprint.route('/<int:public_id>/state', methods=['PUT'])
 @insert_request_user
 def update_object_state(public_id: int, request_user: User):
     if isinstance(request.json, bool):
@@ -556,8 +556,8 @@ def update_object_state(public_id: int, request_user: User):
 
 
 # SPECIAL ROUTES
-@object_rest.route('/newest', methods=['GET'])
-@object_rest.route('/newest/', methods=['GET'])
+@object_blueprint.route('/newest', methods=['GET'])
+@object_blueprint.route('/newest/', methods=['GET'])
 @insert_request_user
 def get_newest(request_user: User):
     """
@@ -577,8 +577,8 @@ def get_newest(request_user: User):
     return make_response(rendered_list)
 
 
-@object_rest.route('/latest', methods=['GET'])
-@object_rest.route('/latest/', methods=['GET'])
+@object_blueprint.route('/latest', methods=['GET'])
+@object_blueprint.route('/latest/', methods=['GET'])
 @insert_request_user
 def get_latest(request_user: User):
     """

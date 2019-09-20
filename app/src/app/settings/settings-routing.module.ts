@@ -45,6 +45,13 @@ const routes: Routes = [
     outlet: 'footer'
   },
   {
+    path: 'system',
+    data: {
+      breadcrumb: 'System'
+    },
+    loadChildren: () => import('./system/system.module').then(m => m.SystemModule)
+  },
+  {
     path: 'logs',
     data: {
       breadcrumb: 'Logs'

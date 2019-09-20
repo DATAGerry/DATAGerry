@@ -18,10 +18,12 @@
 DATAGERRY is a flexible asset management tool and
 open-source configurable management database
 """
+import time
 
 __title__ = 'DATAGERRY'
 __version__ = '1.0.0'
 __author__ = 'NETHINKS GmbH'
 __license__ = 'AGPLv3'
 __copyright__ = 'Copyright 2019 NETHINKS GmbH'
+__runtime__ = time.time()
 __MODE__ = 'INFO'

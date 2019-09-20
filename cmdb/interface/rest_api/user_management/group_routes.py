@@ -32,10 +32,10 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-group_routes = RootBlueprint('group_rest', __name__, url_prefix='/group')
+group_blueprint = RootBlueprint('group_rest', __name__, url_prefix='/group')
 
 
-@group_routes.route('/', methods=['GET'])
+@group_blueprint.route('/', methods=['GET'])
 @login_required
 def get_all_groups():
     try:
@@ -48,7 +48,7 @@ def get_all_groups():
     return make_response(group_list)
 
 
-@group_routes.route('/<int:public_id>', methods=['GET'])
+@group_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
 def get_group(public_id: int):
     try:
@@ -59,7 +59,7 @@ def get_group(public_id: int):
     return make_response(group_instance)
 
 
-@group_routes.route('/', methods=['POST'])
+@group_blueprint.route('/', methods=['POST'])
 @login_required
 def add_group():
     http_post_request_data = json.dumps(request.json)
@@ -80,13 +80,13 @@ def add_group():
     return make_response(insert_ack)
 
 
-@group_routes.route('/<int:public_id>', methods=['PUT'])
+@group_blueprint.route('/<int:public_id>', methods=['PUT'])
 @login_required
 def edit_group(public_id: int):
     raise NotImplementedError
 
 
-@group_routes.route('/<int:public_id>', methods=['DELETE'])
+@group_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @login_required
 def delete_group(public_id: int):
     raise NotImplementedError

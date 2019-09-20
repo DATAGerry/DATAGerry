@@ -17,7 +17,6 @@
 import logging
 from flask import current_app
 from cmdb.interface.route_utils import RootBlueprint
-from cmdb.utils.wraps import login_required
 
 LOGGER = logging.getLogger(__name__)
 try:
@@ -25,14 +24,8 @@ try:
 except ImportError:
     CMDBError = Exception
 
-settings_rest = RootBlueprint('settings_rest', __name__, url_prefix='/settings')
+settings_blueprint = RootBlueprint('settings_rest', __name__, url_prefix='/settings')
 
 with current_app.app_context():
-    from cmdb.interface.rest_api.settings.user_management import user_management_routes
-    settings_rest.register_nested_blueprint(user_management_routes)
-
-
-@settings_rest.route('/', methods=['GET'])
-@login_required
-def get_settings():
-    return None
+    from cmdb.interface.rest_api.settings.system_routes import system_blueprint
+    settings_blueprint.register_nested_blueprint(system_blueprint)

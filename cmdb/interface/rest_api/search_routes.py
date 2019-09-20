@@ -31,10 +31,10 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-search_routes = RootBlueprint('search_rest', __name__, url_prefix='/search')
+search_blueprint = RootBlueprint('search_rest', __name__, url_prefix='/search')
 
 
-@search_routes.route("/", methods=['GET'])
+@search_blueprint.route("/", methods=['GET'])
 @login_required
 @insert_request_user
 def get_search(request_user: User):
@@ -54,7 +54,7 @@ def get_search(request_user: User):
     return _get_response(request_args, current_user=request_user, limit=limit)
 
 
-@search_routes.route("/<string:search_input>", methods=['GET'])
+@search_blueprint.route("/<string:search_input>", methods=['GET'])
 @login_required
 @insert_request_user
 def text_search(search_input, request_user: User):

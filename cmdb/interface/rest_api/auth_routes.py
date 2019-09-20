@@ -28,18 +28,18 @@ try:
 except ImportError:
     CMDBError = Exception
 
-auth_routes = RootBlueprint('auth_rest', __name__, url_prefix='/auth')
+auth_blueprint = RootBlueprint('auth_rest', __name__, url_prefix='/auth')
 LOGGER = logging.getLogger(__name__)
 
 
-@auth_routes.route('/providers/', methods=['GET'])
-@auth_routes.route('/providers', methods=['GET'])
+@auth_blueprint.route('/providers/', methods=['GET'])
+@auth_blueprint.route('/providers', methods=['GET'])
 def get_auth_providers():
     from cmdb.user_management import __AUTH_PROVIDERS__
     return make_response(__AUTH_PROVIDERS__)
 
 
-@auth_routes.route('/login', methods=['POST'])
+@auth_blueprint.route('/login', methods=['POST'])
 def login_call():
     login_data = request.json
     login_user = None

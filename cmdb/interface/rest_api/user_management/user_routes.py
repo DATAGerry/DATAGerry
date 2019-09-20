@@ -34,10 +34,10 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-user_routes = RootBlueprint('user_rest', __name__, url_prefix='/user')
+user_blueprint = RootBlueprint('user_rest', __name__, url_prefix='/user')
 
 
-@user_routes.route('/', methods=['GET'])
+@user_blueprint.route('/', methods=['GET'])
 @login_required
 def get_users():
     try:
@@ -49,7 +49,7 @@ def get_users():
     return resp
 
 
-@user_routes.route('/<int:public_id>', methods=['GET'])
+@user_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
 def get_user(public_id):
     try:
@@ -62,7 +62,7 @@ def get_user(public_id):
     return resp
 
 
-@user_routes.route('/', methods=['POST'])
+@user_blueprint.route('/', methods=['POST'])
 @login_required
 def add_user():
     http_post_request_data = json.dumps(request.json)
@@ -85,19 +85,19 @@ def add_user():
     return make_response(insert_ack)
 
 
-@user_routes.route('/<int:public_id>', methods=['PUT'])
+@user_blueprint.route('/<int:public_id>', methods=['PUT'])
 @login_required
 def update_user(public_id: int):
     raise NotImplementedError
 
 
 @login_required
-@user_routes.route('/<int:public_id>', methods=['DELETE'])
+@user_blueprint.route('/<int:public_id>', methods=['DELETE'])
 def delete_user(public_id: int):
     raise NotImplementedError
 
 
-@user_routes.route('/count/', methods=['GET'])
+@user_blueprint.route('/count/', methods=['GET'])
 @login_required
 def count_objects():
     try:
@@ -112,7 +112,7 @@ def count_objects():
 
 
 @login_required
-@user_routes.route('/<int:public_id>/passwd', methods=['PUT'])
+@user_blueprint.route('/<int:public_id>/passwd', methods=['PUT'])
 def change_user_password(public_id: int):
     from cmdb.data_storage import get_pre_init_database
     from cmdb.utils import get_security_manager
@@ -125,8 +125,8 @@ def change_user_password(public_id: int):
     return make_response(ack)
 
 
-@user_routes.route('/group/<int:public_id>/', methods=['GET'])
-@user_routes.route('/group/<int:public_id>', methods=['GET'])
+@user_blueprint.route('/group/<int:public_id>/', methods=['GET'])
+@user_blueprint.route('/group/<int:public_id>', methods=['GET'])
 @insert_request_user
 def get_user_by_group(public_id: int, request_user: User):
     user_list = user_manager.get_user_by(group_id=public_id)

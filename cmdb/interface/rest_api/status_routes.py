@@ -33,10 +33,10 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-status_routes = RootBlueprint('status_rest', __name__, url_prefix='/status')
+status_blueprint = RootBlueprint('status_rest', __name__, url_prefix='/status')
 
 
-@status_routes.route('/', methods=['GET'])
+@status_blueprint.route('/', methods=['GET'])
 def get_statuses():
     try:
         status = object_manager.get_statuses()
@@ -47,8 +47,8 @@ def get_statuses():
     return make_response(status)
 
 
-@status_routes.route('/<int:public_id>/', methods=['GET'])
-@status_routes.route('/<int:public_id>', methods=['GET'])
+@status_blueprint.route('/<int:public_id>/', methods=['GET'])
+@status_blueprint.route('/<int:public_id>', methods=['GET'])
 def get_status(public_id: int):
     try:
         status = object_manager.get_status(public_id)
@@ -57,7 +57,7 @@ def get_status(public_id: int):
     return make_response(status)
 
 
-@status_routes.route('/', methods=['POST'])
+@status_blueprint.route('/', methods=['POST'])
 def add_status():
     new_status_params = {**request.json, **{'public_id': int(object_manager.get_new_id(CmdbStatus.COLLECTION) + 1)}}
     try:
@@ -67,7 +67,7 @@ def add_status():
     return make_response(ack)
 
 
-@status_routes.route('/', methods=['PUT'])
+@status_blueprint.route('/', methods=['PUT'])
 def update_status():
     updated_status_params = json.dumps(request.json)
     try:
@@ -77,7 +77,7 @@ def update_status():
     return make_response(ack)
 
 
-@status_routes.route('/<int:public_id>/', methods=['DELETE'])
-@status_routes.route('/<int:public_id>', methods=['DELETE'])
+@status_blueprint.route('/<int:public_id>/', methods=['DELETE'])
+@status_blueprint.route('/<int:public_id>', methods=['DELETE'])
 def delete_status(public_id: int):
     raise NotImplementedError

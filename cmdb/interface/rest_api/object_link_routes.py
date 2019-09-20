@@ -21,7 +21,7 @@ from flask import abort, request
 from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_object_manager import object_manager
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError
-from cmdb.interface.rest_api.object_routes import object_rest
+from cmdb.interface.rest_api.object_routes import object_blueprint
 from cmdb.interface.route_utils import make_response, NestedBlueprint
 
 try:
@@ -30,7 +30,7 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-link_rest = NestedBlueprint(object_rest, url_prefix='/link')
+link_rest = NestedBlueprint(object_blueprint, url_prefix='/link')
 
 
 @link_rest.route('/<int:public_id>/', methods=['GET'])

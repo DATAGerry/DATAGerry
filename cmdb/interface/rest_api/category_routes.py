@@ -31,10 +31,10 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-categories_routes = RootBlueprint('categories_rest', __name__, url_prefix='/category')
+categories_blueprint = RootBlueprint('categories_rest', __name__, url_prefix='/category')
 
 
-@categories_routes.route('/', methods=['GET'])
+@categories_blueprint.route('/', methods=['GET'])
 @login_required
 def get_categories():
     categories_list = object_manager.get_all_categories()
@@ -42,7 +42,7 @@ def get_categories():
     return resp
 
 
-@categories_routes.route('/tree', methods=['GET'])
+@categories_blueprint.route('/tree', methods=['GET'])
 @login_required
 def get_category_tree():
     from cmdb.framework.cmdb_errors import NoRootCategories
@@ -53,22 +53,22 @@ def get_category_tree():
     return make_response(category_tree)
 
 
-@categories_routes.route('/<int:public_id>', methods=['GET'])
+@categories_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
 def get_category(public_id):
     category_instance = object_manager.get_category(public_id)
     return make_response(category_instance)
 
 
-@categories_routes.route('/root', methods=['GET'])
-@categories_routes.route('/root/', methods=['GET'])
+@categories_blueprint.route('/root', methods=['GET'])
+@categories_blueprint.route('/root/', methods=['GET'])
 @login_required
 def get_root_category():
     category_instance = object_manager.get_categories_by(_filter={'root': True})
     return make_response(category_instance)
 
 
-@categories_routes.route('/', methods=['POST'])
+@categories_blueprint.route('/', methods=['POST'])
 @login_required
 def add_category():
     http_post_request_data = json.dumps(request.json)
@@ -87,7 +87,7 @@ def add_category():
     return make_response(ack)
 
 
-@categories_routes.route('/', methods=['PUT'])
+@categories_blueprint.route('/', methods=['PUT'])
 @login_required
 def update_category():
     http_put_request_data = json.dumps(request.json)
@@ -113,7 +113,7 @@ def update_category():
     return resp
 
 
-@categories_routes.route('/<int:public_id>', methods=['DELETE'])
+@categories_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @login_required
 def delete_category(public_id):
     delete_response = object_manager.delete_category(public_id)

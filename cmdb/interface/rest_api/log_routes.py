@@ -30,12 +30,12 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-log_routes = RootBlueprint('log_rest', __name__, url_prefix='/log')
+log_blueprint = RootBlueprint('log_rest', __name__, url_prefix='/log')
 
 
 # CRUD routes
-@log_routes.route('/<int:public_id>/', methods=['GET'])
-@log_routes.route('/<int:public_id>', methods=['GET'])
+@log_blueprint.route('/<int:public_id>/', methods=['GET'])
+@log_blueprint.route('/<int:public_id>', methods=['GET'])
 def get_log(public_id: int):
     try:
         selected_log = log_manager.get_log(public_id=public_id)
@@ -45,7 +45,7 @@ def get_log(public_id: int):
     return make_response(selected_log)
 
 
-@log_routes.route('/', methods=['POST'])
+@log_blueprint.route('/', methods=['POST'])
 def insert_log(*args, **kwargs):
     """
     It is not planned to insert a log
@@ -55,8 +55,8 @@ def insert_log(*args, **kwargs):
     return abort(405)
 
 
-@log_routes.route('/<int:public_id>/', methods=['PUT'])
-@log_routes.route('/<int:public_id>', methods=['PUT'])
+@log_blueprint.route('/<int:public_id>/', methods=['PUT'])
+@log_blueprint.route('/<int:public_id>', methods=['PUT'])
 def update_log(public_id, *args, **kwargs):
     """
     It is not planned to update a log
@@ -66,8 +66,8 @@ def update_log(public_id, *args, **kwargs):
     return abort(405)
 
 
-@log_routes.route('/<int:public_id>/', methods=['DELETE'])
-@log_routes.route('/<int:public_id>', methods=['DELETE'])
+@log_blueprint.route('/<int:public_id>/', methods=['DELETE'])
+@log_blueprint.route('/<int:public_id>', methods=['DELETE'])
 def delete_log(public_id: int):
     try:
         delete_ack = log_manager.delete_log(public_id=public_id)
@@ -77,8 +77,8 @@ def delete_log(public_id: int):
 
 
 # FIND routes
-@log_routes.route('/object/exists/', methods=['GET'])
-@log_routes.route('/object/exists', methods=['GET'])
+@log_blueprint.route('/object/exists/', methods=['GET'])
+@log_blueprint.route('/object/exists', methods=['GET'])
 def get_logs_with_existing_objects():
     existing_list = []
     deleted_list = []
@@ -116,8 +116,8 @@ def get_logs_with_existing_objects():
     return make_response(passed_objects)
 
 
-@log_routes.route('/object/notexists/', methods=['GET'])
-@log_routes.route('/object/notexists', methods=['GET'])
+@log_blueprint.route('/object/notexists/', methods=['GET'])
+@log_blueprint.route('/object/notexists', methods=['GET'])
 def get_logs_with_deleted_objects():
     existing_list = []
     deleted_list = []
@@ -155,8 +155,8 @@ def get_logs_with_deleted_objects():
     return make_response(passed_objects)
 
 
-@log_routes.route('/object/deleted/', methods=['GET'])
-@log_routes.route('/object/deleted', methods=['GET'])
+@log_blueprint.route('/object/deleted/', methods=['GET'])
+@log_blueprint.route('/object/deleted', methods=['GET'])
 def get_object_delete_logs():
     try:
         query = {
@@ -173,8 +173,8 @@ def get_object_delete_logs():
     return make_response(object_logs)
 
 
-@log_routes.route('/object/<int:public_id>/', methods=['GET'])
-@log_routes.route('/object/<int:public_id>', methods=['GET'])
+@log_blueprint.route('/object/<int:public_id>/', methods=['GET'])
+@log_blueprint.route('/object/<int:public_id>', methods=['GET'])
 def get_logs_by_objects(public_id: int):
     try:
         object_logs = log_manager.get_object_logs(public_id=public_id)
@@ -186,8 +186,8 @@ def get_logs_by_objects(public_id: int):
     return make_response(object_logs)
 
 
-@log_routes.route('/<int:public_id>/corresponding/', methods=['GET'])
-@log_routes.route('/<int:public_id>/corresponding', methods=['GET'])
+@log_blueprint.route('/<int:public_id>/corresponding/', methods=['GET'])
+@log_blueprint.route('/<int:public_id>/corresponding', methods=['GET'])
 def get_corresponding_object_logs(public_id: int):
     try:
         selected_log = log_manager.get_log(public_id=public_id)

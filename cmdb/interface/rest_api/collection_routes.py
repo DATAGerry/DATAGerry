@@ -28,11 +28,11 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-collection_routes = RootBlueprint('collection_rest', __name__, url_prefix='/collection')
-collection_template_routes = NestedBlueprint(collection_routes, url_prefix='/template')
+collection_blueprint = RootBlueprint('collection_rest', __name__, url_prefix='/collection')
+collection_template_routes = NestedBlueprint(collection_blueprint, url_prefix='/template')
 
 
-@collection_routes.route('/', methods=['GET'])
+@collection_blueprint.route('/', methods=['GET'])
 def get_collections():
     try:
         collections = object_manager.get_collections()
@@ -43,8 +43,8 @@ def get_collections():
     return make_response(collections)
 
 
-@collection_routes.route('/<int:public_id>', methods=['GET'])
-@collection_routes.route('/<int:public_id>/', methods=['GET'])
+@collection_blueprint.route('/<int:public_id>', methods=['GET'])
+@collection_blueprint.route('/<int:public_id>/', methods=['GET'])
 def get_collection(public_id: int):
     try:
         collection = object_manager.get_collection(public_id)
@@ -53,18 +53,18 @@ def get_collection(public_id: int):
     return make_response(collection)
 
 
-@collection_routes.route('/', methods=['POST'])
+@collection_blueprint.route('/', methods=['POST'])
 def add_collection():
     raise NotImplementedError
 
 
-@collection_routes.route('/', methods=['PUT'])
+@collection_blueprint.route('/', methods=['PUT'])
 def update_collection():
     raise NotImplementedError
 
 
-@collection_routes.route('/<int:public_id>/', methods=['DELETE'])
-@collection_routes.route('/<int:public_id>', methods=['DELETE'])
+@collection_blueprint.route('/<int:public_id>/', methods=['DELETE'])
+@collection_blueprint.route('/<int:public_id>', methods=['DELETE'])
 def delete_collection(public_id: int):
     raise NotImplementedError
 

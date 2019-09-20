@@ -1,0 +1,12 @@
+<h1>Information</h1>
+<hr/>
+<dl class="row">
+  <dt class="col-sm-3">Title</dt>
+  <dd class="col-sm-9">{{systemInfos?.title}}</dd>
+  <dt class="col-sm-3">Version</dt>
+  <dd class="col-sm-9">{{systemInfos?.version}}</dd>
+  <dt class="col-sm-3">Program uptime</dt>
+  <dd class="col-sm-9">{{convertToDate(systemInfos?.runtime)}}</dd>
+  <dt class="col-sm-3">Parameters</dt>
+  <dd class="col-sm-9">{{systemInfos?.starting_parameters}}</dd>
+</dl>

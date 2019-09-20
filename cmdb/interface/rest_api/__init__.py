@@ -54,6 +54,7 @@ def create_rest_api(event_queue):
     import cmdb
     cache.init_app(app)
     cache.clear()
+    app.cache = cache
 
     if cmdb.__MODE__ == 'DEBUG':
         app.config.from_object(app_config['rest_development'])
@@ -79,32 +80,34 @@ def register_converters(app):
 
 def register_blueprints(app):
     from cmdb.interface.rest_api.connection import connection_routes
-    from cmdb.interface.rest_api.object_routes import object_rest
-    from cmdb.interface.rest_api.type_routes import type_routes
-    from cmdb.interface.rest_api.auth_routes import auth_routes
-    from cmdb.interface.rest_api.category_routes import categories_routes
-    from cmdb.interface.rest_api.user_management.user_routes import user_routes
-    from cmdb.interface.rest_api.user_management.right_routes import right_routes
-    from cmdb.interface.rest_api.user_management.group_routes import group_routes
-    from cmdb.interface.rest_api.search_routes import search_routes
-    from cmdb.interface.rest_api.export_routes import export_route
-    from cmdb.interface.rest_api.status_routes import status_routes
-    from cmdb.interface.rest_api.collection_routes import collection_routes
-    from cmdb.interface.rest_api.log_routes import log_routes
+    from cmdb.interface.rest_api.object_routes import object_blueprint
+    from cmdb.interface.rest_api.type_routes import type_blueprint
+    from cmdb.interface.rest_api.auth_routes import auth_blueprint
+    from cmdb.interface.rest_api.category_routes import categories_blueprint
+    from cmdb.interface.rest_api.user_management.user_routes import user_blueprint
+    from cmdb.interface.rest_api.user_management.right_routes import right_blueprint
+    from cmdb.interface.rest_api.user_management.group_routes import group_blueprint
+    from cmdb.interface.rest_api.search_routes import search_blueprint
+    from cmdb.interface.rest_api.export_routes import export_blueprint
+    from cmdb.interface.rest_api.status_routes import status_blueprint
+    from cmdb.interface.rest_api.collection_routes import collection_blueprint
+    from cmdb.interface.rest_api.log_routes import log_blueprint
+    from cmdb.interface.rest_api.settings_routes import settings_blueprint
 
-    app.register_blueprint(auth_routes)
-    app.register_blueprint(object_rest)
-    app.register_blueprint(type_routes)
+    app.register_blueprint(auth_blueprint)
+    app.register_blueprint(object_blueprint)
+    app.register_blueprint(type_blueprint)
     app.register_blueprint(connection_routes)
-    app.register_blueprint(categories_routes)
-    app.register_blueprint(user_routes)
-    app.register_blueprint(group_routes)
-    app.register_blueprint(right_routes)
-    app.register_blueprint(search_routes)
-    app.register_blueprint(export_route)
-    app.register_blueprint(status_routes)
-    app.register_blueprint(collection_routes)
-    app.register_blueprint(log_routes)
+    app.register_blueprint(categories_blueprint)
+    app.register_blueprint(user_blueprint)
+    app.register_blueprint(group_blueprint)
+    app.register_blueprint(right_blueprint)
+    app.register_blueprint(search_blueprint)
+    app.register_blueprint(export_blueprint)
+    app.register_blueprint(status_blueprint)
+    app.register_blueprint(collection_blueprint)
+    app.register_blueprint(log_blueprint)
+    app.register_blueprint(settings_blueprint)
 
 
 def register_error_pages(app):
