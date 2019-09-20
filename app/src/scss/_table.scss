@@ -1,12 +1,19 @@
-.table-center {
-  thead th, thead td {
-    text-align: center;
+.dataTables_wrapper {
+
+  .table {
+    width: 100% !important;
+
+    thead th, thead td {
+      text-align: center;
+    }
+    tbody th, tbody td {
+      text-align: center;
+    }
   }
 
-  tbody th, tbody td {
-    text-align: center;
+  .dt-button-collection{
+    padding-bottom: 0!important;
   }
-
 }
 
 table.dataTable tr.dtrg-group td {

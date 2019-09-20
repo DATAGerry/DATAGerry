@@ -218,7 +218,7 @@ export class ObjectListComponent implements OnDestroy {
       buttons: {
         dom: {
           container: {
-            className: 'dt-buttons btn-groups btn-groups-sm'
+            className: 'dt-buttons btn-group btn-group-sm'
           }
         },
         buttons,
