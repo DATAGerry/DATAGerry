@@ -238,7 +238,7 @@ class DataGenerator:
                             "label": "ZIP A",
                             "required": True,
                             "name": "zip_a",
-                            "type": "number"
+                            "type": "text"
                         },
                         {
                             "label": "City A",
@@ -264,7 +264,7 @@ class DataGenerator:
                             "label": "ZIP B",
                             "required": True,
                             "name": "zip_b",
-                            "type": "number"
+                            "type": "text"
                         },
                         {
                             "label": "City B",
