@@ -27,9 +27,9 @@ const httpOptions = {
 @Injectable({
   providedIn: 'root'
 })
-export class ExportService {
+export class FileService {
 
-  private servicePrefix: string = 'export';
+  private servicePrefix: string = 'file';
 
   constructor(private api: ApiCallService) {
   }

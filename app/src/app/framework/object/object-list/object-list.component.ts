@@ -25,7 +25,7 @@ import { ObjectService } from '../../services/object.service';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ExportService } from '../../../export/export.service';
+import { FileService } from '../../../file/file.service';
 import { CmdbMode } from '../../modes.enum';
 import { FileSaverService } from 'ngx-filesaver';
 import { DatePipe } from '@angular/common';
@@ -59,7 +59,7 @@ export class ObjectListComponent implements OnDestroy {
   public mode: CmdbMode = CmdbMode.Simple;
 
   constructor(private apiCallService: ApiCallService, private objService: ObjectService,
-              private exportService: ExportService, private route: ActivatedRoute, private router: Router,
+              private fileService: FileService, private route: ActivatedRoute, private router: Router,
               private spinner: NgxSpinnerService, private fileSaverService: FileSaverService,
               private datePipe: DatePipe, private typeService: TypeService) {
     this.route.params.subscribe((id) => {
@@ -68,7 +68,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   private init(id) {
-    this.exportService.callFileFormatRoute().subscribe(data => {
+    this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
     this.spinner.show();
@@ -352,7 +352,7 @@ export class ObjectListComponent implements OnDestroy {
 
   public exportingFiles(exportType: any) {
     if ('all' === this.selectedObjects && this.items[0] !== undefined) {
-      this.exportService.getObjectFileByType(this.items[0].type_information.type_id, exportType.id)
+      this.fileService.getObjectFileByType(this.items[0].type_information.type_id, exportType.id)
         .subscribe(res => this.downLoadFile(res, exportType));
       return;
     }
@@ -365,7 +365,7 @@ export class ObjectListComponent implements OnDestroy {
       }
     }
     if (publicIds.length > 0) {
-      this.exportService.callExportRoute(publicIds.toString(), exportType.id)
+      this.fileService.callExportRoute(publicIds.toString(), exportType.id)
         .subscribe(res => this.downLoadFile(res, exportType));
     }
   }

@@ -19,30 +19,30 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { ExportRoutingModule } from './export-routing.module';
-import { ExportComponent } from './export.component';
+import { FileRoutingModule } from './file-routing.module';
+import { FileComponent } from './file.component';
 import { LayoutModule } from '../layout/layout.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RenderModule } from '../framework/render/render.module';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { ExportService } from './export.service';
+import { FileService } from './file.service';
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 
 @NgModule({
-  declarations: [ExportComponent],
+  declarations: [FileComponent],
   imports: [
     CommonModule,
     LayoutModule,
     FormsModule,
     ReactiveFormsModule,
     RenderModule,
-    ExportRoutingModule,
+    FileRoutingModule,
     NgSelectModule,
     FontAwesomeModule
   ],
   providers: [
-    ExportService
+    FileService
   ]
 })
-export class ExportModule {
+export class FileModule {
 }

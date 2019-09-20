@@ -18,7 +18,7 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { ExportComponent } from './export.component';
+import { FileComponent } from './file.component';
 import { NavigationComponent } from '../layout/components/navigation/navigation.component';
 import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
 import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';
@@ -46,11 +46,11 @@ const routes: Routes = [
     outlet: 'footer'
   },
   {
-    path: 'export',
+    path: 'file',
     data: {
       breadcrumb: 'Export'
     },
-    component: ExportComponent
+    component: FileComponent
   }
 ];
 
@@ -58,4 +58,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class ExportRoutingModule { }
+export class FileRoutingModule { }

@@ -17,7 +17,7 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { ExportService } from './export.service';
+import { FileService } from './file.service';
 import { DatePipe } from '@angular/common';
 import { CmdbType } from '../framework/models/cmdb-type';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
@@ -25,18 +25,18 @@ import { TypeService } from '../framework/services/type.service';
 import {FileSaverService} from 'ngx-filesaver';
 
 @Component({
-  selector: 'cmdb-export',
-  templateUrl: './export.component.html',
-  styleUrls: ['./export.component.scss']
+  selector: 'cmdb-file',
+  templateUrl: './file.component.html',
+  styleUrls: ['./file.component.scss']
 })
-export class ExportComponent implements OnInit {
+export class FileComponent implements OnInit {
 
   public typeList: CmdbType[];
   public formatList: any[] = [];
   public formExport: FormGroup;
   public isSubmitted = false;
 
-  constructor(private exportService: ExportService, private datePipe: DatePipe, private typeService: TypeService,
+  constructor(private exportService: FileService, private datePipe: DatePipe, private typeService: TypeService,
               private fileSaverService: FileSaverService ) {
     this.formExport = new FormGroup({
       type: new FormControl( null, Validators.required),

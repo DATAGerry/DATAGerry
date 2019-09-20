@@ -10,6 +10,15 @@
         <a class="nav-link" routerLink="/framework/object/add" routerLinkActive="active">
           <fa-icon icon="plus"></fa-icon> Add object</a>
       </li>
+      <li class="nav-title">Sync</li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/import/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          <fa-icon icon="file-import"></fa-icon> Import</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/export/" routerLinkActive="active">
+          <fa-icon icon="file-export"></fa-icon> Export</a>
+      </li>
       <li class="nav-title">Assets</li>
       <li class="nav-item">
         <a class="nav-link" routerLink="/framework/object/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">

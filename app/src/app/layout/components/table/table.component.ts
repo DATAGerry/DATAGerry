@@ -23,7 +23,7 @@ import { BehaviorSubject, Subject} from 'rxjs';
 import { UserService } from '../../../management/services/user.service';
 import { ApiCallService } from '../../../services/api-call.service';
 import { DatePipe } from '@angular/common';
-import { ExportService } from '../../../export/export.service';
+import { FileService } from '../../../file/file.service';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from '../../helpers/modal/modal.component';
@@ -60,7 +60,7 @@ export class TableComponent implements OnInit, OnDestroy {
   public formatList: any[] = [];
 
   constructor(private userService: UserService, private apiCallService: ApiCallService,
-              private exportService: ExportService, private router: Router,
+              private fileService: FileService, private router: Router,
               private modalService: NgbModal, private fileSaverService: FileSaverService,
               private datePipe: DatePipe) {
     this.add = {
@@ -94,7 +94,7 @@ export class TableComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.showExport) {
-      this.exportService.callFileFormatRoute().subscribe( data => {
+      this.fileService.callFileFormatRoute().subscribe( data => {
         this.formatList = data;
       });
     }
@@ -266,7 +266,7 @@ export class TableComponent implements OnInit, OnDestroy {
       }
     }
     if (publicIds.length > 0) {
-      this.exportService.callExportRoute(publicIds.toString(), exportType.id)
+      this.fileService.callExportRoute(publicIds.toString(), exportType.id)
         .subscribe(res => this.downLoadFile(res, exportType));
     }
   }

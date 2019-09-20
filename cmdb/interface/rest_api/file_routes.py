@@ -29,10 +29,10 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-export_blueprint = RootBlueprint('export_rest', __name__, url_prefix='/export')
+file_blueprint = RootBlueprint('file_rest', __name__, url_prefix='/file')
 
 
-@export_blueprint.route('/', methods=['GET'])
+@file_blueprint.route('/', methods=['GET'])
 @login_required
 def get_filetypes():
     filetypes = FileExporter.get_filetypes()
@@ -52,7 +52,7 @@ def get_filetypes():
     return make_response(filetype_list)
 
 
-@export_blueprint.route('/object/<string:public_ids>/<string:export_class>', methods=['POST'])
+@file_blueprint.route('/object/<string:public_ids>/<string:export_class>', methods=['POST'])
 @login_required
 def export_file(public_ids, export_class):
     try:
@@ -69,7 +69,7 @@ def export_file(public_ids, export_class):
     return file_export.export()
 
 
-@export_blueprint.route('/object/type/<int:public_id>/<string:export_class>', methods=['POST'])
+@file_blueprint.route('/object/type/<int:public_id>/<string:export_class>', methods=['POST'])
 @login_required
 def export_file_by_type_id(public_id, export_class):
     try:

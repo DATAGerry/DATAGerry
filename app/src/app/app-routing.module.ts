@@ -53,7 +53,7 @@ const routes: Routes = [
     data: {
       breadcrumb: 'File'
     },
-    loadChildren: () => import('./export/export.module').then(m => m.ExportModule)
+    loadChildren: () => import('./file/file.module').then(m => m.FileModule)
   },
   {
     path: 'framework',
