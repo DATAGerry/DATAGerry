@@ -34,6 +34,7 @@ export class NavigationComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.renderer.addClass(document.body, 'header-fixed');
+    this.dropdownSubmenu();
   }
 
   public ngOnDestroy(): void {
@@ -45,4 +46,18 @@ export class NavigationComponent implements OnInit, OnDestroy {
     this.router.navigate(['/auth/login']);
   }
 
+  private dropdownSubmenu() {
+    $('.dropdown-menu a.dropdown-toggle').on('click', function(e) {
+      if (!$(this).next().hasClass('show')) {
+        $(this).parents('.dropdown-menu').first().find('.show').removeClass('show');
+      }
+      const $subMenu = $(this).next('.dropdown-menu');
+      $subMenu.toggleClass('show');
+      // tslint:disable-next-line:only-arrow-functions
+      $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', function() {
+        $('.dropdown-submenu .show').removeClass('show');
+      });
+      return false;
+    });
+  }
 }
