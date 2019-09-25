@@ -216,6 +216,10 @@ class CmdbObjectManager(CmdbManagerBase):
                 raise Exception
         return ack
 
+    def update_object_fields(self, filter: dict, update: dict):
+        ack = self._update_many(CmdbObject.COLLECTION, filter, update)
+        return ack
+
     def get_object_references(self, public_id: int) -> list:
         # Type of given object id
         type_id = self.get_object(public_id=public_id).get_type_id()

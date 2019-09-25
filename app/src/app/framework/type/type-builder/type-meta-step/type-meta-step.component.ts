@@ -13,6 +13,7 @@ export class TypeMetaStepComponent implements OnInit {
   public externalsForm: FormGroup;
   public externalLinks = [];
   public hrefInterpolCounter;
+  private currentFields: any[] = [];
 
   @Input()
   set preData(data: any) {
@@ -46,7 +47,16 @@ export class TypeMetaStepComponent implements OnInit {
     return this.externalsForm.get('label');
   }
 
-  @Input() fields: any[] = [];
+  @Input()
+  public set fields(value: any[]) {
+    this.currentFields = value;
+    this.checkSummaryFields();
+    this.checkExternalLinks();
+  }
+
+  public get fields(): any[] {
+    return this.currentFields;
+  }
 
   private static occurrences(s, subString): number {
     s += '';
@@ -114,4 +124,30 @@ export class TypeMetaStepComponent implements OnInit {
     this.externalsForm.get('name').setValidators(this.listNameValidator(this.externalLinks));
   }
 
+  private checkSummaryFields() {
+    // checking if summary-fields have removing fields
+    const sumFields: any[] = this.summaryForm.get('fields').value;
+    if (sumFields.length > 0) {
+      const validList = [];
+      sumFields.filter((item) => {
+        this.fields.map(field => field.name).includes(item) ? validList.push(item) : console.log(item);
+      });
+      this.summaryForm.patchValue({fields: validList});
+    }
+  }
+
+  private checkExternalLinks() {
+    // checking if external links have removing fields
+    const extLinks: any[] = this.externalLinks;
+    if (extLinks.length > 0) {
+      let validList = [];
+      extLinks.filter((item) => {
+        item.fields.filter((value) => {
+          this.fields.map(field => field.name).includes(value) ? validList.push(value) : console.log(value);
+        });
+        item.fields = validList;
+        validList = [];
+      });
+    }
+  }
 }
