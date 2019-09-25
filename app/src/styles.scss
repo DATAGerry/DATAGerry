@@ -34,6 +34,9 @@
 @import "~@fortawesome/fontawesome-free-webfonts/css/fa-brands.css";
 @import "~@fortawesome/fontawesome-free-webfonts/css/fa-solid.css";
 
+/* import archwizard*/
+@import "~angular-archwizard/archwizard.scss";
+
 /* custom global modules */
 @import "scss/variables";
 @import "scss/mixins";
@@ -46,4 +49,5 @@
 @import "scss/toast";
 @import "scss/table";
 @import "scss/icon";
+@import "scss/card";
 @import "scss/gimmick";

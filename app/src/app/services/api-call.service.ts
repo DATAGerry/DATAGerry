@@ -29,12 +29,19 @@ const httpOptions = {
 };
 
 declare type HttpObserve = 'body' | 'events' | 'response';
-const resp: HttpObserve = 'response';
+export const resp: HttpObserve = 'response';
 
-const httpObserveOptions = {
+export const httpObserveOptions = {
   headers: new HttpHeaders({
     'Content-Type': 'application/json'
   }),
+  observe: resp
+};
+
+export const httpFileOptions = {
+  headers: new HttpHeaders({
+  }),
+  params: {},
   observe: resp
 };
 
@@ -51,23 +58,23 @@ export class ApiCallService {
       console.error('An error occurred:', err.error.message);
     } else {
       console.error(
-        `Backend returned code ${err.status}, ` +
-        `body was: ${err.error}`);
+        `Backend returned code ${ err.status }, ` +
+        `body was: ${ err.error }`);
     }
     return throwError(
       'Something bad happened; please try again later.');
   }
 
   constructor(private http: HttpClient, private connectionService: ConnectionService) {
-    this.apiURL = `${this.connectionService.currentConnection}/${this.apiPrefix}/`;
+    this.apiURL = `${ this.connectionService.currentConnection }/${ this.apiPrefix }/`;
   }
 
   public callGet<T>(route: string, params?: any): Observable<any> {
     return this.http.get<T>(this.apiURL + route, httpObserveOptions).pipe(catchError(ApiCallService.handleError));
   }
 
-  public callPost<T>(route: string, data): Observable<any> {
-    return this.http.post<T>(this.apiURL + route, data, httpObserveOptions).pipe(catchError(ApiCallService.handleError));
+  public callPost<T>(route: string, data, httpPostOptions = httpObserveOptions): Observable<any> {
+    return this.http.post<T>(this.apiURL + route, data, httpPostOptions).pipe(catchError(ApiCallService.handleError));
   }
 
   public callPut<T>(route: string, data): Observable<any> {

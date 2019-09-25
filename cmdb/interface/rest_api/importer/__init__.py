@@ -13,19 +13,3 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-import logging
-from flask import current_app
-from cmdb.interface.route_utils import RootBlueprint
-
-LOGGER = logging.getLogger(__name__)
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
-
-importer_blueprint = RootBlueprint('import_rest', __name__, url_prefix='/import')
-
-with current_app.app_context():
-    from cmdb.interface.rest_api.importer.importer_object_routes import importer_object_blueprint
-    importer_blueprint.register_nested_blueprint(importer_object_blueprint)

@@ -22,6 +22,8 @@ import datetime
 import re
 import ast
 
+from cmdb.importer.importer_base import BaseImporter
+
 try:
     import uuid
 
@@ -118,6 +120,9 @@ def default(obj):
         return obj.__dict__
     if isinstance(obj, ObjectId):
         return {"$oid": str(obj)}
+    if isinstance(obj, BaseImporter):
+        print(obj.__class__)
+        return obj.__name__
     if isinstance(obj, DBRef):
         return obj.as_doc()
     if isinstance(obj, datetime.datetime):

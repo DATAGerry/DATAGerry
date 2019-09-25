@@ -14,18 +14,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
-from flask import current_app
-from cmdb.interface.route_utils import RootBlueprint
+from cmdb.importer.importer_object.importer_object_csv import CsvObjectImporter
+from cmdb.importer.importer_object.importer_object_json import JsonObjectImporter
+from cmdb.importer.parser_object.parser_object_csv import CsvParser
 
-LOGGER = logging.getLogger(__name__)
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+__OBJECT_IMPORTER__ = {
+    'csv': CsvObjectImporter,
+    'json': JsonObjectImporter
+}
 
-importer_blueprint = RootBlueprint('import_rest', __name__, url_prefix='/import')
-
-with current_app.app_context():
-    from cmdb.interface.rest_api.importer.importer_object_routes import importer_object_blueprint
-    importer_blueprint.register_nested_blueprint(importer_object_blueprint)
+__OBJECT_PARSER__ = {
+    'csv': CsvParser
+}

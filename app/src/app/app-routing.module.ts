@@ -64,6 +64,14 @@ const routes: Routes = [
     loadChildren: () => import('./framework/framework.module').then(m => m.FrameworkModule)
   },
   {
+    path: 'import',
+    canActivate: [AuthGuard],
+    data: {
+      breadcrumb: 'Import'
+    },
+    loadChildren: () => import('./import/import.module').then(m => m.ImportModule)
+  },
+  {
     path: 'management',
     canActivate: [AuthGuard],
     data: {

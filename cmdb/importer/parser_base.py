@@ -15,8 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-from flask import current_app
-from cmdb.interface.route_utils import RootBlueprint
 
 LOGGER = logging.getLogger(__name__)
 try:
@@ -24,8 +22,31 @@ try:
 except ImportError:
     CMDBError = Exception
 
-importer_blueprint = RootBlueprint('import_rest', __name__, url_prefix='/import')
 
-with current_app.app_context():
-    from cmdb.interface.rest_api.importer.importer_object_routes import importer_object_blueprint
-    importer_blueprint.register_nested_blueprint(importer_object_blueprint)
+class BaseParser:
+    DEFAULT_CONFIG = {}
+    CONTENT_TYPE = ''
+    FILE_TYPE = ''
+
+    def __new__(cls, *args, **kwargs):
+        # TODO: INIT validation
+        return super(BaseParser, cls).__new__(cls)
+
+    def __init__(self, parser_config: dict = None):
+        _parser_config = parser_config or self.DEFAULT_CONFIG
+        self.parser_config: dict = {**self.DEFAULT_CONFIG, **_parser_config}
+
+    def get_config(self) -> dict:
+        return self.parser_config
+
+    def parse(self, file) -> (dict, list):
+        raise NotImplementedError
+
+
+class BaseObjectParser(BaseParser):
+
+    def __init__(self, parser_config: dict = None):
+        super(BaseObjectParser, self).__init__(parser_config)
+
+    def parse(self, file) -> (dict, list):
+        raise NotImplementedError

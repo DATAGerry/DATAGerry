@@ -1,0 +1,6 @@
+<form [formGroup]="typeForm">
+  <div class="form-group">
+    <label>Type:</label>
+    <ng-select formControlName="typeID" [items]="typeList" bindLabel="label" bindValue="public_id"></ng-select>
+  </div>
+</form>

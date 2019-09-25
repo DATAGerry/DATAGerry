@@ -15,8 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-from flask import current_app
-from cmdb.interface.route_utils import RootBlueprint
 
 LOGGER = logging.getLogger(__name__)
 try:
@@ -24,8 +22,8 @@ try:
 except ImportError:
     CMDBError = Exception
 
-importer_blueprint = RootBlueprint('import_rest', __name__, url_prefix='/import')
 
-with current_app.app_context():
-    from cmdb.interface.rest_api.importer.importer_object_routes import importer_object_blueprint
-    importer_blueprint.register_nested_blueprint(importer_object_blueprint)
+class ParserError(CMDBError):
+
+    def __init__(self, message):
+        super(ParserError, self).__init__(message)

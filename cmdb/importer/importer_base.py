@@ -14,20 +14,34 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
 
-from cmdb.interface.rest_api.import_routes import import_blueprint
-from cmdb.interface.route_utils import NestedBlueprint, make_response
+class BaseImporter:
+    FILE_TYPE = ''
 
-LOGGER = logging.getLogger(__name__)
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+    def __init__(self, file_type: str, file=None):
+        self.file_type = file_type
+        self.file = file
 
-import_object_blueprint = NestedBlueprint(import_blueprint, url_prefix='/object')
+    def get_file_type(self):
+        return self.file_type
+
+    def get_file(self):
+        return self.file
+
+    def exe_import(self):
+        raise NotImplementedError
 
 
-@import_object_blueprint.route('/', methods=['POST'])
-def import_objects():
-    return make_response("test")
+class BaseObjectImporter(BaseImporter):
+    FILE_TYPE = ''
+    DEFAULT_CONFIG = {}
+
+    def __init__(self, file=None, config: dict = None):
+        self.config = config
+        super(BaseObjectImporter, self).__init__(file_type=self.FILE_TYPE, file=file)
+
+    def get_config(self):
+        return self.config
+
+    def exe_import(self):
+        raise NotImplementedError

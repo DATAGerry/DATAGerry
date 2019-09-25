@@ -1,5 +1,5 @@
 {
-  "name": "DATAGERRYapp",
+  "name": "DATAGERRY",
   "version": "0.0.0",
   "author": "NETHINKS GmbH",
   "license": "AGPLv3",
@@ -32,7 +32,7 @@
     "@ng-select/ng-select": "^2.20.3",
     "@sweetalert2/ngx-sweetalert2": "^5.1.0",
     "@types/chart.js": "^2.8.5",
-    "angular-archwizard": "^4.0.0",
+    "angular-archwizard": "^5.0.0",
     "angular-datatables": "^8.0.0",
     "angularx-qrcode": "^1.6.1",
     "bootstrap": "^4.3.1",

@@ -93,7 +93,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.collection_routes import collection_blueprint
     from cmdb.interface.rest_api.log_routes import log_blueprint
     from cmdb.interface.rest_api.settings_routes import settings_blueprint
-    from cmdb.interface.rest_api.import_routes import import_blueprint
+    from cmdb.interface.rest_api.import_routes import importer_blueprint
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(object_blueprint)
@@ -109,7 +109,7 @@ def register_blueprints(app):
     app.register_blueprint(collection_blueprint)
     app.register_blueprint(log_blueprint)
     app.register_blueprint(settings_blueprint)
-    app.register_blueprint(import_blueprint)
+    app.register_blueprint(importer_blueprint)
 
 
 def register_error_pages(app):
