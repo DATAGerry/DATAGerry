@@ -61,16 +61,15 @@ html{
 }
 
 
+
 .sidebar-fixed {
   #sidebar {
     position: fixed;
   }
 }
 
-.sidebar-hidden {
-  #sidebar {
-    margin-left: -$sidebar-width;
-  }
+.set-sidebar-visible {
+  margin-left: 0!important;
 }
 
 @include media-breakpoint-down('md') {

@@ -33,12 +33,20 @@ $navbar-dropdown-header-background: theme-color('primary');
   background: $navbar-bg-color;
   border-bottom: $navbar-border-width $navbar-border-style theme-color('primary');
 
-  .navbar-container {
-    margin: 0.5rem auto;
+  .container-content {
+    margin: 0.5rem 0;
+    padding: 0.5rem 1.5rem;
     background: $white;
-    .container-content.show {
-      padding: 0.5rem 1.5rem;
+
+    .scrollable-menu {
+      height: auto;
+      max-height: 250px;
+      overflow-x: hidden;
     }
+  }
+
+  .container-content.show {
+    border-bottom: 1px solid darken(white, 40%);
   }
 
   .navbar-brand {
