@@ -1,8 +1,21 @@
-#search-area-box {
-  position: absolute;
+@import "~src/scss/variables";
+
+#search-bar {
+  position:absolute;
   left: 0;
-  top: 100%;
-  min-width: 250px;
-  max-height: 250px;
-  z-index: 100
+  width: 100%;
+  top: calc(80px + 0.5rem);
+}
+
+
+@media(max-width:991px){
+  #search-bar {
+    top: calc(80px + 4rem);
+  }
+
+  .scrollable-menu {
+    height: auto;
+    max-height: 250px;
+    overflow-x: hidden;
+  }
 }

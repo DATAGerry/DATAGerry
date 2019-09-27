@@ -70,10 +70,11 @@
         </li>
       </ul>
       <ul class="nav navbar-nav flex-row float-right">
-        <li class="nav-item nav-search">
-          <div class="search-input">
-            <cmdb-search-bar></cmdb-search-bar>
-          </div>
+        <li class="nav-item dropdown">
+          <a class="dropdown-toggle nav-link mr-1" data-toggle="collapse" data-target="#search-bar"
+             aria-expanded="false" aria-controls="search-content">
+            <fa-icon icon="search"></fa-icon>
+          </a>
         </li>
         <!-- nav notification -->
         <li class="nav-item dropdown">
@@ -133,8 +134,8 @@
           </div>
         </li>
       </ul>
+      <cmdb-search-bar></cmdb-search-bar>
     </div>
-
   </div>
-
 </nav>
+
