@@ -8,19 +8,14 @@ $navbar-brand-font-width-bold: 600;
 $navbar-brand-small-font-width: 700;
 $navbar-brand-small-font-right: 2px;
 $navbar-brand-small-font-top: -1px;
-$navbar-brand-width: 200px;
+$navbar-brand-width: 210px;
 $navbar-bg-color: $white;
 $navbar-border-width: 2px;
 $navbar-border-style: solid;
 $navbar-icon-link: darken(white, 40%);
-$navbar-search-padding: 0.7rem 1rem;
-$navbar-search-border: 0px;
 $navbar-dropdown-font-size: 0.875rem !default;
 $navbar-dropdown-borders: (
   all: (size: 1px, style: solid, color: $border-color)
-);
-$navbar-advanced-search-button-border: (
-  left: (size: 1px, style: solid, color: $border-color)
 );
 $navbar-dropdown-top: 6px;
 $navbar-dropdown-menu-padding: 0;
@@ -43,10 +38,6 @@ $navbar-dropdown-header-background: theme-color('primary');
       max-height: 250px;
       overflow-x: hidden;
     }
-  }
-
-  .container-content.show {
-    border-bottom: 1px solid darken(white, 40%);
   }
 
   .navbar-brand {
@@ -105,38 +96,6 @@ $navbar-dropdown-header-background: theme-color('primary');
     }
   }
 
-  #nav-quick-search {
-    input#quick-search {
-      padding: $navbar-search-padding;
-      border: $navbar-search-border;
-    }
-
-    .advanced-search-button {
-      background: None;
-      @include borders($navbar-advanced-search-button-border);
-    }
-
-    .advanced-search-button-submit {
-      @include borders($navbar-advanced-search-button-border);
-    }
-
-    .dropdown-menu {
-      margin-top: 1px;
-      padding: 10px 20px;
-      width: 312px;
-      @include borders($navbar-dropdown-borders);
-
-      #advanced-search-link {
-        padding-top: ($spacer * 0.25);
-
-        a {
-          font-size: small;
-          text-align: right;
-        }
-      }
-    }
-  }
-
   #navbar-mega {
     .sub-title {
       padding-bottom: 1rem;
@@ -185,6 +144,14 @@ $navbar-dropdown-header-background: theme-color('primary');
       left: 0;
       right: 0;
       padding: 15px;
+    }
+  }
+}
+
+@media(max-width:991px){
+  #navbar-cmdb{
+    .container-content {
+      border-bottom: 1px solid darken(white, 40%);
     }
   }
 }
