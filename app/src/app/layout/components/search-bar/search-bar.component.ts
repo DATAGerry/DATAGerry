@@ -17,12 +17,12 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 import { TypeService } from '../../../framework/services/type.service';
 import { Router } from '@angular/router';
 import { debounceTime, map } from 'rxjs/operators';
 import { ApiCallService } from '../../../services/api-call.service';
-import {RenderResult} from "../../../framework/models/cmdb-render";
+import { RenderResult } from '../../../framework/models/cmdb-render';
 
 @Component({
   selector: 'cmdb-search-bar',
@@ -32,70 +32,46 @@ import {RenderResult} from "../../../framework/models/cmdb-render";
 
 export class SearchBarComponent implements OnInit {
 
-  public searchCtrl: FormControl = new FormControl('');
+  private readonly apiURL: string = '/search/?value=';
+  private searchTerm: string = '';
+  private typeID: any = 'undefined';
+
+  public searchForm: FormGroup;
+  public typeList: any[];
   public autoResult: RenderResult[] = [];
 
-  public categoryList = [{label: 'Categories'}];
-  public category = 'Categories';
-
-  private typeID: string = 'undefined';
-  private url: string = '/search/?value=';
-
   constructor(
-    private typeService: TypeService,
-    private route: Router,
-    private api: ApiCallService) {
+    private typeService: TypeService, private route: Router, private api: ApiCallService) {
+    this.searchForm = new FormGroup({
+      term: new FormControl(null, Validators.required),
+      type: new FormControl( null, Validators.required),
+    });
   }
 
   ngOnInit() {
-    this.typeService.getTypeList().subscribe((list) => {
-      this.categoryList = this.categoryList.concat(list);
-    }, error => {
-      this.route.navigate(['login/']);
-    });
-    this.autoSearch();
-  }
+    this.typeService.getTypeList().subscribe((list) => this.typeList = list);
 
-  public autoSearch() {
-    this.searchCtrl.valueChanges.subscribe( () => {
-      if (typeof this.searchCtrl.value === 'string' && this.searchCtrl.value.length > 0) {
-        this.api.callGetRoute(this.url + this.searchCtrl.value + '&type_id=' + this.typeID, {params: {limit: '5'}})
+    this.searchForm.valueChanges.subscribe(val => {
+      this.searchTerm = val.term == null ? '' : val.term;
+      this.typeID = val.type == null ? 'undefined' : val.type.public_id;
+      if (this.searchTerm.length > 0) {
+        this.api.callGetRoute(this.apiURL + this.searchTerm + '&type_id=' + this.typeID, {params: {limit: '5'}})
           .pipe(
             debounceTime(100)  // WAIT FOR 500 MILISECONDS AFTER EACH KEY STROKE.
-            ).subscribe( (data: RenderResult[]) => {
-                this.autoResult = data;
-        });
+          ).subscribe( (data: RenderResult[]) => this.autoResult = data);
       }
     });
   }
 
   public getResponse() {
-    this.hiden();
-    this.route.navigate(['search/results'], {queryParams: {value: this.searchCtrl.value} });
+    this.route.navigate(['search/results'], {queryParams: {value: this.searchTerm} });
   }
 
   public highlight(value) {
     if (typeof value === 'string' && value.length > 0) {
-      return value.replace(new RegExp(this.searchCtrl.value, 'gi'), match => {
+      return value.replace(new RegExp(value, 'gi'), match => {
         return '<span class="badge badge-secondary">' + match + '</span>';
       });
     }
   }
-
-  public hiden() {
-    setTimeout(() => {
-      this.searchCtrl.setValue('');
-    }, 300);
-  }
-
-  public dropdownMenu(element) {
-    this.category = element.label;
-    this.typeID = this.getAppropriateTypeId(this.categoryList, this.category);
-  }
-
-  private getAppropriateTypeId(object, value) {
-    const item = object.find(i => i.label === value);
-    return item.public_id;
-  }
-
 }
