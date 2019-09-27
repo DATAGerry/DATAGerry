@@ -5,10 +5,7 @@
     </span>
   </div>
   <div class="ml-auto">
-    Session timeout in:
-    <span token [counter]="userTokenExpire" [interval]="1000" (value)="count = $event">
-      {{interval(count)}}
-    </span>
+    Session timeout in: {{timeout}}
   </div>
   <div id="footerLinks" class="ml-auto">
     <a href="{{docUrl}}" target="_blank"><fa-icon icon="book"></fa-icon></a>

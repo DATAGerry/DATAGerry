@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ConnectionService } from '../../../connect/connection.service';
 import { AuthService } from '../../../auth/services/auth.service';
 
@@ -25,17 +25,17 @@ import { AuthService } from '../../../auth/services/auth.service';
   templateUrl: './footer.component.html',
   styleUrls: ['./footer.component.scss']
 })
-export class FooterComponent implements OnInit {
-
+export class FooterComponent implements OnInit, OnDestroy {
 
   public constructor(private connectionService: ConnectionService, private authService: AuthService) {
-    this.docUrl = `${connectionService.currentConnection}/docs`;
+    this.docUrl = `${ connectionService.currentConnection }/docs`;
   }
 
   public today: number = Date.now();
   public docUrl: string = 'localhost';
   public userTokenExpire: number = 0;
-  public count;
+  public timeout: string = '';
+  private timer: number;
 
   public static convertToDate(secs) {
     const secsInt = parseInt(secs, 10);
@@ -51,17 +51,28 @@ export class FooterComponent implements OnInit {
 
   public ngOnInit(): void {
     this.userTokenExpire = this.authService.currentUserValue.token_expire;
+    this.timeout = FooterComponent.convertToDate(this.calcRestTime(this.userTokenExpire));
+    this.interval();
   }
 
-  public interval(countDownDate) {
+  public interval() {
+    this.timer = setInterval(() => {
+      this.timeout = FooterComponent.convertToDate(this.calcRestTime(this.userTokenExpire));
+    }, 1000);
+  }
+
+  public calcRestTime(countDownDate){
     const now = Math.floor(Date.now() / 1000);
     const distance = countDownDate - now;
 
     if (distance < 0) {
       return 'EXPIRED';
     }
+    return distance;
+  }
 
-    return FooterComponent.convertToDate(distance);
+  public ngOnDestroy(): void {
+    clearInterval(this.timer);
   }
 
 }

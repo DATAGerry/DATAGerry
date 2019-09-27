@@ -27,7 +27,6 @@ import { SidebarCategoryComponent } from './components/sidebar/sidebar-category.
 import { ContentHeaderComponent } from './components/content-header/content-header.component';
 import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.component';
 import { LowercaseDirective } from './directives/lowercase.directive';
-import { CounterDirective } from './directives/counter.directive';
 import { SearchBarComponent } from './components/search-bar/search-bar.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -54,7 +53,6 @@ import { ChartsComponent } from './components/charts/charts.component';
 @NgModule({
   declarations: [
     LowercaseDirective,
-    CounterDirective,
     BreadcrumbComponent,
     NavigationComponent,
     SidebarComponent,
@@ -74,7 +72,6 @@ import { ChartsComponent } from './components/charts/charts.component';
   ],
   exports: [
     LowercaseDirective,
-    CounterDirective,
     NavigationComponent,
     BreadcrumbComponent,
     FooterComponent,

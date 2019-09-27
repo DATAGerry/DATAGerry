@@ -1,0 +1,77 @@
+<div class="row">
+  <div class="col-md-3">
+    <div class="card mb-3">
+      <div class="card-header">
+        Definitions
+      </div>
+      <div class="card-body overflow-auto">
+        <div class="list-group">
+          <div class="list-group-item ist-group-item list-group-item-action mt-2">
+            <div class="d-flex w-100 justify-content-between">
+              Public ID
+              <fa-icon icon="arrows-alt"></fa-icon>
+            </div>
+          </div>
+          <div class="list-group-item ist-group-item list-group-item-action mt-2">
+            <div class="d-flex w-100 justify-content-between">
+              Active
+              <fa-icon icon="arrows-alt"></fa-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="row">
+          <label class="col-sm-4 col-form-label">Fields:</label>
+          <div class="col-sm-8">
+            <input class="form-control" type="search" placeholder="Search...">
+          </div>
+        </div>
+      </div>
+      <div class="card-body overflow-auto">
+        <div class="list-group">
+          <div [dndDraggable]="typeFields" *ngFor="let typeFields of typeInstance?.fields"
+               class="list-group-item ist-group-item list-group-item-action mt-2 move">
+            <div class="d-flex w-100 justify-content-between">
+              {{typeFields.label}}
+              <fa-icon icon="arrows-alt"></fa-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-9">
+    <div class="card">
+      <div class="card-header">
+        Mapping
+      </div>
+      <div class="card-body">
+        <table class="table">
+          <thead>
+          <tr>
+            <th scope="col">Field</th>
+            <th scope="col">Row Index</th>
+            <th scope="col" *ngIf="header">Header</th>
+            <th scope="col">Example</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let column of columns; let i = index">
+            <td>
+              <section dndDropzone class="field-drop" data-label="Drop field">
+
+              </section>
+            </td>
+            <th scope="row">{{i}}</th>
+            <th *ngIf="header" scope="row">{{column}}</th>
+            <td>{{parserResponse.lines[0][i]}}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
