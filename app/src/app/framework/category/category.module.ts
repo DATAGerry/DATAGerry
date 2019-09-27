@@ -22,7 +22,7 @@ import { CommonModule } from '@angular/common';
 import { CategoryRoutingModule } from './category-routing.module';
 import { CategoryListComponent } from './category-list/category-list.component';
 import { DndModule } from 'ngx-drag-drop';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LayoutModule } from '../../layout/layout.module';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -31,7 +31,7 @@ import { FilterPipe } from './filter.pipe';
 import { DataTablesModule } from 'angular-datatables';
 import { CategoryEditComponent } from './category-edit/category-edit.component';
 import { BuildCategoryFormComponent } from './build-category-form/build-category-form.component';
-import {SweetAlert2Module} from "@sweetalert2/ngx-sweetalert2";
+import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 
 @NgModule({
   declarations: [
@@ -40,6 +40,9 @@ import {SweetAlert2Module} from "@sweetalert2/ngx-sweetalert2";
     FilterPipe,
     CategoryEditComponent,
     BuildCategoryFormComponent],
+  exports: [
+    FilterPipe
+  ],
   imports: [
     CommonModule,
     CategoryRoutingModule,

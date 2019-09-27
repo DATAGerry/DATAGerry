@@ -87,8 +87,8 @@ export class TypeBasicStepComponent implements OnInit {
   public ngOnInit(): void {
     if (this.mode === CmdbMode.Create) {
       this.basicForm.get('name').setAsyncValidators(TypeNameValidator.createValidator(this.typeService));
-      this.basicForm.get('label').valueChanges.subscribe(val => {
-        this.basicForm.get('name').setValue(val.toString().charAt(0).toLowerCase() + val.toString().slice(1));
+      this.basicForm.get('label').valueChanges.subscribe(value => {
+        this.basicForm.get('name').setValue(value.replace(/ /g, '-').toLowerCase());
         this.basicForm.get('name').markAsDirty({onlySelf: true});
         this.basicForm.get('name').markAsTouched({onlySelf: true});
       });

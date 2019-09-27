@@ -27,12 +27,24 @@ import { ConfigEdit } from '../config.edit';
 export class TextFieldEditComponent extends ConfigEdit implements OnInit {
   @Input() groupList: any;
   @Input() userList: any;
+  public regexValid: boolean;
 
   constructor() {
     super();
   }
 
   public ngOnInit(): void {
+    this.regexValid = true;
+  }
+
+  public validateRegex(regex: string) {
+    try {
+      // tslint:disable-next-line:no-unused-expression
+      new RegExp(regex);
+      this.regexValid = true;
+    } catch (e) {
+      this.regexValid = false;
+    }
   }
 
 }

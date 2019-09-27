@@ -31,8 +31,8 @@ import { CmdbMode } from '../../modes.enum';
 })
 export class RenderElementComponent extends RenderField implements OnInit {
 
-  @ViewChild('fieldContainer', {read: ViewContainerRef, static: true}) containerField;
-  @ViewChild('simpleContainer', {read: ViewContainerRef, static: true}) containerSimple;
+  @ViewChild('fieldContainer', { read: ViewContainerRef, static: true }) containerField;
+  @ViewChild('simpleContainer', { read: ViewContainerRef, static: true }) containerSimple;
 
   private component: any;
   private componentRef: ComponentRef<any>;
@@ -59,6 +59,9 @@ export class RenderElementComponent extends RenderField implements OnInit {
         const fieldControl = new FormControl('');
         if (this.data.required) {
           fieldControl.setValidators(Validators.required);
+        }
+        if (this.data.regex) {
+          fieldControl.setValidators(Validators.pattern(this.data.regex));
         }
         if (this.mode === CmdbMode.View) {
           fieldControl.disable();
