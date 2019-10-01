@@ -23,7 +23,6 @@ GLOBAL_IDENTIFIER = '*'
 
 
 class BaseRight:
-
     CRITICAL = 100
     DANGER = 80
     SECURE = 50
@@ -114,25 +113,23 @@ class BaseRight:
 
 class InvalidLevelRightError(CMDBError):
     def __init__(self, level):
-        super().__init__()
-        self.message = 'Invalid right level - Level {} does not exist.'.format(level)
+        self.message = f'Invalid right level - Level {level} does not exist.'
+        super(InvalidLevelRightError, self).__init__()
 
 
 class PoorlyLevelRightError(CMDBError):
     def __init__(self, level, min_level):
-        super().__init__()
-        self.message = 'The minimum level for the right has been violated. Level was {0}, expected at least {1}'.format(
-            level, min_level)
+        self.message = f'The minimum level for the right has been violated. Level was {level}, expected at least {min_level}'
+        super(PoorlyLevelRightError, self).__init__()
 
 
 class MaxLevelRightError(CMDBError):
     def __init__(self, level, max_level):
-        super().__init__()
-        self.message = 'The maximum level for the right has been violated. Level was {0}, expected at most {1}'.format(
-            level, max_level)
+        self.message = f'The maximum level for the right has been violated. Level was {level}, expected at most {max_level}'
+        super(MaxLevelRightError, self).__init__()
 
 
 class NoParentPrefixError(CMDBError):
     def __init__(self):
-        super().__init__()
         self.message = 'Right dont has a parent prefix.'
+        super(NoParentPrefixError, self).__init__()

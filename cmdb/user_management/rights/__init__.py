@@ -14,8 +14,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
+from cmdb.user_management.rights.import_rights import ImportRight
 from cmdb.user_management.user_right import GLOBAL_IDENTIFIER, BaseRight
-from cmdb.user_management.rights.system_rights import SystemRight, ManagementRight, UserRight, GroupRight
+from cmdb.user_management.rights.system_rights import SystemRight
+from cmdb.user_management.rights.user_management_rights import UserManagementRight, UserRight, GroupRight
 from cmdb.user_management.rights.framework_rights import FrameworkRight, ObjectRight, TypeRight, CategoryRight
 from cmdb.user_management.rights.export_rights import ExportRight
 
@@ -23,7 +26,7 @@ SYSTEM_RIGHTS = (
     SystemRight(GLOBAL_IDENTIFIER, description='system settings rights'),
     SystemRight('security', BaseRight.CRITICAL, description="security features"),
     (
-        ManagementRight(GLOBAL_IDENTIFIER, description='User management rights'),
+        UserManagementRight(GLOBAL_IDENTIFIER, description='User management rights'),
         (
             UserRight('view', BaseRight.SECURE),
             UserRight('add', BaseRight.SECURE),
@@ -72,6 +75,10 @@ FRAMEWORK_RIGHTS = (
 
 EXPORT_RIGHTS = (
     ExportRight(GLOBAL_IDENTIFIER, description='export rights'),
+)
+
+IMPORT_RIGHTS = (
+    ImportRight(GLOBAL_IDENTIFIER, description='import rights'),
 )
 
 __all__ = (

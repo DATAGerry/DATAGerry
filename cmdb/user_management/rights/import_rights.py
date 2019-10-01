@@ -14,14 +14,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
 from cmdb.user_management.user_right import BaseRight
 
 
-class SystemRight(BaseRight):
-    MIN_LEVEL = BaseRight.SECURE
-    PREFIX = '{}.{}'.format(BaseRight.PREFIX, 'system')
+class ImportRight(BaseRight):
+    MIN_LEVEL = BaseRight.PROTECTED
+    PREFIX = '{}.{}'.format(BaseRight.PREFIX, 'import')
 
     def __init__(self, name: str, level: int = 50, description: str = None):
-        super(SystemRight, self).__init__(level, name, description=description)
-
-
+        super(ImportRight, self).__init__(level, name, description=description)

@@ -45,7 +45,14 @@ export class RightService<T = Right> implements ApiService {
   }
 
   public getRightLevels() {
-    return this.api.callGetRoute<Group[]>(this.servicePrefix + '/levels');
+    return this.api.callGet<T[]>(`${this.servicePrefix}/levels`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
 

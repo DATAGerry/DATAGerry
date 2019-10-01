@@ -46,6 +46,13 @@ const routes: Routes = [
     outlet: 'footer'
   },
   {
+    path: 'users',
+    data: {
+      breadcrumb: 'Users'
+    },
+    loadChildren: () => import('./users/users.module').then(m => m.UsersModule)
+  },
+  {
     path: 'groups',
     data: {
       breadcrumb: 'Groups'
@@ -53,12 +60,13 @@ const routes: Routes = [
     loadChildren: () => import('./groups/groups.module').then(m => m.GroupsModule)
   },
   {
-    path: 'users',
+    path: 'rights',
     data: {
-      breadcrumb: 'Users'
+      breadcrumb: 'Rights'
     },
-    loadChildren: () => import('./users/users.module').then(m => m.UsersModule)
+    loadChildren: () => import('./rights/rights.module').then(m => m.RightsModule)
   },
+
 ];
 
 

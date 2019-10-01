@@ -33,7 +33,6 @@ right_blueprint = RootBlueprint('right_rest', __name__, url_prefix='/right')
 @login_required
 def get_all_rights():
     right_list = user_manager.get_all_rights()
-
     resp = make_response(right_list)
     return resp
 
