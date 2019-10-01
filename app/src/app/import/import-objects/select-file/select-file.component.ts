@@ -11,7 +11,7 @@ import { TypeService } from '../../../framework/services/type.service';
 })
 export class SelectFileComponent implements OnInit {
 
-  private defaultFileFormat: string = 'json';
+  private defaultFileFormat: string = '';
   public fileForm: FormGroup;
   public fileName: string = 'Choose file';
   public selectedFileFormat: string = `.${ this.defaultFileFormat }`;
@@ -25,13 +25,12 @@ export class SelectFileComponent implements OnInit {
     this.fileChange = new EventEmitter<File>();
 
     this.fileForm = new FormGroup({
-      fileFormat: new FormControl(this.defaultFileFormat),
+      fileFormat: new FormControl(this.defaultFileFormat, Validators.required),
       file: new FormControl(null, Validators.required),
     });
   }
 
   public ngOnInit(): void {
-
     this.importService.getObjectImporters().subscribe((importerTypes: string[]) => {
       this.importerTypes = importerTypes;
     });
@@ -42,6 +41,10 @@ export class SelectFileComponent implements OnInit {
     this.fileForm.get('file').valueChanges.subscribe((file) => {
       this.fileChange.emit(file);
     });
+  }
+
+  public get fileFormat() {
+    return this.fileForm.get('fileFormat');
   }
 
   public selectFile(files) {

@@ -6,13 +6,15 @@
       </div>
       <div class="card-body overflow-auto">
         <div class="list-group">
-          <div class="list-group-item ist-group-item list-group-item-action mt-2">
+          <div [dndDraggable]="publicID" dndEffectAllowed="move" (dndMoved)="onDragged(publicID)"
+               class="list-group-item ist-group-item list-group-item-action mt-2">
             <div class="d-flex w-100 justify-content-between">
               Public ID
               <fa-icon icon="arrows-alt"></fa-icon>
             </div>
           </div>
-          <div class="list-group-item ist-group-item list-group-item-action mt-2">
+          <div [dndDraggable]="active" dndEffectAllowed="move" (dndMoved)="onDragged(active)"
+               class="list-group-item ist-group-item list-group-item-action mt-2">
             <div class="d-flex w-100 justify-content-between">
               Active
               <fa-icon icon="arrows-alt"></fa-icon>
@@ -22,17 +24,11 @@
       </div>
     </div>
     <div class="card">
-      <div class="card-header">
-        <div class="row">
-          <label class="col-sm-4 col-form-label">Fields:</label>
-          <div class="col-sm-8">
-            <input class="form-control" type="search" placeholder="Search...">
-          </div>
-        </div>
-      </div>
+      <div class="card-header">Fields:</div>
       <div class="card-body overflow-auto">
         <div class="list-group">
-          <div [dndDraggable]="typeFields" *ngFor="let typeFields of typeInstance?.fields"
+          <div [dndDraggable]="typeFields" dndEffectAllowed="move" (dndMoved)="onDragged(typeFields)"
+               *ngFor="let typeFields of fieldList"
                class="list-group-item ist-group-item list-group-item-action mt-2 move">
             <div class="d-flex w-100 justify-content-between">
               {{typeFields.label}}
@@ -53,6 +49,7 @@
           <thead>
           <tr>
             <th scope="col">Field</th>
+            <th scope="col">Value option</th>
             <th scope="col">Row Index</th>
             <th scope="col" *ngIf="header">Header</th>
             <th scope="col">Example</th>
@@ -61,9 +58,24 @@
           <tbody>
           <tr *ngFor="let column of columns; let i = index">
             <td>
-              <section dndDropzone class="field-drop" data-label="Drop field">
-
+              <section dndDropzone (dndDrop)="onDrop($event, i)" class="field-drop" data-label="Drop field">
+                <div *ngIf="mapping[i] !== undefined" class="list-group-item ist-group-item list-group-item-action">
+                  <div class="d-flex w-100 justify-content-between">
+                    {{mapping[i].label}}
+                    <fa-icon icon="times-circle" class="ml-2"></fa-icon>
+                  </div>
+                </div>
               </section>
+            </td>
+            <td>
+              <select class="custom-select" *ngIf="mapping[i] !== undefined">
+                <option value="auto" selected>auto</option>
+                <option value="string">string</option>
+                <option value="boolean">boolean</option>
+                <option value="int">int</option>
+                <option value="double">double</option>
+                <option value="ref">reference</option>
+              </select>
             </td>
             <th scope="row">{{i}}</th>
             <th *ngIf="header" scope="row">{{column}}</th>

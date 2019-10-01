@@ -24,6 +24,7 @@ from werkzeug.utils import secure_filename
 from cmdb.importer import CsvObjectImporter
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.importer.parser_errors import ParserError
+from cmdb.importer.parser_result import ParserResult
 from cmdb.interface.rest_api.import_routes import importer_blueprint
 from cmdb.interface.route_utils import NestedBlueprint, make_response
 from cmdb.importer import __OBJECT_IMPORTER__, __OBJECT_PARSER__
@@ -85,14 +86,14 @@ def parse_object_file(parser_type):
     parse_file.save(f'/tmp/{filename}')
 
     try:
-        parsed_output: dict = parser.parse(filename)
+        parsed_output: ParserResult = parser.parse(filename)
     except ParserError as err:
         LOGGER.error(err)
         parse_file.close()
         return abort(500)
     parse_file.close()
 
-    return make_response(parsed_output)
+    return make_response(parsed_output.__dict__)
 
 
 @importer_object_blueprint.route('/csv/', methods=['POST'])

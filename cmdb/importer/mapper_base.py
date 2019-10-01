@@ -14,17 +14,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from cmdb.importer.importer_object.importer_object_csv import CsvObjectImporter
-from cmdb.importer.importer_object.importer_object_json import JsonObjectImporter
-from cmdb.importer.parser_object.parser_object_csv import CsvParser
-from cmdb.importer.parser_object.parser_object_json import JsonParser
 
-__OBJECT_IMPORTER__ = {
-    'csv': CsvObjectImporter,
-    'json': JsonObjectImporter
-}
+class BaseMapper:
 
-__OBJECT_PARSER__ = {
-    'csv': CsvParser,
-    'json': JsonParser
-}
+    def __init__(self, field_names: list, field_rows: list, ignored_fields: list = None, meta_values: dict = None):
+        self.field_names: list = field_names
+        self.field_rows: list = field_rows
+        self.ignored_fields: (list, None) = ignored_fields or []
+        self.meta_values: (dict, None) = meta_values

@@ -14,17 +14,21 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from cmdb.importer.importer_object.importer_object_csv import CsvObjectImporter
-from cmdb.importer.importer_object.importer_object_json import JsonObjectImporter
-from cmdb.importer.parser_object.parser_object_csv import CsvParser
-from cmdb.importer.parser_object.parser_object_json import JsonParser
+import logging
 
-__OBJECT_IMPORTER__ = {
-    'csv': CsvObjectImporter,
-    'json': JsonObjectImporter
-}
+from cmdb.importer.parser_base import BaseObjectParser
+from cmdb.importer.parser_errors import ParserError
+from cmdb.utils.helpers import str_to_bool
 
-__OBJECT_PARSER__ = {
-    'csv': CsvParser,
-    'json': JsonParser
-}
+LOGGER = logging.getLogger(__name__)
+
+
+class JsonParser(BaseObjectParser):
+    CONTENT_TYPE = 'text/json'
+    FILE_TYPE = 'json'
+
+    def __init__(self, parser_config: dict = None):
+        super(JsonParser, self).__init__(parser_config)
+
+    def parse(self, file) -> dict:
+        return {}

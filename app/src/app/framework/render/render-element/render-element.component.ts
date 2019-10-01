@@ -57,12 +57,14 @@ export class RenderElementComponent extends RenderField implements OnInit {
         this.componentRef.instance.data = this.data;
         this.componentRef.instance.toast = this.toast;
         const fieldControl = new FormControl('');
+        const validators = [];
         if (this.data.required) {
-          fieldControl.setValidators(Validators.required);
+          validators.push(Validators.required);
         }
         if (this.data.regex) {
-          fieldControl.setValidators(Validators.pattern(this.data.regex));
+          validators.push(Validators.pattern(this.data.regex));
         }
+        fieldControl.setValidators(validators);
         if (this.mode === CmdbMode.View) {
           fieldControl.disable();
         }

@@ -1,6 +1,28 @@
-<form [formGroup]="typeForm">
-  <div class="form-group">
-    <label>Type:</label>
-    <ng-select formControlName="typeID" [items]="typeList" bindLabel="label" bindValue="public_id"></ng-select>
+<div class="row">
+  <div class="col-md-7">
+    <form [formGroup]="typeForm">
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Type:</label>
+        <div class=" col-sm-10">
+          <ng-select formControlName="typeID" [items]="typeList" bindLabel="label" bindValue="public_id"></ng-select>
+        </div>
+      </div>
+    </form>
   </div>
-</form>
+  <div class="col-md-5">
+    <div *ngIf="typeInstance" class="card">
+      <div class="row no-gutters">
+        <div class="col-md-6">
+          <div class="card-body">
+            <h5 class="card-title">{{typeInstance?.label}}</h5>
+            <p class="card-text">{{typeInstance?.description}}</p>
+          </div>
+        </div>
+        <div id="type-icon" class="col-md-6">
+          <i class="{{typeInstance?.render_meta?.icon}} card-img"></i>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

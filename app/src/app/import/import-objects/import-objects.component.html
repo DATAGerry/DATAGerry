@@ -22,10 +22,10 @@
       Next Step
     </button>
   </aw-wizard-step>
-  <aw-wizard-step stepId="4" stepTitle="Preview">
+  <aw-wizard-step stepId="4" stepTitle="Mapping">
     <ng-template awWizardStepSymbol><i class="fas fa-eye"></i></ng-template>
-    <cmdb-preview [typeInstance]="typeInstance" [previewTrigger]="previewTrigger" [file]="file"
-                  [fileFormat]="fileFormat"></cmdb-preview>
+    <cmdb-mapping [previewTrigger]="previewTrigger" [typeInstance]="typeInstance" [file]="file"
+                  [fileFormat]="fileFormat"></cmdb-mapping>
     <button class="btn btn-primary prev" type="button" awPreviousStep>Previous step</button>
     <button class="btn btn-primary" type="button" awNextStep>Next Step</button>
   </aw-wizard-step>
