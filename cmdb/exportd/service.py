@@ -27,7 +27,7 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
     def __init__(self):
         super(ExportdService, self).__init__()
         self._name = "exportd"
-        self._eventtypes = ["cmdb.core.object.#", "cmdb.exportd.#"]
+        self._eventtypes = ["cmdb.core.object.#", "cmdb.core.objecttype.#", "cmdb.exportd.#"]
 
     def _run(self):
         # ToDo: for testing only
