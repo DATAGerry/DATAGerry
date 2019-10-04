@@ -1,19 +1,36 @@
 <h1>Right List</h1>
-<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table">
-  <thead>
-  <tr>
-    <th>Name</th>
-    <th>Label</th>
-    <th>Description</th>
-    <th>Level</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr *ngFor="let right of rightList" [className]="right._MASTER ? 'table-warning' : ''">
-    <th scope="col">{{right.name}}</th>
-    <td>{{right.label}}</td>
-    <td>{{right.description}}</td>
-    <td>{{right._level}}</td>
-  </tr>
-  </tbody>
-</table>
+<hr/>
+<div class="row">
+  <div class="col-md-9">
+    <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table">
+      <thead>
+      <tr>
+        <th>Name</th>
+        <th>Label</th>
+        <th>Description</th>
+        <th>Level</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let right of rightList" >
+        <th scope="col" [className]="right._MASTER ? 'table-success' : ''">{{right.name}}</th>
+        <td>{{right.label}}</td>
+        <td>{{right.description}}</td>
+        <td [level]="right._level" classPrefix="table-" rightLevelColor>{{right._level}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-3">
+    <div class="card">
+      <div class="card-header">
+        Security Levels
+      </div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item" *ngFor="let level of securityRightLevels" [level]="level[0]"
+            classPrefix="list-group-item-" rightLevelColor> {{level[1]}}
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
