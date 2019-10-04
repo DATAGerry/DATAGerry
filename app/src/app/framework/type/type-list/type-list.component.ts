@@ -22,7 +22,7 @@ import { TypeService } from '../../services/type.service';
 import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastService } from '../../../layout/services/toast.service';
+import { ToastService } from '../../../layout/toast/toast.service';
 import { UserService } from '../../../management/services/user.service';
 
 @Component({

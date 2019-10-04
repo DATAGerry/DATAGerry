@@ -28,6 +28,7 @@ import { PreviousRouteService } from './services/previous-route.service';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { DatePipe } from '@angular/common';
 import { FileSaverModule } from 'ngx-filesaver';
+import { ToastModule } from './layout/toast/toast.module';
 
 
 @NgModule({
@@ -41,6 +42,7 @@ import { FileSaverModule } from 'ngx-filesaver';
     NgxSpinnerModule,
     AppRoutingModule,
     FileSaverModule,
+    ToastModule,
   ],
   providers: [
     PreviousRouteService,

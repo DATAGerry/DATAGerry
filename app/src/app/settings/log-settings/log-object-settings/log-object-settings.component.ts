@@ -20,7 +20,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { LogService } from '../../../framework/services/log.service';
 import { CmdbLog } from '../../../framework/models/cmdb-log';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastService } from '../../../layout/services/toast.service';
+import { ToastService } from '../../../layout/toast/toast.service';
 import { Observable, forkJoin } from 'rxjs';
 
 @Component({

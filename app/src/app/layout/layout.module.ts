@@ -33,7 +33,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TableComponent } from './components/table/table.component';
 import { DataTablesModule } from 'angular-datatables';
-import { ToastContainerComponent } from './helpers/toast/toast-container.component';
 import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from './helpers/modal/modal.component';
 import { TableModule } from './components/table/table.module';
@@ -49,6 +48,7 @@ import { IconPickerComponent } from './helpers/icon-picker/icon-picker.component
 import { UserImageComponent } from './components/user-image/user-image.component';
 import { UserDisplayComponent } from './components/user-display/user-display.component';
 import { ChartsComponent } from './components/charts/charts.component';
+import { ToastModule } from './toast/toast.module';
 
 @NgModule({
   declarations: [
@@ -61,7 +61,6 @@ import { ChartsComponent } from './components/charts/charts.component';
     ActiveBadgeComponent,
     SearchBarComponent,
     TableComponent,
-    ToastContainerComponent,
     ModalComponent,
     TypeLabelComponent,
     FooterComponent,
@@ -79,12 +78,11 @@ import { ChartsComponent } from './components/charts/charts.component';
     ActiveBadgeComponent,
     SearchBarComponent,
     TableComponent,
-    ToastContainerComponent,
     TypeLabelComponent,
     IconPickerComponent,
     UserImageComponent,
     UserDisplayComponent,
-    ChartsComponent
+    ChartsComponent,
   ],
   imports: [
     CommonModule,
@@ -102,7 +100,8 @@ import { ChartsComponent } from './components/charts/charts.component';
       cancelButtonClass: 'btn'
     }),
     FontAwesomeModule,
-    IconPickerModule
+    IconPickerModule,
+    ToastModule
   ],
   providers: [
     BreadcrumbService,

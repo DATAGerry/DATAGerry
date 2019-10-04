@@ -5,7 +5,7 @@ import { UserService } from '../../services/user.service';
 import { User } from '../../models/user';
 import { Group } from '../../models/group';
 import { GroupService } from '../../services/group.service';
-import { ToastService } from '../../../layout/services/toast.service';
+import { ToastService } from '../../../layout/toast/toast.service';
 import { Router } from '@angular/router';
 
 
@@ -136,7 +136,8 @@ export class UsersAddComponent implements OnInit {
       this.userService.postUser(addUser).subscribe(addResp => {
         this.toastService.show(`User was added with ID: ${addResp}`);
       }, (error) => {
-        console.error(error);
+        console.log(error);
+        this.toastService.error(error.error.description);
       }, () => {
         this.router.navigate(['/management/users/']);
       });

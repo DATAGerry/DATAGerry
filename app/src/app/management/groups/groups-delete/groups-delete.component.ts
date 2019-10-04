@@ -3,7 +3,7 @@ import { Observable, Subscription } from 'rxjs';
 import { Group } from '../../models/group';
 import { GroupService } from '../../services/group.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastService } from '../../../layout/services/toast.service';
+import { ToastService } from '../../../layout/toast/toast.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({

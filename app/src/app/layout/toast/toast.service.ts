@@ -24,12 +24,21 @@ import { Injectable, TemplateRef } from '@angular/core';
 export class ToastService {
 
   toasts: any[] = [];
+  errorToast: any[] = [];
 
-  show(textOrTpl: string | TemplateRef<any>, options: any = {}) {
-    this.toasts.push({textOrTpl, ...options});
+  public show(textOrTpl: string | TemplateRef<any>, options: any = {}) {
+    this.toasts.push({ textOrTpl, ...options });
   }
 
-  remove(toast) {
+  public error(textOrTpl: string | TemplateRef<any>, options: any = {}) {
+    this.errorToast.push({ textOrTpl, ...options });
+  }
+
+  public remove(toast) {
     this.toasts = this.toasts.filter(t => t !== toast);
+  }
+
+  public removeError(toast) {
+    this.errorToast = this.errorToast.filter(t => t !== toast);
   }
 }

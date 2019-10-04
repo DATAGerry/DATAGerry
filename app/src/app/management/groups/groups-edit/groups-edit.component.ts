@@ -6,7 +6,7 @@ import { Group } from '../../models/group';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { RightService } from '../../services/right.service';
 import { Right } from '../../models/right';
-import { ToastService } from '../../../layout/services/toast.service';
+import { ToastService } from '../../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-groups-edit',

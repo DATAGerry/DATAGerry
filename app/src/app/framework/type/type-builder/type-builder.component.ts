@@ -27,7 +27,7 @@ import { UserService } from '../../../management/services/user.service';
 import { CategoryService } from '../../services/category.service';
 import { CmdbMode } from '../../modes.enum';
 import { Router } from '@angular/router';
-import { ToastService } from '../../../layout/services/toast.service';
+import { ToastService } from '../../../layout/toast/toast.service';
 import { SidebarService } from '../../../layout/services/sidebar.service';
 import { CmdbCategory } from '../../models/cmdb-category';
 

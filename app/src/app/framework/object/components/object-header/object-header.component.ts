@@ -19,7 +19,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RenderResult } from '../../../models/cmdb-render';
 import { ObjectService } from '../../../services/object.service';
-import { ToastService } from '../../../../layout/services/toast.service';
+import { ToastService } from '../../../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-object-header',

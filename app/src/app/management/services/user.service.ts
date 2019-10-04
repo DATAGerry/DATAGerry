@@ -88,9 +88,6 @@ export class UserService<T = User> implements ApiService {
   public postUser(data: User) {
     return this.api.callPost<User>(`${ this.servicePrefix }/`, data).pipe(
       map((apiResponse: HttpResponse<any>) => {
-        if (apiResponse.status === 400) {
-          console.error("test");
-        }
         return apiResponse.body;
       })
     );

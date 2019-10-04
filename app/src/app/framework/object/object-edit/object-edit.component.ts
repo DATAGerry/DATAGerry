@@ -23,7 +23,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CmdbMode } from '../../modes.enum';
 import { CmdbObject } from '../../models/cmdb-object';
 import { FormControl, FormGroup } from '@angular/forms';
-import { ToastService } from '../../../layout/services/toast.service';
+import { ToastService } from '../../../layout/toast/toast.service';
 import { RenderResult } from '../../models/cmdb-render';
 
 @Component({

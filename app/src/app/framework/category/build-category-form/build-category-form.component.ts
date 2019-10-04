@@ -22,7 +22,7 @@ import { CmdbType } from '../../models/cmdb-type';
 import { FormGroup } from '@angular/forms';
 import { CategoryService } from '../../services/category.service';
 import { TypeService } from '../../services/type.service';
-import { ToastService } from '../../../layout/services/toast.service';
+import { ToastService } from '../../../layout/toast/toast.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import { ActivatedRoute, Router } from '@angular/router';
