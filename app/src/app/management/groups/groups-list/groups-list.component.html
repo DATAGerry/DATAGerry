@@ -6,26 +6,24 @@
   </div>
   <div class="clearfix"></div>
 </h1>
-<hr/>
+<hr />
 <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table">
   <thead>
   <tr>
-    <th scope="col"></th>
     <th scope="col">Public ID</th>
     <th scope="col">Name</th>
     <th scope="col">Label</th>
+    <th scope="col">Action</th>
   </tr>
   </thead>
   <tbody>
-  <tr *ngFor="let group of groupList" id="tr_{{group.name}}">
-    <td>
-      <button type="button" class="btn btn-link p-0" (click)="toggle(group)">
-        <i class="fas fa-arrow-alt-circle-down"></i>
-      </button>
-    </td>
+  <tr *ngFor="let group of groupList">
     <th scope="row">{{group.public_id}}</th>
     <td>{{group.name}}</td>
     <td>{{group.label}}</td>
+    <td>
+      <a [routerLink]="['/management/groups/edit/', group.public_id]"> Edit </a>
+      <a [routerLink]="['/management/groups/delete/', group.public_id]" *ngIf="group.deletable"> Delete </a>
   </tr>
   </tbody>
 </table>

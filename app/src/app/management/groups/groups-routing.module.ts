@@ -20,6 +20,8 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { GroupsListComponent } from './groups-list/groups-list.component';
 import { GroupsAddComponent } from './groups-add/groups-add.component';
+import { GroupsEditComponent } from './groups-edit/groups-edit.component';
+import { GroupsDeleteComponent } from './groups-delete/groups-delete.component';
 
 const routes: Routes = [
   {
@@ -36,6 +38,20 @@ const routes: Routes = [
     },
     component: GroupsAddComponent
   },
+  {
+    path: 'edit/:publicID',
+    data: {
+      breadcrumb: 'Edit'
+    },
+    component: GroupsEditComponent
+  },
+  {
+    path: 'delete/:publicID',
+    data: {
+      breadcrumb: 'Delete'
+    },
+    component: GroupsDeleteComponent
+  }
 ];
 
 @NgModule({

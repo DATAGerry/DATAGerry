@@ -22,14 +22,14 @@ import { CommonModule } from '@angular/common';
 import { GroupsRoutingModule } from './groups-routing.module';
 import { GroupsListComponent } from './groups-list/groups-list.component';
 import { DataTablesModule } from 'angular-datatables';
-import { GroupTrDropdownComponent } from './group-tr-dropdown/group-tr-dropdown.component';
 import { GroupsAddComponent } from './groups-add/groups-add.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { GroupsEditComponent } from './groups-edit/groups-edit.component';
+import { GroupsDeleteComponent } from './groups-delete/groups-delete.component';
 
 @NgModule({
-  entryComponents: [GroupTrDropdownComponent],
-  declarations: [GroupsListComponent, GroupTrDropdownComponent, GroupsAddComponent],
+  declarations: [GroupsListComponent, GroupsAddComponent, GroupsEditComponent, GroupsDeleteComponent],
   imports: [
     CommonModule,
     GroupsRoutingModule,

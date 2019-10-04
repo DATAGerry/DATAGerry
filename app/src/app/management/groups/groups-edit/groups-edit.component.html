@@ -1,5 +1,5 @@
-<h1>Add new group:</h1><hr />
-<form [formGroup]="addForm" (ngSubmit)="saveGroup()" novalidate>
+<h1>Edit Group: <strong>{{editGroup?.label}}</strong></h1><hr />
+<form [formGroup]="editForm" (ngSubmit)="updateGroup()" novalidate>
   <div class="row">
     <div class="col-md-6">
       <div class="form-group row">
@@ -32,15 +32,15 @@
         <div class="col-sm-10">
           <ng-select class="form-control" [ngClass]="{ 'is-valid': rights.valid && (rights.dirty || rights.touched),
                  'is-invalid': rights.invalid && (rights.dirty || rights.touched)}"
-                     [items]="rightList"
-                     [multiple]="true"
-                     bindLabel="name"
-                     [groupBy]="groupByFn"
-                     [selectableGroup]="true"
-                     [selectableGroupAsModel]="false"
-                     [closeOnSelect]="false"
-                     bindValue="name"
-                     formControlName="rights">
+            [items]="rightList"
+            [multiple]="true"
+            bindLabel="name"
+            [groupBy]="groupByFn"
+            [selectableGroup]="true"
+            [selectableGroupAsModel]="false"
+            [closeOnSelect]="false"
+            bindValue="name"
+            formControlName="rights">
             <ng-template ng-optgroup-tmp let-item="item">
               <span style="vertical-align: middle;">{{item.name}}</span>
               <span class="ml-1 badge badge-secondary">{{item.total}}</span>
