@@ -254,6 +254,9 @@ class CmdbObjectManager(CmdbManagerBase):
     def delete_object(self, public_id: int):
         try:
             ack = self._delete(CmdbObject.COLLECTION, public_id)
+            if self._event_queue:
+                event = Event("cmdb.core.object.deleted", {"id": public_id})
+                self._event_queue.put(event)
             return ack
         except (CMDBError, Exception):
             raise ObjectDeleteError(obj_id=public_id)
