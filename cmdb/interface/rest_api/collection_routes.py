@@ -17,10 +17,12 @@
 import logging
 
 from werkzeug.exceptions import abort
-
-from cmdb.framework.cmdb_object_manager import object_manager
+from flask import current_app
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.interface.route_utils import RootBlueprint, make_response, NestedBlueprint
+
+with current_app.app_context():
+    object_manager = current_app.object_manager
 
 try:
     from cmdb.utils.error import CMDBError

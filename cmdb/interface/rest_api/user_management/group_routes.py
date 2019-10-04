@@ -19,10 +19,11 @@ import json
 
 from bson import json_util
 
-from cmdb.utils.wraps import login_required, right_required
+from cmdb.utils.wraps import login_required
 from cmdb.interface.route_utils import make_response, RootBlueprint, abort
 from cmdb.user_management.user_group import UserGroup
-from cmdb.user_management.user_manager import user_manager, UserManagerInsertError, UserManagerGetError
+from cmdb.user_management.user_manager import user_manager, UserManagerInsertError, UserManagerGetError, \
+    UserManagerUpdateError, UserManagerDeleteError
 
 from flask import request
 
@@ -80,13 +81,31 @@ def add_group():
     return make_response(insert_ack)
 
 
+@group_blueprint.route('/<int:public_id>/', methods=['PUT'])
 @group_blueprint.route('/<int:public_id>', methods=['PUT'])
 @login_required
 def edit_group(public_id: int):
-    raise NotImplementedError
+    updated_group_params = json.dumps(request.json)
+    try:
+        response = user_manager.update_group(public_id,
+                                             json.loads(updated_group_params, object_hook=json_util.object_hook))
+    except UserManagerUpdateError as umue:
+        LOGGER.error(umue)
+        return abort(400)
+    return make_response(response.acknowledged)
 
 
+@group_blueprint.route('/<int:public_id>/', methods=['DELETE'])
 @group_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @login_required
 def delete_group(public_id: int):
-    raise NotImplementedError
+    action = request.args.get('action')
+    if action is None:
+        return abort(400)
+
+    try:
+        user_manager.delete_group(public_id)
+    except UserManagerDeleteError as umde:
+        LOGGER.error(umde)
+        return abort(500)
+    return make_response("test")

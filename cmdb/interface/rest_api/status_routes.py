@@ -18,14 +18,16 @@
 import logging
 import json
 
-from flask import request
+from flask import request, current_app
 from werkzeug.exceptions import abort
 from bson import json_util
 
-from cmdb.framework.cmdb_object_manager import object_manager
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerUpdateError
 from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.interface.route_utils import RootBlueprint, make_response
+
+with current_app.app_context():
+    object_manager = current_app.object_manager
 
 try:
     from cmdb.utils.error import CMDBError

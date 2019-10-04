@@ -17,12 +17,14 @@
 import logging
 import json
 
-from flask import abort, request, jsonify
+from flask import abort, request, jsonify, current_app
 from cmdb.utils.wraps import login_required, json_required
-from cmdb.framework.cmdb_object_manager import object_manager as obm
 from cmdb.interface.route_utils import make_response, RootBlueprint
 from cmdb.framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError
 from cmdb.framework.cmdb_type import CmdbType
+
+with current_app.app_context():
+    object_manager = current_app.object_manager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -31,8 +33,6 @@ except ImportError:
 
 LOGGER = logging.getLogger(__name__)
 type_blueprint = RootBlueprint('type_blueprint', __name__, url_prefix='/type')
-
-object_manager = obm
 
 
 @type_blueprint.route('/', methods=['GET'])

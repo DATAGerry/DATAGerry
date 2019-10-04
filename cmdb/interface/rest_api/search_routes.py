@@ -18,12 +18,14 @@ import logging
 import sys
 import traceback
 
-from flask import abort, request
-from cmdb.framework.cmdb_object_manager import object_manager as obm
+from flask import abort, request, current_app
 from cmdb.framework.cmdb_render import RenderList
 from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user
 from cmdb.user_management.user import User
 from cmdb.utils.wraps import login_required
+
+with current_app.app_context():
+    object_manager = current_app.object_manager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -89,7 +91,7 @@ def _get_response(args, q_operator='$and', current_user: User = None, limit=0):
         result_query.append({q_operator: query_list})
         query = {"$or": result_query}
 
-        object_list = obm.search_objects_with_limit(query, limit=limit)
+        object_list = object_manager.search_objects_with_limit(query, limit=limit)
         render = RenderList(object_list, current_user)
         if limit == 5:
             rendered_list = render.render_result_list(_collect_match_fields(object_list, match_values))

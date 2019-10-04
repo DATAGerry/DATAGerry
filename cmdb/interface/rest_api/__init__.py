@@ -19,6 +19,8 @@ Init module for rest routes
 """
 import logging
 
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
@@ -30,10 +32,9 @@ LOGGER = logging.getLogger(__name__)
 def create_rest_api(event_queue):
     from cmdb.interface.config import app_config
     from cmdb.utils.system_reader import SystemConfigReader
+    system_config_reader = SystemConfigReader()
+
     try:
-
-        system_config_reader = SystemConfigReader()
-
         cache_config = {
             'DEBUG': True,
             'CACHE_TYPE': system_config_reader.get_value('name', 'Cache'),
@@ -47,8 +48,27 @@ def create_rest_api(event_queue):
     from flask_caching import Cache
 
     cache = Cache(config=cache_config)
+
+    # Create object manager
+    from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+
+    app_database = DatabaseManagerMongo(
+        connector=MongoConnector(
+            host=system_config_reader.get_value('host', 'Database'),
+            port=int(system_config_reader.get_value('port', 'Database')),
+            database_name=system_config_reader.get_value('database_name', 'Database')
+        )
+    )
+    object_manager = CmdbObjectManager(
+        database_manager=app_database,
+        event_queue=event_queue
+    )
+
+    # Create APP
     from cmdb.interface.cmdb_app import BaseCmdbApp
-    app = BaseCmdbApp(__name__)
+    app = BaseCmdbApp(__name__, object_manager=object_manager)
+
+    # Import App Extensions
     from flask_cors import CORS
     CORS(app)
     import cmdb

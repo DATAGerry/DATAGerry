@@ -17,10 +17,13 @@
 from flask import Flask
 import logging
 
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+
 LOGGER = logging.getLogger(__name__)
 
 
 class BaseCmdbApp(Flask):
 
-    def __init__(self, import_name: str):
+    def __init__(self, import_name: str, object_manager: CmdbObjectManager = None):
+        self.object_manager: CmdbObjectManager = object_manager
         super(BaseCmdbApp, self).__init__(import_name)

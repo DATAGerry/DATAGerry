@@ -17,13 +17,15 @@
 import logging
 import json
 
-from cmdb.framework.cmdb_object_manager import object_manager
 from cmdb.framework.cmdb_category import CmdbCategory
 from cmdb.utils.wraps import login_required
 from cmdb.interface.route_utils import make_response, RootBlueprint
 
-from flask import request, abort
+from flask import request, abort, current_app
 from bson import json_util
+
+with current_app.app_context():
+    object_manager = current_app.object_manager
 
 try:
     from cmdb.utils.error import CMDBError
