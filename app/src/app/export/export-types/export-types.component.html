@@ -1,0 +1,15 @@
+<aw-wizard [navBarLayout]="'large-empty-symbols'">
+  <aw-wizard-step stepId="1" stepTitle="Select">
+    <ng-template awWizardStepSymbol><i class="fas fa-list-alt"></i></ng-template>
+    <cmdb-export-types-select-step [typeList]="typeList"
+                                   (typeSelectionEmitter)="selectExportTypes($event)"></cmdb-export-types-select-step>
+  </aw-wizard-step>
+  <aw-wizard-step stepId="2" stepTitle="Config">
+    <ng-template awWizardStepSymbol><i class="fas fa-cogs"></i></ng-template>
+    <cmdb-export-types-config-step></cmdb-export-types-config-step>
+  </aw-wizard-step>
+  <aw-wizard-step stepId="3" stepTitle="Download">
+    <ng-template awWizardStepSymbol><i class="fas fa-download"></i></ng-template>
+    <button class="btn btn-primary prev" type="button" awPreviousStep>Previous step</button>
+  </aw-wizard-step>
+</aw-wizard>

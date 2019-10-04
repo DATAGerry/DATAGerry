@@ -72,6 +72,14 @@ const routes: Routes = [
     loadChildren: () => import('./import/import.module').then(m => m.ImportModule)
   },
   {
+    path: 'export',
+    canActivate: [AuthGuard],
+    data: {
+      breadcrumb: 'Export'
+    },
+    loadChildren: () => import('./export/export.module').then(m => m.ExportModule)
+  },
+  {
     path: 'management',
     canActivate: [AuthGuard],
     data: {

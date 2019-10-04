@@ -25,6 +25,7 @@ import { Right } from '../models/right';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CmdbStatus } from '../../framework/models/cmdb-status';
+import { HttpResponse } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -45,7 +46,7 @@ export class UserService<T = User> implements ApiService {
   }
 
   public getUserList(): Observable<T[]> {
-    return this.api.callGet<T>(`${this.servicePrefix}/`).pipe(
+    return this.api.callGet<T>(`${ this.servicePrefix }/`).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -56,11 +57,11 @@ export class UserService<T = User> implements ApiService {
   }
 
   public changeUserPassword(userID: number, newPassword: string) {
-    return this.api.callPutRoute<boolean>(this.servicePrefix + '/' + userID + '/passwd', {password: newPassword});
+    return this.api.callPutRoute<boolean>(this.servicePrefix + '/' + userID + '/passwd', { password: newPassword });
   }
 
   public getUser(publicID: number): Observable<T> {
-    return this.api.callGet<T>(`${this.servicePrefix}/${publicID}`).pipe(
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ publicID }`).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -73,7 +74,7 @@ export class UserService<T = User> implements ApiService {
   }
 
   public getUserByGroup(publicID: number): Observable<T[]> {
-    return this.api.callGet<T>(`${this.servicePrefix}/group/${publicID}`).pipe(
+    return this.api.callGet<T>(`${ this.servicePrefix }/group/${ publicID }`).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -85,8 +86,11 @@ export class UserService<T = User> implements ApiService {
 
   // CRUD functions
   public postUser(data: User) {
-    return this.api.callPost<User>(`${this.servicePrefix}/`, data).pipe(
-      map((apiResponse) => {
+    return this.api.callPost<User>(`${ this.servicePrefix }/`, data).pipe(
+      map((apiResponse: HttpResponse<any>) => {
+        if (apiResponse.status === 400) {
+          console.error("test");
+        }
         return apiResponse.body;
       })
     );

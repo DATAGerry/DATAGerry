@@ -135,12 +135,13 @@ class UserManagement(CmdbManagerBase):
         except NoDocumentFound as e:
             raise GroupNotExistsError(public_id)
 
-    def update_group(self, update_group: UserGroup) -> bool:
+    def update_group(self, public_id, update_params: dict) -> bool:
         try:
-            ack = self.dbm.update(collection=UserGroup.COLLECTION, public_id=update_group.get_public_id(),
-                                  data=update_group.to_database())
-        except CMDBError as e:
-            raise GroupNotNotUpdatedError(update_group.get_name(), e)
+            ack = self.dbm.update(collection=UserGroup.COLLECTION, public_id=public_id,
+                                  data=update_params)
+        except (CMDBError, Exception) as e:
+            LOGGER.error(e)
+            raise UserManagerUpdateError(e)
         return ack
 
     def insert_group(self, insert_group: UserGroup) -> int:

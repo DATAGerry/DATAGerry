@@ -24,6 +24,7 @@ export class Group implements CmdbDao {
   public name: string;
   public label: string;
   public rights: any[];
+  public deletable: boolean;
 
   /* tslint:enable */
 }

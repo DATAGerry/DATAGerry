@@ -81,8 +81,8 @@ export class ApiCallService {
     return this.http.put<T>(this.apiURL + route, data, httpObserveOptions).pipe(catchError(ApiCallService.handleError));
   }
 
-  public callDelete<T>(route: string): Observable<any> {
-    return this.http.delete<T>(this.apiURL + route, httpObserveOptions).pipe(catchError(ApiCallService.handleError));
+  public callDelete<T>(route: string, httpDeleteOptions = httpObserveOptions): Observable<any> {
+    return this.http.delete<T>(this.apiURL + route, httpDeleteOptions).pipe(catchError(ApiCallService.handleError));
   }
 
   /* DEPRECATED API METHODS - ONLY USE TOP METHODS */

@@ -17,13 +17,14 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService } from '../../services/api-call.service';
+import { ApiCallService, ApiService, httpObserveOptions } from '../../services/api-call.service';
 import { AuthService } from '../../auth/services/auth.service';
 import { Group } from '../models/group';
 import { CmdbStatus } from '../../framework/models/cmdb-status';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { User } from '../models/user';
+import { HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -46,7 +47,7 @@ export class GroupService<T = Group> implements ApiService {
 
   // CRUD calls
   public getGroupList(): Observable<T[]> {
-    return this.api.callGet<T[]>(`${this.servicePrefix}/`).pipe(
+    return this.api.callGet<T[]>(`${ this.servicePrefix }/`).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -57,15 +58,33 @@ export class GroupService<T = Group> implements ApiService {
   }
 
   public getGroup(publicID: number): Observable<T> {
-    return this.api.callGet<T>(`${this.servicePrefix}/${publicID}`).pipe(
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ publicID }`).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
     );
   }
 
-  public postGroup(data: T) {
-    return this.api.callPost<T>(`${this.servicePrefix}/`, data).pipe(
+  public postGroup(data: T): Observable<T> {
+    return this.api.callPost<T>(`${ this.servicePrefix }/`, data).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public putGroup(publicID: number, data: T): Observable<T> {
+    return this.api.callPut<T>(`${ this.servicePrefix }/${ publicID }/`, data).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public deleteGroup(publicID: number, action: string = null): Observable<T> {
+    const groupDeleteOptions: any = httpObserveOptions;
+    groupDeleteOptions.params = new HttpParams().set('action', action);
+    return this.api.callDelete<T>(`${ this.servicePrefix }/${ publicID }/`, groupDeleteOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })

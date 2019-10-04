@@ -20,7 +20,7 @@ import { Injectable } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { ApiCallService } from '../../services/api-call.service';
 import { CmdbCategory } from '../models/cmdb-category';
-import {CmdbType} from "../models/cmdb-type";
+import { CmdbType } from '../models/cmdb-type';
 
 @Injectable({
   providedIn: 'root'

@@ -29,6 +29,11 @@ __COLLECTIONS__ = [
     UserGroup
 ]
 
+__FIXED_GROUPS__ = [
+    UserGroup(public_id=1, name='admin', label='Administrator', rights=[], deletable=False),
+    UserGroup(public_id=2, name='user', label='User', rights=[], deletable=False)
+]
+
 __AUTH_PROVIDERS__ = [
     LocalAuthenticationProvider.get_name()
 ]
