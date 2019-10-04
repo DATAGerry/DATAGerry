@@ -63,6 +63,10 @@ def get_rights_with_min_level(level: int):
 @login_required
 def get_security_levels():
     security_levels = user_manager.get_security_levels()
-    return make_response(security_levels)
+    security_list = []
+    for key, value in security_levels.items():
+        temp = [key, value]
+        security_list.append(temp)
+    return make_response(security_list)
 
 # other crud functions are not required because of static right programming
