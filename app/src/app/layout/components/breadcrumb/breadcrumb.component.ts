@@ -103,7 +103,7 @@ export class BreadcrumbComponent implements OnInit {
         breadCrumbLabel = breadCrumbLabel;
       }
       const routeURL: string = route.snapshot.url.map(segment => segment.path).join('/');
-      urlx += '${routeURL}';
+      urlx += `${routeURL}`;
       if (routeURL.length === 0) {
         route.snapshot.params = {};
       }
