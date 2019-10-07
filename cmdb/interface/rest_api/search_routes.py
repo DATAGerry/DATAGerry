@@ -80,17 +80,18 @@ def _get_response(args, q_operator='$and', current_user: User = None, limit=0):
             match_values.append(value)
 
             for v in value.split(","):
-                if key == "type_id":
-                    try:
+                try:
+                    if key == "type_id":
                         query_list.append({key: int(v)})
-                    except (ValueError, TypeError):
-                        return abort(400)
-                else:
-                    query_list.append({'fields.'+key: {'$regex': v}})
+                    if key == "active" and 'true' == v:
+                        query_list.append({key: True})
+                    if key == "value":
+                        query_list.append({'fields.'+key: {'$regex': v, '$options': "i"}})
+                except (ValueError, TypeError):
+                    return abort(400)
 
         result_query.append({q_operator: query_list})
         query = {"$or": result_query}
-
         object_list = object_manager.search_objects_with_limit(query, limit=limit)
         render = RenderList(object_list, current_user)
         if limit == 5:

@@ -45,7 +45,7 @@ export class SearchResultsComponent implements OnDestroy {
               private route: ActivatedRoute) {
 
     this.route.queryParams.subscribe(qParams => {
-      this.url = 'search/?value=' + qParams.value;
+      this.url = 'search/?value=' + qParams.value + '&type_id=' + qParams.type_id + '&active=' + qParams.active;
       this.callObjects();
     });
   }

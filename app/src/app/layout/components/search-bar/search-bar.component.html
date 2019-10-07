@@ -1,11 +1,25 @@
+<form class="form-inline" [formGroup]="searchForm" (ngSubmit)="getResponse()">
+  <div class="form-group">
+    <div class="input-group-prepend">
+      <a class="dropdown-toggle nav-link mr-1" data-toggle="collapse" data-target="#search-bar-advanced"
+         aria-expanded="false" aria-controls="search-bar-advanced">
+        <fa-icon icon="cog"></fa-icon>
+      </a>
+      <input class="form-control mr-sm-2" formControlName="term" type="search" placeholder="Search" aria-label="Search"
+             [value]="searchForm.get('term').value">
+      <button class="btn btn-default" type="button" (click)="getResponse()"><fa-icon icon="search"></fa-icon></button>
+    </div>
+  </div>
+</form>
 
-<div id="search-bar" class="collapse search-bar-body scrollable-menu">
+<div id="search-bar-advanced" class="collapse search-bar-body scrollable-menu">
   <div class="card card-body">
     <form [formGroup]="searchForm" (ngSubmit)="getResponse()">
       <div class="form-group">
         <label for="search-input">Search</label>
-        <input id="search-input" class="form-control" formControlName="term" type="text" placeholder="Search input">
-        <small id="emailHelp" class="form-text text-muted">Search for fields</small>
+        <input id="search-input" class="form-control" type="text" placeholder="Search input" formControlName="term"
+               [value]="searchForm.get('term').value">
+        <small class="form-text text-muted">Search for fields</small>
       </div>
       <div class="form-group">
         <label>Filter by Type</label>
@@ -16,7 +30,7 @@
         </ng-select>
       </div>
       <div class="form-group form-check">
-        <input type="checkbox" class="form-check-input" id="showActivObjects">
+        <input type="checkbox" class="form-check-input" id="showActivObjects" formControlName="active">
         <label class="form-check-label" for="showActivObjects">active objects</label>
       </div>
       <button type="submit" class="btn btn-primary">Submit</button>

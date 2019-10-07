@@ -35,6 +35,7 @@ export class SearchBarComponent implements OnInit {
   private readonly apiURL: string = '/search/?value=';
   private searchTerm: string = '';
   private typeID: any = 'undefined';
+  private objectState: boolean = false;
 
   public searchForm: FormGroup;
   public typeList: any[];
@@ -45,6 +46,7 @@ export class SearchBarComponent implements OnInit {
     this.searchForm = new FormGroup({
       term: new FormControl(null, Validators.required),
       type: new FormControl( null, Validators.required),
+      active: new FormControl( false, Validators.required),
     });
   }
 
@@ -54,6 +56,7 @@ export class SearchBarComponent implements OnInit {
     this.searchForm.valueChanges.subscribe(val => {
       this.searchTerm = val.term == null ? '' : val.term;
       this.typeID = val.type == null ? 'undefined' : val.type.public_id;
+      this.objectState = val.active;
       if (this.searchTerm.length > 0) {
         this.api.callGetRoute(this.apiURL + this.searchTerm + '&type_id=' + this.typeID, {params: {limit: '5'}})
           .pipe(
@@ -61,10 +64,25 @@ export class SearchBarComponent implements OnInit {
           ).subscribe( (data: RenderResult[]) => this.autoResult = data);
       }
     });
+
+
+    // tslint:disable-next-line:only-arrow-functions
+    $(document).mouseup(function(e) {
+      const popup: any = $('#search-bar-advanced');
+      // @ts-ignore
+      if (!$('#search-bar-advanced').is(e.target) && !popup.is(e.target) && popup.has(e.target).length === 0) {
+        popup.collapse('hide');
+      }
+    });
   }
 
   public getResponse() {
-    this.route.navigate(['search/results'], {queryParams: {value: this.searchTerm} });
+    const collapseTag: any = $('.collapse');
+    if (collapseTag.hasClass('show')) {
+      collapseTag.collapse('hide');
+    }
+    this.route.navigate(['search/results'],
+      {queryParams: {value: this.searchTerm, active: this.objectState, type_id: this.typeID} });
   }
 
   public highlight(value) {
