@@ -1,13 +1,5 @@
 @import "~src/scss/variables";
 
-#search-bar-advanced {
-  position:absolute;
-  left: 0;
-  width: 100%;
-  top: calc(80px + 0.5rem);
-  z-index: 5;
-}
-
 #search-area-box {
   position:absolute;
   left: 0;
@@ -18,7 +10,7 @@
 }
 
 @media(max-width:991px){
-  #search-bar-advanced {
+  #search-area-box {
     top: calc(80px + 4rem);
   }
 

@@ -64,6 +64,10 @@
             <a class="dropdown-item" routerLink="/settings/system/">System Information</a>
             <a class="dropdown-item" [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']">Server Information</a>
             <a class="dropdown-item" routerLink="/settings/system/properties">Database Properties</a>
+            <div class="dropdown-header">User Managment</div>
+            <a class="dropdown-item" routerLink="/management/users">Users</a>
+            <a class="dropdown-item" routerLink="/management/groups">Groups</a>
+            <a class="dropdown-item" routerLink="/management/rights">Rights</a>
             <div class="dropdown-header">Logs</div>
             <a class="dropdown-item" routerLink="/settings/logs/objects"><fa-icon icon="clipboard-list"></fa-icon> Object Logs</a>
           </div>
@@ -87,17 +91,6 @@
             </a>
           </div>
         </li>
-        <!-- nav user managment -->
-        <li class="nav-item dropdown mr-2">
-          <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
-             aria-expanded="false"><fa-icon icon="user-cog"></fa-icon></a>
-          <div class="dropdown-menu dropdown-menu-right">
-            <div class="dropdown-header">User Managment</div>
-            <a class="dropdown-item" routerLink="/management/users">Users</a>
-            <a class="dropdown-item" routerLink="/management/groups">Groups</a>
-            <a class="dropdown-item" routerLink="/management/rights">Rights</a>
-          </div>
-        </li>
         <!-- nav user -->
         <li class="nav-item dropdown mr-2">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
@@ -116,26 +109,26 @@
           </div>
         </li>
         <!-- nav language -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown">
-            <img [src]="'/assets/img/language-flags/usa_flag_icon_64.png'"
-                 style="width: 32px; max-width: 50%; padding: 0.10rem"
-                 class="rounded-circle img-thumbnail" alt="selectedflag">
-          </a>
-          <div class="dropdown-menu dropdown-menu-right">
-            <div class="dropdown-header">Language</div>
-            <a [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']" class="dropdown-item">
-              <img [src]="'/assets/img/language-flags/ger_flag_icon_64.png'"
-                   style="width: 32px; max-width: 50%; padding: 0.15rem"
-                   class="rounded-circle img-thumbnail" alt="selectedflag"> German
-            </a>
-            <a [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']" class="dropdown-item">
-              <img [src]="'/assets/img/language-flags/usa_flag_icon_64.png'"
-                   style="width: 32px; max-width: 50%; padding: 0.15rem"
-                   class="rounded-circle img-thumbnail" alt="selectedflag"> English
-            </a>
-          </div>
-        </li>
+<!--        <li class="nav-item dropdown">-->
+<!--          <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown">-->
+<!--            <img [src]="'/assets/img/language-flags/usa_flag_icon_64.png'"-->
+<!--                 style="width: 32px; max-width: 50%; padding: 0.10rem"-->
+<!--                 class="rounded-circle img-thumbnail" alt="selectedflag">-->
+<!--          </a>-->
+<!--          <div class="dropdown-menu dropdown-menu-right">-->
+<!--            <div class="dropdown-header">Language</div>-->
+<!--            <a [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']" class="dropdown-item">-->
+<!--              <img [src]="'/assets/img/language-flags/ger_flag_icon_64.png'"-->
+<!--                   style="width: 32px; max-width: 50%; padding: 0.15rem"-->
+<!--                   class="rounded-circle img-thumbnail" alt="selectedflag"> German-->
+<!--            </a>-->
+<!--            <a [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']" class="dropdown-item">-->
+<!--              <img [src]="'/assets/img/language-flags/usa_flag_icon_64.png'"-->
+<!--                   style="width: 32px; max-width: 50%; padding: 0.15rem"-->
+<!--                   class="rounded-circle img-thumbnail" alt="selectedflag"> English-->
+<!--            </a>-->
+<!--          </div>-->
+<!--        </li>-->
       </ul>
     </div>
   </div>

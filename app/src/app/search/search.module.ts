@@ -28,6 +28,7 @@ import { SearchRoutingModule } from './search-routing.module';
 import { LayoutModule } from '../layout/layout.module';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
+import {NgSelectModule} from "@ng-select/ng-select";
 
 
 @NgModule({
@@ -40,7 +41,8 @@ import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
     ReactiveFormsModule,
     DataTablesModule,
     NgxSpinnerModule,
-    FontAwesomeModule
+    FontAwesomeModule,
+    NgSelectModule
   ],
 
   providers: [ApiCallService]
