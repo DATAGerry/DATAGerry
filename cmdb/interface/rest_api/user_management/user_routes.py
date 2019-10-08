@@ -22,11 +22,11 @@ from flask import abort, request
 from datetime import datetime
 
 from cmdb.data_storage import get_pre_init_database
-from cmdb.interface.route_utils import RootBlueprint, make_response, insert_request_user
+from cmdb.interface.route_utils import RootBlueprint, make_response, insert_request_user, login_required, right_required
 from cmdb.user_management import User
-from cmdb.user_management.user_manager import user_manager, UserManagerInsertError, UserManagerGetError
+from cmdb.user_management.user_manager import user_manager, UserManagerInsertError, UserManagerGetError, \
+    UserManagerUpdateError
 from cmdb.utils import get_security_manager
-from cmdb.utils.wraps import login_required
 
 try:
     from cmdb.utils.error import CMDBError
@@ -39,27 +39,27 @@ user_blueprint = RootBlueprint('user_rest', __name__, url_prefix='/user')
 
 @user_blueprint.route('/', methods=['GET'])
 @login_required
-def get_users():
+@insert_request_user
+def get_users(request_user: User):
     try:
         users = user_manager.get_all_users()
     except CMDBError:
         return abort(404)
+    if len(users) < 1:
+        return make_response([], 204)
+    return make_response(users)
 
-    resp = make_response(users)
-    return resp
 
-
+@user_blueprint.route('/<int:public_id>/', methods=['GET'])
 @user_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
-def get_user(public_id):
+@insert_request_user
+def get_user(public_id, request_user: User):
     try:
         user = user_manager.get_user(public_id=public_id)
-    except UserManagerGetError as err:
-        LOGGER.error(err)
+    except UserManagerGetError:
         return abort(404)
-
-    resp = make_response(user)
-    return resp
+    return make_response(user)
 
 
 @user_blueprint.route('/', methods=['POST'])
@@ -74,21 +74,33 @@ def add_user():
     try:
         new_user = User(**new_user_data)
     except (CMDBError, Exception) as err:
-        LOGGER.error(err.message)
         return abort(400)
     try:
         insert_ack = user_manager.insert_user(new_user)
     except UserManagerInsertError as err:
-        LOGGER.error(err)
-        return abort(400)
+        return abort(400, err.message)
 
     return make_response(insert_ack)
 
 
+@user_blueprint.route('/<int:public_id>/', methods=['PUT'])
 @user_blueprint.route('/<int:public_id>', methods=['PUT'])
 @login_required
 def update_user(public_id: int):
-    raise NotImplementedError
+    http_put_request_data = json.dumps(request.json)
+    user_data = json.loads(http_put_request_data, object_hook=json_util.object_hook)
+
+    # Check if user exists
+    try:
+        user_manager.get_user(public_id)
+    except (CMDBError, Exception) as err:
+        return abort(404)
+    try:
+        insert_ack = user_manager.update_user(public_id, user_data)
+    except UserManagerUpdateError as err:
+        return abort(400, err.message)
+
+    return make_response(insert_ack.acknowledged)
 
 
 @login_required
@@ -109,8 +121,6 @@ def count_objects():
 
 
 """SPEACIAL ROUTES"""
-
-
 @login_required
 @user_blueprint.route('/<int:public_id>/passwd', methods=['PUT'])
 def change_user_password(public_id: int):

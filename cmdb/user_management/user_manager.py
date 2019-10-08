@@ -99,16 +99,14 @@ class UserManagement(CmdbManagerBase):
     def insert_user(self, user: User) -> int:
         try:
             return self.dbm.insert(collection=User.COLLECTION, data=user.to_database())
-        except (CMDBError, Exception) as e:
-            LOGGER.error(e)
+        except (CMDBError, Exception):
             raise UserManagerInsertError(f'Could not insert {user.get_username()}')
 
-    def update_user(self, update_user: User) -> bool:
-        ack = self.dbm.update(collection=User.COLLECTION, public_id=update_user.get_public_id(),
-                              data=update_user.to_database())
-        if ack.modified_count > 0:
-            return True
-        return False
+    def update_user(self, public_id, update_params: dict):
+        try:
+            return self.dbm.update(collection=User.COLLECTION, public_id=public_id, data=update_params)
+        except (CMDBError, Exception):
+            raise UserManagerUpdateError(f'Could not update user with ID: {public_id}')
 
     def delete_user(self, public_id: int) -> DeleteResult:
         try:
@@ -200,37 +198,14 @@ class UserManagement(CmdbManagerBase):
 
     def group_has_right(self, group_id: int, right_name: str) -> bool:
         right_status = False
+
         try:
             chosen_group = self.get_group(group_id)
         except GroupNotExistsError:
             return right_status
 
         right_status = chosen_group.has_right(right_name)
-        if not right_status:
-            try:
-                right_status = self._has_parent_right(chosen_group, right_name)
-            except Exception:
-                return False
         return right_status
-
-    def _has_parent_right(self, group, right_name) -> bool:
-
-        parent_right_name = '{}.{}'.format('.'.join(right_name.split('.')[:-1]), GLOBAL_IDENTIFIER)
-        try:
-            parent_right = self.get_right_by_name(parent_right_name)
-            if parent_right.is_master():
-                return group.has_right(parent_right.get_name())
-            else:
-                return False
-        except (RightNotExistsError, Exception) as e:
-            LOGGER.debug("Right not found {}".format(e.message))
-            return False
-
-    def user_group_has_right(self, user: User, right_name: str) -> bool:
-        try:
-            return self.group_has_right(user.get_group(), right_name)
-        except (CMDBError, Exception):
-            return False
 
     def count_user(self):
         return self.dbm.count(collection=User.COLLECTION)

@@ -113,7 +113,7 @@ class User(UserManagementBase):
         """
         return self.password
 
-    def get_group(self):
+    def get_group(self) -> int:
         """
         Get the public if of the user group
         Returns:

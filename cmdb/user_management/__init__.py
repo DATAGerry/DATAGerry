@@ -18,6 +18,7 @@
 Basic user functions such as create, change and delete are implemented here.
 In addition, the rights management, group administration and access rights are defined here.
 """
+from cmdb.plugins import PluginManager
 from cmdb.user_management.user import User
 from cmdb.user_management.user_authentication import AuthenticationProvider, LocalAuthenticationProvider
 from cmdb.user_management.user_base import UserManagementBase
@@ -35,5 +36,7 @@ __FIXED_GROUPS__ = [
 ]
 
 __AUTH_PROVIDERS__ = [
-    LocalAuthenticationProvider.get_name()
+    LocalAuthenticationProvider.get_name(),
 ]
+
+print(PluginManager().get_base('auth').get_plugins()[0])

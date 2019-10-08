@@ -1,0 +1,19 @@
+<hr/>
+<form [formGroup]="configForm">
+  <div class="form-group row">
+    <label class="col-3 col-form-label">Select type:</label>
+    <div class="col-9">
+      <select class="custom-select" formControlName="typeID">
+        <option *ngFor="let typeSelect of typeList" [value]="typeSelect.public_id">{{typeSelect.label}}</option>
+      </select>
+    </div>
+  </div>
+  <hr/>
+  <template #mappingContainer></template>
+</form>
+<button class="btn btn-primary prev" type="button" awPreviousStep>
+  <i class="fas fa-angle-double-left"></i> Previous step
+</button>
+<button class="btn btn-primary next" type="button" [disabled]="configForm.invalid" awNextStep>
+  Next Step <i class="fas fa-angle-double-right"></i>
+</button>

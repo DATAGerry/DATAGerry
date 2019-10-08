@@ -19,8 +19,7 @@ import json
 
 from bson import json_util
 
-from cmdb.utils.wraps import login_required
-from cmdb.interface.route_utils import make_response, RootBlueprint, abort
+from cmdb.interface.route_utils import make_response, RootBlueprint, abort, login_required
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user_manager import user_manager, UserManagerInsertError, UserManagerGetError, \
     UserManagerUpdateError, UserManagerDeleteError

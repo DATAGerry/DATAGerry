@@ -1,1 +1,14 @@
-<p>json-config works!</p>
+<form [formGroup]="configForm">
+  <div class="form-group row">
+    <label class="col-3 col-form-label">Indent:</label>
+    <div class="col-9">
+      <input name="indent" type="number" class="form-control" formControlName="indent">
+    </div>
+  </div>
+  <div class="form-group row">
+    <label class="col-3 col-form-label">Encoding:</label>
+    <div class="col-9">
+      <input name="encoding" type="text" class="form-control" formControlName="encoding">
+    </div>
+  </div>
+</form>

@@ -13,3 +13,22 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+from cmdb.framework import CmdbType
+
+
+class BaseImporterConfig:
+
+    def __init__(self, mapping: dict):
+        self.mapping: dict = mapping
+
+
+class ObjectImporterConfig(BaseImporterConfig):
+
+    def __init__(self, type_instance: CmdbType, mapping: dict, start_element: int = 0, max_elements: int = 0,
+                 overwrite_public: bool = True):
+        self.type_instance: CmdbType = type_instance
+        self.start_element: int = start_element
+        self.max_elements: int = max_elements
+        self.overwrite_public: bool = overwrite_public
+        super(ObjectImporterConfig, self).__init__(mapping=mapping)

@@ -14,8 +14,9 @@ import { Group } from '../../models/group';
 export class UsersListComponent implements OnInit {
 
   public userList: User[];
+  public groupList: Group[];
 
-  @ViewChild(DataTableDirective, {static: false})
+  @ViewChild(DataTableDirective, { static: false })
   private dtElement: DataTableDirective;
 
   public dtOptions: any = {};
@@ -29,8 +30,8 @@ export class UsersListComponent implements OnInit {
       ordering: true,
       order: [[0, 'asc']],
       rowGroup: {
-        endRender( rows, group ) {
-          return `Number of users in this group: ${rows.count()}`;
+        endRender(rows, group) {
+          return `Number of users in this group: ${ rows.count() }`;
         },
         dataSrc: 5
       },
@@ -39,16 +40,23 @@ export class UsersListComponent implements OnInit {
         searchPlaceholder: 'Filter...'
       }
     };
+    this.groupService.getGroupList().subscribe((groups: Group[]) => {
+      this.groupList = groups;
+      this.userService.getUserList().subscribe((users: User[]) => {
+          this.userList = users;
 
-    this.userService.getUserList().subscribe((users: User[]) => {
-        this.userList = users;
-      },
-      (error) => {
-        console.error(error);
-      }, () => {
-        this.dtTrigger.next();
-      }
-    );
+        },
+        (error) => {
+          console.error(error);
+        }, () => {
+          this.dtTrigger.next();
+        }
+      );
+    });
+  }
+
+  public findGroup(publicID) {
+    return this.groupList.find(g => g.public_id === publicID);
   }
 
 }

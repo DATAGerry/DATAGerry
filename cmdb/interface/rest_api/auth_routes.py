@@ -28,6 +28,7 @@ try:
 except ImportError:
     CMDBError = Exception
 
+
 auth_blueprint = RootBlueprint('auth_rest', __name__, url_prefix='/auth')
 LOGGER = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ def login_call():
         abort(401, e)
     if correct:
         login_user.last_login_time = datetime.utcnow()
-        user_manager.update_user(login_user)
+        user_manager.update_user(login_user.public_id, login_user.to_database())
         tg = TokenGenerator()
         token = tg.generate_token(payload={'user': {
             'public_id': login_user.get_public_id()

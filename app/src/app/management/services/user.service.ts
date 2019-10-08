@@ -93,4 +93,12 @@ export class UserService<T = User> implements ApiService {
     );
   }
 
+  public putUser(publicID: number, data: T): Observable<T> {
+    return this.api.callPut<T>(`${ this.servicePrefix }/${ publicID }/`, data).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
 }

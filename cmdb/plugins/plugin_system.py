@@ -19,7 +19,7 @@ import importlib
 import types
 from cmdb.utils.error import CMDBError
 
-CMDB_LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 POSSIBLE_PLUGIN_TYPES = [
     'auth'
@@ -51,31 +51,22 @@ class PluginModuleBase:
 
 class PluginManager:
 
-    def __init__(self, base_folder='/cmdb/plugins/', single_init: PluginModuleBase = None):
+    def __init__(self, base_folder='/cmdb/plugins/'):
         self.plugin_base_folder = base_folder
-        self.base_list = []
-        if single_init:
-            self.base_list.append(single_init)
-        else:
-            self._init_module_bases()
-        self._add_to_sys_path()
+        self.base_list = {}
+        self._init_module_bases()
 
     def _init_module_bases(self):
-        """TODO: Add other modules"""
-        self.base_list.append(PluginModuleBase('cmdb.plugins.auth'))
+        LOGGER.info('INIT PLUGINS MODULE BASES')
+        self.base_list.update({'auth': PluginModuleBase('cmdb.plugins.auth')})
 
-    def _add_to_sys_path(self):
-        """TODO Fixing"""
-        for mod_base in self.base_list:
-            for plugin in mod_base.plugins:
-                CMDB_LOGGER.debug(plugin)
-                # sys.path.insert(0, "path/pythonfiles")
+    def get_base(self, name) -> PluginModuleBase:
+        return self.base_list[name]
 
 
 class PluginLoader:
 
     def __init__(self, main_module: types.ModuleType, package, include_paths: list = None):
-        """TODO: Fixing Include Paths"""
         self.main_module = main_module
         self.package = package
         self.include_paths = include_paths or []

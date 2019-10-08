@@ -13,14 +13,20 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
+Module of basic importers
+"""
+from cmdb.importer.importer_config import ObjectImporterConfig, BaseImporterConfig
+from cmdb.importer.parser_base import BaseObjectParser
 
 
 class BaseImporter:
-    FILE_TYPE = ''
+    """Superclass for all importer"""
 
-    def __init__(self, file_type: str, file=None):
+    def __init__(self, file=None, file_type: str = None, config: BaseImporterConfig = None):
         self.file_type = file_type
         self.file = file
+        self.config = config
 
     def get_file_type(self):
         return self.file_type
@@ -28,20 +34,32 @@ class BaseImporter:
     def get_file(self):
         return self.file
 
-    def exe_import(self):
+    def start_import(self):
         raise NotImplementedError
 
 
-class BaseObjectImporter(BaseImporter):
+class ObjectImporter(BaseImporter):
+    """Superclass for object importers"""
+    FILE_TYPE = ''
+    CONTENT_TYPE = ''
+
+    def __init__(self, file=None, config: ObjectImporterConfig = None,
+                 parser: BaseObjectParser = None):
+        self.parser = parser
+        super(ObjectImporter, self).__init__(file=file, file_type=self.FILE_TYPE, config=config)
+
+    def start_import(self):
+        raise NotImplementedError
+
+
+class TypeImporter(BaseImporter):
+    """Superclass for type importers"""
     FILE_TYPE = ''
     DEFAULT_CONFIG = {}
 
     def __init__(self, file=None, config: dict = None):
         self.config = config
-        super(BaseObjectImporter, self).__init__(file_type=self.FILE_TYPE, file=file)
+        super(TypeImporter, self).__init__(file=file, file_type=self.FILE_TYPE, config=config)
 
-    def get_config(self):
-        return self.config
-
-    def exe_import(self):
+    def start_import(self):
         raise NotImplementedError

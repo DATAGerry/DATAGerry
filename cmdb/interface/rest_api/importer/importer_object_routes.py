@@ -15,25 +15,30 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import json
 
-from flask import request, abort
+from flask import request, abort, current_app
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
-from cmdb.importer import CsvObjectImporter
+from cmdb.framework import CmdbType
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.importer import load_parser_class, load_importer_class, __OBJECT_IMPORTER__, __OBJECT_PARSER__
+from cmdb.importer.importer_config import ObjectImporterConfig
 from cmdb.importer.parser_base import BaseObjectParser
-from cmdb.importer.parser_errors import ParserError
-from cmdb.importer.parser_result import ParserResult
 from cmdb.interface.rest_api.import_routes import importer_blueprint
 from cmdb.interface.route_utils import NestedBlueprint, make_response
-from cmdb.importer import __OBJECT_IMPORTER__, __OBJECT_PARSER__
+from cmdb.interface.rest_api.importer.importer_route_utils import get_file_in_request, get_element_from_data_request, \
+    generate_parsed_output
 
 LOGGER = logging.getLogger(__name__)
+
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
     CMDBError = Exception
+
+with current_app.app_context():
+    object_manager: CmdbObjectManager = current_app.object_manager
 
 importer_object_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/object')
 
@@ -64,46 +69,53 @@ def get_default_parser_config(parser_type: str):
     return make_response(parser.DEFAULT_CONFIG)
 
 
-@importer_object_blueprint.route('/parser/<string:parser_type>/', methods=['POST'])
-@importer_object_blueprint.route('/parser/<string:parser_type>', methods=['POST'])
-def parse_object_file(parser_type):
-    parse_file: FileStorage = request.files['file']
-    parser_config = None if request.args.to_dict() == {} else request.args.to_dict()
+@importer_object_blueprint.route('/parse/', methods=['POST'])
+@importer_object_blueprint.route('/parse', methods=['POST'])
+def parse_objects():
+    LOGGER.debug(request.form)
+    # Check if file exists
+    request_file: FileStorage = get_file_in_request('file', request.files)
+    # Load parser config
+    parser_config: dict = get_element_from_data_request('parser_config', request) or {}
+    parsed_output = generate_parsed_output(request_file, parser_config)
 
-    if 'file' not in request.files:
-        LOGGER.error('File was not provided')
+    return make_response(parsed_output)
+
+
+@importer_object_blueprint.route('/', methods=['POST'])
+def import_objects():
+    # Check if file exists
+    request_file: FileStorage = get_file_in_request('file', request.files)
+
+    filename = secure_filename(request_file.filename)
+    working_file = f'/tmp/{filename}'
+    request_file.save(working_file)
+
+    # Load parser config
+    parser_config: dict = get_element_from_data_request('parser_config', request) or {}
+
+    # Check for importer config
+    importer_config_request: dict = get_element_from_data_request('importer_config', request) or None
+    if not importer_config_request:
+        LOGGER.error(f'No import config was provided')
         return abort(400)
+
+    # Insert type instance
     try:
-        parser: BaseObjectParser = __OBJECT_PARSER__[parser_type](parser_config)
-    except (IndexError, KeyError) as err:
-        LOGGER.error('Parser could not be init')
-        return abort(400)
-    if parse_file.content_type != parser.CONTENT_TYPE:
-        LOGGER.error('Wrong content type!')
-        return abort(400)
+        framework_type: CmdbType = object_manager.get_type(public_id=importer_config_request.get('type_id'))
+        importer_config_request.update({'type_instance': framework_type})
+    except CMDBError:
+        return abort(404)
 
-    filename = secure_filename(parse_file.filename)
-    parse_file.save(f'/tmp/{filename}')
+    importer_config = ObjectImporterConfig(**importer_config_request)
 
-    try:
-        parsed_output: ParserResult = parser.parse(filename)
-    except ParserError as err:
-        LOGGER.error(err)
-        parse_file.close()
-        return abort(500)
-    parse_file.close()
+    # Load parser class
+    parser_class = load_parser_class('object', request_file.content_type)
+    parser = parser_class(parser_config)
 
-    return make_response(parsed_output.__dict__)
+    # Load Importer
+    importer_class = load_importer_class('object', request_file.content_type)
+    importer = importer_class(working_file, importer_config, parser)
 
-
-@importer_object_blueprint.route('/csv/', methods=['POST'])
-@importer_object_blueprint.route('/csv', methods=['POST'])
-def import_csv_objects():
-    import_file = request.files['file']
-
-    if 'file' not in request.files:
-        return abort(400)
-    if import_file.content_type != CsvObjectImporter.CONTENT_TYPE:
-        return abort(400)
-
-    return make_response("test")
+    import_response = importer.start_import()
+    return make_response('test')

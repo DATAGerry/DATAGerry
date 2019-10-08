@@ -1,3 +1,4 @@
+<hr/>
 <form [formGroup]="fileForm">
   <div class="form-group">
     <label>Format:</label>
@@ -16,3 +17,7 @@
     </div>
   </div>
 </form>
+<hr/>
+<button class="btn btn-primary next" type="button" awNextStep [disabled]="fileForm.invalid">
+  Next Step <i class="fas fa-angle-double-right"></i>
+</button>

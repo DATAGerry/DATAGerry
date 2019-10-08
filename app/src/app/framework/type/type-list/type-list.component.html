@@ -19,7 +19,7 @@
     </td>
     <td scope="row">{{typeInstance.public_id}}</td>
     <td><cmdb-type-label [faIcon]="typeInstance?.render_meta?.icon" [title]="typeInstance.label"></cmdb-type-label></td>
-    <td>{{userService?.findUser(typeInstance?.author_id).user_name }}</td>
+    <td>{{userService?.getUser(typeInstance?.author_id).user_name | async}}</td>
     <td>{{typeInstance.creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
     <td>
       <a class="text-dark" routerLink="/framework/type/edit/{{typeInstance.public_id}}">

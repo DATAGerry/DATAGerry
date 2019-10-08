@@ -20,9 +20,8 @@ import traceback
 
 from flask import abort, request, current_app
 from cmdb.framework.cmdb_render import RenderList
-from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user
+from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user, login_required
 from cmdb.user_management.user import User
-from cmdb.utils.wraps import login_required
 
 with current_app.app_context():
     object_manager = current_app.object_manager

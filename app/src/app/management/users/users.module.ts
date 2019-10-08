@@ -9,9 +9,10 @@ import { PasswordStrengthMeterModule } from '../../layout/password-strength-mete
 import { ReactiveFormsModule } from '@angular/forms';
 import { UserViewComponent } from './user-view/user-view.component';
 import { LayoutModule } from '../../layout/layout.module';
+import { UsersEditComponent } from './users-edit/users-edit.component';
 
 @NgModule({
-  declarations: [UsersListComponent, UserViewComponent, UsersAddComponent],
+  declarations: [UsersListComponent, UserViewComponent, UsersAddComponent, UsersEditComponent],
   imports: [
     CommonModule,
     UsersRoutingModule,
