@@ -15,10 +15,12 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-import { Input } from '@angular/core';
+import {Input} from '@angular/core';
+import {CmdbMode} from '../../../modes.enum';
 
 export class ConfigEdit {
   private innerData: any;
+  private currentMode: CmdbMode.View;
 
   public constructor() {
   }
@@ -32,7 +34,18 @@ export class ConfigEdit {
     return this.innerData;
   }
 
+  @Input('mode')
+  public set mode(value: any) {
+    this.currentMode = value;
+  }
+
+  public get mode(): any {
+    return this.currentMode;
+  }
+
   public calculateName(value) {
-    this.data.name = value.replace(/ /g, '-').toLowerCase();
+    if (this.mode !== CmdbMode.Edit) {
+      this.data.name = value.replace(/ /g, '-').toLowerCase();
+    }
   }
 }

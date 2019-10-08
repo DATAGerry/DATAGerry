@@ -18,6 +18,7 @@
 
 import { AfterContentInit, ChangeDetectorRef, Component, Input, ViewChild } from '@angular/core';
 import { BuilderComponent } from '../../builder/builder.component';
+import {CmdbMode} from "../../../modes.enum";
 
 @Component({
   selector: 'cmdb-type-fields-step',
@@ -29,6 +30,7 @@ export class TypeFieldsStepComponent implements AfterContentInit {
   @ViewChild(BuilderComponent, {static: false})
   public typeBuilder: BuilderComponent;
 
+  @Input() public mode: number = CmdbMode.View;
   @Input()
   set preData(data: any) {
     if ((data !== undefined) && (this.typeBuilder !== undefined)) {
