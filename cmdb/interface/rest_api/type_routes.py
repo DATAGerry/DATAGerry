@@ -102,16 +102,6 @@ def update_type():
         update_type_instance = CmdbType(**new_type_data)
     except CMDBError:
         return abort(400)
-
-    # REMOVE fields from CmdbObject
-    try:
-        old_fields = object_manager.get_type(update_type_instance.get_public_id()).get_fields()
-        new_fields = update_type_instance.get_fields()
-        if len(old_fields) > len(new_fields):
-            removed_type_fields = [item for item in old_fields if not item in new_fields]
-            for field in removed_type_fields:
-                object_manager.update_object_fields(filter={'type_id': update_type_instance.get_public_id()},
-                                                    update={'$pull': {'fields': {"name": field["name"]}}})
     except CMDBError:
         return abort(500)
 

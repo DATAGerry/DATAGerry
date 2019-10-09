@@ -1,7 +1,7 @@
 <div id="sidebar">
   <nav class="sidebar-nav">
     <ul class="nav">
-      <li class="nav-title">Navigation</li>
+      <li class="nav-title">General</li>
       <li class="nav-item">
         <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           <fa-icon icon="tachometer-alt"></fa-icon> Dashboard</a>
@@ -10,26 +10,8 @@
         <a class="nav-link" routerLink="/framework/object/add" routerLinkActive="active">
           <fa-icon icon="plus"></fa-icon> Add object</a>
       </li>
-      <li class="nav-title">Sync</li>
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/import/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <fa-icon icon="file-import"></fa-icon> Import</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/export/" routerLinkActive="active">
-          <fa-icon icon="file-export"></fa-icon> Export</a>
-      </li>
-      <li class="nav-title">Assets</li>
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/framework/object/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <fa-icon icon="list"></fa-icon> List objects</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/framework/type/" routerLinkActive="active">
-          <fa-icon icon="list"></fa-icon> Show types</a>
-      </li>
       <div id="sidebar-categories">
-        <li class="nav-title">Categories</li>
+        <li class="nav-title">Object Menu</li>
         <input id="category_filter" class="form-control form-control-sm" type="text" placeholder="Filter.." [formControl]="filterTerm">
         <div class="list-group panel category_list">
           <cmdb-sidebar-category *ngFor="let category of categoryTree;"

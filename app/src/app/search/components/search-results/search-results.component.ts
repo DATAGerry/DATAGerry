@@ -21,9 +21,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ApiCallService } from '../../../services/api-call.service';
 import { RenderResult } from '../../../framework/models/cmdb-render';
-import { TableColumnAction } from '../../../layout/components/table/models/table-columns-action';
 import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {TypeService} from '../../../framework/services/type.service';
 
 
 @Component({
@@ -38,20 +39,49 @@ export class SearchResultsComponent implements OnDestroy {
   public dtElement: DataTableDirective;
   public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();
+
   public results: RenderResult[] = [];
+  public searchForm: FormGroup;
+  public typeList: any[];
   private url: any;
 
-  constructor(private apiCallService: ApiCallService, private router: Router, private spinner: NgxSpinnerService,
-              private route: ActivatedRoute) {
-
+  constructor(private apiCall: ApiCallService, private typeService: TypeService,
+              private router: Router, private spinner: NgxSpinnerService, private route: ActivatedRoute) {
     this.route.queryParams.subscribe(qParams => {
       this.url = 'search/?value=' + qParams.value;
-      this.callObjects();
+
+      this.typeService.getTypeList().subscribe((list) => {
+        this.typeList = list;
+      }, error => {},
+        () => { this.callObjects(); });
+
+      this.searchForm = new FormGroup({
+        term: new FormControl('', Validators.required),
+        type: new FormControl( null, Validators.required),
+        active: new FormControl( false, Validators.required),
+      });
     });
   }
 
   private callObjects() {
     this.spinner.show();
+    this.loadDatatable();
+
+    this.apiCall.callGetRoute(this.url).subscribe(
+      (data: RenderResult[]) => {
+        this.results = data;
+        this.rerender();
+      },
+      (err) => {
+        console.error(err);
+      },
+      () => {
+        this.dtTrigger.next();
+        this.spinner.hide();
+      });
+  }
+
+  private loadDatatable() {
     this.dtOptions = {
       ordering: true,
       order: [[1, 'asc']],
@@ -73,19 +103,14 @@ export class SearchResultsComponent implements OnDestroy {
         searchPlaceholder: 'Filter...'
       }
     };
+  }
 
-    this.apiCallService.callGetRoute(this.url).subscribe(
-      (data: RenderResult[]) => {
-        this.results = data;
-        this.rerender();
-      },
-      (err) => {
-        console.error(err);
-      },
-      () => {
-        this.dtTrigger.next();
-        this.spinner.hide();
-      });
+  public getResponse() {
+    const searchTerm = this.searchForm.get('term').value;
+    const typeID = this.searchForm.get('type').value == null ? 'undefined' : this.searchForm.get('type').value.public_id;
+    const objectState = this.searchForm.get('active').value;
+    this.url = 'search/?value=' + searchTerm + '&type_id=' + typeID + '&active=' + objectState;
+    this.callObjects();
   }
 
   public rerender(): void {

@@ -254,6 +254,9 @@ class CmdbObjectManager(CmdbManagerBase):
     def delete_object(self, public_id: int):
         try:
             ack = self._delete(CmdbObject.COLLECTION, public_id)
+            if self._event_queue:
+                event = Event("cmdb.core.object.deleted", {"id": public_id})
+                self._event_queue.put(event)
             return ack
         except (CMDBError, Exception):
             raise ObjectDeleteError(obj_id=public_id)
@@ -295,6 +298,9 @@ class CmdbObjectManager(CmdbManagerBase):
         try:
             ack = self._insert(collection=CmdbType.COLLECTION, data=new_type.to_database())
             LOGGER.debug(f"Inserted new type with ack {ack}")
+            if self._event_queue:
+                event = Event("cmdb.core.objecttype.added", {"id": new_type.get_public_id()})
+                self._event_queue.put(event)
         except PublicIDAlreadyExists:
             raise TypeAlreadyExists(type_id=new_type.get_public_id())
         except (CMDBError, InsertError):
@@ -314,6 +320,9 @@ class CmdbObjectManager(CmdbManagerBase):
             public_id=update_type.get_public_id(),
             data=update_type.to_database()
         )
+        if self._event_queue:
+            event = Event("cmdb.core.objecttype.updated", {"id": update_type.get_public_id()})
+            self._event_queue.put(event)
         return ack
 
     def update_many_types(self, filter: dict, update: dict):
@@ -325,6 +334,9 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def delete_type(self, public_id: int):
         ack = self._delete(CmdbType.COLLECTION, public_id)
+        if self._event_queue:
+            event = Event("cmdb.core.objecttype.deleted", {"id": public_id})
+            self._event_queue.put(event)
         return ack
 
     def delete_many_types(self, public_ids: dict):

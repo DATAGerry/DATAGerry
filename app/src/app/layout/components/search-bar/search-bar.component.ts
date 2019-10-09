@@ -18,7 +18,6 @@
 
 import { Component, OnInit } from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import { TypeService } from '../../../framework/services/type.service';
 import { Router } from '@angular/router';
 import { debounceTime, map } from 'rxjs/operators';
 import { ApiCallService } from '../../../services/api-call.service';
@@ -34,42 +33,43 @@ export class SearchBarComponent implements OnInit {
 
   private readonly apiURL: string = '/search/?value=';
   private searchTerm: string = '';
-  private typeID: any = 'undefined';
 
   public searchForm: FormGroup;
-  public typeList: any[];
   public autoResult: RenderResult[] = [];
 
-  constructor(
-    private typeService: TypeService, private route: Router, private api: ApiCallService) {
+  constructor(private route: Router, private api: ApiCallService) {
     this.searchForm = new FormGroup({
-      term: new FormControl(null, Validators.required),
-      type: new FormControl( null, Validators.required),
+      term: new FormControl(null, Validators.required)
     });
   }
 
   ngOnInit() {
-    this.typeService.getTypeList().subscribe((list) => this.typeList = list);
-
     this.searchForm.valueChanges.subscribe(val => {
       this.searchTerm = val.term == null ? '' : val.term;
-      this.typeID = val.type == null ? 'undefined' : val.type.public_id;
       if (this.searchTerm.length > 0) {
-        this.api.callGetRoute(this.apiURL + this.searchTerm + '&type_id=' + this.typeID, {params: {limit: '5'}})
+        this.api.callGetRoute(this.apiURL + this.searchTerm, {params: {limit: '5'}})
           .pipe(
-            debounceTime(100)  // WAIT FOR 500 MILISECONDS AFTER EACH KEY STROKE.
+            debounceTime(500)  // WAIT FOR 500 MILISECONDS AFTER EACH KEY STROKE.
           ).subscribe( (data: RenderResult[]) => this.autoResult = data);
       }
     });
   }
 
   public getResponse() {
-    this.route.navigate(['search/results'], {queryParams: {value: this.searchTerm} });
+    this.hide();
+    this.route.navigate(['search/results'], {queryParams: {value: this.searchTerm}});
+  }
+
+  public hide() {
+    setTimeout(() => {
+      this.searchForm.get('term').setValue('');
+    }, 300);
   }
 
   public highlight(value) {
+    const re = this.searchForm.get('term').value;
     if (typeof value === 'string' && value.length > 0) {
-      return value.replace(new RegExp(value, 'gi'), match => {
+      return value.replace(new RegExp(re, 'gi'), match => {
         return '<span class="badge badge-secondary">' + match + '</span>';
       });
     }

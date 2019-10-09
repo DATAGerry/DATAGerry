@@ -6,7 +6,7 @@
     </button>
   </aw-wizard-step>
   <aw-wizard-step (stepExit)="exitFieldStep()" stepId="2" stepTitle="Field definitions">
-    <cmdb-type-fields-step [preData]="typeInstance"></cmdb-type-fields-step>
+    <cmdb-type-fields-step [mode]="mode" [preData]="typeInstance"></cmdb-type-fields-step>
     <button class="btn btn-primary prev" type="button" awPreviousStep>Go to previous step</button>
     <button class="btn btn-primary next" type="button" awNextStep>Go to next step</button>
   </aw-wizard-step>

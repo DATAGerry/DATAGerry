@@ -142,11 +142,13 @@ export class TypeMetaStepComponent implements OnInit {
     if (extLinks.length > 0) {
       let validList = [];
       extLinks.filter((item) => {
-        item.fields.filter((value) => {
-          this.fields.map(field => field.name).includes(value) ? validList.push(value) : console.log(value);
-        });
-        item.fields = validList;
-        validList = [];
+        if (item.fields.length > 0) {
+          item.fields.filter((value) => {
+            this.fields.map(field => field.name).includes(value) ? validList.push(value) : console.log(value);
+          });
+          item.fields = validList;
+          validList = [];
+        }
       });
     }
   }

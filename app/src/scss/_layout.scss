@@ -60,8 +60,6 @@ html{
   }
 }
 
-
-
 .sidebar-fixed {
   #sidebar {
     position: fixed;
@@ -70,6 +68,19 @@ html{
 
 .set-sidebar-visible {
   margin-left: 0!important;
+}
+
+#ng-select-valid {
+  .ng-select-container {
+    right: 5px;
+  }
+
+  .ng-arrow-wrapper {
+    width: auto;
+  }
+  .ng-arrow-wrapper .ng-arrow {
+    display: none;
+  }
 }
 
 @include media-breakpoint-down('md') {

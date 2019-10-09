@@ -74,22 +74,21 @@ def _get_response(args, q_operator='$and', current_user: User = None, limit=0):
 
     try:
         for key, value in args.items():
-
-            # Collect for later render evaluation
-            match_values.append(value)
-
             for v in value.split(","):
-                if key == "type_id":
-                    try:
+                try:
+                    if key == "type_id":
                         query_list.append({key: int(v)})
-                    except (ValueError, TypeError):
-                        return abort(400)
-                else:
-                    query_list.append({'fields.'+key: {'$regex': v}})
+                    if key == "active" and 'true' == v:
+                        query_list.append({key: True})
+                    if key == "value":
+                        # Collect for later render evaluation
+                        match_values.append(value)
+                        query_list.append({'fields.'+key: {'$regex': v, '$options': "i"}})
+                except (ValueError, TypeError):
+                    return abort(400)
 
         result_query.append({q_operator: query_list})
         query = {"$or": result_query}
-
         object_list = object_manager.search_objects_with_limit(query, limit=limit)
         render = RenderList(object_list, current_user)
         if limit == 5:
@@ -124,12 +123,11 @@ def _filter_query(args):
 
 def _collect_match_fields(object_list, match_values):
     import re
-
     key_match = []
     for passed_object in object_list:
         for term in match_values:
             for fields in getattr(passed_object, 'fields'):
                 for key, value in fields.items():
-                    if isinstance(value, str) and re.search(term, value):
+                    if isinstance(value, str) and re.findall(r"(?i)" + term, value):
                         key_match.append(fields['name'])
     return key_match

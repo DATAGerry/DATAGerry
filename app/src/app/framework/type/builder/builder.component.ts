@@ -53,7 +53,7 @@ export class BuilderComponent implements OnInit {
   public sections: any[];
   public userList: User[] = [];
   public groupList: Group[] = [];
-  public mode = CmdbMode.View;
+  @Input() mode = CmdbMode.View;
 
   @Input() set builderConfig(data) {
     if (data !== undefined) {

@@ -27,57 +27,53 @@
     <div id="navbar-content" class="collapse navbar-collapse container-content clearfix">
       <ul id="navbar-mega" class="nav navbar-nav mr-auto float-left">
         <li class="nav-item dropdown megamenu-li">
-          <a class="nav-link dropdown-toggle" href="" id="dropdownmega" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Mega</a>
-          <div class="dropdown-menu megamenu scrollable-menu" aria-labelledby="dropdownmega">
-            <div class="row">
-              <div class="col-sm-3">
-                <h5 class="sub-title"><fa-icon icon="cubes"></fa-icon> Assets</h5>
-                <a class="dropdown-item" routerLink="/framework/object">Object List</a>
-                <a class="dropdown-item" routerLink="/framework/type">Type List</a>
-                <a class="dropdown-item" routerLink="/framework/category">Category List</a>
-              </div>
-              <div class="col-sm-3">
-                <h5 class="sub-title"><fa-icon icon="stream"></fa-icon> Data Transfer</h5>
-                <a class="dropdown-item dropdown-toggle" data-toggle="dropdown" href="">Type Transfer</a>
-                <ul class="dropdown-menu dropdown-submenu">
-                  <li><a class="dropdown-item" [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']"><fa-icon icon="file-import"></fa-icon> Import Type</a></li>
-                  <li><a class="dropdown-item" [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']"><fa-icon icon="file-export"></fa-icon> Export Type</a></li>
-                </ul>
-                <a class="dropdown-item dropdown-toggle" data-toggle="dropdown" href="">Object Transfer</a>
-                <ul class="dropdown-menu dropdown-submenu">
-                  <li><a class="dropdown-item" [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']"> <fa-icon icon="file-import"></fa-icon> Import Objects</a></li>
-                  <li><a class="dropdown-item" [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']"><fa-icon icon="file-export"></fa-icon> Export Objects</a></li>
-                </ul>
-              </div>
-              <div class="col-sm-3">
-                <h5 class="sub-title"><fa-icon icon="user-cog"></fa-icon> User Managment</h5>
-                <a class="dropdown-item" routerLink="/management/users">Users</a>
-                <a class="dropdown-item" routerLink="/management/groups">Groups</a>
-                <a class="dropdown-item" routerLink="/management/rights">Rights</a>
-              </div>
-              <div class="col-sm-3">
-                <h5 class="sub-title"><fa-icon icon="cogs"></fa-icon> System</h5>
-                <a class="dropdown-item" routerLink="/settings/system/">System Information</a>
-                <a class="dropdown-item" [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']">Server Information</a>
-                <a class="dropdown-item" routerLink="/settings/system/properties">Database Properties</a>
-                <a class="dropdown-item dropdown-toggle" data-toggle="dropdown" href="">Logs</a>
-                <ul class="dropdown-menu dropdown-submenu">
-                  <li><a class="dropdown-item" routerLink="/settings/logs/objects"><fa-icon icon="clipboard-list"></fa-icon> Object Logs</a></li>
-                </ul>
-              </div>
-            </div>
-          </div>
+          <cmdb-search-bar></cmdb-search-bar>
         </li>
       </ul>
       <ul class="nav navbar-nav flex-row float-right">
-        <li class="nav-item dropdown">
-          <a class="dropdown-toggle nav-link mr-1" data-toggle="collapse" data-target="#search-bar"
-             aria-expanded="false" aria-controls="search-content">
-            <fa-icon icon="search"></fa-icon>
-          </a>
+        <!-- nav List -->
+        <li class="nav-item dropdown mr-2">
+          <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+             aria-expanded="false"> <fa-icon icon="list-alt"></fa-icon></a>
+          <div class="dropdown-menu dropdown">
+            <div class="dropdown-header">List</div>
+              <a class="dropdown-item" routerLink="/framework/object">Object List</a>
+              <a class="dropdown-item" routerLink="/framework/type">Type List</a>
+              <a class="dropdown-item" routerLink="/framework/category">Category List</a>
+          </div>
+        </li>
+        <!-- nav Import/Export -->
+        <li class="nav-item dropdown mr-2">
+          <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+             aria-expanded="false"><fa-icon icon="database"></fa-icon></a>
+          <div class="dropdown-menu dropdown">
+            <div class="dropdown-header">Type Import/Export</div>
+            <a class="dropdown-item" [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']"><fa-icon icon="file-import"></fa-icon> Import Type</a>
+            <a class="dropdown-item" [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']"><fa-icon icon="file-export"></fa-icon> Export Type</a>
+            <div class="dropdown-header">Object Import/Export</div>
+            <a class="dropdown-item" [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']"> <fa-icon icon="file-import"></fa-icon> Import Objects</a>
+            <a class="dropdown-item" [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']"><fa-icon icon="file-export"></fa-icon> Export Objects</a>
+          </div>
+        </li>
+        <!-- nav System -->
+        <li class="nav-item dropdown mr-2">
+          <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+             aria-expanded="false"><fa-icon icon="cogs"></fa-icon></a>
+          <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-header">System</div>
+            <a class="dropdown-item" routerLink="/settings/system/">System Information</a>
+            <a class="dropdown-item" [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']">Server Information</a>
+            <a class="dropdown-item" routerLink="/settings/system/properties">Database Properties</a>
+            <div class="dropdown-header">User Managment</div>
+            <a class="dropdown-item" routerLink="/management/users">Users</a>
+            <a class="dropdown-item" routerLink="/management/groups">Groups</a>
+            <a class="dropdown-item" routerLink="/management/rights">Rights</a>
+            <div class="dropdown-header">Logs</div>
+            <a class="dropdown-item" routerLink="/settings/logs/objects"><fa-icon icon="clipboard-list"></fa-icon> Object Logs</a>
+          </div>
         </li>
         <!-- nav notification -->
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown mr-2">
           <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
              aria-expanded="false">
             <fa-icon icon="bell"></fa-icon>
@@ -95,29 +91,8 @@
             </a>
           </div>
         </li>
-        <!-- nav language -->
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown">
-            <img [src]="'/assets/img/language-flags/usa_flag_icon_64.png'"
-                 style="width: 32px; max-width: 50%; padding: 0.10rem"
-                 class="rounded-circle img-thumbnail" alt="selectedflag">
-          </a>
-          <div class="dropdown-menu dropdown-menu-right">
-            <div class="dropdown-header">Language</div>
-            <a [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']" class="dropdown-item">
-              <img [src]="'/assets/img/language-flags/ger_flag_icon_64.png'"
-                   style="width: 32px; max-width: 50%; padding: 0.15rem"
-                   class="rounded-circle img-thumbnail" alt="selectedflag"> German
-            </a>
-            <a [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']" class="dropdown-item">
-              <img [src]="'/assets/img/language-flags/usa_flag_icon_64.png'"
-                   style="width: 32px; max-width: 50%; padding: 0.15rem"
-                   class="rounded-circle img-thumbnail" alt="selectedflag"> English
-            </a>
-          </div>
-        </li>
         <!-- nav user -->
-        <li class="nav-item dropdown">
+        <li class="nav-item dropdown mr-2">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
              aria-expanded="false">
             <fa-icon icon="user-circle"></fa-icon>
@@ -133,8 +108,28 @@
             </a>
           </div>
         </li>
+        <!-- nav language -->
+<!--        <li class="nav-item dropdown">-->
+<!--          <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown">-->
+<!--            <img [src]="'/assets/img/language-flags/usa_flag_icon_64.png'"-->
+<!--                 style="width: 32px; max-width: 50%; padding: 0.10rem"-->
+<!--                 class="rounded-circle img-thumbnail" alt="selectedflag">-->
+<!--          </a>-->
+<!--          <div class="dropdown-menu dropdown-menu-right">-->
+<!--            <div class="dropdown-header">Language</div>-->
+<!--            <a [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']" class="dropdown-item">-->
+<!--              <img [src]="'/assets/img/language-flags/ger_flag_icon_64.png'"-->
+<!--                   style="width: 32px; max-width: 50%; padding: 0.15rem"-->
+<!--                   class="rounded-circle img-thumbnail" alt="selectedflag"> German-->
+<!--            </a>-->
+<!--            <a [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']" class="dropdown-item">-->
+<!--              <img [src]="'/assets/img/language-flags/usa_flag_icon_64.png'"-->
+<!--                   style="width: 32px; max-width: 50%; padding: 0.15rem"-->
+<!--                   class="rounded-circle img-thumbnail" alt="selectedflag"> English-->
+<!--            </a>-->
+<!--          </div>-->
+<!--        </li>-->
       </ul>
-      <cmdb-search-bar></cmdb-search-bar>
     </div>
   </div>
 </nav>

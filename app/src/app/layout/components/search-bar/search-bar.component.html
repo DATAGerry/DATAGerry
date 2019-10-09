@@ -1,25 +1,30 @@
-
-<div id="search-bar" class="collapse search-bar-body scrollable-menu">
-  <div class="card card-body">
-    <form [formGroup]="searchForm" (ngSubmit)="getResponse()">
-      <div class="form-group">
-        <label for="search-input">Search</label>
-        <input id="search-input" class="form-control" formControlName="term" type="text" placeholder="Search input">
-        <small id="emailHelp" class="form-text text-muted">Search for fields</small>
-      </div>
-      <div class="form-group">
-        <label>Filter by Type</label>
-        <ng-select [items]="typeList"
-                   bindLabel="label"
-                   formControlName="type"
-                   placeholder="Select type">
-        </ng-select>
-      </div>
-      <div class="form-group form-check">
-        <input type="checkbox" class="form-check-input" id="showActivObjects">
-        <label class="form-check-label" for="showActivObjects">active objects</label>
-      </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+<form class="form-inline" [formGroup]="searchForm" (ngSubmit)="getResponse()">
+  <div class="form-group">
+    <div class="input-group-prepend">
+      <input class="form-control mr-sm-2" formControlName="term" type="search" placeholder="Search" aria-label="Search"
+             [value]="searchForm.get('term').value" (blur)="hide()">
+      <button class="btn btn-default" type="button" (click)="getResponse()"><fa-icon icon="search"></fa-icon></button>
+    </div>
   </div>
+</form>
+
+
+<div id="search-area-box" class="card overflow-auto" *ngIf="searchForm.get('term').value">
+  <div class="card-header" *ngIf="autoResult.length === 0">
+    No objects found
+  </div>
+
+  <ng-container *ngFor="let element of autoResult">
+    <div class="card-header">
+      {{element?.type_information.type_label}}#{{element?.object_information.object_id}}
+      <span class="badge badge-primary pull-right">{{element?.object_information.active}}</span>
+    </div>
+    <div class="card-body" *ngFor="let field of element?.match_fields"
+         routerLink="/framework/object/view/{{element?.object_information.object_id}}"
+         routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+      <strong>Field</strong> : {{field.label}}<br>
+      <strong>Value</strong> : <span [innerHTML]="highlight(field.value)"></span><br>
+      <small class="text-muted pull-right">more ...</small>
+    </div>
+  </ng-container>
 </div>
