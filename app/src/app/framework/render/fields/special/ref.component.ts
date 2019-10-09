@@ -19,8 +19,8 @@
 import { Component, OnInit } from '@angular/core';
 import { RenderField } from '../components.fields';
 import { ObjectService } from '../../../services/object.service';
-import { CmdbObject } from '../../../models/cmdb-object';
 import { RenderResult } from '../../../models/cmdb-render';
+import { Observable } from 'rxjs';
 
 @Component({
   templateUrl: './ref.component.html',
@@ -28,7 +28,7 @@ import { RenderResult } from '../../../models/cmdb-render';
 })
 export class RefComponent extends RenderField implements OnInit {
 
-  public objectList: RenderResult[];
+  public objectList: Observable<RenderResult[]>;
   public refObject: RenderResult;
 
   public constructor(private objectService: ObjectService) {
@@ -37,13 +37,10 @@ export class RefComponent extends RenderField implements OnInit {
 
   public ngOnInit(): void {
     if (this.data.ref_types !== undefined) {
-      this.objectService.getObjectsByType(this.data.ref_types).subscribe((list: RenderResult[]) => {
-        this.objectList = list;
-      });
+      this.objectList = this.objectService.getObjectsByType(this.data.ref_types);
     }
     if (this.controller.value !== '' && this.data.value !== undefined) {
       this.objectService.getObject(this.controller.value).subscribe((refObject: RenderResult) => {
-          console.log(refObject);
           this.refObject = refObject;
         },
         (error) => {
@@ -52,5 +49,9 @@ export class RefComponent extends RenderField implements OnInit {
     }
   }
 
-
+  public searchRef(term: string, item: any) {
+    term = term.toLocaleLowerCase();
+    const value = item.object_information.object_id + item.type_information.type_label + item.summary_line;
+    return value.toLocaleLowerCase().indexOf(term) > -1 || value.toLocaleLowerCase().includes(term);
+  }
 }

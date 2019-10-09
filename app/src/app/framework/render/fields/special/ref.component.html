@@ -18,15 +18,29 @@
           </div>
         </ng-container>
         <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
-          <select class="custom-select" name="{{data.name}}" [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
-                 'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"
-                  [formControlName]="data.name">
-            <option value="" disabled>Choose a reference</option>
-            <option *ngFor="let instanceObject of objectList" value="{{instanceObject?.object_information?.object_id}}">
-              {{instanceObject?.object_information?.object_id}}# {{instanceObject?.type_information?.type_label}}
-              - {{refObject?.summary_line}}
-            </option>
-          </select>
+          <ng-select
+            [items]="objectList | async"
+            id="ng-select-valid"
+            class="custom-select"
+            bindValue="object_information.object_id" [searchFn]="searchRef"
+            [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
+            'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"
+            [formControlName]="data.name">
+            <ng-template ng-label-tmp let-item="item">
+              <ng-container *ngIf="item.object_information == null">
+                {{refObject?.object_information?.object_id}}# {{refObject?.type_information?.type_label}}
+                - {{refObject?.summary_line}}
+              </ng-container>
+              <ng-container *ngIf="item.object_information != null">
+                {{item?.object_information?.object_id}}# {{item?.type_information?.type_label}}
+                - {{item?.summary_line}}
+              </ng-container>
+            </ng-template>
+            <ng-template ng-option-tmp let-item="item" let-index="index">
+              {{item?.object_information?.object_id}}# {{item?.type_information?.type_label}}
+              - {{item?.summary_line}}
+            </ng-template>
+          </ng-select>
           <div *ngIf="data?.helperText" class="input-group-append">
             <span class="input-group-text">
               <fa-icon icon="info" placement="left" [ngbTooltip]="data?.helperText"></fa-icon>
