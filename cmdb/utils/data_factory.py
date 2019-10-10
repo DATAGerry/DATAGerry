@@ -145,6 +145,7 @@ class DataGenerator:
                                    "between two or more locations provided according to a commercial contract.",
                     "version": "1.0.0",
                     "active": True,
+                    "clean_db": True,
                     "access": {
                         "groups": "",
                         "users": ""
@@ -293,6 +294,7 @@ class DataGenerator:
                                    "and forward data to the destination device. ",
                     "version": "1.0.0",
                     "active": True,
+                    "clean_db": True,
                     "access": {
                         "groups": "",
                         "users": ""
@@ -442,6 +444,7 @@ class DataGenerator:
                                    "between computer networks.",
                     "version": "1.0.0",
                     "active": True,
+                    "clean_db": True,
                     "author_id": 1,
                     "access": {
                         "groups": "",
@@ -590,6 +593,7 @@ class DataGenerator:
                     "description": "Company building and locations",
                     "version": "1.0.0",
                     "active": True,
+                    "clean_db": True,
                     "author_id": 1,
                     "access": {
                         "groups": "",
@@ -699,6 +703,7 @@ class DataGenerator:
                     "description": "Server connections and hostname",
                     "version": "1.0.0",
                     "active": True,
+                    "clean_db": True,
                     "author_id": 1,
                     "access": {
                         "groups": "",

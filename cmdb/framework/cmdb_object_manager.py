@@ -216,6 +216,10 @@ class CmdbObjectManager(CmdbManagerBase):
                 raise Exception
         return ack
 
+    def remove_object_fields(self, filter: dict, update: dict):
+        ack = self._update_many(CmdbObject.COLLECTION, filter, update)
+        return ack
+
     def update_object_fields(self, filter: dict, update: dict):
         ack = self._update_many(CmdbObject.COLLECTION, filter, update)
         return ack
