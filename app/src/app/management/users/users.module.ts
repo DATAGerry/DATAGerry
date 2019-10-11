@@ -10,6 +10,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { UserViewComponent } from './user-view/user-view.component';
 import { LayoutModule } from '../../layout/layout.module';
 import { UsersEditComponent } from './users-edit/users-edit.component';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   declarations: [UsersListComponent, UserViewComponent, UsersAddComponent, UsersEditComponent],
@@ -20,6 +21,7 @@ import { UsersEditComponent } from './users-edit/users-edit.component';
     PasswordStrengthMeterModule,
     ReactiveFormsModule,
     LayoutModule,
+    FontAwesomeModule,
   ]
 })
 export class UsersModule { }

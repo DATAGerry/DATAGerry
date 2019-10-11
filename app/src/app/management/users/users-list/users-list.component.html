@@ -30,11 +30,15 @@
     <td>{{user?.last_name}}</td>
     <td>{{findGroup(user.group_id).label}}</td>
     <td>
-      <a [routerLink]="['/management/users/edit/', user.public_id]">Edit</a>
-      <a *ngIf="user?.public_id !== 1" class="ml-2"
-         [routerLink]="['/management/users/delete/', user.public_id]">Delete</a>
+      <a class="text-dark" [routerLink]="['/management/users/edit/', user.public_id]">
+        <fa-icon [icon]="['far', 'edit']"></fa-icon>
+      </a>
+      <a class="text-dark ml-2" *ngIf="user?.public_id !== 1"
+         [routerLink]="['/management/users/delete/', user.public_id]">
+        <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
+      </a>
+
     </td>
   </tr>
   </tbody>
 </table>
-{{groupList | json}}

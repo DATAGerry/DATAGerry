@@ -45,7 +45,7 @@ export class UsersEditComponent implements OnInit {
       first_name: new FormControl(null),
       last_name: new FormControl(null),
       authenticator: new FormControl('LocalAuthenticationProvider', Validators.required),
-      group_id: new FormControl(null, Validators.required),
+      group_id: new FormControl(2, Validators.required),
       image: new FormControl(null)
     });
     this.user_name.disable();
@@ -84,22 +84,6 @@ export class UsersEditComponent implements OnInit {
       this.passWordToggle.nativeElement.type = 'password';
     }
   }
-
-  public generatePassword(length: number = 12) {
-    const chars = 'abcdefghijklmnopqrstuvwxyz!@#$%^&*()-+<>ABCDEFGHIJKLMNOP1234567890';
-    let pass = '';
-    for (let x = 0; x < length; x++) {
-      const i = Math.floor(Math.random() * chars.length);
-      pass += chars.charAt(i);
-    }
-    this.passWordToggle.nativeElement.value = pass;
-    this.password.clearValidators();
-    this.password.setValue(this.passWordToggle.nativeElement.value);
-    this.password.markAsDirty();
-    this.password.markAsTouched();
-    this.password.disable();
-  }
-
 
   public get user_name() {
     return this.editForm.get('user_name');

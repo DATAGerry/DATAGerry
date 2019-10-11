@@ -102,7 +102,7 @@
           <select formControlName="group_id" class="custom-select"
                   [ngClass]="{ 'is-valid': group.valid && (group.dirty || group.touched),
                  'is-invalid': group.invalid && (group.dirty || group.touched)}">
-            <option *ngFor="let group of groupList" value="{{group.public_id}}">{{group.label}}</option>
+            <option *ngFor="let group of groupList" [ngValue]="group.public_id">{{group.label}}</option>
           </select>
           <div *ngIf="group.invalid && (group.dirty || group.touched)"
                class="invalid-feedback">
