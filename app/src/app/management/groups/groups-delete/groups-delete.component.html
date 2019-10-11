@@ -1,15 +1,36 @@
 <h1>Delete Group: <strong>{{deleteAbleGroup?.label}}</strong></h1>
 <hr/>
 <form [formGroup]="deleteForm" (ngSubmit)="onDeleteGroup()">
-  <div class="custom-control custom-radio">
-    <input formControlName="deleteGroupAction" id="moveUsers" type="radio" name="deleteGroupAction" value="move"
-           class="custom-control-input">
-    <label class="custom-control-label" for="moveUsers">Move users to group: <b>Users</b></label>
+
+  <div class="form-group row">
+    <label class="col-sm-3">Move users to group: </label>
+    <div class="col-sm-9">
+      <div class="row">
+        <div class="col-sm-2">
+          <div class="custom-control custom-radio">
+            <input formControlName="deleteGroupAction" id="moveUsers" type="radio" name="deleteGroupAction" value="move"
+                   class="custom-control-input">
+            <label class="custom-control-label" for="moveUsers"></label>
+          </div>
+        </div>
+        <div class="col-sm-10">
+          <select class="custom-select" formControlName="deleteGroupOption">
+            <option *ngFor="let group of groupList | groupSelect: groupID" [value]="group.public_id">{{group.label}}</option>
+          </select>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="custom-control custom-radio">
-    <input formControlName="deleteGroupAction" id="deleteUsers" type="radio" name="deleteGroupAction" value="delete"
-           class="custom-control-input">
-    <label class="custom-control-label" for="deleteUsers">Delete all users in this group</label>
+
+  <div class="form-group row">
+    <label class="col-sm-3">Delete all users in this group</label>
+    <div class="col-sm-9">
+      <div class="custom-control custom-radio">
+        <input formControlName="deleteGroupAction" id="deleteUsers" type="radio" name="deleteGroupAction" value="delete"
+               class="custom-control-input">
+        <label class="custom-control-label" for="deleteUsers"></label>
+      </div>
+    </div>
   </div>
   <hr/>
   <button type="submit" class="btn btn-primary" [disabled]="deleteForm.invalid">Delete</button>

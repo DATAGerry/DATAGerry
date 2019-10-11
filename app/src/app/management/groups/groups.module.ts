@@ -27,15 +27,18 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { GroupsEditComponent } from './groups-edit/groups-edit.component';
 import { GroupsDeleteComponent } from './groups-delete/groups-delete.component';
+import { LayoutModule } from '../../layout/layout.module';
+import { GroupSelectPipe } from './groups-delete/group-select.pipe';
 
 @NgModule({
-  declarations: [GroupsListComponent, GroupsAddComponent, GroupsEditComponent, GroupsDeleteComponent],
+  declarations: [GroupsListComponent, GroupsAddComponent, GroupsEditComponent, GroupsDeleteComponent, GroupSelectPipe],
   imports: [
     CommonModule,
     GroupsRoutingModule,
     DataTablesModule,
     ReactiveFormsModule,
-    NgSelectModule
+    NgSelectModule,
+    LayoutModule
   ]
 })
 export class GroupsModule {

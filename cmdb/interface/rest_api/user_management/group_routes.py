@@ -99,12 +99,14 @@ def edit_group(public_id: int):
 @login_required
 def delete_group(public_id: int):
     action = request.args.get('action')
+    options = None
+    if request.args.get('options'):
+        options = json.loads(request.args.get('options'))
     if action is None:
         return abort(400)
-
     try:
-        user_manager.delete_group(public_id)
-    except UserManagerDeleteError as umde:
-        LOGGER.error(umde)
+        ack = user_manager.delete_group(public_id, action, options=options)
+    except UserManagerDeleteError as err:
+        LOGGER.error(err)
         return abort(500)
-    return make_response("test")
+    return make_response(ack)

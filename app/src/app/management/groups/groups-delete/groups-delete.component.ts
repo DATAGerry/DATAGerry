@@ -13,20 +13,28 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 })
 export class GroupsDeleteComponent implements OnInit, OnDestroy {
 
-  private groupID: number;
+  private readonly defaultOptionSelection: number = 2;
+
+  public groupID: number;
   private routeParamObserver: Observable<any>;
   private routeParamSubscription: Subscription;
   private groupServiceObserver: Observable<Group>;
   private groupServiceSubscription: Subscription;
+  private groupListSubscription: Subscription;
 
   public deleteAbleGroup: Group;
+  public groupList: Group[];
   public deleteForm: FormGroup;
 
   constructor(private groupService: GroupService, private route: ActivatedRoute,
               private toast: ToastService, private router: Router) {
+    this.routeParamSubscription = new Subscription();
+    this.groupServiceSubscription = new Subscription();
+    this.groupListSubscription = new Subscription();
     this.routeParamObserver = this.route.params;
     this.deleteForm = new FormGroup({
-      deleteGroupAction: new FormControl('', Validators.required)
+      deleteGroupAction: new FormControl('', Validators.required),
+      deleteGroupOption: new FormControl(this.defaultOptionSelection)
     });
   }
 
@@ -40,16 +48,24 @@ export class GroupsDeleteComponent implements OnInit, OnDestroy {
         });
       }
     );
+    this.groupListSubscription = this.groupService.getGroupList().subscribe((groupList: Group[]) => {
+      this.groupList = groupList;
+      this.deleteForm.get('deleteGroupOption').setValue(2);
+    });
   }
 
   public onDeleteGroup(): void {
     if (this.deleteForm.valid) {
-      const groupDeleteSub = this.groupService.deleteGroup(this.groupID, this.deleteForm.get('deleteGroupAction').value)
+      const groupDeleteSub = this.groupService.deleteGroup(this.groupID, this.deleteForm.get('deleteGroupAction').value,
+        {group_id: this.deleteForm.get('deleteGroupOption').value})
         .subscribe(ack => {
-            console.log(ack);
+            if (ack) {
+              this.toast.show('Group was deleted');
+              this.router.navigate(['/management/groups/']);
+            }
           },
           error => {
-          console.error(error);
+            console.error(error);
           },
           () => {
             groupDeleteSub.unsubscribe();
@@ -61,6 +77,7 @@ export class GroupsDeleteComponent implements OnInit, OnDestroy {
   public ngOnDestroy(): void {
     this.routeParamSubscription.unsubscribe();
     this.groupServiceSubscription.unsubscribe();
+    this.groupListSubscription.unsubscribe();
   }
 
 }
