@@ -38,5 +38,3 @@ __FIXED_GROUPS__ = [
 __AUTH_PROVIDERS__ = [
     LocalAuthenticationProvider.get_name(),
 ]
-
-print(PluginManager().get_base('auth').get_plugins()[0])

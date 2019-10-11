@@ -57,7 +57,6 @@ class PluginManager:
         self._init_module_bases()
 
     def _init_module_bases(self):
-        LOGGER.info('INIT PLUGINS MODULE BASES')
         self.base_list.update({'auth': PluginModuleBase('cmdb.plugins.auth')})
 
     def get_base(self, name) -> PluginModuleBase:
