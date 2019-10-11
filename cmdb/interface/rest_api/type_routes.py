@@ -102,9 +102,15 @@ def update_type():
         update_type_instance = CmdbType(**new_type_data)
     except CMDBError:
         return abort(400)
+    try:
+        old_fields = object_manager.get_type(update_type_instance.get_public_id()).get_fields()
+        new_fields = update_type_instance.get_fields()
+        if [item for item in old_fields if item not in new_fields]:
+            update_type_instance.clean_db = False
+        if [item for item in new_fields if item not in old_fields]:
+            update_type_instance.clean_db = False
     except CMDBError:
         return abort(500)
-
     try:
         object_manager.update_type(update_type_instance)
     except CMDBError:
@@ -187,3 +193,59 @@ def update_type_by_category(public_id):
     except CMDBError:
         return abort(500)
     return make_response(ack.raw_result)
+
+
+@type_blueprint.route('/cleanup/remove/<int:public_id>', methods=['GET'])
+@login_required
+def cleanup_removed_fields(public_id):
+    # REMOVE fields from CmdbObject
+    try:
+        update_type_instance = object_manager.get_type(public_id)
+        type_fields = update_type_instance.get_fields()
+        objects_by_type = object_manager.get_objects_by_type(public_id)
+
+        for obj in objects_by_type:
+            incorrect = []
+            correct = []
+            obj_fields = obj.get_all_fields()
+            for t_field in type_fields:
+                name = t_field["name"]
+                for field in obj_fields:
+                    if name == field["name"]:
+                        correct.append(field["name"])
+                    else:
+                        incorrect.append(field["name"])
+            removed_type_fields = [item for item in incorrect if not item in correct]
+            for field in removed_type_fields:
+                object_manager.remove_object_fields(filter={'public_id': obj.public_id},
+                                                    update={'$pull': {'fields': {"name": field}}})
+
+    except CMDBError:
+        return abort(500)
+
+    return make_response(update_type_instance)
+
+
+@type_blueprint.route('/cleanup/update/<int:public_id>', methods=['GET'])
+@login_required
+def cleanup_updated_push_fields(public_id):
+    # Update/Push fields to CmdbObject
+    try:
+        update_type_instance = object_manager.get_type(public_id)
+        type_fields = update_type_instance.get_fields()
+        objects_by_type = object_manager.get_objects_by_type(public_id)
+
+        for obj in objects_by_type:
+            for t_field in type_fields:
+                name = t_field["name"]
+                value = None
+                if [item for item in obj.get_all_fields() if item["name"] == name]:
+                    continue
+                if "value" in t_field:
+                    value = t_field["value"]
+                object_manager.update_object_fields(filter={'public_id': obj.public_id},
+                                                    update={'$addToSet': {'fields': {"name": name, "value": value}}})
+    except CMDBError:
+        return abort(500)
+
+    return make_response(update_type_instance)

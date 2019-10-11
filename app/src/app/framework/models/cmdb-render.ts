@@ -45,6 +45,7 @@ export class RenderResult {
     author_name: string;
     active: boolean;
     version: string;
+    clean_db: boolean;
   };
   public fields: any[];
   public sections: any[];

@@ -39,6 +39,9 @@ export class TypeListComponent implements OnInit, OnDestroy {
   public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();
 
+  public remove: boolean = false;
+  public update: boolean = false;
+
   constructor(private typeService: TypeService, public userService: UserService, private router: Router) {
   }
 
@@ -75,6 +78,27 @@ export class TypeListComponent implements OnInit, OnDestroy {
       () => {
         this.dtTrigger.next();
       });
+  }
+
+  public cleanupDatabase(typeInstance: CmdbType) {
+    if (typeInstance.clean_db === false) {
+      this.typeService.cleanupRemovedFields(typeInstance.public_id).subscribe(() => {
+        this.remove = true;
+      }, error => {console.log(error)},
+        () => {
+          this.typeService.cleanupInsertedFields(typeInstance.public_id).subscribe(() => {
+            this.update = true;
+          }, error => console.log(error),
+            () => {
+              if (this.remove && this.update) {
+                typeInstance.clean_db = true;
+                this.typeService.putType(typeInstance).subscribe(() => {
+                  console.log('ok');
+                });
+              }
+            });
+        });
+    }
   }
 
   public ngOnDestroy(): void {

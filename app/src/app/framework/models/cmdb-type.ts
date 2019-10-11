@@ -36,5 +36,6 @@ export class CmdbType implements CmdbDao {
   public fields: any[];
   public category_name?: string;
   public category_id: number;
+  public clean_db: boolean;
 
 }

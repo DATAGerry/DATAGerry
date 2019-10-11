@@ -1,9 +1,12 @@
 <nav aria-label="breadcrumb">
   <ol [ngClass]="{ 'breadcrumb d-flex': allowBootstrap}"
       class="{{addClass ? '' + addClass : ''}}">
-    <li *ngFor="let breadcrumb of breadcrumbs; let last = last"
+    <li *ngFor="let breadcrumb of breadcrumbs; let last = last; let first = first"
         [ngClass]="{ 'breadcrumb-item': allowBootstrap, 'list': true, 'active': last }">
-      <a *ngIf="!last" [routerLink]="hasParams(breadcrumb)">
+      <a *ngIf="first" [routerLink]="'/'">
+        {{breadcrumb.label}}
+      </a>
+      <a *ngIf="!last && !first" [routerLink]="hasParams(breadcrumb)">
         {{breadcrumb.label}}
       </a>
       <span *ngIf="last">{{ breadcrumb.label }}

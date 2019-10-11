@@ -64,16 +64,20 @@ export class TypeService {
     return this.api.callDeleteRoute<number>(this.servicePrefix + '/' + publicID);
   }
 
-  public filterTypeByCategoryID(publicID: number): CmdbType[] {
-    return this.typeList.filter(id => id.category_id === publicID);
-  }
-
   public getTypeListByCategory(publicID: number) {
     return this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/category/' + publicID);
   }
 
   public updateTypeByCategoryID(publicID: number) {
     return this.api.callPutRoute(this.servicePrefix + '/category/' + publicID, null);
+  }
+
+  public cleanupRemovedFields(publicID: number) {
+    return this.api.callGetRoute(this.servicePrefix + '/cleanup/remove/' + publicID);
+  }
+
+  public cleanupInsertedFields(publicID: number) {
+    return this.api.callGetRoute(this.servicePrefix + '/cleanup/update/' + publicID);
   }
 }
 
