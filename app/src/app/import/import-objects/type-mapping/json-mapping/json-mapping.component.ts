@@ -19,7 +19,6 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TypeMappingBaseComponent } from '../type-mapping-base.component';
-import { ImportService } from '../../../import.service';
 
 @Component({
   selector: 'cmdb-json-mapping',
@@ -28,18 +27,16 @@ import { ImportService } from '../../../import.service';
 })
 export class JsonMappingComponent extends TypeMappingBaseComponent implements OnInit, OnDestroy {
 
-  constructor(public importerService: ImportService) {
-    super(importerService);
+  constructor() {
+    super();
   }
 
   public ngOnInit(): void {
-    this.parsedDataSubscription = this.getParsedData(this.importerFile.file, this.parserConfig).subscribe(data => {
-      console.log(data);
-    });
+
   }
 
   public ngOnDestroy(): void {
-    this.parsedDataSubscription.unsubscribe();
+
   }
 
 

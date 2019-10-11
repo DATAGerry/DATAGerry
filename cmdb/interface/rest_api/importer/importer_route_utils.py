@@ -13,9 +13,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+import json
 import logging
-import ast
 
 from flask import request, abort
 from werkzeug.datastructures import FileStorage
@@ -34,7 +33,7 @@ def get_file_in_request(file_name: str, request_files) -> FileStorage:
 
 def get_element_from_data_request(element, _request: Request) -> (dict, None):
     try:
-        return ast.literal_eval(_request.form.to_dict()[element])
+        return json.loads(_request.form.to_dict()[element])
     except (KeyError, Exception):
         return None
 

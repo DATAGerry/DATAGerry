@@ -15,17 +15,16 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-class BaseImporterResponse:
-    """Base response after import action"""
-
-    def __init__(self, message: str):
-        self.message: str = message
+class BASEContent:
+    CONTENT_TYPE = ''
+    FILE_TYPE = ''
 
 
-class ImporterObjectResponse(BaseImporterResponse):
-    """Response of an bulk object import"""
+class JSONContent:
+    CONTENT_TYPE = 'application/json'
+    FILE_TYPE = 'json'
 
-    def __init__(self, message: str, success_imports: list = None, failed_imports: list = None):
-        self.success_imports: list = success_imports or []
-        self.failed_imports: list = failed_imports or []
-        super(ImporterObjectResponse, self).__init__(message=message)
+
+class CSVContent:
+    CONTENT_TYPE = 'text/csv'
+    FILE_TYPE = 'csv'

@@ -23,10 +23,10 @@ import {
   ComponentFactoryResolver,
   ComponentRef,
   EventEmitter,
-  Input,
+  Input, OnChanges,
   OnDestroy,
   OnInit,
-  Output,
+  Output, SimpleChanges,
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
@@ -37,6 +37,8 @@ import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { JsonMappingComponent } from './json-mapping/json-mapping.component';
 import { ImporterFile } from '../import-object.models';
 import { CsvMappingComponent } from './csv-mapping/csv-mapping.component';
+import { ImportService } from '../../import.service';
+import { TypeMappingBaseComponent } from './type-mapping-base.component';
 
 export const mappingComponents: { [type: string]: any } = {
   json: JsonMappingComponent,
@@ -48,13 +50,24 @@ export const mappingComponents: { [type: string]: any } = {
   templateUrl: './type-mapping.component.html',
   styleUrls: ['./type-mapping.component.scss']
 })
-export class TypeMappingComponent implements OnInit, OnDestroy {
+export class TypeMappingComponent extends TypeMappingBaseComponent implements OnInit, OnChanges, OnDestroy {
 
-  @ViewChild('mappingContainer', { read: ViewContainerRef, static: true }) mappingContainer;
+  @ViewChild('mappingContainer', { read: ViewContainerRef, static: false }) mappingContainer;
   @Output() public typeChange: EventEmitter<any>;
   @Input() public fileFormat;
-  @Input() public importerFile: ImporterFile = {} as ImporterFile;
-  @Input() public parserConfig: any = {};
+
+  private readonly defaultMappingValues = [
+    {
+      name: 'public_id',
+      label: 'Public ID',
+      type: 'property'
+    },
+    {
+      name: 'active',
+      label: 'Active',
+      type: 'property'
+    }
+  ];
 
   private typeListSubscription: Subscription;
   private valueChangeSubscription: Subscription;
@@ -70,18 +83,20 @@ export class TypeMappingComponent implements OnInit, OnDestroy {
   public componentRef: ComponentRef<any>;
   private currentFactory: ComponentFactory<any>;
 
-  constructor(private typeService: TypeService, private ref: ChangeDetectorRef, private resolver: ComponentFactoryResolver) {
+  constructor(private typeService: TypeService, private ref: ChangeDetectorRef,
+              private resolver: ComponentFactoryResolver, private importerService: ImportService) {
+    super();
     this.typeChange = new EventEmitter<any>();
     this.configForm = new FormGroup({
       typeID: new FormControl(null, Validators.required)
     });
-    this.typeIDSubject = new BehaviorSubject<number>(undefined);
+    this.typeIDSubject = new BehaviorSubject<number>(null);
     this.typeID = this.typeIDSubject.asObservable();
     this.typeIDSubscription = new Subscription();
   }
 
   public ngOnInit(): void {
-    this.mappingContainer.clear();
+    this.initMapping();
     this.typeListSubscription = this.typeService.getTypeList().subscribe((typeList: CmdbType[]) => {
       this.typeList = typeList;
     });
@@ -91,20 +106,45 @@ export class TypeMappingComponent implements OnInit, OnDestroy {
       this.typeChange.emit({ typeID: this.currentTypeID, typeInstance: this.typeInstance });
     });
     this.typeIDSubscription = this.typeID.subscribe((typeID: number) => {
-      if (typeID !== undefined) {
-        this.mappingContainer.clear();
-        this.component = mappingComponents[this.fileFormat];
-        this.currentFactory = this.resolver.resolveComponentFactory(this.component);
-        this.componentRef = this.mappingContainer.createComponent(this.currentFactory);
-        this.componentRef.instance.typeInstance = this.typeInstance;
-        this.componentRef.instance.importerFile = this.importerFile;
-        this.componentRef.instance.parserConfig = this.parserConfig;
+      if (typeID !== null && typeID !== undefined) {
+        this.loadMappingComponent();
+        this.initMapping();
       }
     });
   }
 
-  public get currentTypeID(): number {
-    return this.typeIDSubject.value;
+  public ngOnChanges(changes: SimpleChanges): void {
+    if (changes.fileFormat !== undefined && changes.fileFormat.currentValue !== undefined
+      && changes.fileFormat.firstChange !== true) {
+      this.typeIDSubject.next(null);
+    } else {
+      if (this.mappingContainer !== undefined) {
+        this.mappingContainer.clear();
+      }
+    }
+  }
+
+  public initMapping() {
+    this.currentMapping = [];
+    this.mappingControls = [];
+
+    for (const meta of this.defaultMappingValues) {
+      this.mappingControls.push({
+        name: meta.name,
+        label: meta.label,
+        type: 'property'
+      });
+    }
+
+    if (this.typeInstance !== undefined) {
+      for (const field of this.typeInstance.fields) {
+        this.mappingControls.push({
+          name: field.name,
+          label: field.label,
+          type: 'field'
+        });
+      }
+    }
   }
 
   public ngOnDestroy(): void {
@@ -112,5 +152,21 @@ export class TypeMappingComponent implements OnInit, OnDestroy {
     this.valueChangeSubscription.unsubscribe();
     this.typeIDSubscription.unsubscribe();
   }
+
+  public get currentTypeID(): number {
+    return this.typeIDSubject.value;
+  }
+
+  private loadMappingComponent() {
+    this.mappingContainer.clear();
+    this.component = mappingComponents[this.fileFormat];
+    this.currentFactory = this.resolver.resolveComponentFactory(this.component);
+    this.componentRef = this.mappingContainer.createComponent(this.currentFactory);
+    this.componentRef.instance.parserConfig = this.parserConfig;
+    this.componentRef.instance.parsedData = this.parsedData;
+    this.componentRef.instance.mappingControls = this.mappingControls;
+    this.componentRef.instance.currentMapping = this.currentMapping;
+  }
+
 
 }

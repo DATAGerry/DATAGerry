@@ -27,18 +27,15 @@ import { ImportService } from '../../../import.service';
 })
 export class CsvMappingComponent extends TypeMappingBaseComponent implements OnInit, OnDestroy {
 
-  constructor(public importerService: ImportService) {
-    super(importerService);
+  constructor() {
+    super();
   }
 
   public ngOnInit(): void {
-    this.parsedDataSubscription = this.getParsedData(this.importerFile.file, this.parserConfig).subscribe(data => {
-      console.log(data);
-    });
   }
 
   public ngOnDestroy(): void {
-    this.parsedDataSubscription.unsubscribe();
+
   }
 
 

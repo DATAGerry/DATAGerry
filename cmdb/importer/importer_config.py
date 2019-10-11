@@ -13,22 +13,39 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+from enum import Enum
 
-from cmdb.framework import CmdbType
+
+class FieldMapperMode(Enum):
+    MATCH = 0
+    MANUALLY = 1
 
 
 class BaseImporterConfig:
+    DEFAULT_MAPPING = {}
 
-    def __init__(self, mapping: dict):
-        self.mapping: dict = mapping
+    def __init__(self, mapping: dict = None):
+        _mapping = mapping or self.DEFAULT_MAPPING
+        self.mapping: dict = {**self.DEFAULT_MAPPING, **_mapping}
+
+    def get_mapping(self) -> dict:
+        return self.mapping
 
 
 class ObjectImporterConfig(BaseImporterConfig):
+    DEFAULT_MAPPING = {
+        'properties': {},
+        'field_mode': FieldMapperMode.MATCH,
+        'fields': {}
+    }
 
-    def __init__(self, type_instance: CmdbType, mapping: dict, start_element: int = 0, max_elements: int = 0,
-                 overwrite_public: bool = True):
-        self.type_instance: CmdbType = type_instance
+    def __init__(self, type_id: int, mapping: dict = None, start_element: int = 0, max_elements: int = 0,
+                 overwrite_public: bool = True, *args, **kwargs):
+        self.type_id: int = type_id
         self.start_element: int = start_element
         self.max_elements: int = max_elements
         self.overwrite_public: bool = overwrite_public
         super(ObjectImporterConfig, self).__init__(mapping=mapping)
+
+    def get_type_id(self):
+        return self.type_id

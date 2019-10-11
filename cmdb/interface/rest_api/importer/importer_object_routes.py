@@ -20,15 +20,16 @@ from flask import request, abort, current_app
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
-from cmdb.framework import CmdbType
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.importer import load_parser_class, load_importer_class, __OBJECT_IMPORTER__, __OBJECT_PARSER__
-from cmdb.importer.importer_config import ObjectImporterConfig
+from cmdb.importer import load_parser_class, load_importer_class, __OBJECT_IMPORTER__, __OBJECT_PARSER__, \
+    __OBJECT_IMPORTER_CONFIG__, load_importer_config_class
+from cmdb.importer.importer_response import ImporterObjectResponse
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.interface.rest_api.import_routes import importer_blueprint
-from cmdb.interface.route_utils import NestedBlueprint, make_response
+from cmdb.interface.route_utils import NestedBlueprint, make_response, insert_request_user
 from cmdb.interface.rest_api.importer.importer_route_utils import get_file_in_request, get_element_from_data_request, \
     generate_parsed_output
+from cmdb.user_management import User
 
 LOGGER = logging.getLogger(__name__)
 
@@ -48,6 +49,13 @@ importer_object_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/obj
 def get_importer():
     importer = [importer for importer in __OBJECT_IMPORTER__]
     return make_response(importer)
+
+
+@importer_object_blueprint.route('/importer/config/', methods=['GET'])
+@importer_object_blueprint.route('/importer/config', methods=['GET'])
+def get_importer_config():
+    config = [config for config in __OBJECT_IMPORTER_CONFIG__]
+    return make_response(config)
 
 
 @importer_object_blueprint.route('/parser/', methods=['GET'])
@@ -72,18 +80,20 @@ def get_default_parser_config(parser_type: str):
 @importer_object_blueprint.route('/parse/', methods=['POST'])
 @importer_object_blueprint.route('/parse', methods=['POST'])
 def parse_objects():
-    LOGGER.debug(request.form)
     # Check if file exists
     request_file: FileStorage = get_file_in_request('file', request.files)
+
     # Load parser config
     parser_config: dict = get_element_from_data_request('parser_config', request) or {}
-    parsed_output = generate_parsed_output(request_file, parser_config)
+    LOGGER.debug(f'Parser config: {parser_config}')
+    parsed_output = generate_parsed_output(request_file, parser_config).output()
 
     return make_response(parsed_output)
 
 
 @importer_object_blueprint.route('/', methods=['POST'])
-def import_objects():
+@insert_request_user
+def import_objects(request_user: User):
     # Check if file exists
     request_file: FileStorage = get_file_in_request('file', request.files)
 
@@ -100,22 +110,24 @@ def import_objects():
         LOGGER.error(f'No import config was provided')
         return abort(400)
 
-    # Insert type instance
+    # Check if type exists
     try:
-        framework_type: CmdbType = object_manager.get_type(public_id=importer_config_request.get('type_id'))
-        importer_config_request.update({'type_instance': framework_type})
+        object_manager.get_type(public_id=importer_config_request.get('type_id'))
     except CMDBError:
         return abort(404)
 
-    importer_config = ObjectImporterConfig(**importer_config_request)
-
-    # Load parser class
+    # Load parser
     parser_class = load_parser_class('object', request_file.content_type)
     parser = parser_class(parser_config)
 
-    # Load Importer
-    importer_class = load_importer_class('object', request_file.content_type)
-    importer = importer_class(working_file, importer_config, parser)
+    # Load importer config
+    importer_config_class = load_importer_config_class('object', request_file.content_type)
+    importer_config = importer_config_class(**importer_config_request)
 
-    import_response = importer.start_import()
-    return make_response('test')
+    # Load importer
+    importer_class = load_importer_class('object', request_file.content_type)
+    importer = importer_class(working_file, importer_config, parser, object_manager, request_user)
+
+    import_response: ImporterObjectResponse = importer.start_import()
+
+    return make_response(import_response.__dict__)

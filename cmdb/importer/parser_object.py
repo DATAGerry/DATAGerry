@@ -17,6 +17,7 @@ import csv
 import json
 import logging
 
+from cmdb.importer.content_types import JSONContent, CSVContent
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.importer.parser_response import ObjectParserResponse
 
@@ -29,9 +30,8 @@ class JsonObjectParserResponse(ObjectParserResponse):
         super(JsonObjectParserResponse, self).__init__(count=count, entries=entries)
 
 
-class JsonObjectParser(BaseObjectParser):
-    CONTENT_TYPE = 'application/json'
-    FILE_TYPE = 'json'
+class JsonObjectParser(BaseObjectParser, JSONContent):
+
     DEFAULT_CONFIG = {
         'indent': 2,
         'encoding': 'UTF-8'
@@ -44,12 +44,18 @@ class JsonObjectParser(BaseObjectParser):
         run_config = self.get_config()
         with open(file, 'r', encoding=run_config.get('encoding')) as json_file:
             parsed = json.load(json_file)
-        return JsonObjectParserResponse(count=len(parsed), entries=parsed).output()
+        return JsonObjectParserResponse(count=len(parsed), entries=parsed)
 
 
-class CsvObjectParser(BaseObjectParser):
-    CONTENT_TYPE = 'text/csv'
-    FILE_TYPE = 'csv'
+class CsvObjectParserResponse(ObjectParserResponse):
+
+    def __init__(self, count: int, entries: list, entry_length: int, header: list = None):
+        self.entry_length = entry_length
+        self.header = header
+        super(CsvObjectParserResponse, self).__init__(count=count, entries=entries)
+
+
+class CsvObjectParser(BaseObjectParser, CSVContent):
 
     BYTE_ORDER_MARK = '\ufeff'
     BAD_DELIMITERS = ['\r', '\n', '"', BYTE_ORDER_MARK]
@@ -65,7 +71,7 @@ class CsvObjectParser(BaseObjectParser):
     def __init__(self, parser_config: dict = None):
         super(CsvObjectParser, self).__init__(parser_config)
 
-    def parse(self, file) -> dict:
+    def parse(self, file) -> (dict, list, CsvObjectParserResponse):
         run_config = self.get_config()
         LOGGER.info(f'Starting parser with CONFIG: {run_config}')
         dialect = {
@@ -74,17 +80,22 @@ class CsvObjectParser(BaseObjectParser):
             'escapechar': run_config.get('escapeChar'),
             'skipinitialspace': True
         }
-        output = {
+        parsed = {
+            'count': 0,
             'header': None,
-            'rows': []
+            'entries': [],
+            'entry_length': 0
         }
 
         with open(f'{file}', 'r', newline=run_config.get('newline')) as csv_file:
             csv_reader = csv.reader(csv_file, **dialect)
             if run_config.get('header'):
-                output['header'] = next(csv_reader)
+                parsed['header'] = next(csv_reader)
+                parsed['entry_length'] = len(parsed['header'])
+            else:
+                parsed['entries'] = next(csv_reader)
+                parsed['entry_length'] = len(parsed['header'])
             for row in csv_reader:
-                output['rows'].append(row)
-        return output
-
-
+                parsed['entries'].append(row)
+        parsed['count'] = len(parsed['entries'])
+        return CsvObjectParserResponse(**parsed)

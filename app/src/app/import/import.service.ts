@@ -36,7 +36,7 @@ export class ImportService implements ApiService {
   public postObjectParser(file: File, config: any): Observable<any> {
     const formData = new FormData();
     formData.append('file', file, file.name);
-    formData.append('parser_config', config);
+    formData.append('parser_config', JSON.stringify(config));
     return this.api.callPost<any>(`${ this.servicePrefix }/${ this.objectPrefix }/parse/`, formData, httpFileOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;

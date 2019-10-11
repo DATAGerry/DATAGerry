@@ -9,11 +9,59 @@
     </div>
   </div>
   <hr/>
-  <template #mappingContainer></template>
+  <section [hidden]="!typeInstance">
+    <div class="row">
+      <div class="col-md-3">
+        <div class="card mb-3">
+          <div class="card-header">Meta values</div>
+          <div class="card-body">
+            <div class="list-group">
+              <div *ngFor="let control of mappingControls | mappingControl: 'type':'property'"
+                   class="list-group-item list-group-item-action"
+                   [dndDraggable]="control" [dndEffectAllowed]="allowedEffect"
+                   (dndMoved)="onDragged(control, mappingControls, allowedEffect)">
+                <span>
+                 {{control.label}}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">Fields</div>
+          <div class="card-body">
+            <div class="list-group">
+              <div *ngFor="let control of mappingControls | mappingControl: 'type':'field'"
+                   class="list-group-item list-group-item-action"
+                   [dndDraggable]="control" [dndEffectAllowed]="allowedEffect"
+                   (dndMoved)="onDragged(control, mappingControls, allowedEffect)">
+                <span>
+                 {{control.label}}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-9">
+        <template #mappingContainer></template>
+        <button type="button" class="btn btn-outline-primary" (click)="initMapping()">Reset</button>
+        <button type="button" class="btn btn-outline-secondary">Auto-Set</button>
+      </div>
+    </div>
+    <hr/>
+  </section>
 </form>
+<pre>
+{{ mappingControls | json}}
+  </pre>
+<pre>
+{{currentMapping | json }}
+  </pre>
 <button class="btn btn-primary prev" type="button" awPreviousStep>
   <i class="fas fa-angle-double-left"></i> Previous step
 </button>
-<button class="btn btn-primary next" type="button" [disabled]="configForm.invalid" awNextStep>
+<button class="btn btn-primary next" type="button" [disabled]="configForm.invalid && currentMapping.length < 1"
+        awNextStep>
   Next Step <i class="fas fa-angle-double-right"></i>
 </button>

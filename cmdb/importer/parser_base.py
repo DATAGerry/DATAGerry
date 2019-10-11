@@ -27,8 +27,6 @@ except ImportError:
 
 class BaseParser:
     DEFAULT_CONFIG = {}
-    CONTENT_TYPE = ''
-    FILE_TYPE = ''
 
     def __new__(cls, *args, **kwargs):
         # TODO: INIT validation
@@ -47,8 +45,6 @@ class BaseParser:
 
 class BaseObjectParser(BaseParser):
     DEFAULT_CONFIG = {}
-    CONTENT_TYPE = ''
-    FILE_TYPE = ''
 
     def __init__(self, parser_config: dict):
         super(BaseObjectParser, self).__init__(parser_config)

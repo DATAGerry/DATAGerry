@@ -42,10 +42,11 @@ import { TypeMappingComponent } from './import-objects/type-mapping/type-mapping
 import { JsonMappingComponent } from './import-objects/type-mapping/json-mapping/json-mapping.component';
 import { TypeMappingBaseComponent } from './import-objects/type-mapping/type-mapping-base.component';
 import { CsvMappingComponent } from './import-objects/type-mapping/csv-mapping/csv-mapping.component';
+import { MappingControlPipe } from './import-objects/type-mapping/mapping-control.pipe';
 
 @NgModule({
   entryComponents: [JsonConfigComponent, CsvConfigComponent, JsonMappingComponent, CsvMappingComponent],
-  declarations: [ImportComponent, ImportObjectsComponent, SelectFileComponent, FileConfigComponent, CsvConfigComponent, JsonConfigComponent, ImportTypesComponent, ImportConfigComponent, TypeMappingComponent, JsonMappingComponent, TypeMappingBaseComponent, CsvMappingComponent],
+  declarations: [ImportComponent, ImportObjectsComponent, SelectFileComponent, FileConfigComponent, CsvConfigComponent, JsonConfigComponent, ImportTypesComponent, ImportConfigComponent, TypeMappingComponent, JsonMappingComponent, TypeMappingBaseComponent, CsvMappingComponent, MappingControlPipe],
   imports: [
     CommonModule,
     LayoutModule,

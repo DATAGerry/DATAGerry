@@ -19,6 +19,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CmdbType } from '../../framework/models/cmdb-type';
 import { ImporterConfig, ImporterFile } from './import-object.models';
+import { ImportService } from '../import.service';
+import { Subscription } from 'rxjs';
+import { NgxSpinner } from 'ngx-spinner/lib/ngx-spinner.enum';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'cmdb-import-objects',
@@ -30,12 +34,15 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
   private fileReader: FileReader;
   public typeInstance: CmdbType = undefined;
   public importerFile: ImporterFile = {} as ImporterFile;
-  public parserConfig: any = {};
   public importerConfig: ImporterConfig = {} as ImporterConfig;
 
+  private parseDataSubscription: Subscription;
+  public parserConfig: any = {};
+  public parsedData: any = undefined;
 
-  public constructor() {
+  public constructor(private importService: ImportService, private spinner: NgxSpinnerService) {
     this.fileReader = new FileReader();
+    this.parseDataSubscription = new Subscription();
   }
 
   public ngOnInit(): void {
@@ -71,6 +78,19 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
   public typeChange(change: any) {
     this.importerConfig.type_id = change.typeID as number;
     this.typeInstance = change.typeInstance as CmdbType;
+  }
+
+  public onParseData() {
+    this.spinner.show();
+    this.parseDataSubscription = this.importService.postObjectParser(this.importerFile.file, this.parserConfig).subscribe(
+      (parsedData) => {
+        this.parsedData = parsedData;
+      },
+      (e) => console.error(e),
+      () => {
+        this.spinner.hide();
+      }
+    );
   }
 
 }

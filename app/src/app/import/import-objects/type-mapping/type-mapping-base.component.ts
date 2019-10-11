@@ -21,6 +21,7 @@ import { ImportService } from '../../import.service';
 import { Observable, Subscription } from 'rxjs';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { ImporterFile } from '../import-object.models';
+import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 
 @Component({
   selector: 'cmdb-type-mapping-base',
@@ -28,18 +29,35 @@ import { ImporterFile } from '../import-object.models';
 })
 export class TypeMappingBaseComponent {
 
-  @Input() public typeInstance: CmdbType;
-  @Input() public importerFile: ImporterFile = {} as ImporterFile;
+  @Input() public parsedData: any = {};
   @Input() public parserConfig: any = {};
 
-  protected parsedDataSubscription: Subscription;
+  public readonly allowedEffect: any = 'move';
 
-  constructor(public importerService: ImportService) {
-    this.parsedDataSubscription = new Subscription();
+  @Input() public mappingControls: any = [];
+  @Input() public currentMapping: any = [];
+
+  public constructor() {
   }
 
-  public getParsedData(file, parserConfig): Observable<any> {
-    return this.importerService.postObjectParser(file, parserConfig);
+  public onDragged(item: any, list: any[], effect: DropEffect) {
+    if (effect === 'move') {
+      const index = list.indexOf(item);
+      list.splice(index, 1);
+    }
+  }
+
+  public onDrop(event: DndDropEvent, list: any[], index?: number, original?: any[]) {
+    console.log(list);
+    if (typeof index === undefined) {
+      index = list.length;
+    } else {
+      if (original && (list[index] !== undefined)) {
+        const originalData = list[index];
+        original.splice(original.length, 0, originalData)
+      }
+    }
+    list.splice(index, 1, event.data);
   }
 
 }

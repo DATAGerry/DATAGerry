@@ -32,6 +32,7 @@ import { JsonConfigComponent } from './json-config/json-config.component';
 import { FileConfig } from './file-config';
 import { ImportService } from '../../import.service';
 import { Subscription } from 'rxjs';
+import { FormGroup } from '@angular/forms';
 
 export const configComponents: { [type: string]: any } = {
   json: JsonConfigComponent,
@@ -62,16 +63,22 @@ export class FileConfigComponent extends FileConfig implements OnInit, OnChanges
   }
 
   public ngOnInit(): void {
-    this.configForm.valueChanges.subscribe(() => {
+    this.resetConfigSub();
+    this.fileConfig.clear();
+  }
+
+  private resetConfigSub(){
+    this.configChangeSubscription = this.configForm.valueChanges.subscribe(() => {
       this.configChange.emit(this.configForm.getRawValue());
     });
-    this.fileConfig.clear();
   }
 
   public ngOnChanges(changes: SimpleChanges): void {
     if (changes.fileFormat !== undefined && (changes.fileFormat.currentValue !== undefined || changes.fileFormat.currentValue !== '')
       && changes.fileFormat.firstChange === false) {
       this.fileConfig.clear();
+      this.configForm = new FormGroup({});
+      this.resetConfigSub();
       this.component = configComponents[this.fileFormat];
       this.currentFactory = this.resolver.resolveComponentFactory(this.component);
 

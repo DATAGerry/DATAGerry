@@ -16,14 +16,18 @@
 """
 Module of basic importers
 """
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.importer.importer_config import ObjectImporterConfig, BaseImporterConfig
+from cmdb.importer.importer_response import BaseImporterResponse, ImporterObjectResponse
 from cmdb.importer.parser_base import BaseObjectParser
+from cmdb.importer.parser_response import ObjectParserResponse
+from cmdb.user_management import User
 
 
 class BaseImporter:
     """Superclass for all importer"""
 
-    def __init__(self, file=None, file_type: str = None, config: BaseImporterConfig = None):
+    def __init__(self, file, file_type: str, config: BaseImporterConfig = None):
         self.file_type = file_type
         self.file = file
         self.config = config
@@ -34,32 +38,41 @@ class BaseImporter:
     def get_file(self):
         return self.file
 
-    def start_import(self):
+    def start_import(self) -> BaseImporterResponse:
         raise NotImplementedError
 
 
 class ObjectImporter(BaseImporter):
     """Superclass for object importers"""
-    FILE_TYPE = ''
-    CONTENT_TYPE = ''
 
-    def __init__(self, file=None, config: ObjectImporterConfig = None,
-                 parser: BaseObjectParser = None):
+    def __init__(self, file, file_type, config: ObjectImporterConfig = None,
+                 parser: BaseObjectParser = None, object_manager: CmdbObjectManager = None, request_user: User = None):
         self.parser = parser
-        super(ObjectImporter, self).__init__(file=file, file_type=self.FILE_TYPE, config=config)
+        if object_manager:
+            self.object_manager = object_manager
+        else:
+            from cmdb.framework.cmdb_object_manager import object_manager as obm
+            self.object_manager = obm
+        self.request_user = request_user
+        super(ObjectImporter, self).__init__(file=file, file_type=file_type, config=config)
 
-    def start_import(self):
+    def generate_objects(self, parsed: ObjectParserResponse) -> list:
+        raise NotImplementedError
+
+    def generate_object(self, entry) -> dict:
+        raise NotImplementedError
+
+    def start_import(self) -> ImporterObjectResponse:
         raise NotImplementedError
 
 
 class TypeImporter(BaseImporter):
     """Superclass for type importers"""
-    FILE_TYPE = ''
     DEFAULT_CONFIG = {}
 
-    def __init__(self, file=None, config: dict = None):
+    def __init__(self, file, file_type, config: dict = None):
         self.config = config
-        super(TypeImporter, self).__init__(file=file, file_type=self.FILE_TYPE, config=config)
+        super(TypeImporter, self).__init__(file=file, file_type=file_type, config=config)
 
-    def start_import(self):
+    def start_import(self) -> BaseImporterResponse:
         raise NotImplementedError

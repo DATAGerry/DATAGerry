@@ -5,14 +5,14 @@
         <ng-template awWizardStepSymbol><i class="fas fa-file-code"></i></ng-template>
         <cmdb-select-file (formatChange)="formatChange($event)" (fileChange)="fileChange($event)"></cmdb-select-file>
       </aw-wizard-step>
-      <aw-wizard-step stepId="2" stepTitle="File config">
+      <aw-wizard-step stepId="2" stepTitle="File config" (stepExit)="onParseData()">
         <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
         <cmdb-file-config (configChange)="parserConfigChange($event)"
                           [fileFormat]="importerFile.fileFormat"></cmdb-file-config>
       </aw-wizard-step>
       <aw-wizard-step stepId="3" stepTitle="Type mapping">
         <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
-        <cmdb-type-mapping [importerFile]="importerFile" [parserConfig]="parserConfig" (typeChange)="typeChange($event)"
+        <cmdb-type-mapping (typeChange)="typeChange($event)" [parsedData]="parsedData" [parserConfig]="parserConfig"
                            [fileFormat]="importerFile.fileFormat"></cmdb-type-mapping>
       </aw-wizard-step>
       <aw-wizard-step stepId="4" stepTitle="Import config">
