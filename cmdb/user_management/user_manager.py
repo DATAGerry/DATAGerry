@@ -116,7 +116,7 @@ class UserManagement(CmdbManagerBase):
 
     def delete_user(self, public_id: int) -> bool:
         try:
-            return self._delete(collection=User.COLLECTION, public_id=public_id).acknowledged
+            return self._delete(collection=User.COLLECTION, public_id=public_id)
         except Exception:
             raise UserManagerDeleteError(f'Could not delete user with ID: {public_id}')
 

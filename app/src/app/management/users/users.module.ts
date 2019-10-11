@@ -11,9 +11,10 @@ import { UserViewComponent } from './user-view/user-view.component';
 import { LayoutModule } from '../../layout/layout.module';
 import { UsersEditComponent } from './users-edit/users-edit.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { UsersDeleteComponent } from './users-delete/users-delete.component';
 
 @NgModule({
-  declarations: [UsersListComponent, UserViewComponent, UsersAddComponent, UsersEditComponent],
+  declarations: [UsersListComponent, UserViewComponent, UsersAddComponent, UsersEditComponent, UsersDeleteComponent],
   imports: [
     CommonModule,
     UsersRoutingModule,

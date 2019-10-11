@@ -25,7 +25,7 @@ from cmdb.data_storage import get_pre_init_database
 from cmdb.interface.route_utils import RootBlueprint, make_response, insert_request_user, login_required, right_required
 from cmdb.user_management import User
 from cmdb.user_management.user_manager import user_manager, UserManagerInsertError, UserManagerGetError, \
-    UserManagerUpdateError
+    UserManagerUpdateError, UserManagerDeleteError
 from cmdb.utils import get_security_manager
 
 try:
@@ -88,12 +88,12 @@ def add_user():
 @login_required
 def update_user(public_id: int):
     http_put_request_data = json.dumps(request.json)
-    user_data = json.loads(http_put_request_data, object_hook=json_util.object_hook)
+    user_data = json.loads(http_put_request_data)
 
     # Check if user exists
     try:
         user_manager.get_user(public_id)
-    except (CMDBError, Exception) as err:
+    except UserManagerGetError:
         return abort(404)
     try:
         insert_ack = user_manager.update_user(public_id, user_data)
@@ -103,24 +103,34 @@ def update_user(public_id: int):
     return make_response(insert_ack.acknowledged)
 
 
-@login_required
+@user_blueprint.route('/<int:public_id>/', methods=['DELETE'])
 @user_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@login_required
 def delete_user(public_id: int):
-    raise NotImplementedError
+    try:
+        user_manager.get_user(public_id)
+    except UserManagerGetError:
+        return abort(404)
+    try:
+        ack = user_manager.delete_user(public_id=public_id)
+    except UserManagerDeleteError:
+        return abort(400)
+    return make_response(ack)
 
 
 @user_blueprint.route('/count/', methods=['GET'])
 @login_required
-def count_objects():
+def count_users():
     try:
         count = user_manager.count_user()
-        resp = make_response(count)
     except CMDBError:
         return abort(400)
-    return resp
+    return make_response(count)
 
 
 """SPEACIAL ROUTES"""
+
+
 @login_required
 @user_blueprint.route('/<int:public_id>/passwd', methods=['PUT'])
 def change_user_password(public_id: int):

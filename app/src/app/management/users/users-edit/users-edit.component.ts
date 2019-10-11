@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Group } from '../../models/group';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -15,7 +15,7 @@ import { Observable, Subscription } from 'rxjs';
   templateUrl: './users-edit.component.html',
   styleUrls: ['./users-edit.component.scss']
 })
-export class UsersEditComponent implements OnInit {
+export class UsersEditComponent implements OnInit, OnDestroy {
 
   @ViewChild('passWordInput', { static: false }) public passWordToggle: ElementRef;
   public editForm: FormGroup;
@@ -150,6 +150,11 @@ export class UsersEditComponent implements OnInit {
         this.router.navigate(['/management/users/']);
       });
     }
+  }
+
+  public ngOnDestroy(): void {
+    this.routeParamSubscription.unsubscribe();
+    this.userServiceSubscription.unsubscribe();
   }
 }
 

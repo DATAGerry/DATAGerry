@@ -33,12 +33,8 @@ import { HttpResponse } from '@angular/common/http';
 export class UserService<T = User> implements ApiService {
 
   public readonly servicePrefix: string = 'user';
-  private userList: any[] = [];
 
   constructor(private api: ApiCallService, private authService: AuthService) {
-    this.getUserList().subscribe((respUserList: T[]) => {
-      this.userList = respUserList;
-    });
   }
 
   public getCurrentUser(): User {
@@ -68,11 +64,6 @@ export class UserService<T = User> implements ApiService {
     );
   }
 
-  // tslint:disable-next-line:no-shadowed-variable
-  public findUser(publicID: number): User | T {
-    return this.userList.find(user => user.public_id === publicID);
-  }
-
   public getUserByGroup(publicID: number): Observable<T[]> {
     return this.api.callGet<T>(`${ this.servicePrefix }/group/${ publicID }`).pipe(
       map((apiResponse) => {
@@ -95,6 +86,14 @@ export class UserService<T = User> implements ApiService {
 
   public putUser(publicID: number, data: T): Observable<T> {
     return this.api.callPut<T>(`${ this.servicePrefix }/${ publicID }/`, data).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public deleteUser(publicID: number): Observable<boolean> {
+    return this.api.callDelete<boolean>(`${ this.servicePrefix }/${ publicID }/`).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
