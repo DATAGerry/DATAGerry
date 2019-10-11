@@ -29,6 +29,7 @@ import { GroupsEditComponent } from './groups-edit/groups-edit.component';
 import { GroupsDeleteComponent } from './groups-delete/groups-delete.component';
 import { LayoutModule } from '../../layout/layout.module';
 import { GroupSelectPipe } from './groups-delete/group-select.pipe';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   declarations: [GroupsListComponent, GroupsAddComponent, GroupsEditComponent, GroupsDeleteComponent, GroupSelectPipe],
@@ -38,7 +39,8 @@ import { GroupSelectPipe } from './groups-delete/group-select.pipe';
     DataTablesModule,
     ReactiveFormsModule,
     NgSelectModule,
-    LayoutModule
+    LayoutModule,
+    FontAwesomeModule
   ]
 })
 export class GroupsModule {
