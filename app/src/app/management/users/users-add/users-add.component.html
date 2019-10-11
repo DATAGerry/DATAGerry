@@ -44,7 +44,6 @@
                    [ngClass]="{ 'is-valid': password.valid && (password.dirty || password.touched),
                  'is-invalid': password.invalid && (password.dirty || password.touched)}">
             <div class="input-group-append">
-              <span class="input-group-text" (click)="generatePassword()"><i class="fas fa-key"></i></span>
               <span class="input-group-text" (click)="toggleInput()"><i class="far fa-eye"></i></span>
             </div>
             <div *ngIf="password.invalid && (password.dirty || password.touched)"
