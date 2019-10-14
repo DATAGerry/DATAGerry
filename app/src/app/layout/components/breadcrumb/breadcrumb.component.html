@@ -9,7 +9,7 @@
       <a *ngIf="!last && !first" [routerLink]="hasParams(breadcrumb)">
         {{breadcrumb.label}}
       </a>
-      <span *ngIf="last">{{ breadcrumb.label }}
+      <span *ngIf="last && !first">{{ breadcrumb.label }}
         <em *ngIf="breadcrumb.queryParams.value" class="text-primary">{{breadcrumb.queryParams.value}}</em>
       </span>
     </li>
