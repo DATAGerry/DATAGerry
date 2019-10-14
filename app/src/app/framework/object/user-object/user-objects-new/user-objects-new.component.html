@@ -16,7 +16,13 @@
       <tr *ngFor="let newObject of newObjects">
         <th scope="row">{{newObject?.object_information?.object_id}}</th>
         <td>{{newObject?.type_information?.type_label}}</td>
-        <td>{{newObject?.summary_line}}</td>
+        <td>
+          <i class="{{newObject?.type_information?.icon}}"></i> {{newObject?.type_information?.type_label}}
+          #{{newObject?.object_information?.object_id}}
+          <span *ngFor="let sum of newObject?.summaries; let last = last; let first = first">
+            <span *ngIf="first"> - </span>{{sum.value}}<span *ngIf="!last"> | </span>
+          </span>
+        </td>
         <td>{{newObject?.object_information?.creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
         <td>
           <a routerLink="/framework/object/view/{{newObject?.object_information?.object_id}}">View</a>

@@ -16,7 +16,11 @@
       </a>
     </td>
     <td>
-      {{reference.summary_line}}
+      <i class="{{reference?.type_information?.icon}}"></i> {{reference?.type_information?.type_label}}
+      #{{reference?.object_information?.object_id}}
+      <span *ngFor="let sum of reference?.summaries; let last = last; let first = first">
+        <span *ngIf="first"> - </span>{{sum.value}}<span *ngIf="!last"> | </span>
+      </span>
     </td>
     <td>
       <a class="table-center" routerLink="/framework/object/view/{{reference.object_information.object_id}}">

@@ -17,7 +17,13 @@
       <tr *ngFor="let yourObject of userObjects">
         <th scope="row">{{yourObject?.object_information?.object_id}}</th>
         <td>{{yourObject?.type_information?.type_label}}</td>
-        <td>{{yourObject?.summary_line}}</td>
+        <td>
+          <i class="{{yourObject?.type_information?.icon}}"></i> {{yourObject?.type_information?.type_label}}
+          #{{yourObject?.object_information?.object_id}}
+          <span *ngFor="let sum of yourObject?.summaries; let last = last; let first = first">
+            <span *ngIf="first"> - </span>{{sum.value}}<span *ngIf="!last"> | </span>
+          </span>
+        </td>
         <td>{{yourObject?.object_information?.creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
         <td>{{yourObject?.object_information?.last_edit_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
         <td>

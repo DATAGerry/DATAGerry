@@ -6,12 +6,20 @@
     <div class="input-group">
       <ng-container [ngSwitch]="true">
         <ng-container *ngSwitchCase="mode == MODES.View">
-          <input type="text" name="{{data.name}}" class="form-control"
-                 value="{{refObject?.summary_line}}"
-                 disabled/>
+          <button type="text" class="form-control text-left" disabled>
+            <ng-container *ngIf="refObject != null">
+              <i class="{{refObject?.type_information?.icon}}"></i> {{refObject?.type_information?.type_label}}
+              #{{refObject?.object_information?.object_id}}
+              <span *ngFor="let sum of refObject?.summaries; let last = last; let first = first">
+                <span *ngIf="first"> - </span>{{sum.value}}<span *ngIf="!last"> | </span>
+              </span>
+            </ng-container>
+            <ng-container *ngIf="refObject == null"> No reference set </ng-container>
+          </button>
           <div class="input-group-append">
             <span class="input-group-text">
-              <a [routerLink]="'/framework/object/view/'+ controller.value">
+              <a  [class.ref-disabled]="!controller.value"
+                [routerLink]="'/framework/object/view/'+ controller.value">
                 <fa-icon icon="arrow-right"></fa-icon>
               </a>
             </span>
@@ -28,17 +36,29 @@
             [formControlName]="data.name">
             <ng-template ng-label-tmp let-item="item">
               <ng-container *ngIf="item.object_information == null">
-                {{refObject?.object_information?.object_id}}# {{refObject?.type_information?.type_label}}
-                - {{refObject?.summary_line}}
+                <ng-container *ngIf="refObject != null">
+                  <i class="{{refObject?.type_information?.icon}}"></i> {{refObject?.type_information?.type_label}}
+                  #{{refObject?.object_information?.object_id}}
+                  <span *ngFor="let sum of refObject?.summaries; let last = last; let first = first">
+                  <span *ngIf="first"> - </span>{{sum.value}}<span *ngIf="!last"> | </span>
+                </span>
+                </ng-container>
+                <ng-container *ngIf="refObject == null"> No reference set </ng-container>
               </ng-container>
               <ng-container *ngIf="item.object_information != null">
-                {{item?.object_information?.object_id}}# {{item?.type_information?.type_label}}
-                - {{item?.summary_line}}
+                <i class="{{item?.type_information?.icon}}"></i> {{item?.type_information?.type_label}}
+                 #{{item?.object_information?.object_id}}
+                <span *ngFor="let sum of item?.summaries; let last = last; let first = first">
+                <span *ngIf="first"> - </span>{{sum.value}}<span *ngIf="!last"> | </span>
+              </span>
               </ng-container>
             </ng-template>
             <ng-template ng-option-tmp let-item="item" let-index="index">
-              {{item?.object_information?.object_id}}# {{item?.type_information?.type_label}}
-              - {{item?.summary_line}}
+              <i class="{{item?.type_information?.icon}}"></i> {{item?.type_information?.type_label}}
+              # {{item?.object_information?.object_id}}
+              <span *ngFor="let sum of item?.summaries; let last = last; let first = first">
+                <span *ngIf="first"> - </span>{{sum.value}}<span *ngIf="!last"> | </span>
+              </span>
             </ng-template>
           </ng-select>
           <div *ngIf="data?.helperText" class="input-group-append">

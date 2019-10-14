@@ -214,17 +214,17 @@ class CmdbRender:
         summary_line = ""
         if not self.type_instance.has_summaries():
             render_result.summaries = summary_list
-            render_result.summary_line = f'{self.object_instance.public_id}# {self.type_instance.get_label()} '
+            render_result.summary_line = f'{self.type_instance.get_label()} #{self.object_instance.public_id}  '
             return render_result
         summary_list = self.type_instance.get_summary().fields
         render_result.summaries = summary_list
         first = True
         for line in summary_list:
             if first:
-                summary_line += f'{line["label"]}: {line["value"]}'
+                summary_line += f'{line["value"]}'
                 first = False
             else:
-                summary_line += f' | {line["label"]}: {line["value"]}'
+                summary_line += f' | {line["value"]}'
         render_result.summary_line = summary_line
         return render_result
 

@@ -1,1 +1,12 @@
-<span>{{refObject?.summary_line}}</span>
+<span>
+  <ng-container *ngIf="refObject == null">
+    No reference set
+  </ng-container>
+  <ng-container *ngIf="refObject != null">
+    <i class="{{refObject?.type_information?.icon}}"></i> {{refObject?.type_information?.type_label}}
+    #{{refObject?.object_information?.object_id}}
+    <span *ngFor="let sum of refObject?.summaries; let last = last; let first = first">
+    <span *ngIf="first"> - </span>{{sum.value}}<span *ngIf="!last"> | </span>
+  </span>
+  </ng-container>
+</span>
