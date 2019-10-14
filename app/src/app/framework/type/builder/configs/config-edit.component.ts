@@ -40,7 +40,7 @@ export class ConfigEditComponent implements OnInit {
   @Input() data: any;
   @Input() groupList: Group[];
   @Input() userList: User[];
-  @Input() mode = CmdbMode.View;
+  @Input() editingActivated: boolean = false;
   @ViewChild('fieldConfig', {read: ViewContainerRef, static: true}) container;
   private component: any;
   private componentRef: ComponentRef<any>;
@@ -57,6 +57,6 @@ export class ConfigEditComponent implements OnInit {
     this.componentRef.instance.data = this.data;
     this.componentRef.instance.groupList = this.groupList;
     this.componentRef.instance.userList = this.userList;
-    this.componentRef.instance.mode = this.mode;
+    this.componentRef.instance.activeEdit = this.editingActivated;
   }
 }

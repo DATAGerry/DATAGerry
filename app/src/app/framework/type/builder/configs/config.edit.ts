@@ -20,7 +20,7 @@ import {CmdbMode} from '../../../modes.enum';
 
 export class ConfigEdit {
   private innerData: any;
-  private currentMode: CmdbMode.View;
+  private editActive: false;
 
   public constructor() {
   }
@@ -34,17 +34,17 @@ export class ConfigEdit {
     return this.innerData;
   }
 
-  @Input('mode')
-  public set mode(value: any) {
-    this.currentMode = value;
+  @Input('activeEdit')
+  public set activeEdit(value: any) {
+    this.editActive = value;
   }
 
-  public get mode(): any {
-    return this.currentMode;
+  public get activeEdit(): any {
+    return this.editActive;
   }
 
   public calculateName(value) {
-    if (this.mode !== CmdbMode.Edit) {
+    if (this.activeEdit) {
       this.data.name = value.replace(/ /g, '-').toLowerCase();
     }
   }
