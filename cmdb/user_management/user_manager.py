@@ -47,7 +47,8 @@ class UserManagement(CmdbManagerBase):
         self.rights = self._load_rights()
         super().__init__(database_manager)
 
-    def _load_authentication_providers(self) -> dict:
+    @staticmethod
+    def _load_authentication_providers() -> dict:
         return {
             'LocalAuthenticationProvider': LocalAuthenticationProvider
         }
@@ -55,18 +56,18 @@ class UserManagement(CmdbManagerBase):
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
 
+    def count_user(self):
+        return self.dbm.count(collection=User.COLLECTION)
+
     def get_authentication_provider(self, name: str):
         if issubclass(self._authentication_providers[name], AuthenticationProvider):
             return self._authentication_providers[name]()
         else:
             raise NoValidAuthenticationProviderError(self._authentication_providers[name])
 
-    def _get_user(self, public_id: int):
-        return self.dbm.find_one(collection=User.COLLECTION, public_id=public_id)
-
     def get_user(self, public_id: int) -> User:
         try:
-            result = self._get_user(public_id)
+            result = self.dbm.find_one(collection=User.COLLECTION, public_id=public_id)
         except (CMDBError, Exception) as err:
             LOGGER.error(err)
             raise UserManagerGetError(err)
@@ -78,7 +79,6 @@ class UserManagement(CmdbManagerBase):
             try:
                 user_list.append(User(**founded_user))
             except CMDBError:
-                LOGGER.debug("Error while user parser: {}".format(founded_user))
                 continue
         return user_list
 
@@ -99,24 +99,32 @@ class UserManagement(CmdbManagerBase):
     def insert_user(self, user: User) -> int:
         try:
             return self.dbm.insert(collection=User.COLLECTION, data=user.to_database())
-        except (CMDBError, Exception) as e:
-            LOGGER.error(e)
+        except (CMDBError, Exception):
             raise UserManagerInsertError(f'Could not insert {user.get_username()}')
 
-    def update_user(self, update_user: User) -> bool:
-        ack = self.dbm.update(collection=User.COLLECTION, public_id=update_user.get_public_id(),
-                              data=update_user.to_database())
-        if ack.modified_count > 0:
-            return True
-        return False
-
-    def delete_user(self, public_id: int) -> DeleteResult:
+    def update_user(self, public_id, update_params: dict):
         try:
-            return self.dbm.delete(collection=User.COLLECTION, public_id=public_id)
-        except Exception as e:
-            if cmdb.__MODE__ is not 'TESTING':
-                LOGGER.warning(e)
-            raise UserDeleteError(public_id)
+            return self.dbm.update(collection=User.COLLECTION, public_id=public_id, data=update_params)
+        except (CMDBError, Exception):
+            raise UserManagerUpdateError(f'Could not update user with ID: {public_id}')
+
+    def update_users_by(self, query: dict, update: dict):
+        try:
+            return self._update_many(collection=User.COLLECTION, query=query, update=update)
+        except Exception as err:
+            raise UserManagerUpdateError(err)
+
+    def delete_user(self, public_id: int) -> bool:
+        try:
+            return self._delete(collection=User.COLLECTION, public_id=public_id)
+        except Exception:
+            raise UserManagerDeleteError(f'Could not delete user with ID: {public_id}')
+
+    def delete_users_by(self, query: dict):
+        try:
+            return self._delete_many(collection=User.COLLECTION, filter_query=query).acknowledged
+        except Exception as err:
+            raise UserManagerDeleteError(err)
 
     def get_all_groups(self) -> list:
         group_list = []
@@ -147,16 +155,36 @@ class UserManagement(CmdbManagerBase):
     def insert_group(self, insert_group: UserGroup) -> int:
         try:
             return self.dbm.insert(collection=UserGroup.COLLECTION, data=insert_group.to_database())
-        except Exception as e:
+        except Exception:
             raise UserManagerInsertError(insert_group.get_name())
 
-    def delete_group(self, public_id) -> DeleteResult:
+    def delete_group(self, public_id, user_action: str = None, options: dict = None) -> bool:
         try:
-            return self.dbm.delete(collection=UserGroup.COLLECTION, public_id=public_id)
-        except Exception as e:
-            if cmdb.__MODE__ is not 'TESTING':
-                LOGGER.warning(e)
-            raise GroupDeleteError(public_id)
+            delete_group: UserGroup = self.get_group(public_id)
+        except UserManagerGetError:
+            raise UserManagerDeleteError(f'Could not find group with ID: {public_id}')
+
+        if not delete_group.is_deletable():
+            raise UserManagerDeleteError(f'Group {delete_group.get_label()} is not deletable!')
+
+        try:
+            ack = self.dbm.delete(collection=UserGroup.COLLECTION, public_id=public_id).acknowledged
+        except Exception:
+            raise UserManagerDeleteError(f'Could not delete group')
+
+        # Cleanup user
+        users_in_group: [User] = self.get_user_by(**{'group_id': delete_group.get_public_id()})
+        if len(users_in_group) > 0:
+            if user_action == 'move':
+                if not options.get('group_id'):
+                    raise UserManagerDeleteError(f'Not move group was provided!')
+                self.update_users_by(query={'group_id': delete_group.get_public_id()},
+                                     update={'$set': {'group_id': int(options.get('group_id'))}})
+            elif user_action == 'delete':
+                self.delete_users_by({'group_id': delete_group.get_public_id()})
+            else:
+                raise UserManagerDeleteError(f'No valid user action was provided')
+        return ack
 
     def get_right_names_with_min_level(self, MIN_LEVEL):
         selected_levels = list()
@@ -200,40 +228,14 @@ class UserManagement(CmdbManagerBase):
 
     def group_has_right(self, group_id: int, right_name: str) -> bool:
         right_status = False
+
         try:
             chosen_group = self.get_group(group_id)
         except GroupNotExistsError:
             return right_status
 
         right_status = chosen_group.has_right(right_name)
-        if not right_status:
-            try:
-                right_status = self._has_parent_right(chosen_group, right_name)
-            except Exception:
-                return False
         return right_status
-
-    def _has_parent_right(self, group, right_name) -> bool:
-
-        parent_right_name = '{}.{}'.format('.'.join(right_name.split('.')[:-1]), GLOBAL_IDENTIFIER)
-        try:
-            parent_right = self.get_right_by_name(parent_right_name)
-            if parent_right.is_master():
-                return group.has_right(parent_right.get_name())
-            else:
-                return False
-        except (RightNotExistsError, Exception) as e:
-            LOGGER.debug("Right not found {}".format(e.message))
-            return False
-
-    def user_group_has_right(self, user: User, right_name: str) -> bool:
-        try:
-            return self.group_has_right(user.get_group(), right_name)
-        except (CMDBError, Exception):
-            return False
-
-    def count_user(self):
-        return self.dbm.count(collection=User.COLLECTION)
 
 
 class UserManagerGetError(ManagerGetError):

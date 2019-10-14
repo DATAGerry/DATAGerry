@@ -16,6 +16,8 @@
 
 import logging
 
+from cmdb.importer.parser_response import ParserResponse, ObjectParserResponse
+
 LOGGER = logging.getLogger(__name__)
 try:
     from cmdb.utils.error import CMDBError
@@ -25,8 +27,6 @@ except ImportError:
 
 class BaseParser:
     DEFAULT_CONFIG = {}
-    CONTENT_TYPE = ''
-    FILE_TYPE = ''
 
     def __new__(cls, *args, **kwargs):
         # TODO: INIT validation
@@ -39,14 +39,15 @@ class BaseParser:
     def get_config(self) -> dict:
         return self.parser_config
 
-    def parse(self, file) -> (dict, list):
+    def parse(self, file) -> (dict, list, ParserResponse):
         raise NotImplementedError
 
 
 class BaseObjectParser(BaseParser):
+    DEFAULT_CONFIG = {}
 
-    def __init__(self, parser_config: dict = None):
+    def __init__(self, parser_config: dict):
         super(BaseObjectParser, self).__init__(parser_config)
 
-    def parse(self, file) -> (dict, list):
+    def parse(self, file) -> (dict, list, ObjectParserResponse):
         raise NotImplementedError

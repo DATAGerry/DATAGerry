@@ -15,10 +15,20 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-class ParserResult:
+class ParserResponse:
 
-    def __init__(self, header: list, lines: list = None, count: int = 0, parser_config: dict = None):
-        self.header: list = header
-        self.lines: list = lines or []
+    def __init__(self, count: int):
         self.count: int = count
-        self.parser_config: dict = parser_config or {}
+
+    def output(self) -> dict:
+        raise NotImplementedError
+
+
+class ObjectParserResponse(ParserResponse):
+
+    def __init__(self, count: int, entries: list = None):
+        self.entries: list = entries or []
+        super(ObjectParserResponse, self).__init__(count=count)
+
+    def output(self) -> dict:
+        return self.__dict__

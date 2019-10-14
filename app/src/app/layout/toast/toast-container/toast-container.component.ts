@@ -1,5 +1,5 @@
 import { Component, HostBinding, TemplateRef } from '@angular/core';
-import { ToastService } from '../../services/toast.service';
+import { ToastService } from '../toast.service';
 
 @Component({
   selector: 'cmdb-toast-container',
@@ -10,7 +10,6 @@ export class ToastContainerComponent {
   @HostBinding('class.ngb-toasts') toasts = true;
 
   constructor(public toastService: ToastService) {
-
   }
 
   isTemplate(toast) {

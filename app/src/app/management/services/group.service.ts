@@ -81,9 +81,13 @@ export class GroupService<T = Group> implements ApiService {
     );
   }
 
-  public deleteGroup(publicID: number, action: string = null): Observable<T> {
+  public deleteGroup(publicID: number, action: string = null, options: any = {}): Observable<T> {
     const groupDeleteOptions: any = httpObserveOptions;
-    groupDeleteOptions.params = new HttpParams().set('action', action);
+    let params = new HttpParams();
+    params = params.append('action', action);
+    params = params.append('options', JSON.stringify(options));
+    groupDeleteOptions.params = params;
+
     return this.api.callDelete<T>(`${ this.servicePrefix }/${ publicID }/`, groupDeleteOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;

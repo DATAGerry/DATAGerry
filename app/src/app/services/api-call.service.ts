@@ -61,8 +61,7 @@ export class ApiCallService {
         `Backend returned code ${ err.status }, ` +
         `body was: ${ err.error }`);
     }
-    return throwError(
-      'Something bad happened; please try again later.');
+    return throwError(err);
   }
 
   constructor(private http: HttpClient, private connectionService: ConnectionService) {

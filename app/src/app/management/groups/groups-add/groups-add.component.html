@@ -7,7 +7,7 @@
         <div class="col-sm-10">
           <input type="text" formControlName="name" class="form-control" placeholder="Name"
                  [ngClass]="{ 'is-valid': name.valid && (name.dirty || name.touched),
-                 'is-invalid': name.invalid && (name.dirty || name.touched)}">
+                 'is-invalid': name.invalid && (name.dirty || name.touched)}" lowercase>
           <div *ngIf="name.invalid && (name.dirty || name.touched)"
                class="invalid-feedback">
             <div class="float-right" *ngIf="name.errors.required">

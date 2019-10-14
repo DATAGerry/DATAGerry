@@ -20,7 +20,7 @@ import { Component, ComponentFactoryResolver, ComponentRef, OnInit, ViewChild, V
 import { fieldComponents } from '../fields/fields.list';
 import { simpleComponents } from '../simple/simple.list';
 import { RenderField } from '../fields/components.fields';
-import { ToastService } from '../../../layout/services/toast.service';
+import { ToastService } from '../../../layout/toast/toast.service';
 import { FormControl, Validators } from '@angular/forms';
 import { CmdbMode } from '../../modes.enum';
 

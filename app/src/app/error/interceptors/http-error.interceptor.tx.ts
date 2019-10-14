@@ -26,36 +26,25 @@ import { AuthService } from '../../auth/services/auth.service';
 @Injectable()
 export class HttpErrorInterceptor implements HttpInterceptor {
 
-  CONNECTION_REFUSED: number = 0;
+  public readonly CONNECTION_REFUSED: number = 0;
+  public readonly UNAUTHORIZED: number = 401;
 
   constructor(private router: Router, private authService: AuthService) {
   }
 
   public intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(catchError(error => {
-      const errorExtras: NavigationExtras = {
-        queryParams: {
-          statusText: error.statusText,
-          message: error.message,
-          response: JSON.stringify({
-            error
-          })
-        }
-      };
       const statusCode = error.status;
       switch (statusCode) {
         case this.CONNECTION_REFUSED:
           this.router.navigate(['/connect']);
           break;
+        case this.UNAUTHORIZED:
+          this.authService.logout();
+          this.router.navigate(['/auth/login']);
       }
 
-      if (error.status === 401) {
-        // auto logout if 401 response returned from api
-        this.authService.logout();
-        this.router.navigate(['/auth/login']);
-      }
-      const err = error.error.message || error.statusText;
-      return throwError(err);
+      return throwError(error);
     }));
   }
 }

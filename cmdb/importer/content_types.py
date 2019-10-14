@@ -13,3 +13,18 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+class BASEContent:
+    CONTENT_TYPE = ''
+    FILE_TYPE = ''
+
+
+class JSONContent:
+    CONTENT_TYPE = 'application/json'
+    FILE_TYPE = 'json'
+
+
+class CSVContent:
+    CONTENT_TYPE = 'text/csv'
+    FILE_TYPE = 'csv'

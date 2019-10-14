@@ -26,4 +26,5 @@ class BaseCmdbApp(Flask):
 
     def __init__(self, import_name: str, object_manager: CmdbObjectManager = None):
         self.object_manager: CmdbObjectManager = object_manager
+        self.temp_folder: str = '/tmp/'
         super(BaseCmdbApp, self).__init__(import_name)

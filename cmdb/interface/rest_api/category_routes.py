@@ -18,8 +18,7 @@ import logging
 import json
 
 from cmdb.framework.cmdb_category import CmdbCategory
-from cmdb.utils.wraps import login_required
-from cmdb.interface.route_utils import make_response, RootBlueprint
+from cmdb.interface.route_utils import make_response, RootBlueprint, login_required
 
 from flask import request, abort, current_app
 from bson import json_util

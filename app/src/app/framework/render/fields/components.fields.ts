@@ -19,7 +19,7 @@
 import { Input } from '@angular/core';
 import { AbstractControl, FormGroup } from '@angular/forms';
 import { CmdbMode } from '../../modes.enum';
-import { ToastService } from '../../../layout/services/toast.service';
+import { ToastService } from '../../../layout/toast/toast.service';
 
 // deprecated
 export interface ComponentsFields {

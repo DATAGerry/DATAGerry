@@ -38,7 +38,6 @@ class CmdbObject(CmdbDAO):
         'author_id',
         'active',
         'fields',
-        'status',
         'version'
     ]
 

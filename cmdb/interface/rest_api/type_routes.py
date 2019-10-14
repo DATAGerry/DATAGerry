@@ -18,8 +18,8 @@ import logging
 import json
 
 from flask import abort, request, jsonify, current_app
-from cmdb.utils.wraps import login_required, json_required
-from cmdb.interface.route_utils import make_response, RootBlueprint
+from cmdb.utils.wraps import json_required
+from cmdb.interface.route_utils import make_response, RootBlueprint, login_required
 from cmdb.framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError
 from cmdb.framework.cmdb_type import CmdbType
 

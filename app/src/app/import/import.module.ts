@@ -26,10 +26,7 @@ import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { ImportObjectsComponent } from './import-objects/import-objects.component';
 import { ArchwizardModule } from 'angular-archwizard';
 import { ReactiveFormsModule } from '@angular/forms';
-import { SelectTypeComponent } from './import-objects/select-type/select-type.component';
-import { SelectFileComponent } from './import-objects/select-file/select-file.component';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { MappingComponent } from './import-objects/mapping/mapping.component';
 import { FileConfigComponent } from './import-objects/file-config/file-config.component';
 import { CsvConfigComponent } from './import-objects/file-config/csv-config/csv-config.component';
 import { JsonConfigComponent } from './import-objects/file-config/json-config/json-config.component';
@@ -39,11 +36,17 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { DndModule } from 'ngx-drag-drop';
 import { RenderModule } from '../framework/render/render.module';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { SelectFileComponent } from './import-objects/select-file/select-file.component';
+import { ImportConfigComponent } from './import-objects/import-config/import-config.component';
+import { TypeMappingComponent } from './import-objects/type-mapping/type-mapping.component';
+import { JsonMappingComponent } from './import-objects/type-mapping/json-mapping/json-mapping.component';
+import { TypeMappingBaseComponent } from './import-objects/type-mapping/type-mapping-base.component';
+import { CsvMappingComponent } from './import-objects/type-mapping/csv-mapping/csv-mapping.component';
+import { MappingControlPipe } from './import-objects/type-mapping/mapping-control.pipe';
 
 @NgModule({
-  entryComponents: [JsonConfigComponent, CsvConfigComponent],
-  declarations: [ImportComponent, ImportObjectsComponent, SelectTypeComponent, SelectFileComponent, MappingComponent,
-    FileConfigComponent, CsvConfigComponent, JsonConfigComponent, ImportTypesComponent],
+  entryComponents: [JsonConfigComponent, CsvConfigComponent, JsonMappingComponent, CsvMappingComponent],
+  declarations: [ImportComponent, ImportObjectsComponent, SelectFileComponent, FileConfigComponent, CsvConfigComponent, JsonConfigComponent, ImportTypesComponent, ImportConfigComponent, TypeMappingComponent, JsonMappingComponent, TypeMappingBaseComponent, CsvMappingComponent, MappingControlPipe],
   imports: [
     CommonModule,
     LayoutModule,

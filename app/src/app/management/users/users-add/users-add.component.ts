@@ -1,3 +1,21 @@
+/*
+* DATAGERRY - OpenSource Enterprise CMDB
+* Copyright (C) 2019 NETHINKS GmbH
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as
+* published by the Free Software Foundation, either version 3 of the
+* License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+
+* You should have received a copy of the GNU Affero General Public License
+* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -5,7 +23,7 @@ import { UserService } from '../../services/user.service';
 import { User } from '../../models/user';
 import { Group } from '../../models/group';
 import { GroupService } from '../../services/group.service';
-import { ToastService } from '../../../layout/services/toast.service';
+import { ToastService } from '../../../layout/toast/toast.service';
 import { Router } from '@angular/router';
 
 
@@ -57,21 +75,6 @@ export class UsersAddComponent implements OnInit {
     }
   }
 
-  public generatePassword(length: number = 12) {
-    const chars = 'abcdefghijklmnopqrstuvwxyz!@#$%^&*()-+<>ABCDEFGHIJKLMNOP1234567890';
-    let pass = '';
-    for (let x = 0; x < length; x++) {
-      const i = Math.floor(Math.random() * chars.length);
-      pass += chars.charAt(i);
-    }
-    this.passWordToggle.nativeElement.value = pass;
-    this.password.clearValidators();
-    this.password.setValue(this.passWordToggle.nativeElement.value);
-    this.password.markAsDirty();
-    this.password.markAsTouched();
-    this.password.disable();
-  }
-
   public ngOnInit(): void {
     this.addForm = new FormGroup({
       user_name: new FormControl('', Validators.required),
@@ -80,7 +83,7 @@ export class UsersAddComponent implements OnInit {
       first_name: new FormControl(null),
       last_name: new FormControl(null),
       authenticator: new FormControl('LocalAuthenticationProvider', Validators.required),
-      group_id: new FormControl(null, Validators.required),
+      group_id: new FormControl(2, Validators.required),
       image: new FormControl(null)
     });
     this.authenticator.disable();
@@ -136,7 +139,8 @@ export class UsersAddComponent implements OnInit {
       this.userService.postUser(addUser).subscribe(addResp => {
         this.toastService.show(`User was added with ID: ${addResp}`);
       }, (error) => {
-        console.error(error);
+        console.log(error);
+        this.toastService.error(error.error.description);
       }, () => {
         this.router.navigate(['/management/users/']);
       });

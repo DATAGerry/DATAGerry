@@ -16,16 +16,29 @@
     <th scope="col">Firstname</th>
     <th scope="col">Lastname</th>
     <th scope="col">Group</th>
+    <th scope="col">Action</th>
   </tr>
   </thead>
   <tbody>
   <tr *ngFor="let user of userList">
-    <th scope="row">{{user.public_id}}</th>
-    <td>{{user.user_name}}</td>
-    <td><cmdb-user-display [user]="user"></cmdb-user-display></td>
-    <td>{{user.first_name}}</td>
-    <td>{{user.last_name}}</td>
-    <td>{{groupService.findGroup(user.group_id).label}}</td>
+    <th scope="row">{{user?.public_id}}</th>
+    <td>{{user?.user_name}}</td>
+    <td>
+      <cmdb-user-display [user]="user"></cmdb-user-display>
+    </td>
+    <td>{{user?.first_name}}</td>
+    <td>{{user?.last_name}}</td>
+    <td>{{findGroup(user.group_id).label}}</td>
+    <td>
+      <a class="text-dark" [routerLink]="['/management/users/edit/', user.public_id]">
+        <fa-icon [icon]="['far', 'edit']"></fa-icon>
+      </a>
+      <a class="text-dark ml-2" *ngIf="user?.public_id !== 1"
+         [routerLink]="['/management/users/delete/', user.public_id]">
+        <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
+      </a>
+
+    </td>
   </tr>
   </tbody>
 </table>

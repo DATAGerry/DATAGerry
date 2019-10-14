@@ -17,7 +17,7 @@
 */
 
 import { Component, Input } from '@angular/core';
-import { ToastService } from '../../../../layout/services/toast.service';
+import { ToastService } from '../../../../layout/toast/toast.service';
 import { RenderResult } from '../../../models/cmdb-render';
 import { CmdbMode } from '../../../modes.enum';
 

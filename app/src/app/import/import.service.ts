@@ -21,7 +21,6 @@ import { ApiCallService, ApiService, httpFileOptions, resp } from '../services/a
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpHeaders, HttpParams } from '@angular/common/http';
-import { ParserResult } from './import-objects/mapping/mapping.model';
 
 @Injectable({
   providedIn: 'root'
@@ -34,28 +33,23 @@ export class ImportService implements ApiService {
   constructor(private api: ApiCallService) {
   }
 
+  public postObjectParser(file: File, config: any): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    formData.append('parser_config', JSON.stringify(config));
+    return this.api.callPost<any>(`${ this.servicePrefix }/${ this.objectPrefix }/parse/`, formData, httpFileOptions).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
   public getObjectParserDefaultConfig(fileType: string): Observable<any> {
     return this.api.callGet<any>(`${ this.servicePrefix }/${ this.objectPrefix }/parser/default/${ fileType }/`).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return {};
         }
-        return apiResponse.body;
-      })
-    );
-  }
-
-  public postObjectParserFile(fileType: string, formData: FormData, config) {
-    let httpParams = new HttpParams();
-    Object.keys(config).forEach((key) => {
-      httpParams = httpParams.append(key, config[key]);
-    });
-
-    const httpsdf = httpFileOptions;
-    httpsdf.params = httpParams
-    return this.api.callPost<ParserResult>(
-      `${ this.servicePrefix }/${ this.objectPrefix }/parser/${ fileType }/`, formData, httpsdf).pipe(
-      map((apiResponse) => {
         return apiResponse.body;
       })
     );

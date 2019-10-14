@@ -16,20 +16,18 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Injectable, TemplateRef } from '@angular/core';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class ToastService {
-
-  toasts: any[] = [];
-
-  show(textOrTpl: string | TemplateRef<any>, options: any = {}) {
-    this.toasts.push({textOrTpl, ...options});
-  }
-
-  remove(toast) {
-    this.toasts = this.toasts.filter(t => t !== toast);
-  }
+export class ImporterFile {
+  file: File = undefined;
+  fileContent: string | ArrayBuffer = undefined;
+  fileFormat: string = undefined;
+  fileName: string = '';
+}
+export class ImporterConfig {
+  mapping: {} = {};
+  // tslint:disable:variable-name
+  type_id: number = undefined;
+  start_element: number = 0;
+  max_elements: number = 0;
+  overwrite_public: boolean = false;
+  // tslint:enable
 }
