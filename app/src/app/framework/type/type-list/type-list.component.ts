@@ -24,6 +24,10 @@ import { DataTableDirective } from 'angular-datatables';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { UserService } from '../../../management/services/user.service';
+import {FileService} from '../../../file/file.service';
+import {NgxSpinnerService} from 'ngx-spinner';
+import {FileSaverService} from 'ngx-filesaver';
+import {DatePipe} from '@angular/common';
 
 @Component({
   selector: 'cmdb-type-list',
@@ -38,16 +42,35 @@ export class TypeListComponent implements OnInit, OnDestroy {
   public typeList: CmdbType[] = [];
   public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();
+  public selectedObjects: string[] = [];
 
   public remove: boolean = false;
   public update: boolean = false;
 
-  constructor(private typeService: TypeService, public userService: UserService, private router: Router) {
+  constructor(private typeService: TypeService, public userService: UserService, private router: Router,
+              private fileService: FileService, private fileSaverService: FileSaverService, private datePipe: DatePipe) {
   }
 
   public ngOnInit(): void {
     this.dtOptions = {
       ordering: true,
+      columnDefs: [ {
+        orderable: false,
+        className: 'select-checkbox',
+        targets:   0
+      } ],
+      rowCallback: (row: Node, data: any[]) => {
+        const self = this;
+        $('td:first-child', row).unbind('click');
+        $('td:first-child', row).bind('click', () => {
+          self.updateDisplay(data[2]);
+        });
+        return row;
+      },
+      select: {
+        style:    'multi',
+        selector: 'td:first-child'
+      },
       order: [[1, 'asc']],
       dom:
         '<"row" <"col-sm-2" l> <"col-sm-3" B > <"col" f> >' +
@@ -70,21 +93,15 @@ export class TypeListComponent implements OnInit, OnDestroy {
 
     this.typeService.getTypeList().subscribe((list: CmdbType[]) => {
         this.typeList = this.typeList.concat(list);
-
-      },
-      (err) => {
-        console.error(err);
-      },
-      () => {
-        this.dtTrigger.next();
-      });
+      }, (err) => { console.error(err); },
+      () => { this.dtTrigger.next(); });
   }
 
   public cleanupDatabase(typeInstance: CmdbType) {
     if (typeInstance.clean_db === false) {
       this.typeService.cleanupRemovedFields(typeInstance.public_id).subscribe(() => {
         this.remove = true;
-      }, error => {console.log(error)},
+      }, error => {console.log(error); },
         () => {
           this.typeService.cleanupInsertedFields(typeInstance.public_id).subscribe(() => {
             this.update = true;
@@ -105,4 +122,44 @@ export class TypeListComponent implements OnInit, OnDestroy {
     this.dtTrigger.unsubscribe();
   }
 
+  public exportingFiles() {
+    if (this.selectedObjects.length === 0 || this.selectedObjects.length === this.typeList.length) {
+      this.fileService.getTypeFile()
+        .subscribe(res => this.downLoadFile(res, 'json'));
+    } else {
+      this.fileService.callExportTypeRoute('/export/type/' + this.selectedObjects.toString())
+        .subscribe(res => this.downLoadFile(res, 'json'));
+    }
+  }
+
+  public downLoadFile(data: any, exportType: any) {
+    const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
+    this.fileSaverService.save(data.body, timestamp + '.' + exportType);
+  }
+
+  public selectAll() {
+    const table: any = $('#type-list-datatable');
+    const dataTable: any = table.DataTable();
+    const rows: any = dataTable.rows();
+    this.selectedObjects = [];
+    if ($('.selectAll').is( ':checked' )) {
+      rows.select();
+      let lenx: number = rows.data().length - 1;
+      while (lenx >= 0) {
+        this.selectedObjects.push(rows.data()[lenx][2]);
+        lenx--;
+      }
+    } else {
+      rows.deselect();
+    }
+  }
+
+  public updateDisplay(publicID: string): void {
+    const index = this.selectedObjects.findIndex(d => d === publicID); // find index in your array
+    if (index > -1) {
+      this.selectedObjects.splice(index, 1); // remove element from array
+    } else {
+      this.selectedObjects.push(publicID);
+    }
+  }
 }
