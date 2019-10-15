@@ -1,0 +1,15 @@
+version: "3.0"
+services:
+  datagerry:
+    image: nethinks/datagerry:latest
+    ports:
+    - "4000:4000"
+    depends_on:
+    - db
+    - broker
+
+  db:
+    image: mongo:4.2-bionic
+    
+  broker:
+    image: rabbitmq:3.8
