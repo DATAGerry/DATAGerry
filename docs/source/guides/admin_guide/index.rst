@@ -8,3 +8,4 @@ Admin Guide
     :maxdepth: 2
 
     installation
+    configuration
