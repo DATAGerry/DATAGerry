@@ -6,6 +6,7 @@ DATAGERRRY has a small INI style configuration file, called cmdb.conf, which def
 etc). Please see the following example:
 
 .. include:: ../../../../etc/cmdb.conf
+    :literal:
 
 It is possible to overwrite settings in the configuration file with OS environment variables. Please see the following example:
 
