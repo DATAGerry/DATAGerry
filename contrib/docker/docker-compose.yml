@@ -7,6 +7,10 @@ services:
     depends_on:
     - db
     - broker
+    environment:
+      DATAGERRY_Database_host: "db"
+      DATAGERRY_MessageQueueing_host: "broker"
+    restart: unless-stopped
 
   db:
     image: mongo:4.2-bionic
