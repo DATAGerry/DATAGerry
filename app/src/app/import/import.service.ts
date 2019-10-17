@@ -29,6 +29,7 @@ export class ImportService implements ApiService {
 
   public servicePrefix: string = 'import';
   private objectPrefix: string = 'object';
+  private typePrefix: string = 'type';
 
   constructor(private api: ApiCallService) {
   }
@@ -66,4 +67,11 @@ export class ImportService implements ApiService {
     );
   }
 
+  public postTypeParser(formData: FormData): Observable<any> {
+    return this.api.callPost<any>(`${ this.servicePrefix }/${ this.typePrefix }/`, formData, httpFileOptions).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
 }

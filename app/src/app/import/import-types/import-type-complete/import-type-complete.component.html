@@ -1,0 +1,11 @@
+<div id="uploadfileform">
+  <div *ngIf="done">
+    <div class="card-body text-center align-items-center text-center">
+      <h1 class="display-1 text-success"><fa-icon icon="check-circle"></fa-icon></h1>
+      <h6 class="card-subtitle mb-2"> Uploaded file was imported successfully. </h6>
+    </div>
+  </div>
+</div>
+
+<hr/>
+<button class="btn btn-primary next" routerLink="/framework/type/" type="button" [disabled]="!done"> Done </button>

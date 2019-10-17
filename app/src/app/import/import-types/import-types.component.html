@@ -1,1 +1,16 @@
-<p>import-types works!</p>
+<form id="uploadfileform" [formGroup]="fileForm" (ngSubmit)="importTypeFile()">
+  <aw-wizard [navBarLayout]="'large-empty-symbols'">
+    <aw-wizard-step stepId="1" stepTitle="Select file">
+      <ng-template awWizardStepSymbol><i class="fas fa-file-code"></i></ng-template>
+      <cmdb-select-file-drag-drop [formGroup]="fileForm"></cmdb-select-file-drag-drop>
+    </aw-wizard-step>
+    <aw-wizard-step stepId="2" stepTitle="Preview">
+      <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
+      <cmdb-type-preview [data]="fileForm"></cmdb-type-preview>
+    </aw-wizard-step>
+    <aw-wizard-step stepId="5" stepTitle="Complete">
+      <ng-template awWizardStepSymbol><i class="fas fa-save"></i></ng-template>
+      <cmdb-import-type-complete [done]="done"></cmdb-import-type-complete>
+    </aw-wizard-step>
+  </aw-wizard>
+</form>

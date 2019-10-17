@@ -17,6 +17,8 @@
 */
 
 import { Component, OnInit } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { ImportService } from '../import.service';
 
 @Component({
   selector: 'cmdb-import-types',
@@ -25,9 +27,33 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ImportTypesComponent implements OnInit {
 
-  constructor() { }
+  public constructor(private importService: ImportService) {}
+
+  public fileForm: FormGroup;
+  public preview: any;
+  public done: boolean = false;
 
   ngOnInit() {
+    this.fileForm = new FormGroup({
+      format: new FormControl('json', Validators.required),
+      name: new FormControl('', Validators.required),
+      size: new FormControl('', Validators.required),
+      file: new FormControl(null, Validators.required),
+    });
+
+    this.fileForm.valueChanges.subscribe(newValue => {
+      this.fileForm.get('file').patchValue(newValue.file, { onlySelf: true });
+    });
+  }
+
+  public importTypeFile() {
+    const theJSON = JSON.stringify(this.fileForm.get('file').value);
+    const formData = new FormData();
+    formData.append('uploadFile', theJSON);
+    this.importService.postTypeParser(formData).subscribe(res => {
+      console.log(res);
+      this.done = true;
+    });
   }
 
 }
