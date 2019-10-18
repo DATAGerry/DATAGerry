@@ -54,7 +54,7 @@ export class ObjectListComponent implements OnDestroy {
   public objectLists: {};
   public hasSummaries: boolean = false;
   public formatList: any[] = [];
-  private selectedObjects: string = 'all';
+  private selectedObjects: string[] = [];
   public typeID: number = null;
   public mode: CmdbMode = CmdbMode.Simple;
 
@@ -200,11 +200,23 @@ export class ObjectListComponent implements OnDestroy {
     this.dtOptions = {
       ordering: true,
       order: [[2, 'asc']],
-      columnDefs: [{
-        targets: 'nosort',
+      columnDefs: [ {
         orderable: false,
-      }],
-      retrieve: true,
+        className: 'select-checkbox',
+        targets:   0
+      } ],
+      rowCallback: (row: Node, data: any[]) => {
+        const self = this;
+        $('td:first-child', row).unbind('click');
+        $('td:first-child', row).bind('click', () => {
+          self.updateDisplay(data[2]);
+        });
+        return row;
+      },
+      select: {
+        style:    'multi',
+        selector: 'td:first-child'
+      },
       language: {
         search: '',
         searchPlaceholder: 'Filter...'
@@ -233,11 +245,12 @@ export class ObjectListComponent implements OnDestroy {
         visTargets.push(this.columnFields.findIndex(i => i.name === summary.name) + 4);
       }
       this.dtOptions.columnDefs = [
-        {orderable: false, targets: 'nosort'},
-        {visible: true, targets: visTargets},
-        {visible: false, targets: '_all'}
+        { visible: true, targets: visTargets },
+        { visible: false, targets: '_all' },
+        { orderable: false, className: 'select-checkbox', targets:   0 },
       ];
       this.dtOptions.order = [[2, 'asc']];
+      this.dtOptions.ordering = true;
     }
   }
 
@@ -258,46 +271,29 @@ export class ObjectListComponent implements OnDestroy {
   /*
     Table action events
    */
-
   public selectAll() {
-    const overall: any = document.getElementsByClassName('select-all-checkbox')[0];
-    const allCheckbox: any = document.getElementsByClassName('select-checkbox');
-    const checking = overall.checked;
-    this.selectedObjects = 'all';
-
-    for (const box of allCheckbox) {
-      box.checked = checking;
-    }
-    if (checking) {
-      this.selectedObjects = String(allCheckbox.length);
-    }
-    if (!checking) {
-      this.selectedObjects = 'all';
+    const table: any = $('#object-list-datatable');
+    const dataTable: any = table.DataTable();
+    const rows: any = dataTable.rows();
+    this.selectedObjects = [];
+    if ($('.selectAll').is( ':checked' )) {
+      rows.select();
+      let lenx: number = rows.data().length - 1;
+      while (lenx >= 0) {
+        this.selectedObjects.push(rows.data()[lenx][2]);
+        lenx--;
+      }
+    } else {
+      rows.deselect();
     }
   }
 
-  public updateDisplay() {
-    const overall: any = document.getElementsByClassName('select-all-checkbox')[0];
-    const allCheckbox: any = document.getElementsByClassName('select-checkbox');
-    let checkedCount = 0;
-    this.selectedObjects = 'all';
-
-    for (const box of allCheckbox) {
-      if (box.checked) {
-        checkedCount++;
-      }
-    }
-    this.selectedObjects = String(checkedCount);
-
-    if (checkedCount === 0) {
-      overall.checked = false;
-      overall.indeterminate = false;
-    } else if (checkedCount === allCheckbox.length) {
-      overall.checked = true;
-      overall.indeterminate = false;
+  public updateDisplay(publicID: string): void {
+    const index = this.selectedObjects.findIndex(d => d === publicID); // find index in your array
+    if (index > -1) {
+      this.selectedObjects.splice(index, 1); // remove element from array
     } else {
-      overall.checked = false;
-      overall.indeterminate = true;
+      this.selectedObjects.push(publicID);
     }
   }
 
@@ -321,15 +317,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   public delManyObjects() {
-    const allCheckbox: any = document.getElementsByClassName('select-checkbox');
-    const publicIds: number[] = [];
-    for (const box of allCheckbox) {
-      if (box.checked && box.id) {
-        publicIds.push(box.id);
-      }
-    }
-
-    if (publicIds.length > 0) {
+    if (this.selectedObjects.length > 0) {
       const modalComponent = this.objService.openModalComponent(
         'Delete selected Objects',
         'Are you sure, you want to delete all selected objects?',
@@ -338,8 +326,8 @@ export class ObjectListComponent implements OnDestroy {
 
       modalComponent.result.then((result) => {
         if (result) {
-          if (publicIds.length > 0) {
-            this.apiCallService.callDeleteManyRoute('object/delete/' + publicIds).subscribe(data => {
+          if (this.selectedObjects.length > 0) {
+            this.apiCallService.callDeleteManyRoute('object/delete/' + this.selectedObjects.toString()).subscribe(data => {
               this.route.params.subscribe((id) => {
                 this.init(id);
               });
@@ -351,21 +339,11 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   public exportingFiles(exportType: any) {
-    if ('all' === this.selectedObjects && this.items[0] !== undefined) {
+    if (this.selectedObjects.length === 0 || this.selectedObjects.length === this.items.length) {
       this.fileService.getObjectFileByType(this.items[0].type_information.type_id, exportType.id)
         .subscribe(res => this.downLoadFile(res, exportType));
-      return;
-    }
-
-    const publicIds: string[] = [];
-    const allCheckbox: any = document.getElementsByClassName('select-checkbox');
-    for (const box of allCheckbox) {
-      if (box.checked && box.id) {
-        publicIds.push(box.id);
-      }
-    }
-    if (publicIds.length > 0) {
-      this.fileService.callExportRoute('/file/object/' + publicIds.toString(), exportType.id)
+    } else {
+      this.fileService.callExportRoute('/file/object/' + this.selectedObjects.toString(), exportType.id)
         .subscribe(res => this.downLoadFile(res, exportType));
     }
   }
