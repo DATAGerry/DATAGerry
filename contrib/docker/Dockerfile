@@ -6,4 +6,4 @@ COPY files/DATAGERRY-*.rpm /tmp
 RUN rpm -ivh /tmp/DATAGERRY-*.rpm
 
 # start DATAGERRY
-CMD ["/usr/bin/datagerry", "-c /etc/datagerry/cmdb.conf", "-s"]
+CMD ["/usr/bin/datagerry", "-c", "/etc/datagerry/cmdb.conf", "-s"]
