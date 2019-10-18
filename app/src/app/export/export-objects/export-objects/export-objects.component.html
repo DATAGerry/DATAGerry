@@ -8,13 +8,13 @@
       <div class="form-group">
         <label for="typeChooser">Object Type <span class="required">*</span></label>
         <ng-select id="typeChooser"
-          [items]="typeList"
+                   [items]="typeList"
 
-          required
-          bindLabel="label"
-          bindValue="public_id"
-          placeholder="Choose your option"
-          formControlName="type">
+                   required
+                   bindLabel="label"
+                   bindValue="public_id"
+                   placeholder="Choose your option"
+                   formControlName="type">
 
           <ng-template ng-label-tmp let-item="item">
             {{item.label}}

@@ -6,6 +6,7 @@ import { SidebarComponent } from '../layout/components/sidebar/sidebar.component
 import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';
 import { FooterComponent } from '../layout/components/footer/footer.component';
 import { ExportComponent } from './export.component';
+import {ExportObjectsComponent} from "./export-objects/export-objects/export-objects.component";
 
 const routes: Routes = [
   {
@@ -41,6 +42,13 @@ const routes: Routes = [
       breadcrumb: 'Types'
     },
     component: ExportTypesComponent
+  },
+  {
+    path: 'objects',
+    data: {
+      breadcrumb: 'Objects'
+    },
+    component: ExportObjectsComponent
   }
 ];
 

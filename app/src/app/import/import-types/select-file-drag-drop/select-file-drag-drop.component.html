@@ -7,6 +7,7 @@
           <div class="col my-auto">
             <h1 class="display-1 text-success"><fa-icon [icon]="['far', 'file-code']"></fa-icon></h1>
             <p class="lead">{{formGroup.get('name').value}}</p>
+            {{formGroup.get('size').value | fileSize}}
           </div>
           <div class="col-xs-6 my-auto">
             <h5 class="display-4"><fa-icon icon="arrow-right"></fa-icon></h5>

@@ -48,14 +48,6 @@ const routes: Routes = [
     loadChildren: () => import('./search/search.module').then(m => m.SearchModule)
   },
   {
-    path: 'file',
-    canActivate: [AuthGuard],
-    data: {
-      breadcrumb: 'File'
-    },
-    loadChildren: () => import('./file/file.module').then(m => m.FileModule)
-  },
-  {
     path: 'framework',
     canActivate: [AuthGuard],
     data: {

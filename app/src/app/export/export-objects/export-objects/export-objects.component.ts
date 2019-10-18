@@ -17,19 +17,19 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { FileService } from './file.service';
+import { CmdbType} from '../../../framework/models/cmdb-type';
+import { FormControl, FormGroup, Validators} from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { CmdbType } from '../framework/models/cmdb-type';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { TypeService } from '../framework/services/type.service';
-import {FileSaverService} from 'ngx-filesaver';
+import { TypeService } from '../../../framework/services/type.service';
+import { FileSaverService } from 'ngx-filesaver';
+import { FileService } from './export-objects.service';
 
 @Component({
-  selector: 'cmdb-file',
-  templateUrl: './file.component.html',
-  styleUrls: ['./file.component.scss']
+  selector: 'cmdb-export-objects',
+  templateUrl: './export-objects.component.html',
+  styleUrls: ['./export-objects.component.scss']
 })
-export class FileComponent implements OnInit {
+export class ExportObjectsComponent implements OnInit {
 
   public typeList: CmdbType[];
   public formatList: any[] = [];
@@ -82,4 +82,5 @@ export class FileComponent implements OnInit {
     const extension = this.formatList.find(x => x.id === exportType);
     this.fileSaverService.save(data.body, timestamp + '.' + extension.label);
   }
+
 }

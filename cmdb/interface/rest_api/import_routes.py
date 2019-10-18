@@ -19,16 +19,10 @@ import json
 
 from flask import current_app, abort, request
 from cmdb.interface.route_utils import make_response, RootBlueprint, login_required
-from cmdb.framework.cmdb_errors import TypeInsertError
 from cmdb.framework.cmdb_type import CmdbType
 
 with current_app.app_context():
     object_manager = current_app.object_manager
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
 
 try:
     from cmdb.utils.error import CMDBError
@@ -43,38 +37,61 @@ with current_app.app_context():
     importer_blueprint.register_nested_blueprint(importer_object_blueprint)
 
 
-@importer_blueprint.route('/type/', methods=['POST'])
+@importer_blueprint.route('/type/create/', methods=['POST'])
 @login_required
 def add_type():
     from bson import json_util
     from datetime import datetime
 
-    updload = request.form.get('uploadFile')
-    # add_data_dump = json.dumps(upload)
-    # try:
-    #     new_type_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
-    #     new_type_data['public_id'] = object_manager.get_new_id(CmdbType.COLLECTION)
-    #     new_type_data['creation_time'] = datetime.utcnow()
-    # except TypeError as e:
-    #     LOGGER.warning(e)
-    #     abort(400)
+    error_collection = {}
+    upload = request.form.get('uploadFile')
+    new_type_list = json.loads(upload, object_hook=json_util.object_hook)
+    for new_type_data in new_type_list:
+        try:
+            new_type_data['public_id'] = object_manager.get_new_id(CmdbType.COLLECTION)
+            new_type_data['creation_time'] = datetime.utcnow()
+        except TypeError as e:
+            LOGGER.warning(e)
+            abort(400)
+        try:
+            type_instance = CmdbType(**new_type_data)
+        except CMDBError:
+            return abort(400)
+        try:
+            object_manager.insert_type(type_instance)
+        except Exception as ex:
+            error_collection.update({"public_id": type_instance.public_id, "message": ex.message})
 
-    try:
-        data_dump = json.loads(updload, object_hook=json_util.object_hook)
-        for add_data_dump in data_dump:
-            try:
-                type_instance = CmdbType(**add_data_dump)
-            except CMDBError as e:
-                LOGGER.debug(e)
-                return abort(400)
-            try:
-                ack = object_manager.update_type(type_instance)
-            except TypeInsertError:
-                return abort(500)
+    resp = make_response(error_collection)
+    return resp
 
-    except CMDBError as e:
-        LOGGER.debug(e)
-        return abort(400)
 
-    resp = make_response(data_dump)
+@importer_blueprint.route('/type/update/', methods=['POST'])
+@login_required
+def update_type():
+    from bson import json_util
+
+    error_collection = {}
+    upload = request.form.get('uploadFile')
+    data_dump = json.loads(upload, object_hook=json_util.object_hook)
+    for add_data_dump in data_dump:
+        try:
+            update_type_instance = CmdbType(**add_data_dump)
+        except CMDBError:
+            return abort(400)
+        try:
+            old_fields = object_manager.get_type(update_type_instance.get_public_id()).get_fields()
+            new_fields = update_type_instance.get_fields()
+            if [item for item in old_fields if item not in new_fields]:
+                update_type_instance.clean_db = False
+            if [item for item in new_fields if item not in old_fields]:
+                update_type_instance.clean_db = False
+        except Exception as ex:
+            error_collection.update({"public_id": add_data_dump['public_id'], "message": ex.message})
+        try:
+            object_manager.update_type(update_type_instance)
+        except Exception as ex:
+            error_collection.update({"public_id": update_type_instance.public_id, "message": ex.details})
+
+    resp = make_response(error_collection)
     return resp

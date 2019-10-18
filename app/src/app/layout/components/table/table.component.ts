@@ -23,7 +23,7 @@ import { BehaviorSubject, Subject} from 'rxjs';
 import { UserService } from '../../../management/services/user.service';
 import { ApiCallService } from '../../../services/api-call.service';
 import { DatePipe } from '@angular/common';
-import { FileService } from '../../../file/file.service';
+
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from '../../helpers/modal/modal.component';
@@ -31,6 +31,7 @@ import { FileSaverService } from 'ngx-filesaver';
 import { TableColumn} from './models/table-column';
 import { TableColumnAction} from './models/table-columns-action';
 import { RenderResult } from '../../../framework/models/cmdb-render';
+import { FileService } from '../../../export/export-objects/export-objects/export-objects.service';
 
 @Component({
   selector: 'cmdb-table',

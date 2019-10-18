@@ -16,15 +16,35 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 
-@Component({
-  selector: 'cmdb-import-type-complete',
-  templateUrl: './import-type-complete.component.html',
-  styleUrls: ['./import-type-complete.component.scss']
-})
-export class ImportTypeCompleteComponent {
+@Pipe({name: 'fileSize'})
+export class FileSizePipe implements PipeTransform {
+  transform(size) {
+    if (isNaN(size)) {
+      size = 0;
+    }
 
-  @Input() done: boolean;
-  @Input() errorHandling: [];
+    if (size < 1024) {
+      return size + ' Bytes';
+    }
+
+    size /= 1024;
+
+    if (size < 1024) {
+      return size.toFixed(2) + ' Kb';
+    }
+
+    size /= 1024;
+
+    if (size < 1024) {
+      return size.toFixed(2) + ' Mb';
+    }
+
+    size /= 1024;
+
+    if (size < 1024) {
+      return size.toFixed(2) + ' Gb';
+    }
+  }
 }

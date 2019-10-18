@@ -32,6 +32,7 @@ export class ImportTypesComponent implements OnInit {
   public fileForm: FormGroup;
   public preview: any;
   public done: boolean = false;
+  public errorHandling = [];
 
   ngOnInit() {
     this.fileForm = new FormGroup({
@@ -39,6 +40,7 @@ export class ImportTypesComponent implements OnInit {
       name: new FormControl('', Validators.required),
       size: new FormControl('', Validators.required),
       file: new FormControl(null, Validators.required),
+      action: new FormControl('create', Validators.required),
     });
 
     this.fileForm.valueChanges.subscribe(newValue => {
@@ -47,13 +49,26 @@ export class ImportTypesComponent implements OnInit {
   }
 
   public importTypeFile() {
+    const action = this.fileForm.get('action').value;
     const theJSON = JSON.stringify(this.fileForm.get('file').value);
     const formData = new FormData();
     formData.append('uploadFile', theJSON);
-    this.importService.postTypeParser(formData).subscribe(res => {
-      console.log(res);
-      this.done = true;
-    });
+
+    if (action === 'update') {
+      this.importService.postUpdateTypeParser(formData).subscribe(res => {
+        if (Object.keys(res).length > 0) {
+          this.errorHandling.push(res);
+        }
+        this.done = true;
+      });
+    } else {
+      this.importService.postCreateTypeParser(formData).subscribe(res => {
+        if (Object.keys(res).length > 0) {
+          this.errorHandling.push(res);
+        }
+        this.done = true;
+      });
+    }
   }
 
 }

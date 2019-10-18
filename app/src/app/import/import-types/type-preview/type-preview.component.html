@@ -1,3 +1,23 @@
+
+<div class="card-body">
+  <h5 class="card-title"> Do you want to <mark>update</mark> the data or <mark>create</mark> new ones?</h5>
+
+  <div class="form-check form-check-inline">
+    <input (change)="handleChange($event)" class="form-check-input"
+           type="radio" name="uploadTypeFile" id="createType" value="create" checked>
+    <label class="form-check-label" for="createType">
+      Create
+    </label>
+  </div>
+  <div class="form-check form-check-inline">
+    <input (change)="handleChange($event)" class="form-check-input"
+           type="radio" name="uploadTypeFile" id="updateType" value="update">
+    <label class="form-check-label" for="updateType">
+      Update
+    </label>
+  </div>
+</div>
+
 <div *ngIf="data.get('file').value != null">
   <div class="card drag-items mt-3">
     <div class="card-header">

@@ -10,7 +10,7 @@
     </aw-wizard-step>
     <aw-wizard-step stepId="5" stepTitle="Complete">
       <ng-template awWizardStepSymbol><i class="fas fa-save"></i></ng-template>
-      <cmdb-import-type-complete [done]="done"></cmdb-import-type-complete>
+      <cmdb-import-type-complete [errorHandling]="errorHandling" [done]="done"></cmdb-import-type-complete>
     </aw-wizard-step>
   </aw-wizard>
 </form>

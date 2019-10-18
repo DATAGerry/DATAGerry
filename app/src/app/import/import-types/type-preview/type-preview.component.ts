@@ -44,4 +44,8 @@ export class TypePreviewComponent implements OnInit {
   public removeFromFile(index: number) {
     this.data.get('file').value.splice(index, 1);
   }
+
+  handleChange(evt) {
+    this.data.get('action').setValue(evt.target.value);
+  }
 }

@@ -67,8 +67,16 @@ export class ImportService implements ApiService {
     );
   }
 
-  public postTypeParser(formData: FormData): Observable<any> {
-    return this.api.callPost<any>(`${ this.servicePrefix }/${ this.typePrefix }/`, formData, httpFileOptions).pipe(
+  public postUpdateTypeParser(formData: FormData): Observable<any> {
+    return this.api.callPost<any>(`${ this.servicePrefix }/${ this.typePrefix }/update/`, formData, httpFileOptions).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public postCreateTypeParser(formData: FormData): Observable<any> {
+    return this.api.callPost<any>(`${ this.servicePrefix }/${ this.typePrefix }/create/`, formData, httpFileOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })

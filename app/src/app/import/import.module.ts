@@ -46,8 +46,9 @@ import { MappingControlPipe } from './import-objects/type-mapping/mapping-contro
 import { SelectFileDragDropComponent } from './import-types/select-file-drag-drop/select-file-drag-drop.component';
 import { SelectFileDragDropDirective } from './import-types/select-file-drag-drop/select-file-drag-drop.directive';
 import { TypePreviewComponent } from './import-types/type-preview/type-preview.component';
-import {CategoryModule} from "../framework/category/category.module";
+import { CategoryModule } from '../framework/category/category.module';
 import { ImportTypeCompleteComponent } from './import-types/import-type-complete/import-type-complete.component';
+import { FileSizePipe } from './import-types/file-size.pipe';
 
 
 @NgModule({
@@ -70,6 +71,7 @@ import { ImportTypeCompleteComponent } from './import-types/import-type-complete
     SelectFileDragDropDirective,
     TypePreviewComponent,
     ImportTypeCompleteComponent,
+    FileSizePipe
   ],
   imports: [
     CommonModule,

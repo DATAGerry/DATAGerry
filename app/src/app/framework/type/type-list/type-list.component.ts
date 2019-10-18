@@ -21,11 +21,9 @@ import { CmdbType } from '../../models/cmdb-type';
 import { TypeService } from '../../services/type.service';
 import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ToastService } from '../../../layout/toast/toast.service';
+import { Router } from '@angular/router';
 import { UserService } from '../../../management/services/user.service';
-import {FileService} from '../../../file/file.service';
-import {NgxSpinnerService} from 'ngx-spinner';
+import { FileService } from '../../../export/export-objects/export-objects/export-objects.service';
 import {FileSaverService} from 'ngx-filesaver';
 import {DatePipe} from '@angular/common';
 
