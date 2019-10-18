@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -32,5 +32,6 @@ export class CmdbObject implements CmdbDao {
   public creation_time: any;
   public last_edit_time: any;
   public author_name?: string;
+  public comment?: string;
   // tslint:enable
 }

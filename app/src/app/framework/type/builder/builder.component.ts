@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -16,30 +16,26 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { Controller } from './controls/controls.common';
-import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
-import { SectionControl } from './controls/section.control';
-import { UserService } from '../../../user/services/user.service';
-import { Group } from '../../../user/models/group';
-import { User } from '../../../user/models/user';
-import { TextControl } from './controls/text/text.control';
-import { PasswordControl } from './controls/text/password.control';
-import { EmailControl } from './controls/text/email.control';
-import { TelControl } from './controls/text/tel.control';
-import { TextAreaControl } from './controls/textarea/textarea.control';
-import { LinkControl } from './controls/text/href.control';
-import { ReferenceControl } from './controls/specials/ref.control';
-import { RadioControl } from './controls/choice/radio.control';
-import { SelectControl } from './controls/choice/select.control';
-import { CheckboxControl } from './controls/choice/checkbox.control';
-import { GroupService } from '../../../user/services/group.service';
-import { CmdbMode } from '../../modes.enum';
-import { FormGroup } from '@angular/forms';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
-import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
-import { CmdbType } from '../../models/cmdb-type';
+import {Component, Input, OnInit} from '@angular/core';
+import {Controller} from './controls/controls.common';
+import {DndDropEvent, DropEffect} from 'ngx-drag-drop';
+import {SectionControl} from './controls/section.control';
+import {UserService} from '../../../management/services/user.service';
+import {Group} from '../../../management/models/group';
+import {User} from '../../../management/models/user';
+import {TextControl} from './controls/text/text.control';
+import {PasswordControl} from './controls/text/password.control';
+import {TextAreaControl} from './controls/textarea/textarea.control';
+import {ReferenceControl} from './controls/specials/ref.control';
+import {RadioControl} from './controls/choice/radio.control';
+import {SelectControl} from './controls/choice/select.control';
+import {CheckboxControl} from './controls/choice/checkbox.control';
+import {GroupService} from '../../../management/services/group.service';
+import {CmdbMode} from '../../modes.enum';
+import {FormGroup} from '@angular/forms';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {PreviewModalComponent} from './modals/preview-modal/preview-modal.component';
+import {DiagnosticModalComponent} from './modals/diagnostic-modal/diagnostic-modal.component';
 
 declare var $: any;
 
@@ -53,7 +49,8 @@ export class BuilderComponent implements OnInit {
   public sections: any[];
   public userList: User[] = [];
   public groupList: Group[] = [];
-  public mode = CmdbMode.View;
+  @Input() mode = CmdbMode.View;
+  public activeEdit: boolean = false;
 
   @Input() set builderConfig(data) {
     if (data !== undefined) {
@@ -102,6 +99,10 @@ export class BuilderComponent implements OnInit {
   }
 
   public onDrop(event: DndDropEvent, list: any[]) {
+    if (list && (event.dropEffect === 'copy')) {
+      this.activeEdit = true;
+    }
+
     if (list
       && (event.dropEffect === 'copy'
         || event.dropEffect === 'move')) {
@@ -145,4 +146,22 @@ export class BuilderComponent implements OnInit {
     diagnosticModal.componentInstance.data = this.sections;
   }
 
+  public matchedType(value: string) {
+    switch (value) {
+      case 'textarea':
+        return 'align-left';
+      case 'password':
+        return 'key';
+      case 'checkbox':
+        return 'check-square';
+      case 'radio':
+        return 'check-circle';
+      case 'select':
+        return 'list';
+      case 'ref':
+        return 'retweet';
+      default:
+        return 'font';
+    }
+  }
 }

@@ -1,0 +1,68 @@
+<div id="log-header" class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between">
+        <div>
+          <cmdb-active-badge [activeStatus]="renderResult?.object_information?.active"></cmdb-active-badge>
+        </div>
+        <div id="object-view-title">
+          {{renderResult?.type_information?.type_label}} #{{renderResult?.object_information?.object_id}}
+        </div>
+        <div id="object-view-version">Version: {{log?.version}}</div>
+      </div>
+      <div class="card-body">
+        <dl class="row">
+          <dt class="col-sm-3">Log ID</dt>
+          <dd class="col-sm-9">{{log?.public_id}}</dd>
+          <dt class="col-sm-3">User</dt>
+          <dd class="col-sm-9">{{log?.user_name}}</dd>
+          <dt class="col-sm-3">Comment</dt>
+          <dd class="col-sm-9">{{log?.comment}}</dd>
+        </dl>
+        <hr/>
+        <dl class="row">
+          <dt class="col-sm-3">Render time</dt>
+          <dd class="col-sm-9">{{renderResult?.current_render_time?.$date | date:"dd/MM/yy - hh:mm:ss"}}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="log-content" class="row mt-3">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header d-flex">
+        <span class="p-2">Object log state</span>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="renderForm" class="renderForm needs-validation" novalidate autocomplete="off">
+          <cmdb-render [mode]="0" [renderForm]="renderForm" [renderResult]="this?.renderResult"></cmdb-render>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header d-flex">
+        <span class="p-2">Compare: </span>
+        <select class="custom-select flex-grow-1"
+                (change)="loadCompareRender($event.target.value)">
+          <option selected></option>
+          <option *ngFor="let other of completeLogList" value="{{other.public_id}}">v {{other.version}}</option>
+        </select>
+      </div>
+      <div class="card-body">
+        <form [formGroup]="compareForm" class="renderForm needs-validation" novalidate autocomplete="off">
+          <cmdb-render [mode]="0" [renderForm]="compareForm" [renderResult]="this?.compareResult"></cmdb-render>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div id="log-footer" class="row mt-3">
+    <div class="col-12">
+      <button routerLink="/framework/object/view/{{renderResult?.object_information?.object_id}}" type="button"
+              class="btn btn-secondary">Back to object view
+      </button>
+    </div>
+  </div>
+</div>

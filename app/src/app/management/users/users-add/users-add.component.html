@@ -1,0 +1,134 @@
+<h1>Add new user</h1>
+<hr/>
+<form [formGroup]="addForm" (ngSubmit)="saveUser()" novalidate>
+  <div class="row">
+    <div class="col-md-9">
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Username: <span class="required">*</span></label>
+        <div class="col-sm-10">
+          <input type="text" formControlName="user_name" class="form-control" placeholder="Username"
+                 [ngClass]="{ 'is-valid': user_name.valid && (user_name.dirty || user_name.touched),
+                 'is-invalid': user_name.invalid && (user_name.dirty || user_name.touched)}">
+          <div *ngIf="user_name.invalid && (user_name.dirty || user_name.touched)"
+               class="invalid-feedback">
+            <div class="float-right" *ngIf="user_name.errors.required">
+              Username is required
+            </div>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Email: <span class="required">*</span></label>
+        <div class="col-sm-10">
+          <input type="email" formControlName="email" class="form-control" placeholder="Email"
+                 [ngClass]="{ 'is-valid': email.valid && (email.dirty || email.touched),
+                 'is-invalid': email.invalid && (email.dirty || email.touched)}">
+          <div *ngIf="email.invalid && (email.dirty || email.touched)"
+               class="invalid-feedback">
+            <div class="float-right ml-2" *ngIf="email.errors.required">
+              Email is required
+            </div>
+            <div class="float-right ml-2" *ngIf="email.errors.email">
+              This is not a valid email address
+            </div>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Password: <span class="required">*</span></label>
+        <div class="col-sm-10">
+          <div class="input-group">
+            <input type="password" #passWordInput formControlName="password" class="form-control" placeholder="Password"
+                   [ngClass]="{ 'is-valid': password.valid && (password.dirty || password.touched),
+                 'is-invalid': password.invalid && (password.dirty || password.touched)}">
+            <div class="input-group-append">
+              <span class="input-group-text" (click)="toggleInput()"><i class="far fa-eye"></i></span>
+            </div>
+            <div *ngIf="password.invalid && (password.dirty || password.touched)"
+                 class="invalid-feedback">
+              <div class="float-right ml-2" *ngIf="password.errors.required">
+                Password is required
+              </div>
+              <div class="float-right ml-2" *ngIf="password.errors.strength">
+                Password is not strong enough
+              </div>
+              <div class="clearfix"></div>
+            </div>
+          </div>
+
+          <password-strength-meter [password]="password.value" [enableFeedback]="true"
+                                   (strengthChange)="onPasswordStrengthChanged($event)">>
+          </password-strength-meter>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Firstname:</label>
+        <div class="col-sm-10">
+          <input type="text" formControlName="first_name" class="form-control" placeholder="Firstname"
+                 [ngClass]="{ 'is-valid': first_name.valid && (first_name.dirty || first_name.touched),
+                 'is-invalid': first_name.invalid && (first_name.dirty || first_name.touched)}">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Lastname:</label>
+        <div class="col-sm-10">
+          <input type="text" formControlName="last_name" class="form-control" placeholder="Lastname"
+                 [ngClass]="{ 'is-valid': last_name.valid && (last_name.dirty || last_name.touched),
+                 'is-invalid': last_name.invalid && (last_name.dirty || last_name.touched)}">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Authenticator: <span class="required">*</span></label>
+        <div class="col-sm-10">
+          <select formControlName="authenticator" class="custom-select"
+                  [ngClass]="{ 'is-valid': authenticator.valid && (authenticator.dirty || authenticator.touched),
+                 'is-invalid': authenticator.invalid && (authenticator.dirty || authenticator.touched)}">
+            <option *ngFor="let provider of authProviders" value="{{provider}}">{{provider}}</option>
+          </select>
+          <div *ngIf="authenticator.invalid && (authenticator.dirty || authenticator.touched)"
+               class="invalid-feedback">
+            <div class="float-right" *ngIf="authenticator.errors.required">
+              Authenticator is required.
+            </div>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Group: <span class="required">*</span></label>
+        <div class="col-sm-10">
+          <select formControlName="group_id" class="custom-select"
+                  [ngClass]="{ 'is-valid': group.valid && (group.dirty || group.touched),
+                 'is-invalid': group.invalid && (group.dirty || group.touched)}">
+            <option *ngFor="let group of groupList" [ngValue]="group.public_id">{{group.label}}</option>
+          </select>
+          <div *ngIf="group.invalid && (group.dirty || group.touched)"
+               class="invalid-feedback">
+            <div class="float-right" *ngIf="group.errors.required">
+              Group is required.
+            </div>
+            <div class="clearfix"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-3">
+      <div id="picture-upload" class="text-center">
+        <cmdb-user-image [imageURL]="preview"></cmdb-user-image>
+        <div class="custom-file mt-2">
+          <input type="file" (change)="previewImage($event)"
+                 class="custom-file-input" [ngClass]="{ 'is-valid': image.valid && (image.dirty || image.touched),
+                 'is-invalid': image.invalid && (image.dirty || image.touched)}">
+          <label class="custom-file-label">Choose image </label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr/>
+  <button type="submit" class="btn btn-primary">Submit</button>
+  <button type="reset" class="btn ml-2 btn-outline-secondary">Reset</button>
+  <button routerLink="/management/users/" type="button" class="btn ml-2 btn-outline-danger">Cancel</button>
+</form>

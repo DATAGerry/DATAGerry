@@ -42,13 +42,19 @@ $sidebar-padding: 20px;
     ul {
       background: $gray-400;
 
-      > li.toctree-l2 {
+      > li.toctree-l2, > li.toctree-l3 {
         > a {
           color: $black;
 
           &.current{
             background: $gray-600;
           }
+        }
+      }
+      > li.toctree-l3{
+        font-size: 12px;
+        > a{
+          padding-left: $sidebar-padding + 10px;
         }
       }
     }

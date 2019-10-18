@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -17,12 +17,14 @@
 import logging
 import json
 
-from flask import abort, request, jsonify
-from cmdb.utils.interface_wraps import login_required, json_required
-from cmdb.framework.cmdb_object_manager import object_manager as obm
-from cmdb.interface.route_utils import make_response, RootBlueprint
+from flask import abort, request, jsonify, current_app
+from cmdb.utils.wraps import json_required
+from cmdb.interface.route_utils import make_response, RootBlueprint, login_required
 from cmdb.framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError
 from cmdb.framework.cmdb_type import CmdbType
+
+with current_app.app_context():
+    object_manager = current_app.object_manager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -30,12 +32,10 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-type_routes = RootBlueprint('type_routes', __name__, url_prefix='/type')
-
-object_manager = obm
+type_blueprint = RootBlueprint('type_blueprint', __name__, url_prefix='/type')
 
 
-@type_routes.route('/', methods=['GET'])
+@type_blueprint.route('/', methods=['GET'])
 @login_required
 def get_type_list():
     try:
@@ -46,7 +46,7 @@ def get_type_list():
     return resp
 
 
-@type_routes.route('/<int:public_id>', methods=['GET'])
+@type_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
 def get_type(public_id: int):
     try:
@@ -59,7 +59,7 @@ def get_type(public_id: int):
     return resp
 
 
-@type_routes.route('/', methods=['POST'])
+@type_blueprint.route('/', methods=['POST'])
 @login_required
 def add_type():
     from bson import json_util
@@ -67,7 +67,7 @@ def add_type():
     add_data_dump = json.dumps(request.json)
     try:
         new_type_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
-        new_type_data['public_id'] = object_manager.get_highest_id(CmdbType.COLLECTION) + 1
+        new_type_data['public_id'] = object_manager.get_new_id(CmdbType.COLLECTION)
         new_type_data['creation_time'] = datetime.utcnow()
     except TypeError as e:
         LOGGER.warning(e)
@@ -86,7 +86,7 @@ def add_type():
     return resp
 
 
-@type_routes.route('/', methods=['PUT'])
+@type_blueprint.route('/', methods=['PUT'])
 @login_required
 @json_required
 def update_type():
@@ -102,7 +102,15 @@ def update_type():
         update_type_instance = CmdbType(**new_type_data)
     except CMDBError:
         return abort(400)
-
+    try:
+        old_fields = object_manager.get_type(update_type_instance.get_public_id()).get_fields()
+        new_fields = update_type_instance.get_fields()
+        if [item for item in old_fields if item not in new_fields]:
+            update_type_instance.clean_db = False
+        if [item for item in new_fields if item not in old_fields]:
+            update_type_instance.clean_db = False
+    except CMDBError:
+        return abort(500)
     try:
         object_manager.update_type(update_type_instance)
     except CMDBError:
@@ -112,20 +120,12 @@ def update_type():
     return resp
 
 
-@type_routes.route('/<int:public_id>', methods=['DELETE'])
+@type_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @login_required
 def delete_type(public_id: int):
     try:
-
         # delete all objects by typeID
         object_manager.delete_many_objects({'type_id': public_id})
-
-        # update category
-        categories = object_manager.get_categories_by({'type_list': {'$in': [public_id]}})
-        for category in categories:
-            category.type_list = [x for x in category.type_list if x != public_id]
-            object_manager.update_category(category)
-
         ack = object_manager.delete_type(public_id=public_id)
 
     except TypeNotFoundError:
@@ -136,7 +136,7 @@ def delete_type(public_id: int):
     return resp
 
 
-@type_routes.route('/delete/<string:public_ids>', methods=['GET'])
+@type_blueprint.route('/delete/<string:public_ids>', methods=['GET'])
 @login_required
 def delete_many_types(public_ids):
     try:
@@ -163,7 +163,7 @@ def delete_many_types(public_ids):
         return abort(500)
 
 
-@type_routes.route('/count/', methods=['GET'])
+@type_blueprint.route('/count/', methods=['GET'])
 @login_required
 def count_objects():
     try:
@@ -172,3 +172,80 @@ def count_objects():
     except CMDBError:
         return abort(400)
     return resp
+
+
+@type_blueprint.route('/category/<int:public_id>', methods=['GET'])
+@login_required
+def get_type_by_category(public_id):
+    try:
+        type_list = object_manager.get_types_by(**{'category_id': public_id})
+    except CMDBError:
+        return abort(500)
+    resp = make_response(type_list)
+    return resp
+
+
+@type_blueprint.route('/category/<int:public_id>', methods=['PUT'])
+@login_required
+def update_type_by_category(public_id):
+    try:
+        ack = object_manager.update_many_types(filter={'category_id': public_id}, update={'$set': {'category_id': 0}})
+    except CMDBError:
+        return abort(500)
+    return make_response(ack.raw_result)
+
+
+@type_blueprint.route('/cleanup/remove/<int:public_id>', methods=['GET'])
+@login_required
+def cleanup_removed_fields(public_id):
+    # REMOVE fields from CmdbObject
+    try:
+        update_type_instance = object_manager.get_type(public_id)
+        type_fields = update_type_instance.get_fields()
+        objects_by_type = object_manager.get_objects_by_type(public_id)
+
+        for obj in objects_by_type:
+            incorrect = []
+            correct = []
+            obj_fields = obj.get_all_fields()
+            for t_field in type_fields:
+                name = t_field["name"]
+                for field in obj_fields:
+                    if name == field["name"]:
+                        correct.append(field["name"])
+                    else:
+                        incorrect.append(field["name"])
+            removed_type_fields = [item for item in incorrect if not item in correct]
+            for field in removed_type_fields:
+                object_manager.remove_object_fields(filter={'public_id': obj.public_id},
+                                                    update={'$pull': {'fields': {"name": field}}})
+
+    except CMDBError:
+        return abort(500)
+
+    return make_response(update_type_instance)
+
+
+@type_blueprint.route('/cleanup/update/<int:public_id>', methods=['GET'])
+@login_required
+def cleanup_updated_push_fields(public_id):
+    # Update/Push fields to CmdbObject
+    try:
+        update_type_instance = object_manager.get_type(public_id)
+        type_fields = update_type_instance.get_fields()
+        objects_by_type = object_manager.get_objects_by_type(public_id)
+
+        for obj in objects_by_type:
+            for t_field in type_fields:
+                name = t_field["name"]
+                value = None
+                if [item for item in obj.get_all_fields() if item["name"] == name]:
+                    continue
+                if "value" in t_field:
+                    value = t_field["value"]
+                object_manager.update_object_fields(filter={'public_id': obj.public_id},
+                                                    update={'$addToSet': {'fields': {"name": name, "value": value}}})
+    except CMDBError:
+        return abort(500)
+
+    return make_response(update_type_instance)

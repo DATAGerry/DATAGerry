@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ import { Component, ComponentFactoryResolver, ComponentRef, OnInit, ViewChild, V
 import { fieldComponents } from '../fields/fields.list';
 import { simpleComponents } from '../simple/simple.list';
 import { RenderField } from '../fields/components.fields';
-import { ToastService } from '../../../layout/services/toast.service';
+import { ToastService } from '../../../layout/toast/toast.service';
 import { FormControl, Validators } from '@angular/forms';
 import { CmdbMode } from '../../modes.enum';
 
@@ -31,8 +31,8 @@ import { CmdbMode } from '../../modes.enum';
 })
 export class RenderElementComponent extends RenderField implements OnInit {
 
-  @ViewChild('fieldContainer', {read: ViewContainerRef, static: true}) containerField;
-  @ViewChild('simpleContainer', {read: ViewContainerRef, static: true}) containerSimple;
+  @ViewChild('fieldContainer', { read: ViewContainerRef, static: true }) containerField;
+  @ViewChild('simpleContainer', { read: ViewContainerRef, static: true }) containerSimple;
 
   private component: any;
   private componentRef: ComponentRef<any>;
@@ -57,9 +57,14 @@ export class RenderElementComponent extends RenderField implements OnInit {
         this.componentRef.instance.data = this.data;
         this.componentRef.instance.toast = this.toast;
         const fieldControl = new FormControl('');
+        const validators = [];
         if (this.data.required) {
-          fieldControl.setValidators(Validators.required);
+          validators.push(Validators.required);
         }
+        if (this.data.regex) {
+          validators.push(Validators.pattern(this.data.regex));
+        }
+        fieldControl.setValidators(validators);
         if (this.mode === CmdbMode.View) {
           fieldControl.disable();
         }

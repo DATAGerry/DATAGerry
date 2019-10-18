@@ -15,10 +15,10 @@
                      [dndDraggable]="control.typeController.content()"
                      class="list-group-item list-group-item-action">
                 <span>
-                  <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
+                  <fa-icon icon="control.typeController.icon"></fa-icon> {{ control.typeController.label }}
                 </span>
                   <button type="button" class="btn btn-primary btn-sm float-right">
-                    <i class="fa fa-bars" aria-hidden="true"></i>
+                    <fa-icon icon="bars"></fa-icon>
                   </button>
                   <div class="clearfix"></div>
                 </div>
@@ -39,10 +39,10 @@
                      [dndDraggable]="control.typeController.content()"
                      class="list-group-item list-group-item-action">
                 <span>
-                  <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
+                  <fa-icon icon="{{control.typeController.icon}}"></fa-icon> {{ control.typeController.label }}
                 </span>
                   <button type="button" class="btn btn-primary btn-sm float-right">
-                    <i class="fa fa-bars" aria-hidden="true"></i>
+                    <fa-icon icon="bars"></fa-icon>
                   </button>
                   <div class="clearfix"></div>
                 </div>
@@ -63,10 +63,10 @@
                      [dndDraggable]="control.typeController.content()"
                      class="list-group-item list-group-item-action">
                 <span>
-                  <i class="fa {{ control.typeController.icon }}"></i> {{ control.typeController.label }}
+                  <fa-icon [icon]="['fas', control.typeController.icon]"></fa-icon> {{ control.typeController.label }}
                 </span>
                   <button type="button" class="btn btn-primary btn-sm float-right">
-                    <i class="fa fa-bars" aria-hidden="true"></i>
+                    <fa-icon icon="bars"></fa-icon>
                   </button>
                   <div class="clearfix"></div>
                 </div>
@@ -98,23 +98,23 @@
                (dndMoved)="onDragged(section, sections, 'move')">
         <div class="card">
           <div class="card-header">
-            {{section.label}}
+            <fa-icon [icon]="['far', 'object-groups']"></fa-icon> {{section.label}}
             <span class="float-right">
-              <button class="btn btn-link" type="button" data-toggle="collapse"
+              <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
                       [attr.data-target]="'#' + section.name">
-                <i class="fa fa-pencil-square"></i>
+                <fa-icon [icon]="['far', 'edit']"></fa-icon>
               </button>
-              <button class="btn btn-link" type="button" dndHandle>
-                <i class="fa fa-arrows"></i>
+              <button class="btn btn-link mr-1" type="button" dndHandle>
+                <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
               </button>
               <button class="btn btn-link" type="button" (click)="remove(section, sections)">
-                <i class="fa fa-window-close-o"></i>
+                <fa-icon [icon]="['far', 'window-close']"></fa-icon>
               </button>
             </span>
           </div>
           <div class="collapse show" id="{{section.name}}">
             <div class="card-body">
-              <cmdb-config-edit [groupList]="groupList" [userList]="userList" [data]="section"></cmdb-config-edit>
+              <cmdb-config-edit [editingActivated]="activeEdit" [groupList]="groupList" [userList]="userList" [data]="section"></cmdb-config-edit>
             </div>
           </div>
           <div class="card-body" [dndDropzone]="['inputs']"
@@ -129,22 +129,22 @@
 
               <div class="fields card">
                 <div class="card-header">
-                  {{field.label}}
+                  <fa-icon [icon]="['fas', matchedType(field.type)]"></fa-icon> {{field.label}}
                   <span class="float-right">
-                    <button class="btn btn-link" type="button" data-toggle="collapse"
+                    <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
                             [attr.data-target]="'#' + field.name">
-                      <i class="fa fa-pencil-square"></i>
+                      <fa-icon [icon]="['far', 'edit']"></fa-icon>
                     </button>
-                    <button class="btn btn-link" type="button" dndHandle>
-                      <i class="fa fa-arrows"></i>
+                    <button class="btn btn-link mr-1" type="button" dndHandle>
+                      <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
                     </button>
                     <button class="btn btn-link" type="button" (click)="remove(field, section.fields)">
-                      <i class="fa fa-window-close-o"></i>
+                      <fa-icon [icon]="['far', 'window-close']"></fa-icon>
                     </button>
                   </span>
                 </div>
                 <div class="card-body collapse" id="{{field.name}}">
-                  <cmdb-config-edit [groupList]="groupList" [userList]="userList" [data]="field"></cmdb-config-edit>
+                  <cmdb-config-edit [editingActivated]="activeEdit" [groupList]="groupList" [userList]="userList" [data]="field"></cmdb-config-edit>
                 </div>
               </div>
             </div>

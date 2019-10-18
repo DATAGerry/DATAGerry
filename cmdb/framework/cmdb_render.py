@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -23,30 +23,59 @@ try:
 except ImportError:
     CMDBError = Exception
 
-from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.cmdb_type import CmdbType
 import logging
 from datetime import datetime
+
+from cmdb.framework.cmdb_object import CmdbObject
+from cmdb.framework.cmdb_type import CmdbType
+from cmdb.user_management.user_manager import User, UserManagement
 
 LOGGER = logging.getLogger(__name__)
 
 
+class RenderVisualization:
+
+    def __init__(self):
+        self.current_render_time = datetime.utcnow()
+        self.object_information: dict = {}
+        self.type_information: dict = {}
+
+    def get_object_information(self, idx):
+        return self.object_information[idx]
+
+    def get_type_information(self, idx):
+        return self.type_information[idx]
+
+
+class RenderResult(RenderVisualization):
+
+    def __init__(self):
+        super(RenderResult, self).__init__()
+        self.fields: list = []
+        self.sections: list = []
+        self.summaries: list = []
+        self.summary_line: str = ''
+        self.externals: list = []
+        self.match_fields: list = []
+
+
 class CmdbRender:
-    __POSSIBLE_OUTPUT_FORMATS = [
-        dict,
-        str
-    ]
+    AUTHOR_ANONYMOUS_NAME = 'anonymous'
 
-    __slots__ = ['_type_instance', '_object_instance', 'format_', 'fields', 'matched_fields']
+    def __init__(self, object_instance: CmdbObject,
+                 type_instance: CmdbType,
+                 render_user: (int, User),
+                 match_values: [] = None):
 
-    def __init__(self, type_instance: CmdbType, object_instance: CmdbObject, format_: (dict, str) = dict):
-        self.type_instance = type_instance
-        self.object_instance = object_instance
-        if format_ not in CmdbRender.__POSSIBLE_OUTPUT_FORMATS:
-            raise WrongOutputFormat(format_)
-        self.format_ = format_
-        self.fields = None
-        self.matched_fields = list()
+        from cmdb.user_management.user_manager import user_manager
+        self.object_instance: CmdbObject = object_instance
+        self.type_instance: CmdbType = type_instance
+        self.__usm: UserManagement = user_manager
+        # get render user if only the user id was passed
+        if isinstance(render_user, int):
+            self.render_user: User = self.__usm.get_user(render_user)
+        self.render_user: User = render_user
+        self.match_values: [] = match_values if match_values is not None else []
 
     @property
     def object_instance(self) -> CmdbObject:
@@ -87,87 +116,129 @@ class CmdbRender:
             raise TypeInstanceError()
         self._type_instance = type_instance
 
-    def _match_field_values(self) -> list:
-        tmp = list()
-        return tmp
+    def result(self) -> RenderResult:
+        return self._generate_result()
 
-    def set_matched_fieldset(self, matched_fields) -> list:
-        tmp = list()
-        for matched_field in matched_fields:
+    def _generate_result(self) -> RenderResult:
+        render_result = RenderResult()
+        try:
+            render_result = self.__generate_object_information(render_result)
+            render_result = self.__generate_type_information(render_result)
+            render_result = self.__set_fields(render_result)
+            render_result = self.__set_sections(render_result)
+            render_result = self.__set_summaries(render_result)
+            render_result = self.__set_external(render_result)
+            render_result = self.__set_matched_fieldset(render_result)
+        except CMDBError as err:
+            raise RenderError(f'Error while generating a CMDBResult: {err.message}')
+        return render_result
+
+    def __generate_object_information(self, render_result: RenderResult) -> RenderResult:
+        try:
+            author_name = self.__usm.get_user(self.object_instance.author_id).get_name()
+        except CMDBError as err:
+            author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
+            LOGGER.error(err.message)
+        render_result.object_information = {
+            'object_id': self.object_instance.get_public_id(),
+            'creation_time': self.object_instance.creation_time,
+            'last_edit_time': self.object_instance.last_edit_time,
+            'author_id': self.object_instance.author_id,
+            'author_name': author_name,
+            'active': self.object_instance.active,
+            'version': self.object_instance.version
+        }
+        return render_result
+
+    def __generate_type_information(self, render_result: RenderResult) -> RenderResult:
+        try:
+            author_name = self.__usm.get_user(self.type_instance.author_id).get_name()
+        except CMDBError as err:
+            author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
+            LOGGER.error(err.message)
+        try:
+            self.type_instance.render_meta['icon']
+        except KeyError:
+            self.type_instance.render_meta['icon'] = ''
+        render_result.type_information = {
+            'type_id': self.type_instance.get_public_id(),
+            'type_name': self.type_instance.name,
+            'type_label': self.type_instance.label,
+            'creation_time': self.type_instance.creation_time,
+            'author_id': self.type_instance.author_id,
+            'author_name': author_name,
+            'icon': self.type_instance.render_meta['icon'],
+            'active': self.type_instance.active,
+            'clean_db': self.type_instance.clean_db,
+            'version': self.type_instance.version,
+            'category_id': self.type_instance.category_id
+
+        }
+        return render_result
+
+    def __set_fields(self, render_result: RenderResult) -> RenderResult:
+        render_result.fields = self.__merge_fields_value()
+        return render_result
+
+    def __set_sections(self, render_result: RenderResult) -> RenderResult:
+        try:
+            render_result.sections = self.type_instance.render_meta['sections']
+        except (IndexError, ValueError):
+            render_result.sections = []
+        return render_result
+
+    def __merge_fields_value(self) -> list:
+        field_map = []
+        for field in self.type_instance.fields:
             try:
-                tmp.append({
-                    'name': matched_field,
-                    'value': self.object_instance.get_value(matched_field)
-                })
+                field['value'] = [x for x in self.object_instance.fields if x['name'] == field['name']][0]['value']
+            except (ValueError, IndexError):
+                field['value'] = None
+            field_map.append(field)
+        return field_map
+
+    def __set_matched_fieldset(self, render_result: RenderResult) -> RenderResult:
+        tmp = []
+        for matched_field in self.match_values:
+            try:
+                tmp.append(self.type_instance.get_field(matched_field))
             except CMDBError:
                 LOGGER.warning("Could not parse matched field {}".format(matched_field))
                 continue
-        self.matched_fields = tmp
+        render_result.match_fields = tmp
+        return render_result
 
-    def get_summaries(self, output=False) -> list:
-        """
-        get filled summaries - list of summaries should be a string
-        Returns:
-            list of filled summaries
-        """
+    def __set_summaries(self, render_result: RenderResult) -> RenderResult:
         # global summary list
         summary_list = []
-        # check if type has summary definition
+        summary_line = ""
         if not self.type_instance.has_summaries():
-            return summary_list
-        for sum in self.type_instance.get_summaries():
-            value_list = []
-            try:
-                # load summary
-                curr_sum = self.type_instance.get_summary(sum['name'])
-                # get field data for this summary
-                curr_sum_fields = curr_sum.fields
-                # get label data for this summary
-                curr_label_list = []
-                for cs_field in curr_sum_fields:
-                    try:
-                        type_fields = self.type_instance.get_fields()
-                        for fields in type_fields:
-                            if fields.get('name') == cs_field:
-                                curr_label_list.append(fields.get('label'))
-                        # check data
-                        try:
-                            field_data = self.object_instance.get_value(cs_field)
-                        except ValueError:
-                            continue
-                        value_list.append(field_data)
-                    except CMDBError:
-                        # if error while loading continue
-                        continue
-                curr_sum.set_labels(curr_label_list)
-                curr_sum.set_values(value_list)
-            except CMDBError:
-                # if error with summary continue
-                continue
-            if output:
-                summary_list.append(curr_sum.__dict__)
+            render_result.summaries = summary_list
+            render_result.summary_line = f'{self.type_instance.get_label()} #{self.object_instance.public_id}  '
+            return render_result
+        summary_list = self.type_instance.get_summary().fields
+        render_result.summaries = summary_list
+        first = True
+        for line in summary_list:
+            if first:
+                summary_line += f'{line["value"]}'
+                first = False
             else:
-                summary_list.append(curr_sum)
-        return summary_list
+                summary_line += f' | {line["value"]}'
+        render_result.summary_line = summary_line
+        return render_result
 
-    def has_summaries(self) -> bool:
-        if len(self.get_summaries()) > 0:
-            return True
-        else:
-            return False
-
-    def get_externals(self, output=False) -> list:
+    def __set_external(self, render_result: RenderResult) -> RenderResult:
         """
         get filled external links
         Returns:
             list of filled external links (_ExternalLink)
         """
-        from cmdb.framework.cmdb_errors import ExternalFillError
         # global external list
         external_list = []
         # checks if type has externals defined
         if not self.type_instance.has_externals():
-            raise NoExternalLinksError(external_data=self.type_instance.render_meta['external'])
+            render_result.externals = []
         # loop over all externals
         for ext_link in self.type_instance.get_externals():
             # append all values for required field in this list
@@ -181,132 +252,59 @@ class CmdbRender:
                 if ext_link_instance.link_requires_fields():
                     # check if has fields
                     if not ext_link_instance.has_fields():
-                        raise NoExternalFieldDataError(field_list)
+                        raise ValueError(field_list)
                     # for every field get the value data from object_instance
                     for ext_link_field in ext_link_instance.fields:
                         try:
                             _ = self.object_instance.get_value(ext_link_field)
                             if _ is None or _ == '':
                                 # if value is empty or does not exists
-                                raise EmptyValueError(ext_link_field)
+                                raise ValueError(ext_link_field)
                             field_list.append(_)
                         except CMDBError:
                             # if error append missing data
                             missing_list.append(ext_link_instance)
                 if len(missing_list) > 0:
-                    raise NoExternalFieldDataError(missing_list)
+                    raise RuntimeError(missing_list)
                 try:
                     # fill the href with field value data
                     ext_link_instance.fill_href(field_list)
-                except ExternalFillError as e:
+                except ValueError:
                     continue
-            except CMDBError:
+            except (CMDBError, Exception):
                 continue
-            # append field link to output list
-            if output:
-                external_list.append(ext_link_instance.__dict__)
-            else:
-                external_list.append(ext_link_instance)
-        return external_list
-
-    def has_externals(self) -> bool:
-        try:
-            self.get_externals()
-            return True
-        except CMDBError:
-            return False
-
-    def result(self):
-        render_result = self.build_render_result()
-        self.__add_extended_render_results(render_result)
-
+            external_list.append(ext_link_instance.__dict__)
+            render_result.externals = external_list
         return render_result
 
-    @staticmethod
-    def result_loop_render(object_manager, instances: list) -> list:
-        from cmdb.user_management.user_manager import UserManagement
-        all_user = UserManagement.get_all_users_as_dict(object_manager)
-        render_list = []
 
-        for element in instances:
-            render_result = element.build_render_result()
-            element.__add_extended_render_results(render_result)
+class RenderList:
 
-            dic = [i for i in all_user if (i['public_id'] == element.object_instance.author_id)]
-            render_result.set_author_name('{} {}'.format(dic[0]['first_name'], dic[0]['last_name']))
-            render_list.append(render_result)
+    def __init__(self, object_list: list, request_user: User):
+        self.object_list = object_list
+        self.request_user = request_user
 
-        return render_list
-
-    def build_render_result(self):
-        return RenderResult(
-            public_id=self.object_instance.get_public_id(),
-            creation_time=self.object_instance.creation_time,
-            last_edit_time=self.object_instance.last_edit_time,
-            author_id=self.object_instance.author_id,
-            author_name='',
-            type_id=self.type_instance.get_public_id(),
-            type_name=self.type_instance.get_name(),
-            label=self.type_instance.get_label(),
-            active=self.object_instance.active,
-            version=self.object_instance.version
-        )
-
-    def __add_extended_render_results(self, render_result):
-        if self.matched_fields:
-            render_result.match_fields = self.matched_fields
-        if self.object_instance and self.object_instance.fields:
-            if self.type_instance.public_id == self.object_instance.type_id:
-                for type_field in self.type_instance.fields:
-                    for fields in self.object_instance.fields:
-                        if fields.get('name') == type_field.get('name'):
-                            fields['label'] = type_field.get('label')
-                            fields['type'] = type_field.get('type')
-                            fields['selected'] = self.add_selected_option([fields.get('value')],
-                                                                          type_field.get('options'))
-                            render_result.fields = self.object_instance.fields
-        if self.has_summaries():
-            render_result.set_summaries(self.get_summaries(True))
-        if self.has_externals():
-            render_result.set_externals(self.get_externals(True))
-
-    def add_selected_option(self, keys: list, options: list):
-        if keys is not None and len(keys) > 0 and options is not None and len(options) > 0:
-            return [d for d in options if d['name'] in keys]
-        return []
+    def render_result_list(self, search_fields=None):
+        from cmdb.framework.cmdb_object_manager import object_manager
+        preparation_objects = []
+        for passed_object in self.object_list:
+            tmp_render = CmdbRender(type_instance=object_manager.get_type(passed_object.type_id),
+                                    object_instance=passed_object,
+                                    match_values=search_fields,
+                                    render_user=self.request_user)
+            current_render_result = tmp_render.result()
+            preparation_objects.append(current_render_result)
+        return preparation_objects
 
 
-class RenderResult:
+class RenderError(CMDBError):
+    """
+    Error class raised when an error occurs during rendering.
+    """
 
-    def __init__(self, public_id: int, creation_time: datetime, last_edit_time: datetime,
-                 author_id: int, author_name: str, version: str,
-                 type_id: int, active: bool, type_name: str, label: str = None):
-        self.public_id = public_id
-        self.creation_time = creation_time
-        self.last_edit_time = last_edit_time
-        self.author_id = author_id
-        self.author_name = author_name
-        self.active = active
-        self.type_id = type_id
-        self.type_name = type_name
-        self.version = version
-        self.label = label or type_name.title()
-        self.summaries = None
-        self.externals = None
-        self.match_fields = None
-        self.fields = None
-
-    def set_summaries(self, summary_list: list):
-        self.summaries = summary_list
-
-    def set_externals(self, external_list: list):
-        self.externals = external_list
-
-    def set_author_name(self, new_value):
-        self.author_name = new_value
-
-    def to_json(self):
-        return self.__dict__
+    def __init__(self, message):
+        self.message = f'Error while RENDER: {message}'
+        super(CMDBError, self).__init__(self.message)
 
 
 class TypeInstanceError(CMDBError):
@@ -319,36 +317,6 @@ class TypeInstanceError(CMDBError):
         super(CMDBError, self).__init__(self.message)
 
 
-class EmptyValueError(CMDBError):
-    """
-    Error when object instance value is empty or none
-    """
-
-    def __init__(self, field_name):
-        self.message = "Field with this name {} do not exists or empty".format(field_name)
-        super(CMDBError, self).__init__(self.message)
-
-
-class NoExternalLinksError(CMDBError):
-    """
-    Error when type has no external links
-    """
-
-    def __init__(self, external_data):
-        self.message = "Instance has no external links or required data are not defined. Data: {}".format(external_data)
-        super(CMDBError, self).__init__(self.message)
-
-
-class NoExternalFieldDataError(CMDBError):
-    """
-    Error when external link requires data which are not in field values
-    """
-
-    def __init__(self, field_list):
-        self.message = "Instance has no external links. Missing fields: {}".format(field_list)
-        super(CMDBError, self).__init__(self.message)
-
-
 class ObjectInstanceError(CMDBError):
     """
     Error class raised when the passed object is not an instance of CmdbObject.
@@ -356,14 +324,4 @@ class ObjectInstanceError(CMDBError):
 
     def __init__(self):
         self.message = "Wrong object instance"
-        super(CMDBError, self).__init__(self.message)
-
-
-class WrongOutputFormat(CMDBError):
-    """
-    Error class raised when a not support output format was chosen.
-    """
-
-    def __init__(self, output_format):
-        self.message = "{} with type {} is not a supported output format".format(output_format, type(output_format))
         super(CMDBError, self).__init__(self.message)

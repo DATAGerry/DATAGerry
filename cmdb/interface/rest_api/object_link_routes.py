@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,12 +16,15 @@
 
 import logging
 
-from flask import abort, request
+from flask import abort, request, current_app
 
 from cmdb.framework.cmdb_link import CmdbLink
-from cmdb.framework.cmdb_object_manager import ObjectManagerGetError, ObjectManagerInsertError, object_manager
-from cmdb.interface.rest_api.object_routes import object_rest
+from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError
+from cmdb.interface.rest_api.object_routes import object_blueprint
 from cmdb.interface.route_utils import make_response, NestedBlueprint
+
+with current_app.app_context():
+    object_manager = current_app.object_manager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -29,7 +32,7 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-link_rest = NestedBlueprint(object_rest, url_prefix='/link')
+link_rest = NestedBlueprint(object_blueprint, url_prefix='/link')
 
 
 @link_rest.route('/<int:public_id>/', methods=['GET'])
@@ -58,7 +61,7 @@ def get_link_by_partner(public_id: int):
 
 @link_rest.route('/', methods=['POST'])
 def add_link():
-    new_link_params = {**request.json, **{'public_id': int(object_manager.get_highest_id(CmdbLink.COLLECTION) + 1)}}
+    new_link_params = {**request.json, **{'public_id': int(object_manager.get_new_id(CmdbLink.COLLECTION) + 1)}}
     try:
         ack = object_manager.insert_link(new_link_params)
     except ObjectManagerInsertError:

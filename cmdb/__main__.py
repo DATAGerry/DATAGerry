@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-dataGerry is a flexible asset management tool and
+DATAGERRY is a flexible asset management tool and
 open-source configurable management database
 """
 import logging
@@ -118,7 +118,7 @@ def build_arg_parser() -> Namespace:
 
     from cmdb import __title__
     _parser = ArgumentParser(
-        prog='dataGerry',
+        prog='DATAGERRY',
         usage="usage: {} [options]".format(__title__),
     )
     _parser.add_argument('--setup', action='store_true', default=False, dest='setup',
@@ -149,7 +149,7 @@ def main(args):
     Args:
         args: start-options
     """
-    LOGGER.info("dataGerry starting...")
+    LOGGER.info("DATAGERRY starting...")
     if args.debug:
         _activate_debug()
     _init_config_reader(args.config_file)
@@ -216,13 +216,13 @@ def main(args):
     if args.start:
         _start_app()
     sleep(0.2)  # prevent logger output
-    LOGGER.info("dataGerry successfully started")
+    LOGGER.info("DATAGERRY successfully started")
 
 
 if __name__ == "__main__":
     from termcolor import colored
 
-    welcome_string = colored('Welcome to dataGerry \nStarting system with following parameters: \n{}\n', 'yellow')
+    welcome_string = colored('Welcome to DATAGERRY \nStarting system with following parameters: \n{}\n', 'yellow')
     brand_string = colored('''
     ########################################################################                                  
     
@@ -255,5 +255,5 @@ licensed under the terms of the GNU Affero General Public License version 3\n'''
 
             traceback.print_exc()
         LOGGER.critical("There was an unforeseen error {}".format(e))
-        LOGGER.info("dataGerry stopped!")
+        LOGGER.info("DATAGERRY stopped!")
         exit(1)

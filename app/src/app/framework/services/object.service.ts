@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -17,52 +17,140 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService } from '../../services/api-call.service';
+import { ApiCallService, ApiService } from '../../services/api-call.service';
 import { CmdbObject } from '../models/cmdb-object';
 import { Observable } from 'rxjs';
 import { ModalComponent } from '../../layout/helpers/modal/modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { map } from 'rxjs/operators';
+import { RenderResult } from '../models/cmdb-render';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ObjectService {
+export class ObjectService<T = RenderResult> implements ApiService {
 
-  private servicePrefix: string = 'object';
-  public objectList: CmdbObject[];
+  public servicePrefix: string = 'object';
 
   constructor(private api: ApiCallService, private modalService: NgbModal) {
-    this.getObjectList().subscribe((resObjectList: CmdbObject[]) => {
-      this.objectList = resObjectList;
-    });
   }
+
+  // Find calls
+  public getObjectList(native: boolean = false): Observable<T[]> {
+    if (native === true) {
+      return this.api.callGet<CmdbObject[]>(`${this.servicePrefix}/native/`).pipe(
+        map((apiResponse) => {
+          if (apiResponse.status === 204) {
+            return [];
+          }
+          return apiResponse.body;
+        })
+      );
+    }
+    return this.api.callGet<T[]>(`${this.servicePrefix}/`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public getObjectsByType(typeID: number): Observable<T[]> {
+    return this.api.callGet<T[]>(`${this.servicePrefix}/type/${typeID}`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public getObject<R>(publicID: number, native: boolean = false): Observable<R> {
+    if (native === true) {
+      return this.api.callGet<CmdbObject[]>(`${this.servicePrefix}/${publicID}/native/`).pipe(
+        map((apiResponse) => {
+          return apiResponse.body;
+        })
+      );
+    }
+    return this.api.callGet<R[]>(`${this.servicePrefix}/${publicID}/`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  // CRUD calls
+  public postObject(objectInstance: CmdbObject): Observable<any> {
+    return this.api.callPostRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
+  }
+
+  public putObject(publicID: number, objectInstance: CmdbObject): Observable<any> {
+    return this.api.callPutRoute<CmdbObject>(`${this.servicePrefix}/${publicID}/`, objectInstance);
+  }
+
+  public changeState(publicID: number, status: boolean) {
+    return this.api.callPut<boolean>(`${this.servicePrefix}/${publicID}/state/`, status).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  // Count calls
 
   public countObjectsByType(typeID: number) {
     return this.api.callGetRoute<number>(this.servicePrefix + '/count/' + typeID);
   }
 
-  public getObjectList() {
-    return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/');
+  // Custom calls
+  public getObjectReferences(publicID: number) {
+    return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/reference/${publicID}`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
-  public getObjectsByType(typeID: number) {
-    return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/type/' + typeID);
+  public getObjectsByUser(publicID: number) {
+    return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/user/${publicID}`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
-  public getObject(publicID: number, native: boolean = false) {
-    if (native) {
-      return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/' + publicID + '/native/');
-    }
-    return this.api.callGetRoute<CmdbObject[]>(this.servicePrefix + '/' + publicID);
+  public getNewObjectsSince(timestamp: number) {
+    return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/user/new/${timestamp}`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
-  public postObject(objectInstance: CmdbObject): Observable<any> {
-    return this.api.callPostRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
+  public getChangedObjectsSince(timestamp: number) {
+    return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/user/changed/${timestamp}`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
-  public putObject(objectInstance: CmdbObject): Observable<any> {
-    return this.api.callPutRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
-  }
 
   public openModalComponent(title: string,
                             modalMessage: string,

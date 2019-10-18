@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -24,13 +24,16 @@
 @import "~datatables.net-bs4/css/dataTables.bootstrap4.css";
 @import "~datatables.net-fixedheader-bs4/css/fixedHeader.bootstrap4.css";
 @import "~datatables.net-responsive-bs4/css/responsive.bootstrap4.css";
+@import "~datatables.net-select-dt/css/select.dataTables.css";
 
-/* import ng-select */
-@import "~@ng-select/ng-select/themes/default.theme.css";
+/* import font-awesome*/
+@import "~@fortawesome/fontawesome-free-webfonts/css/fontawesome.css";
+@import "~@fortawesome/fontawesome-free-webfonts/css/fa-regular.css";
+@import "~@fortawesome/fontawesome-free-webfonts/css/fa-brands.css";
+@import "~@fortawesome/fontawesome-free-webfonts/css/fa-solid.css";
 
-/* import fontawesome */
-$fa-font-path: "../node_modules/font-awesome/fonts";
-@import "~font-awesome/scss/font-awesome";
+/* import archwizard*/
+@import "~angular-archwizard/archwizard.scss";
 
 /* custom global modules */
 @import "scss/variables";
@@ -42,3 +45,7 @@ $fa-font-path: "../node_modules/font-awesome/fonts";
 @import "scss/render";
 @import "scss/wizard";
 @import "scss/toast";
+@import "scss/table";
+@import "scss/icon";
+@import "scss/card";
+@import "scss/gimmick";

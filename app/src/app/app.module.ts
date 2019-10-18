@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -24,12 +24,12 @@ import { AppComponent } from './app.component';
 import { LayoutModule } from './layout/layout.module';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
-import { HttpErrorInterceptor } from './auth/interceptors/http-error.interceptor.tx';
 import { PreviousRouteService } from './services/previous-route.service';
 import { NgxSpinnerModule } from 'ngx-spinner';
-import { ConnectionService } from './services/connection.service';
 import { DatePipe } from '@angular/common';
 import { FileSaverModule } from 'ngx-filesaver';
+import { ToastModule } from './layout/toast/toast.module';
+
 
 @NgModule({
   declarations: [
@@ -41,14 +41,13 @@ import { FileSaverModule } from 'ngx-filesaver';
     LayoutModule,
     NgxSpinnerModule,
     AppRoutingModule,
-    FileSaverModule
+    FileSaverModule,
+    ToastModule,
   ],
   providers: [
     PreviousRouteService,
-    ConnectionService,
     DatePipe,
     {provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true},
-    //{provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true},
   ],
   bootstrap: [AppComponent]
 })

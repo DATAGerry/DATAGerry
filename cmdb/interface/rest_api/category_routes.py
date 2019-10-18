@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -17,13 +17,14 @@
 import logging
 import json
 
-from cmdb.framework.cmdb_object_manager import object_manager
-from cmdb.framework.cmdb_object_category import CmdbCategory
-from cmdb.utils.interface_wraps import login_required
-from cmdb.interface.route_utils import make_response, RootBlueprint
+from cmdb.framework.cmdb_category import CmdbCategory
+from cmdb.interface.route_utils import make_response, RootBlueprint, login_required
 
-from flask import request, abort
+from flask import request, abort, current_app
 from bson import json_util
+
+with current_app.app_context():
+    object_manager = current_app.object_manager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -31,10 +32,10 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-categories_routes = RootBlueprint('categories_rest', __name__, url_prefix='/category')
+categories_blueprint = RootBlueprint('categories_rest', __name__, url_prefix='/category')
 
 
-@categories_routes.route('/', methods=['GET'])
+@categories_blueprint.route('/', methods=['GET'])
 @login_required
 def get_categories():
     categories_list = object_manager.get_all_categories()
@@ -42,7 +43,7 @@ def get_categories():
     return resp
 
 
-@categories_routes.route('/tree', methods=['GET'])
+@categories_blueprint.route('/tree', methods=['GET'])
 @login_required
 def get_category_tree():
     from cmdb.framework.cmdb_errors import NoRootCategories
@@ -53,14 +54,22 @@ def get_category_tree():
     return make_response(category_tree)
 
 
-@categories_routes.route('/<int:public_id>', methods=['GET'])
+@categories_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
 def get_category(public_id):
     category_instance = object_manager.get_category(public_id)
     return make_response(category_instance)
 
 
-@categories_routes.route('/', methods=['POST'])
+@categories_blueprint.route('/root', methods=['GET'])
+@categories_blueprint.route('/root/', methods=['GET'])
+@login_required
+def get_root_category():
+    category_instance = object_manager.get_categories_by(_filter={'root': True})
+    return make_response(category_instance)
+
+
+@categories_blueprint.route('/', methods=['POST'])
 @login_required
 def add_category():
     http_post_request_data = json.dumps(request.json)
@@ -72,14 +81,14 @@ def add_category():
         LOGGER.warning(e)
         abort(400)
     try:
-        modified_category_data['public_id'] = int(object_manager.get_highest_id(CmdbCategory.COLLECTION) + 1)
+        modified_category_data['public_id'] = int(object_manager.get_new_id(CmdbCategory.COLLECTION))
         ack = object_manager.insert_category(modified_category_data)
     except CMDBError as e:
         LOGGER.debug(e.message)
     return make_response(ack)
 
 
-@categories_routes.route('/', methods=['PUT'])
+@categories_blueprint.route('/', methods=['PUT'])
 @login_required
 def update_category():
     http_put_request_data = json.dumps(request.json)
@@ -105,8 +114,15 @@ def update_category():
     return resp
 
 
-@categories_routes.route('/<int:public_id>', methods=['DELETE'])
+@categories_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @login_required
 def delete_category(public_id):
     delete_response = object_manager.delete_category(public_id)
+
+    # update category
+    categories = object_manager.get_categories_by({'parent_id': public_id})
+    for category in categories:
+        category.parent_id = None
+        object_manager.update_category(category)
+
     return make_response(delete_response)

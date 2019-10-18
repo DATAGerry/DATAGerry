@@ -1,0 +1,42 @@
+<div id="delete-log-list" class="row">
+  <div class="col-9">
+    <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-hover table-striped">
+      <thead>
+      <tr>
+        <th scope="col">Log ID</th>
+        <th scope="col">Object ID</th>
+        <th scope="col">Action</th>
+        <th scope="col">User</th>
+        <th scope="col">Version</th>
+        <th scope="col">Date</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let deleteLog of deleteLogList">
+        <th scope="row">{{deleteLog.public_id}}</th>
+        <td>{{deleteLog.object_id}}</td>
+        <td>{{deleteLog.action_name}}</td>
+        <td>{{deleteLog.user_name}}</td>
+        <td>{{deleteLog.version}}</td>
+        <td>{{deleteLog.log_time.$date | date: "MM-dd-yyyy hh:mm:ss"}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-3">
+    <div class="card">
+      <div class="card-header">
+        Log Methods:
+      </div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item list-group-item-action list-group-item-danger pointer" (click)="cleanup()">
+          <i class="far fa-trash-alt"></i> Cleanup
+          <i class="fas fa-question-circle float-right" placement="left" ngbTooltip="Deletes all logs"></i>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-12 mt-2 card-footer text-center text-muted">
+    Delete Logs
+  </div>
+</div>

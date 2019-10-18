@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,7 @@
 */
 
 import { Component, Input } from '@angular/core';
+import { RenderResult } from '../../../models/cmdb-render';
 
 @Component({
   selector: 'cmdb-object-externals',
@@ -25,6 +26,6 @@ import { Component, Input } from '@angular/core';
 })
 export class ObjectExternalsComponent {
 
-  @Input() objectInstance: any = [];
+  @Input() renderResult: RenderResult = undefined;
 
 }

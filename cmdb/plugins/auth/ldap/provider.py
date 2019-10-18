@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@ from cmdb.user_management.user_authentication import AuthenticationProvider
 class LDAPAuthenticationPlugin(AuthPluginBase):
 
     def __init__(self):
-        super(AuthPluginBase, 'LDAPAuthenticationProvider', LdapAuthenticationProvider)
+        super(LDAPAuthenticationPlugin, self).__init__('LdapAuthenticationProvider', LdapAuthenticationProvider)
 
 
 class LdapAuthenticationProvider(AuthenticationProvider):
@@ -41,14 +41,14 @@ class LdapAuthenticationProvider(AuthenticationProvider):
         super(AuthenticationProvider, self).__init__()
 
     def connect(self, bind_dn, password):
-        from ldap3 import Server, Connection
+        """from ldap3 import Server, Connection
         server = Server(host=self.ldap_server, port=int(self.ldap_port), use_ssl=self.ldap_ssl)
         conn = Connection(
             server=server,
             user=bind_dn,
             password=password,
-            auto_bind=True)
-        return conn
+            auto_bind=True)"""
+        return True
 
     def authenticate(self, user, password: str, **kwargs) -> bool:
         connection = self.connect(bind_dn=self.bind_dn, password=self.bind_password)

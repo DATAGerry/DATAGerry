@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -45,7 +45,7 @@ class CsvExportType(ExportType):
     FILE_EXTENSION = "csv"
     LABEL = "CSV"
     MULTITYPE_SUPPORT = False
-    ICON = "fa-table"
+    ICON = "file-csv"
     DESCRIPTION = "Export as CSV (only of the same type)"
     ACTIVE = True
 
@@ -94,7 +94,7 @@ class JsonExportType(ExportType):
     FILE_EXTENSION = "json"
     LABEL = "JSON"
     MULTITYPE_SUPPORT = True
-    ICON = "fa-file-text-o"
+    ICON = "file-code"
     DESCRIPTION = "Export as JSON"
     ACTIVE = True
 
@@ -121,7 +121,7 @@ class XlsxExportType(ExportType):
     FILE_EXTENSION = "xlsx"
     LABEL = "XLSX"
     MULTITYPE_SUPPORT = True
-    ICON = "fa-file-excel-o"
+    ICON = "file-excel"
     DESCRIPTION = "Export as XLS"
     ACTIVE = True
 
@@ -202,7 +202,7 @@ class XmlExportType(ExportType):
     FILE_EXTENSION = "xml"
     LABEL = "XML"
     MULTITYPE_SUPPORT = True
-    ICON = "fa-code"
+    ICON = "file-alt"
     DESCRIPTION = "Export as XML"
     ACTIVE = True
 

@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -29,16 +29,17 @@ DIR_DOCS_BUILD = ${DIR_BUILD}/docs
 DIR_DOCS_TARGET = cmdb/interface/docs/static
 DIR_RPM_BUILD = ${DIR_BUILD}/rpm
 DIR_TARGZ_BUILD = ${DIR_BUILD}/targz
+DIR_DOCKER_BUILD = ${DIR_BUILD}/docker
 DIR_WEB_SOURCE = app
-DIR_WEB_BUILD = app/dist/dataGerryApp
-DIR_WEB_TARGET = cmdb/interface/net_app/dataGerryApp
+DIR_WEB_BUILD = app/dist/DATAGERRYApp
+DIR_WEB_TARGET = cmdb/interface/net_app/DATAGERRYApp
 
 # set default goal
 .DEFAULT_GOAL := all
 
 # build whole application
 .PHONY: all
-all: bin rpm targz
+all: bin rpm targz docker
 
 
 # install Python requirements
@@ -62,7 +63,7 @@ webapp:
 	cp -R ${DIR_WEB_BUILD}/* ${DIR_WEB_TARGET}
 
 
-# create onefile binary of dataGerry
+# create onefile binary of DATAGERRY
 .PHONY: bin
 bin: requirements docs webapp
 	${BIN_PYINSTALLER} --name datagerry --onefile \
@@ -76,7 +77,7 @@ bin: requirements docs webapp
 		--hidden-import gunicorn.glogging \
 		--hidden-import gunicorn.workers.sync \
 		--add-data cmdb/interface/docs/static:cmdb/interface/docs/static \
-		--add-data cmdb/interface/net_app/dataGerryApp:cmdb/interface/net_app/dataGerryApp \
+		--add-data cmdb/interface/net_app/DATAGERRYApp:cmdb/interface/net_app/DATAGERRYApp \
 		cmdb/__main__.py
 
 
@@ -104,6 +105,18 @@ targz: bin
 	cp LICENSE ${DIR_TARGZ_BUILD}/src/datagerry
 	cp contrib/setup/setup.sh ${DIR_TARGZ_BUILD}/src/datagerry
 	tar -czvf ${DIR_TARGZ_BUILD}/datagerry.tar.gz -C ${DIR_TARGZ_BUILD}/src datagerry
+
+
+# create Docker image
+.PHONY: docker
+docker: rpm
+	mkdir -p ${DIR_DOCKER_BUILD}
+	mkdir -p ${DIR_DOCKER_BUILD}/src
+	mkdir -p ${DIR_DOCKER_BUILD}/src/files
+	cp contrib/docker/Dockerfile ${DIR_DOCKER_BUILD}/src
+	cp ${DIR_RPM_BUILD}/RPMS/x86_64/DATAGERRY-*.rpm ${DIR_DOCKER_BUILD}/src/files
+	docker build -f ${DIR_DOCKER_BUILD}/src/Dockerfile -t nethinks/datagerry:latest ${DIR_DOCKER_BUILD}/src
+	docker save --output ${DIR_DOCKER_BUILD}/datagerry_latest.tar nethinks/datagerry:latest
 
 
 # execute tests

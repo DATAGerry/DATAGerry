@@ -6,6 +6,8 @@ jobs:
     steps:
       # checkout the source code
       - checkout
+      # setup docker environment (to allow building docker images)
+      - setup_remote_docker
       # build datagerry
       - run: make
       # run tests (temp. disabled for redesign, see NET-71)
@@ -14,8 +16,10 @@ jobs:
       - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$CIRCLE_BRANCH/bin"
       - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/bin/datagerry $SCP_USER@$SCP_HOST:$SCP_PATH/$CIRCLE_BRANCH/bin
       - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$CIRCLE_BRANCH/rpm"
-      - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/rpm/RPMS/x86_64/dataGerry-*.rpm  $SCP_USER@$SCP_HOST:$SCP_PATH/$CIRCLE_BRANCH/rpm
+      - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/rpm/RPMS/x86_64/DATAGERRY-*.rpm  $SCP_USER@$SCP_HOST:$SCP_PATH/$CIRCLE_BRANCH/rpm
       - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$CIRCLE_BRANCH/targz"
       - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/targz/datagerry.tar.gz  $SCP_USER@$SCP_HOST:$SCP_PATH/$CIRCLE_BRANCH/targz
+      - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$CIRCLE_BRANCH/docker"
+      - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/docker/datagerry_latest.tar  $SCP_USER@$SCP_HOST:$SCP_PATH/$CIRCLE_BRANCH/docker
       - store_artifacts:
           path: target/bin

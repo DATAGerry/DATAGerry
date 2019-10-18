@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,14 @@
 from flask import Flask
 import logging
 
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+
 LOGGER = logging.getLogger(__name__)
 
 
 class BaseCmdbApp(Flask):
 
-    def __init__(self, import_name: str):
+    def __init__(self, import_name: str, object_manager: CmdbObjectManager = None):
+        self.object_manager: CmdbObjectManager = object_manager
+        self.temp_folder: str = '/tmp/'
         super(BaseCmdbApp, self).__init__(import_name)

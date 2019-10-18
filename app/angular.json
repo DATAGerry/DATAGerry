@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "dataGerryApp": {
+    "DATAGERRYApp": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/dataGerryApp",
+            "outputPath": "dist/DATAGERRYApp",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -33,6 +33,8 @@
               "./node_modules/bootstrap/dist/js/bootstrap.bundle.js",
               "./node_modules/datatables.net/js/jquery.dataTables.js",
               "./node_modules/datatables.net-bs4/js/dataTables.bootstrap4.js",
+              "./node_modules/datatables.net-rowgroup/js/dataTables.rowGroup.js",
+              "./node_modules/datatables.net-rowgroup-bs4/js/rowGroup.bootstrap4.js",
               "./node_modules/datatables.net-fixedheader/js/dataTables.fixedHeader.js",
               "./node_modules/datatables.net-fixedheader-bs4/js/fixedHeader.bootstrap4.js",
               "./node_modules/datatables.net-responsive/js/dataTables.responsive.js",
@@ -42,6 +44,7 @@
               "./node_modules/datatables.net-buttons/js/buttons.flash.js",
               "./node_modules/datatables.net-buttons/js/buttons.html5.js",
               "./node_modules/datatables.net-buttons/js/buttons.print.js",
+              "./node_modules/datatables.net-select/js/dataTables.select.js",
               "./node_modules/jszip/dist/jszip.js"
             ],
             "es5BrowserSupport": true
@@ -76,18 +79,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "dataGerryApp:build"
+            "browserTarget": "DATAGERRYApp:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "dataGerryApp:build:production"
+              "browserTarget": "DATAGERRYApp:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "dataGerryApp:build"
+            "browserTarget": "DATAGERRYApp:build"
           }
         },
         "test": {
@@ -121,7 +124,7 @@
         }
       }
     },
-    "dataGerryApp-e2e": {
+    "DATAGERRYApp-e2e": {
       "root": "e2e/",
       "projectType": "application",
       "prefix": "",
@@ -130,11 +133,11 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "dataGerryApp:serve"
+            "devServerTarget": "DATAGERRYApp:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "dataGerryApp:serve:production"
+              "devServerTarget": "DATAGERRYApp:serve:production"
             }
           }
         },
@@ -150,5 +153,5 @@
       }
     }
   },
-  "defaultProject": "dataGerryApp"
+  "defaultProject": "DATAGERRYApp"
 }

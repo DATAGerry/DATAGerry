@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -14,15 +14,27 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from cmdb.user_management.user_base import UserManagementBase
-from cmdb.user_management.user_manager import UserManagement
-from cmdb.user_management.user_group import UserGroup
+"""
+Basic user functions such as create, change and delete are implemented here.
+In addition, the rights management, group administration and access rights are defined here.
+"""
+from cmdb.plugins import PluginManager
 from cmdb.user_management.user import User
-from cmdb.user_management.user_authentication import AuthenticationProvider
+from cmdb.user_management.user_authentication import AuthenticationProvider, LocalAuthenticationProvider
+from cmdb.user_management.user_base import UserManagementBase
+from cmdb.user_management.user_group import UserGroup
+from cmdb.user_management.user_manager import UserManagement
 
 __COLLECTIONS__ = [
     User,
     UserGroup
 ]
 
+__FIXED_GROUPS__ = [
+    UserGroup(public_id=1, name='admin', label='Administrator', rights=[], deletable=False),
+    UserGroup(public_id=2, name='user', label='User', rights=[], deletable=False)
+]
 
+__AUTH_PROVIDERS__ = [
+    LocalAuthenticationProvider.get_name(),
+]

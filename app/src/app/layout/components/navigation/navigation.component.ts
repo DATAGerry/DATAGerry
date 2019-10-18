@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -27,13 +27,14 @@ import { Router } from '@angular/router';
 })
 export class NavigationComponent implements OnInit, OnDestroy {
 
-  public readonly title: string = 'dataGerry';
+  public readonly title: string = 'DATAGERRY';
 
   constructor(private renderer: Renderer2, public authService: AuthService, private router: Router) {
   }
 
   public ngOnInit(): void {
     this.renderer.addClass(document.body, 'header-fixed');
+    this.dropdownSubmenu();
   }
 
   public ngOnDestroy(): void {
@@ -45,4 +46,23 @@ export class NavigationComponent implements OnInit, OnDestroy {
     this.router.navigate(['/auth/login']);
   }
 
+  private dropdownSubmenu() {
+    $('.dropdown-menu a.dropdown-toggle').on('click', function(e) {
+      if (!$(this).next().hasClass('show')) {
+        $(this).parents('.dropdown-menu').first().find('.show').removeClass('show');
+      }
+      const $subMenu = $(this).next('.dropdown-menu');
+      $subMenu.toggleClass('show');
+      // tslint:disable-next-line:only-arrow-functions
+      $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', function() {
+        $('.dropdown-submenu .show').removeClass('show');
+      });
+      return false;
+    });
+  }
+
+  public visibilitySidebar() {
+    const sidebar = document.getElementById('sidebar').classList;
+    sidebar.length === 0 ? sidebar.add('set-sidebar-visible') : sidebar.remove('set-sidebar-visible');
+  }
 }

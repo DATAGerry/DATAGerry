@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,8 @@
 import calendar
 import datetime
 import re
+
+from cmdb.framework.cmdb_render import RenderVisualization
 
 try:
     import uuid
@@ -38,7 +40,6 @@ def default(obj):
     from cmdb.framework import CmdbDAO
     from cmdb.user_management import UserManagementBase
     from cmdb.user_management.user_right import BaseRight
-    from cmdb.framework.cmdb_render import RenderResult
     """Helper function for converting cmdb objects to json"""
     if isinstance(obj, CmdbDAO):
         return obj.__dict__
@@ -46,8 +47,8 @@ def default(obj):
         return obj.__dict__
     if isinstance(obj, BaseRight):
         return obj.__dict__
-    if isinstance(obj, RenderResult):
-        return obj.to_json()
+    if isinstance(obj, RenderVisualization):
+        return obj.__dict__
     if isinstance(obj, bytes):
         return obj.decode("utf-8")
     if isinstance(obj, ObjectId):

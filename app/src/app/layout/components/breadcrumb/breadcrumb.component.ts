@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -91,7 +91,7 @@ export class BreadcrumbComponent implements OnInit {
 
   private buildBreadCrumb(route: ActivatedRoute) {
     let breadCrumbLabel: string = '';
-    let url: string = '';
+    let urlx: string = '';
     const hasData = (route.routeConfig && route.routeConfig.data);
     const hasDynamicBreadcrumb: boolean = route.snapshot.params.hasOwnProperty(this.ROUTE_PARAM_BREADCRUMB);
 
@@ -100,10 +100,10 @@ export class BreadcrumbComponent implements OnInit {
         breadCrumbLabel = route.snapshot.params[this.ROUTE_PARAM_BREADCRUMB].replace(/_/g, ' ');
       } else if (route.snapshot.data.hasOwnProperty(this.ROUTE_DATA_BREADCRUMB)) {
         breadCrumbLabel = route.snapshot.data[this.ROUTE_DATA_BREADCRUMB];
-        breadCrumbLabel = breadCrumbLabel === 'Framework' ? 'Dashboard' : breadCrumbLabel;
+        breadCrumbLabel = breadCrumbLabel;
       }
       const routeURL: string = route.snapshot.url.map(segment => segment.path).join('/');
-      url += `/framework/${routeURL}`;
+      urlx += `${routeURL}`;
       if (routeURL.length === 0) {
         route.snapshot.params = {};
       }
@@ -111,7 +111,7 @@ export class BreadcrumbComponent implements OnInit {
         label: breadCrumbLabel,
         params: route.snapshot.params,
         queryParams: route.snapshot.queryParams,
-        url: url === '/framework/framework' ? '' : url
+        url: urlx
       };
 
       if (route.snapshot.data.hasOwnProperty(this.PREFIX_BREADCRUMB)) {

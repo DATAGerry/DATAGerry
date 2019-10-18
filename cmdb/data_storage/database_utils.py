@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -103,6 +103,7 @@ def object_hook(dct: dict):
 
 
 def default(obj):
+    from cmdb.framework.cmdb_render import RenderResult
     """Helper function for converting bson to json
         Args:
             obj: bson data
@@ -112,6 +113,8 @@ def default(obj):
         """
     from cmdb.framework.cmdb_dao import CmdbDAO
     if isinstance(obj, CmdbDAO):
+        return obj.__dict__
+    if isinstance(obj, RenderResult):
         return obj.__dict__
     if isinstance(obj, ObjectId):
         return {"$oid": str(obj)}

@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -25,39 +25,43 @@ class UserGroup(UserManagementBase):
         {'keys': [('name', UserManagementBase.ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
-    def __init__(self, name: str, label: str = None, rights: list = None, **kwargs):
-        self.name = name
-        self.label = label or name.title()
-        self.rights = rights or []
+    def __init__(self, name: str, label: str = None, rights: list = None, deletable: bool = True, **kwargs):
+        self.name: str = name
+        self.label: str = label or name.title()
+        self.rights: list = rights or []
+        self.deletable: bool = deletable
         super(UserGroup, self).__init__(**kwargs)
 
-    def get_name(self):
+    def get_name(self) -> str:
         return self.name
 
-    def get_label(self):
+    def get_label(self) -> str:
         return self.label
 
     def set_rights(self, rights: list):
         self.rights = rights
 
-    def get_rights(self):
+    def get_rights(self) -> list:
         return self.rights
 
-    def get_right(self, name):
+    def get_right(self, name) -> str:
         try:
             return self.rights[self.rights.index(name)]
         except (IndexError, TypeError, ValueError):
             raise RightNotFoundError(self.name, name)
 
-    def has_right(self, name):
+    def has_right(self, name) -> bool:
         try:
             self.get_right(name)
         except RightNotFoundError:
             return False
         return True
 
+    def is_deletable(self) -> bool:
+        return self.deletable
+
 
 class RightNotFoundError(CMDBError):
     def __init__(self, group, right):
-        super().__init__()
         self.message = "Right was not found inside this group Groupname: {} | Rightname: {}".format(group, right)
+        super(RightNotFoundError, self).__init__()

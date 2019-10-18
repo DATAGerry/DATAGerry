@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -23,178 +23,38 @@ The implementation of the manager used is always realized using the respective s
 import logging
 import re
 
+from datetime import datetime
+
 from cmdb.data_storage import get_pre_init_database
 from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
 from cmdb.event_management.event import Event
-from cmdb.framework import *
-from cmdb.framework import CmdbStatus
+from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb.framework.cmdb_category import CmdbCategory
+from cmdb.framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplate
 from cmdb.framework.cmdb_errors import WrongInputFormatError, UpdateError, TypeInsertError, TypeAlreadyExists, \
-    TypeNotFoundError, ObjectInsertError, ObjectNotFoundError, ObjectDeleteError, NoRootCategories
+    TypeNotFoundError, ObjectInsertError, ObjectDeleteError, NoRootCategories, ObjectManagerGetError, \
+    ObjectManagerInsertError, ObjectManagerUpdateError
+from cmdb.framework.cmdb_link import CmdbLink
+from cmdb.framework.cmdb_object import CmdbObject
+from cmdb.framework.cmdb_status import CmdbStatus
+from cmdb.framework.cmdb_type import CmdbType
 from cmdb.utils.error import CMDBError
-from cmdb.utils.helpers import timing
 
 LOGGER = logging.getLogger(__name__)
 
 
-class CmdbManagerBase:
-    """Represents the base class for object managers. A respective implementation is always adapted to the
-       respective database manager :class:`cmdb.data_storage.DatabaseManager` or the used functionalities.
-       But should always use at least the super functions listed here.
-
-    """
-
-    def __init__(self, database_manager):
-        """Example:
-            Depending on the condition or whether a fork process is used, the database manager can also be seen
-            directly in the declaration of the object manager
-
-        .. code-block:: python
-               :linenos:
-
-                system_config_reader = get_system_config_reader()
-                object_manager = CmdbObjectManager(
-                    database_manager = DatabaseManagerMongo(
-                        connector=MongoConnector(
-                            host=system_config_reader.get_value('host', 'Database'),
-                            port=int(system_config_reader.get_value('port', 'Database')),
-                            database_name=system_config_reader.get_value('database_name', 'Database'),
-                            timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT
-                        )
-                    )
-                )
-
-        Args:
-            database_manager (DatabaseManager): initialisation of an database manager
-
-        """
-        if database_manager:
-            self.dbm = database_manager
-
-    def _get(self, collection: str, public_id: int) -> (object, dict):
-        """get document from the database by their public id
-
-        Args:
-            collection (str): name of the database collection
-            public_id (int): public id of the document/entry
-
-        Returns:
-            str: founded document in json format
-        """
-        return self.dbm.find_one(
-            collection=collection,
-            public_id=public_id
-        )
-
-    def _get_all(self, collection: str, sort='public_id', limit=0, **requirements: dict) -> list:
-        """get all documents from the database which have the passing requirements
-
-        Args:
-            collection (str): name of the database collection
-            sort (str): sort by given key - default public_id
-            **requirements (dict): dictionary of key value requirement
-
-        Returns:
-            list: list of all documents
-
-        """
-        requirements_filter = {}
-        formatted_sort = [(sort, self.dbm.DESCENDING)]
-        for k, req in requirements.items():
-            requirements_filter.update({k: req})
-        return self.dbm.find_all(collection=collection, limit=limit, filter=requirements_filter, sort=formatted_sort)
-
-    def _insert(self, collection: str, data: dict) -> (int, None):
-        """insert document/object into database
-
-        Args:
-            collection (str): name of the database collection
-            data (dict): dictionary of object or the data
-
-        Returns:
-            int: new public_id of inserted document
-            None: if anything goes wrong
-
-        """
-        return self.dbm.insert(
-            collection=collection,
-            data=data
-        )
-
-    def _update(self, collection: str, public_id: int, data: dict) -> object:
-        """
-        update document/object in database
-        Args:
-            collection (str): name of the database collection
-            public_id (int): public id of object
-            data: changed data/object
-
-        Returns:
-            acknowledgment of database
-        """
-        return self.dbm.update(
-            collection=collection,
-            public_id=public_id,
-            data=data
-        )
-
-    def _delete(self, collection: str, public_id: int):
-        """
-        delete document/object inside database
-        Args:
-            collection (str): name of the database collection
-            public_id (int): public id of object
-
-        Returns:
-            acknowledgment of database
-        """
-        return self.dbm.delete(
-            collection=collection,
-            public_id=public_id
-        ).acknowledged
-
-    def _delete_many(self, collection: str, filter_query: dict):
-        """
-        removes all documents that match the filter from a collection.
-        Args:
-            collection (str): name of the database collection
-            filter (dict): Specifies deletion criteria using query operators.
-
-        Returns:
-            acknowledgment of database
-        """
-        return self.dbm.delete_many(
-            collection=collection,
-            **filter_query
-        )
-
-    def _search(self, collection: str, requirements, limit=0):
-        return self._get_all(collection, limit=limit, **requirements)
-
-
 class CmdbObjectManager(CmdbManagerBase):
     def __init__(self, database_manager=None, event_queue=None):
-        """
-
-        Args:
-            database_manager:
-        """
         self._event_queue = event_queue
         super(CmdbObjectManager, self).__init__(database_manager)
 
     def is_ready(self) -> bool:
         return self.dbm.status()
 
-    def get_highest_id(self, collection: str):
-        return self.dbm.get_highest_id(collection)
+    def get_new_id(self, collection: str) -> int:
+        return self.dbm.get_next_public_id(collection)
 
     def get_object(self, public_id: int):
-        """get object by public id
-        Args:
-            public_id:
-
-        Returns:
-
-        """
         try:
             return CmdbObject(
                 **self._get(
@@ -202,8 +62,8 @@ class CmdbObjectManager(CmdbManagerBase):
                     public_id=public_id
                 )
             )
-        except (CMDBError, Exception):
-            raise ObjectNotFoundError(obj_id=public_id)
+        except (CMDBError, Exception) as err:
+            raise ObjectManagerGetError(err.message)
 
     def get_objects(self, public_ids: list):
         object_list = []
@@ -287,7 +147,15 @@ class CmdbObjectManager(CmdbManagerBase):
                 continue
         return result_list
 
-    def insert_object(self, data: (CmdbObject, dict)):
+    def insert_object(self, data: (CmdbObject, dict)) -> int:
+        """
+        Insert new CMDB Object
+        Args:
+            data: init data
+
+        Returns:
+            Public ID of the new object in database
+        """
         if isinstance(data, dict):
             try:
                 new_object = CmdbObject(**data)
@@ -300,7 +168,6 @@ class CmdbObjectManager(CmdbManagerBase):
                 collection=CmdbObject.COLLECTION,
                 data=new_object.to_database()
             )
-            # create cmdb.core.object.added event
             if self._event_queue:
                 event = Event("cmdb.core.object.added", {"id": new_object.get_public_id()})
                 self._event_queue.put(event)
@@ -326,6 +193,7 @@ class CmdbObjectManager(CmdbManagerBase):
             update_object = data
         else:
             raise UpdateError(CmdbObject.__class__, data, 'Wrong CmdbObject init format - expecting CmdbObject or dict')
+        update_object.last_edit_time = datetime.utcnow()
         ack = self.dbm.update(
             collection=CmdbObject.COLLECTION,
             public_id=update_object.get_public_id(),
@@ -348,50 +216,51 @@ class CmdbObjectManager(CmdbManagerBase):
                 raise Exception
         return ack
 
-    @timing("Object references loading time took ")
+    def remove_object_fields(self, filter: dict, update: dict):
+        ack = self._update_many(CmdbObject.COLLECTION, filter, update)
+        return ack
+
+    def update_object_fields(self, filter: dict, update: dict):
+        ack = self._update_many(CmdbObject.COLLECTION, filter, update)
+        return ack
+
     def get_object_references(self, public_id: int) -> list:
         # Type of given object id
         type_id = self.get_object(public_id=public_id).get_type_id()
-        LOGGER.debug("Type ID: {}".format(type_id))
+
         # query for all types with ref input type with value of type id
-        req_type_query = {"fields": {"$elemMatch": {"input_type": "ref", "$and": [{"type_id": int(type_id)}]}}}
-        LOGGER.debug("Query: {}".format(req_type_query))
-        # get type list
-        req_type_list = self.dbm.find_all(collection=CmdbType.COLLECTION, filter=req_type_query)
-        LOGGER.debug("Req type list: {}".format(req_type_list))
+        req_type_query = {"fields": {"$elemMatch": {"type": "ref", "$and": [{"ref_types": int(type_id)}]}}}
+
+        # get type list with given query
+        req_type_list = self.get_types_by(**req_type_query)
+
         type_init_list = []
         for new_type_init in req_type_list:
             try:
-                current_loop_type = self.get_type(new_type_init['public_id'])
-                ref_field = current_loop_type.get_field_of_type_with_value(input_type='ref', _filter='type_id',
+                current_loop_type = new_type_init
+                ref_field = current_loop_type.get_field_of_type_with_value(input_type='ref', _filter='ref_types',
                                                                            value=type_id)
-                LOGGER.debug("Current reference field {}".format(ref_field))
                 type_init_list.append(
-                    {"type_id": current_loop_type.get_public_id(), "field_name": ref_field.get_name()})
+                    {"type_id": current_loop_type.get_public_id(), "field_name": ref_field['name']})
             except CMDBError as e:
                 LOGGER.warning('Unsolvable type reference with type {}'.format(e.message))
                 continue
-        LOGGER.debug("Init type list: {}".format(type_init_list))
 
         referenced_by_objects = []
         for possible_object_types in type_init_list:
             referenced_query = {"type_id": possible_object_types['type_id'], "fields": {
                 "$elemMatch": {"$and": [{"name": possible_object_types['field_name']}],
-                               "$or": [{"value": int(public_id)}]}}}
-            referenced_by_objects = referenced_by_objects + self.dbm.find_all(collection=CmdbObject.COLLECTION,
-                                                                              filter=referenced_query)
-        matched_objects = []
-        for matched_object in referenced_by_objects:
-            matched_objects.append(CmdbObject(
-                **matched_object
-            ))
-        LOGGER.debug("matched objects count: {}".format(len(matched_objects)))
-        LOGGER.debug("matched objects: {}".format(matched_objects))
-        return matched_objects
+                               "$or": [{"value": int(public_id)}, {"value": str(public_id)}]}}}
+            referenced_by_objects = referenced_by_objects + self.get_objects_by(**referenced_query)
+
+        return referenced_by_objects
 
     def delete_object(self, public_id: int):
         try:
             ack = self._delete(CmdbObject.COLLECTION, public_id)
+            if self._event_queue:
+                event = Event("cmdb.core.object.deleted", {"id": public_id})
+                self._event_queue.put(event)
             return ack
         except (CMDBError, Exception):
             raise ObjectDeleteError(obj_id=public_id)
@@ -433,6 +302,9 @@ class CmdbObjectManager(CmdbManagerBase):
         try:
             ack = self._insert(collection=CmdbType.COLLECTION, data=new_type.to_database())
             LOGGER.debug(f"Inserted new type with ack {ack}")
+            if self._event_queue:
+                event = Event("cmdb.core.objecttype.added", {"id": new_type.get_public_id()})
+                self._event_queue.put(event)
         except PublicIDAlreadyExists:
             raise TypeAlreadyExists(type_id=new_type.get_public_id())
         except (CMDBError, InsertError):
@@ -452,6 +324,13 @@ class CmdbObjectManager(CmdbManagerBase):
             public_id=update_type.get_public_id(),
             data=update_type.to_database()
         )
+        if self._event_queue:
+            event = Event("cmdb.core.objecttype.updated", {"id": update_type.get_public_id()})
+            self._event_queue.put(event)
+        return ack
+
+    def update_many_types(self, filter: dict, update: dict):
+        ack = self._update_many(CmdbType.COLLECTION, filter, update)
         return ack
 
     def count_types(self):
@@ -459,6 +338,9 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def delete_type(self, public_id: int):
         ack = self._delete(CmdbType.COLLECTION, public_id)
+        if self._event_queue:
+            event = Event("cmdb.core.objecttype.deleted", {"id": public_id})
+            self._event_queue.put(event)
         return ack
 
     def delete_many_types(self, public_ids: dict):
@@ -512,7 +394,7 @@ class CmdbObjectManager(CmdbManagerBase):
         root_categories = self.get_categories_by(_filter={
             '$or': [
                 {'parent_id': {'$exists': False}},
-                {'parent_id': None}
+                {'parent_id': 0}
             ]
         })
         if len(root_categories) > 0:
@@ -704,31 +586,10 @@ class CmdbObjectManager(CmdbManagerBase):
         return ack
 
 
-class ObjectManagerGetError(CMDBError):
-
-    def __init__(self, err):
-        self.message = f'Error while GET operation - E: ${err}'
-
-
-class ObjectManagerInsertError(CMDBError):
-
-    def __init__(self, err):
-        self.message = f'Error while INSERT operation - E: ${err}'
-
-
-class ObjectManagerUpdateError(CMDBError):
-
-    def __init__(self, err):
-        self.message = f'Error while UPDATE operation - E: ${err}'
-
-
-class ObjectManagerDeleteError(CMDBError):
-
-    def __init__(self, err):
-        self.message = f'Error while DELETE operation - E: ${err}'
-
-
-object_manager = CmdbObjectManager(
-    database_manager=get_pre_init_database(),
-    event_queue=None
-)
+try:
+    object_manager = CmdbObjectManager(
+        database_manager=get_pre_init_database(),
+        event_queue=None
+    )
+except ImportError:
+    pass

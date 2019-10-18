@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,6 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FooterComponent } from './components/footer/footer.component';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { RouterModule } from '@angular/router';
 import { BreadcrumbComponent } from './components/breadcrumb/breadcrumb.component';
@@ -29,41 +28,61 @@ import { ContentHeaderComponent } from './components/content-header/content-head
 import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.component';
 import { LowercaseDirective } from './directives/lowercase.directive';
 import { SearchBarComponent } from './components/search-bar/search-bar.component';
+import { FooterComponent } from './components/footer/footer.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TableComponent } from './components/table/table.component';
 import { DataTablesModule } from 'angular-datatables';
-import { ToastContainerComponent } from './helpers/toast/toast-container.component';
-import { NgbActiveModal, NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from './helpers/modal/modal.component';
-import { ToastService } from './services/toast.service';
-import {TableModule} from "./components/table/table.module";
+import { TableModule } from './components/table/table.module';
+import { TypeLabelComponent } from './helpers/type-label/type-label.component';
+import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
+
+import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { fas } from '@fortawesome/free-solid-svg-icons';
+import { far } from '@fortawesome/free-regular-svg-icons';
+import { fab } from '@fortawesome/free-brands-svg-icons';
+import { IconPickerModule } from 'ngx-icon-picker';
+import { IconPickerComponent } from './helpers/icon-picker/icon-picker.component';
+import { UserImageComponent } from './components/user-image/user-image.component';
+import { UserDisplayComponent } from './components/user-display/user-display.component';
+import { ChartsComponent } from './components/charts/charts.component';
+import { ToastModule } from './toast/toast.module';
 
 @NgModule({
   declarations: [
+    LowercaseDirective,
     BreadcrumbComponent,
     NavigationComponent,
-    FooterComponent,
     SidebarComponent,
     SidebarCategoryComponent,
     ContentHeaderComponent,
     ActiveBadgeComponent,
-    LowercaseDirective,
     SearchBarComponent,
     TableComponent,
-    ToastContainerComponent,
-    ModalComponent
+    ModalComponent,
+    TypeLabelComponent,
+    FooterComponent,
+    IconPickerComponent,
+    UserImageComponent,
+    UserDisplayComponent,
+    ChartsComponent
   ],
   exports: [
+    LowercaseDirective,
     NavigationComponent,
     BreadcrumbComponent,
     FooterComponent,
     ContentHeaderComponent,
     ActiveBadgeComponent,
     SearchBarComponent,
-    LowercaseDirective,
     TableComponent,
-    ToastContainerComponent
+    TypeLabelComponent,
+    IconPickerComponent,
+    UserImageComponent,
+    UserDisplayComponent,
+    ChartsComponent,
   ],
   imports: [
     CommonModule,
@@ -73,7 +92,16 @@ import {TableModule} from "./components/table/table.module";
     NgbModule,
     FormsModule,
     DataTablesModule,
-    TableModule
+    TableModule,
+    SweetAlert2Module.forRoot({
+      buttonsStyling: false,
+      customClass: 'modal-content',
+      confirmButtonClass: 'btn btn-primary',
+      cancelButtonClass: 'btn'
+    }),
+    FontAwesomeModule,
+    IconPickerModule,
+    ToastModule
   ],
   providers: [
     BreadcrumbService,
@@ -84,4 +112,7 @@ import {TableModule} from "./components/table/table.module";
   ]
 })
 export class LayoutModule {
+  constructor(private iconLibrary: FaIconLibrary) {
+    iconLibrary.addIconPacks(fas, far, fab);
+  }
 }

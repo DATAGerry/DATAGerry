@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
 */
 
 
-import {Component, OnDestroy, ViewChild} from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
@@ -25,12 +25,13 @@ import { ObjectService } from '../../services/object.service';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ExportService } from '../../../export/export.service';
+import { FileService } from '../../../export/export-objects/export-objects/export-objects.service';
 import { CmdbMode } from '../../modes.enum';
 import { FileSaverService } from 'ngx-filesaver';
 import { DatePipe } from '@angular/common';
 import { CmdbType } from '../../models/cmdb-type';
 import { TypeService } from '../../services/type.service';
+import { RenderResult } from '../../models/cmdb-render';
 
 @Component({
   selector: 'cmdb-object-list',
@@ -45,10 +46,11 @@ export class ObjectListComponent implements OnDestroy {
   public dtTrigger: Subject<any> = new Subject();
   readonly dtButtons: any[] = [];
 
-  private summaries: [] = [];
-  private columnFields: [] = [];
+  private summaries: any[] = [];
+  private columnFields: any[] = [];
   private items: any[] = [];
   public pageTitle: string = 'List';
+  public faIcon: string;
   public objectLists: {};
   public hasSummaries: boolean = false;
   public formatList: any[] = [];
@@ -57,7 +59,7 @@ export class ObjectListComponent implements OnDestroy {
   public mode: CmdbMode = CmdbMode.Simple;
 
   constructor(private apiCallService: ApiCallService, private objService: ObjectService,
-              private exportService: ExportService, private route: ActivatedRoute, private router: Router,
+              private fileService: FileService, private route: ActivatedRoute, private router: Router,
               private spinner: NgxSpinnerService, private fileSaverService: FileSaverService,
               private datePipe: DatePipe, private typeService: TypeService) {
     this.route.params.subscribe((id) => {
@@ -66,9 +68,10 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   private init(id) {
-    this.exportService.callFileFormatRoute().subscribe(data => {
+    this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
+    this.spinner.show();
     this.getRouteObjects(id.publicID);
   }
 
@@ -80,13 +83,16 @@ export class ObjectListComponent implements OnDestroy {
       url = url + 'type/' + id;
       this.typeID = id;
       this.hasSummaries = true;
-      this.typeService.getType(id).subscribe((data: CmdbType) => this.pageTitle = data.label + ' list');
+      this.typeService.getType(id).subscribe((data: CmdbType) => {
+        this.faIcon = data.render_meta.icon;
+        this.pageTitle = data.label + ' list';
+      });
     }
 
     this.apiCallService.callGetRoute(url)
       .pipe(
-        map(dataArray => {
-          const lenx = dataArray.length;
+        map((dataArray: RenderResult[]) => {
+          const lenx = dataArray === null ? 0 : dataArray.length;
           this.summaries = lenx > 0 ? dataArray[0].summaries : [];
           this.columnFields = lenx > 0 ? dataArray[0].fields : [];
           this.items = lenx > 0 ? dataArray : [];
@@ -95,7 +101,6 @@ export class ObjectListComponent implements OnDestroy {
       )
       .subscribe(
         data => {
-          this.spinner.show();
           this.buildDtTable();
 
           setTimeout(() => {
@@ -124,7 +129,7 @@ export class ObjectListComponent implements OnDestroy {
     this.dtButtons.push(
       {
         // add new
-        text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
+        text: '<i class="fas fa-plus"></i> Add',
         className: 'btn btn-success btn-sm mr-1',
         action: function() {
           if (this.typeID === null) {
@@ -140,7 +145,7 @@ export class ObjectListComponent implements OnDestroy {
     this.dtButtons.push(
       {
         // print
-        text: 'Print <i class="fa fa-print" aria-hidden="true"></i>',
+        text: 'Print <i class="fas fa-print"></i>',
         extend: 'print',
         className: 'btn btn-info btn-sm mr-1'
       }
@@ -153,7 +158,7 @@ export class ObjectListComponent implements OnDestroy {
         {
           extend: 'collection',
           className: 'btn btn-secondary btn-sm mr-1 dropdown-toggle',
-          text: '<i class="fa fa-cog" aria-hidden="true"></i>',
+          text: '<i class="fas fa-cog"></i>',
           collectionLayout: 'dropdown-menu overflow-auto',
           buttons: function() {
             const columnButton = [];
@@ -177,7 +182,7 @@ export class ObjectListComponent implements OnDestroy {
             columnButton.push({
               extend: 'colvisRestore',
               text: 'Restore',
-              className: 'btn btn-secondary btn-lg btn-block',
+              className: 'btn btn-secondary btn-sm btn-block',
               action: function() {
                 this.rerender();
                 this.dtTrigger.next();
@@ -224,8 +229,8 @@ export class ObjectListComponent implements OnDestroy {
   private buildAdvancedDtOptions() {
     if (this.hasSummaries && this.summaries != null) {
       const visTargets: any[] = [0, 1, 2, 3, -3, -2, -1];
-      for (let i = 0; i < this.summaries.length; i++) {
-        visTargets.push(i + 4);
+      for (const summary of this.summaries) {
+        visTargets.push(this.columnFields.findIndex(i => i.name === summary.name) + 4);
       }
       this.dtOptions.columnDefs = [
         {orderable: false, targets: 'nosort'},
@@ -305,7 +310,7 @@ export class ObjectListComponent implements OnDestroy {
 
     modalComponent.result.then((result) => {
       if (result) {
-        const id = value.public_id;
+        const id = value.object_information.object_id;
         this.apiCallService.callDeleteRoute('object/' + id).subscribe(data => {
           this.route.params.subscribe((typeId) => {
             this.init(typeId);
@@ -346,8 +351,8 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   public exportingFiles(exportType: any) {
-    if ('all' === this.selectedObjects) {
-      this.exportService.getObjectFileByType(this.items[0].type_id, exportType.id)
+    if ('all' === this.selectedObjects && this.items[0] !== undefined) {
+      this.fileService.getObjectFileByType(this.items[0].type_information.type_id, exportType.id)
         .subscribe(res => this.downLoadFile(res, exportType));
       return;
     }
@@ -360,7 +365,7 @@ export class ObjectListComponent implements OnDestroy {
       }
     }
     if (publicIds.length > 0) {
-      this.exportService.callExportRoute(publicIds.toString(), exportType.id)
+      this.fileService.callExportRoute('/file/object/' + publicIds.toString(), exportType.id)
         .subscribe(res => this.downLoadFile(res, exportType));
     }
   }

@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -43,6 +43,8 @@ import { CheckboxSimpleComponent } from './simple/choice/checkbox-simple.compone
 import { RadioSimpleComponent } from './simple/choice/radio-simple.component';
 import { SelectSimpleComponent } from './simple/choice/select-simple.component';
 import { RouterModule } from '@angular/router';
+import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
+import { RefSimpleComponent } from './simple/special/ref-simple.component';
 
 
 @NgModule({
@@ -63,13 +65,14 @@ import { RouterModule } from '@angular/router';
     CheckboxSimpleComponent,
     RadioSimpleComponent,
     SelectSimpleComponent,
+    RefSimpleComponent,
     RenderComponent,
     RenderElementComponent
   ],
   declarations: [
     RenderComponent, RenderElementComponent, TextComponent, DummyComponent, PasswordComponent, EmailComponent, PhoneComponent,
     HrefComponent, RadioComponent, SelectComponent, RefComponent, CheckboxComponent, TextareaComponent, ModeErrorComponent,
-    RenderErrorComponent, TextSimpleComponent, PasswordSimpleComponent, CheckboxSimpleComponent, RadioSimpleComponent, SelectSimpleComponent
+    RenderErrorComponent, TextSimpleComponent, PasswordSimpleComponent, CheckboxSimpleComponent, RadioSimpleComponent, SelectSimpleComponent, RefSimpleComponent
   ],
   exports: [
     RenderElementComponent,
@@ -82,7 +85,8 @@ import { RouterModule } from '@angular/router';
     NgSelectModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterModule
+    RouterModule,
+    FontAwesomeModule
   ]
 })
 export class RenderModule {

@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -112,33 +112,27 @@ class SetupRoutine:
             LOGGER.info(f'KEY ROUTINE: Password was updated for user: {admin_user.get_username()}')
         except Exception:
             pass
-
-
         LOGGER.info('KEY ROUTINE: FINISHED')
 
     def __create_user_management(self):
-        from cmdb.user_management.user_manager import UserManagement, User, UserGroup
+        from cmdb.user_management.user_manager import UserManagement, User
+        from cmdb.user_management import __FIXED_GROUPS__
         from cmdb.utils.security import SecurityManager
         scm = SecurityManager(self.setup_database_manager)
         usm = UserManagement(self.setup_database_manager, scm)
-        admin_group = UserGroup(
-            public_id=1,
-            name='admin',
-            label='admin',
-            rights=[
-                'base.system.*',
-                'base.framework.*'
-            ]
-        )
-        usm.insert_group(admin_group)
+
+        for group in __FIXED_GROUPS__:
+            usm.insert_group(group)
+
         admin_name = str(input('Admin name: '))
         admin_pass = str(input('Admin password: '))
+
         import datetime
         admin_user = User(
             public_id=1,
             user_name=admin_name,
             password=scm.generate_hmac(admin_pass),
-            group_id=1,
+            group_id=__FIXED_GROUPS__[0].get_public_id(),
             registration_time=datetime.datetime.utcnow()
         )
         usm.insert_user(admin_user)

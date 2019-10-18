@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -19,6 +19,8 @@
 import { Injectable } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
 import { ApiCallService } from '../../services/api-call.service';
+import {CmdbStatus} from "../models/cmdb-status";
+import {map} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -62,5 +64,20 @@ export class TypeService {
     return this.api.callDeleteRoute<number>(this.servicePrefix + '/' + publicID);
   }
 
+  public getTypeListByCategory(publicID: number) {
+    return this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/category/' + publicID);
+  }
+
+  public updateTypeByCategoryID(publicID: number) {
+    return this.api.callPutRoute(this.servicePrefix + '/category/' + publicID, null);
+  }
+
+  public cleanupRemovedFields(publicID: number) {
+    return this.api.callGetRoute(this.servicePrefix + '/cleanup/remove/' + publicID);
+  }
+
+  public cleanupInsertedFields(publicID: number) {
+    return this.api.callGetRoute(this.servicePrefix + '/cleanup/update/' + publicID);
+  }
 }
 

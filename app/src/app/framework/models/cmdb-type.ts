@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -35,5 +35,7 @@ export class CmdbType implements CmdbDao {
   public render_meta: any;
   public fields: any[];
   public category_name?: string;
+  public category_id: number;
+  public clean_db: boolean;
 
 }

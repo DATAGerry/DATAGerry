@@ -1,28 +1,27 @@
-<h1>Edit of {{typeInstance?.label}} #{{objectInstance?.public_id}}</h1>
+<h1>Edit of {{renderResult?.type_information?.type_label}} #{{renderResult?.object_information?.object_id}}</h1>
 <hr/>
 <div id="object-edit" class="card">
   <div class="card-body">
     <form [formGroup]="renderForm" class="renderForm needs-validation" novalidate autocomplete="off"
           (ngSubmit)="editObject()">
-      <fieldset>
-        <legend>Object status</legend>
-        <div class="form-group row">
-          <label class="col-sm-3 col-form-label">
-            Active:
-          </label>
-          <div class="col-sm-9">
-            <div class="custom-control custom-checkbox">
-              <input type="checkbox" formControlName="active" class="custom-control-input" id="active">
-              <label class="custom-control-label" for="active"></label>
-            </div>
-          </div>
-        </div>
-      </fieldset>
-      <cmdb-render [typeInstance]="typeInstance" [objectInstance]="objectInstance" [mode]="mode"
+      <cmdb-render [renderResult]="renderResult" [mode]="mode"
                    [renderForm]="renderForm"></cmdb-render>
+      <hr/>
+      <form [formGroup]="commitForm" class="renderForm needs-validation" novalidate autocomplete="off">
+        <fieldset class="log-comment">
+          <legend>Edit comment</legend>
+          <div class="input-group">
+          <textarea maxlength="255" class="form-control" formControlName="comment" id="edit_comment"
+                    rows="3"></textarea>
+          </div>
+          <small class="description form-text text-muted">The comment is only listed in the logs and should be additional
+            information about the change.</small>
+        </fieldset>
+      </form>
       <button type="submit" class="btn btn-outline-success mr-2" [disabled]="!renderForm.dirty">Save</button>
       <button class="btn btn-outline-danger"
-              routerLink="/framework/object/{{objectInstance?.public_id}}">Cancel</button>
+              routerLink="/framework/object/view/{{renderResult?.object_information?.object_id}}">Cancel
+      </button>
     </form>
   </div>
 </div>

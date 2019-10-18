@@ -1,59 +1,20 @@
-
-<form [formGroup]="formExport" (ngSubmit)="exportObjectByTypeID()">
+<div class="card-deck">
   <div class="card">
-    <div class="card-header">Export</div>
-
-    <div class="card-body">
-
-      <div class="form-group">
-        <label for="typeChooser">Object Type <span class="required">*</span></label>
-        <ng-select id="typeChooser"
-          [items]="typeList"
-
-          required
-          bindLabel="label"
-          bindValue="public_id"
-          placeholder="Choose your option"
-          formControlName="type">
-
-          <ng-template ng-label-tmp let-item="item">
-            {{item.label}}
-          </ng-template>
-          <ng-template ng-option-tmp let-item="item" let-index="index">
-            {{item.label}}
-          </ng-template>
-        </ng-select>
-
-        <!-- error block -->
-        <div class="cross-validation-error-message alert alert-danger" *ngIf="isSubmitted && type.errors?.required">
-          Please enter type
-        </div>
+    <a routerLink="/export/types/">
+      <div class="dash-card primary">
+        <i class="far fa-object-ungroup"></i>
+        <span class="count-numbers">Types</span>
+        <span class="count-name">Export</span>
       </div>
-
-      <div class="form-group">
-        <label for="formatChooser">Output format <span class="required">*</span></label>
-        <ng-select id="formatChooser"
-                   [items]="formatList"
-                   required
-                   bindLabel="label"
-                   bindValue="id"
-                   placeholder="Choose your option"
-                   formControlName="format">
-
-          <ng-template ng-label-tmp let-item="item">
-              <i class="fa {{item.icon}}"></i> {{item.label}}
-          </ng-template>
-          <ng-template ng-option-tmp let-item="item" let-index="index">
-            <i class="fa {{item.icon}}"></i> {{item.label}}
-          </ng-template>
-        </ng-select>
-        <!-- error block -->
-        <div class="cross-validation-error-message alert alert-danger" *ngIf="isSubmitted && format.errors?.required">
-          Please enter format
-        </div>
-      </div>
-
-      <button type="submit" class="btn btn-primary float-right">Go!</button>
-    </div>
+    </a>
   </div>
-</form>
+  <div class="card">
+    <a routerLink="/export/objects/">
+      <div class="dash-card primary">
+        <i class="far fa-object-ungroup"></i>
+        <span class="count-numbers">Objects</span>
+        <span class="count-name">Export</span>
+      </div>
+    </a>
+  </div>
+</div>

@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -7410,10 +7410,14 @@ blockquote {
       background: #e94d18; }
     #navigation ul ul {
       background: #ced4da; }
-      #navigation ul ul > li.toctree-l2 > a {
+      #navigation ul ul > li.toctree-l2 > a, #navigation ul ul > li.toctree-l3 > a {
         color: #000; }
-        #navigation ul ul > li.toctree-l2 > a.current {
+        #navigation ul ul > li.toctree-l2 > a.current, #navigation ul ul > li.toctree-l3 > a.current {
           background: #6c757d; }
+      #navigation ul ul > li.toctree-l3 {
+        font-size: 12px; }
+        #navigation ul ul > li.toctree-l3 > a {
+          padding-left: 30px; }
   #navigation form {
     padding-left: 20px;
     padding-right: 20px; }

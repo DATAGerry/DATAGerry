@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -17,21 +17,21 @@
 */
 
 import { Component, Input } from '@angular/core';
-import { CmdbObject } from '../../../models/cmdb-object';
+import { RenderResult } from '../../../models/cmdb-render';
 
 
 class MetaView {
   private readonly headers: { [key: string]: object | string | number }[] = [
-    {'Public ID': this.publicID},
+    {'Public ID': this.objectID},
+    {'Type ID': this.typeID},
+    {'Type Name': this.typeName},
     {'Creation Time': this.creationTime},
-    {'Last Edit Time': this.lastEditTime},
     {'Author ID': this.authorID},
     {'Author Name': this.authorName}
   ];
 
-  constructor(public publicID: number, public creationTime: object, public lastEditTime: object,
+  constructor(public objectID: number, public typeID: number, public typeName, public creationTime: string,
               public authorID: number, public authorName) {
-
   }
 
   public get headerLine() {
@@ -48,21 +48,26 @@ export class ObjectViewMetaComponent {
 
   public meteObject: MetaView = null;
   // tslint:disable-next-line:variable-name
-  private _objectInstance: CmdbObject;
-  @Input('objectInstance')
-  public set objectInstance(data: CmdbObject) {
+  private _renderResult: any;
+
+  @Input('renderResult')
+  public set renderResult(data: RenderResult) {
     if (data !== undefined) {
-      this._objectInstance = data;
+      this._renderResult = data;
       this.meteObject = new MetaView(
-        this.objectInstance.public_id, this.objectInstance.creation_time, this.objectInstance.last_edit_time,
-        this.objectInstance.author_id, this.objectInstance.author_name
+        this.renderResult.object_information.object_id,
+        this.renderResult.type_information.type_id,
+        this.renderResult.type_information.type_label,
+        this.renderResult.object_information.creation_time.$date,
+        this.renderResult.object_information.author_id,
+        this.renderResult.object_information.author_name,
       );
     }
 
   }
 
-  public get objectInstance(): CmdbObject {
-    return this._objectInstance;
+  public get renderResult(): RenderResult {
+    return this._renderResult;
   }
 
   public isObject(value: object | string | number) {

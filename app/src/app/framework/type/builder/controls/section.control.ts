@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ export class SectionControl implements ControlsCommon {
 
   name = 'section';
   label = 'Section';
-  icon = 'fa fa-square-o';
+  icon = 'object-groups';
   dndType: string = 'sections';
 
   content() {

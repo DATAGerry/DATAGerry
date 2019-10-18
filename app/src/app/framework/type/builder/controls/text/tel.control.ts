@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -44,7 +44,7 @@ export class TelControl implements ControlsCommon {
 
   name = 'phone';
   label = 'Phone';
-  icon = 'fa-phone';
+  icon = 'phone';
   dndType: string = 'inputs';
 
   content() {

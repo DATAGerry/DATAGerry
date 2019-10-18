@@ -1,13 +1,13 @@
-<ng-container *ngIf="objectInstance?.externals && objectInstance?.externals.length>0">
+<ng-container *ngIf="renderResult?.externals && renderResult?.externals.length>0">
   <div id="cmdb-object-externals" class="card">
     <div class="card-header">
       Externals
     </div>
     <div class="card-body">
       <ul class="fa-ul">
-        <li *ngFor="let ext of objectInstance?.externals">
-          <i class="fa-li fa {{ext.icon}}" aria-hidden="true"></i> <a class="card-link"
-                                                                      href="{{ext.href}}">{{ext.label}}</a>
+        <li *ngFor="let ext of renderResult?.externals">
+          <i class="{{ext.icon}} mr-1" aria-hidden="true"></i>
+          <a class="card-link" target="_blank" href="{{ext.href}}">{{ext.label}}</a>
         </li>
       </ul>
     </div>

@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -45,12 +45,19 @@ const routes: Routes = [
     outlet: 'footer'
   },
   {
-    path: 'user-management',
+    path: 'system',
     data: {
-      breadcrumb: 'User Management'
+      breadcrumb: 'System'
     },
-    loadChildren: () => import('./user-management/user-management.module').then(m => m.UserManagementModule),
+    loadChildren: () => import('./system/system.module').then(m => m.SystemModule)
   },
+  {
+    path: 'logs',
+    data: {
+      breadcrumb: 'Logs'
+    },
+    loadChildren: () => import('./log-settings/log-settings.module').then(m => m.LogSettingsModule)
+  }
 ];
 
 @NgModule({

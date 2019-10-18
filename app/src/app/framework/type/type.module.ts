@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -24,20 +24,21 @@ import { LayoutModule } from '../../layout/layout.module';
 import { DataTablesModule } from 'angular-datatables';
 import { TypeAddComponent } from './type-add/type-add.component';
 import { ArchwizardModule } from 'angular-archwizard';
-import { TypeBuilderComponent } from './components/type-builder/type-builder.component';
-import { TypeBasicStepComponent } from './components/type-builder/type-basic-step/type-basic-step.component';
+import { TypeBuilderComponent } from './type-builder/type-builder.component';
+import { TypeBasicStepComponent } from './type-builder/type-basic-step/type-basic-step.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { TypeFieldsStepComponent } from './components/type-builder/type-fields-step/type-fields-step.component';
+import { TypeFieldsStepComponent } from './type-builder/type-fields-step/type-fields-step.component';
 import { QRCodeModule } from 'angularx-qrcode';
-import { TypeAccessStepComponent } from './components/type-builder/type-access-step/type-access-step.component';
+import { TypeAccessStepComponent } from './type-builder/type-access-step/type-access-step.component';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { TypeValidationStepComponent } from './components/type-builder/type-validation-step/type-validation-step.component';
+import { TypeValidationStepComponent } from './type-builder/type-validation-step/type-validation-step.component';
 import { RenderModule } from '../render/render.module';
 import { BuilderModule } from './builder/builder.module';
 import { TypeEditComponent } from './type-edit/type-edit.component';
-import { TypeMetaStepComponent } from './components/type-builder/type-meta-step/type-meta-step.component';
+import { TypeMetaStepComponent } from './type-builder/type-meta-step/type-meta-step.component';
 import { TypeDeleteComponent, TypeDeleteConfirmModalComponent } from './type-delete/type-delete.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   entryComponents: [TypeDeleteConfirmModalComponent],
@@ -66,7 +67,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     RenderModule,
     BuilderModule,
     FormsModule,
-    NgbModule
+    NgbModule,
+    FontAwesomeModule
   ]
 })
 export class TypeModule {

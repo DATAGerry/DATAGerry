@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -13,9 +13,20 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import logging
+
 from authlib.jose import jwt, JWT
+from authlib.jose.errors import BadSignatureError, InvalidClaimError
 
 from cmdb.security.key.holder import KeyHolder
+
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
+
+LOGGER = logging.getLogger(__name__)
 
 
 class TokenValidator:
@@ -23,5 +34,22 @@ class TokenValidator:
     def __init__(self):
         self.key_holder = KeyHolder()
 
+    def decode_token(self, token: (JWT, str, dict)):
+        try:
+            decoded_token = jwt.decode(s=token, key=self.key_holder.get_public_key())
+        except BadSignatureError as err:
+            raise ValidationError(err)
+        return decoded_token
+
     def validate_token(self, token: (JWT, str, dict)):
-        return jwt.decode(s=token, key=self.key_holder.get_public_key())
+        try:
+            import time
+            token.validate(time.time())
+        except InvalidClaimError as err:
+            raise ValidationError(err)
+
+
+class ValidationError(CMDBError):
+
+    def __init__(self, message):
+        self.message = f'Error while decode the token operation - E: ${message}'

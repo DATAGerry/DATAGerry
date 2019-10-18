@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -20,16 +20,18 @@
 import { Component, OnDestroy, ViewChild, Input, OnInit } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
 import { BehaviorSubject, Subject} from 'rxjs';
-import { UserService } from '../../../user/services/user.service';
+import { UserService } from '../../../management/services/user.service';
 import { ApiCallService } from '../../../services/api-call.service';
 import { DatePipe } from '@angular/common';
-import { ExportService } from '../../../export/export.service';
+
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from '../../helpers/modal/modal.component';
 import { FileSaverService } from 'ngx-filesaver';
 import { TableColumn} from './models/table-column';
 import { TableColumnAction} from './models/table-columns-action';
+import { RenderResult } from '../../../framework/models/cmdb-render';
+import { FileService } from '../../../export/export-objects/export-objects/export-objects.service';
 
 @Component({
   selector: 'cmdb-table',
@@ -55,16 +57,16 @@ export class TableComponent implements OnInit, OnDestroy {
   @Input() showExport: boolean = true;
   @Input() showDeleteSelected: boolean = true;
 
-  public items: any = new BehaviorSubject<any[]>([]);
+  public items: any = new BehaviorSubject<RenderResult[]>([]);
   public formatList: any[] = [];
 
   constructor(private userService: UserService, private apiCallService: ApiCallService,
-              private exportService: ExportService, private router: Router,
+              private fileService: FileService, private router: Router,
               private modalService: NgbModal, private fileSaverService: FileSaverService,
               private datePipe: DatePipe) {
     this.add = {
       // add new
-      text: '<i class="fa fa-plus" aria-hidden="true"></i> Add',
+      text: '<i class="fas fa-plus"></i> Add',
       className: 'btn btn-success btn-sm mr-1',
       action: function() {
         this.router.navigate(['/framework/' + this.linkRoute + 'add']);
@@ -73,7 +75,7 @@ export class TableComponent implements OnInit, OnDestroy {
 
     this.print = {
       // print
-      text: 'Print <i class="fa fa-print" aria-hidden="true"></i>',
+      text: 'Print <i class="fas fa-print"></i>',
       extend: 'print',
       className: 'btn btn-info btn-sm mr-1'
     };
@@ -86,27 +88,26 @@ export class TableComponent implements OnInit, OnDestroy {
       { name: 'action', label: 'Action'}];
 
     this.thColumnsActions = [
-      { name: 'view', classValue: 'text-dark ml-1', linkRoute: '', fontIcon: 'fa fa-eye', active: false},
-      { name: 'edit', classValue: 'text-dark ml-1', linkRoute: 'edit/', fontIcon: 'fa fa-pencil-square-o'},
-      { name: 'delete', classValue: 'text-dark ml-1', linkRoute: 'delete/', fontIcon: 'fa fa-trash-o'}];
+      { name: 'view', classValue: 'text-dark ml-1', linkRoute: '', fontIcon: 'eye', active: false},
+      { name: 'edit', classValue: 'text-dark ml-1', linkRoute: 'edit/', fontIcon: 'edit'},
+      { name: 'delete', classValue: 'text-dark ml-1', linkRoute: 'delete/', fontIcon: 'trash'}];
   }
 
   ngOnInit(): void {
     if (this.showExport) {
-      this.exportService.callFileFormatRoute().subscribe( data => {
+      this.fileService.callFileFormatRoute().subscribe( data => {
         this.formatList = data;
       });
     }
   }
 
-  @Input() set entryLists(value: any[]) {
+  @Input() set entryLists(value: RenderResult[]) {
     this.items.next(value);
     this.buildTable();
-    this.rerender();
     this.dtTrigger.next();
   }
 
-  get entryLists(): any[] {
+  get entryLists(): RenderResult[] {
     return this.items.getValue();
   }
 
@@ -142,7 +143,7 @@ export class TableComponent implements OnInit, OnDestroy {
       buttons: {
         dom: {
           container: {
-            className: 'dt-buttons btn-group btn-group-sm'
+            className: 'dt-buttons btn-groups btn-groups-sm'
           }
         },
         buttons,
@@ -219,8 +220,8 @@ export class TableComponent implements OnInit, OnDestroy {
       modalComponent.result.then((result) => {
         if (result) {
           this.apiCallService.callDeleteManyRoute(this.linkRoute + 'delete/' + publicIds ).subscribe(data => {
-            this.apiCallService.callGetRoute(this.linkRoute).subscribe(objs => {
-              this.entryLists = objs;
+            this.apiCallService.callGetRoute('render/').subscribe((objs: RenderResult[]) => {
+              this.items.next(objs);
             });
           });
         }
@@ -230,10 +231,9 @@ export class TableComponent implements OnInit, OnDestroy {
     }
   }
 
-  public delObject(route: any, value: any) {
-
+  public delObject(route: any, value: RenderResult) {
     if ( route === 'delete/') {
-      this.router.navigate([this.router.url + '/' + route + value.public_id]);
+      this.router.navigate([this.router.url + '/' + route + value.type_information.type_id]);
     }
 
     if ( route === 'object/') {
@@ -245,10 +245,10 @@ export class TableComponent implements OnInit, OnDestroy {
 
       modalComponent.result.then((result) => {
         if (result) {
-          const id = value.public_id;
+          const id = value.object_information.object_id;
           this.apiCallService.callDeleteRoute(this.linkRoute + id).subscribe(data => {
-            this.apiCallService.callGetRoute(this.linkRoute).subscribe(objs => {
-              this.entryLists = objs;
+            this.apiCallService.callGetRoute('object/').subscribe((objs: RenderResult[]) => {
+              this.items.next(objs);
             });
           });
         }
@@ -267,7 +267,7 @@ export class TableComponent implements OnInit, OnDestroy {
       }
     }
     if (publicIds.length > 0) {
-      this.exportService.callExportRoute(publicIds.toString(), exportType.id)
+      this.fileService.callExportRoute('/file/object/' + publicIds.toString(), exportType.id)
         .subscribe(res => this.downLoadFile(res, exportType));
     }
   }

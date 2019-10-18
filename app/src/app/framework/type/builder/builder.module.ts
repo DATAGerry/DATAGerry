@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -33,8 +33,9 @@ import { ChoiceFieldEditComponent } from './configs/edits/choice-field-edit.comp
 import { CheckFieldEditComponent } from './configs/edits/check-field-edit.component';
 import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
 import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
-import { NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { RenderElementComponent } from '../../render/render-element/render-element.component';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   entryComponents: [
@@ -68,10 +69,12 @@ import { RenderElementComponent } from '../../render/render-element/render-eleme
     FormsModule,
     RenderModule,
     NgbModalModule,
-    NgSelectModule
+    NgSelectModule,
+    FontAwesomeModule
   ],
   exports: [
     BuilderComponent
   ]
 })
-export class BuilderModule { }
+export class BuilderModule {
+}

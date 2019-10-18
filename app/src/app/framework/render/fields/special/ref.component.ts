@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -19,7 +19,8 @@
 import { Component, OnInit } from '@angular/core';
 import { RenderField } from '../components.fields';
 import { ObjectService } from '../../../services/object.service';
-import { CmdbObject } from '../../../models/cmdb-object';
+import { RenderResult } from '../../../models/cmdb-render';
+import { Observable } from 'rxjs';
 
 @Component({
   templateUrl: './ref.component.html',
@@ -27,8 +28,8 @@ import { CmdbObject } from '../../../models/cmdb-object';
 })
 export class RefComponent extends RenderField implements OnInit {
 
-  public objectList: CmdbObject[];
-  public refObject: CmdbObject;
+  public objectList: Observable<RenderResult[]>;
+  public refObject: RenderResult;
 
   public constructor(private objectService: ObjectService) {
     super();
@@ -36,16 +37,21 @@ export class RefComponent extends RenderField implements OnInit {
 
   public ngOnInit(): void {
     if (this.data.ref_types !== undefined) {
-      this.objectService.getObjectsByType(this.data.ref_types).subscribe((list: CmdbObject[]) => {
-        this.objectList = list;
-      });
+      this.objectList = this.objectService.getObjectsByType(this.data.ref_types);
     }
-    if (this.controller.value !== undefined) {
-      this.objectService.getObject(this.controller.value).subscribe((refObject: CmdbObject) => {
-        this.refObject = refObject;
-      });
+    if (this.controller.value !== '' && this.data.value !== undefined) {
+      this.objectService.getObject(this.controller.value).subscribe((refObject: RenderResult) => {
+          this.refObject = refObject;
+        },
+        (error) => {
+          console.error(error);
+        });
     }
   }
 
-
+  public searchRef(term: string, item: any) {
+    term = term.toLocaleLowerCase();
+    const value = item.object_information.object_id + item.type_information.type_label + item.summary_line;
+    return value.toLocaleLowerCase().indexOf(term) > -1 || value.toLocaleLowerCase().includes(term);
+  }
 }

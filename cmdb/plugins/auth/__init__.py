@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@ from cmdb.user_management.user_authentication import AuthenticationProvider, NoV
 class AuthPluginBase(PluginBase):
 
     def __init__(self, plugin_name: str, provider_class):
-        if provider_class is not issubclass(AuthenticationProvider):
+        if not issubclass(provider_class, AuthenticationProvider):
             raise NoValidAuthenticationProviderError(provider_class)
         self.provider_class = provider_class
         super(PluginBase, self).__init__(plugin_name, 'auth')

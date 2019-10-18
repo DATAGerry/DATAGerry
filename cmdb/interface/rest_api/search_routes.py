@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -14,13 +14,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import cmdb,logging, ast, sys, traceback
-from flask import abort, current_app as app, request
-from cmdb.framework.cmdb_render import CmdbRender
-from cmdb.interface.route_utils import make_response, RootBlueprint
-from cmdb.framework.cmdb_object_manager import object_manager as obm
-from cmdb.utils.interface_wraps import login_required
+import logging
+import sys
+import traceback
 
+from flask import abort, request, current_app
+from cmdb.framework.cmdb_render import RenderList
+from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user, login_required
+from cmdb.user_management.user import User
+
+with current_app.app_context():
+    object_manager = current_app.object_manager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -28,12 +32,13 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-search_routes = RootBlueprint('search_rest', __name__, url_prefix='/search')
+search_blueprint = RootBlueprint('search_rest', __name__, url_prefix='/search')
 
 
-@search_routes.route("/", methods=['GET'])
+@search_blueprint.route("/", methods=['GET'])
 @login_required
-def get_search():
+@insert_request_user
+def get_search(request_user: User):
     request_args = request.args.to_dict()
 
     if not bool(request_args):
@@ -47,16 +52,17 @@ def get_search():
     else:
         limit = 0
 
-    return _get_response(request_args, limit=limit)
+    return _get_response(request_args, current_user=request_user, limit=limit)
 
 
-@search_routes.route("/<string:search_input>", methods=['GET'])
+@search_blueprint.route("/<string:search_input>", methods=['GET'])
 @login_required
-def text_search(search_input):
-    return _get_response({'value': search_input}, q_operator = '$or')
+@insert_request_user
+def text_search(search_input, request_user: User):
+    return _get_response({'value': search_input}, q_operator='$or', current_user=request_user)
 
 
-def _get_response(args, q_operator='$and', limit=0):
+def _get_response(args, q_operator='$and', current_user: User = None, limit=0):
     query_list = []
     result_query = []
 
@@ -68,51 +74,31 @@ def _get_response(args, q_operator='$and', limit=0):
 
     try:
         for key, value in args.items():
-
-            # Collect for later render evaluation
-            match_values.append(value)
-
             for v in value.split(","):
-                if key == "type_id":
-                    try:
+                try:
+                    if key == "type_id":
                         query_list.append({key: int(v)})
-                    except (ValueError, TypeError):
-                        return abort(400)
-                else:
-                    query_list.append({'fields.'+key: {'$regex': v}})
+                    if key == "active" and 'true' == v:
+                        query_list.append({key: True})
+                    if key == "value":
+                        # Collect for later render evaluation
+                        match_values.append(value)
+                        query_list.append({'fields.'+key: {'$regex': v, '$options': "i"}})
+                except (ValueError, TypeError):
+                    return abort(400)
 
         result_query.append({q_operator: query_list})
         query = {"$or": result_query}
-
-        render = _cm_db_render(obm.search_objects_with_limit(query, limit=limit), match=match_values)
-        resp = make_response(CmdbRender.result_loop_render(obm, render))
-        return resp
+        object_list = object_manager.search_objects_with_limit(query, limit=limit)
+        render = RenderList(object_list, current_user)
+        if limit == 5:
+            rendered_list = render.render_result_list(_collect_match_fields(object_list, match_values))
+        else:
+            rendered_list = render.render_result_list(None)
+        return make_response(rendered_list)
 
     except CMDBError:
         raise traceback.print_exc(file=sys.stdout)
-
-
-def _cm_db_render(all_objects_list, match=[]) -> list:
-    all_objects = []
-    type_buffer_list = {}
-
-    try:
-        for passed_object in all_objects_list:
-            passed_object_type_id = passed_object.get_type_id()
-
-            if passed_object_type_id in type_buffer_list:
-                current_type = type_buffer_list[passed_object_type_id]
-            else:
-                current_type = obm.get_type(passed_object_type_id)
-                type_buffer_list.update({passed_object_type_id: current_type})
-
-            tmp_render = CmdbRender(type_instance=current_type, object_instance=passed_object)
-            tmp_render.set_matched_fieldset(_collect_match_fields(passed_object, match))
-            all_objects.append(tmp_render)
-    except Exception:
-        raise traceback.print_exc(file=sys.stdout)
-
-    return all_objects
 
 
 def _filter_query(args):
@@ -135,11 +121,13 @@ def _filter_query(args):
         pass
 
 
-def _collect_match_fields(passed_object, match_values):
+def _collect_match_fields(object_list, match_values):
+    import re
     key_match = []
-    for term in match_values:
-        for fields in getattr(passed_object, 'fields'):
-            for key, value in fields.items():
-                if isinstance(value, str) and term in value:
-                    key_match.append(fields['name'])
+    for passed_object in object_list:
+        for term in match_values:
+            for fields in getattr(passed_object, 'fields'):
+                for key, value in fields.items():
+                    if isinstance(value, str) and re.findall(r"(?i)" + term, value):
+                        key_match.append(fields['name'])
     return key_match

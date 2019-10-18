@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
-import { ConnectionService } from './connection.service';
+import { ConnectionService } from '../connect/connection.service';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -29,12 +29,19 @@ const httpOptions = {
 };
 
 declare type HttpObserve = 'body' | 'events' | 'response';
-const resp: HttpObserve = 'response';
+export const resp: HttpObserve = 'response';
 
-const httpObserveOptions = {
+export const httpObserveOptions = {
   headers: new HttpHeaders({
     'Content-Type': 'application/json'
   }),
+  observe: resp
+};
+
+export const httpFileOptions = {
+  headers: new HttpHeaders({
+  }),
+  params: {},
   observe: resp
 };
 
@@ -51,37 +58,36 @@ export class ApiCallService {
       console.error('An error occurred:', err.error.message);
     } else {
       console.error(
-        `Backend returned code ${err.status}, ` +
-        `body was: ${err.error}`);
+        `Backend returned code ${ err.status }, ` +
+        `body was: ${ err.error }`);
     }
-    return throwError(
-      'Something bad happened; please try again later.');
+    return throwError(err);
   }
 
   constructor(private http: HttpClient, private connectionService: ConnectionService) {
-    this.apiURL = `${this.connectionService.connectionURL}${this.apiPrefix}/`;
+    this.apiURL = `${ this.connectionService.currentConnection }/${ this.apiPrefix }/`;
   }
 
   public callGet<T>(route: string, params?: any): Observable<any> {
     return this.http.get<T>(this.apiURL + route, httpObserveOptions).pipe(catchError(ApiCallService.handleError));
   }
 
-  public callPost<T>(route: string, data): Observable<any> {
-    return this.http.post<T>(this.apiURL + route, data, httpObserveOptions).pipe(catchError(ApiCallService.handleError));
+  public callPost<T>(route: string, data, httpPostOptions = httpObserveOptions): Observable<any> {
+    return this.http.post<T>(this.apiURL + route, data, httpPostOptions).pipe(catchError(ApiCallService.handleError));
   }
 
   public callPut<T>(route: string, data): Observable<any> {
     return this.http.put<T>(this.apiURL + route, data, httpObserveOptions).pipe(catchError(ApiCallService.handleError));
   }
 
-  public callDelete<T>(route: string): Observable<any> {
-    return this.http.delete<T>(this.apiURL + route, httpObserveOptions).pipe(catchError(ApiCallService.handleError));
+  public callDelete<T>(route: string, httpDeleteOptions = httpObserveOptions): Observable<any> {
+    return this.http.delete<T>(this.apiURL + route, httpDeleteOptions).pipe(catchError(ApiCallService.handleError));
   }
 
   /* DEPRECATED API METHODS - ONLY USE TOP METHODS */
 
   public callGetRoute<T>(route: string, params?: any): Observable<any> {
-    return this.http.get<T>(this.apiURL + route, {observe: 'body'}).pipe(
+    return this.http.get<T>(this.apiURL + route, params).pipe(
       map((res) => {
         return res;
       }),

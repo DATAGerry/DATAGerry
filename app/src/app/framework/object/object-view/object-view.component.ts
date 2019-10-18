@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -17,13 +17,10 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { ApiCallService } from '../../../services/api-call.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { CmdbObject } from '../../models/cmdb-object';
+import { ActivatedRoute } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
-import { CmdbType } from '../../models/cmdb-type';
-import { TypeService } from '../../services/type.service';
 import { CmdbMode } from '../../modes.enum';
+import { RenderResult } from '../../models/cmdb-render';
 
 @Component({
   selector: 'cmdb-object-view',
@@ -34,11 +31,9 @@ export class ObjectViewComponent implements OnInit {
 
   public mode: CmdbMode = CmdbMode.View;
   private objectID: number;
-  public objectInstance: CmdbObject;
-  public typeInstance: CmdbType;
+  public renderResult: RenderResult;
 
-  constructor(private api: ApiCallService, private objectService: ObjectService, private typeService: TypeService,
-              private activateRoute: ActivatedRoute) {
+  constructor(public objectService: ObjectService, private activateRoute: ActivatedRoute) {
     this.activateRoute.params.subscribe((params) => {
       this.objectID = params.publicID;
       this.ngOnInit();
@@ -46,16 +41,15 @@ export class ObjectViewComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    // RenderResult
-    this.objectService.getObject(this.objectID).subscribe((objectInstanceResp: CmdbObject) => {
-      this.objectInstance = objectInstanceResp;
+    this.objectService.getObject(this.objectID).subscribe((result: RenderResult) => {
+      this.renderResult = result;
     }, (error) => {
       console.error(error);
-    }, () => {
-      this.typeService.getType(this.objectInstance.type_id).subscribe((typeInstanceResp: CmdbType) => {
-        this.typeInstance = typeInstanceResp;
-      });
     });
+  }
+
+  public logChange(event) {
+    // TODO: Update log list after object changed
   }
 
 }

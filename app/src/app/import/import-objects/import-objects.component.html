@@ -1,0 +1,62 @@
+<div class="row">
+  <div class="col-md-9">
+    <aw-wizard [navBarLayout]="'large-empty-symbols'">
+      <aw-wizard-step stepId="1" stepTitle="Select file">
+        <ng-template awWizardStepSymbol><i class="fas fa-file-code"></i></ng-template>
+        <cmdb-select-file (formatChange)="formatChange($event)" (fileChange)="fileChange($event)"></cmdb-select-file>
+      </aw-wizard-step>
+      <aw-wizard-step stepId="2" stepTitle="File config" (stepExit)="onParseData()">
+        <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
+        <cmdb-file-config (configChange)="parserConfigChange($event)"
+                          [fileFormat]="importerFile.fileFormat"></cmdb-file-config>
+      </aw-wizard-step>
+      <aw-wizard-step stepId="3" stepTitle="Type mapping">
+        <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
+        <cmdb-type-mapping (typeChange)="typeChange($event)" [parsedData]="parsedData" [parserConfig]="parserConfig"
+                           [fileFormat]="importerFile.fileFormat"></cmdb-type-mapping>
+      </aw-wizard-step>
+      <aw-wizard-step stepId="4" stepTitle="Import config">
+        <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
+        <cmdb-import-config (configChange)="importConfigChange($event)"></cmdb-import-config>
+      </aw-wizard-step>
+      <aw-wizard-step stepId="5" stepTitle="Complete">
+        <ng-template awWizardStepSymbol><i class="fas fa-save"></i></ng-template>
+        <button class="btn btn-primary prev" type="button" awPreviousStep>Previous step</button>
+      </aw-wizard-step>
+    </aw-wizard>
+  </div>
+  <div class="col-md-3">
+    <h2>Configuration</h2>
+    <hr/>
+    <div class="card mb-3">
+      <div class="card-header">
+        File
+      </div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">File format: {{importerFile?.fileFormat}}</li>
+        <li class="list-group-item">File: {{importerFile?.fileName}}</li>
+      </ul>
+    </div>
+    <div class="card mb-3">
+      <div class="card-header">
+        Parser config:
+      </div>
+      <ul class="list-group list-group-flush">
+        <li *ngFor="let parserPro of parserConfig | keyvalue" class="list-group-item">
+          {{parserPro.key | uppercase}}: {{parserPro.value}}
+        </li>
+      </ul>
+    </div>
+    <div class="card mb-3">
+      <div class="card-header">
+        Importer config:
+      </div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">Type: {{typeInstance?.label}}</li>
+        <li class="list-group-item">Start at: {{importerConfig?.start_element}}</li>
+        <li class="list-group-item">Max elements: {{importerConfig?.max_elements}}</li>
+        <li class="list-group-item">Overwrite exists: {{importerConfig?.overwrite_public}}</li>
+      </ul>
+    </div>
+  </div>
+</div>

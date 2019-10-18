@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { HttpErrorInterceptor } from './auth/interceptors/http-error.interceptor.tx';
+import { HttpErrorInterceptor } from './error/interceptors/http-error.interceptor.tx';
 
 const routes: Routes = [
   {
@@ -30,6 +30,10 @@ const routes: Routes = [
       breadcrumb: 'Dashboard'
     },
     loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
+  },
+  {
+    path: 'connect',
+    loadChildren: () => import('./connect/connect.module').then(m => m.ConnectModule)
   },
   {
     path: 'auth',
@@ -44,28 +48,36 @@ const routes: Routes = [
     loadChildren: () => import('./search/search.module').then(m => m.SearchModule)
   },
   {
-    path: 'file',
-    canActivate: [AuthGuard],
-    data: {
-      breadcrumb: 'File'
-    },
-    loadChildren: () => import('./export/export.module').then(m => m.ExportModule)
-  },
-  {
     path: 'framework',
     canActivate: [AuthGuard],
     data: {
-      breadcrumb: 'Framework'
+      breadcrumb: 'Dashboard'
     },
     loadChildren: () => import('./framework/framework.module').then(m => m.FrameworkModule)
   },
   {
-    path: 'user',
+    path: 'import',
     canActivate: [AuthGuard],
     data: {
-      breadcrumb: 'User'
+      breadcrumb: 'Import'
     },
-    loadChildren: () => import('./user/user.module').then(m => m.UserModule),
+    loadChildren: () => import('./import/import.module').then(m => m.ImportModule)
+  },
+  {
+    path: 'export',
+    canActivate: [AuthGuard],
+    data: {
+      breadcrumb: 'Export'
+    },
+    loadChildren: () => import('./export/export.module').then(m => m.ExportModule)
+  },
+  {
+    path: 'management',
+    canActivate: [AuthGuard],
+    data: {
+      breadcrumb: 'User-Management'
+    },
+    loadChildren: () => import('./management/management.module').then(m => m.ManagementModule),
   },
   {
     path: 'settings',
@@ -90,7 +102,7 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule],
   providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true },
+    {provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true},
   ]
 })
 export class AppRoutingModule {

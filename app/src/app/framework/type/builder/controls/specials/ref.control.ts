@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -45,7 +45,7 @@ export class ReferenceControl implements ControlsCommon {
 
   name = 'ref';
   label = 'Reference';
-  icon = 'fa-retweet';
+  icon = 'retweet';
   dndType: string = 'inputs';
 
   content() {

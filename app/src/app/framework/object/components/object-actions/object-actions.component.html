@@ -1,24 +1,24 @@
 <div id="object-action-list" class="card">
   <div class="card-body">
     <div class="list-group list-group-flush">
-      <a routerLink="/framework/object/type/{{objectInstance?.type_id}}" class="list-group-item list-group-item-action">
-        <i class="fa fa-th-list"></i> List objects
+      <a routerLink="/framework/object/type/{{renderResult?.type_information?.type_id}}" class="list-group-item list-group-item-action">
+        <fa-icon icon="list"></fa-icon> List objects
       </a>
-      <a routerLink="/framework/object/add/{{objectInstance?.type_id}}"
+      <a routerLink="/framework/object/add/{{renderResult?.type_information?.type_id}}"
          class="list-group-item list-group-item-action list-group-item-action">
-        <i class="fa fa-plus"></i> Add new {{typeInstance?.label}} object
+        <fa-icon [icon]="['fas', 'plus']"></fa-icon> Add new {{renderResult?.type_information?.type_label}} object
       </a>
-      <a routerLink="/framework/object/copy/{{objectInstance?.public_id}}"
+      <a routerLink="/framework/object/copy/{{renderResult?.object_information?.object_id}}"
          class="list-group-item list-group-item-action list-group-item-action">
-        <i class="fa fa-clone"></i> Copy object
+        <fa-icon [icon]="['far', 'clone']"></fa-icon> Copy object
       </a>
-      <a routerLink="/framework/object/edit/{{objectInstance?.public_id}}"
+      <a routerLink="/framework/object/edit/{{renderResult?.object_information?.object_id}}"
          class="list-group-item list-group-item-action list-group-item-action">
-        <i class="fa fa-pencil-square-o"></i> Edit object
+        <fa-icon [icon]="['far', 'edit']"></fa-icon> Edit object
       </a>
       <a class="list-group-item list-group-item-action list-group-item-action"
-         (click)="deleteObject(objectInstance?.public_id)">
-        <i class="fa fa-trash-o"></i> Delete object
+         (click)="deleteObject(renderResult?.object_information?.object_id)">
+        <fa-icon [icon]="['far', 'trash-alt']"></fa-icon> Delete object
       </a>
     </div>
   </div>

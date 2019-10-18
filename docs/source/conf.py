@@ -12,10 +12,18 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath('../../cmdb/'))
+sys.path.insert(0, os.path.abspath('../../cmdb/framework/'))
+sys.path.insert(0, os.path.abspath('../../cmdb/data_storage/'))
+sys.path.insert(0, os.path.abspath('../../cmdb/event_management/'))
+sys.path.insert(0, os.path.abspath('../../cmdb/user_management/'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'dataGerry'
+project = 'DATAGERRY'
 copyright = '2019, NETHINKS GmbH'
 author = 'NETHINKS GmbH'
 
@@ -124,7 +132,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'dataGerry.tex', 'dataGerry Documentation',
+    (master_doc, 'DATAGERRY.tex', 'DATAGERRY Documentation',
      'NETHINKS GmbH', 'manual'),
 ]
 
@@ -133,7 +141,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'datagerry', 'dataGerry Documentation',
+    (master_doc, 'datagerry', 'DATAGERRY Documentation',
      [author], 1)
 ]
 
@@ -143,13 +151,12 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'dataGerry', 'dataGerry Documentation',
-     author, 'dataGerry', 'One line description of project.',
+    (master_doc, 'DATAGERRY', 'DATAGERRY Documentation',
+     author, 'DATAGERRY', 'One line description of project.',
      'Miscellaneous'),
 ]
 
 # -- Extension configuration -------------------------------------------------
-
 
 # -- Options for todo extension ----------------------------------------------
 # If true, `todo` and `todoList` produce output, else they produce nothing.

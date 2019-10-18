@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -27,5 +27,16 @@ export class ContentHeaderComponent {
 
   @Input() public title: string;
   @Input() public separator: boolean = true;
+
+  public currentIcon: string;
+
+  @Input()
+  public set faIcon(value: string) {
+    this.currentIcon = value === undefined ? 'cube' : value;
+  }
+
+  public get faIcon(): string {
+    return this.currentIcon === undefined ? 'cube' : this.currentIcon;
+  }
 
 }

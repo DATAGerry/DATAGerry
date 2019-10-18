@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -65,9 +65,16 @@ export class LoginComponent implements OnInit, OnDestroy {
         data => {
           this.router.navigate(['/']);
         },
-        error => {
-          console.log(error);
+        async error => {
+          this.render.addClass(document.getElementById('login-logo'), 'shake');
+          this.loginForm.reset();
+          await this.delay(1000);
+          this.render.removeClass(document.getElementById('login-logo'), 'shake');
         });
+  }
+
+  public delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) );
   }
 
 

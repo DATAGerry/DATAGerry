@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -26,8 +26,9 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import { configComponents } from './configs.list';
-import { Group } from '../../../../user/models/group';
-import { User } from '../../../../user/models/user';
+import { Group } from '../../../../management/models/group';
+import { User } from '../../../../management/models/user';
+import { CmdbMode } from '../../../modes.enum';
 
 @Component({
   selector: 'cmdb-config-edit',
@@ -39,6 +40,7 @@ export class ConfigEditComponent implements OnInit {
   @Input() data: any;
   @Input() groupList: Group[];
   @Input() userList: User[];
+  @Input() editingActivated: boolean = false;
   @ViewChild('fieldConfig', {read: ViewContainerRef, static: true}) container;
   private component: any;
   private componentRef: ComponentRef<any>;
@@ -55,5 +57,6 @@ export class ConfigEditComponent implements OnInit {
     this.componentRef.instance.data = this.data;
     this.componentRef.instance.groupList = this.groupList;
     this.componentRef.instance.userList = this.userList;
+    this.componentRef.instance.activeEdit = this.editingActivated;
   }
 }

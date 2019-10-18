@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -14,9 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""
-Data access object for all core objects that are to be stored in the database.
-"""
 import logging
 
 try:
@@ -28,8 +25,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class CmdbDAO:
-    """
-    The data access object is the basic presentation if objects and
+    """The data access object is the basic presentation if objects and
     their necessary dependent classes are to be stored in the database.
 
     Attributes;
@@ -140,7 +136,7 @@ class CmdbDAO:
             index_list.append(IndexModel(**index))
         return index_list
 
-    def _update_version(self, update) -> str:
+    def update_version(self, update) -> str:
         """
         Update the version number of the object
 

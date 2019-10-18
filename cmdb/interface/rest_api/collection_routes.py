@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,12 @@
 import logging
 
 from werkzeug.exceptions import abort
-
-from cmdb.framework.cmdb_object_manager import object_manager, ObjectManagerGetError
+from flask import current_app
+from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.interface.route_utils import RootBlueprint, make_response, NestedBlueprint
+
+with current_app.app_context():
+    object_manager = current_app.object_manager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -27,11 +30,11 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-collection_routes = RootBlueprint('collection_rest', __name__, url_prefix='/collection')
-collection_template_routes = NestedBlueprint(collection_routes, url_prefix='/template')
+collection_blueprint = RootBlueprint('collection_rest', __name__, url_prefix='/collection')
+collection_template_routes = NestedBlueprint(collection_blueprint, url_prefix='/template')
 
 
-@collection_routes.route('/', methods=['GET'])
+@collection_blueprint.route('/', methods=['GET'])
 def get_collections():
     try:
         collections = object_manager.get_collections()
@@ -42,8 +45,8 @@ def get_collections():
     return make_response(collections)
 
 
-@collection_routes.route('/<int:public_id>', methods=['GET'])
-@collection_routes.route('/<int:public_id>/', methods=['GET'])
+@collection_blueprint.route('/<int:public_id>', methods=['GET'])
+@collection_blueprint.route('/<int:public_id>/', methods=['GET'])
 def get_collection(public_id: int):
     try:
         collection = object_manager.get_collection(public_id)
@@ -52,18 +55,18 @@ def get_collection(public_id: int):
     return make_response(collection)
 
 
-@collection_routes.route('/', methods=['POST'])
+@collection_blueprint.route('/', methods=['POST'])
 def add_collection():
     raise NotImplementedError
 
 
-@collection_routes.route('/', methods=['PUT'])
+@collection_blueprint.route('/', methods=['PUT'])
 def update_collection():
     raise NotImplementedError
 
 
-@collection_routes.route('/<int:public_id>/', methods=['DELETE'])
-@collection_routes.route('/<int:public_id>', methods=['DELETE'])
+@collection_blueprint.route('/<int:public_id>/', methods=['DELETE'])
+@collection_blueprint.route('/<int:public_id>', methods=['DELETE'])
 def delete_collection(public_id: int):
     raise NotImplementedError
 

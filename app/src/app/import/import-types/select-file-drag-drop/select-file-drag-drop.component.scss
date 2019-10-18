@@ -1,0 +1,16 @@
+#uploadfileform {
+  .uploadfilestart, .uploadfiledone{
+    background: None;
+    border: 2px dashed orangered;
+    border-radius: 5px;
+  }
+
+  .uploadfilestart:hover, .uploadfiledone:hover {
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+
+  .uploadfiledone {
+    border: 2px dashed green;
+  }
+}

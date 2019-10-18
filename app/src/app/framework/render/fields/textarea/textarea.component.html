@@ -11,7 +11,7 @@
                      rows="{{data?.rows ? data?.rows : 3}}"></textarea>
           <div class="input-group-append">
             <span class="input-group-text" (click)="copyToClipboard()">
-              <i class="fa fa-clipboard"></i>
+              <fa-icon [icon]="['far', 'clipboard']"></fa-icon>
             </span>
           </div>
         </ng-container>
@@ -22,7 +22,7 @@
                  'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"></textarea>
           <div *ngIf="data?.helperText" class="input-group-append">
             <span class="input-group-text">
-              <i class="fa fa-info-circle" placement="left" [ngbTooltip]="data?.helperText"></i>
+              <fa-icon icon="info" placement="left" [ngbTooltip]="data?.helperText"></fa-icon>
             </span>
           </div>
         </ng-container>

@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -20,8 +20,6 @@ Collection of different helper classes and functions
 import re
 import importlib
 from functools import wraps
-from json import JSONEncoder
-import cmdb.data_storage.database_utils
 
 
 def debug_print(self):
@@ -86,3 +84,16 @@ def load_class(classname):
     loaded_module = importlib.import_module(module_name)
     loaded_class = getattr(loaded_module, class_name)
     return loaded_class
+
+
+def str_to_bool(s):
+    if s == 'True' or s == 'true':
+        return True
+    elif s == 'False' or s == 'false':
+        return False
+    elif s is True:
+        return True
+    elif s is False:
+        return False
+    else:
+        raise ValueError

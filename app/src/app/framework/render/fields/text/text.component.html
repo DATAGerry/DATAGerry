@@ -10,7 +10,7 @@
                  [formControlName]="data.name"/>
           <div class="input-group-append">
             <span class="input-group-text" (click)="copyToClipboard()">
-              <i class="fa fa-clipboard"></i>
+              <fa-icon [icon]="['far', 'clipboard']"></fa-icon>
             </span>
           </div>
         </ng-container>
@@ -21,7 +21,7 @@
                  'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"/>
           <div *ngIf="data?.helperText" class="input-group-append">
             <span class="input-group-text">
-              <i class="fa fa-info-circle" placement="left" [ngbTooltip]="data?.helperText"></i>
+              <fa-icon icon="info" placement="left" [ngbTooltip]="data?.helperText"></fa-icon>
             </span>
           </div>
         </ng-container>
@@ -30,8 +30,11 @@
         </div>
       </ng-container>
       <div *ngIf="controller.invalid && (controller.dirty || controller.touched)" class="invalid-feedback">
-        <div class="float-right" *ngIf="controller.errors.required">
+        <div class="float-right" *ngIf="controller.errors?.required">
           {{data.label}} is a required field.
+        </div>
+        <div class="float-right" *ngIf="controller.errors?.pattern">
+          {{data.value}} your input does not match the set regex pattern: {{data.regex}}
         </div>
         <div class="clearfix"></div>
       </div>

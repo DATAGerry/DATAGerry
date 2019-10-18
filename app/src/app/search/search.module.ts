@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -27,6 +27,8 @@ import { SearchResultsComponent } from './components/search-results/search-resul
 import { SearchRoutingModule } from './search-routing.module';
 import { LayoutModule } from '../layout/layout.module';
 import { NgxSpinnerModule } from 'ngx-spinner';
+import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
+import {NgSelectModule} from "@ng-select/ng-select";
 
 
 @NgModule({
@@ -38,7 +40,9 @@ import { NgxSpinnerModule } from 'ngx-spinner';
     LayoutModule,
     ReactiveFormsModule,
     DataTablesModule,
-    NgxSpinnerModule
+    NgxSpinnerModule,
+    FontAwesomeModule,
+    NgSelectModule
   ],
 
   providers: [ApiCallService]

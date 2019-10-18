@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { CmdbMode } from '../../modes.enum';
 import { RenderComponent } from '../../render/render.component';
 import { CmdbObject } from '../../models/cmdb-object';
-import { UserService } from '../../../user/services/user.service';
+import { UserService } from '../../../management/services/user.service';
 import { ObjectService } from '../../services/object.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryService } from '../../services/category.service';
@@ -79,15 +79,24 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.typeService.getTypeList().subscribe((typeList: CmdbType[]) => {
       this.typeList = typeList;
+      this.preperatedTypeList = [];
     }, (e) => {
       console.error(e);
     }, () => {
       this.categoryService.getCategoryList().subscribe((categoryList: CmdbCategory[]) => {
-        for (const category of categoryList) {
-          for (const typeSelectedID of category.type_list) {
-            this.typeList.find(type => type.public_id === typeSelectedID).category_name = category.name;
+        categoryList.forEach( category => {
+          for ( const type of this.typeList ) {
+            if ((type.category_id === category.public_id)
+              || (category.root && type.category_id === 0) ) {
+              type.category_name = category.label;
+              this.preperatedTypeList.push(type);
+            }
           }
-        }
+        });
+      }, (e) => {
+        console.log(e);
+      }, () => {
+        this.typeList = this.preperatedTypeList;
       });
     });
     this.typeIDForm = new FormGroup({
@@ -100,7 +109,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
     this.typeIDSubject.unsubscribe();
   }
 
-  groupByFn = (item) => item.category_id;
+  groupByFn = (item) => item.category_name;
 
   groupValueFn = (_: string, children: any[]) => ({name: children[0].category_name, total: children.length});
 
@@ -121,7 +130,6 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
     this.renderForm.markAllAsTouched();
     if (this.renderForm.valid) {
       this.objectInstance.type_id = this.currentTypeID;
-      this.objectInstance.active = this.render.renderForm.get('active').value;
       this.objectInstance.version = '1.0.0';
       this.objectInstance.author_id = this.userService.getCurrentUser().public_id;
       this.objectInstance.fields = [];

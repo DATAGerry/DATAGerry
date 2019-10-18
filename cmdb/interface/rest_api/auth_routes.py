@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,25 +15,32 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+from datetime import datetime
 
 from flask import request, abort
 
+from cmdb.interface.route_utils import make_response, RootBlueprint
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management.user_manager import user_manager
-from cmdb.data_storage import get_pre_init_database
-from cmdb.utils import get_security_manager
-from cmdb.interface.route_utils import make_response, RootBlueprint
 
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
     CMDBError = Exception
 
-auth_routes = RootBlueprint('auth_rest', __name__, url_prefix='/auth')
+
+auth_blueprint = RootBlueprint('auth_rest', __name__, url_prefix='/auth')
 LOGGER = logging.getLogger(__name__)
 
 
-@auth_routes.route('/login', methods=['POST'])
+@auth_blueprint.route('/providers/', methods=['GET'])
+@auth_blueprint.route('/providers', methods=['GET'])
+def get_auth_providers():
+    from cmdb.user_management import __AUTH_PROVIDERS__
+    return make_response(__AUTH_PROVIDERS__)
+
+
+@auth_blueprint.route('/login', methods=['POST'])
 def login_call():
     login_data = request.json
     login_user = None
@@ -50,8 +57,14 @@ def login_call():
     except CMDBError as e:
         abort(401, e)
     if correct:
-        login_user.token = TokenGenerator().generate_token(payload={'user': {
+        login_user.last_login_time = datetime.utcnow()
+        user_manager.update_user(login_user.public_id, login_user.to_database())
+        tg = TokenGenerator()
+        token = tg.generate_token(payload={'user': {
             'public_id': login_user.get_public_id()
         }})
+        login_user.token = token
+        login_user.token_issued_at = int(datetime.now().timestamp())
+        login_user.token_expire = int(tg.get_expire_time().timestamp())
         return make_response(login_user)
     abort(401)

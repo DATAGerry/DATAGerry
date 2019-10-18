@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -19,11 +19,15 @@ Database Management instance for database actions
 
 """
 import logging
+
 from pymongo.errors import DuplicateKeyError
-from pymongo.results import DeleteResult
+from pymongo.results import DeleteResult, UpdateResult
+
 from cmdb.data_storage.database_connection import Connector
-from cmdb.utils.error import CMDBError
 from cmdb.data_storage.database_connection import MongoConnector
+from cmdb.data_storage.database_framework_counter import IDCounter
+from cmdb.utils.error import CMDBError
+from cmdb.utils.wraps import deprecated
 
 LOGGER = logging.getLogger(__name__)
 
@@ -332,8 +336,8 @@ class DatabaseManagerMongo(DatabaseManager):
             list: list of founded documents
 
         """
-
-        return list(self.__find(collection=collection, *args, **kwargs))
+        founded_documents = self.__find(collection=collection, *args, **kwargs)
+        return list(founded_documents)
 
     def count(self, collection: str, *args, **kwargs):
         """This method does not actually
@@ -414,6 +418,23 @@ class DatabaseManagerMongo(DatabaseManager):
         formatted_data = {'$set': data}
         return self.database_connector.get_collection(collection).update_one(formatted_public_id, formatted_data)
 
+    def update_many(self, collection: str, query: dict, update: dict) -> UpdateResult:
+        """update all documents that match the filter from a collection.
+
+        Args:
+            collection (str): name of database collection
+            query (dict): A query that matches the documents to update.
+            update (dict): The modifications to apply.
+
+        Returns:
+            A boolean acknowledged as true if the operation ran with write concern or false if write concern was disabled
+
+        """
+        result = self.database_connector.get_collection(collection).update_many(filter=query, update=update)
+        if not result.acknowledged:
+            raise DocumentCouldNotBeDeleted(collection)
+        return result
+
     def insert_with_internal(self, collection: str, _id: int or str, data: dict):
         formatted_id = {'_id': _id}
         formatted_data = {'$set': data}
@@ -454,7 +475,7 @@ class DatabaseManagerMongo(DatabaseManager):
             raise DocumentCouldNotBeDeleted(collection, public_id)
         return result
 
-    def delete_many(self, collection: str,  **requirements: dict) -> DeleteResult:
+    def delete_many(self, collection: str, **requirements: dict) -> DeleteResult:
         """removes all documents that match the filter from a collection.
 
         Args:
@@ -528,6 +549,7 @@ class DatabaseManagerMongo(DatabaseManager):
         """
         return self.database_connector.delete_collection(collection_name)
 
+    @deprecated
     def get_document_with_highest_id(self, collection: str) -> str:
         """get the document with the highest public id inside a collection
 
@@ -540,6 +562,7 @@ class DatabaseManagerMongo(DatabaseManager):
         formatted_sort = [('public_id', self.DESCENDING)]
         return self.find_one_by(collection=collection, sort=formatted_sort)
 
+    @deprecated
     def get_highest_id(self, collection: str) -> int:
         """wrapper function
         calls get_document_with_highest_id() and returns the public_id
@@ -556,6 +579,35 @@ class DatabaseManagerMongo(DatabaseManager):
         except NoDocumentFound:
             return 0
         return highest
+
+    def get_next_public_id(self, collection: str) -> int:
+        try:
+            founded_counter = self.database_connector.get_collection(IDCounter.COLLECTION).find_one(filter={
+                '_id': collection
+            })
+            new_id = founded_counter['counter'] + 1
+        except (NoDocumentFound, Exception) as err:
+            LOGGER.error(err)
+
+            LOGGER.warning(f'Counter for collection {collection} wasn´t found - setup new with data from {collection}')
+            docs_count = self.get_highest_id(collection)
+            self.database_connector.get_collection(IDCounter.COLLECTION).insert({
+                '_id': collection,
+                'counter': docs_count
+            })
+            new_id = docs_count + 1
+        finally:
+            self._update_public_id_counter(collection)
+        return new_id
+
+    def _update_public_id_counter(self, collection: str):
+        working_collection = self.database_connector.get_collection(IDCounter.COLLECTION)
+        query = {
+            '_id': collection
+        }
+        counter_doc = working_collection.find_one(query)
+        counter_doc['counter'] = counter_doc['counter'] + 1
+        self.database_connector.get_collection(IDCounter.COLLECTION).update(query, counter_doc)
 
 
 class InsertError(CMDBError):

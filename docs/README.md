@@ -1,6 +1,6 @@
-# dataGerry Documentation
+# DATAGERRY Documentation
 
-This is the documentation of dataGerry. Python-Sphinx is used to generate the documentation.
+This is the documentation of DATAGERRY. Python-Sphinx is used to generate the documentation.
 
 ## Build docs from source
 ```bash

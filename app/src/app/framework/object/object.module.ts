@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -34,7 +34,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RenderModule } from '../render/render.module';
 import { ObjectAddComponent } from './object-add/object-add.component';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { ObjectFooterComponent } from './components/object-footer/object-footer.component';
+import { ObjectFooterComponent } from './object-view/object-footer/object-footer.component';
 import { ObjectActionsComponent } from './components/object-actions/object-actions.component';
 import { ObjectViewMetaComponent } from './components/object-view-meta/object-view-meta.component';
 import { ObjectEditComponent } from './object-edit/object-edit.component';
@@ -42,11 +42,36 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectViewRenderComponent } from './components/object-view-render/object-view-render.component';
 import { ObjectCopyComponent } from './object-copy/object-copy.component';
 import { ObjectLinksComponent } from './components/object-links/object-links.component';
+import { ObjectTypeLabelComponent } from './components/object-type-label/object-type-label.component';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { ObjectLogListComponent } from './object-view/object-log-list/object-log-list.component';
+import { ObjectReferenceListComponent } from './object-view/object-reference-list/object-reference-list.component';
+import { ObjectLogComponent } from './object-log/object-log.component';
+import { ObjectLogChangeViewComponent } from './object-view/object-log-list/object-log-change-view/object-log-change-view.component';
+import { ObjectLogUserComponent } from './object-view/object-log-list/object-log-user/object-log-user.component';
 
 @NgModule({
-  declarations: [ObjectListComponent, ObjectViewComponent, ObjectHeaderComponent, ObjectQrComponent, ObjectSummaryComponent,
-    ObjectExternalsComponent, ObjectAddComponent, ObjectFooterComponent, ObjectActionsComponent, ObjectViewRenderComponent,
-    ObjectViewMetaComponent, ObjectEditComponent, ObjectCopyComponent, ObjectLinksComponent],
+  declarations: [
+    ObjectListComponent,
+    ObjectViewComponent,
+    ObjectHeaderComponent,
+    ObjectQrComponent,
+    ObjectSummaryComponent,
+    ObjectExternalsComponent,
+    ObjectAddComponent,
+    ObjectFooterComponent,
+    ObjectActionsComponent,
+    ObjectViewRenderComponent,
+    ObjectViewMetaComponent,
+    ObjectEditComponent,
+    ObjectCopyComponent,
+    ObjectLinksComponent,
+    ObjectTypeLabelComponent,
+    ObjectLogListComponent,
+    ObjectReferenceListComponent,
+    ObjectLogComponent,
+    ObjectLogChangeViewComponent,
+    ObjectLogUserComponent],
   imports: [
     CommonModule,
     ObjectRoutingModule,
@@ -58,7 +83,8 @@ import { ObjectLinksComponent } from './components/object-links/object-links.com
     ReactiveFormsModule,
     RenderModule,
     NgSelectModule,
-    NgbTooltipModule
+    NgbTooltipModule,
+    FontAwesomeModule
   ]
 })
 export class ObjectModule {

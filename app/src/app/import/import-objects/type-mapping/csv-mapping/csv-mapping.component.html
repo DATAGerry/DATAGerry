@@ -1,0 +1,27 @@
+<div class="card">
+  <div class="card-header">Mapping</div>
+  <table class="table">
+    <thead>
+    <tr>
+      <th>Identifier</th>
+      <th *ngIf="parserConfig.header">Header</th>
+      <th>Index</th>
+      <th>Example</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let entry of [].constructor(parsedData?.entry_length); let idx = index">
+      <td dndDropzone [dndEffectAllowed]="allowedEffect" (dndDrop)="onDrop($event, currentMapping, idx, mappingControls)">
+        <div class="list-group-item list-group-item-action">
+          <span>
+            {{currentMapping[idx]?.label}}
+          </span>
+        </div>
+      </td>
+      <th *ngIf="parserConfig.header">{{parsedData.header[idx]}}</th>
+      <th>{{idx}}</th>
+      <td>{{parsedData.entries[0][idx]}}</td>
+    </tr>
+    </tbody>
+  </table>
+</div>

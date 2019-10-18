@@ -1,35 +1,60 @@
-<div class="card-title" style="padding-top: 1em">
-  <cmdb-content-header title="Search Result"></cmdb-content-header>
+
+<h3 class="dropdown-toggle" data-toggle="collapse" data-target="#search-bar-advanced"
+    aria-expanded="true" aria-controls="search-bar-advanced">Advanced search options
+</h3><ng-template [ngIf]="true"><hr/></ng-template>
+
+<div id="search-bar-advanced" class="collapse show search-bar-body">
+    <form [formGroup]="searchForm" (ngSubmit)="getResponse()">
+      <div class="form-group">
+        <label for="search-input">Search</label>
+        <input id="search-input" class="form-control" type="text" placeholder="Search input" formControlName="term"
+               [value]="searchForm.get('term').value">
+        <small class="form-text text-muted">Search for fields</small>
+      </div>
+      <div class="form-group">
+        <label>Filter by Type</label>
+        <ng-select [items]="typeList"
+                   bindLabel="label"
+                   formControlName="type"
+                   placeholder="Select type">
+        </ng-select>
+      </div>
+      <div class="form-group form-check">
+        <input type="checkbox" class="form-check-input" id="showActivObjects" formControlName="active">
+        <label class="form-check-label" for="showActivObjects">active objects</label>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
 </div>
 
-<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-striped table-bordered">
+<div class="card-title" style="padding-top: 1em">
+  <h3>search results ( {{results.length}} )</h3>
+  <ng-template [ngIf]="true"><hr/></ng-template>
+</div>
+
+<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"  class="table table-striped table-bordered">
   <thead>
   <tr>
-    <th>Active</th>
+    <th class="toggle-active">Active</th>
     <th>ID</th>
     <th>Type</th>
-    <th>Description</th>
     <th>Author</th>
+    <th>Creation time</th>
     <th>Action</th>
   </tr>
   </thead>
   <tbody>
-  <tr *ngFor="let result of results">
-    <td>
-      <cmdb-active-badge [activeStatus]="result.active"></cmdb-active-badge>
-    </td>
-    <td>{{result.public_id}}</td>
-    <td><a routerLink="/framework/type/{{result.type_id}}">{{result.label}}</a></td>
-    <td>
-      <div *ngFor="let field of result.match_fields">
-        <p class="mb-0">{{field.value}}</p>
-        <footer class="blockquote-footer">Found in <cite title="Source Title">{{field.name}}</cite></footer>
-      </div>
-    </td>
-    <td><a routerLink="/user/{{result.author_id}}">{{result.author_name}}</a></td>
-    <td>
-      <a class="text-dark" routerLink="/framework/object/{{result.public_id}}"><i class="fa fa-eye" aria-hidden="true"></i></a>
+  <tr *ngFor="let entry of results">
+
+    <td><cmdb-active-badge [activeStatus]="entry?.object_information.active"></cmdb-active-badge></td>
+    <td>{{entry?.object_information.object_id}}</td>
+    <td>{{entry?.type_information.type_label}}</td>
+    <td>{{entry?.object_information.author_name }}</td>
+    <td>{{entry?.object_information.creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
+    <td><a class="text-dark"[routerLink]="['/framework/object/view', entry?.object_information.object_id]">
+      <fa-icon [icon]="['far', 'eye']"></fa-icon></a>
     </td>
   </tr>
   </tbody>
 </table>
+

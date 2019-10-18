@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -15,70 +15,75 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-
+from abc import abstractclassmethod
 from datetime import datetime
 from enum import Enum
+
+from cmdb.framework.cmdb_dao import CmdbDAO
 
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
     CMDBError = Exception
-from cmdb.framework.cmdb_dao import CmdbDAO
-from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.cmdb_type import CmdbType
 
 LOGGER = logging.getLogger(__name__)
 
 
-class LogCommands(Enum):
-    CREATE = 1
-    EDIT = 2
-    ACTIVE = 3
-    DEACTIVATE = 4
+class LogAction(Enum):
+    CREATE = 0
+    EDIT = 1
+    ACTIVE_CHANGE = 2
+    DELETE = 3
 
 
-class LogModels(Enum):
-    OBJECT = CmdbObject.__class__.__name__
-    TYPE = CmdbType.__class__.__name__
-
-
-class CmdbLog(CmdbDAO):
-    """
-    State control of objects and types.
-    """
-
-    COLLECTION = "framework.logs"
+class CmdbMetaLog(CmdbDAO):
+    COLLECTION = 'framework.logs'
     REQUIRED_INIT_KEYS = [
-        'model',
-        'user_id',
-        'time',
-        'meta',
-        'state'
+        'log_type',
+        'log_time',
+        'action',
     ]
 
-    def __init__(self, model: str, action: LogCommands, user_id: int, time: datetime, meta: dict = None,
-                 state: bytearray = None, **kwargs):
-        self.model = model
-        self.action = action
+    def __init__(self, log_type, log_time: datetime, action: LogAction, **kwargs):
+        self.log_type = log_type
+        self.log_time: datetime = log_time
+        self.action: LogAction = action
+        super(CmdbMetaLog, self).__init__(**kwargs)
+
+
+class CmdbObjectLog(CmdbMetaLog):
+    UNKNOWN_USER_STRING = 'Unknown'
+    REQUIRED_INIT_KEYS = [
+                             'object_id',
+                             'version',
+                             'user_id'
+                         ] + CmdbMetaLog.REQUIRED_INIT_KEYS
+
+    def __init__(self, object_id: int, version, user_id: int, user_name: str = None, changes: list = None,
+                 comment: str = None, render_state=None, **kwargs):
+        self.object_id = object_id
+        self.version = version
         self.user_id = user_id
-        self.time = time
-        self.meta = meta or {}
-        self.state = state or None
-        super(CmdbLog, self).__init__(**kwargs)
+        self.user_name = user_name or self.UNKNOWN_USER_STRING
+        self.comment = comment
+        self.changes = changes or []
+        self.render_state = render_state
+        super(CmdbObjectLog, self).__init__(**kwargs)
 
-    def get_decrypted_state(self) -> (LogModels.OBJECT, LogModels.TYPE):
-        from cmdb.security.keys import KeyHolder
-        from cmdb.security.crypto import RSADecryption
-        key_holder = KeyHolder()
-        rsa_dec = RSADecryption(private_key_pem=key_holder.get_private_pem())
-        rsa_decrypted = rsa_dec.decrypt(self.state)
-        LOGGER.debug(rsa_decrypted)
-        return rsa_decrypted
 
-    def encrypt_state(self, data: (LogModels.OBJECT, LogModels.TYPE)):
-        from cmdb.security.keys import KeyHolder
-        from cmdb.security.crypto import RSAEncryption
-        key_holder = KeyHolder()
-        rsa_enc = RSAEncryption(public_key_pem=key_holder.get_public_pem())
-        LOGGER.debug(rsa_enc)
-        self.state = rsa_enc.encrypt(data.to_database())
+class CmdbLog:
+    REGISTERED_LOG_TYPE = {}
+    DEFAULT_LOG_TYPE = CmdbObjectLog
+
+    @abstractclassmethod
+    def register_log_type(cls, log_name, log_class):
+        cls.REGISTERED_LOG_TYPE[log_name] = log_class
+
+    def __new__(cls, *args, **kwargs):
+        try:
+            _log_class = cls.REGISTERED_LOG_TYPE[kwargs['log_type']]
+        except (KeyError, ValueError):
+            _log_class = cls.DEFAULT_LOG_TYPE
+        return _log_class(*args, **kwargs)
+
+

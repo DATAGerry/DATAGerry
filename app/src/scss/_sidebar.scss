@@ -180,9 +180,9 @@ $sidebar-borders: (
       }
 
       &[aria-expanded='false']::after {
-        font-family: 'FontAwesome', sans-serif;
+        font-family: 'Font Awesome 5 Free', sans-serif;
         font-weight: 900;
-        content: '\f107';
+        content: '\f078';
         text-align: right;
         display: inline;
         padding-left: 5px;
@@ -193,9 +193,9 @@ $sidebar-borders: (
         background-color: inherit;
 
         &::after {
-          font-family: 'FontAwesome', sans-serif;
+          font-family: 'Font Awesome 5 Free', sans-serif;
           font-weight: 900;
-          content: '\f104';
+          content: '\f077';
           text-align: right;
           display: inline;
           padding-left: 5px;

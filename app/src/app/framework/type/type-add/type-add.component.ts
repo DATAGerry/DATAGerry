@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ import { Component } from '@angular/core';
 import { CmdbType } from '../../models/cmdb-type';
 import { ActivatedRoute } from '@angular/router';
 import { TypeService } from '../../services/type.service';
-import { UserService } from '../../../user/services/user.service';
+import { UserService } from '../../../management/services/user.service';
 
 @Component({
   selector: 'cmdb-type-add',

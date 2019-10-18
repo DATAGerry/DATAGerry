@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@
 Collection of system readers which loads configuration files and settings
 """
 import os
+import re
 from cmdb.utils.error import CMDBError
 
 
@@ -69,6 +70,7 @@ class SystemReader:
 class SystemConfigReader:
     """
     System reader for local config file
+    Options from config file can be overwritten by environment vars
     """
     DEFAULT_CONFIG_LOCATION = os.path.join(os.path.dirname(__file__), '../../etc/')
     DEFAULT_CONFIG_NAME = 'cmdb.conf'
@@ -116,6 +118,8 @@ class SystemConfigReader:
                 self.config_status = self.setup()
             if self.config_status == SystemConfigReader.CONFIG_NOT_LOADED:
                 raise ConfigFileNotFound(self.config_name)
+            # load environment variables
+            self.__envvars = SystemEnvironmentReader()
 
         def add_section(self, section):
             """
@@ -177,6 +181,13 @@ class SystemConfigReader:
             Returns:
                 value
             """
+            # check if environment variable is set
+            try:
+                value = self.__envvars.get_value(name, section)
+                return value
+            except KeyError:
+                pass
+            # load option from config file
             if self.config_status == SystemConfigReader.CONFIG_LOADED:
                 if self.config.has_section(section):
                     if name not in self.config[section]:
@@ -208,16 +219,30 @@ class SystemConfigReader:
             Returns:
                 key value dict of all elements inside section
             """
+            # load env vars
+            section_envvars = {}
+            try:
+                section_envvars = self.__envvars.get_all_values_from_section(section)
+            except:
+                pass
+
+            # get section from config
+            section_conffile = {}
             if self.config_status == SystemConfigReader.CONFIG_LOADED:
                 try:
                     if self.config.has_section(section):
-                        return dict(self.config.items(section))
+                        section_conffile = dict(self.config.items(section))
                     else:
                         raise SectionError(section)
                 except KeyError:
                     raise KeySectionError(section)
             else:
                 raise ConfigNotLoaded(SystemConfigReader.RUNNING_CONFIG_NAME)
+
+            # merge two the config dicts
+            section_merged = section_conffile.copy()
+            section_merged.update(section_envvars)
+            return section_merged
 
         def status(self):
             """
@@ -307,6 +332,38 @@ class SystemSettingsReader(SystemReader):
         """
         return SystemSettingsReader.SETUP_INITS
 
+
+class SystemEnvironmentReader(SystemReader):
+    """
+    Settings reader loads settings from environment variables
+    """
+
+    def __init__(self):
+        # get all environment variables and store them in config dict
+        self.__config = {}
+        pattern = re.compile("DATAGERRY_(.*)_(.*)")
+        for key in os.environ.keys():
+            match = pattern.fullmatch(key)
+            if match:
+                section = match.group(1)
+                name = match.group(2)
+                value = os.environ[key]
+                # save value in config dict
+                if section not in self.__config:
+                    self.__config[section] = {}
+                self.__config[section][name] = value
+
+    def get_value(self, name, section):
+        return self.__config[section][name]
+
+    def get_sections(self):
+        return self.__config.keys()
+
+    def get_all_values_from_section(self, section):
+        return self.__config[section]
+
+    def setup(self):
+        pass
 
 class ConfigFileSetError(CMDBError):
     """

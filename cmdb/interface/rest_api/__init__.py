@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -19,6 +19,8 @@ Init module for rest routes
 """
 import logging
 
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
@@ -30,10 +32,9 @@ LOGGER = logging.getLogger(__name__)
 def create_rest_api(event_queue):
     from cmdb.interface.config import app_config
     from cmdb.utils.system_reader import SystemConfigReader
+    system_config_reader = SystemConfigReader()
+
     try:
-
-        system_config_reader = SystemConfigReader()
-
         cache_config = {
             'DEBUG': True,
             'CACHE_TYPE': system_config_reader.get_value('name', 'Cache'),
@@ -47,13 +48,33 @@ def create_rest_api(event_queue):
     from flask_caching import Cache
 
     cache = Cache(config=cache_config)
+
+    # Create object manager
+    from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+
+    app_database = DatabaseManagerMongo(
+        connector=MongoConnector(
+            host=system_config_reader.get_value('host', 'Database'),
+            port=int(system_config_reader.get_value('port', 'Database')),
+            database_name=system_config_reader.get_value('database_name', 'Database')
+        )
+    )
+    object_manager = CmdbObjectManager(
+        database_manager=app_database,
+        event_queue=event_queue
+    )
+
+    # Create APP
     from cmdb.interface.cmdb_app import BaseCmdbApp
-    app = BaseCmdbApp(__name__)
+    app = BaseCmdbApp(__name__, object_manager=object_manager)
+
+    # Import App Extensions
     from flask_cors import CORS
     CORS(app)
     import cmdb
     cache.init_app(app)
     cache.clear()
+    app.cache = cache
 
     if cmdb.__MODE__ == 'DEBUG':
         app.config.from_object(app_config['rest_development'])
@@ -79,29 +100,38 @@ def register_converters(app):
 
 def register_blueprints(app):
     from cmdb.interface.rest_api.connection import connection_routes
-    from cmdb.interface.rest_api.object_routes import object_rest
-    from cmdb.interface.rest_api.type_routes import type_routes
-    from cmdb.interface.rest_api.auth_routes import auth_routes
-    from cmdb.interface.rest_api.category_routes import categories_routes
-    from cmdb.interface.rest_api.user_management.user_routes import user_routes
-    from cmdb.interface.rest_api.user_management.right_routes import right_routes
-    from cmdb.interface.rest_api.user_management.group_routes import group_routes
-    from cmdb.interface.rest_api.search_routes import search_routes
-    from cmdb.interface.rest_api.export_routes import export_route
-    from cmdb.interface.rest_api.status_routes import status_routes
-    from cmdb.interface.rest_api.collection_routes import collection_routes
-    app.register_blueprint(auth_routes)
-    app.register_blueprint(object_rest)
-    app.register_blueprint(type_routes)
+    from cmdb.interface.rest_api.object_routes import object_blueprint
+    from cmdb.interface.rest_api.type_routes import type_blueprint
+    from cmdb.interface.rest_api.auth_routes import auth_blueprint
+    from cmdb.interface.rest_api.category_routes import categories_blueprint
+    from cmdb.interface.rest_api.user_management.user_routes import user_blueprint
+    from cmdb.interface.rest_api.user_management.right_routes import right_blueprint
+    from cmdb.interface.rest_api.user_management.group_routes import group_blueprint
+    from cmdb.interface.rest_api.search_routes import search_blueprint
+    from cmdb.interface.rest_api.file_routes import file_blueprint
+    from cmdb.interface.rest_api.export_type_routes import type_export_blueprint
+    from cmdb.interface.rest_api.status_routes import status_blueprint
+    from cmdb.interface.rest_api.collection_routes import collection_blueprint
+    from cmdb.interface.rest_api.log_routes import log_blueprint
+    from cmdb.interface.rest_api.settings_routes import settings_blueprint
+    from cmdb.interface.rest_api.import_routes import importer_blueprint
+
+    app.register_blueprint(auth_blueprint)
+    app.register_blueprint(object_blueprint)
+    app.register_blueprint(type_blueprint)
     app.register_blueprint(connection_routes)
-    app.register_blueprint(categories_routes)
-    app.register_blueprint(user_routes)
-    app.register_blueprint(group_routes)
-    app.register_blueprint(right_routes)
-    app.register_blueprint(search_routes)
-    app.register_blueprint(export_route)
-    app.register_blueprint(status_routes)
-    app.register_blueprint(collection_routes)
+    app.register_blueprint(categories_blueprint)
+    app.register_blueprint(user_blueprint)
+    app.register_blueprint(group_blueprint)
+    app.register_blueprint(right_blueprint)
+    app.register_blueprint(search_blueprint)
+    app.register_blueprint(file_blueprint)
+    app.register_blueprint(type_export_blueprint)
+    app.register_blueprint(status_blueprint)
+    app.register_blueprint(collection_blueprint)
+    app.register_blueprint(log_blueprint)
+    app.register_blueprint(settings_blueprint)
+    app.register_blueprint(importer_blueprint)
 
 
 def register_error_pages(app):

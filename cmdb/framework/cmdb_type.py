@@ -1,4 +1,4 @@
-# dataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -39,7 +39,8 @@ class CmdbType(CmdbDAO):
         'author_id',
         'creation_time',
         'render_meta',
-        'fields'
+        'fields',
+        'category_id'
     ]
 
     INDEX_KEYS = [
@@ -47,7 +48,9 @@ class CmdbType(CmdbDAO):
     ]
 
     def __init__(self, name: str, active: bool, author_id: int, creation_time: datetime,
-                 render_meta: dict, fields: list, version: str = '1.0.0', access: list = None, label: str = None,
+                 render_meta: dict, fields: list, category_id: int, version: str = '1.0.0', access: list = None,
+                 label: str = None,
+                 clean_db: bool = None,
                  status: list = None, description: str = None, **kwargs):
         self.name = name
         self.label = label or self.name.title()
@@ -55,18 +58,14 @@ class CmdbType(CmdbDAO):
         self.version = version
         self.status = status
         self.active = active
+        self.clean_db = clean_db
         self.access = access or []
         self.author_id = author_id
         self.creation_time = creation_time
         self.render_meta = render_meta
         self.fields = fields or []
+        self.category_id = category_id or 0
         super(CmdbType, self).__init__(**kwargs)
-
-    def __truediv__(self, other):
-        if not isinstance(other, CmdbType):
-            raise TypeError("Not a CmdbType instance")
-        from deepdiff import DeepDiff
-        return DeepDiff(self, other, ignore_order=True)
 
     def get_name(self):
         return self.name
@@ -90,20 +89,16 @@ class CmdbType(CmdbDAO):
         ext_data = next(ext for ext in self.render_meta['external'] if ext["name"] == name)
         return _ExternalLink(**ext_data)
 
-    def get_summaries(self):
-        return self.render_meta['summary']
-
     def has_summaries(self):
-        if len(self.render_meta['summary']) > 0:
+        if len(self.render_meta['summary'].get('fields')) > 0:
             return True
         return False
 
-    def get_summary_fields(self, name):
-        return self.get_summary(name)['fields']
-
-    def get_summary(self, name):
-        sum_data = next(sum for sum in self.render_meta['summary'] if sum["name"] == name)
-        return _Summary(**sum_data)
+    def get_summary(self):
+        complete_field_list = []
+        for field_name in self.render_meta['summary']['fields']:
+            complete_field_list.append(self.get_field(field_name))
+        return _Summary(fields=complete_field_list)
 
     def get_sections(self):
         return sorted(self.render_meta['sections'], key=lambda k: k['position'])
@@ -126,11 +121,8 @@ class CmdbType(CmdbDAO):
         return len(self.fields)
 
     def get_field_of_type_with_value(self, input_type: str, _filter: str, value) -> dict:
-        field = [x for x in self.fields if x['input_type'] == input_type and x[_filter] == value]
+        field = [x for x in self.fields if x['type'] == input_type and x[_filter] == value]
         if field:
-            LOGGER.debug('Field of type {}'.format(input_type))
-            LOGGER.debug('Field len'.format(field))
-            LOGGER.debug('Field {}'.format(len(field)))
             try:
                 return field[0]
             except (RequiredInitKeyNotFoundError, CMDBError) as e:
@@ -201,24 +193,13 @@ class _ExternalLink:
 
 class _Summary:
 
-    def __init__(self, name: str, label: str = None, labels: [] = None, fields: list = None, values: list = None):
-        self.name = name
-        self.label = label or self.name.title()
-        self.labels = labels or []
+    def __init__(self, fields: list = None):
         self.fields = fields or []
-        self.values = values
 
     def has_fields(self):
         if len(self.fields) > 0:
             return True
         return False
 
-    def set_values(self, values):
-        self.values = values
-
-    def set_labels(self, labels):
-        self.labels = labels
-
-    def __repr__(self):
-        output_string = "{}: {}".format(self.label, self.values)
-        return output_string
+    def set_fields(self, fields):
+        self.fields = fields

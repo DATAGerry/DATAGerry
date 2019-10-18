@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -19,6 +19,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { ApiCallService } from '../../../services/api-call.service';
+import { TypeService } from '../../../framework/services/type.service';
 
 @Component({
   selector: 'cmdb-sidebar-category',
@@ -29,26 +30,46 @@ export class SidebarCategoryComponent implements OnInit {
 
   @Input() categoryData: any;
   public categoryPopUp: any[];
+  public categoryTypeList: CmdbType[];
 
-  constructor(private api: ApiCallService) {
+  constructor(private api: ApiCallService, private typeService: TypeService) {
   }
 
   ngOnInit() {
+    this.initCategoryTypeList();
   }
 
-  public get_objects_by_type(categoryTypeList) {
+  private initCategoryTypeList() {
+    if (this.categoryData.category.root) {
+      this.typeService.getTypeListByCategory(0).subscribe((data: CmdbType[]) => {
+        this.categoryTypeList = data;
+      });
+    } else {
+      this.typeService.getTypeListByCategory(this.categoryData.category.public_id).subscribe((data: CmdbType[]) => {
+        this.categoryTypeList = data;
+      });
+    }
+  }
+
+  public get_objects_by_type() {
     this.categoryPopUp = [];
-    for (const typeID of categoryTypeList) {
+    this.initCategoryTypeList();
+
+    for (const type of this.categoryTypeList) {
+      const typeID = type.public_id;
       let currentTypeLabel = '';
+      let currentTypeIcon = '';
       let amount = '';
       this.api.callGetRoute('type/' + typeID).subscribe((data: CmdbType) => {
         currentTypeLabel = data.label;
+        currentTypeIcon = data.render_meta.icon;
         this.api.callGetRoute('object/count/' + typeID).subscribe(ack => {
           amount = ack;
           const popUp = {
             id: typeID,
             label: currentTypeLabel,
-            count: amount
+            count: amount,
+            icon: currentTypeIcon
           };
           this.categoryPopUp.push(popUp);
         });

@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -21,6 +21,7 @@ import { CmdbType } from '../models/cmdb-type';
 import { CmdbMode } from '../modes.enum';
 import { FormGroup } from '@angular/forms';
 import { CmdbObject } from '../models/cmdb-object';
+import { RenderResult } from '../models/cmdb-render';
 
 @Component({
   selector: 'cmdb-render',
@@ -31,6 +32,8 @@ export class RenderComponent {
 
   private typeInstanceBack: CmdbType;
   private objectInstanceBack: CmdbObject;
+  private renderResultBack: RenderResult = undefined;
+
   @Input() public renderForm: FormGroup;
   @Input() public mode: CmdbMode;
   public MODES = CmdbMode;
@@ -58,6 +61,15 @@ export class RenderComponent {
     return this.objectInstanceBack;
   }
 
+  @Input('renderResult')
+  public set renderResult(data: RenderResult) {
+    this.renderResultBack = data;
+  }
+
+  public get renderResult(): RenderResult {
+    return this.renderResultBack;
+  }
+
   @Input('currentField')
   public get currentField() {
     return this.field;
@@ -78,13 +90,23 @@ export class RenderComponent {
   }
 
   public getFieldByName(name: string) {
-    return this.typeInstance.fields.find(field => field.name === name);
+    if (this.renderResult !== undefined) {
+      return this.renderResult.fields.find(field => field.name === name);
+    } else {
+      return this.typeInstance.fields.find(field => field.name === name);
+    }
   }
 
   public getValueByName(name: string) {
-    if (this.objectInstance !== undefined) {
+    if (this.renderResult !== undefined) {
+      const fieldFound = this.renderResult.fields.find(field => field.name === name);
+      if (fieldFound === undefined) {
+        return {};
+      }
+      return fieldFound.value;
+    } else if (this.objectInstance !== undefined) {
       const fieldFound = this.objectInstance.fields.find(field => field.name === name);
-      if ( fieldFound === undefined) {
+      if (fieldFound === undefined) {
         return {};
       }
       return fieldFound.value;

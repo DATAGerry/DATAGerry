@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -20,8 +20,8 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { User } from '../../user/models/user';
-import { ConnectionService } from '../../services/connection.service';
+import { User } from '../../management/models/user';
+import { ConnectionService } from '../../connect/connection.service';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -57,14 +57,22 @@ export class AuthService {
     return this.currentUserTokenSubject.value;
   }
 
+  public getAuthProviders() {
+    return this.http.get(`${this.connectionService.currentConnection}/${this.restPrefix}/${this.servicePrefix}/providers`).pipe(
+      map((apiResponse) => {
+        return apiResponse;
+      })
+    );
+  }
+
   public login(username: string, password: string) {
     const data = {
       user_name: username,
       password
     };
-    return this.http.post<User>(`${this.connectionService.connectionURL}${this.restPrefix}/${this.servicePrefix}/login`, data, httpOptions)
+    return this.http.post<User>(`${this.connectionService.currentConnection}/${this.restPrefix}/${this.servicePrefix}/login`, data, httpOptions)
       .pipe(map(user => {
-        // store user details and jwt token in local storage to keep user logged in between page refreshes
+        console.log(user);
 
         localStorage.setItem('current-user', JSON.stringify(user));
         localStorage.setItem('access-token', JSON.stringify(user.token));

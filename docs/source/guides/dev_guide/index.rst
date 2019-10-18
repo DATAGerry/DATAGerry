@@ -13,3 +13,6 @@ features to Datagerry,apply patches or develop plugins.
 
     setup
     docs
+    processmanagement
+    logging
+    eventhandling

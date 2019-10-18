@@ -1,7 +1,7 @@
 ********
 Download
 ********
-Download dataGerry to get the compiled binary, source code, or with the help of a package managers.
+Download DATAGERRY to get the compiled binary, source code, or with the help of a package managers.
 We use a file directory which is automatically updated by our continuous integration.
 This includes each stable and development branch which is provided in three different ways.
 `File directory <http://files.datagerry.com/>`_
@@ -25,7 +25,7 @@ Source code
 ===========
 Download the source code via github:
 
-    - `Master branch <https://github.com/NETHINKS/dataGerry/archive/master.zip>`_
-    - `Development branch <https://github.com/NETHINKS/dataGerry/archive/development.zip>`_
+    - `Master branch <https://github.com/NETHINKS/DATAGERRY/archive/master.zip>`_
+    - `Development branch <https://github.com/NETHINKS/DATAGERRY/archive/development.zip>`_
 
 

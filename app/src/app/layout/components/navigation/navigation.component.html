@@ -1,89 +1,136 @@
-<nav id="navbar-cmdb" class="navbar navbar-light navbar-expand-md fixed-top">
-  <a class="navbar-brand" routerLink="/">
-    <img src="/assets/img/datagerry_logo.svg" class="img-fluid" alt="DATAGERRY"/>
-  </a>
-  <a href="#" class="btn btn-link sidebar-toggle d-md-down-none">
-    <i class="fa fa-bars"></i>
-  </a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-content"
-          aria-controls="navbar-content" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+<nav id="navbar-cmdb" class="navbar navbar-light navbar-expand-lg fixed-top px-0">
 
-  <div class="collapse navbar-collapse" id="navbar-content">
+  <div class="container-fluid no-gutters px-0">
 
-    <cmdb-search-bar></cmdb-search-bar>
 
-    <ul class="navbar-nav ml-auto">
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="framework-dropdown" role="button" data-toggle="dropdown"
-           aria-haspopup="true" aria-expanded="false">
-          <i class="fa fa-map-o"></i>
-        </a>
-        <div class="dropdown-menu dropdown-menu-right">
-          <div class="dropdown-header">Type</div>
-          <a class="dropdown-item" routerLink="/framework/type">List all types</a>
-          <a class="dropdown-item" routerLink="/framework/type/add">Add a new type</a>
-          <div class="dropdown-header">Categories</div>
-          <a class="dropdown-item" routerLink="/framework/category">List all categories</a>
-          <a class="dropdown-item" routerLink="/framework/category/management">Manage categories</a>
-          <div class="dropdown-header">Status</div>
-          <a class="dropdown-item" routerLink="/framework/status">List all status</a>
-          <a class="dropdown-item" routerLink="/framework/status/management">Manage status</a>
-        </div>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
-           aria-expanded="false">
-          <i class="fa fa-bell-o"></i>
-        </a>
-        <div class="dropdown-menu dropdown-menu-right">
-          <div class="dropdown-header">Objects modified</div>
-          <a href="#" class="dropdown-item">
-            <i class="fa fa-plus"></i> New
-          </a>
-          <a href="#" class="dropdown-item">
-            <i class="fa fa-reply"></i> Changed
-          </a>
-          <a href="#" class="dropdown-item">
-            <i class="fa fa-briefcase"></i> Your items
-          </a>
-        </div>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
-           aria-expanded="false">
-          <i class="fa fa-user-o"></i>
-        </a>
-        <div class="dropdown-menu dropdown-menu-right">
-          <div class="dropdown-header">Account</div>
-          <a routerLink="/user/{{authService.currentUserValue.public_id}}" class="dropdown-item">
-            <i class="fa fa-user"></i> Profile
-          </a>
-          <div class="dropdown-header">Auth</div>
-          <a class="dropdown-item" (click)="logout()">
-            <i class="fa fa-power-off"></i> Logout
-          </a>
-        </div>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown">
-          <i class="fa fa-cogs" aria-hidden="true"></i>
-        </a>
-        <div class="dropdown-menu dropdown-menu-right">
-          <div class="dropdown-header">User-Management</div>
-          <a routerLink="/settings/user-management" class="dropdown-item">
-            <i class="fa fa-user"></i> User
-          </a>
-          <a routerLink="/settings/user-management/groups" class="dropdown-item">
-            <i class="fa fa-user"></i> Groups
-          </a>
-          <a routerLink="/settings/user-management/rights" class="dropdown-item">
-            <i class="fa fa-user"></i> Rights
-          </a>
-        </div>
+    <ul class="nav navbar-nav flex-row">
+      <li class="nav-item d-lg-none">
+        <span (click)="visibilitySidebar()" style="padding: 1.5rem 1.5rem">
+          <fa-icon icon="bars"></fa-icon>
+        </span>
       </li>
     </ul>
 
+    <div class="navbar-header">
+      <a class="navbar-brand" routerLink="/" style="padding-left: 1.5rem">
+        <img src="/assets/img/datagerry_logo.svg" class="brand-logo" alt="DATAGERRY"/></a>
+    </div>
+
+    <ul class="nav navbar-nav flex-row">
+      <li class="nav-item d-lg-none">
+        <a class="nav-link collapsed" data-toggle="collapse" data-target="#navbar-content" aria-expanded="false"
+        style="padding: 1.5rem 1.5rem">
+          <fa-icon icon="ellipsis-v"></fa-icon></a>
+      </li>
+    </ul>
+
+    <div id="navbar-content" class="collapse navbar-collapse container-content clearfix">
+      <ul id="navbar-mega" class="nav navbar-nav mr-auto float-left">
+        <li class="nav-item dropdown megamenu-li">
+          <cmdb-search-bar></cmdb-search-bar>
+        </li>
+      </ul>
+      <ul class="nav navbar-nav flex-row float-right">
+        <!-- nav List -->
+        <li class="nav-item dropdown mr-2">
+          <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+             aria-expanded="false"> <fa-icon icon="list-alt"></fa-icon></a>
+          <div class="dropdown-menu dropdown">
+            <div class="dropdown-header">List</div>
+              <a class="dropdown-item" routerLink="/framework/object">Object List</a>
+              <a class="dropdown-item" routerLink="/framework/type">Type List</a>
+              <a class="dropdown-item" routerLink="/framework/category">Category List</a>
+          </div>
+        </li>
+        <!-- nav Import/Export -->
+        <li class="nav-item dropdown mr-2">
+          <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+             aria-expanded="false"><fa-icon icon="database"></fa-icon></a>
+          <div class="dropdown-menu dropdown">
+            <div class="dropdown-header">Type Import/Export</div>
+            <a class="dropdown-item" routerLink="/import/type"><fa-icon icon="file-import"></fa-icon> Import Type</a>
+            <a class="dropdown-item" routerLink="/export/types"><fa-icon icon="file-export"></fa-icon> Export Type</a>
+            <div class="dropdown-header">Object Import/Export</div>
+            <a class="dropdown-item" [routerLink]="['/import/object/']"> <fa-icon icon="file-import"></fa-icon> Import Objects</a>
+            <a class="dropdown-item" [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']"><fa-icon icon="file-export"></fa-icon> Export Objects</a>
+          </div>
+        </li>
+        <!-- nav System -->
+        <li class="nav-item dropdown mr-2">
+          <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+             aria-expanded="false"><fa-icon icon="cogs"></fa-icon></a>
+          <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-header">System</div>
+            <a class="dropdown-item" routerLink="/settings/system/">System Information</a>
+            <a class="dropdown-item" [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']">Server Information</a>
+            <a class="dropdown-item" routerLink="/settings/system/properties">Database Properties</a>
+            <div class="dropdown-header">User Managment</div>
+            <a class="dropdown-item" routerLink="/management/users">Users</a>
+            <a class="dropdown-item" routerLink="/management/groups">Groups</a>
+            <a class="dropdown-item" routerLink="/management/rights">Rights</a>
+            <div class="dropdown-header">Logs</div>
+            <a class="dropdown-item" routerLink="/settings/logs/objects"><fa-icon icon="clipboard-list"></fa-icon> Object Logs</a>
+          </div>
+        </li>
+        <!-- nav notification -->
+        <li class="nav-item dropdown mr-2">
+          <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+             aria-expanded="false">
+            <fa-icon icon="bell"></fa-icon>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-header">Objects modified</div>
+            <a routerLink="/framework/object/user/new/" class="dropdown-item">
+              <fa-icon icon="plus"></fa-icon> New
+            </a>
+            <a routerLink="/framework/object/user/changed/" href="#" class="dropdown-item">
+              <fa-icon icon="reply"></fa-icon> Changed
+            </a>
+            <a routerLink="/framework/object/user/own/" class="dropdown-item">
+              <fa-icon icon="briefcase"></fa-icon> Your items
+            </a>
+          </div>
+        </li>
+        <!-- nav user -->
+        <li class="nav-item dropdown mr-2">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+             aria-expanded="false">
+            <fa-icon icon="user-circle"></fa-icon>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-header">Account</div>
+            <a routerLink="/management/users/view/{{authService.currentUserValue.public_id}}" class="dropdown-item">
+              <fa-icon icon="user-edit"></fa-icon> Profile
+            </a>
+            <div class="dropdown-header">Auth</div>
+            <a class="dropdown-item" (click)="logout()">
+              <fa-icon icon="sign-out-alt"></fa-icon> Logout
+            </a>
+          </div>
+        </li>
+        <!-- nav language -->
+<!--        <li class="nav-item dropdown">-->
+<!--          <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown">-->
+<!--            <img [src]="'/assets/img/language-flags/usa_flag_icon_64.png'"-->
+<!--                 style="width: 32px; max-width: 50%; padding: 0.10rem"-->
+<!--                 class="rounded-circle img-thumbnail" alt="selectedflag">-->
+<!--          </a>-->
+<!--          <div class="dropdown-menu dropdown-menu-right">-->
+<!--            <div class="dropdown-header">Language</div>-->
+<!--            <a [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']" class="dropdown-item">-->
+<!--              <img [src]="'/assets/img/language-flags/ger_flag_icon_64.png'"-->
+<!--                   style="width: 32px; max-width: 50%; padding: 0.15rem"-->
+<!--                   class="rounded-circle img-thumbnail" alt="selectedflag"> German-->
+<!--            </a>-->
+<!--            <a [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']" class="dropdown-item">-->
+<!--              <img [src]="'/assets/img/language-flags/usa_flag_icon_64.png'"-->
+<!--                   style="width: 32px; max-width: 50%; padding: 0.15rem"-->
+<!--                   class="rounded-circle img-thumbnail" alt="selectedflag"> English-->
+<!--            </a>-->
+<!--          </div>-->
+<!--        </li>-->
+      </ul>
+    </div>
   </div>
 </nav>
+

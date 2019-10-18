@@ -23,4 +23,4 @@ class TestTokenGenerator:
         token_gen = TokenGenerator()
         token_validator = TokenValidator()
         token = token_gen.generate_token(payload={'test': 'test'})
-        print(token_validator.validate_token(token))
+        print(token_validator.decode_token(token))

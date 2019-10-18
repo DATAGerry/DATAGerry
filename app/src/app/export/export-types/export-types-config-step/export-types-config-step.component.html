@@ -1,0 +1,43 @@
+<section class="mt-3 mb-3">
+  <div class="row">
+    <div class="col-md-12">
+      <form [formGroup]="fileFormatForm">
+        <div class="form-group row">
+          <label for="fileFormatInput" class="col-sm-2 col-form-label">File Format:</label>
+          <div class="col-sm-10">
+            <select formControlName="fileFormat" id="fileFormatInput" class="custom-select">
+              <option value="json">JSON</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="row">
+    <form [formGroup]="configForm" class="col-md-12">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>#</th>
+          <th>Property</th>
+          <th>Options</th>
+        </tr>
+        </thead>
+        <tr *ngFor="let control of propertiesControls">
+          <td formGroupName="properties">
+            {{control | json}}
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="active">
+              <label class="custom-control-label" for="active"></label>
+            </div>
+          </td>
+          <th scope="col">Active</th>
+          <td></td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</section>
+
+<button class="btn btn-primary prev" type="button" awPreviousStep>Previous step</button>
+<button class="btn btn-primary" type="button" awNextStep>Next Step</button>

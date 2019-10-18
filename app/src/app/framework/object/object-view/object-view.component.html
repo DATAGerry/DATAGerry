@@ -1,13 +1,14 @@
 <div class="row">
   <div id="object-view" class="col-md-9">
-    <cmdb-object-header [objectInstance]="objectInstance" [typeInstance]="typeInstance"></cmdb-object-header>
-    <cmdb-object-view-render [mode]="mode" [objectInstance]="objectInstance"
-                        [typeInstance]="typeInstance"></cmdb-object-view-render>
-    <cmdb-object-footer [publicID]="objectInstance?.public_id"></cmdb-object-footer>
+    <cmdb-object-header [renderResult]="renderResult" (stateChange)="logChange($event)"></cmdb-object-header>
+    <cmdb-object-view-render [mode]="mode" [renderResult]="renderResult"></cmdb-object-view-render>
   </div>
   <div id="object-view-sidebar" class="col-md-3">
-    <cmdb-object-qr></cmdb-object-qr>
-    <cmdb-object-externals [objectInstance]="objectInstance"></cmdb-object-externals>
-    <cmdb-object-actions [objectInstance]="objectInstance" [typeInstance]="typeInstance"></cmdb-object-actions>
+    <cmdb-object-type-label [typeInformation]="renderResult?.type_information"></cmdb-object-type-label>
+    <cmdb-object-externals [renderResult]="renderResult"></cmdb-object-externals>
+    <cmdb-object-actions [renderResult]="renderResult"></cmdb-object-actions>
+  </div>
+  <div id="object-view-footer" class="col-12">
+    <cmdb-object-footer [renderResult]="renderResult"></cmdb-object-footer>
   </div>
 </div>

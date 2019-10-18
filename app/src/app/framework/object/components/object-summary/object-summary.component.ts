@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,9 @@
 */
 
 import { Component, Input } from '@angular/core';
-import { ToastService } from '../../../../layout/services/toast.service';
+import { ToastService } from '../../../../layout/toast/toast.service';
+import { RenderResult } from '../../../models/cmdb-render';
+import { CmdbMode } from '../../../modes.enum';
 
 @Component({
   selector: 'cmdb-object-summary',
@@ -26,9 +28,12 @@ import { ToastService } from '../../../../layout/services/toast.service';
 })
 export class ObjectSummaryComponent {
 
-  @Input() objectInstance: any = [];
+  @Input() summaries: any = [];
+  @Input() renderResult: RenderResult;
+  public mode: CmdbMode = CmdbMode.Simple;
 
-  public constructor(private toast: ToastService) {}
+  public constructor(private toast: ToastService) {
+  }
 
   public clipBoardSummary(data) {
     const selBox = document.createElement('textarea');

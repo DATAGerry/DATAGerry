@@ -1,5 +1,5 @@
 /*
-* dataGerry - OpenSource Enterprise CMDB
+* DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
@@ -23,6 +23,7 @@ import { RouterModule } from '@angular/router';
 import { AuthService } from './services/auth.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthRoutingModule } from './auth-routing.module';
+import { InlineSVGModule } from 'ng-inline-svg';
 
 @NgModule({
   declarations: [LoginComponent],
@@ -32,6 +33,7 @@ import { AuthRoutingModule } from './auth-routing.module';
     RouterModule,
     AuthRoutingModule,
     ReactiveFormsModule,
+    InlineSVGModule,
   ]
 })
 export class AuthModule {
