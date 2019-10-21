@@ -16,33 +16,30 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ControlsCommon, StructureContent, randomName } from './controls.common';
+import { Component, OnInit } from '@angular/core';
+import { RenderField } from '../../fields/components.fields';
+import { formatDate } from '@angular/common';
 
-class SectionContent implements StructureContent {
+@Component({
+  selector: 'cmdb-date-simple',
+  templateUrl: './date-simple.component.html',
+  styleUrls: ['./date-simple.component.scss']
+})
+export class DateSimpleComponent extends RenderField {
 
-  label: string;
-  name: string;
-  position: number;
-  access: boolean;
-  groups: number[];
-  users: number[];
-  fields: [] = [];
-  type: string = 'section';
-
-}
-
-export class SectionControl implements ControlsCommon {
-
-  name = 'section';
-  label = 'Section';
-  icon = 'object-group';
-  dndType: string = 'sections';
-
-  content() {
-    const section = new SectionContent();
-    section.name = randomName(this.name);
-    section.label = this.label;
-    return section;
+  constructor() {
+    super();
   }
 
+  public getSimpleDate(obj) {
+    // ToDo: Recognize format by language
+    if ( obj.day === undefined) {
+      return 'TT.MM.JJJJ';
+    }
+    const format = 'dd/MM/yyyy';
+    const myDate = obj.year + '-' + obj.month + '-' + obj.day;
+    const locale = 'en-US';
+    const formattedDate = formatDate(myDate, format, locale);
+    return formattedDate;
+  }
 }

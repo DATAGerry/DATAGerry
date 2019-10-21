@@ -27,8 +27,7 @@ import { RadioComponent } from './choice/radio.component';
 import { SelectComponent } from './choice/select.component';
 import { DummyComponent } from './dummy/dummy.component';
 import { RefComponent } from './special/ref.component';
-import { Component } from '@angular/core';
-import { RenderField } from './components.fields';
+import { DateComponent } from './date/date.component';
 
 
 export const fieldComponents: { [type: string]: any } = {
@@ -42,5 +41,6 @@ export const fieldComponents: { [type: string]: any } = {
   radio: RadioComponent,
   select: SelectComponent,
   ref: RefComponent,
+  date: DateComponent,
   debug: DummyComponent
 };

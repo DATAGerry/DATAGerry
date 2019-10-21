@@ -16,33 +16,42 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ControlsCommon, StructureContent, randomName } from './controls.common';
+import { ControlsCommon, ControlsContent, randomName } from '../controls.common';
 
-class SectionContent implements StructureContent {
+class DateContent implements ControlsContent {
 
-  label: string;
-  name: string;
-  position: number;
   access: boolean;
+  helperText: string;
+  name: string;
+  optional: any;
+  placeholder: string;
+  required: boolean;
+  type: string;
+  value: any;
+  label: string;
   groups: number[];
   users: number[];
-  fields: [] = [];
-  type: string = 'section';
+  format: string;
 
-}
-
-export class SectionControl implements ControlsCommon {
-
-  name = 'section';
-  label = 'Section';
-  icon = 'object-group';
-  dndType: string = 'sections';
-
-  content() {
-    const section = new SectionContent();
-    section.name = randomName(this.name);
-    section.label = this.label;
-    return section;
+  public constructor() {
+    this.type = 'date';
+    this.name = randomName(this.type);
+    this.label = 'Date';
   }
 
 }
+
+export class DateControl implements ControlsCommon {
+
+  name = 'date';
+  label = 'Date';
+  icon = 'calendar-alt';
+  dndType: string = 'inputs';
+
+  content() {
+    return new DateContent();
+  }
+
+}
+
+

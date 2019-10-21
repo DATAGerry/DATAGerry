@@ -36,7 +36,6 @@ export class RenderComponent {
 
   @Input() public renderForm: FormGroup;
   @Input() public mode: CmdbMode;
-  public MODES = CmdbMode;
   private field: any;
 
   @Input('typeInstance')

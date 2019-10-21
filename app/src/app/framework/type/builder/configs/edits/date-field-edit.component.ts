@@ -16,33 +16,25 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ControlsCommon, StructureContent, randomName } from './controls.common';
+import { Component, Input, OnInit } from '@angular/core';
+import { ConfigEdit } from '../config.edit';
+import {formatDate} from "@angular/common";
 
-class SectionContent implements StructureContent {
+@Component({
+  selector: 'cmdb-date-field-edit',
+  templateUrl: './date-field-edit.component.html',
+  styleUrls: ['./date-field-edit.component.scss']
+})
+export class DateFieldEditComponent extends ConfigEdit implements OnInit {
 
-  label: string;
-  name: string;
-  position: number;
-  access: boolean;
-  groups: number[];
-  users: number[];
-  fields: [] = [];
-  type: string = 'section';
+  @Input() groupList: any;
+  @Input() userList: any;
+  public format: string;
 
-}
-
-export class SectionControl implements ControlsCommon {
-
-  name = 'section';
-  label = 'Section';
-  icon = 'object-group';
-  dndType: string = 'sections';
-
-  content() {
-    const section = new SectionContent();
-    section.name = randomName(this.name);
-    section.label = this.label;
-    return section;
+  constructor() {
+    super();
   }
 
+  public ngOnInit(): void {
+  }
 }

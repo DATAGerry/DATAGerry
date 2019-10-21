@@ -33,9 +33,10 @@ import { ChoiceFieldEditComponent } from './configs/edits/choice-field-edit.comp
 import { CheckFieldEditComponent } from './configs/edits/check-field-edit.component';
 import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
 import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
-import { NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import {NgbDatepickerModule, NgbModalModule} from '@ng-bootstrap/ng-bootstrap';
 import { RenderElementComponent } from '../../render/render-element/render-element.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { DateFieldEditComponent } from './configs/edits/date-field-edit.component';
 
 @NgModule({
   entryComponents: [
@@ -46,6 +47,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     DummyFieldEditComponent,
     ChoiceFieldEditComponent,
     CheckFieldEditComponent,
+    DateFieldEditComponent,
     PreviewModalComponent,
     DiagnosticModalComponent,
     RenderElementComponent
@@ -61,7 +63,8 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     ChoiceFieldEditComponent,
     CheckFieldEditComponent,
     PreviewModalComponent,
-    DiagnosticModalComponent
+    DiagnosticModalComponent,
+    DateFieldEditComponent
   ],
   imports: [
     CommonModule,
@@ -70,7 +73,8 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     RenderModule,
     NgbModalModule,
     NgSelectModule,
-    FontAwesomeModule
+    FontAwesomeModule,
+    NgbDatepickerModule
   ],
   exports: [
     BuilderComponent
