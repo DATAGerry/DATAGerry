@@ -124,8 +124,9 @@ class SetupRoutine:
         for group in __FIXED_GROUPS__:
             usm.insert_group(group)
 
-        admin_name = str(input('Admin name: '))
-        admin_pass = str(input('Admin password: '))
+        # setting the initial user to admin/admin as default
+        admin_name = 'admin'
+        admin_pass = 'admin'
 
         import datetime
         admin_user = User(
