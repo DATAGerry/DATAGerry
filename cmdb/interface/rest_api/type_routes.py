@@ -125,7 +125,12 @@ def update_type():
 def delete_type(public_id: int):
     try:
         # delete all objects by typeID
-        object_manager.delete_many_objects({'type_id': public_id})
+        obj_ids = []
+        objs_by_type = object_manager.get_objects_by_type(public_id)
+        for objID in objs_by_type:
+            obj_ids.append(objID.get_public_id())
+        object_manager.delete_many_objects({'type_id': public_id}, obj_ids)
+
         ack = object_manager.delete_type(public_id=public_id)
 
     except TypeNotFoundError:
@@ -153,7 +158,7 @@ def delete_many_types(public_ids):
         operator_in.update({'$in': ids})
         filter_public_ids.update({'public_id': operator_in})
 
-        ack = object_manager.delete_many_types(filter_public_ids)
+        ack = object_manager.delete_many_types(filter_public_ids, ids)
         return make_response(ack.raw_result)
     except TypeNotFoundError as e:
         return jsonify(message='Delete Error', error=e.message)

@@ -216,8 +216,8 @@ class CmdbObjectManager(CmdbManagerBase):
                 raise Exception
         return ack
 
-    def remove_object_fields(self, filter: dict, update: dict):
-        ack = self._update_many(CmdbObject.COLLECTION, filter, update)
+    def remove_object_fields(self, filter_query: dict, update: dict):
+        ack = self._update_many(CmdbObject.COLLECTION, filter_query, update)
         return ack
 
     def update_object_fields(self, filter: dict, update: dict):
@@ -265,8 +265,11 @@ class CmdbObjectManager(CmdbManagerBase):
         except (CMDBError, Exception):
             raise ObjectDeleteError(obj_id=public_id)
 
-    def delete_many_objects(self, public_ids: dict):
-        ack = self._delete_many(CmdbObject.COLLECTION, public_ids)
+    def delete_many_objects(self, filter_query: dict, public_ids):
+        ack = self._delete_many(CmdbObject.COLLECTION, filter_query)
+        if self._event_queue:
+            event = Event("cmdb.core.objects.deleted", {"ids": public_ids})
+            self._event_queue.put(event)
         return ack
 
     def get_all_types(self):
@@ -343,8 +346,11 @@ class CmdbObjectManager(CmdbManagerBase):
             self._event_queue.put(event)
         return ack
 
-    def delete_many_types(self, public_ids: dict):
-        ack = self._delete_many(CmdbType.COLLECTION, public_ids)
+    def delete_many_types(self, filter_query: dict, public_ids):
+        ack = self._delete_many(CmdbType.COLLECTION, filter_query)
+        if self._event_queue:
+            event = Event("cmdb.core.objecttypes.deleted", {"ids": public_ids})
+            self._event_queue.put(event)
         return ack
 
     def get_all_categories(self):

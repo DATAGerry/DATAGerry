@@ -465,23 +465,60 @@ def delete_object(public_id: int, request_user: User):
 
 @object_blueprint.route('/delete/<string:public_ids>', methods=['GET'])
 @login_required
-def delete_many_objects(public_ids):
+@insert_request_user
+def delete_many_objects(public_ids, request_user: User):
     try:
         ids = []
         operator_in = {'$in': []}
         filter_public_ids = {'public_id': {}}
-
         for v in public_ids.split(","):
             try:
                 ids.append(int(v))
             except (ValueError, TypeError):
                 return abort(400)
-
         operator_in.update({'$in': ids})
         filter_public_ids.update({'public_id': operator_in})
 
-        ack = object_manager.delete_many_objects(filter_public_ids)
-        return make_response(ack.raw_result)
+        ack = []
+        objects = object_manager.get_objects_by(**filter_public_ids)
+
+        for current_object_instance in objects:
+            try:
+                current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
+                current_object_render_result = CmdbRender(object_instance=current_object_instance,
+                                                          type_instance=current_type_instance,
+                                                          render_user=request_user).result()
+            except ObjectManagerGetError as err:
+                LOGGER.error(err)
+                return abort(404)
+            except RenderError as err:
+                LOGGER.error(err)
+                return abort(500)
+
+            try:
+                ack.append(object_manager.delete_object(public_id=current_object_instance.get_public_id()))
+            except ObjectDeleteError:
+                return abort(400)
+            except CMDBError:
+                return abort(500)
+
+            try:
+                # generate log
+                log_data = {
+                    'object_id': current_object_instance.get_public_id(),
+                    'version': current_object_render_result.object_information['version'],
+                    'user_id': request_user.get_public_id(),
+                    'user_name': request_user.get_name(),
+                    'comment': 'Object was deleted',
+                    'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
+                }
+                log_manager.insert_log(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
+            except (CMDBError, LogManagerInsertError) as err:
+                LOGGER.error(err)
+
+        resp = make_response({'successfully': ack})
+        return resp
+
     except ObjectDeleteError as e:
         return jsonify(message='Delete Error', error=e.message)
     except CMDBError:
