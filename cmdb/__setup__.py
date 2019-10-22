@@ -45,6 +45,7 @@ class SetupRoutine:
     def setup(self) -> SetupStatus:
         LOGGER.info('SETUP ROUTINE: STARTED...')
         self.status = SetupRoutine.SetupStatus.RUNNING
+
         # check database
         if not self.__check_database():
             self.status = SetupRoutine.SetupStatus.ERROR
@@ -52,35 +53,43 @@ class SetupRoutine:
                 'The database manager could not be initialized. Perhaps the database cannot be reached, \
                 or the database was already initialized.'
             )
-        # init database
-        try:
-            self.__init_database()
-        except Exception as err:
-            self.status = SetupRoutine.SetupStatus.ERROR
-            raise RuntimeError(
-                f'Something went wrong during the initialization of the database. \n Error: {err}'
+
+        # check database collection
+        if not self.__check_database_collection_valid() and not self.__is_database_empty():
+            raise Exception(
+                'The current database version does not match the valid database version.'
             )
 
-        # generate keys
-        LOGGER.info('SETUP ROUTINE: Generate rsa key pair')
+        if self.__is_database_empty():
+            # init database
+            try:
+                self.__init_database()
+            except Exception as err:
+                self.status = SetupRoutine.SetupStatus.ERROR
+                raise RuntimeError(
+                    f'Something went wrong during the initialization of the database. \n Error: {err}'
+                )
 
-        try:
-            self.init_keys()
-        except Exception as err:
-            self.status = SetupRoutine.SetupStatus.ERROR
-            raise RuntimeError(
-                f'Something went wrong during the generation of the rsa keypair. \n Error: {err}'
-            )
+            # generate keys
+            LOGGER.info('SETUP ROUTINE: Generate rsa key pair')
 
-        # create user management
-        LOGGER.info('SETUP ROUTINE: User management')
-        try:
-            self.__create_user_management()
-        except Exception as err:
-            self.status = SetupRoutine.SetupStatus.ERROR
-            raise RuntimeError(
-                f'Something went wrong during the generation of the user management. \n Error: {err}'
-            )
+            try:
+                self.init_keys()
+            except Exception as err:
+                self.status = SetupRoutine.SetupStatus.ERROR
+                raise RuntimeError(
+                    f'Something went wrong during the generation of the rsa keypair. \n Error: {err}'
+                )
+
+            # create user management
+            LOGGER.info('SETUP ROUTINE: User management')
+            try:
+                self.__create_user_management()
+            except Exception as err:
+                self.status = SetupRoutine.SetupStatus.ERROR
+                raise RuntimeError(
+                    f'Something went wrong during the generation of the user management. \n Error: {err}'
+                )
 
         self.status = SetupRoutine.SetupStatus.FINISHED
         LOGGER.info('SETUP ROUTINE: FINISHED!')
@@ -108,11 +117,59 @@ class SetupRoutine:
             admin_pass = str(input('New admin password: '))
             new_password = scm.generate_hmac(admin_pass)
             admin_user.password = new_password
-            usm.update_user(admin_user)
+            usm.update_user(admin_user.get_public_id(), admin_user.__dict__)
             LOGGER.info(f'KEY ROUTINE: Password was updated for user: {admin_user.get_username()}')
-        except Exception:
-            pass
+        except Exception as ex:
+            LOGGER.info(f'KEY ROUTINE: Password was updated for user failed: {ex}')
         LOGGER.info('KEY ROUTINE: FINISHED')
+
+    def update_database_collection(self):
+        LOGGER.info('UPDATE ROUTINE: Update database collection')
+        from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
+        from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
+        self.status = SetupRoutine.SetupStatus.RUNNING
+
+        # check database
+        if not self.__check_database():
+            self.status = SetupRoutine.SetupStatus.ERROR
+            raise RuntimeError(
+                'The database manager could not be initialized. Perhaps the database cannot be reached, \
+                or the database was already initialized.'
+            )
+
+        if not self.__is_database_empty():
+            try:
+                detected_database = self.setup_database_manager.database_connector.database
+
+                # update collections
+                # framework collections
+                for collection in FRAMEWORK_CLASSES:
+                    try:
+                        detected_database.validate_collection(collection.COLLECTION)['valid']
+                    except:
+                        self.setup_database_manager.create_collection(collection.COLLECTION)
+                        # set unique indexes
+                        self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+                        LOGGER.info(f'UPDATE ROUTINE: Database collection {collection.COLLECTION} was created.')
+
+                # user management collections
+                for collection in USER_MANAGEMENT_COLLECTION:
+                    try:
+                        detected_database.validate_collection(collection.COLLECTION)['valid']
+                    except:
+                        self.setup_database_manager.create_collection(collection.COLLECTION)
+                        # set unique indexes
+                        self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+                        LOGGER.info(f'UPDATE ROUTINE: Database collection {collection.COLLECTION} was created.')
+            except Exception as ex:
+                LOGGER.info(f'UPDATE ROUTINE: Database collection validation failed: {ex}')
+        else:
+            LOGGER.info('UPDATE ROUTINE: The update is faulty because no collection was detected.')
+
+        LOGGER.info('UPDATE ROUTINE: Update database collection finished.')
+        self.status = SetupRoutine.SetupStatus.FINISHED
+        LOGGER.info('SETUP ROUTINE: FINISHED!')
+        return self.status
 
     def __create_user_management(self):
         from cmdb.user_management.user_manager import UserManagement, User
@@ -158,6 +215,32 @@ class SetupRoutine:
             connection_test = False
         LOGGER.info(f'SETUP ROUTINE: Database connection status {connection_test}')
         return connection_test
+
+    def __is_database_empty(self) -> bool:
+        return not self.setup_database_manager.database_connector.database.list_collection_names()
+
+    def __check_database_collection_valid(self) -> bool:
+        LOGGER.info('SETUP ROUTINE: Checking database collection validation')
+        from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
+        from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
+        detected_database = self.setup_database_manager.database_connector.database
+        collection_test = False
+
+        try:
+            # framework collections
+            for collection in FRAMEWORK_CLASSES:
+                collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
+                if not collection_test:
+                    break
+            # user management collections
+            for collection in USER_MANAGEMENT_COLLECTION:
+                collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
+        except Exception as ex:
+            LOGGER.info(f'SETUP ROUTINE: Database collection validation failed: {ex}')
+            collection_test = False
+
+        LOGGER.info(f'SETUP ROUTINE: Database collection validation status {collection_test}')
+        return collection_test
 
     def __init_database(self):
         database_name = self.setup_system_config_reader.get_value('database_name', 'Database')

@@ -127,6 +127,9 @@ def build_arg_parser() -> Namespace:
     _parser.add_argument('--keys', action='store_true', default=False, dest='keys',
                          help="init keys")
 
+    _parser.add_argument('--update', action='store_true', default=False, dest='update',
+                         help="update cmdb")
+
     _parser.add_argument('--test', action='store_true', default=False, dest='test_data',
                          help="generate and insert test data")
 
@@ -188,6 +191,22 @@ def main(args):
             LOGGER.error(err)
             setup_status = setup_routine.get_setup_status()
             LOGGER.warning(f'The key generation did not go through as expected - Status {setup_status}')
+        if setup_status == SetupRoutine.SetupStatus.FINISHED:
+            exit(0)
+        else:
+            exit(1)
+
+    if args.update:
+        from cmdb.__setup__ import SetupRoutine
+        setup_routine = SetupRoutine()
+        setup_status = None
+        try:
+            setup_status = setup_routine.update_database_collection()
+        except RuntimeError as err:
+            LOGGER.error(err)
+            setup_status = setup_routine.get_setup_status()
+            LOGGER.warning(f'The setup did not go through as expected - Status {setup_status}')
+
         if setup_status == SetupRoutine.SetupStatus.FINISHED:
             exit(0)
         else:
