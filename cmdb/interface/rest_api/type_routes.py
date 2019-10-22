@@ -222,10 +222,11 @@ def cleanup_removed_fields(public_id):
                         incorrect.append(field["name"])
             removed_type_fields = [item for item in incorrect if not item in correct]
             for field in removed_type_fields:
-                object_manager.remove_object_fields(filter={'public_id': obj.public_id},
+                object_manager.remove_object_fields(filter_query={'public_id': obj.public_id},
                                                     update={'$pull': {'fields': {"name": field}}})
 
-    except CMDBError:
+    except Exception as error:
+        print(error)
         return abort(500)
 
     return make_response(update_type_instance)
