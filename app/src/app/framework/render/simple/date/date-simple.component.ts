@@ -33,7 +33,7 @@ export class DateSimpleComponent extends RenderField {
 
   public getSimpleDate(obj) {
     // ToDo: Recognize format by language
-    if ( obj.day === undefined) {
+    if ( obj === null || obj.day === undefined) {
       return 'TT.MM.JJJJ';
     }
     const format = 'dd/MM/yyyy';
