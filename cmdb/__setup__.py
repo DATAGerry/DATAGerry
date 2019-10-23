@@ -230,13 +230,12 @@ class SetupRoutine:
             # framework collections
             for collection in FRAMEWORK_CLASSES:
                 collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
-                if not collection_test:
-                    break
             # user management collections
             for collection in USER_MANAGEMENT_COLLECTION:
                 collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
         except Exception as ex:
-            LOGGER.info(f'SETUP ROUTINE: Database collection validation failed: {ex}')
+            LOGGER.info(f'SETUP ROUTINE: Database collection validation for "{collection.COLLECTION}" failed. '
+                        f'msgerror: {ex}')
             collection_test = False
 
         LOGGER.info(f'SETUP ROUTINE: Database collection validation status {collection_test}')
