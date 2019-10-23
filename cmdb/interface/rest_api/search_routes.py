@@ -91,10 +91,7 @@ def _get_response(args, q_operator='$and', current_user: User = None, limit=0):
         query = {"$or": result_query}
         object_list = object_manager.search_objects_with_limit(query, limit=limit)
         render = RenderList(object_list, current_user)
-        if limit == 5:
-            rendered_list = render.render_result_list(_collect_match_fields(object_list, match_values))
-        else:
-            rendered_list = render.render_result_list(None)
+        rendered_list = render.render_result_list(_collect_match_fields(object_list, match_values))
         return make_response(rendered_list)
 
     except CMDBError:
@@ -123,11 +120,15 @@ def _filter_query(args):
 
 def _collect_match_fields(object_list, match_values):
     import re
-    key_match = []
+    key_match = set()
     for passed_object in object_list:
         for term in match_values:
+            if not term:
+                continue
             for fields in getattr(passed_object, 'fields'):
                 for key, value in fields.items():
+                    if key == 'name':
+                        continue
                     if isinstance(value, str) and re.findall(r"(?i)" + term, value):
-                        key_match.append(fields['name'])
+                        key_match.add(fields['name'])
     return key_match

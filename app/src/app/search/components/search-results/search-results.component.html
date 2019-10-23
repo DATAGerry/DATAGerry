@@ -39,6 +39,8 @@
     <th>ID</th>
     <th>Type</th>
     <th>Author</th>
+    <th>Matches</th>
+    <th>Summaries</th>
     <th>Creation time</th>
     <th>Action</th>
   </tr>
@@ -50,6 +52,14 @@
     <td>{{entry?.object_information.object_id}}</td>
     <td>{{entry?.type_information.type_label}}</td>
     <td>{{entry?.object_information.author_name }}</td>
+    <td>
+      <ul>
+        <li *ngFor="let match of entry?.match_fields">
+          {{match.label}} : <cmdb-render-element [mode]="3" [data]="match"></cmdb-render-element>
+        </li>
+      </ul>
+    </td>
+    <td>{{entry?.summary_line}}</td>
     <td>{{entry?.object_information.creation_time.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
     <td><a class="text-dark"[routerLink]="['/framework/object/view', entry?.object_information.object_id]">
       <fa-icon [icon]="['far', 'eye']"></fa-icon></a>
