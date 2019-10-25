@@ -39,7 +39,7 @@ export class BreadcrumbComponent implements OnInit {
   public addClass: string;
 
 
-  public constructor(private breadcrumbService: BreadcrumbService, private activatedRoute: ActivatedRoute, private router: Router) {
+  public constructor(public breadcrumbService: BreadcrumbService, private activatedRoute: ActivatedRoute, private router: Router) {
 
   }
 
