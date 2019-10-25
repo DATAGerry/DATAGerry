@@ -53,7 +53,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     TypeEditComponent,
     TypeMetaStepComponent,
     TypeDeleteComponent,
-    TypeDeleteConfirmModalComponent
+    TypeDeleteConfirmModalComponent,
   ],
   imports: [
     CommonModule,

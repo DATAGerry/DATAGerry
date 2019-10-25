@@ -64,7 +64,7 @@ const routes: Routes = [
   {
     path: 'type/:publicID',
     data: {
-      breadcrumb: 'List'
+      breadcrumb: 'Object Type List'
     },
     component: ObjectListComponent
   },
@@ -72,6 +72,13 @@ const routes: Routes = [
     path: 'view/:publicID',
     data: {
       breadcrumb: 'View'
+    },
+    component: ObjectViewComponent
+  },
+  {
+    path: 'type/view/:publicID',
+    data: {
+      breadcrumb: 'Type View'
     },
     component: ObjectViewComponent
   },

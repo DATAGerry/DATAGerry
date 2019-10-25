@@ -22,6 +22,7 @@ import { NavigationComponent } from '../layout/components/navigation/navigation.
 import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
 import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';
 import { FooterComponent } from '../layout/components/footer/footer.component';
+import { SettingsComponent } from './settings.component';
 
 const routes: Routes = [
   {
@@ -43,6 +44,13 @@ const routes: Routes = [
     path: '',
     component: FooterComponent,
     outlet: 'footer'
+  },
+  {
+    path: '',
+    data: {
+      breadcrumb: 'Overview'
+    },
+    component: SettingsComponent
   },
   {
     path: 'system',

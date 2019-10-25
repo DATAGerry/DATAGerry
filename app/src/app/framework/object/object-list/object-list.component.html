@@ -69,7 +69,8 @@
         <td>{{result?.type_information.author_name}}</td>
         <td>{{result?.object_information.creation_time?.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
         <td>
-          <a class="text-dark"[routerLink]="['/framework/object/view', result?.object_information.object_id]">
+          <a class="text-dark"
+             [routerLink]="[hasSummaries ? '/framework/object/type/view' : '/framework/object/view',result?.object_information.object_id]">
             <fa-icon [icon]="['far', 'eye']"></fa-icon>
           </a>
           <a class="ml-1 text-dark" [routerLink]="['/framework/object/edit/', result?.object_information.object_id]">

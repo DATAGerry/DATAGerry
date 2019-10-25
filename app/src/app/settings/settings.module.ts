@@ -21,13 +21,18 @@ import { CommonModule } from '@angular/common';
 
 import { SettingsRoutingModule } from './settings-routing.module';
 import { LayoutModule } from '../layout/layout.module';
+import { SettingsComponent } from './settings.component';
+import {SweetAlert2Module} from "@sweetalert2/ngx-sweetalert2";
 
 @NgModule({
-  declarations: [],
+  declarations: [
+    SettingsComponent,
+  ],
   imports: [
     CommonModule,
     LayoutModule,
-    SettingsRoutingModule
+    SettingsRoutingModule,
+    SweetAlert2Module
   ]
 })
 export class SettingsModule { }
