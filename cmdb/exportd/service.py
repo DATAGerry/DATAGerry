@@ -15,7 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import time
 import cmdb.process_management.service
 import cmdb.exportd.exporter_base
 
@@ -43,10 +42,12 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
         event_type = event.get_type()
         LOGGER.debug("event received: {}".format(event_type))
         # ToDo: schedule jobs
-        if event_type == "cmdb.core.object.listed":
+        if event_type == "cmdb.core.object.added":
             self.__schedule_job()
 
     def __schedule_job(self):
+        from cmdb.exportd.exportd_job.exportd_job_manager import exportd_job_manager
         # ToDo: schedule job only and handle execution in _run() (own thread)
-        job = cmdb.exportd.exporter_base.ExportJob()
-        job.execute()
+        for obj in exportd_job_manager.get_all_jobs():
+            job = cmdb.exportd.exporter_base.ExportJob(obj)
+            job.execute()

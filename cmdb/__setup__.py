@@ -127,6 +127,7 @@ class SetupRoutine:
         LOGGER.info('UPDATE ROUTINE: Update database collection')
         from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
         from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
+        from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
         self.status = SetupRoutine.SetupStatus.RUNNING
 
         # check database
@@ -160,6 +161,17 @@ class SetupRoutine:
                         self.setup_database_manager.create_collection(collection.COLLECTION)
                         # set unique indexes
                         self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+                        LOGGER.info(f'UPDATE ROUTINE: Database collection {collection.COLLECTION} was created.')
+
+                # exportdJob management collections
+                for collection in JOB_MANAGEMENT_COLLECTION:
+                    try:
+                        detected_database.validate_collection(collection.COLLECTION)['valid']
+                    except:
+                        self.setup_database_manager.create_collection(collection.COLLECTION)
+                        # set unique indexes
+                        self.setup_database_manager.create_indexes(collection.COLLECTION,
+                                                                   collection.get_index_keys())
                         LOGGER.info(f'UPDATE ROUTINE: Database collection {collection.COLLECTION} was created.')
             except Exception as ex:
                 LOGGER.info(f'UPDATE ROUTINE: Database collection validation failed: {ex}')
@@ -223,6 +235,7 @@ class SetupRoutine:
         LOGGER.info('SETUP ROUTINE: Checking database collection validation')
         from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
         from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
+        from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
         detected_database = self.setup_database_manager.database_connector.database
         collection_test = False
 
@@ -233,6 +246,10 @@ class SetupRoutine:
             # user management collections
             for collection in USER_MANAGEMENT_COLLECTION:
                 collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
+            # exportdJob management collections
+            for collection in JOB_MANAGEMENT_COLLECTION:
+                collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)[
+                    'valid']
         except Exception as ex:
             LOGGER.info(f'SETUP ROUTINE: Database collection validation for "{collection.COLLECTION}" failed. '
                         f'msgerror: {ex}')
@@ -256,9 +273,17 @@ class SetupRoutine:
             self.setup_database_manager.create_collection(collection.COLLECTION)
             # set unique indexes
             self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+
         # user management collections
         from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
         for collection in USER_MANAGEMENT_COLLECTION:
+            self.setup_database_manager.create_collection(collection.COLLECTION)
+            # set unique indexes
+            self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+
+        # ExportdJob management collections
+        from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
+        for collection in JOB_MANAGEMENT_COLLECTION:
             self.setup_database_manager.create_collection(collection.COLLECTION)
             # set unique indexes
             self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
