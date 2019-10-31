@@ -28,16 +28,10 @@ try:
         from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
         from cmdb.utils.system_reader import SystemConfigReader
         system_config_reader = SystemConfigReader()
-        try:
-            timeout = system_config_reader.get_value('connection_timeout', 'Database')
-        except KeyError:
-            timeout = MongoConnector.DEFAULT_CONNECTION_TIMEOUT
+        database_options = system_config_reader.get_all_values_from_section('Database')
         return DatabaseManagerMongo(
             connector=MongoConnector(
-                host=system_config_reader.get_value('host', 'Database'),
-                port=int(system_config_reader.get_value('port', 'Database')),
-                database_name=system_config_reader.get_value('database_name', 'Database'),
-                timeout=timeout
+               **database_options
             )
         )
 except ImportError:

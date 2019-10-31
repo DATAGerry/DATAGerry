@@ -55,7 +55,8 @@ def _check_database():
 
     from cmdb.utils.system_reader import SystemConfigReader
     from cmdb.data_storage import get_pre_init_database
-    LOGGER.info(f'Checking database connection with {SystemConfigReader.DEFAULT_CONFIG_NAME} data')
+    ssc = SystemConfigReader()
+    LOGGER.info(f'Checking database connection with {ssc.config_name} data')
     dbm = get_pre_init_database()
     connection_test = dbm.database_connector.is_connected()
     LOGGER.debug(f'Database status is {connection_test}')
