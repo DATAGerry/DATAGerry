@@ -87,7 +87,7 @@ class UserManagement(CmdbManagerBase):
         try:
             return User(**self.dbm.find_one_by(collection=User.COLLECTION, filter=formatted_filter))
         except NoDocumentFound:
-            raise NoUserFoundExceptions(user_name)
+            raise UserManagerGetError(f'User not found')
 
     def get_user_by(self, sort='public_id', **requirements) -> list:
         ack = []

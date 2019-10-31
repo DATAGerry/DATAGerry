@@ -48,6 +48,7 @@ def get_all_groups():
     return make_response(group_list)
 
 
+@group_blueprint.route('/<int:public_id>/', methods=['GET'])
 @group_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
 def get_group(public_id: int):

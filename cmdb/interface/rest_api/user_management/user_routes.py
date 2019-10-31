@@ -62,11 +62,31 @@ def get_user(public_id, request_user: User):
     return make_response(user)
 
 
+@user_blueprint.route('/<string:user_name>/', methods=['GET'])
+@user_blueprint.route('/<string:user_name>', methods=['GET'])
+@insert_request_user
+def get_user_by_name(user_name: str, request_user: User):
+    try:
+        user = user_manager.get_user_by_name(user_name=user_name)
+    except UserManagerGetError:
+        return abort(404)
+
+    return make_response(user)
+
+
 @user_blueprint.route('/', methods=['POST'])
 @login_required
 def add_user():
     http_post_request_data = json.dumps(request.json)
     new_user_data = json.loads(http_post_request_data, object_hook=json_util.object_hook)
+
+    try:
+        user_manager.get_user_by_name(new_user_data['user_name'])
+    except (UserManagerGetError, Exception):
+        pass
+    else:
+        return abort(400, f'User with the username {new_user_data["user_name"]} already exists')
+
     new_user_data['public_id'] = user_manager.get_new_id(User.COLLECTION)
     new_user_data['group_id'] = int(new_user_data['group_id'])
     new_user_data['registration_time'] = datetime.utcnow()
@@ -74,7 +94,7 @@ def add_user():
     try:
         new_user = User(**new_user_data)
     except (CMDBError, Exception) as err:
-        return abort(400)
+        return abort(400, err.message)
     try:
         insert_ack = user_manager.insert_user(new_user)
     except UserManagerInsertError as err:
