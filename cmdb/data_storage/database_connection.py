@@ -87,7 +87,7 @@ class MongoConnector(Connector[MongoClient]):
     PyMongo (MongoDB) implementation from connector
     """
     DOCUMENT_CLASS = dict
-    AUTO_CONNECT: bool = True
+    AUTO_CONNECT: bool = False
 
     def __init__(self, host: str, port: int, database_name: str, **kwargs):
         self.client_options = kwargs or {}
