@@ -23,6 +23,8 @@ import { DataTableDirective } from 'angular-datatables';
 import { combineLatest, forkJoin, Subject, Subscription } from 'rxjs';
 import { User } from '../../models/user';
 import { Group } from '../../models/group';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { UsersPasswdModalComponent } from '../modals/users-passwd-modal/users-passwd-modal.component';
 
 @Component({
   selector: 'cmdb-users-list',
@@ -60,7 +62,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
     }
   };
 
-  constructor(private userService: UserService, public groupService: GroupService) {
+  constructor(private userService: UserService, public groupService: GroupService, private modalService: NgbModal) {
     this.dataSubscription = new Subscription();
   }
 
@@ -89,6 +91,11 @@ export class UsersListComponent implements OnInit, OnDestroy {
 
   public findGroup(publicID) {
     return this.groupList.find(g => g.public_id === publicID);
+  }
+
+  public openDeleteModal(user: User) {
+    const deleteModal = this.modalService.open(UsersPasswdModalComponent, { size: 'lg' });
+    deleteModal.componentInstance.user = user;
   }
 
 }

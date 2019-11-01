@@ -59,7 +59,6 @@ export class UsersEditComponent implements OnInit, OnDestroy {
       public_id: new FormControl(0),
       user_name: new FormControl('', Validators.required),
       email: new FormControl('', [Validators.required, Validators.email]),
-      password: new FormControl('', [Validators.required]),
       first_name: new FormControl(null),
       last_name: new FormControl(null),
       authenticator: new FormControl('LocalAuthenticationProvider', Validators.required),
@@ -160,9 +159,8 @@ export class UsersEditComponent implements OnInit, OnDestroy {
     if (this.editForm.valid) {
       const data = this.editForm.getRawValue();
       this.userService.putUser(this.userID, data).subscribe(addResp => {
-        this.toastService.show(`User with ID: ${ addResp } was updated!`);
+        this.toastService.show(`User with ID: ${ this.userID } was updated!`);
       }, (error) => {
-        console.log(error);
         this.toastService.error(error.error.description);
       }, () => {
         this.router.navigate(['/management/users/']);

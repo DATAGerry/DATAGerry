@@ -157,11 +157,11 @@ def change_user_password(public_id: int):
     from cmdb.data_storage import get_pre_init_database
     from cmdb.utils import get_security_manager
     try:
-        user = user_manager.get_user(public_id=public_id)
+        user_manager.get_user(public_id=public_id)
     except CMDBError:
         return abort(404)
-    user.password = get_security_manager(get_pre_init_database()).generate_hmac(request.json.get('password'))
-    ack = user_manager.update_user(user)
+    password = get_security_manager(get_pre_init_database()).generate_hmac(request.json.get('password'))
+    ack = user_manager.update_user(public_id, {'password': password}).acknowledged
     return make_response(ack)
 
 

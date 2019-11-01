@@ -33,6 +33,9 @@
       <a class="text-dark" [routerLink]="['/management/users/edit/', user.public_id]">
         <fa-icon [icon]="['far', 'edit']"></fa-icon>
       </a>
+      <a class="text-dark ml-2" (click)="openDeleteModal(user)">
+        <fa-icon [icon]="['fas', 'key']"></fa-icon>
+      </a>
       <a class="text-dark ml-2" *ngIf="user?.public_id !== 1"
          [routerLink]="['/management/users/delete/', user.public_id]">
         <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
