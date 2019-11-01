@@ -143,6 +143,12 @@ class UserManagement(CmdbManagerBase):
         except NoDocumentFound as e:
             raise GroupNotExistsError(public_id)
 
+    def get_group_by(self, **requirements) -> UserGroup:
+        try:
+            return UserGroup(**self.dbm.find_one_by(collection=UserGroup.COLLECTION, filter=requirements))
+        except NoDocumentFound:
+            raise UserManagerGetError(f'Group not found')
+
     def update_group(self, public_id, update_params: dict) -> bool:
         try:
             ack = self.dbm.update(collection=UserGroup.COLLECTION, public_id=public_id,

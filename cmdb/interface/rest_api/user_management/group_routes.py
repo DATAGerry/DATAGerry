@@ -19,7 +19,8 @@ import json
 
 from bson import json_util
 
-from cmdb.interface.route_utils import make_response, RootBlueprint, abort, login_required
+from cmdb.interface.route_utils import make_response, RootBlueprint, abort, login_required, insert_request_user
+from cmdb.user_management import User
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user_manager import user_manager, UserManagerInsertError, UserManagerGetError, \
     UserManagerUpdateError, UserManagerDeleteError
@@ -58,6 +59,17 @@ def get_group(public_id: int):
         LOGGER.error(err)
         return abort(404)
     return make_response(group_instance)
+
+
+@group_blueprint.route('/<string:group_name>/', methods=['GET'])
+@group_blueprint.route('/<string:group_name>', methods=['GET'])
+@insert_request_user
+def get_group_by_name(group_name: str, request_user: User):
+    try:
+        group = user_manager.get_group_by(name=group_name)
+    except UserManagerGetError:
+        return abort(404)
+    return make_response(group)
 
 
 @group_blueprint.route('/', methods=['POST'])
