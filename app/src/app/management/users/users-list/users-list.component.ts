@@ -25,6 +25,7 @@ import { User } from '../../models/user';
 import { Group } from '../../models/group';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { UsersPasswdModalComponent } from '../modals/users-passwd-modal/users-passwd-modal.component';
+import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'cmdb-users-list',
@@ -41,7 +42,6 @@ export class UsersListComponent implements OnInit, OnDestroy {
   // Table
   private readonly sortingColumnID: number = 1;
   private readonly groupingColumnID: number = 5;
-
   @ViewChild(DataTableDirective, { static: false })
   private dtElement: DataTableDirective;
   public dtTrigger: Subject<any> = new Subject();
@@ -62,11 +62,15 @@ export class UsersListComponent implements OnInit, OnDestroy {
     }
   };
 
-  constructor(private userService: UserService, public groupService: GroupService, private modalService: NgbModal) {
+  // Current user
+  public currentUser: User;
+
+  constructor(private authService: AuthService, private userService: UserService, public groupService: GroupService, private modalService: NgbModal) {
     this.dataSubscription = new Subscription();
   }
 
   public ngOnInit(): void {
+    this.currentUser = this.authService.currentUserValue;
     const dataSubscriptionArray: any[] = [
       this.userService.getUserList(), this.groupService.getGroupList()
     ];
