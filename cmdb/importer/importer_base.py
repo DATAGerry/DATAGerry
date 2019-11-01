@@ -51,8 +51,14 @@ class ObjectImporter(BaseImporter):
         if object_manager:
             self.object_manager = object_manager
         else:
-            from cmdb.framework.cmdb_object_manager import object_manager as obm
-            self.object_manager = obm
+            from cmdb.utils.system_reader import SystemConfigReader
+            from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+            object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
+                MongoConnector(
+                    **SystemConfigReader().get_all_values_from_section('Database')
+                )
+            ))
+            self.object_manager = object_manager
         self.request_user = request_user
         super(ObjectImporter, self).__init__(file=file, file_type=file_type, config=config)
 

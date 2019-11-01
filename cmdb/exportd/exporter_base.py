@@ -16,21 +16,25 @@
 
 import jinja2
 
-from flask import abort
+from cmdb.data_storage import DatabaseManagerMongo
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import load_class
-from cmdb.framework.cmdb_object_manager import object_manager
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
 
 class ExportJob(ExportdJobManagement):
 
-    def __init__(self, job: ExportdJob):
+    def __init__(self, job: ExportdJob, database_manager: DatabaseManagerMongo):
         self.job = job
         self.exportvars = self.__get_exportvars()
         self.sources = self.__get_sources()
         self.destinations = self.__get__destinations()
+        self.__object_manager = CmdbObjectManager(
+            database_manager=database_manager
+        )
+        super(ExportJob, self).__init__(database_manager)
 
     def __get_exportvars(self):
         exportvars = {}
@@ -40,7 +44,7 @@ class ExportJob(ExportdJobManagement):
 
     def __get_sources(self):
         sources = []
-        sources.append(ExportSource(self.job))
+        sources.append(ExportSource(self.job, object_manager=self.__object_manager))
         return sources
 
     def __get__destinations(self):
@@ -82,9 +86,6 @@ class ExportVariable:
         self.__value_tpl_types = value_tpl_types
 
     def get_value(self, cmdb_object):
-        # get object manager
-        om = object_manager
-
         # get value template
         value_template = self.__value_tpl_default
         object_type_id = cmdb_object.get_type_id()
@@ -112,9 +113,10 @@ class ExportVariable:
 
 class ExportSource:
 
-    def __init__(self, job: ExportdJob):
+    def __init__(self, job: ExportdJob, object_manager: CmdbObjectManager=None):
         self.__job = job
         self.__objects = self.__fetch_objects()
+        self.__object_manager = object_manager
 
     def get_objects(self):
         return self.__objects
@@ -129,7 +131,7 @@ class ExportSource:
                     operator = con["value"]
                 condition.append({"$and": [{"fields.name": con["name"]}, {"fields.value": operator}]})
         query = {"$or": condition}
-        result = object_manager.get_objects_by(sort="public_id", **query)
+        result = self.__object_manager.get_objects_by(sort="public_id", **query)
 
         return result
 

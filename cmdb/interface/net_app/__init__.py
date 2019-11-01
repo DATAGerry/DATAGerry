@@ -30,12 +30,21 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-app = BaseCmdbApp(__name__)
-CORS(app)
+
 system_config_reader = SystemConfigReader()
 
 
 def create_app(event_queue):
+    # Create manager
+    from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+    app_database = DatabaseManagerMongo(
+        connector=MongoConnector(
+            **system_config_reader.get_all_values_from_section('Database')
+        )
+    )
+
+    app = BaseCmdbApp(__name__, app_database)
+    CORS(app)
     import cmdb
     from cmdb.interface.net_app.app_routes import app_pages, redirect_index
 

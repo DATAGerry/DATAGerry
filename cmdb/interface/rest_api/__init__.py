@@ -19,7 +19,9 @@ Init module for rest routes
 """
 import logging
 
+from cmdb.framework.cmdb_log_manager import CmdbLogManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.utils import SecurityManager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -49,24 +51,29 @@ def create_rest_api(event_queue):
 
     cache = Cache(config=cache_config)
 
-    # Create object manager
+    # Create manager
     from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
-
     app_database = DatabaseManagerMongo(
         connector=MongoConnector(
-            host=system_config_reader.get_value('host', 'Database'),
-            port=int(system_config_reader.get_value('port', 'Database')),
-            database_name=system_config_reader.get_value('database_name', 'Database')
+            **system_config_reader.get_all_values_from_section('Database')
         )
     )
     object_manager = CmdbObjectManager(
         database_manager=app_database,
         event_queue=event_queue
     )
+    log_manager = CmdbLogManager(
+        database_manager=app_database
+    )
+
+    security_manager = SecurityManager(
+        database_manager=app_database
+    )
 
     # Create APP
     from cmdb.interface.cmdb_app import BaseCmdbApp
-    app = BaseCmdbApp(__name__, object_manager=object_manager)
+    app = BaseCmdbApp(__name__, database_manager=app_database,
+                      object_manager=object_manager, log_manager=log_manager, security_manager=security_manager)
 
     # Import App Extensions
     from flask_cors import CORS

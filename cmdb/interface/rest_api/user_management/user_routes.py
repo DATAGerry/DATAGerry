@@ -18,15 +18,13 @@ import json
 import logging
 
 from bson import json_util
-from flask import abort, request
+from flask import abort, request, current_app
 from datetime import datetime
 
-from cmdb.data_storage import get_pre_init_database
 from cmdb.interface.route_utils import RootBlueprint, make_response, insert_request_user, login_required, right_required
 from cmdb.user_management import User
 from cmdb.user_management.user_manager import user_manager, UserManagerInsertError, UserManagerGetError, \
     UserManagerUpdateError, UserManagerDeleteError
-from cmdb.utils import get_security_manager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -35,6 +33,9 @@ except ImportError:
 
 LOGGER = logging.getLogger(__name__)
 user_blueprint = RootBlueprint('user_rest', __name__, url_prefix='/user')
+
+with current_app.app_context():
+    security_manager = current_app.security_manager
 
 
 @user_blueprint.route('/', methods=['GET'])
@@ -90,7 +91,7 @@ def add_user():
     new_user_data['public_id'] = user_manager.get_new_id(User.COLLECTION)
     new_user_data['group_id'] = int(new_user_data['group_id'])
     new_user_data['registration_time'] = datetime.utcnow()
-    new_user_data['password'] = get_security_manager(get_pre_init_database()).generate_hmac(new_user_data['password'])
+    new_user_data['password'] = security_manager.generate_hmac(new_user_data['password'])
     try:
         new_user = User(**new_user_data)
     except (CMDBError, Exception) as err:
@@ -154,13 +155,11 @@ def count_users():
 @login_required
 @user_blueprint.route('/<int:public_id>/passwd', methods=['PUT'])
 def change_user_password(public_id: int):
-    from cmdb.data_storage import get_pre_init_database
-    from cmdb.utils import get_security_manager
     try:
         user_manager.get_user(public_id=public_id)
     except CMDBError:
         return abort(404)
-    password = get_security_manager(get_pre_init_database()).generate_hmac(request.json.get('password'))
+    password = security_manager.generate_hmac(request.json.get('password'))
     ack = user_manager.update_user(public_id, {'password': password}).acknowledged
     return make_response(ack)
 

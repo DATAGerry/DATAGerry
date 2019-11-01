@@ -15,8 +15,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+
+from flask import current_app
+
 from cmdb.interface.route_utils import RootBlueprint, make_response
-from cmdb.data_storage import get_pre_init_database
+from cmdb.data_storage import DatabaseManagerMongo
+
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
@@ -25,6 +29,9 @@ except ImportError:
 connection_routes = RootBlueprint('connection_routes', __name__)
 LOGGER = logging.getLogger(__name__)
 
+with current_app.app_context():
+    database_manager: DatabaseManagerMongo = current_app.database_manager
+
 
 @connection_routes.route('/')
 def connection_response():
@@ -32,6 +39,6 @@ def connection_response():
     resp = {
         'title': __title__,
         'version': __version__,
-        'connected': get_pre_init_database().status()
+        'connected': database_manager.status()
     }
     return make_response(resp)

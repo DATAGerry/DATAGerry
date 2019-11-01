@@ -15,14 +15,24 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from flask import abort, Response
+
+from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
 from cmdb.framework.cmdb_errors import ObjectNotFoundError, TypeNotFoundError
-from cmdb.framework.cmdb_object_manager import object_manager
 from cmdb.file_export.export_types import ExportType
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
     CMDBError = Exception
+
+from cmdb.utils.system_reader import SystemConfigReader
+
+object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
+    MongoConnector(
+        **SystemConfigReader().get_all_values_from_section('Database')
+    )
+))
 
 
 class FileExporter:

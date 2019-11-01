@@ -17,7 +17,7 @@
 import logging
 
 import cmdb
-from cmdb.data_storage import NoDocumentFound, DatabaseManagerMongo
+from cmdb.data_storage import NoDocumentFound, DatabaseManagerMongo, MongoConnector
 from cmdb.data_storage.database_manager import DeleteResult
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
@@ -26,8 +26,10 @@ from cmdb.user_management.user_authentication import AuthenticationProvider, Loc
     NoValidAuthenticationProviderError
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user_right import BaseRight, GLOBAL_IDENTIFIER
+from cmdb.utils import get_security_manager
 from cmdb.utils.error import CMDBError
 from cmdb.utils.security import SecurityManager
+from cmdb.utils.system_reader import SystemConfigReader
 from cmdb.utils.wraps import deprecated
 
 LOGGER = logging.getLogger(__name__)
@@ -319,13 +321,17 @@ class GroupInsertError(CMDBError):
 
 
 def get_user_manager():
-    from cmdb.data_storage import get_pre_init_database
-    from cmdb.utils import get_security_manager
-    db_man = get_pre_init_database()
+    # TODO: refactor for single instance
+    system_config_reader = SystemConfigReader()
+    database_manager = DatabaseManagerMongo(
+        connector=MongoConnector(
+            **system_config_reader.get_all_values_from_section('Database')
+        )
+    )
     return UserManagement(
-        database_manager=db_man,
+        database_manager=database_manager,
         security_manager=get_security_manager(
-            database_manager=db_man
+            database_manager=database_manager
         )
     )
 
