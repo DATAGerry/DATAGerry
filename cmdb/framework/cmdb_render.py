@@ -17,6 +17,8 @@
 """
 Object/Type render
 """
+from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -285,7 +287,14 @@ class RenderList:
         self.request_user = request_user
 
     def render_result_list(self, search_fields=None):
-        from cmdb.framework.cmdb_object_manager import object_manager
+        from cmdb.utils.system_reader import SystemConfigReader
+
+        object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
+            MongoConnector(
+                **SystemConfigReader().get_all_values_from_section('Database')
+            )
+        ))
+
         preparation_objects = []
         for passed_object in self.object_list:
             tmp_render = CmdbRender(type_instance=object_manager.get_type(passed_object.type_id),

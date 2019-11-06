@@ -15,7 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from datetime import datetime
 
-from cmdb.data_storage import get_pre_init_database
 from cmdb.framework import CmdbLog, CmdbMetaLog, CmdbObjectLog
 from cmdb.framework.cmdb_base import CmdbManagerBase
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerUpdateError, \
@@ -126,8 +125,3 @@ class LogManagerDeleteError(ObjectManagerDeleteError):
 
     def __init__(self, err):
         super(LogManagerDeleteError, self).__init__(err)
-
-
-log_manager = CmdbLogManager(
-    database_manager=get_pre_init_database()
-)

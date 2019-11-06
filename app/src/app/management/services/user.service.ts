@@ -19,13 +19,28 @@
 import { Injectable } from '@angular/core';
 import { ApiCallService, ApiService } from '../../services/api-call.service';
 import { User } from '../models/user';
-import { Group } from '../models/group';
 import { AuthService } from '../../auth/services/auth.service';
-import { Right } from '../models/right';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { CmdbStatus } from '../../framework/models/cmdb-status';
+import { switchMap, map, catchError } from 'rxjs/operators';
+import { Observable, timer } from 'rxjs';
 import { HttpResponse } from '@angular/common/http';
+import { FormControl } from '@angular/forms';
+
+export const checkUserExistsValidator = (userService: UserService, time: number = 500) => {
+  return (control: FormControl) => {
+    return timer(time).pipe(switchMap(() => {
+      return userService.checkUserExists(control.value).pipe(
+        map(() => {
+          return { userExists: true };
+        }),
+        catchError(() => {
+          return new Promise(resolve => {
+            resolve(null);
+          });
+        })
+      );
+    }));
+  };
+};
 
 @Injectable({
   providedIn: 'root'
@@ -100,4 +115,8 @@ export class UserService<T = User> implements ApiService {
     );
   }
 
+  // Special functions
+  public checkUserExists(userName: string) {
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ userName }`);
+  }
 }

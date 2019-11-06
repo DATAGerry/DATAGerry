@@ -215,10 +215,7 @@ class SetupRoutine:
         try:
             self.setup_database_manager = DatabaseManagerMongo(
                 connector=MongoConnector(
-                    host=self.setup_system_config_reader.get_value('host', 'Database'),
-                    port=int(self.setup_system_config_reader.get_value('port', 'Database')),
-                    database_name=self.setup_system_config_reader.get_value('database_name', 'Database'),
-                    timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT
+                    **self.setup_system_config_reader.get_all_values_from_section('Database')
                 )
             )
 

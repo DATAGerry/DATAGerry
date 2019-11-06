@@ -17,7 +17,6 @@
 */
 
 import { NgModule } from '@angular/core';
-
 import { CommonModule } from '@angular/common';
 import { UsersRoutingModule } from './users-routing.module';
 import { UsersListComponent } from './users-list/users-list.component';
@@ -30,9 +29,20 @@ import { LayoutModule } from '../../layout/layout.module';
 import { UsersEditComponent } from './users-edit/users-edit.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { UsersDeleteComponent } from './users-delete/users-delete.component';
+import { UsersPasswdModalComponent } from './modals/users-passwd-modal/users-passwd-modal.component';
 
 @NgModule({
-  declarations: [UsersListComponent, UserViewComponent, UsersAddComponent, UsersEditComponent, UsersDeleteComponent],
+  entryComponents: [
+    UsersPasswdModalComponent
+  ],
+  declarations: [
+    UsersListComponent,
+    UserViewComponent,
+    UsersAddComponent,
+    UsersEditComponent,
+    UsersDeleteComponent,
+    UsersPasswdModalComponent
+  ],
   imports: [
     CommonModule,
     UsersRoutingModule,
@@ -43,4 +53,5 @@ import { UsersDeleteComponent } from './users-delete/users-delete.component';
     FontAwesomeModule,
   ]
 })
-export class UsersModule { }
+export class UsersModule {
+}

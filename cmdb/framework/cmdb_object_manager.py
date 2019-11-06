@@ -25,7 +25,6 @@ import re
 
 from datetime import datetime
 
-from cmdb.data_storage import get_pre_init_database
 from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
@@ -590,12 +589,3 @@ class CmdbObjectManager(CmdbManagerBase):
             LOGGER.error(err)
             raise ObjectManagerInsertError(err)
         return ack
-
-
-try:
-    object_manager = CmdbObjectManager(
-        database_manager=get_pre_init_database(),
-        event_queue=None
-    )
-except ImportError:
-    pass

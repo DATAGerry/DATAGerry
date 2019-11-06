@@ -14,6 +14,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from cmdb.data_storage.database_connection import MongoConnector, Connector
-from cmdb.data_storage.database_manager import DatabaseManagerMongo, DatabaseManager
-from cmdb.data_storage.database_manager import NoDocumentFound
+from typing import TypeVar
+from pymongo.errors import ConnectionFailure as MongoConnectionFailure
+
+CLIENT = TypeVar('CLIENT')
+
+
+class ConnectionStatus:
+
+    def __init__(self, status: bool, message: str = None):
+        self._status: bool = status  # Connected = True, Disconnected = False
+        self.message: str = message or 'No message given'
+
+    def status(self):
+        return self._status

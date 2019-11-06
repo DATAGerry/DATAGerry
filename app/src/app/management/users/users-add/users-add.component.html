@@ -8,11 +8,14 @@
         <div class="col-sm-10">
           <input type="text" formControlName="user_name" class="form-control" placeholder="Username"
                  [ngClass]="{ 'is-valid': user_name.valid && (user_name.dirty || user_name.touched),
-                 'is-invalid': user_name.invalid && (user_name.dirty || user_name.touched)}">
+                 'is-invalid': user_name.invalid && (user_name.dirty || user_name.touched)}" lowercase>
           <div *ngIf="user_name.invalid && (user_name.dirty || user_name.touched)"
                class="invalid-feedback">
             <div class="float-right" *ngIf="user_name.errors.required">
               Username is required
+            </div>
+            <div class="float-right" *ngIf="user_name.errors.userExists">
+              User with this name already exists
             </div>
             <div class="clearfix"></div>
           </div>
@@ -57,7 +60,6 @@
               <div class="clearfix"></div>
             </div>
           </div>
-
           <password-strength-meter [password]="password.value" [enableFeedback]="true"
                                    (strengthChange)="onPasswordStrengthChanged($event)">>
           </password-strength-meter>

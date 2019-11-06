@@ -17,7 +17,7 @@
 */
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { GroupService } from '../../services/group.service';
+import { checkGroupExistsValidator, GroupService } from '../../services/group.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { RightService } from '../../services/right.service';
 import { Right } from '../../models/right';
@@ -36,14 +36,13 @@ export class GroupsAddComponent implements OnInit, OnDestroy {
   private rightServiceSubscription: Subscription;
 
   public rightList: Right[];
-  public addGroup: Group;
   public addForm: FormGroup;
 
   constructor(private groupService: GroupService, private rightService: RightService,
               private toast: ToastService, private router: Router) {
     this.addForm = new FormGroup({
-      name: new FormControl('', Validators.required),
-      label: new FormControl(''),
+      name: new FormControl('', [Validators.required], [checkGroupExistsValidator(this.groupService)]),
+      label: new FormControl('', [Validators.required]),
       rights: new FormControl([], Validators.minLength(1))
     });
   }
@@ -76,6 +75,7 @@ export class GroupsAddComponent implements OnInit, OnDestroy {
   }
 
   public saveGroup() {
+    this.addForm.markAllAsTouched();
     const rawData = this.addForm.getRawValue();
     if (this.addForm.valid) {
       this.groupService.postGroup(rawData).subscribe(insertAck => {

@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
 from cmdb.utils import SystemSettingsWriter
 from cmdb.utils.system_reader import SystemConfigReader
 
@@ -20,8 +21,13 @@ from cmdb.utils.system_reader import SystemConfigReader
 class KeyGenerator:
 
     def __init__(self, key_directory=None):
-        from cmdb.data_storage import get_pre_init_database
-        self.ssw = SystemSettingsWriter(get_pre_init_database())
+        self.scr = SystemConfigReader()
+        self.__dbm = DatabaseManagerMongo(
+            connector=MongoConnector(
+                **self.scr.get_all_values_from_section('Database')
+            )
+        )
+        self.ssw = SystemSettingsWriter(self.__dbm)
         self.key_directory = key_directory or SystemConfigReader.DEFAULT_CONFIG_LOCATION + "/keys"
 
     def generate_rsa_keypair(self):

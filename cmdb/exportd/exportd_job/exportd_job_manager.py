@@ -19,11 +19,12 @@ import logging
 from datetime import datetime
 
 from cmdb.event_management.event import Event
-from cmdb.data_storage import DatabaseManagerMongo, NoDocumentFound
+from cmdb.data_storage import DatabaseManagerMongo, NoDocumentFound, MongoConnector
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.utils.error import CMDBError
+from cmdb.utils.system_reader import SystemConfigReader
 
 LOGGER = logging.getLogger(__name__)
 
@@ -149,11 +150,16 @@ class ExportdJobManagerDeleteError(ManagerDeleteError):
 
 
 def get_exoportd_job_manager():
-    from cmdb.data_storage import get_pre_init_database
-    db_man = get_pre_init_database()
+    ssc = SystemConfigReader()
+    database_options = ssc.get_all_values_from_section('Database')
+    dbm = DatabaseManagerMongo(
+        connector=MongoConnector(
+            **database_options
+        )
+    )
     return ExportdJobManagement(
-        database_manager=db_man,
-        event_queue=None
+        event_queue=None,
+        database_manager=dbm
     )
 
 

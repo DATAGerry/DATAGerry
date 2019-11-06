@@ -13,8 +13,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-from cmdb.framework.cmdb_object_manager import object_manager
+from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.utils import json_encoding
 import csv
 import io
@@ -24,8 +24,16 @@ import json
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
 
-class ExportType:
+from cmdb.utils.system_reader import SystemConfigReader
 
+object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
+    MongoConnector(
+        **SystemConfigReader().get_all_values_from_section('Database')
+    )
+))
+
+
+class ExportType:
     FILE_EXTENSION = None
     LABEL = None
     MULTITYPE_SUPPORT = False
@@ -41,14 +49,12 @@ class ExportType:
 
 
 class CsvExportType(ExportType):
-
     FILE_EXTENSION = "csv"
     LABEL = "CSV"
     MULTITYPE_SUPPORT = False
     ICON = "file-csv"
     DESCRIPTION = "Export as CSV (only of the same type)"
     ACTIVE = True
-
 
     def __init__(self):
         pass
@@ -90,7 +96,6 @@ class CsvExportType(ExportType):
 
 
 class JsonExportType(ExportType):
-
     FILE_EXTENSION = "json"
     LABEL = "JSON"
     MULTITYPE_SUPPORT = True
@@ -117,7 +122,6 @@ class JsonExportType(ExportType):
 
 
 class XlsxExportType(ExportType):
-
     FILE_EXTENSION = "xlsx"
     LABEL = "XLSX"
     MULTITYPE_SUPPORT = True
@@ -198,7 +202,6 @@ class XlsxExportType(ExportType):
 
 
 class XmlExportType(ExportType):
-
     FILE_EXTENSION = "xml"
     LABEL = "XML"
     MULTITYPE_SUPPORT = True
@@ -237,4 +240,5 @@ class XmlExportType(ExportType):
                 ET.SubElement(cmdb_object_fields, "field", field_attribs)
 
         # return xml as string (pretty printed)
-        return xml.dom.minidom.parseString(ET.tostring(cmdb_object_list, encoding='unicode', method='xml')).toprettyxml()
+        return xml.dom.minidom.parseString(
+            ET.tostring(cmdb_object_list, encoding='unicode', method='xml')).toprettyxml()

@@ -27,10 +27,23 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-app = BaseCmdbApp(__name__)
+
+from cmdb.utils.system_reader import SystemConfigReader
+
+system_config_reader = SystemConfigReader()
 
 
 def create_docs_server(event_queue):
+    # Create manager
+    from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+    app_database = DatabaseManagerMongo(
+        connector=MongoConnector(
+            **system_config_reader.get_all_values_from_section('Database')
+        )
+    )
+
+    app = BaseCmdbApp(__name__, app_database)
+
     if cmdb.__MODE__ == 'DEBUG':
         app.config.from_object(app_config['rest_development'])
         LOGGER.info('Docs starting with config mode {}'.format(app.config.get("ENV")))

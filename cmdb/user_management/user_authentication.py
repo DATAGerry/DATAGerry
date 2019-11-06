@@ -16,11 +16,14 @@
 
 import logging
 
+from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+from cmdb.utils import get_security_manager
+from cmdb.utils.system_reader import SystemConfigReader
+
 LOGGER = logging.getLogger(__name__)
 
 
 class AuthenticationProvider:
-
     PASSWORD_ABLE = True
 
     def authenticate(self, user, password: str, **kwargs) -> bool:
@@ -44,12 +47,16 @@ class AuthenticationProvider:
 class LocalAuthenticationProvider(AuthenticationProvider):
 
     def __init__(self):
+        self.scr = SystemConfigReader()
+        self.__dbm = DatabaseManagerMongo(
+            connector=MongoConnector(
+                **self.scr.get_all_values_from_section('Database')
+            )
+        )
         super(AuthenticationProvider, self).__init__()
 
     def authenticate(self, user, password: str, **kwargs) -> bool:
-        from cmdb.utils import get_security_manager
-        from cmdb.data_storage import get_pre_init_database
-        security_manager = get_security_manager(get_pre_init_database())
+        security_manager = get_security_manager(self.__dbm)
         login_pass = security_manager.generate_hmac(password)
         if login_pass == user.get_password():
             return True

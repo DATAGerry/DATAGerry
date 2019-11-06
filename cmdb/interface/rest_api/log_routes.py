@@ -21,11 +21,12 @@ from flask import current_app
 
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.cmdb_log import CmdbObjectLog, LogAction
-from cmdb.framework.cmdb_log_manager import LogManagerGetError, LogManagerDeleteError, log_manager
+from cmdb.framework.cmdb_log_manager import LogManagerGetError, LogManagerDeleteError
 from cmdb.interface.route_utils import RootBlueprint, make_response
 
 with current_app.app_context():
     object_manager = current_app.object_manager
+    log_manager = current_app.log_manager
 
 try:
     from cmdb.utils.error import CMDBError

@@ -17,6 +17,8 @@
 import logging
 import cmdb.process_management.service
 import cmdb.exportd.exporter_base
+from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+from cmdb.utils.system_reader import SystemConfigReader
 
 LOGGER = logging.getLogger(__name__)
 
@@ -48,6 +50,12 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
     def __schedule_job(self, event):
         from cmdb.exportd.exportd_job.exportd_job_manager import exportd_job_manager
         # ToDo: schedule job only and handle execution in _run() (own thread)
+        scr = SystemConfigReader()
+        database_options = scr.get_all_values_from_section('Database')
         obj = exportd_job_manager.get_job(event.get_param("id"))
-        job = cmdb.exportd.exporter_base.ExportJob(obj)
+        job = cmdb.exportd.exporter_base.ExportJob(obj, database_manager=DatabaseManagerMongo(
+            connector=MongoConnector(
+                **database_options
+            )
+        ))
         job.execute()
