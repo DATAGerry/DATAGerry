@@ -60,12 +60,6 @@ export class RenderField {
   public constructor() {
   }
 
-  public copyDateToClipboard() {
-    const selBox = document.createElement('textarea');
-    selBox.value = this.controller.value.day + '-' + this.controller.value.month + '-' + this.controller.value.year;
-    this.generateDataForClipboard(selBox);
-  }
-
   public copyToClipboard() {
     const selBox = document.createElement('textarea');
     selBox.value = this.controller.value;
