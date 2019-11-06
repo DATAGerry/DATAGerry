@@ -1,0 +1,70 @@
+
+<div class="row">
+  <div class="col-sm-2">
+    <button class="btn btn-primary" type="button" (click)="addVariable()">
+      <i class="fas fa-plus-circle"></i> Add new Variable </button>
+  </div>
+  <div class="col-sm-10">
+    <form [formGroup]="variableForm">
+      <ng-container formArrayName="variables">
+        <ng-container *ngFor="let variable of variableForm['controls'].variables['controls']; let s=index">
+          <div class="space-bottom card">
+            <div class="card-header">Variable {{s}}
+              <span class="float-right">
+                <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
+                        [attr.data-target]="['#collapseExample' + s]" aria-expanded="true">
+                  <fa-icon [icon]="['far', 'edit']"></fa-icon>
+                </button>
+                <button class="btn btn-link" type="button" (click)="delVariable(s)">
+                  <fa-icon [icon]="['far', 'window-close']"></fa-icon>
+                </button>
+              </span>
+            </div>
+            <div class="card-body collapse show" id="collapseExample{{s}}">
+              <table class="table table-bordered">
+                <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Value</th>
+                  <th scope="col">Type Template</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr formArrayName="{{s}}">
+                  <th scope="row">{{s + 1}}</th>
+                  <td>
+                    <input type="text" class="form-control" formControlName="name"
+                           [ngClass]="{ 'is-valid': variable.get('name').valid
+                             && (variable.get('name').dirty
+                             || variable.get('name').touched), 'is-invalid': variable.get('name').invalid
+                             && (variable.get('name').dirty || variable.get('name').touched)}"
+                           required>
+                  </td>
+                  <td>
+                    <input type="text" class="form-control" formControlName="default"
+                           [ngClass]="{ 'is-valid': variable.get('default').valid
+                             && (variable.get('default').dirty
+                             || variable.get('default').touched), 'is-invalid': variable.get('default').invalid
+                             && (variable.get('default').dirty || variable.get('default').touched)}"
+                           required>
+                  </td>
+                  <td>
+                    <input type="text" class="form-control" formControlName="type_template"
+                           [ngClass]="{ 'is-valid': variable.get('type_template').valid
+                             && (variable.get('type_template').dirty
+                             || variable.get('type_template').touched), 'is-invalid': variable.get('type_template').invalid
+                             && (variable.get('type_template').dirty || variable.get('type_template').touched)}"
+                           required>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </ng-container>
+      </ng-container>
+    </form>
+  </div>
+
+</div>

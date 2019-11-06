@@ -51,5 +51,15 @@ class JobManagementBase:
             index_list.append(IndexModel(**index))
         return index_list
 
+    def to_json(self) -> dict:
+        """
+        converts attribute dict to json - maybe later for database updates
+        Returns:
+            dict: json dump with database default encoding of the object attributes
+        """
+        from cmdb.data_storage.database_utils import default
+        import json
+        return json.dumps(self.__dict__, default=default)
+
     def to_database(self):
         return self.__dict__

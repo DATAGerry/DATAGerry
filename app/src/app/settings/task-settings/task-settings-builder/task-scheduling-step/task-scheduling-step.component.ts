@@ -16,23 +16,31 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {Component, Input, OnInit} from '@angular/core';
+import {CmdbMode} from "../../../../framework/modes.enum";
+import {FormGroup} from "@angular/forms";
 
-import { SettingsRoutingModule } from './settings-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-import { SettingsComponent } from './settings.component';
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
-
-@NgModule({
-  declarations: [
-    SettingsComponent,
-  ],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    SettingsRoutingModule,
-    SweetAlert2Module
-  ]
+@Component({
+  selector: 'cmdb-task-scheduling-step',
+  templateUrl: './task-scheduling-step.component.html',
+  styleUrls: ['./task-scheduling-step.component.scss']
 })
-export class SettingsModule { }
+export class TaskSchedulingStepComponent implements OnInit {
+
+  // @Input()
+  // set preData(data: any) {
+  //   if (data !== undefined) {
+  //     this.schedulingForm.patchValue(data);
+  //   }
+  // }
+
+  @Input() public mode: CmdbMode;
+  public schedulingForm: FormGroup;
+  readonly VARIABLES = 'variables';
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

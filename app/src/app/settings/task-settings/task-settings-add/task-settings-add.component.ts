@@ -16,23 +16,22 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
-import { SettingsRoutingModule } from './settings-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-import { SettingsComponent } from './settings.component';
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
+import {Component, OnInit} from '@angular/core';
+import {CmdbMode} from "../../../framework/modes.enum";
 
-@NgModule({
-  declarations: [
-    SettingsComponent,
-  ],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    SettingsRoutingModule,
-    SweetAlert2Module
-  ]
+@Component({
+  selector: 'cmdb-task-settings-add',
+  templateUrl: './task-settings-add.component.html',
+  styleUrls: ['./task-settings-add.component.scss']
 })
-export class SettingsModule { }
+export class TaskSettingsAddComponent implements OnInit {
+
+  public mode: CmdbMode = CmdbMode.Create;
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

@@ -16,23 +16,25 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
-import { SettingsRoutingModule } from './settings-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-import { SettingsComponent } from './settings.component';
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
+import { Injectable } from '@angular/core';
+import { ApiCallService } from '../../services/api-call.service';
 
-@NgModule({
-  declarations: [
-    SettingsComponent,
-  ],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    SettingsRoutingModule,
-    SweetAlert2Module
-  ]
+@Injectable({
+  providedIn: 'root'
 })
-export class SettingsModule { }
+export class ExternalSystemService {
+
+  private servicePrefix: string = 'externalsystem';
+
+  constructor(private api: ApiCallService) {
+  }
+
+  public getExternSytemParams(name: string) {
+    return this.api.callGetRoute<any>(this.servicePrefix + '/' + name);
+  }
+
+  public getExternSytemList() {
+    return this.api.callGetRoute<any[]>(this.servicePrefix + '/');
+  }
+}

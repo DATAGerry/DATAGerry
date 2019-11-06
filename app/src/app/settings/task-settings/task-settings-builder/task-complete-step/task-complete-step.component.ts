@@ -16,23 +16,20 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, OnInit } from '@angular/core';
+import { TaskBasicStepComponent } from '../task-basic-step/task-basic-step.component';
 
-import { SettingsRoutingModule } from './settings-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-import { SettingsComponent } from './settings.component';
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
-
-@NgModule({
-  declarations: [
-    SettingsComponent,
-  ],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    SettingsRoutingModule,
-    SweetAlert2Module
-  ]
+@Component({
+  selector: 'cmdb-task-complete-step',
+  templateUrl: './task-complete-step.component.html',
+  styleUrls: ['./task-complete-step.component.scss']
 })
-export class SettingsModule { }
+export class TaskCompleteStepComponent implements OnInit {
+
+  @Input() public basicStep: TaskBasicStepComponent = null;
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+}

@@ -16,23 +16,18 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+export class Task {
 
-import { SettingsRoutingModule } from './settings-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-import { SettingsComponent } from './settings.component';
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
+  // tslint:disable: variable-name
+  public public_id: number;
+  public name: string;
+  public label: string;
+  public description: string;
+  public active: boolean;
+  public last_execute_date: any;
+  public sources: [];
+  public destination: [];
+  public variables: [];
+  // tslint:enable
+}
 
-@NgModule({
-  declarations: [
-    SettingsComponent,
-  ],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    SettingsRoutingModule,
-    SweetAlert2Module
-  ]
-})
-export class SettingsModule { }

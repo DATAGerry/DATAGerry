@@ -20,6 +20,7 @@ Init module for rest routes
 import logging
 
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 
 try:
     from cmdb.utils.error import CMDBError
@@ -64,9 +65,14 @@ def create_rest_api(event_queue):
         event_queue=event_queue
     )
 
+    exportd_job_manager = ExportdJobManagement(
+        database_manager=app_database,
+        event_queue=event_queue
+    )
+
     # Create APP
     from cmdb.interface.cmdb_app import BaseCmdbApp
-    app = BaseCmdbApp(__name__, object_manager=object_manager)
+    app = BaseCmdbApp(__name__, object_manager=object_manager, exportd_manager=exportd_job_manager)
 
     # Import App Extensions
     from flask_cors import CORS
@@ -115,6 +121,8 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.log_routes import log_blueprint
     from cmdb.interface.rest_api.settings_routes import settings_blueprint
     from cmdb.interface.rest_api.import_routes import importer_blueprint
+    from cmdb.interface.rest_api.exportd_job_routes import exportd_job_blueprint
+    from cmdb.interface.rest_api.external_systems_routes import external_system
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(object_blueprint)
@@ -132,6 +140,8 @@ def register_blueprints(app):
     app.register_blueprint(log_blueprint)
     app.register_blueprint(settings_blueprint)
     app.register_blueprint(importer_blueprint)
+    app.register_blueprint(exportd_job_blueprint)
+    app.register_blueprint(external_system)
 
 
 def register_error_pages(app):
