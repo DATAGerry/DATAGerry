@@ -44,18 +44,18 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
         event_type = event.get_type()
         LOGGER.debug("event received: {}".format(event_type))
         # ToDo: schedule jobs
-        if event_type == "cmdb.core.object.added":
-            self.__schedule_job()
+        if event_type == "cmdb.exportd.run_manual":
+            self.__schedule_job(event)
 
-    def __schedule_job(self):
+    def __schedule_job(self, event):
         from cmdb.exportd.exportd_job.exportd_job_manager import exportd_job_manager
         # ToDo: schedule job only and handle execution in _run() (own thread)
         scr = SystemConfigReader()
         database_options = scr.get_all_values_from_section('Database')
-        for obj in exportd_job_manager.get_all_jobs():
-            job = cmdb.exportd.exporter_base.ExportJob(obj, database_manager=DatabaseManagerMongo(
-                connector=MongoConnector(
-                    **database_options
-                )
-            ))
-            job.execute()
+        obj = exportd_job_manager.get_job(event.get_param("id"))
+        job = cmdb.exportd.exporter_base.ExportJob(obj, database_manager=DatabaseManagerMongo(
+            connector=MongoConnector(
+                **database_options
+            )
+        ))
+        job.execute()

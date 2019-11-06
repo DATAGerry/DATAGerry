@@ -86,6 +86,21 @@ def load_class(classname):
     return loaded_class
 
 
+def get_module_classes(module_name):
+    """
+        Get all class of an module and return list of classes
+
+    """
+    import inspect
+
+    class_list = []
+    loaded_module = importlib.import_module(module_name)
+    for key, data in inspect.getmembers(loaded_module, inspect.isclass):
+        if module_name in str(data):
+            class_list.append(key)
+    return class_list
+
+
 def str_to_bool(s):
     if s == 'True' or s == 'true':
         return True

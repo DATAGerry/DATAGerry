@@ -150,6 +150,8 @@ class ExportDestination:
 
 class ExternalSystem:
 
+    parameters = []
+
     def __init__(self, destination_parms, export_vars):
         self._destination_parms = destination_parms
         self._export_vars = export_vars

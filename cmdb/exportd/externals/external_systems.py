@@ -19,6 +19,12 @@ from cmdb.exportd.exporter_base import ExternalSystem, ExportJobConfigException,
 
 class ExternalSystemDummy(ExternalSystem):
 
+    parameters = [
+        {"name": "ip-address", "required": False, "description": "Set static IP addresses", "default": "192.168.0.2"},
+        {"name": "ssid-name", "required": True, "description": "Router for Login", "default": "host-name"},
+        {"name": "password", "required": True, "description": "Password for Login", "default": "1234"}
+    ]
+
     def __init__(self, destination_parms, export_vars):
         super(ExternalSystemDummy, self).__init__(destination_parms, export_vars)
         # init destination vars

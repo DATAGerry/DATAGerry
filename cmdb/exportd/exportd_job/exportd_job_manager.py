@@ -16,6 +16,9 @@
 
 import logging
 
+from datetime import datetime
+
+from cmdb.event_management.event import Event
 from cmdb.data_storage import DatabaseManagerMongo, NoDocumentFound, MongoConnector
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
@@ -28,9 +31,13 @@ LOGGER = logging.getLogger(__name__)
 
 class ExportdJobManagement(CmdbManagerBase):
 
-    def __init__(self, database_manager: DatabaseManagerMongo):
+    def __init__(self, database_manager: DatabaseManagerMongo, event_queue=None):
         self.dbm = database_manager
+        self._event_queue = event_queue
         super().__init__(database_manager)
+
+    def get_new_id(self, collection: str) -> int:
+        return self.dbm.get_next_public_id(collection)
 
     def get_job(self, public_id: int) -> ExportdJob:
         try:
@@ -57,23 +64,65 @@ class ExportdJobManagement(CmdbManagerBase):
             LOGGER.error(err)
             raise err
 
-    def insert_job(self, job: ExportdJob) -> int:
-        try:
-            return self.dbm.insert(collection=ExportdJob.COLLECTION, data=job.to_database())
-        except (CMDBError, Exception):
-            raise ExportdJobManagerInsertError(f'Could not insert {job.get_name()}')
+    def insert_job(self, data: (ExportdJob, dict)) -> int:
+        """
+        Insert new ExportdJob Object
+        Args:
+            data: init data
 
-    def update_job(self, public_id, update_params: dict):
+        Returns:
+            Public ID of the new ExportdJob in database
+        """
+        if isinstance(data, dict):
+            try:
+                new_object = ExportdJob(**data)
+            except CMDBError as e:
+                raise ExportdJobManagerInsertError(e)
+        elif isinstance(data, ExportdJob):
+            new_object = data
         try:
-            return self.dbm.update(collection=ExportdJob.COLLECTION, public_id=public_id, data=update_params)
-        except (CMDBError, Exception):
-            raise ExportdJobManagerUpdateError(f'Could not update job with ID: {public_id}')
+            ack = self.dbm.insert(
+                collection=ExportdJob.COLLECTION,
+                data=new_object.to_database()
+            )
+        except CMDBError as e:
+            raise ExportdJobManagerInsertError(e)
+        return ack
+
+    def update_job(self, data: (dict, ExportdJob)) -> str:
+        """
+        Update new ExportdJob Object
+        Args:
+            data: init data
+
+        Returns:
+            Public ID of the ExportdJob in database
+        """
+        if isinstance(data, dict):
+            update_object = ExportdJob(**data)
+        elif isinstance(data, ExportdJob):
+            update_object = data
+        else:
+            raise ExportdJobManagerUpdateError(f'Could not update job with ID: {data.get_public_id()}')
+        update_object.last_execute_date = datetime.utcnow()
+        ack = self.dbm.update(
+            collection=ExportdJob.COLLECTION,
+            public_id=update_object.get_public_id(),
+            data=update_object.to_database()
+        )
+        return ack.acknowledged
 
     def delete_job(self, public_id: int) -> bool:
         try:
             return self._delete(collection=ExportdJob.COLLECTION, public_id=public_id)
         except Exception:
             raise ExportdJobManagerDeleteError(f'Could not delete job with ID: {public_id}')
+
+    def run_job_manual(self, public_id: int) -> bool:
+        if self._event_queue:
+            event = Event("cmdb.exportd.run_manual", {"id": public_id})
+            self._event_queue.put(event)
+        return True
 
 
 class ExportdJobManagerGetError(ManagerGetError):
@@ -109,6 +158,7 @@ def get_exoportd_job_manager():
         )
     )
     return ExportdJobManagement(
+        event_queue=None,
         database_manager=dbm
     )
 

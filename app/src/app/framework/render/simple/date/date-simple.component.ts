@@ -30,16 +30,4 @@ export class DateSimpleComponent extends RenderField {
   constructor() {
     super();
   }
-
-  public getSimpleDate(obj) {
-    // ToDo: Recognize format by language
-    if ( obj === null || obj.day === undefined) {
-      return 'TT.MM.JJJJ';
-    }
-    const format = 'dd/MM/yyyy';
-    const myDate = obj.year + '-' + obj.month + '-' + obj.day;
-    const locale = 'en-US';
-    const formattedDate = formatDate(myDate, format, locale);
-    return formattedDate;
-  }
 }

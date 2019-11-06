@@ -7,18 +7,19 @@
       <ng-container [ngSwitch]="true">
         <ng-container *ngSwitchCase="mode == MODES.View">
           <input type="text" name="{{data.name}}" placeholder="{{data?.placeholder}}" class="form-control"
-                 [formControlName]="data.name" [value]="getDateValue(data.value)"/>
+                 [formControlName]="data.name" [value]="data?.value | date:'dd/MM/yy - hh:mm:ss'"/>
           <div class="input-group-append">
-            <span class="input-group-text" (click)="copyDateToClipboard()">
+            <span class="input-group-text" (click)="copyToClipboard()">
               <fa-icon [icon]="['far', 'clipboard']"></fa-icon>
             </span>
           </div>
         </ng-container>
         <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
-          <input type="{{data.type}}" name="{{data.name}}"  placeholder="{{data?.placeholder}}"
+          <input type="{{data.type}}" name="{{data.name}}"
                  class="form-control"
                  [formControlName]="data.name"
                  ngbDatepicker #d="ngbDatepicker"
+                 (input)="onDateSelect($event.target.value, data.name)"
                  [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
                  'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"/>
           <div *ngIf="data?.helperText" class="input-group-append">

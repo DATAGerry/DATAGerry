@@ -16,6 +16,11 @@
 
 from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
 
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
+
 
 class ExportdJob(JobManagementBase):
     """
@@ -26,7 +31,7 @@ class ExportdJob(JobManagementBase):
         'name',
     ]
 
-    def __init__(self, name, active, sources, destination, variables, **kwargs):
+    def __init__(self, name, label, description, active, last_execute_date, sources, destination, variables, **kwargs):
         """
         Args:
             name: name of this job
@@ -37,11 +42,34 @@ class ExportdJob(JobManagementBase):
             **kwargs: optional params
         """
         self.name = name
+        self.label = label
+        self.description = description
         self.active = active
+        self.last_execute_date = last_execute_date
         self.sources = sources
         self.destination = destination
         self.variables = variables
         super(ExportdJob, self).__init__(**kwargs)
+
+    def get_public_id(self) -> int:
+        """
+        get the public id of current element
+
+        Note:
+            Since the dao object is not initializable
+            the child class object will inherit this function
+            SHOULD NOT BE OVERWRITTEN!
+
+        Returns:
+            int: public id
+
+        Raises:
+            NoPublicIDError: if `public_id` is zero or not set
+
+        """
+        if self.public_id == 0 or self.public_id is None:
+            raise NoPublicIDError()
+        return self.public_id
 
     def get_name(self) -> str:
         """
@@ -89,3 +117,12 @@ class ExportdJob(JobManagementBase):
         """
         return self.variables
 
+
+class NoPublicIDError(CMDBError):
+    """
+    Error if object has no public key and public key was'n removed over IGNORED_INIT_KEYS
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.message = 'The object has no general public id - look at the IGNORED_INIT_KEYS constant or the docs'
