@@ -127,13 +127,17 @@ def update_user(public_id: int):
 @user_blueprint.route('/<int:public_id>/', methods=['DELETE'])
 @user_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @login_required
-def delete_user(public_id: int):
+@insert_request_user
+def delete_user(public_id: int, request_user: User):
+    if public_id == request_user.get_public_id():
+        return abort(403, 'You cant delete yourself!')
     try:
         user_manager.get_user(public_id)
     except UserManagerGetError:
         return abort(404)
     try:
-        ack = user_manager.delete_user(public_id=public_id)
+        ack = None
+        pass#ack = user_manager.delete_user(public_id=public_id)
     except UserManagerDeleteError:
         return abort(400)
     return make_response(ack)
