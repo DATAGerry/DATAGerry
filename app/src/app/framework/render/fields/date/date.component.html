@@ -19,6 +19,7 @@
                  class="form-control"
                  [formControlName]="data.name"
                  ngbDatepicker #d="ngbDatepicker"
+                 (input)="onDateSelect($event.target.value, data.name)"
                  [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
                  'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"/>
           <div *ngIf="data?.helperText" class="input-group-append">
