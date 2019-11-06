@@ -21,6 +21,7 @@ import logging
 
 from cmdb.framework.cmdb_log_manager import CmdbLogManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.utils import SecurityManager
 
 try:
