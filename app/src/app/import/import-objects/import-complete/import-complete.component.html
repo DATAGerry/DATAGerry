@@ -1,0 +1,80 @@
+<hr/>
+<table class="table table-borderless">
+  <tbody>
+  <tr class="table-primary">
+    <th scope="row" colspan="2">File</th>
+  </tr>
+  <tr>
+    <th scope="row">Import Format</th>
+    <td>{{importFile.fileFormat}}</td>
+  </tr>
+  <tr>
+    <th scope="row">Import File</th>
+    <td>{{importFile.fileName}}</td>
+  </tr>
+  <tr class="table-primary">
+    <th scope="row" colspan="2">Summary</th>
+  </tr>
+  <tr>
+    <th scope="row">Possible number of objects</th>
+    <td>{{parsedData.count}}</td>
+  </tr>
+  <tr>
+    <th scope="row">Number of objects which will be imported</th>
+    <td>{{(parsedData.count - importerConfig.start_element) - importerConfig.max_elements}}</td>
+  </tr>
+  </tbody>
+</table>
+<div *ngIf="!importResponse">
+  <hr/>
+  <button class="btn btn-success next" type="button" (click)="onStartImport()">
+    Start import <i class="fas fa-save"></i>
+  </button>
+  <div class="clearfix"></div>
+</div>
+<hr/>
+<div *ngIf="importResponse" id="import-response" class="row">
+  <div class="col-md-6">
+    <h3>Successful Imports</h3>
+    <table class="table">
+      <thead class="thead-light">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Public ID</th>
+        <th scope="col">Object</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let successObject of importResponse.success_imports; let i = index">
+        <th scope="row">{{i}}</th>
+        <td>{{successObject?.public_id}}</td>
+        <td>{{successObject?.obj | json}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-6">
+    <h3>Failed Imports</h3>
+    <table class="table">
+      <thead class="thead-light">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Error message</th>
+        <th scope="col">Object</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let failedObject of importResponse.failed_imports; let i = index">
+        <th scope="row">{{i}}</th>
+        <td>{{failedObject?.error_message}}</td>
+        <td>{{failedObject?.obj | json}}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<div *ngIf="importResponse">
+  <hr/>
+  <button class="btn btn-primary next" type="button" (click)="onListRedirect()"> Go to list</button>
+  <div class="clearfix"></div>
+</div>

@@ -23,6 +23,7 @@ from werkzeug.utils import secure_filename
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.importer import load_parser_class, load_importer_class, __OBJECT_IMPORTER__, __OBJECT_PARSER__, \
     __OBJECT_IMPORTER_CONFIG__, load_importer_config_class
+from cmdb.importer.importer_config import ObjectImporterConfig
 from cmdb.importer.importer_response import ImporterObjectResponse
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.interface.rest_api.import_routes import importer_blueprint
@@ -51,11 +52,14 @@ def get_importer():
     return make_response(importer)
 
 
-@importer_object_blueprint.route('/importer/config/', methods=['GET'])
-@importer_object_blueprint.route('/importer/config', methods=['GET'])
-def get_importer_config():
-    config = [config for config in __OBJECT_IMPORTER_CONFIG__]
-    return make_response(config)
+@importer_object_blueprint.route('/importer/config/<string:importer_type>/', methods=['GET'])
+@importer_object_blueprint.route('/importer/config<string:importer_type>', methods=['GET'])
+def get_default_importer_config(importer_type):
+    try:
+        importer: ObjectImporterConfig = __OBJECT_IMPORTER_CONFIG__[importer_type]
+    except IndexError:
+        return abort(404)
+    return make_response({'manually_mapping': importer.MANUALLY_MAPPING})
 
 
 @importer_object_blueprint.route('/parser/', methods=['GET'])
@@ -65,15 +69,15 @@ def get_parser():
     return make_response(parser)
 
 
-# @importer_object_blueprint.route('/default', defaults={'importer_type': 'json'}, methods=['GET'])
-# @importer_object_blueprint.route('/default/', defaults={'importer_type': 'json'}, methods=['GET'])
+# @importer_object_blueprint.route('/parser/default', defaults={'importer_type': 'json'}, methods=['GET'])
+# @importer_object_blueprint.route('/parser/default/', defaults={'importer_type': 'json'}, methods=['GET'])
 @importer_object_blueprint.route('/parser/default/<string:parser_type>', methods=['GET'])
 @importer_object_blueprint.route('/parser/default/<string:parser_type>/', methods=['GET'])
 def get_default_parser_config(parser_type: str):
     try:
         parser: BaseObjectParser = __OBJECT_PARSER__[parser_type]
     except IndexError:
-        return abort(400)
+        return abort(404)
     return make_response(parser.DEFAULT_CONFIG)
 
 
@@ -82,7 +86,6 @@ def get_default_parser_config(parser_type: str):
 def parse_objects():
     # Check if file exists
     request_file: FileStorage = get_file_in_request('file', request.files)
-
     # Load parser config
     parser_config: dict = get_element_from_data_request('parser_config', request) or {}
     LOGGER.debug(f'Parser config: {parser_config}')
@@ -112,8 +115,10 @@ def import_objects(request_user: User):
 
     # Check if type exists
     try:
+        LOGGER.debug(importer_config_request)
         object_manager.get_type(public_id=importer_config_request.get('type_id'))
     except CMDBError:
+        LOGGER.debug("test")
         return abort(404)
 
     # Load parser
@@ -130,4 +135,4 @@ def import_objects(request_user: User):
 
     import_response: ImporterObjectResponse = importer.start_import()
 
-    return make_response(import_response.__dict__)
+    return make_response(import_response)

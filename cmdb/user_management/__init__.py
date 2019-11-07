@@ -31,8 +31,8 @@ __COLLECTIONS__ = [
 ]
 
 __FIXED_GROUPS__ = [
-    UserGroup(public_id=1, name='admin', label='Administrator', rights=[], deletable=False),
-    UserGroup(public_id=2, name='user', label='User', rights=[], deletable=False)
+    UserGroup(public_id=1, name='admin', label='Administrator', rights=['base.*'], deletable=False),
+    UserGroup(public_id=2, name='user', label='User', rights=['base.framework.*'], deletable=False)
 ]
 
 __AUTH_PROVIDERS__ = [

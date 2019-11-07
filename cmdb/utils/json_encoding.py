@@ -19,6 +19,7 @@ import datetime
 import re
 
 from cmdb.framework.cmdb_render import RenderVisualization
+from cmdb.importer.importer_response import ImportMessage, BaseImporterResponse
 
 try:
     import uuid
@@ -51,6 +52,10 @@ def default(obj):
     if isinstance(obj, BaseRight):
         return obj.__dict__
     if isinstance(obj, RenderVisualization):
+        return obj.__dict__
+    if isinstance(obj, BaseImporterResponse):
+        return obj.__dict__
+    if isinstance(obj, ImportMessage):
         return obj.__dict__
     if isinstance(obj, bytes):
         return obj.decode("utf-8")

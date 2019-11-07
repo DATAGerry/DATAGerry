@@ -296,21 +296,18 @@ def insert_object(request_user):
     except TypeError as e:
         LOGGER.warning(e)
         abort(400)
+
     try:
-        object_instance = CmdbObject(**new_object_data)
-    except CMDBError as e:
-        LOGGER.debug(e)
-        return abort(400)
-    try:
-        new_object_id = object_manager.insert_object(object_instance)
+        new_object_id = object_manager.insert_object(new_object_data)
     except ObjectInsertError as oie:
         LOGGER.error(oie)
         return abort(500)
 
     # get current object state
     try:
-        current_type_instance = object_manager.get_type(object_instance.get_type_id())
-        current_object_render_result = CmdbRender(object_instance=object_instance,
+        current_type_instance = object_manager.get_type(new_object_data['type_id'])
+        current_object = object_manager.get_object(new_object_id)
+        current_object_render_result = CmdbRender(object_instance=current_object,
                                                   type_instance=current_type_instance,
                                                   render_user=request_user).result()
     except ObjectManagerGetError as err:
@@ -328,7 +325,7 @@ def insert_object(request_user):
             'user_name': request_user.get_name(),
             'comment': 'Object was created',
             'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
-            'version': object_instance.version
+            'version': current_object.version
         }
         log_ack = log_manager.insert_log(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
     except LogManagerInsertError as err:

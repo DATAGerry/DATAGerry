@@ -55,6 +55,7 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
   @ViewChild('mappingContainer', { read: ViewContainerRef, static: false }) mappingContainer;
   @Output() public typeChange: EventEmitter<any>;
   @Input() public fileFormat;
+  @Input() public manuallyMapping: boolean = true;
 
   private readonly defaultMappingValues = [
     {

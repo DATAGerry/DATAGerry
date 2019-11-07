@@ -159,7 +159,8 @@ class CmdbObjectManager(CmdbManagerBase):
             try:
                 new_object = CmdbObject(**data)
             except CMDBError as e:
-                raise ObjectInsertError(e)
+                LOGGER.debug(f'Error while inserting object - error: {e.message}')
+                raise ObjectManagerInsertError(e)
         elif isinstance(data, CmdbObject):
             new_object = data
         try:
@@ -191,7 +192,7 @@ class CmdbObjectManager(CmdbManagerBase):
         elif isinstance(data, CmdbObject):
             update_object = data
         else:
-            raise UpdateError(CmdbObject.__class__, data, 'Wrong CmdbObject init format - expecting CmdbObject or dict')
+            raise ObjectManagerUpdateError('Wrong CmdbObject init format - expecting CmdbObject or dict')
         update_object.last_edit_time = datetime.utcnow()
         ack = self.dbm.update(
             collection=CmdbObject.COLLECTION,

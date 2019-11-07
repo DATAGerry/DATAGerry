@@ -82,6 +82,9 @@ IMPORT_RIGHTS = (
 )
 
 __all__ = (
+    BaseRight(
+        BaseRight.NOTSET, GLOBAL_IDENTIFIER, description='Base application right'
+    ),
     SYSTEM_RIGHTS,
     FRAMEWORK_RIGHTS,
     EXPORT_RIGHTS
