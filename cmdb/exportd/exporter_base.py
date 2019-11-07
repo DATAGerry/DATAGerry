@@ -30,7 +30,6 @@ class ExportJob(ExportdJobManagement):
     def __init__(self, job: ExportdJob):
         self.job = job
         self.exportvars = self.__get_exportvars()
-        self.sources = self.__get_sources()
         self.destinations = self.__get__destinations()
         scr = SystemConfigReader()
         database_manager = DatabaseManagerMongo(
@@ -41,6 +40,7 @@ class ExportJob(ExportdJobManagement):
         self.__object_manager = CmdbObjectManager(
             database_manager=database_manager
         )
+        self.sources = self.__get_sources()
         super(ExportJob, self).__init__(database_manager)
 
     def __get_exportvars(self):
@@ -123,8 +123,8 @@ class ExportSource:
 
     def __init__(self, job: ExportdJob, object_manager: CmdbObjectManager = None):
         self.__job = job
+        self.__obm = object_manager
         self.__objects = self.__fetch_objects()
-        self.__object_manager = object_manager
 
     def get_objects(self):
         return self.__objects
@@ -139,7 +139,7 @@ class ExportSource:
                     operator = con["value"]
                 condition.append({"$and": [{"fields.name": con["name"]}, {"fields.value": operator}]})
         query = {"$or": condition}
-        result = self.__object_manager.get_objects_by(sort="public_id", **query)
+        result = self.__obm.get_objects_by(sort="public_id", **query)
 
         return result
 

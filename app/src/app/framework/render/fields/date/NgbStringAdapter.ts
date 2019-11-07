@@ -7,6 +7,24 @@ export class NgbStringAdapter extends NgbDateAdapter<Date> {
   }
 
   fromModel(date: any): NgbDateStruct {
+
+    if (date instanceof Date) {
+      return date ? {
+        year: date.getFullYear(),
+        month: date.getMonth() + 1,
+        day: date.getDate()
+      } : null;
+    }
+
+    if (Number(date)) {
+      const newDate =  new Date(date);
+      return newDate ? {
+        year: newDate.getFullYear(),
+        month: newDate.getMonth() + 1,
+        day: newDate.getDate()
+      } : null;
+    }
+
     if (date && date.item) {
       const newDate =  new Date(date.item);
       return newDate ? {
@@ -24,20 +42,11 @@ export class NgbStringAdapter extends NgbDateAdapter<Date> {
         day: newDate.getDate()
       } : null;
     }
-
-    if (date instanceof Date) {
-      return date ? {
-        year: date.getFullYear(),
-        month: date.getMonth() + 1,
-        day: date.getDate()
-      } : null;
-    }
-
     return null;
   }
 
-  toModel(date: NgbDateStruct): Date {
-    return date ? new Date(Date.UTC(date.year, date.month - 1, date.day, 0, 0, 0)) : null;
+  toModel(date: NgbDateStruct): any {
+    return date ? new Date(date.year, date.month - 1, date.day).toUTCString() : null;
 
   }
 }
