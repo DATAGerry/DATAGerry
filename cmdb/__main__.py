@@ -184,7 +184,7 @@ def main(args):
             LOGGER.warning(f'The setup did not go through as expected - Status {setup_status}')
 
         if setup_status == SetupRoutine.SetupStatus.FINISHED:
-            exit(0)
+            pass
         else:
             exit(1)
 
@@ -215,7 +215,7 @@ def main(args):
             LOGGER.warning(f'The setup did not go through as expected - Status {setup_status}')
 
         if setup_status == SetupRoutine.SetupStatus.FINISHED:
-            exit(0)
+            pass
         else:
             exit(1)
 
