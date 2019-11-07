@@ -53,9 +53,5 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
         scr = SystemConfigReader()
         database_options = scr.get_all_values_from_section('Database')
         obj = exportd_job_manager.get_job(event.get_param("id"))
-        job = cmdb.exportd.exporter_base.ExportJob(obj, database_manager=DatabaseManagerMongo(
-            connector=MongoConnector(
-                **database_options
-            )
-        ))
+        job = cmdb.exportd.exporter_base.ExportJob(obj)
         job.execute()

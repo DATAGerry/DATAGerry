@@ -16,21 +16,28 @@
 
 import jinja2
 
-from cmdb.data_storage import DatabaseManagerMongo
+from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import load_class
+from cmdb.utils.system_reader import SystemConfigReader
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
 
 class ExportJob(ExportdJobManagement):
 
-    def __init__(self, job: ExportdJob, database_manager: DatabaseManagerMongo):
+    def __init__(self, job: ExportdJob):
         self.job = job
         self.exportvars = self.__get_exportvars()
         self.sources = self.__get_sources()
         self.destinations = self.__get__destinations()
+        scr = SystemConfigReader()
+        database_manager = DatabaseManagerMongo(
+            connector=MongoConnector(
+                **scr.get_all_values_from_section('Database')
+            )
+        )
         self.__object_manager = CmdbObjectManager(
             database_manager=database_manager
         )
@@ -39,7 +46,8 @@ class ExportJob(ExportdJobManagement):
     def __get_exportvars(self):
         exportvars = {}
         for variable in self.job.get_variables():
-            exportvars.update({variable["name"]: ExportVariable(variable["name"], variable["default"], variable["type_template"])})
+            exportvars.update(
+                {variable["name"]: ExportVariable(variable["name"], variable["default"], variable["type_template"])})
         return exportvars
 
     def __get_sources(self):
@@ -113,7 +121,7 @@ class ExportVariable:
 
 class ExportSource:
 
-    def __init__(self, job: ExportdJob, object_manager: CmdbObjectManager=None):
+    def __init__(self, job: ExportdJob, object_manager: CmdbObjectManager = None):
         self.__job = job
         self.__objects = self.__fetch_objects()
         self.__object_manager = object_manager
@@ -149,7 +157,6 @@ class ExportDestination:
 
 
 class ExternalSystem:
-
     parameters = []
 
     def __init__(self, destination_parms, export_vars):
