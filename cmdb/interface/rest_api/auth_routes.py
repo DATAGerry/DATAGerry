@@ -21,7 +21,8 @@ from flask import request, abort
 
 from cmdb.interface.route_utils import make_response, RootBlueprint
 from cmdb.security.token.generator import TokenGenerator
-from cmdb.user_management.user_manager import user_manager
+from cmdb.user_management.user_authentication import WrongUserPasswordError
+from cmdb.user_management.user_manager import user_manager, UserManagerGetError
 
 try:
     from cmdb.utils.error import CMDBError
@@ -41,7 +42,7 @@ def get_auth_providers():
 
 
 @auth_blueprint.route('/login', methods=['POST'])
-def login_call():
+def post_login():
     login_data = request.json
     login_user = None
     login_user_name = login_data['user_name']
@@ -54,8 +55,10 @@ def login_call():
             user=login_user,
             password=login_password
         )
-    except CMDBError as e:
-        abort(401, e)
+    except UserManagerGetError as e:
+        return abort(404, e.message)
+    except WrongUserPasswordError as e:
+        return abort(401, e.message)
     if correct:
         login_user.last_login_time = datetime.utcnow()
         user_manager.update_user(login_user.public_id, login_user.to_database())

@@ -19,7 +19,7 @@
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { AuthService } from './services/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 
 @Component({
@@ -33,7 +33,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   public submitted = false;
 
   constructor(
-    private formBuilder: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
     private authenticationService: AuthService,
@@ -43,9 +42,9 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.render.addClass(document.body, 'embedded');
-    this.loginForm = this.formBuilder.group({
-      username: ['', Validators.required],
-      password: ['', Validators.required]
+    this.loginForm = new FormGroup({
+      username: new FormControl('', [Validators.required]),
+      password: new FormControl('', [Validators.required])
     });
   }
 
