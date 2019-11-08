@@ -67,6 +67,12 @@ def create_app(event_queue):
         from flask import send_from_directory
         return send_from_directory(path.join(app.root_path, '_static'), 'favicon.ico')
 
+    @app.route('/browserconfig.xml')
+    def browser_config():
+        from os import path
+        from flask import send_from_directory
+        return send_from_directory(path.join(app.root_path, '_static'), 'browserconfig.xml')
+
     return app
 
 
