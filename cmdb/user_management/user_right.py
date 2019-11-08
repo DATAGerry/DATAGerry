@@ -19,7 +19,7 @@ from cmdb.utils.error import CMDBError
 
 LOGGER = logging.getLogger(__name__)
 
-GLOBAL_IDENTIFIER = '*'
+GLOBAL_RIGHT_IDENTIFIER = '*'
 
 
 class BaseRight:
@@ -60,7 +60,7 @@ class BaseRight:
         self.name = '{}.{}'.format(self.PREFIX, name)
         self.label = label or f'{self.get_prefix()}.{self.name.split(".")[-1]}'
         self.description = description or "No description"
-        if name == GLOBAL_IDENTIFIER:
+        if name == GLOBAL_RIGHT_IDENTIFIER:
             self._MASTER = True
 
     def __new__(cls, *args, **kwargs):

@@ -15,14 +15,14 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from cmdb.user_management.rights.import_rights import ImportRight, ImportObjectRight, ImportTypeRight
-from cmdb.user_management.user_right import GLOBAL_IDENTIFIER, BaseRight
+from cmdb.user_management.user_right import GLOBAL_RIGHT_IDENTIFIER, BaseRight
 from cmdb.user_management.rights.system_rights import SystemRight
 from cmdb.user_management.rights.user_management_rights import UserManagementRight, UserRight, GroupRight
 from cmdb.user_management.rights.framework_rights import FrameworkRight, ObjectRight, TypeRight, CategoryRight, LogRight
 from cmdb.user_management.rights.export_rights import ExportRight, ExportObjectRight, ExportTypeRight
 
 SYSTEM_RIGHTS = (
-    SystemRight(GLOBAL_IDENTIFIER, description='System and settings'),
+    SystemRight(GLOBAL_RIGHT_IDENTIFIER, description='System and settings'),
     (
         SystemRight('view', description='View system configurations and settings'),
         SystemRight('reload', description='Reload system configurations')
@@ -30,10 +30,10 @@ SYSTEM_RIGHTS = (
 )
 
 FRAMEWORK_RIGHTS = (
-    FrameworkRight(GLOBAL_IDENTIFIER, description='Manage the core framework'),
+    FrameworkRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage the core framework'),
 
     (
-        ObjectRight(GLOBAL_IDENTIFIER, description='Manage objects from framework'),
+        ObjectRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage objects from framework'),
         (
             ObjectRight('view', description='View objects'),
             ObjectRight('add', description='Add objects'),
@@ -43,7 +43,7 @@ FRAMEWORK_RIGHTS = (
         )
     ),
     (
-        TypeRight(GLOBAL_IDENTIFIER, description='Manage types from framework'),
+        TypeRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage types from framework'),
         (
             TypeRight('view', BaseRight.PROTECTED, description='View types'),
             TypeRight('add', BaseRight.PROTECTED, description='Add types'),
@@ -53,7 +53,7 @@ FRAMEWORK_RIGHTS = (
         )
     ),
     (
-        CategoryRight(GLOBAL_IDENTIFIER, description='Manage categories from framework'),
+        CategoryRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage categories from framework'),
         (
             CategoryRight('view', description='View category'),
             CategoryRight('add', description='Add category'),
@@ -62,7 +62,7 @@ FRAMEWORK_RIGHTS = (
         )
     ),
     (
-        LogRight(GLOBAL_IDENTIFIER, description='Manage framework logs'),
+        LogRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage framework logs'),
         (
             LogRight('view', description='View logs'),
             LogRight('reload', BaseRight.SECURE, description='Reload logs'),
@@ -72,36 +72,36 @@ FRAMEWORK_RIGHTS = (
 )
 
 EXPORT_RIGHTS = (
-    ExportRight(GLOBAL_IDENTIFIER, description='Manage exports'),
+    ExportRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage exports'),
     (
-        ExportObjectRight(GLOBAL_IDENTIFIER, description='Manage object exports')
+        ExportObjectRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage object exports')
     ),
     (
-        ExportTypeRight(GLOBAL_IDENTIFIER, description='Manage type exports')
+        ExportTypeRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage type exports')
     )
 )
 
 IMPORT_RIGHTS = (
-    ImportRight(GLOBAL_IDENTIFIER, description='Manage imports'),
+    ImportRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage imports'),
     (
-        ImportObjectRight(GLOBAL_IDENTIFIER, description='Manage object imports')
+        ImportObjectRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage object imports')
     ),
     (
-        ImportTypeRight(GLOBAL_IDENTIFIER, description='Manage type imports')
+        ImportTypeRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage type imports')
     )
 )
 
 USER_MANAGEMENT_RIGHTS = (
-    UserManagementRight(GLOBAL_IDENTIFIER, description='User management'),
+    UserManagementRight(GLOBAL_RIGHT_IDENTIFIER, description='User management'),
     (
-        UserRight(GLOBAL_IDENTIFIER, description='Manage users'),
+        UserRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage users'),
         (
             UserRight('view', description='View user'),
             UserRight('add', description='Add user'),
             UserRight('edit', BaseRight.SECURE, description='Edit user'),
             UserRight('delete', BaseRight.SECURE, description='Delete user')
         ),
-        GroupRight(GLOBAL_IDENTIFIER, description='Manage groups'),
+        GroupRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage groups'),
         (
             GroupRight('view', description='View group'),
             GroupRight('add', BaseRight.DANGER, description='Add group'),
@@ -113,7 +113,7 @@ USER_MANAGEMENT_RIGHTS = (
 
 __all__ = (
     BaseRight(
-        BaseRight.NOTSET, GLOBAL_IDENTIFIER, description='Base application right'
+        BaseRight.NOTSET, GLOBAL_RIGHT_IDENTIFIER, description='Base application right'
     ),
     SYSTEM_RIGHTS,
     FRAMEWORK_RIGHTS,

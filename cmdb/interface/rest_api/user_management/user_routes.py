@@ -41,6 +41,7 @@ with current_app.app_context():
 @user_blueprint.route('/', methods=['GET'])
 @login_required
 @insert_request_user
+@right_required('base.user-management.user.view')
 def get_users(request_user: User):
     try:
         users = user_manager.get_all_users()
@@ -54,8 +55,7 @@ def get_users(request_user: User):
 @user_blueprint.route('/<int:public_id>/', methods=['GET'])
 @user_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
-@insert_request_user
-def get_user(public_id, request_user: User):
+def get_user(public_id):
     try:
         user = user_manager.get_user(public_id=public_id)
     except UserManagerGetError:
@@ -65,14 +65,23 @@ def get_user(public_id, request_user: User):
 
 @user_blueprint.route('/<string:user_name>/', methods=['GET'])
 @user_blueprint.route('/<string:user_name>', methods=['GET'])
-@insert_request_user
-def get_user_by_name(user_name: str, request_user: User):
+@login_required
+def get_user_by_name(user_name: str):
     try:
         user = user_manager.get_user_by_name(user_name=user_name)
     except UserManagerGetError:
         return abort(404)
 
     return make_response(user)
+
+
+@user_blueprint.route('/group/<int:public_id>/', methods=['GET'])
+@user_blueprint.route('/group/<int:public_id>', methods=['GET'])
+def get_users_by_group(public_id: int):
+    user_list = user_manager.get_user_by(group_id=public_id)
+    if len(user_list) < 1:
+        return make_response(user_list, 204)
+    return make_response(user_list)
 
 
 @user_blueprint.route('/', methods=['POST'])
@@ -143,7 +152,6 @@ def delete_user(public_id: int, request_user: User):
 
 
 @user_blueprint.route('/count/', methods=['GET'])
-@login_required
 def count_users():
     try:
         count = user_manager.count_user()
@@ -153,10 +161,8 @@ def count_users():
 
 
 """SPEACIAL ROUTES"""
-
-
-@login_required
 @user_blueprint.route('/<int:public_id>/passwd', methods=['PUT'])
+@login_required
 def change_user_password(public_id: int):
     try:
         user_manager.get_user(public_id=public_id)
@@ -165,15 +171,3 @@ def change_user_password(public_id: int):
     password = security_manager.generate_hmac(request.json.get('password'))
     ack = user_manager.update_user(public_id, {'password': password}).acknowledged
     return make_response(ack)
-
-
-@user_blueprint.route('/group/<int:public_id>/', methods=['GET'])
-@user_blueprint.route('/group/<int:public_id>', methods=['GET'])
-@insert_request_user
-def get_user_by_group(public_id: int, request_user: User):
-    user_list = user_manager.get_user_by(group_id=public_id)
-
-    if len(user_list) < 1:
-        return make_response(user_list, 204)
-
-    return make_response(user_list)
