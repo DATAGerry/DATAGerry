@@ -17,13 +17,13 @@ from cmdb.user_management.rights import SystemRight
 from cmdb.user_management.user_right import BaseRight
 
 
-class UserManagementRight(SystemRight):
+class UserManagementRight(BaseRight):
     MIN_LEVEL = BaseRight.SECURE
     MAX_LEVEL = BaseRight.DANGER
-    PREFIX = '{}.{}'.format(SystemRight.PREFIX, 'user-management')
+    PREFIX = '{}.{}'.format(BaseRight.PREFIX, 'user-management')
 
     def __init__(self, name: str, level: int = MIN_LEVEL, description: str = None):
-        super(UserManagementRight, self).__init__(name, level, description=description)
+        super(UserManagementRight, self).__init__(level, name, description=description)
 
 
 class UserRight(UserManagementRight):
