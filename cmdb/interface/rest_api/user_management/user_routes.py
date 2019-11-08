@@ -136,8 +136,7 @@ def delete_user(public_id: int, request_user: User):
     except UserManagerGetError:
         return abort(404)
     try:
-        ack = None
-        pass#ack = user_manager.delete_user(public_id=public_id)
+        ack = user_manager.delete_user(public_id=public_id)
     except UserManagerDeleteError:
         return abort(400)
     return make_response(ack)
