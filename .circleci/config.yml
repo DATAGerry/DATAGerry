@@ -9,7 +9,7 @@ jobs:
       # setup docker environment (to allow building docker images)
       - setup_remote_docker
       # build datagerry
-      - run: make
+      - run: BUILDVAR_VERSION=$CIRCLE_BRANCH make -e
       # run tests (temp. disabled for redesign, see NET-71)
       #- run: make tests
       # copy datagerry to webserver
