@@ -79,6 +79,8 @@ bin: requirements buildvars docs webapp
 		--workpath ${DIR_TEMP} \
 		--hidden-import cmdb.exportd \
 		--hidden-import cmdb.exportd.service \
+		--hidden-import cmdb.exportd.externals \
+		--hidden-import cmdb.exportd.externals.external_systems \
 		--hidden-import cmdb.file_export \
 		--hidden-import cmdb.file_export.file_exporter \
 		--hidden-import cmdb.interface.gunicorn \
