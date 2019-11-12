@@ -16,6 +16,7 @@
 
 import json
 import logging
+from typing import List
 
 from bson import json_util
 from flask import abort, request, current_app
@@ -23,8 +24,9 @@ from datetime import datetime
 
 from cmdb.interface.route_utils import RootBlueprint, make_response, insert_request_user, login_required, right_required
 from cmdb.user_management import User
-from cmdb.user_management.user_manager import user_manager, UserManagerInsertError, UserManagerGetError, \
-    UserManagerUpdateError, UserManagerDeleteError
+from cmdb.user_management.user_manager import UserManagerInsertError, UserManagerGetError, \
+    UserManagerUpdateError, UserManagerDeleteError, UserManager
+from cmdb.utils import SecurityManager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -35,16 +37,17 @@ LOGGER = logging.getLogger(__name__)
 user_blueprint = RootBlueprint('user_rest', __name__, url_prefix='/user')
 
 with current_app.app_context():
-    security_manager = current_app.security_manager
+    user_manager: UserManager = current_app.user_manager
+    security_manager: SecurityManager = current_app.security_manager
 
 
 @user_blueprint.route('/', methods=['GET'])
 @login_required
 @insert_request_user
-@right_required('base.user-management.user.view')
+@right_required('base.user-management.user.*')
 def get_users(request_user: User):
     try:
-        users = user_manager.get_all_users()
+        users: List[User] = user_manager.get_all_users()
     except CMDBError:
         return abort(404)
     if len(users) < 1:
@@ -55,9 +58,11 @@ def get_users(request_user: User):
 @user_blueprint.route('/<int:public_id>/', methods=['GET'])
 @user_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
-def get_user(public_id):
+@insert_request_user
+@right_required('base.user-management.user.view')
+def get_user(public_id, request_user: User):
     try:
-        user = user_manager.get_user(public_id=public_id)
+        user: User = user_manager.get_user(public_id=public_id)
     except UserManagerGetError:
         return abort(404)
     return make_response(user)
@@ -66,9 +71,11 @@ def get_user(public_id):
 @user_blueprint.route('/<string:user_name>/', methods=['GET'])
 @user_blueprint.route('/<string:user_name>', methods=['GET'])
 @login_required
-def get_user_by_name(user_name: str):
+@insert_request_user
+@right_required('base.user-management.user.view')
+def get_user_by_name(user_name: str, request_user: User):
     try:
-        user = user_manager.get_user_by_name(user_name=user_name)
+        user: User = user_manager.get_user_by_name(user_name=user_name)
     except UserManagerGetError:
         return abort(404)
 
@@ -77,7 +84,9 @@ def get_user_by_name(user_name: str):
 
 @user_blueprint.route('/group/<int:public_id>/', methods=['GET'])
 @user_blueprint.route('/group/<int:public_id>', methods=['GET'])
-def get_users_by_group(public_id: int):
+@insert_request_user
+@right_required('base.user-management.user.view')
+def get_users_by_group(public_id: int, request_user: User):
     user_list = user_manager.get_user_by(group_id=public_id)
     if len(user_list) < 1:
         return make_response(user_list, 204)
@@ -86,7 +95,9 @@ def get_users_by_group(public_id: int):
 
 @user_blueprint.route('/', methods=['POST'])
 @login_required
-def add_user():
+@insert_request_user
+@right_required('base.user-management.user.add')
+def add_user(request_user: User):
     http_post_request_data = json.dumps(request.json)
     new_user_data = json.loads(http_post_request_data, object_hook=json_util.object_hook)
 
@@ -116,7 +127,9 @@ def add_user():
 @user_blueprint.route('/<int:public_id>/', methods=['PUT'])
 @user_blueprint.route('/<int:public_id>', methods=['PUT'])
 @login_required
-def update_user(public_id: int):
+@insert_request_user
+@right_required('base.user-management.user.edit')
+def update_user(public_id: int, request_user: User):
     http_put_request_data = json.dumps(request.json)
     user_data = json.loads(http_put_request_data)
 
@@ -137,6 +150,7 @@ def update_user(public_id: int):
 @user_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @login_required
 @insert_request_user
+@right_required('base.user-management.user.delete')
 def delete_user(public_id: int, request_user: User):
     if public_id == request_user.get_public_id():
         return abort(403, 'You cant delete yourself!')
@@ -151,7 +165,13 @@ def delete_user(public_id: int, request_user: User):
     return make_response(ack)
 
 
+"""COUNT ROUTES"""
+
+
 @user_blueprint.route('/count/', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.user-management.user.view')
 def count_users():
     try:
         count = user_manager.count_user()
@@ -161,13 +181,22 @@ def count_users():
 
 
 """SPEACIAL ROUTES"""
+
+
 @user_blueprint.route('/<int:public_id>/passwd', methods=['PUT'])
 @login_required
-def change_user_password(public_id: int):
+@insert_request_user
+@right_required('base.user-management.user.*')
+def change_user_password(public_id: int, request_user: User):
     try:
         user_manager.get_user(public_id=public_id)
-    except CMDBError:
-        return abort(404)
+    except UserManagerGetError as e:
+        LOGGER.error(f'User was not found: {e}')
+        return abort(404, f'User with Public ID: {public_id} not found!')
     password = security_manager.generate_hmac(request.json.get('password'))
-    ack = user_manager.update_user(public_id, {'password': password}).acknowledged
+    try:
+        ack = user_manager.update_user(public_id, {'password': password}).acknowledged
+    except UserManagerUpdateError as e:
+        LOGGER.error(f'Error while setting a new password for user: {e}')
+        return abort(500, 'Could not update user')
     return make_response(ack)

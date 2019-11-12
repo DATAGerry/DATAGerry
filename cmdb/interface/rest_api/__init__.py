@@ -22,6 +22,7 @@ import logging
 from cmdb.framework.cmdb_log_manager import CmdbLogManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
+from cmdb.user_management import UserManager
 from cmdb.utils import SecurityManager
 
 try:
@@ -71,6 +72,11 @@ def create_rest_api(event_queue):
         database_manager=app_database
     )
 
+    user_manager = UserManager(
+        database_manager=app_database,
+        security_manager=security_manager
+    )
+
     exportd_job_manager = ExportdJobManagement(
         database_manager=app_database,
         event_queue=event_queue
@@ -80,7 +86,8 @@ def create_rest_api(event_queue):
     from cmdb.interface.cmdb_app import BaseCmdbApp
 
     app = BaseCmdbApp(__name__, database_manager=app_database, exportd_manager=exportd_job_manager,
-                      object_manager=object_manager, log_manager=log_manager, security_manager=security_manager)
+                      object_manager=object_manager, log_manager=log_manager, user_manager=user_manager,
+                      security_manager=security_manager)
 
     # Import App Extensions
     from flask_cors import CORS

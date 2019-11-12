@@ -49,7 +49,8 @@ FRAMEWORK_RIGHTS = (
             TypeRight('add', BaseRight.PROTECTED, description='Add types'),
             TypeRight('edit', BaseRight.SECURE, description='Edit types'),
             TypeRight('delete', BaseRight.SECURE, description='Delete types'),
-            TypeRight('activation', BaseRight.SECURE, description='Activate/Deactivate Types')
+            TypeRight('activation', BaseRight.SECURE, description='Activate/Deactivate types'),
+            TypeRight('clean', BaseRight.SECURE, description='Clean type fields')
         )
     ),
     (

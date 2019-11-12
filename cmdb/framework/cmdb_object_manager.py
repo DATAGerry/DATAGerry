@@ -285,8 +285,8 @@ class CmdbObjectManager(CmdbManagerBase):
                 collection=CmdbType.COLLECTION,
                 public_id=public_id)
                             )
-        except (CMDBError, Exception):
-            raise TypeNotFoundError(type_id=public_id)
+        except (CMDBError, Exception) as e:
+            raise ObjectManagerGetError(err=e)
 
     def get_types_by(self, sort='public_id', **requirements):
         ack = []
@@ -423,7 +423,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
         return self._insert(collection=CmdbCategory.COLLECTION, data=new_category.to_database())
 
-    def update_category(self, data: (CmdbCategory, dict)):
+    def update_category(self, data: dict):
         if isinstance(data, CmdbCategory):
             update_category = data
         elif isinstance(data, dict):
@@ -579,10 +579,16 @@ class CmdbObjectManager(CmdbManagerBase):
 
     # Link CRUDS
 
+    def get_link(self, public_id: int):
+        try:
+            return CmdbLink(**self._get(collection=CmdbLink.COLLECTION, public_id=public_id))
+        except (CMDBError, Exception) as err:
+            raise ObjectManagerGetError(err)
+
     def get_links_by_partner(self, public_id: int):
         return NotImplementedError
 
-    def insert_link(self, data):
+    def insert_link(self, data: dict):
         try:
             new_link = CmdbLink(**data)
             ack = self.dbm.insert(CmdbLink.COLLECTION, new_link.to_database())

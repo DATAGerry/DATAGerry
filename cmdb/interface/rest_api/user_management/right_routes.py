@@ -14,6 +14,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""
+Query routes for rights system
+
+Warnings:
+    Since the rights system is fixed and not variable, protected routes are not necessary.
+"""
+
 import logging
 
 from cmdb.interface.route_utils import make_response, RootBlueprint, login_required

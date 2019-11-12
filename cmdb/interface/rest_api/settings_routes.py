@@ -28,4 +28,5 @@ settings_blueprint = RootBlueprint('settings_rest', __name__, url_prefix='/setti
 
 with current_app.app_context():
     from cmdb.interface.rest_api.settings.system_routes import system_blueprint
+
     settings_blueprint.register_nested_blueprint(system_blueprint)

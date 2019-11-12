@@ -21,7 +21,8 @@ import time
 from flask import current_app
 
 from cmdb.interface.rest_api.settings_routes import settings_blueprint
-from cmdb.interface.route_utils import NestedBlueprint, make_response
+from cmdb.interface.route_utils import NestedBlueprint, make_response, login_required, right_required, \
+    insert_request_user
 from cmdb.utils.system_reader import SystemConfigReader
 
 LOGGER = logging.getLogger(__name__)
@@ -34,6 +35,9 @@ system_blueprint = NestedBlueprint(settings_blueprint, url_prefix='/system')
 
 
 @system_blueprint.route('/', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.system.view')
 @current_app.cache.cached(timeout=50)
 def get_datagerry_information():
     from cmdb import __title__, __version__, __runtime__
@@ -48,6 +52,9 @@ def get_datagerry_information():
 
 @system_blueprint.route('/config/', methods=['GET'])
 @system_blueprint.route('/config', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.system.view')
 @current_app.cache.cached(timeout=1200)
 def get_config_information():
     ssc = SystemConfigReader()
@@ -70,6 +77,9 @@ def get_config_information():
 
 @system_blueprint.route('/config/', methods=['POST'])
 @system_blueprint.route('/config', methods=['POST'])
+@login_required
+@insert_request_user
+@right_required('base.system.reload')
 def reload_config_reader():
     ssc = SystemConfigReader()
     ssc.setup()
@@ -82,6 +92,9 @@ def reload_config_reader():
 
 @system_blueprint.route('/information/', methods=['GET'])
 @system_blueprint.route('/information', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.system.view')
 @current_app.cache.cached(timeout=50)
 def get_system_information():
     system_infos = {

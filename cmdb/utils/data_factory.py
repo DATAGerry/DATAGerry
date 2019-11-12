@@ -1234,12 +1234,12 @@ class DataFactory:
         if self._database_manager is None:
             raise NoDatabaseManagerError()
         from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-        from cmdb.user_management.user_manager import UserManagement
+        from cmdb.user_management.user_manager import UserManager
         from cmdb.utils.security import SecurityManager
 
         obm = CmdbObjectManager(database_manager=self._database_manager)
-        usm = UserManagement(database_manager=self._database_manager,
-                             security_manager=SecurityManager(self._database_manager))
+        usm = UserManager(database_manager=self._database_manager,
+                          security_manager=SecurityManager(self._database_manager))
 
         error = []
         for group_element in self.groups:

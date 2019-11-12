@@ -32,7 +32,7 @@ from cmdb.utils.system_reader import SystemConfigReader
 LOGGER = logging.getLogger(__name__)
 
 
-class UserManagement(CmdbManagerBase):
+class UserManager(CmdbManagerBase):
     MANAGEMENT_CLASSES = {
         'GROUP_CLASSES': UserGroup,
         'USER_CLASSES': User,
@@ -276,7 +276,7 @@ def get_user_manager():
             **system_config_reader.get_all_values_from_section('Database')
         )
     )
-    return UserManagement(
+    return UserManager(
         database_manager=database_manager,
         security_manager=get_security_manager(
             database_manager=database_manager

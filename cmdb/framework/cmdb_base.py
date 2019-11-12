@@ -39,7 +39,7 @@ class CmdbManagerBase:
         if database_manager:
             self.dbm: DatabaseManagerMongo = database_manager
 
-    def _get(self, collection: str, public_id: int) -> (dict, object):
+    def _get(self, collection: str, public_id: int) -> dict:
         """get document from the database by their public id
 
         Args:

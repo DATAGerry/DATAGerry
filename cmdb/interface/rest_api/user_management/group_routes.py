@@ -19,7 +19,8 @@ import json
 
 from bson import json_util
 
-from cmdb.interface.route_utils import make_response, RootBlueprint, abort, login_required, insert_request_user
+from cmdb.interface.route_utils import make_response, RootBlueprint, abort, login_required, insert_request_user, \
+    right_required
 from cmdb.user_management import User
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user_manager import user_manager, UserManagerInsertError, UserManagerGetError, \
@@ -38,7 +39,9 @@ group_blueprint = RootBlueprint('group_rest', __name__, url_prefix='/group')
 
 @group_blueprint.route('/', methods=['GET'])
 @login_required
-def get_all_groups():
+@insert_request_user
+@right_required('base.user-management.group.view')
+def get_all_groups(request_user: User):
     try:
         group_list = user_manager.get_all_groups()
     except UserManagerGetError as err:
@@ -52,7 +55,9 @@ def get_all_groups():
 @group_blueprint.route('/<int:public_id>/', methods=['GET'])
 @group_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
-def get_group(public_id: int):
+@insert_request_user
+@right_required('base.user-management.group.view')
+def get_group(public_id: int, request_user: User):
     try:
         group_instance = user_manager.get_group(public_id)
     except UserManagerGetError as err:
@@ -63,7 +68,9 @@ def get_group(public_id: int):
 
 @group_blueprint.route('/<string:group_name>/', methods=['GET'])
 @group_blueprint.route('/<string:group_name>', methods=['GET'])
+@login_required
 @insert_request_user
+@right_required('base.user-management.group.view')
 def get_group_by_name(group_name: str, request_user: User):
     try:
         group = user_manager.get_group_by(name=group_name)
@@ -74,7 +81,9 @@ def get_group_by_name(group_name: str, request_user: User):
 
 @group_blueprint.route('/', methods=['POST'])
 @login_required
-def add_group():
+@insert_request_user
+@right_required('base.user-management.group.add')
+def add_group(request_user: User):
     http_post_request_data = json.dumps(request.json)
     new_group_data = json.loads(http_post_request_data, object_hook=json_util.object_hook)
     new_group_data['public_id'] = user_manager.get_new_id(UserGroup.COLLECTION)
@@ -96,7 +105,9 @@ def add_group():
 @group_blueprint.route('/<int:public_id>/', methods=['PUT'])
 @group_blueprint.route('/<int:public_id>', methods=['PUT'])
 @login_required
-def edit_group(public_id: int):
+@insert_request_user
+@right_required('base.user-management.group.edit')
+def edit_group(public_id: int, request_user: User):
     updated_group_params = json.dumps(request.json)
     try:
         response = user_manager.update_group(public_id,
@@ -110,7 +121,9 @@ def edit_group(public_id: int):
 @group_blueprint.route('/<int:public_id>/', methods=['DELETE'])
 @group_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @login_required
-def delete_group(public_id: int):
+@insert_request_user
+@right_required('base.user-management.group.delete')
+def delete_group(public_id: int, request_user: User):
     action = request.args.get('action')
     options = None
     if request.args.get('options'):
