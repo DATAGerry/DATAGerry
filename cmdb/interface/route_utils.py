@@ -30,7 +30,6 @@ except ImportError:
 
 from flask import Blueprint, request, abort
 
-from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.security.token.validator import TokenValidator, ValidationError
 from cmdb.utils import json_encoding
 

@@ -20,7 +20,7 @@ import time
 
 from flask import current_app
 
-from cmdb.interface.rest_api.settings_routes import settings_blueprint
+from cmdb.interface.rest_api.setting_routes import settings_blueprint
 from cmdb.interface.route_utils import NestedBlueprint, make_response, login_required, right_required, \
     insert_request_user
 from cmdb.utils.system_reader import SystemConfigReader

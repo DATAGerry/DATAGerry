@@ -19,6 +19,7 @@ import logging
 from cmdb.user_management.user_base import UserManagementBase
 from cmdb.user_management.user_right import GLOBAL_RIGHT_IDENTIFIER
 from cmdb.utils.error import CMDBError
+from cmdb.utils.wraps import timing
 
 LOGGER = logging.getLogger(__name__)
 
@@ -62,6 +63,7 @@ class UserGroup(UserManagementBase):
             return False
         return True
 
+    @timing('Group right calculation')
     def has_extended_right(self, right_name: str) -> bool:
         parent_right_name: str = right_name.rsplit(".", 1)[0]
         if self.has_right(f'{parent_right_name}.{GLOBAL_RIGHT_IDENTIFIER}'):

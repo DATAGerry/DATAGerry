@@ -20,7 +20,7 @@ from flask import abort, request, current_app
 
 from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError
-from cmdb.interface.rest_api.object_routes import object_blueprint
+from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint
 from cmdb.interface.route_utils import make_response, NestedBlueprint
 
 with current_app.app_context():

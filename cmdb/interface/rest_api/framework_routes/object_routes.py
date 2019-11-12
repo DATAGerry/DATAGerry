@@ -43,7 +43,7 @@ except ImportError:
 LOGGER = logging.getLogger(__name__)
 object_blueprint = RootBlueprint('object_blueprint', __name__, url_prefix='/object')
 with current_app.app_context():
-    from cmdb.interface.rest_api.object_link_routes import link_rest
+    from cmdb.interface.rest_api.framework_routes.object_link_routes import link_rest
 
     object_blueprint.register_nested_blueprint(link_rest)
 

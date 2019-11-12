@@ -51,3 +51,27 @@ def json_required(f):
     return _json_required
 
 
+def timing(msg=None):
+    """
+    Time wrap function - Measures time of function duration
+    Args:
+        msg: output message
+
+    Returns:
+        wrap function
+    """
+
+    def _timing(f):
+        @wraps(f)
+        def wrap(*args, **kwargs):
+            import logging
+            import time
+            time1 = time.time()
+            ret = f(*args, **kwargs)
+            time2 = time.time()
+            logging.getLogger(__name__).debug(f'{msg} took {(time2 - time1) * 1000.0} MS')
+            return ret
+
+        return wrap
+
+    return _timing
