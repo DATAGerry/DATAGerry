@@ -20,6 +20,7 @@ from functools import wraps
 from authlib.jose.errors import ExpiredTokenError
 
 from cmdb.user_management import User
+from cmdb.user_management.user_manager import UserManagerGetError
 from cmdb.utils.wraps import LOGGER
 
 try:
@@ -65,7 +66,7 @@ class NestedBlueprint:
         return self.blueprint.route(rule, **options)
 
 
-def make_response(instance: (CmdbDAO, list, dict), status_code=200):
+def make_response(instance, status_code=200):
     """
     make json http response with indent settings and auto encoding
     Args:
@@ -135,7 +136,7 @@ def insert_request_user(func):
     return get_user
 
 
-def right_required(required_right: str, *args, **kwargs):
+def right_required(required_right: str):
     """wraps function for routes which requires a special user right
     requires: insert_request_user
     """
@@ -143,19 +144,19 @@ def right_required(required_right: str, *args, **kwargs):
     def _page_right(func):
         @functools.wraps(func)
         def _decorate(*args, **kwargs):
-            has_right: bool = False
             from cmdb.user_management.user_manager import user_manager
             try:
                 current_user: User = kwargs['request_user']
+            except KeyError:
+                return abort(400, 'No request user was provided')
+            try:
                 has_right = user_manager.group_has_right(current_user.get_group(), required_right)
-            except (Exception, CMDBError):
-                return abort(403)
+            except UserManagerGetError:
+                return abort(404, 'Group or right not exists')
             if not has_right:
-                return abort(403)
+                return abort(403, 'Request user does not have the right for this action')
             return func(*args, **kwargs)
-
         return _decorate
-
     return _page_right
 
 

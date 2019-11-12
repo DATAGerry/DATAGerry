@@ -172,7 +172,7 @@ def delete_user(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.user-management.user.view')
-def count_users():
+def count_users(request_user: User):
     try:
         count = user_manager.count_user()
     except CMDBError:
