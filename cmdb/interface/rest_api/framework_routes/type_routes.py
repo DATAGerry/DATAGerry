@@ -57,7 +57,7 @@ def get_type_list(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.type.view')
-def get_type(public_id: int):
+def get_type(public_id: int, request_user: User):
     try:
         type_instance = object_manager.get_type(public_id)
     except UserManagerGetError as err:
@@ -98,7 +98,7 @@ def add_type(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.type.edit')
-def update_type():
+def update_type(request_user: User):
     """TODO: Generate update log"""
     from bson import json_util
     add_data_dump = json.dumps(request.json)
