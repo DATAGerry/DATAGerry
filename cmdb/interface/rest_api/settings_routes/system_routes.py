@@ -23,6 +23,7 @@ from flask import current_app
 from cmdb.interface.rest_api.setting_routes import settings_blueprint
 from cmdb.interface.route_utils import NestedBlueprint, make_response, login_required, right_required, \
     insert_request_user
+from cmdb.user_management import User
 from cmdb.utils.system_reader import SystemConfigReader
 
 LOGGER = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ system_blueprint = NestedBlueprint(settings_blueprint, url_prefix='/system')
 @insert_request_user
 @right_required('base.system.view')
 @current_app.cache.cached(timeout=50)
-def get_datagerry_information():
+def get_datagerry_information(request_user: User):
     from cmdb import __title__, __version__, __runtime__
     datagerry_infos = {
         'title': __title__,
@@ -56,7 +57,7 @@ def get_datagerry_information():
 @insert_request_user
 @right_required('base.system.view')
 @current_app.cache.cached(timeout=1200)
-def get_config_information():
+def get_config_information(request_user: User):
     ssc = SystemConfigReader()
     config_dict = {
         'path': ssc.config_file,
@@ -80,7 +81,7 @@ def get_config_information():
 @login_required
 @insert_request_user
 @right_required('base.system.reload')
-def reload_config_reader():
+def reload_config_reader(request_user: User):
     ssc = SystemConfigReader()
     ssc.setup()
     LOGGER.warning('Reload config file!')
@@ -96,7 +97,7 @@ def reload_config_reader():
 @insert_request_user
 @right_required('base.system.view')
 @current_app.cache.cached(timeout=50)
-def get_system_information():
+def get_system_information(request_user: User):
     system_infos = {
         'platform': sys.platform,
         'python_interpreter': {
