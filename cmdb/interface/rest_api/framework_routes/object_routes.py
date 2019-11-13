@@ -28,7 +28,7 @@ from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, Obj
 from cmdb.framework.cmdb_log import LogAction, CmdbObjectLog
 from cmdb.framework.cmdb_log_manager import LogManagerInsertError
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
-from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user, login_required
+from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user, login_required, right_required
 from cmdb.user_management import User
 
 with current_app.app_context():
@@ -43,7 +43,7 @@ except ImportError:
 LOGGER = logging.getLogger(__name__)
 object_blueprint = RootBlueprint('object_blueprint', __name__, url_prefix='/object')
 with current_app.app_context():
-    from cmdb.interface.rest_api.object_link_routes import link_rest
+    from cmdb.interface.rest_api.framework_routes.object_link_routes import link_rest
 
     object_blueprint.register_nested_blueprint(link_rest)
 
@@ -53,6 +53,7 @@ with current_app.app_context():
 @object_blueprint.route('/', methods=['GET'])
 @login_required
 @insert_request_user
+@right_required('base.framework.object.view')
 def get_object_list(request_user: User):
     """
     get all objects in database
@@ -76,7 +77,9 @@ def get_object_list(request_user: User):
 
 @object_blueprint.route('/native', methods=['GET'])
 @login_required
-def get_native_object_list():
+@insert_request_user
+@right_required('base.framework.object.view')
+def get_native_object_list(request_user: User):
     try:
         object_list = object_manager.get_all_objects()
     except CMDBError:
@@ -88,6 +91,7 @@ def get_native_object_list():
 @object_blueprint.route('/type/<int:public_id>', methods=['GET'])
 @login_required
 @insert_request_user
+@right_required('base.framework.object.view')
 def get_objects_by_type(public_id, request_user: User):
     """Return all objects by type_id"""
     try:
@@ -105,6 +109,8 @@ def get_objects_by_type(public_id, request_user: User):
 
 @object_blueprint.route('/type/<string:type_ids>', methods=['GET'])
 @login_required
+@insert_request_user
+@right_required('base.framework.object.view')
 def get_objects_by_types(type_ids):
     """Return all objects by type_id
     TODO: Refactore to render results"""
@@ -121,6 +127,8 @@ def get_objects_by_types(type_ids):
 
 @object_blueprint.route('/many/<string:public_ids>', methods=['GET'])
 @login_required
+@insert_request_user
+@right_required('base.framework.object.view')
 def get_objects_by_public_id(public_ids):
     """Return all objects by public_ids
     TODO: Refactore to render results"""
@@ -162,6 +170,7 @@ def count_objects():
 @object_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
 @insert_request_user
+@right_required('base.framework.object.view')
 def get_object(public_id, request_user: User):
     try:
         object_instance = object_manager.get_object(public_id)
@@ -188,7 +197,9 @@ def get_object(public_id, request_user: User):
 
 @object_blueprint.route('<int:public_id>/native/', methods=['GET'])
 @login_required
-def get_native_object(public_id: int):
+@insert_request_user
+@right_required('base.framework.object.view')
+def get_native_object(public_id: int, request_user: User):
     try:
         object_instance = object_manager.get_object(public_id)
     except CMDBError:
@@ -214,7 +225,9 @@ def get_objects_by_reference(public_id: int, request_user: User):
 
 @object_blueprint.route('/user/<int:public_id>/', methods=['GET'])
 @object_blueprint.route('/user/<int:public_id>', methods=['GET'])
+@login_required
 @insert_request_user
+@right_required('base.framework.object.view')
 def get_objects_by_user(public_id: int, request_user: User):
     try:
         object_list = object_manager.get_objects_by(sort="type_id", author_id=public_id)
@@ -231,7 +244,9 @@ def get_objects_by_user(public_id: int, request_user: User):
 
 @object_blueprint.route('/user/new/<int:timestamp>/', methods=['GET'])
 @object_blueprint.route('/user/new/<int:timestamp>', methods=['GET'])
+@login_required
 @insert_request_user
+@right_required('base.framework.object.view')
 def get_new_objects_since(timestamp: int, request_user: User):
     request_date = datetime.fromtimestamp(timestamp, pytz.utc)
     query = {
@@ -254,7 +269,9 @@ def get_new_objects_since(timestamp: int, request_user: User):
 
 @object_blueprint.route('/user/changed/<int:timestamp>/', methods=['GET'])
 @object_blueprint.route('/user/changed/<int:timestamp>', methods=['GET'])
+@login_required
 @insert_request_user
+@right_required('base.framework.object.view')
 def get_changed_objects_since(timestamp: int, request_user: User):
     request_date = datetime.fromtimestamp(timestamp, pytz.utc)
     query = {
@@ -281,7 +298,8 @@ def get_changed_objects_since(timestamp: int, request_user: User):
 @object_blueprint.route('/', methods=['POST'])
 @login_required
 @insert_request_user
-def insert_object(request_user):
+@right_required('base.framework.object.add')
+def insert_object(request_user: User):
     from bson import json_util
     from datetime import datetime
     add_data_dump = json.dumps(request.json)
@@ -296,21 +314,18 @@ def insert_object(request_user):
     except TypeError as e:
         LOGGER.warning(e)
         abort(400)
+
     try:
-        object_instance = CmdbObject(**new_object_data)
-    except CMDBError as e:
-        LOGGER.debug(e)
-        return abort(400)
-    try:
-        new_object_id = object_manager.insert_object(object_instance)
+        new_object_id = object_manager.insert_object(new_object_data)
     except ObjectInsertError as oie:
         LOGGER.error(oie)
         return abort(500)
 
     # get current object state
     try:
-        current_type_instance = object_manager.get_type(object_instance.get_type_id())
-        current_object_render_result = CmdbRender(object_instance=object_instance,
+        current_type_instance = object_manager.get_type(new_object_data['type_id'])
+        current_object = object_manager.get_object(new_object_id)
+        current_object_render_result = CmdbRender(object_instance=current_object,
                                                   type_instance=current_type_instance,
                                                   render_user=request_user).result()
     except ObjectManagerGetError as err:
@@ -328,7 +343,7 @@ def insert_object(request_user):
             'user_name': request_user.get_name(),
             'comment': 'Object was created',
             'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
-            'version': object_instance.version
+            'version': current_object.version
         }
         log_ack = log_manager.insert_log(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
     except LogManagerInsertError as err:
@@ -342,6 +357,7 @@ def insert_object(request_user):
 @object_blueprint.route('/<int:public_id>', methods=['PUT'])
 @login_required
 @insert_request_user
+@right_required('base.framework.object.edit')
 def update_object(public_id: int, request_user: User):
     # get current object state
     try:
@@ -425,6 +441,7 @@ def update_object(public_id: int, request_user: User):
 @object_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @login_required
 @insert_request_user
+@right_required('base.framework.object.delete')
 def delete_object(public_id: int, request_user: User):
     try:
         current_object_instance = object_manager.get_object(public_id)
@@ -467,6 +484,7 @@ def delete_object(public_id: int, request_user: User):
 @object_blueprint.route('/delete/<string:public_ids>', methods=['GET'])
 @login_required
 @insert_request_user
+@right_required('base.framework.object.delete')
 def delete_many_objects(public_ids, request_user: User):
     try:
         ids = []
@@ -529,7 +547,10 @@ def delete_many_objects(public_ids, request_user: User):
 # Special routes
 @object_blueprint.route('/<int:public_id>/state/', methods=['GET'])
 @object_blueprint.route('/<int:public_id>/state', methods=['GET'])
-def get_object_state(public_id: int):
+@login_required
+@insert_request_user
+@right_required('base.framework.object.activation')
+def get_object_state(public_id: int, request_user: User):
     try:
         founded_object = object_manager.get_object(public_id=public_id)
     except ObjectManagerGetError as err:
@@ -540,7 +561,9 @@ def get_object_state(public_id: int):
 
 @object_blueprint.route('/<int:public_id>/state/', methods=['PUT'])
 @object_blueprint.route('/<int:public_id>/state', methods=['PUT'])
+@login_required
 @insert_request_user
+@right_required('base.framework.object.activation')
 def update_object_state(public_id: int, request_user: User):
     if isinstance(request.json, bool):
         state = request.json
@@ -597,7 +620,9 @@ def update_object_state(public_id: int, request_user: User):
 # SPECIAL ROUTES
 @object_blueprint.route('/newest', methods=['GET'])
 @object_blueprint.route('/newest/', methods=['GET'])
+@login_required
 @insert_request_user
+@right_required('base.framework.object.view')
 def get_newest(request_user: User):
     """
     get object with newest creation time
@@ -618,7 +643,9 @@ def get_newest(request_user: User):
 
 @object_blueprint.route('/latest', methods=['GET'])
 @object_blueprint.route('/latest/', methods=['GET'])
+@login_required
 @insert_request_user
+@right_required('base.framework.object.view')
 def get_latest(request_user: User):
     """
     get object with newest last edit time

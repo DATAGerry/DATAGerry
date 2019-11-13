@@ -22,7 +22,8 @@ class FieldMapperMode(Enum):
 
 
 class BaseImporterConfig:
-    DEFAULT_MAPPING = {}
+    DEFAULT_MAPPING: dict = {}
+    MANUALLY_MAPPING: bool = True
 
     def __init__(self, mapping: dict = None):
         _mapping = mapping or self.DEFAULT_MAPPING
@@ -49,3 +50,5 @@ class ObjectImporterConfig(BaseImporterConfig):
 
     def get_type_id(self):
         return self.type_id
+
+

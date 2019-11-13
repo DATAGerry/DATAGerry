@@ -1,7 +1,7 @@
 version: "3.0"
 services:
   datagerry:
-    image: nethinks/datagerry:latest
+    image: nethinks/datagerry:undefined
     ports:
     - "4000:4000"
     depends_on:
@@ -14,6 +14,16 @@ services:
 
   db:
     image: mongo:4.2-bionic
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
     
   broker:
     image: rabbitmq:3.8
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+volumes:
+  rabbitmq-data:
+  mongodb-data:
+  mongodb-config:

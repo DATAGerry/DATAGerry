@@ -31,11 +31,11 @@ class CmdbLink(CmdbDAO):
         self.secondary = secondary
         super(CmdbLink, self).__init__(**kwargs)
 
-    def get_primary(self):
+    def get_primary(self) -> int:
         return self.primary
 
-    def get_secondary(self):
+    def get_secondary(self) -> int:
         return self.secondary
 
-    def get_partners(self):
+    def get_partners(self) -> (int, int):
         return self.get_primary(), self.get_secondary()

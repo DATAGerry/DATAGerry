@@ -14,16 +14,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""
-DATAGERRY is a flexible asset management tool and
-open-source configurable management database
-"""
-import time
+import logging
+from flask import current_app
+from cmdb.interface.route_utils import RootBlueprint
 
-__title__ = 'DATAGERRY'
-__version__ = '@@DG_BUILDVAR_VERSION@@'
-__author__ = 'NETHINKS GmbH'
-__license__ = 'AGPLv3'
-__copyright__ = 'Copyright 2019 NETHINKS GmbH'
-__runtime__ = time.time()
-__MODE__ = 'INFO'
+LOGGER = logging.getLogger(__name__)
+try:
+    from cmdb.utils.error import CMDBError
+except ImportError:
+    CMDBError = Exception
+
+settings_blueprint = RootBlueprint('settings_rest', __name__, url_prefix='/settings')
+
+with current_app.app_context():
+    from cmdb.interface.rest_api.settings_routes.system_routes import system_blueprint
+
+    settings_blueprint.register_nested_blueprint(system_blueprint)

@@ -33,7 +33,7 @@ LOGGER = logging.getLogger(__name__)
 importer_blueprint = RootBlueprint('import_rest', __name__, url_prefix='/import')
 
 with current_app.app_context():
-    from cmdb.interface.rest_api.importer.importer_object_routes import importer_object_blueprint
+    from cmdb.interface.rest_api.importer_routes.importer_object_routes import importer_object_blueprint
     importer_blueprint.register_nested_blueprint(importer_object_blueprint)
 
 

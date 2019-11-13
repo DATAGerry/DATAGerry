@@ -21,8 +21,6 @@ import { filter } from 'rxjs/operators';
 import { BreadcrumbItem } from './breadcrumb.model';
 import { BreadcrumbService } from './breadcrumb.service';
 import { ActivatedRoute, NavigationEnd, PRIMARY_OUTLET, Router } from '@angular/router';
-import { BehaviorSubject } from "rxjs";
-
 
 @Component({
   selector: 'cmdb-breadcrumb',

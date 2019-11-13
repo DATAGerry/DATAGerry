@@ -16,26 +16,23 @@
 
 import logging
 
-import cmdb
 from cmdb.data_storage import NoDocumentFound, DatabaseManagerMongo, MongoConnector
-from cmdb.data_storage.database_manager import DeleteResult
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.user_management.user import User
 from cmdb.user_management.user_authentication import AuthenticationProvider, LocalAuthenticationProvider, \
     NoValidAuthenticationProviderError
 from cmdb.user_management.user_group import UserGroup
-from cmdb.user_management.user_right import BaseRight, GLOBAL_IDENTIFIER
+from cmdb.user_management.user_right import BaseRight
 from cmdb.utils import get_security_manager
 from cmdb.utils.error import CMDBError
 from cmdb.utils.security import SecurityManager
 from cmdb.utils.system_reader import SystemConfigReader
-from cmdb.utils.wraps import deprecated
 
 LOGGER = logging.getLogger(__name__)
 
 
-class UserManagement(CmdbManagerBase):
+class UserManager(CmdbManagerBase):
     MANAGEMENT_CLASSES = {
         'GROUP_CLASSES': UserGroup,
         'USER_CLASSES': User,
@@ -143,7 +140,7 @@ class UserManagement(CmdbManagerBase):
             founded_group = self.dbm.find_one(collection=UserGroup.COLLECTION, public_id=public_id)
             return UserGroup(**founded_group)
         except NoDocumentFound as e:
-            raise GroupNotExistsError(public_id)
+            raise UserManagerGetError(e)
 
     def get_group_by(self, **requirements) -> UserGroup:
         try:
@@ -195,12 +192,10 @@ class UserManagement(CmdbManagerBase):
         return ack
 
     def get_right_names_with_min_level(self, MIN_LEVEL):
-        selected_levels = list()
+        selected_levels = []
         for right in self.rights:
             if right.get_level() <= MIN_LEVEL:
                 selected_levels.append(right.get_name())
-        if len(selected_levels) == 0:
-            raise NoFittingRightError()
         return selected_levels
 
     def get_all_rights(self):
@@ -232,17 +227,20 @@ class UserManagement(CmdbManagerBase):
         try:
             return next(right for right in self.rights if right.name == name)
         except Exception:
-            raise RightNotExistsError(name)
+            raise UserManagerGetError(name)
 
     def group_has_right(self, group_id: int, right_name: str) -> bool:
         right_status = False
-
         try:
+            selected_right = self.get_right_by_name(right_name)
             chosen_group = self.get_group(group_id)
-        except GroupNotExistsError:
+        except UserManagerGetError:
             return right_status
 
-        right_status = chosen_group.has_right(right_name)
+        right_status = chosen_group.has_right(right_name=right_name)
+        if not right_status:
+            right_status = chosen_group.has_extended_right(right_name=right_name)
+        LOGGER.debug(f'Group: {chosen_group.get_name()} has right {right_name}: {right_status}')
         return right_status
 
 
@@ -270,56 +268,6 @@ class UserManagerDeleteError(ManagerDeleteError):
         super(UserManagerDeleteError, self).__init__(err)
 
 
-# DEPRECATED @ HERE
-class GroupDeleteError(CMDBError):
-    def __init__(self, name):
-        super().__init__()
-        self.message = "The following group could not be deleted: {}".format(name)
-
-
-class UserDeleteError(CMDBError):
-    def __init__(self, name):
-        super().__init__()
-        self.message = "The following user could not be deleted: {}".format(name)
-
-
-class NoUserFoundExceptions(CMDBError):
-    """Exception if user was not found in the database"""
-
-    def __init__(self, username):
-        self.message = "No user with the username or the id {} was found in database".format(username)
-
-
-class GroupNotExistsError(CMDBError):
-    def __init__(self, name):
-        super().__init__()
-        self.message = "The following group does not exists: {}".format(name)
-
-
-class GroupNotNotUpdatedError(CMDBError):
-    def __init__(self, name, error):
-        super().__init__()
-        self.message = "The following group could not be updated: {} | error: {}".format(name, error.message)
-
-
-class NoFittingRightError(CMDBError):
-    def __init__(self):
-        super().__init__()
-        self.message = "No Rights with this requirements found"
-
-
-class RightNotExistsError(CMDBError):
-    def __init__(self, name):
-        super().__init__()
-        self.message = "The following right does not exists: {}".format(name)
-
-
-class GroupInsertError(CMDBError):
-    def __init__(self, name):
-        super().__init__()
-        self.message = "The following group could not be added: {}".format(name)
-
-
 def get_user_manager():
     # TODO: refactor for single instance
     system_config_reader = SystemConfigReader()
@@ -328,7 +276,7 @@ def get_user_manager():
             **system_config_reader.get_all_values_from_section('Database')
         )
     )
-    return UserManagement(
+    return UserManager(
         database_manager=database_manager,
         security_manager=get_security_manager(
             database_manager=database_manager

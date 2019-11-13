@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # set environment variables
+BUILDVAR_VERSION = undefined
 BIN_PYINSTALLER = pyinstaller
 BIN_SPHINX = sphinx-build
 BIN_PYTEST = pytest
@@ -48,9 +49,16 @@ requirements:
 	${BIN_PIP} install -r requirements.txt
 
 
+# substitue BUILD variables
+.PHONY: buildvars
+buildvars:
+	sed -i 's/@@DG_BUILDVAR_VERSION@@/${BUILDVAR_VERSION}/g' cmdb/__init__.py
+	sed -i 's/@@DG_BUILDVAR_VERSION@@/${BUILDVAR_VERSION}/g' docs/source/conf.py
+
+
 # create documentation
 .PHONY: docs
-docs: requirements
+docs: requirements buildvars
 	${BIN_SPHINX} -b html -a ${DIR_DOCS_SOURCE} ${DIR_DOCS_BUILD}
 	cp -R ${DIR_DOCS_BUILD}/* ${DIR_DOCS_TARGET}
 
@@ -65,12 +73,14 @@ webapp:
 
 # create onefile binary of DATAGERRY
 .PHONY: bin
-bin: requirements docs webapp
+bin: requirements buildvars docs webapp
 	${BIN_PYINSTALLER} --name datagerry --onefile \
 		--distpath ${DIR_BIN_BUILD} \
 		--workpath ${DIR_TEMP} \
 		--hidden-import cmdb.exportd \
 		--hidden-import cmdb.exportd.service \
+		--hidden-import cmdb.exportd.externals \
+		--hidden-import cmdb.exportd.externals.external_systems \
 		--hidden-import cmdb.file_export \
 		--hidden-import cmdb.file_export.file_exporter \
 		--hidden-import cmdb.interface.gunicorn \
@@ -90,6 +100,7 @@ rpm: bin
 	cp contrib/systemd/datagerry.service ${DIR_RPM_BUILD}/SOURCES
 	cp etc/cmdb.conf ${DIR_RPM_BUILD}/SOURCES
 	cp contrib/rpm/datagerry.spec ${DIR_RPM_BUILD}
+	sed -i 's/@@DG_BUILDVAR_VERSION@@/${BUILDVAR_VERSION}/g' ${DIR_RPM_BUILD}/datagerry.spec
 	${BIN_RPMBUILD} --define '_topdir ${DIR_RPM_BUILD}' -bb ${DIR_RPM_BUILD}/datagerry.spec
 
 
@@ -104,7 +115,7 @@ targz: bin
 	cp etc/cmdb.conf ${DIR_TARGZ_BUILD}/src/datagerry/files
 	cp LICENSE ${DIR_TARGZ_BUILD}/src/datagerry
 	cp contrib/setup/setup.sh ${DIR_TARGZ_BUILD}/src/datagerry
-	tar -czvf ${DIR_TARGZ_BUILD}/datagerry.tar.gz -C ${DIR_TARGZ_BUILD}/src datagerry
+	tar -czvf ${DIR_TARGZ_BUILD}/datagerry-${BUILDVAR_VERSION}.tar.gz -C ${DIR_TARGZ_BUILD}/src datagerry
 
 
 # create Docker image
@@ -115,8 +126,8 @@ docker: rpm
 	mkdir -p ${DIR_DOCKER_BUILD}/src/files
 	cp contrib/docker/Dockerfile ${DIR_DOCKER_BUILD}/src
 	cp ${DIR_RPM_BUILD}/RPMS/x86_64/DATAGERRY-*.rpm ${DIR_DOCKER_BUILD}/src/files
-	docker build -f ${DIR_DOCKER_BUILD}/src/Dockerfile -t nethinks/datagerry:latest ${DIR_DOCKER_BUILD}/src
-	docker save --output ${DIR_DOCKER_BUILD}/datagerry_latest.tar nethinks/datagerry:latest
+	docker build -f ${DIR_DOCKER_BUILD}/src/Dockerfile -t nethinks/datagerry:${BUILDVAR_VERSION} ${DIR_DOCKER_BUILD}/src
+	docker save --output ${DIR_DOCKER_BUILD}/datagerry_${BUILDVAR_VERSION}.tar nethinks/datagerry:${BUILDVAR_VERSION}
 
 
 # execute tests

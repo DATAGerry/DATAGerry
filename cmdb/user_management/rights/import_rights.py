@@ -24,3 +24,19 @@ class ImportRight(BaseRight):
 
     def __init__(self, name: str, level: int = 50, description: str = None):
         super(ImportRight, self).__init__(level, name, description=description)
+
+
+class ImportObjectRight(ImportRight):
+    MIN_LEVEL = BaseRight.PROTECTED
+    PREFIX = '{}.{}'.format(ImportRight.PREFIX, 'object')
+
+    def __init__(self, name: str, level: int = 50, description: str = None):
+        super(ImportObjectRight, self).__init__(name, level, description=description)
+
+
+class ImportTypeRight(ImportRight):
+    MIN_LEVEL = BaseRight.SECURE
+    PREFIX = '{}.{}'.format(ImportRight.PREFIX, 'type')
+
+    def __init__(self, name: str, level: int = 50, description: str = None):
+        super(ImportTypeRight, self).__init__(name, level, description=description)

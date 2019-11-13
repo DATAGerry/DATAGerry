@@ -30,7 +30,7 @@ from datetime import datetime
 
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_type import CmdbType
-from cmdb.user_management.user_manager import User, UserManagement
+from cmdb.user_management.user_manager import User, UserManager
 
 LOGGER = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ class CmdbRender:
         from cmdb.user_management.user_manager import user_manager
         self.object_instance: CmdbObject = object_instance
         self.type_instance: CmdbType = type_instance
-        self.__usm: UserManagement = user_manager
+        self.__usm: UserManager = user_manager
         # get render user if only the user id was passed
         if isinstance(render_user, int):
             self.render_user: User = self.__usm.get_user(render_user)

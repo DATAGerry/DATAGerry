@@ -49,6 +49,7 @@ import { TypePreviewComponent } from './import-types/type-preview/type-preview.c
 import { CategoryModule } from '../framework/category/category.module';
 import { ImportTypeCompleteComponent } from './import-types/import-type-complete/import-type-complete.component';
 import { FileSizePipe } from './import-types/file-size.pipe';
+import { ImportCompleteComponent } from './import-objects/import-complete/import-complete.component';
 
 
 @NgModule({
@@ -71,7 +72,8 @@ import { FileSizePipe } from './import-types/file-size.pipe';
     SelectFileDragDropDirective,
     TypePreviewComponent,
     ImportTypeCompleteComponent,
-    FileSizePipe
+    FileSizePipe,
+    ImportCompleteComponent
   ],
   imports: [
     CommonModule,

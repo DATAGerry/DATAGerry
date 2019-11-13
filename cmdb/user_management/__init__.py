@@ -18,12 +18,11 @@
 Basic user functions such as create, change and delete are implemented here.
 In addition, the rights management, group administration and access rights are defined here.
 """
-from cmdb.plugins import PluginManager
 from cmdb.user_management.user import User
 from cmdb.user_management.user_authentication import AuthenticationProvider, LocalAuthenticationProvider
 from cmdb.user_management.user_base import UserManagementBase
 from cmdb.user_management.user_group import UserGroup
-from cmdb.user_management.user_manager import UserManagement
+from cmdb.user_management.user_manager import UserManager
 
 __COLLECTIONS__ = [
     User,
@@ -31,8 +30,8 @@ __COLLECTIONS__ = [
 ]
 
 __FIXED_GROUPS__ = [
-    UserGroup(public_id=1, name='admin', label='Administrator', rights=[], deletable=False),
-    UserGroup(public_id=2, name='user', label='User', rights=[], deletable=False)
+    UserGroup(public_id=1, name='admin', label='Administrator', rights=['base.*'], deletable=False),
+    UserGroup(public_id=2, name='user', label='User', rights=['base.framework.*'], deletable=False)
 ]
 
 __AUTH_PROVIDERS__ = [

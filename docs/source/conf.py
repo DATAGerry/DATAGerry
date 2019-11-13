@@ -28,9 +28,9 @@ copyright = '2019, NETHINKS GmbH'
 author = 'NETHINKS GmbH'
 
 # The short X.Y version
-version = '1.0'
+version = '@@DG_BUILDVAR_VERSION@@'
 # The full version, including alpha/beta/rc tags
-release = '1.0.0'
+release = '@@DG_BUILDVAR_VERSION@@'
 
 # -- General configuration ---------------------------------------------------
 

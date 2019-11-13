@@ -18,13 +18,12 @@ import logging
 import json
 
 from flask import abort, request, jsonify, current_app
-from cmdb.utils.wraps import json_required
-from cmdb.interface.route_utils import make_response, RootBlueprint, login_required
-from cmdb.framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError
-from cmdb.framework.cmdb_type import CmdbType
 
-with current_app.app_context():
-    object_manager = current_app.object_manager
+from cmdb.user_management import User
+from cmdb.user_management.user_manager import UserManagerGetError
+from cmdb.interface.route_utils import make_response, RootBlueprint, login_required, insert_request_user, right_required
+from cmdb.framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError, ObjectManagerGetError
+from cmdb.framework.cmdb_type import CmdbType
 
 try:
     from cmdb.utils.error import CMDBError
@@ -34,34 +33,43 @@ except ImportError:
 LOGGER = logging.getLogger(__name__)
 type_blueprint = RootBlueprint('type_blueprint', __name__, url_prefix='/type')
 
+with current_app.app_context():
+    object_manager = current_app.object_manager
+
 
 @type_blueprint.route('/', methods=['GET'])
 @login_required
-def get_type_list():
+@insert_request_user
+@right_required('base.framework.type.view')
+def get_type_list(request_user: User):
     try:
         type_list = object_manager.get_all_types()
-    except CMDBError:
+    except ObjectManagerGetError as e:
+        LOGGER.error(f'Error while getting all types as list: {e}')
         return abort(500)
-    resp = make_response(type_list)
-    return resp
+    if len(type_list) == 0:
+        return make_response(type_list, 204)
+    return make_response(type_list)
 
 
+@type_blueprint.route('/<int:public_id>/', methods=['GET'])
 @type_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
-def get_type(public_id: int):
+@insert_request_user
+@right_required('base.framework.type.view')
+def get_type(public_id: int, request_user: User):
     try:
         type_instance = object_manager.get_type(public_id)
-    except TypeNotFoundError:
-        return abort(404)
-    except CMDBError:
-        return abort(500)
-    resp = make_response(type_instance)
-    return resp
+    except UserManagerGetError as err:
+        return abort(404, err)
+    return make_response(type_instance)
 
 
 @type_blueprint.route('/', methods=['POST'])
 @login_required
-def add_type():
+@insert_request_user
+@right_required('base.framework.type.add')
+def add_type(request_user: User):
     from bson import json_util
     from datetime import datetime
     add_data_dump = json.dumps(request.json)
@@ -88,8 +96,9 @@ def add_type():
 
 @type_blueprint.route('/', methods=['PUT'])
 @login_required
-@json_required
-def update_type():
+@insert_request_user
+@right_required('base.framework.type.edit')
+def update_type(request_user: User):
     """TODO: Generate update log"""
     from bson import json_util
     add_data_dump = json.dumps(request.json)
@@ -120,9 +129,12 @@ def update_type():
     return resp
 
 
+@type_blueprint.route('/<int:public_id>/', methods=['DELETE'])
 @type_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @login_required
-def delete_type(public_id: int):
+@insert_request_user
+@right_required('base.framework.type.delete')
+def delete_type(public_id: int, request_user: User):
     try:
         # delete all objects by typeID
         obj_ids = []
@@ -132,18 +144,17 @@ def delete_type(public_id: int):
         object_manager.delete_many_objects({'type_id': public_id}, obj_ids)
 
         ack = object_manager.delete_type(public_id=public_id)
-
-    except TypeNotFoundError:
-        return abort(400)
-    except CMDBError:
-        return abort(500)
-    resp = make_response(ack)
-    return resp
+    except User:
+        return abort(400, f'Type with Public ID: {public_id} was not found!: {e}')
+    return make_response(ack)
 
 
+@type_blueprint.route('/delete/<string:public_ids>/', methods=['GET'])
 @type_blueprint.route('/delete/<string:public_ids>', methods=['GET'])
 @login_required
-def delete_many_types(public_ids):
+@insert_request_user
+@right_required('base.framework.type.delete')
+def delete_many_types(public_ids, request_user: User):
     try:
         ids = []
         operator_in = {'$in': []}
@@ -169,8 +180,11 @@ def delete_many_types(public_ids):
 
 
 @type_blueprint.route('/count/', methods=['GET'])
+@type_blueprint.route('/count', methods=['GET'])
 @login_required
-def count_objects():
+@insert_request_user
+@right_required('base.framework.type.view')
+def count_objects(request_user: User):
     try:
         count = object_manager.count_types()
         resp = make_response(count)
@@ -179,20 +193,25 @@ def count_objects():
     return resp
 
 
+@type_blueprint.route('/category/<int:public_id>/', methods=['GET'])
 @type_blueprint.route('/category/<int:public_id>', methods=['GET'])
 @login_required
-def get_type_by_category(public_id):
+@insert_request_user
+@right_required('base.framework.type.view')
+def get_type_by_category(public_id, request_user: User):
     try:
         type_list = object_manager.get_types_by(**{'category_id': public_id})
-    except CMDBError:
-        return abort(500)
-    resp = make_response(type_list)
-    return resp
+    except ObjectManagerGetError:
+        return abort(404, 'Not types in this Category')
+    return make_response(type_list)
 
 
+@type_blueprint.route('/category/<int:public_id>/', methods=['PUT'])
 @type_blueprint.route('/category/<int:public_id>', methods=['PUT'])
 @login_required
-def update_type_by_category(public_id):
+@insert_request_user
+@right_required('base.framework.type.edit')
+def update_type_by_category(public_id, request_user: User):
     try:
         ack = object_manager.update_many_types(filter={'category_id': public_id}, update={'$set': {'category_id': 0}})
     except CMDBError:
@@ -200,9 +219,12 @@ def update_type_by_category(public_id):
     return make_response(ack.raw_result)
 
 
+@type_blueprint.route('/cleanup/remove/<int:public_id>/', methods=['GET'])
 @type_blueprint.route('/cleanup/remove/<int:public_id>', methods=['GET'])
 @login_required
-def cleanup_removed_fields(public_id):
+@insert_request_user
+@right_required('base.framework.type.clean')
+def cleanup_removed_fields(public_id, request_user: User):
     # REMOVE fields from CmdbObject
     try:
         update_type_instance = object_manager.get_type(public_id)
@@ -232,9 +254,12 @@ def cleanup_removed_fields(public_id):
     return make_response(update_type_instance)
 
 
+@type_blueprint.route('/cleanup/update/<int:public_id>/', methods=['GET'])
 @type_blueprint.route('/cleanup/update/<int:public_id>', methods=['GET'])
 @login_required
-def cleanup_updated_push_fields(public_id):
+@insert_request_user
+@right_required('base.framework.type.clean')
+def cleanup_updated_push_fields(public_id, request_user: User):
     # Update/Push fields to CmdbObject
     try:
         update_type_instance = object_manager.get_type(public_id)

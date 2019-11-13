@@ -20,7 +20,7 @@ from flask import abort, request, current_app
 
 from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError
-from cmdb.interface.rest_api.object_routes import object_blueprint
+from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint
 from cmdb.interface.route_utils import make_response, NestedBlueprint
 
 with current_app.app_context():
@@ -61,7 +61,13 @@ def get_link_by_partner(public_id: int):
 
 @link_rest.route('/', methods=['POST'])
 def add_link():
-    new_link_params = {**request.json, **{'public_id': int(object_manager.get_new_id(CmdbLink.COLLECTION) + 1)}}
+    LOGGER.debug(request.json)
+    try:
+        new_link_params = {**request.json, **{'public_id': int(object_manager.get_new_id(CmdbLink.COLLECTION) + 1)}}
+    except TypeError as e:
+        LOGGER.error(e)
+        return abort(400)
+    LOGGER.debug(f'Link insert params: {new_link_params}')
     try:
         ack = object_manager.insert_link(new_link_params)
     except ObjectManagerInsertError:

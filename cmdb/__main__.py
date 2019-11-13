@@ -24,7 +24,7 @@ import signal
 from time import sleep
 from argparse import ArgumentParser, Namespace
 from cmdb.utils.logger import get_logging_conf
-from cmdb.utils.helpers import timing
+from cmdb.utils.wraps import timing
 from sys import exit
 
 
@@ -152,7 +152,7 @@ def build_arg_parser() -> Namespace:
     return _parser.parse_args()
 
 
-@timing('CMDB start took')
+@timing('CMDB start')
 def main(args):
     """
     Default application start function
