@@ -67,9 +67,9 @@ const routes: Routes = [
     loadChildren: () => import('./log-settings/log-settings.module').then(m => m.LogSettingsModule)
   },
   {
-    path: 'task',
+    path: 'exportdjob',
     data: {
-      breadcrumb: 'Task'
+      breadcrumb: 'Exportd Job'
     },
     loadChildren: () => import('./task-settings/task-settings.module').then(m => m.TaskSettingsModule)
   }

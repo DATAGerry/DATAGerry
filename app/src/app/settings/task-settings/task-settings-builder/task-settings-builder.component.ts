@@ -25,8 +25,8 @@ import { TaskSourcesStepComponent } from './task-sources-step/task-sources-step.
 import { TaskDestinationsStepComponent } from './task-destinations-step/task-destinations-step.component';
 import { TaskVariablesStepComponent } from './task-variables-step/task-variables-step.component';
 import { TaskSchedulingStepComponent } from './task-scheduling-step/task-scheduling-step.component';
-import { Task } from '../../models/task';
-import { TaskService } from '../../services/task.service';
+import { ExportdJob } from '../../models/exportd-job';
+import { ExportdJobService } from '../../services/exportd-job.service';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../layout/toast/toast.service';
 
@@ -39,7 +39,7 @@ export class TaskSettingsBuilderComponent implements OnInit {
 
   @Input() public mode: number = CmdbMode.Create;
   @Input() public typeInstance?: CmdbType;
-  @Input() public taskInstance?: Task;
+  @Input() public taskInstance?: ExportdJob;
 
   @ViewChild(TaskBasicStepComponent, {static: true})
   public basicStep: TaskBasicStepComponent;
@@ -56,7 +56,7 @@ export class TaskSettingsBuilderComponent implements OnInit {
   @ViewChild(TaskSchedulingStepComponent, {static: true})
   public schedulingStep: TaskSchedulingStepComponent;
 
-  constructor(private taskService: TaskService, private router: Router, private toast: ToastService) { }
+  constructor(private taskService: ExportdJobService, private router: Router, private toast: ToastService) { }
 
   ngOnInit() {
   }
@@ -64,7 +64,7 @@ export class TaskSettingsBuilderComponent implements OnInit {
   public saveTask() {
 
     if (this.mode === CmdbMode.Create) {
-      this.taskInstance = new Task();
+      this.taskInstance = new ExportdJob();
     }
     this.taskInstance.name = this.basicStep.basicForm.get('name').value;
     this.taskInstance.label = this.basicStep.basicForm.get('label').value;
@@ -74,20 +74,24 @@ export class TaskSettingsBuilderComponent implements OnInit {
     this.taskInstance.destination = this.destinationStep.destinationForm.get('destination').value;
     this.taskInstance.sources = this.sourcesStep.sourcesForm.get('sources').value;
     this.taskInstance.variables = this.variablesStep.variableForm.get('variables').value;
+    this.taskInstance.scheduling = {
+      event: this.schedulingStep.eventForm.value,
+      cron: this.schedulingStep.cronForm.value
+    };
 
     if (this.mode === CmdbMode.Create) {
       let newID = null;
       this.taskService.postTask(this.taskInstance).subscribe(publicIDResp => {
           newID = publicIDResp;
-          this.router.navigate(['/settings/task/'], {queryParams: {typeAddSuccess: newID}});
+          this.router.navigate(['/settings/exportdjob/'], {queryParams: {typeAddSuccess: newID}});
         },
         (error) => {
           console.error(error);
         });
     } else if (this.mode === CmdbMode.Edit) {
-      this.taskService.putTask(this.taskInstance).subscribe((updateResp: Task) => {
-          this.toast.show(`Task was successfully edit: TaskID: ${updateResp.public_id}`);
-          this.router.navigate(['/settings/task/'], {queryParams: {typeEditSuccess: updateResp.public_id}});
+      this.taskService.putTask(this.taskInstance).subscribe((updateResp: ExportdJob) => {
+          this.toast.show(`Exportd Job was successfully edit: Exportd Job ID: ${updateResp.public_id}`);
+          this.router.navigate(['/settings/exportdjob/'], {queryParams: {typeEditSuccess: updateResp.public_id}});
         },
         (error) => {
           console.log(error);

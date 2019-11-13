@@ -9,7 +9,7 @@
     <div class="card" id="controlExternalWrapper">
       <h5 class="card-header">External Systems</h5>
       <div class="card-body">
-        <ng-container *ngFor="let system of externalSystemList">
+        <ng-container *ngFor="let system of externalSystemList; let no1 = first">
           <div class="card" [dndDraggable]="system" [dndType]="'dragSystem'">
             <div class="list-group-item list-group-item-action">
               <span class="d-flex justify-content-between align-items-center ">
@@ -21,7 +21,10 @@
                 <fa-icon icon="bars"></fa-icon>
               </span>
             </div>
-            <div class="card-body collapse" id="collapseSystems">
+            <div [ngClass]="{'show': no1}" class="card-body collapse"  id="collapseSystems">
+              <ng-container *ngIf="externalSystemParams.length == 0">
+                <p class="text-center">Parameters are displayed after assignment to External Name.</p>
+              </ng-container>
               <div *ngFor="let selectedParam of externalSystemParams" class="input-group mb-3">
                 <div class="input-group flex-nowrap" [dndDraggable]="selectedParam" [dndType]="'dragParameter'">
                   <div class="input-group-prepend">
@@ -37,6 +40,7 @@
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         </ng-container>
@@ -64,18 +68,19 @@
 
                 <div class="form-group">
                   <section [dndDropzone]="['dragSystem']"
-                           (dndDrop)="onDraggedSystem($event, destination, 'copy')">
+                           (dndDrop)="onDraggedSystem($event, destination, s,'copy')">
                     <div style="border: 1px green solid; border-radius: 5px; padding: 15px;"
                          dndPlaceholderRef>
                       Drop property here
                     </div>
-                    <div class="input-group flex-nowrap">
-                      <input type="text" name="text" class="form-control" formControlName="className"
+                    <div class="form-group flex-nowrap">
+                      <label for="externalName">External Name</label>
+                      <input type="text" id="externalName" name="text" class="form-control" formControlName="className"
                              [ngClass]="{ 'is-valid': destination.get('className').valid
                                    && (destination.get('className').dirty
                                    || destination.get('className').touched), 'is-invalid': destination.get('className').invalid
                                    && (destination.get('className').dirty || destination.get('className').touched)}"
-                             required/>
+                             required readonly/>
                     </div>
                     <div *ngIf="destination.get('className').length === 0"
                          class="list-group-item list-group-item-action"
@@ -89,18 +94,18 @@
                 </div>
 
                 <ng-container formArrayName="parameter">
-                  <ng-container *ngFor="let param of destination['controls'].parameter['controls']; let iy=index">
-                    <label>Parameter: {{iy}}</label>
+                    <label>Parameters</label>
                     <table class="table table-bordered">
                       <thead>
                       <tr>
                         <th scope="col">#</th>
                         <th scope="col">Name</th>
                         <th scope="col">Value</th>
+                        <th scope="col">Action</th>
                       </tr>
                       </thead>
                       <tbody>
-                      <tr formArrayName="{{iy}}">
+                      <tr *ngFor="let param of destination['controls'].parameter['controls']; let iy=index" formArrayName="{{iy}}">
                         <th scope="row">{{iy + 1}}</th>
                         <td>
                           <section [dndDropzone]="['dragParameter']"
@@ -151,7 +156,6 @@
                       </tbody>
                     </table>
                   </ng-container>
-                </ng-container>
                 <button type="button" class="btn btn-outline-secondary" (click)="addParameters(s)">+ Add Parameter</button>
               </ng-container>
             </div>

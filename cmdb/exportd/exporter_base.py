@@ -47,7 +47,7 @@ class ExportJob(ExportdJobManagement):
         exportvars = {}
         for variable in self.job.get_variables():
             exportvars.update(
-                {variable["name"]: ExportVariable(variable["name"], variable["default"], variable["type_template"])})
+                {variable["name"]: ExportVariable(variable["name"], variable["default"], variable["templates"])})
         return exportvars
 
     def __get_sources(self):
@@ -97,8 +97,10 @@ class ExportVariable:
         # get value template
         value_template = self.__value_tpl_default
         object_type_id = cmdb_object.get_type_id()
-        if object_type_id in self.__value_tpl_types:
-            value_template = self.__value_tpl_types[object_type_id]
+
+        for templ in self.__value_tpl_types:
+            if templ['type'] != '' and object_type_id == int(templ['type']):
+                value_template = templ['template']
 
         # objectdata for use in ExportVariable templates
         objectdata = {}

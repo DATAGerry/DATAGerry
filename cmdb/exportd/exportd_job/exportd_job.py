@@ -31,7 +31,9 @@ class ExportdJob(JobManagementBase):
         'name',
     ]
 
-    def __init__(self, name, label, description, active, last_execute_date, sources, destination, variables, **kwargs):
+    def __init__(self, name, label, description, active,
+                 last_execute_date, sources, destination,
+                 variables, scheduling, **kwargs):
         """
         Args:
             name: name of this job
@@ -49,6 +51,7 @@ class ExportdJob(JobManagementBase):
         self.sources = sources
         self.destination = destination
         self.variables = variables
+        self.scheduling = scheduling
         super(ExportdJob, self).__init__(**kwargs)
 
     def get_public_id(self) -> int:

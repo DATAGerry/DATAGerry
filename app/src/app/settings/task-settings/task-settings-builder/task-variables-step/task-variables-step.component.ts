@@ -19,6 +19,8 @@
 import { Component, Input, OnInit} from '@angular/core';
 import { CmdbMode } from '../../../../framework/modes.enum';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { CmdbType } from '../../../../framework/models/cmdb-type';
+import { TypeService } from '../../../../framework/services/type.service';
 
 @Component({
   selector: 'cmdb-task-variables-step',
@@ -42,8 +44,18 @@ export class TaskVariablesStepComponent implements OnInit {
           forArray.push(this.formBuilder.group({
             name: new FormControl('', Validators.required),
             default: new FormControl('', Validators.required),
-            type_template: new FormControl('', Validators.required)
+            templates: this.formBuilder.array([])
           }));
+          i++;
+        }
+
+        // Create templates
+        i = 0;
+        while ( i < forArray.controls.length) {
+          for (const item of data.variables[i].templates) {
+            const control = forArray.controls[i].get('templates') as FormArray;
+            control.push(this.createTemplate());
+          }
           i++;
         }
 
@@ -54,22 +66,31 @@ export class TaskVariablesStepComponent implements OnInit {
   }
 
   @Input() public mode: CmdbMode;
+  public typeList: CmdbType[] = [];
   public variableForm: FormGroup;
   readonly VARIABLES = 'variables';
 
-  constructor(private formBuilder: FormBuilder) {}
+  constructor(private formBuilder: FormBuilder, private typeService: TypeService) {}
 
   ngOnInit() {
     this.variableForm = this.formBuilder.group({
       variables: this.formBuilder.array([this.createVariable()])
     });
+    this.typeService.getTypeList().subscribe((value: CmdbType[]) => this.typeList = value);
   }
 
   private createVariable(): FormGroup {
     return this.formBuilder.group({
       name: new FormControl('', Validators.required),
       default: new FormControl('', Validators.required),
-      type_template: new FormControl('', Validators.required)
+      templates: this.formBuilder.array([this.createTemplate()])
+    });
+  }
+
+  private createTemplate(): FormGroup {
+    return this.formBuilder.group({
+      type: new FormControl('', Validators.required),
+      template: new FormControl('', Validators.required)
     });
   }
 
@@ -82,8 +103,18 @@ export class TaskVariablesStepComponent implements OnInit {
     control.push(this.createVariable());
   }
 
+  public addTemplate(event): void {
+    const control = this.getVariableAsFormArray().at(event).get('templates') as FormArray;
+    control.push(this.createTemplate());
+  }
+
   public delVariable(index): void {
     const control = this.getVariableAsFormArray();
+    control.removeAt(index);
+  }
+
+  public delTemplate(index, event): void {
+    const control = this.getVariableAsFormArray().at(event).get('templates') as FormArray;
     control.removeAt(index);
   }
 }

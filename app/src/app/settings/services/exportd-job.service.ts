@@ -19,43 +19,41 @@
 
 import { Injectable } from '@angular/core';
 import { ApiCallService } from '../../services/api-call.service';
-import { Task } from '../models/task';
-import {CmdbObject} from "../../framework/models/cmdb-object";
-import {Observable} from "rxjs";
-import {CmdbType} from "../../framework/models/cmdb-type";
+import { ExportdJob } from '../models/exportd-job';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
-export class TaskService {
+export class ExportdJobService {
 
-  private servicePrefix: string = 'task';
-  private taskList: Task[];
+  private servicePrefix: string = 'exportdjob';
+  private taskList: ExportdJob[];
 
   constructor(private api: ApiCallService) {
-    this.getTaskList().subscribe((list: Task[]) => {
+    this.getTaskList().subscribe((list: ExportdJob[]) => {
       this.taskList = list;
     });
   }
 
-  public findTask(publicID: number): Task {
+  public findTask(publicID: number): ExportdJob {
     return this.taskList.find(task => task.public_id === publicID);
   }
 
   public getTask(publicID: number) {
-    return this.api.callGetRoute<Task>(this.servicePrefix + '/' + publicID);
+    return this.api.callGetRoute<ExportdJob>(this.servicePrefix + '/' + publicID);
   }
 
   public getTaskList() {
-    return this.api.callGetRoute<Task[]>(this.servicePrefix + '/');
+    return this.api.callGetRoute<ExportdJob[]>(this.servicePrefix + '/');
   }
 
   // CRUD calls
-  public postTask(taskInstance: Task): Observable<any> {
-    return this.api.callPostRoute<Task>(this.servicePrefix + '/', taskInstance);
+  public postTask(taskInstance: ExportdJob): Observable<any> {
+    return this.api.callPostRoute<ExportdJob>(this.servicePrefix + '/', taskInstance);
   }
 
-  public putTask( taskInstance: Task): Observable<any> {
+  public putTask( taskInstance: ExportdJob): Observable<any> {
     return this.api.callPutRoute(this.servicePrefix + '/', taskInstance);
   }
 
@@ -64,6 +62,6 @@ export class TaskService {
   }
 
   public run_task(publicID: number) {
-    return this.api.callGetRoute<Task>(this.servicePrefix + '/manual/' + publicID);
+    return this.api.callGetRoute<ExportdJob>(this.servicePrefix + '/manual/' + publicID);
   }
 }

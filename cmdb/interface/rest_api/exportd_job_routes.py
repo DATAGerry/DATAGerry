@@ -36,7 +36,7 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-exportd_job_blueprint = RootBlueprint('exportd_job_blueprint', __name__, url_prefix='/task')
+exportd_job_blueprint = RootBlueprint('exportd_job_blueprint', __name__, url_prefix='/exportdjob')
 
 
 # DEFAULT ROUTES

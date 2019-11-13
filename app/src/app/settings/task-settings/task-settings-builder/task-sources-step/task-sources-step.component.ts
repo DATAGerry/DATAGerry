@@ -78,14 +78,6 @@ export class TaskSourcesStepComponent implements OnInit {
     this.typeService.getTypeList().subscribe((value: CmdbType[]) => this.typeList = value);
   }
 
-  public getFields(item: any) {
-    try {
-      return this.typeService.findType(item).fields;
-    } catch (e) {
-      return [];
-    }
-  }
-
   private createSource(): FormGroup {
     return this.formBuilder.group({
       type_id: new FormControl('', Validators.required),

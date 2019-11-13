@@ -20,7 +20,8 @@ import { Component, Input, OnInit} from '@angular/core';
 import { CmdbMode } from '../../../../framework/modes.enum';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ExternalSystemService } from '../../../services/external_system.service';
-import {DndDropEvent, DropEffect} from "ngx-drag-drop";
+import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
+
 
 @Component({
   selector: 'cmdb-task-destinations-step',
@@ -60,7 +61,7 @@ export class TaskDestinationsStepComponent implements OnInit {
                 this.externalSystemParams = params as [];
                 required = params[c].required;
                 description = params[c].description;
-                control.push(this.createParameters('', description, required));
+                control.push(this.createParameters('', '', description, required));
                 this.destinationForm.addControl('destination', forArray);
                 this.destinationForm.patchValue(data);
               });
@@ -106,10 +107,10 @@ export class TaskDestinationsStepComponent implements OnInit {
     });
   }
 
-  private createParameters(name = '', description = '', required = false): FormGroup {
+  private createParameters(name = '', value = '', description = '', required = false): FormGroup {
     return this.formBuilder.group({
       name: new FormControl(name, Validators.required),
-      value: new FormControl('', Validators.required),
+      value: new FormControl(value, Validators.required),
       required: new FormControl(required, Validators.required),
       description: new FormControl(description, Validators.required)
     });
@@ -146,7 +147,18 @@ export class TaskDestinationsStepComponent implements OnInit {
     control.get('value').setValue(item.data.default);
   }
 
-  public onDraggedSystem(item: DndDropEvent, control: any, effect: DropEffect) {
+  public onDraggedSystem(item: DndDropEvent, control: any, index, effect: DropEffect) {
     control.get('className').setValue(item.data);
+
+    this.externalService.getExternSytemParams(item.data).subscribe(params => {
+      this.externalSystemParams = params as [];
+    }, error => console.log(error),
+      () => {
+        const controlArray = this.getDestinationAsFormArray().at(index).get('parameter') as FormArray;
+        controlArray.clear();
+        for (const param of this.externalSystemParams) {
+          controlArray.push(this.createParameters(param.name, param.default, param.description, param.required));
+        }
+      });
   }
 }

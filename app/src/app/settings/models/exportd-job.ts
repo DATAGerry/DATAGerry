@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export class Task {
+export class ExportdJob {
 
   // tslint:disable: variable-name
   public public_id: number;
@@ -28,6 +28,7 @@ export class Task {
   public sources: [];
   public destination: [];
   public variables: [];
+  public scheduling: any;
   // tslint:enable
 }
 

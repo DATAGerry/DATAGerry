@@ -39,26 +39,20 @@
                 </div>
 
                 <ng-container formArrayName="condition">
-                  <ng-container *ngFor="let condition of source['controls'].condition['controls']; let iy=index">
-                    <label>Condition: {{iy}}</label>
+                    <label>Conditions</label>
                     <table class="table table-bordered">
-                      <colgroup>
-                        <col class="col-md-1">
-                        <col class="col-md-6">
-                        <col class="col-md-4">
-                        <col class="col-md-2">
-                      </colgroup>
                       <thead>
                       <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Value</th>
-                        <th scope="col">Operator</th>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Value</th>
+                        <th>Operator</th>
+                        <th>Action</th>
                       </tr>
                       </thead>
                       <tbody>
-                      <tr formArrayName="{{iy}}">
-                        <th scope="row">{{iy + 1}}</th>
+                      <tr *ngFor="let condition of source['controls'].condition['controls']; let iy=index" formArrayName="{{iy}}">
+                        <td>{{iy + 1}}</td>
                         <td>
                           <select formControlName="name" class="form-control"
                                   [ngClass]="{ 'is-valid': condition.get('name').valid
@@ -66,7 +60,7 @@
                                    || condition.get('name').touched), 'is-invalid': condition.get('name').invalid
                                    && (condition.get('name').dirty || condition.get('name').touched)}"
                                   required>
-                            <option *ngFor="let order of getFields(source.get('type_id').value); let i = index" [value]="order.name">
+                            <option *ngFor="let order of this.typeService.findType((source.get('type_id').value)).fields; let i = index" [value]="order.name">
                               {{order.name}}
                             </option>
                           </select>
@@ -100,7 +94,6 @@
                       </tbody>
                     </table>
                   </ng-container>
-                </ng-container>
                 <button type="button" class="btn btn-outline-secondary" (click)="addCondition(s)">+ Add Condition</button>
               </ng-container>
             </div>

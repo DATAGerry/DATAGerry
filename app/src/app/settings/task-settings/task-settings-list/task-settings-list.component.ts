@@ -20,10 +20,12 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { TaskService } from '../../services/task.service';
-import { Task } from '../../models/task';
-import {BreadcrumbItem} from "../../../layout/components/breadcrumb/breadcrumb.model";
-import {Router} from "@angular/router";
+import { ExportdJobService } from '../../services/exportd-job.service';
+import { ExportdJob } from '../../models/exportd-job';
+import { Router } from '@angular/router';
+import { ToastService } from '../../../layout/toast/toast.service';
+import { ModalComponent } from '../../../layout/helpers/modal/modal.component';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'cmdb-task-settings-list',
@@ -36,9 +38,10 @@ export class TaskSettingsListComponent implements OnInit, OnDestroy {
   public dtElement: DataTableDirective;
   public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();
-  public taskList: BehaviorSubject<Task[]> = new BehaviorSubject<Task[]>([]);
+  public taskList: BehaviorSubject<ExportdJob[]> = new BehaviorSubject<ExportdJob[]>([]);
 
-  constructor(private taskService: TaskService, private router: Router) { }
+  constructor(private taskService: ExportdJobService, private router: Router,
+              private toast: ToastService, private modalService: NgbModal) { }
 
   ngOnInit() {
     this.dtOptions = {
@@ -53,7 +56,7 @@ export class TaskSettingsListComponent implements OnInit, OnDestroy {
           text: '<i class="fas fa-plus"></i> Add',
           className: 'btn btn-success btn-sm mr-1',
           action: function() {
-            this.router.navigate(['/settings/task/add']);
+            this.router.navigate(['/settings/exportdjob/add']);
           }.bind(this)
         }
       ],
@@ -62,7 +65,7 @@ export class TaskSettingsListComponent implements OnInit, OnDestroy {
         searchPlaceholder: 'Filter...'
       }
     };
-    this.taskService.getTaskList().subscribe((list: Task[]) => {
+    this.taskService.getTaskList().subscribe((list: ExportdJob[]) => {
       this.taskList.next(list);
       this.dtTrigger.next();
     });
@@ -71,17 +74,28 @@ export class TaskSettingsListComponent implements OnInit, OnDestroy {
   public run_job_manual(itemID: number) {
     this.taskService.run_task(itemID).subscribe(resp => console.log(resp),
       error => {},
-      () => this.taskService.getTaskList().subscribe((list: Task[]) => {
+      () => this.taskService.getTaskList().subscribe((list: ExportdJob[]) => {
         this.taskList.next(list);
+        this.toast.show(`Exportd Job was started: Exportd ID: ${itemID}`);
       }));
   }
 
   public delTask(itemID: number) {
-    this.taskService.deleteTask(itemID).subscribe(resp => console.log(resp),
-      error => {},
-      () => this.taskService.getTaskList().subscribe((list: Task[]) => {
-        this.taskList.next(list);
-      }));
+
+    const modalComponent = this.modalService.open(ModalComponent);
+    modalComponent.componentInstance.title = 'Delete Exportd Job';
+    modalComponent.componentInstance.modalMessage = 'Are you sure you want to delete this Exportd Job?';
+    modalComponent.componentInstance.buttonDeny = 'Cancel';
+    modalComponent.componentInstance.buttonAccept = 'Delete';
+    modalComponent.result.then((result) => {
+      if (result) {
+        this.taskService.deleteTask(itemID).subscribe(resp => console.log(resp),
+          error => {},
+          () => this.taskService.getTaskList().subscribe((list: ExportdJob[]) => {
+            this.taskList.next(list);
+          }));
+      }
+    });
   }
 
   ngOnDestroy(): void {

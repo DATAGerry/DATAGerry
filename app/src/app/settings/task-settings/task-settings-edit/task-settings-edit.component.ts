@@ -22,8 +22,8 @@ import { CmdbMode } from '../../../framework/modes.enum';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { TypeService } from '../../../framework/services/type.service';
 import { ActivatedRoute } from '@angular/router';
-import { Task } from '../../models/task';
-import { TaskService } from '../../services/task.service';
+import { ExportdJob } from '../../models/exportd-job';
+import { ExportdJobService } from '../../services/exportd-job.service';
 
 @Component({
   selector: 'cmdb-task-settings-edit',
@@ -34,16 +34,15 @@ export class TaskSettingsEditComponent implements OnInit {
 
   public taskID: number;
   public typeInstance: CmdbType;
-  public taskInstance: Task;
+  public taskInstance: ExportdJob;
   public mode: number = CmdbMode.Edit;
 
-  constructor(private typeService: TypeService, private taskService: TaskService, private route: ActivatedRoute) {
+  constructor(private typeService: TypeService, private taskService: ExportdJobService, private route: ActivatedRoute) {
     this.route.params.subscribe((id) => this.taskID = id.publicID);
   }
 
   public ngOnInit(): void {
-    // this.typeService.getType(this.typeID).subscribe((typeInstance: CmdbType) => this.typeInstance = typeInstance);
-    this.taskService.getTask(this.taskID).subscribe((taskInstance: Task) => this.taskInstance = taskInstance);
+    this.taskService.getTask(this.taskID).subscribe((taskInstance: ExportdJob) => this.taskInstance = taskInstance);
   }
 
 }

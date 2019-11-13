@@ -35,7 +35,7 @@ import { TaskVariablesStepComponent } from './task-settings-builder/task-variabl
 import { TaskSchedulingStepComponent } from './task-settings-builder/task-scheduling-step/task-scheduling-step.component';
 import { TaskCompleteStepComponent } from './task-settings-builder/task-complete-step/task-complete-step.component';
 import { DndModule } from 'ngx-drag-drop';
-import { ReactiveFormsModule } from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import {NgbTooltipModule} from "@ng-bootstrap/ng-bootstrap";
 
@@ -61,7 +61,8 @@ import {NgbTooltipModule} from "@ng-bootstrap/ng-bootstrap";
     DndModule,
     ReactiveFormsModule,
     NgSelectModule,
-    NgbTooltipModule
+    NgbTooltipModule,
+    FormsModule
   ]
 })
 export class TaskSettingsModule { }
