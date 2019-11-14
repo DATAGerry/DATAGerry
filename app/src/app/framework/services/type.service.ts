@@ -18,66 +18,132 @@
 
 import { Injectable } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
-import { ApiCallService } from '../../services/api-call.service';
-import {CmdbStatus} from "../models/cmdb-status";
-import {map} from "rxjs/operators";
+import { ApiCallService, ApiService } from '../../services/api-call.service';
+import { Observable, timer } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import { FormControl } from '@angular/forms';
+import { UserService } from '../../management/services/user.service';
+
+export const checkTypeExistsValidator = (typeService: TypeService<CmdbType>, time: number = 500) => {
+  return (control: FormControl) => {
+    return timer(time).pipe(switchMap(() => {
+      return typeService.checkTypeExists(control.value).pipe(
+        map(() => {
+          return { typeExists: true };
+        }),
+        catchError(() => {
+          return new Promise(resolve => {
+            resolve(null);
+          });
+        })
+      );
+    }));
+  };
+};
 
 @Injectable({
   providedIn: 'root'
 })
-export class TypeService {
+export class TypeService<T = CmdbType> implements ApiService {
 
-  private servicePrefix: string = 'type';
-  private typeList: CmdbType[];
+  public servicePrefix: string = 'type';
+  private typeList: T[];
 
   constructor(private api: ApiCallService) {
-    this.getTypeList().subscribe((respTypeList: CmdbType[]) => {
+    // STRUCTURE IS DEPRECATED PLEASE NOT USE
+    this.getTypeList().subscribe((respTypeList: T[]) => {
       this.typeList = respTypeList;
     });
   }
 
-  public findType(publicID: number): CmdbType {
+  public findType(publicID: number): T {
+    // FUNCTION IS DEPRECATED PLEASE NOT USE
+    // @ts-ignore
     return this.typeList.find(id => id.public_id === publicID);
   }
 
-  public getType(publicID: number) {
-    return this.api.callGetRoute<CmdbType>(this.servicePrefix + '/' + publicID);
+  public getType(publicID: number): Observable<T[]> {
+    return this.api.callGet<CmdbType>(this.servicePrefix + '/' + publicID).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
   }
 
-  public getTypeList() {
-    return this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/');
+  public getTypeList(): Observable<T[]> {
+    return this.api.callGet<CmdbType[]>(this.servicePrefix + '/').pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public postType(typeInstance: CmdbType): Observable<any> {
+    return this.api.callPost<T>(this.servicePrefix + '/', typeInstance).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public putType(typeInstance: CmdbType): Observable<any> {
+    return this.api.callPut<T>(this.servicePrefix + '/', typeInstance).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public deleteType(publicID: number): Observable<any> {
+    return this.api.callDelete<number>(this.servicePrefix + '/' + publicID).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public getTypeListByCategory(publicID: number): Observable<any> {
+    return this.api.callGet<T[]>(this.servicePrefix + '/category/' + publicID).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public updateTypeByCategoryID(publicID: number): Observable<any> {
+    return this.api.callPut<T>(this.servicePrefix + '/category/' + publicID, null).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public cleanupRemovedFields(publicID: number): Observable<any> {
+    return this.api.callGetRoute(this.servicePrefix + '/cleanup/remove/' + publicID).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public cleanupInsertedFields(publicID: number): Observable<any> {
+    return this.api.callGetRoute(this.servicePrefix + '/cleanup/update/' + publicID).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  // Validation functions
+  public checkTypeExists(typeName: string) {
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`);
   }
 
   public async validateTypeName(name: string) {
+    // FUNCTION IS DEPRECATED PLEASE NOT USE
+    // @ts-ignore
     return this.typeList.find(type => type.name === name) === undefined;
   }
 
-  public postType(typeInstance: CmdbType) {
-    return this.api.callPostRoute<number>(this.servicePrefix + '/', typeInstance);
-  }
-
-  public putType(typeInstance: CmdbType) {
-    return this.api.callPutRoute(this.servicePrefix + '/', typeInstance);
-  }
-
-  public deleteType(publicID: number) {
-    return this.api.callDeleteRoute<number>(this.servicePrefix + '/' + publicID);
-  }
-
-  public getTypeListByCategory(publicID: number) {
-    return this.api.callGetRoute<CmdbType[]>(this.servicePrefix + '/category/' + publicID);
-  }
-
-  public updateTypeByCategoryID(publicID: number) {
-    return this.api.callPutRoute(this.servicePrefix + '/category/' + publicID, null);
-  }
-
-  public cleanupRemovedFields(publicID: number) {
-    return this.api.callGetRoute(this.servicePrefix + '/cleanup/remove/' + publicID);
-  }
-
-  public cleanupInsertedFields(publicID: number) {
-    return this.api.callGetRoute(this.servicePrefix + '/cleanup/update/' + publicID);
-  }
 }
 

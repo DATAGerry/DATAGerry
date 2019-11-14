@@ -60,8 +60,21 @@ def get_type_list(request_user: User):
 def get_type(public_id: int, request_user: User):
     try:
         type_instance = object_manager.get_type(public_id)
-    except UserManagerGetError as err:
-        return abort(404, err)
+    except ObjectManagerGetError as err:
+        return abort(404, err.message)
+    return make_response(type_instance)
+
+
+@type_blueprint.route('/<string:name>/', methods=['GET'])
+@type_blueprint.route('/<string:name>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.framework.type.view')
+def get_type_by_name(name: str, request_user: User):
+    try:
+        type_instance = object_manager.get_type_by(name=name)
+    except ObjectManagerGetError as err:
+        return abort(404, err.message)
     return make_response(type_instance)
 
 
@@ -184,7 +197,7 @@ def delete_many_types(public_ids, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.type.view')
-def count_objects(request_user: User):
+def count_types(request_user: User):
     try:
         count = object_manager.count_types()
         resp = make_response(count)
