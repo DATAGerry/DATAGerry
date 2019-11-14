@@ -16,6 +16,7 @@
 
 import logging
 import datetime
+from typing import List
 
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.importer import JsonObjectParser, CsvObjectParser
@@ -57,7 +58,9 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
         super(JsonObjectImporter, self).__init__(file=file, file_type=self.FILE_TYPE, config=config, parser=parser,
                                                  object_manager=object_manager, request_user=request_user)
 
-    def generate_object(self, entry: dict) -> dict:
+    def generate_object(self, entry: dict, *args, **kwargs) -> dict:
+
+        possible_fields: List[dict] = kwargs['fields']
         mapping: dict = self.config.get_mapping()
         working_object: dict = {
             'type_id': self.config.get_type_id(),
@@ -67,10 +70,15 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
             'creation_time': datetime.datetime.utcnow()
         }
         map_properties = mapping.get('properties')
+
         for prop in map_properties:
             working_object = self._map_element(prop, entry, working_object)
 
-        working_object.update({'fields': entry.get('fields')})
+        LOGGER.debug(f'Current working object fields: {working_object.get("fields")}')
+        for entry_field in entry.get('fields'):
+            field_exists = next((item for item in possible_fields if item["name"] == entry_field['name']), None)
+            if field_exists:
+                working_object.get('fields').append(entry_field)
         return working_object
 
     def _map_element(self, prop, entry: dict, working: dict):
@@ -86,7 +94,9 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
 
     def start_import(self) -> ImporterObjectResponse:
         parsed_response: JsonObjectParserResponse = self.parser.parse(self.file)
-        import_objects: [dict] = self._generate_objects(parsed_response)
+        type_instance_fields: List = self.object_manager.get_type(self.config.get_type_id()).get_fields()
+
+        import_objects: [dict] = self._generate_objects(parsed_response, fields=type_instance_fields)
         import_result: ImporterObjectResponse = self._import(import_objects)
 
         return import_result
