@@ -1,26 +1,45 @@
 <div class="card">
-  <div class="card-header">Mapping</div>
-  <table class="table">
+  <div class="card-header">
+    <div class="float-left">
+      Mapping
+    </div>
+    <div class="float-right">
+      <form [formGroup]="previewIndexSelectionForm">
+        <select formControlName="indexSelection" class="custom-select custom-select-sm">
+          <option *ngFor="let _ of parsedData.entries; let idx = index" [value]="idx">
+            Row: {{idx}}
+          </option>
+        </select>
+      </form>
+    </div>
+    <div class="clearfix"></div>
+  </div>
+  <table class="table table-responsive w-100">
     <thead>
     <tr>
       <th>Identifier</th>
+      <th>Output format</th>
+      <th>Option</th>
       <th *ngIf="parserConfig.header">Header</th>
-      <th>Index</th>
+      <th *ngIf="!parserConfig.header">Index</th>
       <th>Example</th>
     </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let entry of [].constructor(parsedData?.entry_length); let idx = index">
-      <td dndDropzone [dndEffectAllowed]="allowedEffect" (dndDrop)="onDrop($event, currentMapping, idx, mappingControls)">
+    <tr *ngFor="let _ of [].constructor(parsedData?.entry_length); let idx = index">
+      <td dndDropzone [dndEffectAllowed]="allowedEffect"
+          (dndDrop)="onDrop($event, currentMapping, idx, mappingControls)">
         <div class="list-group-item list-group-item-action">
           <span>
             {{currentMapping[idx]?.label}}
           </span>
         </div>
       </td>
+      <td>
+      </td>
       <th *ngIf="parserConfig.header">{{parsedData.header[idx]}}</th>
-      <th>{{idx}}</th>
-      <td>{{parsedData.entries[0][idx]}}</td>
+      <th *ngIf="!parserConfig.header">{{idx}}</th>
+      <td>{{parsedData.entries[previewIndex][idx]}}</td>
     </tr>
     </tbody>
   </table>

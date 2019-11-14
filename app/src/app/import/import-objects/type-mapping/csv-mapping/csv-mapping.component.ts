@@ -18,7 +18,8 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TypeMappingBaseComponent } from '../type-mapping-base.component';
-import { ImportService } from '../../../import.service';
+import { FormControl, FormGroup } from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'cmdb-csv-mapping',
@@ -27,15 +28,31 @@ import { ImportService } from '../../../import.service';
 })
 export class CsvMappingComponent extends TypeMappingBaseComponent implements OnInit, OnDestroy {
 
+  public previewIndex: number = 0;
+  public previewIndexSelectionForm: FormGroup;
+  private previewSelectionSubscription: Subscription;
+
   constructor() {
     super();
+    this.previewIndexSelectionForm = new FormGroup({
+      indexSelection: new FormControl(0)
+    });
+    this.previewSelectionSubscription = this.previewIndexSelectionForm.get('indexSelection').valueChanges
+      .subscribe((change) => {
+        console.log(`Selected preview value: ${ change }`);
+        this.previewIndex = +change;
+      });
   }
 
+
   public ngOnInit(): void {
+    if (this.parsedData !== undefined) {
+
+    }
   }
 
   public ngOnDestroy(): void {
-
+    this.previewSelectionSubscription.unsubscribe();
   }
 
 

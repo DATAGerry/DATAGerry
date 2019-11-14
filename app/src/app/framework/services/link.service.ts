@@ -20,7 +20,6 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiCallService, ApiService } from '../../services/api-call.service';
-import { CmdbStatus } from '../models/cmdb-status';
 import { CmdbLink } from '../models/cmdb-link';
 
 
@@ -33,7 +32,15 @@ export class LinkService<T = CmdbLink> implements ApiService {
   constructor(private api: ApiCallService) {
   }
 
-  public postLink(data: CmdbLink) {
+  public getLinks(publicID: number): Observable<T[]> {
+    return this.api.callGet<T[]>(`${this.servicePrefix}/${publicID}/`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public postLink(data: CmdbLink): Observable<any> {
     return this.api.callPost<CmdbLink>(`${this.servicePrefix}/`, data).pipe(
       map((apiResponse) => {
         return apiResponse.body;

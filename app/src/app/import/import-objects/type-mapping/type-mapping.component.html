@@ -45,15 +45,18 @@
       </div>
       <div class="col-md-9">
         <template #mappingContainer></template>
+        <div class="float-right mt-2">
         <button type="button" class="btn btn-outline-primary" (click)="initMapping()">Reset</button>
-        <button type="button" class="btn btn-outline-secondary">Auto-Set</button>
+        <button type="button" class="btn btn-outline-secondary ml-2">Auto-Set</button>
+        </div>
+        <div class="clearfix"></div>
       </div>
     </div>
     <hr/>
   </section>
 </form>
 <button class="btn btn-primary prev" type="button" awPreviousStep>
-  <i class="fas fa-angle-double-left"></i> Previous step
+  <i class="fas fa-angle-double-left"></i> Previous Step
 </button>
 <button class="btn btn-primary next" type="button" [disabled]="configForm.invalid && currentMapping.length < 1"
         awNextStep>

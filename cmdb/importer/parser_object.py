@@ -93,8 +93,8 @@ class CsvObjectParser(BaseObjectParser, CSVContent):
                 parsed['header'] = next(csv_reader)
                 parsed['entry_length'] = len(parsed['header'])
             else:
-                parsed['entries'] = next(csv_reader)
-                parsed['entry_length'] = len(parsed['header'])
+                parsed['entries'].append(next(csv_reader))
+                parsed['entry_length'] = len(parsed['entries'][0])
             for row in csv_reader:
                 parsed['entries'].append(row)
         parsed['count'] = len(parsed['entries'])

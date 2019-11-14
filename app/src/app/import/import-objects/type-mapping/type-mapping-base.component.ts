@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { ImportService } from '../../import.service';
 import { Observable, Subscription } from 'rxjs';
 import { CmdbType } from '../../../framework/models/cmdb-type';
@@ -40,6 +40,7 @@ export class TypeMappingBaseComponent {
   public constructor() {
   }
 
+
   public onDragged(item: any, list: any[], effect: DropEffect) {
     if (effect === 'move') {
       const index = list.indexOf(item);
@@ -48,7 +49,6 @@ export class TypeMappingBaseComponent {
   }
 
   public onDrop(event: DndDropEvent, list: any[], index?: number, original?: any[]) {
-    console.log(list);
     if (typeof index === undefined) {
       index = list.length;
     } else {

@@ -3,7 +3,7 @@
     "short_name": "DATAGERRY",
     "icons": [
         {
-            "src": "/android-chrome-72x72.png",
+            "src": "/assets/img/android-chrome-72x72.png",
             "sizes": "72x72",
             "type": "image/png"
         }

@@ -11,8 +11,7 @@
     <label>File:</label>
     <div class="custom-file">
       <input [disabled]="fileFormat.invalid" (change)="selectFile($event.target.files)" type="file"
-             class="custom-file-input"
-             [accept]="selectedFileFormat">
+             class="custom-file-input" [accept]="selectedFileFormat">
       <label class="custom-file-label">{{fileName}}</label>
     </div>
   </div>

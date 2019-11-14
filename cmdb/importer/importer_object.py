@@ -23,7 +23,7 @@ from cmdb.importer.content_types import JSONContent, CSVContent
 from cmdb.importer.importer_base import ObjectImporter
 from cmdb.importer.importer_config import ObjectImporterConfig, FieldMapperMode
 from cmdb.importer.importer_response import ImporterObjectResponse
-from cmdb.importer.parser_object import JsonObjectParserResponse
+from cmdb.importer.parser_object import JsonObjectParserResponse, CsvObjectParserResponse
 from cmdb.importer.parser_response import ObjectParserResponse
 from cmdb.user_management import User
 
@@ -92,15 +92,39 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
         return import_result
 
 
+class CsvObjectImporterConfig(ObjectImporterConfig, JSONContent):
+    MANUALLY_MAPPING = True
+    DEFAULT_FIELD_MAPPER_VALUE = FieldMapperMode.MATCH
+    DEFAULT_FIELD_MAPPER: DEFAULT_FIELD_MAPPER_VALUE = DEFAULT_FIELD_MAPPER_VALUE.value
+    DEFAULT_MAPPING = {
+        'properties': {
+            'public_id': 'public_id',
+            'active': 'active',
+        },
+        'field_mode': DEFAULT_FIELD_MAPPER,
+        'fields': {
+        }
+    }
+
+    def __init__(self, type_id: int, mapping: dict = None, start_element: int = 0, max_elements: int = 0,
+                 overwrite_public: bool = True, *args, **kwargs):
+        super(CsvObjectImporterConfig, self).__init__(type_id=type_id, mapping=mapping, start_element=start_element,
+                                                      max_elements=max_elements, overwrite_public=overwrite_public)
+
+
 class CsvObjectImporter(ObjectImporter, CSVContent):
 
-    def __init__(self, file=None, config: ObjectImporterConfig = None,
+    def __init__(self, file=None, config: CsvObjectImporterConfig = None,
                  parser: CsvObjectParser = None):
         super(CsvObjectImporter, self).__init__(file=file, config=config, parser=parser)
 
-    def generate_objects(self, parsed: ObjectParserResponse) -> list:
-        raise NotImplementedError
+    def generate_object(self, entry: dict) -> dict:
+        return entry
 
     def start_import(self) -> ImporterObjectResponse:
-        parsed_data = self.parser.parse(self.file)
-        raise NotImplementedError
+        parsed_response: CsvObjectParserResponse = self.parser.parse(self.file)
+        import_objects: [dict] = self._generate_objects(parsed_response)
+        LOGGER.debug(f'CSV Object generation: \n {import_objects}')
+        # import_result: ImporterObjectResponse = self._import(import_objects)
+
+        return None
