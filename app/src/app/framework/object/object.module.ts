@@ -41,16 +41,20 @@ import { ObjectEditComponent } from './object-edit/object-edit.component';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectViewRenderComponent } from './components/object-view-render/object-view-render.component';
 import { ObjectCopyComponent } from './object-copy/object-copy.component';
-import { ObjectLinksComponent } from './components/object-links/object-links.component';
+import { ObjectLinksComponent } from './object-view/object-footer/object-links/object-links.component';
 import { ObjectTypeLabelComponent } from './components/object-type-label/object-type-label.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { ObjectLogListComponent } from './object-view/object-log-list/object-log-list.component';
-import { ObjectReferenceListComponent } from './object-view/object-reference-list/object-reference-list.component';
+import { ObjectLogListComponent } from './object-view/object-footer/object-log-list/object-log-list.component';
+import { ObjectReferenceListComponent } from './object-view/object-footer/object-reference-list/object-reference-list.component';
 import { ObjectLogComponent } from './object-log/object-log.component';
-import { ObjectLogChangeViewComponent } from './object-view/object-log-list/object-log-change-view/object-log-change-view.component';
-import { ObjectLogUserComponent } from './object-view/object-log-list/object-log-user/object-log-user.component';
+import { ObjectLogChangeViewComponent } from './object-view/object-footer/object-log-list/object-log-change-view/object-log-change-view.component';
+import { ObjectLogUserComponent } from './object-view/object-footer/object-log-list/object-log-user/object-log-user.component';
+import { ObjectLinkAddModalComponent } from './components/modals/object-link-add-modal/object-link-add-modal.component';
 
 @NgModule({
+  entryComponents: [
+    ObjectLinkAddModalComponent
+  ],
   declarations: [
     ObjectListComponent,
     ObjectViewComponent,
@@ -71,7 +75,8 @@ import { ObjectLogUserComponent } from './object-view/object-log-list/object-log
     ObjectReferenceListComponent,
     ObjectLogComponent,
     ObjectLogChangeViewComponent,
-    ObjectLogUserComponent],
+    ObjectLogUserComponent,
+    ObjectLinkAddModalComponent],
   imports: [
     CommonModule,
     ObjectRoutingModule,

@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { User } from '../../../../../management/models/user';
-import { UserService } from '../../../../../management/services/user.service';
+import { User } from '../../../../../../management/models/user';
+import { UserService } from '../../../../../../management/services/user.service';
 
 @Component({
   selector: 'cmdb-object-log-user',
