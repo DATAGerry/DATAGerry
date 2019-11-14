@@ -62,7 +62,7 @@ export class TypeService<T = CmdbType> implements ApiService {
     return this.typeList.find(id => id.public_id === publicID);
   }
 
-  public getType(publicID: number): Observable<T[]> {
+  public getType(publicID: number): Observable<T> {
     return this.api.callGet<CmdbType>(this.servicePrefix + '/' + publicID).pipe(
       map((apiResponse) => {
         return apiResponse.body;
