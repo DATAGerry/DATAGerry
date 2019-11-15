@@ -70,7 +70,7 @@
              aria-expanded="false"><fa-icon icon="cogs"></fa-icon></a>
           <div class="dropdown-menu dropdown-menu-right">
             <div class="dropdown-header">System</div>
-            <a class="dropdown-item" routerLink="/settings/system/">System Information</a>
+            <a class="dropdown-item" *permissionLink="'base.system.view'" routerLink="/settings/system/">System Information</a>
             <a class="dropdown-item" [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']">Server Information</a>
             <a class="dropdown-item" routerLink="/settings/system/properties">Database Properties</a>
             <div class="dropdown-header">User Managment</div>

@@ -18,8 +18,8 @@
 
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { TypeService } from '../../../framework/services/type.service';
-import { SidebarService } from '../../services/sidebar.service';
+import { TypeService } from '../../framework/services/type.service';
+import { SidebarService } from '../services/sidebar.service';
 
 @Component({
   selector: 'cmdb-sidebar',

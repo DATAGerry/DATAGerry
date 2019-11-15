@@ -17,9 +17,9 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { CmdbType } from '../../../framework/models/cmdb-type';
-import { ApiCallService } from '../../../services/api-call.service';
-import { TypeService } from '../../../framework/services/type.service';
+import { CmdbType } from '../../framework/models/cmdb-type';
+import { ApiCallService } from '../../services/api-call.service';
+import { TypeService } from '../../framework/services/type.service';
 
 @Component({
   selector: 'cmdb-sidebar-category',
