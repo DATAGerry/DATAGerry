@@ -11,7 +11,13 @@
               <i class="{{refObject?.type_information?.icon}}"></i> {{refObject?.type_information?.type_label}}
               #{{refObject?.object_information?.object_id}}
               <span *ngFor="let sum of refObject?.summaries; let last = last; let first = first">
-                <span *ngIf="first"> - </span>{{sum.value}}<span *ngIf="!last"> | </span>
+                <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
+                  <span *ngIf="first"> - </span>{{sum.value}}
+                </ng-template>
+                <ng-template #templateDate>
+                  <span *ngIf="first"> - </span>{{sum.value | date:"dd/MM/yy - hh:mm:ss"}}
+                </ng-template>
+                <span *ngIf="!last"> | </span>
               </span>
             </ng-container>
             <ng-container *ngIf="refObject == null"> No reference set </ng-container>
@@ -40,8 +46,14 @@
                   <i class="{{refObject?.type_information?.icon}}"></i> {{refObject?.type_information?.type_label}}
                   #{{refObject?.object_information?.object_id}}
                   <span *ngFor="let sum of refObject?.summaries; let last = last; let first = first">
-                  <span *ngIf="first"> - </span>{{sum.value}}<span *ngIf="!last"> | </span>
-                </span>
+                    <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
+                      <span *ngIf="first"> - </span>{{sum.value}}
+                    </ng-template>
+                    <ng-template #templateDate>
+                      <span *ngIf="first"> - </span>{{sum.value | date:"dd/MM/yy - hh:mm:ss"}}
+                    </ng-template>
+                    <span *ngIf="!last"> | </span>
+                  </span>
                 </ng-container>
                 <ng-container *ngIf="refObject == null"> No reference set </ng-container>
               </ng-container>
@@ -49,15 +61,27 @@
                 <i class="{{item?.type_information?.icon}}"></i> {{item?.type_information?.type_label}}
                  #{{item?.object_information?.object_id}}
                 <span *ngFor="let sum of item?.summaries; let last = last; let first = first">
-                <span *ngIf="first"> - </span>{{sum.value}}<span *ngIf="!last"> | </span>
-              </span>
+                  <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
+                    <span *ngIf="first"> - </span>{{sum.value}}
+                  </ng-template>
+                  <ng-template #templateDate>
+                    <span *ngIf="first"> - </span>{{sum.value | date:"dd/MM/yy - hh:mm:ss"}}
+                  </ng-template>
+                  <span *ngIf="!last"> | </span>
+                </span>
               </ng-container>
             </ng-template>
             <ng-template ng-option-tmp let-item="item" let-index="index">
               <i class="{{item?.type_information?.icon}}"></i> {{item?.type_information?.type_label}}
               # {{item?.object_information?.object_id}}
               <span *ngFor="let sum of item?.summaries; let last = last; let first = first">
-                <span *ngIf="first"> - </span>{{sum.value}}<span *ngIf="!last"> | </span>
+                <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
+                  <span *ngIf="first"> - </span>{{sum.value}}
+                </ng-template>
+                <ng-template #templateDate>
+                  <span *ngIf="first"> - </span>{{sum.value | date:"dd/MM/yy - hh:mm:ss"}}
+                </ng-template>
+                <span *ngIf="!last"> | </span>
               </span>
             </ng-template>
           </ng-select>

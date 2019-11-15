@@ -15,9 +15,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import time
 import cmdb.process_management.service
 import cmdb.exportd.exporter_base
+from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+from cmdb.utils.system_reader import SystemConfigReader
 
 LOGGER = logging.getLogger(__name__)
 
@@ -27,7 +28,11 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
     def __init__(self):
         super(ExportdService, self).__init__()
         self._name = "exportd"
-        self._eventtypes = ["cmdb.core.object.#", "cmdb.core.objecttype.#", "cmdb.exportd.#"]
+        self._eventtypes = ["cmdb.core.object.#",
+                            "cmdb.core.objects.#",
+                            "cmdb.core.objecttype.#",
+                            "cmdb.core.objecttypes.#",
+                            "cmdb.exportd.#"]
 
     def _run(self):
         # ToDo: for testing only
@@ -39,10 +44,14 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
         event_type = event.get_type()
         LOGGER.debug("event received: {}".format(event_type))
         # ToDo: schedule jobs
-        if event_type == "cmdb.core.object.listed":
-            self.__schedule_job()
+        if event_type == "cmdb.exportd.run_manual":
+            self.__schedule_job(event)
 
-    def __schedule_job(self):
+    def __schedule_job(self, event):
+        from cmdb.exportd.exportd_job.exportd_job_manager import exportd_job_manager
         # ToDo: schedule job only and handle execution in _run() (own thread)
-        job = cmdb.exportd.exporter_base.ExportJob()
+        scr = SystemConfigReader()
+        database_options = scr.get_all_values_from_section('Database')
+        obj = exportd_job_manager.get_job(event.get_param("id"))
+        job = cmdb.exportd.exporter_base.ExportJob(obj)
         job.execute()

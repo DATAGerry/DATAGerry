@@ -1,18 +1,23 @@
 <nav aria-label="breadcrumb">
   <ol [ngClass]="{ 'breadcrumb d-flex': allowBootstrap}"
       class="{{addClass ? '' + addClass : ''}}">
-    <li *ngFor="let breadcrumb of breadcrumbs; let last = last; let first = first"
-        [ngClass]="{ 'breadcrumb-item': allowBootstrap, 'list': true, 'active': last }">
-      <a *ngIf="first" [routerLink]="'/'">
-        {{breadcrumb.label}}
-      </a>
-      <a *ngIf="!last && !first" [routerLink]="hasParams(breadcrumb)">
-        {{breadcrumb.label}}
-      </a>
-      <span *ngIf="last && !first">{{ breadcrumb.label }}
-        <em *ngIf="breadcrumb.queryParams.value" class="text-primary">{{breadcrumb.queryParams.value}}</em>
-      </span>
+
+    <li class="breadcrumb-item">
+      <a routerLink="">Dashboard</a>
     </li>
+
+    <ng-container *ngFor="let breadcrumb of breadcrumbService.get() | async; let last = last">
+      <li *ngIf="breadcrumb.label !== 'Dashboard'"
+          [ngClass]="{ 'breadcrumb-item': allowBootstrap, 'list': true, 'active': last }">
+        <a *ngIf="!last" [routerLink]="hasParams(breadcrumb)">
+          {{breadcrumb.label}}
+        </a>
+        <span *ngIf="last">{{ breadcrumb.label }}
+          <em *ngIf="breadcrumb.queryParams.value" class="text-primary">{{breadcrumb.queryParams.value}}</em>
+      </span>
+      </li>
+    </ng-container>
+
     <div class="custom-control custom-switch ml-auto">
       <input type="checkbox" [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']"
              class="custom-control-input" name="active_cookiee" id="active_cookiee" checked/>

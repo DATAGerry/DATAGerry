@@ -1,5 +1,5 @@
 Name:       DATAGERRY
-Version:	1.0.0
+Version:	@@DG_BUILDVAR_VERSION@@
 Release:	1%{?dist}
 Summary:	DATAGERRY is an enterprise-grade OpenSource CMDB, which completely leaves the definition of object types to the user.
 

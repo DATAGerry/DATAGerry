@@ -19,7 +19,6 @@ Collection of different helper classes and functions
 """
 import re
 import importlib
-from functools import wraps
 
 
 def debug_print(self):
@@ -46,32 +45,6 @@ def get_config_dir():
     return os.path.join(os.path.dirname(__file__), '../../etc/')
 
 
-def timing(msg=None):
-    """
-    Time wrap function - Measures time of function duration
-    Args:
-        msg: output message
-
-    Returns:
-        wrap function
-    """
-
-    def _timing(f):
-        @wraps(f)
-        def wrap(*args, **kwargs):
-            import logging
-            import time
-            time1 = time.clock()
-            ret = f(*args)
-            time2 = time.clock()
-            logging.getLogger(__name__).debug('{} {:.3f}ms'.format(msg, (time2 - time1) * 1000.0))
-            return ret
-
-        return wrap
-
-    return _timing
-
-
 def load_class(classname):
     """ load and return the class with the given classname """
     # extract class from module
@@ -84,6 +57,21 @@ def load_class(classname):
     loaded_module = importlib.import_module(module_name)
     loaded_class = getattr(loaded_module, class_name)
     return loaded_class
+
+
+def get_module_classes(module_name):
+    """
+        Get all class of an module and return list of classes
+
+    """
+    import inspect
+
+    class_list = []
+    loaded_module = importlib.import_module(module_name)
+    for key, data in inspect.getmembers(loaded_module, inspect.isclass):
+        if module_name in str(data):
+            class_list.append(key)
+    return class_list
 
 
 def str_to_bool(s):

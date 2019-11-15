@@ -43,8 +43,10 @@ import { CheckboxSimpleComponent } from './simple/choice/checkbox-simple.compone
 import { RadioSimpleComponent } from './simple/choice/radio-simple.component';
 import { SelectSimpleComponent } from './simple/choice/select-simple.component';
 import { RouterModule } from '@angular/router';
-import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { RefSimpleComponent } from './simple/special/ref-simple.component';
+import { DateComponent } from './fields/date/date.component';
+import { DateSimpleComponent } from './simple/date/date-simple.component';
 
 
 @NgModule({
@@ -60,19 +62,41 @@ import { RefSimpleComponent } from './simple/special/ref-simple.component';
     RefComponent,
     CheckboxComponent,
     TextareaComponent,
+    DateComponent,
     TextSimpleComponent,
     PasswordSimpleComponent,
     CheckboxSimpleComponent,
     RadioSimpleComponent,
     SelectSimpleComponent,
     RefSimpleComponent,
+    DateSimpleComponent,
     RenderComponent,
     RenderElementComponent
   ],
   declarations: [
-    RenderComponent, RenderElementComponent, TextComponent, DummyComponent, PasswordComponent, EmailComponent, PhoneComponent,
-    HrefComponent, RadioComponent, SelectComponent, RefComponent, CheckboxComponent, TextareaComponent, ModeErrorComponent,
-    RenderErrorComponent, TextSimpleComponent, PasswordSimpleComponent, CheckboxSimpleComponent, RadioSimpleComponent, SelectSimpleComponent, RefSimpleComponent
+    RenderComponent,
+    RenderElementComponent,
+    TextComponent,
+    DummyComponent,
+    PasswordComponent,
+    EmailComponent,
+    PhoneComponent,
+    HrefComponent,
+    RadioComponent,
+    SelectComponent,
+    RefComponent,
+    CheckboxComponent,
+    TextareaComponent,
+    ModeErrorComponent,
+    RenderErrorComponent,
+    TextSimpleComponent,
+    PasswordSimpleComponent,
+    CheckboxSimpleComponent,
+    RadioSimpleComponent,
+    SelectSimpleComponent,
+    RefSimpleComponent,
+    DateSimpleComponent,
+    DateComponent
   ],
   exports: [
     RenderElementComponent,

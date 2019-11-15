@@ -18,13 +18,28 @@
 
 import { Injectable } from '@angular/core';
 import { ApiCallService, ApiService, httpObserveOptions } from '../../services/api-call.service';
-import { AuthService } from '../../auth/services/auth.service';
 import { Group } from '../models/group';
-import { CmdbStatus } from '../../framework/models/cmdb-status';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { User } from '../models/user';
+import { Observable, timer } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { HttpParams } from '@angular/common/http';
+import { FormControl } from '@angular/forms';
+
+export const checkGroupExistsValidator = (groupService: GroupService, time: number = 500) => {
+  return (control: FormControl) => {
+    return timer(time).pipe(switchMap(() => {
+      return groupService.checkGroupExists(control.value).pipe(
+        map(() => {
+          return { groupExists: true };
+        }),
+        catchError(() => {
+          return new Promise(resolve => {
+            resolve(null);
+          });
+        })
+      );
+    }));
+  };
+};
 
 @Injectable({
   providedIn: 'root'
@@ -32,17 +47,8 @@ import { HttpParams } from '@angular/common/http';
 export class GroupService<T = Group> implements ApiService {
 
   public servicePrefix: string = 'group';
-  private groups: any[];
 
   constructor(private api: ApiCallService) {
-    this.getGroupList().subscribe((groups: T[]) => {
-      this.groups = groups;
-    });
-  }
-
-  // Find calls
-  public findGroup(publicID: number): Group {
-    return this.groups.find(g => g.public_id === publicID);
   }
 
   // CRUD calls
@@ -93,6 +99,11 @@ export class GroupService<T = Group> implements ApiService {
         return apiResponse.body;
       })
     );
+  }
+
+  // Special functions
+  public checkGroupExists(groupName: string) {
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ groupName }`);
   }
 
 }

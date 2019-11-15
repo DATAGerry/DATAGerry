@@ -13,6 +13,9 @@
             <div class="float-right" *ngIf="name.errors.required">
               Name is required
             </div>
+            <div class="float-right" *ngIf="name.errors.groupExists">
+              Group with this name already exists
+            </div>
             <div class="clearfix"></div>
           </div>
         </div>
@@ -23,6 +26,13 @@
           <input type="text" formControlName="label" class="form-control" placeholder="Label"
                  [ngClass]="{ 'is-valid': label.valid && (label.dirty || label.touched),
                  'is-invalid': label.invalid && (label.dirty || label.touched)}">
+          <div *ngIf="label.invalid && (label.dirty || label.touched)"
+               class="invalid-feedback">
+            <div class="float-right" *ngIf="label.errors.required">
+              Label is required
+            </div>
+            <div class="clearfix"></div>
+          </div>
         </div>
       </div>
     </div>

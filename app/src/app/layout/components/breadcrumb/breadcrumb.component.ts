@@ -22,7 +22,6 @@ import { BreadcrumbItem } from './breadcrumb.model';
 import { BreadcrumbService } from './breadcrumb.service';
 import { ActivatedRoute, NavigationEnd, PRIMARY_OUTLET, Router } from '@angular/router';
 
-
 @Component({
   selector: 'cmdb-breadcrumb',
   templateUrl: './breadcrumb.component.html',
@@ -30,13 +29,6 @@ import { ActivatedRoute, NavigationEnd, PRIMARY_OUTLET, Router } from '@angular/
   encapsulation: ViewEncapsulation.None
 })
 export class BreadcrumbComponent implements OnInit {
-  private ROUTE_DATA_BREADCRUMB: string = 'breadcrumb';
-  private ROUTE_PARAM_BREADCRUMB: string = 'breadcrumb';
-  private PREFIX_BREADCRUMB: string = 'prefixBreadcrumb';
-
-  private currentBreadcrumbs: BreadcrumbItem[];
-  public breadcrumbs: BreadcrumbItem[];
-  private lastBreadCrumbRoute: ActivatedRoute = null;
 
   @Input()
   public allowBootstrap: boolean = true;
@@ -45,10 +37,8 @@ export class BreadcrumbComponent implements OnInit {
   public addClass: string;
 
 
-  public constructor(private breadcrumbService: BreadcrumbService, private activatedRoute: ActivatedRoute, private router: Router) {
-    breadcrumbService.get().subscribe((breadcrumbs: BreadcrumbItem[]) => {
-      this.breadcrumbs = breadcrumbs as BreadcrumbItem[];
-    });
+  public constructor(public breadcrumbService: BreadcrumbService, private activatedRoute: ActivatedRoute, private router: Router) {
+
   }
 
   public hasParams(breadcrumb: BreadcrumbItem) {
@@ -58,68 +48,45 @@ export class BreadcrumbComponent implements OnInit {
 
   public ngOnInit() {
     if (this.router.navigated) {
-      this.generateBreadcrumbTrail();
+      this.breadcrumbService.store(this.getBreadcrumbs(this.activatedRoute.root));
     }
 
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd
       )).subscribe(event => {
-      this.generateBreadcrumbTrail();
+      this.breadcrumbService.store(this.getBreadcrumbs(this.activatedRoute.root));
     });
   }
 
-  private generateBreadcrumbTrail() {
-    let currentRoute: ActivatedRoute = this.activatedRoute.root;
-    this.currentBreadcrumbs = [];
+  private getBreadcrumbs(route: ActivatedRoute, url: string= '', breadcrumbs: BreadcrumbItem[]= []): BreadcrumbItem[] {
+    const ROUTE_DATA_BREADCRUMB: string = 'breadcrumb';
+    const currentRoute: ActivatedRoute[] = route.children;
 
-    while (currentRoute.children.length > 0) {
-      const childrenRoutes: ActivatedRoute[] = currentRoute.children;
-
-      childrenRoutes.forEach(route => {
-        currentRoute = route;
-        if (route.outlet !== PRIMARY_OUTLET) {
-          return;
-        }
-        this.buildBreadCrumb(route);
-        this.lastBreadCrumbRoute = route;
-      });
+    if (currentRoute.length === 0) {
+      return breadcrumbs;
     }
-    if (this.lastBreadCrumbRoute.firstChild) {
-      this.buildBreadCrumb(this.lastBreadCrumbRoute.firstChild);
-    }
-  }
 
-  private buildBreadCrumb(route: ActivatedRoute) {
-    let breadCrumbLabel: string = '';
-    let urlx: string = '';
-    const hasData = (route.routeConfig && route.routeConfig.data);
-    const hasDynamicBreadcrumb: boolean = route.snapshot.params.hasOwnProperty(this.ROUTE_PARAM_BREADCRUMB);
+    for (const child of currentRoute) {
+      if (child.outlet !== PRIMARY_OUTLET) {
+        continue;
+      }
 
-    if (hasData || hasDynamicBreadcrumb) {
-      if (hasDynamicBreadcrumb) {
-        breadCrumbLabel = route.snapshot.params[this.ROUTE_PARAM_BREADCRUMB].replace(/_/g, ' ');
-      } else if (route.snapshot.data.hasOwnProperty(this.ROUTE_DATA_BREADCRUMB)) {
-        breadCrumbLabel = route.snapshot.data[this.ROUTE_DATA_BREADCRUMB];
-        breadCrumbLabel = breadCrumbLabel;
+      if (!child.snapshot.data.hasOwnProperty(ROUTE_DATA_BREADCRUMB)) {
+        return this.getBreadcrumbs(child, url, breadcrumbs);
       }
-      const routeURL: string = route.snapshot.url.map(segment => segment.path).join('/');
-      urlx += `${routeURL}`;
-      if (routeURL.length === 0) {
-        route.snapshot.params = {};
-      }
+
+      const routeURL: string = child.snapshot.url.map(segment => segment.path).join('/');
+      url += `/${routeURL}`;
+
       const breadcrumb: BreadcrumbItem = {
-        label: breadCrumbLabel,
-        params: route.snapshot.params,
-        queryParams: route.snapshot.queryParams,
-        url: urlx
+        label: child.snapshot.data[ROUTE_DATA_BREADCRUMB],
+        params: child.snapshot.params,
+        queryParams: child.snapshot.queryParams,
+        url
       };
+      breadcrumbs.push(breadcrumb);
 
-      if (route.snapshot.data.hasOwnProperty(this.PREFIX_BREADCRUMB)) {
-        this.breadcrumbService.storePrefixed(breadcrumb);
-      } else {
-        this.currentBreadcrumbs.push(breadcrumb);
-      }
-      this.breadcrumbService.store(this.currentBreadcrumbs);
+      return this.getBreadcrumbs(child, url, breadcrumbs);
     }
   }
 }

@@ -40,6 +40,10 @@ export class UsersDeleteComponent implements OnInit, OnDestroy {
   private userServiceObserver: Observable<User>;
   private userServiceSubscription: Subscription;
 
+  // Action
+  private userDeleteObserver: Observable<boolean>;
+  private userDeleteSubscription: Subscription;
+
   constructor(private userService: UserService, private router: Router, private route: ActivatedRoute,
               private toast: ToastService) {
     this.routeParamObserver = this.route.params;
@@ -60,11 +64,18 @@ export class UsersDeleteComponent implements OnInit, OnDestroy {
   public ngOnDestroy(): void {
     this.routeParamSubscription.unsubscribe();
     this.userServiceSubscription.unsubscribe();
+    this.userDeleteSubscription.unsubscribe();
   }
 
-  public onDelete(): void{
-    this.userService.deleteUser(this.userID).subscribe((ack: boolean) => {
-      this.toast.show('User was deleted');
+  public onDelete(): void {
+    this.userDeleteObserver = this.userService.deleteUser(this.userID);
+    this.userDeleteSubscription = this.userDeleteObserver.subscribe((ack: boolean) => {
+        this.toast.show('User was deleted');
+      },
+      (error) => {
+        this.toast.error(error.error.description);
+      }
+    ).add(() => {
       this.router.navigate(['/management/users']);
     });
   }

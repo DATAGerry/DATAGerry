@@ -29,6 +29,7 @@ import { LayoutModule } from '../layout/layout.module';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
 import {NgSelectModule} from "@ng-select/ng-select";
+import {RenderModule} from "../framework/render/render.module";
 
 
 @NgModule({
@@ -42,7 +43,8 @@ import {NgSelectModule} from "@ng-select/ng-select";
     DataTablesModule,
     NgxSpinnerModule,
     FontAwesomeModule,
-    NgSelectModule
+    NgSelectModule,
+    RenderModule
   ],
 
   providers: [ApiCallService]

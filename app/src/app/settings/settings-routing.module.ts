@@ -22,6 +22,7 @@ import { NavigationComponent } from '../layout/components/navigation/navigation.
 import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
 import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';
 import { FooterComponent } from '../layout/components/footer/footer.component';
+import { SettingsComponent } from './settings.component';
 
 const routes: Routes = [
   {
@@ -45,6 +46,13 @@ const routes: Routes = [
     outlet: 'footer'
   },
   {
+    path: '',
+    data: {
+      breadcrumb: 'Overview'
+    },
+    component: SettingsComponent
+  },
+  {
     path: 'system',
     data: {
       breadcrumb: 'System'
@@ -57,6 +65,13 @@ const routes: Routes = [
       breadcrumb: 'Logs'
     },
     loadChildren: () => import('./log-settings/log-settings.module').then(m => m.LogSettingsModule)
+  },
+  {
+    path: 'exportdjob',
+    data: {
+      breadcrumb: 'Exportd Job'
+    },
+    loadChildren: () => import('./task-settings/task-settings.module').then(m => m.TaskSettingsModule)
   }
 ];
 

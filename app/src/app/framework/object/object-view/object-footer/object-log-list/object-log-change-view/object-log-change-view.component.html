@@ -1,0 +1,21 @@
+<div [ngSwitch]="action">
+  <div *ngSwitchCase="modes.ACTIVE_CHANGE">
+    <cmdb-active-badge [activeStatus]="changes['old']"></cmdb-active-badge>
+    <i class="fas fa-arrow-right"></i>
+    <cmdb-active-badge [activeStatus]="changes['new']"></cmdb-active-badge>
+  </div>
+  <div *ngSwitchCase="modes.CREATE">
+    -
+  </div>
+  <div *ngSwitchCase="modes.EDIT">
+    <ul class="list-unstyled">
+      <li *ngFor="let change of changes?.old; let i = index">
+        <b>{{change?.name}}</b><br />
+        {{change?.value}} <i class="fas fa-arrow-right"></i> {{changes?.new[i]?.value}}
+      </li>
+    </ul>
+  </div>
+  <div *ngSwitchDefault>
+    Unknown action
+  </div>
+</div>

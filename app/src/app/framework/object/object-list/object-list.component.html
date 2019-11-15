@@ -18,21 +18,22 @@
               *ngFor="let item of formatList"
               (click)="exportingFiles(item)"
               [ngbTooltip]="item.helperText">
-            <fa-icon icon="{{item.icon}}"></fa-icon> {{item.label}} ({{selectedObjects}})
+            <fa-icon icon="{{item.icon}}"></fa-icon> {{item.label}}
+            <span *ngIf="selectedObjects.length == 0">( all )</span>
+            <span *ngIf="selectedObjects.length > 0"> ( {{selectedObjects.length}} )</span>
           </li>
         </ul>
       </div>
     </span>
   </div>
 
-  <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table framework-table table-striped table-bordered">
+  <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
+         id="object-list-datatable"
+         class="table framework-table table-striped table-bordered">
     <ng-container *ngFor="let results of objectLists">
       <thead>
       <tr>
-        <th class="toggle-check nosort" style="text-align: center">
-          <input type="checkbox" class="select-all-checkbox" (click)="selectAll()">
-        </th>
-
+        <th class="no-displ"><input type="checkbox" class="selectAll" name="selectAll" value="all" (click)="selectAll()"></th>
         <th class="toggle-active">Active</th>
         <th class="toggle-id">ID</th>
         <th class="toggle-type">Type</th>
@@ -50,9 +51,7 @@
       </thead>
       <tbody>
       <tr *ngFor="let result of results.items">
-        <td style="text-align: center">
-          <input id="{{result?.object_information.object_id}}" class="select-checkbox" type="checkbox" (click)="updateDisplay()">
-        </td>
+        <td></td>
         <td>
           <cmdb-active-badge [activeStatus]="result?.object_information.active"></cmdb-active-badge>
         </td>
@@ -70,7 +69,8 @@
         <td>{{result?.type_information.author_name}}</td>
         <td>{{result?.object_information.creation_time?.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
         <td>
-          <a class="text-dark"[routerLink]="['/framework/object/view', result?.object_information.object_id]">
+          <a class="text-dark"
+             [routerLink]="[hasSummaries ? '/framework/object/type/view' : '/framework/object/view',result?.object_information.object_id]">
             <fa-icon [icon]="['far', 'eye']"></fa-icon>
           </a>
           <a class="ml-1 text-dark" [routerLink]="['/framework/object/edit/', result?.object_information.object_id]">

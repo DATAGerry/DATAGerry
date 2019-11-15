@@ -24,13 +24,17 @@ import signal
 from time import sleep
 from argparse import ArgumentParser, Namespace
 from cmdb.utils.logger import get_logging_conf
-from cmdb.utils.helpers import timing
+from cmdb.utils.wraps import timing
 from sys import exit
+
 
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
     CMDBError = Exception
+
+from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
 
 # setup logging for startup
 logging.config.dictConfig(get_logging_conf())
@@ -53,10 +57,14 @@ def _check_database():
 
     """
 
-    from cmdb.utils.system_reader import SystemConfigReader
-    from cmdb.data_storage import get_pre_init_database
-    LOGGER.info(f'Checking database connection with {SystemConfigReader.DEFAULT_CONFIG_NAME} data')
-    dbm = get_pre_init_database()
+    ssc = SystemConfigReader()
+    LOGGER.info(f'Checking database connection with {ssc.config_name} data')
+    database_options = ssc.get_all_values_from_section('Database')
+    dbm = DatabaseManagerMongo(
+        connector=MongoConnector(
+            **database_options
+        )
+    )
     connection_test = dbm.database_connector.is_connected()
     LOGGER.debug(f'Database status is {connection_test}')
     if connection_test is True:
@@ -100,7 +108,6 @@ def _stop_app(signum, frame):
 def _init_config_reader(config_file):
     import os
 
-    from cmdb.utils.system_reader import SystemConfigReader
     path, filename = os.path.split(config_file)
     if filename is not SystemConfigReader.DEFAULT_CONFIG_NAME or path is not SystemConfigReader.DEFAULT_CONFIG_LOCATION:
         SystemConfigReader.RUNNING_CONFIG_NAME = filename
@@ -127,6 +134,9 @@ def build_arg_parser() -> Namespace:
     _parser.add_argument('--keys', action='store_true', default=False, dest='keys',
                          help="init keys")
 
+    _parser.add_argument('--update', action='store_true', default=False, dest='update',
+                         help="update cmdb")
+
     _parser.add_argument('--test', action='store_true', default=False, dest='test_data',
                          help="generate and insert test data")
 
@@ -142,7 +152,7 @@ def build_arg_parser() -> Namespace:
     return _parser.parse_args()
 
 
-@timing('CMDB start took')
+@timing('CMDB start')
 def main(args):
     """
     Default application start function
@@ -174,7 +184,7 @@ def main(args):
             LOGGER.warning(f'The setup did not go through as expected - Status {setup_status}')
 
         if setup_status == SetupRoutine.SetupStatus.FINISHED:
-            exit(0)
+            pass
         else:
             exit(1)
 
@@ -193,25 +203,46 @@ def main(args):
         else:
             exit(1)
 
+    if args.update:
+        from cmdb.__setup__ import SetupRoutine
+        setup_routine = SetupRoutine()
+        setup_status = None
+        try:
+            setup_status = setup_routine.update_database_collection()
+        except RuntimeError as err:
+            LOGGER.error(err)
+            setup_status = setup_routine.get_setup_status()
+            LOGGER.warning(f'The setup did not go through as expected - Status {setup_status}')
+
+        if setup_status == SetupRoutine.SetupStatus.FINISHED:
+            pass
+        else:
+            exit(1)
+
     if args.test_data:
         _activate_debug()
         from cmdb.utils.data_factory import DataFactory
-        from cmdb.data_storage import get_pre_init_database
 
-        _factory_database_manager = get_pre_init_database()
-        db_name = _factory_database_manager.get_database_name()
+        ssc = SystemConfigReader()
+        database_options = ssc.get_all_values_from_section('Database')
+        dbm = DatabaseManagerMongo(
+            connector=MongoConnector(
+                **database_options
+            )
+        )
+        db_name = dbm.get_database_name()
         LOGGER.warning(f'Inserting test-data into: {db_name}')
         try:
-            factory = DataFactory(database_manager=_factory_database_manager)
+            factory = DataFactory(database_manager=dbm)
             ack = factory.insert_data()
-            LOGGER.warning("Test-data was successfully added".format(_factory_database_manager.get_database_name()))
+            LOGGER.warning("Test-data was successfully added".format(dbm.get_database_name()))
             if len(ack) > 0:
                 LOGGER.critical("Error while inserting test-data: {} - dropping database".format(ack))
-                _factory_database_manager.drop(db_name)  # cleanup database
+                dbm.drop(db_name)  # cleanup database
         except (Exception, CMDBError) as e:
             import traceback
             traceback.print_tb(e.__traceback__)
-            _factory_database_manager.drop(db_name)  # cleanup database
+            dbm.drop(db_name)  # cleanup database
             exit(1)
     if args.start:
         _start_app()

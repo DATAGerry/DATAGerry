@@ -53,6 +53,7 @@ export class GroupsEditComponent implements OnInit, OnDestroy {
       label: new FormControl(''),
       rights: new FormControl([], Validators.minLength(1))
     });
+    this.editForm.get('name').disable();
   }
 
   public ngOnInit(): void {

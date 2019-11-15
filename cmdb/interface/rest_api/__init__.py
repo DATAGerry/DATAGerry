@@ -19,7 +19,11 @@ Init module for rest routes
 """
 import logging
 
+from cmdb.framework.cmdb_log_manager import CmdbLogManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
+from cmdb.user_management import UserManager
+from cmdb.utils import SecurityManager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -49,24 +53,41 @@ def create_rest_api(event_queue):
 
     cache = Cache(config=cache_config)
 
-    # Create object manager
+    # Create manager
     from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
-
     app_database = DatabaseManagerMongo(
         connector=MongoConnector(
-            host=system_config_reader.get_value('host', 'Database'),
-            port=int(system_config_reader.get_value('port', 'Database')),
-            database_name=system_config_reader.get_value('database_name', 'Database')
+            **system_config_reader.get_all_values_from_section('Database')
         )
     )
     object_manager = CmdbObjectManager(
         database_manager=app_database,
         event_queue=event_queue
     )
+    log_manager = CmdbLogManager(
+        database_manager=app_database
+    )
+
+    security_manager = SecurityManager(
+        database_manager=app_database
+    )
+
+    user_manager = UserManager(
+        database_manager=app_database,
+        security_manager=security_manager
+    )
+
+    exportd_job_manager = ExportdJobManagement(
+        database_manager=app_database,
+        event_queue=event_queue
+    )
 
     # Create APP
     from cmdb.interface.cmdb_app import BaseCmdbApp
-    app = BaseCmdbApp(__name__, object_manager=object_manager)
+
+    app = BaseCmdbApp(__name__, database_manager=app_database, exportd_manager=exportd_job_manager,
+                      object_manager=object_manager, log_manager=log_manager, user_manager=user_manager,
+                      security_manager=security_manager)
 
     # Import App Extensions
     from flask_cors import CORS
@@ -100,21 +121,23 @@ def register_converters(app):
 
 def register_blueprints(app):
     from cmdb.interface.rest_api.connection import connection_routes
-    from cmdb.interface.rest_api.object_routes import object_blueprint
-    from cmdb.interface.rest_api.type_routes import type_blueprint
+    from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint
+    from cmdb.interface.rest_api.framework_routes.type_routes import type_blueprint
     from cmdb.interface.rest_api.auth_routes import auth_blueprint
-    from cmdb.interface.rest_api.category_routes import categories_blueprint
-    from cmdb.interface.rest_api.user_management.user_routes import user_blueprint
-    from cmdb.interface.rest_api.user_management.right_routes import right_blueprint
-    from cmdb.interface.rest_api.user_management.group_routes import group_blueprint
+    from cmdb.interface.rest_api.framework_routes.category_routes import categories_blueprint
+    from cmdb.interface.rest_api.user_management_routes.user_routes import user_blueprint
+    from cmdb.interface.rest_api.user_management_routes.right_routes import right_blueprint
+    from cmdb.interface.rest_api.user_management_routes.group_routes import group_blueprint
     from cmdb.interface.rest_api.search_routes import search_blueprint
-    from cmdb.interface.rest_api.file_routes import file_blueprint
-    from cmdb.interface.rest_api.export_type_routes import type_export_blueprint
-    from cmdb.interface.rest_api.status_routes import status_blueprint
-    from cmdb.interface.rest_api.collection_routes import collection_blueprint
+    from cmdb.interface.rest_api.exporter_routes.file_routes import file_blueprint
+    from cmdb.interface.rest_api.exporter_routes.export_type_routes import type_export_blueprint
+    from cmdb.interface.rest_api.framework_routes.status_routes import status_blueprint
+    from cmdb.interface.rest_api.framework_routes.collection_routes import collection_blueprint
     from cmdb.interface.rest_api.log_routes import log_blueprint
-    from cmdb.interface.rest_api.settings_routes import settings_blueprint
+    from cmdb.interface.rest_api.setting_routes import settings_blueprint
     from cmdb.interface.rest_api.import_routes import importer_blueprint
+    from cmdb.interface.rest_api.exporter_routes.exportd_job_routes import exportd_job_blueprint
+    from cmdb.interface.rest_api.external_systems_routes import external_system
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(object_blueprint)
@@ -132,6 +155,8 @@ def register_blueprints(app):
     app.register_blueprint(log_blueprint)
     app.register_blueprint(settings_blueprint)
     app.register_blueprint(importer_blueprint)
+    app.register_blueprint(exportd_job_blueprint)
+    app.register_blueprint(external_system)
 
 
 def register_error_pages(app):

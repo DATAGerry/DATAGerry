@@ -24,6 +24,7 @@ import { TextareaEditComponent } from './edits/textarea-edit.component';
 import { RefFieldEditComponent } from './edits/ref-field-edit.component';
 import { ChoiceFieldEditComponent } from './edits/choice-field-edit.component';
 import { CheckFieldEditComponent } from './edits/check-field-edit.component';
+import { DateFieldEditComponent } from './edits/date-field-edit.component';
 
 export const configComponents: { [type: string]: any } = {
   text: TextFieldEditComponent,
@@ -37,5 +38,6 @@ export const configComponents: { [type: string]: any } = {
   checkbox: CheckFieldEditComponent,
   radio: ChoiceFieldEditComponent,
   select: ChoiceFieldEditComponent,
+  date: DateFieldEditComponent,
   debug: DummyFieldEditComponent
 };

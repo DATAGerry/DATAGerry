@@ -19,6 +19,7 @@ import datetime
 import re
 
 from cmdb.framework.cmdb_render import RenderVisualization
+from cmdb.importer.importer_response import ImportMessage, BaseImporterResponse
 
 try:
     import uuid
@@ -40,14 +41,21 @@ def default(obj):
     from cmdb.framework import CmdbDAO
     from cmdb.user_management import UserManagementBase
     from cmdb.user_management.user_right import BaseRight
+    from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
     """Helper function for converting cmdb objects to json"""
     if isinstance(obj, CmdbDAO):
         return obj.__dict__
     if isinstance(obj, UserManagementBase):
         return obj.__dict__
+    if isinstance(obj, JobManagementBase):
+        return obj.__dict__
     if isinstance(obj, BaseRight):
         return obj.__dict__
     if isinstance(obj, RenderVisualization):
+        return obj.__dict__
+    if isinstance(obj, BaseImporterResponse):
+        return obj.__dict__
+    if isinstance(obj, ImportMessage):
         return obj.__dict__
     if isinstance(obj, bytes):
         return obj.decode("utf-8")

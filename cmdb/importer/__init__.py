@@ -15,7 +15,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from cmdb.importer.parser_object import CsvObjectParser, JsonObjectParser
-from cmdb.importer.importer_object import JsonObjectImporter, CsvObjectImporter, JsonObjectImporterConfig
+from cmdb.importer.importer_object import JsonObjectImporter, CsvObjectImporter, JsonObjectImporterConfig, \
+    CsvObjectImporterConfig
 
 try:
     from cmdb.utils.error import CMDBError
@@ -28,12 +29,13 @@ __OBJECT_IMPORTER__ = {
 }
 
 __OBJECT_IMPORTER_CONFIG__ = {
-    'json': JsonObjectImporterConfig
+    'json': JsonObjectImporterConfig,
+    'csv': CsvObjectImporterConfig
 }
 
 __OBJECT_PARSER__ = {
-    'csv': CsvObjectParser,
-    'json': JsonObjectParser
+    'json': JsonObjectParser,
+    'csv': CsvObjectParser
 }
 
 
@@ -67,6 +69,7 @@ def load_importer_config_class(importer_type: str, importer_name: str):
     __importer_config = {
         'object': {
             JsonObjectImporterConfig.CONTENT_TYPE: JsonObjectImporterConfig,
+            CsvObjectImporterConfig.CONTENT_TYPE: CsvObjectImporterConfig
         }
     }
     try:

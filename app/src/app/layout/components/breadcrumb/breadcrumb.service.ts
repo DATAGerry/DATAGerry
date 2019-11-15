@@ -18,58 +18,41 @@
 
 import { Injectable } from '@angular/core';
 import { BreadcrumbItem } from './breadcrumb.model';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { TypeService } from '../../../framework/services/type.service';
+import { ObjectService } from '../../../framework/services/object.service';
+import { RenderResult } from '../../../framework/models/cmdb-render';
 
 @Injectable()
 export class BreadcrumbService {
 
-  private breadcrumbs: BreadcrumbItem[];
-  private readonly prefixedBreadcrumbs: BreadcrumbItem[] = [];
-  public breadcrumbsSource: Subject<BreadcrumbItem[]>;
-  public breadcrumbsChanged$: Observable<BreadcrumbItem[]>;
+  public breadcrumbsSource: BehaviorSubject<BreadcrumbItem[]>;
 
-  constructor() {
-    this.breadcrumbs = [];
-    this.breadcrumbsSource = new Subject<BreadcrumbItem[]>();
-    this.breadcrumbsChanged$ = this.breadcrumbsSource.asObservable();
-
-    if (localStorage.getItem('prefixedBreadcrumbs') != null) {
-      this.prefixedBreadcrumbs = (JSON.parse(localStorage.getItem('prefixedBreadcrumbs')));
-    }
+  constructor(private typeService: TypeService, private objService: ObjectService) {
+    this.breadcrumbsSource = new BehaviorSubject<BreadcrumbItem[]>([]);
   }
 
   public store(breadcrumbs: BreadcrumbItem[]) {
-    this.breadcrumbs = breadcrumbs;
+    if (breadcrumbs) {
+      //  Exceptions for type Routes
+      const typeLabel = breadcrumbs.find(x => x.label === 'Object Type List');
+      if (typeLabel && typeLabel.params.publicID !== undefined) {
+        this.typeService.getType(typeLabel.params.publicID).subscribe(type => typeLabel.label = type.label);
+      }
 
-    const allBreadcrumbs = this.prefixedBreadcrumbs.concat(this.breadcrumbs);
-    this.breadcrumbsSource.next(allBreadcrumbs);
-
-  }
-
-  public storePrefixed(breadcrumb: BreadcrumbItem) {
-    this.storeIfUnique(breadcrumb);
-    localStorage.setItem('prefixedBreadcrumbs', JSON.stringify(this.prefixedBreadcrumbs));
-    const allBreadcrumbs = this.prefixedBreadcrumbs.concat(this.breadcrumbs);
-    this.breadcrumbsSource.next(allBreadcrumbs);
-
+      const typeViewLabel = breadcrumbs.find(x => x.label === 'Type View');
+      if (typeViewLabel && typeViewLabel.params.publicID !== undefined) {
+        typeViewLabel.label = 'View';
+        this.objService.getObject(breadcrumbs[breadcrumbs.length - 1].params.publicID).subscribe((test: RenderResult) => {
+          breadcrumbs[breadcrumbs.length - 2].url = 'object/type/' + test.type_information.type_id;
+          breadcrumbs[breadcrumbs.length - 2].label = test.type_information.type_label;
+        });
+      }
+      this.breadcrumbsSource.next(breadcrumbs);
+    }
   }
 
   public get() {
-    return this.breadcrumbsChanged$;
+    return this.breadcrumbsSource;
   }
-
-  private storeIfUnique(newBreadcrumb: BreadcrumbItem) {
-    let isUnique = true;
-    for (const crumb of this.prefixedBreadcrumbs) {
-      if (newBreadcrumb.url === crumb.url) {
-        isUnique = false;
-        break;
-      }
-    }
-    if (isUnique) {
-      this.prefixedBreadcrumbs.push(newBreadcrumb);
-    }
-
-  }
-
 }

@@ -17,14 +17,30 @@
 from flask import Flask
 import logging
 
+from cmdb.data_storage import DatabaseManagerMongo
+from cmdb.framework.cmdb_log_manager import CmdbLogManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
+from cmdb.user_management import UserManager
+from cmdb.utils import SecurityManager
 
 LOGGER = logging.getLogger(__name__)
 
 
 class BaseCmdbApp(Flask):
 
-    def __init__(self, import_name: str, object_manager: CmdbObjectManager = None):
+    def __init__(self, import_name: str,
+                 database_manager: DatabaseManagerMongo,
+                 exportd_manager: ExportdJobManagement = None,
+                 object_manager: CmdbObjectManager = None,
+                 log_manager: CmdbLogManager = None,
+                 user_manager: UserManager = None,
+                 security_manager: SecurityManager = None):
+        self.database_manager: DatabaseManagerMongo = database_manager
         self.object_manager: CmdbObjectManager = object_manager
+        self.exportd_manager: ExportdJobManagement = exportd_manager
+        self.log_manager: CmdbLogManager = log_manager
+        self.user_manager: UserManager = user_manager
+        self.security_manager: SecurityManager = security_manager
         self.temp_folder: str = '/tmp/'
         super(BaseCmdbApp, self).__init__(import_name)

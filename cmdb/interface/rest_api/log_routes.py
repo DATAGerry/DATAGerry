@@ -21,11 +21,9 @@ from flask import current_app
 
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.cmdb_log import CmdbObjectLog, LogAction
-from cmdb.framework.cmdb_log_manager import LogManagerGetError, LogManagerDeleteError, log_manager
-from cmdb.interface.route_utils import RootBlueprint, make_response
-
-with current_app.app_context():
-    object_manager = current_app.object_manager
+from cmdb.framework.cmdb_log_manager import LogManagerGetError, LogManagerDeleteError
+from cmdb.interface.route_utils import RootBlueprint, make_response, login_required, right_required, insert_request_user
+from cmdb.user_management import User
 
 try:
     from cmdb.utils.error import CMDBError
@@ -35,15 +33,20 @@ except ImportError:
 LOGGER = logging.getLogger(__name__)
 log_blueprint = RootBlueprint('log_rest', __name__, url_prefix='/log')
 
+with current_app.app_context():
+    object_manager = current_app.object_manager
+    log_manager = current_app.log_manager
 
 # CRUD routes
 @log_blueprint.route('/<int:public_id>/', methods=['GET'])
 @log_blueprint.route('/<int:public_id>', methods=['GET'])
-def get_log(public_id: int):
+@login_required
+@insert_request_user
+@right_required('base.framework.log.view')
+def get_log(public_id: int, request_user: User):
     try:
         selected_log = log_manager.get_log(public_id=public_id)
-    except LogManagerGetError as err:
-        LOGGER.error(err)
+    except LogManagerGetError:
         return abort(404)
     return make_response(selected_log)
 
@@ -71,7 +74,10 @@ def update_log(public_id, *args, **kwargs):
 
 @log_blueprint.route('/<int:public_id>/', methods=['DELETE'])
 @log_blueprint.route('/<int:public_id>', methods=['DELETE'])
-def delete_log(public_id: int):
+@login_required
+@insert_request_user
+@right_required('base.framework.log.delete')
+def delete_log(public_id: int, request_user: User):
     try:
         delete_ack = log_manager.delete_log(public_id=public_id)
     except LogManagerDeleteError as err:
@@ -82,7 +88,10 @@ def delete_log(public_id: int):
 # FIND routes
 @log_blueprint.route('/object/exists/', methods=['GET'])
 @log_blueprint.route('/object/exists', methods=['GET'])
-def get_logs_with_existing_objects():
+@login_required
+@insert_request_user
+@right_required('base.framework.log.view')
+def get_logs_with_existing_objects(request_user: User):
     existing_list = []
     deleted_list = []
     passed_objects = []
@@ -121,7 +130,10 @@ def get_logs_with_existing_objects():
 
 @log_blueprint.route('/object/notexists/', methods=['GET'])
 @log_blueprint.route('/object/notexists', methods=['GET'])
-def get_logs_with_deleted_objects():
+@login_required
+@insert_request_user
+@right_required('base.framework.log.view')
+def get_logs_with_deleted_objects(request_user: User):
     existing_list = []
     deleted_list = []
     passed_objects = []
@@ -160,7 +172,10 @@ def get_logs_with_deleted_objects():
 
 @log_blueprint.route('/object/deleted/', methods=['GET'])
 @log_blueprint.route('/object/deleted', methods=['GET'])
-def get_object_delete_logs():
+@login_required
+@insert_request_user
+@right_required('base.framework.log.view')
+def get_object_delete_logs(request_user: User):
     try:
         query = {
             'log_type': CmdbObjectLog.__name__,
@@ -178,7 +193,10 @@ def get_object_delete_logs():
 
 @log_blueprint.route('/object/<int:public_id>/', methods=['GET'])
 @log_blueprint.route('/object/<int:public_id>', methods=['GET'])
-def get_logs_by_objects(public_id: int):
+@login_required
+@insert_request_user
+@right_required('base.framework.log.view')
+def get_logs_by_objects(public_id: int, request_user: User):
     try:
         object_logs = log_manager.get_object_logs(public_id=public_id)
     except ObjectManagerGetError as err:
@@ -191,7 +209,10 @@ def get_logs_by_objects(public_id: int):
 
 @log_blueprint.route('/<int:public_id>/corresponding/', methods=['GET'])
 @log_blueprint.route('/<int:public_id>/corresponding', methods=['GET'])
-def get_corresponding_object_logs(public_id: int):
+@login_required
+@insert_request_user
+@right_required('base.framework.log.view')
+def get_corresponding_object_logs(public_id: int, request_user: User):
     try:
         selected_log = log_manager.get_log(public_id=public_id)
         query = {

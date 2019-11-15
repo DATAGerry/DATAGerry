@@ -15,51 +15,70 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import jinja2
-import cmdb.framework
+
+from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
+from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import load_class
-from cmdb.framework.cmdb_object_manager import object_manager
+from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
 
-class ExportJob:
+class ExportJob(ExportdJobManagement):
 
-    def __init__(self):
-        self.__sources = []
-        self.__destinations = []
-        self.__exportvars = {}
-        # ToDo: read data from configuration
-        # setup export variables
-        exportvar_objectid = ExportVariable("objectid", "{{id}}")
-        exportvar_dummy1 = ExportVariable("dummy1", "{{fields.first_name}} {{fields.last_name}}")
-        exportvar_dummy2 = ExportVariable("dummy2", "{{fields.last_name}} {{id}}")
-        self.__exportvars = {
-            "objectid": exportvar_objectid,
-            "dummy1": exportvar_dummy1,
-            "dummy2": exportvar_dummy2
-        }
-        # setup sources
-        self.__sources.append(ExportSource())
-        # setup destinations
-        destination_parms = {
-            "ip": "192.168.0.123",
-            "user": "admin",
-            "password": "admin"
-        }
-        export_destination = ExportDestination(
-            "cmdb.exportd.exporter_base.ExternalSystemDummy",
-            destination_parms,
-            self.__exportvars
+    def __init__(self, job: ExportdJob):
+        self.job = job
+        self.exportvars = self.__get_exportvars()
+        self.destinations = self.__get__destinations()
+        scr = SystemConfigReader()
+        database_manager = DatabaseManagerMongo(
+            connector=MongoConnector(
+                **scr.get_all_values_from_section('Database')
+            )
         )
-        self.__destinations.append(export_destination)
+        self.__object_manager = CmdbObjectManager(
+            database_manager=database_manager
+        )
+        self.sources = self.__get_sources()
+        super(ExportJob, self).__init__(database_manager)
+
+    def __get_exportvars(self):
+        exportvars = {}
+        for variable in self.job.get_variables():
+            exportvars.update(
+                {variable["name"]: ExportVariable(variable["name"], variable["default"], variable["templates"])})
+        return exportvars
+
+    def __get_sources(self):
+        sources = []
+        sources.append(ExportSource(self.job, object_manager=self.__object_manager))
+        return sources
+
+    def __get__destinations(self):
+        destinations = []
+        destination_params = {}
+        for destination in self.job.get_destinations():
+            for param in destination["parameter"]:
+                destination_params.update({param["name"]: param["value"]})
+
+            export_destination = ExportDestination(
+                "cmdb.exportd.externals.external_systems.{}".format(destination["className"]),
+                destination_params,
+                self.exportvars
+            )
+            destinations.append(export_destination)
+
+        return destinations
 
     def execute(self):
         # get cmdb objects from all sources
         cmdb_objects = set()
-        for source in self.__sources:
+        for source in self.sources:
             cmdb_objects.update(source.get_objects())
 
         # for every destination: do export
-        for destination in self.__destinations:
+        for destination in self.destinations:
             external_system = destination.get_external_system()
             external_system.prepare_export()
             for cmdb_object in cmdb_objects:
@@ -75,14 +94,13 @@ class ExportVariable:
         self.__value_tpl_types = value_tpl_types
 
     def get_value(self, cmdb_object):
-        # get object manager
-        om = object_manager
-
         # get value template
         value_template = self.__value_tpl_default
         object_type_id = cmdb_object.get_type_id()
-        if object_type_id in self.__value_tpl_types:
-            value_template = self.__value_tpl_types[object_type_id]
+
+        for templ in self.__value_tpl_types:
+            if templ['type'] != '' and object_type_id == int(templ['type']):
+                value_template = templ['template']
 
         # objectdata for use in ExportVariable templates
         objectdata = {}
@@ -105,13 +123,27 @@ class ExportVariable:
 
 class ExportSource:
 
-    def __init__(self):
-        self.__objects = []
-        # ToDo: filter objects
-        self.__objects = object_manager.get_all_objects()
+    def __init__(self, job: ExportdJob, object_manager: CmdbObjectManager = None):
+        self.__job = job
+        self.__obm = object_manager
+        self.__objects = self.__fetch_objects()
 
     def get_objects(self):
         return self.__objects
+
+    def __fetch_objects(self):
+        condition = []
+        for source in self.__job.get_sources():
+            for con in source["condition"]:
+                if con["operator"] == "!=":
+                    operator = {"$ne": con["value"]}
+                else:
+                    operator = con["value"]
+                condition.append({"$and": [{"fields.name": con["name"]}, {"fields.value": operator}]})
+        query = {"$or": condition}
+        result = self.__obm.get_objects_by(sort="public_id", **query)
+
+        return result
 
 
 class ExportDestination:
@@ -127,6 +159,7 @@ class ExportDestination:
 
 
 class ExternalSystem:
+    parameters = []
 
     def __init__(self, destination_parms, export_vars):
         self._destination_parms = destination_parms
@@ -140,42 +173,6 @@ class ExternalSystem:
 
     def finish_export(self):
         pass
-
-
-class ExternalSystemDummy(ExternalSystem):
-
-    def __init__(self, destination_parms, export_vars):
-        super(ExternalSystemDummy, self).__init__(destination_parms, export_vars)
-        # init destination vars
-        self.__ip = self._destination_parms.get("ip", None)
-        self.__user = self._destination_parms.get("user", None)
-        self.__password = self._destination_parms.get("password", None)
-        if not (self.__ip and self.__user and self.__password):
-            raise ExportJobConfigException()
-        # init export vars
-        self.__objectid = self._export_vars.get("objectid", ExportVariable("objectid", ""))
-        self.__dummy1 = self._export_vars.get("dummy1", ExportVariable("dummy1", ""))
-        self.__dummy2 = self._export_vars.get("dummy2", ExportVariable("dummy2", ""))
-        self.__dummy3 = self._export_vars.get("dummy3", ExportVariable("dummy3", ""))
-        self.__dummy4 = self._export_vars.get("dummy4", ExportVariable("dummy4", ""))
-
-    def prepare_export(self):
-        print("prepare export")
-        print("destination parms: ip={} user={} password={}".format(self.__ip, self.__user, self.__password))
-
-    def add_object(self, cmdb_object):
-        # print values of export variables
-        object_id = self.__objectid.get_value(cmdb_object)
-        dummy1 = self.__dummy1.get_value(cmdb_object)
-        dummy2 = self.__dummy2.get_value(cmdb_object)
-        dummy3 = self.__dummy3.get_value(cmdb_object)
-        dummy4 = self.__dummy4.get_value(cmdb_object)
-        print("object {}".format(object_id))
-        print("dummy1: {}; dummy2: {}; dummy3: {}; dummy4: {}".format(dummy1, dummy2, dummy3, dummy4))
-        print("")
-
-    def finish_export(self):
-        print("finish export")
 
 
 class ExportJobConfigException(CMDBError):

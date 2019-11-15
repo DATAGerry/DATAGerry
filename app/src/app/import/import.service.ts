@@ -21,6 +21,7 @@ import { ApiCallService, ApiService, httpFileOptions, resp } from '../services/a
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpHeaders, HttpParams } from '@angular/common/http';
+import { ImporterConfig, ImporterFile } from './import-objects/import-object.models';
 
 @Injectable({
   providedIn: 'root'
@@ -34,12 +35,35 @@ export class ImportService implements ApiService {
   constructor(private api: ApiCallService) {
   }
 
-  public postObjectParser(file: File, config: any): Observable<any> {
+  public importObjects(file: File, parserConfig: any, importerConfig: ImporterConfig): Observable<any> {
     const formData = new FormData();
     formData.append('file', file, file.name);
-    formData.append('parser_config', JSON.stringify(config));
+    formData.append('parser_config', JSON.stringify(parserConfig));
+    formData.append('importer_config', JSON.stringify(importerConfig));
+    return this.api.callPost<any>(`${ this.servicePrefix }/${ this.objectPrefix }/`, formData, httpFileOptions).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public postObjectParser(file: File, parserConfig: any): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    formData.append('parser_config', JSON.stringify(parserConfig));
     return this.api.callPost<any>(`${ this.servicePrefix }/${ this.objectPrefix }/parse/`, formData, httpFileOptions).pipe(
       map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public getObjectImporterDefaultConfig(fileType: string): Observable<any> {
+    return this.api.callGet<any>(`${ this.servicePrefix }/${ this.objectPrefix }/importer/config/${ fileType }/`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return {};
+        }
         return apiResponse.body;
       })
     );

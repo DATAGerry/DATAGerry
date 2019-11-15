@@ -50,3 +50,12 @@ class CategoryRight(FrameworkRight):
 
     def __init__(self, name: str, level: int = BaseRight.PROTECTED, description: str = None):
         super(CategoryRight, self).__init__(name, level, description=description)
+
+
+class LogRight(FrameworkRight):
+    MIN_LEVEL = BaseRight.PROTECTED
+    MAX_LEVEL = BaseRight.DANGER
+    PREFIX = '{}.{}'.format(FrameworkRight.PREFIX, 'log')
+
+    def __init__(self, name: str, level: int = BaseRight.PROTECTED, description: str = None):
+        super(LogRight, self).__init__(name, level, description=description)

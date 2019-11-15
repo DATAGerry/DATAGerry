@@ -1,0 +1,30 @@
+
+<div class="card-deck">
+  <div class="card">
+    <a routerLink="system/">
+      <div class="dash-card primary">
+        <i class="fas fa-cogs"></i>
+        <span class="count-numbers">System</span>
+        <span class="count-name">System Information</span>
+      </div>
+    </a>
+  </div>
+  <div class="card">
+    <a [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']">
+      <div class="dash-card primary">
+        <i class="fas fa-cogs"></i>
+        <span class="count-numbers">System</span>
+        <span class="count-name">Server Information</span>
+      </div>
+    </a>
+  </div>
+  <div class="card">
+    <a routerLink="system/properties">
+      <div class="dash-card primary">
+        <i class="fas fa-cogs"></i>
+        <span class="count-numbers">System</span>
+        <span class="count-name">Config Properties</span>
+      </div>
+    </a>
+  </div>
+</div>

@@ -1,0 +1,16 @@
+<div class="modal-header bg-primary text-white">
+  <h4 class="modal-title">Add connection to object:
+    #{{renderResult?.object_information?.object_id}} {{renderResult?.type_information?.type_label}}</h4>
+  <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<form [formGroup]="addLinkForm" novalidate>
+  <div class="modal-body">
+    <p></p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Close click')">Close</button>
+    <button type="submit" class="btn btn-outline-primary">Save</button>
+  </div>
+</form>

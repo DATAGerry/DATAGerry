@@ -18,7 +18,7 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CmdbType } from '../../framework/models/cmdb-type';
-import { ImporterConfig, ImporterFile } from './import-object.models';
+import { ImporterConfig, ImporterFile, ImportResponse } from './import-object.models';
 import { ImportService } from '../import.service';
 import { Subscription } from 'rxjs';
 import { NgxSpinner } from 'ngx-spinner/lib/ngx-spinner.enum';
@@ -33,15 +33,25 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
 
   private fileReader: FileReader;
   public typeInstance: CmdbType = undefined;
+
+  // Importer Data
+  private importerSubscription: Subscription;
   public importerFile: ImporterFile = {} as ImporterFile;
   public importerConfig: ImporterConfig = {} as ImporterConfig;
+  // at the moment only MAPPING
+  public defaultImporterConfig: any;
 
+  // Parser Data
   private parseDataSubscription: Subscription;
   public parserConfig: any = {};
   public parsedData: any = undefined;
 
+  // Import Response
+  public importResponse: ImportResponse = undefined;
+
   public constructor(private importService: ImportService, private spinner: NgxSpinnerService) {
     this.fileReader = new FileReader();
+    this.importerSubscription = new Subscription();
     this.parseDataSubscription = new Subscription();
   }
 
@@ -55,10 +65,19 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
     if (this.fileReader.readyState !== FileReader.DONE) {
       this.fileReader.abort();
     }
+    this.importerSubscription.unsubscribe();
+    this.parseDataSubscription.unsubscribe();
   }
 
   public formatChange(format: string) {
     this.importerFile.fileFormat = format;
+    const defaultImporterConfig = this.importService.getObjectImporterDefaultConfig(this.importerFile.fileFormat)
+      .subscribe((defaultConfig: any) => {
+          this.defaultImporterConfig = defaultConfig;
+        },
+        (error) => console.error(error),
+        () => defaultImporterConfig.unsubscribe()
+      );
   }
 
   public fileChange(file: File) {
@@ -73,6 +92,7 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
 
   public importConfigChange(config: any) {
     this.importerConfig = config as ImporterConfig;
+    this.importerConfig.type_id = this.typeInstance.public_id as number;
   }
 
   public typeChange(change: any) {
@@ -87,6 +107,22 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
         this.parsedData = parsedData;
       },
       (e) => console.error(e),
+      () => {
+        this.spinner.hide();
+      }
+    );
+  }
+
+  public startImport() {
+    this.spinner.show();
+    this.importService.importObjects(this.importerFile.file, this.parserConfig, this.importerConfig).subscribe(
+      (importResponse) => {
+        this.importResponse = importResponse;
+      },
+      (error) => {
+        console.error(error);
+        this.spinner.hide();
+      },
       () => {
         this.spinner.hide();
       }

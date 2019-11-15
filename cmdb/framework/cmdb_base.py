@@ -32,21 +32,6 @@ class CmdbManagerBase:
             Depending on the condition or whether a fork process is used, the database manager can also be seen
             directly in the declaration of the object manager
 
-        .. code-block:: python
-               :linenos:
-
-                system_config_reader = get_system_config_reader()
-                object_manager = CmdbObjectManager(
-                    database_manager = DatabaseManagerMongo(
-                        connector=MongoConnector(
-                            host=system_config_reader.get_value('host', 'Database'),
-                            port=int(system_config_reader.get_value('port', 'Database')),
-                            database_name=system_config_reader.get_value('database_name', 'Database'),
-                            timeout=MongoConnector.DEFAULT_CONNECTION_TIMEOUT
-                        )
-                    )
-                )
-
         Args:
             database_manager (DatabaseManager): initialisation of an database manager
 
@@ -54,7 +39,7 @@ class CmdbManagerBase:
         if database_manager:
             self.dbm: DatabaseManagerMongo = database_manager
 
-    def _get(self, collection: str, public_id: int) -> (dict, object):
+    def _get(self, collection: str, public_id: int) -> dict:
         """get document from the database by their public id
 
         Args:

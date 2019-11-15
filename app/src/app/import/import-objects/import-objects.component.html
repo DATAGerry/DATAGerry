@@ -12,17 +12,20 @@
       </aw-wizard-step>
       <aw-wizard-step stepId="3" stepTitle="Type mapping">
         <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
-        <cmdb-type-mapping (typeChange)="typeChange($event)" [parsedData]="parsedData" [parserConfig]="parserConfig"
+        <cmdb-type-mapping (typeChange)="typeChange($event)" [manuallyMapping]="defaultImporterConfig?.manually_mapping"
+                           [parsedData]="parsedData" [parserConfig]="parserConfig"
                            [fileFormat]="importerFile.fileFormat"></cmdb-type-mapping>
       </aw-wizard-step>
       <aw-wizard-step stepId="4" stepTitle="Import config">
         <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
         <cmdb-import-config (configChange)="importConfigChange($event)"></cmdb-import-config>
       </aw-wizard-step>
-      <aw-wizard-step stepId="5" stepTitle="Complete">
+      <aw-wizard-completion-step stepId="5" stepTitle="Complete">
         <ng-template awWizardStepSymbol><i class="fas fa-save"></i></ng-template>
-        <button class="btn btn-primary prev" type="button" awPreviousStep>Previous step</button>
-      </aw-wizard-step>
+        <cmdb-import-complete (startImportEmitter)="startImport()" [importResponse]="importResponse"
+                              [importFile]="importerFile" [importerConfig]="importerConfig"
+                              [parserConfig]="parserConfig" [parsedData]="parsedData"></cmdb-import-complete>
+      </aw-wizard-completion-step>
     </aw-wizard>
   </div>
   <div class="col-md-3">
@@ -30,7 +33,7 @@
     <hr/>
     <div class="card mb-3">
       <div class="card-header">
-        File
+        File:
       </div>
       <ul class="list-group list-group-flush">
         <li class="list-group-item">File format: {{importerFile?.fileFormat}}</li>
@@ -43,7 +46,7 @@
       </div>
       <ul class="list-group list-group-flush">
         <li *ngFor="let parserPro of parserConfig | keyvalue" class="list-group-item">
-          {{parserPro.key | uppercase}}: {{parserPro.value}}
+          {{parserPro?.key | uppercase}}: {{parserPro?.value}}
         </li>
       </ul>
     </div>

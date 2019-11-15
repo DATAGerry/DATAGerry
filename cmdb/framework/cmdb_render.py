@@ -17,6 +17,8 @@
 """
 Object/Type render
 """
+from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -28,7 +30,7 @@ from datetime import datetime
 
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_type import CmdbType
-from cmdb.user_management.user_manager import User, UserManagement
+from cmdb.user_management.user_manager import User, UserManager
 
 LOGGER = logging.getLogger(__name__)
 
@@ -70,7 +72,7 @@ class CmdbRender:
         from cmdb.user_management.user_manager import user_manager
         self.object_instance: CmdbObject = object_instance
         self.type_instance: CmdbType = type_instance
-        self.__usm: UserManagement = user_manager
+        self.__usm: UserManager = user_manager
         # get render user if only the user id was passed
         if isinstance(render_user, int):
             self.render_user: User = self.__usm.get_user(render_user)
@@ -285,7 +287,14 @@ class RenderList:
         self.request_user = request_user
 
     def render_result_list(self, search_fields=None):
-        from cmdb.framework.cmdb_object_manager import object_manager
+        from cmdb.utils.system_reader import SystemConfigReader
+
+        object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
+            MongoConnector(
+                **SystemConfigReader().get_all_values_from_section('Database')
+            )
+        ))
+
         preparation_objects = []
         for passed_object in self.object_list:
             tmp_render = CmdbRender(type_instance=object_manager.get_type(passed_object.type_id),

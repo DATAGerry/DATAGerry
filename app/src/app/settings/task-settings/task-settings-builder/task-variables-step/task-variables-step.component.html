@@ -1,0 +1,98 @@
+<div class="row">
+  <div class="col-sm-2">
+    <button class="btn btn-primary" type="button" (click)="addVariable()">
+      <i class="fas fa-plus-circle"></i> Add new source </button>
+  </div>
+  <div class="col-sm-10">
+    <form [formGroup]="variableForm">
+      <ng-container formArrayName="variables">
+        <ng-container *ngFor="let variable of variableForm['controls'].variables['controls']; let s=index">
+          <div class="space-bottom card">
+            <div class="card-header">Source {{s}}
+              <span class="float-right">
+                <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
+                        [attr.data-target]="['#collapseExample' + s]" aria-expanded="true">
+                  <fa-icon [icon]="['far', 'edit']"></fa-icon>
+                </button>
+                <button class="btn btn-link" type="button" (click)="delVariable(s)">
+                  <fa-icon [icon]="['far', 'window-close']"></fa-icon>
+                </button>
+              </span>
+            </div>
+            <div class="card-body collapse show" id="collapseExample{{s}}">
+              <ng-container formGroupName="{{s}}">
+                <div class="form-group">
+                  <label for="variableName">Name <span class="required">*</span></label>
+                  <input id="variableName" class="form-control"
+                         [ngClass]="{ 'is-valid': variable.get('name').valid
+                         && (variable.get('name').dirty || variable.get('name').touched),
+                         'is-invalid': variable.get('name').invalid
+                         && (variable.get('name').dirty || variable.get('name').touched)}"
+                         formControlName="name"
+                         required>
+                </div>
+
+                <div class="form-group">
+                  <label for="variableDefault">Default Value <span class="required">*</span></label>
+                  <input id="variableDefault" class="form-control"
+                         [ngClass]="{ 'is-valid': variable.get('default').valid
+                         && (variable.get('default').dirty || variable.get('default').touched),
+                         'is-invalid': variable.get('default').invalid
+                         && (variable.get('default').dirty || variable.get('default').touched)}"
+                         formControlName="default"
+                         required>
+                </div>
+
+                <ng-container formArrayName="templates">
+                  <label>Templates</label>
+                  <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Type</th>
+                      <th>Template</th>
+                      <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr *ngFor="let templ of variable['controls'].templates['controls']; let iy=index" formArrayName="{{iy}}">
+                      <td>{{iy + 1}}</td>
+                      <td>
+                        <select formControlName="type" class="form-control"
+                                [ngClass]="{ 'is-valid': templ.get('type').valid
+                                   && (templ.get('type').dirty
+                                   || templ.get('type').touched), 'is-invalid': templ.get('type').invalid
+                                   && (templ.get('type').dirty || templ.get('type').touched)}"
+                                required>
+                          <option *ngFor="let order of typeList; let i = index" [value]="order.public_id">
+                            {{order.label}} #{{order.public_id}}
+                          </option>
+                        </select>
+                      </td>
+                      <td>
+                        <input type="text" class="form-control" formControlName="template"
+                               [ngClass]="{ 'is-valid': templ.get('template').valid
+                                   && (templ.get('template').dirty
+                                   || templ.get('template').touched), 'is-invalid': templ.get('template').invalid
+                                   && (templ.get('template').dirty || templ.get('template').touched)}"
+                               required>
+                      </td>
+                      <td>
+                        <button type="button" class="btn btn-outline-primary" (click)="delTemplate(iy,s)">
+                          <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
+                        </button>
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </ng-container>
+                <button type="button" class="btn btn-outline-secondary" (click)="addTemplate(s)">+ Add Condition</button>
+              </ng-container>
+            </div>
+          </div>
+        </ng-container>
+      </ng-container>
+    </form>
+  </div>
+
+</div>

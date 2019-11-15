@@ -62,14 +62,22 @@ export class RenderField {
 
   public copyToClipboard() {
     const selBox = document.createElement('textarea');
+    selBox.value = this.controller.value;
+    this.generateDataForClipboard(selBox);
+  }
+
+  private generateDataForClipboard(selBox: any) {
     selBox.style.position = 'fixed';
     selBox.style.left = '0';
     selBox.style.top = '0';
     selBox.style.opacity = '0';
-    selBox.value = this.controller.value;
     document.body.appendChild(selBox);
     selBox.focus();
     selBox.select();
+    this.showToast(selBox);
+  }
+
+  private showToast(selBox: any) {
     document.execCommand('copy');
     document.body.removeChild(selBox);
     this.toast.show('Content was copied to clipboard');

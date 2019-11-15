@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from typing import List
+
 
 class BaseImporterResponse:
     """Base response after import action"""
@@ -26,6 +28,26 @@ class ImporterObjectResponse(BaseImporterResponse):
     """Response of an bulk object import"""
 
     def __init__(self, message: str, success_imports: list = None, failed_imports: list = None):
-        self.success_imports: list = success_imports or []
-        self.failed_imports: list = failed_imports or []
+        self.success_imports: List[ImportSuccessMessage] = success_imports or []
+        self.failed_imports: List[ImportFailedMessage] = failed_imports or []
         super(ImporterObjectResponse, self).__init__(message=message)
+
+
+class ImportMessage:
+
+    def __init__(self, obj: dict = None):
+        self.obj = obj
+
+
+class ImportSuccessMessage(ImportMessage):
+
+    def __init__(self, public_id: int, obj: dict = None):
+        self.public_id = public_id
+        super(ImportSuccessMessage, self).__init__(obj=obj)
+
+
+class ImportFailedMessage(ImportMessage):
+
+    def __init__(self, error_message: str, obj: dict = None):
+        self.error_message = error_message
+        super(ImportFailedMessage, self).__init__(obj=obj)

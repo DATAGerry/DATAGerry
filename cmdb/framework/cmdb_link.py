@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from datetime import datetime
 from cmdb.framework.cmdb_dao import CmdbDAO
 
 
@@ -24,18 +25,22 @@ class CmdbLink(CmdbDAO):
         'secondary',
     ]
 
-    def __init__(self, primary: int, secondary: int, **kwargs):
-        self.primary = primary
+    def __init__(self, primary: int, secondary: int, creation_time: datetime = None, **kwargs):
         if primary == secondary:
             raise ValueError(f'Same link IDs: {primary}/{secondary}')
-        self.secondary = secondary
+        self.primary: int = primary
+        self.secondary: int = secondary
+        self.creation_time: datetime = creation_time or datetime.utcnow()
         super(CmdbLink, self).__init__(**kwargs)
 
-    def get_primary(self):
+    def get_primary(self) -> int:
         return self.primary
 
-    def get_secondary(self):
+    def get_secondary(self) -> int:
         return self.secondary
 
-    def get_partners(self):
+    def get_creation_time(self) -> datetime:
+        return self.creation_time
+
+    def get_partners(self) -> (int, int):
         return self.get_primary(), self.get_secondary()

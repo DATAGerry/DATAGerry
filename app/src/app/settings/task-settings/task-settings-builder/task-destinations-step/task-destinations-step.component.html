@@ -1,0 +1,168 @@
+<div class="mb-3">
+  <button class="btn btn-primary" type="button" (click)="addDestination()">
+    <i class="fas fa-plus-circle"></i> Add new Destination
+  </button>
+</div>
+
+<div class="row">
+  <div class="col-sm-4" id="builder-external">
+    <div class="card" id="controlExternalWrapper">
+      <h5 class="card-header">External Systems</h5>
+      <div class="card-body">
+        <ng-container *ngFor="let system of externalSystemList; let no1 = first">
+          <div class="card" [dndDraggable]="system" [dndType]="'dragSystem'">
+            <div class="list-group-item list-group-item-action">
+              <span class="d-flex justify-content-between align-items-center ">
+                <a class="btn" data-toggle="collapse" href="#collapseSystems"
+                   (click)="getSystemParameters(system)"
+                   role="button" aria-expanded="false" aria-controls="collapseSystems">
+                  {{system}}
+                </a>
+                <fa-icon icon="bars"></fa-icon>
+              </span>
+            </div>
+            <div [ngClass]="{'show': no1}" class="card-body collapse"  id="collapseSystems">
+              <ng-container *ngIf="externalSystemParams.length == 0">
+                <p class="text-center">Parameters are displayed after assignment to External Name.</p>
+              </ng-container>
+              <div *ngFor="let selectedParam of externalSystemParams" class="input-group mb-3">
+                <div class="input-group flex-nowrap" [dndDraggable]="selectedParam" [dndType]="'dragParameter'">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <fa-icon icon="info" placement="right" [ngbTooltip]="selectedParam?.description"></fa-icon>
+                    </span>
+                  </div>
+                  <input type="text" class="form-control" value="{{selectedParam.name}}" readonly>
+                  <div class="input-group-append">
+                    <span class="input-group-text">
+                        <fa-icon icon="bars"></fa-icon>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-8">
+    <form [formGroup]="destinationForm" >
+      <ng-container formArrayName="destination">
+        <ng-container *ngFor="let destination of destinationForm['controls'].destination['controls']; let s=index">
+          <div class="space-bottom card">
+            <div class="card-header">Destination {{s}}
+              <span class="float-right">
+                <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
+                        [attr.data-target]="['#collapseExample' + s]" aria-expanded="true">
+                  <fa-icon [icon]="['far', 'edit']"></fa-icon>
+                </button>
+                <button class="btn btn-link" type="button" (click)="delDestination(s)">
+                  <fa-icon [icon]="['far', 'window-close']"></fa-icon>
+                </button>
+              </span>
+            </div>
+            <div class="card-body collapse show" id="collapseExample{{s}}">
+              <ng-container formGroupName="{{s}}">
+
+                <div class="form-group">
+                  <section [dndDropzone]="['dragSystem']"
+                           (dndDrop)="onDraggedSystem($event, destination, s,'copy')">
+                    <div style="border: 1px green solid; border-radius: 5px; padding: 15px;"
+                         dndPlaceholderRef>
+                      Drop property here
+                    </div>
+                    <div class="form-group flex-nowrap">
+                      <label for="externalName">External Name</label>
+                      <input type="text" id="externalName" name="text" class="form-control" formControlName="className"
+                             [ngClass]="{ 'is-valid': destination.get('className').valid
+                                   && (destination.get('className').dirty
+                                   || destination.get('className').touched), 'is-invalid': destination.get('className').invalid
+                                   && (destination.get('className').dirty || destination.get('className').touched)}"
+                             required readonly/>
+                    </div>
+                    <div *ngIf="destination.get('className').length === 0"
+                         class="list-group-item list-group-item-action"
+                         style="border: 1px orangered dashed; border-radius: 5px; padding: 15px;">
+                              <span class="d-flex justify-content-between align-items-center ">
+                                    Drop property here
+                                <fa-icon icon="code"></fa-icon>
+                              </span>
+                    </div>
+                  </section>
+                </div>
+
+                <ng-container formArrayName="parameter">
+                    <label>Parameters</label>
+                    <table class="table table-bordered">
+                      <thead>
+                      <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Value</th>
+                        <th scope="col">Action</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      <tr *ngFor="let param of destination['controls'].parameter['controls']; let iy=index" formArrayName="{{iy}}">
+                        <th scope="row">{{iy + 1}}</th>
+                        <td>
+                          <section [dndDropzone]="['dragParameter']"
+                                   (dndDrop)="onDraggedParameter($event, param, 'copy')">
+                            <div style="border: 1px green solid; border-radius: 5px; padding: 15px;"
+                                 dndPlaceholderRef>
+                              Drop property here
+                            </div>
+                            <div class="input-group flex-nowrap">
+                              <input type="text" name="text" class="form-control" formControlName="name"
+                                     [ngClass]="{ 'is-valid': param.get('name').valid
+                                   && (param.get('name').dirty
+                                   || param.get('name').touched), 'is-invalid': param.get('name').invalid
+                                   && (param.get('name').dirty || param.get('name').touched)}"
+                                     required/>
+                              <div *ngIf="param.get('description')?.value" class="input-group-append">
+                              <span class="input-group-text">
+                                <fa-icon icon="info" placement="left" [ngbTooltip]="param.get('description')?.value"></fa-icon>
+                              </span>
+                              </div>
+                            </div>
+                            <div *ngIf="param.get('name').length === 0"
+                                 class="list-group-item list-group-item-action"
+                                 style="border: 1px orangered dashed; border-radius: 5px; padding: 15px;">
+                              <span class="d-flex justify-content-between align-items-center ">
+                                    Drop property here
+                                <fa-icon icon="code"></fa-icon>
+                              </span>
+                            </div>
+                          </section>
+                        </td>
+                        <td>
+                          <input type="text" class="form-control" formControlName="value"
+                                 [ngClass]="{ 'is-valid': param.get('value').valid
+                                   && (param.get('value').dirty
+                                   || param.get('value').touched), 'is-invalid': param.get('value').invalid
+                                   && (param.get('value').dirty || param.get('value').touched)}"
+                                 required>
+                        </td>
+                        <td>
+                          <button
+                            [disabled]="param.get('required')?.value"
+                            type="button" class="btn btn-outline-primary" (click)="delParameter(iy,s)">
+                            <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
+                          </button>
+                        </td>
+                      </tr>
+                      </tbody>
+                    </table>
+                  </ng-container>
+                <button type="button" class="btn btn-outline-secondary" (click)="addParameters(s)">+ Add Parameter</button>
+              </ng-container>
+            </div>
+          </div>
+        </ng-container>
+      </ng-container>
+    </form>
+  </div>
+
+</div>

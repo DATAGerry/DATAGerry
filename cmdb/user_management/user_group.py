@@ -14,8 +14,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import logging
+
 from cmdb.user_management.user_base import UserManagementBase
+from cmdb.user_management.user_right import GLOBAL_RIGHT_IDENTIFIER
 from cmdb.utils.error import CMDBError
+from cmdb.utils.wraps import timing
+
+LOGGER = logging.getLogger(__name__)
 
 
 class UserGroup(UserManagementBase):
@@ -50,12 +56,23 @@ class UserGroup(UserManagementBase):
         except (IndexError, TypeError, ValueError):
             raise RightNotFoundError(self.name, name)
 
-    def has_right(self, name) -> bool:
+    def has_right(self, right_name) -> bool:
         try:
-            self.get_right(name)
+            self.get_right(right_name)
         except RightNotFoundError:
             return False
         return True
+
+    @timing('Group right calculation')
+    def has_extended_right(self, right_name: str) -> bool:
+        parent_right_name: str = right_name.rsplit(".", 1)[0]
+        if self.has_right(f'{parent_right_name}.{GLOBAL_RIGHT_IDENTIFIER}'):
+            return True
+        if parent_right_name == 'base':
+            if self.has_right(f'{parent_right_name}.{GLOBAL_RIGHT_IDENTIFIER}'):
+                return True
+            return False
+        return self.has_extended_right(right_name=parent_right_name)
 
     def is_deletable(self) -> bool:
         return self.deletable

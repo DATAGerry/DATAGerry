@@ -22,6 +22,7 @@ export class ImporterFile {
   fileFormat: string = undefined;
   fileName: string = '';
 }
+
 export class ImporterConfig {
   mapping: {} = {};
   // tslint:disable:variable-name
@@ -29,5 +30,12 @@ export class ImporterConfig {
   start_element: number = 0;
   max_elements: number = 0;
   overwrite_public: boolean = false;
+  // tslint:enable
+}
+
+export class ImportResponse {
+  // tslint:disable:variable-name
+  success_imports: any[];
+  failed_imports: any[];
   // tslint:enable
 }

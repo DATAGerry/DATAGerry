@@ -16,15 +16,17 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../../auth/services/auth.service';
-import { UserService } from '../../services/user.service';
+import { checkUserExistsValidator, UserService } from '../../services/user.service';
 import { User } from '../../models/user';
 import { Group } from '../../models/group';
 import { GroupService } from '../../services/group.service';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { map, delay } from 'rxjs/operators';
 
 
 @Component({
@@ -32,9 +34,9 @@ import { Router } from '@angular/router';
   templateUrl: './users-add.component.html',
   styleUrls: ['./users-add.component.scss']
 })
-export class UsersAddComponent implements OnInit {
+export class UsersAddComponent implements OnInit, OnDestroy {
 
-  @ViewChild('passWordInput', {static: false}) public passWordToggle: ElementRef;
+  @ViewChild('passWordInput', { static: false }) public passWordToggle: ElementRef;
 
   public addForm: FormGroup;
   public authProviders: string[];
@@ -42,25 +44,21 @@ export class UsersAddComponent implements OnInit {
   private currentPasswordStrength: number = 0;
   public preview: any = undefined;
 
+  private authProvidersSubscription: Subscription;
+  private groupListSubscription: Subscription;
+
   constructor(private authService: AuthService, private userService: UserService, private groupService: GroupService,
               private toastService: ToastService, private router: Router) {
-    this.authService.getAuthProviders().subscribe((authList: string[]) => {
-      this.authProviders = authList;
+    this.addForm = new FormGroup({
+      user_name: new FormControl('', [Validators.required], [checkUserExistsValidator(this.userService)]),
+      email: new FormControl('', [Validators.required, Validators.email]),
+      password: new FormControl('', [Validators.required]),
+      first_name: new FormControl(null),
+      last_name: new FormControl(null),
+      authenticator: new FormControl('LocalAuthenticationProvider', Validators.required),
+      group_id: new FormControl(2, Validators.required),
+      image: new FormControl(null)
     });
-    this.groupService.getGroupList().subscribe((groupList: Group[]) => {
-      this.groupList = groupList;
-    });
-  }
-
-  private passwordStringValidator(threshold: number = 2) {
-    return (control: AbstractControl) => {
-      if (this.currentPasswordStrength < threshold) {
-        return {
-          strength: {valid: false}
-        };
-      }
-      return null;
-    };
   }
 
   public onPasswordStrengthChanged(strength) {
@@ -76,17 +74,19 @@ export class UsersAddComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.addForm = new FormGroup({
-      user_name: new FormControl('', Validators.required),
-      email: new FormControl('', [Validators.required, Validators.email]),
-      password: new FormControl('', [Validators.required, this.passwordStringValidator()]),
-      first_name: new FormControl(null),
-      last_name: new FormControl(null),
-      authenticator: new FormControl('LocalAuthenticationProvider', Validators.required),
-      group_id: new FormControl(2, Validators.required),
-      image: new FormControl(null)
+
+    this.authProvidersSubscription = this.authService.getAuthProviders().subscribe((authList: string[]) => {
+      this.authProviders = authList;
+    });
+    this.groupListSubscription = this.groupService.getGroupList().subscribe((groupList: Group[]) => {
+      this.groupList = groupList;
     });
     this.authenticator.disable();
+  }
+
+  public ngOnDestroy(): void {
+    this.authProvidersSubscription.unsubscribe();
+    this.groupListSubscription.unsubscribe();
   }
 
   public get user_name() {
@@ -137,9 +137,8 @@ export class UsersAddComponent implements OnInit {
     if (this.addForm.valid) {
       const addUser: User = this.addForm.getRawValue();
       this.userService.postUser(addUser).subscribe(addResp => {
-        this.toastService.show(`User was added with ID: ${addResp}`);
+        this.toastService.show(`User was added with ID: ${ addResp }`);
       }, (error) => {
-        console.log(error);
         this.toastService.error(error.error.description);
       }, () => {
         this.router.navigate(['/management/users/']);

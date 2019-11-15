@@ -8,7 +8,7 @@
         <a class="nav-link" data-toggle="tab" href="#logs" role="tab">Logs</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" data-toggle="tab" href="#connections" role="tab">Connected with</a>
+        <a class="nav-link" data-toggle="tab" href="#connections" role="tab">Connections/Links</a>
       </li>
     </ul>
   </div>
@@ -20,9 +20,7 @@
       <cmdb-object-log-list [publicID]="objectID"></cmdb-object-log-list>
     </div>
     <div class="tab-pane fade" id="connections" role="tabpanel">
-      <div class="alert alert-info" role="alert">
-        Not implemented yet
-      </div>
+      <cmdb-object-links [publicID]="objectID" [renderResult]="renderResult"></cmdb-object-links>
     </div>
   </div>
 </div>

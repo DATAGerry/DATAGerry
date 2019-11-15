@@ -25,7 +25,6 @@ import re
 
 from datetime import datetime
 
-from cmdb.data_storage import get_pre_init_database
 from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
@@ -160,7 +159,8 @@ class CmdbObjectManager(CmdbManagerBase):
             try:
                 new_object = CmdbObject(**data)
             except CMDBError as e:
-                raise ObjectInsertError(e)
+                LOGGER.debug(f'Error while inserting object - error: {e.message}')
+                raise ObjectManagerInsertError(e)
         elif isinstance(data, CmdbObject):
             new_object = data
         try:
@@ -192,7 +192,7 @@ class CmdbObjectManager(CmdbManagerBase):
         elif isinstance(data, CmdbObject):
             update_object = data
         else:
-            raise UpdateError(CmdbObject.__class__, data, 'Wrong CmdbObject init format - expecting CmdbObject or dict')
+            raise ObjectManagerUpdateError('Wrong CmdbObject init format - expecting CmdbObject or dict')
         update_object.last_edit_time = datetime.utcnow()
         ack = self.dbm.update(
             collection=CmdbObject.COLLECTION,
@@ -216,8 +216,8 @@ class CmdbObjectManager(CmdbManagerBase):
                 raise Exception
         return ack
 
-    def remove_object_fields(self, filter: dict, update: dict):
-        ack = self._update_many(CmdbObject.COLLECTION, filter, update)
+    def remove_object_fields(self, filter_query: dict, update: dict):
+        ack = self._update_many(CmdbObject.COLLECTION, filter_query, update)
         return ack
 
     def update_object_fields(self, filter: dict, update: dict):
@@ -265,8 +265,11 @@ class CmdbObjectManager(CmdbManagerBase):
         except (CMDBError, Exception):
             raise ObjectDeleteError(obj_id=public_id)
 
-    def delete_many_objects(self, public_ids: dict):
-        ack = self._delete_many(CmdbObject.COLLECTION, public_ids)
+    def delete_many_objects(self, filter_query: dict, public_ids):
+        ack = self._delete_many(CmdbObject.COLLECTION, filter_query)
+        if self._event_queue:
+            event = Event("cmdb.core.objects.deleted", {"ids": public_ids})
+            self._event_queue.put(event)
         return ack
 
     def get_all_types(self):
@@ -282,8 +285,18 @@ class CmdbObjectManager(CmdbManagerBase):
                 collection=CmdbType.COLLECTION,
                 public_id=public_id)
                             )
-        except (CMDBError, Exception):
-            raise TypeNotFoundError(type_id=public_id)
+        except (CMDBError, Exception) as e:
+            raise ObjectManagerGetError(err=e)
+
+    def get_type_by(self, **requirements) -> CmdbType:
+        try:
+            found_type_list = self._get_all(collection=CmdbType.COLLECTION, limit=1, **requirements)
+            if len(found_type_list) > 0:
+                return CmdbType(**found_type_list[0])
+            else:
+                raise ObjectManagerGetError(err='More than 1 type matches this requirement')
+        except (CMDBError, Exception) as e:
+            raise ObjectManagerGetError(err=e)
 
     def get_types_by(self, sort='public_id', **requirements):
         ack = []
@@ -343,8 +356,11 @@ class CmdbObjectManager(CmdbManagerBase):
             self._event_queue.put(event)
         return ack
 
-    def delete_many_types(self, public_ids: dict):
-        ack = self._delete_many(CmdbType.COLLECTION, public_ids)
+    def delete_many_types(self, filter_query: dict, public_ids):
+        ack = self._delete_many(CmdbType.COLLECTION, filter_query)
+        if self._event_queue:
+            event = Event("cmdb.core.objecttypes.deleted", {"ids": public_ids})
+            self._event_queue.put(event)
         return ack
 
     def get_all_categories(self):
@@ -417,7 +433,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
         return self._insert(collection=CmdbCategory.COLLECTION, data=new_category.to_database())
 
-    def update_category(self, data: (CmdbCategory, dict)):
+    def update_category(self, data: dict):
         if isinstance(data, CmdbCategory):
             update_category = data
         elif isinstance(data, dict):
@@ -484,7 +500,6 @@ class CmdbObjectManager(CmdbManagerBase):
         return NotImplementedError
 
     # COLLECTIONS/TEMPLATES CRUD
-
     def get_collections(self) -> list:
         collection_list = list()
         try:
@@ -571,25 +586,19 @@ class CmdbObjectManager(CmdbManagerBase):
     def delete_collection_template(self, public_id: int):
         return NotImplementedError
 
-    # Link CRUDS
+    # Link CRUD
+    def get_link(self, public_id: int):
+        try:
+            return CmdbLink(**self._get(collection=CmdbLink.COLLECTION, public_id=public_id))
+        except (CMDBError, Exception) as err:
+            raise ObjectManagerGetError(err)
 
     def get_links_by_partner(self, public_id: int):
         return NotImplementedError
 
-    def insert_link(self, data):
+    def insert_link(self, data: dict):
         try:
-            new_link = CmdbLink(**data)
-            ack = self.dbm.insert(CmdbLink.COLLECTION, new_link.to_database())
+            new_link = CmdbLink(public_id=self.get_new_id(collection=CmdbLink.COLLECTION), **data)
+            return self._insert(CmdbLink.COLLECTION, new_link.to_database())
         except (CMDBError, Exception) as err:
-            LOGGER.error(err)
             raise ObjectManagerInsertError(err)
-        return ack
-
-
-try:
-    object_manager = CmdbObjectManager(
-        database_manager=get_pre_init_database(),
-        event_queue=None
-    )
-except ImportError:
-    pass

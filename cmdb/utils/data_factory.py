@@ -25,7 +25,6 @@ from cmdb.framework.cmdb_category import CmdbCategory
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user import User
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
-from cmdb.data_storage import get_pre_init_database
 from faker import Faker
 import random
 import datetime
@@ -1177,8 +1176,8 @@ class DataGenerator:
 
 class DataFactory:
 
-    def __init__(self, database_manager: DatabaseManagerMongo = None, auto: bool = True):
-        self._database_manager = database_manager or get_pre_init_database()
+    def __init__(self, database_manager: DatabaseManagerMongo, auto: bool = True):
+        self._database_manager = database_manager
         self._data_generator = DataGenerator(Faker(), database_manager)
         self._auto_generate = auto
         if self._auto_generate:
@@ -1235,12 +1234,12 @@ class DataFactory:
         if self._database_manager is None:
             raise NoDatabaseManagerError()
         from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-        from cmdb.user_management.user_manager import UserManagement
+        from cmdb.user_management.user_manager import UserManager
         from cmdb.utils.security import SecurityManager
 
         obm = CmdbObjectManager(database_manager=self._database_manager)
-        usm = UserManagement(database_manager=self._database_manager,
-                             security_manager=SecurityManager(self._database_manager))
+        usm = UserManager(database_manager=self._database_manager,
+                          security_manager=SecurityManager(self._database_manager))
 
         error = []
         for group_element in self.groups:

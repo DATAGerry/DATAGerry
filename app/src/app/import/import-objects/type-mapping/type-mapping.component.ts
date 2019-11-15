@@ -55,6 +55,7 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
   @ViewChild('mappingContainer', { read: ViewContainerRef, static: false }) mappingContainer;
   @Output() public typeChange: EventEmitter<any>;
   @Input() public fileFormat;
+  @Input() public manuallyMapping: boolean = true;
 
   private readonly defaultMappingValues = [
     {
@@ -96,7 +97,6 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
   }
 
   public ngOnInit(): void {
-    this.initMapping();
     this.typeListSubscription = this.typeService.getTypeList().subscribe((typeList: CmdbType[]) => {
       this.typeList = typeList;
     });
@@ -107,7 +107,6 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
     });
     this.typeIDSubscription = this.typeID.subscribe((typeID: number) => {
       if (typeID !== null && typeID !== undefined) {
-        this.loadMappingComponent();
         this.initMapping();
       }
     });
@@ -119,7 +118,7 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
       this.typeIDSubject.next(null);
     } else {
       if (this.mappingContainer !== undefined) {
-        this.mappingContainer.clear();
+        this.initMapping();
       }
     }
   }
@@ -145,6 +144,7 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
         });
       }
     }
+    this.loadMappingComponent();
   }
 
   public ngOnDestroy(): void {
@@ -157,10 +157,14 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
     return this.typeIDSubject.value;
   }
 
-  private loadMappingComponent() {
+  private resetMappingComponent(): void {
     this.mappingContainer.clear();
     this.component = mappingComponents[this.fileFormat];
     this.currentFactory = this.resolver.resolveComponentFactory(this.component);
+  }
+
+  private loadMappingComponent(): void {
+    this.resetMappingComponent();
     this.componentRef = this.mappingContainer.createComponent(this.currentFactory);
     this.componentRef.instance.parserConfig = this.parserConfig;
     this.componentRef.instance.parsedData = this.parsedData;

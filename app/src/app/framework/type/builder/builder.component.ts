@@ -36,6 +36,7 @@ import {FormGroup} from '@angular/forms';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {PreviewModalComponent} from './modals/preview-modal/preview-modal.component';
 import {DiagnosticModalComponent} from './modals/diagnostic-modal/diagnostic-modal.component';
+import {DateControl} from "./controls/specials/date.control";
 
 declare var $: any;
 
@@ -77,6 +78,7 @@ export class BuilderComponent implements OnInit {
     new Controller('checkbox', CheckboxControl),
     new Controller('radio', RadioControl),
     new Controller('select', SelectControl),
+    new Controller('date', DateControl)
   ];
   public specialControls = [
     new Controller('ref', ReferenceControl)
@@ -160,6 +162,8 @@ export class BuilderComponent implements OnInit {
         return 'list';
       case 'ref':
         return 'retweet';
+      case 'date':
+        return 'calendar-alt';
       default:
         return 'font';
     }
