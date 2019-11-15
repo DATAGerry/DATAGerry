@@ -39,15 +39,14 @@ export class CsvMappingComponent extends TypeMappingBaseComponent implements OnI
     });
     this.previewSelectionSubscription = this.previewIndexSelectionForm.get('indexSelection').valueChanges
       .subscribe((change) => {
-        console.log(`Selected preview value: ${ change }`);
         this.previewIndex = +change;
       });
   }
 
 
   public ngOnInit(): void {
-    if (this.parsedData !== undefined) {
-
+    for (let i = 0; i < this.parsedData.entry_length; i++) {
+      this.currentMapping.push({});
     }
   }
 
@@ -55,5 +54,8 @@ export class CsvMappingComponent extends TypeMappingBaseComponent implements OnI
     this.previewSelectionSubscription.unsubscribe();
   }
 
+  public onAutoSet(): void{
+
+  }
 
 }

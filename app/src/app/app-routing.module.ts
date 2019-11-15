@@ -21,16 +21,9 @@ import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { HttpErrorInterceptor } from './error/interceptors/http-error.interceptor.tx';
+import { PermissionGuard } from './auth/guards/permission.guard';
 
 const routes: Routes = [
-  {
-    path: '',
-    canActivate: [AuthGuard],
-    data: {
-      breadcrumb: 'Dashboard'
-    },
-    loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
-  },
   {
     path: 'connect',
     loadChildren: () => import('./connect/connect.module').then(m => m.ConnectModule)
@@ -40,16 +33,26 @@ const routes: Routes = [
     loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
   },
   {
-    path: 'search',
+    path: '',
     canActivate: [AuthGuard],
     data: {
-      breadcrumb: 'Search'
+      breadcrumb: 'Dashboard'
+    },
+    loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
+  },
+  {
+    path: 'search',
+    canActivate: [AuthGuard, PermissionGuard],
+    data: {
+      breadcrumb: 'Search',
+      right: 'base.framework.*'
     },
     loadChildren: () => import('./search/search.module').then(m => m.SearchModule)
   },
   {
     path: 'framework',
     canActivate: [AuthGuard],
+    canActivateChild: [PermissionGuard],
     data: {
       breadcrumb: 'Framework'
     },
@@ -59,31 +62,35 @@ const routes: Routes = [
     path: 'import',
     canActivate: [AuthGuard],
     data: {
-      breadcrumb: 'Import'
+      breadcrumb: 'Import',
+      right: 'base.import.*'
     },
     loadChildren: () => import('./import/import.module').then(m => m.ImportModule)
   },
   {
     path: 'export',
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: {
-      breadcrumb: 'Export'
+      breadcrumb: 'Export',
+      right: 'base.export.*'
     },
     loadChildren: () => import('./export/export.module').then(m => m.ExportModule)
   },
   {
     path: 'management',
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: {
-      breadcrumb: 'User-Management'
+      breadcrumb: 'User-Management',
+      right: 'base.user-management.*'
     },
     loadChildren: () => import('./management/management.module').then(m => m.ManagementModule),
   },
   {
     path: 'settings',
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, PermissionGuard],
     data: {
-      breadcrumb: 'Settings'
+      breadcrumb: 'Settings',
+      right: 'base.system.*'
     },
     loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule)
   },

@@ -27,28 +27,32 @@ const routes: Routes = [
   {
     path: '',
     data: {
-      breadcrumb: 'List'
+      breadcrumb: 'List',
+      right: 'base.user-management.group.view'
     },
     component: GroupsListComponent
   },
   {
     path: 'add',
     data: {
-      breadcrumb: 'Add'
+      breadcrumb: 'Add',
+      right: 'base.user-management.group.add'
     },
     component: GroupsAddComponent
   },
   {
     path: 'edit/:publicID',
     data: {
-      breadcrumb: 'Edit'
+      breadcrumb: 'Edit',
+      right: 'base.user-management.group.edit'
     },
     component: GroupsEditComponent
   },
   {
     path: 'delete/:publicID',
     data: {
-      breadcrumb: 'Delete'
+      breadcrumb: 'Delete',
+      right: 'base.user-management.group.delete'
     },
     component: GroupsDeleteComponent
   }

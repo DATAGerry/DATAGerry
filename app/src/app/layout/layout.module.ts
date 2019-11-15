@@ -18,17 +18,17 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NavigationComponent } from './components/navigation/navigation.component';
+import { NavigationComponent } from './structure/navigation/navigation.component';
 import { RouterModule } from '@angular/router';
-import { BreadcrumbComponent } from './components/breadcrumb/breadcrumb.component';
-import { BreadcrumbService } from './components/breadcrumb/breadcrumb.service';
-import { SidebarComponent } from './components/sidebar/sidebar.component';
-import { SidebarCategoryComponent } from './components/sidebar/sidebar-category.component';
+import { BreadcrumbComponent } from './structure/breadcrumb/breadcrumb.component';
+import { BreadcrumbService } from './structure/breadcrumb/breadcrumb.service';
+import { SidebarComponent } from './structure/sidebar/sidebar.component';
+import { SidebarCategoryComponent } from './structure/sidebar/sidebar-category.component';
 import { ContentHeaderComponent } from './components/content-header/content-header.component';
 import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.component';
 import { LowercaseDirective } from './directives/lowercase.directive';
 import { SearchBarComponent } from './components/search-bar/search-bar.component';
-import { FooterComponent } from './components/footer/footer.component';
+import { FooterComponent } from './structure/footer/footer.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TableComponent } from './components/table/table.component';
@@ -49,6 +49,7 @@ import { UserImageComponent } from './components/user-image/user-image.component
 import { UserDisplayComponent } from './components/user-display/user-display.component';
 import { ChartsComponent } from './components/charts/charts.component';
 import { ToastModule } from './toast/toast.module';
+import { AuthModule } from '../auth/auth.module';
 
 @NgModule({
   declarations: [
@@ -101,7 +102,8 @@ import { ToastModule } from './toast/toast.module';
     }),
     FontAwesomeModule,
     IconPickerModule,
-    ToastModule
+    ToastModule,
+    AuthModule
   ],
   providers: [
     BreadcrumbService,

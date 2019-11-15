@@ -20,6 +20,7 @@ from flask import request, abort, current_app
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
+from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.importer import load_parser_class, load_importer_class, __OBJECT_IMPORTER__, __OBJECT_PARSER__, \
     __OBJECT_IMPORTER_CONFIG__, load_importer_config_class
@@ -97,33 +98,35 @@ def parse_objects():
 @importer_object_blueprint.route('/', methods=['POST'])
 @insert_request_user
 def import_objects(request_user: User):
+    if not request.files:
+        return abort(400, 'No import file was provided')
     # Check if file exists
     request_file: FileStorage = get_file_in_request('file', request.files)
 
     filename = secure_filename(request_file.filename)
     working_file = f'/tmp/{filename}'
     request_file.save(working_file)
-
     # Load parser config
     parser_config: dict = get_element_from_data_request('parser_config', request) or {}
+    if parser_config == {}:
+        LOGGER.info('No parser config was provided - using default parser config')
 
     # Check for importer config
     importer_config_request: dict = get_element_from_data_request('importer_config', request) or None
     if not importer_config_request:
-        LOGGER.error(f'No import config was provided')
-        return abort(400)
+        return abort(400, 'No import config was provided')
 
     # Check if type exists
     try:
-        LOGGER.debug(importer_config_request)
         object_manager.get_type(public_id=importer_config_request.get('type_id'))
-    except CMDBError:
-        LOGGER.debug("test")
-        return abort(404)
+    except ObjectManagerGetError as err:
+        return abort(404, err.message)
 
     # Load parser
     parser_class = load_parser_class('object', request_file.content_type)
     parser = parser_class(parser_config)
+
+    LOGGER.info(f'Parser {parser_class} was loaded')
 
     # Load importer config
     importer_config_class = load_importer_config_class('object', request_file.content_type)
@@ -133,6 +136,9 @@ def import_objects(request_user: User):
     importer_class = load_importer_class('object', request_file.content_type)
     importer = importer_class(working_file, importer_config, parser, object_manager, request_user)
 
+    LOGGER.info(f'Importer {importer_class} was loaded')
+
     import_response: ImporterObjectResponse = importer.start_import()
 
+    request_file.close()
     return make_response(import_response)

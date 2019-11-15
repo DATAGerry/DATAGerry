@@ -59,9 +59,9 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
                                                  object_manager=object_manager, request_user=request_user)
 
     def generate_object(self, entry: dict, *args, **kwargs) -> dict:
-
         possible_fields: List[dict] = kwargs['fields']
         mapping: dict = self.config.get_mapping()
+
         working_object: dict = {
             'type_id': self.config.get_type_id(),
             'fields': [],
@@ -74,7 +74,6 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
         for prop in map_properties:
             working_object = self._map_element(prop, entry, working_object)
 
-        LOGGER.debug(f'Current working object fields: {working_object.get("fields")}')
         for entry_field in entry.get('fields'):
             field_exists = next((item for item in possible_fields if item["name"] == entry_field['name']), None)
             if field_exists:
@@ -102,7 +101,7 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
         return import_result
 
 
-class CsvObjectImporterConfig(ObjectImporterConfig, JSONContent):
+class CsvObjectImporterConfig(ObjectImporterConfig, CSVContent):
     MANUALLY_MAPPING = True
     DEFAULT_FIELD_MAPPER_VALUE = FieldMapperMode.MATCH
     DEFAULT_FIELD_MAPPER: DEFAULT_FIELD_MAPPER_VALUE = DEFAULT_FIELD_MAPPER_VALUE.value
@@ -125,16 +124,51 @@ class CsvObjectImporterConfig(ObjectImporterConfig, JSONContent):
 class CsvObjectImporter(ObjectImporter, CSVContent):
 
     def __init__(self, file=None, config: CsvObjectImporterConfig = None,
-                 parser: CsvObjectParser = None):
-        super(CsvObjectImporter, self).__init__(file=file, config=config, parser=parser)
+                 parser: JsonObjectParser = None, object_manager: CmdbObjectManager = None, request_user: User = None):
+        super(CsvObjectImporter, self).__init__(file=file, file_type=self.FILE_TYPE, config=config, parser=parser,
+                                                object_manager=object_manager, request_user=request_user)
 
-    def generate_object(self, entry: dict) -> dict:
+    def generate_object(self, entry: dict, *args, **kwargs) -> dict:
+        LOGGER.debug(f'Entry generations - entry content: {entry}')
+        possible_fields: List[dict] = kwargs['fields']
+        mapping: dict = self.config.get_mapping()
+        working_object: dict = {
+            'type_id': self.config.get_type_id(),
+            'fields': [],
+            'author_id': self.request_user.get_public_id(),
+            'version': '1.0.0',
+            'creation_time': datetime.datetime.utcnow()
+        }
+        map_properties = mapping.get('properties')
+
+        for prop in map_properties:
+            working_object = self._map_element(prop, entry, working_object)
+
+        for entry_field in entry.get('fields'):
+            field_exists = next((item for item in possible_fields if item["name"] == entry_field['name']), None)
+            if field_exists:
+                working_object.get('fields').append(entry_field)
+
         return entry
+
+    def _map_element(self, prop, entry: dict, working: dict):
+        mapping: dict = self.config.get_mapping()
+        map_ident: dict = mapping.get('properties')
+        if map_ident:
+            idx_ident = map_ident.get(prop)
+            if idx_ident:
+                value = entry.get(idx_ident)
+                if value:
+                    working.update({prop: value})
+        return working
 
     def start_import(self) -> ImporterObjectResponse:
         parsed_response: CsvObjectParserResponse = self.parser.parse(self.file)
-        import_objects: [dict] = self._generate_objects(parsed_response)
-        LOGGER.debug(f'CSV Object generation: \n {import_objects}')
+        LOGGER.debug(f'Parser Response: {parsed_response.entries}')
+        type_instance_fields: List = self.object_manager.get_type(self.config.get_type_id()).get_fields()
+
+        import_objects: [dict] = self._generate_objects(parsed_response, fields=type_instance_fields)
+        LOGGER.debug(import_objects)
         # import_result: ImporterObjectResponse = self._import(import_objects)
 
-        return None
+        return ImporterObjectResponse('Nope')

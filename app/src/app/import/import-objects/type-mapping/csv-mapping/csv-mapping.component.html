@@ -18,8 +18,6 @@
     <thead>
     <tr>
       <th>Identifier</th>
-      <th>Output format</th>
-      <th>Option</th>
       <th *ngIf="parserConfig.header">Header</th>
       <th *ngIf="!parserConfig.header">Index</th>
       <th>Example</th>
@@ -34,8 +32,6 @@
             {{currentMapping[idx]?.label}}
           </span>
         </div>
-      </td>
-      <td>
       </td>
       <th *ngIf="parserConfig.header">{{parsedData.header[idx]}}</th>
       <th *ngIf="!parserConfig.header">{{idx}}</th>

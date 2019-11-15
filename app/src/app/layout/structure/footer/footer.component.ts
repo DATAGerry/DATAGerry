@@ -17,8 +17,8 @@
 */
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ConnectionService } from '../../connect/connection.service';
-import { AuthService } from '../../auth/services/auth.service';
+import { ConnectionService } from '../../../connect/connection.service';
+import { AuthService } from '../../../auth/services/auth.service';
 
 @Component({
   selector: 'cmdb-footer',

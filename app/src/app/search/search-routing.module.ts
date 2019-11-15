@@ -18,12 +18,12 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { NavigationComponent } from '../layout/components/navigation/navigation.component';
-import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';
+import { NavigationComponent } from '../layout/structure/navigation/navigation.component';
+import { BreadcrumbComponent } from '../layout/structure/breadcrumb/breadcrumb.component';
 
-import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
+import { SidebarComponent } from '../layout/structure/sidebar/sidebar.component';
 import { SearchResultsComponent } from './components/search-results/search-results.component';
-import { FooterComponent } from '../layout/components/footer/footer.component';
+import { FooterComponent } from '../layout/structure/footer/footer.component';
 
 const routes: Routes = [
   {

@@ -29,6 +29,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { DatePipe } from '@angular/common';
 import { FileSaverModule } from 'ngx-filesaver';
 import { ToastModule } from './layout/toast/toast.module';
+import { AuthModule } from './auth/auth.module';
 
 
 @NgModule({
@@ -38,11 +39,12 @@ import { ToastModule } from './layout/toast/toast.module';
   imports: [
     BrowserModule,
     HttpClientModule,
+    AuthModule,
     LayoutModule,
     NgxSpinnerModule,
     AppRoutingModule,
     FileSaverModule,
-    ToastModule,
+    ToastModule
   ],
   providers: [
     PreviousRouteService,

@@ -19,9 +19,9 @@
 import { Injectable } from '@angular/core';
 import { BreadcrumbItem } from './breadcrumb.model';
 import { BehaviorSubject } from 'rxjs';
-import { TypeService } from '../../framework/services/type.service';
-import { ObjectService } from '../../framework/services/object.service';
-import { RenderResult } from '../../framework/models/cmdb-render';
+import { TypeService } from '../../../framework/services/type.service';
+import { ObjectService } from '../../../framework/services/object.service';
+import { RenderResult } from '../../../framework/models/cmdb-render';
 
 @Injectable()
 export class BreadcrumbService {

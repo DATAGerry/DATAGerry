@@ -23,6 +23,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ConnectionService } from '../../connect/connection.service';
 import { User } from '../../management/models/user';
 import { Right } from '../../management/models/right';
+import { PermissionService } from './permission.service';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -46,11 +47,8 @@ export class AuthService {
   private currentUserTokenSubject: BehaviorSubject<string>;
   public currentUserToken: Observable<string>;
 
-  // Right storage
-  private currentUserRightListSubject: BehaviorSubject<Right[]>;
-  public currentUserRightList: Observable<Right[]>;
-
-  constructor(private http: HttpClient, private connectionService: ConnectionService) {
+  constructor(private http: HttpClient, private connectionService: ConnectionService,
+              private permissionService: PermissionService) {
     this.currentUserSubject = new BehaviorSubject<User>(
       JSON.parse(localStorage.getItem('current-user')));
     this.currentUser = this.currentUserSubject.asObservable();
@@ -58,10 +56,6 @@ export class AuthService {
     this.currentUserTokenSubject = new BehaviorSubject<string>(
       JSON.parse(localStorage.getItem('access-token')));
     this.currentUserToken = this.currentUserTokenSubject.asObservable();
-
-    this.currentUserRightListSubject = new BehaviorSubject<Right[]>(
-      JSON.parse(localStorage.getItem('current-user-rights')));
-    this.currentUserRightList = this.currentUserRightListSubject.asObservable();
   }
 
   public get currentUserValue(): User {
@@ -72,9 +66,6 @@ export class AuthService {
     return this.currentUserTokenSubject.value;
   }
 
-  public get currentUserRights(): Right[] {
-    return this.currentUserRightListSubject.value;
-  }
 
   public getAuthProviders() {
     return this.http.get(`${ this.connectionService.currentConnection }/${ this.restPrefix }/${ this.servicePrefix }/providers`).pipe(
@@ -96,6 +87,7 @@ export class AuthService {
         localStorage.setItem('access-token', JSON.stringify(user.token));
         this.currentUserSubject.next(user);
         this.currentUserTokenSubject.next(user.token);
+        this.permissionService.storeUserRights(user.group_id);
         return user;
       }));
   }
@@ -103,8 +95,8 @@ export class AuthService {
   public logout() {
     localStorage.removeItem('current-user');
     localStorage.removeItem('access-token');
-    localStorage.removeItem('current-user-rights');
     this.currentUserSubject.next(null);
     this.currentUserTokenSubject.next(null);
+    this.permissionService.clearUserRightStorage();
   }
 }

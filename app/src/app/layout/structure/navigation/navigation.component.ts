@@ -17,9 +17,9 @@
 */
 
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
-import { AuthService } from '../../auth/services/auth.service';
+import { AuthService } from '../../../auth/services/auth.service';
 import { Router } from '@angular/router';
-import { PermissionGuard } from '../../auth/guards/permission.guard';
+import { PermissionGuard } from '../../../auth/guards/permission.guard';
 
 @Component({
   selector: 'cmdb-navigation',

@@ -37,10 +37,6 @@ export class TypeMappingBaseComponent {
   @Input() public mappingControls: any = [];
   @Input() public currentMapping: any = [];
 
-  public constructor() {
-  }
-
-
   public onDragged(item: any, list: any[], effect: DropEffect) {
     if (effect === 'move') {
       const index = list.indexOf(item);

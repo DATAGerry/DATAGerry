@@ -85,7 +85,7 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
   private currentFactory: ComponentFactory<any>;
 
   constructor(private typeService: TypeService, private ref: ChangeDetectorRef,
-              private resolver: ComponentFactoryResolver, private importerService: ImportService) {
+              private resolver: ComponentFactoryResolver) {
     super();
     this.typeChange = new EventEmitter<any>();
     this.configForm = new FormGroup({
@@ -144,6 +144,7 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
         });
       }
     }
+
     this.loadMappingComponent();
   }
 

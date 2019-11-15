@@ -24,78 +24,81 @@ import { ObjectAddComponent } from './object-add/object-add.component';
 import { ObjectEditComponent } from './object-edit/object-edit.component';
 import { ObjectCopyComponent } from './object-copy/object-copy.component';
 import { ObjectLogComponent } from './object-log/object-log.component';
+import { PermissionGuard } from '../../auth/guards/permission.guard';
 
 const routes: Routes = [
   {
     path: '',
     data: {
-      breadcrumb: 'List'
+      breadcrumb: 'List',
+      right: 'base.framework.object.view'
     },
     component: ObjectListComponent
   },
   {
     path: 'add',
     data: {
-      breadcrumb: 'New'
+      breadcrumb: 'New',
+      right: 'base.framework.object.add'
     },
     component: ObjectAddComponent
   },
   {
     path: 'add/:publicID',
     data: {
-      breadcrumb: 'Add'
+      breadcrumb: 'Add',
+      right: 'base.framework.object.view'
     },
     component: ObjectAddComponent
   },
   {
     path: 'edit/:publicID',
     data: {
-      breadcrumb: 'Edit'
+      breadcrumb: 'Edit',
+      right: 'base.framework.object.edit'
     },
     component: ObjectEditComponent
   },
   {
     path: 'copy/:publicID',
     data: {
-      breadcrumb: 'Copy'
+      breadcrumb: 'Copy',
+      right: 'base.framework.object.add'
     },
     component: ObjectCopyComponent
   },
   {
     path: 'type/:publicID',
     data: {
-      breadcrumb: 'Object Type List'
+      breadcrumb: 'Object Type List',
+      right: 'base.framework.object.view'
     },
     component: ObjectListComponent
   },
   {
     path: 'view/:publicID',
     data: {
-      breadcrumb: 'View'
+      breadcrumb: 'View',
+      right: 'base.framework.object.view'
     },
     component: ObjectViewComponent
   },
   {
     path: 'type/view/:publicID',
     data: {
-      breadcrumb: 'Type View'
+      breadcrumb: 'Type View',
+      right: 'base.framework.object.view'
     },
     component: ObjectViewComponent
   },
   {
     path: 'log/:publicID',
     data: {
-      breadcrumb: 'View Log'
+      breadcrumb: 'View Log',
+      right: 'base.framework.object.view'
     },
     component: ObjectLogComponent
-  },
-  {
-    path: 'user',
-    data: {
-      breadcrumb: 'User'
-    },
-    loadChildren: () => import('./user-object/user-object.module').then(m => m.UserObjectModule),
-  },
+  }
 ];
 
 @NgModule({

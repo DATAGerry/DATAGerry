@@ -20,13 +20,17 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LoginComponent } from './login.component';
 import { RouterModule } from '@angular/router';
-import { AuthService } from './services/auth.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthRoutingModule } from './auth-routing.module';
 import { InlineSVGModule } from 'ng-inline-svg';
+import { PermissionLinkDirective } from './directives/permission-link.directive';
+import { PermissionGuard } from './guards/permission.guard';
 
 @NgModule({
-  declarations: [LoginComponent],
+  declarations: [LoginComponent, PermissionLinkDirective],
+  exports: [
+    PermissionLinkDirective
+  ],
   imports: [
     CommonModule,
     FormsModule,
@@ -34,6 +38,9 @@ import { InlineSVGModule } from 'ng-inline-svg';
     AuthRoutingModule,
     ReactiveFormsModule,
     InlineSVGModule,
+  ],
+  providers: [
+    PermissionGuard
   ]
 })
 export class AuthModule {
