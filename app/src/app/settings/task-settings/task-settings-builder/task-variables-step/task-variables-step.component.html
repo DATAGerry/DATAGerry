@@ -8,7 +8,7 @@
       <ng-container formArrayName="variables">
         <ng-container *ngFor="let variable of variableForm['controls'].variables['controls']; let s=index">
           <div class="space-bottom card">
-            <div class="card-header">Source {{s}}
+            <div class="card-header">Variable: {{variable.get('name').value}}
               <span class="float-right">
                 <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
                         [attr.data-target]="['#collapseExample' + s]" aria-expanded="true">

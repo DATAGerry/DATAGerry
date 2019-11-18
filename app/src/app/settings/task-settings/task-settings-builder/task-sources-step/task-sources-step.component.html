@@ -8,7 +8,7 @@
       <ng-container formArrayName="sources">
         <ng-container *ngFor="let source of sourcesForm['controls'].sources['controls']; let s=index">
           <div class="space-bottom card">
-            <div class="card-header">Source {{s}}
+            <div class="card-header">Source: TypeID #{{source.get('type_id').value}}
               <span class="float-right">
                 <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
                         [attr.data-target]="['#collapseExample' + s]" aria-expanded="true">
@@ -60,7 +60,7 @@
                                    || condition.get('name').touched), 'is-invalid': condition.get('name').invalid
                                    && (condition.get('name').dirty || condition.get('name').touched)}"
                                   required>
-                            <option *ngFor="let order of this.typeService.findType((source.get('type_id').value)).fields; let i = index" [value]="order.name">
+                            <option *ngFor="let order of getFields(source.get('type_id').value); let i = index" [value]="order.name">
                               {{order.name}}
                             </option>
                           </select>
@@ -94,7 +94,15 @@
                       </tbody>
                     </table>
                   </ng-container>
-                <button type="button" class="btn btn-outline-secondary" (click)="addCondition(s)">+ Add Condition</button>
+                <ng-template [ngIf]="source.get('type_id').value === null" [ngIfElse]="loadCondition">
+                  <div class="lessons-list">
+                    <button type="button" class="btn btn-outline-secondary"
+                            [swal]="['Oops!', 'Please choose a type first', 'warning']">+ Add Condition</button>
+                  </div>
+                </ng-template>
+                <ng-template #loadCondition>
+                  <button type="button" class="btn btn-outline-secondary" (click)="addCondition(s)">+ Add Condition</button>
+                </ng-template>
               </ng-container>
             </div>
           </div>

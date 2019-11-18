@@ -140,6 +140,7 @@ class ExportSource:
                 else:
                     operator = con["value"]
                 condition.append({"$and": [{"fields.name": con["name"]}, {"fields.value": operator}]})
+            condition.append({'type_id': source["type_id"]})
         query = {"$or": condition}
         result = self.__obm.get_objects_by(sort="public_id", **query)
 

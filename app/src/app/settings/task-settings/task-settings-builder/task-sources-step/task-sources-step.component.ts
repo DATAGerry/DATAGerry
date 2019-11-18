@@ -16,11 +16,11 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { CmdbMode } from '../../../../framework/modes.enum';
-import { CmdbType } from '../../../../framework/models/cmdb-type';
-import { TypeService } from '../../../../framework/services/type.service';
+import {Component, Input, OnInit} from '@angular/core';
+import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {CmdbMode} from '../../../../framework/modes.enum';
+import {CmdbType} from '../../../../framework/models/cmdb-type';
+import {TypeService} from '../../../../framework/services/type.service';
 
 
 @Component({
@@ -76,11 +76,23 @@ export class TaskSourcesStepComponent implements OnInit {
       sources: this.formBuilder.array([this.createSource()])
     });
     this.typeService.getTypeList().subscribe((value: CmdbType[]) => this.typeList = value);
+
+    if (this.mode === CmdbMode.Create) {
+      this.delCondition(0, 0);
+    }
+  }
+
+  public getFields(item: any) {
+    try {
+      return this.typeService.findType(item).fields;
+    } catch (e) {
+      return [];
+    }
   }
 
   private createSource(): FormGroup {
     return this.formBuilder.group({
-      type_id: new FormControl('', Validators.required),
+      type_id: new FormControl(null, Validators.required),
       condition: this.formBuilder.array([this.createCondition()])
     });
   }
