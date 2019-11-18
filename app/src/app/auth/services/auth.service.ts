@@ -19,7 +19,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpHeaders } from '@angular/common/http';
 import { ConnectionService } from '../../connect/connection.service';
 import { User } from '../../management/models/user';
 import { Right } from '../../management/models/right';
@@ -40,6 +40,7 @@ export class AuthService {
   // Rest backend
   private restPrefix: string = 'rest';
   private servicePrefix: string = 'auth';
+  private http: HttpClient;
 
   // User storage
   private currentUserSubject: BehaviorSubject<User>;
@@ -47,8 +48,9 @@ export class AuthService {
   private currentUserTokenSubject: BehaviorSubject<string>;
   public currentUserToken: Observable<string>;
 
-  constructor(private http: HttpClient, private connectionService: ConnectionService,
+  constructor(private backend: HttpBackend, private connectionService: ConnectionService,
               private permissionService: PermissionService) {
+    this.http = new HttpClient(backend);
     this.currentUserSubject = new BehaviorSubject<User>(
       JSON.parse(localStorage.getItem('current-user')));
     this.currentUser = this.currentUserSubject.asObservable();
