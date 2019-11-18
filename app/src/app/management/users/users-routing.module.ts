@@ -28,35 +28,40 @@ const routes: Routes = [
   {
     path: '',
     data: {
-      breadcrumb: 'List'
+      breadcrumb: 'List',
+      right: 'base.user-management.user.view'
     },
     component: UsersListComponent
   },
   {
-    path: 'add',
-    data: {
-      breadcrumb: 'Add'
-    },
-    component: UsersAddComponent
-  },
-  {
     path: 'view/:publicID',
     data: {
-      breadcrumb: 'View'
+      breadcrumb: 'View',
+      right: 'base.user-management.user.view'
     },
     component: UserViewComponent
   },
   {
+    path: 'add',
+    data: {
+      breadcrumb: 'Add',
+      right: 'base.user-management.user.add'
+    },
+    component: UsersAddComponent
+  },
+  {
     path: 'edit/:publicID',
     data: {
-      breadcrumb: 'Edit'
+      breadcrumb: 'Edit',
+      right: 'base.user-management.user.edit'
     },
     component: UsersEditComponent
   },
   {
     path: 'delete/:publicID',
     data: {
-      breadcrumb: 'Delete'
+      breadcrumb: 'Delete',
+      right: 'base.user-management.user.delete'
     },
     component: UsersDeleteComponent
   }

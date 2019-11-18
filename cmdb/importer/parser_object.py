@@ -16,6 +16,7 @@
 import csv
 import json
 import logging
+from json import JSONDecodeError
 
 from cmdb.importer.content_types import JSONContent, CSVContent
 from cmdb.importer.parser_base import BaseObjectParser
@@ -89,13 +90,30 @@ class CsvObjectParser(BaseObjectParser, CSVContent):
 
         with open(f'{file}', 'r', newline=run_config.get('newline')) as csv_file:
             csv_reader = csv.reader(csv_file, **dialect)
+
+            first_line = next(csv_reader)
             if run_config.get('header'):
-                parsed['header'] = next(csv_reader)
+                parsed['header'] = first_line
                 parsed['entry_length'] = len(parsed['header'])
             else:
-                parsed['entries'] = next(csv_reader)
-                parsed['entry_length'] = len(parsed['header'])
+                parsed['entry_length'] = len(parsed['first_line'])
+
+            for first_split in first_line:
+                converted_content: dict = {}
+                converted_content.update(json.loads(first_split))
+                parsed['entries'].append(converted_content)
+
             for row in csv_reader:
-                parsed['entries'].append(row)
+                converted_content: dict = {}
+                for split_content in row:
+                    try:
+                        converted_content.append(json.loads(split_content))
+                    except JSONDecodeError:
+                        converted_content.append(split_content)
+                parsed['entries'].append(converted_content)
+
+            if not run_config.get('header'):
+                parsed['entry_length'] = len(parsed['entries'][0])
+
         parsed['count'] = len(parsed['entries'])
         return CsvObjectParserResponse(**parsed)

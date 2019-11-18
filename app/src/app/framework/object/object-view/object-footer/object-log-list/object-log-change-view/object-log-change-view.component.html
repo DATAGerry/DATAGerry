@@ -9,9 +9,9 @@
   </div>
   <div *ngSwitchCase="modes.EDIT">
     <ul class="list-unstyled">
-      <li *ngFor="let change of changes.old; let i = index">
-        <b>{{change.name}}</b><br />
-        {{change.value}} <i class="fas fa-arrow-right"></i> {{changes.new[i].value}}
+      <li *ngFor="let change of changes?.old; let i = index">
+        <b>{{change?.name}}</b><br />
+        {{change?.value}} <i class="fas fa-arrow-right"></i> {{changes?.new[i]?.value}}
       </li>
     </ul>
   </div>

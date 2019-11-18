@@ -22,33 +22,38 @@ import { TypeListComponent } from './type-list/type-list.component';
 import { TypeAddComponent } from './type-add/type-add.component';
 import { TypeEditComponent } from './type-edit/type-edit.component';
 import { TypeDeleteComponent } from './type-delete/type-delete.component';
+import { PermissionGuard } from '../../auth/guards/permission.guard';
 
 const routes: Routes = [
   {
     path: '',
     data: {
-      breadcrumb: 'List'
+      breadcrumb: 'List',
+      right: 'base.framework.type.view'
     },
     component: TypeListComponent
   },
   {
     path: 'add',
     data: {
-      breadcrumb: 'Add'
+      breadcrumb: 'Add',
+      right: 'base.framework.type.add'
     },
     component: TypeAddComponent
   },
   {
     path: 'edit/:publicID',
     data: {
-      breadcrumb: 'Edit'
+      breadcrumb: 'Edit',
+      right: 'base.framework.type.edit'
     },
     component: TypeEditComponent
   },
   {
     path: 'delete/:publicID',
     data: {
-      breadcrumb: 'Delete'
+      breadcrumb: 'Delete',
+      right: 'base.framework.type.delete'
     },
     component: TypeDeleteComponent
   }

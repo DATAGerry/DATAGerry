@@ -17,8 +17,8 @@
 */
 
 import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
-import { LogService } from '../../../services/log.service';
-import { CmdbLog } from '../../../models/cmdb-log';
+import { LogService } from '../../../../services/log.service';
+import { CmdbLog } from '../../../../models/cmdb-log';
 import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
 
@@ -27,7 +27,7 @@ import { DataTableDirective } from 'angular-datatables';
   templateUrl: './object-log-list.component.html',
   styleUrls: ['./object-log-list.component.scss']
 })
-export class ObjectLogListComponent implements OnInit, OnChanges, OnDestroy {
+export class ObjectLogListComponent implements OnInit, OnDestroy {
 
   private id: number;
   @ViewChild(DataTableDirective, {static: true})
@@ -83,9 +83,6 @@ export class ObjectLogListComponent implements OnInit, OnChanges, OnDestroy {
         searchPlaceholder: 'Filter...'
       }
     };
-  }
-
-  public ngOnChanges(changes: SimpleChanges): void {
   }
 
   public ngOnDestroy(): void {

@@ -73,13 +73,13 @@ class ObjectImporter(BaseImporter):
         self.request_user = request_user
         super(ObjectImporter, self).__init__(file=file, file_type=file_type, config=config)
 
-    def _generate_objects(self, parsed: ObjectParserResponse) -> list:
+    def _generate_objects(self, parsed: ObjectParserResponse, *args, **kwargs) -> list:
         object_instance_list: [dict] = []
         for entry in parsed.entries:
-            object_instance_list.append(self.generate_object(entry))
+            object_instance_list.append(self.generate_object(entry, *args, **kwargs))
         return object_instance_list
 
-    def generate_object(self, entry) -> dict:
+    def generate_object(self, entry, *args, **kwargs) -> dict:
         raise NotImplementedError
 
     def _import(self, import_objects: list) -> ImporterObjectResponse:

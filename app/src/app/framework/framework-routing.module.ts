@@ -18,11 +18,12 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { NavigationComponent } from '../layout/components/navigation/navigation.component';
-import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';
-import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
-import { FooterComponent } from '../layout/components/footer/footer.component';
+import { NavigationComponent } from '../layout/structure/navigation/navigation.component';
+import { BreadcrumbComponent } from '../layout/structure/breadcrumb/breadcrumb.component';
+import { SidebarComponent } from '../layout/structure/sidebar/sidebar.component';
+import { FooterComponent } from '../layout/structure/footer/footer.component';
 import { FrameworkComponent } from './framework.component';
+import { PermissionGuard } from '../auth/guards/permission.guard';
 
 const routes: Routes = [
   {
@@ -48,37 +49,37 @@ const routes: Routes = [
   {
     path: '',
     data: {
-      breadcrumb: 'Overview'
+      breadcrumb: 'Overview',
+      right: 'base.framework.*'
     },
     component: FrameworkComponent
   },
   {
-    path: 'type',
-    data: {
-      breadcrumb: 'Type'
-    },
-    loadChildren: () => import('./type/type.module').then(m => m.TypeModule),
-  },
-  {
     path: 'object',
+    canActivateChild: [PermissionGuard],
     data: {
-      breadcrumb: 'Object'
+      breadcrumb: 'Object',
+      right: 'base.framework.object.*'
     },
     loadChildren: () => import('./object/object.module').then(m => m.ObjectModule),
   },
   {
+    path: 'type',
+    canActivateChild: [PermissionGuard],
+    data: {
+      breadcrumb: 'Type',
+      right: 'base.framework.type.*'
+    },
+    loadChildren: () => import('./type/type.module').then(m => m.TypeModule),
+  },
+
+  {
     path: 'category',
     data: {
-      breadcrumb: 'Category'
+      breadcrumb: 'Category',
+      right: 'base.framework.category.*'
     },
     loadChildren: () => import('./category/category.module').then(m => m.CategoryModule),
-  },
-  {
-    path: 'status',
-    data: {
-      breadcrumb: 'Status'
-    },
-    loadChildren: () => import('./status/status.module').then(m => m.StatusModule),
   }
 ];
 

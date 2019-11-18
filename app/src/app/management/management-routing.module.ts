@@ -18,10 +18,10 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { NavigationComponent } from '../layout/components/navigation/navigation.component';
-import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
-import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';
-import { FooterComponent } from '../layout/components/footer/footer.component';
+import { NavigationComponent } from '../layout/structure/navigation/navigation.component';
+import { SidebarComponent } from '../layout/structure/sidebar/sidebar.component';
+import { BreadcrumbComponent } from '../layout/structure/breadcrumb/breadcrumb.component';
+import { FooterComponent } from '../layout/structure/footer/footer.component';
 import { UserViewComponent } from './users/user-view/user-view.component';
 
 const routes: Routes = [
@@ -48,21 +48,23 @@ const routes: Routes = [
   {
     path: 'users',
     data: {
-      breadcrumb: 'Users'
+      breadcrumb: 'Users',
+      right: 'base.user-management.user.*'
     },
     loadChildren: () => import('./users/users.module').then(m => m.UsersModule)
   },
   {
     path: 'groups',
     data: {
-      breadcrumb: 'Groups'
+      breadcrumb: 'Groups',
+      right: 'base.user-management.group.*'
     },
     loadChildren: () => import('./groups/groups.module').then(m => m.GroupsModule)
   },
   {
     path: 'rights',
     data: {
-      breadcrumb: 'Rights'
+      breadcrumb: 'Rights',
     },
     loadChildren: () => import('./rights/rights.module').then(m => m.RightsModule)
   },

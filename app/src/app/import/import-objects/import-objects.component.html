@@ -46,7 +46,7 @@
       </div>
       <ul class="list-group list-group-flush">
         <li *ngFor="let parserPro of parserConfig | keyvalue" class="list-group-item">
-          {{parserPro.key | uppercase}}: {{parserPro.value}}
+          {{parserPro?.key | uppercase}}: {{parserPro?.value}}
         </li>
       </ul>
     </div>

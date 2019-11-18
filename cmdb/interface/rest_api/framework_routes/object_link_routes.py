@@ -21,7 +21,9 @@ from flask import abort, request, current_app
 from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError
 from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint
-from cmdb.interface.route_utils import make_response, NestedBlueprint
+from cmdb.interface.route_utils import make_response, NestedBlueprint, insert_request_user, login_required, \
+    right_required
+from cmdb.user_management import User
 
 with current_app.app_context():
     object_manager = current_app.object_manager
@@ -37,15 +39,10 @@ link_rest = NestedBlueprint(object_blueprint, url_prefix='/link')
 
 @link_rest.route('/<int:public_id>/', methods=['GET'])
 @link_rest.route('/<int:public_id>', methods=['GET'])
-def get_link(public_id: int):
-    """
-    Get link from object where the primary or secondary id is a public id
-    Args:
-        public_id: id of the secondary or primary object
-
-    Returns:
-
-    """
+@login_required
+@insert_request_user
+@right_required('base.framework.object.view')
+def get_link(public_id: int, request_user: User):
     try:
         ack = []
     except ObjectManagerGetError:
@@ -60,14 +57,15 @@ def get_link_by_partner(public_id: int):
 
 
 @link_rest.route('/', methods=['POST'])
-def add_link():
-    LOGGER.debug(request.json)
+@login_required
+@insert_request_user
+@right_required('base.framework.object.add')
+def add_link(request_user: User):
     try:
-        new_link_params = {**request.json, **{'public_id': int(object_manager.get_new_id(CmdbLink.COLLECTION) + 1)}}
-    except TypeError as e:
-        LOGGER.error(e)
+        new_link_params = {**request.json}
+    except TypeError:
         return abort(400)
-    LOGGER.debug(f'Link insert params: {new_link_params}')
+
     try:
         ack = object_manager.insert_link(new_link_params)
     except ObjectManagerInsertError:

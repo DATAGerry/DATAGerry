@@ -18,8 +18,8 @@
 
 import { Component, Input, OnDestroy, ViewChild } from '@angular/core';
 import { Subject } from 'rxjs';
-import { RenderResult } from '../../../models/cmdb-render';
-import { ObjectService } from '../../../services/object.service';
+import { RenderResult } from '../../../../models/cmdb-render';
+import { ObjectService } from '../../../../services/object.service';
 import { DataTableDirective } from 'angular-datatables';
 
 @Component({

@@ -18,30 +18,17 @@
 
 import { Component, Injectable, Input, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
-import { TypeService } from '../../../services/type.service';
+import { checkTypeExistsValidator, TypeService } from '../../../services/type.service';
 import { CategoryService } from '../../../services/category.service';
 import { CmdbCategory } from '../../../models/cmdb-category';
 import { Observable } from 'rxjs';
 import { CmdbMode } from '../../../modes.enum';
 
 
-@Injectable()
-export class TypeNameValidator {
-
-  static createValidator(typeService: TypeService) {
-    return (control: AbstractControl) => {
-      return typeService.validateTypeName(control.value).then(res => {
-        return res ? null : {nameAlreadyTaken: true};
-      });
-    };
-  }
-}
-
 @Component({
   selector: 'cmdb-type-basic-step',
   templateUrl: './type-basic-step.component.html',
   styleUrls: ['./type-basic-step.component.scss'],
-  providers: [TypeNameValidator]
 })
 export class TypeBasicStepComponent implements OnInit {
 
@@ -86,14 +73,14 @@ export class TypeBasicStepComponent implements OnInit {
 
   public ngOnInit(): void {
     if (this.mode === CmdbMode.Create) {
-      this.basicForm.get('name').setAsyncValidators(TypeNameValidator.createValidator(this.typeService));
+      this.basicForm.get('name').setAsyncValidators(checkTypeExistsValidator(this.typeService));
       this.basicForm.get('label').valueChanges.subscribe(value => {
         this.basicForm.get('name').setValue(value.replace(/ /g, '-').toLowerCase());
-        this.basicForm.get('name').markAsDirty({onlySelf: true});
-        this.basicForm.get('name').markAsTouched({onlySelf: true});
+        this.basicForm.get('name').markAsDirty({ onlySelf: true });
+        this.basicForm.get('name').markAsTouched({ onlySelf: true });
       });
       this.basicCategoryForm.get('category_id').setValidators(Validators.required);
-      this.categoryService.getRootCategory().subscribe( (category: CmdbCategory[]) => {
+      this.categoryService.getRootCategory().subscribe((category: CmdbCategory[]) => {
         if (category.length) {
           this.basicCategoryForm.get('category_id').setValue(category[0].public_id);
         }

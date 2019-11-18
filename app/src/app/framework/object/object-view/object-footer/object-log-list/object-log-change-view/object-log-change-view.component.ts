@@ -17,7 +17,7 @@
 */
 
 import { Component, Input } from '@angular/core';
-import { LogMode } from '../../../../modes.enum';
+import { LogMode } from '../../../../../modes.enum';
 
 @Component({
   selector: 'cmdb-object-log-change-view',

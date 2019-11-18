@@ -288,6 +288,16 @@ class CmdbObjectManager(CmdbManagerBase):
         except (CMDBError, Exception) as e:
             raise ObjectManagerGetError(err=e)
 
+    def get_type_by(self, **requirements) -> CmdbType:
+        try:
+            found_type_list = self._get_all(collection=CmdbType.COLLECTION, limit=1, **requirements)
+            if len(found_type_list) > 0:
+                return CmdbType(**found_type_list[0])
+            else:
+                raise ObjectManagerGetError(err='More than 1 type matches this requirement')
+        except (CMDBError, Exception) as e:
+            raise ObjectManagerGetError(err=e)
+
     def get_types_by(self, sort='public_id', **requirements):
         ack = []
         objects = self._get_all(collection=CmdbType.COLLECTION, sort=sort, **requirements)
@@ -490,7 +500,6 @@ class CmdbObjectManager(CmdbManagerBase):
         return NotImplementedError
 
     # COLLECTIONS/TEMPLATES CRUD
-
     def get_collections(self) -> list:
         collection_list = list()
         try:
@@ -577,8 +586,7 @@ class CmdbObjectManager(CmdbManagerBase):
     def delete_collection_template(self, public_id: int):
         return NotImplementedError
 
-    # Link CRUDS
-
+    # Link CRUD
     def get_link(self, public_id: int):
         try:
             return CmdbLink(**self._get(collection=CmdbLink.COLLECTION, public_id=public_id))
@@ -590,9 +598,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def insert_link(self, data: dict):
         try:
-            new_link = CmdbLink(**data)
-            ack = self.dbm.insert(CmdbLink.COLLECTION, new_link.to_database())
+            new_link = CmdbLink(public_id=self.get_new_id(collection=CmdbLink.COLLECTION), **data)
+            return self._insert(CmdbLink.COLLECTION, new_link.to_database())
         except (CMDBError, Exception) as err:
-            LOGGER.error(err)
             raise ObjectManagerInsertError(err)
-        return ack

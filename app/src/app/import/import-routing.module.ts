@@ -19,11 +19,11 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { ImportComponent } from './import.component';
-import { NavigationComponent } from '../layout/components/navigation/navigation.component';
-import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
-import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';
+import { NavigationComponent } from '../layout/structure/navigation/navigation.component';
+import { SidebarComponent } from '../layout/structure/sidebar/sidebar.component';
+import { BreadcrumbComponent } from '../layout/structure/breadcrumb/breadcrumb.component';
 import { ImportObjectsComponent } from './import-objects/import-objects.component';
-import { FooterComponent } from '../layout/components/footer/footer.component';
+import { FooterComponent } from '../layout/structure/footer/footer.component';
 import { ImportTypesComponent } from './import-types/import-types.component';
 
 const routes: Routes = [
@@ -50,21 +50,24 @@ const routes: Routes = [
   {
     path: '',
     data: {
-      breadcrumb: 'Overview'
+      breadcrumb: 'Overview',
+      right: 'base.import.*'
     },
     component: ImportComponent
   },
   {
     path: 'object',
     data: {
-      breadcrumb: 'Object'
+      breadcrumb: 'Object',
+      right: 'base.import.object.*'
     },
     component: ImportObjectsComponent
   },
   {
     path: 'type',
     data: {
-      breadcrumb: 'Type'
+      breadcrumb: 'Type',
+      right: 'base.import.type.*'
     },
     component: ImportTypesComponent
   }

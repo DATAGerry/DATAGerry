@@ -20,9 +20,10 @@ import { CmdbDao } from './cmdb-dao';
 
 export class CmdbLink implements CmdbDao {
 
-  // tslint:disable-next-line:variable-name
+  // tslint:disable:variable-name
   public readonly public_id: number;
   public primary: number;
   public secondary: number;
-
+  public creation_time: Date;
+  // tslint:enable:variable-name
 }

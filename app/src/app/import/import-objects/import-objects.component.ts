@@ -71,6 +71,13 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
 
   public formatChange(format: string) {
     this.importerFile.fileFormat = format;
+    const defaultImporterConfig = this.importService.getObjectImporterDefaultConfig(this.importerFile.fileFormat)
+      .subscribe((defaultConfig: any) => {
+          this.defaultImporterConfig = defaultConfig;
+        },
+        (error) => console.error(error),
+        () => defaultImporterConfig.unsubscribe()
+      );
   }
 
   public fileChange(file: File) {
@@ -86,13 +93,6 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
   public importConfigChange(config: any) {
     this.importerConfig = config as ImporterConfig;
     this.importerConfig.type_id = this.typeInstance.public_id as number;
-    const defaultImporterConfig = this.importService.getObjectImporterDefaultConfig(this.importerFile.fileFormat)
-      .subscribe((defaultConfig: boolean) => {
-        this.defaultImporterConfig = defaultConfig;
-      },
-      (error) => console.error(error),
-      () => defaultImporterConfig.unsubscribe()
-    );
   }
 
   public typeChange(change: any) {
