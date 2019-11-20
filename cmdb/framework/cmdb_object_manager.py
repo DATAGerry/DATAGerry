@@ -24,6 +24,7 @@ import logging
 import re
 
 from datetime import datetime
+from typing import List
 
 from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
 from cmdb.event_management.event import Event
@@ -593,8 +594,22 @@ class CmdbObjectManager(CmdbManagerBase):
         except (CMDBError, Exception) as err:
             raise ObjectManagerGetError(err)
 
-    def get_links_by_partner(self, public_id: int):
-        return NotImplementedError
+    def get_links_by_partner(self, public_id: int) -> List[CmdbLink]:
+        query = {
+            '$or': [
+                {'primary': public_id},
+                {'secondary': public_id}
+            ]
+        }
+        link_list: List[CmdbLink] = []
+        try:
+            find_list: List[dict] = self._get_all(CmdbLink.COLLECTION, **query)
+            LOGGER.debug(find_list)
+            for link in find_list:
+                link_list.append(CmdbLink(**link))
+        except CMDBError as err:
+            raise ObjectManagerGetError(err)
+        return link_list
 
     def insert_link(self, data: dict):
         try:

@@ -20,13 +20,14 @@ from flask import abort, request, current_app
 
 from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint
 from cmdb.interface.route_utils import make_response, NestedBlueprint, insert_request_user, login_required, \
     right_required
 from cmdb.user_management import User
 
 with current_app.app_context():
-    object_manager = current_app.object_manager
+    object_manager: CmdbObjectManager = current_app.object_manager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -44,16 +45,21 @@ link_rest = NestedBlueprint(object_blueprint, url_prefix='/link')
 @right_required('base.framework.object.view')
 def get_link(public_id: int, request_user: User):
     try:
-        ack = []
-    except ObjectManagerGetError:
-        return abort(404)
-    return make_response(ack)
+        return object_manager.get_link(public_id=public_id)
+    except ObjectManagerGetError as err:
+        return abort(404, err.message)
 
 
-@link_rest.route('/primary/<int:public_id>/', methods=['GET'])
-@link_rest.route('/secondary/<int:public_id>', methods=['GET'])
-def get_link_by_partner(public_id: int):
-    return get_link(public_id)
+@link_rest.route('/partner/<int:public_id>/', methods=['GET'])
+@link_rest.route('/partner/<int:public_id>', methods=['GET'])
+def get_partner_links(public_id: int):
+    try:
+        link_list = object_manager.get_links_by_partner(public_id=public_id)
+    except ObjectManagerGetError as err:
+        return abort(404, err.message)
+    if len(link_list) == 0:
+        return make_response(link_list, 204)
+    return make_response(link_list)
 
 
 @link_rest.route('/', methods=['POST'])

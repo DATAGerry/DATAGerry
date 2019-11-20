@@ -1,16 +1,36 @@
 <div class="modal-header bg-primary text-white">
   <h4 class="modal-title">Add connection to object:
-    #{{renderResult?.object_information?.object_id}} {{renderResult?.type_information?.type_label}}</h4>
+    #{{primaryRenderResult?.object_information?.object_id}} {{primaryRenderResult?.type_information?.type_label}}</h4>
   <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
     <span aria-hidden="true">&times;</span>
   </button>
 </div>
-<form [formGroup]="addLinkForm" novalidate>
+<form [formGroup]="addLinkForm" (ngSubmit)="onSave()" novalidate>
   <div class="modal-body">
-    <p></p>
+    <div class="form-group">
+      <label for="secondary">Enter Public ID:</label>
+      <input type="number" class="form-control" formControlName="secondary" name="secondary" id="secondary"
+             [ngClass]="{ 'is-valid': secondary.valid && (secondary.dirty || secondary.touched),
+                 'is-invalid': secondary.invalid && (secondary.dirty || secondary.touched)}"/>
+      <small id="secondaryHelp" class="form-text text-muted float-left">Select the Public ID of another object</small>
+      <div *ngIf="secondary.invalid && (secondary.dirty || secondary.touched)" class="invalid-feedback">
+        <div class="float-right" *ngIf="secondary.errors.required">
+          Please enter a valid Public ID
+        </div>
+        <div class="float-right" *ngIf="secondary.errors.sameID">
+          You can`t link a object to itself.
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <div class="clearfix"></div>
+    </div>
+    <div *ngIf="secondaryResult">
+      <strong>{{primaryRenderResult?.type_information?.type_label}} #{{secondaryResult?.object_information?.object_id}}</strong>:
+      {{secondaryResult?.summary_line}}
+    </div>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Close click')">Close</button>
-    <button type="submit" class="btn btn-outline-primary">Save</button>
+    <button type="submit" class="btn btn-outline-primary" [disabled]="addLinkForm.invalid">Save</button>
   </div>
 </form>

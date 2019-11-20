@@ -32,8 +32,20 @@ export class LinkService<T = CmdbLink> implements ApiService {
   constructor(private api: ApiCallService) {
   }
 
+  public getPartnerID(id: number, link: CmdbLink): number {
+    return id === link.primary ? link.secondary : link.primary;
+  }
+
   public getLinks(publicID: number): Observable<T[]> {
-    return this.api.callGet<T[]>(`${this.servicePrefix}/${publicID}/`).pipe(
+    return this.api.callGet<T[]>(`${ this.servicePrefix }/${ publicID }/`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public getLinksByPartner(publicID: number): Observable<T[]> {
+    return this.api.callGet<T[]>(`${ this.servicePrefix }/partner/${ publicID }/`).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -41,7 +53,7 @@ export class LinkService<T = CmdbLink> implements ApiService {
   }
 
   public postLink(data: CmdbLink): Observable<any> {
-    return this.api.callPost<CmdbLink>(`${this.servicePrefix}/`, data).pipe(
+    return this.api.callPost<CmdbLink>(`${ this.servicePrefix }/`, data).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
