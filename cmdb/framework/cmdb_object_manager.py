@@ -169,7 +169,8 @@ class CmdbObjectManager(CmdbManagerBase):
                 data=new_object.to_database()
             )
             if self._event_queue:
-                event = Event("cmdb.core.object.added", {"id": new_object.get_public_id()})
+                event = Event("cmdb.core.object.added", {"id": new_object.get_public_id(),
+                                                         "type_id": new_object.get_type_id()})
                 self._event_queue.put(event)
         except (CMDBError, PublicIDAlreadyExists) as e:
             raise ObjectInsertError(e)
@@ -201,7 +202,8 @@ class CmdbObjectManager(CmdbManagerBase):
         )
         # create cmdb.core.object.updated event
         if self._event_queue:
-            event = Event("cmdb.core.object.updated", {"id": update_object.get_public_id()})
+            event = Event("cmdb.core.object.updated", {"id": update_object.get_public_id(),
+                                                       "type_id": update_object.get_type_id()})
             self._event_queue.put(event)
         return ack.acknowledged
 
