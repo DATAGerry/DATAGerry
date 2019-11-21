@@ -74,16 +74,6 @@ class ExportdJobManagement(CmdbManagerBase):
                 continue
         return job_list
 
-    def get_job_by_cron(self, state):
-        formatted_filter = {'scheduling.cron.active': state}
-        job_list = []
-        for founded_job in self.dbm.find_all(collection=ExportdJob.COLLECTION, filter=formatted_filter):
-            try:
-                job_list.append(ExportdJob(**founded_job))
-            except CMDBError:
-                continue
-        return job_list
-
     def insert_job(self, data: (ExportdJob, dict)) -> int:
         """
         Insert new ExportdJob Object
@@ -107,7 +97,7 @@ class ExportdJobManagement(CmdbManagerBase):
             )
             if self._event_queue:
                 event = Event("cmdb.exportd.added", {"id": new_object.get_public_id(),
-                                                     "active": new_object.scheduling["cron"]["active"]})
+                                                     "active": new_object.scheduling["event"]["active"] and new_object.get_active()})
                 self._event_queue.put(event)
         except CMDBError as e:
             raise ExportdJobManagerInsertError(e)
@@ -136,7 +126,7 @@ class ExportdJobManagement(CmdbManagerBase):
         )
         if self._event_queue:
             event = Event("cmdb.exportd.updated", {"id": update_object.get_public_id(),
-                                                   "active": update_object.scheduling["cron"]["active"]})
+                                                   "active": update_object.scheduling["event"]["active"] and update_object.get_active()})
             self._event_queue.put(event)
         return ack.acknowledged
 

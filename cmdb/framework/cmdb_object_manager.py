@@ -259,13 +259,14 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def delete_object(self, public_id: int):
         try:
-            ack = self._delete(CmdbObject.COLLECTION, public_id)
             if self._event_queue:
-                event = Event("cmdb.core.object.deleted", {"id": public_id})
+                event = Event("cmdb.core.object.deleted",
+                              {"id": public_id, "type_id": self.get_object(public_id).get_type_id()})
                 self._event_queue.put(event)
+            ack = self._delete(CmdbObject.COLLECTION, public_id)
             return ack
         except (CMDBError, Exception):
-            raise ObjectDeleteError(obj_id=public_id)
+            raise ObjectDeleteError(msg=public_id)
 
     def delete_many_objects(self, filter_query: dict, public_ids):
         ack = self._delete_many(CmdbObject.COLLECTION, filter_query)
