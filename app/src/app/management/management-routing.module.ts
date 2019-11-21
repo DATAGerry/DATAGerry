@@ -18,8 +18,8 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
 import { PermissionGuard } from '../auth/guards/permission.guard';
+import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
 
 const routes: Routes = [
   {
@@ -47,11 +47,11 @@ const routes: Routes = [
     },
     loadChildren: () => import('./rights/rights.module').then(m => m.RightsModule)
   }
-].concat(LAYOUT_COMPONENT_ROUTES);
+];
 
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
   exports: [RouterModule]
 })
 export class ManagementRoutingModule {

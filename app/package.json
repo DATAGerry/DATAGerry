@@ -6,8 +6,9 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
-    "prod": "ng build --prod=true ",
+    "aot": "ng build --aot=true --verbose=true",
+    "build": "ng build --progress=true --verbose=true",
+    "prod": "ng build --prod=true",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"

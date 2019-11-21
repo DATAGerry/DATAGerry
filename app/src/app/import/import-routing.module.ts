@@ -57,10 +57,10 @@ const routes: Routes = [
     },
     component: ImportTypesComponent
   }
-].concat(LAYOUT_COMPONENT_ROUTES);
+];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
   exports: [RouterModule]
 })
 export class ImportRoutingModule {

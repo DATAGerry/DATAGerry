@@ -51,7 +51,7 @@ import { ChartsComponent } from './components/charts/charts.component';
 import { ToastModule } from './toast/toast.module';
 import { AuthModule } from '../auth/auth.module';
 
-export const LAYOUT_COMPONENT_ROUTES: any[] = [
+export const LAYOUT_COMPONENT_ROUTES: Routes = [
   {
     path: '',
     component: NavigationComponent,

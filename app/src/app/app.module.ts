@@ -39,8 +39,8 @@ import { ErrorModule } from './error/error.module';
   imports: [
     BrowserModule,
     HttpClientModule,
-    AuthModule,
     LayoutModule,
+    AuthModule,
     NgxSpinnerModule,
     AppRoutingModule,
     FileSaverModule,
