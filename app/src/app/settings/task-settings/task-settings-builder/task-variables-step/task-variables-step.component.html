@@ -1,14 +1,14 @@
 <div class="row">
   <div class="col-sm-2">
     <button class="btn btn-primary" type="button" (click)="addVariable()">
-      <i class="fas fa-plus-circle"></i> Add new source </button>
+      <i class="fas fa-plus-circle"></i> Add new Variable </button>
   </div>
   <div class="col-sm-10">
     <form [formGroup]="variableForm">
       <ng-container formArrayName="variables">
         <ng-container *ngFor="let variable of variableForm['controls'].variables['controls']; let s=index">
           <div class="space-bottom card">
-            <div class="card-header">Source {{s}}
+            <div class="card-header">Variable: {{variable.get('name').value}}
               <span class="float-right">
                 <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
                         [attr.data-target]="['#collapseExample' + s]" aria-expanded="true">
@@ -86,7 +86,7 @@
                     </tbody>
                   </table>
                 </ng-container>
-                <button type="button" class="btn btn-outline-secondary" (click)="addTemplate(s)">+ Add Condition</button>
+                <button type="button" class="btn btn-outline-secondary" (click)="addTemplate(s)">+ Add Template</button>
               </ng-container>
             </div>
           </div>

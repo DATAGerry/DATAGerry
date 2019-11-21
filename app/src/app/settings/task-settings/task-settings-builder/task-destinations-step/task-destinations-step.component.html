@@ -52,7 +52,7 @@
       <ng-container formArrayName="destination">
         <ng-container *ngFor="let destination of destinationForm['controls'].destination['controls']; let s=index">
           <div class="space-bottom card">
-            <div class="card-header">Destination {{s}}
+            <div class="card-header">Destination: {{destination.get('className').value}}
               <span class="float-right">
                 <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
                         [attr.data-target]="['#collapseExample' + s]" aria-expanded="true">

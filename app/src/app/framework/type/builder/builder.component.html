@@ -94,14 +94,14 @@
            dndPlaceholderRef>
         Drop section here
       </div>
-      <section *ngFor="let section of sections" dndEffectAllowed="copyMove" dndType="sections" [dndDraggable]="section"
+      <section *ngFor="let section of sections; let x = index" dndEffectAllowed="copyMove" dndType="sections" [dndDraggable]="section"
                (dndMoved)="onDragged(section, sections, 'move')">
         <div class="card">
           <div class="card-header">
             <fa-icon [icon]="['far', 'object-group']"></fa-icon> {{section.label}}
             <span class="float-right">
               <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
-                      [attr.data-target]="'#' + section.name">
+                      [attr.data-target]="'#section-' + x + section.name">
                 <fa-icon [icon]="['far', 'edit']"></fa-icon>
               </button>
               <button class="btn btn-link mr-1" type="button" dndHandle>
@@ -112,7 +112,7 @@
               </button>
             </span>
           </div>
-          <div class="collapse show" id="{{section.name}}">
+          <div class="collapse show" id="section-{{x}}{{section.name}}">
             <div class="card-body">
               <cmdb-config-edit [editingActivated]="activeEdit" [groupList]="groupList" [userList]="userList" [data]="section"></cmdb-config-edit>
             </div>
@@ -123,7 +123,7 @@
                  dndPlaceholderRef>
               Drop field here
             </div>
-            <div *ngFor="let field of section.fields" dndEffectAllowed="move" dndType="inputs"
+            <div *ngFor="let field of section.fields; let y = index" dndEffectAllowed="move" dndType="inputs"
                           [dndDraggable]="field"
                           (dndMoved)="onDragged(field, section.fields, 'move')">
 
@@ -132,7 +132,7 @@
                   <fa-icon [icon]="['fas', matchedType(field.type)]"></fa-icon> {{field.label}}
                   <span class="float-right">
                     <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
-                            [attr.data-target]="'#' + field.name">
+                            [attr.data-target]="'#field-'+ x + y + field.name">
                       <fa-icon [icon]="['far', 'edit']"></fa-icon>
                     </button>
                     <button class="btn btn-link mr-1" type="button" dndHandle>
@@ -143,7 +143,7 @@
                     </button>
                   </span>
                 </div>
-                <div class="card-body collapse" id="{{field.name}}">
+                <div class="card-body collapse" id="field-{{x}}{{y}}{{field.name}}">
                   <cmdb-config-edit [editingActivated]="activeEdit" [groupList]="groupList" [userList]="userList" [data]="field"></cmdb-config-edit>
                 </div>
               </div>

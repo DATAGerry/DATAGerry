@@ -64,6 +64,26 @@ class ExportdJobManagement(CmdbManagerBase):
             LOGGER.error(err)
             raise err
 
+    def get_job_by_event_based(self, state):
+        formatted_filter = {'scheduling.event.active': state}
+        job_list = []
+        for founded_job in self.dbm.find_all(collection=ExportdJob.COLLECTION, filter=formatted_filter):
+            try:
+                job_list.append(ExportdJob(**founded_job))
+            except CMDBError:
+                continue
+        return job_list
+
+    def get_job_by_cron(self, state):
+        formatted_filter = {'scheduling.cron.active': state}
+        job_list = []
+        for founded_job in self.dbm.find_all(collection=ExportdJob.COLLECTION, filter=formatted_filter):
+            try:
+                job_list.append(ExportdJob(**founded_job))
+            except CMDBError:
+                continue
+        return job_list
+
     def insert_job(self, data: (ExportdJob, dict)) -> int:
         """
         Insert new ExportdJob Object
@@ -85,6 +105,10 @@ class ExportdJobManagement(CmdbManagerBase):
                 collection=ExportdJob.COLLECTION,
                 data=new_object.to_database()
             )
+            if self._event_queue:
+                event = Event("cmdb.exportd.added", {"id": new_object.get_public_id(),
+                                                     "active": new_object.scheduling["cron"]["active"]})
+                self._event_queue.put(event)
         except CMDBError as e:
             raise ExportdJobManagerInsertError(e)
         return ack
@@ -110,11 +134,19 @@ class ExportdJobManagement(CmdbManagerBase):
             public_id=update_object.get_public_id(),
             data=update_object.to_database()
         )
+        if self._event_queue:
+            event = Event("cmdb.exportd.updated", {"id": update_object.get_public_id(),
+                                                   "active": update_object.scheduling["cron"]["active"]})
+            self._event_queue.put(event)
         return ack.acknowledged
 
     def delete_job(self, public_id: int) -> bool:
         try:
-            return self._delete(collection=ExportdJob.COLLECTION, public_id=public_id)
+            ack = self._delete(collection=ExportdJob.COLLECTION, public_id=public_id)
+            if self._event_queue:
+                event = Event("cmdb.exportd.deleted", {"id": public_id, "active": False})
+                self._event_queue.put(event)
+            return ack
         except Exception:
             raise ExportdJobManagerDeleteError(f'Could not delete job with ID: {public_id}')
 

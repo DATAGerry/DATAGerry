@@ -54,7 +54,6 @@ export class TaskSchedulingStepComponent implements OnInit {
   constructor(private formBuilder: FormBuilder) {
     this.eventForm = this.formBuilder.group({
       active: new FormControl(false, Validators.required),
-      command: new FormControl('')
     });
 
     this.cronForm = this.formBuilder.group({

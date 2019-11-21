@@ -38,6 +38,7 @@ import { DndModule } from 'ngx-drag-drop';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import {NgbTooltipModule} from "@ng-bootstrap/ng-bootstrap";
+import {SweetAlert2Module} from "@sweetalert2/ngx-sweetalert2";
 
 @NgModule({
   declarations: [
@@ -62,7 +63,8 @@ import {NgbTooltipModule} from "@ng-bootstrap/ng-bootstrap";
     ReactiveFormsModule,
     NgSelectModule,
     NgbTooltipModule,
-    FormsModule
+    FormsModule,
+    SweetAlert2Module
   ]
 })
 export class TaskSettingsModule { }

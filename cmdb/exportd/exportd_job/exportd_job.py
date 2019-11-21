@@ -52,6 +52,7 @@ class ExportdJob(JobManagementBase):
         self.destination = destination
         self.variables = variables
         self.scheduling = scheduling
+        self.running = False
         super(ExportdJob, self).__init__(**kwargs)
 
     def get_public_id(self) -> int:
@@ -85,16 +86,27 @@ class ExportdJob(JobManagementBase):
         else:
             return self.name
 
+    def get_label(self) -> str:
+        """
+        Get the label of the job
+        Returns:
+            str: display label
+        """
+        if self.label is None:
+            return ""
+        else:
+            return self.label
+
     def get_active(self) -> bool:
         """
         Get active state of the job
         Returns:
             bool: is job executable
         """
-        if self.name is None:
+        if self.active is None:
             return ""
         else:
-            return self.name
+            return self.active
 
     def get_sources(self):
         """
@@ -119,6 +131,14 @@ class ExportdJob(JobManagementBase):
             list: all variables
         """
         return self.variables
+
+    def get_scheduling(self):
+        """
+        Get scheduling of the job
+        Returns:
+            list: all scheduling
+        """
+        return self.scheduling
 
 
 class NoPublicIDError(CMDBError):
