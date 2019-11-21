@@ -23,37 +23,23 @@ import { SidebarComponent } from '../layout/structure/sidebar/sidebar.component'
 import { BreadcrumbComponent } from '../layout/structure/breadcrumb/breadcrumb.component';
 import { FooterComponent } from '../layout/structure/footer/footer.component';
 import { SettingsComponent } from './settings.component';
+import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
+import { PermissionGuard } from '../auth/guards/permission.guard';
 
 const routes: Routes = [
   {
     path: '',
-    component: NavigationComponent,
-    outlet: 'navigation'
-  },
-  {
-    path: '',
-    component: SidebarComponent,
-    outlet: 'sidebar'
-  },
-  {
-    path: '',
-    component: BreadcrumbComponent,
-    outlet: 'breadcrumb'
-  },
-  {
-    path: '',
-    component: FooterComponent,
-    outlet: 'footer'
-  },
-  {
-    path: '',
+    pathMatch: 'full',
+    canActivate: [PermissionGuard],
     data: {
-      breadcrumb: 'Overview'
+      breadcrumb: 'Overview',
+      right: 'base.system.*'
     },
     component: SettingsComponent
   },
   {
     path: 'system',
+    canActivateChild: [PermissionGuard],
     data: {
       breadcrumb: 'System'
     },
@@ -73,7 +59,7 @@ const routes: Routes = [
     },
     loadChildren: () => import('./task-settings/task-settings.module').then(m => m.TaskSettingsModule)
   }
-];
+].concat(LAYOUT_COMPONENT_ROUTES);
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

@@ -18,43 +18,21 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { NavigationComponent } from '../layout/structure/navigation/navigation.component';
-import { SidebarComponent } from '../layout/structure/sidebar/sidebar.component';
-import { BreadcrumbComponent } from '../layout/structure/breadcrumb/breadcrumb.component';
-import { FooterComponent } from '../layout/structure/footer/footer.component';
-import { UserViewComponent } from './users/user-view/user-view.component';
+import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
+import { PermissionGuard } from '../auth/guards/permission.guard';
 
 const routes: Routes = [
   {
-    path: '',
-    component: NavigationComponent,
-    outlet: 'navigation'
-  },
-  {
-    path: '',
-    component: SidebarComponent,
-    outlet: 'sidebar'
-  },
-  {
-    path: '',
-    component: BreadcrumbComponent,
-    outlet: 'breadcrumb'
-  },
-  {
-    path: '',
-    component: FooterComponent,
-    outlet: 'footer'
-  },
-  {
     path: 'users',
+    canActivateChild: [PermissionGuard],
     data: {
       breadcrumb: 'Users',
-      right: 'base.user-management.user.*'
     },
     loadChildren: () => import('./users/users.module').then(m => m.UsersModule)
   },
   {
     path: 'groups',
+    canActivateChild: [PermissionGuard],
     data: {
       breadcrumb: 'Groups',
       right: 'base.user-management.group.*'
@@ -63,13 +41,13 @@ const routes: Routes = [
   },
   {
     path: 'rights',
+    canActivateChild: [PermissionGuard],
     data: {
       breadcrumb: 'Rights',
     },
     loadChildren: () => import('./rights/rights.module').then(m => m.RightsModule)
-  },
-
-];
+  }
+].concat(LAYOUT_COMPONENT_ROUTES);
 
 
 @NgModule({

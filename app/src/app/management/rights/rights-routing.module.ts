@@ -23,6 +23,7 @@ import { RightsListComponent } from './rights-list/rights-list.component';
 const routes: Routes = [
   {
     path: '',
+    pathMatch: 'full',
     data: {
       breadcrumb: 'List'
     },

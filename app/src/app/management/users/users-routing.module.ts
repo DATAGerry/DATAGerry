@@ -27,6 +27,7 @@ import { UsersDeleteComponent } from './users-delete/users-delete.component';
 const routes: Routes = [
   {
     path: '',
+    pathMatch: 'full',
     data: {
       breadcrumb: 'List',
       right: 'base.user-management.user.view'

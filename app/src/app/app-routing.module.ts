@@ -34,6 +34,7 @@ const routes: Routes = [
   },
   {
     path: '',
+    pathMatch: 'full',
     canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Dashboard'
@@ -42,20 +43,17 @@ const routes: Routes = [
   },
   {
     path: 'search',
-    canActivate: [AuthGuard, PermissionGuard],
+    canActivate: [AuthGuard],
     data: {
-      breadcrumb: 'Search',
-      right: 'base.framework.*'
+      breadcrumb: 'Search'
     },
     loadChildren: () => import('./search/search.module').then(m => m.SearchModule)
   },
   {
     path: 'framework',
     canActivate: [AuthGuard],
-    canActivateChild: [PermissionGuard],
     data: {
-      breadcrumb: 'Framework',
-      right: 'base.framework.*'
+      breadcrumb: 'Framework'
     },
     loadChildren: () => import('./framework/framework.module').then(m => m.FrameworkModule)
   },
@@ -63,35 +61,31 @@ const routes: Routes = [
     path: 'import',
     canActivate: [AuthGuard],
     data: {
-      breadcrumb: 'Import',
-      right: 'base.import.*'
+      breadcrumb: 'Import'
     },
     loadChildren: () => import('./import/import.module').then(m => m.ImportModule)
   },
   {
     path: 'export',
-    canActivate: [AuthGuard, PermissionGuard],
+    canActivate: [AuthGuard],
     data: {
-      breadcrumb: 'Export',
-      right: 'base.export.*'
+      breadcrumb: 'Export'
     },
     loadChildren: () => import('./export/export.module').then(m => m.ExportModule)
   },
   {
     path: 'management',
-    canActivate: [AuthGuard, PermissionGuard],
+    canActivate: [AuthGuard],
     data: {
-      breadcrumb: 'User-Management',
-      right: 'base.user-management.*'
+      breadcrumb: 'User-Management'
     },
     loadChildren: () => import('./management/management.module').then(m => m.ManagementModule),
   },
   {
     path: 'settings',
-    canActivate: [AuthGuard, PermissionGuard],
+    canActivate: [AuthGuard],
     data: {
-      breadcrumb: 'Settings',
-      right: 'base.system.*'
+      breadcrumb: 'Settings'
     },
     loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule)
   },

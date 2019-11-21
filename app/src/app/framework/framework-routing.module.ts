@@ -18,34 +18,11 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { NavigationComponent } from '../layout/structure/navigation/navigation.component';
-import { BreadcrumbComponent } from '../layout/structure/breadcrumb/breadcrumb.component';
-import { SidebarComponent } from '../layout/structure/sidebar/sidebar.component';
-import { FooterComponent } from '../layout/structure/footer/footer.component';
 import { FrameworkComponent } from './framework.component';
 import { PermissionGuard } from '../auth/guards/permission.guard';
+import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
 
 const routes: Routes = [
-  {
-    path: '',
-    component: NavigationComponent,
-    outlet: 'navigation'
-  },
-  {
-    path: '',
-    component: SidebarComponent,
-    outlet: 'sidebar'
-  },
-  {
-    path: '',
-    component: BreadcrumbComponent,
-    outlet: 'breadcrumb'
-  },
-  {
-    path: '',
-    component: FooterComponent,
-    outlet: 'footer'
-  },
   {
     path: '',
     pathMatch: 'full',
@@ -60,8 +37,7 @@ const routes: Routes = [
     path: 'object',
     canActivateChild: [PermissionGuard],
     data: {
-      breadcrumb: 'Object',
-      right: 'base.framework.object.*'
+      breadcrumb: 'Object'
     },
     loadChildren: () => import('./object/object.module').then(m => m.ObjectModule),
   },
@@ -69,21 +45,20 @@ const routes: Routes = [
     path: 'type',
     canActivateChild: [PermissionGuard],
     data: {
-      breadcrumb: 'Type',
-      right: 'base.framework.type.*'
+      breadcrumb: 'Type'
     },
     loadChildren: () => import('./type/type.module').then(m => m.TypeModule),
   },
 
   {
     path: 'category',
+    canActivateChild: [PermissionGuard],
     data: {
-      breadcrumb: 'Category',
-      right: 'base.framework.category.*'
+      breadcrumb: 'Category'
     },
     loadChildren: () => import('./category/category.module').then(m => m.CategoryModule),
   }
-];
+].concat(LAYOUT_COMPONENT_ROUTES);
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

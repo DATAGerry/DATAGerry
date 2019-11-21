@@ -26,6 +26,7 @@ import { GroupsDeleteComponent } from './groups-delete/groups-delete.component';
 const routes: Routes = [
   {
     path: '',
+    pathMatch: 'full',
     data: {
       breadcrumb: 'List',
       right: 'base.user-management.group.view'

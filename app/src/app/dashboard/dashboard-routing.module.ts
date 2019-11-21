@@ -23,33 +23,15 @@ import { SidebarComponent } from '../layout/structure/sidebar/sidebar.component'
 import { BreadcrumbComponent } from '../layout/structure/breadcrumb/breadcrumb.component';
 import { DashboardComponent } from './dashboard.component';
 import { FooterComponent } from '../layout/structure/footer/footer.component';
+import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
 
 const routes: Routes = [
   {
     path: '',
-    component: NavigationComponent,
-    outlet: 'navigation'
-  },
-  {
-    path: '',
-    component: SidebarComponent,
-    outlet: 'sidebar'
-  },
-  {
-    path: '',
-    component: BreadcrumbComponent,
-    outlet: 'breadcrumb'
-  },
-  {
-    path: '',
-    component: FooterComponent,
-    outlet: 'footer'
-  },
-  {
-    path: '',
+    pathMatch: 'full',
     component: DashboardComponent
   }
-];
+].concat(LAYOUT_COMPONENT_ROUTES);
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

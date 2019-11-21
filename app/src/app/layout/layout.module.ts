@@ -19,7 +19,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationComponent } from './structure/navigation/navigation.component';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { BreadcrumbComponent } from './structure/breadcrumb/breadcrumb.component';
 import { BreadcrumbService } from './structure/breadcrumb/breadcrumb.service';
 import { SidebarComponent } from './structure/sidebar/sidebar.component';
@@ -50,6 +50,29 @@ import { UserDisplayComponent } from './components/user-display/user-display.com
 import { ChartsComponent } from './components/charts/charts.component';
 import { ToastModule } from './toast/toast.module';
 import { AuthModule } from '../auth/auth.module';
+
+export const LAYOUT_COMPONENT_ROUTES: any[] = [
+  {
+    path: '',
+    component: NavigationComponent,
+    outlet: 'navigation'
+  },
+  {
+    path: '',
+    component: SidebarComponent,
+    outlet: 'sidebar'
+  },
+  {
+    path: '',
+    component: BreadcrumbComponent,
+    outlet: 'breadcrumb'
+  },
+  {
+    path: '',
+    component: FooterComponent,
+    outlet: 'footer'
+  }
+];
 
 @NgModule({
   declarations: [

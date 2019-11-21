@@ -8,9 +8,7 @@ import { PermissionService } from '../services/permission.service';
 })
 export class PermissionGuard implements CanActivate, CanActivateChild {
 
-  public constructor(private permissionService: PermissionService) {
-
-  }
+  public constructor(private permissionService: PermissionService) {}
 
   public canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot)
     : Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {

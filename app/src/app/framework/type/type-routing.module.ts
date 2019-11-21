@@ -27,6 +27,7 @@ import { PermissionGuard } from '../../auth/guards/permission.guard';
 const routes: Routes = [
   {
     path: '',
+    pathMatch: 'full',
     data: {
       breadcrumb: 'List',
       right: 'base.framework.type.view'

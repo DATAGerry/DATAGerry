@@ -25,30 +25,14 @@ import { BreadcrumbComponent } from '../layout/structure/breadcrumb/breadcrumb.c
 import { ImportObjectsComponent } from './import-objects/import-objects.component';
 import { FooterComponent } from '../layout/structure/footer/footer.component';
 import { ImportTypesComponent } from './import-types/import-types.component';
+import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
+import { PermissionGuard } from '../auth/guards/permission.guard';
 
 const routes: Routes = [
   {
     path: '',
-    component: NavigationComponent,
-    outlet: 'navigation'
-  },
-  {
-    path: '',
-    component: SidebarComponent,
-    outlet: 'sidebar'
-  },
-  {
-    path: '',
-    component: BreadcrumbComponent,
-    outlet: 'breadcrumb'
-  },
-  {
-    path: '',
-    component: FooterComponent,
-    outlet: 'footer'
-  },
-  {
-    path: '',
+    pathMatch: 'full',
+    canActivate: [PermissionGuard],
     data: {
       breadcrumb: 'Overview',
       right: 'base.import.*'
@@ -57,6 +41,7 @@ const routes: Routes = [
   },
   {
     path: 'object',
+    canActivate: [PermissionGuard],
     data: {
       breadcrumb: 'Object',
       right: 'base.import.object.*'
@@ -65,13 +50,14 @@ const routes: Routes = [
   },
   {
     path: 'type',
+    canActivate: [PermissionGuard],
     data: {
       breadcrumb: 'Type',
       right: 'base.import.type.*'
     },
     component: ImportTypesComponent
   }
-];
+].concat(LAYOUT_COMPONENT_ROUTES);
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

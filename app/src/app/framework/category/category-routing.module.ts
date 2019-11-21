@@ -25,6 +25,7 @@ import { CategoryEditComponent } from './category-edit/category-edit.component';
 const routes: Routes = [
   {
     path: '',
+    pathMatch: 'full',
     data: {
       breadcrumb: 'List',
       right: 'base.framework.category.view'
