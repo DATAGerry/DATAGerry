@@ -147,15 +147,7 @@ def get_run_job_manual(public_id):
      run job manual
     """
     try:
-        job_data = exportd_manager.get_job(public_id)
-        job_data.last_execute_date = datetime.utcnow()
         ack = exportd_manager.run_job_manual(public_id)
-
-        try:
-            exportd_manager.update_job(job_data)
-        except ExportdJobManagerUpdateError:
-            return abort(500)
-
     except Exception as err:
         LOGGER.error(err)
         return abort(404)

@@ -33,7 +33,7 @@
     <cmdb-task-scheduling-step  [preData]="taskInstance" [mode]="mode"></cmdb-task-scheduling-step>
     <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
     <button class="btn btn-primary next" type="button"
-            [disabled]="!schedulingStep.eventForm.valid || !schedulingStep.cronForm.valid"
+            [disabled]="!schedulingStep.eventForm.valid"
             awNextStep>Go to next step</button>
   </aw-wizard-step>
   <aw-wizard-step stepId="5" stepTitle="Complete">

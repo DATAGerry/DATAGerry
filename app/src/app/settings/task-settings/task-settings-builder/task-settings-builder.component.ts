@@ -74,10 +74,7 @@ export class TaskSettingsBuilderComponent implements OnInit {
     this.taskInstance.destination = this.destinationStep.destinationForm.get('destination').value;
     this.taskInstance.sources = this.sourcesStep.sourcesForm.get('sources').value;
     this.taskInstance.variables = this.variablesStep.variableForm.get('variables').value;
-    this.taskInstance.scheduling = {
-      event: this.schedulingStep.eventForm.value,
-      cron: this.schedulingStep.cronForm.value
-    };
+    this.taskInstance.scheduling = { event: this.schedulingStep.eventForm.value };
 
     if (this.mode === CmdbMode.Create) {
       let newID = null;
