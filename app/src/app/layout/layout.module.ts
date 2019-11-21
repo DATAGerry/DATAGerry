@@ -94,14 +94,9 @@ import { AuthModule } from '../auth/auth.module';
     FormsModule,
     DataTablesModule,
     TableModule,
-    SweetAlert2Module.forRoot({
-      buttonsStyling: false,
-      customClass: 'modal-content',
-      confirmButtonClass: 'btn btn-primary',
-      cancelButtonClass: 'btn'
-    }),
     FontAwesomeModule,
     IconPickerModule,
+    SweetAlert2Module.forRoot(),
     ToastModule,
     AuthModule
   ],
