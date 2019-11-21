@@ -17,7 +17,7 @@
 """
 Object/Type render
 """
-from cmdb.data_storage.database_manager import DatabaseManagerMongo, MongoConnector
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
 try:
@@ -290,9 +290,7 @@ class RenderList:
         from cmdb.utils.system_reader import SystemConfigReader
 
         object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
-            MongoConnector(
-                **SystemConfigReader().get_all_values_from_section('Database')
-            )
+            **SystemConfigReader().get_all_values_from_section('Database')
         ))
 
         preparation_objects = []

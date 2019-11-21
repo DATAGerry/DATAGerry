@@ -16,7 +16,7 @@
 
 from flask import abort, Response
 
-from cmdb.data_storage.database_manager import DatabaseManagerMongo, MongoConnector
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_errors import ObjectNotFoundError, TypeNotFoundError
 from cmdb.file_export.export_types import ExportType
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
@@ -29,9 +29,7 @@ except ImportError:
 from cmdb.utils.system_reader import SystemConfigReader
 
 object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
-    MongoConnector(
-        **SystemConfigReader().get_all_values_from_section('Database')
-    )
+    **SystemConfigReader().get_all_values_from_section('Database')
 ))
 
 
@@ -58,7 +56,6 @@ class FileExporter:
         # object_list: list of objects e.g CmdbObject or CmdbType
         self.object_list = []
         self.response = None
-
 
     def get_object_type(self):
         """
@@ -91,7 +88,6 @@ class FileExporter:
 
     def set_response(self, value):
         self.response = value
-
 
     #
     #   Get values from the database

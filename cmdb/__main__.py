@@ -27,14 +27,13 @@ from cmdb.utils.logger import get_logging_conf
 from cmdb.utils.wraps import timing
 from sys import exit
 
-
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
     CMDBError = Exception
 
 from cmdb.utils.system_reader import SystemConfigReader
-from cmdb.data_storage.database_manager import DatabaseManagerMongo, MongoConnector
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
 
 # setup logging for startup
 logging.config.dictConfig(get_logging_conf())
@@ -61,14 +60,12 @@ def _check_database():
     LOGGER.info(f'Checking database connection with {ssc.config_name} data')
     database_options = ssc.get_all_values_from_section('Database')
     dbm = DatabaseManagerMongo(
-        connector=MongoConnector(
-            **database_options
-        )
+        **database_options
     )
-    connection_test = dbm.database_connector.is_connected()
+    connection_test = dbm.connector.is_connected()
     LOGGER.debug(f'Database status is {connection_test}')
     if connection_test is True:
-        dbm.database_connector.disconnect()
+        dbm.connector.disconnect()
         return connection_test
     retries = 0
     while retries < 3:
@@ -76,9 +73,9 @@ def _check_database():
         LOGGER.warning(
             f'Retry {retries}: Checking database connection with {SystemConfigReader.DEFAULT_CONFIG_NAME} data')
 
-        connection_test = dbm.database_connector.is_connected()
+        connection_test = dbm.connector.is_connected()
         if connection_test:
-            dbm.database_connector.disconnect()
+            dbm.connector.disconnect()
             return connection_test
     return connection_test
 
@@ -226,9 +223,7 @@ def main(args):
         ssc = SystemConfigReader()
         database_options = ssc.get_all_values_from_section('Database')
         dbm = DatabaseManagerMongo(
-            connector=MongoConnector(
                 **database_options
-            )
         )
         db_name = dbm.get_database_name()
         LOGGER.warning(f'Inserting test-data into: {db_name}')

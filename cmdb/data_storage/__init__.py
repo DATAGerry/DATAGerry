@@ -24,3 +24,4 @@ Attributes:
 from typing import TypeVar
 
 CLIENT: TypeVar = TypeVar('CLIENT')
+CONNECTOR: TypeVar = TypeVar('CONNECTOR')

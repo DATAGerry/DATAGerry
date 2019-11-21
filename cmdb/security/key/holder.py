@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from cmdb.data_storage.database_manager import DatabaseManagerMongo, MongoConnector
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.utils.error import CMDBError
 from cmdb.utils.system_reader import SystemConfigReader, SystemSettingsReader
 
@@ -27,9 +27,7 @@ class KeyHolder:
         """
         self.scr = SystemConfigReader()
         self.__dbm = DatabaseManagerMongo(
-            connector=MongoConnector(
-                **self.scr.get_all_values_from_section('Database')
-            )
+            **self.scr.get_all_values_from_section('Database')
         )
         self.ssr = SystemSettingsReader(self.__dbm)
         self.rsa_public = self.get_public_key()

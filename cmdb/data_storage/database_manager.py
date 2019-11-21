@@ -19,11 +19,12 @@ Database Management instance for database actions
 
 """
 import logging
+from typing import Generic
 
 from pymongo.errors import DuplicateKeyError
 from pymongo.results import DeleteResult, UpdateResult
 
-from cmdb.data_storage.database_connection import Connector
+from cmdb.data_storage import CONNECTOR
 from cmdb.data_storage.database_connection import MongoConnector
 from cmdb.data_storage.database_framework_counter import IDCounter
 from cmdb.utils.error import CMDBError
@@ -32,7 +33,7 @@ from cmdb.utils.wraps import deprecated
 LOGGER = logging.getLogger(__name__)
 
 
-class DatabaseManager:
+class DatabaseManager(Generic[CONNECTOR]):
     """
     Default database manager with no implementation
 
@@ -43,15 +44,18 @@ class DatabaseManager:
     ASCENDING = 1
     DESCENDING = -1
 
-    def __init__(self, connector: Connector):
+    def __init__(self, connector: CONNECTOR):
         """instance of super class
 
         Args:
-            connector (Connector): Database Connector for subclass implementation
+            connector (CONNECTOR): Database Connector for subclass implementation
 
         """
 
-        self.database_connector = connector
+        self.connector: CONNECTOR = connector
+
+    def get_connector(self) -> CONNECTOR:
+        return self.connector
 
     def status(self):
         """check if connector has connection
@@ -59,7 +63,7 @@ class DatabaseManager:
         Returns: connection status
 
         """
-        return self.database_connector.is_connected()
+        return self.connector.is_connected()
 
     def setup(self):
         """
@@ -202,20 +206,14 @@ class DatabaseManager:
         raise NotImplementedError
 
 
-class DatabaseManagerMongo(DatabaseManager):
+class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
     """PyMongo (mongodb) implementation of Database Manager"""
 
     DB_MANAGER_TYPE = 'MONGO_DB'
 
-    def __init__(self, connector: MongoConnector):
-        """init mongo implementation
-
-        Args:
-            connector: mongodb connector
-
-        """
-        self.database_connector = connector
-        super().__init__(connector)
+    def __init__(self, host: str, port: int, database_name: str, **kwargs):
+        connector = MongoConnector(host, port, database_name, **kwargs)
+        super(DatabaseManagerMongo, self).__init__(connector)
 
     def setup(self) -> bool:
         """setup script
@@ -257,17 +255,17 @@ class DatabaseManagerMongo(DatabaseManager):
         return True
 
     def create_index(self, collection: str, name: str, unique: bool, background=True):
-        self.database_connector.get_collection(collection).create_index(
+        self.connector.get_collection(collection).create_index(
             name=name,
             unique=unique,
             background=background
         )
 
     def create_indexes(self, collection: str, indexes: list):
-        self.database_connector.get_collection(collection).create_indexes(indexes)
+        self.connector.get_collection(collection).create_indexes(indexes)
 
     def get_database_name(self):
-        return self.database_connector.get_database_name()
+        return self.connector.get_database_name()
 
     def __find(self, collection: str, *args, **kwargs):
         """general find function for database search
@@ -281,7 +279,7 @@ class DatabaseManagerMongo(DatabaseManager):
             founded document
 
         """
-        result = self.database_connector.get_collection(collection).find(*args, **kwargs)
+        result = self.connector.get_collection(collection).find(*args, **kwargs)
         return result
 
     def find_one(self, collection: str, public_id: int, *args, **kwargs):
@@ -367,7 +365,7 @@ class DatabaseManagerMongo(DatabaseManager):
             count document
 
         """
-        result = self.database_connector.get_collection(collection).count(*args, **kwargs)
+        result = self.connector.get_collection(collection).count(*args, **kwargs)
         return result
 
     def insert(self, collection: str, data: dict) -> int:
@@ -386,7 +384,7 @@ class DatabaseManagerMongo(DatabaseManager):
             self.find_one(collection=collection, public_id=data['public_id'])
         except NoDocumentFound:
             try:
-                result = self.database_connector.get_collection(collection).insert_one(data)
+                result = self.connector.get_collection(collection).insert_one(data)
             except Exception as e:
                 LOGGER.debug(f"Insert error while type module {e}")
                 raise InsertError(e)
@@ -415,7 +413,7 @@ class DatabaseManagerMongo(DatabaseManager):
 
         formatted_public_id = {'public_id': public_id}
         formatted_data = {'$set': data}
-        return self.database_connector.get_collection(collection).update_one(formatted_public_id, formatted_data)
+        return self.connector.get_collection(collection).update_one(formatted_public_id, formatted_data)
 
     def update_many(self, collection: str, query: dict, update: dict) -> UpdateResult:
         """update all documents that match the filter from a collection.
@@ -429,7 +427,7 @@ class DatabaseManagerMongo(DatabaseManager):
             A boolean acknowledged as true if the operation ran with write concern or false if write concern was disabled
 
         """
-        result = self.database_connector.get_collection(collection).update_many(filter=query, update=update)
+        result = self.connector.get_collection(collection).update_many(filter=query, update=update)
         if not result.acknowledged:
             raise DocumentCouldNotBeDeleted(collection)
         return result
@@ -437,7 +435,7 @@ class DatabaseManagerMongo(DatabaseManager):
     def insert_with_internal(self, collection: str, _id: int or str, data: dict):
         formatted_id = {'_id': _id}
         formatted_data = {'$set': data}
-        return self.database_connector.get_collection(collection).insert_one(formatted_id, formatted_data)
+        return self.connector.get_collection(collection).insert_one(formatted_id, formatted_data)
 
     def update_with_internal(self, collection: str, _id: int or str, data: dict):
         """update function for database elements without public id
@@ -454,7 +452,7 @@ class DatabaseManagerMongo(DatabaseManager):
 
         formatted_id = {'_id': _id}
         formatted_data = {'$set': data}
-        return self.database_connector.get_collection(collection).update_one(formatted_id, formatted_data)
+        return self.connector.get_collection(collection).update_one(formatted_id, formatted_data)
 
     def delete(self, collection: str, public_id: int) -> DeleteResult:
         """delete document inside database
@@ -469,7 +467,7 @@ class DatabaseManagerMongo(DatabaseManager):
         """
 
         formatted_public_id = {'public_id': public_id}
-        result = self.database_connector.get_collection(collection).delete_one(formatted_public_id)
+        result = self.connector.get_collection(collection).delete_one(formatted_public_id)
         if result.deleted_count != 1:
             raise DocumentCouldNotBeDeleted(collection, public_id)
         return result
@@ -489,7 +487,7 @@ class DatabaseManagerMongo(DatabaseManager):
         for k, req in requirements.items():
             requirements_filter.update({k: req})
 
-        result = self.database_connector.get_collection(collection).delete_many(requirements_filter)
+        result = self.connector.get_collection(collection).delete_many(requirements_filter)
         if not result.acknowledged:
             raise DocumentCouldNotBeDeleted(collection)
         return result
@@ -505,7 +503,7 @@ class DatabaseManagerMongo(DatabaseManager):
 
         """
 
-        return self.database_connector.client[db_name]
+        return self.connector.client[db_name]
 
     def drop(self, db_name: str):
         """delete database
@@ -518,7 +516,7 @@ class DatabaseManagerMongo(DatabaseManager):
 
         """
 
-        return self.database_connector.client.drop_database(db_name)
+        return self.connector.client.drop_database(db_name)
 
     def create_collection(self, collection_name):
         """
@@ -532,7 +530,7 @@ class DatabaseManagerMongo(DatabaseManager):
         from pymongo.errors import CollectionInvalid
 
         try:
-            self.database_connector.create_collection(collection_name)
+            self.connector.create_collection(collection_name)
         except CollectionInvalid:
             raise CollectionAlreadyExists(collection_name)
         return collection_name
@@ -546,7 +544,7 @@ class DatabaseManagerMongo(DatabaseManager):
         Returns:
             delete ack
         """
-        return self.database_connector.delete_collection(collection_name)
+        return self.connector.delete_collection(collection_name)
 
     @deprecated
     def get_document_with_highest_id(self, collection: str) -> str:
@@ -581,7 +579,7 @@ class DatabaseManagerMongo(DatabaseManager):
 
     def get_next_public_id(self, collection: str) -> int:
         try:
-            founded_counter = self.database_connector.get_collection(IDCounter.COLLECTION).find_one(filter={
+            founded_counter = self.connector.get_collection(IDCounter.COLLECTION).find_one(filter={
                 '_id': collection
             })
             new_id = founded_counter['counter'] + 1
@@ -590,7 +588,7 @@ class DatabaseManagerMongo(DatabaseManager):
 
             LOGGER.warning(f'Counter for collection {collection} wasn´t found - setup new with data from {collection}')
             docs_count = self.get_highest_id(collection)
-            self.database_connector.get_collection(IDCounter.COLLECTION).insert({
+            self.connector.get_collection(IDCounter.COLLECTION).insert({
                 '_id': collection,
                 'counter': docs_count
             })
@@ -600,13 +598,13 @@ class DatabaseManagerMongo(DatabaseManager):
         return new_id
 
     def _update_public_id_counter(self, collection: str):
-        working_collection = self.database_connector.get_collection(IDCounter.COLLECTION)
+        working_collection = self.connector.get_collection(IDCounter.COLLECTION)
         query = {
             '_id': collection
         }
         counter_doc = working_collection.find_one(query)
         counter_doc['counter'] = counter_doc['counter'] + 1
-        self.database_connector.get_collection(IDCounter.COLLECTION).update(query, counter_doc)
+        self.connector.get_collection(IDCounter.COLLECTION).update(query, counter_doc)
 
 
 class InsertError(CMDBError):

@@ -54,11 +54,9 @@ def create_rest_api(event_queue):
     cache = Cache(config=cache_config)
 
     # Create manager
-    from cmdb.data_storage.database_manager import DatabaseManagerMongo, MongoConnector
+    from cmdb.data_storage.database_manager import DatabaseManagerMongo
     app_database = DatabaseManagerMongo(
-        connector=MongoConnector(
-            **system_config_reader.get_all_values_from_section('Database')
-        )
+        **system_config_reader.get_all_values_from_section('Database')
     )
     object_manager = CmdbObjectManager(
         database_manager=app_database,

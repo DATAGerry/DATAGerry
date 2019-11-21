@@ -20,8 +20,9 @@ Real connection to database over a given connector
 """
 import logging
 
-from typing import Generic
+from typing import Generic, List
 from pymongo import MongoClient
+from pymongo.collection import Collection
 from pymongo.errors import ConnectionFailure
 
 from cmdb.data_storage.database_connection_utils import ConnectionStatus
@@ -127,7 +128,7 @@ class MongoConnector(Connector[MongoClient]):
         """auto close mongo client on exit"""
         self.client.close()
 
-    def create_collection(self, collection_name) -> str:
+    def create_collection(self, collection_name) -> Collection:
         """
         creation collection/table in database
         Args:
@@ -138,7 +139,7 @@ class MongoConnector(Connector[MongoClient]):
         """
         return self.database.create_collection(collection_name)
 
-    def delete_collection(self, collection_name) -> str:
+    def delete_collection(self, collection_name) -> bool:
         """
         delete collection/table in database
         Args:
@@ -147,15 +148,11 @@ class MongoConnector(Connector[MongoClient]):
         Returns:
             creation ack
         """
-        return self.database.drop_collection(collection_name)
-
-    def get_database_name(self) -> str:
-        """
-        get database name
-        Returns:
-            name of selected database
-        """
-        return self.database.name
+        try:
+            self.database.drop_collection(collection_name)
+            return True
+        except Exception:
+            return False
 
     def get_database(self):
         """
@@ -165,7 +162,7 @@ class MongoConnector(Connector[MongoClient]):
         """
         return self.database
 
-    def get_collection(self, name):
+    def get_collection(self, name) -> Collection:
         """
         get a collection inside database
         (same as Tables in SQL)
@@ -176,7 +173,7 @@ class MongoConnector(Connector[MongoClient]):
         """
         return self.database[name]
 
-    def get_collections(self) -> list:
+    def get_collections(self) -> List[str]:
         """
         list all collections inside mongo database
         Returns:

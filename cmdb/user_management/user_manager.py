@@ -16,7 +16,7 @@
 
 import logging
 
-from cmdb.data_storage.database_manager import NoDocumentFound, DatabaseManagerMongo, MongoConnector
+from cmdb.data_storage.database_manager import NoDocumentFound, DatabaseManagerMongo
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.user_management.user import User
@@ -272,9 +272,7 @@ def get_user_manager():
     # TODO: refactor for single instance
     system_config_reader = SystemConfigReader()
     database_manager = DatabaseManagerMongo(
-        connector=MongoConnector(
             **system_config_reader.get_all_values_from_section('Database')
-        )
     )
     return UserManager(
         database_manager=database_manager,

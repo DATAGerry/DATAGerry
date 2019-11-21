@@ -19,7 +19,7 @@ import logging
 from datetime import datetime
 
 from cmdb.event_management.event import Event
-from cmdb.data_storage.database_manager import DatabaseManagerMongo, NoDocumentFound, MongoConnector
+from cmdb.data_storage.database_manager import DatabaseManagerMongo, NoDocumentFound
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
@@ -185,9 +185,7 @@ def get_exoportd_job_manager():
     ssc = SystemConfigReader()
     database_options = ssc.get_all_values_from_section('Database')
     dbm = DatabaseManagerMongo(
-        connector=MongoConnector(
             **database_options
-        )
     )
     return ExportdJobManagement(
         event_queue=None,

@@ -16,7 +16,7 @@
 
 import jinja2
 
-from cmdb.data_storage.database_manager import DatabaseManagerMongo, MongoConnector
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.utils.error import CMDBError
@@ -33,9 +33,7 @@ class ExportJob(ExportdJobManagement):
         self.destinations = self.__get__destinations()
         scr = SystemConfigReader()
         database_manager = DatabaseManagerMongo(
-            connector=MongoConnector(
                 **scr.get_all_values_from_section('Database')
-            )
         )
         self.__object_manager = CmdbObjectManager(
             database_manager=database_manager
