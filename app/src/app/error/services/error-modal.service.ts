@@ -16,26 +16,27 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { PreviousRouteService } from '../services/previous-route.service';
+import { Injectable } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ErrorModalComponent } from '../modals/error-modal.component';
 
-@Component({
-  selector: 'cmdb-error',
-  templateUrl: './error.component.html',
-  styleUrls: ['./error.component.scss']
+@Injectable({
+  providedIn: 'root'
 })
-export class ErrorComponent implements OnInit {
+export class ErrorModalService {
+  public errors: any[];
 
-  public previousUrl: string;
-
-
-  constructor(private route: ActivatedRoute, private prevRouteService: PreviousRouteService) {
-
+  public constructor(private modalService: NgbModal) {
+    this.errors = [];
   }
 
-  public ngOnInit(): void {
-    this.previousUrl = this.prevRouteService.getPreviousUrl();
+  public show(error: any): void {
+    const modalRef = this.modalService.open(ErrorModalComponent);
+    this.errors.push(error);
+  }
+
+  public remove(error: any): void {
+    this.errors = this.errors.filter(err => err !== error);
   }
 
 }

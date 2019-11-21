@@ -17,33 +17,54 @@
 */
 
 import { Injectable } from '@angular/core';
-import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
+import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { NavigationExtras, Router } from '@angular/router';
-import { AuthService } from '../../auth/services/auth.service';
+import { ErrorModalService } from '../services/error-modal.service';
 
 @Injectable()
 export class HttpErrorInterceptor implements HttpInterceptor {
 
   public readonly CONNECTION_REFUSED: number = 0;
+  public readonly BAD_REQUEST: number = 400;
   public readonly UNAUTHORIZED: number = 401;
+  public readonly FORBIDDEN: number = 403;
+  public readonly NOT_FOUND: number = 404;
+  public readonly METHOD_NOT_ALLOWED: number = 405;
+  public readonly NOT_ACCEPTABLE: number = 406;
+  public readonly PAGE_GONE: number = 410;
+  public readonly INTERNAL_SERVER_ERROR: number = 500;
+  public readonly NOT_IMPLEMENTED: number = 501;
 
-  constructor(private router: Router, private authService: AuthService) {
+  private readonly INFO_ERRORS: number[] = [
+    this.BAD_REQUEST,
+    this.FORBIDDEN,
+    this.METHOD_NOT_ALLOWED,
+    this.NOT_ACCEPTABLE,
+    this.PAGE_GONE,
+    this.NOT_IMPLEMENTED
+  ];
+
+  private readonly REDIRECT_ERRORS: number[] = [
+    this.UNAUTHORIZED,
+    this.INTERNAL_SERVER_ERROR
+  ];
+
+  constructor(private errorService: ErrorModalService) {
   }
 
   public intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return next.handle(request).pipe(catchError(error => {
+    return next.handle(request).pipe(catchError((error: HttpErrorResponse) => {
       const statusCode = error.status;
-      switch (statusCode) {
-        case this.CONNECTION_REFUSED:
-          this.router.navigate(['/connect']);
-          break;
-        case this.UNAUTHORIZED:
-          this.authService.logout();
-          this.router.navigate(['/auth/login']);
+      console.log(statusCode);
+      if (this.INFO_ERRORS.indexOf(statusCode) !== -1) {
+        console.log(error.error);
+        this.errorService.show(error.error);
+      } else if (this.REDIRECT_ERRORS.indexOf(statusCode) !== -1) {
+        // TODO redirect page
+      } else {
+        // TODO handle special error
       }
-
       return throwError(error);
     }));
   }
