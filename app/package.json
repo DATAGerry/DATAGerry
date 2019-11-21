@@ -30,7 +30,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.11.2",
     "@ng-bootstrap/ng-bootstrap": "^5.1.4",
     "@ng-select/ng-select": "^2.20.5",
-    "@sweetalert2/ngx-sweetalert2": "^5.1.0",
+    "@sweetalert2/ngx-sweetalert2": "^7.0.1",
     "@types/chart.js": "^2.9.0",
     "angular-archwizard": "^5.0.0",
     "angular-datatables": "^8.0.0",
@@ -56,7 +56,7 @@
     "ngx-icon-picker": "0.0.10",
     "ngx-spinner": "^7.2.0",
     "rxjs": "^6.5.3",
-    "sweetalert2": "^8.19.0",
+    "sweetalert2": "^9.3.11",
     "tslib": "^1.10.0",
     "zone.js": "~0.9.1",
     "zxcvbn": "^4.4.2"
