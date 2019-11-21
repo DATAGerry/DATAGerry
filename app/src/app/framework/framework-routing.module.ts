@@ -48,6 +48,8 @@ const routes: Routes = [
   },
   {
     path: '',
+    pathMatch: 'full',
+    canActivate: [PermissionGuard],
     data: {
       breadcrumb: 'Overview',
       right: 'base.framework.*'

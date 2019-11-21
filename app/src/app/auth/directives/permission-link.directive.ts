@@ -27,16 +27,21 @@ import { PermissionService } from '../services/permission.service';
 })
 export class PermissionLinkDirective {
 
-  private displayRightName: string = undefined;
+  private rightNames: string[] = [];
 
   constructor(private element: ElementRef,
               private templateRef: TemplateRef<any>,
               private viewContainer: ViewContainerRef, private permissionService: PermissionService) {
   }
 
-  @Input('permissionLink') set permissionLink(rightName: string) {
-    if (rightName !== undefined) {
-      this.displayRightName = rightName;
+  @Input('permissionLink') set permissionLink(rightNames: string | string[]) {
+    if (rightNames !== undefined) {
+      if (Array.isArray(rightNames)) {
+        this.rightNames = rightNames;
+      } else {
+        this.rightNames = [];
+        this.rightNames.push(rightNames);
+      }
       this.updateView();
     }
   }
@@ -45,10 +50,13 @@ export class PermissionLinkDirective {
 
   private checkPermission() {
     let hasPermission = false;
-    if (this.permissionService.hasRight(this.displayRightName)) {
-      hasPermission = true;
-    } else if (this.permissionService.hasExtendedRight(this.displayRightName)) {
-      hasPermission = true;
+    for (const right of this.rightNames) {
+      if (this.permissionService.hasRight(right)) {
+        hasPermission = true;
+        break;
+      } else if (this.permissionService.hasExtendedRight(right)) {
+        hasPermission = true;
+      }
     }
     return hasPermission;
   }
