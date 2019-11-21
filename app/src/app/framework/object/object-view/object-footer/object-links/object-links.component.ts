@@ -23,7 +23,7 @@ import { forkJoin, Observable, Subject, Subscription } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
 import { RenderResult } from '../../../../models/cmdb-render';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ObjectLinkAddModalComponent } from '../../../components/modals/object-link-add-modal/object-link-add-modal.component';
+import { ObjectLinkAddModalComponent } from '../../../modals/object-link-add-modal/object-link-add-modal.component';
 import { ObjectService } from '../../../../services/object.service';
 
 @Component({

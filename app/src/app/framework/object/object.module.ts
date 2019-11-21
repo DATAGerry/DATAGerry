@@ -49,7 +49,7 @@ import { ObjectReferenceListComponent } from './object-view/object-footer/object
 import { ObjectLogComponent } from './object-log/object-log.component';
 import { ObjectLogChangeViewComponent } from './object-view/object-footer/object-log-list/object-log-change-view/object-log-change-view.component';
 import { ObjectLogUserComponent } from './object-view/object-footer/object-log-list/object-log-user/object-log-user.component';
-import { ObjectLinkAddModalComponent } from './components/modals/object-link-add-modal/object-link-add-modal.component';
+import { ObjectLinkAddModalComponent } from './modals/object-link-add-modal/object-link-add-modal.component';
 
 @NgModule({
   entryComponents: [

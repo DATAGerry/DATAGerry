@@ -58,10 +58,10 @@ const routes: Routes = [
     },
     loadChildren: () => import('./category/category.module').then(m => m.CategoryModule),
   }
-].concat(LAYOUT_COMPONENT_ROUTES);
+];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
   exports: [RouterModule]
 })
 export class FrameworkRoutingModule { }

@@ -19,11 +19,11 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { RenderResult } from '../../../../models/cmdb-render';
-import { ObjectService } from '../../../../services/object.service';
+import { RenderResult } from '../../../models/cmdb-render';
+import { ObjectService } from '../../../services/object.service';
 import { Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { LinkService } from '../../../../services/link.service';
+import { LinkService } from '../../../services/link.service';
 
 @Component({
   templateUrl: './object-link-add-modal.component.html',
@@ -31,9 +31,9 @@ import { LinkService } from '../../../../services/link.service';
 })
 export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
 
-  // Object data
-  private primaryResult: RenderResult;
-  private secondaryResult: RenderResult;
+  // Data
+  public primaryResult: RenderResult;
+  public secondaryResult: RenderResult;
 
   @Input()
   public set primaryRenderResult(result: RenderResult) {
