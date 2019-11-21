@@ -85,8 +85,8 @@ class DatabaseManager:
         raise NotImplementedError
 
     def find_one_by(self, *args, **kwargs):
-        """
-        find only one document by requirement
+        """find only one document by requirement
+
         Args:
             *args: arguments for search operation
             **kwargs: key arguments
@@ -243,7 +243,6 @@ class DatabaseManagerMongo(DatabaseManager):
         return True
 
     def _import(self, collection: str, data_list: list):
-        LOGGER.debug(data_list)
         try:
             self.delete_collection(collection)
         except Exception as e:

@@ -17,7 +17,7 @@
 """
 Object/Type render
 """
-from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+from cmdb.data_storage.database_manager import DatabaseManagerMongo, MongoConnector
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
 try:

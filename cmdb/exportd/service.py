@@ -17,7 +17,6 @@
 import logging
 import cmdb.process_management.service
 import cmdb.exportd.exporter_base
-from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
 from cmdb.utils.system_reader import SystemConfigReader
 
 LOGGER = logging.getLogger(__name__)

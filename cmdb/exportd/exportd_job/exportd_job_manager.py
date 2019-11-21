@@ -19,7 +19,7 @@ import logging
 from datetime import datetime
 
 from cmdb.event_management.event import Event
-from cmdb.data_storage import DatabaseManagerMongo, NoDocumentFound, MongoConnector
+from cmdb.data_storage.database_manager import DatabaseManagerMongo, NoDocumentFound, MongoConnector
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob

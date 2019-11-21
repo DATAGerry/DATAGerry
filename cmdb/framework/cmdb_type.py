@@ -67,23 +67,28 @@ class CmdbType(CmdbDAO):
         self.category_id = category_id or 0
         super(CmdbType, self).__init__(**kwargs)
 
-    def get_name(self):
+    def get_name(self) -> str:
+        """Get the name of the type"""
         return self.name
 
-    def get_label(self):
+    def get_label(self) -> str:
+        """Get the label
+        Notes:
+            If no label was set the class will set the title of the name
+        """
         return self.label
 
-    def get_description(self):
+    def get_description(self) -> str:
+        """Get the description"""
         return self.description
 
     def get_externals(self):
+        """Get the render meta values of externals"""
         return self.render_meta['external']
 
-    def has_externals(self):
-        if len(self.get_externals()) > 0:
-            return True
-        else:
-            return False
+    def has_externals(self) -> bool:
+        """Check if type has external links"""
+        return True if len(self.get_externals()) > 0 else False
 
     def get_external(self, name):
         ext_data = next(ext for ext in self.render_meta['external'] if ext["name"] == name)

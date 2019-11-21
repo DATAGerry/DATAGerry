@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+from cmdb.data_storage.database_manager import DatabaseManagerMongo, MongoConnector
 from cmdb.utils.error import CMDBError
 from cmdb.utils.system_reader import SystemConfigReader, SystemSettingsReader
 

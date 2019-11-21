@@ -16,7 +16,7 @@
 
 from flask import abort, Response
 
-from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+from cmdb.data_storage.database_manager import DatabaseManagerMongo, MongoConnector
 from cmdb.framework.cmdb_errors import ObjectNotFoundError, TypeNotFoundError
 from cmdb.file_export.export_types import ExportType
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager

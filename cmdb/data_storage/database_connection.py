@@ -19,12 +19,13 @@ Database-Connection
 Real connection to database over a given connector
 """
 import logging
-from pymongo.errors import ServerSelectionTimeoutError
 
-from cmdb.data_storage.database_connection_utils import CLIENT, ConnectionStatus, MongoConnectionFailure
-
-from pymongo import MongoClient
 from typing import Generic
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
+
+from cmdb.data_storage.database_connection_utils import ConnectionStatus
+from cmdb.data_storage import CLIENT
 
 try:
     from cmdb.utils.error import CMDBError
@@ -104,7 +105,7 @@ class MongoConnector(Connector[MongoClient]):
         try:
             status = self.client.admin.command('ismaster')
             return ConnectionStatus(status=True, message=str(status))
-        except MongoConnectionFailure as mcf:
+        except ConnectionFailure as mcf:
             raise DatabaseConnectionError(message=str(mcf))
 
     def disconnect(self) -> ConnectionStatus:

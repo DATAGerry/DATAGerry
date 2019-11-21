@@ -14,11 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from typing import TypeVar
-from pymongo.errors import ConnectionFailure as MongoConnectionFailure
-
-CLIENT = TypeVar('CLIENT')
-
 
 class ConnectionStatus:
 
@@ -26,5 +21,8 @@ class ConnectionStatus:
         self._status: bool = status  # Connected = True, Disconnected = False
         self.message: str = message or 'No message given'
 
-    def status(self):
+    def status(self) -> bool:
         return self._status
+
+    def get_message(self) -> str:
+        return self.message

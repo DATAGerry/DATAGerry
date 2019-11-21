@@ -34,7 +34,7 @@ def bad_request(error):
 
 
 @error_pages.errorhandler(401)
-def unauthorized_user(error):
+def unauthorized(error):
     message = {
         'status': 401,
         'response': 'Unauthorized: ' + request.url,
@@ -113,11 +113,6 @@ def not_acceptable(error):
 
 @error_pages.errorhandler(410)
 def page_gone(error):
-    """
-
-    :param error: error code
-    :return: error page
-    """
     message = {
         'status': 410,
         'response': 'Gone: ' + request.url,

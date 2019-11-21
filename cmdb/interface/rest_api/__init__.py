@@ -54,7 +54,7 @@ def create_rest_api(event_queue):
     cache = Cache(config=cache_config)
 
     # Create manager
-    from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+    from cmdb.data_storage.database_manager import DatabaseManagerMongo, MongoConnector
     app_database = DatabaseManagerMongo(
         connector=MongoConnector(
             **system_config_reader.get_all_values_from_section('Database')
@@ -161,9 +161,9 @@ def register_blueprints(app):
 
 def register_error_pages(app):
     from cmdb.interface.rest_api.error_routes import page_not_found, method_not_allowed, not_acceptable, \
-        internal_server_error, unauthorized_user, bad_request, forbidden, page_gone, not_implemented
+        internal_server_error, unauthorized, bad_request, forbidden, page_gone, not_implemented
     app.register_error_handler(400, bad_request)
-    app.register_error_handler(401, unauthorized_user)
+    app.register_error_handler(401, unauthorized)
     app.register_error_handler(403, forbidden)
     app.register_error_handler(404, page_not_found)
     app.register_error_handler(405, method_not_allowed)

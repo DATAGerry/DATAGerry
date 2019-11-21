@@ -73,14 +73,14 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_objects_by(self, sort='public_id', **requirements):
         ack = []
-        objects = self._get_all(collection=CmdbObject.COLLECTION, sort=sort, **requirements)
+        objects = self._get_many(collection=CmdbObject.COLLECTION, sort=sort, **requirements)
         for obj in objects:
             ack.append(CmdbObject(**obj))
         return ack
 
     def get_all_objects(self):
         ack = []
-        objects = self._get_all(collection=CmdbObject.COLLECTION, sort='public_id')
+        objects = self._get_many(collection=CmdbObject.COLLECTION, sort='public_id')
         for obj in objects:
             ack.append(CmdbObject(**obj))
         return ack
@@ -275,7 +275,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_all_types(self):
         ack = []
-        types = self._get_all(collection=CmdbType.COLLECTION)
+        types = self._get_many(collection=CmdbType.COLLECTION)
         for type_obj in types:
             ack.append(CmdbType(**type_obj))
         return ack
@@ -291,7 +291,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_type_by(self, **requirements) -> CmdbType:
         try:
-            found_type_list = self._get_all(collection=CmdbType.COLLECTION, limit=1, **requirements)
+            found_type_list = self._get_many(collection=CmdbType.COLLECTION, limit=1, **requirements)
             if len(found_type_list) > 0:
                 return CmdbType(**found_type_list[0])
             else:
@@ -301,7 +301,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_types_by(self, sort='public_id', **requirements):
         ack = []
-        objects = self._get_all(collection=CmdbType.COLLECTION, sort=sort, **requirements)
+        objects = self._get_many(collection=CmdbType.COLLECTION, sort=sort, **requirements)
         for data in objects:
             ack.append(CmdbType(**data))
         return ack
@@ -603,7 +603,7 @@ class CmdbObjectManager(CmdbManagerBase):
         }
         link_list: List[CmdbLink] = []
         try:
-            find_list: List[dict] = self._get_all(CmdbLink.COLLECTION, **query)
+            find_list: List[dict] = self._get_many(CmdbLink.COLLECTION, **query)
             LOGGER.debug(find_list)
             for link in find_list:
                 link_list.append(CmdbLink(**link))

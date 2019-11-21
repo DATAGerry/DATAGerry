@@ -16,7 +16,7 @@
 
 import logging
 
-from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+from cmdb.data_storage.database_manager import DatabaseManagerMongo, MongoConnector
 from cmdb.utils import get_security_manager
 from cmdb.utils.system_reader import SystemConfigReader
 
