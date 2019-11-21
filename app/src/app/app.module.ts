@@ -30,7 +30,7 @@ import { DatePipe } from '@angular/common';
 import { FileSaverModule } from 'ngx-filesaver';
 import { ToastModule } from './layout/toast/toast.module';
 import { AuthModule } from './auth/auth.module';
-
+import { ErrorModule } from './error/error.module';
 
 @NgModule({
   declarations: [
@@ -44,12 +44,13 @@ import { AuthModule } from './auth/auth.module';
     NgxSpinnerModule,
     AppRoutingModule,
     FileSaverModule,
-    ToastModule
+    ToastModule,
+    ErrorModule
   ],
   providers: [
     PreviousRouteService,
     DatePipe,
-    {provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true},
+    { provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true },
   ],
   bootstrap: [AppComponent]
 })

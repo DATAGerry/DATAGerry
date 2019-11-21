@@ -98,7 +98,6 @@ const routes: Routes = [
     path: 'error',
     loadChildren: () => import('./error/error.module').then(m => m.ErrorModule)
   },
-
   {
     path: '**',
     redirectTo: 'error/404'
@@ -107,10 +106,7 @@ const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule],
-  providers: [
-    {provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true},
-  ]
+  exports: [RouterModule]
 })
 export class AppRoutingModule {
 }
