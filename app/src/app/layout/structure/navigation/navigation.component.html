@@ -143,6 +143,22 @@
             </a>
           </div>
         </li>
+        <!-- info -->
+        <li class="nav-item dropdown mr-2">
+          <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+             aria-expanded="false">
+            <i class="far fa-question-circle"></i>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right dropdown">
+            <div class="dropdown-header">Help</div>
+            <a class="dropdown-item"[routerLink]="['/info/about']">
+              <i class="fas fa-cube"></i> About
+            </a>
+            <a class="dropdown-item" [routerLink]="['/info/license']">
+              <i class="fas fa-lock-open"></i> License
+            </a>
+          </div>
+        </li>
       </ul>
     </div>
   </div>

@@ -19,9 +19,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from './auth/guards/auth.guard';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { HttpErrorInterceptor } from './error/interceptors/http-error.interceptor.tx';
-import { PermissionGuard } from './auth/guards/permission.guard';
 
 const routes: Routes = [
   {
@@ -88,6 +85,14 @@ const routes: Routes = [
       breadcrumb: 'Settings'
     },
     loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule)
+  },
+  {
+    path: 'info',
+    canActivate: [AuthGuard],
+    data: {
+      breadcrumb: 'Info'
+    },
+    loadChildren: () => import('./info/info.module').then(m => m.InfoModule)
   },
   {
     path: 'error',

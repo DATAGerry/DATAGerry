@@ -19,11 +19,11 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'cmdb-about',
-  templateUrl: './about.component.html',
-  styleUrls: ['./about.component.scss']
+  selector: 'cmdb-license',
+  templateUrl: './license.component.html',
+  styleUrls: ['./license.component.scss']
 })
-export class AboutComponent implements OnInit {
+export class LicenseComponent implements OnInit {
 
   constructor() { }
 
