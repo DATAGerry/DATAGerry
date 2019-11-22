@@ -42,6 +42,7 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
         LOGGER.info("{}: start run".format(self._name))
         while not self._event_shutdown.is_set():
             scheduler.run()
+            time.sleep(1)
         LOGGER.info("{}: end run".format(self._name))
 
     def _handle_event(self, event):
