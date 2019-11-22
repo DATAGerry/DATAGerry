@@ -34,7 +34,7 @@ import { ErrorModule } from './error/error.module';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
   ],
   imports: [
     BrowserModule,
