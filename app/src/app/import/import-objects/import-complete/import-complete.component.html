@@ -17,11 +17,11 @@
   </tr>
   <tr>
     <th scope="row">Possible number of objects</th>
-    <td>{{parsedData.count}}</td>
+    <td>{{parsedData?.count}}</td>
   </tr>
   <tr>
     <th scope="row">Number of objects which will be imported</th>
-    <td>{{(parsedData.count - importerConfig.start_element) - importerConfig.max_elements}}</td>
+    <td>{{(parsedData?.count - importerConfig.start_element) - importerConfig.max_elements}}</td>
   </tr>
   </tbody>
 </table>

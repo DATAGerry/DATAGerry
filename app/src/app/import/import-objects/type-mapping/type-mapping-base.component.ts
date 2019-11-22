@@ -29,7 +29,7 @@ import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 })
 export class TypeMappingBaseComponent {
 
-  @Input() public parsedData: any = {};
+  @Input() public parsedData: any = undefined;
   @Input() public parserConfig: any = {};
 
   public readonly allowedEffect: any = 'move';

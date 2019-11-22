@@ -29,7 +29,7 @@
     </aw-wizard>
   </div>
   <div class="col-md-3">
-    <h2>Configuration</h2>
+    <h2>Import objects</h2>
     <hr/>
     <div class="card mb-3">
       <div class="card-header">
@@ -45,6 +45,9 @@
         Parser config:
       </div>
       <ul class="list-group list-group-flush">
+        <li *ngIf="!parserConfig" class="list-group-item list-group-item-warning">
+          Parser not selected yet!
+        </li>
         <li *ngFor="let parserPro of parserConfig | keyvalue" class="list-group-item">
           {{parserPro?.key | uppercase}}: {{parserPro?.value}}
         </li>

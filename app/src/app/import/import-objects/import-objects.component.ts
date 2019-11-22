@@ -43,7 +43,7 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
 
   // Parser Data
   private parseDataSubscription: Subscription;
-  public parserConfig: any = {};
+  public parserConfig: any = undefined;
   public parsedData: any = undefined;
 
   // Import Response
@@ -91,8 +91,12 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
   }
 
   public importConfigChange(config: any) {
-    this.importerConfig = config as ImporterConfig;
-    this.importerConfig.type_id = this.typeInstance.public_id as number;
+    if (config !== undefined) {
+      this.importerConfig = config as ImporterConfig;
+      if (this.typeInstance !== undefined) {
+        this.importerConfig.type_id = this.typeInstance.public_id as number;
+      }
+    }
   }
 
   public typeChange(change: any) {
