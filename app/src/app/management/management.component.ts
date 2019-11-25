@@ -16,27 +16,12 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
 
-import { ManagementRoutingModule } from './management-routing.module';
-import { UserService } from './services/user.service';
-import { LayoutModule } from '../layout/layout.module';
-import { ReactiveFormsModule } from '@angular/forms';
-import { GroupService } from './services/group.service';
-import { ManagementComponent } from './management.component';
-
-@NgModule({
-  declarations: [ManagementComponent],
-  imports: [
-    CommonModule,
-    ManagementRoutingModule,
-    LayoutModule,
-    ReactiveFormsModule
-  ],
-  providers: [
-    UserService,
-    GroupService,
-  ],
+@Component({
+  selector: 'cmdb-management',
+  templateUrl: './management.component.html',
+  providers: []
 })
-export class ManagementModule { }
+export class ManagementComponent {
+}

@@ -249,6 +249,8 @@ export class TableComponent implements OnInit, OnDestroy {
           this.apiCallService.callDeleteRoute(this.linkRoute + id).subscribe(data => {
             this.apiCallService.callGetRoute('object/').subscribe((objs: RenderResult[]) => {
               this.items.next(objs);
+              this.rerender();
+              this.dtTrigger.next();
             });
           });
         }

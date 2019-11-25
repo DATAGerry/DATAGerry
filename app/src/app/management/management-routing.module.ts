@@ -20,8 +20,19 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { PermissionGuard } from '../auth/guards/permission.guard';
 import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
+import { ManagementComponent } from './management.component';
 
 const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    canActivate: [PermissionGuard],
+    data: {
+      breadcrumb: 'Overview',
+      right: 'base.system.*'
+    },
+    component: ManagementComponent
+  },
   {
     path: 'users',
     canActivateChild: [PermissionGuard],
