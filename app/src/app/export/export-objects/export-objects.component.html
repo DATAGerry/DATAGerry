@@ -1,15 +1,13 @@
-
+<cmdb-content-header
+  title="Export Objects">
+</cmdb-content-header>
 <form [formGroup]="formExport" (ngSubmit)="exportObjectByTypeID()">
   <div class="card">
-    <div class="card-header">Export</div>
-
     <div class="card-body">
-
       <div class="form-group">
-        <label for="typeChooser">Object Type <span class="required">*</span></label>
+        <label for="typeChooser">Select Object Type <span class="required">*</span></label>
         <ng-select id="typeChooser"
                    [items]="typeList"
-
                    required
                    bindLabel="label"
                    bindValue="public_id"
@@ -17,10 +15,12 @@
                    formControlName="type">
 
           <ng-template ng-label-tmp let-item="item">
-            {{item.label}}
+            <i class="{{item?.render_meta?.icon}}"></i> {{item?.label}}
+            #{{item?.public_id}}
           </ng-template>
           <ng-template ng-option-tmp let-item="item" let-index="index">
-            {{item.label}}
+            <i class="{{item?.render_meta?.icon}}"></i> {{item?.label}}
+            #{{item?.public_id}}
           </ng-template>
         </ng-select>
 

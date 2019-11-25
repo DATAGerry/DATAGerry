@@ -31,7 +31,7 @@ import { FileSaverService } from 'ngx-filesaver';
 import { TableColumn} from './models/table-column';
 import { TableColumnAction} from './models/table-columns-action';
 import { RenderResult } from '../../../framework/models/cmdb-render';
-import { FileService } from '../../../export/export-objects/export-objects/export-objects.service';
+import { FileService } from '../../../export/export.service';
 
 @Component({
   selector: 'cmdb-table',

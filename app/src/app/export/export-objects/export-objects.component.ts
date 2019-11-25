@@ -17,12 +17,12 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { CmdbType} from '../../../framework/models/cmdb-type';
+import { CmdbType} from '../../framework/models/cmdb-type';
 import { FormControl, FormGroup, Validators} from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { TypeService } from '../../../framework/services/type.service';
+import { TypeService } from '../../framework/services/type.service';
 import { FileSaverService } from 'ngx-filesaver';
-import { FileService } from './export-objects.service';
+import { FileService } from '../export.service';
 
 @Component({
   selector: 'cmdb-export-objects',

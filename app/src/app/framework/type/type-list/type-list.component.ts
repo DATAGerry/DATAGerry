@@ -23,9 +23,9 @@ import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
 import { Router } from '@angular/router';
 import { UserService } from '../../../management/services/user.service';
-import { FileService } from '../../../export/export-objects/export-objects/export-objects.service';
-import {FileSaverService} from 'ngx-filesaver';
-import {DatePipe} from '@angular/common';
+import { FileSaverService } from 'ngx-filesaver';
+import { DatePipe } from '@angular/common';
+import { FileService } from '../../../export/export.service';
 
 @Component({
   selector: 'cmdb-type-list',
