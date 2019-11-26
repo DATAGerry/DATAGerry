@@ -26,6 +26,8 @@ import { Router } from '@angular/router';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { ModalComponent } from '../../../layout/helpers/modal/modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { interval, Subscription } from 'rxjs';
+
 
 @Component({
   selector: 'cmdb-task-settings-list',
@@ -39,6 +41,9 @@ export class TaskSettingsListComponent implements OnInit, OnDestroy {
   public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();
   public taskList: BehaviorSubject<ExportdJob[]> = new BehaviorSubject<ExportdJob[]>([]);
+
+  private subscription: Subscription;
+  private interval = interval(1000);
 
   constructor(private taskService: ExportdJobService, private router: Router,
               private toast: ToastService, private modalService: NgbModal) { }
@@ -65,19 +70,26 @@ export class TaskSettingsListComponent implements OnInit, OnDestroy {
         searchPlaceholder: 'Filter...'
       }
     };
-    this.taskService.getTaskList().subscribe((list: ExportdJob[]) => {
-      this.taskList.next(list);
-      this.dtTrigger.next();
+    this.subscription = this.interval.subscribe(val => {
+      this.taskService.getTaskList().subscribe((list: ExportdJob[]) => {
+        this.taskList.next(list);
+      });
     });
+    this.dtTrigger.next();
   }
 
-  public run_job_manual(itemID: number) {
-    this.taskService.run_task(itemID).subscribe(resp => console.log(resp),
+  public run_job_manual(job: ExportdJob) {
+    job.running = true;
+    this.taskService.putTask(job).subscribe(value => console.log(value),
       error => {},
-      () => this.taskService.getTaskList().subscribe((list: ExportdJob[]) => {
-        this.taskList.next(list);
-        this.toast.show(`Exportd Job was started: Exportd ID: ${itemID}`);
-      }));
+      () =>
+        this.taskService.run_task(job.public_id).subscribe(resp => console.log(resp),
+          error => {},
+          () => this.taskService.getTaskList().subscribe((list: ExportdJob[]) => {
+            this.taskList.next(list);
+            this.toast.show(`Exportd Job was started: Exportd ID: ${job.public_id}`);
+          }))
+    );
   }
 
   public delTask(itemID: number) {
@@ -101,5 +113,6 @@ export class TaskSettingsListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     // Do not forget to unsubscribe the event
     this.dtTrigger.unsubscribe();
+    this.subscription.unsubscribe();
   }
 }

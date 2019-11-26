@@ -33,7 +33,7 @@ class ExportdJob(JobManagementBase):
 
     def __init__(self, name, label, description, active,
                  last_execute_date, sources, destination,
-                 variables, scheduling, **kwargs):
+                 variables, scheduling, running=False, logs=None, **kwargs):
         """
         Args:
             name: name of this job
@@ -52,7 +52,8 @@ class ExportdJob(JobManagementBase):
         self.destination = destination
         self.variables = variables
         self.scheduling = scheduling
-        self.running = False
+        self.running = running
+        self.logs = logs or []
         super(ExportdJob, self).__init__(**kwargs)
 
     def get_public_id(self) -> int:
@@ -139,6 +140,22 @@ class ExportdJob(JobManagementBase):
             list: all scheduling
         """
         return self.scheduling
+
+    def is_running(self):
+        """
+        Get state of the job
+        Returns:
+            bool: True is running else False
+        """
+        return self.running
+
+    def get_logs(self):
+        """
+        Get all logs of the job
+        Returns:
+            list: all logs
+        """
+        return self.logs
 
 
 class NoPublicIDError(CMDBError):
