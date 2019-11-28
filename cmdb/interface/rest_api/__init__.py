@@ -156,10 +156,22 @@ def register_blueprints(app):
     app.register_blueprint(exportd_job_blueprint)
     app.register_blueprint(external_system)
 
+    import cmdb
+    if cmdb.__MODE__ == 'DEBUG':
+        from cmdb.interface.rest_api.debug_routes import debug_blueprint
+        app.register_blueprint(debug_blueprint)
+
 
 def register_error_pages(app):
-    from cmdb.interface.rest_api.error_routes import page_not_found, method_not_allowed, not_acceptable, \
-        internal_server_error, unauthorized, bad_request, forbidden, page_gone, not_implemented
+    from cmdb.interface.error_handlers import not_implemented
+    from cmdb.interface.error_handlers import internal_server_error
+    from cmdb.interface.error_handlers import page_gone
+    from cmdb.interface.error_handlers import not_acceptable
+    from cmdb.interface.error_handlers import method_not_allowed
+    from cmdb.interface.error_handlers import page_not_found
+    from cmdb.interface.error_handlers import forbidden
+    from cmdb.interface.error_handlers import unauthorized
+    from cmdb.interface.error_handlers import bad_request
     app.register_error_handler(400, bad_request)
     app.register_error_handler(401, unauthorized)
     app.register_error_handler(403, forbidden)
