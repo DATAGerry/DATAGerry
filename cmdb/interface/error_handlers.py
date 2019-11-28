@@ -36,24 +36,29 @@ LOGGER = logging.getLogger(__name__)
 
 class ErrorResponse:
 
-    def __init__(self, status: int, prefix: str, description: str, message: str = None):
+    def __init__(self, status: int, prefix: str, description: str, message: str, joke: str = None):
         self.status: int = status
         self.response: str = f'{prefix}: {request.url}'
         self.description: str = description
         self.message: str = self._validate_message(message, description) or ''
+        if joke:
+            self.joke: str = joke
 
     @staticmethod
     def _validate_message(message, description) -> Optional[str]:
         """Checks if description and message are the same"""
         if message != description:
             return message
-        else:
-            return None
+        return None
+
+    def get_status_code(self) -> int:
+        """Get the HTTP status code of this error"""
+        return self.status
 
     def make_error(self, error: HTTPException) -> dict:
         """make a flask valid error response"""
         resp = jsonify(self.__dict__)
-        resp.status_code = self.status
+        resp.status_code = self.get_status_code()
         error.description = self.description
         resp.error = error
         return resp
@@ -63,34 +68,35 @@ class ErrorResponse:
 def bad_request(error):
     """400 Bad Request"""
     resp = ErrorResponse(status=400, prefix='Bad Request', description=BadRequest.description,
-                         message=error.description)
+                         message=error.description, joke='no no nuts!')
     return resp.make_error(error)
 
 
 def unauthorized(error):
     """401 Unauthorized"""
     resp = ErrorResponse(status=401, prefix='Unauthorized', description=Unauthorized.description,
-                         message=error.description)
+                         message=error.description, joke='who the nuts?')
     return resp.make_error(error)
 
 
 def forbidden(error):
     """403 Forbidden"""
     resp = ErrorResponse(status=403, prefix='Forbidden', description=Forbidden.description,
-                         message=error.description)
+                         message=error.description, joke='what the nuts?!')
     return resp.make_error(error)
 
 
 def page_not_found(error):
     """404 Not Found"""
-    resp = ErrorResponse(status=404, prefix='Not Found', description=NotFound.description, message=error.description)
+    resp = ErrorResponse(status=404, prefix='Not Found', description=NotFound.description,
+                         message=error.description, joke='where are my nuts?!')
     return resp.make_error(error)
 
 
 def method_not_allowed(error):
     """405 Method Not Allowed"""
     resp = ErrorResponse(status=405, prefix='Method Not Allowed', description=MethodNotAllowed.description,
-                         message=error.description)
+                         message=error.description, joke='not this nuts!')
     return resp.make_error(error)
 
 
@@ -104,7 +110,7 @@ def not_acceptable(error):
 def page_gone(error):
     """410 Page Gone"""
     resp = ErrorResponse(status=410, prefix='Gone', description=Gone.description,
-                         message=error.description)
+                         message=error.description, joke='i ate this nuts...')
     return resp.make_error(error)
 
 
@@ -112,12 +118,12 @@ def page_gone(error):
 def internal_server_error(error):
     """500 Internal Server Error"""
     resp = ErrorResponse(status=500, prefix='Internal Server Error', description=InternalServerError.description,
-                         message=error.description)
+                         message=error.description, joke='oh my nuts...')
     return resp.make_error(error)
 
 
 def not_implemented(error):
     """501 Not Implemented"""
     resp = ErrorResponse(status=501, prefix='Not Implemented', description=Gone.description,
-                         message=error.description)
+                         message=error.description, joke='... no nuts...sry')
     return resp.make_error(error)
