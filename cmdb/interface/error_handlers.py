@@ -68,7 +68,7 @@ class ErrorResponse:
 def bad_request(error):
     """400 Bad Request"""
     resp = ErrorResponse(status=400, prefix='Bad Request', description=BadRequest.description,
-                         message=error.description, joke='no no nuts!')
+                         message=error.description, joke='not this kind of nuts!')
     return resp.make_error(error)
 
 
@@ -118,12 +118,12 @@ def page_gone(error):
 def internal_server_error(error):
     """500 Internal Server Error"""
     resp = ErrorResponse(status=500, prefix='Internal Server Error', description=InternalServerError.description,
-                         message=error.description, joke='oh my nuts...')
+                         message=error.description, joke='oh my nuts done something strange')
     return resp.make_error(error)
 
 
 def not_implemented(error):
     """501 Not Implemented"""
     resp = ErrorResponse(status=501, prefix='Not Implemented', description=Gone.description,
-                         message=error.description, joke='... no nuts...sry')
+                         message=error.description, joke='... sry we still making this nuts')
     return resp.make_error(error)
