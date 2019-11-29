@@ -25,6 +25,7 @@ from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerIn
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.utils.error import CMDBError
 from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.user_management import User
 
 LOGGER = logging.getLogger(__name__)
 
@@ -42,7 +43,7 @@ class ExportdJobManagement(CmdbManagerBase):
     def get_job(self, public_id: int) -> ExportdJob:
         try:
             result = self.dbm.find_one(collection=ExportdJob.COLLECTION, public_id=public_id)
-        except Exception as err:
+        except (ExportdJobManagerGetError, Exception) as err:
             LOGGER.error(err)
             raise err
         return ExportdJob(**result)
@@ -79,7 +80,6 @@ class ExportdJobManagement(CmdbManagerBase):
         Insert new ExportdJob Object
         Args:
             data: init data
-
         Returns:
             Public ID of the new ExportdJob in database
         """
@@ -97,18 +97,20 @@ class ExportdJobManagement(CmdbManagerBase):
             )
             if self._event_queue:
                 event = Event("cmdb.exportd.added", {"id": new_object.get_public_id(),
-                                                     "active": new_object.scheduling["event"]["active"] and new_object.get_active()})
+                                                     "active": new_object.scheduling["event"]["active"] and new_object.get_active(),
+                                                     "user_id": new_object.get_author_id()})
                 self._event_queue.put(event)
         except CMDBError as e:
             raise ExportdJobManagerInsertError(e)
         return ack
 
-    def update_job(self, data: (dict, ExportdJob)) -> str:
+    def update_job(self, data: (dict, ExportdJob), request_user: User, event_start=True) -> str:
         """
         Update new ExportdJob Object
         Args:
             data: init data
-
+            request_user: current user, to detect who triggered event
+            event_start: Controls whether an event should be started
         Returns:
             Public ID of the ExportdJob in database
         """
@@ -124,25 +126,28 @@ class ExportdJobManagement(CmdbManagerBase):
             public_id=update_object.get_public_id(),
             data=update_object.to_database()
         )
-        if self._event_queue:
+        if self._event_queue and event_start:
             event = Event("cmdb.exportd.updated", {"id": update_object.get_public_id(),
-                                                   "active": update_object.scheduling["event"]["active"] and update_object.get_active()})
+                                                   "active": update_object.scheduling["event"]["active"] and update_object.get_active(),
+                                                   "user_id": request_user.get_public_id()})
             self._event_queue.put(event)
         return ack.acknowledged
 
-    def delete_job(self, public_id: int) -> bool:
+    def delete_job(self, public_id: int, request_user: User) -> bool:
         try:
             ack = self._delete(collection=ExportdJob.COLLECTION, public_id=public_id)
             if self._event_queue:
-                event = Event("cmdb.exportd.deleted", {"id": public_id, "active": False})
+                event = Event("cmdb.exportd.deleted", {"id": public_id, "active": False,
+                                                       "user_id": request_user.get_public_id()})
                 self._event_queue.put(event)
             return ack
         except Exception:
             raise ExportdJobManagerDeleteError(f'Could not delete job with ID: {public_id}')
 
-    def run_job_manual(self, public_id: int) -> bool:
+    def run_job_manual(self, public_id: int, request_user: User) -> bool:
         if self._event_queue:
-            event = Event("cmdb.exportd.run_manual", {"id": public_id})
+            event = Event("cmdb.exportd.run_manual", {"id": public_id,
+                                                      "user_id": request_user.get_public_id()})
             self._event_queue.put(event)
         return True
 

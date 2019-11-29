@@ -27,18 +27,34 @@ import { DeleteTabComponent } from './log-object-settings/delete-tab/delete-tab.
 import { DataTablesModule } from 'angular-datatables';
 import { LayoutModule } from '../../layout/layout.module';
 import { NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { DeleteExportdModalComponent, LogExportdSettingsComponent } from './log-exportd-settings/log-exportd-settings.component';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { LogSettingsComponent } from './log-settings.component';
+import { ActivateExportdTabComponent } from './log-exportd-settings/activate-exportd-tab/activate-exportd-tab.component';
+import { DeactivateExportdTabComponent } from './log-exportd-settings/deactivate-exportd-tab/deactivate-exportd-tab.component';
 
 @NgModule({
-  entryComponents: [DeleteModalComponent],
-  declarations: [DeleteModalComponent, LogObjectSettingsComponent, ActivateTabComponent, DeactivateTabComponent, DeleteTabComponent],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    LogSettingsRoutingModule,
-    DataTablesModule,
-    NgbTooltipModule,
-    NgbProgressbarModule
-  ]
+  entryComponents: [DeleteModalComponent, DeleteExportdModalComponent],
+  declarations: [
+    DeleteModalComponent,
+    DeleteExportdModalComponent,
+    LogObjectSettingsComponent,
+    ActivateTabComponent,
+    DeactivateTabComponent,
+    DeleteTabComponent,
+    LogSettingsComponent,
+    LogExportdSettingsComponent,
+    ActivateExportdTabComponent,
+    DeactivateExportdTabComponent],
+    imports: [
+        CommonModule,
+        LayoutModule,
+        LogSettingsRoutingModule,
+        DataTablesModule,
+        NgbTooltipModule,
+        NgbProgressbarModule,
+        FontAwesomeModule
+    ]
 })
 export class LogSettingsModule {
 }

@@ -16,20 +16,20 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export class ExportdJob {
+import { Component, Input, OnInit } from '@angular/core';
+import { ExportdJobBasicStepComponent } from '../exportd-job-basic-step/exportd-job-basic-step.component';
 
-  // tslint:disable: variable-name
-  public public_id: number;
-  public name: string;
-  public label: string;
-  public description: string;
-  public active: boolean;
-  public last_execute_date: any;
-  public sources: [];
-  public destination: [];
-  public variables: [];
-  public scheduling: any;
-  public running: boolean;
-  public state: any;
-  // tslint:enable
+@Component({
+  selector: 'cmdb-task-complete-step',
+  templateUrl: './exportd-job-complete-step.component.html',
+  styleUrls: ['./exportd-job-complete-step.component.scss']
+})
+export class ExportdJobCompleteStepComponent implements OnInit {
+
+  @Input() public basicStep: ExportdJobBasicStepComponent = null;
+  constructor() { }
+
+  ngOnInit() {
+  }
+
 }

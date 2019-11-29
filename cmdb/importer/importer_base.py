@@ -133,7 +133,7 @@ class ObjectImporter(BaseImporter):
                     success_imports.append(ImportSuccessMessage(public_id=current_public_id, obj=current_import_object))
             else:
                 try:
-                    self.object_manager.delete_object(current_public_id)
+                    self.object_manager.delete_object(current_public_id, self.request_user)
                 except ObjectManagerDeleteError as err:
                     failed_imports.append(ImportFailedMessage(error_message=err.message, obj=current_import_object))
                     current_import_index += 1

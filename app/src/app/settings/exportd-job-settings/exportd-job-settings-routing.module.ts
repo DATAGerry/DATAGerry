@@ -18,31 +18,39 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { LogObjectSettingsComponent } from './log-object-settings/log-object-settings.component';
-import { LogExportdSettingsComponent } from './log-exportd-settings/log-exportd-settings.component';
-import { LogSettingsComponent } from './log-settings.component';
+import { ExportdJobSettingsListComponent } from './exportd-job-settings-list/exportd-job-settings-list.component';
+import { ExportdJobSettingsAddComponent } from './exportd-job-settings-add/exportd-job-settings-add.component';
+import { ExportdJobSettingsEditComponent } from './exportd-job-settings-edit/exportd-job-settings-edit.component';
+import { ExportdJobLogsComponent } from './exportd-job-logs/exportd-job-logs.component';
 
 const routes: Routes = [
   {
     path: '',
     data: {
-      breadcrumb: 'Overview'
+      breadcrumb: 'List'
     },
-    component: LogSettingsComponent
+    component: ExportdJobSettingsListComponent
   },
   {
-    path: 'objects',
+    path: 'add',
     data: {
-      breadcrumb: 'Objects'
+      breadcrumb: 'Add'
     },
-    component: LogObjectSettingsComponent
+    component: ExportdJobSettingsAddComponent
   },
   {
-    path: 'exportdjobs',
+    path: 'edit/:publicID',
     data: {
-      breadcrumb: 'Exportd Jobs'
+      breadcrumb: 'Edit'
     },
-    component: LogExportdSettingsComponent
+    component: ExportdJobSettingsEditComponent
+  },
+  {
+    path: 'log/:publicID',
+    data: {
+      breadcrumb: 'Log'
+    },
+    component: ExportdJobLogsComponent
   }
 ];
 
@@ -50,4 +58,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class LogSettingsRoutingModule { }
+export class ExportdJobSettingsRoutingModule { }

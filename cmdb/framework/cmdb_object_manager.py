@@ -39,6 +39,7 @@ from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.framework.cmdb_type import CmdbType
 from cmdb.utils.error import CMDBError
+from cmdb.user_management import User
 
 LOGGER = logging.getLogger(__name__)
 
@@ -152,7 +153,7 @@ class CmdbObjectManager(CmdbManagerBase):
         Insert new CMDB Object
         Args:
             data: init data
-
+            request_user: current user, to detect who triggered event
         Returns:
             Public ID of the new object in database
         """
@@ -171,24 +172,14 @@ class CmdbObjectManager(CmdbManagerBase):
             )
             if self._event_queue:
                 event = Event("cmdb.core.object.added", {"id": new_object.get_public_id(),
-                                                         "type_id": new_object.get_type_id()})
+                                                         "type_id": new_object.get_type_id(),
+                                                         "user_id": new_object.author_id})
                 self._event_queue.put(event)
         except (CMDBError, PublicIDAlreadyExists) as e:
             raise ObjectInsertError(e)
         return ack
 
-    def insert_many_objects(self, objects: list):
-        ack = []
-        for obj in objects:
-            if isinstance(obj, CmdbObject):
-                ack.append(self.insert_object(obj.to_database()))
-            elif isinstance(obj, dict):
-                ack.append(self.insert_object(obj))
-            else:
-                raise Exception
-        return ack
-
-    def update_object(self, data: (dict, CmdbObject)) -> str:
+    def update_object(self, data: (dict, CmdbObject), request_user: User) -> str:
         if isinstance(data, dict):
             update_object = CmdbObject(**data)
         elif isinstance(data, CmdbObject):
@@ -204,20 +195,10 @@ class CmdbObjectManager(CmdbManagerBase):
         # create cmdb.core.object.updated event
         if self._event_queue:
             event = Event("cmdb.core.object.updated", {"id": update_object.get_public_id(),
-                                                       "type_id": update_object.get_type_id()})
+                                                       "type_id": update_object.get_type_id(),
+                                                       "user_id": request_user.get_public_id()})
             self._event_queue.put(event)
         return ack.acknowledged
-
-    def update_many_objects(self, objects: list):
-        ack = []
-        for obj in objects:
-            if isinstance(obj, CmdbObject):
-                ack.append(self.update_object(obj.to_database()))
-            elif isinstance(obj, dict):
-                ack.append(self.update_object(obj))
-            else:
-                raise Exception
-        return ack
 
     def remove_object_fields(self, filter_query: dict, update: dict):
         ack = self._update_many(CmdbObject.COLLECTION, filter_query, update)
@@ -258,21 +239,24 @@ class CmdbObjectManager(CmdbManagerBase):
 
         return referenced_by_objects
 
-    def delete_object(self, public_id: int):
+    def delete_object(self, public_id: int, request_user: User):
         try:
             if self._event_queue:
                 event = Event("cmdb.core.object.deleted",
-                              {"id": public_id, "type_id": self.get_object(public_id).get_type_id()})
+                              {"id": public_id,
+                               "type_id": self.get_object(public_id).get_type_id(),
+                               "user_id": request_user.get_public_id()})
                 self._event_queue.put(event)
             ack = self._delete(CmdbObject.COLLECTION, public_id)
             return ack
         except (CMDBError, Exception):
             raise ObjectDeleteError(msg=public_id)
 
-    def delete_many_objects(self, filter_query: dict, public_ids):
+    def delete_many_objects(self, filter_query: dict, public_ids, request_user: User):
         ack = self._delete_many(CmdbObject.COLLECTION, filter_query)
         if self._event_queue:
-            event = Event("cmdb.core.objects.deleted", {"ids": public_ids})
+            event = Event("cmdb.core.objects.deleted", {"ids": public_ids,
+                                                        "user_id": request_user.get_public_id()})
             self._event_queue.put(event)
         return ack
 

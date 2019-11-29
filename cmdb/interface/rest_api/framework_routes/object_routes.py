@@ -415,7 +415,7 @@ def update_object(public_id: int, request_user: User):
 
     # insert object
     try:
-        update_ack = object_manager.update_object(update_object_instance)
+        update_ack = object_manager.update_object(update_object_instance, request_user)
     except CMDBError as e:
         LOGGER.warning(e)
         return abort(500)
@@ -457,7 +457,7 @@ def delete_object(public_id: int, request_user: User):
         return abort(500)
 
     try:
-        ack = object_manager.delete_object(public_id=public_id)
+        ack = object_manager.delete_object(public_id=public_id, request_user=request_user)
     except ObjectDeleteError:
         return abort(400)
     except CMDBError:
@@ -515,7 +515,8 @@ def delete_many_objects(public_ids, request_user: User):
                 return abort(500)
 
             try:
-                ack.append(object_manager.delete_object(public_id=current_object_instance.get_public_id()))
+                ack.append(object_manager.delete_object(public_id=current_object_instance.get_public_id(),
+                                                        request_user=request_user))
             except ObjectDeleteError:
                 return abort(400)
             except CMDBError:
@@ -578,7 +579,7 @@ def update_object_state(public_id: int, request_user: User):
         return make_response(False, 204)
     try:
         founded_object.active = state
-        update_ack = object_manager.update_object(founded_object)
+        update_ack = object_manager.update_object(founded_object, request_user)
     except ObjectManagerUpdateError as err:
         LOGGER.error(err)
         return abort(500)

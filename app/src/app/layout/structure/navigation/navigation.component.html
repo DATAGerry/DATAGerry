@@ -85,6 +85,10 @@
           <div class="dropdown-menu dropdown-menu-right">
             <div class="dropdown-header">Task Managment</div>
             <a class="dropdown-item" routerLink="/settings/exportdjob">Exportd Job Settings</a>
+            <div class="dropdown-header">Logs</div>
+            <a class="dropdown-item" [routerLink]="['/settings/logs/exportdjobs']">
+              <fa-icon icon="clipboard-list"></fa-icon>
+              Exportd Job Logs</a>
           </div>
         </li>
         <!-- nav System -->

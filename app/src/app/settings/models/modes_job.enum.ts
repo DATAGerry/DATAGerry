@@ -16,20 +16,10 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export class ExportdJob {
-
-  // tslint:disable: variable-name
-  public public_id: number;
-  public name: string;
-  public label: string;
-  public description: string;
-  public active: boolean;
-  public last_execute_date: any;
-  public sources: [];
-  public destination: [];
-  public variables: [];
-  public scheduling: any;
-  public running: boolean;
-  public state: any;
-  // tslint:enable
+export enum ExecuteState {
+  SUCCESSFUL = 'SUCCESSFUL',
+  INFO = 'INFO',
+  WARNING = 'WARNING',
+  FAILED = 'FAILED',
+  RUNNING = 'RUNNING',
 }

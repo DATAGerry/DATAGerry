@@ -16,20 +16,12 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export class ExportdJob {
+import { Component } from '@angular/core';
 
-  // tslint:disable: variable-name
-  public public_id: number;
-  public name: string;
-  public label: string;
-  public description: string;
-  public active: boolean;
-  public last_execute_date: any;
-  public sources: [];
-  public destination: [];
-  public variables: [];
-  public scheduling: any;
-  public running: boolean;
-  public state: any;
-  // tslint:enable
+@Component({
+  selector: 'cmdb-log-settings',
+  templateUrl: './log-settings.component.html',
+  providers: []
+})
+export class LogSettingsComponent {
 }
