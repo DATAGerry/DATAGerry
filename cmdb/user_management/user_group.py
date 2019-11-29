@@ -63,7 +63,6 @@ class UserGroup(UserManagementBase):
             return False
         return True
 
-    @timing('Group right calculation')
     def has_extended_right(self, right_name: str) -> bool:
         parent_right_name: str = right_name.rsplit(".", 1)[0]
         if self.has_right(f'{parent_right_name}.{GLOBAL_RIGHT_IDENTIFIER}'):
