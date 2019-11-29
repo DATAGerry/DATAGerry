@@ -15,6 +15,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from enum import Enum
 
+from cmdb.importer.mapper import Mapping
+
 
 class FieldMapperMode(Enum):
     MATCH = 0
@@ -22,25 +24,19 @@ class FieldMapperMode(Enum):
 
 
 class BaseImporterConfig:
-    DEFAULT_MAPPING: dict = {}
+    DEFAULT_MAPPING: Mapping = Mapping()
     MANUALLY_MAPPING: bool = True
 
-    def __init__(self, mapping: dict = None):
-        _mapping = mapping or self.DEFAULT_MAPPING
-        self.mapping: dict = {**self.DEFAULT_MAPPING, **_mapping}
+    def __init__(self, mapping: Mapping = None):
+        self.mapping: Mapping = mapping or self.DEFAULT_MAPPING
 
-    def get_mapping(self) -> dict:
+    def get_mapping(self) -> Mapping:
         return self.mapping
 
 
 class ObjectImporterConfig(BaseImporterConfig):
-    DEFAULT_MAPPING = {
-        'properties': {},
-        'field_mode': FieldMapperMode.MATCH,
-        'fields': {}
-    }
 
-    def __init__(self, type_id: int, mapping: dict = None, start_element: int = 0, max_elements: int = 0,
+    def __init__(self, type_id: int, mapping: Mapping = None, start_element: int = 0, max_elements: int = 0,
                  overwrite_public: bool = True, *args, **kwargs):
         self.type_id: int = type_id
         self.start_element: int = start_element

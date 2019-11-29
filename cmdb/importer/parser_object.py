@@ -13,11 +13,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import csv
 import json
 import logging
-from json import JSONDecodeError
 
+from cmdb.importer.importer_errors import ParserRuntimeError
+from cmdb.utils.cast import auto_cast
 from cmdb.importer.content_types import JSONContent, CSVContent
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.importer.parser_response import ObjectParserResponse
@@ -32,7 +34,6 @@ class JsonObjectParserResponse(ObjectParserResponse):
 
 
 class JsonObjectParser(BaseObjectParser, JSONContent):
-
     DEFAULT_CONFIG = {
         'indent': 2,
         'encoding': 'UTF-8'
@@ -51,13 +52,20 @@ class JsonObjectParser(BaseObjectParser, JSONContent):
 class CsvObjectParserResponse(ObjectParserResponse):
 
     def __init__(self, count: int, entries: list, entry_length: int, header: list = None):
-        self.entry_length = entry_length
-        self.header = header
+        self.entry_length: int = entry_length
+        self.header: list = header
         super(CsvObjectParserResponse, self).__init__(count=count, entries=entries)
+
+    def get_entry_length(self) -> int:
+        return self.entry_length
+
+    def get_header_list(self) -> list:
+        if not self.header:
+            return []
+        return self.header
 
 
 class CsvObjectParser(BaseObjectParser, CSVContent):
-
     BYTE_ORDER_MARK = '\ufeff'
     BAD_DELIMITERS = ['\r', '\n', '"', BYTE_ORDER_MARK]
     DEFAULT_QUOTE_CHAR = '"'
@@ -72,9 +80,9 @@ class CsvObjectParser(BaseObjectParser, CSVContent):
     def __init__(self, parser_config: dict = None):
         super(CsvObjectParser, self).__init__(parser_config)
 
-    def parse(self, file) -> (dict, list, CsvObjectParserResponse):
+    def parse(self, file) -> CsvObjectParserResponse:
         run_config = self.get_config()
-        LOGGER.info(f'Starting parser with CONFIG: {run_config}')
+
         dialect = {
             'delimiter': run_config.get('delimiter'),
             'quotechar': run_config.get('quoteChar'),
@@ -87,33 +95,24 @@ class CsvObjectParser(BaseObjectParser, CSVContent):
             'entries': [],
             'entry_length': 0
         }
+        try:
+            with open(f'{file}', 'r', newline=run_config.get('newline')) as csv_file:
+                csv_reader = csv.reader(csv_file, dialect=dialect)
+                if run_config.get('header'):
+                    first_line = next(csv_reader)
+                    parsed['header'] = first_line
+                for row in csv_reader:
+                    row_list = []
+                    for entry in row:
+                        row_list.append(auto_cast(entry))
+                    parsed.get('entries').append(row_list)
+                    parsed['count'] = parsed['count'] + 1
 
-        with open(f'{file}', 'r', newline=run_config.get('newline')) as csv_file:
-            csv_reader = csv.reader(csv_file, **dialect)
-
-            first_line = next(csv_reader)
-            if run_config.get('header'):
-                parsed['header'] = first_line
-                parsed['entry_length'] = len(parsed['header'])
-            else:
-                parsed['entry_length'] = len(parsed['first_line'])
-
-            for first_split in first_line:
-                converted_content: dict = {}
-                converted_content.update(json.loads(first_split))
-                parsed['entries'].append(converted_content)
-
-            for row in csv_reader:
-                converted_content: dict = {}
-                for split_content in row:
-                    try:
-                        converted_content.append(json.loads(split_content))
-                    except JSONDecodeError:
-                        converted_content.append(split_content)
-                parsed['entries'].append(converted_content)
-
-            if not run_config.get('header'):
-                parsed['entry_length'] = len(parsed['entries'][0])
-
-        parsed['count'] = len(parsed['entries'])
+                if len(parsed.get('entries')) > 0:
+                    parsed['entry_length'] = len(parsed.get('entries')[0])
+                else:
+                    raise ParserRuntimeError(self.__class__.__name__, 'No content data!')
+        except Exception as err:
+            LOGGER.error(err)
+            raise ParserRuntimeError(self.__class__.__name__, err)
         return CsvObjectParserResponse(**parsed)

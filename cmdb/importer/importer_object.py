@@ -19,13 +19,14 @@ import datetime
 from typing import List
 
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.importer import JsonObjectParser, CsvObjectParser
+from cmdb.importer import JsonObjectParser
+from cmdb.importer.importer_errors import ImportRuntimeError, ParserRuntimeError
 from cmdb.importer.content_types import JSONContent, CSVContent
 from cmdb.importer.importer_base import ObjectImporter
-from cmdb.importer.importer_config import ObjectImporterConfig, FieldMapperMode
+from cmdb.importer.importer_config import ObjectImporterConfig
 from cmdb.importer.importer_response import ImporterObjectResponse
+from cmdb.importer.mapper import Mapping
 from cmdb.importer.parser_object import JsonObjectParserResponse, CsvObjectParserResponse
-from cmdb.importer.parser_response import ObjectParserResponse
 from cmdb.user_management import User
 
 LOGGER = logging.getLogger(__name__)
@@ -33,19 +34,8 @@ LOGGER = logging.getLogger(__name__)
 
 class JsonObjectImporterConfig(ObjectImporterConfig, JSONContent):
     MANUALLY_MAPPING = False
-    DEFAULT_FIELD_MAPPER_VALUE = FieldMapperMode.MATCH
-    DEFAULT_FIELD_MAPPER: DEFAULT_FIELD_MAPPER_VALUE = DEFAULT_FIELD_MAPPER_VALUE.value
-    DEFAULT_MAPPING = {
-        'properties': {
-            'public_id': 'public_id',
-            'active': 'active',
-        },
-        'field_mode': DEFAULT_FIELD_MAPPER,
-        'fields': {
-        }
-    }
 
-    def __init__(self, type_id: int, mapping: dict = None, start_element: int = 0, max_elements: int = 0,
+    def __init__(self, type_id: int, mapping: Mapping = None, start_element: int = 0, max_elements: int = 0,
                  overwrite_public: bool = True, *args, **kwargs):
         super(JsonObjectImporterConfig, self).__init__(type_id=type_id, mapping=mapping, start_element=start_element,
                                                        max_elements=max_elements, overwrite_public=overwrite_public)
@@ -103,19 +93,8 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
 
 class CsvObjectImporterConfig(ObjectImporterConfig, CSVContent):
     MANUALLY_MAPPING = True
-    DEFAULT_FIELD_MAPPER_VALUE = FieldMapperMode.MATCH
-    DEFAULT_FIELD_MAPPER: DEFAULT_FIELD_MAPPER_VALUE = DEFAULT_FIELD_MAPPER_VALUE.value
-    DEFAULT_MAPPING = {
-        'properties': {
-            'public_id': 'public_id',
-            'active': 'active',
-        },
-        'field_mode': DEFAULT_FIELD_MAPPER,
-        'fields': {
-        }
-    }
 
-    def __init__(self, type_id: int, mapping: dict = None, start_element: int = 0, max_elements: int = 0,
+    def __init__(self, type_id: int, mapping: Mapping = None, start_element: int = 0, max_elements: int = 0,
                  overwrite_public: bool = True, *args, **kwargs):
         super(CsvObjectImporterConfig, self).__init__(type_id=type_id, mapping=mapping, start_element=start_element,
                                                       max_elements=max_elements, overwrite_public=overwrite_public)
@@ -129,46 +108,20 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
                                                 object_manager=object_manager, request_user=request_user)
 
     def generate_object(self, entry: dict, *args, **kwargs) -> dict:
-        LOGGER.debug(f'Entry generations - entry content: {entry}')
-        possible_fields: List[dict] = kwargs['fields']
-        mapping: dict = self.config.get_mapping()
-        working_object: dict = {
-            'type_id': self.config.get_type_id(),
-            'fields': [],
-            'author_id': self.request_user.get_public_id(),
-            'version': '1.0.0',
-            'creation_time': datetime.datetime.utcnow()
-        }
-        map_properties = mapping.get('properties')
-
-        for prop in map_properties:
-            working_object = self._map_element(prop, entry, working_object)
-
-        for entry_field in entry.get('fields'):
-            field_exists = next((item for item in possible_fields if item["name"] == entry_field['name']), None)
-            if field_exists:
-                working_object.get('fields').append(entry_field)
 
         return entry
 
-    def _map_element(self, prop, entry: dict, working: dict):
-        mapping: dict = self.config.get_mapping()
-        map_ident: dict = mapping.get('properties')
-        if map_ident:
-            idx_ident = map_ident.get(prop)
-            if idx_ident:
-                value = entry.get(idx_ident)
-                if value:
-                    working.update({prop: value})
-        return working
-
     def start_import(self) -> ImporterObjectResponse:
-        parsed_response: CsvObjectParserResponse = self.parser.parse(self.file)
-        LOGGER.debug(f'Parser Response: {parsed_response.entries}')
-        type_instance_fields: List = self.object_manager.get_type(self.config.get_type_id()).get_fields()
+        try:
+            parsed_response: CsvObjectParserResponse = self.parser.parse(self.file)
+        except ParserRuntimeError as pre:
+            raise ImportRuntimeError(self.__class__.__name__, pre)
 
-        import_objects: [dict] = self._generate_objects(parsed_response, fields=type_instance_fields)
-        LOGGER.debug(import_objects)
+        LOGGER.debug(f'Parser Response: {parsed_response.__dict__}')
+
+        #type_instance_fields: List = self.object_manager.get_type(self.config.get_type_id()).get_fields()
+
+        #import_objects: [dict] = self._generate_objects(parsed_response, fields=type_instance_fields)
         # import_result: ImporterObjectResponse = self._import(import_objects)
 
         return ImporterObjectResponse('Nope')

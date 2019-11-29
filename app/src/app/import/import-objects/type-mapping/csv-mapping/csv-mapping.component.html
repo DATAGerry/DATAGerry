@@ -6,7 +6,7 @@
     <div class="float-right">
       <form [formGroup]="previewIndexSelectionForm">
         <select formControlName="indexSelection" class="custom-select custom-select-sm">
-          <option *ngFor="let _ of parsedData.entries; let idx = index" [value]="idx">
+          <option *ngFor="let _ of parsedData?.entries; let idx = index" [value]="idx">
             Row: {{idx}}
           </option>
         </select>
@@ -33,8 +33,8 @@
           </span>
         </div>
       </td>
-      <th *ngIf="parserConfig.header">{{parsedData.header[idx]}}</th>
-      <th *ngIf="!parserConfig.header">{{idx}}</th>
+      <th *ngIf="parserConfig?.header">{{parsedData?.header[idx]}}</th>
+      <th *ngIf="!parserConfig?.header">{{idx}}</th>
       <td>{{parsedData.entries[previewIndex][idx]}}</td>
     </tr>
     </tbody>

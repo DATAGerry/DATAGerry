@@ -29,7 +29,6 @@ class BaseParser:
     DEFAULT_CONFIG = {}
 
     def __new__(cls, *args, **kwargs):
-        # TODO: INIT validation
         return super(BaseParser, cls).__new__(cls)
 
     def __init__(self, parser_config: dict = None):
@@ -39,7 +38,7 @@ class BaseParser:
     def get_config(self) -> dict:
         return self.parser_config
 
-    def parse(self, file) -> (dict, list, ParserResponse):
+    def parse(self, file) -> ParserResponse:
         raise NotImplementedError
 
 
@@ -49,5 +48,5 @@ class BaseObjectParser(BaseParser):
     def __init__(self, parser_config: dict):
         super(BaseObjectParser, self).__init__(parser_config)
 
-    def parse(self, file) -> (dict, list, ObjectParserResponse):
+    def parse(self, file) -> ObjectParserResponse:
         raise NotImplementedError

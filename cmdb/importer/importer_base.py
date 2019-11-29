@@ -63,11 +63,9 @@ class ObjectImporter(BaseImporter):
             self.object_manager = object_manager
         else:
             from cmdb.utils.system_reader import SystemConfigReader
-            from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+            from cmdb.data_storage.database_manager import DatabaseManagerMongo
             object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
-                MongoConnector(
                     **SystemConfigReader().get_all_values_from_section('Database')
-                )
             ))
             self.object_manager = object_manager
         self.request_user = request_user
