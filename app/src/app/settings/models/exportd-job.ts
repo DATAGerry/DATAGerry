@@ -30,6 +30,6 @@ export class ExportdJob {
   public variables: [];
   public scheduling: any;
   public running: boolean;
+  public state: any;
   // tslint:enable
 }
-

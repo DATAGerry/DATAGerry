@@ -16,7 +16,9 @@
 
 
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
+from cmdb.exportd.exportd_logs.exportd_log import ExportdMetaLog
 
 __COLLECTIONS__ = [
-    ExportdJob
+    ExportdJob,
+    ExportdMetaLog
     ]

@@ -27,7 +27,7 @@ import { Subject } from 'rxjs';
   styleUrls: ['./newest-view.component.scss']
 })
 
-export class NewestViewComponent implements OnInit, OnDestroy {
+export class NewestViewComponent implements OnInit {
 
   public newest: RenderResult[] = [];
   public thColumnsActions: any[] = [];
@@ -38,22 +38,8 @@ export class NewestViewComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.dtOptions = {
-      ordering: true,
-      order: [[4, 'desc']],
-      language: {
-        search: '',
-        searchPlaceholder: 'Filter...'
-      }
-    };
     this.specialService.getNewestObjects().subscribe((newestList: RenderResult[]) => {
         this.newest = newestList;
-      },
-      err => {
-        console.error(err);
-      },
-      () => {
-        this.dtTrigger.next();
       });
 
     this.thColumnsActions = [
@@ -61,9 +47,4 @@ export class NewestViewComponent implements OnInit, OnDestroy {
       { name: 'edit', classValue: 'text-dark ml-1', linkRoute: 'framework/object/edit/', fontIcon: 'edit'},
       { name: 'delete', classValue: 'text-dark ml-1', linkRoute: 'object/', fontIcon: 'trash-alt'}];
   }
-
-  public ngOnDestroy(): void {
-    this.dtTrigger.unsubscribe();
-  }
-
 }

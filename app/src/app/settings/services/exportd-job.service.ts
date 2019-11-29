@@ -16,7 +16,6 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { Injectable } from '@angular/core';
 import { ApiCallService } from '../../services/api-call.service';
 import { ExportdJob } from '../models/exportd-job';
@@ -28,6 +27,7 @@ import { Observable } from 'rxjs';
 export class ExportdJobService {
 
   private servicePrefix: string = 'exportdjob';
+
   private taskList: ExportdJob[];
 
   constructor(private api: ApiCallService) {

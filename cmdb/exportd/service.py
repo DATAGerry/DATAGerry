@@ -23,6 +23,14 @@ import sched
 from threading import Thread
 from datetime import datetime
 from cmdb.exportd.exportd_job.exportd_job_manager import exportd_job_manager
+from cmdb.exportd.exportd_job.exportd_job import ExecuteState
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
+from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
+from cmdb.user_management.user_manager import UserManager
+from cmdb.utils.security import SecurityManager
+
 
 LOGGER = logging.getLogger(__name__)
 scheduler = sched.scheduler(time.time, time.sleep)
@@ -66,79 +74,105 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
         event_param_state = event.get_param("active")
 
         for q in scheduler.queue:
-
-            if event_type == "cmdb.exportd.run_manual" and event_param_id == q.argument[0].get_param("id"):
+            if "cmdb.core.object" in event_type and event_param_type_id == q.argument[0].get_param("type_id"):
                 scheduler.cancel(q)
 
-            elif "cmdb.core.object" in event_type:
-                if event_param_type_id == q.argument[0].get_param("type_id"):
-                    scheduler.cancel(q)
+            elif "cmdb.exportd" in event.get_type() and event_param_id == q.argument[0].get_param("id"):
+                scheduler.cancel(q)
 
-            elif "cmdb.exportd" in event.get_type():
-                if event_param_id == q.argument[0].get_param("id"):
-                    if "cmdb.exportd.deleted" == event_type:
-                        scheduler.cancel(q)
-
-                    elif event_param_state:
-                        scheduler.cancel(q)
-
-        if "cmdb.exportd.added" == event_type or "cmdb.exportd.updated" == event_type:
-            if event_param_state:
-                scheduler.enter(20, 1, self.start_thread, argument=(event,))
-
+        if event_param_state:
+            scheduler.enter(10, 1, self.start_thread, argument=(event,))
         elif "cmdb.exportd.deleted" != event_type and "cmdb.core.object.deleted" != event_type:
-            scheduler.enter(10, 1, self.start_thread, argument=(event, ))
+            scheduler.enter(5, 1, self.start_thread, argument=(event, ))
 
     @staticmethod
     def start_thread(event):
         event_type = event.get_type()
         # start new threads
-        if event_type == "cmdb.exportd.run_manual":
-            new_thread = ExportdThread(event.get_param("id"))
+
+        if "cmdb.exportd.run_manual" == event_type:
+            new_thread = ExportdThread(event=event, state=True)
             new_thread.start()
 
         elif "cmdb.core.object" in event_type:
-            new_thread = ExportdEventThread(event.get_param("type_id"))
+            new_thread = ExportdThread(event=event, state=False)
             new_thread.start()
 
         elif "cmdb.exportd" in event_type:
-            new_thread = ExportdThread(event.get_param("id"))
+            new_thread = ExportdThread(event=event, state=event.get_param("active"))
             new_thread.start()
-
-
-class ExportdEventThread(Thread):
-
-    def __init__(self, type_id):
-        super(ExportdEventThread, self).__init__()
-        self.type_id = type_id
-
-    def run(self):
-        for obj in exportd_job_manager.get_job_by_event_based(True):
-            if next((item for item in obj.get_sources() if item["type_id"] == self.type_id), None):
-                if obj.get_active() and obj.scheduling["event"]["active"]:
-                    job = cmdb.exportd.exporter_base.ExportJob(obj)
-                    job.execute()
 
 
 class ExportdThread(Thread):
 
-    def __init__(self, job_id):
+    def __init__(self, event, state=False):
         super(ExportdThread, self).__init__()
-        self.job_id = job_id
+        self.job = None
+        self.job_id = event.get_param("id")
+        self.type_id = event.get_param("type_id")
+        self.user_id = event.get_param("user_id")
+        self.event = event
+        self.is_active = state
+        self.exception_handling = None
+
+        scr = SystemConfigReader()
+        database_options = scr.get_all_values_from_section('Database')
+        self.__dbm = DatabaseManagerMongo(
+            **database_options
+        )
+        self.log_manager = cmdb.exportd.exportd_logs.exportd_log_manager.ExportdLogManager(
+            database_manager=self.__dbm)
+        self.user_manager = UserManager(database_manager=self.__dbm,
+                                        security_manager=SecurityManager(self.__dbm))
 
     def run(self):
-        obj = exportd_job_manager.get_job(self.job_id)
+        try:
+            if self.type_id:
+                for obj in exportd_job_manager.get_job_by_event_based(True):
+                    if next((item for item in obj.get_sources() if item["type_id"] == self.type_id), None):
+                        if obj.get_active() and obj.scheduling["event"]["active"]:
+                            self.job = obj
+                            self.worker()
+            elif self.is_active:
+                self.job = exportd_job_manager.get_job(self.job_id)
+                self.worker()
+        except Exception as ex:
+            LOGGER.error(ex)
+            return ex
 
-        # set job is running for UI
-        obj.running = True
-        obj.last_execute_date = datetime.utcnow()
-        exportd_job_manager.update_job(obj)
+    def worker(self):
+        try:
+            # update job for UI
+            self.job.state = ExecuteState.RUNNING.name
+            self.job.last_execute_date = datetime.utcnow()
 
-        # execute Exportd job
-        job = cmdb.exportd.exporter_base.ExportJob(obj)
-        job.execute()
+            exportd_job_manager.update_job(self.job, self.user_manager.get_user(self.user_id), event_start=False)
+            # execute Exportd job
+            job = cmdb.exportd.exporter_base.ExportJob(self.job)
+            job.execute()
 
-        # set job is running for UI
-        obj.running = False
-        exportd_job_manager.update_job(obj)
+        except Exception as err:
+            LOGGER.error(err.__dict__)
+            self.exception_handling = err.__dict__
+            return err
+        finally:
+            # Generate new insert log
+            try:
+                msg = 'Successful' if not self.exception_handling else self.exception_handling
+                log_params = {
+                    'job_id': self.job.get_public_id(),
+                    'user_id': self.user_id,
+                    'user_name': self.user_manager.get_user(self.user_id).get_name(),
+                    'event': self.event.get_type(),
+                    'message': msg,
+                }
+                self.log_manager.insert_log(action=LogAction.EXECUTE, log_type=ExportdJobLog.__name__, **log_params)
+            except LogManagerInsertError as err:
+                LOGGER.error(err)
+
+            # update job for UI
+            self.job.state = ExecuteState.SUCCESSFUL.name if not self.exception_handling else ExecuteState.FAILED.name
+            exportd_job_manager.update_job(self.job, self.user_manager.get_user(self.user_id), event_start=False)
+
+
 

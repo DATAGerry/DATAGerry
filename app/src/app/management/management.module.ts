@@ -21,13 +21,13 @@ import { CommonModule } from '@angular/common';
 
 import { ManagementRoutingModule } from './management-routing.module';
 import { UserService } from './services/user.service';
-import { UserViewComponent } from './users/user-view/user-view.component';
 import { LayoutModule } from '../layout/layout.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { GroupService } from './services/group.service';
+import { ManagementComponent } from './management.component';
 
 @NgModule({
-  declarations: [],
+  declarations: [ManagementComponent],
   imports: [
     CommonModule,
     ManagementRoutingModule,

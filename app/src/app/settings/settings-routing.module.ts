@@ -53,7 +53,7 @@ const routes: Routes = [
     data: {
       breadcrumb: 'Exportd Job'
     },
-    loadChildren: () => import('./task-settings/task-settings.module').then(m => m.TaskSettingsModule)
+    loadChildren: () => import('./exportd-job-settings/exportd-job-settings.module').then(m => m.ExportdJobSettingsModule)
   }
 ];
 

@@ -25,13 +25,13 @@ import { ObjectService } from '../../services/object.service';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { FileService } from '../../../export/export-objects/export-objects/export-objects.service';
 import { CmdbMode } from '../../modes.enum';
 import { FileSaverService } from 'ngx-filesaver';
 import { DatePipe } from '@angular/common';
 import { CmdbType } from '../../models/cmdb-type';
 import { TypeService } from '../../services/type.service';
 import { RenderResult } from '../../models/cmdb-render';
+import { FileService } from '../../../export/export.service';
 
 @Component({
   selector: 'cmdb-object-list',

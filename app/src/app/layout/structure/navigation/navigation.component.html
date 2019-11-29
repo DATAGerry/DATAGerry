@@ -71,8 +71,7 @@
             <a class="dropdown-item" *permissionLink="'base.import.object.*'" [routerLink]="['/import/object']">
               <fa-icon icon="file-import"></fa-icon>
               Import Objects</a>
-            <a class="dropdown-item" *permissionLink="'base.export.object.*'"
-               [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']">
+            <a class="dropdown-item" *permissionLink="'base.export.object.*'" [routerLink]="['/export/objects']">
               <fa-icon icon="file-export"></fa-icon>
               Export Objects</a>
           </div>
@@ -86,6 +85,10 @@
           <div class="dropdown-menu dropdown-menu-right">
             <div class="dropdown-header">Task Managment</div>
             <a class="dropdown-item" routerLink="/settings/exportdjob">Exportd Job Settings</a>
+            <div class="dropdown-header">Logs</div>
+            <a class="dropdown-item" [routerLink]="['/settings/logs/exportdjobs']">
+              <fa-icon icon="clipboard-list"></fa-icon>
+              Exportd Job Logs</a>
           </div>
         </li>
         <!-- nav System -->
@@ -98,9 +101,9 @@
             <div class="dropdown-header" *permissionLink="['base.system.view', 'base.system.reload']">System</div>
             <a class="dropdown-item" *permissionLink="'base.system.view'" [routerLink]="['/settings/system']">
               <i class="fas fa-info-circle"></i> System Information</a>
-            <a class="dropdown-item" *permissionLink="'base.system.view'"
-               [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']">
-              <i class="fas fa-server"></i> Server Information</a>
+<!--            <a class="dropdown-item" *permissionLink="'base.system.view'"-->
+<!--               [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']">-->
+<!--              <i class="fas fa-server"></i> Server Information</a>-->
             <a class="dropdown-item" *permissionLink="'base.system.reload'"
                [routerLink]="['/settings/system/properties']">
               <i class="fas fa-database"></i> Database Properties

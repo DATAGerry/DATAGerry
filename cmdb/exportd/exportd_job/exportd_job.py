@@ -15,11 +15,20 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
+from enum import Enum
 
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
     CMDBError = Exception
+
+
+class ExecuteState(Enum):
+    SUCCESSFUL = 0
+    INFO = 1
+    WARNING = 2
+    FAILED = 3
+    RUNNING = 4
 
 
 class ExportdJob(JobManagementBase):
@@ -31,9 +40,9 @@ class ExportdJob(JobManagementBase):
         'name',
     ]
 
-    def __init__(self, name, label, description, active,
+    def __init__(self, name, label, description, active, author_id,
                  last_execute_date, sources, destination,
-                 variables, scheduling, **kwargs):
+                 variables, scheduling, state=None, **kwargs):
         """
         Args:
             name: name of this job
@@ -47,12 +56,13 @@ class ExportdJob(JobManagementBase):
         self.label = label
         self.description = description
         self.active = active
+        self.author_id = author_id
         self.last_execute_date = last_execute_date
         self.sources = sources
         self.destination = destination
         self.variables = variables
         self.scheduling = scheduling
-        self.running = False
+        self.state = state or 0
         super(ExportdJob, self).__init__(**kwargs)
 
     def get_public_id(self) -> int:
@@ -139,6 +149,17 @@ class ExportdJob(JobManagementBase):
             list: all scheduling
         """
         return self.scheduling
+
+    def get_state(self):
+        """
+        Get type of executation of the job
+        Returns:
+            str:
+        """
+        return self.state
+
+    def get_author_id(self):
+        return self.author_id
 
 
 class NoPublicIDError(CMDBError):

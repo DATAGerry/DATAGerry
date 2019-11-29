@@ -1,6 +1,10 @@
 import { Component, OnInit, Output } from '@angular/core';
 import { TypeService } from '../../framework/services/type.service';
 import { CmdbType } from '../../framework/models/cmdb-type';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { DatePipe } from '@angular/common';
+import { FileSaverService } from 'ngx-filesaver';
+import { FileService } from '../export.service';
 
 @Component({
   selector: 'cmdb-export-types',
@@ -10,8 +14,16 @@ import { CmdbType } from '../../framework/models/cmdb-type';
 export class ExportTypesComponent implements OnInit {
 
   public typeList: CmdbType[] = [];
+  public formatList: any[] = [{ id: 0, label: 'json', icon: 'file-code'}];
+  public formExport: FormGroup;
+  public isSubmitted = false;
 
-  constructor(private typeService: TypeService) {
+  constructor(private typeService: TypeService, private exportService: FileService,
+              private datePipe: DatePipe, private fileSaverService: FileSaverService ) {
+    this.formExport = new FormGroup({
+      type: new FormControl( null, Validators.required),
+      format: new FormControl(null, Validators.required)
+    });
   }
 
   public ngOnInit(): void {
@@ -20,8 +32,32 @@ export class ExportTypesComponent implements OnInit {
     });
   }
 
-  public selectExportTypes(value) {
-    console.log(value);
+  get type() {
+    return this.formExport.get('type');
+  }
+
+  get format() {
+    return this.formExport.get('format');
+  }
+
+  public export() {
+    this.isSubmitted = true;
+    if (!this.formExport.valid) {
+      return false;
+    }
+
+    const typeID = this.formExport.get('type').value;
+    const fileExtension: any = this.formExport.get('format').value;
+
+    if (fileExtension != null && typeID != null) {
+      this.exportService.callExportTypeRoute('/export/type/' + typeID.toString())
+        .subscribe(res => this.downLoadFile(res));
+    }
+  }
+
+  public downLoadFile(data: any) {
+    const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
+    this.fileSaverService.save(data.body, timestamp + '.json');
   }
 
 }

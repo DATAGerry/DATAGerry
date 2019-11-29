@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { ExportTypesComponent } from './export-types/export-types.component';
 import { ExportComponent } from './export.component';
-import { ExportObjectsComponent } from './export-objects/export-objects/export-objects.component';
+import { ExportObjectsComponent } from './export-objects/export-objects.component';
 import { PermissionGuard } from '../auth/guards/permission.guard';
 import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
 
