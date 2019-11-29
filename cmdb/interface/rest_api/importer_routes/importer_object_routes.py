@@ -23,14 +23,15 @@ from werkzeug.utils import secure_filename
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.importer import load_parser_class, load_importer_class, __OBJECT_IMPORTER__, __OBJECT_PARSER__, \
-    __OBJECT_IMPORTER_CONFIG__, load_importer_config_class
+    __OBJECT_IMPORTER_CONFIG__, load_importer_config_class, ParserLoadError, ImporterLoadError
+from cmdb.importer.importer_errors import ImportRuntimeError, ParserRuntimeError
 from cmdb.importer.importer_config import ObjectImporterConfig
 from cmdb.importer.importer_response import ImporterObjectResponse
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.interface.rest_api.import_routes import importer_blueprint
 from cmdb.interface.route_utils import NestedBlueprint, make_response, insert_request_user
-from cmdb.interface.rest_api.importer_routes.importer_route_utils import get_file_in_request, get_element_from_data_request, \
-    generate_parsed_output
+from cmdb.interface.rest_api.importer_routes.importer_route_utils import get_file_in_request, \
+    get_element_from_data_request, generate_parsed_output
 from cmdb.user_management import User
 
 LOGGER = logging.getLogger(__name__)
@@ -89,23 +90,25 @@ def parse_objects():
     request_file: FileStorage = get_file_in_request('file', request.files)
     # Load parser config
     parser_config: dict = get_element_from_data_request('parser_config', request) or {}
-    LOGGER.debug(f'Parser config: {parser_config}')
-    parsed_output = generate_parsed_output(request_file, parser_config).output()
-
+    try:
+        parsed_output = generate_parsed_output(request_file, parser_config).output()
+    except ParserRuntimeError as pre:
+        return abort(500, pre.message)
     return make_response(parsed_output)
 
 
 @importer_object_blueprint.route('/', methods=['POST'])
 @insert_request_user
 def import_objects(request_user: User):
+    # Check if file exists
     if not request.files:
         return abort(400, 'No import file was provided')
-    # Check if file exists
     request_file: FileStorage = get_file_in_request('file', request.files)
 
     filename = secure_filename(request_file.filename)
     working_file = f'/tmp/{filename}'
     request_file.save(working_file)
+
     # Load parser config
     parser_config: dict = get_element_from_data_request('parser_config', request) or {}
     if parser_config == {}:
@@ -123,22 +126,36 @@ def import_objects(request_user: User):
         return abort(404, err.message)
 
     # Load parser
-    parser_class = load_parser_class('object', request_file.content_type)
+    try:
+        parser_class = load_parser_class('object', request_file.content_type)
+    except ParserLoadError as ple:
+        return abort(406, ple.message)
     parser = parser_class(parser_config)
 
     LOGGER.info(f'Parser {parser_class} was loaded')
 
     # Load importer config
-    importer_config_class = load_importer_config_class('object', request_file.content_type)
+    try:
+        importer_config_class = load_importer_config_class('object', request_file.content_type)
+    except ImporterLoadError as ile:
+        return abort(406, ile.message)
     importer_config = importer_config_class(**importer_config_request)
 
     # Load importer
-    importer_class = load_importer_class('object', request_file.content_type)
+    try:
+        importer_class = load_importer_class('object', request_file.content_type)
+    except ImporterLoadError as ile:
+        return abort(406, ile.message)
     importer = importer_class(working_file, importer_config, parser, object_manager, request_user)
-
     LOGGER.info(f'Importer {importer_class} was loaded')
 
-    import_response: ImporterObjectResponse = importer.start_import()
+    try:
+        import_response: ImporterObjectResponse = importer.start_import()
+    except ImportRuntimeError as ire:
+        LOGGER.error(f'Error while importing objects: {ire.message}')
+        return abort(500, ire.message)
 
+    # close request file
     request_file.close()
+
     return make_response(import_response)
