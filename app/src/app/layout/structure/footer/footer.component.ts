@@ -32,7 +32,6 @@ export class FooterComponent implements OnInit, OnDestroy {
   public userTokenExpire: number = 0;
   public timeout: string = '';
   private timer: number;
-  public devMode: boolean = isDevMode();
 
   public constructor(private connectionService: ConnectionService, private authService: AuthService) {
     this.docUrl = `${ connectionService.currentConnection }/docs`;
