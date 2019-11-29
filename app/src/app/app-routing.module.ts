@@ -100,19 +100,16 @@ const routes: Routes = [
       breadcrumb: 'Info'
     },
     loadChildren: () => import('./info/info.module').then(m => m.InfoModule)
-  }
-];
-
-if (isDevMode()) {
-  routes.push({
+  },
+  {
     path: 'debug',
     canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Debug'
     },
     loadChildren: () => import('./debug/debug.module').then(m => m.DebugModule)
-  });
-}
+  }
+];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
