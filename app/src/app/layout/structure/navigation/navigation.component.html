@@ -98,16 +98,6 @@
             <fa-icon icon="cogs"></fa-icon>
           </a>
           <div class="dropdown-menu dropdown-menu-right">
-            <div class="dropdown-header" *permissionLink="['base.system.view', 'base.system.reload']">System</div>
-            <a class="dropdown-item" *permissionLink="'base.system.view'" [routerLink]="['/settings/system']">
-              <i class="fas fa-info-circle"></i> System Information</a>
-<!--            <a class="dropdown-item" *permissionLink="'base.system.view'"-->
-<!--               [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']">-->
-<!--              <i class="fas fa-server"></i> Server Information</a>-->
-            <a class="dropdown-item" *permissionLink="'base.system.reload'"
-               [routerLink]="['/settings/system/properties']">
-              <i class="fas fa-database"></i> Database Properties
-            </a>
             <div class="dropdown-header"
                  *permissionLink="['base.user-management.user.view', 'base.user-management.group.view']">
               User Management
@@ -153,9 +143,22 @@
             <i class="far fa-question-circle"></i>
           </a>
           <div class="dropdown-menu dropdown-menu-right dropdown">
+            <div class="dropdown-header" *permissionLink="['base.system.view', 'base.system.reload']">System</div>
+            <a class="dropdown-item" *permissionLink="'base.system.view'" [routerLink]="['/settings/system']">
+              <i class="fas fa-info-circle"></i> System Information</a>
+            <!--            <a class="dropdown-item" *permissionLink="'base.system.view'"-->
+            <!--               [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']">-->
+            <!--              <i class="fas fa-server"></i> Server Information</a>-->
+            <a class="dropdown-item" *permissionLink="'base.system.reload'"
+               [routerLink]="['/settings/system/properties']">
+              <i class="fas fa-database"></i> Database Properties
+            </a>
             <div class="dropdown-header">Help</div>
             <a class="dropdown-item"[routerLink]="['/info/about']">
-              <i class="fas fa-cube"></i> About
+              <i class="fas fa-cube"></i> About DATAGERRY
+            </a>
+            <a class="dropdown-item" href="https://docs.datagerry.com/" target="_blank">
+              <i class="fas fa-book"></i> Documentation
             </a>
             <a class="dropdown-item" [routerLink]="['/info/license']">
               <i class="fas fa-lock-open"></i> License
