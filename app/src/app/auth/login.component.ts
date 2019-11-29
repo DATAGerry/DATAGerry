@@ -58,6 +58,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   public onSubmit() {
     this.submitted = true;
+    this.render.addClass(document.getElementById('login-button'), 'button-progress');
     this.authenticationService.login(this.loginForm.controls.username.value, this.loginForm.controls.password.value)
       .pipe(first())
       .subscribe(
@@ -65,6 +66,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           this.router.navigate(['/']);
         },
         async error => {
+          this.render.removeClass(document.getElementById('login-button'), 'button-progress');
           this.render.addClass(document.getElementById('login-logo'), 'shake');
           this.loginForm.reset();
           await this.delay(1000);

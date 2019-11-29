@@ -20,11 +20,13 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { DashboardComponent } from './dashboard.component';
 import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
+import { AuthGuard } from '../auth/guards/auth.guard';
 
 const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
+    canActivate: [AuthGuard],
     component: DashboardComponent
   },
 ];

@@ -18,32 +18,16 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LoginComponent } from './login.component';
-import { RouterModule } from '@angular/router';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { AuthRoutingModule } from './auth-routing.module';
-import { InlineSVGModule } from 'ng-inline-svg';
-import { PermissionLinkDirective } from './directives/permission-link.directive';
-import { PermissionGuard } from './guards/permission.guard';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { BasicAuthInterceptor } from './interceptors/basic-auth.interceptor';
+import { ErrorMessageComponent } from './error-message.component';
+import { ErrorMessageContainerComponent } from './error-message-container.component';
 
 @NgModule({
-  declarations: [LoginComponent, PermissionLinkDirective],
+  declarations: [ErrorMessageComponent, ErrorMessageContainerComponent],
   exports: [
-    PermissionLinkDirective
+    ErrorMessageContainerComponent
   ],
   imports: [
-    CommonModule,
-    FormsModule,
-    RouterModule,
-    AuthRoutingModule,
-    ReactiveFormsModule,
-    InlineSVGModule,
-  ],
-  providers: [
-    PermissionGuard
+    CommonModule
   ]
 })
-export class AuthModule {
-}
+export class ErrorMessageModule { }

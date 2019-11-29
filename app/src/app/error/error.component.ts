@@ -16,26 +16,54 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  ComponentFactory,
+  ComponentFactoryResolver, ComponentRef,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PreviousRouteService } from '../services/previous-route.service';
+import { Subscription } from 'rxjs';
+import { errorComponents } from './error.list';
 
 @Component({
-  selector: 'cmdb-error',
   templateUrl: './error.component.html',
   styleUrls: ['./error.component.scss']
 })
-export class ErrorComponent implements OnInit {
+export class ErrorComponent implements OnInit, OnDestroy {
+
+  @ViewChild('errorContainer', { read: ViewContainerRef, static: true }) public errorContainer;
+  private componentRef: ComponentRef<any>;
 
   public previousUrl: string;
 
+  private statusCodeSubscription: Subscription;
+  public statusCode: number = undefined;
 
-  constructor(private route: ActivatedRoute, private prevRouteService: PreviousRouteService) {
 
+  constructor(private route: ActivatedRoute, private resolver: ComponentFactoryResolver,
+              private prevRouteService: PreviousRouteService) {
+    this.statusCodeSubscription = this.route.params.subscribe(params => this.statusCode = params.statusCode);
   }
 
   public ngOnInit(): void {
+    this.createErrorComponent(this.statusCode);
     this.previousUrl = this.prevRouteService.getPreviousUrl();
+  }
+
+  private createErrorComponent(statusCode: number) {
+    // const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(errorComponents[statusCode]);
+    // this.componentRef = this.errorContainer.createComponent(factory);
+  }
+
+  public ngOnDestroy(): void {
+    this.errorContainer.clear();
+    this.componentRef.destroy();
+    this.statusCodeSubscription.unsubscribe();
   }
 
 }

@@ -20,7 +20,10 @@ import { Injectable } from '@angular/core';
 import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { ErrorModalService } from '../services/error-modal.service';
+import { ErrorMessageService } from '../services/error-message.service';
+import { AuthService } from '../../auth/services/auth.service';
+import { Router } from '@angular/router';
+import { BackendHttpError } from '../models/custom.error';
 
 @Injectable()
 export class HttpErrorInterceptor implements HttpInterceptor {
@@ -39,6 +42,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
   private readonly INFO_ERRORS: number[] = [
     this.BAD_REQUEST,
     this.FORBIDDEN,
+    this.NOT_FOUND,
     this.METHOD_NOT_ALLOWED,
     this.NOT_ACCEPTABLE,
     this.PAGE_GONE,
@@ -50,20 +54,20 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     this.INTERNAL_SERVER_ERROR
   ];
 
-  constructor(private errorService: ErrorModalService) {
+  constructor(private router: Router, private errorService: ErrorMessageService, private authService: AuthService) {
   }
 
   public intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(catchError((error: HttpErrorResponse) => {
       const statusCode = error.status;
-      console.log(statusCode);
+
       if (this.INFO_ERRORS.indexOf(statusCode) !== -1) {
-        console.log(error.error);
-        this.errorService.show(error.error);
+        this.errorService.add(error.error as BackendHttpError);
       } else if (this.REDIRECT_ERRORS.indexOf(statusCode) !== -1) {
-        // TODO redirect page
-      } else {
-        // TODO handle special error
+        if (statusCode === this.UNAUTHORIZED) {
+          this.authService.logout();
+          this.router.navigate(['/auth/login/']);
+        }
       }
       return throwError(error);
     }));

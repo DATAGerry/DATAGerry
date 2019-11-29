@@ -16,29 +16,10 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { ErrorComponent } from './error.component';
-import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
-
-const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    component: ErrorComponent
-  },
-  {
-    path: ':statusCode',
-    data: {
-      breadcrumb: 'Error'
-    },
-    component: ErrorComponent
-  }
-];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
-  exports: [RouterModule]
-})
-export class ErrorRoutingModule {
+export class BackendHttpError {
+  public status: number;
+  public response: string;
+  public description: string;
+  public message: string;
+  public joke?: string;
 }

@@ -22,22 +22,23 @@ import { CommonModule } from '@angular/common';
 import { ErrorRoutingModule } from './error-routing.module';
 import { ErrorComponent } from './error.component';
 import { LayoutModule } from '../layout/layout.module';
-import { ErrorModalService } from './services/error-modal.service';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { HttpErrorInterceptor } from './interceptors/http-error.interceptor.tx';
-import { ErrorModalComponent } from './modals/error-modal.component';
+import { ErrorMessageService } from './services/error-message.service';
+import { ErrorForbiddenComponent } from './components/error-forbidden/error-forbidden.component';
+import { DefaultErrorComponent } from './toasts/default-error/default-error.component';
 
 @NgModule({
-  entryComponents: [ErrorModalComponent],
-  declarations: [ErrorComponent, ErrorModalComponent],
+  declarations: [ErrorComponent, ErrorForbiddenComponent, DefaultErrorComponent],
+  entryComponents: [DefaultErrorComponent, ErrorForbiddenComponent],
   imports: [
     CommonModule,
-    ErrorRoutingModule,
-    LayoutModule
+    LayoutModule,
+    ErrorRoutingModule
+  ],
+  exports: [
+    DefaultErrorComponent
   ],
   providers: [
-    ErrorModalService,
-    { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true }
+    ErrorMessageService
   ]
 })
 export class ErrorModule {

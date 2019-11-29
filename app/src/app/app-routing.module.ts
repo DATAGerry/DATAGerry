@@ -16,11 +16,22 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
+import { NgModule, isDevMode } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from './auth/guards/auth.guard';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpErrorInterceptor } from './error/interceptors/http-error.interceptor.tx';
 
 const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    canActivateChild: [AuthGuard],
+    data: {
+      breadcrumb: 'Dashboard'
+    },
+    loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
+  },
   {
     path: 'connect',
     loadChildren: () => import('./connect/connect.module').then(m => m.ConnectModule)
@@ -30,13 +41,9 @@ const routes: Routes = [
     loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
   },
   {
-    path: '',
-    pathMatch: 'full',
+    path: 'errors',
     canActivate: [AuthGuard],
-    data: {
-      breadcrumb: 'Dashboard'
-    },
-    loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
+    loadChildren: () => import('./error/error.module').then(m => m.ErrorModule)
   },
   {
     path: 'search',
@@ -93,16 +100,19 @@ const routes: Routes = [
       breadcrumb: 'Info'
     },
     loadChildren: () => import('./info/info.module').then(m => m.InfoModule)
-  },
-  {
-    path: 'error',
-    loadChildren: () => import('./error/error.module').then(m => m.ErrorModule)
-  },
-  {
-    path: '**',
-    redirectTo: 'error/404'
   }
 ];
+
+if (isDevMode()) {
+  routes.push({
+    path: 'debug',
+    canActivate: [AuthGuard],
+    data: {
+      breadcrumb: 'Debug'
+    },
+    loadChildren: () => import('./debug/debug.module').then(m => m.DebugModule)
+  });
+}
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

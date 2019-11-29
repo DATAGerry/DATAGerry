@@ -38,6 +38,9 @@ export class PermissionService {
   }
 
   public get currentUserRights(): string[] {
+    if (this.currentUserRightListSubject.value == null) {
+      return [];
+    }
     return this.currentUserRightListSubject.value;
   }
 
@@ -66,7 +69,7 @@ export class PermissionService {
   public hasExtendedRight(rightName: string): boolean {
     let status = false;
     rightName = rightName.substring(0, rightName.lastIndexOf('.'));
-    if (this.hasRight(`${rightName}.*`)) {
+    if (this.hasRight(`${ rightName }.*`)) {
       status = true;
     } else {
       if (rightName === 'base') {

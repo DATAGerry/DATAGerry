@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, isDevMode, OnDestroy, OnInit } from '@angular/core';
 import { ConnectionService } from '../../../connect/connection.service';
 import { AuthService } from '../../../auth/services/auth.service';
 
@@ -27,15 +27,16 @@ import { AuthService } from '../../../auth/services/auth.service';
 })
 export class FooterComponent implements OnInit, OnDestroy {
 
-  public constructor(private connectionService: ConnectionService, private authService: AuthService) {
-    this.docUrl = `${ connectionService.currentConnection }/docs`;
-  }
-
   public today: number = Date.now();
   public docUrl: string = 'localhost';
   public userTokenExpire: number = 0;
   public timeout: string = '';
   private timer: number;
+  public devMode: boolean = isDevMode();
+
+  public constructor(private connectionService: ConnectionService, private authService: AuthService) {
+    this.docUrl = `${ connectionService.currentConnection }/docs`;
+  }
 
   public static convertToDate(secs) {
     const secsInt = parseInt(secs, 10);

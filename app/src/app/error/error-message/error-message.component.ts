@@ -16,29 +16,30 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { ErrorComponent } from './error.component';
-import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
+import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
+import { BackendHttpError } from '../models/custom.error';
 
-const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    component: ErrorComponent
+@Component({
+  selector: 'cmdb-error-message',
+  templateUrl: './error-message.component.html',
+  styleUrls: ['./error-message.component.scss'],
+  encapsulation: ViewEncapsulation.None,
+  // tslint:disable-next-line:no-host-metadata-property
+  host: {
+    role: 'alert',
+    '[attr.aria-live]': 'ariaLive',
+    'aria-atomic': 'true',
+    '[class.toast]': 'true',
+    '[class.show]': 'true',
   },
-  {
-    path: ':statusCode',
-    data: {
-      breadcrumb: 'Error'
-    },
-    component: ErrorComponent
-  }
-];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
-  exports: [RouterModule]
 })
-export class ErrorRoutingModule {
+export class ErrorMessageComponent {
+
+  @Input() public error: BackendHttpError = undefined;
+  @Output() public hideOut = new EventEmitter<void>();
+
+  public onHide() {
+    this.hideOut.emit();
+  }
+
 }

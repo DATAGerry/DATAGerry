@@ -16,27 +16,8 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Injectable } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ErrorModalComponent } from '../modals/error-modal.component';
+import { ErrorForbiddenComponent } from './components/error-forbidden/error-forbidden.component';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class ErrorModalService {
-  public errors: any[];
-
-  public constructor(private modalService: NgbModal) {
-    this.errors = [];
-  }
-
-  public show(error: any): void {
-    const modalRef = this.modalService.open(ErrorModalComponent);
-    this.errors.push(error);
-  }
-
-  public remove(error: any): void {
-    this.errors = this.errors.filter(err => err !== error);
-  }
-
-}
+export const errorComponents: { [code: number]: any } = {
+  403: ErrorForbiddenComponent,
+};
