@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import xml.etree.ElementTree as ET
+import requests
 from cmdb.exportd.exporter_base import ExternalSystem, ExportJobConfigException, ExportVariable
 
 
@@ -69,7 +70,6 @@ class ExternalSystemOpenNMS(ExternalSystem):
         {"name": "restpassword", "required": True, "description": "OpenNMS REST password", "default": "admin"},
         {"name": "requisition", "required": True, "description": "OpenNMS requisition to use", "default": "cmdb"},
         {"name": "services", "required": False, "description": "name of services to bind on each node sepetated by space", "default": "ICMP SNMP"},
-        {"name": "sslVerify", "required": False, "description": "disable SSL peer verification", "default": "false"},
         {"name": "rescanExisting", "required": False, "description": "set rescanExisting flag for OpenNMS import", "default": "dbOnly"},
         {"name": "exportSnmpConfig", "required": False, "description": "also export SNMP configuration for nodes", "default": "false"},
         {"name": "exportSnmpConfigRetries", "required": False, "description": "export SNMP configuration for nodes: set SNMP retries", "default": "1"},
@@ -78,14 +78,26 @@ class ExternalSystemOpenNMS(ExternalSystem):
 
     def __init__(self, destination_parms, export_vars):
         super(ExternalSystemOpenNMS, self).__init__(destination_parms, export_vars)
-        # ToDo: init destination vars
-        self.__requisition = self._destination_parms.get("requisition", None)
+        # ToDo: init destination vars; get default values from parameters
+        self.__resturl = self._destination_parms.get("resturl", "http://127.0.0.1:8980/opennms/rest")
+        self.__restuser = self._destination_parms.get("restuser", "admin")
+        self.__restpassword = self._destination_parms.get("restpassword", "admin")
+        self.__requisition = self._destination_parms.get("requisition", "cmdb")
         self.__services = self._destination_parms.get("services", "ICMP SNMP").split()
         if not (self.__requisition):
             raise ExportJobConfigException()
+        self.__snmp_export = False
+        if self._destination_parms.get("exportSnmpConfig", "false") in ["True", "true"]:
+            self.__snmp_export = True
+        self.__snmp_retries = self._destination_parms.get("exportSnmpConfigRetries", "1")
+        self.__snmp_timeout = self._destination_parms.get("exportSnmpConfigTimeout", "2000")
+
 
 
     def prepare_export(self):
+        # check connection to OpenNMS
+        if not self.__onms_check_connection():
+            raise Exception("can't connect to OpenNMS")
         # init XML object for OpenNMS REST API
         attributes = {}
         attributes["foreign-source"] = self.__requisition
@@ -140,7 +152,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
             for service in self.__services:
                 service_xml_attr = {}
                 service_xml_attr["service-name"] = str(service)
-                service_xml = ET.SubElement(interface_xml, "monitored-service", service_xml_attr)
+                ET.SubElement(interface_xml, "monitored-service", service_xml_attr)
         # XML: categories
         for category in categories:
             cat_xml_attr = {}
@@ -155,9 +167,87 @@ class ExternalSystemOpenNMS(ExternalSystem):
         # XML: append structure
         self.__xml.append(node_xml)
 
+        # update SNMP config if option is set
+        if self.__snmp_export:
+            snmp_ip = str(self._export_vars.get("ip", ExportVariable("ip", "127.0.0.1")).get_value(cmdb_object))
+            snmp_community = str(self._export_vars.get("snmp_community", ExportVariable("snmp_community", "public")).get_value(cmdb_object))
+            snmp_version = str(self._export_vars.get("snmp_version", ExportVariable("snmp_version", "v2c")).get_value(cmdb_object))
+            self.__onms_update_snmpconf_v12(snmp_ip, snmp_community, snmp_version)
+
 
     def finish_export(self):
-        print(ET.tostring(self.__xml, encoding="unicode", method="xml"))
+        self.__onms_update_requisition()
+        self.__onms_sync_requisition()
+
+    def __onms_check_connection(self):
+        url = "{}/info".format(self.__resturl)
+        try:
+            response = requests.get(url, auth=(self.__restuser, self.__restpassword), verify=False)
+            if response.status_code <= 202:
+                return True
+        except:
+            pass
+        return False
+
+    def __onms_update_requisition(self):
+        url = "{}/requisitions".format(self.__resturl)
+        data = ET.tostring(self.__xml, encoding="unicode", method="xml")
+        headers = {
+            "Content-Type": "application/xml"
+        }
+        try:
+            response = requests.post(url, data=data, headers=headers, auth=(self.__restuser, self.__restpassword),
+                                    verify=False)
+            if response.status_code > 202:
+                print("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
+                return False
+        except:
+            print("can't connect to OpenNMS")
+            return False
+        return True
+
+    def __onms_sync_requisition(self):
+        url = "{}/requisitions/{}/import".format(self.__resturl, self.__requisition)
+        try:
+            response = requests.put(url, data="", auth=(self.__restuser, self.__restpassword), verify=False)
+            if response.status_code > 202:
+                print("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
+                return False
+        except:
+            print("can't connect to OpenNMS")
+            return False
+        return True
+
+    def __onms_update_snmpconf_v12(self, ip, community, version="v2c", port="161"):
+        # create XML
+        snmp_config_xml = ET.Element("snmp-info")
+        snmp_community_xml = ET.SubElement(snmp_config_xml, "readCommunity")
+        snmp_community_xml.text = community
+        snmp_port_xml = ET.SubElement(snmp_config_xml, "port")
+        snmp_port_xml.text = port
+        snmp_retries_xml = ET.SubElement(snmp_config_xml, "retries")
+        snmp_retries_xml.text = self.__snmp_retries
+        snmp_timeout_xml = ET.SubElement(snmp_config_xml, "timeout")
+        snmp_timeout_xml.text = self.__snmp_timeout
+        snmp_version = ET.SubElement(snmp_config_xml, "version")
+        snmp_version.text = version
+        
+        # send XML to OpenNMS
+        url = "{}/snmpConfig/{}".format(self.__resturl, ip)
+        data = ET.tostring(snmp_config_xml, encoding="unicode", method="xml")
+        headers = {
+            "Content-Type": "application/xml"
+        }
+        try:
+            response = requests.put(url, data=data, headers=headers, auth=(self.__restuser, self.__restpassword),
+                                    verify=False)
+            if response.status_code > 204:
+                print("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
+                return False
+        except:
+            print("can't connect to OpenNMS")
+            return False
+        return True
 
 
     def __check_ip(self, input_ip):
