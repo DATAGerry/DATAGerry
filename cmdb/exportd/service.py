@@ -152,8 +152,8 @@ class ExportdThread(Thread):
             job.execute()
 
         except Exception as err:
-            LOGGER.error(err.__dict__)
-            self.exception_handling = err.__dict__
+            LOGGER.error(err)
+            self.exception_handling = err
             return err
         finally:
             # Generate new insert log
@@ -164,7 +164,7 @@ class ExportdThread(Thread):
                     'user_id': self.user_id,
                     'user_name': self.user_manager.get_user(self.user_id).get_name(),
                     'event': self.event.get_type(),
-                    'message': msg,
+                    'message': msg.args,
                 }
                 self.log_manager.insert_log(action=LogAction.EXECUTE, log_type=ExportdJobLog.__name__, **log_params)
             except LogManagerInsertError as err:

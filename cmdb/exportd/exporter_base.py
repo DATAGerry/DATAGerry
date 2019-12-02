@@ -173,8 +173,17 @@ class ExternalSystem:
     def finish_export(self):
         pass
 
+    def error(self, msg):
+        raise ExportdJobManagement(msg)
+
+    def warning(self, msg):
+        pass
+
+    def info(self, msg):
+        pass
+
 
 class ExportJobConfigException(CMDBError):
-    def __init__(self):
+    def __init__(self, message: str):
         super().__init__()
-        self.message = 'missing parameters for ExportDestination'
+        self.message = message
