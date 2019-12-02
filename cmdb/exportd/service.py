@@ -157,6 +157,7 @@ class ExportdThread(Thread):
 
         except Exception as err:
             LOGGER.error(err)
+            self.exception_handling = err
             # Generate Error log
             try:
                 log_params = {
