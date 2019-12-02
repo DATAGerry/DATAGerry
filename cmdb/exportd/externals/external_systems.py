@@ -34,7 +34,7 @@ class ExternalSystemDummy(ExternalSystem):
         self.__user = self._destination_parms.get("ssid-name", None)
         self.__password = self._destination_parms.get("password", None)
         if not (self.__ip and self.__user and self.__password):
-            raise ExportJobConfigException()
+            self.error()
         # init export vars
         self.__objectid = self._export_vars.get("objectid", ExportVariable("objectid", ""))
         self.__dummy1 = self._export_vars.get("dummy1", ExportVariable("dummy1", ""))

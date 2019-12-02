@@ -139,7 +139,7 @@ class ExportSource:
                     operator = con["value"]
                 condition.append({"$and": [{"fields.name": con["name"]}, {"fields.value": operator}]})
             condition.append({'type_id': source["type_id"]})
-        query = {"$or": condition}
+        query = {"$and": condition}
         result = self.__obm.get_objects_by(sort="public_id", **query)
 
         return result
@@ -173,8 +173,17 @@ class ExternalSystem:
     def finish_export(self):
         pass
 
+    def error(self, msg):
+        raise ExportdJobManagement(msg)
+
+    def warning(self, msg):
+        pass
+
+    def info(self, msg):
+        pass
+
 
 class ExportJobConfigException(CMDBError):
-    def __init__(self):
+    def __init__(self, message: str):
         super().__init__()
-        self.message = 'missing parameters for ExportDestination'
+        self.message = message
