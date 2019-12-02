@@ -150,6 +150,7 @@ def update_job(request_user: User):
         try:
             log_params = {
                 'job_id': update_job_instance.get_public_id(),
+                'state': True,
                 'user_id': request_user.get_public_id(),
                 'user_name': request_user.get_name(),
                 'event': LogAction.EDIT.name,

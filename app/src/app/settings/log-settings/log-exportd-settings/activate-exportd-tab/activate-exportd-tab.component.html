@@ -4,6 +4,7 @@
   <tr>
     <th>ID</th>
     <th>Job ID</th>
+    <th>Job state</th>
     <th>Event</th>
     <th>Action</th>
     <th>User</th>
@@ -16,11 +17,12 @@
   <tr *ngFor="let log of activeLogList">
     <td>{{log.public_id}}</td>
     <td>{{log.job_id}}</td>
+    <td><cmdb-active-badge [activeStatus]="log.state"></cmdb-active-badge></td>
     <td>{{log.event}}</td>
     <td>{{log.action_name}}</td>
     <td>{{log.user_name}}</td>
     <td>{{log.log_time?.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
-    <td>{{log.message | json}}</td>
+    <td>{{log.message}}</td>
     <td>
       <a class="text-dark ml-1" (click)="deleteEmitter.emit(log.public_id); rerender()">
         <i class="fas fa-trash-alt"></i>

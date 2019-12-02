@@ -20,6 +20,7 @@ export class ExportdLog {
   // tslint:disable:variable-name
   public readonly public_id: number;
   public job_id: number;
+  public state: string;
   public user_id: number;
   public user_name: string;
   public event: string;

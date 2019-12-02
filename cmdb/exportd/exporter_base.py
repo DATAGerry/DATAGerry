@@ -15,14 +15,19 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import jinja2
+import logging
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
+from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import load_class
 from cmdb.utils.system_reader import SystemConfigReader
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
+
+LOGGER = logging.getLogger(__name__)
 
 
 class ExportJob(ExportdJobManagement):
@@ -38,6 +43,9 @@ class ExportJob(ExportdJobManagement):
         self.__object_manager = CmdbObjectManager(
             database_manager=database_manager
         )
+        self.log_manager = ExportdLogManager(
+            database_manager=database_manager)
+
         self.sources = self.__get_sources()
         super(ExportJob, self).__init__(database_manager)
 
@@ -69,7 +77,7 @@ class ExportJob(ExportdJobManagement):
 
         return destinations
 
-    def execute(self):
+    def execute(self, event, user_id: int, user_name: str):
         # get cmdb objects from all sources
         cmdb_objects = set()
         for source in self.sources:
@@ -82,6 +90,19 @@ class ExportJob(ExportdJobManagement):
             for cmdb_object in cmdb_objects:
                 external_system.add_object(cmdb_object)
             external_system.finish_export()
+
+            try:
+                log_params = {
+                    'job_id': self.job.get_public_id(),
+                    'state': True,
+                    'user_id': user_id,
+                    'user_name': user_name,
+                    'event': event.get_type(),
+                    'message': external_system.msg_string,
+                }
+                self.log_manager.insert_log(action=LogAction.EXECUTE, log_type=ExportdJobLog.__name__, **log_params)
+            except LogManagerInsertError as err:
+                LOGGER.error(err)
 
 
 class ExportVariable:
@@ -163,6 +184,7 @@ class ExternalSystem:
     def __init__(self, destination_parms, export_vars):
         self._destination_parms = destination_parms
         self._export_vars = export_vars
+        self.msg_string = ""
 
     def prepare_export(self):
         pass
@@ -176,11 +198,8 @@ class ExternalSystem:
     def error(self, msg):
         raise ExportdJobManagement(msg)
 
-    def warning(self, msg):
-        pass
-
-    def info(self, msg):
-        pass
+    def set_msg(self, msg):
+        self.msg_string = msg
 
 
 class ExportJobConfigException(CMDBError):
