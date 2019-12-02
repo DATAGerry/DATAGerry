@@ -141,6 +141,8 @@ class ExportdThread(Thread):
             return ex
 
     def worker(self):
+        import warnings
+
         try:
             # update job for UI
             self.job.state = ExecuteState.RUNNING.name
@@ -156,15 +158,15 @@ class ExportdThread(Thread):
             self.exception_handling = err
             return err
         finally:
+
             # Generate new insert log
             try:
-                msg = 'Successful' if not self.exception_handling else self.exception_handling
                 log_params = {
                     'job_id': self.job.get_public_id(),
                     'user_id': self.user_id,
                     'user_name': self.user_manager.get_user(self.user_id).get_name(),
                     'event': self.event.get_type(),
-                    'message': msg.args,
+                    'message': ['Successful'] if not self.exception_handling else self.exception_handling.args,
                 }
                 self.log_manager.insert_log(action=LogAction.EXECUTE, log_type=ExportdJobLog.__name__, **log_params)
             except LogManagerInsertError as err:
