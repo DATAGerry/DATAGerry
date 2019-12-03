@@ -1,267 +1,120 @@
-###########################
-Install guide for DATAGERRY
-###########################
-* Installing on Debian 
-* Installing on RHEL
-|
-
-Installing on Debian
-********************
-Instructions for installing DATAGERRY one a Debian system
-
-- **1. Installing the dependencies**
-    - **1.1. MongoDB**
-        - **1.1.1 Installing MongoDB**
-            | sudo apt install -y MongoDB
-        - **1.1.2 Enable MongoDB on startup**
-            | systemctl enable MongoDB
-        - **1.1.3 Start MongoDB**
-            | systemctl start MongoDB
-        - **1.1.4 Check the status of MongoDB**
-            | systemctl status MongoDB
-    - **1.2 RabbitMQ and Dependencies**
-        - **1.2.1 Installing Erlang**
-            | Erlang is a programming language that is required for the installation of RabbitMQ
-            | wget https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
-            | sudo dpkg -I erlang-solutions_1.0_all.deb
-            | sudo apt-get update
-            | sudo apt-get install erlang
-        - **1.2.2 Installing RabbitMQ**
-            | Enable RabbitMQ repository:
-            | echo 'deb http://www.rabbitmq.com/debian/ testing main' | sudo tee /etc/apt/sources.list.d/rabbitmq.list
-            | wget -O- https://www.rabbitmq.com/rabbitmq-release-signing-key.asc | sudo apt-key add –
-            
-            | Update Cache an install RabbitMQ:
-            | sudo apt-get update
-            | sudo apt-get install -y rabbitmq-server
-
-            | systemctl enable rabbitmq-server
-            | systemctl start rabbitmq-server
-            | systemctl status rabbitmq-server
-
-- **2. Installing DATAGERRY**
-    | Actually there is only the binary file for Debian systems available at the momement.
-    | We recommend to create a directory under /opt and move the datagerry files in this directory.
-
-    - **2.1 Create a directory and download the DATAGERRY binary**
-        cd /opt
-        mkdir cmdb (just an example and you can name the directory like you want)
-        wget http://files.datagerry.com/master/bin/
-
-    - **2.2 Make datagerry binary executable**
-        chmod +x datagerry
-
-    - **2.3 Create the configuration file**
-        vi cmdb.conf
-
-        | [Database]
-        | host = 127.0.0.1 
-        | port = 27017    
-        | database_name = cmdb
-        | ;username = username
-        | ;password = password
-
-        | [WebServer]
-        | host = 0.0.0.0 
-        | port = 4000 
-        | [Token]
-        | expire = 1440
-
-        | [MessageQueueing]
-        | host = 127.0.0.1
-        | port = 5672
-        | username = guest
-        | password = guest
-        | exchange = datagerry.eventbus
-        | connection_attempts = 2
-        | retry_delay = 6
-        | use_tls = False
-    - **2.4 Set the firewall rules**
-        ufw allow 4000
-    - **2.5 DATAGERRY commands**
-        Initialize the database:
-        | PATH_TO_DATAGERRY/datagerry --setup -c /PATH/TO/cmdb.conf
-        | Create Admin user:
-        | PATH_TO_DATAGERRY /datagerry --keys -c /PATH/TO/cmdb.conf
-        | Start DATAGERRY:
-        | PATH_TO_DATAGERRY /datagerry -s -c /PATH/TO/cmdb.conf
-    - **2.6 Create a systemd.service for autostart**
-        vi /usr/lib/systemd/system/datagerry.service
-
-        | [Unit]
-        | Description=DATAGERRY - Enterprise grade OpenSource CMDB
-        | Wants=rabbitmq-server.service mongod.service
-        | Requires=network.target
-        | After=rabbitmq-server.service mongod.service network.target
-
-        | [Service]
-        | User=datagerry
-        | Group=datagerry
-        | Type=simple
-        | ExecStart=/opt/cmdb/datagerry -c /opt/cmdb/cmdb.conf -s
-        | KillMode=process
-        | Restart=on-failure
-
-        | [Install]
-        | WantedBy=multi-user.target
-        | Alias=datagerry.service
-
-        | systemctl enable datagerry.service
-        | systemctl start datagerry.service
-        | systemctl status datagerry.service
-|
-
-Installing on RHEL
-******************
 ***************************
 Install guide for DATAGERRY
 ***************************
 .. contents:: Table of Contents
     :local:
+|
 
 Installing on Debian
 ====================
-Instructions for installing DATAGERRY one a Debian system
+Instructions for installing DATAGERRY on a Debian system
 
-Installing the dependencies
----------------------------
-MongoDB
-^^^^^^^
+1. Installing the dependencies
+------------------------------
+1.1 MongoDB
+^^^^^^^^^^^
 
-Installing MongoDB
-""""""""""""""""""
-sudo apt install -y MongoDB
+| **Installing MongoDB:**
+.. code-block:: console
 
-Enable MongoDB on startup
-"""""""""""""""""""""""""
-systemctl enable MongoDB
-Start MongoDB
-"""""""""""""
-systemctl start MongoDB
-Check the status of MongoDB
-"""""""""""""""""""""""""""
-systemctl status MongoDB
+    $ sudo apt install -y MongoDB
 
+| **Enable MongoDB on startup:**
+.. code-block:: console
 
-RabbitMQ and Dependencies
-^^^^^^^^^^^^^^^^^^^^^^^^^
-Installing Erlang
-"""""""""""""""""
-| Erlang is a programming language that is required for the installation of RabbitMQ
-| wget https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
-| sudo dpkg -I erlang-solutions_1.0_all.deb
-| sudo apt-get update
-| sudo apt-get install erlang
+    $ systemctl enable MongoDB
 
-Installing RabbitMQ
-"""""""""""""""""""
-Enable RabbitMQ repository:
+| **Start MongoDB:**
+.. code-block:: console
 
-| echo 'deb http://www.rabbitmq.com/debian/ testing main' | sudo tee /etc/apt/sources.list.d/rabbitmq.list
-| wget -O- https://www.rabbitmq.com/rabbitmq-release-signing-key.asc | sudo apt-key add –
+    $ systemctl start MongoDB
 
-| Update Cache an install RabbitMQ:
-| sudo apt-get update
-| sudo apt-get install -y rabbitmq-server
+| **Check the status of MongoDB:**
+.. code-block:: console
 
-| systemctl enable rabbitmq-server
-| systemctl start rabbitmq-server
-| systemctl status rabbitmq-server
+    $ systemctl status MongoDB
 
-
-
-Installing DATAGERRY
---------------------
-| Actually there is only the binary file for Debian systems available at the momement.
-| We recommend to create a directory under /opt and move the datagerry files in this directory.
-
-Create a directory and download the DATAGERRY binary
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-| cd /opt
-| mkdir cmdb (just an example and you can name the directory like you want)
-| wget http://files.datagerry.com/master/bin/
-
-Make datagerry binary executable
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-chmod +x datagerry
-
-Create the configuration file
+1.2 RabbitMQ and Dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-vi cmdb.conf
+| **Installing Erlang:**
+| Erlang is a programming language that is required for the installation of RabbitMQ
+.. code-block:: console
 
-| [Database]
-| host = 127.0.0.1 
-| port = 27017    
-| database_name = cmdb
-| ;username = username
-| ;password = password
+    $ wget https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
+    $ sudo dpkg -I erlang-solutions_1.0_all.deb
+    $ sudo apt-get update
+    $ sudo apt-get install erlang
 
-| [WebServer]
-| host = 0.0.0.0 
-| port = 4000 
-| [Token]
-| expire = 1440
+| **Installing RabbitMQ:**
+| Enable RabbitMQ repository:
+.. code-block:: console
 
-| [MessageQueueing]
-| host = 127.0.0.1
-| port = 5672
-| username = guest
-| password = guest
-| exchange = datagerry.eventbus
-| connection_attempts = 2
-| retry_delay = 6
-| use_tls = False
+    $ echo 'deb http://www.rabbitmq.com/debian/ testing main' | sudo tee /etc/apt/sources.list.d/rabbitmq.list
+    $ wget -O- https://www.rabbitmq.com/rabbitmq-release-signing-key.asc | sudo apt-key add –
 
-Set the firewall rules
-^^^^^^^^^^^^^^^^^^^^^^
-ufw allow 4000
+| Update Cache and install RabbitMQ:
+.. code-block:: console
 
-DATAGERRY commands
-^^^^^^^^^^^^^^^^^^
-Initialize the database:
-| PATH_TO_DATAGERRY/datagerry --setup -c /PATH/TO/cmdb.conf
-| Create Admin user:
-| PATH_TO_DATAGERRY /datagerry --keys -c /PATH/TO/cmdb.conf
-| Start DATAGERRY:
-| PATH_TO_DATAGERRY /datagerry -s -c /PATH/TO/cmdb.conf
+    $ sudo apt-get update
+    $ sudo apt-get install -y rabbitmq-server
 
-Create a systemd.service for autostart
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-vi /usr/lib/systemd/system/datagerry.service
+| **Enable RabbitMQ on startup:**
+.. code-block:: console
 
-| [Unit]
-| Description=DATAGERRY - Enterprise grade OpenSource CMDB
-| Wants=rabbitmq-server.service mongod.service
-| Requires=network.target
-| After=rabbitmq-server.service mongod.service network.target
+    $ systemctl enable rabbitmq-server
 
-| [Service]
-| User=datagerry
-| Group=datagerry
-| Type=simple
-| ExecStart=/opt/cmdb/datagerry -c /opt/cmdb/cmdb.conf -s
-| KillMode=process
-| Restart=on-failure
+| **Start RabbitMQ:**
+.. code-block:: console
 
-| [Install]
-| WantedBy=multi-user.target
-| Alias=datagerry.service
+    $ systemctl start rabbitmq-server
 
-| systemctl enable datagerry.service
-| systemctl start datagerry.service
-| systemctl status datagerry.service
+| **Check the status of RabbitMQ:**
+.. code-block:: console
+
+    $ systemctl status rabbitmq-server
+
+2. Installing DATAGERRY
+-----------------------
+| **Create a directory and download the DATAGERRY binary:**
+.. code-block:: console
+
+    $ wget http://files.datagerry.com/master/targz/datagerry-master.tar.gz
+
+| **Extract the archive:**
+.. code-block:: console
+
+    $ tar -xzvf datagerry-development.tar.gz
+
+| **Execute the setup script:**
+.. code-block:: console
+
+    $ cd datagerry
+    $ bash setup.sh
+
+| **Set the firewall rules:**
+.. code-block:: console
+
+    $ ufw allow 4000
+
+| **Check if DATAGERRY is running:**
+.. code-block:: console
+
+    $ systemctl status datagerry.service
+|
 
 Installing on RHEL
 ==================
 Instructions for installing DATAGERRY one a RHEL system
 
-Installing the dependencies
----------------------------
-MongoDB
-^^^^^^^
-Installing MongoDB
-""""""""""""""""""
-| vi /etc/yum.repos.d/mongodb.repo
+1. Installing the dependencies
+------------------------------
+1.1 MongoDB
+^^^^^^^^^^^
+| **Installing MongoDB:**
+| Create a repository file with the following input:
+.. code-block:: console
+
+    $ vi /etc/yum.repos.d/mongodb.repo
 
 | [MongoDB]
 | name=MongoDB Repository
@@ -269,36 +122,43 @@ Installing MongoDB
 | gpgcheck=1
 | enabled=1
 | gpgkey=https://www.mongodb.org/static/pgp/server-4.2.asc
+.. code-block:: console
 
-| sudo yum install -y mongodb-org
+    $ sudo yum install -y mongodb-org
 
-Enable MongoDB on startup
-"""""""""""""""""""""""""
-systemctl enable MongoDB
+| **Enable MongoDB on startup:**
+.. code-block:: console
 
-Start MongoDB
-"""""""""""""
-systemctl start MongoDB
+    $ systemctl enable MongoDB
 
-Check the status of MongoDB
-"""""""""""""""""""""""""""
-systemctl status MongoDB
+| **Start MongoDB:**
+.. code-block:: console
 
-RabbitMQ and Dependencies
-^^^^^^^^^^^^^^^^^^^^^^^^^
-Installing Erlang
-"""""""""""""""""
+    $ systemctl start MongoDB
+
+| **Check the status of MongoDB:**
+.. code-block:: console
+
+    $ systemctl status MongoDB
+
+1.2 RabbitMQ and Dependencies
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+| **Installing Erlang:**
 | Erlang is a programming language that is required for the installation of RabbitMQ
-| yum install -y erlang
+.. code-block:: console
 
-Installing RabbitMQ
-"""""""""""""""""""
-Import the rpm-key:
+    $ yum install -y erlang
 
-| rpm --import https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc
+| **Installing RabbitMQ:**
+| Import the rpm-key:
+.. code-block:: console
+
+    $ rpm --import https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc
 
 | Enable RabbitMQ repository:
-| vi /etc/yum.repos.d/rabbitmq.repo
+.. code-block:: console
+
+    $ vi /etc/yum.repos.d/rabbitmq.repo
 
 | [bintray-rabbitmq-server]
 | name=bintray-rabbitmq-rpm
@@ -307,125 +167,80 @@ Import the rpm-key:
 | repo_gpgcheck=0
 | enabled=1  |
 
-| systemctl enable rabbitmq-server
-| systemctl start rabbitmq-server
-| systemctl status rabbitmq-server
-|
+| **Enable RabbitMQ on startup:**
+.. code-block:: console
 
-Installing DATAGERRY
---------------------
-There are two options for RHEL available with a binary file or a rpm-package.
+    $ systemctl enable rabbitmq-server
 
-DATAGERRY binary
-^^^^^^^^^^^^^^^^
-Create a directory and download the DATAGERRY binary
-""""""""""""""""""""""""""""""""""""""""""""""""""""
-| cd /opt
-| mkdir cmdb (just an example and you can name the directory like you want)
-wget http://files.datagerry.com/master/bin/
+| **Start RabbitMQ:**
+.. code-block:: console
 
-Make datagerry binary executable
-""""""""""""""""""""""""""""""""
-chmod +x datagerry
-    
-Create the configuration file
-"""""""""""""""""""""""""""""
-vi cmdb.conf
+    $ systemctl start rabbitmq-server
 
-| [Database]
-| host = 127.0.0.1 
-| port = 27017    
-| database_name = cmdb
-| ;username = username
-| ;password = password
+| **Check the status of RabbitMQ:**
+.. code-block:: console
 
-| [WebServer]
-| host = 0.0.0.0 
-| port = 4000 
-| [Token]
-| expire = 1440
+    $ systemctl status rabbitmq-server
 
-| [MessageQueueing]
-| host = 127.0.0.1
-| port = 5672
-| username = guest
-| password = guest
-| exchange = datagerry.eventbus
-| connection_attempts = 2
-| retry_delay = 6
-| use_tls = False
+2. Installing DATAGERRY
+-----------------------
+| There are two options for RHEL available with a *.tar.gz archive or a rpm-package.
 
-Set the firewall rules
-""""""""""""""""""""""
-| firewall-cmd --permanent --zone=public --add-port=4000/tcp
-| firewall-cmd --reload
+2.1 DATAGERRY from archive
+^^^^^^^^^^^^^^^^^^^^^^^^^
+| **Create a directory and download the DATAGERRY archive:**
+.. code-block:: console
 
-Deactivate SELinux
-""""""""""""""""""
-| vi /etc/selinux/config
+    $ wget http://files.datagerry.com/master/targz/datagerry-master.tar.gz
+
+| **Extract the archive:**
+.. code-block:: console
+
+    $ tar -xzvf datagerry-development.tar.gz
+
+| **Execute the setup script:**
+.. code-block:: console
+
+    $ cd datagerry
+    $ bash setup.sh
+
+| **Set the firewall rules:**
+.. code-block:: console
+
+    $ firewall-cmd --permanent --zone=public --add-port=4000/tcp
+    $ firewall-cmd --reload
+
+| **Deactivate SELinux:**
+.. code-block:: console
+
+    $ vi /etc/selinux/config
 | Set SELINUX=enforcing to SELINUX=disabled and restart the system
 
-DATAGERRY commands
-""""""""""""""""""
-| Initialize the database:
-| PATH_TO_DATAGERRY/datagerry --setup -c /PATH/TO/cmdb.conf
+| **Check if DATAGERRY is running:**
+.. code-block:: console
 
-| Create Admin user:
-| PATH_TO_DATAGERRY /datagerry --keys -c /PATH/TO/cmdb.conf
+    $ systemctl status datagerry.service
 
-| Start DATAGERRY:
-| PATH_TO_DATAGERRY /datagerry -s -c /PATH/TO/cmdb.conf
-    
-Create a systemd.service for autostart
-""""""""""""""""""""""""""""""""""""""
-| vi /usr/lib/systemd/system/datagerry.service
+2.2 DATAGERRY rpm-package
+^^^^^^^^^^^^^^^^^^^^^^^^^
+| **Install the rpm:**
+.. code-block:: console
 
-| [Unit]
-| Description=DATAGERRY - Enterprise grade OpenSource CMDB
-| Wants=rabbitmq-server.service mongod.service
-| Requires=network.target
-| After=rabbitmq-server.service mongod.service network.target
+    $ rpm -ivh DATAGERRY_RPM_PACKAGE.rpm
 
-| [Service]
-| User=datagerry
-| Group=datagerry
-| Type=simple
-| ExecStart=/opt/cmdb/datagerry -c /opt/cmdb/cmdb.conf -s
-| KillMode=process
-| Restart=on-failure
+| **Set the firewall rules:**
+.. code-block:: console
 
-| [Install]
-| WantedBy=multi-user.target
-| Alias=datagerry.service
-|
-| systemctl enable datagerry.service
-| systemctl start datagerry.service
-| systemctl status datagerry.service
-    
-DATAGERRY rpm-package
-^^^^^^^^^^^^^^^^^^^^^
-Install the rpm
-"""""""""""""""
-rpm -i DATAGERRY_RPM_PACKAGE.rpm
+    $ firewall-cmd --permanent --zone=public --add-port=4000/tcp
+    $ firewall-cmd --reload
 
-Set the firewall rules
-""""""""""""""""""""""
-| firewall-cmd --permanent --zone=public --add-port=4000/tcp
-| firewall-cmd --reload
+| **Deactivate SELinux:**
+.. code-block:: console
 
-Deactivate SELinux
-""""""""""""""""""
-| vi /etc/selinux/config
+    $ vi /etc/selinux/config
 | Set SELINUX=enforcing to SELINUX=disabled and restart the system
 
-DATAGERRY commands
-""""""""""""""""""
-| Initialize the database:
-| PATH_TO_DATAGERRY/datagerry --setup -c /PATH/TO/cmdb.conf
+| **Check if DATAGERRY is running:**
+.. code-block:: console
 
-| Create Admin user:
-| PATH_TO_DATAGERRY /datagerry --keys -c /PATH/TO/cmdb.conf
-
-| Start DATAGERRY:
-| PATH_TO_DATAGERRY /datagerry -s -c /PATH/TO/cmdb.conf
-    
+    $ systemctl status datagerry.service

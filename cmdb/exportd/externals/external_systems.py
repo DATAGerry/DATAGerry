@@ -17,7 +17,7 @@
 import ipaddress
 import xml.etree.ElementTree as ET
 import requests
-from cmdb.exportd.exporter_base import ExternalSystem, ExportJobConfigException, ExportVariable
+from cmdb.exportd.exporter_base import ExternalSystem, ExportVariable
 
 
 class ExternalSystemDummy(ExternalSystem):
@@ -77,7 +77,6 @@ class ExternalSystemOpenNMS(ExternalSystem):
         {"name": "restpassword", "required": True, "description": "OpenNMS REST password", "default": "admin"},
         {"name": "requisition", "required": True, "description": "OpenNMS requisition to use", "default": "cmdb"},
         {"name": "services", "required": False, "description": "name of services to bind on each node sepetated by space", "default": "ICMP SNMP"},
-        {"name": "rescanExisting", "required": False, "description": "set rescanExisting flag for OpenNMS import", "default": "dbOnly"},
         {"name": "exportSnmpConfig", "required": False, "description": "also export SNMP configuration for nodes", "default": "false"},
         {"name": "exportSnmpConfigRetries", "required": False, "description": "export SNMP configuration for nodes: set SNMP retries", "default": "1"},
         {"name": "exportSnmpConfigTimeout", "required": False, "description": "export SNMP configuration for nodes: set SNMP timeout", "default": "2000"}
@@ -155,33 +154,30 @@ class ExternalSystemOpenNMS(ExternalSystem):
 
     def __init__(self, destination_parms, export_vars):
         super(ExternalSystemOpenNMS, self).__init__(destination_parms, export_vars)
-        # ToDo: init destination vars; get default values from parameters
-        self.__resturl = self._destination_parms.get("resturl")
-        self.__restuser = self._destination_parms.get("restuser")
-        self.__restpassword = self._destination_parms.get("restpassword")
-        self.__requisition = self._destination_parms.get("requisition")
+        # init destination vars
         self.__services = self._destination_parms.get("services").split()
-        if not self.__requisition:
-            self.error("configuration error: parameter requisition not set")
         self.__snmp_export = False
         if bool(self._destination_parms.get("exportSnmpConfig")):
             self.__snmp_export = True
-        self.__snmp_retries = self._destination_parms.get("exportSnmpConfigRetries")
-        self.__snmp_timeout = self._destination_parms.get("exportSnmpConfigTimeout")
         # init error handling
-        self.__counter_successful = 0
-        self.__counter_failed = 0
+        self.__obj_successful = []
+        self.__obj_warning = []
+        # init variables
         self.__timeout = 10
+        self.__xml = None
 
     def prepare_export(self):
         # check connection to OpenNMS
         self.__onms_check_connection()
         # init XML object for OpenNMS REST API
         attributes = {}
-        attributes["foreign-source"] = self.__requisition
+        attributes["foreign-source"] = self._destination_parms["requisition"]
         self.__xml = ET.Element("model-import", attributes)
 
     def add_object(self, cmdb_object):
+        # init error handling
+        warning = False
+
         # get node variables
         node_foreignid = cmdb_object.get_public_id()
         node_label = self._export_vars.get("nodelabel", ExportVariable("nodelabel", "undefined")).get_value(cmdb_object)
@@ -196,6 +192,8 @@ class ExternalSystemOpenNMS(ExternalSystem):
         for interface in interfaces_in:
             if self.__check_ip(interface):
                 interfaces.append(interface)
+            else:
+                warning = True
         interfaces = list(set(interfaces))
 
         # get category information
@@ -252,45 +250,51 @@ class ExternalSystemOpenNMS(ExternalSystem):
             self.__onms_update_snmpconf_v12(snmp_ip, snmp_community, snmp_version)
 
         # update error counter
-        self.__counter_successful += 1
+        self.__obj_successful.append(cmdb_object.get_public_id())
+        if warning:
+            self.__obj_warning.append(cmdb_object.get_public_id())
 
     def finish_export(self):
         self.__onms_update_requisition()
         self.__onms_sync_requisition()
-        self.set_msg("{} objects exported to OpenNMS".format(self.__counter_successful))
+        # create result message
+        msg = "Export to OpenNMS finished. "
+        msg += "{} objects exported. ".format(len(self.__obj_successful))
+        msg += "The following objects were exported with warnings: {}".format(self.__obj_warning)
+        self.set_msg(msg)
 
     def __onms_check_connection(self):
-        url = "{}/info".format(self.__resturl)
+        url = "{}/info".format(self._destination_parms["resturl"])
         try:
-            response = requests.get(url, auth=(self.__restuser, self.__restpassword), verify=False, timeout=self.__timeout)
+            response = requests.get(url, auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]), verify=False, timeout=self.__timeout)
             if response.status_code > 202:
                 self.error("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
-        except:
+        except Exception:
             self.error("Can't connect to OpenNMS API")
         return True
 
     def __onms_update_requisition(self):
-        url = "{}/requisitions".format(self.__resturl)
+        url = "{}/requisitions".format(self._destination_parms["resturl"])
         data = ET.tostring(self.__xml, encoding="utf-8", method="xml")
         headers = {
             "Content-Type": "application/xml"
         }
         try:
-            response = requests.post(url, data=data, headers=headers, auth=(self.__restuser, self.__restpassword),
+            response = requests.post(url, data=data, headers=headers, auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]),
                                      verify=False, timeout=self.__timeout)
             if response.status_code > 202:
                 self.error("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
-        except:
+        except Exception:
             self.error("Can't connect to OpenNMS API")
         return True
 
     def __onms_sync_requisition(self):
-        url = "{}/requisitions/{}/import".format(self.__resturl, self.__requisition)
+        url = "{}/requisitions/{}/import".format(self._destination_parms["resturl"], self._destination_parms["requisition"])
         try:
-            response = requests.put(url, data="", auth=(self.__restuser, self.__restpassword), verify=False, timeout=self.__timeout)
+            response = requests.put(url, data="", auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]), verify=False, timeout=self.__timeout)
             if response.status_code > 202:
                 self.error("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
-        except:
+        except Exception:
             self.error("Can't connect to OpenNMS API")
         return True
 
@@ -302,24 +306,24 @@ class ExternalSystemOpenNMS(ExternalSystem):
         snmp_port_xml = ET.SubElement(snmp_config_xml, "port")
         snmp_port_xml.text = port
         snmp_retries_xml = ET.SubElement(snmp_config_xml, "retries")
-        snmp_retries_xml.text = self.__snmp_retries
+        snmp_retries_xml.text = self._destination_parms["exportSnmpConfigRetries"]
         snmp_timeout_xml = ET.SubElement(snmp_config_xml, "timeout")
-        snmp_timeout_xml.text = self.__snmp_timeout
+        snmp_timeout_xml.text = self._destination_parms["exportSnmpConfigTimeout"]
         snmp_version = ET.SubElement(snmp_config_xml, "version")
         snmp_version.text = version
-        
+
         # send XML to OpenNMS
-        url = "{}/snmpConfig/{}".format(self.__resturl, ip)
+        url = "{}/snmpConfig/{}".format(self._destination_parms["resturl"], ip)
         data = ET.tostring(snmp_config_xml, encoding="utf-8", method="xml")
         headers = {
             "Content-Type": "application/xml"
         }
         try:
-            response = requests.put(url, data=data, headers=headers, auth=(self.__restuser, self.__restpassword),
+            response = requests.put(url, data=data, headers=headers, auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]),
                                     verify=False, timeout=self.__timeout)
             if response.status_code > 204:
                 self.error("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
-        except:
+        except Exception:
             self.error("Can't connect to OpenNMS API")
         return True
 
@@ -333,7 +337,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
     def __check_asset(self, asset_name, asset_value):
         try:
             asset_length = self.__class__.onms_assetfields[asset_name]
-        except:
+        except Exception:
             return None
         if asset_length and len(asset_value) > asset_length:
             asset_value = asset_value[:asset_length]
