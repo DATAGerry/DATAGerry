@@ -31,9 +31,9 @@ class ExternalSystemDummy(ExternalSystem):
     def __init__(self, destination_parms, export_vars):
         super(ExternalSystemDummy, self).__init__(destination_parms, export_vars)
         # init destination vars
-        self.__ip = self._destination_parms.get("ip-address", None)
-        self.__user = self._destination_parms.get("ssid-name", None)
-        self.__password = self._destination_parms.get("password", None)
+        self.__ip = self._destination_parms.get("ip-address")
+        self.__user = self._destination_parms.get("ssid-name")
+        self.__password = self._destination_parms.get("password")
         if not (self.__ip and self.__user and self.__password):
             self.error("missing parameters")
         # init export vars
@@ -139,24 +139,22 @@ class ExternalSystemOpenNMS(ExternalSystem):
     def __init__(self, destination_parms, export_vars):
         super(ExternalSystemOpenNMS, self).__init__(destination_parms, export_vars)
         # ToDo: init destination vars; get default values from parameters
-        self.__resturl = self._destination_parms.get("resturl", "http://127.0.0.1:8980/opennms/rest")
-        self.__restuser = self._destination_parms.get("restuser", "admin")
-        self.__restpassword = self._destination_parms.get("restpassword", "admin")
-        self.__requisition = self._destination_parms.get("requisition", "cmdb")
-        self.__services = self._destination_parms.get("services", "ICMP SNMP").split()
-        if not (self.__requisition):
+        self.__resturl = self._destination_parms.get("resturl")
+        self.__restuser = self._destination_parms.get("restuser")
+        self.__restpassword = self._destination_parms.get("restpassword")
+        self.__requisition = self._destination_parms.get("requisition")
+        self.__services = self._destination_parms.get("services").split()
+        if not self.__requisition:
             self.error("configuration error: parameter requisition not set")
         self.__snmp_export = False
-        if self._destination_parms.get("exportSnmpConfig", "false") in ["True", "true"]:
+        if bool(self._destination_parms.get("exportSnmpConfig")):
             self.__snmp_export = True
-        self.__snmp_retries = self._destination_parms.get("exportSnmpConfigRetries", "1")
-        self.__snmp_timeout = self._destination_parms.get("exportSnmpConfigTimeout", "2000")
+        self.__snmp_retries = self._destination_parms.get("exportSnmpConfigRetries")
+        self.__snmp_timeout = self._destination_parms.get("exportSnmpConfigTimeout")
         # init error handling
         self.__counter_successful = 0
         self.__counter_failed = 0
         self.__timeout = 10
-
-
 
     def prepare_export(self):
         # check connection to OpenNMS
@@ -198,7 +196,6 @@ class ExternalSystemOpenNMS(ExternalSystem):
                 if asset_value:
                     assets[asset_name] = asset_value
 
-
         # create node XML structure
         # XML: node
         node_xml_attr = {}
@@ -239,7 +236,6 @@ class ExternalSystemOpenNMS(ExternalSystem):
 
         # update error counter
         self.__counter_successful += 1
-
 
     def finish_export(self):
         self.__onms_update_requisition()
@@ -309,7 +305,6 @@ class ExternalSystemOpenNMS(ExternalSystem):
         except:
             self.error("Can't connect to OpenNMS API")
         return True
-
 
     def __check_ip(self, input_ip):
         try:
