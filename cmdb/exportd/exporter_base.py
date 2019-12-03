@@ -184,9 +184,14 @@ class ExportDestination:
 
 
 class ExternalSystem:
-    parameters = []
+    parameters = {}
 
     def __init__(self, destination_parms, export_vars):
+        # Set default if value is empty
+        for key, val in destination_parms.items():
+            if not bool(str(val).strip()):
+                destination_parms[key] = [item["default"] for item in self.parameters if item['name'] == key][0]
+
         self._destination_parms = destination_parms
         self._export_vars = export_vars
         self.msg_string = ""
