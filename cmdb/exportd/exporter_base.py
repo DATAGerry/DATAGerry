@@ -190,7 +190,11 @@ class ExternalSystem:
         # Set default if value is empty
         for key, val in destination_parms.items():
             if not bool(str(val).strip()):
-                destination_parms[key] = [item["default"] for item in self.parameters if item['name'] == key][0]
+                destination_parms[key] = [item['default'] for item in self.parameters if item['name'] == key][0]
+
+        for item in self.parameters:
+            if not destination_parms.get(item['name']):
+                destination_parms.update({item['name']: item['default']})
 
         self._destination_parms = destination_parms
         self._export_vars = export_vars
