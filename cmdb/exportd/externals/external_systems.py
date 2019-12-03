@@ -259,7 +259,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
 
     def __onms_update_requisition(self):
         url = "{}/requisitions".format(self.__resturl)
-        data = ET.tostring(self.__xml, encoding="unicode", method="xml")
+        data = ET.tostring(self.__xml, encoding="utf-8", method="xml")
         headers = {
             "Content-Type": "application/xml"
         }
@@ -298,7 +298,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
         
         # send XML to OpenNMS
         url = "{}/snmpConfig/{}".format(self.__resturl, ip)
-        data = ET.tostring(snmp_config_xml, encoding="unicode", method="xml")
+        data = ET.tostring(snmp_config_xml, encoding="utf-8", method="xml")
         headers = {
             "Content-Type": "application/xml"
         }
