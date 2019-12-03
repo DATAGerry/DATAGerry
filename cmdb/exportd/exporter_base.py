@@ -158,7 +158,12 @@ class ExportSource:
                     operator = {"$ne": con["value"]}
                 else:
                     operator = con["value"]
-                condition.append({"$and": [{"fields.name": con["name"]}, {"fields.value": operator}]})
+                    try:
+                        operator = eval(operator)
+                    except Exception as w:
+                        LOGGER.info(w)
+                        operator = operator
+                condition.append({'fields':  {"$elemMatch": {"name": con["name"], "value": operator}}})
             condition.append({'type_id': source["type_id"]})
         query = {"$and": condition}
         result = self.__obm.get_objects_by(sort="public_id", **query)
@@ -196,13 +201,13 @@ class ExternalSystem:
         pass
 
     def error(self, msg):
-        raise ExportdJobManagement(msg)
+        raise ExportJobConfigException(msg)
 
     def set_msg(self, msg):
         self.msg_string = msg
 
 
 class ExportJobConfigException(CMDBError):
-    def __init__(self, message: str):
-        super().__init__()
-        self.message = message
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
+
