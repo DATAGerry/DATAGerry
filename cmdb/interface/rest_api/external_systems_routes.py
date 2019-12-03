@@ -40,12 +40,25 @@ def get_external_system_list():
     return make_response(get_module_classes('cmdb.exportd.externals.external_systems'))
 
 
-@external_system.route('/<string:class_external_system>', methods=['GET'])
-@login_required
+@external_system.route('/parameters/<string:class_external_system>', methods=['GET'])
+# @login_required
 def get_external_system_params(class_external_system):
     try:
         external_system_class = load_class("cmdb.exportd.externals.external_systems.{}".format(class_external_system))
         list_of_parameters = external_system_class.parameters
+    except Exception as e:
+        return abort(400, e)
+    except CMDBError as e:
+        return abort(404, jsonify(message='Not Found', error=e.message))
+    return make_response(list_of_parameters)
+
+
+@external_system.route('/variables/<string:class_external_system>', methods=['GET'])
+# @login_required
+def get_external_system_variables(class_external_system):
+    try:
+        external_system_class = load_class("cmdb.exportd.externals.external_systems.{}".format(class_external_system))
+        list_of_parameters = external_system_class.variables
     except Exception as e:
         return abort(400, e)
     except CMDBError as e:

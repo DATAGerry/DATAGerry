@@ -28,6 +28,13 @@ class ExternalSystemDummy(ExternalSystem):
         {"name": "password", "required": True, "description": "Password for Login", "default": "1234"}
     ]
 
+    variables = [
+        {"name": "dummy1", "required": False, "description": "No dummy1 are needed."},
+        {"name": "dummy2", "required": False, "description": "No dummy2 are needed."},
+        {"name": "dummy3", "required": False, "description": "No dummy3 are needed."},
+        {"name": "dummy4", "required": False, "description": "No dummy4 are needed."}
+    ]
+
     def __init__(self, destination_parms, export_vars):
         super(ExternalSystemDummy, self).__init__(destination_parms, export_vars)
         # init destination vars
@@ -62,7 +69,6 @@ class ExternalSystemDummy(ExternalSystem):
         print("finish export")
 
 
-
 class ExternalSystemOpenNMS(ExternalSystem):
 
     parameters = [
@@ -75,6 +81,17 @@ class ExternalSystemOpenNMS(ExternalSystem):
         {"name": "exportSnmpConfig", "required": False, "description": "also export SNMP configuration for nodes", "default": "false"},
         {"name": "exportSnmpConfigRetries", "required": False, "description": "export SNMP configuration for nodes: set SNMP retries", "default": "1"},
         {"name": "exportSnmpConfigTimeout", "required": False, "description": "export SNMP configuration for nodes: set SNMP timeout", "default": "2000"}
+    ]
+
+    variables = [
+        {"name": "nodelabel", "required": True, "description": "nodelabel for the OpenNMS node."},
+        {"name": "ip", "required": True, "description": "ip address to add in OpenNMS"},
+        {"name": "furtherIps", "required": False, "description": "further ip addresses to add to OpenNMS node. Format: IP1;IP2;IP3. (since version 0.10)"},
+        {"name": "asset_", "required": False, "description": "content for asset field e.g. - asset_city for adding information to the city field"},
+        {"name": "category_", "required": False, "description": "use variable value of the field to define a category e.g. - category_1"},
+        {"name": "category_", "required": False, "description": "use variable value of the field to define a category in format <name>-<varvalue> e.g. - category_admin"},
+        {"name": "snmp_community", "required": False, "description": "SNMP community of a node. This will be set in OpenNMS, if exportSnmpConfig is set to true (since version 0.14)"},
+        {"name": "snmp_version", "required": False, "description": "SNMP version of a node. This will be set in OpenNMS, if exportSnmpConfig is set to true. Currently the exporter supports only v1/v2c (since version 0.14)"}
     ]
 
     onms_assetfields = {

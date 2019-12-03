@@ -185,6 +185,7 @@ class ExportDestination:
 
 class ExternalSystem:
     parameters = {}
+    variables = {}
 
     def __init__(self, destination_parms, export_vars):
         # Set default if value is empty

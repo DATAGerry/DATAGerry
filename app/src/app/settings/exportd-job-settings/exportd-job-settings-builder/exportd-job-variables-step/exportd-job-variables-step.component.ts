@@ -16,11 +16,31 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnInit, Pipe, PipeTransform} from '@angular/core';
 import { CmdbMode } from '../../../../framework/modes.enum';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbType } from '../../../../framework/models/cmdb-type';
 import { TypeService } from '../../../../framework/services/type.service';
+import { ExportdJobDestinationsStepComponent } from '../exportd-job-destinations-step/exportd-job-destinations-step.component';
+import { ExternalSystemService } from '../../../services/external_system.service';
+
+
+@Pipe({
+  name: 'filterUnique',
+  pure: false
+})
+export class FilterPipe implements PipeTransform {
+
+  transform(value: any, args?: any): any {
+    const newArr = []
+    value.forEach((item, index) => {
+      if (newArr.findIndex(i => i.className === item.className) === -1) {
+        newArr.push(item);
+      }
+    });
+    return newArr;
+  }
+}
 
 @Component({
   selector: 'cmdb-task-variables-step',
@@ -65,12 +85,23 @@ export class ExportdJobVariablesStepComponent implements OnInit {
     }
   }
 
+  private destinationForm: ExportdJobDestinationsStepComponent;
   @Input() public mode: CmdbMode;
   public typeList: CmdbType[] = [];
   public variableForm: FormGroup;
+  public variableHelper: any[];
   readonly VARIABLES = 'variables';
 
-  constructor(private formBuilder: FormBuilder, private typeService: TypeService) {}
+  constructor(private formBuilder: FormBuilder, private typeService: TypeService,
+              private externalService: ExternalSystemService) {}
+
+  @Input() set destinationStep(value: ExportdJobDestinationsStepComponent) {
+    this.destinationForm = value;
+  }
+
+  get destinationStep(): ExportdJobDestinationsStepComponent {
+    return this.destinationForm;
+  }
 
   ngOnInit() {
     this.variableForm = this.formBuilder.group({
@@ -116,5 +147,11 @@ export class ExportdJobVariablesStepComponent implements OnInit {
   public delTemplate(index, event): void {
     const control = this.getVariableAsFormArray().at(event).get('templates') as FormArray;
     control.removeAt(index);
+  }
+
+  public getVariableHelp(value: string) {
+    this.externalService.getExternSytemVariables(value).subscribe(item => {
+      this.variableHelper = item;
+    });
   }
 }
