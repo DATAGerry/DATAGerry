@@ -85,12 +85,11 @@ class ExternalSystemOpenNMS(ExternalSystem):
     variables = [
         {"name": "nodelabel", "required": True, "description": "nodelabel for the OpenNMS node."},
         {"name": "ip", "required": True, "description": "ip address to add in OpenNMS"},
-        {"name": "furtherIps", "required": False, "description": "further ip addresses to add to OpenNMS node. Format: IP1;IP2;IP3. (since version 0.10)"},
+        {"name": "furtherIps", "required": False, "description": "further ip addresses to add to OpenNMS node. Format: IP1;IP2;IP3."},
         {"name": "asset_", "required": False, "description": "content for asset field e.g. - asset_city for adding information to the city field"},
         {"name": "category_", "required": False, "description": "use variable value of the field to define a category e.g. - category_1"},
-        {"name": "category_", "required": False, "description": "use variable value of the field to define a category in format <name>-<varvalue> e.g. - category_admin"},
-        {"name": "snmp_community", "required": False, "description": "SNMP community of a node. This will be set in OpenNMS, if exportSnmpConfig is set to true (since version 0.14)"},
-        {"name": "snmp_version", "required": False, "description": "SNMP version of a node. This will be set in OpenNMS, if exportSnmpConfig is set to true. Currently the exporter supports only v1/v2c (since version 0.14)"}
+        {"name": "snmp_community", "required": False, "description": "SNMP community of a node. This will be set in OpenNMS, if exportSnmpConfig is set to true."},
+        {"name": "snmp_version", "required": False, "description": "SNMP version of a node. This will be set in OpenNMS, if exportSnmpConfig is set to true. Currently the exporter supports only v1/v2c"}
     ]
 
     onms_assetfields = {
