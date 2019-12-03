@@ -17,7 +17,7 @@
 import ipaddress
 import xml.etree.ElementTree as ET
 import requests
-from cmdb.exportd.exporter_base import ExternalSystem, ExportJobConfigException, ExportVariable
+from cmdb.exportd.exporter_base import ExternalSystem, ExportVariable
 
 
 class ExternalSystemDummy(ExternalSystem):
@@ -71,7 +71,6 @@ class ExternalSystemOpenNMS(ExternalSystem):
         {"name": "restpassword", "required": True, "description": "OpenNMS REST password", "default": "admin"},
         {"name": "requisition", "required": True, "description": "OpenNMS requisition to use", "default": "cmdb"},
         {"name": "services", "required": False, "description": "name of services to bind on each node sepetated by space", "default": "ICMP SNMP"},
-        {"name": "rescanExisting", "required": False, "description": "set rescanExisting flag for OpenNMS import", "default": "dbOnly"},
         {"name": "exportSnmpConfig", "required": False, "description": "also export SNMP configuration for nodes", "default": "false"},
         {"name": "exportSnmpConfigRetries", "required": False, "description": "export SNMP configuration for nodes: set SNMP retries", "default": "1"},
         {"name": "exportSnmpConfigTimeout", "required": False, "description": "export SNMP configuration for nodes: set SNMP timeout", "default": "2000"}
@@ -146,7 +145,9 @@ class ExternalSystemOpenNMS(ExternalSystem):
         # init error handling
         self.__obj_successful = []
         self.__obj_warning = []
+        # init variables
         self.__timeout = 10
+        self.__xml = None
 
     def prepare_export(self):
         # check connection to OpenNMS
@@ -251,7 +252,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
             response = requests.get(url, auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]), verify=False, timeout=self.__timeout)
             if response.status_code > 202:
                 self.error("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
-        except:
+        except Exception:
             self.error("Can't connect to OpenNMS API")
         return True
 
@@ -266,7 +267,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
                                      verify=False, timeout=self.__timeout)
             if response.status_code > 202:
                 self.error("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
-        except:
+        except Exception:
             self.error("Can't connect to OpenNMS API")
         return True
 
@@ -276,7 +277,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
             response = requests.put(url, data="", auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]), verify=False, timeout=self.__timeout)
             if response.status_code > 202:
                 self.error("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
-        except:
+        except Exception:
             self.error("Can't connect to OpenNMS API")
         return True
 
@@ -293,7 +294,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
         snmp_timeout_xml.text = self._destination_parms["exportSnmpConfigTimeout"]
         snmp_version = ET.SubElement(snmp_config_xml, "version")
         snmp_version.text = version
-        
+
         # send XML to OpenNMS
         url = "{}/snmpConfig/{}".format(self._destination_parms["resturl"], ip)
         data = ET.tostring(snmp_config_xml, encoding="utf-8", method="xml")
@@ -305,7 +306,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
                                     verify=False, timeout=self.__timeout)
             if response.status_code > 204:
                 self.error("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
-        except:
+        except Exception:
             self.error("Can't connect to OpenNMS API")
         return True
 
@@ -319,7 +320,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
     def __check_asset(self, asset_name, asset_value):
         try:
             asset_length = self.__class__.onms_assetfields[asset_name]
-        except:
+        except Exception:
             return None
         if asset_length and len(asset_value) > asset_length:
             asset_value = asset_value[:asset_length]
