@@ -117,25 +117,6 @@
               Object Logs</a>
           </div>
         </li>
-        <!-- nav user -->
-        <li class="nav-item dropdown mr-2">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
-             aria-expanded="false">
-            <fa-icon icon="user-circle"></fa-icon>
-          </a>
-          <div class="dropdown-menu dropdown-menu-right">
-            <div class="dropdown-header">Account</div>
-            <a routerLink="/management/users/view/{{authService.currentUserValue.public_id}}" class="dropdown-item">
-              <fa-icon icon="user-edit"></fa-icon>
-              Profile
-            </a>
-            <div class="dropdown-header">Auth</div>
-            <a class="dropdown-item" (click)="logout()">
-              <fa-icon icon="sign-out-alt"></fa-icon>
-              Logout
-            </a>
-          </div>
-        </li>
         <!-- info -->
         <li class="nav-item dropdown mr-2">
           <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
@@ -157,11 +138,30 @@
             <a class="dropdown-item"[routerLink]="['/info/about']">
               <i class="fas fa-cube"></i> About DATAGERRY
             </a>
-            <a class="dropdown-item" href="https://docs.datagerry.com/" target="_blank">
+            <a class="dropdown-item" href="/docs" target="_blank">
               <i class="fas fa-book"></i> Documentation
             </a>
             <a class="dropdown-item" [routerLink]="['/info/license']">
               <i class="fas fa-lock-open"></i> License
+            </a>
+          </div>
+        </li>
+        <!-- nav user -->
+        <li class="nav-item dropdown mr-2">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+             aria-expanded="false">
+            <fa-icon icon="user-circle"></fa-icon>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-header">Account</div>
+            <a routerLink="/management/users/view/{{authService.currentUserValue.public_id}}" class="dropdown-item">
+              <fa-icon icon="user-edit"></fa-icon>
+              Profile
+            </a>
+            <div class="dropdown-header">Auth</div>
+            <a class="dropdown-item" (click)="logout()">
+              <fa-icon icon="sign-out-alt"></fa-icon>
+              Logout
             </a>
           </div>
         </li>
