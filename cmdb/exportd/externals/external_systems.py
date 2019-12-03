@@ -144,8 +144,8 @@ class ExternalSystemOpenNMS(ExternalSystem):
         if bool(self._destination_parms.get("exportSnmpConfig")):
             self.__snmp_export = True
         # init error handling
-        self.__counter_successful = 0
-        self.__counter_failed = 0
+        self.__obj_successful = []
+        self.__obj_warning = []
         self.__timeout = 10
 
     def prepare_export(self):
@@ -157,6 +157,9 @@ class ExternalSystemOpenNMS(ExternalSystem):
         self.__xml = ET.Element("model-import", attributes)
 
     def add_object(self, cmdb_object):
+        # init error handling
+        warning = False
+
         # get node variables
         node_foreignid = cmdb_object.get_public_id()
         node_label = self._export_vars.get("nodelabel", ExportVariable("nodelabel", "undefined")).get_value(cmdb_object)
@@ -171,6 +174,8 @@ class ExternalSystemOpenNMS(ExternalSystem):
         for interface in interfaces_in:
             if self.__check_ip(interface):
                 interfaces.append(interface)
+            else:
+                warning = True
         interfaces = list(set(interfaces))
 
         # get category information
@@ -227,12 +232,18 @@ class ExternalSystemOpenNMS(ExternalSystem):
             self.__onms_update_snmpconf_v12(snmp_ip, snmp_community, snmp_version)
 
         # update error counter
-        self.__counter_successful += 1
+        self.__obj_successful.append(cmdb_object.get_public_id())
+        if warning:
+            self.__obj_warning.append(cmdb_object.get_public_id())
 
     def finish_export(self):
         self.__onms_update_requisition()
         self.__onms_sync_requisition()
-        self.set_msg("{} objects exported to OpenNMS".format(self.__counter_successful))
+        # create result message
+        msg = "Export to OpenNMS finished. "
+        msg += "{} objects exported. ".format(len(self.__obj_successful))
+        msg += "The following objects were exported with warnings: {}".format(self.__obj_warning)
+        self.set_msg(msg)
 
     def __onms_check_connection(self):
         url = "{}/info".format(self._destination_parms["resturl"])
