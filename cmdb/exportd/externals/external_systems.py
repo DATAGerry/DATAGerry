@@ -173,7 +173,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
         # get interface information
         interfaces_in = []
         interfaces_in.append(self._export_vars.get("ip", ExportVariable("ip", "127.0.0.1")).get_value(cmdb_object))
-        interfaces_in.extend(self._export_vars.get("furtherIps", ExportVariable("furtherIps", "[]")).get_value(cmdb_object).split())
+        interfaces_in.extend(self._export_vars.get("furtherIps", ExportVariable("furtherIps", "[]")).get_value(cmdb_object).split(";"))
         # validate interfaces
         interfaces = []
         for interface in interfaces_in:
