@@ -178,7 +178,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
         warning = False
 
         # get node variables
-        node_foreignid = cmdb_object.get_public_id()
+        node_foreignid = cmdb_object.object_information['object_id']
         node_label = self._export_vars.get("nodelabel", ExportVariable("nodelabel", "undefined")).get_value(cmdb_object)
         node_location = self._export_vars.get("location", ExportVariable("location", "default")).get_value(cmdb_object)
 
@@ -249,9 +249,9 @@ class ExternalSystemOpenNMS(ExternalSystem):
             self.__onms_update_snmpconf_v12(snmp_ip, snmp_community, snmp_version)
 
         # update error counter
-        self.__obj_successful.append(cmdb_object.get_public_id())
+        self.__obj_successful.append(cmdb_object.object_information['object_id'])
         if warning:
-            self.__obj_warning.append(cmdb_object.get_public_id())
+            self.__obj_warning.append(cmdb_object.object_information['object_id'])
 
     def finish_export(self):
         self.__onms_update_requisition()

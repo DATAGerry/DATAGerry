@@ -19,13 +19,14 @@ import logging
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
-from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
+from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager, LogManagerDeleteError
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import load_class
 from cmdb.utils.system_reader import SystemConfigReader
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
+from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
 
 LOGGER = logging.getLogger(__name__)
 
@@ -111,33 +112,68 @@ class ExportVariable:
         self.__name = name
         self.__value_tpl_default = value_tpl_default
         self.__value_tpl_types = value_tpl_types
+        self.__iteration = 3
+        self.__objectdata = {}
+
+        scr = SystemConfigReader()
+        database_manager = DatabaseManagerMongo(
+            **scr.get_all_values_from_section('Database')
+        )
+        self.__object_manager = CmdbObjectManager(
+            database_manager=database_manager
+        )
 
     def get_value(self, cmdb_object):
         # get value template
         value_template = self.__value_tpl_default
-        object_type_id = cmdb_object.get_type_id()
+        object_type_id = cmdb_object.type_information['type_id']
 
         for templ in self.__value_tpl_types:
             if templ['type'] != '' and object_type_id == int(templ['type']):
                 value_template = templ['template']
 
         # objectdata for use in ExportVariable templates
-        objectdata = {}
-        objectdata["id"] = cmdb_object.get_public_id()
+        self.__objectdata.update({'fields': {}})
+        self.__objectdata.update({'id': cmdb_object.object_information['object_id']})
         # objectdata: object fields
         # ToDo: use rendered fields
-        objectdata["fields"] = {}
-        fields = cmdb_object.get_all_fields()
+        fields = cmdb_object.fields
         for field in fields:
-            field_name = field["name"]
-            field_value = field["value"]
-            objectdata["fields"][field_name] = field_value
+            # field_name = field["name"]
+            # field_value = field["value"]
+            # objectdata["fields"][field_name] = field_value
+            self.set_references(field)
         # ToDo: dereference objectrefs
 
         # render template
         template = jinja2.Template(value_template)
-        output = template.render(objectdata)
+        try:
+            output = template.render(self.__objectdata)
+        except Exception as ex:
+            LOGGER.warning(ex)
+            output = ''
         return output
+
+    def set_references(self, field):
+
+        if 'ref' == field["type"] and field["value"] and self.__iteration != 0:
+            self.__iteration = self.__iteration-1
+            current_object = self.__object_manager.get_object(field["value"])
+            type_instance = self.__object_manager.get_type(current_object.get_type_id())
+            cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance, render_user=None)
+            sub_fields = {field["name"]: {'id': field["value"], 'fields': {}}}
+            for subfield in cmdb_render_object.result().fields:
+                field_name = subfield["name"]
+                field_value = subfield["value"]
+                update = {field_name: field_value}
+                sub_fields[field["name"]]['fields'].update(update)
+                self.__objectdata['fields'].update(sub_fields)
+                self.set_references(subfield)
+        else:
+            field_name = field["name"]
+            field_value = field["value"]
+            update = {field_name: field_value}
+            self.__objectdata['fields'].update(update)
 
 
 class ExportSource:
@@ -151,22 +187,32 @@ class ExportSource:
         return self.__objects
 
     def __fetch_objects(self):
-        condition = []
+        result = []
         for source in self.__job.get_sources():
+            condition = []
             for con in source["condition"]:
                 if con["operator"] == "!=":
                     operator = {"$ne": con["value"]}
                 else:
                     operator = con["value"]
-                    try:
-                        operator = eval(operator)
-                    except Exception as w:
-                        LOGGER.info(w)
-                        operator = operator
+
+                if operator in ['True', 'true']:
+                    operator = True
+                elif operator in ['False', 'false']:
+                    operator = False
+                else:
+                    operator = operator
+
                 condition.append({'fields':  {"$elemMatch": {"name": con["name"], "value": operator}}})
-            condition.append({'type_id': source["type_id"]})
-        query = {"$and": condition}
-        result = self.__obm.get_objects_by(sort="public_id", **query)
+                condition.append({'type_id': source["type_id"]})
+                query = {"$and": condition}
+                current_objects = self.__obm.get_objects_by(sort="public_id", **query)
+                result.extend(RenderList(current_objects, None).render_result_list())
+
+            if not source["condition"]:
+                query = {'type_id': source["type_id"]}
+                current_objects = self.__obm.get_objects_by(sort="public_id", **query)
+                result.extend(RenderList(current_objects, None).render_result_list())
 
         return result
 
