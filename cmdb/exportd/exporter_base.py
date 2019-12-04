@@ -159,10 +159,14 @@ class ExportSource:
                     operator = {"$ne": con["value"]}
                 else:
                     operator = con["value"]
-                    try:
-                        operator = eval(operator)
-                    except Exception:
-                        operator = operator
+
+                if operator in ['True', 'true']:
+                    operator = True
+                elif operator in ['False', 'false']:
+                    operator = False
+                else:
+                    operator = operator
+
                 condition.append({'fields':  {"$elemMatch": {"name": con["name"], "value": operator}}})
                 condition.append({'type_id': source["type_id"]})
                 query = {"$and": condition}
