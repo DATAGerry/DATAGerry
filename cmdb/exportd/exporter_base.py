@@ -161,14 +161,19 @@ class ExportSource:
                     operator = con["value"]
                     try:
                         operator = eval(operator)
-                    except Exception as w:
-                        LOGGER.info(w)
+                    except Exception:
                         operator = operator
                 condition.append({'fields':  {"$elemMatch": {"name": con["name"], "value": operator}}})
                 condition.append({'type_id': source["type_id"]})
                 query = {"$and": condition}
                 current_objects = self.__obm.get_objects_by(sort="public_id", **query)
                 result.extend(RenderList(current_objects, None).render_result_list())
+
+            if not source["condition"]:
+                query = {'type_id': source["type_id"]}
+                current_objects = self.__obm.get_objects_by(sort="public_id", **query)
+                result.extend(RenderList(current_objects, None).render_result_list())
+
         return result
 
 
