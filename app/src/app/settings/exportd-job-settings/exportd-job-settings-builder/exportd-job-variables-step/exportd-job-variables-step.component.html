@@ -32,9 +32,9 @@
                          required>
                   <div id="variableHelpers" class="form-text text-muted">
                     Variable Helpers:
-                    <a *ngFor="let des of destinationStep.destinationForm.get('destination').value | filterUnique"
-                       type="button" (click)="getVariableHelp(des.className)"
-                       class="badge badge-pill badge-info mr-1 text-white" data-toggle="modal" data-target="#variableHelper">
+                    <a href="#" *ngFor="let des of destinationStep.destinationForm.get('destination').value | filterUnique"
+                          class="badge badge-pill badge-info mr-1" data-toggle="modal" data-target="#variableHelper"
+                          (click)="getVariableHelp(des.className)">
                       {{des.className}} <fa-icon icon="question-circle"></fa-icon>
                     </a>
                   </div>
