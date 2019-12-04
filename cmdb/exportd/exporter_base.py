@@ -26,6 +26,7 @@ from cmdb.utils.helpers import load_class
 from cmdb.utils.system_reader import SystemConfigReader
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
+from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
 
 LOGGER = logging.getLogger(__name__)
 
@@ -115,19 +116,18 @@ class ExportVariable:
     def get_value(self, cmdb_object):
         # get value template
         value_template = self.__value_tpl_default
-        object_type_id = cmdb_object.get_type_id()
+        object_type_id = cmdb_object.type_information['type_id']
 
         for templ in self.__value_tpl_types:
             if templ['type'] != '' and object_type_id == int(templ['type']):
                 value_template = templ['template']
 
         # objectdata for use in ExportVariable templates
-        objectdata = {}
-        objectdata["id"] = cmdb_object.get_public_id()
+        objectdata = {'id': cmdb_object.object_information['object_id']}
         # objectdata: object fields
         # ToDo: use rendered fields
         objectdata["fields"] = {}
-        fields = cmdb_object.get_all_fields()
+        fields = cmdb_object.fields
         for field in fields:
             field_name = field["name"]
             field_value = field["value"]
@@ -151,8 +151,9 @@ class ExportSource:
         return self.__objects
 
     def __fetch_objects(self):
-        condition = []
+        result = []
         for source in self.__job.get_sources():
+            condition = []
             for con in source["condition"]:
                 if con["operator"] == "!=":
                     operator = {"$ne": con["value"]}
@@ -164,10 +165,10 @@ class ExportSource:
                         LOGGER.info(w)
                         operator = operator
                 condition.append({'fields':  {"$elemMatch": {"name": con["name"], "value": operator}}})
-            condition.append({'type_id': source["type_id"]})
-        query = {"$and": condition}
-        result = self.__obm.get_objects_by(sort="public_id", **query)
-
+                condition.append({'type_id': source["type_id"]})
+                query = {"$and": condition}
+                current_objects = self.__obm.get_objects_by(sort="public_id", **query)
+                result.extend(RenderList(current_objects, None).render_result_list())
         return result
 
 
