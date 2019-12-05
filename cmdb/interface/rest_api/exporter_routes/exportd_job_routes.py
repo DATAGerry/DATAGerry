@@ -69,7 +69,7 @@ def get_exportd_job_list(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.exportd.job.view')
-def get_exportd_job(public_id):
+def get_exportd_job(public_id, request_user: User):
     """
         get job in database
         Returns:
