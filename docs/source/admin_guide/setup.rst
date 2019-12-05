@@ -1,6 +1,6 @@
-***************************
-Install guide for DATAGERRY
-***************************
+*****
+Setup
+*****
 .. contents:: Table of Contents
     :local:
 |
@@ -9,10 +9,10 @@ Installing on Debian
 ====================
 Instructions for installing DATAGERRY on a Debian system
 
-1. Installing the dependencies
-------------------------------
-1.1 MongoDB
-^^^^^^^^^^^
+Installing the dependencies
+---------------------------
+MongoDB
+^^^^^^^
 
 | **Installing MongoDB:**
 .. code-block:: console
@@ -34,8 +34,8 @@ Instructions for installing DATAGERRY on a Debian system
 
     $ systemctl status MongoDB
 
-1.2 RabbitMQ and Dependencies
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RabbitMQ and Dependencies
+^^^^^^^^^^^^^^^^^^^^^^^^^
 | **Installing Erlang:**
 | Erlang is a programming language that is required for the installation of RabbitMQ
 .. code-block:: console
@@ -73,8 +73,8 @@ Instructions for installing DATAGERRY on a Debian system
 
     $ systemctl status rabbitmq-server
 
-2. Installing DATAGERRY
------------------------
+Installing DATAGERRY
+--------------------
 | **Create a directory and download the DATAGERRY binary:**
 .. code-block:: console
 
@@ -106,10 +106,10 @@ Installing on RHEL
 ==================
 Instructions for installing DATAGERRY one a RHEL system
 
-1. Installing the dependencies
-------------------------------
-1.1 MongoDB
-^^^^^^^^^^^
+Installing the dependencies
+---------------------------
+MongoDB
+^^^^^^^
 | **Installing MongoDB:**
 | Create a repository file with the following input:
 .. code-block:: console
@@ -141,8 +141,8 @@ Instructions for installing DATAGERRY one a RHEL system
 
     $ systemctl status MongoDB
 
-1.2 RabbitMQ and Dependencies
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RabbitMQ and Dependencies
+^^^^^^^^^^^^^^^^^^^^^^^^^
 | **Installing Erlang:**
 | Erlang is a programming language that is required for the installation of RabbitMQ
 .. code-block:: console
@@ -182,12 +182,12 @@ Instructions for installing DATAGERRY one a RHEL system
 
     $ systemctl status rabbitmq-server
 
-2. Installing DATAGERRY
------------------------
+Installing DATAGERRY
+---------------------
 | There are two options for RHEL available with a *.tar.gz archive or a rpm-package.
 
-2.1 DATAGERRY from archive
-^^^^^^^^^^^^^^^^^^^^^^^^^
+DATAGERRY from archive
+^^^^^^^^^^^^^^^^^^^^^^
 | **Create a directory and download the DATAGERRY archive:**
 .. code-block:: console
 
@@ -221,8 +221,8 @@ Instructions for installing DATAGERRY one a RHEL system
 
     $ systemctl status datagerry.service
 
-2.2 DATAGERRY rpm-package
-^^^^^^^^^^^^^^^^^^^^^^^^^
+DATAGERRY rpm-package
+^^^^^^^^^^^^^^^^^^^^^
 | **Install the rpm:**
 .. code-block:: console
 
@@ -244,3 +244,20 @@ Instructions for installing DATAGERRY one a RHEL system
 .. code-block:: console
 
     $ systemctl status datagerry.service
+
+
+Configuration
+=============
+
+DATAGERRRY has a small INI style configuration file, called cmdb.conf, which defines some basic configuration options (e.g. database connection,
+etc). Please see the following example:
+
+.. include:: ../../../etc/cmdb.conf
+    :literal:
+
+It is possible to overwrite settings in the configuration file with OS environment variables. Please see the following example:
+
+.. code-block:: bash
+
+   DATAGERRY_<section_name>_<option_name>
+   DATAGERRY_Database_port=27018

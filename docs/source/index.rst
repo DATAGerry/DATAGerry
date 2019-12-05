@@ -8,13 +8,14 @@ definition of object types to the user.
 .. toctree::
     introduction/getting-started
     introduction/download
+    introduction/license
+    introduction/team
     :caption: Introduction
     :name: introduction
 
 .. toctree::
-    guides/user_guide/index
-    guides/admin_guide/index
-    guides/dev_guide/index
+    admin_guide/index
+    dev_guide/index
     :caption: Guides
     :name: guides
 
@@ -27,11 +28,6 @@ definition of object types to the user.
     :caption: API
     :name: api
 
-.. toctree::
-    about/license
-    about/team
-    :caption: About
-    :name: about
 
 Indices and tables
 ==================
