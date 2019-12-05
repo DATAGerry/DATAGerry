@@ -70,6 +70,10 @@ following syntax is supported::
     # max 3 levels were dereferenced
     {{fields["location"]["fields"]["city"]}}
 
+.. note::
+    If you access object fields, use the name of the field instead of the label.
+
+
 
 Configure Scheduling
 --------------------
