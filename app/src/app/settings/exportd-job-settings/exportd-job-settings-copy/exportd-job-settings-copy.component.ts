@@ -15,22 +15,20 @@ import { UserService } from '../../../management/services/user.service';
 export class ExportdJobSettingsCopyComponent {
 
   public taskID: number;
-  public typeInstance: CmdbType;
   public taskInstance: ExportdJob;
+  public mode: number = CmdbMode.Create;
 
   constructor(private typeService: TypeService, private taskService: ExportdJobService,
               private route: ActivatedRoute, private userService: UserService) {
-    this.typeInstance = new CmdbType();
+    this.taskInstance = new ExportdJob();
     this.route.params.subscribe((param) => {
-      console.log(param);
       if (param.publicID !== undefined) {
-        console.log('TEST');
         this.taskService.getTask(param.publicID).subscribe((taskCopy: ExportdJob) => {
-          this.taskInstance = taskCopy;
-          delete this.taskInstance.public_id;
+          delete taskCopy.public_id;
           // @ts-ignore
-          delete this.taskInstance._id;
-          delete this.taskInstance.last_execute_date;
+          delete taskCopy._id;
+          delete taskCopy.last_execute_date;
+          this.taskInstance = taskCopy;
           this.taskInstance.state = 'SUCCESSFUL';
           this.taskInstance.author_id = this.userService.getCurrentUser().public_id;
           this.taskInstance.author_name = this.userService.getCurrentUser().user_name;
