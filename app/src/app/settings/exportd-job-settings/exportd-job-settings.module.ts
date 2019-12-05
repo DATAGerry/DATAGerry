@@ -40,6 +40,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { DeleteLogJobModalComponent, ExportdJobLogsComponent } from './exportd-job-logs/exportd-job-logs.component';
+import { ExportdJobSettingsCopyComponent } from './exportd-job-settings-copy/exportd-job-settings-copy.component';
 
 @NgModule({
   entryComponents: [DeleteLogJobModalComponent],
@@ -56,7 +57,8 @@ import { DeleteLogJobModalComponent, ExportdJobLogsComponent } from './exportd-j
     ExportdJobCompleteStepComponent,
     ExportdJobLogsComponent,
     DeleteLogJobModalComponent,
-    FilterPipe],
+    FilterPipe,
+    ExportdJobSettingsCopyComponent],
   imports: [
     CommonModule,
     LayoutModule,

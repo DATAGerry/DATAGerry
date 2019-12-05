@@ -57,6 +57,10 @@
       <a class="ml-1 text-dark mr-1" [routerLink]="['/settings/exportdjob/edit/', task?.public_id]">
         <fa-icon [icon]="['far', 'edit']"></fa-icon>
       </a>
+      <a class="ml-1 text-dark mr-1" [routerLink]="['/settings/exportdjob/copy/', task?.public_id]"
+         [queryParams]="{copy: task?.public_id}">
+        <fa-icon [icon]="['far', 'copy']"></fa-icon>
+      </a>
       <a class="ml-1 text-dark">
         <fa-icon [icon]="['far', 'trash-alt']" (click)="delTask(task?.public_id)"></fa-icon>
       </a>

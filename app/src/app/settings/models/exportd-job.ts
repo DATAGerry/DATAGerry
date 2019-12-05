@@ -19,11 +19,14 @@
 export class ExportdJob {
 
   // tslint:disable: variable-name
+  private readonly _id?: string;
   public public_id: number;
   public name: string;
   public label: string;
   public description: string;
   public active: boolean;
+  public author_id: number;
+  public author_name: string;
   public last_execute_date: any;
   public sources: [];
   public destination: [];

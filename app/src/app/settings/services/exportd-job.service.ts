@@ -17,17 +17,35 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService } from '../../services/api-call.service';
+import { ApiCallService, ApiService } from '../../services/api-call.service';
 import { ExportdJob } from '../models/exportd-job';
-import { Observable } from 'rxjs';
+import { Observable, timer} from 'rxjs';
+import { FormControl } from '@angular/forms';
+import { catchError, map, switchMap } from 'rxjs/operators';
+
+export const checkJobExistsValidator = (jobService: ExportdJobService<ExportdJob>, time: number = 500) => {
+  return (control: FormControl) => {
+    return timer(time).pipe(switchMap(() => {
+      return jobService.checkJobExists(control.value).pipe(
+        map(() => {
+          return { typeExists: true };
+        }),
+        catchError(() => {
+          return new Promise(resolve => {
+            resolve(null);
+          });
+        })
+      );
+    }));
+  };
+};
 
 @Injectable({
   providedIn: 'root'
 })
-export class ExportdJobService {
+export class ExportdJobService<T = ExportdJob> implements ApiService {
 
-  private servicePrefix: string = 'exportdjob';
-
+  public servicePrefix: string = 'exportdjob';
   private taskList: ExportdJob[];
 
   constructor(private api: ApiCallService) {
@@ -63,5 +81,10 @@ export class ExportdJobService {
 
   public run_task(publicID: number) {
     return this.api.callGetRoute<ExportdJob>(this.servicePrefix + '/manual/' + publicID);
+  }
+
+  // Validation functions
+  public checkJobExists(typeName: string) {
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`);
   }
 }
