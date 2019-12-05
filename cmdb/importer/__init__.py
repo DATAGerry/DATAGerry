@@ -15,9 +15,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from cmdb.importer.importer_errors import ImporterLoadError, ParserLoadError
-from cmdb.importer.parser_object import CsvObjectParser, JsonObjectParser
+from cmdb.importer.parser_object import CsvObjectParser, JsonObjectParser, ExcelObjectParser
 from cmdb.importer.importer_object import JsonObjectImporter, CsvObjectImporter, JsonObjectImporterConfig, \
-    CsvObjectImporterConfig
+    CsvObjectImporterConfig, ExcelObjectImporter, ExcelObjectImporterConfig
 
 try:
     from cmdb.utils.error import CMDBError
@@ -26,17 +26,20 @@ except ImportError:
 
 __OBJECT_IMPORTER__ = {
     'json': JsonObjectImporter,
-    'csv': CsvObjectImporter
+    'csv': CsvObjectImporter,
+    'xlsx': ExcelObjectImporter
 }
 
 __OBJECT_IMPORTER_CONFIG__ = {
     'json': JsonObjectImporterConfig,
-    'csv': CsvObjectImporterConfig
+    'csv': CsvObjectImporterConfig,
+    'xlsx': ExcelObjectImporterConfig
 }
 
 __OBJECT_PARSER__ = {
     'json': JsonObjectParser,
-    'csv': CsvObjectParser
+    'csv': CsvObjectParser,
+    'xlsx': ExcelObjectParser
 }
 
 
@@ -44,7 +47,8 @@ def load_importer_class(importer_type: str, importer_name: str):
     __importer = {
         'object': {
             JsonObjectImporter.CONTENT_TYPE: JsonObjectImporter,
-            CsvObjectImporter.CONTENT_TYPE: CsvObjectImporter
+            CsvObjectImporter.CONTENT_TYPE: CsvObjectImporter,
+            ExcelObjectImporter.CONTENT_TYPE: ExcelObjectImporter
         }
     }
     try:
@@ -60,7 +64,8 @@ def load_importer_config_class(importer_type: str, importer_name: str):
     __importer_config = {
         'object': {
             JsonObjectImporterConfig.CONTENT_TYPE: JsonObjectImporterConfig,
-            CsvObjectImporterConfig.CONTENT_TYPE: CsvObjectImporterConfig
+            CsvObjectImporterConfig.CONTENT_TYPE: CsvObjectImporterConfig,
+            ExcelObjectImporterConfig.CONTENT_TYPE: ExcelObjectImporterConfig
         }
     }
     try:
@@ -76,7 +81,8 @@ def load_parser_class(parser_type: str, parser_name: str):
     __parser = {
         'object': {
             JsonObjectParser.CONTENT_TYPE: JsonObjectParser,
-            CsvObjectParser.CONTENT_TYPE: CsvObjectParser
+            CsvObjectParser.CONTENT_TYPE: CsvObjectParser,
+            ExcelObjectParser.CONTENT_TYPE: ExcelObjectParser
         }
     }
     try:

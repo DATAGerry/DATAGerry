@@ -16,16 +16,17 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ImportService } from '../../import.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'cmdb-select-file',
   templateUrl: './select-file.component.html',
   styleUrls: ['./select-file.component.scss']
 })
-export class SelectFileComponent implements OnInit {
+export class SelectFileComponent implements OnInit, OnDestroy {
 
   private defaultFileFormat: string = '';
   public fileForm: FormGroup;
@@ -33,12 +34,22 @@ export class SelectFileComponent implements OnInit {
   public selectedFileFormat: string = `.${ this.defaultFileFormat }`;
   public importerTypes: any[] = [];
 
+  // Loading subscription
+  private importerDefinitionSubscription: Subscription;
+  private fileFormatChangeSubscription: Subscription;
+  private fileChangeSubscription: Subscription;
+
+  // Event outputs
   @Output() public formatChange: EventEmitter<string>;
   @Output() public fileChange: EventEmitter<File>;
 
   public constructor(private importService: ImportService) {
     this.formatChange = new EventEmitter<string>();
     this.fileChange = new EventEmitter<File>();
+
+    this.importerDefinitionSubscription = new Subscription();
+    this.fileFormatChangeSubscription = new Subscription();
+    this.fileChangeSubscription = new Subscription();
 
     this.fileForm = new FormGroup({
       fileFormat: new FormControl(this.defaultFileFormat, Validators.required),
@@ -47,16 +58,22 @@ export class SelectFileComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.importService.getObjectImporters().subscribe(importers => {
+    this.importerDefinitionSubscription = this.importService.getObjectImporters().subscribe(importers => {
       this.importerTypes = importers;
     });
-    this.fileFormat.valueChanges.subscribe((format: string) => {
+    this.fileFormatChangeSubscription = this.fileFormat.valueChanges.subscribe((format: string) => {
       this.formatChange.emit(format);
       this.selectedFileFormat = `.${ format }`;
     });
-    this.file.valueChanges.subscribe((file) => {
+    this.fileChangeSubscription = this.file.valueChanges.subscribe((file) => {
       this.fileChange.emit(file);
     });
+  }
+
+  public ngOnDestroy(): void {
+    this.importerDefinitionSubscription.unsubscribe();
+    this.fileFormatChangeSubscription.unsubscribe();
+    this.fileChangeSubscription.unsubscribe();
   }
 
   public get fileFormat() {

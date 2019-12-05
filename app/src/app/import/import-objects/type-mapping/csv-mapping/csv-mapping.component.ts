@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, forwardRef } from '@angular/core';
 import { TypeMappingBaseComponent } from '../type-mapping-base.component';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -24,7 +24,8 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'cmdb-csv-mapping',
   templateUrl: './csv-mapping.component.html',
-  styleUrls: ['./csv-mapping.component.scss']
+  styleUrls: ['./csv-mapping.component.scss'],
+  providers: [{provide: TypeMappingBaseComponent, useExisting: forwardRef(() => CsvMappingComponent) }]
 })
 export class CsvMappingComponent extends TypeMappingBaseComponent implements OnInit, OnDestroy {
 
@@ -52,10 +53,6 @@ export class CsvMappingComponent extends TypeMappingBaseComponent implements OnI
 
   public ngOnDestroy(): void {
     this.previewSelectionSubscription.unsubscribe();
-  }
-
-  public onAutoSet(): void{
-
   }
 
 }

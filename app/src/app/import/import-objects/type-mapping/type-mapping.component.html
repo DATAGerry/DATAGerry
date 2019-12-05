@@ -57,7 +57,7 @@
 <button class="btn btn-primary prev" type="button" awPreviousStep>
   <i class="fas fa-angle-double-left"></i> Previous Step
 </button>
-<button class="btn btn-primary next" type="button" [disabled]="configForm.invalid && currentMapping.length < 1"
+<button class="btn btn-primary next" type="button" [disabled]="configForm.invalid"
         awNextStep>
   Next Step <i class="fas fa-angle-double-right"></i>
 </button>

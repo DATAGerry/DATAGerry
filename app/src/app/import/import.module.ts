@@ -50,6 +50,7 @@ import { CategoryModule } from '../framework/category/category.module';
 import { ImportTypeCompleteComponent } from './import-types/import-type-complete/import-type-complete.component';
 import { FileSizePipe } from './import-types/file-size.pipe';
 import { ImportCompleteComponent } from './import-objects/import-complete/import-complete.component';
+import { XlsxConfigComponent } from './import-objects/file-config/xlsx-config/xlsx-config.component';
 
 
 @NgModule({
@@ -73,7 +74,8 @@ import { ImportCompleteComponent } from './import-objects/import-complete/import
     TypePreviewComponent,
     ImportTypeCompleteComponent,
     FileSizePipe,
-    ImportCompleteComponent
+    ImportCompleteComponent,
+    XlsxConfigComponent
   ],
   imports: [
     CommonModule,

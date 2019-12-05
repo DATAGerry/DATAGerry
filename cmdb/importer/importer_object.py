@@ -21,18 +21,29 @@ from typing import List
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.importer import JsonObjectParser
 from cmdb.importer.importer_errors import ImportRuntimeError, ParserRuntimeError
-from cmdb.importer.content_types import JSONContent, CSVContent
+from cmdb.importer.content_types import JSONContent, CSVContent, XLSXContent
 from cmdb.importer.importer_base import ObjectImporter
 from cmdb.importer.importer_config import ObjectImporterConfig
 from cmdb.importer.importer_response import ImporterObjectResponse
-from cmdb.importer.mapper import Mapping
-from cmdb.importer.parser_object import JsonObjectParserResponse, CsvObjectParserResponse
+from cmdb.importer.mapper import Mapping, MapEntry
+from cmdb.importer.parser_object import JsonObjectParserResponse, CsvObjectParserResponse, ExcelObjectParserResponse
 from cmdb.user_management import User
 
 LOGGER = logging.getLogger(__name__)
 
 
 class JsonObjectImporterConfig(ObjectImporterConfig, JSONContent):
+    """Importer configuration for JSON files"""
+
+    DEFAULT_MAPPING = {
+        'properties': {
+            'public_id': 'public_id',
+            'active': 'active',
+        },
+        'fields': {
+        }
+    }
+
     MANUALLY_MAPPING = False
 
     def __init__(self, type_id: int, mapping: Mapping = None, start_element: int = 0, max_elements: int = 0,
@@ -42,6 +53,7 @@ class JsonObjectImporterConfig(ObjectImporterConfig, JSONContent):
 
 
 class JsonObjectImporter(ObjectImporter, JSONContent):
+    """Object importer for JSON"""
 
     def __init__(self, file=None, config: JsonObjectImporterConfig = None,
                  parser: JsonObjectParser = None, object_manager: CmdbObjectManager = None, request_user: User = None):
@@ -49,6 +61,7 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
                                                  object_manager=object_manager, request_user=request_user)
 
     def generate_object(self, entry: dict, *args, **kwargs) -> dict:
+        """create the native cmdb object from parsed content"""
         possible_fields: List[dict] = kwargs['fields']
         mapping: dict = self.config.get_mapping()
 
@@ -94,7 +107,7 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
 class CsvObjectImporterConfig(ObjectImporterConfig, CSVContent):
     MANUALLY_MAPPING = True
 
-    def __init__(self, type_id: int, mapping: Mapping = None, start_element: int = 0, max_elements: int = 0,
+    def __init__(self, type_id: int, mapping: list = None, start_element: int = 0, max_elements: int = 0,
                  overwrite_public: bool = True, *args, **kwargs):
         super(CsvObjectImporterConfig, self).__init__(type_id=type_id, mapping=mapping, start_element=start_element,
                                                       max_elements=max_elements, overwrite_public=overwrite_public)
@@ -108,8 +121,37 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
                                                 object_manager=object_manager, request_user=request_user)
 
     def generate_object(self, entry: dict, *args, **kwargs) -> dict:
+        try:
+            possible_fields: List[dict] = kwargs['fields']
+        except (KeyError, IndexError, ValueError) as err:
+            raise ImportRuntimeError(CsvObjectImporter, f'[CSV] cant import objects: {err}')
 
-        return entry
+        working_object: dict = {
+            'active': True,
+            'type_id': self.get_config().get_type_id(),
+            'fields': [],
+            'author_id': self.request_user.get_public_id(),
+            'version': '1.0.0',
+            'creation_time': datetime.datetime.utcnow()
+        }
+        current_mapping = self.get_config().get_mapping()
+        property_entries: List[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'property'})
+        field_entries: List[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'field'})
+
+        # Insert properties
+        for property_entry in property_entries:
+            working_object.update({property_entry.get_name(): entry.get(property_entry.get_value())})
+
+        # Validate insert fields
+        for field_entry in field_entries:
+            if field_entry.get_name() not in possible_fields:
+                continue
+            working_object['fields'].append(
+                {'name': field_entry.get_name(),
+                 'value': entry.get(field_entry.get_value())
+                 })
+
+        return working_object
 
     def start_import(self) -> ImporterObjectResponse:
         try:
@@ -117,11 +159,69 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
         except ParserRuntimeError as pre:
             raise ImportRuntimeError(self.__class__.__name__, pre)
 
-        LOGGER.debug(f'Parser Response: {parsed_response.__dict__}')
+        type_instance_fields: List[dict] = self.object_manager.get_type(self.config.get_type_id()).get_fields()
 
-        #type_instance_fields: List = self.object_manager.get_type(self.config.get_type_id()).get_fields()
+        import_objects: [dict] = self._generate_objects(parsed_response, fields=type_instance_fields)
+        import_result: ImporterObjectResponse = self._import(import_objects)
 
-        #import_objects: [dict] = self._generate_objects(parsed_response, fields=type_instance_fields)
-        # import_result: ImporterObjectResponse = self._import(import_objects)
+        return import_result
+
+
+class ExcelObjectImporterConfig(ObjectImporterConfig, XLSXContent):
+    MANUALLY_MAPPING = True
+
+    def __init__(self, type_id: int, mapping: list = None, start_element: int = 0, max_elements: int = 0,
+                 overwrite_public: bool = True, *args, **kwargs):
+        super(ExcelObjectImporterConfig, self).__init__(type_id=type_id, mapping=mapping, start_element=start_element,
+                                                        max_elements=max_elements, overwrite_public=overwrite_public)
+
+
+class ExcelObjectImporter(ObjectImporter, XLSXContent):
+
+    def __init__(self, file=None, config: ExcelObjectImporterConfig = None,
+                 parser: JsonObjectParser = None, object_manager: CmdbObjectManager = None, request_user: User = None):
+        super(ExcelObjectImporter, self).__init__(file=file, file_type=self.FILE_TYPE, config=config, parser=parser,
+                                                  object_manager=object_manager, request_user=request_user)
+
+    def generate_object(self, entry: dict, *args, **kwargs) -> dict:
+        try:
+            possible_fields: List[dict] = kwargs['fields']
+        except (KeyError, IndexError, ValueError) as err:
+            raise ImportRuntimeError(CsvObjectImporter, f'[CSV] cant import objects: {err}')
+
+        working_object: dict = {
+            'active': True,
+            'type_id': self.get_config().get_type_id(),
+            'fields': [],
+            'author_id': self.request_user.get_public_id(),
+            'version': '1.0.0',
+            'creation_time': datetime.datetime.utcnow()
+        }
+        current_mapping = self.get_config().get_mapping()
+        property_entries: List[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'property'})
+        field_entries: List[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'field'})
+
+        # Insert properties
+        for property_entry in property_entries:
+            working_object.update({property_entry.get_name(): entry.get(property_entry.get_value())})
+
+        # Validate insert fields
+        for field_entry in field_entries:
+            if field_entry.get_name() not in possible_fields:
+                continue
+            working_object['fields'].append(
+                {'name': field_entry.get_name(),
+                 'value': entry.get(field_entry.get_value())
+                 })
+
+        return working_object
+
+    def start_import(self) -> ImporterObjectResponse:
+        try:
+            parsed_response: ExcelObjectParserResponse = self.parser.parse(self.file)
+        except ParserRuntimeError as pre:
+            raise ImportRuntimeError(self.__class__.__name__, pre)
+
+        LOGGER.debug(parsed_response)
 
         return ImporterObjectResponse('Nope')
