@@ -17,13 +17,14 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService } from '../../services/api-call.service';
+import { HttpInterceptorHandler, ApiCallService, ApiService } from '../../services/api-call.service';
 import { User } from '../models/user';
 import { AuthService } from '../../auth/services/auth.service';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
-import { HttpResponse } from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpResponse } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
+import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
 
 export const checkUserExistsValidator = (userService: UserService, time: number = 500) => {
   return (control: FormControl) => {
@@ -49,7 +50,7 @@ export class UserService<T = User> implements ApiService {
 
   public readonly servicePrefix: string = 'user';
 
-  constructor(private api: ApiCallService, private authService: AuthService) {
+  constructor(private api: ApiCallService, private backend: HttpBackend, private authService: AuthService) {
   }
 
   public getCurrentUser(): User {
@@ -117,6 +118,7 @@ export class UserService<T = User> implements ApiService {
 
   // Special functions
   public checkUserExists(userName: string) {
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ userName }`);
+    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor(this.authService)));
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ userName }`, specialClient);
   }
 }

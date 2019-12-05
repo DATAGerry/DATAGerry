@@ -17,7 +17,14 @@
 */
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpEvent,
+  HttpHandler,
+  HttpHeaders,
+  HttpInterceptor, HttpRequest
+} from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { ConnectionService } from '../connect/connection.service';
@@ -39,8 +46,7 @@ export const httpObserveOptions = {
 };
 
 export const httpFileOptions = {
-  headers: new HttpHeaders({
-  }),
+  headers: new HttpHeaders({}),
   params: {},
   observe: resp
 };
@@ -68,8 +74,8 @@ export class ApiCallService {
     this.apiURL = `${ this.connectionService.currentConnection }/${ this.apiPrefix }/`;
   }
 
-  public callGet<T>(route: string, params?: any): Observable<any> {
-    return this.http.get<T>(this.apiURL + route, httpObserveOptions).pipe(catchError(ApiCallService.handleError));
+  public callGet<T>(route: string, client: HttpClient = this.http): Observable<any> {
+    return client.get<T>(this.apiURL + route, httpObserveOptions).pipe(catchError(ApiCallService.handleError));
   }
 
   public callPost<T>(route: string, data, httpPostOptions = httpObserveOptions): Observable<any> {
@@ -115,4 +121,13 @@ export class ApiCallService {
 
 export interface ApiService {
   servicePrefix: string;
+}
+
+export class HttpInterceptorHandler implements HttpHandler {
+  constructor(private next: HttpHandler, private interceptor: HttpInterceptor) {
+  }
+
+  handle(req: HttpRequest<any>): Observable<HttpEvent<any>> {
+    return this.interceptor.intercept(req, this.next);
+  }
 }

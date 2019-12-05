@@ -24,7 +24,6 @@ import { AppComponent } from './app.component';
 import { LayoutModule } from './layout/layout.module';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { PreviousRouteService } from './services/previous-route.service';
-import { NgxSpinnerModule } from 'ngx-spinner';
 import { DatePipe } from '@angular/common';
 import { FileSaverModule } from 'ngx-filesaver';
 import { ToastModule } from './layout/toast/toast.module';
@@ -43,7 +42,6 @@ import { ErrorMessageModule } from './error/error-message/error-message.module';
     LayoutModule,
     AuthModule,
     ErrorMessageModule,
-    NgxSpinnerModule,
     FileSaverModule,
     ToastModule,
     AppRoutingModule

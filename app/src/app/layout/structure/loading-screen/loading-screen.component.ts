@@ -16,20 +16,18 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { ConnectComponent } from './connect.component';
+import { Component } from '@angular/core';
 
-const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    component: ConnectComponent
-  }
-];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+@Component({
+  selector: 'cmdb-loading-screen',
+  templateUrl: './loading-screen.component.html',
+  styleUrls: ['./loading-screen.component.scss']
 })
-export class ConnectRoutingModule { }
+export class LoadingScreenComponent {
+
+  public bdColor: string = 'rgba(50,50,50, 0.2)';
+  public color: string = 'rgb(233, 77, 24)';
+  public type: string = 'ball-clip-rotate-multiple';
+  public fullScreen: boolean = false;
+
+}

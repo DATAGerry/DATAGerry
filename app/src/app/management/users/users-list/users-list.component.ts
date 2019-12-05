@@ -16,23 +16,24 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { GroupService } from '../../services/group.service';
 import { UserService } from '../../services/user.service';
 import { DataTableDirective } from 'angular-datatables';
-import { combineLatest, forkJoin, Subject, Subscription } from 'rxjs';
+import { forkJoin, Subject, Subscription } from 'rxjs';
 import { User } from '../../models/user';
 import { Group } from '../../models/group';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { UsersPasswdModalComponent } from '../modals/users-passwd-modal/users-passwd-modal.component';
 import { AuthService } from '../../../auth/services/auth.service';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'cmdb-users-list',
   templateUrl: './users-list.component.html',
   styleUrls: ['./users-list.component.scss']
 })
-export class UsersListComponent implements OnInit, OnDestroy {
+export class UsersListComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Display data
   public userList: User[];
@@ -65,11 +66,13 @@ export class UsersListComponent implements OnInit, OnDestroy {
   // Current user
   public currentUser: User;
 
-  constructor(private authService: AuthService, private userService: UserService, public groupService: GroupService, private modalService: NgbModal) {
+  constructor(private authService: AuthService, private userService: UserService, public groupService: GroupService,
+              private modalService: NgbModal, private spinner: NgxSpinnerService) {
     this.dataSubscription = new Subscription();
   }
 
   public ngOnInit(): void {
+    this.spinner.show();
     this.currentUser = this.authService.currentUserValue;
     const dataSubscriptionArray: any[] = [
       this.userService.getUserList(), this.groupService.getGroupList()
@@ -85,7 +88,11 @@ export class UsersListComponent implements OnInit, OnDestroy {
       () => {
         this.dtTrigger.next();
       }
-    );
+    ).add(() => this.spinner.hide());
+  }
+
+  public ngAfterViewInit(): void {
+
   }
 
   public ngOnDestroy(): void {
@@ -101,5 +108,6 @@ export class UsersListComponent implements OnInit, OnDestroy {
     const deleteModal = this.modalService.open(UsersPasswdModalComponent, { size: 'lg' });
     deleteModal.componentInstance.user = user;
   }
+
 
 }

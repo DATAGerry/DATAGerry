@@ -50,6 +50,8 @@ import { UserDisplayComponent } from './components/user-display/user-display.com
 import { ChartsComponent } from './components/charts/charts.component';
 import { ToastModule } from './toast/toast.module';
 import { AuthModule } from '../auth/auth.module';
+import { NgxSpinnerComponent, NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
+import { LoadingScreenComponent } from './structure/loading-screen/loading-screen.component';
 
 export const LAYOUT_COMPONENT_ROUTES: Routes = [
   {
@@ -66,6 +68,11 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     path: '',
     component: BreadcrumbComponent,
     outlet: 'breadcrumb'
+  },
+  {
+    path: '',
+    component: LoadingScreenComponent,
+    outlet: 'loading-screen'
   },
   {
     path: '',
@@ -91,9 +98,11 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     IconPickerComponent,
     UserImageComponent,
     UserDisplayComponent,
-    ChartsComponent
+    ChartsComponent,
+    LoadingScreenComponent
   ],
   exports: [
+    NgxSpinnerComponent,
     LowercaseDirective,
     NavigationComponent,
     BreadcrumbComponent,
@@ -113,6 +122,7 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     RouterModule,
     NgSelectModule,
     ReactiveFormsModule,
+    NgxSpinnerModule,
     NgbModule,
     FormsModule,
     DataTablesModule,

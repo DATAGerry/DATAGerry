@@ -22,7 +22,7 @@
   <tbody>
   <tr *ngFor="let user of userList">
     <th scope="row">{{user?.public_id}}</th>
-    <td>{{user?.user_name}}</td>
+    <td><a [routerLink]="['/management/users/view/', user?.public_id]">{{user?.user_name}}</a></td>
     <td>
       <cmdb-user-display [user]="user"></cmdb-user-display>
     </td>

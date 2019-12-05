@@ -50,6 +50,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
   ];
 
   private readonly REDIRECT_ERRORS: number[] = [
+    this.CONNECTION_REFUSED,
     this.UNAUTHORIZED,
     this.INTERNAL_SERVER_ERROR
   ];
@@ -64,6 +65,9 @@ export class HttpErrorInterceptor implements HttpInterceptor {
       if (this.INFO_ERRORS.indexOf(statusCode) !== -1) {
         this.errorService.add(error.error as BackendHttpError);
       } else if (this.REDIRECT_ERRORS.indexOf(statusCode) !== -1) {
+        if (statusCode === this.CONNECTION_REFUSED || statusCode === this.INTERNAL_SERVER_ERROR) {
+          this.router.navigate(['/connect/']);
+        }
         if (statusCode === this.UNAUTHORIZED) {
           this.authService.logout();
           this.router.navigate(['/auth/login/']);
