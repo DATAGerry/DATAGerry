@@ -28,7 +28,7 @@
       <div class="card-header">
         Log Methods:
       </div>
-      <ul class="list-group list-group-flush">
+      <ul class="list-group list-group-flush" *permissionLink="['base.framework.log.delete']">
         <li class="list-group-item list-group-item-action list-group-item-danger pointer" (click)="cleanup()">
           <i class="far fa-trash-alt"></i> Cleanup
           <i class="fas fa-question-circle float-right" placement="left" ngbTooltip="Deletes all logs"></i>

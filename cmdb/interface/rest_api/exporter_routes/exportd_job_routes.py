@@ -26,7 +26,7 @@ from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagerGetErr
     ExportdJobManagerInsertError, ExportdJobManagerUpdateError, ExportdJobManagerDeleteError
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob, ExecuteState
-from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user, login_required
+from cmdb.interface.route_utils import make_response, RootBlueprint, login_required, insert_request_user, right_required
 from cmdb.user_management import User
 
 with current_app.app_context():
@@ -45,7 +45,9 @@ exportd_job_blueprint = RootBlueprint('exportd_job_blueprint', __name__, url_pre
 # DEFAULT ROUTES
 @exportd_job_blueprint.route('/', methods=['GET'])
 @login_required
-def get_exportd_job_list():
+@insert_request_user
+@right_required('base.exportd.job.view')
+def get_exportd_job_list(request_user: User):
     """
     get all objects in database
     Returns:
@@ -65,7 +67,9 @@ def get_exportd_job_list():
 @exportd_job_blueprint.route('/<int:public_id>/', methods=['GET'])
 @exportd_job_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
-def get_exportd_job(public_id):
+@insert_request_user
+@right_required('base.exportd.job.view')
+def get_exportd_job(public_id, request_user: User):
     """
         get job in database
         Returns:
@@ -84,6 +88,7 @@ def get_exportd_job(public_id):
 @exportd_job_blueprint.route('/<string:name>', methods=['GET'])
 @login_required
 @insert_request_user
+@right_required('base.exportd.job.view')
 def get_type_by_name(name: str, request_user: User):
     try:
         job_instance = exportd_manager.get_job_by_name(name=name)
@@ -95,6 +100,7 @@ def get_type_by_name(name: str, request_user: User):
 @exportd_job_blueprint.route('/', methods=['POST'])
 @login_required
 @insert_request_user
+@right_required('base.exportd.job.add')
 def add_job(request_user: User):
     from bson import json_util
     add_data_dump = json.dumps(request.json)
@@ -138,8 +144,8 @@ def add_job(request_user: User):
 
 @exportd_job_blueprint.route('/', methods=['PUT'])
 @login_required
-@json_required
 @insert_request_user
+@right_required('base.exportd.job.edit')
 def update_job(request_user: User):
     from bson import json_util
     add_data_dump = json.dumps(request.json)
@@ -178,9 +184,11 @@ def update_job(request_user: User):
     return resp
 
 
+@exportd_job_blueprint.route('/<int:public_id>/', methods=['DELETE'])
 @exportd_job_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @login_required
 @insert_request_user
+@right_required('base.exportd.job.delete')
 def delete_job(public_id: int, request_user: User):
     try:
         try:
@@ -211,6 +219,7 @@ def delete_job(public_id: int, request_user: User):
 @exportd_job_blueprint.route('/manual/<int:public_id>', methods=['GET'])
 @login_required
 @insert_request_user
+@right_required('base.exportd.job.run')
 def get_run_job_manual(public_id, request_user: User):
     """
      run job manual

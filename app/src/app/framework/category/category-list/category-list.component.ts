@@ -53,18 +53,9 @@ export class CategoryListComponent implements OnInit, OnDestroy {
       ordering: true,
       order: [[1, 'desc']],
       dom:
-        '<"row" <"col-sm-2" l> <"col-sm-3" B > <"col" f> >' +
+        '<"row" <"col-sm-2" l><"col" f> >' +
         '<"row" <"col-sm-12"tr>>' +
         '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
-      buttons: [
-        {
-          text: '<i class="fas fa-plus"></i> Add',
-          className: 'btn btn-success btn-sm mr-1',
-          action: function() {
-            this.router.navigate(['/framework/category/add']);
-          }.bind(this)
-        }
-      ],
       language: {
         search: '',
         searchPlaceholder: 'Filter...'

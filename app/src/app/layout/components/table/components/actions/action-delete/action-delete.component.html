@@ -1,8 +1,10 @@
 <ng-container *ngFor="let action of data">
-  <a *ngIf="action.name === 'delete' && action.active !== false"
-     class="{{action.classValue}}"
-     type="button"
-     (click)="delete(action.linkRoute)">
-    <fa-icon [icon]="['far', action.fontIcon]"></fa-icon>
-  </a>
+  <ng-container *ngIf="action.name === 'delete' && action.active !== false">
+    <a *permissionLink="['base.framework.object.delete']"
+       class="{{action.classValue}}"
+       type="button"
+       (click)="delete(action.linkRoute)">
+      <fa-icon [icon]="['far', action.fontIcon]"></fa-icon>
+    </a>
+  </ng-container>
 </ng-container>

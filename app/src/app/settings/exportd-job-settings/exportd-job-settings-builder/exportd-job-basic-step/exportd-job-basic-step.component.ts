@@ -17,10 +17,9 @@
 */
 
 
-import { Component, Input, OnInit} from '@angular/core';
+import { Component, Injectable, Input, OnInit} from '@angular/core';
 import { CmdbMode } from '../../../../framework/modes.enum';
-import { FormControl, FormGroup, Validators} from '@angular/forms';
-import { TypeService} from '../../../../framework/services/type.service';
+import { AbstractControl, FormControl, FormGroup, Validators} from '@angular/forms';
 import { checkJobExistsValidator, ExportdJobService} from '../../../services/exportd-job.service';
 
 @Component({
@@ -42,7 +41,7 @@ export class ExportdJobBasicStepComponent implements OnInit {
 
   public basicForm: FormGroup;
 
-  constructor(private typeService: TypeService, private exportdService: ExportdJobService) {
+  constructor(private exportdService: ExportdJobService) {
     this.basicForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl('', Validators.required),
@@ -59,9 +58,9 @@ export class ExportdJobBasicStepComponent implements OnInit {
     return this.basicForm.get('label');
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
     if (this.mode === CmdbMode.Create) {
-      this.basicForm.get('name').setAsyncValidators(checkJobExistsValidator(this.exportdService));
+      // this.basicForm.get('name').setAsyncValidators(checkJobExistsValidator(this.exportdService));
       this.basicForm.get('label').valueChanges.subscribe(value => {
         this.basicForm.get('name').setValue(value.replace(/ /g, '-').toLowerCase());
         this.basicForm.get('name').markAsDirty({ onlySelf: true });

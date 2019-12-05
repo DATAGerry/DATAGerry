@@ -1,5 +1,13 @@
 <cmdb-content-header [faIcon]="'cube'" title="Exportd Job List"></cmdb-content-header>
 
+<div class="card-body" style="padding: 0 0 1em 0;">
+  <button type="button"
+          *permissionLink="['base.exportd.job.add']"
+          class="btn btn-success btn-sm"
+          [routerLink]="['/settings/exportdjob/add']">
+    <i class="fas fa-plus"></i> Add
+  </button>
+</div>
 <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-striped table-bordered">
   <thead>
   <tr>
@@ -11,9 +19,9 @@
     <th scope="col">Running</th>
     <th scope="col">Last Execute Date</th>
     <th scope="col">Execute State</th>
-    <th scope="col">Execute Job</th>
-    <th scope="col">Action</th>
-    <th scope="col">Logs</th>
+    <th scope="col" *permissionLink="['base.exportd.job.run']">Execute Job</th>
+    <th scope="col" *permissionLink="['base.exportd.job.edit', 'base.exportd.job.delete']">Action</th>
+    <th scope="col" *permissionLink="['base.exportd.log.view']">Logs</th>
   </tr>
   </thead>
   <tbody>
@@ -47,25 +55,27 @@
           : 'fas fa-check-circle ng-fa-icon text-success'"></i>
       </h2>
     </td>
-    <td>
+    <td *permissionLink="['base.exportd.job.run']">
       <button type="button" class="btn badge-pill btn-success"
               (click)="run_job_manual(task)">
         Run Now <fa-icon icon="play"></fa-icon>
       </button>
     </td>
-    <td>
-      <a class="ml-1 text-dark mr-1" [routerLink]="['/settings/exportdjob/edit/', task?.public_id]">
+    <td *permissionLink="['base.exportd.job.edit', 'base.exportd.job.delete']">
+      <a class="ml-1 text-dark mr-1" *permissionLink="['base.exportd.job.edit']"
+         [routerLink]="['/settings/exportdjob/edit/', task?.public_id]">
         <fa-icon [icon]="['far', 'edit']"></fa-icon>
       </a>
-      <a class="ml-1 text-dark mr-1" [routerLink]="['/settings/exportdjob/copy/', task?.public_id]"
+      <a class="ml-1 text-dark mr-1" *permissionLink="['base.exportd.job.edit']"
+         [routerLink]="['/settings/exportdjob/copy/', task?.public_id]"
          [queryParams]="{copy: task?.public_id}">
         <fa-icon [icon]="['far', 'copy']"></fa-icon>
       </a>
-      <a class="ml-1 text-dark">
+      <a class="ml-1 text-dark" *permissionLink="['base.exportd.job.delete']">
         <fa-icon [icon]="['far', 'trash-alt']" (click)="delTask(task?.public_id)"></fa-icon>
       </a>
     </td>
-    <td>
+    <td *permissionLink="['base.exportd.log.view']">
       <a class="ml-1 text-cmdb-primary" [routerLink]="['/settings/exportdjob/log/', task?.public_id]">
         <fa-icon [icon]="['far', 'arrow-alt-circle-right']"></fa-icon>
       </a>

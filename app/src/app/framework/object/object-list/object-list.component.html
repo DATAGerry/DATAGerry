@@ -5,10 +5,18 @@
   </div>
 
   <div class="card-body" style="padding: 0 0 1em 0;">
-    <button type="button" class="btn btn-danger btn-sm" (click)="delManyObjects()">Delete Selected</button>
+    <button type="button"
+            *permissionLink="['base.framework.object.delete']"
+            class="btn btn-danger btn-sm mr-1" (click)="delManyObjects()">Delete Selected</button>
 
+    <button type="button"
+            *permissionLink="['base.framework.object.add']"
+            class="btn btn-success btn-sm"
+            [routerLink]="typeID?['/framework/object/add/', typeID]:['/framework/object/add/']">
+      <i class="fas fa-plus"></i> Add
+    </button>
     <span class="card-group float-right" *ngIf="hasSummaries">
-      <div class="btn-group">
+      <div class="btn-group" *permissionLink="'base.export.object.*'">
         <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <fa-icon icon="file-export"></fa-icon> Export
@@ -46,7 +54,8 @@
         <!-- END: summarie fields -->
         <th class="toggle-autor">Author</th>
         <th class="toggle-last-modified">Last modified</th>
-        <th class="toggle-action">Action</th>
+        <th *permissionLink="['base.framework.object.view', 'base.framework.object.view', 'base.framework.object.delete']"
+            class="toggle-action">Action</th>
       </tr>
       </thead>
       <tbody>
@@ -68,15 +77,16 @@
 
         <td>{{result?.type_information.author_name}}</td>
         <td>{{result?.object_information.creation_time?.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
-        <td>
-          <a class="text-dark"
+        <td *permissionLink="['base.framework.object.view', 'base.framework.object.view', 'base.framework.object.delete']">
+          <a class="text-dark" *permissionLink="'base.framework.object.view'"
              [routerLink]="[hasSummaries ? '/framework/object/type/view' : '/framework/object/view',result?.object_information.object_id]">
             <fa-icon [icon]="['far', 'eye']"></fa-icon>
           </a>
-          <a class="ml-1 text-dark" [routerLink]="['/framework/object/edit/', result?.object_information.object_id]">
+          <a class="ml-1 text-dark" *permissionLink="'base.framework.object.edit'"
+             [routerLink]="['/framework/object/edit/', result?.object_information.object_id]">
             <fa-icon [icon]="['far', 'edit']"></fa-icon>
           </a>
-          <a class="ml-1 text-dark" (click)="delObject(result)">
+          <a *permissionLink="'base.framework.object.delete'" class="ml-1 text-dark" (click)="delObject(result)">
             <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
           </a>
         </td>

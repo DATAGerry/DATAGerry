@@ -1,8 +1,10 @@
-
 <ng-container *ngFor="let action of data">
-  <a *ngIf="action.name === 'view' && action.active !== false"
-    class="{{action.classValue}}"
-    routerLink="{{action.linkRoute}}{{publicID}}">
-    <fa-icon [icon]="['far', action.fontIcon]"></fa-icon>
-  </a>
+  <ng-container *ngIf="action.name === 'view' && action.active !== false">
+    <a *permissionLink="['base.framework.object.view']"
+       class="{{action.classValue}}"
+       type="button"
+       routerLink="{{action.linkRoute}}{{publicID}}">
+      <fa-icon [icon]="['far', action.fontIcon]"></fa-icon>
+    </a>
+  </ng-container>
 </ng-container>
