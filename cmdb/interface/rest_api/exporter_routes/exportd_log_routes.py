@@ -42,7 +42,7 @@ with current_app.app_context():
 @exportd_log_blueprint.route('/', methods=['GET'])
 @login_required
 @insert_request_user
-@right_required('base.*')
+@right_required('base.exportd.log.view')
 def get_log_list(request_user: User):
     """
     get all exportd logs in database
@@ -64,7 +64,7 @@ def get_log_list(request_user: User):
 @exportd_log_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @login_required
 @insert_request_user
-@right_required('base.*')
+@right_required('base.exportd.log.delete')
 def delete_log(public_id: int, request_user: User):
     try:
         delete_ack = log_manager.delete_log(public_id=public_id)
@@ -77,7 +77,7 @@ def delete_log(public_id: int, request_user: User):
 @exportd_log_blueprint.route('/job/<int:public_id>', methods=['GET'])
 @login_required
 @insert_request_user
-@right_required('base.*')
+@right_required('base.exportd.log.view')
 def get_logs_by_jobs(public_id: int, request_user: User):
     try:
         object_logs = log_manager.get_exportd_job_logs(public_id=public_id)
@@ -94,7 +94,7 @@ def get_logs_by_jobs(public_id: int, request_user: User):
 @exportd_log_blueprint.route('/job/exists', methods=['GET'])
 @login_required
 @insert_request_user
-@right_required('base.*')
+@right_required('base.exportd.log.view')
 def get_logs_with_existing_objects(request_user: User):
     existing_list = []
     deleted_list = []
@@ -136,7 +136,7 @@ def get_logs_with_existing_objects(request_user: User):
 @exportd_log_blueprint.route('/job/notexists', methods=['GET'])
 @login_required
 @insert_request_user
-@right_required('base.*')
+@right_required('base.exportd.log.view')
 def get_logs_with_deleted_objects(request_user: User):
     existing_list = []
     deleted_list = []
@@ -178,7 +178,7 @@ def get_logs_with_deleted_objects(request_user: User):
 @exportd_log_blueprint.route('/job/deleted', methods=['GET'])
 @login_required
 @insert_request_user
-@right_required('base.*')
+@right_required('base.exportd.log.view')
 def get_job_delete_logs(request_user: User):
     try:
         query = {

@@ -24,7 +24,9 @@
           <a class="text-dark" routerLink="/framework/object/log/{{deactiveLog.public_id}}">
             <i class="fas fa-eye"></i>
           </a>
-          <a class="text-dark ml-1" (click)="deleteEmitter.emit(deactiveLog.public_id); rerender()">
+          <a class="text-dark ml-1"
+             *permissionLink="['base.framework.log.delete']"
+             (click)="deleteEmitter.emit(deactiveLog.public_id); rerender()">
             <i class="fas fa-trash-alt"></i>
           </a>
         </td>
@@ -37,7 +39,7 @@
       <div class="card-header">
         Log Methods:
       </div>
-      <ul class="list-group list-group-flush">
+      <ul class="list-group list-group-flush" *permissionLink="['base.framework.log.delete']">
         <li class="list-group-item list-group-item-action list-group-item-danger pointer" (click)="cleanup()">
           <i class="far fa-trash-alt"></i> Cleanup
           <i class="fas fa-question-circle float-right" placement="left" ngbTooltip="Deletes all logs"></i>

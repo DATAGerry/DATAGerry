@@ -128,22 +128,6 @@ export class ObjectListComponent implements OnDestroy {
     this.dtButtons.length = 0;
     this.dtButtons.push(
       {
-        // add new
-        text: '<i class="fas fa-plus"></i> Add',
-        className: 'btn btn-success btn-sm mr-1',
-        action: function() {
-          if (this.typeID === null) {
-            this.router.navigate(['/framework/object/add']);
-          } else {
-            this.router.navigate(['/framework/object/add/' + this.typeID]);
-          }
-
-        }.bind(this)
-      }
-    );
-
-    this.dtButtons.push(
-      {
         // print
         text: 'Print <i class="fas fa-print"></i>',
         extend: 'print',

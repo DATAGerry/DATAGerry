@@ -41,6 +41,7 @@ import { NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstr
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { DeleteLogJobModalComponent, ExportdJobLogsComponent } from './exportd-job-logs/exportd-job-logs.component';
 import { ExportdJobSettingsCopyComponent } from './exportd-job-settings-copy/exportd-job-settings-copy.component';
+import {AuthModule} from "../../auth/auth.module";
 
 @NgModule({
   entryComponents: [DeleteLogJobModalComponent],
@@ -59,20 +60,21 @@ import { ExportdJobSettingsCopyComponent } from './exportd-job-settings-copy/exp
     DeleteLogJobModalComponent,
     FilterPipe,
     ExportdJobSettingsCopyComponent],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    ExportdJobSettingsRoutingModule,
-    DataTablesModule,
-    FontAwesomeModule,
-    ArchwizardModule,
-    DndModule,
-    ReactiveFormsModule,
-    NgSelectModule,
-    NgbTooltipModule,
-    FormsModule,
-    SweetAlert2Module,
-    NgbProgressbarModule
-  ]
+    imports: [
+        CommonModule,
+        LayoutModule,
+        ExportdJobSettingsRoutingModule,
+        DataTablesModule,
+        FontAwesomeModule,
+        ArchwizardModule,
+        DndModule,
+        ReactiveFormsModule,
+        NgSelectModule,
+        NgbTooltipModule,
+        FormsModule,
+        SweetAlert2Module,
+        NgbProgressbarModule,
+        AuthModule
+    ]
 })
 export class ExportdJobSettingsModule { }

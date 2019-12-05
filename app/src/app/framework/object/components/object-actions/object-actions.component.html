@@ -4,19 +4,23 @@
       <a routerLink="/framework/object/type/{{renderResult?.type_information?.type_id}}" class="list-group-item list-group-item-action">
         <fa-icon icon="list"></fa-icon> List objects
       </a>
-      <a routerLink="/framework/object/add/{{renderResult?.type_information?.type_id}}"
+      <a *permissionLink="'base.framework.object.add'"
+         routerLink="/framework/object/add/{{renderResult?.type_information?.type_id}}"
          class="list-group-item list-group-item-action list-group-item-action">
         <fa-icon [icon]="['fas', 'plus']"></fa-icon> Add new {{renderResult?.type_information?.type_label}} object
       </a>
-      <a routerLink="/framework/object/copy/{{renderResult?.object_information?.object_id}}"
+      <a *permissionLink="'base.framework.object.edit'"
+         routerLink="/framework/object/copy/{{renderResult?.object_information?.object_id}}"
          class="list-group-item list-group-item-action list-group-item-action">
         <fa-icon [icon]="['far', 'clone']"></fa-icon> Copy object
       </a>
-      <a routerLink="/framework/object/edit/{{renderResult?.object_information?.object_id}}"
+      <a *permissionLink="'base.framework.object.edit'"
+         routerLink="/framework/object/edit/{{renderResult?.object_information?.object_id}}"
          class="list-group-item list-group-item-action list-group-item-action">
         <fa-icon [icon]="['far', 'edit']"></fa-icon> Edit object
       </a>
-      <a class="list-group-item list-group-item-action list-group-item-action"
+      <a *permissionLink="'base.framework.object.delete'"
+         class="list-group-item list-group-item-action list-group-item-action"
          (click)="deleteObject(renderResult?.object_information?.object_id)">
         <fa-icon [icon]="['far', 'trash-alt']"></fa-icon> Delete object
       </a>

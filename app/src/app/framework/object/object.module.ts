@@ -50,6 +50,7 @@ import { ObjectLogComponent } from './object-log/object-log.component';
 import { ObjectLogChangeViewComponent } from './object-view/object-footer/object-log-list/object-log-change-view/object-log-change-view.component';
 import { ObjectLogUserComponent } from './object-view/object-footer/object-log-list/object-log-user/object-log-user.component';
 import { ObjectLinkAddModalComponent } from './modals/object-link-add-modal/object-link-add-modal.component';
+import {AuthModule} from "../../auth/auth.module";
 
 @NgModule({
   entryComponents: [
@@ -77,20 +78,21 @@ import { ObjectLinkAddModalComponent } from './modals/object-link-add-modal/obje
     ObjectLogChangeViewComponent,
     ObjectLogUserComponent,
     ObjectLinkAddModalComponent],
-  imports: [
-    CommonModule,
-    ObjectRoutingModule,
-    DataTablesModule,
-    LayoutModule,
-    QRCodeModule,
-    NgxSpinnerModule,
-    FormsModule,
-    ReactiveFormsModule,
-    RenderModule,
-    NgSelectModule,
-    NgbTooltipModule,
-    FontAwesomeModule
-  ]
+    imports: [
+        CommonModule,
+        ObjectRoutingModule,
+        DataTablesModule,
+        LayoutModule,
+        QRCodeModule,
+        NgxSpinnerModule,
+        FormsModule,
+        ReactiveFormsModule,
+        RenderModule,
+        NgSelectModule,
+        NgbTooltipModule,
+        FontAwesomeModule,
+        AuthModule
+    ]
 })
 export class ObjectModule {
 }

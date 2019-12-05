@@ -39,6 +39,7 @@ import { TypeMetaStepComponent } from './type-builder/type-meta-step/type-meta-s
 import { TypeDeleteComponent, TypeDeleteConfirmModalComponent } from './type-delete/type-delete.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import {AuthModule} from "../../auth/auth.module";
 
 @NgModule({
   entryComponents: [TypeDeleteConfirmModalComponent],
@@ -55,21 +56,22 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     TypeDeleteComponent,
     TypeDeleteConfirmModalComponent,
   ],
-  imports: [
-    CommonModule,
-    TypeRoutingModule,
-    DataTablesModule,
-    LayoutModule,
-    ReactiveFormsModule,
-    ArchwizardModule,
-    QRCodeModule,
-    NgSelectModule,
-    RenderModule,
-    BuilderModule,
-    FormsModule,
-    NgbModule,
-    FontAwesomeModule
-  ]
+    imports: [
+        CommonModule,
+        TypeRoutingModule,
+        DataTablesModule,
+        LayoutModule,
+        ReactiveFormsModule,
+        ArchwizardModule,
+        QRCodeModule,
+        NgSelectModule,
+        RenderModule,
+        BuilderModule,
+        FormsModule,
+        NgbModule,
+        FontAwesomeModule,
+        AuthModule
+    ]
 })
 export class TypeModule {
 }
