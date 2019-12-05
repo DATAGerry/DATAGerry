@@ -54,7 +54,8 @@
           </div>
         </li>
         <!-- nav Import/Export -->
-        <li class="nav-item dropdown mr-2">
+        <li *permissionLink="['base.import.type.*', 'base.export.type.*', 'base.import.object.*', 'base.export.object.*']"
+            class="nav-item dropdown mr-2">
           <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
              aria-expanded="false">
             <fa-icon icon="database"></fa-icon>
@@ -77,16 +78,18 @@
           </div>
         </li>
         <!-- nav Exportd Job -->
-        <li class="nav-item dropdown mr-2">
+        <li *permissionLink="['base.exportd.job.view', 'base.exportd.log.view']" class="nav-item dropdown mr-2">
           <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
              aria-expanded="false">
             <fa-icon icon="tachometer-alt"></fa-icon>
           </a>
           <div class="dropdown-menu dropdown-menu-right">
-            <div class="dropdown-header">Task Managment</div>
-            <a class="dropdown-item" routerLink="/settings/exportdjob">Exportd Job Settings</a>
-            <div class="dropdown-header">Logs</div>
-            <a class="dropdown-item" [routerLink]="['/settings/logs/exportdjobs']">
+            <div class="dropdown-header" *permissionLink="['base.exportd.job.view']">Task Managment</div>
+            <a class="dropdown-item" *permissionLink="['base.exportd.job.view']"
+               routerLink="/settings/exportdjob">Exportd Job Settings</a>
+            <div class="dropdown-header" *permissionLink="['base.exportd.log.view']">Logs</div>
+            <a class="dropdown-item" *permissionLink="['base.exportd.log.view']"
+               [routerLink]="['/settings/logs/exportdjobs']">
               <fa-icon icon="clipboard-list"></fa-icon>
               Exportd Job Logs</a>
           </div>

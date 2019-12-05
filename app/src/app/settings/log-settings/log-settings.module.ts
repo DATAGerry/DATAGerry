@@ -32,6 +32,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { LogSettingsComponent } from './log-settings.component';
 import { ActivateExportdTabComponent } from './log-exportd-settings/activate-exportd-tab/activate-exportd-tab.component';
 import { DeactivateExportdTabComponent } from './log-exportd-settings/deactivate-exportd-tab/deactivate-exportd-tab.component';
+import {AuthModule} from "../../auth/auth.module";
 
 @NgModule({
   entryComponents: [DeleteModalComponent, DeleteExportdModalComponent],
@@ -53,7 +54,8 @@ import { DeactivateExportdTabComponent } from './log-exportd-settings/deactivate
         DataTablesModule,
         NgbTooltipModule,
         NgbProgressbarModule,
-        FontAwesomeModule
+        FontAwesomeModule,
+        AuthModule
     ]
 })
 export class LogSettingsModule {

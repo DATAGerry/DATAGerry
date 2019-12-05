@@ -9,7 +9,7 @@
         <th scope="col">User</th>
         <th scope="col">Version</th>
         <th scope="col">Date</th>
-        <th scope="col">Links</th>
+        <th scope="col">Action</th>
       </tr>
       </thead>
       <tbody>
@@ -24,7 +24,8 @@
           <a class="text-dark" routerLink="/framework/object/log/{{activeLog.public_id}}">
             <i class="fas fa-eye"></i>
           </a>
-          <a class="text-dark ml-1" (click)="deleteEmitter.emit(activeLog.public_id); rerender()">
+          <a class="text-dark ml-1" *permissionLink="['base.framework.log.delete']"
+             (click)="deleteEmitter.emit(activeLog.public_id); rerender()">
             <i class="fas fa-trash-alt"></i>
           </a>
         </td>
