@@ -59,8 +59,9 @@ class ExportdJobLog(ExportdMetaLog):
                              'user_id'
                          ] + ExportdMetaLog.REQUIRED_INIT_KEYS
 
-    def __init__(self, job_id: int, user_id: int, user_name: str = None, event: str = None, message=None, **kwargs):
+    def __init__(self, job_id: int, state: bool, user_id: int, user_name: str = None, event: str = None, message=None, **kwargs):
         self.job_id = job_id
+        self.state = state
         self.user_id = user_id
         self.user_name = user_name or self.UNKNOWN_USER_STRING
         self.event = event

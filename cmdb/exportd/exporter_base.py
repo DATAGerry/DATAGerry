@@ -15,14 +15,20 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import jinja2
+import logging
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
+from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager, LogManagerDeleteError
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import load_class
 from cmdb.utils.system_reader import SystemConfigReader
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
+from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
+
+LOGGER = logging.getLogger(__name__)
 
 
 class ExportJob(ExportdJobManagement):
@@ -38,6 +44,9 @@ class ExportJob(ExportdJobManagement):
         self.__object_manager = CmdbObjectManager(
             database_manager=database_manager
         )
+        self.log_manager = ExportdLogManager(
+            database_manager=database_manager)
+
         self.sources = self.__get_sources()
         super(ExportJob, self).__init__(database_manager)
 
@@ -69,7 +78,7 @@ class ExportJob(ExportdJobManagement):
 
         return destinations
 
-    def execute(self):
+    def execute(self, event, user_id: int, user_name: str):
         # get cmdb objects from all sources
         cmdb_objects = set()
         for source in self.sources:
@@ -83,6 +92,19 @@ class ExportJob(ExportdJobManagement):
                 external_system.add_object(cmdb_object)
             external_system.finish_export()
 
+            try:
+                log_params = {
+                    'job_id': self.job.get_public_id(),
+                    'state': True,
+                    'user_id': user_id,
+                    'user_name': user_name,
+                    'event': event.get_type(),
+                    'message': external_system.msg_string,
+                }
+                self.log_manager.insert_log(action=LogAction.EXECUTE, log_type=ExportdJobLog.__name__, **log_params)
+            except LogManagerInsertError as err:
+                LOGGER.error(err)
+
 
 class ExportVariable:
 
@@ -90,33 +112,68 @@ class ExportVariable:
         self.__name = name
         self.__value_tpl_default = value_tpl_default
         self.__value_tpl_types = value_tpl_types
+        self.__iteration = 3
+        self.__objectdata = {}
+
+        scr = SystemConfigReader()
+        database_manager = DatabaseManagerMongo(
+            **scr.get_all_values_from_section('Database')
+        )
+        self.__object_manager = CmdbObjectManager(
+            database_manager=database_manager
+        )
 
     def get_value(self, cmdb_object):
         # get value template
         value_template = self.__value_tpl_default
-        object_type_id = cmdb_object.get_type_id()
+        object_type_id = cmdb_object.type_information['type_id']
 
         for templ in self.__value_tpl_types:
             if templ['type'] != '' and object_type_id == int(templ['type']):
                 value_template = templ['template']
 
         # objectdata for use in ExportVariable templates
-        objectdata = {}
-        objectdata["id"] = cmdb_object.get_public_id()
+        self.__objectdata.update({'fields': {}})
+        self.__objectdata.update({'id': cmdb_object.object_information['object_id']})
         # objectdata: object fields
         # ToDo: use rendered fields
-        objectdata["fields"] = {}
-        fields = cmdb_object.get_all_fields()
+        fields = cmdb_object.fields
         for field in fields:
-            field_name = field["name"]
-            field_value = field["value"]
-            objectdata["fields"][field_name] = field_value
+            # field_name = field["name"]
+            # field_value = field["value"]
+            # objectdata["fields"][field_name] = field_value
+            self.set_references(field)
         # ToDo: dereference objectrefs
 
         # render template
         template = jinja2.Template(value_template)
-        output = template.render(objectdata)
+        try:
+            output = template.render(self.__objectdata)
+        except Exception as ex:
+            LOGGER.warning(ex)
+            output = ''
         return output
+
+    def set_references(self, field):
+
+        if 'ref' == field["type"] and field["value"] and self.__iteration != 0:
+            self.__iteration = self.__iteration-1
+            current_object = self.__object_manager.get_object(field["value"])
+            type_instance = self.__object_manager.get_type(current_object.get_type_id())
+            cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance, render_user=None)
+            sub_fields = {field["name"]: {'id': field["value"], 'fields': {}}}
+            for subfield in cmdb_render_object.result().fields:
+                field_name = subfield["name"]
+                field_value = subfield["value"]
+                update = {field_name: field_value}
+                sub_fields[field["name"]]['fields'].update(update)
+                self.__objectdata['fields'].update(sub_fields)
+                self.set_references(subfield)
+        else:
+            field_name = field["name"]
+            field_value = field["value"]
+            update = {field_name: field_value}
+            self.__objectdata['fields'].update(update)
 
 
 class ExportSource:
@@ -130,17 +187,32 @@ class ExportSource:
         return self.__objects
 
     def __fetch_objects(self):
-        condition = []
+        result = []
         for source in self.__job.get_sources():
+            condition = []
             for con in source["condition"]:
                 if con["operator"] == "!=":
                     operator = {"$ne": con["value"]}
                 else:
                     operator = con["value"]
-                condition.append({"$and": [{"fields.name": con["name"]}, {"fields.value": operator}]})
-            condition.append({'type_id': source["type_id"]})
-        query = {"$or": condition}
-        result = self.__obm.get_objects_by(sort="public_id", **query)
+
+                if operator in ['True', 'true']:
+                    operator = True
+                elif operator in ['False', 'false']:
+                    operator = False
+                else:
+                    operator = operator
+
+                condition.append({'fields':  {"$elemMatch": {"name": con["name"], "value": operator}}})
+                condition.append({'type_id': source["type_id"]})
+                query = {"$and": condition}
+                current_objects = self.__obm.get_objects_by(sort="public_id", **query)
+                result.extend(RenderList(current_objects, None).render_result_list())
+
+            if not source["condition"]:
+                query = {'type_id': source["type_id"]}
+                current_objects = self.__obm.get_objects_by(sort="public_id", **query)
+                result.extend(RenderList(current_objects, None).render_result_list())
 
         return result
 
@@ -158,11 +230,22 @@ class ExportDestination:
 
 
 class ExternalSystem:
-    parameters = []
+    parameters = {}
+    variables = {}
 
     def __init__(self, destination_parms, export_vars):
+        # Set default if value is empty
+        for key, val in destination_parms.items():
+            if not bool(str(val).strip()):
+                destination_parms[key] = [item['default'] for item in self.parameters if item['name'] == key][0]
+
+        for item in self.parameters:
+            if not destination_parms.get(item['name']):
+                destination_parms.update({item['name']: item['default']})
+
         self._destination_parms = destination_parms
         self._export_vars = export_vars
+        self.msg_string = ""
 
     def prepare_export(self):
         pass
@@ -173,8 +256,14 @@ class ExternalSystem:
     def finish_export(self):
         pass
 
+    def error(self, msg):
+        raise ExportJobConfigException(msg)
+
+    def set_msg(self, msg):
+        self.msg_string = msg
+
 
 class ExportJobConfigException(CMDBError):
-    def __init__(self):
-        super().__init__()
-        self.message = 'missing parameters for ExportDestination'
+    def __init__(self, *args, **kwargs):
+        Exception.__init__(self, *args, **kwargs)
+

@@ -120,7 +120,7 @@ class ExportdThread(Thread):
         self.__dbm = DatabaseManagerMongo(
             **database_options
         )
-        self.log_manager = cmdb.exportd.exportd_logs.exportd_log_manager.ExportdLogManager(
+        self.log_manager = ExportdLogManager(
             database_manager=self.__dbm)
         self.user_manager = UserManager(database_manager=self.__dbm,
                                         security_manager=SecurityManager(self.__dbm))
@@ -141,35 +141,37 @@ class ExportdThread(Thread):
             return ex
 
     def worker(self):
+        cur_user = None
         try:
             # update job for UI
             self.job.state = ExecuteState.RUNNING.name
             self.job.last_execute_date = datetime.utcnow()
 
+            # get current user
+            cur_user = self.user_manager.get_user(self.user_id)
+
             exportd_job_manager.update_job(self.job, self.user_manager.get_user(self.user_id), event_start=False)
             # execute Exportd job
             job = cmdb.exportd.exporter_base.ExportJob(self.job)
-            job.execute()
+            job.execute(self.event, cur_user.get_public_id(), cur_user.get_name())
 
         except Exception as err:
-            LOGGER.error(err.__dict__)
-            self.exception_handling = err.__dict__
-            return err
-        finally:
-            # Generate new insert log
+            LOGGER.error(err)
+            self.exception_handling = err
+            # Generate Error log
             try:
-                msg = 'Successful' if not self.exception_handling else self.exception_handling
                 log_params = {
                     'job_id': self.job.get_public_id(),
-                    'user_id': self.user_id,
-                    'user_name': self.user_manager.get_user(self.user_id).get_name(),
+                    'state': False,
+                    'user_id': cur_user.get_public_id(),
+                    'user_name': cur_user.get_name(),
                     'event': self.event.get_type(),
-                    'message': msg,
+                    'message': ['Successful'] if not err else err.args,
                 }
                 self.log_manager.insert_log(action=LogAction.EXECUTE, log_type=ExportdJobLog.__name__, **log_params)
             except LogManagerInsertError as err:
                 LOGGER.error(err)
-
+        finally:
             # update job for UI
             self.job.state = ExecuteState.SUCCESSFUL.name if not self.exception_handling else ExecuteState.FAILED.name
             exportd_job_manager.update_job(self.job, self.user_manager.get_user(self.user_id), event_start=False)

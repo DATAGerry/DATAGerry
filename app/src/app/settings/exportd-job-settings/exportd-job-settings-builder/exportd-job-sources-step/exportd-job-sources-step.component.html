@@ -80,7 +80,7 @@
                                    || condition.get('operator').touched), 'is-invalid': condition.get('operator').invalid
                                    && (condition.get('operator').dirty || condition.get('operator').touched)}"
                                   required>
-                            <option *ngFor="let order of operators" [value]="order.name">
+                            <option *ngFor="let order of operators" [value]="order">
                               {{order}}
                             </option>
                           </select>

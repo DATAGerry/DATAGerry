@@ -30,6 +30,14 @@
                          && (variable.get('name').dirty || variable.get('name').touched)}"
                          formControlName="name"
                          required>
+                  <div id="variableHelpers" class="form-text text-muted">
+                    Variable Helpers:
+                    <a href="#" *ngFor="let des of destinationStep.destinationForm.get('destination').value | filterUnique"
+                          class="badge badge-pill badge-info mr-1" data-toggle="modal" data-target="#variableHelper"
+                          (click)="getVariableHelp(des.className)">
+                      {{des.className}} <fa-icon icon="question-circle"></fa-icon>
+                    </a>
+                  </div>
                 </div>
 
                 <div class="form-group">
@@ -94,5 +102,38 @@
       </ng-container>
     </form>
   </div>
+</div>
 
+<div class="modal fade" id="variableHelper" tabindex="-1" role="dialog" aria-labelledby="variableHelper" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Variable Helper</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table class="table">
+          <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Required</th>
+            <th scope="col">Description</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let v of variableHelper">
+            <td>{{v.name}}</td>
+            <td>{{v.required}}</td>
+            <td>{{v.description}}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
 </div>

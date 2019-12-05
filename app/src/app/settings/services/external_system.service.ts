@@ -30,11 +30,15 @@ export class ExternalSystemService {
   constructor(private api: ApiCallService) {
   }
 
-  public getExternSytemParams(name: string) {
-    return this.api.callGetRoute<any>(this.servicePrefix + '/' + name);
-  }
-
   public getExternSytemList() {
     return this.api.callGetRoute<any[]>(this.servicePrefix + '/');
+  }
+
+  public getExternSytemParams(name: string) {
+    return this.api.callGetRoute<any>(this.servicePrefix + '/parameters/' + name);
+  }
+
+  public getExternSytemVariables(name: string) {
+    return this.api.callGetRoute<any>(this.servicePrefix + '/variables/' + name);
   }
 }

@@ -80,6 +80,18 @@ def get_exportd_job(public_id):
     return resp
 
 
+@exportd_job_blueprint.route('/<string:name>/', methods=['GET'])
+@exportd_job_blueprint.route('/<string:name>', methods=['GET'])
+@login_required
+@insert_request_user
+def get_type_by_name(name: str, request_user: User):
+    try:
+        job_instance = exportd_manager.get_job_by_name(name=name)
+    except ExportdJobManagerGetError as err:
+        return abort(404, err.message)
+    return make_response(job_instance)
+
+
 @exportd_job_blueprint.route('/', methods=['POST'])
 @login_required
 @insert_request_user
@@ -92,6 +104,7 @@ def add_job(request_user: User):
         new_job_data['last_execute_date'] = datetime.utcnow()
         new_job_data['author_id'] = request_user.get_public_id()
         new_job_data['author_name'] = request_user.get_name()
+        new_job_data['state'] = ExecuteState.SUCCESSFUL.name
     except TypeError as e:
         LOGGER.warning(e)
         abort(400)
@@ -109,6 +122,7 @@ def add_job(request_user: User):
     try:
         log_params = {
             'job_id': job_instance.get_public_id(),
+            'state': True,
             'user_id': request_user.get_public_id(),
             'user_name': request_user.get_name(),
             'event': LogAction.CREATE.name,
@@ -150,6 +164,7 @@ def update_job(request_user: User):
         try:
             log_params = {
                 'job_id': update_job_instance.get_public_id(),
+                'state': True,
                 'user_id': request_user.get_public_id(),
                 'user_name': request_user.get_name(),
                 'event': LogAction.EDIT.name,
@@ -172,6 +187,7 @@ def delete_job(public_id: int, request_user: User):
             job_instance = exportd_manager.get_job(public_id)
             log_params = {
                 'job_id': job_instance.get_public_id(),
+                'state': True,
                 'user_id': request_user.get_public_id(),
                 'user_name': request_user.get_name(),
                 'event': LogAction.DELETE.name,

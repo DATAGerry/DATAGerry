@@ -20,7 +20,8 @@
 import { Component, Input, OnInit} from '@angular/core';
 import { CmdbMode } from '../../../../framework/modes.enum';
 import { FormControl, FormGroup, Validators} from '@angular/forms';
-import { TypeService } from '../../../../framework/services/type.service';
+import { TypeService} from '../../../../framework/services/type.service';
+import { checkJobExistsValidator, ExportdJobService} from '../../../services/exportd-job.service';
 
 @Component({
   selector: 'cmdb-task-basic-step',
@@ -41,7 +42,7 @@ export class ExportdJobBasicStepComponent implements OnInit {
 
   public basicForm: FormGroup;
 
-  constructor(private typeService: TypeService) {
+  constructor(private typeService: TypeService, private exportdService: ExportdJobService) {
     this.basicForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl('', Validators.required),
@@ -60,10 +61,11 @@ export class ExportdJobBasicStepComponent implements OnInit {
 
   ngOnInit() {
     if (this.mode === CmdbMode.Create) {
+      this.basicForm.get('name').setAsyncValidators(checkJobExistsValidator(this.exportdService));
       this.basicForm.get('label').valueChanges.subscribe(value => {
         this.basicForm.get('name').setValue(value.replace(/ /g, '-').toLowerCase());
-        this.basicForm.get('name').markAsDirty({onlySelf: true});
-        this.basicForm.get('name').markAsTouched({onlySelf: true});
+        this.basicForm.get('name').markAsDirty({ onlySelf: true });
+        this.basicForm.get('name').markAsTouched({ onlySelf: true });
       });
     } else if (this.mode === CmdbMode.Edit) {
       this.basicForm.markAllAsTouched();
