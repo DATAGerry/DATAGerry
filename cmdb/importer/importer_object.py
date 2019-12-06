@@ -141,15 +141,15 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
         # Insert properties
         for property_entry in property_entries:
             working_object.update({property_entry.get_name(): entry.get(property_entry.get_value())})
-
+        LOGGER.debug(possible_fields)
         # Validate insert fields
-        for field_entry in field_entries:
-            if field_entry.get_name() not in possible_fields:
-                continue
-            working_object['fields'].append(
-                {'name': field_entry.get_name(),
-                 'value': entry.get(field_entry.get_value())
-                 })
+        for entry_field in field_entries:
+            field_exists = next((item for item in possible_fields if item["name"] == entry_field.get_name()), None)
+            if field_exists:
+                working_object['fields'].append(
+                    {'name': entry_field.get_name(),
+                     'value': entry.get(entry_field.get_value())
+                     })
 
         return working_object
 

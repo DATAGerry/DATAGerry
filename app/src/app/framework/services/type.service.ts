@@ -18,11 +18,14 @@
 
 import { Injectable } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
-import { ApiCallService, ApiService } from '../../services/api-call.service';
+import { ApiCallService, ApiService, HttpInterceptorHandler } from '../../services/api-call.service';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
 import { UserService } from '../../management/services/user.service';
+import { HttpBackend, HttpClient } from '@angular/common/http';
+import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
+import { AuthService } from '../../auth/services/auth.service';
 
 export const checkTypeExistsValidator = (typeService: TypeService<CmdbType>, time: number = 500) => {
   return (control: FormControl) => {
@@ -49,7 +52,7 @@ export class TypeService<T = CmdbType> implements ApiService {
   public servicePrefix: string = 'type';
   private typeList: T[];
 
-  constructor(private api: ApiCallService) {
+  constructor(private api: ApiCallService, private backend: HttpBackend, private authService: AuthService) {
     // STRUCTURE IS DEPRECATED PLEASE NOT USE
     this.getTypeList().subscribe((respTypeList: T[]) => {
       this.typeList = respTypeList;
@@ -136,14 +139,10 @@ export class TypeService<T = CmdbType> implements ApiService {
 
   // Validation functions
   public checkTypeExists(typeName: string) {
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`);
+    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor(this.authService)));
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`, specialClient);
   }
 
-  public async validateTypeName(name: string) {
-    // FUNCTION IS DEPRECATED PLEASE NOT USE
-    // @ts-ignore
-    return this.typeList.find(type => type.name === name) === undefined;
-  }
 
 }
 
