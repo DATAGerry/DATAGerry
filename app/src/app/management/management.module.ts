@@ -25,15 +25,17 @@ import { LayoutModule } from '../layout/layout.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { GroupService } from './services/group.service';
 import { ManagementComponent } from './management.component';
+import {AuthModule} from "../auth/auth.module";
 
 @NgModule({
   declarations: [ManagementComponent],
-  imports: [
-    CommonModule,
-    ManagementRoutingModule,
-    LayoutModule,
-    ReactiveFormsModule
-  ],
+    imports: [
+        CommonModule,
+        ManagementRoutingModule,
+        LayoutModule,
+        ReactiveFormsModule,
+        AuthModule
+    ],
   providers: [
     UserService,
     GroupService,

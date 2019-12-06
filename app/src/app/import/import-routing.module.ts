@@ -34,8 +34,7 @@ const routes: Routes = [
     pathMatch: 'full',
     canActivate: [PermissionGuard],
     data: {
-      breadcrumb: 'Overview',
-      right: 'base.import.*'
+      breadcrumb: 'Overview'
     },
     component: ImportComponent
   },

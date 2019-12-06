@@ -1,6 +1,6 @@
 
 <div class="card-deck">
-  <div class="card">
+  <div class="card" *permissionLink="'base.user-management.user.*'">
     <a [routerLink]="['/management/users']">
       <div class="dash-card primary">
         <i class="fas fa-user-friends"></i>
@@ -10,7 +10,7 @@
     </a>
   </div>
   <div class="card">
-    <a [routerLink]="['/management/groups']">
+    <a *permissionLink="'base.user-management.group.view'" [routerLink]="['/management/groups']">
       <div class="dash-card primary">
         <i class="fas fa-users"></i>
         <span class="count-numbers">Groups</span>

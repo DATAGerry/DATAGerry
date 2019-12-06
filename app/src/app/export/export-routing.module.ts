@@ -12,8 +12,7 @@ const routes: Routes = [
     pathMatch: 'full',
     canActivate: [PermissionGuard],
     data: {
-      breadcrumb: 'Overview',
-      right: 'base.export.*'
+      breadcrumb: 'Overview'
     },
     component: ExportComponent
   },

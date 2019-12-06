@@ -17,11 +17,14 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService } from '../../services/api-call.service';
+import { ApiCallService, ApiService, HttpInterceptorHandler } from '../../services/api-call.service';
 import { ExportdJob } from '../models/exportd-job';
 import { Observable, timer} from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { catchError, map, switchMap } from 'rxjs/operators';
+import { HttpBackend, HttpClient } from '@angular/common/http';
+import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
+import { AuthService } from '../../auth/services/auth.service';
 
 export const checkJobExistsValidator = (jobService: ExportdJobService<ExportdJob>, time: number = 500) => {
   return (control: FormControl) => {
@@ -48,7 +51,7 @@ export class ExportdJobService<T = ExportdJob> implements ApiService {
   public servicePrefix: string = 'exportdjob';
   private taskList: ExportdJob[];
 
-  constructor(private api: ApiCallService) {
+  constructor(private api: ApiCallService, private backend: HttpBackend, private authService: AuthService) {
     this.getTaskList().subscribe((list: ExportdJob[]) => {
       this.taskList = list;
     });
@@ -85,6 +88,7 @@ export class ExportdJobService<T = ExportdJob> implements ApiService {
 
   // Validation functions
   public checkJobExists(typeName: string) {
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`);
+    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor(this.authService)));
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`, specialClient);
   }
 }

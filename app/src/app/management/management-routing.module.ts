@@ -28,8 +28,7 @@ const routes: Routes = [
     pathMatch: 'full',
     canActivate: [PermissionGuard],
     data: {
-      breadcrumb: 'Overview',
-      right: 'base.system.*'
+      breadcrumb: 'Overview'
     },
     component: ManagementComponent
   },
