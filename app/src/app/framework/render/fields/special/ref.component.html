@@ -33,7 +33,7 @@
         </ng-container>
         <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
           <ng-select
-            [items]="objectList | async"
+            [items]="objectList"
             id="ng-select-valid"
             class="custom-select"
             bindValue="object_information.object_id" [searchFn]="searchRef"

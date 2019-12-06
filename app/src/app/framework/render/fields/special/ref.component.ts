@@ -28,7 +28,7 @@ import { Observable } from 'rxjs';
 })
 export class RefComponent extends RenderField implements OnInit {
 
-  public objectList: Observable<RenderResult[]>;
+  public objectList: RenderResult[] = [];
   public refObject: RenderResult;
 
   public constructor(private objectService: ObjectService) {
@@ -37,9 +37,11 @@ export class RefComponent extends RenderField implements OnInit {
 
   public ngOnInit(): void {
     if (this.data.ref_types !== undefined) {
-      this.objectList = this.objectService.getObjectsByType(this.data.ref_types);
+      this.objectService.getObjectsByType(this.data.ref_types).subscribe((objectList: RenderResult[]) => {
+        this.objectList = objectList;
+      });
     }
-    if (this.controller.value !== '' && this.data.value !== undefined) {
+    if (this.controller.value !== '' && this.data.value !== undefined && this.data.value !== null) {
       this.objectService.getObject(this.controller.value).subscribe((refObject: RenderResult) => {
           this.refObject = refObject;
         },
