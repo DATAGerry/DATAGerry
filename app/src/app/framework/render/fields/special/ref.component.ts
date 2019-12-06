@@ -21,6 +21,10 @@ import { RenderField } from '../components.fields';
 import { ObjectService } from '../../../services/object.service';
 import { RenderResult } from '../../../models/cmdb-render';
 import { Observable } from 'rxjs';
+import { HttpBackend, HttpClient } from '@angular/common/http';
+import { HttpInterceptorHandler } from '../../../../services/api-call.service';
+import { BasicAuthInterceptor } from '../../../../auth/interceptors/basic-auth.interceptor';
+import { AuthService } from '../../../../auth/services/auth.service';
 
 @Component({
   templateUrl: './ref.component.html',
@@ -31,18 +35,19 @@ export class RefComponent extends RenderField implements OnInit {
   public objectList: RenderResult[] = [];
   public refObject: RenderResult;
 
-  public constructor(private objectService: ObjectService) {
+  public constructor(private objectService: ObjectService, private backend: HttpBackend, private authService: AuthService) {
     super();
   }
 
   public ngOnInit(): void {
+    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor(this.authService)));
     if (this.data.ref_types !== undefined) {
       this.objectService.getObjectsByType(this.data.ref_types).subscribe((objectList: RenderResult[]) => {
         this.objectList = objectList;
       });
     }
     if (this.controller.value !== '' && this.data.value !== undefined && this.data.value !== null) {
-      this.objectService.getObject(this.controller.value).subscribe((refObject: RenderResult) => {
+      this.objectService.getObject(this.controller.value, false, specialClient).subscribe((refObject: RenderResult) => {
           this.refObject = refObject;
         },
         (error) => {
