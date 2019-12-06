@@ -50,3 +50,13 @@ class BaseObjectParser(BaseParser):
 
     def parse(self, file) -> ObjectParserResponse:
         raise NotImplementedError
+
+
+class BaseTypeParser(BaseParser):
+    DEFAULT_CONFIG = {}
+
+    def __init__(self, parser_config: dict):
+        super(BaseTypeParser, self).__init__(parser_config)
+
+    def parse(self, file) -> ObjectParserResponse:
+        raise NotImplementedError

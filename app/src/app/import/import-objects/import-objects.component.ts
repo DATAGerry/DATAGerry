@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { CmdbType } from '../../framework/models/cmdb-type';
 import { ImporterConfig, ImporterFile, ImportResponse } from './import-object.models';
 import { ImportService } from '../import.service';
@@ -29,7 +29,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
   templateUrl: './import-objects.component.html',
   styleUrls: ['./import-objects.component.scss']
 })
-export class ImportObjectsComponent implements OnInit, OnDestroy {
+export class ImportObjectsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private fileReader: FileReader;
   public typeInstance: CmdbType = undefined;
@@ -46,6 +46,9 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
   public parserConfig: any = undefined;
   public parsedData: any = undefined;
 
+  // Mapping
+  public mapping: [] = undefined;
+
   // Import Response
   public importResponse: ImportResponse = undefined;
 
@@ -56,9 +59,14 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
+    this.spinner.show();
     this.fileReader.onload = (e) => {
       this.importerFile.fileContent = this.fileReader.result;
     };
+  }
+
+  public ngAfterViewInit(): void {
+    this.spinner.hide();
   }
 
   public ngOnDestroy(): void {
@@ -104,6 +112,10 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
     this.typeInstance = change.typeInstance as CmdbType;
   }
 
+  public mappingChange(change: any) {
+    this.mapping = change.filter(value => Object.keys(value).length !== 0);
+  }
+
   public onParseData() {
     this.spinner.show();
     this.parseDataSubscription = this.importService.postObjectParser(this.importerFile.file, this.parserConfig).subscribe(
@@ -119,7 +131,11 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
 
   public startImport() {
     this.spinner.show();
-    this.importService.importObjects(this.importerFile.file, this.parserConfig, this.importerConfig).subscribe(
+    const runtimeConfig = this.importerConfig;
+    if (this.defaultImporterConfig.manually_mapping) {
+      runtimeConfig.mapping = this.mapping;
+    }
+    this.importService.importObjects(this.importerFile.file, this.parserConfig, runtimeConfig).subscribe(
       (importResponse) => {
         this.importResponse = importResponse;
       },

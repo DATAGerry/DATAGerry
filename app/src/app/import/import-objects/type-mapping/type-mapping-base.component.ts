@@ -37,6 +37,8 @@ export class TypeMappingBaseComponent {
   @Input() public mappingControls: any = [];
   @Input() public currentMapping: any = [];
 
+  @Output() public mappingChange = new EventEmitter();
+
   public onDragged(item: any, list: any[], effect: DropEffect) {
     if (effect === 'move') {
       const index = list.indexOf(item);
@@ -50,10 +52,12 @@ export class TypeMappingBaseComponent {
     } else {
       if (original && (list[index] !== undefined)) {
         const originalData = list[index];
-        original.splice(original.length, 0, originalData)
+        original.splice(original.length, 0, originalData);
       }
     }
+    event.data.value = index;
     list.splice(index, 1, event.data);
+    this.mappingChange.emit(this.currentMapping);
   }
 
 }

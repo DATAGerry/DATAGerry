@@ -5,6 +5,13 @@ Objects and Object Types
 Managing Categories
 ===================
 
+Objects Types are organized in Categories. Categories can be managed under Framework -> Categories. Each Object Type is
+assigned to one Category. Categories can be organized hierarchically, just define a parent Category. The tree of
+Categories and their assigned Object Types is displayed on the sidebar on the left side of DATAGERRY.
+
+.. image:: img/objects_categories_sidebar.png
+    :width: 100
+
 
 Managing Object Types
 =====================
@@ -12,6 +19,7 @@ Managing Object Types
 To manage Object Types select Framework -> Types in the menu bar:
 
 .. image:: img/objects_menu_types.png
+    :width: 200
 
 A list with defined object types will be shown.
 
@@ -24,6 +32,7 @@ wizzard will guide you through the process.
 At first, some basic information about the type will be asked:
 
 .. image:: img/objects_type_basic.png
+    :width: 600
 
 Choose a label and icon for the Object Type, that will be shown in the frontend. The name of the Object Type will be 
 created automatically and cannot be changed and is only for internal use. Each Type is connected with a category. With
@@ -33,6 +42,7 @@ the exception of name, each setting on this page can be changed at any time.
 As a next step, the object fields can be defined:
 
 .. image:: img/objects_type_fields.png
+    :width: 600
 
 Fields are organized in "Sections". To add a new section or field, choose an element from the left side box and move it
 to the center with drag and drop. At first, add a section (you find it under "Structure Controls"), after that, choose
@@ -59,6 +69,7 @@ With the yellow preview button, and example of an object with the current config
 On the next page on the configuration dialog, meta informations can be set:
 
 .. image:: img/objects_type_meta.png
+    :width: 600
 
 Each object has summary fields. These fields summarize the object and are shown by default in object lists. On a router,
 this could be a management ip and a hostname. The summary fields can be set under "Summary".

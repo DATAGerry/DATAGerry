@@ -22,7 +22,7 @@ import {
   ComponentFactory,
   ComponentFactoryResolver,
   ComponentRef,
-  EventEmitter,
+  EventEmitter, forwardRef,
   Input, OnChanges,
   OnDestroy,
   OnInit,
@@ -48,7 +48,8 @@ export const mappingComponents: { [type: string]: any } = {
 @Component({
   selector: 'cmdb-type-mapping',
   templateUrl: './type-mapping.component.html',
-  styleUrls: ['./type-mapping.component.scss']
+  styleUrls: ['./type-mapping.component.scss'],
+  providers: [{provide: TypeMappingBaseComponent, useExisting: forwardRef(() => TypeMappingComponent) }]
 })
 export class TypeMappingComponent extends TypeMappingBaseComponent implements OnInit, OnChanges, OnDestroy {
 
@@ -171,6 +172,7 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
     this.componentRef.instance.parsedData = this.parsedData;
     this.componentRef.instance.mappingControls = this.mappingControls;
     this.componentRef.instance.currentMapping = this.currentMapping;
+    this.componentRef.instance.mappingChange = this.mappingChange;
   }
 
 

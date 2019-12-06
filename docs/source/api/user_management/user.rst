@@ -1,6 +1,0 @@
-****
-User
-****
-
-.. automodule:: user
-   :members:

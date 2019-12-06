@@ -14,17 +14,37 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""Basic identifiers for the identification of the corresponding importers based on the file type.
+The Content-Type entity header is used to indicate the media type of the resource.
+"""
+
 
 class BASEContent:
+    """Empty general content type
+    Notes:
+        Should not be used
+    """
+    ICON = ''
     CONTENT_TYPE = ''
     FILE_TYPE = ''
 
 
-class JSONContent:
+class JSONContent(BASEContent):
+    """Identifier for JavaScript Object Notation files"""
+    ICON = 'fas fa-file-code'
     CONTENT_TYPE = 'application/json'
     FILE_TYPE = 'json'
 
 
-class CSVContent:
+class CSVContent(BASEContent):
+    """Identifier for Comma-Separated Values files"""
+    ICON = 'fas fa-file-csv'
     CONTENT_TYPE = 'text/csv'
     FILE_TYPE = 'csv'
+
+
+class XLSXContent(BASEContent):
+    """Identifier for Excel files"""
+    ICON = 'fas fa-file-excel'
+    CONTENT_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    FILE_TYPE = 'xlsx'

@@ -2,14 +2,14 @@
 DATAGERRY Documentation
 +++++++++++++++++++++++
 
+.. image:: introduction/img/introduction_datagerry.png
+
 DATAGERRY is an enterprise-grade OpenSource CMDB, which completely leaves the
 definition of object types to the user.
 
 .. toctree::
-    introduction/getting-started
-    introduction/download
+    introduction/welcome
     introduction/license
-    introduction/team
     :caption: Introduction
     :name: introduction
 
@@ -27,10 +27,3 @@ definition of object types to the user.
     api/user_management/index
     :caption: API
     :name: api
-
-
-Indices and tables
-==================
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

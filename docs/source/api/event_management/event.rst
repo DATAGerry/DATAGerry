@@ -1,5 +1,0 @@
-*****
-Event
-*****
-.. automodule:: event
-   :members:

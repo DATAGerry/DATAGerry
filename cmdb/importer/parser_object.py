@@ -18,9 +18,11 @@ import csv
 import json
 import logging
 
+from openpyxl.worksheet.worksheet import Worksheet
+
 from cmdb.importer.importer_errors import ParserRuntimeError
 from cmdb.utils.cast import auto_cast
-from cmdb.importer.content_types import JSONContent, CSVContent
+from cmdb.importer.content_types import JSONContent, CSVContent, XLSXContent
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.importer.parser_response import ObjectParserResponse
 
@@ -51,17 +53,15 @@ class JsonObjectParser(BaseObjectParser, JSONContent):
 
 class CsvObjectParserResponse(ObjectParserResponse):
 
-    def __init__(self, count: int, entries: list, entry_length: int, header: list = None):
+    def __init__(self, count: int, entries: list, entry_length: int, header: dict = None):
         self.entry_length: int = entry_length
-        self.header: list = header
+        self.header: dict = header or {}
         super(CsvObjectParserResponse, self).__init__(count=count, entries=entries)
 
     def get_entry_length(self) -> int:
         return self.entry_length
 
-    def get_header_list(self) -> list:
-        if not self.header:
-            return []
+    def get_header_list(self) -> dict:
         return self.header
 
 
@@ -79,6 +79,17 @@ class CsvObjectParser(BaseObjectParser, CSVContent):
 
     def __init__(self, parser_config: dict = None):
         super(CsvObjectParser, self).__init__(parser_config)
+
+    @staticmethod
+    def __generate_index_pair(row: list) -> dict:
+        line: dict = {}
+        idx: int = 0
+        for col in row:
+            line.update({
+                idx: col
+            })
+            idx = idx + 1
+        return line
 
     def parse(self, file) -> CsvObjectParserResponse:
         run_config = self.get_config()
@@ -99,13 +110,12 @@ class CsvObjectParser(BaseObjectParser, CSVContent):
             with open(f'{file}', 'r', newline=run_config.get('newline')) as csv_file:
                 csv_reader = csv.reader(csv_file, dialect=dialect)
                 if run_config.get('header'):
-                    first_line = next(csv_reader)
-                    parsed['header'] = first_line
+                    parsed['header'] = self.__generate_index_pair(next(csv_reader))
                 for row in csv_reader:
                     row_list = []
                     for entry in row:
                         row_list.append(auto_cast(entry))
-                    parsed.get('entries').append(row_list)
+                    parsed.get('entries').append(self.__generate_index_pair(row_list))
                     parsed['count'] = parsed['count'] + 1
 
                 if len(parsed.get('entries')) > 0:
@@ -116,3 +126,62 @@ class CsvObjectParser(BaseObjectParser, CSVContent):
             LOGGER.error(err)
             raise ParserRuntimeError(self.__class__.__name__, err)
         return CsvObjectParserResponse(**parsed)
+
+
+class ExcelObjectParserResponse(ObjectParserResponse):
+
+    def __init__(self, count: int, entries: list, entry_length: int, header: dict = None):
+        self.entry_length: int = entry_length
+        self.header: dict = header or {}
+        super(ExcelObjectParserResponse, self).__init__(count=count, entries=entries)
+
+    def get_entry_length(self) -> int:
+        return self.entry_length
+
+    def get_header_list(self) -> dict:
+        return self.header
+
+
+class ExcelObjectParser(BaseObjectParser, XLSXContent):
+    DEFAULT_CONFIG = {
+        'sheet_name': 'Sheet1',
+        'header': True
+    }
+
+    def __init__(self, parser_config: dict = None):
+        super(ExcelObjectParser, self).__init__(parser_config)
+
+    @staticmethod
+    def __generate_index_pair(row: list) -> dict:
+        line: dict = {}
+        idx: int = 0
+        for col in row:
+            line.update({
+                idx: col
+            })
+            idx = idx + 1
+        return line
+
+    def parse(self, file) -> ExcelObjectParserResponse:
+        from openpyxl import load_workbook
+
+        parsed = {
+            'count': 0,
+            'header': None,
+            'entries': [],
+            'entry_length': 0
+        }
+
+        run_config = self.get_config()
+        try:
+            working_sheet = run_config['sheet_name']
+        except (IndexError, ValueError, KeyError) as err:
+            raise ParserRuntimeError(ExcelObjectParser, err)
+
+        wb = load_workbook(file)
+        try:
+            sheet: Worksheet = wb[working_sheet]
+        except KeyError as err:
+            raise ParserRuntimeError(ExcelObjectParser, err)
+
+        return ExcelObjectParserResponse(0, [], 0)

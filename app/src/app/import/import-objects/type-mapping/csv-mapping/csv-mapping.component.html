@@ -1,8 +1,6 @@
 <div class="card">
   <div class="card-header">
-    <div class="float-left">
       Mapping
-    </div>
     <div class="float-right">
       <form [formGroup]="previewIndexSelectionForm">
         <select formControlName="indexSelection" class="custom-select custom-select-sm">
@@ -14,12 +12,12 @@
     </div>
     <div class="clearfix"></div>
   </div>
-  <table class="table table-responsive w-100">
+  <table class="table">
     <thead>
     <tr>
       <th>Identifier</th>
-      <th *ngIf="parserConfig.header">Header</th>
-      <th *ngIf="!parserConfig.header">Index</th>
+      <th *ngIf="parserConfig?.header">Header</th>
+      <th *ngIf="parserConfig?.header">Index</th>
       <th>Example</th>
     </tr>
     </thead>
@@ -34,8 +32,8 @@
         </div>
       </td>
       <th *ngIf="parserConfig?.header">{{parsedData?.header[idx]}}</th>
-      <th *ngIf="!parserConfig?.header">{{idx}}</th>
-      <td>{{parsedData.entries[previewIndex][idx]}}</td>
+      <th *ngIf="parserConfig?.header">{{idx}}</th>
+      <td>{{parsedData?.entries[previewIndex][idx]}}</td>
     </tr>
     </tbody>
   </table>
