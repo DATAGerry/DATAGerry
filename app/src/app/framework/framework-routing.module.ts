@@ -28,8 +28,7 @@ const routes: Routes = [
     pathMatch: 'full',
     canActivate: [PermissionGuard],
     data: {
-      breadcrumb: 'Overview',
-      right: 'base.framework.*'
+      breadcrumb: 'Overview'
     },
     component: FrameworkComponent
   },
@@ -37,7 +36,8 @@ const routes: Routes = [
     path: 'object',
     canActivateChild: [PermissionGuard],
     data: {
-      breadcrumb: 'Object'
+      breadcrumb: 'Object',
+      right: 'base.framework.object.view'
     },
     loadChildren: () => import('./object/object.module').then(m => m.ObjectModule),
   },
@@ -45,7 +45,8 @@ const routes: Routes = [
     path: 'type',
     canActivateChild: [PermissionGuard],
     data: {
-      breadcrumb: 'Type'
+      breadcrumb: 'Type',
+      right: 'base.framework.type.view'
     },
     loadChildren: () => import('./type/type.module').then(m => m.TypeModule),
   },
@@ -54,7 +55,8 @@ const routes: Routes = [
     path: 'category',
     canActivateChild: [PermissionGuard],
     data: {
-      breadcrumb: 'Category'
+      breadcrumb: 'Category',
+      right: 'base.framework.category.view'
     },
     loadChildren: () => import('./category/category.module').then(m => m.CategoryModule),
   }

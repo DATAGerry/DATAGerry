@@ -18,33 +18,20 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { NavigationComponent } from '../layout/structure/navigation/navigation.component';
-import { BreadcrumbComponent } from '../layout/structure/breadcrumb/breadcrumb.component';
-
-import { SidebarComponent } from '../layout/structure/sidebar/sidebar.component';
 import { SearchResultsComponent } from './components/search-results/search-results.component';
-import { FooterComponent } from '../layout/structure/footer/footer.component';
+import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
+import {PermissionGuard} from '../auth/guards/permission.guard';
 
 const routes: Routes = [
   {
     path: '',
-    component: NavigationComponent,
-    outlet: 'navigation'
-  },
-  {
-    path: '',
-    component: SidebarComponent,
-    outlet: 'sidebar'
-  },
-  {
-    path: '',
-    component: BreadcrumbComponent,
-    outlet: 'breadcrumb'
-  },
-  {
-    path: '',
-    component: FooterComponent,
-    outlet: 'footer'
+    pathMatch: 'full',
+    canActivate: [PermissionGuard],
+    data: {
+      breadcrumb: 'Search for ',
+      right: 'base.framework.object.view'
+    },
+    component: SearchResultsComponent
   },
   {
     path: ':value',
@@ -56,7 +43,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
   exports: [RouterModule]
 })
 export class SearchRoutingModule {

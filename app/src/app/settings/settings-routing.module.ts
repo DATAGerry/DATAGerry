@@ -29,7 +29,7 @@ const routes: Routes = [
     canActivate: [PermissionGuard],
     data: {
       breadcrumb: 'Overview',
-      right: 'base.system.*'
+      right: 'base.system.view'
     },
     component: SettingsComponent
   },
