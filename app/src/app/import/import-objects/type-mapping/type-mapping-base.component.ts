@@ -50,6 +50,7 @@ export class TypeMappingBaseComponent {
 
   public moveControl(item: any, from: any[], targetIdx: number, to: any[]) {
     from.splice(from.indexOf(item), 1);
+    item.value = targetIdx;
     to.splice(targetIdx, 1, item);
   }
 
