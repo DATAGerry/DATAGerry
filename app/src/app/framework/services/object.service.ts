@@ -36,27 +36,6 @@ export class ObjectService<T = RenderResult> implements ApiService {
   }
 
   // Find calls
-  public getObjectList(native: boolean = false): Observable<T[]> {
-    if (native === true) {
-      return this.api.callGet<CmdbObject[]>(`${this.servicePrefix}/native/`).pipe(
-        map((apiResponse) => {
-          if (apiResponse.status === 204) {
-            return [];
-          }
-          return apiResponse.body;
-        })
-      );
-    }
-    return this.api.callGet<T[]>(`${this.servicePrefix}/`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
-  }
-
   public getObjectsByType(typeID: number): Observable<T[]> {
     return this.api.callGet<T[]>(`${this.servicePrefix}/type/${typeID}`).pipe(
       map((apiResponse) => {

@@ -12,7 +12,7 @@
   <section [hidden]="!typeInstance || !manuallyMapping">
     <div class="row">
       <div class="col-md-3">
-        <div class="card mb-3">
+        <div class="card">
           <div class="card-header">Meta values</div>
           <div class="card-body">
             <div class="list-group">
@@ -27,7 +27,7 @@
             </div>
           </div>
         </div>
-        <div class="card">
+        <div class="card mt-3">
           <div class="card-header">Fields</div>
           <div class="card-body">
             <div class="list-group">
@@ -42,11 +42,26 @@
             </div>
           </div>
         </div>
+        <div class="card mt-3" *ngIf="hasReferences">
+          <div class="card-header">Foreign Keys</div>
+          <div class="card-body">
+            <div class="list-group">
+              <div *ngFor="let control of mappingControls | mappingControl: 'type':'ref'"
+                   class="list-group-item list-group-item-action"
+                   [dndDraggable]="control" [dndEffectAllowed]="allowedEffect"
+                   (dndMoved)="onDragged(control, mappingControls, allowedEffect)">
+                <span>
+                  <strong>{{control.ref_name}}: </strong>{{control.label}}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="col-md-9">
         <template #mappingContainer></template>
         <div class="float-right mt-2">
-        <button type="button" class="btn btn-outline-primary" (click)="initMapping()">Reset</button>
+          <button type="button" class="btn btn-outline-primary" (click)="initMapping()">Reset</button>
         </div>
         <div class="clearfix"></div>
       </div>

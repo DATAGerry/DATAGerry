@@ -39,6 +39,8 @@ export class TypeMappingBaseComponent {
 
   @Output() public mappingChange = new EventEmitter();
 
+  public hasReferences: boolean = false;
+
   public onDragged(item: any, list: any[], effect: DropEffect) {
     if (effect === 'move') {
       const index = list.indexOf(item);

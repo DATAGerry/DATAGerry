@@ -38,4 +38,24 @@ export class CmdbType implements CmdbDao {
   public category_id: number;
   public clean_db: boolean;
 
+  public has_references(): boolean {
+    for (const field of this.fields) {
+      if (field.type === 'ref') {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public get_reference_fields() {
+    const refFields = [];
+    for (const field of this.fields) {
+      if (field.type === 'ref') {
+        refFields.push(field);
+      }
+    }
+    return refFields;
+  }
+
+  // tslint:enable:variable-name
 }

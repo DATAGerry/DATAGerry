@@ -17,6 +17,7 @@
     <tr>
       <th>Identifier</th>
       <th *ngIf="parserConfig?.header">Header</th>
+      <th *ngIf="hasReferences">Key</th>
       <th *ngIf="parserConfig?.header">Index</th>
       <th>Example</th>
     </tr>
@@ -27,6 +28,7 @@
           (dndDrop)="onDrop($event, currentMapping, idx, mappingControls)">
         <div class="list-group-item list-group-item-action">
           <span>
+            <strong *ngIf="currentMapping[idx]?.ref_name">{{currentMapping[idx]?.type_name}}: </strong>
             {{currentMapping[idx]?.label}}
           </span>
         </div>
