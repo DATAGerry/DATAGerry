@@ -60,7 +60,7 @@ export class ExportdJobBasicStepComponent implements OnInit {
 
   public ngOnInit(): void {
     if (this.mode === CmdbMode.Create) {
-      // this.basicForm.get('name').setAsyncValidators(checkJobExistsValidator(this.exportdService));
+      this.basicForm.get('name').setAsyncValidators(checkJobExistsValidator(this.exportdService));
       this.basicForm.get('label').valueChanges.subscribe(value => {
         this.basicForm.get('name').setValue(value.replace(/ /g, '-').toLowerCase());
         this.basicForm.get('name').markAsDirty({ onlySelf: true });
