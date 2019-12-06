@@ -27,6 +27,7 @@ from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagerGetErr
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob, ExecuteState
 from cmdb.interface.route_utils import make_response, RootBlueprint, login_required, insert_request_user, right_required
+from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.user_management import User
 
 with current_app.app_context():
@@ -92,7 +93,7 @@ def get_exportd_job(public_id, request_user: User):
 def get_type_by_name(name: str, request_user: User):
     try:
         job_instance = exportd_manager.get_job_by_name(name=name)
-    except ExportdJobManagerGetError as err:
+    except ObjectManagerGetError as err:
         return abort(404, err.message)
     return make_response(job_instance)
 

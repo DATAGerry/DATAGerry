@@ -19,9 +19,10 @@ import logging
 from datetime import datetime
 
 from cmdb.event_management.event import Event
-from cmdb.data_storage.database_manager import DatabaseManagerMongo, NoDocumentFound
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
+from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.utils.error import CMDBError
 from cmdb.utils.system_reader import SystemConfigReader
@@ -57,13 +58,15 @@ class ExportdJobManagement(CmdbManagerBase):
                 continue
         return job_list
 
-    def get_job_by_name(self, name):
-        formatted_filter = {'name': name}
+    def get_job_by_name(self, **requirements) -> ExportdJob:
         try:
-            return self.dbm.find_one_by(collection=ExportdJob.COLLECTION, filter=formatted_filter)
-        except NoDocumentFound as err:
-            LOGGER.error(err)
-            raise err
+            found_type_list = self._get_many(collection=ExportdJob.COLLECTION, limit=1, **requirements)
+            if len(found_type_list) > 0:
+                return ExportdJob(**found_type_list[0])
+            else:
+                raise ObjectManagerGetError(err='More than 1 type matches this requirement')
+        except (CMDBError, Exception) as e:
+            raise ObjectManagerGetError(err=e)
 
     def get_job_by_event_based(self, state):
         formatted_filter = {'scheduling.event.active': state}
