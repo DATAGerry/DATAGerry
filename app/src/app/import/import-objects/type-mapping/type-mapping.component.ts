@@ -117,13 +117,9 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
   }
 
   public ngOnChanges(changes: SimpleChanges): void {
-    if (changes.fileFormat !== undefined && changes.fileFormat.currentValue !== undefined
-      && changes.fileFormat.firstChange !== true) {
-      this.typeIDSubject.next(null);
-    } else {
-      if (this.mappingContainer !== undefined) {
-        this.initMapping();
-      }
+    if (changes.parsedData !== undefined && changes.parsedData.currentValue !== undefined
+      && changes.parsedData.firstChange !== true) {
+      this.initMapping();
     }
   }
 
@@ -141,9 +137,6 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
 
     if (this.typeInstance !== undefined) {
       for (const field of this.typeInstance.fields) {
-        if (field.type === 'ref') {
-          continue;
-        }
         this.mappingControls.push({
           name: field.name,
           label: field.label,

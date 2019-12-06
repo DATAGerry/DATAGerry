@@ -48,6 +48,20 @@ export class TypeMappingBaseComponent {
     }
   }
 
+  public moveControl(item: any, from: any[], targetIdx: number, to: any[]) {
+    from.splice(from.indexOf(item), 1);
+    to.splice(targetIdx, 1, item);
+  }
+
+  public onRemove(index: number, list: any[], original?: any[]) {
+    if (original && (list[index] !== undefined)) {
+      const originalData = list[index];
+      original.splice(original.length, 0, originalData);
+    }
+    list.splice(index, 1, '');
+    this.mappingChange.emit(this.currentMapping);
+  }
+
   public onDrop(event: DndDropEvent, list: any[], index?: number, original?: any[]) {
     if (typeof index === undefined) {
       index = list.length;

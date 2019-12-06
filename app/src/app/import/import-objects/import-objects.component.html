@@ -50,7 +50,7 @@
           Parser not selected yet!
         </li>
         <li *ngFor="let parserPro of parserConfig | keyvalue" class="list-group-item">
-          {{parserPro?.key | uppercase}}: {{parserPro?.value}}
+          {{parserPro?.key | titlecase}}: {{parserPro?.value}}
         </li>
       </ul>
     </div>
@@ -67,7 +67,7 @@
     </div>
     <div *ngIf="defaultImporterConfig?.manually_mapping" class="card mb-3">
       <div class="card-header">
-        Mapping
+        Mapping:
       </div>
       <ul class="list-group list-group-flush">
         <li *ngFor="let mapEntry of mapping" class="list-group-item">
