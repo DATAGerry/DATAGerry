@@ -26,20 +26,17 @@ except ImportError:
 
 __OBJECT_IMPORTER__ = {
     'json': JsonObjectImporter,
-    'csv': CsvObjectImporter,
-    'xlsx': ExcelObjectImporter
+    'csv': CsvObjectImporter
 }
 
 __OBJECT_IMPORTER_CONFIG__ = {
     'json': JsonObjectImporterConfig,
-    'csv': CsvObjectImporterConfig,
-    'xlsx': ExcelObjectImporterConfig
+    'csv': CsvObjectImporterConfig
 }
 
 __OBJECT_PARSER__ = {
     'json': JsonObjectParser,
-    'csv': CsvObjectParser,
-    'xlsx': ExcelObjectParser
+    'csv': CsvObjectParser
 }
 
 
@@ -47,8 +44,7 @@ def load_importer_class(importer_type: str, importer_name: str):
     __importer = {
         'object': {
             JsonObjectImporter.CONTENT_TYPE: JsonObjectImporter,
-            CsvObjectImporter.CONTENT_TYPE: CsvObjectImporter,
-            ExcelObjectImporter.CONTENT_TYPE: ExcelObjectImporter
+            CsvObjectImporter.CONTENT_TYPE: CsvObjectImporter
         }
     }
     try:
@@ -64,8 +60,7 @@ def load_importer_config_class(importer_type: str, importer_name: str):
     __importer_config = {
         'object': {
             JsonObjectImporterConfig.CONTENT_TYPE: JsonObjectImporterConfig,
-            CsvObjectImporterConfig.CONTENT_TYPE: CsvObjectImporterConfig,
-            ExcelObjectImporterConfig.CONTENT_TYPE: ExcelObjectImporterConfig
+            CsvObjectImporterConfig.CONTENT_TYPE: CsvObjectImporterConfig
         }
     }
     try:
@@ -81,8 +76,7 @@ def load_parser_class(parser_type: str, parser_name: str):
     __parser = {
         'object': {
             JsonObjectParser.CONTENT_TYPE: JsonObjectParser,
-            CsvObjectParser.CONTENT_TYPE: CsvObjectParser,
-            ExcelObjectParser.CONTENT_TYPE: ExcelObjectParser
+            CsvObjectParser.CONTENT_TYPE: CsvObjectParser
         }
     }
     try:
