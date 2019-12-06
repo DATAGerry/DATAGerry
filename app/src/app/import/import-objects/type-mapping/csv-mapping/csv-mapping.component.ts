@@ -79,7 +79,6 @@ export class CsvMappingComponent extends TypeMappingBaseComponent implements OnI
           });
         }
       }
-      console.log(moveList);
       for (const moveControl of moveList) {
         this.moveControl(moveControl.item, this.mappingControls, moveControl.index, this.currentMapping);
       }
