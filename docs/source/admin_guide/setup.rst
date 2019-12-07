@@ -220,7 +220,8 @@ After that, activate and start DATAGERRY with Systemd:
 
 .. code-block:: console
 
-    $ systemctl start datagerry.service
+    $ sudo systemctl enable datagerry.service
+    $ sudo systemctl start datagerry.service
 
 
 To access the DATAGERRY frontend, use the following parameters:
