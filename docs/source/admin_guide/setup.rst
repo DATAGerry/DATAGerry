@@ -85,8 +85,8 @@ After that, install the mongodb-org package and start the server with SystemD:
 .. code-block:: console
 
     $ sudo yum install -y mongodb-org
-    $ systemctl enable MongoDB
-    $ systemctl start MongoDB
+    $ sudo systemctl enable mongod
+    $ sudo systemctl start mongod
 
 
 Setup RabbitMQ
@@ -98,27 +98,22 @@ RabbitMQ 3.8+ is used as messaging bus between the processes of DATAGERRY.
     The setup of RabbitMQ is described in detail on the RabbitMQ website: https://www.rabbitmq.com/install-rpm.html
     The following section is a quick install guide of RabbitMQ
 
-As RabbitMQ requires Erlang, we need to install Erlang first:
 
-.. code-block:: console
-
-    $ yum install -y erlang
-
-
-For setting up RabbitMQ, we can use the RPM repository provided by Bintray. At first, add the RPM signing key:
-
-.. code-block:: console
-
-    $ rpm --import https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc
-
-
-After that, place the following file under /etc/yum.repos.d/rabbitmq.repo:
+For setting up RabbitMQ, we can use the RPM repository provided by Bintray. Place the following file under 
+/etc/yum.repos.d/rabbitmq.repo:
 
 .. code-block:: ini
 
     [bintray-rabbitmq-server]
     name=bintray-rabbitmq-rpm
     baseurl=https://dl.bintray.com/rabbitmq/rpm/rabbitmq-server/v3.8.x/el/$releasever/
+    gpgcheck=1
+    gpgkey=https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc
+    enabled=1
+
+    [bintraybintray-rabbitmq-erlang-rpm]
+    name=bintray-rabbitmq-erlang-rpm
+    baseurl=https://dl.bintray.com/rabbitmq-erlang/rpm/erlang/22/el/$releasever/
     gpgcheck=0
     repo_gpgcheck=0
     enabled=1
@@ -127,9 +122,9 @@ Now, RabbitMQ can be installed and started:
 
 .. code-block:: console
 
-    $ yum install rabbitmq
-    $ systemctl enable rabbitmq-server
-    $ systemctl start rabbitmq-server
+    $ sudo yum install -y rabbitmq-server
+    $ sudo systemctl enable rabbitmq-server
+    $ sudo systemctl start rabbitmq-server
 
 
 Setup DATAGERRY
@@ -139,7 +134,7 @@ If all requirements were installed, we'll can install the downloaded DATAGERRY R
 
 .. code-block:: console
 
-    $ rpm -ivh DATAGERRY-<version>.x86_64.rpm
+    $ sudo rpm -ivh DATAGERRY-<version>.x86_64.rpm
 
 
 To change the parameters for connecting to MongoDB and RabbitMQ, edit the configuration file /etc/datagerry/cmdb.conf
@@ -155,8 +150,8 @@ After that, activate and start DATAGERRY with Systemd:
 
 .. code-block:: console
 
-    $ systemctl enable datagerry.service
-    $ systemctl start datagerry.service
+    $ sudo systemctl enable datagerry.service
+    $ sudo systemctl start datagerry.service
 
 
 To access the DATAGERRY frontend, use the following parameters:
@@ -167,6 +162,10 @@ To access the DATAGERRY frontend, use the following parameters:
     user: admin
     password: admin
 
+
+.. note::
+    If you can't access the webfrontend of DATAGERRY, check the firewall settings of your server. Port 4000 should ba
+    accessible.
 
 
 tar.gz archive setup
@@ -232,3 +231,6 @@ To access the DATAGERRY frontend, use the following parameters:
     user: admin
     password: admin
 
+.. note::
+    If you can't access the webfrontend of DATAGERRY, check the firewall settings of your server. Port 4000 should ba
+    accessible.
