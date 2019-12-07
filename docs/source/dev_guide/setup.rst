@@ -22,14 +22,18 @@ Please see at the official documentation for details: `Download Python | Python.
 Clone repository
 ================
 Clone the git repository from our official mirror:
+
 .. code:: bash
+
     git clone https://github.com/NETHINKS/DATAGERRY
 
 Install requirements
 --------------------
 We recommend generating an isolated python environment like ``Virtualenv``
 To install the python requirements run:
+
 .. code:: bash
+
     pip install -r requirements.txt
 
 
@@ -52,7 +56,7 @@ Modify configuration file
 Default file is ``etc/cmdb.conf``.
 The default configuration should look like this:
 
-.. include:: ../../../../etc/cmdb.conf
+.. include:: ../../../etc/cmdb.conf
     :literal:
 
 Database config
@@ -97,6 +101,7 @@ Starting DATAGERRY
 To start DATAGERRY you can use the following command.
 
 .. code-block:: bash
+
     ./datagerry -s -d
 
 .. note::
@@ -117,7 +122,9 @@ admin user is started. In addition, the asymmetric key pair is generated and sto
 Insert test data (optional)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Optionally DATAGERRY can be filled with fictitious test data.
+
 .. code-block:: bash
+
     ./datagerry --test
 
 Starting angular frontend
