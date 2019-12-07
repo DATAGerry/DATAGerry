@@ -23,7 +23,7 @@ jobs:
       - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/docker/datagerry_*.tar  $SCP_USER@$SCP_HOST:$SCP_PATH/$CIRCLE_BRANCH/docker
       # copy documenation to docs.datagerry.com
       - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH_DOCS/$CIRCLE_BRANCH"
-      - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "rm -R $SCP_PATH_DOCS/$CIRCLE_BRANCH/*"
+      - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "rm -Rf $SCP_PATH_DOCS/$CIRCLE_BRANCH/*"
       - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r target/docs/*  $SCP_USER@$SCP_HOST:$SCP_PATH_DOCS/$CIRCLE_BRANCH
       - store_artifacts:
           path: target/bin
