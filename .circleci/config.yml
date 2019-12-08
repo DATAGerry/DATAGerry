@@ -1,5 +1,12 @@
-version: 2
+version: 2.1
 jobs:
+  versionset-tag:
+    steps:
+      - run: export VERSION_STRING="${CIRCLE_TAG}"
+      - run: export VERSION_ID=""
+  versionset-branch:
+      - run: export VERSION_STRING="$CIRCLE_BRANCH"
+      - run: export VERSION_ID="$CIRCLE_BRANCH-$CIRCLE_SHA1"
   build:
     docker:
       - image: nethinks/datagerry_ci
@@ -9,22 +16,43 @@ jobs:
       # setup docker environment (to allow building docker images)
       - setup_remote_docker
       # build datagerry
-      - run: BUILDVAR_VERSION=$CIRCLE_BRANCH make -e
+      - run: BUILDVAR_VERSION=$VERSION_STRING BUILDVAR_VERSION_EXT=$VERSION_ID make -e
       # run tests (temp. disabled for redesign, see NET-71)
       #- run: make tests
       # copy datagerry to files.datagerry.com
-      - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$CIRCLE_BRANCH/bin"
-      - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/bin/datagerry $SCP_USER@$SCP_HOST:$SCP_PATH/$CIRCLE_BRANCH/bin
-      - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$CIRCLE_BRANCH/rpm"
-      - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/rpm/RPMS/x86_64/DATAGERRY-*.rpm  $SCP_USER@$SCP_HOST:$SCP_PATH/$CIRCLE_BRANCH/rpm
-      - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$CIRCLE_BRANCH/targz"
-      - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/targz/datagerry-*.tar.gz  $SCP_USER@$SCP_HOST:$SCP_PATH/$CIRCLE_BRANCH/targz
+      - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_STRING/bin"
+      - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/bin/datagerry $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_STRING/bin
+      - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_STRING/rpm"
+      - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/rpm/RPMS/x86_64/DATAGERRY-*.rpm  $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_STRING/rpm
+      - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_STRING/targz"
+      - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/targz/datagerry-*.tar.gz  $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_STRING/targz
       # publish docker image to hub.docker.com
       - run: echo "$DOCKER_TOKEN" | docker login --username $DOCKER_USER --password-stdin
-      - run: docker push nethinks/datagerry:$CIRCLE_BRANCH
+      - run: docker push nethinks/datagerry:$VERSION_STRING
       # copy documenation to docs.datagerry.com
-      - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH_DOCS/$CIRCLE_BRANCH"
-      - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "rm -Rf $SCP_PATH_DOCS/$CIRCLE_BRANCH/*"
-      - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r target/docs/*  $SCP_USER@$SCP_HOST:$SCP_PATH_DOCS/$CIRCLE_BRANCH
+      - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH_DOCS/$VERSION_STRING"
+      - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "rm -Rf $SCP_PATH_DOCS/$VERSION_STRING/*"
+      - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r target/docs/*  $SCP_USER@$SCP_HOST:$SCP_PATH_DOCS/$VERSION_STRING
       - store_artifacts:
           path: target/bin
+
+workflows:
+  version: 2
+  tagged-build:
+    jobs:
+      - versionset-tag:
+          filters:
+            tags:
+              only: /.*/
+      - build:
+          requires:
+            - versionset-tag
+          filters:
+            tags:
+              only: /.*/
+  untagged-build:
+    jobs:
+      - versionset-branch
+      - build:
+          requires:
+            - versionset-branch
