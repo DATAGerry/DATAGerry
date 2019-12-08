@@ -1,13 +1,10 @@
 version: 2.1
 jobs:
-  versionset-tag:
-    steps:
-      - run: export VERSION_STRING="${CIRCLE_TAG}"
-      - run: export VERSION_ID=""
-  versionset-branch:
-      - run: export VERSION_STRING="$CIRCLE_BRANCH"
-      - run: export VERSION_ID="$CIRCLE_BRANCH-$CIRCLE_SHA1"
   build:
+    parameters:
+      version-is-tagged:
+        type: boolean
+        default: false
     docker:
       - image: nethinks/datagerry_ci
     steps:
@@ -15,6 +12,14 @@ jobs:
       - checkout
       # setup docker environment (to allow building docker images)
       - setup_remote_docker
+      # setup version string
+      - run: export VERSION_STRING="$CIRCLE_BRANCH"
+      - run: export VERSION_ID="$CIRCLE_BRANCH-$CIRCLE_SHA1"
+      - when:
+          condition: <<parameters.version-is-tagged>>
+          steps:
+            - run: export VERSION_STRING="$CIRCLE_TAG"
+            - run: export VERSION_ID=""
       # build datagerry
       - run: BUILDVAR_VERSION=$VERSION_STRING BUILDVAR_VERSION_EXT=$VERSION_ID make -e
       # run tests (temp. disabled for redesign, see NET-71)
@@ -40,19 +45,11 @@ workflows:
   version: 2
   tagged-build:
     jobs:
-      - versionset-tag:
-          filters:
-            tags:
-              only: /.*/
       - build:
-          requires:
-            - versionset-tag
+          version-is-tagged: true
           filters:
             tags:
               only: /.*/
   untagged-build:
     jobs:
-      - versionset-branch
-      - build:
-          requires:
-            - versionset-branch
+      - build
