@@ -19,7 +19,7 @@ jobs:
           condition: <<parameters.version-is-tagged>>
           steps:
             - run: export VERSION_STRING="$CIRCLE_TAG" >> $BASH_ENV
-            - run: export VERSION_ID="" >> $BASH_ENV
+            - run: export VERSION_ID="$CIRCLE_TAG" >> $BASH_ENV
       # build datagerry
       - run: BUILDVAR_VERSION=$VERSION_STRING BUILDVAR_VERSION_EXT=$VERSION_ID make -e
       # run tests (temp. disabled for redesign, see NET-71)
