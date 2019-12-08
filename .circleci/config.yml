@@ -50,6 +50,8 @@ workflows:
           filters:
             tags:
               only: /.*/
+            branches:
+              ignore: /.*/
   untagged-build:
     jobs:
       - build
