@@ -127,7 +127,6 @@ docker: rpm
 	cp contrib/docker/Dockerfile ${DIR_DOCKER_BUILD}/src
 	cp ${DIR_RPM_BUILD}/RPMS/x86_64/DATAGERRY-*.rpm ${DIR_DOCKER_BUILD}/src/files
 	docker build -f ${DIR_DOCKER_BUILD}/src/Dockerfile -t nethinks/datagerry:${BUILDVAR_VERSION} ${DIR_DOCKER_BUILD}/src
-	docker save --output ${DIR_DOCKER_BUILD}/datagerry_${BUILDVAR_VERSION}.tar nethinks/datagerry:${BUILDVAR_VERSION}
 
 
 # execute tests

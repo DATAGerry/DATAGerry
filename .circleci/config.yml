@@ -19,8 +19,9 @@ jobs:
       - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/rpm/RPMS/x86_64/DATAGERRY-*.rpm  $SCP_USER@$SCP_HOST:$SCP_PATH/$CIRCLE_BRANCH/rpm
       - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$CIRCLE_BRANCH/targz"
       - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/targz/datagerry-*.tar.gz  $SCP_USER@$SCP_HOST:$SCP_PATH/$CIRCLE_BRANCH/targz
-      - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$CIRCLE_BRANCH/docker"
-      - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/docker/datagerry_*.tar  $SCP_USER@$SCP_HOST:$SCP_PATH/$CIRCLE_BRANCH/docker
+      # publish docker image to hub.docker.com
+      - run: echo "$DOCKER_TOKEN" | docker login --username $DOCKER_USER --password-stdin
+      - run: docker push nethinks/datagerry:$CIRCLE_BRANCH
       # copy documenation to docs.datagerry.com
       - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH_DOCS/$CIRCLE_BRANCH"
       - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "rm -Rf $SCP_PATH_DOCS/$CIRCLE_BRANCH/*"
