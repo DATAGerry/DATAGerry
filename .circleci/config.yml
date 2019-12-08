@@ -13,13 +13,13 @@ jobs:
       # setup docker environment (to allow building docker images)
       - setup_remote_docker
       # setup version string
-      - run: export VERSION_STRING="$CIRCLE_BRANCH" >> $BASH_ENV
-      - run: export VERSION_ID="$CIRCLE_BRANCH-$CIRCLE_SHA1" >> $BASH_ENV
+      - run: echo "export VERSION_STRING=\"$CIRCLE_BRANCH\"" >> $BASH_ENV
+      - run: echo "export VERSION_ID=\"$CIRCLE_BRANCH-$CIRCLE_SHA1\"" >> $BASH_ENV
       - when:
           condition: <<parameters.version-is-tagged>>
           steps:
-            - run: export VERSION_STRING="$CIRCLE_TAG" >> $BASH_ENV
-            - run: export VERSION_ID="$CIRCLE_TAG" >> $BASH_ENV
+            - run: echo "export VERSION_STRING=\"$CIRCLE_TAG\"" >> $BASH_ENV
+            - run: echo "export VERSION_ID=\"$CIRCLE_TAG\"" >> $BASH_ENV
       # build datagerry
       - run: BUILDVAR_VERSION=$VERSION_STRING BUILDVAR_VERSION_EXT=$VERSION_ID make -e
       # run tests (temp. disabled for redesign, see NET-71)
