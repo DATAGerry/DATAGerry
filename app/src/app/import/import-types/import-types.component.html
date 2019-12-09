@@ -1,4 +1,4 @@
-<form id="uploadfileform" [formGroup]="fileForm" (ngSubmit)="importTypeFile()">
+<form id="uploadfileform" [formGroup]="fileForm">
   <aw-wizard [navBarLayout]="'large-empty-symbols'">
     <aw-wizard-step stepId="1" stepTitle="Select file">
       <ng-template awWizardStepSymbol><i class="fas fa-file-code"></i></ng-template>
@@ -7,6 +7,13 @@
     <aw-wizard-step stepId="2" stepTitle="Preview">
       <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
       <cmdb-type-preview [data]="fileForm"></cmdb-type-preview>
+      <button class="btn btn-primary prev" type="button" awPreviousStep>
+        <i class="fas fa-angle-double-left"></i> Previous step
+      </button>
+      <button class="btn btn-primary next" type="submit" awNextStep [disabled]="fileForm.invalid"
+      (click)="importTypeFile()">
+        Import File <i class="fas fa-angle-double-right"></i>
+      </button>
     </aw-wizard-step>
     <aw-wizard-step stepId="5" stepTitle="Complete">
       <ng-template awWizardStepSymbol><i class="fas fa-save"></i></ng-template>
