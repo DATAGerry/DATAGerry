@@ -1,263 +1,237 @@
 *****
 Setup
 *****
-.. contents:: Table of Contents
-    :local:
-|
 
-Installing on Debian
-====================
-Instructions for installing DATAGERRY on a Debian system
+Requirements
+============
+DATAGERRY has the following system requirements:
 
-Installing the dependencies
----------------------------
-MongoDB
-^^^^^^^
+ * Linux Operating System
+ * MongoDB 4.2+
+ * RabbitMQ
 
-| **Installing MongoDB:**
+There a several setup options for DATAGERRY, which are described in the sections below in detail:
+
+ * Docker Images
+ * RPM file (for RHEL/CentOS distributions)
+ * tar.gz archive with setup script (for Debian/Ubuntu or other distributions)
+
+
+Docker Image
+============
+The fastest way for getting started with DATAGERRY is using Docker. We provide a docker-compose file, which creates
+three containers (DATAGERRY, MongoDB, RabbitMQ). All data were stored in MongoDB using Docker volumes on the Docker host
+system.
+
+To start, copy the follwing docker-compose.yml in a directory of your Docker host, and replace "undefined" with the version
+of DATAGERRY, you want to use:
+
+.. include:: ../../../contrib/docker/docker-compose.yml
+    :literal:
+
+Run docker-compose to start the application:
+
 .. code-block:: console
 
-    $ sudo apt install -y MongoDB
+    $ docker-compose up -d
 
-| **Enable MongoDB on startup:**
+To access the DATAGERRY frontend, use the following parameters:
+
 .. code-block:: console
 
-    $ systemctl enable MongoDB
+    http://<<host>:4000
+    user: admin
+    password: admin
 
-| **Start MongoDB:**
-.. code-block:: console
 
-    $ systemctl start MongoDB
+RPM setup
+=========
 
-| **Check the status of MongoDB:**
-.. code-block:: console
+For Red Hat Enterprise Linux (RHEL) or RHEL based systems like CentOS or Oracle Linux, we provide a RPM file for
+installing DATAGERRY.
 
-    $ systemctl status MongoDB
+The following RHEL/CentOS versions are supported and tested:
 
-RabbitMQ and Dependencies
-^^^^^^^^^^^^^^^^^^^^^^^^^
-| **Installing Erlang:**
-| Erlang is a programming language that is required for the installation of RabbitMQ
-.. code-block:: console
+ * RHEL/CentOS 7
+ * RHEL/CentOS 8
 
-    $ wget https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
-    $ sudo dpkg -I erlang-solutions_1.0_all.deb
-    $ sudo apt-get update
-    $ sudo apt-get install erlang
 
-| **Installing RabbitMQ:**
-| Enable RabbitMQ repository:
-.. code-block:: console
+Before we can install DATAGERRY, we need to install the required dependencies MongoDB and Rabbit MQ.
 
-    $ echo 'deb http://www.rabbitmq.com/debian/ testing main' | sudo tee /etc/apt/sources.list.d/rabbitmq.list
-    $ wget -O- https://www.rabbitmq.com/rabbitmq-release-signing-key.asc | sudo apt-key add –
+Setup MongoDB
+-------------
 
-| Update Cache and install RabbitMQ:
-.. code-block:: console
+MongoDB 4.2+ is required as database for DATAGERRY.
 
-    $ sudo apt-get update
-    $ sudo apt-get install -y rabbitmq-server
+.. note::
+    The setup of MongoDB is described in detail on the MongoDB website: https://docs.mongodb.com/manual/tutorial/install-mongodb-on-red-hat/
+    The following section is a quick install guide of MonogDB.
 
-| **Enable RabbitMQ on startup:**
-.. code-block:: console
+To setup MongoDB, place the follwing file under /etc/yum.repos.d/mongodb.repo:
 
-    $ systemctl enable rabbitmq-server
 
-| **Start RabbitMQ:**
-.. code-block:: console
+.. code-block:: ini
 
-    $ systemctl start rabbitmq-server
+    [MongoDB]
+    name=MongoDB Repository
+    baseurl=http://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.2/$basearch/
+    gpgcheck=1
+    enabled=1
+    gpgkey=https://www.mongodb.org/static/pgp/server-4.2.asc
 
-| **Check the status of RabbitMQ:**
-.. code-block:: console
 
-    $ systemctl status rabbitmq-server
+After that, install the mongodb-org package and start the server with SystemD:
 
-Installing DATAGERRY
---------------------
-| **Create a directory and download the DATAGERRY binary:**
-.. code-block:: console
-
-    $ wget http://files.datagerry.com/master/targz/datagerry-master.tar.gz
-
-| **Extract the archive:**
-.. code-block:: console
-
-    $ tar -xzvf datagerry-development.tar.gz
-
-| **Execute the setup script:**
-.. code-block:: console
-
-    $ cd datagerry
-    $ bash setup.sh
-
-| **Set the firewall rules:**
-.. code-block:: console
-
-    $ ufw allow 4000
-
-| **Check if DATAGERRY is running:**
-.. code-block:: console
-
-    $ systemctl status datagerry.service
-|
-
-Installing on RHEL
-==================
-Instructions for installing DATAGERRY one a RHEL system
-
-Installing the dependencies
----------------------------
-MongoDB
-^^^^^^^
-| **Installing MongoDB:**
-| Create a repository file with the following input:
-.. code-block:: console
-
-    $ vi /etc/yum.repos.d/mongodb.repo
-
-| [MongoDB]
-| name=MongoDB Repository
-| baseurl=http://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.2/$basearch/
-| gpgcheck=1
-| enabled=1
-| gpgkey=https://www.mongodb.org/static/pgp/server-4.2.asc
 .. code-block:: console
 
     $ sudo yum install -y mongodb-org
+    $ sudo systemctl enable mongod
+    $ sudo systemctl start mongod
 
-| **Enable MongoDB on startup:**
+
+Setup RabbitMQ
+--------------
+
+RabbitMQ 3.8+ is used as messaging bus between the processes of DATAGERRY.
+
+.. note::
+    The setup of RabbitMQ is described in detail on the RabbitMQ website: https://www.rabbitmq.com/install-rpm.html
+    The following section is a quick install guide of RabbitMQ
+
+
+For setting up RabbitMQ, we can use the RPM repository provided by Bintray. Place the following file under 
+/etc/yum.repos.d/rabbitmq.repo:
+
+.. code-block:: ini
+
+    [bintray-rabbitmq-server]
+    name=bintray-rabbitmq-rpm
+    baseurl=https://dl.bintray.com/rabbitmq/rpm/rabbitmq-server/v3.8.x/el/$releasever/
+    gpgcheck=1
+    gpgkey=https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc
+    enabled=1
+
+    [bintraybintray-rabbitmq-erlang-rpm]
+    name=bintray-rabbitmq-erlang-rpm
+    baseurl=https://dl.bintray.com/rabbitmq-erlang/rpm/erlang/22/el/$releasever/
+    gpgcheck=0
+    repo_gpgcheck=0
+    enabled=1
+
+Now, RabbitMQ can be installed and started:
+
 .. code-block:: console
 
-    $ systemctl enable MongoDB
+    $ sudo yum install -y rabbitmq-server
+    $ sudo systemctl enable rabbitmq-server
+    $ sudo systemctl start rabbitmq-server
 
-| **Start MongoDB:**
+
+Setup DATAGERRY
+---------------
+
+If all requirements were installed, we'll can install the downloaded DATAGERRY RPM file:
+
 .. code-block:: console
 
-    $ systemctl start MongoDB
+    $ sudo rpm -ivh DATAGERRY-<version>.x86_64.rpm
 
-| **Check the status of MongoDB:**
+
+To change the parameters for connecting to MongoDB and RabbitMQ, edit the configuration file /etc/datagerry/cmdb.conf
+
+Now, the database structure can be created:
+
 .. code-block:: console
 
-    $ systemctl status MongoDB
+    $ datagerry -c /etc/datagerry/cmdb.conf --setup
 
-RabbitMQ and Dependencies
-^^^^^^^^^^^^^^^^^^^^^^^^^
-| **Installing Erlang:**
-| Erlang is a programming language that is required for the installation of RabbitMQ
+
+After that, activate and start DATAGERRY with Systemd:
+
 .. code-block:: console
 
-    $ yum install -y erlang
+    $ sudo systemctl enable datagerry.service
+    $ sudo systemctl start datagerry.service
 
-| **Installing RabbitMQ:**
-| Import the rpm-key:
+
+To access the DATAGERRY frontend, use the following parameters:
+
 .. code-block:: console
 
-    $ rpm --import https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc
+    http://<<host>:4000
+    user: admin
+    password: admin
 
-| Enable RabbitMQ repository:
+
+.. note::
+    If you can't access the webfrontend of DATAGERRY, check the firewall settings of your server. Port 4000 should ba
+    accessible.
+
+
+tar.gz archive setup
+====================
+For all non rpm based Linux distributions, we provide a tar.gz archive with a setup shell script. Systemd is a
+requirement for that setup. This should work on most distributions, and is tested with the following distributions:
+
+ * Ubuntu 18.04
+
+
+Before we can install DATAGERRY, we need to install the required dependencies MongoDB and Rabbit MQ.
+
+Setup MongoDB
+-------------
+
+MongoDB 4.2+ is required as database for DATAGERRY.
+
+Please follow the offical `MongoDB documentation <https://docs.mongodb.com/manual/administration/install-on-linux/>` to
+setup MongoDB for your distribution.
+
+
+Setup RabbitMQ
+--------------
+
+RabbitMQ 3.8+ is used as messaging bus between the processes of DATAGERRY.
+
+Please follow the offical `RabbitMQ documentation <https://www.rabbitmq.com/download.html#installation-guides>` to
+setup RabbitMQ for your distribution.
+
+
+Setup DATAGERRY
+---------------
+
+Extract the provided tar.gz archive and execute the setup script as root:
+
 .. code-block:: console
 
-    $ vi /etc/yum.repos.d/rabbitmq.repo
-
-| [bintray-rabbitmq-server]
-| name=bintray-rabbitmq-rpm
-| baseurl=https://dl.bintray.com/rabbitmq/rpm/rabbitmq-server/v3.8.x/el/$releasever/
-| gpgcheck=0
-| repo_gpgcheck=0
-| enabled=1  |
-
-| **Enable RabbitMQ on startup:**
-.. code-block:: console
-
-    $ systemctl enable rabbitmq-server
-
-| **Start RabbitMQ:**
-.. code-block:: console
-
-    $ systemctl start rabbitmq-server
-
-| **Check the status of RabbitMQ:**
-.. code-block:: console
-
-    $ systemctl status rabbitmq-server
-
-Installing DATAGERRY
----------------------
-| There are two options for RHEL available with a *.tar.gz archive or a rpm-package.
-
-DATAGERRY from archive
-^^^^^^^^^^^^^^^^^^^^^^
-| **Create a directory and download the DATAGERRY archive:**
-.. code-block:: console
-
-    $ wget http://files.datagerry.com/master/targz/datagerry-master.tar.gz
-
-| **Extract the archive:**
-.. code-block:: console
-
-    $ tar -xzvf datagerry-development.tar.gz
-
-| **Execute the setup script:**
-.. code-block:: console
-
+    $ tar -xzvf datagerry-<version>.tar.gz
     $ cd datagerry
-    $ bash setup.sh
+    $ sudo ./setup.sh
 
-| **Set the firewall rules:**
+To change the parameters for connecting to MongoDB and RabbitMQ, edit the configuration file /etc/datagerry/cmdb.conf
+
+Now, the database structure can be created:
+
 .. code-block:: console
 
-    $ firewall-cmd --permanent --zone=public --add-port=4000/tcp
-    $ firewall-cmd --reload
+    $ datagerry -c /etc/datagerry/cmdb.conf --setup
 
-| **Deactivate SELinux:**
+
+After that, activate and start DATAGERRY with Systemd:
+
 .. code-block:: console
 
-    $ vi /etc/selinux/config
-| Set SELINUX=enforcing to SELINUX=disabled and restart the system
+    $ sudo systemctl enable datagerry.service
+    $ sudo systemctl start datagerry.service
 
-| **Check if DATAGERRY is running:**
+
+To access the DATAGERRY frontend, use the following parameters:
+
 .. code-block:: console
 
-    $ systemctl status datagerry.service
+    http://<<host>:4000
+    user: admin
+    password: admin
 
-DATAGERRY rpm-package
-^^^^^^^^^^^^^^^^^^^^^
-| **Install the rpm:**
-.. code-block:: console
-
-    $ rpm -ivh DATAGERRY_RPM_PACKAGE.rpm
-
-| **Set the firewall rules:**
-.. code-block:: console
-
-    $ firewall-cmd --permanent --zone=public --add-port=4000/tcp
-    $ firewall-cmd --reload
-
-| **Deactivate SELinux:**
-.. code-block:: console
-
-    $ vi /etc/selinux/config
-| Set SELINUX=enforcing to SELINUX=disabled and restart the system
-
-| **Check if DATAGERRY is running:**
-.. code-block:: console
-
-    $ systemctl status datagerry.service
-
-
-Configuration
-=============
-
-DATAGERRRY has a small INI style configuration file, called cmdb.conf, which defines some basic configuration options (e.g. database connection,
-etc). Please see the following example:
-
-.. include:: ../../../etc/cmdb.conf
-    :literal:
-
-It is possible to overwrite settings in the configuration file with OS environment variables. Please see the following example:
-
-.. code-block:: bash
-
-   DATAGERRY_<section_name>_<option_name>
-   DATAGERRY_Database_port=27018
+.. note::
+    If you can't access the webfrontend of DATAGERRY, check the firewall settings of your server. Port 4000 should ba
+    accessible.

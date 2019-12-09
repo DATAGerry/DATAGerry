@@ -122,8 +122,6 @@ def import_objects(request_user: User):
         return abort(400, 'No import file was provided')
     request_file: FileStorage = get_file_in_request('file', request.files)
 
-    LOGGER.debug(request_file.content_type)
-
     filename = secure_filename(request_file.filename)
     working_file = f'/tmp/{filename}'
     request_file.save(working_file)

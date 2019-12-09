@@ -16,7 +16,16 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, OnDestroy, forwardRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  forwardRef,
+  AfterContentInit,
+  OnChanges,
+  SimpleChanges,
+  AfterViewInit
+} from '@angular/core';
 import { TypeMappingBaseComponent } from '../type-mapping-base.component';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -25,9 +34,9 @@ import { Subscription } from 'rxjs';
   selector: 'cmdb-csv-mapping',
   templateUrl: './csv-mapping.component.html',
   styleUrls: ['./csv-mapping.component.scss'],
-  providers: [{provide: TypeMappingBaseComponent, useExisting: forwardRef(() => CsvMappingComponent) }]
+  providers: [{ provide: TypeMappingBaseComponent, useExisting: forwardRef(() => CsvMappingComponent) }]
 })
-export class CsvMappingComponent extends TypeMappingBaseComponent implements OnInit, OnDestroy {
+export class CsvMappingComponent extends TypeMappingBaseComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public previewIndex: number = 0;
   public previewIndexSelectionForm: FormGroup;
@@ -49,10 +58,32 @@ export class CsvMappingComponent extends TypeMappingBaseComponent implements OnI
     for (let i = 0; i < this.parsedData.entry_length; i++) {
       this.currentMapping.push({});
     }
+
   }
 
   public ngOnDestroy(): void {
     this.previewSelectionSubscription.unsubscribe();
+  }
+
+  public ngAfterViewInit(): void {
+    const moveList: any[] = [];
+    if (this.parserConfig.header && this.parsedData) {
+      for (const control of this.mappingControls) {
+        if (control.type === 'ref') {
+          continue;
+        }
+        if (this.parsedData.header.indexOf(control.name) > -1) {
+          moveList.push({
+            index: this.parsedData.header.indexOf(control.name),
+            item: control
+          });
+        }
+      }
+      for (const moveControl of moveList) {
+        this.moveControl(moveControl.item, this.mappingControls, moveControl.index, this.currentMapping);
+      }
+      this.mappingChange.emit(this.currentMapping);
+    }
   }
 
 }

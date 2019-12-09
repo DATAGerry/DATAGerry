@@ -9,6 +9,7 @@ Admin Guide
     :numbered:
 
     setup
+    configuration
     gettingstarted
     objects
     exportd

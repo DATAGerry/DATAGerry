@@ -18,6 +18,8 @@ import logging
 import datetime
 from typing import List
 
+from cmdb.framework import CmdbObject
+from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.importer import JsonObjectParser
 from cmdb.importer.importer_errors import ImportRuntimeError, ParserRuntimeError
@@ -137,11 +139,11 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
         current_mapping = self.get_config().get_mapping()
         property_entries: List[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'property'})
         field_entries: List[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'field'})
+        foreign_entries: List[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'ref'})
 
         # Insert properties
         for property_entry in property_entries:
             working_object.update({property_entry.get_name(): entry.get(property_entry.get_value())})
-        LOGGER.debug(possible_fields)
         # Validate insert fields
         for entry_field in field_entries:
             field_exists = next((item for item in possible_fields if item["name"] == entry_field.get_name()), None)
@@ -150,6 +152,39 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
                     {'name': entry_field.get_name(),
                      'value': entry.get(entry_field.get_value())
                      })
+
+        for foreign_entry in foreign_entries:
+            LOGGER.debug(f'[CSV] search for object based on {foreign_entry.__dict__}')
+            try:
+                working_type_id = foreign_entry.get_option()['type_id']
+            except (KeyError, IndexError) as err:
+                continue
+            try:
+                query: dict = {
+                    'type_id': working_type_id,
+                    'fields': {
+                        '$elemMatch': {
+                            '$and': [
+                                {'name': foreign_entry.get_option()['ref_name']},
+                                {'value': entry.get(foreign_entry.get_value())},
+                            ]
+                        }
+                    }
+                }
+                LOGGER.debug(f'[CSV] Ref query: {query}')
+                founded_objects: List[CmdbObject] = self.object_manager.get_objects_by(**query)
+                LOGGER.debug(founded_objects)
+                if len(founded_objects) != 1:
+                    continue
+                else:
+                    working_object['fields'].append(
+                        {'name': foreign_entry.get_name(),
+                         'value': founded_objects[0].get_public_id()
+                    })
+
+            except (ObjectManagerGetError, Exception) as err:
+                LOGGER.error(f'[CSV] Error while loading ref object {err.message}')
+                continue
 
         return working_object
 

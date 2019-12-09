@@ -34,47 +34,35 @@
 </div>
 <hr/>
 <div *ngIf="importResponse" id="import-response" class="row">
-  <div class="col-md-6">
-    <h3>Successful Imports</h3>
-    <table class="table">
-      <thead class="thead-light">
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col">Public ID</th>
-        <th scope="col">Object</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let successObject of importResponse.success_imports; let i = index">
-        <th scope="row">{{i}}</th>
-        <td>{{successObject?.public_id}}</td>
-        <td>{{successObject?.obj | json}}</td>
-      </tr>
-      </tbody>
-    </table>
+  <div *ngIf="importResponse.success_imports.length > 0" class="col-md-12">
+    <div class="alert alert-success" role="alert">
+      <h4 class="alert-heading">Import success!</h4>
+      <p>Number of objects successfully imported: {{importResponse.success_imports.length}} from
+        {{(parsedData?.count - importerConfig.start_element) - importerConfig.max_elements}}</p>
+      <hr />
+      <button class="btn btn-primary next" type="button" (click)="onListRedirect()">
+        View list
+      </button>
+      <div class="clearfix"></div>
+    </div>
   </div>
-  <div class="col-md-6">
+  <hr/>
+  <div *ngIf="importResponse.failed_imports.length > 0" class="col-md-12">
     <h3>Failed Imports</h3>
-    <table class="table">
+    <hr/>
+    <table datatable class="table table-warning">
       <thead class="thead-light">
       <tr>
-        <th scope="col">#</th>
         <th scope="col">Error message</th>
         <th scope="col">Object</th>
       </tr>
       </thead>
       <tbody>
       <tr *ngFor="let failedObject of importResponse.failed_imports; let i = index">
-        <th scope="row">{{i}}</th>
         <td>{{failedObject?.error_message}}</td>
         <td>{{failedObject?.obj | json}}</td>
       </tr>
       </tbody>
     </table>
   </div>
-</div>
-<div *ngIf="importResponse">
-  <hr/>
-  <button class="btn btn-primary next" type="button" (click)="onListRedirect()"> Go to list</button>
-  <div class="clearfix"></div>
 </div>

@@ -5,9 +5,9 @@ Objects and Object Types
 Managing Categories
 ===================
 
-Objects Types are organized in Categories. Categories can be managed under Framework -> Categories. Each Object Type is
+Object Types are organized in Categories. Categories can be managed under Framework -> Categories. Each Object Type is
 assigned to one Category. Categories can be organized hierarchically, just define a parent Category. The tree of
-Categories and their assigned Object Types is displayed on the sidebar on the left side of DATAGERRY.
+Categories and their assigned Object Types are displayed on the sidebar on the left side of DATAGERRY.
 
 .. image:: img/objects_categories_sidebar.png
     :width: 100
@@ -50,7 +50,7 @@ one or more fields. Each field or section has a name and label. A name will be c
 changed manually, while a label can be changed at any time. Depending on the field type, several options can be set.
 Currently we support the following field types:
 
-.. csv-table:: field types
+.. csv-table::
     :header: "type", "description"
     :align: left
 
@@ -63,7 +63,7 @@ Currently we support the following field types:
     "Date", "A datepicker"
     "Reference", "Reference to another object of a specific type. E.g. connection between a router and a location object"
 
-With the yellow preview button, and example of an object with the current configuration will be shown.
+With the yellow preview button, an example of an object with the current configuration will be shown.
 
 
 On the next page on the configuration dialog, meta informations can be set:
@@ -85,3 +85,67 @@ The Object Type definition will be applied to all existing objects, so if you re
 DATAGERRY anymore. The removed field still exists in the database and if you add the field again, you can access the old
 content. To cleanup the database and sync Object Type definition with the database, click on the "Cleanup" button in the
 object type list.
+
+
+Importing/Exporting Object Types
+--------------------------------
+Object Types can be exported in JSON format. In the Object Types list, click on the yellow "Export" button to get a file
+in JSON format. By default, all Object Types will be exported. If you only want to export specific types, select items
+in the list and click on the "Export" button.
+
+Object Types can also be imported from a JSON file. In the menu, choose "Type Import/Export" -> "Import Type" and upload
+a JSON file with type definitions. During the import, you can choose, which types from the JSON file should be imported.
+
+
+Managing Objects
+================
+You can access Objects in DATAGERRY in several ways:
+
+ * using the Category tree on the left side
+ * using the search bar at the top
+
+When using the Category tree, you can choose an Object Type (e.g. router) and get a list with all objects of that type.
+By default, only summary fields of an object are shown in the table, with the yellow settings button, additional fields
+can be faded in.
+
+
+Exporting Objects
+-----------------
+Objects can be exported in several formats. Currently we support:
+
+ * CSV
+ * Microsoft Excel (xlsx)
+ * JSON
+ * XML
+
+To export objects, click on the "Export" button in an Object list and choose the export format. Only Objects of a single
+type can be exported (so you won't find the Export button in a list with Objects of multiple types).
+
+An export is also possible in the menu, choose "Object Import/Export" -> "Export Objects".
+
+
+Importing Objects
+-----------------
+To import Objects, choose "Objects Import/Export" -> "Import Objects" from the menu. Currently we support the import of
+the following file formats:
+
+ * CSV
+ * JSON
+
+To start an import, upload a file and choose the file format. Depending on the format, you have to make some settings
+before an import can start.
+
+CSV Import
+^^^^^^^^^^
+During an import from a CSV file, a mapping of rows to object fields must be defined with a drag and drop assistent.
+If the CSV file contains a header that matches the name of object fields, the mapping will be predefined in the WebUI.
+Also object references can be resolved with "Foreign Keys". For example, router objects with a field "location" should
+be imported. There are Location objects in DATAGERRY with a field "name", that contains an unique name of a Location
+(e.g. FRA1). The CSV file with router Objects contains the unique location name. If you choose "foreign key:
+location:name" in the mapping wizzard, a reference to the correct Location object will be set during the import.
+
+
+JSON
+^^^^
+DATAGERRY can import Objects from a JSON file. The JSON format correspond to the format that was created when exporting
+Objects.

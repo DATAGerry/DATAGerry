@@ -110,7 +110,7 @@ class CsvObjectParser(BaseObjectParser, CSVContent):
             with open(f'{file}', 'r', newline=run_config.get('newline')) as csv_file:
                 csv_reader = csv.reader(csv_file, dialect=dialect)
                 if run_config.get('header'):
-                    parsed['header'] = self.__generate_index_pair(next(csv_reader))
+                    parsed['header'] = next(csv_reader)
                 for row in csv_reader:
                     row_list = []
                     for entry in row:
