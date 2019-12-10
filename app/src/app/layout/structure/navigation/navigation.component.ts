@@ -30,8 +30,7 @@ export class NavigationComponent implements OnInit, OnDestroy {
 
   public readonly title: string = 'DATAGERRY';
 
-  constructor(private renderer: Renderer2, public authService: AuthService, private router: Router,
-              public permissionGuard: PermissionGuard) {
+  constructor(private renderer: Renderer2, public authService: AuthService, private router: Router) {
   }
 
   public ngOnInit(): void {

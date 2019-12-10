@@ -6,11 +6,11 @@
   </tr>
   <tr>
     <th scope="row">Import Format</th>
-    <td>{{importFile.fileFormat}}</td>
+    <td>{{importFile?.fileFormat}}</td>
   </tr>
   <tr>
     <th scope="row">Import File</th>
-    <td>{{importFile.fileName}}</td>
+    <td>{{importFile?.fileName}}</td>
   </tr>
   <tr class="table-primary">
     <th scope="row" colspan="2">Summary</th>
@@ -20,8 +20,12 @@
     <td>{{parsedData?.count}}</td>
   </tr>
   <tr>
-    <th scope="row">Number of objects which will be imported</th>
-    <td>{{(parsedData?.count - importerConfig.start_element) - importerConfig.max_elements}}</td>
+    <th scope="row">Staring at object</th>
+    <td>{{importerConfig?.start_element}}</td>
+  </tr>
+  <tr *ngIf="importerConfig?.max_elements > 0">
+    <th scope="row">Max number of object</th>
+    <td>{{importerConfig?.max_elements}}</td>
   </tr>
   </tbody>
 </table>
@@ -38,8 +42,8 @@
     <div class="alert alert-success" role="alert">
       <h4 class="alert-heading">Import success!</h4>
       <p>Number of objects successfully imported: {{importResponse.success_imports.length}} from
-        {{(parsedData?.count - importerConfig.start_element) - importerConfig.max_elements}}</p>
-      <hr />
+        {{parsedData?.count}}</p>
+      <hr/>
       <button class="btn btn-primary next" type="button" (click)="onListRedirect()">
         View list
       </button>

@@ -12,6 +12,7 @@ features to Datagerry,apply patches or develop plugins.
     :numbered:
 
     setup
+    repository
     docs
     processmanagement
     logging
