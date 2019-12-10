@@ -25,6 +25,7 @@ import { RenderResult } from '../../../../models/cmdb-render';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectLinkAddModalComponent } from '../../../modals/object-link-add-modal/object-link-add-modal.component';
 import { ObjectService } from '../../../../services/object.service';
+import { ObjectLinkDeleteModalComponent } from '../../../modals/object-link-delete-modal/object-link-delete-modal.component';
 
 @Component({
   selector: 'cmdb-object-links',
@@ -37,20 +38,21 @@ export class ObjectLinksComponent implements OnInit, OnDestroy {
   private id: number;
 
   @Input()
-  public set publicID(publicID: number) {
-    this.id = publicID;
+  public set objectID(objectID: number) {
+    this.id = objectID;
     if (this.id !== undefined && this.id !== null) {
       this.loadLinks();
     }
   }
 
-  public get publicID(): number {
+  public get objectID(): number {
     return this.id;
   }
 
   // Links
   @Input() public renderResult: RenderResult = undefined;
   public linkList: CmdbLink[];
+  private linkPartnerSubscription: Subscription;
   private linkListSubscription: Subscription;
   public partnerObjects: RenderResult[];
 
@@ -68,23 +70,47 @@ export class ObjectLinksComponent implements OnInit, OnDestroy {
   public dtTrigger: Subject<any>;
 
   constructor(private linkService: LinkService, private objectService: ObjectService, private modalService: NgbModal) {
-    this.linkList = [];
+    this.dtTrigger = new Subject();
+    this.linkPartnerSubscription = new Subscription();
+    this.linkListSubscription = new Subscription();
   }
 
   public ngOnInit(): void {
-    this.dtTrigger = new Subject();
-    this.linkListSubscription = new Subscription();
+    this.linkList = [];
+  }
+
+  public ngOnDestroy(): void {
+    this.linkPartnerSubscription.unsubscribe();
+    this.linkListSubscription.unsubscribe();
+    this.dtTrigger.unsubscribe();
   }
 
   public onShowAddModal(): void {
     const modalRef = this.modalService.open(ObjectLinkAddModalComponent);
     modalRef.componentInstance.primaryRenderResult = this.renderResult;
+    modalRef.componentInstance.closeEmitter.subscribe((closeResponse: string) => {
+      if (closeResponse === 'save') {
+          this.loadLinks();
+      }
+    });
+  }
+
+  public onShowDeleteModal(linkID: number): void {
+    const modalRef = this.modalService.open(ObjectLinkDeleteModalComponent);
+    modalRef.componentInstance.publicID = linkID;
+    modalRef.componentInstance.closeEmitter.subscribe((closeResponse: string) => {
+      if (closeResponse === 'deleted') {
+        this.loadLinks();
+      }
+    });
   }
 
   private loadLinks(): void {
-    console.log('Reload object links');
-    this.linkService.getLinksByPartner(this.publicID).subscribe(
-      (resp: CmdbLink[]) => this.linkList = resp,
+    this.linkList = [];
+    this.linkPartnerSubscription = this.linkService.getLinksByPartner(this.objectID).subscribe(
+      (resp: CmdbLink[]) => {
+        this.linkList = resp;
+      },
       (error) => console.error(error),
       () => this.loadPartnerObjects()
     );
@@ -93,10 +119,10 @@ export class ObjectLinksComponent implements OnInit, OnDestroy {
   private loadPartnerObjects(): void {
     const partnerObservableList: Observable<RenderResult>[] = [];
     for (const link of this.linkList) {
-      const partnerID = this.linkService.getPartnerID(this.publicID, link);
+      const partnerID = this.linkService.getPartnerID(this.objectID, link);
       partnerObservableList.push(this.objectService.getObject<RenderResult>(partnerID));
     }
-    forkJoin(partnerObservableList).subscribe(
+    this.linkListSubscription = forkJoin(partnerObservableList).subscribe(
       (partnerObjects: RenderResult[]) => this.partnerObjects = partnerObjects,
       (error) => console.error(error),
       () => this.insertPartnerObjects()
@@ -104,7 +130,7 @@ export class ObjectLinksComponent implements OnInit, OnDestroy {
   }
 
   public getPartnerObject(link: CmdbLink): RenderResult {
-    const partnerID = this.linkService.getPartnerID(this.publicID, link);
+    const partnerID = this.linkService.getPartnerID(this.objectID, link);
     return this.partnerObjects.find(x => x.object_information.object_id === partnerID);
   }
 
@@ -127,8 +153,4 @@ export class ObjectLinksComponent implements OnInit, OnDestroy {
 
   }
 
-  public ngOnDestroy(): void {
-    this.linkListSubscription.unsubscribe();
-    this.dtTrigger.unsubscribe();
-  }
 }

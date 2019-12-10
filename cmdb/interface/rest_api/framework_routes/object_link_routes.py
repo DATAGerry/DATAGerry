@@ -19,7 +19,7 @@ import logging
 from flask import abort, request, current_app
 
 from cmdb.framework.cmdb_link import CmdbLink
-from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError
+from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerDeleteError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint
 from cmdb.interface.route_utils import make_response, NestedBlueprint, insert_request_user, login_required, \
@@ -56,7 +56,9 @@ def get_partner_links(public_id: int):
     try:
         link_list = object_manager.get_links_by_partner(public_id=public_id)
     except ObjectManagerGetError as err:
+        LOGGER.error(f'[CmdbLinks] Error while getting partner links: {err}')
         return abort(404, err.message)
+    LOGGER.debug(f'[CmdbLinks] Found link list: {link_list}')
     if len(link_list) == 0:
         return make_response(link_list, 204)
     return make_response(link_list)
@@ -76,4 +78,16 @@ def add_link(request_user: User):
         ack = object_manager.insert_link(new_link_params)
     except ObjectManagerInsertError:
         return abort(400)
+    return make_response(ack)
+
+
+@link_rest.route('/<int:public_id>', methods=['DELETE'])
+@login_required
+@insert_request_user
+@right_required('base.framework.object.delete')
+def remove_link(public_id: int, request_user: User):
+    try:
+        ack = object_manager.delete_link(public_id)
+    except ObjectManagerDeleteError as err:
+        return abort(400, err.message)
     return make_response(ack)

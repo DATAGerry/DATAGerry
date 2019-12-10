@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { RenderResult } from '../../../models/cmdb-render';
@@ -34,6 +34,8 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
   // Data
   public primaryResult: RenderResult;
   public secondaryResult: RenderResult;
+
+  @Output() public closeEmitter: EventEmitter<string> = new EventEmitter<string>();
 
   @Input()
   public set primaryRenderResult(result: RenderResult) {
@@ -103,8 +105,10 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
   public onSave() {
     const formData = this.addLinkForm.getRawValue();
     this.linkService.postLink(formData).subscribe(insertResult => {
-      console.log(insertResult);
-    }).add(() => this.activeModal.close());
+    }).add(() => {
+      this.activeModal.close();
+      this.closeEmitter.emit('save');
+    });
   }
 
 }

@@ -47,14 +47,17 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ObjectLogListComponent } from './object-view/object-footer/object-log-list/object-log-list.component';
 import { ObjectReferenceListComponent } from './object-view/object-footer/object-reference-list/object-reference-list.component';
 import { ObjectLogComponent } from './object-log/object-log.component';
+// tslint:disable-next-line:max-line-length
 import { ObjectLogChangeViewComponent } from './object-view/object-footer/object-log-list/object-log-change-view/object-log-change-view.component';
 import { ObjectLogUserComponent } from './object-view/object-footer/object-log-list/object-log-user/object-log-user.component';
 import { ObjectLinkAddModalComponent } from './modals/object-link-add-modal/object-link-add-modal.component';
-import {AuthModule} from "../../auth/auth.module";
+import { ObjectLinkDeleteModalComponent } from './modals/object-link-delete-modal/object-link-delete-modal.component';
+import { AuthModule } from '../../auth/auth.module';
 
 @NgModule({
   entryComponents: [
-    ObjectLinkAddModalComponent
+    ObjectLinkAddModalComponent,
+    ObjectLinkDeleteModalComponent
   ],
   declarations: [
     ObjectListComponent,
@@ -77,22 +80,23 @@ import {AuthModule} from "../../auth/auth.module";
     ObjectLogComponent,
     ObjectLogChangeViewComponent,
     ObjectLogUserComponent,
-    ObjectLinkAddModalComponent],
-    imports: [
-        CommonModule,
-        ObjectRoutingModule,
-        DataTablesModule,
-        LayoutModule,
-        QRCodeModule,
-        NgxSpinnerModule,
-        FormsModule,
-        ReactiveFormsModule,
-        RenderModule,
-        NgSelectModule,
-        NgbTooltipModule,
-        FontAwesomeModule,
-        AuthModule
-    ]
+    ObjectLinkAddModalComponent,
+    ObjectLinkDeleteModalComponent],
+  imports: [
+    CommonModule,
+    ObjectRoutingModule,
+    DataTablesModule,
+    AuthModule,
+    LayoutModule,
+    QRCodeModule,
+    NgxSpinnerModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RenderModule,
+    NgSelectModule,
+    NgbTooltipModule,
+    FontAwesomeModule
+  ]
 })
 export class ObjectModule {
 }

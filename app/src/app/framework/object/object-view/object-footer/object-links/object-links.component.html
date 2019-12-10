@@ -8,6 +8,7 @@
     <th>Partner</th>
     <th>Summary</th>
     <th>Creation time</th>
+    <th>Action</th>
   </tr>
   </thead>
   <tbody>
@@ -17,7 +18,8 @@
       [routerLink]="['/framework/object/view', link?.partnerObject?.object_information?.object_id]">{{link?.partnerObject?.object_information?.object_id}}
       # {{link?.partnerObject?.type_information?.type_label}}</a></td>
     <td>{{link?.partnerObject?.summary_line}}</td>
-    <td>{{link?.creation_time?.$date | date: 'full'}}</td>
+    <td>{{link?.creation_time?.$date | date: 'medium'}}</td>
+    <td><button class="btn btn-sm btn-danger" (click)="onShowDeleteModal(link?.public_id)">Delete</button></td>
   </tr>
   </tbody>
 </table>

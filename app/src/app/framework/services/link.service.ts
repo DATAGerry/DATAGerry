@@ -47,6 +47,9 @@ export class LinkService<T = CmdbLink> implements ApiService {
   public getLinksByPartner(publicID: number): Observable<T[]> {
     return this.api.callGet<T[]>(`${ this.servicePrefix }/partner/${ publicID }/`).pipe(
       map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
         return apiResponse.body;
       })
     );
@@ -54,6 +57,14 @@ export class LinkService<T = CmdbLink> implements ApiService {
 
   public postLink(data: CmdbLink): Observable<any> {
     return this.api.callPost<CmdbLink>(`${ this.servicePrefix }/`, data).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public deleteLink(publicID: number): Observable<any> {
+    return this.api.callDelete<number>(`${ this.servicePrefix }/${ publicID }`).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })

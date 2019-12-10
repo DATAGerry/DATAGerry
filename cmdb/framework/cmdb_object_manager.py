@@ -33,7 +33,7 @@ from cmdb.framework.cmdb_category import CmdbCategory
 from cmdb.framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplate
 from cmdb.framework.cmdb_errors import WrongInputFormatError, UpdateError, TypeInsertError, TypeAlreadyExists, \
     TypeNotFoundError, ObjectInsertError, ObjectDeleteError, NoRootCategories, ObjectManagerGetError, \
-    ObjectManagerInsertError, ObjectManagerUpdateError
+    ObjectManagerInsertError, ObjectManagerUpdateError, ObjectManagerDeleteError
 from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_status import CmdbStatus
@@ -591,7 +591,6 @@ class CmdbObjectManager(CmdbManagerBase):
         link_list: List[CmdbLink] = []
         try:
             find_list: List[dict] = self._get_many(CmdbLink.COLLECTION, **query)
-            LOGGER.debug(find_list)
             for link in find_list:
                 link_list.append(CmdbLink(**link))
         except CMDBError as err:
@@ -604,3 +603,10 @@ class CmdbObjectManager(CmdbManagerBase):
             return self._insert(CmdbLink.COLLECTION, new_link.to_database())
         except (CMDBError, Exception) as err:
             raise ObjectManagerInsertError(err)
+
+    def delete_link(self, public_id: int):
+        try:
+            ack = self._delete(CmdbLink.COLLECTION, public_id)
+        except (CMDBError, Exception) as err:
+            raise ObjectManagerDeleteError(err)
+        return ack
