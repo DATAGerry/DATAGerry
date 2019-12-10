@@ -49,16 +49,16 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
   private records: number;
 
   readonly dtButtons: any[] = [];
-  private summaries: any[] = [];
-  private columnFields: any[] = [];
-  private items: any[] = [];
+  public summaries: any[] = [];
+  public columnFields: any[] = [];
+  public items: any[] = [];
 
   public pageTitle: string = 'List';
   public faIcon: string;
   public objectLists: RenderResult[];
   public hasSummaries: boolean = false;
   public formatList: any[] = [];
-  private selectedObjects: string[] = [];
+  public selectedObjects: string[] = [];
   public typeID: number = null;
   public mode: CmdbMode = CmdbMode.Simple;
 
