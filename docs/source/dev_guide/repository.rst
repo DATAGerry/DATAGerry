@@ -42,3 +42,7 @@ To create a bugfix release of an existing version, do the following steps:
 
 A tag should be set by creating a release in the GitHub WebUI. CircleCI will start automatically after setting a new 
 tag and will create binaries, Docker images and documentation. Add the built tar.gz and binary to the GitHub release.
+
+
+.. note::
+    On our two plattforms files.datagerry.com and docs.datagerry.com, the latest symlink should be set to new tag.
