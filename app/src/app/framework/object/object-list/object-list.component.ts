@@ -17,7 +17,7 @@
 */
 
 
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
@@ -38,20 +38,24 @@ import { FileService } from '../../../export/export.service';
   templateUrl: './object-list.component.html',
   styleUrls: ['./object-list.component.scss'],
 })
-export class ObjectListComponent implements OnDestroy {
+export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
 
   @ViewChild(DataTableDirective, {static: false})
   public dtElement: DataTableDirective;
   public dtOptions: any = {}; // : DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
-  readonly dtButtons: any[] = [];
 
+  private url: string ;
+  private records: number;
+
+  readonly dtButtons: any[] = [];
   private summaries: any[] = [];
   private columnFields: any[] = [];
   private items: any[] = [];
+
   public pageTitle: string = 'List';
   public faIcon: string;
-  public objectLists: {};
+  public objectLists: RenderResult[];
   public hasSummaries: boolean = false;
   public formatList: any[] = [];
   private selectedObjects: string[] = [];
@@ -62,78 +66,130 @@ export class ObjectListComponent implements OnDestroy {
               private fileService: FileService, private route: ActivatedRoute, private router: Router,
               private spinner: NgxSpinnerService, private fileSaverService: FileSaverService,
               private datePipe: DatePipe, private typeService: TypeService) {
-    this.route.params.subscribe((id) => {
-      this.init(id);
-    });
-  }
-
-  private init(id) {
     this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
-    this.spinner.show();
-    this.getRouteObjects(id.publicID);
   }
 
-  private getRouteObjects(id) {
-    let url = 'object/';
+  private getMetaData(id) {
+    this.url = 'object/';
     this.pageTitle = 'Object List';
     this.hasSummaries = false;
     if (typeof id !== 'undefined') {
-      url = url + 'type/' + id;
+      this.url = this.url + 'type/' + id;
       this.typeID = id;
       this.hasSummaries = true;
       this.typeService.getType(id).subscribe((data: CmdbType) => {
         this.faIcon = data.render_meta.icon;
         this.pageTitle = data.label + ' list';
       });
+      this.objService.countObjectsByType(this.typeID).subscribe(count => this.records = count);
+    } else {
+      this.objService.countObjects().subscribe(count => this.records = count);
     }
-
-    this.apiCallService.callGetRoute(url)
-      .pipe(
-        map((dataArray: RenderResult[]) => {
-          const lenx = dataArray === null ? 0 : dataArray.length;
-          this.summaries = lenx > 0 ? dataArray[0].summaries : [];
-          this.columnFields = lenx > 0 ? dataArray[0].fields : [];
-          this.items = lenx > 0 ? dataArray : [];
-          return [{items: this.items, columnFields: this.columnFields}];
-        })
-      )
-      .subscribe(
-        data => {
-          this.buildDtTable();
-
-          setTimeout(() => {
-            this.objectLists = data;
-            this.rerender();
-            this.dtTrigger.next();
-            this.spinner.hide();
-          }, 100);
-        });
-
   }
+
+  ngOnInit(): void {
+    this.route.params.subscribe((id) => {
+      this.getMetaData(id.publicID);
+      this.getObjects();
+    });
+  }
+
+  public getObjects() {
+    const that = this;
+    const START = 'start';
+    const LENGTH = 'length';
+    const SEARCH = 'search';
+    this.rerender();
+    this.dtOptions = {
+      pagingType: 'full_numbers',
+      serverSide: true,
+      processing: true,
+      ajax: (dataTablesParameters: RenderResult[], callback) => {
+        const param = {
+          start: dataTablesParameters[START],
+          length: dataTablesParameters[LENGTH],
+        };
+        if (this.typeID != null) {
+          const type = 'type';
+          param[type] = that.typeID;
+        }
+
+        if (dataTablesParameters[SEARCH].value !== null
+          && dataTablesParameters[SEARCH].value !== ''
+          && dataTablesParameters[SEARCH].value !== undefined) {
+          const was = 'object/filter/' + dataTablesParameters[SEARCH].value;
+          that.apiCallService.callGetRoute( was, {params: param}).subscribe(resp => {
+            that.objectLists = resp;
+            that.summaries = resp !== null ? resp[0].summaries : [];
+            that.selectedObjects.length = 0;
+            callback({
+              data: [],
+              recordsTotal: that.records,
+              recordsFiltered: that.records,
+            });
+          });
+        } else {
+          that.apiCallService.callGetRoute(this.url, {params: param}).subscribe(resp => {
+            that.objectLists = resp;
+            that.summaries = resp !== null ? resp[0].summaries : [];
+            that.selectedObjects.length = 0;
+            callback({
+              data: [],
+              recordsTotal: that.records,
+              recordsFiltered: that.records,
+            });
+          });
+        }
+      },
+      columnDefs: [ {
+        orderable: false,
+        targets:   0
+      } ],
+      language: {
+        search: '',
+        searchPlaceholder: 'Filter...'
+      }
+    };
+  }
+
+  ngAfterViewInit(): void {
+    this.dtTrigger.next();
+  }
+
+  ngOnDestroy(): void {
+    // Do not forget to unsubscribe the event
+    this.dtTrigger.unsubscribe();
+
+    // If a table is initialized while it is hidden,
+    // the browser calculates the width of the columns
+    this.dtElement.dtInstance.then((dtInstance: any) => {
+      dtInstance.columns.adjust()
+        .responsive.recalc();
+    });
+  }
+
+  rerender(): void {
+    if (typeof this.dtElement !== 'undefined' && typeof this.dtElement.dtInstance !== 'undefined') {
+      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        // Destroy the table first
+        dtInstance.destroy();
+        // Call the dtTrigger to rerender again
+        this.dtTrigger.next();
+      });
+    }
+  }
+
+//  LOGIC
 
   /*
     Build table increments
    */
 
   private buildDtTable() {
-    this.buildDefaultDtButtons();
     this.buildAdvancedButtons();
-    this.buildDefaultDtOptions();
     this.buildAdvancedDtOptions();
-  }
-
-  private buildDefaultDtButtons() {
-    this.dtButtons.length = 0;
-    this.dtButtons.push(
-      {
-        // print
-        text: 'Print <i class="fas fa-print"></i>',
-        extend: 'print',
-        className: 'btn btn-info btn-sm mr-1'
-      }
-    );
   }
 
   private buildAdvancedButtons() {
@@ -180,6 +236,7 @@ export class ObjectListComponent implements OnDestroy {
   }
 
   private buildDefaultDtOptions() {
+    const table = $('#object-list-datatable').DataTable();
     const buttons = this.dtButtons;
     this.dtOptions = {
       ordering: true,
@@ -238,23 +295,17 @@ export class ObjectListComponent implements OnDestroy {
     }
   }
 
-  public ngOnDestroy(): void {
-    // Do not forget to unsubscribe the event
-    this.dtTrigger.unsubscribe();
-  }
-
-  public rerender(): void {
-    if (typeof this.dtElement !== 'undefined' && typeof this.dtElement.dtInstance !== 'undefined') {
-      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-        // Destroy the table first
-        dtInstance.destroy();
-      });
-    }
-  }
-
   /*
     Table action events
    */
+
+  public addColumn() {
+    const table: any = $('#object-list-datatable');
+    const dataTable: any = table.DataTable();
+    const columns: any = dataTable.columns();
+    console.log(columns.data());
+  }
+
   public selectAll() {
     const table: any = $('#object-list-datatable');
     const dataTable: any = table.DataTable();
@@ -272,7 +323,7 @@ export class ObjectListComponent implements OnDestroy {
     }
   }
 
-  public updateDisplay(publicID: string): void {
+  public updateDisplay(publicID: any): void {
     const index = this.selectedObjects.findIndex(d => d === publicID); // find index in your array
     if (index > -1) {
       this.selectedObjects.splice(index, 1); // remove element from array
@@ -293,7 +344,7 @@ export class ObjectListComponent implements OnDestroy {
         const id = value.object_information.object_id;
         this.apiCallService.callDeleteRoute('object/' + id).subscribe(data => {
           this.route.params.subscribe((typeId) => {
-            this.init(typeId);
+            this.getObjects();
           });
         });
       }
@@ -313,7 +364,7 @@ export class ObjectListComponent implements OnDestroy {
           if (this.selectedObjects.length > 0) {
             this.apiCallService.callDeleteManyRoute('object/delete/' + this.selectedObjects.toString()).subscribe(data => {
               this.route.params.subscribe((id) => {
-                this.init(id);
+                this.getObjects();
               });
             });
           }
@@ -324,7 +375,7 @@ export class ObjectListComponent implements OnDestroy {
 
   public exportingFiles(exportType: any) {
     if (this.selectedObjects.length === 0 || this.selectedObjects.length === this.items.length) {
-      this.fileService.getObjectFileByType(this.items[0].type_information.type_id, exportType.id)
+      this.fileService.getObjectFileByType(this.objectLists[0].type_information.type_id, exportType.id)
         .subscribe(res => this.downLoadFile(res, exportType));
     } else {
       this.fileService.callExportRoute('/file/object/' + this.selectedObjects.toString(), exportType.id)

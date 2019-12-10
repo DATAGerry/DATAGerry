@@ -64,6 +64,11 @@ def get_object_list(request_user: User):
     """
     try:
         object_list = object_manager.get_all_objects()
+        if request.args.get('start') is not None:
+            start = int(request.args.get('start'))
+            length = int(request.args.get('length'))
+            object_list = object_list[start:start + length]
+
     except ObjectManagerGetError as err:
         LOGGER.error(err.message)
         return abort(404)
@@ -94,8 +99,58 @@ def get_native_object_list(request_user: User):
 @right_required('base.framework.object.view')
 def get_objects_by_type(public_id, request_user: User):
     """Return all objects by type_id"""
+
     try:
         object_list = object_manager.get_objects_by(sort="type_id", type_id=public_id)
+    except CMDBError:
+        return abort(400)
+
+    if request.args.get('start') is not None:
+        start = int(request.args.get('start'))
+        length = int(request.args.get('length'))
+        object_list = object_list[start:start+length]
+
+    if len(object_list) < 1:
+        return make_response(object_list, 204)
+
+    rendered_list = RenderList(object_list, request_user).render_result_list()
+    resp = make_response(rendered_list)
+    return resp
+
+
+@object_blueprint.route('/filter/<string:value>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.framework.object.view')
+def get_objects_by_searchterm(value, request_user: User):
+    """Return all objects by search term"""
+    try:
+        type = {}
+        term = value
+        try:
+            term = int(value)
+        except:
+            if value in ['True', 'true']:
+                term = True
+            elif value in ['False', 'false']:
+                term = False
+            elif isinstance(value, str):
+                term = {'$regex': value}
+
+        if request.args.get('type') is not None:
+            type = {'type_id': int(request.args.get('type'))}
+
+        query: dict = {'$and': [
+            {'fields': {'$elemMatch': {'value': term}}},
+            type
+        ]}
+        object_list = object_manager.get_objects_by(sort="type_id", **query)
+
+        if request.args.get('start') is not None:
+            start = int(request.args.get('start'))
+            length = int(request.args.get('length'))
+            object_list = object_list[start:start + length]
+
     except CMDBError:
         return abort(400)
 
