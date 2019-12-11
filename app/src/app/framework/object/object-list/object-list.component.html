@@ -48,47 +48,47 @@
 </div>
 
 
-<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
+<table #dtTableElement datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
        id="object-list-datatable"
        class="table framework-table table-striped table-bordered">
-  <thead>
-  <tr>
-    <th class="no-displ"></th>
-    <th class="toggle-active">Active</th>
-    <th class="toggle-id">ID</th>
-    <th class="toggle-type">Type</th>
-    <th class="toggle-autor">Author</th>
-    <th class="toggle-last-modified">Last modified</th>
-    <th class="toggle-action">Action</th>
-  </tr>
-  </thead>
-  <tbody *ngIf="objectLists?.length != 0">
-  <tr class="odd" role="row" *ngFor="let obj of objectLists">
-    <td><input type="checkbox" class="select-checkbox" name="select-checkbox" (click)="updateDisplay(obj?.object_information?.object_id)"></td>
-    <td>
-      <cmdb-active-badge [activeStatus]="obj?.object_information.active"></cmdb-active-badge>
-    </td>
-    <td>{{obj?.object_information.object_id}}</td>
-    <td>{{obj?.type_information.type_label}}</td>
-    <td>{{obj?.type_information.author_name}}</td>
-    <td>{{obj?.object_information.creation_time?.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
-    <td>
-      <a class="text-dark"
-         [routerLink]="[hasSummaries ? '/framework/object/type/view' : '/framework/object/view',obj?.object_information.object_id]">
-        <fa-icon [icon]="['far', 'eye']"></fa-icon>
-      </a>
-      <a class="ml-1 text-dark" [routerLink]="['/framework/object/edit/', obj?.object_information.object_id]">
-        <fa-icon [icon]="['far', 'edit']"></fa-icon>
-      </a>
-      <a class="ml-1 text-dark" (click)="delObject(obj)">
-        <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
-      </a>
-    </td>
-  </tr>
-  </tbody>
-  <tbody *ngIf="objectLists?.length == 0 || objectLists == null">
-  <tr>
-    <td colspan="100%" class="no-data-available">No data!</td>
-  </tr>
-  <tbody>
+<!--  <thead>-->
+<!--  <tr>-->
+<!--    <th class="no-displ"></th>-->
+<!--    <th class="toggle-active">Active</th>-->
+<!--    <th class="toggle-id">ID</th>-->
+<!--    <th class="toggle-type">Type</th>-->
+<!--    <th class="toggle-autor">Author</th>-->
+<!--    <th class="toggle-last-modified">Last modified</th>-->
+<!--    <th class="toggle-action">Action</th>-->
+<!--  </tr>-->
+<!--  </thead>-->
+<!--  <tbody *ngIf="objectLists?.length != 0">-->
+<!--  <tr class="odd" role="row" *ngFor="let obj of objectLists">-->
+<!--    <td><input type="checkbox" class="select-checkbox" name="select-checkbox" (click)="updateDisplay(obj?.object_information?.object_id)"></td>-->
+<!--    <td>-->
+<!--      <cmdb-active-badge [activeStatus]="obj?.object_information.active"></cmdb-active-badge>-->
+<!--    </td>-->
+<!--    <td>{{obj?.object_information.object_id}}</td>-->
+<!--    <td>{{obj?.type_information.type_label}}</td>-->
+<!--    <td>{{obj?.type_information.author_name}}</td>-->
+<!--    <td>{{obj?.object_information.creation_time?.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>-->
+<!--    <td>-->
+<!--      <a class="text-dark"-->
+<!--         [routerLink]="[hasSummaries ? '/framework/object/type/view' : '/framework/object/view',obj?.object_information.object_id]">-->
+<!--        <fa-icon [icon]="['far', 'eye']"></fa-icon>-->
+<!--      </a>-->
+<!--      <a class="ml-1 text-dark" [routerLink]="['/framework/object/edit/', obj?.object_information.object_id]">-->
+<!--        <fa-icon [icon]="['far', 'edit']"></fa-icon>-->
+<!--      </a>-->
+<!--      <a class="ml-1 text-dark" (click)="delObject(obj)">-->
+<!--        <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>-->
+<!--      </a>-->
+<!--    </td>-->
+<!--  </tr>-->
+<!--  </tbody>-->
+<!--  <tbody *ngIf="objectLists?.length == 0 || objectLists == null">-->
+<!--  <tr>-->
+<!--    <td colspan="100%" class="no-data-available">No data!</td>-->
+<!--  </tr>-->
+<!--  <tbody>-->
 </table>

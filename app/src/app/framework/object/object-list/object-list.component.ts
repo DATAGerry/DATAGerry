@@ -17,14 +17,14 @@
 */
 
 
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ObjectService } from '../../services/object.service';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import {map, publish} from 'rxjs/operators';
 import { CmdbMode } from '../../modes.enum';
 import { FileSaverService } from 'ngx-filesaver';
 import { DatePipe } from '@angular/common';
@@ -44,6 +44,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
   public dtElement: DataTableDirective;
   public dtOptions: any = {}; // : DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
+  @ViewChild('dtTableElement', {static: false}) dtTableElement: ElementRef;
 
   private url: string ;
   private records: number;
@@ -53,10 +54,12 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
   public columnFields: any[] = [];
   public items: any[] = [];
 
+  public columns: any[] = [];
+
   public pageTitle: string = 'List';
   public faIcon: string;
   public objectLists: RenderResult[];
-  public hasSummaries: boolean = false;
+  public hasSummaries: boolean = true;
   public formatList: any[] = [];
   public selectedObjects: string[] = [];
   public typeID: number = null;
@@ -101,8 +104,12 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     const START = 'start';
     const LENGTH = 'length';
     const SEARCH = 'search';
-    this.rerender();
+    const FIELDS = 'fields';
+    this.reload();
     this.dtOptions = {
+      dom: '<"row" <"col-sm-3" l> <"col-sm-3" B > <"col" f> >' +
+        '<"row" <"col-sm-12"tr>>' +
+        '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
       pagingType: 'full_numbers',
       serverSide: true,
       processing: true,
@@ -121,36 +128,105 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
           && dataTablesParameters[SEARCH].value !== undefined) {
           const was = 'object/filter/' + dataTablesParameters[SEARCH].value;
           that.apiCallService.callGetRoute( was, {params: param}).subscribe(resp => {
-            that.objectLists = resp;
-            that.summaries = resp !== null ? resp[0].summaries : [];
-            that.selectedObjects.length = 0;
+            that.objectLists = resp === null ? [] : resp;
+            if (resp != null) {
+              that.summaries = resp[0].summaries;
+              that.columnFields = resp[0].fields;
+              that.objectLists[FIELDS] = this.columnFields;
+              that.selectedObjects.length = 0;
+            }
+            this.rerender(this.dtOptions);
             callback({
-              data: [],
+              data: that.objectLists,
               recordsTotal: that.records,
               recordsFiltered: that.records,
             });
           });
         } else {
           that.apiCallService.callGetRoute(this.url, {params: param}).subscribe(resp => {
-            that.objectLists = resp;
-            that.summaries = resp !== null ? resp[0].summaries : [];
-            that.selectedObjects.length = 0;
+            that.objectLists = resp === null ? [] : resp;
+            if (resp != null) {
+              that.summaries = resp[0].summaries;
+              that.columnFields = resp[0].fields;
+              that.objectLists[FIELDS] = this.columnFields;
+              that.selectedObjects.length = 0;
+
+              if (this.dtOptions.columns !== undefined) {
+                for (const col of this.columnFields) {
+                  let value = '';
+                  this.dtOptions.columns.push({
+                    title: col.label,
+                    render: function (data, type, full, meta) {
+                      Object.keys(full.fields).forEach(key => {
+                        if (col.name === full.fields[key].name) {
+                          value = '<cmdb-render-element [mode]="' + that.mode + '" [data]="' + full.fields[key] + ' "></cmdb-render-element>';
+                          return;
+                        }
+                      });
+                      return value;
+                    }
+                  });
+                }
+              }
+            }
+            this.rerender(this.dtOptions);
             callback({
-              data: [],
+              data: that.objectLists,
               recordsTotal: that.records,
               recordsFiltered: that.records,
             });
           });
         }
       },
+      columns: [
+        {
+          targets: 0,
+          data: null,
+          className: 'select-checkbox',
+          orderable: false,
+          render: function (data, type, full, meta) {
+            return '';
+          }
+        },
+        {title: 'Active', data: 'object_information.active'},
+        {title: 'ID', data: 'object_information.object_id'},
+        {title: 'Type', data: 'type_information.type_label'},
+        {title: 'Author', data: 'object_information.author_name'},
+        {
+          title: 'Action',
+          orderable: false,
+          render: function (data: any, type: any, full: any) {
+            return '<a class="text-dark" href="/framework/object/view/' + full.object_information.object_id + '"> ' +
+            '<i class="far fa-eye"></i> </a>'
+              + '<a class="text-dark" href="/framework/object/edit/' + full.object_information.object_id + '"> ' +
+              '<i class="far fa-edit"></i> </a>'
+              + '<a class="text-dark" (click)="delObject(' + full.object_information.object_id + ')"> ' +
+              '<i class="far fa-trash-alt"></i> </a>';
+          }
+        }
+
+      ],
       columnDefs: [ {
         orderable: false,
+        className: 'select-checkbox',
         targets:   0
       } ],
+      rowCallback: (row: Node, data: RenderResult) => {
+        const self = this;
+        $('td:first-child', row).unbind('click');
+        $('td:first-child', row).bind('click', () => {
+          self.updateDisplay(data.object_information.object_id);
+        });
+        return row;
+      },
+      select: {
+        style:    'multi',
+        selector: 'td:first-child'
+      },
       language: {
         search: '',
         searchPlaceholder: 'Filter...'
-      }
+      },
     };
   }
 
@@ -170,15 +246,52 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     });
   }
 
-  rerender(): void {
+  reload(): void {
     if (typeof this.dtElement !== 'undefined' && typeof this.dtElement.dtInstance !== 'undefined') {
       this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
         // Destroy the table first
+
         dtInstance.destroy();
         // Call the dtTrigger to rerender again
         this.dtTrigger.next();
       });
     }
+  }
+
+  async rerender(newSettings?: any) {
+    try {
+      await this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        if (newSettings) {
+          // FIX To ensure that the DT doesn't break when we don't get columns
+          if (this.dtOptions.columns !== undefined) {
+            if (this.objectLists.length > 0 && this.hasSummaries) {
+
+            }
+          }
+          if (newSettings.columns && newSettings.columns.length > 1) {
+            dtInstance.destroy();
+            this.dtOptions = Promise.resolve(newSettings);
+            this.displayTable(this.dtTableElement);
+          }
+        }
+      });
+    } catch (error) {
+      console.log(`DT Rerender Exception: ${error}`);
+    }
+    return Promise.resolve(null);
+  }
+
+  private displayTable(renderIn: ElementRef): void {
+    this.dtElement.dtInstance = new Promise((resolve, reject) => {
+      Promise.resolve(this.dtOptions).then(dtOptions => {
+        // Using setTimeout as a "hack" to be "part" of NgZone
+        setTimeout(() => {
+          $(renderIn.nativeElement).empty();
+          const dt = $(renderIn.nativeElement).DataTable(dtOptions);
+          resolve(dt);
+        });
+      }).catch(error => reject(error));
+    });
   }
 
 //  LOGIC
@@ -224,7 +337,6 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
               text: 'Restore',
               className: 'btn btn-secondary btn-sm btn-block',
               action: function() {
-                this.rerender();
                 this.dtTrigger.next();
               }.bind(this)
             });
