@@ -44,16 +44,13 @@ export class PermissionService {
     return this.currentUserRightListSubject.value;
   }
 
-  public storeUserRights(groupID: number) {
-    const userGroupSubscription = this.groupService.getGroup(groupID).subscribe(
+  public async storeUserRights(groupID: number) {
+    return this.groupService.getGroup(groupID).subscribe(
       (group: Group) => {
         localStorage.setItem('current-user-rights', JSON.stringify(group.rights));
         this.currentUserRightListSubject.next(group.rights);
       },
-      (error) => console.error(error),
-      () => {
-        userGroupSubscription.unsubscribe();
-      }
+      (error) => console.error(error)
     );
   }
 

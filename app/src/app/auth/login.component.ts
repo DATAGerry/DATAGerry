@@ -21,6 +21,9 @@ import { AuthService } from './services/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
+import { forkJoin, Subscription } from 'rxjs';
+import { User } from '../management/models/user';
+import { PermissionService } from './services/permission.service';
 
 @Component({
   selector: 'cmdb-login',
@@ -32,12 +35,16 @@ export class LoginComponent implements OnInit, OnDestroy {
   public loginForm: FormGroup;
   public submitted = false;
 
+  private loginSubscription: Subscription;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private authenticationService: AuthService,
+    private permissionService: PermissionService,
     private render: Renderer2
   ) {
+    this.loginSubscription = new Subscription();
   }
 
   public ngOnInit(): void {
@@ -50,6 +57,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy(): void {
     this.render.removeClass(document.body, 'embedded');
+    this.loginSubscription.unsubscribe();
   }
 
   get controls() {
@@ -59,23 +67,27 @@ export class LoginComponent implements OnInit, OnDestroy {
   public onSubmit() {
     this.submitted = true;
     this.render.addClass(document.getElementById('login-button'), 'button-progress');
-    this.authenticationService.login(this.loginForm.controls.username.value, this.loginForm.controls.password.value)
-      .pipe(first())
-      .subscribe(
-        data => {
+
+    this.loginSubscription = this.authenticationService.login(
+      this.loginForm.controls.username.value, this.loginForm.controls.password.value).pipe(first()).subscribe(
+      (user: User) => {
+        this.permissionService.storeUserRights(user.group_id).then(() => {
           this.router.navigate(['/']);
-        },
-        async error => {
-          this.render.removeClass(document.getElementById('login-button'), 'button-progress');
-          this.render.addClass(document.getElementById('login-logo'), 'shake');
-          this.loginForm.reset();
-          await this.delay(1000);
-          this.render.removeClass(document.getElementById('login-logo'), 'shake');
         });
+      },
+      async error => {
+        this.render.removeClass(document.getElementById('login-button'), 'button-progress');
+        this.render.addClass(document.getElementById('login-logo'), 'shake');
+        this.loginForm.reset();
+        await this.delay(1000);
+        this.render.removeClass(document.getElementById('login-logo'), 'shake');
+      }
+    );
+
   }
 
   public delay(ms: number) {
-    return new Promise( resolve => setTimeout(resolve, ms) );
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
 

@@ -44,9 +44,7 @@ import { AuthService } from './services/auth.service';
     InlineSVGModule,
   ],
   providers: [
-    PermissionGuard,
-    AuthService,
-    PermissionService
+    PermissionGuard
   ]
 })
 export class AuthModule {
