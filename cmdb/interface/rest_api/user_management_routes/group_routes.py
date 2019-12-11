@@ -56,7 +56,7 @@ def get_all_groups(request_user: User):
 @group_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
 @insert_request_user
-@right_required('base.user-management.group.view')
+@right_required('base.user-management.group.view', {'group_id': 'public_id'})
 def get_group(public_id: int, request_user: User):
     try:
         group_instance = user_manager.get_group(public_id)

@@ -89,7 +89,6 @@ export class AuthService {
         localStorage.setItem('access-token', JSON.stringify(user.token));
         this.currentUserSubject.next(user);
         this.currentUserTokenSubject.next(user.token);
-        this.permissionService.storeUserRights(user.group_id);
         return user;
       }));
   }
