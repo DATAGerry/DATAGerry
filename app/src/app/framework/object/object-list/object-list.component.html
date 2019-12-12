@@ -52,7 +52,9 @@
        class="table framework-table table-striped table-bordered">
   <thead>
   <tr>
-    <th class="no-displ"></th>
+    <th class="toggle-check nosort" style="text-align: center">
+      <input type="checkbox" [(ngModel)]="masterSelected"  class="select-all-checkbox" (change)="checkUncheckAll()"/>
+    </th>
     <th class="toggle-active">Active</th>
     <th class="toggle-id">ID</th>
     <th class="toggle-type">Type</th>
@@ -70,7 +72,7 @@
   </thead>
   <tbody *ngIf="objectLists?.length != 0">
   <tr class="odd" role="row" *ngFor="let obj of objectLists">
-    <td><input type="checkbox" class="select-checkbox" name="select-checkbox" (click)="updateDisplay(obj?.object_information?.object_id)"></td>
+    <td><input type="checkbox" class="select-checkbox" name="{{obj?.object_information?.object_id}}" (click)="updateDisplay(obj?.object_information?.object_id)"></td>
     <td>
       <cmdb-active-badge [activeStatus]="obj?.object_information.active"></cmdb-active-badge>
     </td>
