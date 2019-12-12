@@ -252,7 +252,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
    */
 
   private buildDtTable() {
-    this.buildDefaultDtButtons();
+    // this.buildDefaultDtButtons();
     // this.buildAdvancedButtons();
     this.buildDefaultDtOptions();
     // this.buildAdvancedDtOptions();
