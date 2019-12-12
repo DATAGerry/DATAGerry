@@ -41,7 +41,6 @@ export class HttpErrorInterceptor implements HttpInterceptor {
 
   private readonly INFO_ERRORS: number[] = [
     this.BAD_REQUEST,
-    this.FORBIDDEN,
     this.NOT_FOUND,
     this.METHOD_NOT_ALLOWED,
     this.NOT_ACCEPTABLE,
@@ -52,7 +51,8 @@ export class HttpErrorInterceptor implements HttpInterceptor {
   private readonly REDIRECT_ERRORS: number[] = [
     this.CONNECTION_REFUSED,
     this.UNAUTHORIZED,
-    this.INTERNAL_SERVER_ERROR
+    this.INTERNAL_SERVER_ERROR,
+    this.FORBIDDEN
   ];
 
   constructor(private router: Router, private errorService: ErrorMessageService, private authService: AuthService) {
@@ -67,10 +67,11 @@ export class HttpErrorInterceptor implements HttpInterceptor {
       } else if (this.REDIRECT_ERRORS.indexOf(statusCode) !== -1) {
         if (statusCode === this.CONNECTION_REFUSED || statusCode === this.INTERNAL_SERVER_ERROR) {
           this.router.navigate(['/connect/']);
-        }
-        if (statusCode === this.UNAUTHORIZED) {
+        } else if (statusCode === this.UNAUTHORIZED) {
           this.authService.logout();
           this.router.navigate(['/auth/login/']);
+        } else {
+          this.router.navigate(['/error/', statusCode]);
         }
       }
       return throwError(error);

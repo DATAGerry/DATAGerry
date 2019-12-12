@@ -17,7 +17,9 @@
 */
 
 import { ErrorForbiddenComponent } from './components/error-forbidden/error-forbidden.component';
+import { ErrorNotFoundComponent } from './components/error-not-found/error-not-found.component';
 
 export const errorComponents: { [code: number]: any } = {
   403: ErrorForbiddenComponent,
+  404: ErrorNotFoundComponent
 };

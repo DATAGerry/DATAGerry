@@ -16,32 +16,18 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { ErrorComponent } from './error.component';
-import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
+import { Component, OnInit } from '@angular/core';
 
-const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    data: {
-      breadcrumb: 'Not found'
-    },
-    redirectTo: 'dashboard'
-  },
-  {
-    path: ':statusCode',
-    data: {
-      breadcrumb: 'Status'
-    },
-    component: ErrorComponent
-  }
-];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
-  exports: [RouterModule]
+@Component({
+  selector: 'cmdb-error-not-found',
+  templateUrl: './error-not-found.component.html',
+  styleUrls: ['./error-not-found.component.scss']
 })
-export class ErrorRoutingModule {
+export class ErrorNotFoundComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
 }

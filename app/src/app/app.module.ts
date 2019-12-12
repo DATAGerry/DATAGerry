@@ -31,6 +31,7 @@ import { HttpErrorInterceptor } from './error/interceptors/http-error.intercepto
 import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
 import { AuthModule } from './auth/auth.module';
 import { ErrorMessageModule } from './error/error-message/error-message.module';
+import { ErrorModule } from './error/error.module';
 
 @NgModule({
   declarations: [

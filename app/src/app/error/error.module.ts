@@ -25,17 +25,19 @@ import { LayoutModule } from '../layout/layout.module';
 import { ErrorMessageService } from './services/error-message.service';
 import { ErrorForbiddenComponent } from './components/error-forbidden/error-forbidden.component';
 import { DefaultErrorComponent } from './toasts/default-error/default-error.component';
+import { ErrorNotFoundComponent } from './components/error-not-found/error-not-found.component';
 
 @NgModule({
-  declarations: [ErrorComponent, ErrorForbiddenComponent, DefaultErrorComponent],
-  entryComponents: [DefaultErrorComponent, ErrorForbiddenComponent],
+  declarations: [ErrorComponent, ErrorForbiddenComponent, DefaultErrorComponent, ErrorNotFoundComponent],
+  entryComponents: [DefaultErrorComponent, ErrorForbiddenComponent, ErrorNotFoundComponent],
   imports: [
     CommonModule,
     LayoutModule,
     ErrorRoutingModule
   ],
   exports: [
-    DefaultErrorComponent
+    DefaultErrorComponent,
+    ErrorNotFoundComponent,
   ],
   providers: [
     ErrorMessageService
