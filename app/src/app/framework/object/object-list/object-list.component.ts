@@ -56,6 +56,8 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
 
   public columns: any[] = [];
 
+  public masterSelected: boolean = false;
+
   public pageTitle: string = 'List';
   public faIcon: string;
   public objectLists: RenderResult[];
@@ -80,6 +82,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
 
   private getMetaData(id) {
     this.url = 'object/';
+    this.masterSelected = false;
     this.pageTitle = 'Object List';
     this.hasSummaries = false;
     if (typeof id !== 'undefined') {
@@ -120,6 +123,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
       pagingType: 'full_numbers',
       serverSide: true,
       processing: true,
+      ordering: false,
       ajax: (dataTablesParameters: RenderResult[], callback) => {
         const param = {
           start: dataTablesParameters[START],
@@ -140,6 +144,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
               that.objectLists = resp !== null ? resp : [];
               that.summaries = resp !== null ? resp[0].summaries : [];
               that.selectedObjects.length = 0;
+              that.masterSelected = false;
             }
             callback({
               data: [],
@@ -154,6 +159,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
               that.objectLists = resp !== null ? resp : [];
               that.summaries = resp !== null ? resp[0].summaries : [];
               that.selectedObjects.length = 0;
+              that.masterSelected = false;
             }
             callback({
               data: [],
@@ -316,7 +322,6 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
 
   private buildDefaultDtOptions() {
     const buttons = this.dtButtons;
-    this.dtOptions.ordering = true;
     this.dtOptions.order = [[2, 'asc']];
     this.dtOptions.select = {
       style:    'multi',
@@ -371,21 +376,18 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     console.log(columns.data());
   }
 
-  public selectAll() {
-    const table: any = $('#object-list-datatable');
-    const dataTable: any = table.DataTable();
-    const rows: any = dataTable.rows();
+  checkUncheckAll() {
     this.selectedObjects = [];
-    if ($('.selectAll').is( ':checked' )) {
-      rows.select();
-      let lenx: number = rows.data().length - 1;
-      while (lenx >= 0) {
-        this.selectedObjects.push(rows.data()[lenx][2]);
-        lenx--;
-      }
-    } else {
-      rows.deselect();
+    const allCheckbox: any = document.getElementsByClassName('select-checkbox');
+
+    for (const box of allCheckbox) {
+      box.checked = this.masterSelected;
+      this.selectedObjects.push(box.name);
     }
+    if (!this.masterSelected) {
+      this.selectedObjects = [];
+    }
+
   }
 
   public updateDisplay(publicID: any): void {
