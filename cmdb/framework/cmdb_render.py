@@ -293,23 +293,16 @@ class RenderList:
             **SystemConfigReader().get_all_values_from_section('Database')
         ))
 
-        type_list: List[CmdbType] = object_manager.get_all_types()
         preparation_objects = []
         for passed_object in self.object_list:
             tmp_render = CmdbRender(
-                type_instance=self.contains(type_list, lambda x: x.public_id == passed_object.type_id),
+                type_instance=object_manager.get_type(passed_object.type_id),
                 object_instance=passed_object,
                 match_values=search_fields,
                 render_user=self.request_user)
             current_render_result = tmp_render.result()
             preparation_objects.append(current_render_result)
         return preparation_objects
-
-    @staticmethod
-    def contains(l, f):
-        for x in l:
-            if f(x):
-                return x
 
 
 class RenderError(CMDBError):
