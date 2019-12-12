@@ -112,7 +112,6 @@ class ExportVariable:
         self.__name = name
         self.__value_tpl_default = value_tpl_default
         self.__value_tpl_types = value_tpl_types
-        self.__objectdata = {}
 
         scr = SystemConfigReader()
         database_manager = DatabaseManagerMongo(
@@ -134,46 +133,36 @@ class ExportVariable:
                 value_template = templ['template']
 
         # setup objectdata for use in ExportVariable templates
-        self.__objectdata.clear()
-        self.__objectdata.update({'id': cmdb_object.object_information['object_id']})
-        self.__objectdata.update({'fields': {}})
-        fields = cmdb_object.fields
-        for field in fields:
-            # dereference object-refs (max 3 iterations)
-            self.set_references(field, 3)
+        objectdata = self.get_objectdata(cmdb_object, 3)
 
         # render template
-        # print(self.__objectdata)
         template = jinja2.Template(value_template)
         try:
-            output = template.render(self.__objectdata)
+            output = template.render(objectdata)
         except Exception as ex:
             LOGGER.warning(ex)
             output = ''
         return output
 
-    def set_references(self, field, iteration):
-        try:
-            if 'ref' == field["type"] and field["value"] and iteration != 0:
-                iteration = iteration - 1
-                current_object = self.__object_manager.get_object(field["value"])
-                type_instance = self.__object_manager.get_type(current_object.get_type_id())
-                cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance, render_user=None)
-                sub_fields = {field["name"]: {'id': field["value"], 'fields': {}}}
-                for subfield in cmdb_render_object.result().fields:
-                    field_name = subfield["name"]
-                    field_value = subfield["value"]
-                    update = {field_name: field_value}
-                    sub_fields[field["name"]]['fields'].update(update)
-                    self.__objectdata['fields'].update(sub_fields)
-                    self.set_references(subfield, iteration)
-            else:
+    def get_objectdata(self, cmdb_object, iteration):
+        data = {}
+        data["id"] = cmdb_object.object_information['object_id']
+        data["fields"] = {}
+        for field in cmdb_object.fields:
+            try:
                 field_name = field["name"]
-                field_value = field["value"]
-                update = {field_name: field_value}
-                self.__objectdata['fields'].update(update)
-        except Exception as e:
-            return
+                if field["type"] == "ref" and field["value"] and iteration > 0:
+                    # resolve type
+                    iteration = iteration - 1 
+                    current_object = self.__object_manager.get_object(field["value"])
+                    type_instance = self.__object_manager.get_type(current_object.get_type_id())
+                    cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance, render_user=None)
+                    data["fields"][field_name] = self.get_objectdata(cmdb_render_object.result(), iteration)
+                else:
+                    data["fields"][field_name] = field["value"]
+            except Exception as e:
+                pass
+        return data
 
 
 class ExportSource:
