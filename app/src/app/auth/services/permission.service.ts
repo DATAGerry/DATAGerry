@@ -53,14 +53,6 @@ export class PermissionService {
         return group;
       }
     ));
-    /*return this.groupService.getGroup(groupID).pipe(first()).subscribe(
-      (group: Group) => {
-        localStorage.setItem('current-user-rights', JSON.stringify(group.rights));
-        this.currentUserRightListSubject.next(group.rights);
-        resolve("test");
-      },
-      (error) => console.error(error)
-    );*/
   }
 
   public clearUserRightStorage() {
