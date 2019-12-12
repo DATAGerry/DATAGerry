@@ -24,6 +24,7 @@ import { first } from 'rxjs/operators';
 import { forkJoin, Subscription } from 'rxjs';
 import { User } from '../management/models/user';
 import { PermissionService } from './services/permission.service';
+import { Group } from '../management/models/group';
 
 @Component({
   selector: 'cmdb-login',
@@ -64,14 +65,14 @@ export class LoginComponent implements OnInit, OnDestroy {
     return this.loginForm.controls;
   }
 
-  public onSubmit() {
+  public async onSubmit() {
     this.submitted = true;
     this.render.addClass(document.getElementById('login-button'), 'button-progress');
 
     this.loginSubscription = this.authenticationService.login(
       this.loginForm.controls.username.value, this.loginForm.controls.password.value).pipe(first()).subscribe(
       (user: User) => {
-        this.permissionService.storeUserRights(user.group_id).then(() => {
+        this.permissionService.storeUserRights(user.group_id).pipe(first()).subscribe((group: Group) => {
           this.router.navigate(['/']);
         });
       },
