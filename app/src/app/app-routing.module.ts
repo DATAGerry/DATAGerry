@@ -41,8 +41,11 @@ const routes: Routes = [
     loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
   },
   {
-    path: 'errors',
+    path: 'error',
     canActivate: [AuthGuard],
+    data: {
+      breadcrumb: 'Error'
+    },
     loadChildren: () => import('./error/error.module').then(m => m.ErrorModule)
   },
   {
@@ -111,11 +114,7 @@ const routes: Routes = [
   },
   {
     path: '**',
-    canActivate: [AuthGuard],
-    data: {
-      breadcrumb: 'Error'
-    },
-    loadChildren: () => import('./error/error.module').then(m => m.ErrorModule)
+    redirectTo: '/error/404'
   }
 ];
 

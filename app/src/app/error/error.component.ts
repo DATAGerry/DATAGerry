@@ -42,7 +42,8 @@ export class ErrorComponent implements OnInit, OnDestroy {
   public previousUrl: string;
 
   private statusCodeSubscription: Subscription;
-  public statusCode: number = undefined;
+  private readonly defaultStatusCode: number = 404;
+  public statusCode: number = this.defaultStatusCode;
 
 
   constructor(private route: ActivatedRoute, private resolver: ComponentFactoryResolver,
@@ -56,8 +57,8 @@ export class ErrorComponent implements OnInit, OnDestroy {
   }
 
   private createErrorComponent(statusCode: number) {
-    // const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(errorComponents[statusCode]);
-    // this.componentRef = this.errorContainer.createComponent(factory);
+    const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(errorComponents[statusCode]);
+    this.componentRef = this.errorContainer.createComponent(factory);
   }
 
   public ngOnDestroy(): void {
