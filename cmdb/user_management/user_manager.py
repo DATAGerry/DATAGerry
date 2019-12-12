@@ -68,7 +68,6 @@ class UserManager(CmdbManagerBase):
         try:
             result = self.dbm.find_one(collection=User.COLLECTION, public_id=public_id)
         except (CMDBError, Exception) as err:
-            LOGGER.error(err)
             raise UserManagerGetError(err)
         return User(**result)
 
