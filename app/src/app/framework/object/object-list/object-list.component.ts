@@ -17,20 +17,14 @@
 */
 
 
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ObjectService } from '../../services/object.service';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { CmdbMode } from '../../modes.enum';
 import { FileSaverService } from 'ngx-filesaver';
 import { DatePipe } from '@angular/common';
@@ -46,15 +40,13 @@ import { FileService } from '../../../export/export.service';
 })
 export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
 
-
-
-  @ViewChild(DataTableDirective, { static: false })
+  @ViewChild(DataTableDirective, {static: false})
   public dtElement: DataTableDirective;
   public dtOptions: any = {}; // : DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
-  @ViewChild('dtTableElement', { static: false }) dtTableElement: ElementRef;
+  @ViewChild('dtTableElement', {static: false}) dtTableElement: ElementRef;
 
-  private url: string;
+  private url: string ;
   private records: number;
 
   readonly dtButtons: any[] = [];
@@ -67,10 +59,11 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
   public pageTitle: string = 'List';
   public faIcon: string;
   public objectLists: RenderResult[];
-  public hasSummaries: boolean = true;
+  public hasSummaries: boolean = false;
   public formatList: any[] = [];
   public selectedObjects: string[] = [];
   public typeID: number = null;
+  public typeInstance: CmdbType = undefined;
   public mode: CmdbMode = CmdbMode.Simple;
 
   constructor(private apiCallService: ApiCallService, private objService: ObjectService,
@@ -91,6 +84,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
       this.typeID = id;
       this.hasSummaries = true;
       this.typeService.getType(id).subscribe((data: CmdbType) => {
+        this.typeInstance = data;
         this.faIcon = data.render_meta.icon;
         this.pageTitle = data.label + ' list';
       });
@@ -104,6 +98,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     this.route.params.subscribe((id) => {
       this.getMetaData(id.publicID);
       this.getObjects();
+      this.buildDtTable();
     });
   }
 
@@ -115,7 +110,8 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     const FIELDS = 'fields';
     this.reload();
     this.dtOptions = {
-      dom: '<"row" <"col-sm-3" l> <"col-sm-3" B > <"col" f> >' +
+      // <"col-sm-3" B >
+      dom: '<"row" <"col-sm-3" l>  <"col" f> >' +
         '<"row" <"col-sm-12"tr>>' +
         '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
       pagingType: 'full_numbers',
@@ -135,112 +131,50 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
           && dataTablesParameters[SEARCH].value !== ''
           && dataTablesParameters[SEARCH].value !== undefined) {
           const was = 'object/filter/' + dataTablesParameters[SEARCH].value;
-          that.apiCallService.callGetRoute(was, { params: param }).subscribe(resp => {
+          that.apiCallService.callGetRoute( was, {params: param}).subscribe(resp => {
             that.objectLists = resp === null ? [] : resp;
             if (resp != null) {
-              that.summaries = resp[0].summaries;
-              that.columnFields = resp[0].fields;
-              that.objectLists[FIELDS] = this.columnFields;
+              that.objectLists = resp !== null ? resp : [];
+              that.summaries = resp !== null ? resp[0].summaries : [];
               that.selectedObjects.length = 0;
             }
-            this.rerender(this.dtOptions);
             callback({
-              data: that.objectLists,
+              data: [],
               recordsTotal: that.records,
               recordsFiltered: that.records,
             });
           });
         } else {
-          that.apiCallService.callGetRoute(this.url, { params: param }).subscribe(resp => {
+          that.apiCallService.callGetRoute(this.url, {params: param}).subscribe(resp => {
             that.objectLists = resp === null ? [] : resp;
             if (resp != null) {
-              that.summaries = resp[0].summaries;
-              that.columnFields = resp[0].fields;
-              that.objectLists[FIELDS] = this.columnFields;
+              that.objectLists = resp !== null ? resp : [];
+              that.summaries = resp !== null ? resp[0].summaries : [];
               that.selectedObjects.length = 0;
-
-              if (this.dtOptions.columns !== undefined) {
-                for (const col of this.columnFields) {
-                  let value = '';
-                  this.dtOptions.columns.push({
-                    title: col.label,
-                    render: (data, type, full, meta) => {
-                      Object.keys(full.fields).forEach(key => {
-                        if (col.name === full.fields[key].name) {
-                          value = '<ng-template cmdb-render-element [mo></ng-template>';
-                          return value;
-                        }
-                      });
-                      return value;
-                    }
-                  });
-                }
-              }
             }
-            this.rerender(this.dtOptions);
             callback({
-              data: that.objectLists,
+              data: [],
               recordsTotal: that.records,
               recordsFiltered: that.records,
             });
           });
         }
       },
-      columns: [
-        {
-          targets: 0,
-          data: null,
-          className: 'select-checkbox',
-          orderable: false,
-          render: function (data, type, full, meta) {
-            return '';
-          }
-        },
-        { title: 'Active', data: 'object_information.active' },
-        { title: 'ID', data: 'object_information.object_id' },
-        { title: 'Type', data: 'type_information.type_label' },
-        { title: 'Author', data: 'object_information.author_name' },
-        {
-          title: 'Action',
-          orderable: false,
-          render: function (data: any, type: any, full: any) {
-            return '<a class="text-dark" href="/framework/object/view/' + full.object_information.object_id + '"> ' +
-              '<i class="far fa-eye"></i> </a>'
-              + '<a class="text-dark" href="/framework/object/edit/' + full.object_information.object_id + '"> ' +
-              '<i class="far fa-edit"></i> </a>'
-              + '<a class="text-dark" (click)="delObject(' + full.object_information.object_id + ')"> ' +
-              '<i class="far fa-trash-alt"></i> </a>';
-          }
-        }
-
-      ],
-      columnDefs: [{
-        orderable: false,
-        className: 'select-checkbox',
-        targets: 0
-      }],
-      rowCallback: (row: Node, data: RenderResult) => {
-        const self = this;
-        $('td:first-child', row).unbind('click');
-        $('td:first-child', row).bind('click', () => {
-          self.updateDisplay(data.object_information.object_id);
-        });
-        return row;
-      },
-      select: {
-        style: 'multi',
-        selector: 'td:first-child'
-      },
       language: {
         search: '',
         searchPlaceholder: 'Filter...'
-      },
+      }
     };
   }
 
   ngAfterViewInit(): void {
     this.dtTrigger.next();
   }
+
+  public getMergeNameToLabel(value: string) {
+    return this.summaries.find(x => x.name === value);
+  }
+
 
   ngOnDestroy(): void {
     // Do not forget to unsubscribe the event
@@ -258,7 +192,6 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     if (typeof this.dtElement !== 'undefined' && typeof this.dtElement.dtInstance !== 'undefined') {
       this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
         // Destroy the table first
-
         dtInstance.destroy();
         // Call the dtTrigger to rerender again
         this.dtTrigger.next();
@@ -266,16 +199,17 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     }
   }
 
-  async rerender(newSettings?: any) {
+  async rerender(newSettings?: DataTables.Settings) {
     try {
       await this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
         if (newSettings) {
           // FIX To ensure that the DT doesn't break when we don't get columns
           if (this.dtOptions.columns !== undefined) {
-            if (this.objectLists.length > 0 && this.hasSummaries) {
-
-            }
+            // console.log('ASDFASfd')
+            // this.buildDtTable();
           }
+          console.log('ASDFASfd')
+          this.buildDtTable();
           if (newSettings.columns && newSettings.columns.length > 1) {
             dtInstance.destroy();
             this.dtOptions = Promise.resolve(newSettings);
@@ -284,7 +218,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
         }
       });
     } catch (error) {
-      console.log(`DT Rerender Exception: ${ error }`);
+      console.log(`DT Rerender Exception: ${error}`);
     }
     return Promise.resolve(null);
   }
@@ -309,33 +243,55 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
    */
 
   private buildDtTable() {
-    this.buildAdvancedButtons();
-    this.buildAdvancedDtOptions();
+    this.buildDefaultDtButtons();
+    // this.buildAdvancedButtons();
+    this.buildDefaultDtOptions();
+    // this.buildAdvancedDtOptions();
+  }
+
+  private buildDefaultDtButtons() {
+    this.dtButtons.length = 0;
+    this.dtButtons.push(
+      {
+        // add new
+        text: '<i class="fas fa-plus"></i> Add',
+        className: 'btn btn-success btn-sm mr-1',
+        action: function() {
+          if (this.typeID === null) {
+            this.router.navigate(['/framework/object/add']);
+          } else {
+            this.router.navigate(['/framework/object/add/' + this.typeID]);
+          }
+
+        }.bind(this)
+      }
+    );
   }
 
   private buildAdvancedButtons() {
     if (this.hasSummaries) {
+      const that = this;
       this.dtButtons.push(
         {
           extend: 'collection',
           className: 'btn btn-secondary btn-sm mr-1 dropdown-toggle',
           text: '<i class="fas fa-cog"></i>',
           collectionLayout: 'dropdown-menu overflow-auto',
-          buttons: function () {
+          buttons: function() {
             const columnButton = [];
             // tslint:disable-next-line:prefer-for-of
-            if (this.columnFields == null) {
-              this.columnFields = [];
+            if (that.typeInstance.fields == null) {
+              that.typeInstance.fields = [];
             }
             let i = 0;
-            for (const obj of this.columnFields) {
+            for (const obj of that.typeInstance.fields) {
               {
                 columnButton.push(
                   {
-                    text: this.columnFields[i].label,
+                    text: that.typeInstance.fields[i].label,
                     extend: 'columnToggle',
-                    columns: '.toggle-' + this.columnFields[i].name,
-                    className: 'dropdown-item ' + this.columnFields[i].name,
+                    columns: '.toggle-' + that.typeInstance.fields[i].name,
+                    className: 'dropdown-item ' + that.typeInstance.fields[i].name,
                   });
               }
               i++;
@@ -344,74 +300,60 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
               extend: 'colvisRestore',
               text: 'Restore',
               className: 'btn btn-secondary btn-sm btn-block',
-              action: function () {
-                this.dtTrigger.next();
-              }.bind(this)
+              action: function() {
+                that.reload();
+              }
             });
             return columnButton;
-          }.bind(this),
+          }
         },
       );
     }
   }
 
   private buildDefaultDtOptions() {
-    const table = $('#object-list-datatable').DataTable();
     const buttons = this.dtButtons;
-    this.dtOptions = {
-      ordering: true,
-      order: [[2, 'asc']],
-      columnDefs: [{
-        orderable: false,
-        className: 'select-checkbox',
-        targets: 0
-      }],
-      rowCallback: (row: Node, data: any[]) => {
-        const self = this;
-        $('td:first-child', row).unbind('click');
-        $('td:first-child', row).bind('click', () => {
-          self.updateDisplay(data[2]);
-        });
-        return row;
+    this.dtOptions.ordering = true;
+    this.dtOptions.order = [[2, 'asc']];
+    this.dtOptions.select = {
+      style:    'multi',
+      selector: 'td:first-child'
+    };
+    this.dtOptions.language = {
+      search: '',
+      searchPlaceholder: 'Filter...'
+    };
+    this.dtOptions.dom =
+      '<"row" <"col-sm-3" l> <"col-sm-3" B > <"col" f> >' +
+      '<"row" <"col-sm-12"tr>>' +
+      '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >';
+    // Configure the buttons
+    // Declare the use of the extension in the dom parameter
+    this.dtOptions.buttons = {
+      dom: {
+        container: {
+          className: 'dt-buttons btn-group btn-group-sm'
+        }
       },
-      select: {
-        style: 'multi',
-        selector: 'td:first-child'
-      },
-      language: {
-        search: '',
-        searchPlaceholder: 'Filter...'
-      },
-      dom:
-        '<"row" <"col-sm-3" l> <"col-sm-3" B > <"col" f> >' +
-        '<"row" <"col-sm-12"tr>>' +
-        '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
-      // Configure the buttons
-      // Declare the use of the extension in the dom parameter
-      buttons: {
-        dom: {
-          container: {
-            className: 'dt-buttons btn-group btn-group-sm'
-          }
-        },
-        buttons,
-      },
+      buttons,
     };
   }
 
   private buildAdvancedDtOptions() {
-    if (this.hasSummaries && this.summaries != null) {
+    if (this.hasSummaries) {
       const visTargets: any[] = [0, 1, 2, 3, -3, -2, -1];
-      for (const summary of this.summaries) {
-        visTargets.push(this.columnFields.findIndex(i => i.name === summary.name) + 4);
-      }
-      this.dtOptions.columnDefs = [
-        { visible: true, targets: visTargets },
-        { visible: false, targets: '_all' },
-        { orderable: false, className: 'select-checkbox', targets: 0 },
-      ];
-      this.dtOptions.order = [[2, 'asc']];
-      this.dtOptions.ordering = true;
+      this.typeService.getType(this.typeID).subscribe(data => {
+        for (const summary of data.render_meta.summary.fields) {
+          visTargets.push(data.fields.findIndex(i => i.name === summary.name) + 4);
+        }
+        this.dtOptions.columnDefs = [
+          { visible: true, targets: visTargets },
+          { visible: false, targets: '_all' },
+          { orderable: false, className: 'select-checkbox', targets:   0 },
+        ];
+        this.dtOptions.order = [[2, 'asc']];
+        this.dtOptions.ordering = true;
+      });
     }
   }
 
@@ -431,7 +373,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     const dataTable: any = table.DataTable();
     const rows: any = dataTable.rows();
     this.selectedObjects = [];
-    if ($('.selectAll').is(':checked')) {
+    if ($('.selectAll').is( ':checked' )) {
       rows.select();
       let lenx: number = rows.data().length - 1;
       while (lenx >= 0) {

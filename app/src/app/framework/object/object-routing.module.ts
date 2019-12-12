@@ -25,7 +25,6 @@ import { ObjectEditComponent } from './object-edit/object-edit.component';
 import { ObjectCopyComponent } from './object-copy/object-copy.component';
 import { ObjectLogComponent } from './object-log/object-log.component';
 import { PermissionGuard } from '../../auth/guards/permission.guard';
-import { ObjectListByTypeComponent } from './object-list-by-type/object-list-by-type.component';
 
 const routes: Routes = [
   {
@@ -75,7 +74,7 @@ const routes: Routes = [
       breadcrumb: 'Object Type List',
       right: 'base.framework.object.view'
     },
-    component: ObjectListByTypeComponent
+    component: ObjectListComponent,
   },
   {
     path: 'view/:publicID',
