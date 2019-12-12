@@ -19,6 +19,9 @@ The collection module is a compilation of different types which have to be insta
 The collections are made up of a list of types and the number of objects to be created.
 This functionality will later be used to represent constructions such as services.
 Integration with the status system should also be possible.
+
+Notes:
+    ONLY IMPLEMENTED IN BACKEND AT THE MOMENT - CANT BE USED!
 """
 from cmdb.framework.cmdb_dao import CmdbDAO
 from typing import Tuple, List

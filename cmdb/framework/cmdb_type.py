@@ -131,10 +131,8 @@ class CmdbType(CmdbDAO):
             try:
                 return field[0]
             except (RequiredInitKeyNotFoundError, CMDBError) as e:
-                LOGGER.warning(e.message)
                 raise FieldInitError(value)
         else:
-            LOGGER.debug('Field of type {} NOT found'.format(input_type))
             raise FieldNotFoundError(value, self.get_name())
 
     def get_field(self, name) -> dict:
