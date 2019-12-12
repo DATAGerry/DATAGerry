@@ -23,6 +23,7 @@ import { ConnectComponent } from './connect.component';
 const routes: Routes = [
   {
     path: '',
+    pathMatch: 'full',
     component: ConnectComponent
   }
 ];

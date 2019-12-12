@@ -26,33 +26,17 @@ import { SpecialService } from '../../framework/services/special.service';
   templateUrl: './latest-changes-view.component.html',
   styleUrls: ['./latest-changes-view.component.scss']
 })
-export class LatestChangesViewComponent implements OnInit, OnDestroy {
+export class LatestChangesViewComponent implements OnInit {
 
   public latest: RenderResult[] = [];
   public thColumnsActions: any[] = [];
-  public dtOptions: any = {};
-  public dtTrigger: Subject<any> = new Subject();
 
   public constructor(private specialService: SpecialService<RenderResult>) {
   }
 
   public ngOnInit(): void {
-    this.dtOptions = {
-      ordering: true,
-      order: [[4, 'desc']],
-      language: {
-        search: '',
-        searchPlaceholder: 'Filter...'
-      }
-    };
     this.specialService.getLatestObjects().subscribe((latestList: RenderResult[]) => {
         this.latest = latestList;
-      },
-      err => {
-        console.error(err);
-      },
-      () => {
-        this.dtTrigger.next();
       });
 
     this.thColumnsActions = [
@@ -60,10 +44,5 @@ export class LatestChangesViewComponent implements OnInit, OnDestroy {
       { name: 'edit', classValue: 'text-dark ml-1', linkRoute: 'framework/object/edit/', fontIcon: 'edit'},
       { name: 'delete', classValue: 'text-dark ml-1', linkRoute: 'object/', fontIcon: 'trash-alt'}];
   }
-
-  public ngOnDestroy(): void {
-    this.dtTrigger.unsubscribe();
-  }
-
 }
 

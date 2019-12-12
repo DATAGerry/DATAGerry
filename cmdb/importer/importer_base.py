@@ -17,6 +17,7 @@
 Module of basic importers
 """
 import logging
+from typing import Optional
 
 from cmdb.framework import CmdbObject
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, \
@@ -36,20 +37,35 @@ class BaseImporter:
     """Superclass for all importer"""
 
     def __init__(self, file, file_type: str, config: BaseImporterConfig = None):
-        self.file_type = file_type
+        """
+        Init constructor for importer classes
+        Args:
+            file: File instance, name, content or loaded path to file
+            file_type: file type - used with content-type
+            config: importer configuration
+        """
         self.file = file
+        self.file_type: str = file_type
         self.config = config
 
-    def get_file_type(self):
+    def get_file_type(self) -> str:
+        """Get the name of the file-type"""
         return self.file_type
 
     def get_file(self):
+        """Get the loaded file"""
         return self.file
 
-    def get_config(self):
+    def get_config(self) -> Optional[BaseImporterConfig]:
+        """Get the configuration object"""
         return self.config
 
+    def has_config(self) -> bool:
+        """Check if importer has a config"""
+        return True if self.config else False
+
     def start_import(self) -> BaseImporterResponse:
+        """Starting the import process"""
         raise NotImplementedError
 
 
@@ -58,35 +74,52 @@ class ObjectImporter(BaseImporter):
 
     def __init__(self, file, file_type, config: ObjectImporterConfig = None,
                  parser: BaseObjectParser = None, object_manager: CmdbObjectManager = None, request_user: User = None):
+        """
+        Basic importer super class for object imports
+        Normally should be started by start_import
+        Args:
+            file: File instance, name, content or loaded path to file
+            file_type: file type - used with content-type
+            config: importer configuration
+            parser: the parser instance based on content-type
+            object_manager: a instance of the object manager
+            request_user: the instance of the started user
+        """
         self.parser = parser
         if object_manager:
             self.object_manager = object_manager
         else:
             from cmdb.utils.system_reader import SystemConfigReader
-            from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+            from cmdb.data_storage.database_manager import DatabaseManagerMongo
             object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
-                MongoConnector(
-                    **SystemConfigReader().get_all_values_from_section('Database')
-                )
+                **SystemConfigReader().get_all_values_from_section('Database')
             ))
             self.object_manager = object_manager
         self.request_user = request_user
         super(ObjectImporter, self).__init__(file=file, file_type=file_type, config=config)
 
     def _generate_objects(self, parsed: ObjectParserResponse, *args, **kwargs) -> list:
+        """Generate a list of all data from the parser.
+        The implementation of the object generation should be written in the sub class"""
         object_instance_list: [dict] = []
         for entry in parsed.entries:
             object_instance_list.append(self.generate_object(entry, *args, **kwargs))
         return object_instance_list
 
     def generate_object(self, entry, *args, **kwargs) -> dict:
+        """Generation of the CMDB-Objects based on the parser response
+        and the imported fields"""
         raise NotImplementedError
 
     def _import(self, import_objects: list) -> ImporterObjectResponse:
-        run_config = self.config
+        """Basic import wrapper - starting the import process
+        Args:
+            import_objects: list of all objects for import - or output of _generate_objects()
+        """
+        run_config = self.get_config()
 
         success_imports: [ImportSuccessMessage] = []
-        failed_imports:  [ImportFailedMessage] = []
+        failed_imports: [ImportFailedMessage] = []
 
         current_import_index = run_config.start_element
         importer_counter = 0
@@ -133,7 +166,7 @@ class ObjectImporter(BaseImporter):
                     success_imports.append(ImportSuccessMessage(public_id=current_public_id, obj=current_import_object))
             else:
                 try:
-                    self.object_manager.delete_object(current_public_id)
+                    self.object_manager.delete_object(current_public_id, self.request_user)
                 except ObjectManagerDeleteError as err:
                     failed_imports.append(ImportFailedMessage(error_message=err.message, obj=current_import_object))
                     current_import_index += 1
@@ -161,11 +194,15 @@ class ObjectImporter(BaseImporter):
         )
 
     def start_import(self) -> ImporterObjectResponse:
+        """Starting the import process.
+        Should call the _import method"""
         raise NotImplementedError
 
 
 class TypeImporter(BaseImporter):
-    """Superclass for type importers"""
+    """Superclass for type importers
+    Notes: Currently not implemented
+    """
     DEFAULT_CONFIG = {}
 
     def __init__(self, file, file_type, config: dict = None):

@@ -140,7 +140,7 @@ class SetupRoutine:
 
         if not self.__is_database_empty():
             try:
-                detected_database = self.setup_database_manager.database_connector.database
+                detected_database = self.setup_database_manager.connector.database
 
                 # update collections
                 # framework collections
@@ -211,29 +211,27 @@ class SetupRoutine:
     def __check_database(self):
         LOGGER.info('SETUP ROUTINE: Checking database connection')
         from cmdb.data_storage.database_manager import DatabaseManagerMongo
-        from cmdb.data_storage.database_connection import MongoConnector, ServerSelectionTimeoutError
+        from cmdb.data_storage.database_connection import ServerTimeoutError
         try:
             self.setup_database_manager = DatabaseManagerMongo(
-                connector=MongoConnector(
-                    **self.setup_system_config_reader.get_all_values_from_section('Database')
-                )
+                **self.setup_system_config_reader.get_all_values_from_section('Database')
             )
 
-            connection_test = self.setup_database_manager.database_connector.is_connected()
-        except ServerSelectionTimeoutError:
+            connection_test = self.setup_database_manager.connector.is_connected()
+        except ServerTimeoutError:
             connection_test = False
         LOGGER.info(f'SETUP ROUTINE: Database connection status {connection_test}')
         return connection_test
 
     def __is_database_empty(self) -> bool:
-        return not self.setup_database_manager.database_connector.database.list_collection_names()
+        return not self.setup_database_manager.connector.database.list_collection_names()
 
     def __check_database_collection_valid(self) -> bool:
         LOGGER.info('SETUP ROUTINE: Checking database collection validation')
         from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
         from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
         from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
-        detected_database = self.setup_database_manager.database_connector.database
+        detected_database = self.setup_database_manager.connector.database
         collection_test = False
 
         try:

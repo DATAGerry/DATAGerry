@@ -16,7 +16,7 @@
 
 import logging
 
-from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.utils import get_security_manager
 from cmdb.utils.system_reader import SystemConfigReader
 
@@ -49,9 +49,7 @@ class LocalAuthenticationProvider(AuthenticationProvider):
     def __init__(self):
         self.scr = SystemConfigReader()
         self.__dbm = DatabaseManagerMongo(
-            connector=MongoConnector(
-                **self.scr.get_all_values_from_section('Database')
-            )
+            **self.scr.get_all_values_from_section('Database')
         )
         super(AuthenticationProvider, self).__init__()
 

@@ -135,7 +135,7 @@ def insert_request_user(func):
     return get_user
 
 
-def right_required(required_right: str):
+def right_required(required_right: str, excepted: dict = None):
     """wraps function for routes which requires a special user right
     requires: insert_request_user
     """
@@ -148,6 +148,26 @@ def right_required(required_right: str):
                 current_user: User = kwargs['request_user']
             except KeyError:
                 return abort(400, 'No request user was provided')
+
+            if excepted:
+                for exe_key, exe_value in excepted.items():
+
+                    LOGGER.debug(f'Excepted parameter: {exe_key} | {exe_value}')
+                    # Check if parameter exits
+                    try:
+                        route_parameter = kwargs[exe_value]
+                        LOGGER.debug(f'Parameter exits {route_parameter}')
+                    except KeyError:
+                        continue
+                    # Check if user attr exists
+                    if not hasattr(current_user, exe_key):
+                        continue
+
+                    # Check if parameter test passed
+                    if current_user.__dict__.get(exe_key) == route_parameter:
+                        LOGGER.debug(f'Exception parameter passed test at {exe_key} | {exe_value}!')
+                        return func(*args, **kwargs)
+
             try:
                 has_right = user_manager.group_has_right(current_user.get_group(), required_right)
             except UserManagerGetError:
@@ -155,7 +175,7 @@ def right_required(required_right: str):
             if not has_right:
                 return abort(403, 'Request user does not have the right for this action')
             return func(*args, **kwargs)
+
         return _decorate
+
     return _page_right
-
-

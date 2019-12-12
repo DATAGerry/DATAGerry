@@ -13,7 +13,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.utils import SystemSettingsWriter
 from cmdb.utils.system_reader import SystemConfigReader
 
@@ -22,10 +23,10 @@ class KeyGenerator:
 
     def __init__(self, key_directory=None):
         self.scr = SystemConfigReader()
+        ssc = SystemConfigReader()
+        database_options = ssc.get_all_values_from_section('Database')
         self.__dbm = DatabaseManagerMongo(
-            connector=MongoConnector(
-                **self.scr.get_all_values_from_section('Database')
-            )
+            **database_options
         )
         self.ssw = SystemSettingsWriter(self.__dbm)
         self.key_directory = key_directory or SystemConfigReader.DEFAULT_CONFIG_LOCATION + "/keys"

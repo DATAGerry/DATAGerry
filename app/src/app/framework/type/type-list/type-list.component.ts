@@ -23,9 +23,9 @@ import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
 import { Router } from '@angular/router';
 import { UserService } from '../../../management/services/user.service';
-import { FileService } from '../../../export/export-objects/export-objects/export-objects.service';
-import {FileSaverService} from 'ngx-filesaver';
-import {DatePipe} from '@angular/common';
+import { FileSaverService } from 'ngx-filesaver';
+import { DatePipe } from '@angular/common';
+import { FileService } from '../../../export/export.service';
 
 @Component({
   selector: 'cmdb-type-list',
@@ -71,18 +71,9 @@ export class TypeListComponent implements OnInit, OnDestroy {
       },
       order: [[1, 'asc']],
       dom:
-        '<"row" <"col-sm-2" l> <"col-sm-3" B > <"col" f> >' +
+        '<"row" <"col-sm-2" l><"col" f> >' +
         '<"row" <"col-sm-12"tr>>' +
         '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
-      buttons: [
-        {
-          text: '<i class="fas fa-plus"></i> Add',
-          className: 'btn btn-success btn-sm mr-1',
-          action: function() {
-            this.router.navigate(['/framework/type/add']);
-          }.bind(this)
-        }
-      ],
       language: {
         search: '',
         searchPlaceholder: 'Filter...'
@@ -90,7 +81,7 @@ export class TypeListComponent implements OnInit, OnDestroy {
     };
 
     this.typeService.getTypeList().subscribe((list: CmdbType[]) => {
-        this.typeList = this.typeList.concat(list);
+        this.typeList = list;
       }, (err) => { console.error(err); },
       () => { this.dtTrigger.next(); });
   }

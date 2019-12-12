@@ -40,7 +40,7 @@ class CmdbLogManager(CmdbManagerBase):
     def get_logs_by(self, sort='public_id', **requirements):
         ack = []
         try:
-            logs = self._get_all(collection=CmdbMetaLog.COLLECTION, sort=sort, **requirements)
+            logs = self._get_many(collection=CmdbMetaLog.COLLECTION, sort=sort, **requirements)
             for log in logs:
                 ack.append(CmdbLog(**log))
         except (CMDBError, Exception) as err:

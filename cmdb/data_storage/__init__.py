@@ -13,7 +13,15 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""Database connection and data access
 
-from cmdb.data_storage.database_connection import MongoConnector, Connector
-from cmdb.data_storage.database_manager import DatabaseManagerMongo, DatabaseManager
-from cmdb.data_storage.database_manager import NoDocumentFound
+This module controls the connection and access to the database
+
+Attributes:
+    CLIENT (TypeVar): generic type variable for `Connector` class implementation
+
+"""
+from typing import TypeVar
+
+CLIENT: TypeVar = TypeVar('CLIENT')
+CONNECTOR: TypeVar = TypeVar('CONNECTOR')

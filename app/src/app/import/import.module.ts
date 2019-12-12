@@ -50,6 +50,7 @@ import { CategoryModule } from '../framework/category/category.module';
 import { ImportTypeCompleteComponent } from './import-types/import-type-complete/import-type-complete.component';
 import { FileSizePipe } from './import-types/file-size.pipe';
 import { ImportCompleteComponent } from './import-objects/import-complete/import-complete.component';
+import { DataTablesModule } from 'angular-datatables';
 
 
 @NgModule({
@@ -73,7 +74,7 @@ import { ImportCompleteComponent } from './import-objects/import-complete/import
     TypePreviewComponent,
     ImportTypeCompleteComponent,
     FileSizePipe,
-    ImportCompleteComponent
+    ImportCompleteComponent,
   ],
   imports: [
     CommonModule,
@@ -89,7 +90,8 @@ import { ImportCompleteComponent } from './import-objects/import-complete/import
     RenderModule,
     NgbTooltipModule,
     FormsModule,
-    CategoryModule
+    CategoryModule,
+    DataTablesModule
   ]
 })
 export class ImportModule {

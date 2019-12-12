@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.utils import json_encoding
 import csv
@@ -27,9 +27,7 @@ import xml.dom.minidom
 from cmdb.utils.system_reader import SystemConfigReader
 
 object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
-    MongoConnector(
-        **SystemConfigReader().get_all_values_from_section('Database')
-    )
+    **SystemConfigReader().get_all_values_from_section('Database')
 ))
 
 

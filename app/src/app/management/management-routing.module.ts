@@ -18,60 +18,50 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { NavigationComponent } from '../layout/components/navigation/navigation.component';
-import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
-import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';
-import { FooterComponent } from '../layout/components/footer/footer.component';
-import { UserViewComponent } from './users/user-view/user-view.component';
+import { PermissionGuard } from '../auth/guards/permission.guard';
+import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
+import { ManagementComponent } from './management.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: NavigationComponent,
-    outlet: 'navigation'
-  },
-  {
-    path: '',
-    component: SidebarComponent,
-    outlet: 'sidebar'
-  },
-  {
-    path: '',
-    component: BreadcrumbComponent,
-    outlet: 'breadcrumb'
-  },
-  {
-    path: '',
-    component: FooterComponent,
-    outlet: 'footer'
+    pathMatch: 'full',
+    canActivate: [PermissionGuard],
+    data: {
+      breadcrumb: 'Overview'
+    },
+    component: ManagementComponent
   },
   {
     path: 'users',
+    canActivateChild: [PermissionGuard],
     data: {
-      breadcrumb: 'Users'
+      breadcrumb: 'Users',
     },
     loadChildren: () => import('./users/users.module').then(m => m.UsersModule)
   },
   {
     path: 'groups',
+    canActivateChild: [PermissionGuard],
     data: {
-      breadcrumb: 'Groups'
+      breadcrumb: 'Groups',
+      right: 'base.user-management.group.*'
     },
     loadChildren: () => import('./groups/groups.module').then(m => m.GroupsModule)
   },
   {
     path: 'rights',
+    canActivateChild: [PermissionGuard],
     data: {
-      breadcrumb: 'Rights'
+      breadcrumb: 'Rights',
     },
     loadChildren: () => import('./rights/rights.module').then(m => m.RightsModule)
-  },
-
+  }
 ];
 
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
   exports: [RouterModule]
 })
 export class ManagementRoutingModule {

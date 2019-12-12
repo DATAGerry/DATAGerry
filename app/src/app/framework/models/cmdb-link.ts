@@ -17,6 +17,7 @@
 */
 
 import { CmdbDao } from './cmdb-dao';
+import { RenderResult } from './cmdb-render';
 
 export class CmdbLink implements CmdbDao {
 
@@ -25,5 +26,6 @@ export class CmdbLink implements CmdbDao {
   public primary: number;
   public secondary: number;
   public creation_time: Date;
+  public partnerObject?: RenderResult;
   // tslint:enable:variable-name
 }

@@ -16,21 +16,42 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { Injectable } from '@angular/core';
-import { ApiCallService } from '../../services/api-call.service';
+import { ApiCallService, ApiService, HttpInterceptorHandler } from '../../services/api-call.service';
 import { ExportdJob } from '../models/exportd-job';
-import { Observable } from 'rxjs';
+import { Observable, timer} from 'rxjs';
+import { FormControl } from '@angular/forms';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import { HttpBackend, HttpClient } from '@angular/common/http';
+import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
+import { AuthService } from '../../auth/services/auth.service';
+
+export const checkJobExistsValidator = (jobService: ExportdJobService<ExportdJob>, time: number = 500) => {
+  return (control: FormControl) => {
+    return timer(time).pipe(switchMap(() => {
+      return jobService.checkJobExists(control.value).pipe(
+        map(() => {
+          return { typeExists: true };
+        }),
+        catchError(() => {
+          return new Promise(resolve => {
+            resolve(null);
+          });
+        })
+      );
+    }));
+  };
+};
 
 @Injectable({
   providedIn: 'root'
 })
-export class ExportdJobService {
+export class ExportdJobService<T = ExportdJob> implements ApiService {
 
-  private servicePrefix: string = 'exportdjob';
+  public servicePrefix: string = 'exportdjob';
   private taskList: ExportdJob[];
 
-  constructor(private api: ApiCallService) {
+  constructor(private api: ApiCallService, private backend: HttpBackend, private authService: AuthService) {
     this.getTaskList().subscribe((list: ExportdJob[]) => {
       this.taskList = list;
     });
@@ -63,5 +84,11 @@ export class ExportdJobService {
 
   public run_task(publicID: number) {
     return this.api.callGetRoute<ExportdJob>(this.servicePrefix + '/manual/' + publicID);
+  }
+
+  // Validation functions
+  public checkJobExists(typeName: string) {
+    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor(this.authService)));
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`, specialClient);
   }
 }

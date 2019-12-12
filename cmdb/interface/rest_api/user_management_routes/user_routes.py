@@ -59,7 +59,7 @@ def get_users(request_user: User):
 @user_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
 @insert_request_user
-@right_required('base.user-management.user.view')
+@right_required('base.user-management.user.view', excepted={'public_id': 'public_id'})
 def get_user(public_id, request_user: User):
     try:
         user: User = user_manager.get_user(public_id=public_id)
@@ -186,7 +186,7 @@ def count_users(request_user: User):
 @user_blueprint.route('/<int:public_id>/passwd', methods=['PUT'])
 @login_required
 @insert_request_user
-@right_required('base.user-management.user.*')
+@right_required('base.user-management.user.*', {'public_id': 'public_id'})
 def change_user_password(public_id: int, request_user: User):
     try:
         user_manager.get_user(public_id=public_id)

@@ -32,6 +32,7 @@ import { DataTablesModule } from 'angular-datatables';
 import { CategoryEditComponent } from './category-edit/category-edit.component';
 import { BuildCategoryFormComponent } from './build-category-form/build-category-form.component';
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
+import {AuthModule} from "../../auth/auth.module";
 
 @NgModule({
   declarations: [
@@ -43,18 +44,19 @@ import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
   exports: [
     FilterPipe
   ],
-  imports: [
-    CommonModule,
-    CategoryRoutingModule,
-    DndModule,
-    ReactiveFormsModule,
-    LayoutModule,
-    NgSelectModule,
-    FontAwesomeModule,
-    FormsModule,
-    DataTablesModule,
-    SweetAlert2Module
-  ]
+    imports: [
+        CommonModule,
+        CategoryRoutingModule,
+        DndModule,
+        ReactiveFormsModule,
+        LayoutModule,
+        NgSelectModule,
+        FontAwesomeModule,
+        FormsModule,
+        DataTablesModule,
+        SweetAlert2Module,
+        AuthModule
+    ]
 })
 export class CategoryModule {
 }

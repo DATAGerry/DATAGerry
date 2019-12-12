@@ -7,22 +7,26 @@ import { ServerComponent } from './server/server.component';
 const routes: Routes = [
   {
     path: '',
+    pathMatch: 'full',
     data: {
-      breadcrumb: 'Information'
+      breadcrumb: 'Information',
+      right: 'base.system.view'
     },
     component: InformationComponent
   },
   {
     path: 'server',
     data: {
-      breadcrumb: 'Server'
+      breadcrumb: 'Server',
+      right: 'base.system.view'
     },
     component: ServerComponent
   },
   {
     path: 'properties',
     data: {
-      breadcrumb: 'Properties'
+      breadcrumb: 'Properties',
+      right: 'base.system.reload'
     },
     component: PropertiesComponent
   }

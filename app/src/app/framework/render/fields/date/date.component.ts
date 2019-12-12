@@ -16,11 +16,6 @@ export class DateComponent extends RenderField implements  OnInit {
     super();
   }
 
-  public onDateSelect(value: any, item: any) {
-    this.parentFormGroup.get(item).patchValue(new Date(Date.parse(value)));
-    this.parentFormGroup.get(item).markAsTouched();
-  }
-
   ngOnInit(): void {
   }
 

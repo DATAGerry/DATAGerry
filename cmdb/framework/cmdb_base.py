@@ -13,12 +13,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from cmdb.utils.error import CMDBError
+from typing import List
 
-try:
-    from cmdb.data_storage import DatabaseManagerMongo
-except ImportError:
-    DatabaseManagerMongo = object
+from cmdb.utils.error import CMDBError
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
 
 
 class CmdbManagerBase:
@@ -36,8 +34,7 @@ class CmdbManagerBase:
             database_manager (DatabaseManager): initialisation of an database manager
 
         """
-        if database_manager:
-            self.dbm: DatabaseManagerMongo = database_manager
+        self.dbm: DatabaseManagerMongo = database_manager
 
     def _get(self, collection: str, public_id: int) -> dict:
         """get document from the database by their public id
@@ -54,7 +51,7 @@ class CmdbManagerBase:
             public_id=public_id
         )
 
-    def _get_all(self, collection: str, sort='public_id', limit=0, **requirements: dict) -> list:
+    def _get_many(self, collection: str, sort='public_id', direction: int = -1, limit=0, **requirements: dict) -> List[dict]:
         """get all documents from the database which have the passing requirements
 
         Args:
@@ -67,12 +64,12 @@ class CmdbManagerBase:
 
         """
         requirements_filter = {}
-        formatted_sort = [(sort, self.dbm.DESCENDING)]
+        formatted_sort = [(sort, direction)]
         for k, req in requirements.items():
             requirements_filter.update({k: req})
         return self.dbm.find_all(collection=collection, limit=limit, filter=requirements_filter, sort=formatted_sort)
 
-    def _insert(self, collection: str, data: dict) -> (int, None):
+    def _insert(self, collection: str, data: dict) -> int:
         """insert document/object into database
 
         Args:
@@ -88,6 +85,9 @@ class CmdbManagerBase:
             collection=collection,
             data=data
         )
+
+    def _insert_many(self, collection: str, d):
+        pass  # TODO
 
     def _update(self, collection: str, public_id: int, data: dict) -> object:
         """
@@ -154,7 +154,7 @@ class CmdbManagerBase:
         )
 
     def _search(self, collection: str, requirements, limit=0):
-        return self._get_all(collection, limit=limit, **requirements)
+        return self._get_many(collection, limit=limit, **requirements)
 
 
 class ManagerGetError(CMDBError):

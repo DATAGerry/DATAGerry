@@ -1,0 +1,86 @@
+<cmdb-content-header [faIcon]="'cube'" title="Exportd Job List"></cmdb-content-header>
+
+<div class="card-body" style="padding: 0 0 1em 0;">
+  <button type="button"
+          *permissionLink="['base.exportd.job.add']"
+          class="btn btn-success btn-sm"
+          [routerLink]="['/settings/exportdjob/add']">
+    <i class="fas fa-plus"></i> Add
+  </button>
+</div>
+<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-striped table-bordered">
+  <thead>
+  <tr>
+    <th scope="col">ID</th>
+    <th scope="col">State</th>
+    <th scope="col">Name</th>
+    <th scope="col">External Systems</th>
+    <th scope="col">Author</th>
+    <th scope="col">Running</th>
+    <th scope="col">Last Execute Date</th>
+    <th scope="col">Execute State</th>
+    <th scope="col" *permissionLink="['base.exportd.job.run']">Execute Job</th>
+    <th scope="col" *permissionLink="['base.exportd.job.edit', 'base.exportd.job.delete']">Action</th>
+    <th scope="col" *permissionLink="['base.exportd.log.view']">Logs</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let task of taskList | async">
+    <th scope="row">{{task.public_id}}</th>
+    <td><cmdb-active-badge [activeStatus]="task.active"></cmdb-active-badge></td>
+    <td>{{task.label}}</td>
+    <td>
+      <ul>
+        <li *ngFor="let des of task.destination">{{des.className}}</li>
+      </ul>
+    </td>
+    <td>
+      {{task.author_name}}
+    </td>
+    <td>
+      <div class="progress">
+        <div [className]="task.state === modes.RUNNING
+            ? 'progress-bar progress-bar-striped progress-bar-animated'
+              :'progress-bar bg-success'"
+             role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+          {{task.state === modes.RUNNING ? "is running" : "done"}}
+        </div>
+      </div>
+    </td>
+    <td>{{task.last_execute_date.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
+    <td>
+      <h2 class="text-center">
+        <i [class]="task.state === modes.FAILED
+          ? 'fas fa-exclamation-triangle ng-fa-icon text-danger'
+          : 'fas fa-check-circle ng-fa-icon text-success'"></i>
+      </h2>
+    </td>
+    <td *permissionLink="['base.exportd.job.run']">
+      <button type="button" class="btn badge-pill btn-success"
+              (click)="run_job_manual(task)">
+        Run Now <fa-icon icon="play"></fa-icon>
+      </button>
+    </td>
+    <td *permissionLink="['base.exportd.job.edit', 'base.exportd.job.delete']">
+      <a class="ml-1 text-dark mr-1" *permissionLink="['base.exportd.job.edit']"
+         [routerLink]="['/settings/exportdjob/edit/', task?.public_id]">
+        <fa-icon [icon]="['far', 'edit']"></fa-icon>
+      </a>
+      <a class="ml-1 text-dark mr-1" *permissionLink="['base.exportd.job.edit']"
+         [routerLink]="['/settings/exportdjob/copy/', task?.public_id]"
+         [queryParams]="{copy: task?.public_id}">
+        <fa-icon [icon]="['far', 'copy']"></fa-icon>
+      </a>
+      <a class="ml-1 text-dark" *permissionLink="['base.exportd.job.delete']">
+        <fa-icon [icon]="['far', 'trash-alt']" (click)="delTask(task?.public_id)"></fa-icon>
+      </a>
+    </td>
+    <td *permissionLink="['base.exportd.log.view']">
+      <a class="ml-1 text-cmdb-primary" [routerLink]="['/settings/exportdjob/log/', task?.public_id]">
+        <fa-icon [icon]="['far', 'arrow-alt-circle-right']"></fa-icon>
+      </a>
+    </td>
+  </tr>
+  </tbody>
+</table>
+

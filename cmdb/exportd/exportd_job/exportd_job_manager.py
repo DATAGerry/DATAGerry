@@ -19,12 +19,14 @@ import logging
 from datetime import datetime
 
 from cmdb.event_management.event import Event
-from cmdb.data_storage import DatabaseManagerMongo, NoDocumentFound, MongoConnector
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
+from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.utils.error import CMDBError
 from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.user_management import User
 
 LOGGER = logging.getLogger(__name__)
 
@@ -42,7 +44,7 @@ class ExportdJobManagement(CmdbManagerBase):
     def get_job(self, public_id: int) -> ExportdJob:
         try:
             result = self.dbm.find_one(collection=ExportdJob.COLLECTION, public_id=public_id)
-        except Exception as err:
+        except (ExportdJobManagerGetError, Exception) as err:
             LOGGER.error(err)
             raise err
         return ExportdJob(**result)
@@ -56,20 +58,31 @@ class ExportdJobManagement(CmdbManagerBase):
                 continue
         return job_list
 
-    def get_job_by_name(self, name):
-        formatted_filter = {'name': name}
+    def get_job_by_name(self, **requirements) -> ExportdJob:
         try:
-            return self.dbm.find_one_by(collection=ExportdJob.COLLECTION, filter=formatted_filter)
-        except NoDocumentFound as err:
-            LOGGER.error(err)
-            raise err
+            found_type_list = self._get_many(collection=ExportdJob.COLLECTION, limit=1, **requirements)
+            if len(found_type_list) > 0:
+                return ExportdJob(**found_type_list[0])
+            else:
+                raise ObjectManagerGetError(err='More than 1 type matches this requirement')
+        except (CMDBError, Exception) as e:
+            raise ObjectManagerGetError(err=e)
+
+    def get_job_by_event_based(self, state):
+        formatted_filter = {'scheduling.event.active': state}
+        job_list = []
+        for founded_job in self.dbm.find_all(collection=ExportdJob.COLLECTION, filter=formatted_filter):
+            try:
+                job_list.append(ExportdJob(**founded_job))
+            except CMDBError:
+                continue
+        return job_list
 
     def insert_job(self, data: (ExportdJob, dict)) -> int:
         """
         Insert new ExportdJob Object
         Args:
             data: init data
-
         Returns:
             Public ID of the new ExportdJob in database
         """
@@ -85,16 +98,22 @@ class ExportdJobManagement(CmdbManagerBase):
                 collection=ExportdJob.COLLECTION,
                 data=new_object.to_database()
             )
+            if self._event_queue:
+                event = Event("cmdb.exportd.added", {"id": new_object.get_public_id(),
+                                                     "active": new_object.scheduling["event"]["active"] and new_object.get_active(),
+                                                     "user_id": new_object.get_author_id()})
+                self._event_queue.put(event)
         except CMDBError as e:
             raise ExportdJobManagerInsertError(e)
         return ack
 
-    def update_job(self, data: (dict, ExportdJob)) -> str:
+    def update_job(self, data: (dict, ExportdJob), request_user: User, event_start=True) -> str:
         """
         Update new ExportdJob Object
         Args:
             data: init data
-
+            request_user: current user, to detect who triggered event
+            event_start: Controls whether an event should be started
         Returns:
             Public ID of the ExportdJob in database
         """
@@ -110,17 +129,28 @@ class ExportdJobManagement(CmdbManagerBase):
             public_id=update_object.get_public_id(),
             data=update_object.to_database()
         )
+        if self._event_queue and event_start:
+            event = Event("cmdb.exportd.updated", {"id": update_object.get_public_id(),
+                                                   "active": update_object.scheduling["event"]["active"] and update_object.get_active(),
+                                                   "user_id": request_user.get_public_id()})
+            self._event_queue.put(event)
         return ack.acknowledged
 
-    def delete_job(self, public_id: int) -> bool:
+    def delete_job(self, public_id: int, request_user: User) -> bool:
         try:
-            return self._delete(collection=ExportdJob.COLLECTION, public_id=public_id)
+            ack = self._delete(collection=ExportdJob.COLLECTION, public_id=public_id)
+            if self._event_queue:
+                event = Event("cmdb.exportd.deleted", {"id": public_id, "active": False,
+                                                       "user_id": request_user.get_public_id()})
+                self._event_queue.put(event)
+            return ack
         except Exception:
             raise ExportdJobManagerDeleteError(f'Could not delete job with ID: {public_id}')
 
-    def run_job_manual(self, public_id: int) -> bool:
+    def run_job_manual(self, public_id: int, request_user: User) -> bool:
         if self._event_queue:
-            event = Event("cmdb.exportd.run_manual", {"id": public_id})
+            event = Event("cmdb.exportd.run_manual", {"id": public_id,
+                                                      "user_id": request_user.get_public_id()})
             self._event_queue.put(event)
         return True
 
@@ -153,9 +183,7 @@ def get_exoportd_job_manager():
     ssc = SystemConfigReader()
     database_options = ssc.get_all_values_from_section('Database')
     dbm = DatabaseManagerMongo(
-        connector=MongoConnector(
             **database_options
-        )
     )
     return ExportdJobManagement(
         event_queue=None,

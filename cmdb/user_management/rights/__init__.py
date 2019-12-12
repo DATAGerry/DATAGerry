@@ -20,6 +20,7 @@ from cmdb.user_management.rights.system_rights import SystemRight
 from cmdb.user_management.rights.user_management_rights import UserManagementRight, UserRight, GroupRight
 from cmdb.user_management.rights.framework_rights import FrameworkRight, ObjectRight, TypeRight, CategoryRight, LogRight
 from cmdb.user_management.rights.export_rights import ExportRight, ExportObjectRight, ExportTypeRight
+from cmdb.user_management.rights.exportd_rights import ExportdRight, ExportdJobRight, ExportdLogRight
 
 SYSTEM_RIGHTS = (
     SystemRight(GLOBAL_RIGHT_IDENTIFIER, description='System and settings'),
@@ -112,6 +113,28 @@ USER_MANAGEMENT_RIGHTS = (
     )
 )
 
+EXPORTD_RIGHTS = (
+    ExportdRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage exportd'),
+    (
+        ExportdJobRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage jobs'),
+        (
+            ExportdJobRight('view', description='View job'),
+            ExportdJobRight('add', description='Add job'),
+            ExportdJobRight('edit', BaseRight.SECURE, description='Edit job'),
+            ExportdJobRight('delete', BaseRight.SECURE, description='Delete job'),
+            ExportdJobRight('run', BaseRight.SECURE, description='Run job manual')
+        ),
+    ),
+    (
+        ExportdLogRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage exportd logs'),
+        (
+            ExportdLogRight('view', description='View exportd logs'),
+            ExportdLogRight('reload', BaseRight.SECURE, description='Reload exportd logs'),
+            ExportdLogRight('delete', BaseRight.DANGER, description='Delete exportd logs')
+        )
+    )
+)
+
 __all__ = (
     BaseRight(
         BaseRight.NOTSET, GLOBAL_RIGHT_IDENTIFIER, description='Base application right'
@@ -120,5 +143,6 @@ __all__ = (
     FRAMEWORK_RIGHTS,
     EXPORT_RIGHTS,
     IMPORT_RIGHTS,
-    USER_MANAGEMENT_RIGHTS
+    USER_MANAGEMENT_RIGHTS,
+    EXPORTD_RIGHTS
 )

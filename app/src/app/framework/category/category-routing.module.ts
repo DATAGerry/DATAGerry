@@ -25,22 +25,26 @@ import { CategoryEditComponent } from './category-edit/category-edit.component';
 const routes: Routes = [
   {
     path: '',
+    pathMatch: 'full',
     data: {
-      breadcrumb: 'List'
+      breadcrumb: 'List',
+      right: 'base.framework.category.view'
     },
     component: CategoryListComponent
   },
   {
     path: 'add',
     data: {
-      breadcrumb: 'Add'
+      breadcrumb: 'Add',
+      right: 'base.framework.category.add'
     },
     component: CategoryAddComponent
   },
   {
     path: 'edit/:publicID',
     data: {
-      breadcrumb: 'Edit'
+      breadcrumb: 'Edit',
+      right: 'base.framework.category.edit'
     },
     component: CategoryEditComponent
   }

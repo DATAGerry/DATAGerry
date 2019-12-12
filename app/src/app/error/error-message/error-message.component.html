@@ -1,0 +1,10 @@
+<div class="toast-header bg-danger text-white">
+  <i class="fas fa-exclamation-triangle"></i>
+  <small class="ml-1 mr-auto text-uppercase">{{error?.response}}</small>
+  <button type="button" class="close" aria-label="Close" (click)="onHide()">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="toast-body">
+  <ng-content></ng-content>
+</div>

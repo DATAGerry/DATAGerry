@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
+import { NgModule, isDevMode } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -25,7 +25,8 @@ import { HttpErrorInterceptor } from './error/interceptors/http-error.intercepto
 const routes: Routes = [
   {
     path: '',
-    canActivate: [AuthGuard],
+    pathMatch: 'full',
+    canActivateChild: [AuthGuard],
     data: {
       breadcrumb: 'Dashboard'
     },
@@ -38,6 +39,14 @@ const routes: Routes = [
   {
     path: 'auth',
     loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
+  },
+  {
+    path: 'error',
+    canActivate: [AuthGuard],
+    data: {
+      breadcrumb: 'Error'
+    },
+    loadChildren: () => import('./error/error.module').then(m => m.ErrorModule)
   },
   {
     path: 'search',
@@ -88,22 +97,30 @@ const routes: Routes = [
     loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule)
   },
   {
-    path: 'error',
-    loadChildren: () => import('./error/error.module').then(m => m.ErrorModule)
+    path: 'info',
+    canActivate: [AuthGuard],
+    data: {
+      breadcrumb: 'Info'
+    },
+    loadChildren: () => import('./info/info.module').then(m => m.InfoModule)
   },
-
+  {
+    path: 'debug',
+    canActivate: [AuthGuard],
+    data: {
+      breadcrumb: 'Debug'
+    },
+    loadChildren: () => import('./debug/debug.module').then(m => m.DebugModule)
+  },
   {
     path: '**',
-    redirectTo: 'error/404'
+    redirectTo: '/error/404'
   }
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule],
-  providers: [
-    {provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true},
-  ]
+  exports: [RouterModule]
 })
 export class AppRoutingModule {
 }

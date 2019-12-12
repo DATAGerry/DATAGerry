@@ -13,6 +13,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""Cmdb statuses are status information about objects. The event system should later be able to react to status changes.
+Notes:
+    ONLY IMPLEMENTED IN BACKEND AT THE MOMENT - CANT BE USED!
+"""
 
 from cmdb.framework.cmdb_dao import CmdbDAO
 

@@ -19,36 +19,20 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { ImportComponent } from './import.component';
-import { NavigationComponent } from '../layout/components/navigation/navigation.component';
-import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
-import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';
+import { NavigationComponent } from '../layout/structure/navigation/navigation.component';
+import { SidebarComponent } from '../layout/structure/sidebar/sidebar.component';
+import { BreadcrumbComponent } from '../layout/structure/breadcrumb/breadcrumb.component';
 import { ImportObjectsComponent } from './import-objects/import-objects.component';
-import { FooterComponent } from '../layout/components/footer/footer.component';
+import { FooterComponent } from '../layout/structure/footer/footer.component';
 import { ImportTypesComponent } from './import-types/import-types.component';
+import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
+import { PermissionGuard } from '../auth/guards/permission.guard';
 
 const routes: Routes = [
   {
     path: '',
-    component: NavigationComponent,
-    outlet: 'navigation'
-  },
-  {
-    path: '',
-    component: SidebarComponent,
-    outlet: 'sidebar'
-  },
-  {
-    path: '',
-    component: BreadcrumbComponent,
-    outlet: 'breadcrumb'
-  },
-  {
-    path: '',
-    component: FooterComponent,
-    outlet: 'footer'
-  },
-  {
-    path: '',
+    pathMatch: 'full',
+    canActivate: [PermissionGuard],
     data: {
       breadcrumb: 'Overview'
     },
@@ -56,22 +40,26 @@ const routes: Routes = [
   },
   {
     path: 'object',
+    canActivate: [PermissionGuard],
     data: {
-      breadcrumb: 'Object'
+      breadcrumb: 'Object',
+      right: 'base.import.object.*'
     },
     component: ImportObjectsComponent
   },
   {
     path: 'type',
+    canActivate: [PermissionGuard],
     data: {
-      breadcrumb: 'Type'
+      breadcrumb: 'Type',
+      right: 'base.import.type.*'
     },
     component: ImportTypesComponent
   }
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
   exports: [RouterModule]
 })
 export class ImportRoutingModule {

@@ -19,14 +19,30 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { LogObjectSettingsComponent } from './log-object-settings/log-object-settings.component';
+import { LogExportdSettingsComponent } from './log-exportd-settings/log-exportd-settings.component';
+import { LogSettingsComponent } from './log-settings.component';
 
 const routes: Routes = [
+  {
+    path: '',
+    data: {
+      breadcrumb: 'Overview'
+    },
+    component: LogSettingsComponent
+  },
   {
     path: 'objects',
     data: {
       breadcrumb: 'Objects'
     },
     component: LogObjectSettingsComponent
+  },
+  {
+    path: 'exportdjobs',
+    data: {
+      breadcrumb: 'Exportd Jobs'
+    },
+    component: LogExportdSettingsComponent
   }
 ];
 

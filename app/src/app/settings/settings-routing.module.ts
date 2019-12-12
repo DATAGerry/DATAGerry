@@ -18,42 +18,24 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { NavigationComponent } from '../layout/components/navigation/navigation.component';
-import { SidebarComponent } from '../layout/components/sidebar/sidebar.component';
-import { BreadcrumbComponent } from '../layout/components/breadcrumb/breadcrumb.component';
-import { FooterComponent } from '../layout/components/footer/footer.component';
 import { SettingsComponent } from './settings.component';
+import { PermissionGuard } from '../auth/guards/permission.guard';
+import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
 
 const routes: Routes = [
   {
     path: '',
-    component: NavigationComponent,
-    outlet: 'navigation'
-  },
-  {
-    path: '',
-    component: SidebarComponent,
-    outlet: 'sidebar'
-  },
-  {
-    path: '',
-    component: BreadcrumbComponent,
-    outlet: 'breadcrumb'
-  },
-  {
-    path: '',
-    component: FooterComponent,
-    outlet: 'footer'
-  },
-  {
-    path: '',
+    pathMatch: 'full',
+    canActivate: [PermissionGuard],
     data: {
-      breadcrumb: 'Overview'
+      breadcrumb: 'Overview',
+      right: 'base.system.view'
     },
     component: SettingsComponent
   },
   {
     path: 'system',
+    canActivateChild: [PermissionGuard],
     data: {
       breadcrumb: 'System'
     },
@@ -71,12 +53,12 @@ const routes: Routes = [
     data: {
       breadcrumb: 'Exportd Job'
     },
-    loadChildren: () => import('./task-settings/task-settings.module').then(m => m.TaskSettingsModule)
+    loadChildren: () => import('./exportd-job-settings/exportd-job-settings.module').then(m => m.ExportdJobSettingsModule)
   }
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
   exports: [RouterModule]
 })
 export class SettingsRoutingModule { }

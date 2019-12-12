@@ -15,13 +15,20 @@
           </div>
         </ng-container>
         <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
-          <input type="{{data.type}}" name="{{data.name}}"
-                 class="form-control"
-                 [formControlName]="data.name"
-                 ngbDatepicker #d="ngbDatepicker"
-                 (input)="onDateSelect($event.target.value, data.name)"
-                 [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
-                 'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"/>
+          <input
+            type="text"
+            name="{{data.name}}"
+            class="form-control"
+            placeholder="yyyy-mm-dd"
+            [formControlName]="data.name"
+            ngbDatepicker #d="ngbDatepicker"
+            [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
+            'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"/>
+          <div class="input-group-append">
+            <span class="input-group-text" (click)="d.toggle()">
+              <fa-icon icon="calendar-alt"></fa-icon>
+            </span>
+          </div>
           <div *ngIf="data?.helperText" class="input-group-append">
             <span class="input-group-text">
               <fa-icon icon="info" placement="left" [ngbTooltip]="data?.helperText"></fa-icon>

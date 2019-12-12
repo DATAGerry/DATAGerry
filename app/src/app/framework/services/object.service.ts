@@ -24,6 +24,8 @@ import { ModalComponent } from '../../layout/helpers/modal/modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { map } from 'rxjs/operators';
 import { RenderResult } from '../models/cmdb-render';
+import { HttpBackend, HttpClient } from '@angular/common/http';
+import { AuthService } from '../../auth/services/auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -36,27 +38,6 @@ export class ObjectService<T = RenderResult> implements ApiService {
   }
 
   // Find calls
-  public getObjectList(native: boolean = false): Observable<T[]> {
-    if (native === true) {
-      return this.api.callGet<CmdbObject[]>(`${this.servicePrefix}/native/`).pipe(
-        map((apiResponse) => {
-          if (apiResponse.status === 204) {
-            return [];
-          }
-          return apiResponse.body;
-        })
-      );
-    }
-    return this.api.callGet<T[]>(`${this.servicePrefix}/`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
-  }
-
   public getObjectsByType(typeID: number): Observable<T[]> {
     return this.api.callGet<T[]>(`${this.servicePrefix}/type/${typeID}`).pipe(
       map((apiResponse) => {
@@ -68,7 +49,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
     );
   }
 
-  public getObject<R>(publicID: number, native: boolean = false): Observable<R> {
+  public getObject<R>(publicID: number, native: boolean = false, specialClient?: HttpClient): Observable<R> {
     if (native === true) {
       return this.api.callGet<CmdbObject[]>(`${this.servicePrefix}/${publicID}/native/`).pipe(
         map((apiResponse) => {
@@ -76,7 +57,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
         })
       );
     }
-    return this.api.callGet<R[]>(`${this.servicePrefix}/${publicID}/`).pipe(
+    return this.api.callGet<R[]>(`${this.servicePrefix}/${publicID}/`, specialClient).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -104,6 +85,17 @@ export class ObjectService<T = RenderResult> implements ApiService {
 
   public countObjectsByType(typeID: number) {
     return this.api.callGetRoute<number>(this.servicePrefix + '/count/' + typeID);
+  }
+
+  public countObjects() {
+    return this.api.callGet<number>(`${this.servicePrefix}/count/`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
   // Custom calls

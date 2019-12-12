@@ -23,31 +23,35 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LayoutModule } from './layout/layout.module';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
 import { PreviousRouteService } from './services/previous-route.service';
-import { NgxSpinnerModule } from 'ngx-spinner';
 import { DatePipe } from '@angular/common';
 import { FileSaverModule } from 'ngx-filesaver';
 import { ToastModule } from './layout/toast/toast.module';
-
+import { HttpErrorInterceptor } from './error/interceptors/http-error.interceptor.tx';
+import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
+import { AuthModule } from './auth/auth.module';
+import { ErrorMessageModule } from './error/error-message/error-message.module';
+import { ErrorModule } from './error/error.module';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     LayoutModule,
-    NgxSpinnerModule,
-    AppRoutingModule,
+    AuthModule,
+    ErrorMessageModule,
     FileSaverModule,
     ToastModule,
+    AppRoutingModule
   ],
   providers: [
     PreviousRouteService,
     DatePipe,
-    {provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true},
+    { provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true }
   ],
   bootstrap: [AppComponent]
 })

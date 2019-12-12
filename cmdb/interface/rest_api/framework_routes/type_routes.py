@@ -154,7 +154,7 @@ def delete_type(public_id: int, request_user: User):
         objs_by_type = object_manager.get_objects_by_type(public_id)
         for objID in objs_by_type:
             obj_ids.append(objID.get_public_id())
-        object_manager.delete_many_objects({'type_id': public_id}, obj_ids)
+        object_manager.delete_many_objects({'type_id': public_id}, obj_ids, request_user)
 
         ack = object_manager.delete_type(public_id=public_id)
     except User:

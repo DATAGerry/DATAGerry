@@ -17,14 +17,21 @@
 */
 
 import { Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
+import {
+  CanActivate,
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot,
+  UrlTree,
+  Router,
+  CanActivateChild
+} from '@angular/router';
 import { Observable } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthGuard implements CanActivate {
+export class AuthGuard implements CanActivate, CanActivateChild {
 
   constructor(
     private router: Router,
@@ -41,6 +48,20 @@ export class AuthGuard implements CanActivate {
     if (currentUser && currentUserToken) {
       return true;
     }
+    console.log('NO USER -> REDIRECT TO LOGIN');
+    this.authenticationService.logout();
+    this.router.navigate(['/auth/login']);
+    return false;
+  }
+
+  public canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
+    const currentUser = this.authenticationService.currentUserValue;
+    const currentUserToken = this.authenticationService.currentUserTokenValue;
+    if (currentUser && currentUserToken) {
+      return true;
+    }
+    console.log('NO USER -> REDIRECT TO LOGIN');
+    this.authenticationService.logout();
     this.router.navigate(['/auth/login']);
     return false;
   }

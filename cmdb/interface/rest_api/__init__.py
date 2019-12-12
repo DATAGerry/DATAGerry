@@ -22,6 +22,7 @@ import logging
 from cmdb.framework.cmdb_log_manager import CmdbLogManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
+from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.user_management import UserManager
 from cmdb.utils import SecurityManager
 
@@ -54,16 +55,15 @@ def create_rest_api(event_queue):
     cache = Cache(config=cache_config)
 
     # Create manager
-    from cmdb.data_storage import DatabaseManagerMongo, MongoConnector
+    from cmdb.data_storage.database_manager import DatabaseManagerMongo
     app_database = DatabaseManagerMongo(
-        connector=MongoConnector(
-            **system_config_reader.get_all_values_from_section('Database')
-        )
+        **system_config_reader.get_all_values_from_section('Database')
     )
     object_manager = CmdbObjectManager(
         database_manager=app_database,
         event_queue=event_queue
     )
+
     log_manager = CmdbLogManager(
         database_manager=app_database
     )
@@ -82,10 +82,15 @@ def create_rest_api(event_queue):
         event_queue=event_queue
     )
 
+    exportd_log_manager = ExportdLogManager(
+        database_manager=app_database
+    )
+
     # Create APP
     from cmdb.interface.cmdb_app import BaseCmdbApp
 
-    app = BaseCmdbApp(__name__, database_manager=app_database, exportd_manager=exportd_job_manager,
+    app = BaseCmdbApp(__name__, database_manager=app_database,
+                      exportd_manager=exportd_job_manager, exportd_log_manager=exportd_log_manager,
                       object_manager=object_manager, log_manager=log_manager, user_manager=user_manager,
                       security_manager=security_manager)
 
@@ -137,6 +142,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.setting_routes import settings_blueprint
     from cmdb.interface.rest_api.import_routes import importer_blueprint
     from cmdb.interface.rest_api.exporter_routes.exportd_job_routes import exportd_job_blueprint
+    from cmdb.interface.rest_api.exporter_routes.exportd_log_routes import exportd_log_blueprint
     from cmdb.interface.rest_api.external_systems_routes import external_system
 
     app.register_blueprint(auth_blueprint)
@@ -156,14 +162,27 @@ def register_blueprints(app):
     app.register_blueprint(settings_blueprint)
     app.register_blueprint(importer_blueprint)
     app.register_blueprint(exportd_job_blueprint)
+    app.register_blueprint(exportd_log_blueprint)
     app.register_blueprint(external_system)
+
+    import cmdb
+    if cmdb.__MODE__ == 'DEBUG':
+        from cmdb.interface.rest_api.debug_routes import debug_blueprint
+        app.register_blueprint(debug_blueprint)
 
 
 def register_error_pages(app):
-    from cmdb.interface.rest_api.error_routes import page_not_found, method_not_allowed, not_acceptable, \
-        internal_server_error, unauthorized_user, bad_request, forbidden, page_gone, not_implemented
+    from cmdb.interface.error_handlers import not_implemented
+    from cmdb.interface.error_handlers import internal_server_error
+    from cmdb.interface.error_handlers import page_gone
+    from cmdb.interface.error_handlers import not_acceptable
+    from cmdb.interface.error_handlers import method_not_allowed
+    from cmdb.interface.error_handlers import page_not_found
+    from cmdb.interface.error_handlers import forbidden
+    from cmdb.interface.error_handlers import unauthorized
+    from cmdb.interface.error_handlers import bad_request
     app.register_error_handler(400, bad_request)
-    app.register_error_handler(401, unauthorized_user)
+    app.register_error_handler(401, unauthorized)
     app.register_error_handler(403, forbidden)
     app.register_error_handler(404, page_not_found)
     app.register_error_handler(405, method_not_allowed)

@@ -22,7 +22,7 @@ import {
   ComponentFactory,
   ComponentFactoryResolver,
   ComponentRef,
-  EventEmitter,
+  EventEmitter, forwardRef,
   Input, OnChanges,
   OnDestroy,
   OnInit,
@@ -48,7 +48,8 @@ export const mappingComponents: { [type: string]: any } = {
 @Component({
   selector: 'cmdb-type-mapping',
   templateUrl: './type-mapping.component.html',
-  styleUrls: ['./type-mapping.component.scss']
+  styleUrls: ['./type-mapping.component.scss'],
+  providers: [{ provide: TypeMappingBaseComponent, useExisting: forwardRef(() => TypeMappingComponent) }]
 })
 export class TypeMappingComponent extends TypeMappingBaseComponent implements OnInit, OnChanges, OnDestroy {
 
@@ -85,7 +86,7 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
   private currentFactory: ComponentFactory<any>;
 
   constructor(private typeService: TypeService, private ref: ChangeDetectorRef,
-              private resolver: ComponentFactoryResolver, private importerService: ImportService) {
+              private resolver: ComponentFactoryResolver) {
     super();
     this.typeChange = new EventEmitter<any>();
     this.configForm = new FormGroup({
@@ -101,10 +102,13 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
       this.typeList = typeList;
     });
     this.valueChangeSubscription = this.configForm.get('typeID').valueChanges.subscribe((typeID: number) => {
-      this.typeInstance = this.typeList.find(typeInstance => typeInstance.public_id === +typeID);
-      this.typeIDSubject.next(+typeID);
-      this.typeChange.emit({ typeID: this.currentTypeID, typeInstance: this.typeInstance });
+      this.typeService.getType(+typeID).subscribe((typeInstance: CmdbType) => {
+        this.typeInstance = Object.assign(new CmdbType(), typeInstance) as CmdbType;
+        this.typeIDSubject.next(+typeID);
+        this.typeChange.emit({ typeID: this.currentTypeID, typeInstance: this.typeInstance });
+      });
     });
+
     this.typeIDSubscription = this.typeID.subscribe((typeID: number) => {
       if (typeID !== null && typeID !== undefined) {
         this.initMapping();
@@ -113,13 +117,9 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
   }
 
   public ngOnChanges(changes: SimpleChanges): void {
-    if (changes.fileFormat !== undefined && changes.fileFormat.currentValue !== undefined
-      && changes.fileFormat.firstChange !== true) {
-      this.typeIDSubject.next(null);
-    } else {
-      if (this.mappingContainer !== undefined) {
-        this.initMapping();
-      }
+    if (changes.parsedData !== undefined && changes.parsedData.currentValue !== undefined
+      && changes.parsedData.firstChange !== true) {
+      this.initMapping();
     }
   }
 
@@ -143,7 +143,26 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
           type: 'field'
         });
       }
+      this.hasReferences = this.typeInstance.has_references();
+      if (this.hasReferences) {
+        const refFields = this.typeInstance.get_reference_fields();
+        let workingRefType;
+        for (const refField of refFields) {
+          workingRefType = this.typeList.find(id => id.public_id === refField.ref_types) as CmdbType;
+          for (const typeField of workingRefType.fields) {
+            this.mappingControls.push({
+              name: refField.name,
+              ref_name: typeField.name,
+              label: typeField.label,
+              type: 'ref',
+              type_id: workingRefType.public_id,
+              type_name: workingRefType.name
+            });
+          }
+        }
+      }
     }
+
     this.loadMappingComponent();
   }
 
@@ -170,6 +189,7 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
     this.componentRef.instance.parsedData = this.parsedData;
     this.componentRef.instance.mappingControls = this.mappingControls;
     this.componentRef.instance.currentMapping = this.currentMapping;
+    this.componentRef.instance.mappingChange = this.mappingChange;
   }
 
 

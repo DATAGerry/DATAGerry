@@ -1,14 +1,34 @@
 
 
-  <div class="card-title" style="padding-top: 1em">
-    <cmdb-content-header [faIcon]="faIcon" title="{{pageTitle}}"></cmdb-content-header>
-  </div>
+<div class="card-title" style="padding-top: 1em">
+  <cmdb-content-header [faIcon]="faIcon" title="{{pageTitle}}"></cmdb-content-header>
+</div>
 
-  <div class="card-body" style="padding: 0 0 1em 0;">
-    <button type="button" class="btn btn-danger btn-sm" (click)="delManyObjects()">Delete Selected</button>
+<div class="card-body" style="padding: 0 0 1em 0;">
+  <button type="button"
+          *permissionLink="['base.framework.object.delete']"
+          class="btn btn-danger btn-sm mr-1" (click)="delManyObjects()">
+    Delete Selected <span class="badge badge-secondary badge-pill">{{selectedObjects.length}}</span>
+  </button>
 
-    <span class="card-group float-right" *ngIf="hasSummaries">
-      <div class="btn-group">
+      <button type="button"
+              *permissionLink="['base.framework.object.add']"
+              class="btn btn-success btn-sm mr-1"
+              [routerLink]="typeID?['/framework/object/add/', typeID]:['/framework/object/add/']">
+        <i class="fas fa-plus"></i> Add
+      </button>
+
+  <!--    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown"-->
+  <!--            aria-haspopup="true" aria-expanded="false" *ngIf="hasSummaries" style="display: none">-->
+  <!--      <i class="fas fa-cog"></i>-->
+  <!--    </button>-->
+  <!--    <ul class="dropdown-menu">-->
+  <!--      <li *ngFor="let sum of summaries" class="dropdown-item" (click)="addColumn()">{{sum.label}}</li>-->
+  <!--      <li class="dropdown-item text-center"><button class="btn btn-primary" type="submit">RESTORE</button></li>-->
+  <!--    </ul>-->
+
+  <span class="card-group float-right" *ngIf="hasSummaries">
+      <div class="btn-group" *permissionLink="'base.export.object.*'">
         <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <fa-icon icon="file-export"></fa-icon> Export
@@ -25,62 +45,65 @@
         </ul>
       </div>
     </span>
-  </div>
+</div>
 
-  <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
-         id="object-list-datatable"
-         class="table framework-table table-striped table-bordered">
-    <ng-container *ngFor="let results of objectLists">
-      <thead>
-      <tr>
-        <th class="no-displ"><input type="checkbox" class="selectAll" name="selectAll" value="all" (click)="selectAll()"></th>
-        <th class="toggle-active">Active</th>
-        <th class="toggle-id">ID</th>
-        <th class="toggle-type">Type</th>
-        <!-- BEGIN: summarie fields : show only if objects are categorized -->
-        <ng-container *ngIf="hasSummaries">
-          <ng-container *ngFor="let obj of results.columnFields;">
-              <th class="toggle-{{obj.name}}">{{obj.label}}</th>
-          </ng-container>
-        </ng-container>
-        <!-- END: summarie fields -->
-        <th class="toggle-autor">Author</th>
-        <th class="toggle-last-modified">Last modified</th>
-        <th class="toggle-action">Action</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let result of results.items">
-        <td></td>
-        <td>
-          <cmdb-active-badge [activeStatus]="result?.object_information.active"></cmdb-active-badge>
-        </td>
-        <td>{{result?.object_information.object_id}}</td>
-        <td>{{result?.type_information.type_label}}</td>
-
-        <!-- BEGIN: summarie contens : show only if objects are categorized  -->
-        <ng-container *ngIf="hasSummaries" >
-            <td *ngFor="let field of result.fields">
-              <cmdb-render-element [mode]="mode" [data]="field"></cmdb-render-element>
-            </td>
-        </ng-container>
-        <!-- END: summarie contens -->
-
-        <td>{{result?.type_information.author_name}}</td>
-        <td>{{result?.object_information.creation_time?.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
-        <td>
-          <a class="text-dark"
-             [routerLink]="[hasSummaries ? '/framework/object/type/view' : '/framework/object/view',result?.object_information.object_id]">
-            <fa-icon [icon]="['far', 'eye']"></fa-icon>
-          </a>
-          <a class="ml-1 text-dark" [routerLink]="['/framework/object/edit/', result?.object_information.object_id]">
-            <fa-icon [icon]="['far', 'edit']"></fa-icon>
-          </a>
-          <a class="ml-1 text-dark" (click)="delObject(result)">
-            <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
-          </a>
-        </td>
-      </tr>
-      </tbody>
+<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
+       id="object-list-datatable"
+       class="table framework-table table-striped table-bordered">
+  <thead>
+  <tr>
+    <th class="toggle-check nosort" style="text-align: center">
+      <input type="checkbox" [(ngModel)]="masterSelected"  class="select-all-checkbox" (change)="checkUncheckAll()"/>
+    </th>
+    <th class="toggle-active">Active</th>
+    <th class="toggle-id">ID</th>
+    <th class="toggle-type">Type</th>
+    <!-- BEGIN: summarie fields : show only if objects are categorized -->
+    <ng-container *ngIf="hasSummaries">
+      <ng-container *ngFor="let obj of typeInstance.render_meta.summary.fields">
+        <th class="toggle-{{obj.name}}">{{getMergeNameToLabel(obj)?.label}}</th>
+      </ng-container>
     </ng-container>
-  </table>
+    <!-- END: summarie fields -->
+    <th class="toggle-autor">Author</th>
+    <th class="toggle-last-modified">Last modified</th>
+    <th class="toggle-action">Action</th>
+  </tr>
+  </thead>
+  <tbody *ngIf="objectLists?.length != 0">
+  <tr class="odd" role="row" *ngFor="let obj of objectLists">
+    <td><input type="checkbox" class="select-checkbox" name="{{obj?.object_information?.object_id}}" (click)="updateDisplay(obj?.object_information?.object_id)"></td>
+    <td>
+      <cmdb-active-badge [activeStatus]="obj?.object_information.active"></cmdb-active-badge>
+    </td>
+    <td>{{obj?.object_information.object_id}}</td>
+    <td>{{obj?.type_information.type_label}}</td>
+    <!-- BEGIN: summarie contens : show only if objects are categorized  -->
+    <ng-container *ngIf="hasSummaries" >
+      <td *ngFor="let field of obj.summaries" class="toggle-{{field.name}}">
+        <cmdb-render-element [mode]="mode" [data]="field"></cmdb-render-element>
+      </td>
+    </ng-container>
+    <!-- END: summarie contens -->
+    <td>{{obj?.type_information.author_name}}</td>
+    <td>{{obj?.object_information.creation_time?.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
+    <td>
+      <a class="text-dark"
+         [routerLink]="[hasSummaries ? '/framework/object/type/view' : '/framework/object/view',obj?.object_information.object_id]">
+        <fa-icon [icon]="['far', 'eye']"></fa-icon>
+      </a>
+      <a class="ml-1 text-dark" [routerLink]="['/framework/object/edit/', obj?.object_information.object_id]">
+        <fa-icon [icon]="['far', 'edit']"></fa-icon>
+      </a>
+      <a class="ml-1 text-dark" (click)="delObject(obj)">
+        <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
+      </a>
+    </td>
+  </tr>
+  </tbody>
+  <tbody *ngIf="objectLists?.length == 0 || objectLists == null">
+  <tr>
+    <td colspan="100%" class="no-data-available">No data!</td>
+  </tr>
+  <tbody>
+</table>

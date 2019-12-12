@@ -34,20 +34,33 @@ class ImporterObjectResponse(BaseImporterResponse):
 
 
 class ImportMessage:
+    """Simple class wrapper for json encoding"""
 
     def __init__(self, obj: dict = None):
         self.obj = obj
 
 
 class ImportSuccessMessage(ImportMessage):
+    """Message wrapper for successfully imported objects"""
 
     def __init__(self, public_id: int, obj: dict = None):
+        """Init message
+        Args:
+            public_id: ID of the new object
+            obj (optional): cmdb object instance
+        """
         self.public_id = public_id
         super(ImportSuccessMessage, self).__init__(obj=obj)
 
 
 class ImportFailedMessage(ImportMessage):
+    """Message wrapper for failed imported objects"""
 
     def __init__(self, error_message: str, obj: dict = None):
+        """Init message
+        Args:
+            error_message: reason why it failed - exception error or something
+            obj (optional): failed dict
+        """
         self.error_message = error_message
         super(ImportFailedMessage, self).__init__(obj=obj)

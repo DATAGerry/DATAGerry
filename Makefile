@@ -16,6 +16,7 @@
 
 # set environment variables
 BUILDVAR_VERSION = undefined
+BUILDVAR_VERSION_EXT = undefined
 BIN_PYINSTALLER = pyinstaller
 BIN_SPHINX = sphinx-build
 BIN_PYTEST = pytest
@@ -52,8 +53,8 @@ requirements:
 # substitue BUILD variables
 .PHONY: buildvars
 buildvars:
-	sed -i 's/@@DG_BUILDVAR_VERSION@@/${BUILDVAR_VERSION}/g' cmdb/__init__.py
-	sed -i 's/@@DG_BUILDVAR_VERSION@@/${BUILDVAR_VERSION}/g' docs/source/conf.py
+	sed -i 's/@@DG_BUILDVAR_VERSION@@/${BUILDVAR_VERSION_EXT}/g' cmdb/__init__.py
+	sed -i 's/@@DG_BUILDVAR_VERSION@@/${BUILDVAR_VERSION_EXT}/g' docs/source/conf.py
 
 
 # create documentation
@@ -127,7 +128,6 @@ docker: rpm
 	cp contrib/docker/Dockerfile ${DIR_DOCKER_BUILD}/src
 	cp ${DIR_RPM_BUILD}/RPMS/x86_64/DATAGERRY-*.rpm ${DIR_DOCKER_BUILD}/src/files
 	docker build -f ${DIR_DOCKER_BUILD}/src/Dockerfile -t nethinks/datagerry:${BUILDVAR_VERSION} ${DIR_DOCKER_BUILD}/src
-	docker save --output ${DIR_DOCKER_BUILD}/datagerry_${BUILDVAR_VERSION}.tar nethinks/datagerry:${BUILDVAR_VERSION}
 
 
 # execute tests

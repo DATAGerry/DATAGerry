@@ -6,6 +6,7 @@ import { ActionDeleteComponent } from './components/actions/action-delete/action
 import { ActionsComponent } from './components/actions/actions.component';
 import { RouterModule } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import {AuthModule} from "../../../auth/auth.module";
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
   imports: [
     CommonModule,
     RouterModule,
-    FontAwesomeModule
+    FontAwesomeModule,
+    AuthModule
   ]
 })
 export class TableModule {

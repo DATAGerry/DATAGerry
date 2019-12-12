@@ -8,10 +8,9 @@
         <router-outlet></router-outlet>
       </div>
     </div>
+    <router-outlet name="loading-screen"></router-outlet>
     <router-outlet name="footer"></router-outlet>
+    <error-message-container></error-message-container>
     <cmdb-toast-container></cmdb-toast-container>
-    <ngx-spinner [fullScreen]="false">
-      <p style="color: white"> Loading... </p>
-    </ngx-spinner>
   </main>
 </div>

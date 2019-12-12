@@ -18,17 +18,17 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NavigationComponent } from './components/navigation/navigation.component';
-import { RouterModule } from '@angular/router';
-import { BreadcrumbComponent } from './components/breadcrumb/breadcrumb.component';
-import { BreadcrumbService } from './components/breadcrumb/breadcrumb.service';
-import { SidebarComponent } from './components/sidebar/sidebar.component';
-import { SidebarCategoryComponent } from './components/sidebar/sidebar-category.component';
+import { NavigationComponent } from './structure/navigation/navigation.component';
+import { RouterModule, Routes } from '@angular/router';
+import { BreadcrumbComponent } from './structure/breadcrumb/breadcrumb.component';
+import { BreadcrumbService } from './structure/breadcrumb/breadcrumb.service';
+import { SidebarComponent } from './structure/sidebar/sidebar.component';
+import { SidebarCategoryComponent } from './structure/sidebar/sidebar-category.component';
 import { ContentHeaderComponent } from './components/content-header/content-header.component';
 import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.component';
 import { LowercaseDirective } from './directives/lowercase.directive';
 import { SearchBarComponent } from './components/search-bar/search-bar.component';
-import { FooterComponent } from './components/footer/footer.component';
+import { FooterComponent } from './structure/footer/footer.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TableComponent } from './components/table/table.component';
@@ -49,6 +49,37 @@ import { UserImageComponent } from './components/user-image/user-image.component
 import { UserDisplayComponent } from './components/user-display/user-display.component';
 import { ChartsComponent } from './components/charts/charts.component';
 import { ToastModule } from './toast/toast.module';
+import { AuthModule } from '../auth/auth.module';
+import { NgxSpinnerComponent, NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
+import { LoadingScreenComponent } from './structure/loading-screen/loading-screen.component';
+
+export const LAYOUT_COMPONENT_ROUTES: Routes = [
+  {
+    path: '',
+    component: NavigationComponent,
+    outlet: 'navigation'
+  },
+  {
+    path: '',
+    component: SidebarComponent,
+    outlet: 'sidebar'
+  },
+  {
+    path: '',
+    component: BreadcrumbComponent,
+    outlet: 'breadcrumb'
+  },
+  {
+    path: '',
+    component: LoadingScreenComponent,
+    outlet: 'loading-screen'
+  },
+  {
+    path: '',
+    component: FooterComponent,
+    outlet: 'footer'
+  }
+];
 
 @NgModule({
   declarations: [
@@ -67,9 +98,11 @@ import { ToastModule } from './toast/toast.module';
     IconPickerComponent,
     UserImageComponent,
     UserDisplayComponent,
-    ChartsComponent
+    ChartsComponent,
+    LoadingScreenComponent
   ],
   exports: [
+    NgxSpinnerComponent,
     LowercaseDirective,
     NavigationComponent,
     BreadcrumbComponent,
@@ -89,19 +122,16 @@ import { ToastModule } from './toast/toast.module';
     RouterModule,
     NgSelectModule,
     ReactiveFormsModule,
+    NgxSpinnerModule,
     NgbModule,
     FormsModule,
     DataTablesModule,
     TableModule,
-    SweetAlert2Module.forRoot({
-      buttonsStyling: false,
-      customClass: 'modal-content',
-      confirmButtonClass: 'btn btn-primary',
-      cancelButtonClass: 'btn'
-    }),
     FontAwesomeModule,
     IconPickerModule,
-    ToastModule
+    SweetAlert2Module.forRoot(),
+    ToastModule,
+    AuthModule
   ],
   providers: [
     BreadcrumbService,

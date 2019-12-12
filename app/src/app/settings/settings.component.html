@@ -4,17 +4,17 @@
     <a routerLink="system/">
       <div class="dash-card primary">
         <i class="fas fa-cogs"></i>
-        <span class="count-numbers">System</span>
-        <span class="count-name">System Information</span>
+        <span class="count-numbers">System Information</span>
+        <span class="count-name">System</span>
       </div>
     </a>
   </div>
-  <div class="card">
+  <div class="card" *permissionLink="'base.system.view'">
     <a [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']">
       <div class="dash-card primary">
         <i class="fas fa-cogs"></i>
-        <span class="count-numbers">System</span>
-        <span class="count-name">Server Information</span>
+        <span class="count-numbers">Server Information</span>
+        <span class="count-name">System</span>
       </div>
     </a>
   </div>
@@ -22,8 +22,8 @@
     <a routerLink="system/properties">
       <div class="dash-card primary">
         <i class="fas fa-cogs"></i>
-        <span class="count-numbers">System</span>
-        <span class="count-name">Config Properties</span>
+        <span class="count-numbers">Config Properties</span>
+        <span class="count-name">System</span>
       </div>
     </a>
   </div>

@@ -16,38 +16,55 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  ComponentFactory,
+  ComponentFactoryResolver, ComponentRef,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PreviousRouteService } from '../services/previous-route.service';
+import { Subscription } from 'rxjs';
+import { errorComponents } from './error.list';
 
 @Component({
-  selector: 'cmdb-error',
   templateUrl: './error.component.html',
   styleUrls: ['./error.component.scss']
 })
-export class ErrorComponent implements OnInit {
-  public readonly statusCode: number = 501;
-  public statusText: string;
-  public response: string;
-  public message: string;
-  public readonly now: number = Date.now();
+export class ErrorComponent implements OnInit, OnDestroy {
+
+  @ViewChild('errorContainer', { read: ViewContainerRef, static: true }) public errorContainer;
+  private componentRef: ComponentRef<any>;
+
   public previousUrl: string;
 
+  private statusCodeSubscription: Subscription;
+  private readonly defaultStatusCode: number = 404;
+  public statusCode: number = this.defaultStatusCode;
 
-  constructor(private route: ActivatedRoute, private prevRouteService: PreviousRouteService) {
-    if (this.route.snapshot.paramMap.get('statusCode') !== null) {
-      this.statusCode = +this.route.snapshot.paramMap.get('statusCode');
-    }
+
+  constructor(private route: ActivatedRoute, private resolver: ComponentFactoryResolver,
+              private prevRouteService: PreviousRouteService) {
+    this.statusCodeSubscription = this.route.params.subscribe(params => this.statusCode = params.statusCode);
   }
 
   public ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      this.statusText = params.statusText;
-      this.response = params.response;
-      this.message = params.message;
-    });
-
+    this.createErrorComponent(this.statusCode);
     this.previousUrl = this.prevRouteService.getPreviousUrl();
+  }
+
+  private createErrorComponent(statusCode: number) {
+    const factory: ComponentFactory<any> = this.resolver.resolveComponentFactory(errorComponents[statusCode]);
+    this.componentRef = this.errorContainer.createComponent(factory);
+  }
+
+  public ngOnDestroy(): void {
+    this.errorContainer.clear();
+    this.componentRef.destroy();
+    this.statusCodeSubscription.unsubscribe();
   }
 
 }

@@ -29,7 +29,7 @@ import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 })
 export class TypeMappingBaseComponent {
 
-  @Input() public parsedData: any = {};
+  @Input() public parsedData: any = undefined;
   @Input() public parserConfig: any = {};
 
   public readonly allowedEffect: any = 'move';
@@ -37,9 +37,9 @@ export class TypeMappingBaseComponent {
   @Input() public mappingControls: any = [];
   @Input() public currentMapping: any = [];
 
-  public constructor() {
-  }
+  @Output() public mappingChange = new EventEmitter();
 
+  public hasReferences: boolean = false;
 
   public onDragged(item: any, list: any[], effect: DropEffect) {
     if (effect === 'move') {
@@ -48,16 +48,33 @@ export class TypeMappingBaseComponent {
     }
   }
 
+  public moveControl(item: any, from: any[], targetIdx: number, to: any[]) {
+    from.splice(from.indexOf(item), 1);
+    item.value = targetIdx;
+    to.splice(targetIdx, 1, item);
+  }
+
+  public onRemove(index: number, list: any[], original?: any[]) {
+    if (original && (list[index] !== undefined)) {
+      const originalData = list[index];
+      original.splice(original.length, 0, originalData);
+    }
+    list.splice(index, 1, '');
+    this.mappingChange.emit(this.currentMapping);
+  }
+
   public onDrop(event: DndDropEvent, list: any[], index?: number, original?: any[]) {
     if (typeof index === undefined) {
       index = list.length;
     } else {
       if (original && (list[index] !== undefined)) {
         const originalData = list[index];
-        original.splice(original.length, 0, originalData)
+        original.splice(original.length, 0, originalData);
       }
     }
+    event.data.value = index;
     list.splice(index, 1, event.data);
+    this.mappingChange.emit(this.currentMapping);
   }
 
 }

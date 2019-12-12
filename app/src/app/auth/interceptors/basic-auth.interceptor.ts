@@ -24,8 +24,7 @@ import { AuthService } from '../services/auth.service';
 @Injectable()
 export class BasicAuthInterceptor implements HttpInterceptor {
 
-  constructor(private authenticationService: AuthService) {
-  }
+  constructor(private authenticationService: AuthService) {}
 
   public intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const currentUser = this.authenticationService.currentUserValue;
@@ -33,7 +32,7 @@ export class BasicAuthInterceptor implements HttpInterceptor {
     if (currentUser && currentUserToken) {
       request = request.clone({
         setHeaders: {
-          Authorization: `${currentUserToken}`
+          Authorization: `${ currentUserToken }`
         }
       });
     }

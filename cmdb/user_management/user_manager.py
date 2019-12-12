@@ -16,7 +16,7 @@
 
 import logging
 
-from cmdb.data_storage import NoDocumentFound, DatabaseManagerMongo, MongoConnector
+from cmdb.data_storage.database_manager import NoDocumentFound, DatabaseManagerMongo
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.user_management.user import User
@@ -68,7 +68,6 @@ class UserManager(CmdbManagerBase):
         try:
             result = self.dbm.find_one(collection=User.COLLECTION, public_id=public_id)
         except (CMDBError, Exception) as err:
-            LOGGER.error(err)
             raise UserManagerGetError(err)
         return User(**result)
 
@@ -90,7 +89,7 @@ class UserManager(CmdbManagerBase):
 
     def get_user_by(self, sort='public_id', **requirements) -> list:
         ack = []
-        users = self._get_all(collection=User.COLLECTION, sort=sort, **requirements)
+        users = self._get_many(collection=User.COLLECTION, sort=sort, **requirements)
         for user in users:
             ack.append(User(**user))
         return ack
@@ -272,9 +271,7 @@ def get_user_manager():
     # TODO: refactor for single instance
     system_config_reader = SystemConfigReader()
     database_manager = DatabaseManagerMongo(
-        connector=MongoConnector(
             **system_config_reader.get_all_values_from_section('Database')
-        )
     )
     return UserManager(
         database_manager=database_manager,
