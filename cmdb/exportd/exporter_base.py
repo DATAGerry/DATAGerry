@@ -39,7 +39,7 @@ class ExportJob(ExportdJobManagement):
         self.destinations = self.__get__destinations()
         scr = SystemConfigReader()
         database_manager = DatabaseManagerMongo(
-                **scr.get_all_values_from_section('Database')
+            **scr.get_all_values_from_section('Database')
         )
         self.__object_manager = CmdbObjectManager(
             database_manager=database_manager
@@ -118,6 +118,8 @@ class ExportVariable:
         database_manager = DatabaseManagerMongo(
             **scr.get_all_values_from_section('Database')
         )
+        from cmdb.user_management.user_manager import user_manager
+        self.__user_manager = user_manager
         self.__object_manager = CmdbObjectManager(
             database_manager=database_manager
         )
@@ -141,7 +143,7 @@ class ExportVariable:
             self.set_references(field, 3)
 
         # render template
-        #print(self.__objectdata)
+        # print(self.__objectdata)
         template = jinja2.Template(value_template)
         try:
             output = template.render(self.__objectdata)
@@ -153,10 +155,11 @@ class ExportVariable:
     def set_references(self, field, iteration):
         try:
             if 'ref' == field["type"] and field["value"] and iteration != 0:
-                iteration = iteration-1
+                iteration = iteration - 1
                 current_object = self.__object_manager.get_object(field["value"])
                 type_instance = self.__object_manager.get_type(current_object.get_type_id())
-                cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance, render_user=None)
+                cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance,
+                                                user_manager=self.__user_manager, render_user=None)
                 sub_fields = {field["name"]: {'id': field["value"], 'fields': {}}}
                 for subfield in cmdb_render_object.result().fields:
                     field_name = subfield["name"]
@@ -201,7 +204,7 @@ class ExportSource:
                 else:
                     operator = operator
 
-                condition.append({'fields':  {"$elemMatch": {"name": con["name"], "value": operator}}})
+                condition.append({'fields': {"$elemMatch": {"name": con["name"], "value": operator}}})
                 condition.append({'type_id': source["type_id"]})
                 query = {"$and": condition}
                 current_objects = self.__obm.get_objects_by(sort="public_id", **query)
@@ -264,4 +267,3 @@ class ExternalSystem:
 class ExportJobConfigException(CMDBError):
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args, **kwargs)
-

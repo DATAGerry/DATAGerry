@@ -17,14 +17,20 @@
 */
 
 
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ObjectService } from '../../services/object.service';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
-import {map, publish} from 'rxjs/operators';
 import { CmdbMode } from '../../modes.enum';
 import { FileSaverService } from 'ngx-filesaver';
 import { DatePipe } from '@angular/common';
@@ -40,13 +46,15 @@ import { FileService } from '../../../export/export.service';
 })
 export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
 
-  @ViewChild(DataTableDirective, {static: false})
+
+
+  @ViewChild(DataTableDirective, { static: false })
   public dtElement: DataTableDirective;
   public dtOptions: any = {}; // : DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
-  @ViewChild('dtTableElement', {static: false}) dtTableElement: ElementRef;
+  @ViewChild('dtTableElement', { static: false }) dtTableElement: ElementRef;
 
-  private url: string ;
+  private url: string;
   private records: number;
 
   readonly dtButtons: any[] = [];
@@ -127,7 +135,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
           && dataTablesParameters[SEARCH].value !== ''
           && dataTablesParameters[SEARCH].value !== undefined) {
           const was = 'object/filter/' + dataTablesParameters[SEARCH].value;
-          that.apiCallService.callGetRoute( was, {params: param}).subscribe(resp => {
+          that.apiCallService.callGetRoute(was, { params: param }).subscribe(resp => {
             that.objectLists = resp === null ? [] : resp;
             if (resp != null) {
               that.summaries = resp[0].summaries;
@@ -143,7 +151,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
             });
           });
         } else {
-          that.apiCallService.callGetRoute(this.url, {params: param}).subscribe(resp => {
+          that.apiCallService.callGetRoute(this.url, { params: param }).subscribe(resp => {
             that.objectLists = resp === null ? [] : resp;
             if (resp != null) {
               that.summaries = resp[0].summaries;
@@ -156,11 +164,11 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
                   let value = '';
                   this.dtOptions.columns.push({
                     title: col.label,
-                    render: function (data, type, full, meta) {
+                    render: (data, type, full, meta) => {
                       Object.keys(full.fields).forEach(key => {
                         if (col.name === full.fields[key].name) {
-                          value = '<cmdb-render-element [mode]="' + that.mode + '" [data]="' + full.fields[key] + ' "></cmdb-render-element>';
-                          return;
+                          value = '<ng-template cmdb-render-element [mo></ng-template>';
+                          return value;
                         }
                       });
                       return value;
@@ -188,16 +196,16 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
             return '';
           }
         },
-        {title: 'Active', data: 'object_information.active'},
-        {title: 'ID', data: 'object_information.object_id'},
-        {title: 'Type', data: 'type_information.type_label'},
-        {title: 'Author', data: 'object_information.author_name'},
+        { title: 'Active', data: 'object_information.active' },
+        { title: 'ID', data: 'object_information.object_id' },
+        { title: 'Type', data: 'type_information.type_label' },
+        { title: 'Author', data: 'object_information.author_name' },
         {
           title: 'Action',
           orderable: false,
           render: function (data: any, type: any, full: any) {
             return '<a class="text-dark" href="/framework/object/view/' + full.object_information.object_id + '"> ' +
-            '<i class="far fa-eye"></i> </a>'
+              '<i class="far fa-eye"></i> </a>'
               + '<a class="text-dark" href="/framework/object/edit/' + full.object_information.object_id + '"> ' +
               '<i class="far fa-edit"></i> </a>'
               + '<a class="text-dark" (click)="delObject(' + full.object_information.object_id + ')"> ' +
@@ -206,11 +214,11 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
         }
 
       ],
-      columnDefs: [ {
+      columnDefs: [{
         orderable: false,
         className: 'select-checkbox',
-        targets:   0
-      } ],
+        targets: 0
+      }],
       rowCallback: (row: Node, data: RenderResult) => {
         const self = this;
         $('td:first-child', row).unbind('click');
@@ -220,7 +228,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
         return row;
       },
       select: {
-        style:    'multi',
+        style: 'multi',
         selector: 'td:first-child'
       },
       language: {
@@ -276,7 +284,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
         }
       });
     } catch (error) {
-      console.log(`DT Rerender Exception: ${error}`);
+      console.log(`DT Rerender Exception: ${ error }`);
     }
     return Promise.resolve(null);
   }
@@ -313,7 +321,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
           className: 'btn btn-secondary btn-sm mr-1 dropdown-toggle',
           text: '<i class="fas fa-cog"></i>',
           collectionLayout: 'dropdown-menu overflow-auto',
-          buttons: function() {
+          buttons: function () {
             const columnButton = [];
             // tslint:disable-next-line:prefer-for-of
             if (this.columnFields == null) {
@@ -336,7 +344,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
               extend: 'colvisRestore',
               text: 'Restore',
               className: 'btn btn-secondary btn-sm btn-block',
-              action: function() {
+              action: function () {
                 this.dtTrigger.next();
               }.bind(this)
             });
@@ -353,11 +361,11 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     this.dtOptions = {
       ordering: true,
       order: [[2, 'asc']],
-      columnDefs: [ {
+      columnDefs: [{
         orderable: false,
         className: 'select-checkbox',
-        targets:   0
-      } ],
+        targets: 0
+      }],
       rowCallback: (row: Node, data: any[]) => {
         const self = this;
         $('td:first-child', row).unbind('click');
@@ -367,7 +375,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
         return row;
       },
       select: {
-        style:    'multi',
+        style: 'multi',
         selector: 'td:first-child'
       },
       language: {
@@ -400,7 +408,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
       this.dtOptions.columnDefs = [
         { visible: true, targets: visTargets },
         { visible: false, targets: '_all' },
-        { orderable: false, className: 'select-checkbox', targets:   0 },
+        { orderable: false, className: 'select-checkbox', targets: 0 },
       ];
       this.dtOptions.order = [[2, 'asc']];
       this.dtOptions.ordering = true;
@@ -423,7 +431,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     const dataTable: any = table.DataTable();
     const rows: any = dataTable.rows();
     this.selectedObjects = [];
-    if ($('.selectAll').is( ':checked' )) {
+    if ($('.selectAll').is(':checked')) {
       rows.select();
       let lenx: number = rows.data().length - 1;
       while (lenx >= 0) {

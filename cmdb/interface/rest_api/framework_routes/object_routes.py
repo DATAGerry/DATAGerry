@@ -34,6 +34,7 @@ from cmdb.user_management import User
 with current_app.app_context():
     object_manager = current_app.object_manager
     log_manager = current_app.log_manager
+    user_manager = current_app.user_manager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -108,7 +109,7 @@ def get_objects_by_type(public_id, request_user: User):
     if request.args.get('start') is not None:
         start = int(request.args.get('start'))
         length = int(request.args.get('length'))
-        object_list = object_list[start:start+length]
+        object_list = object_list[start:start + length]
 
     if len(object_list) < 1:
         return make_response(object_list, 204)
@@ -240,7 +241,8 @@ def get_object(public_id, request_user: User):
         return abort(404)
 
     try:
-        render = CmdbRender(object_instance=object_instance, type_instance=type_instance, render_user=request_user)
+        render = CmdbRender(object_instance=object_instance, type_instance=type_instance, user_manager=user_manager,
+                            render_user=request_user)
         render_result = render.result()
     except RenderError as err:
         LOGGER.error(err)
@@ -382,6 +384,7 @@ def insert_object(request_user: User):
         current_object = object_manager.get_object(new_object_id)
         current_object_render_result = CmdbRender(object_instance=current_object,
                                                   type_instance=current_type_instance,
+                                                  user_manager=user_manager,
                                                   render_user=request_user).result()
     except ObjectManagerGetError as err:
         LOGGER.error(err)
@@ -420,6 +423,7 @@ def update_object(public_id: int, request_user: User):
         current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
         current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                   type_instance=current_type_instance,
+                                                  user_manager=user_manager,
                                                   render_user=request_user).result()
     except ObjectManagerGetError as err:
         LOGGER.error(err)
@@ -503,6 +507,7 @@ def delete_object(public_id: int, request_user: User):
         current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
         current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                   type_instance=current_type_instance,
+                                                  user_manager=user_manager,
                                                   render_user=request_user).result()
     except ObjectManagerGetError as err:
         LOGGER.error(err)
@@ -561,6 +566,7 @@ def delete_many_objects(public_ids, request_user: User):
                 current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
                 current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                           type_instance=current_type_instance,
+                                                          user_manager=user_manager,
                                                           render_user=request_user).result()
             except ObjectManagerGetError as err:
                 LOGGER.error(err)
@@ -644,6 +650,7 @@ def update_object_state(public_id: int, request_user: User):
         current_type_instance = object_manager.get_type(founded_object.get_type_id())
         current_object_render_result = CmdbRender(object_instance=founded_object,
                                                   type_instance=current_type_instance,
+                                                  user_manager=user_manager,
                                                   render_user=request_user).result()
     except ObjectManagerGetError as err:
         LOGGER.error(err)

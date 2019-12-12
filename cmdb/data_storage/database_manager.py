@@ -264,6 +264,10 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
     def create_indexes(self, collection: str, indexes: list):
         self.connector.get_collection(collection).create_indexes(indexes)
 
+    def get_index_info(self, collection: str):
+        """get the max index value"""
+        return self.connector.get_collection(collection).index_information()
+
     def get_database_name(self):
         return self.connector.get_database_name()
 

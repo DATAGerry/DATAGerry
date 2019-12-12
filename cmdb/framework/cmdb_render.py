@@ -17,8 +17,11 @@
 """
 Object/Type render
 """
+from typing import List
+
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.utils.wraps import timing
 
 try:
     from cmdb.utils.error import CMDBError
@@ -66,16 +69,13 @@ class CmdbRender:
 
     def __init__(self, object_instance: CmdbObject,
                  type_instance: CmdbType,
-                 render_user: (int, User),
+                 user_manager: UserManager,
+                 render_user: User,
                  match_values: [] = None):
 
-        from cmdb.user_management.user_manager import user_manager
         self.object_instance: CmdbObject = object_instance
         self.type_instance: CmdbType = type_instance
         self.__usm: UserManager = user_manager
-        # get render user if only the user id was passed
-        if isinstance(render_user, int):
-            self.render_user: User = self.__usm.get_user(render_user)
         self.render_user: User = render_user
         self.match_values: [] = match_values if match_values is not None else []
 
@@ -282,26 +282,37 @@ class CmdbRender:
 
 class RenderList:
 
-    def __init__(self, object_list: list, request_user: User):
-        self.object_list = object_list
+    def __init__(self, object_list: List[CmdbObject], request_user: User):
+        self.object_list: List[CmdbObject] = object_list
         self.request_user = request_user
 
+    @timing('RenderList')
     def render_result_list(self, search_fields=None):
         from cmdb.utils.system_reader import SystemConfigReader
+        from cmdb.user_management.user_manager import user_manager
 
         object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
             **SystemConfigReader().get_all_values_from_section('Database')
         ))
 
+        type_list: List[CmdbType] = object_manager.get_all_types()
         preparation_objects = []
         for passed_object in self.object_list:
-            tmp_render = CmdbRender(type_instance=object_manager.get_type(passed_object.type_id),
-                                    object_instance=passed_object,
-                                    match_values=search_fields,
-                                    render_user=self.request_user)
+            tmp_render = CmdbRender(
+                type_instance=self.contains(type_list, lambda x: x.public_id == passed_object.type_id),
+                object_instance=passed_object,
+                user_manager=user_manager,
+                match_values=search_fields,
+                render_user=self.request_user)
             current_render_result = tmp_render.result()
             preparation_objects.append(current_render_result)
         return preparation_objects
+
+    @staticmethod
+    def contains(l, f):
+        for x in l:
+            if f(x):
+                return x
 
 
 class RenderError(CMDBError):

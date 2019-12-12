@@ -53,6 +53,7 @@ import { ObjectLogUserComponent } from './object-view/object-footer/object-log-l
 import { ObjectLinkAddModalComponent } from './modals/object-link-add-modal/object-link-add-modal.component';
 import { ObjectLinkDeleteModalComponent } from './modals/object-link-delete-modal/object-link-delete-modal.component';
 import { AuthModule } from '../../auth/auth.module';
+import { ObjectListByTypeComponent } from './object-list-by-type/object-list-by-type.component';
 
 @NgModule({
   entryComponents: [
@@ -81,7 +82,8 @@ import { AuthModule } from '../../auth/auth.module';
     ObjectLogChangeViewComponent,
     ObjectLogUserComponent,
     ObjectLinkAddModalComponent,
-    ObjectLinkDeleteModalComponent],
+    ObjectLinkDeleteModalComponent,
+    ObjectListByTypeComponent],
   imports: [
     CommonModule,
     ObjectRoutingModule,

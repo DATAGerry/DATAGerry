@@ -89,9 +89,9 @@ class CmdbCollectionTemplate(CmdbDAO):
             type_tuple_list: Tuple of types with numbers of objects
             label: (optional) Label of the name
         """
-        self.name = name
-        self.label = label or self.name.title()
-        self.type_tuple_list = type_tuple_list or List[self.TEMPLATE_TUPLE]
+        self.name: str = name
+        self.label: str = label or self.name.title()
+        self.type_tuple_list: List[CmdbCollectionTemplate.TEMPLATE_TUPLE] = type_tuple_list or []
         super(CmdbCollectionTemplate, self).__init__(**kwargs)
 
     def get_name(self) -> str:
@@ -119,8 +119,8 @@ class CmdbCollectionTemplate(CmdbDAO):
         """
         return self.type_tuple_list
 
-    @staticmethod
-    def generate_type_tuple(type_id: int, count: int) -> TEMPLATE_TUPLE:
+    @classmethod
+    def generate_type_tuple(cls, type_id: int, count: int) -> TEMPLATE_TUPLE:
         """
         generate a type tuple
         Args:

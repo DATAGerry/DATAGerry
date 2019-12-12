@@ -16,11 +16,23 @@
 
 import logging
 
+from flask import current_app
 from werkzeug.exceptions import abort
-from cmdb.interface.route_utils import RootBlueprint
+
+from cmdb.interface.route_utils import RootBlueprint, make_response
 
 debug_blueprint = RootBlueprint('debug_rest', __name__, url_prefix='/debug')
 LOGGER = logging.getLogger(__name__)
+
+with current_app.app_context():
+    from cmdb.data_storage.database_manager import DatabaseManagerMongo
+    database_manager: DatabaseManagerMongo = current_app.database_manager
+
+
+@debug_blueprint.route('/indexes/<string:collection>/', methods=['GET'])
+@debug_blueprint.route('/indexes/<string:collection>', methods=['GET'])
+def get_index(collection: str):
+    return make_response(database_manager.get_index_info(collection))
 
 
 @debug_blueprint.route('/error/<int:status_code>/', methods=['GET', 'POST'])
