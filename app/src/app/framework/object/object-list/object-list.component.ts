@@ -73,6 +73,9 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
+    this.router.routeReuseStrategy.shouldReuseRoute = function () {
+      return false;
+    };
   }
 
   private getMetaData(id) {

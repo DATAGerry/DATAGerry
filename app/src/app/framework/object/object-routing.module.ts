@@ -24,7 +24,6 @@ import { ObjectAddComponent } from './object-add/object-add.component';
 import { ObjectEditComponent } from './object-edit/object-edit.component';
 import { ObjectCopyComponent } from './object-copy/object-copy.component';
 import { ObjectLogComponent } from './object-log/object-log.component';
-import { PermissionGuard } from '../../auth/guards/permission.guard';
 
 const routes: Routes = [
   {
@@ -106,5 +105,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class ObjectRoutingModule {
-}
+export class ObjectRoutingModule { }
