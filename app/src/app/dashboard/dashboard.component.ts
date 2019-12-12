@@ -38,6 +38,9 @@ export class DashboardComponent implements OnInit {
   public objectCount: number;
   public typeCount: number;
   public userCount: number;
+
+  public readonly maxChartValue: number = 4;
+
   // Chart Objects
   public labelsObject: string [] = [];
   public itemsObject: number [] = [];
@@ -93,50 +96,63 @@ export class DashboardComponent implements OnInit {
     };
     let values;
     this.typeService.getTypeList().subscribe((data: CmdbType[]) => {
-      values = data;
-      }, error => {},
+        values = data;
+      }, error => {
+      },
       () => {
-        values.forEach(type => {
-          this.objectService.countObjectsByType(type.public_id).subscribe(count => {
-            this.labelsObject.push(type.label);
+        // tslint:disable-next-line:prefer-for-of
+        for (let i = 0; i < values.length; i++) {
+          this.objectService.countObjectsByType(values[i].public_id).subscribe(count => {
+            this.labelsObject.push(values[i].label);
             this.colorsObject.push(this.getRandomColor());
             this.itemsObject.push(count);
           });
-        });
+          if (i === this.maxChartValue) {
+            break;
+          }
+        }
       });
   }
 
   private generateTypeChar() {
     this.categoryService.getCategoryList().subscribe((data: CmdbCategory[]) => {
-        data.forEach(category => {
-          this.labelsCategory.push(category.label);
-          this.colorsCategory.push(this.getRandomColor());
-          if (category.root) {
-            this.typeService.getTypeListByCategory(0).subscribe((list: any[]) => {
-              this.itemsCategory.push(list.length);
-            });
-          } else {
-            this.typeService.getTypeListByCategory(category.public_id).subscribe((list: any[]) => {
-              this.itemsCategory.push(list.length);
-            });
-          }
-        });
-      });
+      for (let i = 0; i < data.length; i++) {
+        this.labelsCategory.push(data[i].label);
+        this.colorsCategory.push(this.getRandomColor());
+        if (data[i].root) {
+          this.typeService.getTypeListByCategory(0).subscribe((list: any[]) => {
+            this.itemsCategory.push(list.length);
+          });
+        } else {
+          this.typeService.getTypeListByCategory(data[i].public_id).subscribe((list: any[]) => {
+            this.itemsCategory.push(list.length);
+          });
+        }
+        if (i === this.maxChartValue) {
+          break;
+        }
+      }
+    });
   }
 
   private generateGroupChar() {
     let values;
     this.groupService.getGroupList().subscribe((data: Group[]) => {
         values = data;
-      }, (error) => {},
+      }, (error) => {
+      },
       () => {
-        values.forEach(group => {
-          this.userService.getUserByGroup(group.public_id).subscribe((users: User[]) => {
-            this.labelsGroup.push(group.label);
+        for (let i = 0; i < values.length; i++) {
+          this.userService.getUserByGroup(values[i].public_id).subscribe((users: User[]) => {
+            this.labelsGroup.push(values[i].label);
             this.colorsGroup.push(this.getRandomColor());
             this.itemsGroup.push(users.length);
           });
-        });
+          if (i === this.maxChartValue) {
+            break;
+          }
+        }
+
       });
   }
 
