@@ -108,6 +108,14 @@ const routes: Routes = [
       breadcrumb: 'Debug'
     },
     loadChildren: () => import('./debug/debug.module').then(m => m.DebugModule)
+  },
+  {
+    path: '**',
+    canActivate: [AuthGuard],
+    data: {
+      breadcrumb: 'Error'
+    },
+    loadChildren: () => import('./error/error.module').then(m => m.ErrorModule)
   }
 ];
 
