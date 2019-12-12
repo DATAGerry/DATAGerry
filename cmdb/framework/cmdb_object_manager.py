@@ -72,9 +72,9 @@ class CmdbObjectManager(CmdbManagerBase):
             object_list.append(self.get_object(public_id))
         return object_list
 
-    def get_objects_by(self, sort='public_id', **requirements):
+    def get_objects_by(self, sort='public_id', direction=-1, **requirements):
         ack = []
-        objects = self._get_many(collection=CmdbObject.COLLECTION, sort=sort, **requirements)
+        objects = self._get_many(collection=CmdbObject.COLLECTION, sort=sort, direction=direction, **requirements)
         for obj in objects:
             ack.append(CmdbObject(**obj))
         return ack

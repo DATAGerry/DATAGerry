@@ -158,8 +158,7 @@ class ExportVariable:
                 iteration = iteration - 1
                 current_object = self.__object_manager.get_object(field["value"])
                 type_instance = self.__object_manager.get_type(current_object.get_type_id())
-                cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance,
-                                                user_manager=self.__user_manager, render_user=None)
+                cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance, render_user=None)
                 sub_fields = {field["name"]: {'id': field["value"], 'fields': {}}}
                 for subfield in cmdb_render_object.result().fields:
                     field_name = subfield["name"]

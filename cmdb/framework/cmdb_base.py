@@ -51,7 +51,7 @@ class CmdbManagerBase:
             public_id=public_id
         )
 
-    def _get_many(self, collection: str, sort='public_id', limit=0, **requirements: dict) -> List[dict]:
+    def _get_many(self, collection: str, sort='public_id', direction: int = -1, limit=0, **requirements: dict) -> List[dict]:
         """get all documents from the database which have the passing requirements
 
         Args:
@@ -64,7 +64,7 @@ class CmdbManagerBase:
 
         """
         requirements_filter = {}
-        formatted_sort = [(sort, self.dbm.DESCENDING)]
+        formatted_sort = [(sort, direction)]
         for k, req in requirements.items():
             requirements_filter.update({k: req})
         return self.dbm.find_all(collection=collection, limit=limit, filter=requirements_filter, sort=formatted_sort)
@@ -87,7 +87,7 @@ class CmdbManagerBase:
         )
 
     def _insert_many(self, collection: str, d):
-        pass # TODO
+        pass  # TODO
 
     def _update(self, collection: str, public_id: int, data: dict) -> object:
         """
