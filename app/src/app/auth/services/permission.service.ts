@@ -21,6 +21,7 @@ import { Right } from '../../management/models/right';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { GroupService } from '../../management/services/group.service';
 import { Group } from '../../management/models/group';
+import { first, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -44,14 +45,14 @@ export class PermissionService {
     return this.currentUserRightListSubject.value;
   }
 
-  public async storeUserRights(groupID: number) {
-    return this.groupService.getGroup(groupID).subscribe(
-      (group: Group) => {
+  public storeUserRights(groupID: number) {
+    return this.groupService.getGroup(groupID).pipe(map(
+      group => {
         localStorage.setItem('current-user-rights', JSON.stringify(group.rights));
         this.currentUserRightListSubject.next(group.rights);
-      },
-      (error) => console.error(error)
-    );
+        return group;
+      }
+    ));
   }
 
   public clearUserRightStorage() {
