@@ -62,6 +62,45 @@ def text_search(search_input, request_user: User):
     return _get_response({'value': search_input}, q_operator='$or', current_user=request_user)
 
 
+@search_blueprint.route("/count/", methods=['GET'])
+@login_required
+def count_search_result():
+    args = request.args.to_dict()
+    q_operator = '$and'
+    query_list = []
+    result_query = []
+
+    # Collect all match values
+    match_values = []
+
+    # remove unnecessary query parameters
+    _filter_query(args)
+
+    try:
+        for key, value in args.items():
+            for v in value.split(","):
+                try:
+                    if key == "type_id":
+                        query_list.append({key: int(v)})
+                    if key == "active" and 'true' == v:
+                        query_list.append({key: True})
+                    if key == "value":
+                        # Collect for later render evaluation
+                        match_values.append(value)
+                        query_list.append({'fields.' + key: {'$regex': v, '$options': "i"}})
+                except (ValueError, TypeError):
+                    return abort(400)
+
+        result_query.append({q_operator: query_list})
+        query = {"$or": result_query}
+        object_list = object_manager.search_objects_with_limit(query, limit=0)
+
+        return make_response(len(object_list))
+
+    except CMDBError:
+        raise traceback.print_exc(file=sys.stdout)
+
+
 def _get_response(args, q_operator='$and', current_user: User = None, limit=0):
     query_list = []
     result_query = []
@@ -90,6 +129,12 @@ def _get_response(args, q_operator='$and', current_user: User = None, limit=0):
         result_query.append({q_operator: query_list})
         query = {"$or": result_query}
         object_list = object_manager.search_objects_with_limit(query, limit=limit)
+
+        if request.args.get('start') is not None:
+            start = int(request.args.get('start'))
+            length = int(request.args.get('length'))
+            object_list = {k: object_list[k] for k in list(object_list.keys())[start:start + length]}
+
         render = RenderList(object_list, current_user)
         rendered_list = render.render_result_list(_collect_match_fields(object_list, match_values))
         return make_response(rendered_list)

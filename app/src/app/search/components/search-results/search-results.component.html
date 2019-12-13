@@ -45,7 +45,7 @@
     <th>Action</th>
   </tr>
   </thead>
-  <tbody>
+  <tbody *ngIf="results?.length != 0">
   <tr *ngFor="let entry of results">
 
     <td><cmdb-active-badge [activeStatus]="entry?.object_information.active"></cmdb-active-badge></td>
