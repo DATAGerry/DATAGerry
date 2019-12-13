@@ -148,8 +148,8 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
             }
             callback({
               data: [],
-              recordsTotal: that.objectLists.length,
-              recordsFiltered: that.objectLists.length,
+              recordsTotal: that.records,
+              recordsFiltered: that.records
             });
           });
         } else {
