@@ -88,7 +88,7 @@ export class SearchResultsComponent implements AfterViewInit, OnDestroy, OnInit 
     const LENGTH = 'length';
     const SEARCH = 'search';
     this.dtOptions = {
-      dom: '<"row" <"col-sm-3" l><"col" f> >' +
+      dom: '<"row" <"col-sm-3" l> >' +
         '<"row" <"col-sm-12"tr>>' +
         '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
       pagingType: 'full_numbers',
