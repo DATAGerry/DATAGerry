@@ -88,7 +88,7 @@ export class SearchResultsComponent implements AfterViewInit, OnDestroy, OnInit 
     const LENGTH = 'length';
     const SEARCH = 'search';
     this.dtOptions = {
-      dom: '<"row" <"col-sm-3" l> >' +
+      dom: '<"row" <"col-sm-3" l><"col" f> >' +
         '<"row" <"col-sm-12"tr>>' +
         '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
       pagingType: 'full_numbers',
@@ -103,7 +103,7 @@ export class SearchResultsComponent implements AfterViewInit, OnDestroy, OnInit 
           && dataTablesParameters[SEARCH].value !== ''
           && dataTablesParameters[SEARCH].value !== undefined) {
           const was = 'object/filter/' + dataTablesParameters[SEARCH].value;
-          that.apiCall.callGetRoute(this.url, {params: that.param}).subscribe(resp => {
+          that.apiCall.callGetRoute(was, {params: that.param}).subscribe(resp => {
             that.results = resp === null ? [] : resp;
             callback({
               data: [],
