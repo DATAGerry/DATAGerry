@@ -396,8 +396,8 @@ class ExternalSystemCpanelDns(ExternalSystem):
         # check if a DNS record exist for object
         if hostname in self.__existing_records.keys():
             # check if entry has changed
-            if not self.__existing_records[hostname]["data"] != ip:
-                if hostname in self.__created_records.keys():
+            if self.__existing_records[hostname]["data"] != ip:
+                if hostname not in self.__created_records.keys():
                     # recreate entry
                     self.delete_a_records(self.__domain_name, hostname)
                     self.add_a_record(self.__domain_name, hostname, ip)
