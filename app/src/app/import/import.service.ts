@@ -35,9 +35,10 @@ export class ImportService implements ApiService {
   constructor(private api: ApiCallService) {
   }
 
-  public importObjects(file: File, parserConfig: any, importerConfig: ImporterConfig): Observable<any> {
+  public importObjects(file: File, fileFormat: string, parserConfig: any, importerConfig: ImporterConfig): Observable<any> {
     const formData = new FormData();
     formData.append('file', file, file.name);
+    formData.append('file_format', fileFormat);
     formData.append('parser_config', JSON.stringify(parserConfig));
     formData.append('importer_config', JSON.stringify(importerConfig));
     return this.api.callPost<any>(`${ this.servicePrefix }/${ this.objectPrefix }/`, formData, httpFileOptions).pipe(
@@ -47,9 +48,10 @@ export class ImportService implements ApiService {
     );
   }
 
-  public postObjectParser(file: File, parserConfig: any): Observable<any> {
+  public postObjectParser(file: File, fileFormat: string, parserConfig: any): Observable<any> {
     const formData = new FormData();
     formData.append('file', file, file.name);
+    formData.append('file_format', fileFormat);
     formData.append('parser_config', JSON.stringify(parserConfig));
     return this.api.callPost<any>(`${ this.servicePrefix }/${ this.objectPrefix }/parse/`, formData, httpFileOptions).pipe(
       map((apiResponse) => {

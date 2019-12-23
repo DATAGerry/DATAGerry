@@ -118,7 +118,7 @@ export class ImportObjectsComponent implements OnInit, AfterViewInit, OnDestroy 
 
   public onParseData() {
     this.spinner.show();
-    this.parseDataSubscription = this.importService.postObjectParser(this.importerFile.file, this.parserConfig).subscribe(
+    this.parseDataSubscription = this.importService.postObjectParser(this.importerFile.file, this.importerFile.fileFormat, this.parserConfig).subscribe(
       (parsedData) => {
         this.parsedData = parsedData;
       },
@@ -135,7 +135,7 @@ export class ImportObjectsComponent implements OnInit, AfterViewInit, OnDestroy 
     if (this.defaultImporterConfig.manually_mapping) {
       runtimeConfig.mapping = this.mapping;
     }
-    this.importService.importObjects(this.importerFile.file, this.parserConfig, runtimeConfig).subscribe(
+    this.importService.importObjects(this.importerFile.file, this.importerFile.fileFormat, this.parserConfig, runtimeConfig).subscribe(
       (importResponse) => {
         this.importResponse = importResponse;
       },
