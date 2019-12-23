@@ -38,10 +38,10 @@ def get_element_from_data_request(element, _request: Request) -> (dict, None):
         return None
 
 
-def generate_parsed_output(request_file, parser_config):
+def generate_parsed_output(request_file, file_format, parser_config):
     from cmdb.importer import load_parser_class
     # Load parser class
-    parser_class = load_parser_class('object', request_file.content_type)
+    parser_class = load_parser_class('object', file_format)
 
     # save file
     filename = secure_filename(request_file.filename)
