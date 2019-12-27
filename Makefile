@@ -101,7 +101,7 @@ rpm: bin
 	cp contrib/systemd/datagerry.service ${DIR_RPM_BUILD}/SOURCES
 	cp etc/cmdb.conf ${DIR_RPM_BUILD}/SOURCES
 	cp contrib/rpm/datagerry.spec ${DIR_RPM_BUILD}
-	sed -i 's/@@DG_BUILDVAR_VERSION@@/${BUILDVAR_VERSION}/g' ${DIR_RPM_BUILD}/datagerry.spec
+	sed -i 's/@@DG_BUILDVAR_VERSION@@/$(subst -,_,${BUILDVAR_VERSION})/g' ${DIR_RPM_BUILD}/datagerry.spec
 	${BIN_RPMBUILD} --define '_topdir ${DIR_RPM_BUILD}' -bb ${DIR_RPM_BUILD}/datagerry.spec
 
 
