@@ -56,9 +56,9 @@ def post_login():
             password=login_password
         )
     except UserManagerGetError as e:
-        return abort(404, e.message)
+        return abort(401)
     except WrongUserPasswordError as e:
-        return abort(401, e.message)
+        return abort(401)
     if correct:
         login_user.last_login_time = datetime.utcnow()
         user_manager.update_user(login_user.public_id, login_user.to_database())
