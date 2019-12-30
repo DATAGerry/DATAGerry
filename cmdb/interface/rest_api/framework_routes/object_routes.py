@@ -406,8 +406,10 @@ def insert_object(request_user: User):
 
     try:
         new_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
-        new_object_data['public_id'] = object_manager.get_new_id(CmdbObject.COLLECTION)
-        new_object_data['active'] = True
+        if not 'public_id' in new_object_data:
+            new_object_data['public_id'] = object_manager.get_new_id(CmdbObject.COLLECTION)
+        if not 'active' in new_object_data:
+            new_object_data['active'] = True
         new_object_data['creation_time'] = datetime.utcnow()
         new_object_data['views'] = 0
         new_object_data['version'] = '1.0.0'  # default init version
