@@ -17,6 +17,7 @@
 import ipaddress
 import xml.etree.ElementTree as ET
 import requests
+import re
 from cmdb.exportd.exporter_base import ExternalSystem, ExportVariable
 
 
@@ -341,3 +342,218 @@ class ExternalSystemOpenNMS(ExternalSystem):
         if asset_length and len(asset_value) > asset_length:
             asset_value = asset_value[:asset_length]
         return asset_value
+
+
+class ExternalSystemCpanelDns(ExternalSystem):
+
+    parameters = [
+        {"name": "cpanelApiUrl",        "required": True,   "description": "cPanel API base URL", "default": "https://1.2.3.4:2083/json-api"},
+        {"name": "cpanelApiUser",       "required": True,   "description": "cPanel username", "default": "admin"},
+        {"name": "cpanelApiPassword",   "required": True,   "description": "cPanel password", "default": "admin"},
+        {"name": "cpanelApiToken",      "required": True,   "description": "cPanel token", "default": ""},
+        {"name": "domainName",          "required": True,   "description": "DNS Zone managed by cPanel for adding DNS A records", "default": "objects.datagerry.com"},
+        {"name": "cpanelApiSslVerify",  "required": False,  "description": "disable SSL peer verification", "default": False}
+    ]
+
+    variables = [
+        {"name": "hostname",    "required": True,   "description": "host part of the DNS A record. e.g. - test"},
+        {"name": "ip",          "required": True,   "description": "ip address of the DNS A record. e.g. - 8.8.8.8"}
+    ]
+
+    def __init__(self, destination_parms, export_vars):
+        super(ExternalSystemCpanelDns, self).__init__(destination_parms, export_vars)
+
+        self.__variables = export_vars
+
+        # get parameters for cPanel access
+        self.__cpanel_api_user = self._destination_parms.get("cpanelApiUser")
+        self.__cpanel_api_password = self._destination_parms.get("cpanelApiPassword")
+        self.__cpanel_api_token = self._destination_parms.get("cpanelApiToken")
+        self.__domain_name = self._destination_parms.get("domainName")
+        self.__cpanel_api_url = self._destination_parms.get("cpanelApiUrl")
+        self.__cpanel_api_url += "/cpanel?cpanel_jsonapi_user={}".format(self.__cpanel_api_user)
+        self.__cpanel_api_url += "&cpanel_jsonapi_apiversion=2&"
+
+        if not (self.__cpanel_api_user and self.__cpanel_api_password and self.__domain_name and self.__cpanel_api_url):
+            self.error("Parameters for ExternalSystem not set correctly")
+
+        # SSL verify option
+        self.__cpanel_api_ssl_verify = self._destination_parms.get("cpanelApiSslVerify")
+
+        # get all existing DNS records from cPanel
+        self.__existing_records = self.get_a_records(self.__domain_name)
+        self.__created_records = {}
+
+    def add_object(self, cmdb_object):
+        # get variables from object
+        hostname = self.format_hostname(str(self._export_vars.get("hostname", ExportVariable("hostname", "default")).get_value(cmdb_object)))
+        ip = self.format_ip(str(self._export_vars.get("ip", ExportVariable("ip", "")).get_value(cmdb_object)))
+
+        # ignore CmdbObject,
+        if ip == "" or hostname == "":
+            self.set_msg('Ignore CmdbObject ID:%s. IP and/or hostname is invalid' % cmdb_object.object_information['object_id'])
+
+        # check if a DNS record exist for object
+        if hostname in self.__existing_records.keys():
+            # check if entry has changed
+            if self.__existing_records[hostname]["data"] != ip:
+                if hostname not in self.__created_records.keys():
+                    # recreate entry
+                    self.delete_a_records(self.__domain_name, hostname)
+                    self.add_a_record(self.__domain_name, hostname, ip)
+
+            # delete entry from exitsing records array
+            del self.__existing_records[hostname]
+        else:
+            # if not create a new one
+            if hostname not in self.__created_records.keys():
+                self.add_a_record(self.__domain_name, hostname, ip)
+
+        # save to created records
+        self.__created_records[hostname] = ip
+
+    def finish_export(self):
+        # delete all DNS A records that does not exist in DATAGERRY
+        for hostname in self.__existing_records:
+            self.delete_a_records(self.__domain_name, hostname)
+
+    def get_a_records(self, cur_domain: str):
+        """
+        Gets all DNS A records for the given domain
+        Args:
+            cur_domain: DNS zone to get the A records.
+        Returns:
+            A records with hostname -> IP
+        """
+        url_parameters = "cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=fetchzone&domain={}{}".format(cur_domain, "&type=A")
+        json_result = self.get_data(url_parameters)
+
+        if json_result['cpanelresult']['data'][0]['status'] == 0:
+            self.error(json_result['cpanelresult']['data'][0]['statusmsg'])
+
+        records = json_result['cpanelresult']['data'][0]['record']
+
+        # create output array
+        output = {}
+
+        for record in records:
+            record_hostname = ''
+            record_data = ''
+            record_line = ''
+
+            if 'name' in record:
+                record_hostname = record['name']
+            if 'address' in record:
+                record_data = record['address']
+            if 'line' in record:
+                record_line = record['line']
+
+            # format hostname
+            matches = re.search(r'(.*?).%s?.' % cur_domain, record_hostname)
+            if matches:
+                record_hostname = matches.group(1)
+                output.update({record_hostname: {"data": record_data, "line": record_line}})
+
+        return output
+
+    def get_data(self, url: str):
+        """
+        Sends an HTTP request to cPanel and returns result
+        Args:
+            url: part of the URL request to use.
+        Returns:
+            JSON data, which are returned from API
+        """
+        from requests.exceptions import HTTPError
+        json_result = {}
+
+        try:
+            # curl request
+            __session__ = requests.Session()
+            __session__.auth = (self.__cpanel_api_user, self.__cpanel_api_password)
+
+            headers = {
+                'Authorization': 'WHM %s:%s' % (self.__cpanel_api_user, self.__cpanel_api_token),
+            }
+            url = self.__cpanel_api_url + url
+            response = requests.get(url,
+                                    headers=headers,
+                                    auth=(self.__cpanel_api_user, self.__cpanel_api_password),
+                                    )
+
+            # If the response was successful, no Exception will be raised
+            response.raise_for_status()
+            # get JSON data
+            json_result = response.json()
+            __session__.close()
+        except HTTPError as http_err:
+            self.error(f'HTTP error occurred: {http_err}')
+        except Exception as err:
+            self.error(f'Other error occurred: {err}')
+
+        return json_result
+
+    def add_a_record(self, cur_domain, cur_hostname, cur_ip):
+        """
+        Adds an A record to the given domain in cPanel
+        Args:
+            cur_domain:     domain for adding the record
+            cur_hostname:   host part
+            cur_ip:         IP address
+
+        Returns:
+
+        """
+        url_parameters = "cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=add_zone_record"
+        url_parameters += "&domain={}".format(cur_domain)
+        url_parameters += "&name={}".format(cur_hostname)
+        url_parameters += "&type=A&address={}".format(cur_ip)
+        self.get_data(url_parameters)
+
+    def delete_a_records(self, cur_domain, cur_hostname):
+        """
+        Adds an A record to the given domain in cPanel
+        Args:
+            cur_domain:     domain for adding the record
+            cur_hostname:   host part
+
+        Returns:
+
+        """
+        # get all A records in zone
+        records = self.get_a_records(cur_domain)
+        for r_name in records:
+            # check if record has the correct name
+            if r_name == cur_hostname:
+                # delete enty
+                url_parameters = "cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=remove_zone_record"
+                url_parameters += "&domain={}&line={}".format(cur_domain, str(records[r_name]['line']))
+                self.get_data(url_parameters)
+
+    def format_hostname(self, value: str) -> str:
+        """
+    Checks, if a hostname has the correct format.
+        Args:
+            value: input in the correct format.
+        Returns:
+            Value in the correct format.
+        """
+        value = re.sub(r' ', "", value)
+        value = re.sub(r'[^A-Za-z0-9\-\.]', "", value)
+        return value
+
+    def format_ip(self, value) -> str:
+        """
+        Checks if an IPv4 address has the correct format
+        Args:
+            value: input address.
+        Returns:
+            The correct format. Empty string, if not.
+        """
+        import ipaddress
+        try:
+            if ipaddress.IPv4Address(value) or ipaddress.IPv6Address(value):
+                return value
+        except:
+            return ""
+        return ""

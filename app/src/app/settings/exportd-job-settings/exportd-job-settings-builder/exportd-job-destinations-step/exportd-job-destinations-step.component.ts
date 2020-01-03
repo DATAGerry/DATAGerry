@@ -58,7 +58,6 @@ export class ExportdJobDestinationsStepComponent implements OnInit {
             const classname = forArray.controls[i].get('className').value;
             if (classname !== '' && classname !== undefined) {
               this.externalService.getExternSytemParams(classname).subscribe(params => {
-                this.externalSystemParams = params as [];
                 required = params[c].required;
                 description = params[c].description;
                 control.push(this.createParameters('', '', description, required));
@@ -76,9 +75,8 @@ export class ExportdJobDestinationsStepComponent implements OnInit {
   }
 
   @Input() public mode: CmdbMode;
-  public MODES = CmdbMode;
   public externalSystemList: any[] = [];
-  public externalSystemParams: any[] = [];
+  public externalSystems: any[] = [];
   public destinationForm: FormGroup;
   readonly DESTINATION = 'destination';
 
@@ -91,13 +89,14 @@ export class ExportdJobDestinationsStepComponent implements OnInit {
 
     this.externalService.getExternSytemList().subscribe(data => {
       this.externalSystemList = data;
-    });
-  }
-
-  public getSystemParameters(className: string) {
-    this.externalService.getExternSytemParams(className).subscribe(params => {
-      this.externalSystemParams = params as [];
-    });
+    }, error => {},
+      () => {
+        for (const className of this.externalSystemList) {
+          this.externalService.getExternSytemParams(className).subscribe(params => {
+            this.externalSystems.push({name: className, parameter : params});
+          });
+        }
+      });
   }
 
   private createDestination(): FormGroup {
@@ -148,15 +147,15 @@ export class ExportdJobDestinationsStepComponent implements OnInit {
   }
 
   public onDraggedSystem(item: DndDropEvent, control: any, index, effect: DropEffect) {
-    control.get('className').setValue(item.data);
-
-    this.externalService.getExternSytemParams(item.data).subscribe(params => {
-      this.externalSystemParams = params as [];
+    control.get('className').setValue(item.data.name);
+    let externalSystemParams = [];
+    this.externalService.getExternSytemParams(item.data.name).subscribe(params => {
+      externalSystemParams = params as [];
     }, error => console.log(error),
       () => {
         const controlArray = this.getDestinationAsFormArray().at(index).get('parameter') as FormArray;
         controlArray.clear();
-        for (const param of this.externalSystemParams) {
+        for (const param of externalSystemParams) {
           controlArray.push(this.createParameters(param.name, param.default, param.description, param.required));
         }
       });

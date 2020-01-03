@@ -32,7 +32,9 @@ export class BasicAuthInterceptor implements HttpInterceptor {
     if (currentUser && currentUserToken) {
       request = request.clone({
         setHeaders: {
-          Authorization: `${ currentUserToken }`
+            'Authorization': `${ currentUserToken }`,
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
         }
       });
     }
