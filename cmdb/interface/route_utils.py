@@ -33,7 +33,7 @@ from flask import Blueprint, request, abort
 from cmdb.security.token.validator import TokenValidator, ValidationError
 from cmdb.utils import json_encoding
 
-DEFAULT_MIME_TYPE = 'Content-Type: application/json'
+DEFAULT_MIME_TYPE = 'application/json'
 
 
 class RootBlueprint(Blueprint):
