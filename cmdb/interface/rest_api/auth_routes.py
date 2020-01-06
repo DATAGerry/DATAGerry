@@ -21,7 +21,7 @@ from flask import request, abort, current_app
 
 from cmdb.interface.route_utils import make_response, RootBlueprint
 from cmdb.security.token.generator import TokenGenerator
-from cmdb.security.auth.auth_errors import WrongUserPasswordError
+from cmdb.security.auth.auth_providers import WrongUserPasswordError
 from cmdb.user_management.user_manager import user_manager, UserManagerGetError
 from cmdb.utils import SystemSettingsReader
 
