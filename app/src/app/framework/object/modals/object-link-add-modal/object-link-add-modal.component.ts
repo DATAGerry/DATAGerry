@@ -84,7 +84,8 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
     this.secondaryResultSubscription = new Subscription();
     this.secondarySelectionSubscription = this.addLinkForm.get('secondary').valueChanges.pipe(debounceTime(500))
       .subscribe((selectedID: number) => {
-        if (selectedID !== null) {
+        this.addLinkForm.get('secondary').setValidators([Validators.required, this.sameIDValidator()]);
+        if (selectedID !== null && this.addLinkForm.get('secondary').valid) {
           this.secondaryResultSubscription = this.objectService.getObject(selectedID).subscribe(
             (secondaryResult: RenderResult) => {
               this.secondaryResult = secondaryResult;
@@ -95,6 +96,7 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
           );
         }
       });
+    this.addLinkForm.get('secondary').updateValueAndValidity();
   }
 
   public ngOnDestroy(): void {
