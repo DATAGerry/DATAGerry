@@ -17,12 +17,13 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService, httpObserveOptions } from '../../services/api-call.service';
+import { ApiCallService, ApiService, HttpInterceptorHandler, httpObserveOptions } from '../../services/api-call.service';
 import { Group } from '../models/group';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { HttpParams } from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpParams} from '@angular/common/http';
 import { FormControl } from '@angular/forms';
+import { BasicAuthInterceptor } from "../../auth/interceptors/basic-auth.interceptor";
 
 export const checkGroupExistsValidator = (groupService: GroupService, time: number = 500) => {
   return (control: FormControl) => {
@@ -48,7 +49,7 @@ export class GroupService<T = Group> implements ApiService {
 
   public servicePrefix: string = 'group';
 
-  constructor(private api: ApiCallService) {
+  constructor(private api: ApiCallService, private backend: HttpBackend) {
   }
 
   // CRUD calls
@@ -103,7 +104,8 @@ export class GroupService<T = Group> implements ApiService {
 
   // Special functions
   public checkGroupExists(groupName: string) {
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ groupName }`);
+    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ groupName }`, specialClient);
   }
 
 }
