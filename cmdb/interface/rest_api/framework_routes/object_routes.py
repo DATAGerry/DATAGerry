@@ -266,6 +266,25 @@ def count_objects():
     return resp
 
 
+@object_blueprint.route('/group/<string:value>', methods=['GET'])
+@login_required
+def group_objects_by_type_id(value):
+    try:
+        result = []
+        cursor = object_manager.group_objects_by_value(value)
+        max_length = 0
+        for document in cursor:
+            document['label'] = object_manager.get_type(document['_id']).label
+            result.append(document)
+            max_length += 1
+            if max_length == 5:
+                break
+        resp = make_response(result)
+    except CMDBError:
+        return abort(400)
+    return resp
+
+
 @object_blueprint.route('/<int:public_id>/', methods=['GET'])
 @object_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
