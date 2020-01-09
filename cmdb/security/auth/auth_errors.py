@@ -13,19 +13,24 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-from cmdb.plugins.plugin_system import PluginBase
-from cmdb.security.auth.auth_errors import NoValidAuthenticationProviderError
-from cmdb.security.auth import AuthenticationProvider
+from cmdb.utils.error import CMDBError
 
 
-class AuthPluginBase(PluginBase):
+class AuthenticationError(CMDBError):
 
-    def __init__(self, plugin_name: str, provider_class):
-        if not issubclass(provider_class, AuthenticationProvider):
-            raise NoValidAuthenticationProviderError(provider_class)
-        self.provider_class = provider_class
-        super(PluginBase, self).__init__(plugin_name, 'auth')
+    def __init__(self, provider_name: str, error=None):
+        self.message = f'Could not authenticate via provider: {provider_name} - error message: {error}'
 
-    def get_provider_class(self):
-        return self.provider_class
+
+class NoValidAuthenticationProviderError(CMDBError):
+    """Exception if auth provider do not exist"""
+
+    def __init__(self, authenticator):
+        self.message = f'The Provider {authenticator} is not a valid authentication-provider'
+
+
+class NotPasswordAbleError(CMDBError):
+    """Exception if application tries to generate a password for an not password_able class"""
+
+    def __init__(self, provider):
+        self.message = f'The AuthenticationProvider {provider} is not password able'

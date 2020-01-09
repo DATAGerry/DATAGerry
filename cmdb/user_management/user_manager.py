@@ -20,8 +20,6 @@ from cmdb.data_storage.database_manager import NoDocumentFound, DatabaseManagerM
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.user_management.user import User
-from cmdb.user_management.user_authentication import AuthenticationProvider, LocalAuthenticationProvider, \
-    NoValidAuthenticationProviderError
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user_right import BaseRight
 from cmdb.utils import get_security_manager
@@ -42,27 +40,14 @@ class UserManager(CmdbManagerBase):
     def __init__(self, database_manager: DatabaseManagerMongo, security_manager: SecurityManager):
         self.dbm = database_manager
         self.scm = security_manager
-        self._authentication_providers = self._load_authentication_providers()
         self.rights = self._load_rights()
         super().__init__(database_manager)
-
-    @staticmethod
-    def _load_authentication_providers() -> dict:
-        return {
-            'LocalAuthenticationProvider': LocalAuthenticationProvider
-        }
 
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
 
     def count_user(self):
         return self.dbm.count(collection=User.COLLECTION)
-
-    def get_authentication_provider(self, name: str):
-        if issubclass(self._authentication_providers[name], AuthenticationProvider):
-            return self._authentication_providers[name]()
-        else:
-            raise NoValidAuthenticationProviderError(self._authentication_providers[name])
 
     def get_user(self, public_id: int) -> User:
         try:
@@ -95,6 +80,9 @@ class UserManager(CmdbManagerBase):
         return ack
 
     def insert_user(self, user: User) -> int:
+        """
+        TODO: Refactor for dict use
+        """
         try:
             return self.dbm.insert(collection=User.COLLECTION, data=user.to_database())
         except (CMDBError, Exception):
@@ -239,7 +227,6 @@ class UserManager(CmdbManagerBase):
         right_status = chosen_group.has_right(right_name=right_name)
         if not right_status:
             right_status = chosen_group.has_extended_right(right_name=right_name)
-        LOGGER.debug(f'Group: {chosen_group.get_name()} has right {right_name}: {right_status}')
         return right_status
 
 

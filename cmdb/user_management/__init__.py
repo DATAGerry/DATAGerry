@@ -21,7 +21,6 @@ In addition, the rights management, group administration and access rights are d
 from typing import List
 
 from cmdb.user_management.user import User
-from cmdb.user_management.user_authentication import AuthenticationProvider, LocalAuthenticationProvider
 from cmdb.user_management.user_base import UserManagementBase
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user_manager import UserManager
@@ -49,6 +48,3 @@ __FIXED_GROUPS__: List[UserGroup] = [
     UserGroup(public_id=2, name='user', label='User', rights=__USER_GROUP_RIGHTS__, deletable=False)
 ]
 
-__AUTH_PROVIDERS__: List[AuthenticationProvider] = [
-    LocalAuthenticationProvider.get_name(),
-]

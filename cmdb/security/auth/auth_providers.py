@@ -16,29 +16,57 @@
 
 import logging
 
-from cmdb.data_storage.database_manager import DatabaseManagerMongo
-from cmdb.security.auth.auth_errors import WrongUserPasswordError
-from cmdb.security.auth.provider_base import AuthenticationProvider
-from cmdb.utils import get_security_manager
-from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.security.auth.providers.provider_config import AuthProviderConfig
+from cmdb.user_management import User
 
 LOGGER = logging.getLogger(__name__)
 
 
-class LocalAuthenticationProvider(AuthenticationProvider):
+class AuthenticationProvider:
+    """Provider super class"""
+    PASSWORD_ABLE: bool = True
+    EXTERNAL_PROVIDER: bool = False
+    PROVIDER_CONFIG_CLASS = AuthProviderConfig
+    DEFAULT_PROVIDER_CONFIG = None
 
-    def __init__(self):
-        self.scr = SystemConfigReader()
-        self.__dbm = DatabaseManagerMongo(
-            **self.scr.get_all_values_from_section('Database')
-        )
-        super(AuthenticationProvider, self).__init__()
+    def __init__(self, config: AuthProviderConfig = None, *args, **kwargs):
+        """
+        Init constructor for provider classes
+        Args:
+            config: Configuration object
+        """
+        self.__config = config or self.DEFAULT_PROVIDER_CONFIG
 
-    def authenticate(self, user, password: str, **kwargs) -> bool:
-        security_manager = get_security_manager(self.__dbm)
-        login_pass = security_manager.generate_hmac(password)
-        if login_pass == user.get_password():
-            return True
-        raise WrongUserPasswordError(user.get_username())
+    def authenticate(self, user_name: str, password: str, **kwargs) -> User:
+        """Auth method for login"""
+        raise NotImplementedError
 
+    def is_active(self) -> bool:
+        """Check if provider is active"""
+        raise NotImplementedError
 
+    @classmethod
+    def is_password_able(cls):
+        """Check if provider class needs a internal password validation
+        Notes:
+            Normally not necessary for external providers.
+        """
+        return cls.PASSWORD_ABLE
+
+    @classmethod
+    def is_external(cls) -> bool:
+        """Check if provider class is a external provider"""
+        return cls.EXTERNAL_PROVIDER
+
+    @classmethod
+    def get_name(cls):
+        """Get the class name of the provider
+        Notes:
+            Works as identifier
+        """
+        return cls.__qualname__
+
+    @classmethod
+    def get_default_config(cls):
+        """Get the default configuration"""
+        return cls.DEFAULT_PROVIDER_CONFIG

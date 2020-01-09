@@ -18,7 +18,8 @@ from cmdb.user_management.rights.import_rights import ImportRight, ImportObjectR
 from cmdb.user_management.user_right import GLOBAL_RIGHT_IDENTIFIER, BaseRight
 from cmdb.user_management.rights.system_rights import SystemRight
 from cmdb.user_management.rights.user_management_rights import UserManagementRight, UserRight, GroupRight
-from cmdb.user_management.rights.framework_rights import FrameworkRight, ObjectRight, TypeRight, CategoryRight, LogRight
+from cmdb.user_management.rights.framework_rights import FrameworkRight, ObjectRight, TypeRight, CategoryRight, \
+    LogRight, CollectionRight
 from cmdb.user_management.rights.export_rights import ExportRight, ExportObjectRight, ExportTypeRight
 from cmdb.user_management.rights.exportd_rights import ExportdRight, ExportdJobRight, ExportdLogRight
 
@@ -61,6 +62,15 @@ FRAMEWORK_RIGHTS = (
             CategoryRight('add', description='Add category'),
             CategoryRight('edit', BaseRight.PROTECTED, description='Edit category'),
             CategoryRight('delete', BaseRight.SECURE, description='Delete category')
+        )
+    ),
+    (
+        CollectionRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage collections'),
+        (
+            CollectionRight('view', BaseRight.PERMISSION, description='View collections'),
+            CollectionRight('add', BaseRight.PERMISSION, description='View collections'),
+            CollectionRight('edit', BaseRight.PERMISSION, description='View collections'),
+            CollectionRight('delete', BaseRight.PROTECTED, description='View collections'),
         )
     ),
     (

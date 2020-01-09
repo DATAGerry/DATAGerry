@@ -14,18 +14,38 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from cmdb.plugins.plugin_system import PluginBase
-from cmdb.security.auth.auth_errors import NoValidAuthenticationProviderError
-from cmdb.security.auth import AuthenticationProvider
+
+class AuthProviderConfig:
+    """Base provider config"""
+
+    def __init__(self, active: bool, **kwargs):
+        """ Base init constructor
+        Args:
+            active: is provider activated/deactivated
+            **kwargs:
+        """
+        self.active: bool = active
+        # auto set parameters as attribute
+        for key in kwargs:
+            setattr(self, key, kwargs[key])
+
+    def is_active(self) -> bool:
+        return self.active
 
 
-class AuthPluginBase(PluginBase):
+class AuthProviderConfigForm:
 
-    def __init__(self, plugin_name: str, provider_class):
-        if not issubclass(provider_class, AuthenticationProvider):
-            raise NoValidAuthenticationProviderError(provider_class)
-        self.provider_class = provider_class
-        super(PluginBase, self).__init__(plugin_name, 'auth')
+    def __init__(self):
+        pass
 
-    def get_provider_class(self):
-        return self.provider_class
+
+class AuthProviderConfigFormElement:
+
+    def __init__(self):
+        pass
+
+
+class AuthProviderConfigFormList:
+
+    def __init__(self):
+        pass

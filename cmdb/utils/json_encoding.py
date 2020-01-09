@@ -20,6 +20,7 @@ import re
 
 from cmdb.framework.cmdb_render import RenderVisualization
 from cmdb.importer.importer_response import ImportMessage, BaseImporterResponse
+from cmdb.security.auth import AuthSettingsDAO
 
 try:
     import uuid
@@ -56,6 +57,8 @@ def default(obj):
     if isinstance(obj, BaseImporterResponse):
         return obj.__dict__
     if isinstance(obj, ImportMessage):
+        return obj.__dict__
+    if isinstance(obj, AuthSettingsDAO):
         return obj.__dict__
     if isinstance(obj, bytes):
         return obj.decode("utf-8")

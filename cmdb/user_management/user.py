@@ -28,10 +28,11 @@ class User(UserManagementBase):
     INDEX_KEYS = [
         {'keys': [('user_name', UserManagementBase.ASCENDING)], 'name': 'user_name', 'unique': True}
     ]
+    DEFAULT_AUTHENTICATOR: str = 'LocalAuthenticationProvider'
 
     def __init__(self, user_name, group_id, registration_time, active=True, password=None, last_login_time=None,
-                 image=None, first_name=None, last_name=None, email=None, authenticator='LocalAuthenticationProvider',
-                 **kwargs):
+                 image=None, first_name=None, last_name=None, email=None,
+                 authenticator=DEFAULT_AUTHENTICATOR, **kwargs):
         """
 
         Args:
@@ -95,7 +96,7 @@ class User(UserManagementBase):
         """
         return self.user_name
 
-    def get_email(self) -> (str, None):
+    def get_email(self):
         """
         Get email
         Returns:

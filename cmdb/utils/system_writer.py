@@ -76,9 +76,7 @@ class SystemWriter:
 
 
 class SystemSettingsWriter(SystemWriter):
-    """
-
-    """
+    """"""
     COLLECTION = 'settings.conf'
 
     def __init__(self, database_manager: DatabaseManagerMongo):
@@ -97,7 +95,7 @@ class SystemSettingsWriter(SystemWriter):
             data: data to write
         Returns:
             acknowledgment: based on database manager
-        TODO: auto find _id
+        TODO: REFACTOR
 
         """
         try:
@@ -124,7 +122,7 @@ class SystemSettingsWriter(SystemWriter):
         Returns:
             acknowledgment: based on database manager
 
-        TODO: Error handling
+        TODO: REFACTOR
         """
         from cmdb.data_storage.database_utils import convert_form_data
         new_data = convert_form_data(data)
@@ -142,6 +140,7 @@ class SystemSettingsWriter(SystemWriter):
 
         Returns:
             bool if entry exists and has data (compare), otherwise false
+        TODO: REFACTOR
         """
         try:
             verify_document = self.writer.find_one_by(collection=self.COLLECTION, filter={'_id': _id})

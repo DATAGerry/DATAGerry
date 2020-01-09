@@ -281,8 +281,10 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
 
         Returns:
             founded document
-
         """
+        LOGGER.debug(f'__find call with args: {args} and kwargs: {kwargs}')
+        if 'projection' not in kwargs:
+            kwargs.update({'projection': {'_id': 0}})
         result = self.connector.get_collection(collection).find(*args, **kwargs)
         return result
 

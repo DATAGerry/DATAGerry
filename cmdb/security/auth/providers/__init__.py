@@ -14,18 +14,3 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from cmdb.plugins.plugin_system import PluginBase
-from cmdb.security.auth.auth_errors import NoValidAuthenticationProviderError
-from cmdb.security.auth import AuthenticationProvider
-
-
-class AuthPluginBase(PluginBase):
-
-    def __init__(self, plugin_name: str, provider_class):
-        if not issubclass(provider_class, AuthenticationProvider):
-            raise NoValidAuthenticationProviderError(provider_class)
-        self.provider_class = provider_class
-        super(PluginBase, self).__init__(plugin_name, 'auth')
-
-    def get_provider_class(self):
-        return self.provider_class
