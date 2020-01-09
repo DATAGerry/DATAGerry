@@ -142,15 +142,11 @@ export class ObjectLinksComponent implements OnInit, OnDestroy {
   }
 
   private renderTable(): void {
-    if (this.dtElement.dtInstance === undefined) {
-      this.dtTrigger.next();
-    } else {
+    if (typeof this.dtElement !== 'undefined' && typeof this.dtElement.dtInstance !== 'undefined') {
       this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
         dtInstance.destroy();
         this.dtTrigger.next();
       });
     }
-
   }
-
 }

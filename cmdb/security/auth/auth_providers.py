@@ -17,6 +17,8 @@
 import logging
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
+# from cmdb.security.auth.auth_errors import WrongUserPasswordError
+# from cmdb.security.auth.provider_base import AuthenticationProvider
 from cmdb.utils import get_security_manager
 from cmdb.utils.system_reader import SystemConfigReader
 

@@ -372,6 +372,22 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         result = self.connector.get_collection(collection).count(*args, **kwargs)
         return result
 
+    def group(self, collection: str, *args, **kwargs):
+        """This method does not actually
+           performs the find() operation
+           but instead returns
+           a objects grouped by type of the documents that meet the selection criteria.
+
+           Args:
+               collection (str): name of database collection
+               *args: arguments for search operation
+               **kwargs: key arguments
+           Returns:
+               returns the objects grouped by value of the documents
+           """
+        result = self.connector.get_collection(collection).aggregate(*args, **kwargs)
+        return result
+
     def insert(self, collection: str, data: dict) -> int:
         """adds document to database
 

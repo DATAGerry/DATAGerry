@@ -9,23 +9,22 @@
     <div class="card" id="controlExternalWrapper">
       <h5 class="card-header">External Systems</h5>
       <div class="card-body">
-        <ng-container *ngFor="let system of externalSystemList; let no1 = first">
+        <ng-container *ngFor="let system of externalSystems">
           <div class="card" [dndDraggable]="system" [dndType]="'dragSystem'">
             <div class="list-group-item list-group-item-action">
               <span class="d-flex justify-content-between align-items-center ">
-                <a class="btn" data-toggle="collapse" href="#collapseSystems"
-                   (click)="getSystemParameters(system)"
+                <a class="btn" data-toggle="collapse" href="#collapseSystems{{system.name}}"
                    role="button" aria-expanded="false" aria-controls="collapseSystems">
-                  {{system}}
+                  {{system.name}}
                 </a>
                 <fa-icon icon="bars"></fa-icon>
               </span>
             </div>
-            <div [ngClass]="{'show': no1}" class="card-body collapse"  id="collapseSystems">
-              <ng-container *ngIf="externalSystemParams.length == 0">
-                <p class="text-center">Parameters are displayed after assignment to External Name.</p>
+            <div class="card-body collapse" id="collapseSystems{{system.name}}">
+              <ng-container *ngIf="system.parameter.length == 0">
+                <p class="text-center">No parameters available for this service.</p>
               </ng-container>
-              <div *ngFor="let selectedParam of externalSystemParams" class="input-group mb-3">
+              <div *ngFor="let selectedParam of system.parameter" class="input-group mb-3">
                 <div class="input-group flex-nowrap" [dndDraggable]="selectedParam" [dndType]="'dragParameter'">
                   <div class="input-group-prepend">
                     <span class="input-group-text">

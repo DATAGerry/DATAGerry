@@ -41,11 +41,9 @@ __OBJECT_PARSER__ = {
 
 
 def load_importer_class(importer_type: str, importer_name: str):
+    global __OBJECT_IMPORTER__
     __importer = {
-        'object': {
-            JsonObjectImporter.CONTENT_TYPE: JsonObjectImporter,
-            CsvObjectImporter.CONTENT_TYPE: CsvObjectImporter
-        }
+        'object': __OBJECT_IMPORTER__
     }
     try:
         importer_class = __importer.get(importer_type).get(importer_name)
@@ -57,11 +55,9 @@ def load_importer_class(importer_type: str, importer_name: str):
 
 
 def load_importer_config_class(importer_type: str, importer_name: str):
+    global __OBJECT_IMPORTER_CONFIG__
     __importer_config = {
-        'object': {
-            JsonObjectImporterConfig.CONTENT_TYPE: JsonObjectImporterConfig,
-            CsvObjectImporterConfig.CONTENT_TYPE: CsvObjectImporterConfig
-        }
+        'object': __OBJECT_IMPORTER_CONFIG__
     }
     try:
         importer_config_class = __importer_config.get(importer_type).get(importer_name)
@@ -73,11 +69,9 @@ def load_importer_config_class(importer_type: str, importer_name: str):
 
 
 def load_parser_class(parser_type: str, parser_name: str):
+    global __OBJECT_PARSER__
     __parser = {
-        'object': {
-            JsonObjectParser.CONTENT_TYPE: JsonObjectParser,
-            CsvObjectParser.CONTENT_TYPE: CsvObjectParser
-        }
+            'object': __OBJECT_PARSER__
     }
     try:
         parser_class = __parser.get(parser_type).get(parser_name)

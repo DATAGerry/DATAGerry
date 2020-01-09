@@ -20,7 +20,7 @@ from cmdb.data_storage.database_manager import NoDocumentFound, DatabaseManagerM
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.user_management.user import User
-from cmdb.user_management.user_authentication import AuthenticationProvider, LocalAuthenticationProvider, \
+from cmdb.security.auth.auth_providers import AuthenticationProvider, LocalAuthenticationProvider, \
     NoValidAuthenticationProviderError
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user_right import BaseRight

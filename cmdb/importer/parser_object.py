@@ -93,13 +93,6 @@ class CsvObjectParser(BaseObjectParser, CSVContent):
 
     def parse(self, file) -> CsvObjectParserResponse:
         run_config = self.get_config()
-
-        dialect = {
-            'delimiter': run_config.get('delimiter'),
-            'quotechar': run_config.get('quoteChar'),
-            'escapechar': run_config.get('escapeChar'),
-            'skipinitialspace': True
-        }
         parsed = {
             'count': 0,
             'header': None,
@@ -108,7 +101,11 @@ class CsvObjectParser(BaseObjectParser, CSVContent):
         }
         try:
             with open(f'{file}', 'r', newline=run_config.get('newline')) as csv_file:
-                csv_reader = csv.reader(csv_file, dialect=dialect)
+                csv_reader = csv.reader(csv_file,
+                                        delimiter=run_config.get('delimiter'),
+                                        quotechar=run_config.get('quoteChar'),
+                                        escapechar=run_config.get('escapeChar'),
+                                        skipinitialspace=True)
                 if run_config.get('header'):
                     parsed['header'] = next(csv_reader)
                 for row in csv_reader:

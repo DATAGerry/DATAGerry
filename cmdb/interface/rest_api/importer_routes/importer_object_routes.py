@@ -105,8 +105,10 @@ def parse_objects(request_user: User):
     request_file: FileStorage = get_file_in_request('file', request.files)
     # Load parser config
     parser_config: dict = get_element_from_data_request('parser_config', request) or {}
+    # Load file format
+    file_format = request.form.get('file_format', None)
     try:
-        parsed_output = generate_parsed_output(request_file, parser_config).output()
+        parsed_output = generate_parsed_output(request_file, file_format, parser_config).output()
     except ParserRuntimeError as pre:
         return abort(500, pre.message)
     return make_response(parsed_output)
@@ -126,6 +128,9 @@ def import_objects(request_user: User):
     working_file = f'/tmp/{filename}'
     request_file.save(working_file)
 
+    # Load file format
+    file_format = request.form.get('file_format', None)
+
     # Load parser config
     parser_config: dict = get_element_from_data_request('parser_config', request) or {}
     if parser_config == {}:
@@ -144,7 +149,7 @@ def import_objects(request_user: User):
 
     # Load parser
     try:
-        parser_class = load_parser_class('object', request_file.content_type)
+        parser_class = load_parser_class('object', file_format)
     except ParserLoadError as ple:
         return abort(406, ple.message)
     parser = parser_class(parser_config)
@@ -153,14 +158,14 @@ def import_objects(request_user: User):
 
     # Load importer config
     try:
-        importer_config_class = load_importer_config_class('object', request_file.content_type)
+        importer_config_class = load_importer_config_class('object', file_format)
     except ImporterLoadError as ile:
         return abort(406, ile.message)
     importer_config = importer_config_class(**importer_config_request)
     LOGGER.debug(importer_config_request)
     # Load importer
     try:
-        importer_class = load_importer_class('object', request_file.content_type)
+        importer_class = load_importer_class('object', file_format)
     except ImporterLoadError as ile:
         return abort(406, ile.message)
     importer = importer_class(working_file, importer_config, parser, object_manager, request_user)

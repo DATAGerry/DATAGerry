@@ -46,7 +46,11 @@ export class NgbStringAdapter extends NgbDateAdapter<Date> {
   }
 
   toModel(date: NgbDateStruct): any {
-    return date ? new Date(date.year, date.month - 1, date.day).toISOString() : null;
-
+    if (date != null) {
+      const d = new Date(date.year, date.month - 1, date.day);
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      return d;
+    }
+    return null;
   }
 }

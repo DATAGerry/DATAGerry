@@ -266,6 +266,25 @@ def count_objects():
     return resp
 
 
+@object_blueprint.route('/group/<string:value>', methods=['GET'])
+@login_required
+def group_objects_by_type_id(value):
+    try:
+        result = []
+        cursor = object_manager.group_objects_by_value(value)
+        max_length = 0
+        for document in cursor:
+            document['label'] = object_manager.get_type(document['_id']).label
+            result.append(document)
+            max_length += 1
+            if max_length == 5:
+                break
+        resp = make_response(result)
+    except CMDBError:
+        return abort(400)
+    return resp
+
+
 @object_blueprint.route('/<int:public_id>/', methods=['GET'])
 @object_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
@@ -406,8 +425,10 @@ def insert_object(request_user: User):
 
     try:
         new_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
-        new_object_data['public_id'] = object_manager.get_new_id(CmdbObject.COLLECTION)
-        new_object_data['active'] = True
+        if not 'public_id' in new_object_data:
+            new_object_data['public_id'] = object_manager.get_new_id(CmdbObject.COLLECTION)
+        if not 'active' in new_object_data:
+            new_object_data['active'] = True
         new_object_data['creation_time'] = datetime.utcnow()
         new_object_data['views'] = 0
         new_object_data['version'] = '1.0.0'  # default init version
