@@ -40,7 +40,7 @@ export class RefComponent extends RenderField implements OnInit {
   }
 
   public ngOnInit(): void {
-    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor(this.authService)));
+    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
     if (this.data.ref_types !== undefined) {
       this.objectService.getObjectsByType(this.data.ref_types).subscribe((objectList: RenderResult[]) => {
         this.objectList = objectList;

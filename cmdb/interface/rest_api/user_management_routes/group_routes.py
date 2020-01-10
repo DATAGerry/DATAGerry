@@ -43,7 +43,7 @@ group_blueprint = RootBlueprint('group_rest', __name__, url_prefix='/group')
 @right_required('base.user-management.group.view')
 def get_all_groups(request_user: User):
     try:
-        group_list = user_manager.get_all_groups()
+        group_list = user_manager.get_groups()
     except UserManagerGetError as err:
         LOGGER.error(err)
         return abort(404)

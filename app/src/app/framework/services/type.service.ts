@@ -139,7 +139,7 @@ export class TypeService<T = CmdbType> implements ApiService {
 
   // Validation functions
   public checkTypeExists(typeName: string) {
-    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor(this.authService)));
+    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
     return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`, specialClient);
   }
 

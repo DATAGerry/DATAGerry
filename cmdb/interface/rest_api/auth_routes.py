@@ -24,8 +24,9 @@ from cmdb.interface.route_utils import make_response, RootBlueprint
 from cmdb.security.auth import AuthModule, AuthSettingsDAO
 from cmdb.security.auth.auth_errors import AuthenticationError
 from cmdb.security.token.generator import TokenGenerator
-from cmdb.user_management.user_manager import UserManager, UserManagerGetError
-from cmdb.utils.system_reader import SystemSettingsReader
+from cmdb.user_management.user_manager import UserManager
+from cmdb.user_management.user_manager import user_manager, UserManagerGetError
+from cmdb.utils import SystemSettingsReader
 
 try:
     from cmdb.utils.error import CMDBError

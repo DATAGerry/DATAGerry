@@ -118,7 +118,7 @@ export class UserService<T = User> implements ApiService {
 
   // Special functions
   public checkUserExists(userName: string) {
-    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor(this.authService)));
+    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
     return this.api.callGet<T>(`${ this.servicePrefix }/${ userName }`, specialClient);
   }
 }

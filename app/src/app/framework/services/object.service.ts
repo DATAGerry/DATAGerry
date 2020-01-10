@@ -87,6 +87,10 @@ export class ObjectService<T = RenderResult> implements ApiService {
     return this.api.callGetRoute<number>(this.servicePrefix + '/count/' + typeID);
   }
 
+  public groupObjectsByType(value: string) {
+    return this.api.callGetRoute<any>(this.servicePrefix + '/group/' + value);
+  }
+
   public countObjects() {
     return this.api.callGet<number>(`${this.servicePrefix}/count/`).pipe(
       map((apiResponse) => {

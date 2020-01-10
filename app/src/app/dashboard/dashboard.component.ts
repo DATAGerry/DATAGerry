@@ -94,24 +94,13 @@ export class DashboardComponent implements OnInit {
         }]
       },
     };
-    let values;
-    this.typeService.getTypeList().subscribe((data: CmdbType[]) => {
-        values = data;
-      }, error => {
-      },
-      () => {
-        // tslint:disable-next-line:prefer-for-of
-        for (let i = 0; i < values.length; i++) {
-          this.objectService.countObjectsByType(values[i].public_id).subscribe(count => {
-            this.labelsObject.push(values[i].label);
-            this.colorsObject.push(this.getRandomColor());
-            this.itemsObject.push(count);
-          });
-          if (i === this.maxChartValue) {
-            break;
-          }
-        }
-      });
+    this.objectService.groupObjectsByType('type_id').subscribe(values => {
+      for (const obj of values) {
+        this.labelsObject.push(obj.label);
+        this.colorsObject.push(this.getRandomColor());
+        this.itemsObject.push(obj.count);
+      }
+    });
   }
 
   private generateTypeChar() {
