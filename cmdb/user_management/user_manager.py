@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+from typing import List
 
 from cmdb.data_storage.database_manager import NoDocumentFound, DatabaseManagerMongo
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
@@ -31,53 +32,60 @@ LOGGER = logging.getLogger(__name__)
 
 
 class UserManager(CmdbManagerBase):
-    MANAGEMENT_CLASSES = {
-        'GROUP_CLASSES': UserGroup,
-        'USER_CLASSES': User,
-        'BASE_RIGHT_CLASSES': BaseRight
-    }
 
     def __init__(self, database_manager: DatabaseManagerMongo, security_manager: SecurityManager):
-        self.dbm = database_manager
         self.scm = security_manager
         self.rights = self._load_rights()
-        super().__init__(database_manager)
+        super(UserManager, self).__init__(database_manager)
 
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
 
-    def count_user(self):
-        return self.dbm.count(collection=User.COLLECTION)
+    def count_user(self) -> int:
+        """Get number of users"""
+        return self._count(collection=User.COLLECTION)
 
     def get_user(self, public_id: int) -> User:
+        """Get user by public id"""
         try:
-            result = self.dbm.find_one(collection=User.COLLECTION, public_id=public_id)
+            result = self._get(collection=User.COLLECTION, public_id=public_id)
         except (CMDBError, Exception) as err:
             raise UserManagerGetError(err)
         return User(**result)
 
-    def get_all_users(self):
+    def get_users(self) -> List[User]:
+        """Get all users"""
         user_list = []
-        for founded_user in self.dbm.find_all(collection=User.COLLECTION):
+        for founded_user in self._get_many(collection=User.COLLECTION):
             try:
                 user_list.append(User(**founded_user))
             except CMDBError:
                 continue
         return user_list
 
-    def get_user_by_name(self, user_name) -> User:
-        formatted_filter = {'user_name': user_name}
+    def get_user_by(self, **requirements) -> User:
+        """Get user by requirement"""
         try:
-            return User(**self.dbm.find_one_by(collection=User.COLLECTION, filter=formatted_filter))
+            return User(**self._get_by(collection=User.COLLECTION, **requirements))
         except NoDocumentFound:
             raise UserManagerGetError(f'User not found')
 
-    def get_user_by(self, sort='public_id', **requirements) -> list:
-        ack = []
-        users = self._get_many(collection=User.COLLECTION, sort=sort, **requirements)
-        for user in users:
-            ack.append(User(**user))
-        return ack
+    def get_user_by_name(self, user_name) -> User:
+        """Get a user by his user_name"""
+        return self.get_user_by(user_name=user_name)
+
+    def get_users_by(self, sort='public_id', **requirements) -> List[User]:
+        """Get a list of users by requirement"""
+        user_list = []
+        users_in_database = self._get_many(collection=User.COLLECTION, sort=sort, **requirements)
+        for user in users_in_database:
+            try:
+                user_ = User(**user)
+            except CMDBError as err:
+                LOGGER.error(f'[UserManager] Error while inserting database user into return list: {err}')
+                continue
+            user_list.append(user_)
+        return user_list
 
     def insert_user(self, user: User) -> int:
         """
@@ -90,7 +98,7 @@ class UserManager(CmdbManagerBase):
 
     def update_user(self, public_id, update_params: dict):
         try:
-            return self.dbm.update(collection=User.COLLECTION, public_id=public_id, data=update_params)
+            return self._update(collection=User.COLLECTION, public_id=public_id, data=update_params)
         except (CMDBError, Exception):
             raise UserManagerUpdateError(f'Could not update user with ID: {public_id}')
 
@@ -112,9 +120,9 @@ class UserManager(CmdbManagerBase):
         except Exception as err:
             raise UserManagerDeleteError(err)
 
-    def get_all_groups(self) -> list:
+    def get_groups(self) -> list:
         group_list = []
-        for founded_group in self.dbm.find_all(collection=UserGroup.COLLECTION):
+        for founded_group in self._get_many(collection=UserGroup.COLLECTION):
             try:
                 group_list.append(UserGroup(**founded_group))
             except CMDBError:
@@ -124,14 +132,14 @@ class UserManager(CmdbManagerBase):
 
     def get_group(self, public_id: int) -> UserGroup:
         try:
-            founded_group = self.dbm.find_one(collection=UserGroup.COLLECTION, public_id=public_id)
+            founded_group = self._get(collection=UserGroup.COLLECTION, public_id=public_id)
             return UserGroup(**founded_group)
         except NoDocumentFound as e:
             raise UserManagerGetError(e)
 
     def get_group_by(self, **requirements) -> UserGroup:
         try:
-            return UserGroup(**self.dbm.find_one_by(collection=UserGroup.COLLECTION, filter=requirements))
+            return UserGroup(**self._get_by(collection=UserGroup.COLLECTION, **requirements))
         except NoDocumentFound:
             raise UserManagerGetError(f'Group not found')
 
@@ -165,7 +173,7 @@ class UserManager(CmdbManagerBase):
             raise UserManagerDeleteError(f'Could not delete group')
 
         # Cleanup user
-        users_in_group: [User] = self.get_user_by(**{'group_id': delete_group.get_public_id()})
+        users_in_group: [User] = self.get_users_by(**{'group_id': delete_group.get_public_id()})
         if len(users_in_group) > 0:
             if user_action == 'move':
                 if not options.get('group_id'):
@@ -178,10 +186,10 @@ class UserManager(CmdbManagerBase):
                 raise UserManagerDeleteError(f'No valid user action was provided')
         return ack
 
-    def get_right_names_with_min_level(self, MIN_LEVEL):
+    def get_right_names_with_min_level(self, min_level):
         selected_levels = []
         for right in self.rights:
-            if right.get_level() <= MIN_LEVEL:
+            if right.get_level() <= min_level:
                 selected_levels.append(right.get_name())
         return selected_levels
 
@@ -258,7 +266,7 @@ def get_user_manager():
     # TODO: refactor for single instance
     system_config_reader = SystemConfigReader()
     database_manager = DatabaseManagerMongo(
-            **system_config_reader.get_all_values_from_section('Database')
+        **system_config_reader.get_all_values_from_section('Database')
     )
     return UserManager(
         database_manager=database_manager,
