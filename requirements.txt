@@ -25,6 +25,7 @@ jdcal==1.4.1
 Jinja2==2.10
 jsonpickle==1.1
 jwcrypto==0.6.0
+ldap3==2.6.1
 macholib==1.11
 MarkupSafe==1.1.1
 mongomock==3.16.0
@@ -36,6 +37,7 @@ pefile==2019.4.18
 pika==0.12.0
 pluggy==0.9.0
 py==1.8.0
+pyasn1==0.4.8
 pycparser==2.19
 pycryptodome==3.8.1
 Pygments==2.4.2
