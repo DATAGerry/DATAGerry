@@ -136,6 +136,11 @@ def post_login():
                     f'[LOGIN] User {request_user_name} could not validate with provider {provider}: {ae}')
 
             LOGGER.info(f'[LOGIN] Provider instance: {provider_instance}')
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        LOGGER.error(f'[LOGIN] Error while login: {e}')
+        return abort(401)
     finally:
         # If login success generate user instance with token
         if user_instance:

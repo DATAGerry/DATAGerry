@@ -48,10 +48,10 @@ class UserManager(CmdbManagerBase):
     def get_user(self, public_id: int) -> User:
         """Get user by public id"""
         try:
-            result = self._get(collection=User.COLLECTION, public_id=public_id)
+            result = User(**self._get(collection=User.COLLECTION, public_id=public_id))
         except (CMDBError, Exception) as err:
             raise UserManagerGetError(err)
-        return User(**result)
+        return result
 
     def get_users(self) -> List[User]:
         """Get all users"""
