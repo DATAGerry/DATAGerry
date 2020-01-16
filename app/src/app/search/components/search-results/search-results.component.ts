@@ -126,7 +126,11 @@ export class SearchResultsComponent implements AfterViewInit, OnDestroy, OnInit 
       language: {
         search: '',
         searchPlaceholder: 'Filter...'
-      }
+      },
+      columnDefs: [
+        { width: '5%', targets: [0, 1, 2] },
+        { width: '8%', targets: [-1, -2, 3 ]},
+      ],
     };
   }
 

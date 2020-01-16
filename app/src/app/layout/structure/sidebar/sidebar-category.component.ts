@@ -24,7 +24,7 @@ import { TypeService } from '../../../framework/services/type.service';
 @Component({
   selector: 'cmdb-sidebar-category',
   templateUrl: './sidebar-category.component.html',
-  styleUrls: ['./sidebar.component.scss']
+  styleUrls: ['./sidebar-category.component.scss'],
 })
 export class SidebarCategoryComponent implements OnInit {
 

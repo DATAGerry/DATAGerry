@@ -75,7 +75,8 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
-    this.router.routeReuseStrategy.shouldReuseRoute = function () {
+    // tslint:disable-next-line:only-arrow-functions
+    this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
     };
   }
@@ -172,7 +173,12 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
       language: {
         search: '',
         searchPlaceholder: 'Filter...'
-      }
+      },
+      columnDefs: [
+        { className: 'dt-head-center', width: '1%', targets: 0 },
+        { className: 'dt-head-center', width: '5%', targets: [1, 2] },
+        { className: 'dt-head-center', width: '8%', targets: [-1, -2, -3, 3 ]},
+      ],
     };
   }
 
@@ -217,7 +223,6 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
             // console.log('ASDFASfd')
             // this.buildDtTable();
           }
-          console.log('ASDFASfd')
           this.buildDtTable();
           if (newSettings.columns && newSettings.columns.length > 1) {
             dtInstance.destroy();
@@ -286,7 +291,8 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
           className: 'btn btn-secondary btn-sm mr-1 dropdown-toggle',
           text: '<i class="fas fa-cog"></i>',
           collectionLayout: 'dropdown-menu overflow-auto',
-          buttons: function() {
+          // tslint:disable-next-line:only-arrow-functions
+          buttons() {
             const columnButton = [];
             // tslint:disable-next-line:prefer-for-of
             if (that.typeInstance.fields == null) {
@@ -309,7 +315,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
               extend: 'colvisRestore',
               text: 'Restore',
               className: 'btn btn-secondary btn-sm btn-block',
-              action: function() {
+              action() {
                 that.reload();
               }
             });
