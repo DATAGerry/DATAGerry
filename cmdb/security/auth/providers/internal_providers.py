@@ -19,7 +19,7 @@ from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.auth_errors import AuthenticationError
 from cmdb.security.auth.provider_config import AuthProviderConfig
-from cmdb.security.auth.provider_config_form import AuthProviderConfigForm
+from cmdb.security.auth.provider_config_form import AuthProviderConfigForm, AuthProviderConfigFormEntry
 from cmdb.user_management import User
 from cmdb.user_management.user_manager import UserManager, UserManagerGetError
 from cmdb.utils import SecurityManager
@@ -29,7 +29,13 @@ LOGGER = logging.getLogger(__name__)
 
 
 class LocalAuthenticationProviderConfig(AuthProviderConfig):
-    PROVIDER_CONFIG_FORM: AuthProviderConfigForm = AuthProviderConfig._BASE_PROVIDER_CONFIG_FORM
+    PROVIDER_CONFIG_FORM = AuthProviderConfigForm(
+        entries=[
+            AuthProviderConfigFormEntry(name='active', type='checkbox',
+                                        default=AuthProviderConfig.DEFAULT_CONFIG_VALUES.get('active'),
+                                        disabled=True)
+        ]
+    )
 
     def __init__(self, active: bool, **kwargs):
         super(LocalAuthenticationProviderConfig, self).__init__(active, **kwargs)

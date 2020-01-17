@@ -20,10 +20,11 @@ from typing import List, ClassVar
 
 from flask import request, current_app, abort
 
-from cmdb.interface.route_utils import make_response, RootBlueprint
+from cmdb.interface.route_utils import make_response, RootBlueprint, login_required, insert_request_user, right_required
 from cmdb.security.auth import AuthModule, AuthSettingsDAO, AuthenticationProvider
 from cmdb.security.auth.auth_errors import AuthenticationError
 from cmdb.security.token.generator import TokenGenerator
+from cmdb.user_management import User
 from cmdb.user_management.user_manager import UserManager
 from cmdb.user_management.user_manager import user_manager, UserManagerGetError
 from cmdb.utils import SystemSettingsReader, SystemSettingsWriter
@@ -44,17 +45,20 @@ with current_app.app_context():
 
 @auth_blueprint.route('/settings/', methods=['GET'])
 @auth_blueprint.route('/settings', methods=['GET'])
-def get_auth_settings():
-    auth_settings_values = system_settings_reader.get_all_values_from_section('auth',
-                                                                              default=AuthModule.__DEFAULT_SETTINGS__)
-    LOGGER.debug(auth_settings_values)
-    auth_module = AuthModule(AuthSettingsDAO(**auth_settings_values))
+@login_required
+@insert_request_user
+@right_required('base.system.view')
+def get_auth_settings(request_user: User):
+    auth_module = AuthModule(system_settings_reader)
     return make_response(auth_module.settings)
 
 
 @auth_blueprint.route('/settings/', methods=['POST', 'PUT'])
 @auth_blueprint.route('/settings', methods=['POST', 'PUT'])
-def update_auth_settings():
+@login_required
+@insert_request_user
+@right_required('base.system.edit')
+def update_auth_settings(request_user: User):
     new_auth_settings_values = request.get_json()
     if not new_auth_settings_values:
         return abort(400, 'No new data was provided')
@@ -70,19 +74,24 @@ def update_auth_settings():
 
 @auth_blueprint.route('/providers/', methods=['GET'])
 @auth_blueprint.route('/providers', methods=['GET'])
-def get_installed_providers():
-    provider_names: List[str] = []
-    auth_module = AuthModule()
+@login_required
+@insert_request_user
+@right_required('base.system.view')
+def get_installed_providers(request_user: User):
+    provider_names: List[dict] = []
+    auth_module = AuthModule(system_settings_reader)
     for provider in auth_module.providers:
-        provider_names.append(provider.get_name())
+        provider_names.append({'class_name': provider.get_name(), 'external': provider.EXTERNAL_PROVIDER})
     return make_response(provider_names)
 
 
 @auth_blueprint.route('/providers/<string:provider_class>/config/', methods=['GET'])
 @auth_blueprint.route('/providers/<string:provider_class>/config', methods=['GET'])
-def get_provider_config(provider_class: str):
-    auth_settings_values = system_settings_reader.get_all_values_from_section('auth')
-    auth_module = AuthModule(AuthSettingsDAO(**auth_settings_values))
+@login_required
+@insert_request_user
+@right_required('base.system.view')
+def get_provider_config(provider_class: str, request_user: User):
+    auth_module = AuthModule(system_settings_reader)
     try:
         provider_class_config = auth_module.get_provider(provider_class).get_config()
     except StopIteration:
@@ -92,9 +101,11 @@ def get_provider_config(provider_class: str):
 
 @auth_blueprint.route('/providers/<string:provider_class>/config_form/', methods=['GET'])
 @auth_blueprint.route('/providers/<string:provider_class>/config_form', methods=['GET'])
-def get_provider_config_form(provider_class: str):
-    auth_settings_values = system_settings_reader.get_all_values_from_section('auth')
-    auth_module = AuthModule(AuthSettingsDAO(**auth_settings_values))
+@login_required
+@insert_request_user
+@right_required('base.system.view')
+def get_provider_config_form(provider_class: str, request_user: User):
+    auth_module = AuthModule(system_settings_reader)
     try:
         provider_class_config = auth_module.get_provider(provider_class).get_config().PROVIDER_CONFIG_FORM
     except StopIteration:
@@ -112,8 +123,7 @@ def post_login():
     request_user_name = login_data['user_name']
     request_password = login_data['password']
 
-    auth_settings_values = system_settings_reader.get_all_values_from_section('auth')
-    auth_module = AuthModule(AuthSettingsDAO(**auth_settings_values))
+    auth_module = AuthModule(system_settings_reader)
     user_instance = None
     # search for user in db
     try:
@@ -131,6 +141,8 @@ def post_login():
         provider_instance = provider(config=provider_config_instance)
         if not provider_config_instance.is_active():
             return abort(503, f'Provider {provider_class_name} is deactivated')
+        if provider_instance.EXTERNAL_PROVIDER and not auth_module.settings.enable_external:
+            return abort(503, f'External providers are deactivated')
         try:
             user_instance = provider_instance.authenticate(request_user_name, request_password)
         except AuthenticationError as ae:
@@ -152,9 +164,8 @@ def post_login():
             provider_config_instance = provider_config_class(**provider_settings)
 
             if not provider_config_instance.is_active():
-                LOGGER.info(f'[LOGIN] Provider {provider} is not activated -> skip')
-
-            if not external_enabled:
+                continue
+            if provider.EXTERNAL_PROVIDER and not auth_module.settings.enable_external:
                 continue
 
             provider_instance = provider(config=provider_config_instance)

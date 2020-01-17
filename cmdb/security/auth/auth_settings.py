@@ -31,12 +31,13 @@ class AuthSettingsDAO:
     def __init__(self, providers: List[dict] = None, enable_external: bool = None, *args, **kwargs):
 
         self._id: str = AuthSettingsDAO.__DOCUMENT_IDENTIFIER
-        self.providers: List[dict] = []
-        self.__init_provider_list(providers=providers)
+        self.providers: List[dict] = providers
+        # self.__init_provider_list(providers=providers)
         self.enable_external: bool = enable_external or AuthSettingsDAO.__DEFAULT_EXTERNAL_ENABLED
 
     def __init_provider_list(self, providers: List[dict]):
         from cmdb.security.auth import AuthModule
+
         for provider in providers:
             try:
                 _provider_class_name: ClassVar[str] = provider.get('class_name')

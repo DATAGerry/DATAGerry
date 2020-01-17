@@ -22,6 +22,7 @@ from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.providers.external_providers import LdapAuthenticationProvider
 from cmdb.security.auth.providers.internal_providers import LocalAuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
+from cmdb.utils import SystemSettingsReader
 
 LOGGER = logging.getLogger(__name__)
 
@@ -40,12 +41,28 @@ class AuthModule:
         '_id': 'auth',
         'enable_external': True,
         'providers': [
-            provider.PROVIDER_CONFIG_CLASS.DEFAULT_CONFIG_VALUES for provider in __installed_providers
+            {
+                'class_name': provider.get_name(),
+                'config': provider.PROVIDER_CONFIG_CLASS.DEFAULT_CONFIG_VALUES
+            } for provider in __installed_providers
         ]
     }
 
-    def __init__(self, settings: AuthSettingsDAO = None):
-        self.__settings: AuthSettingsDAO = settings
+    def __init__(self, system_settings_reader: SystemSettingsReader):
+        auth_settings_values = system_settings_reader.\
+            get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__)
+        self.__settings: AuthSettingsDAO = self.__init_settings(auth_settings_values)
+
+    def __init_settings(self, auth_settings_values: dict) -> AuthSettingsDAO:
+        """Merge default values with database entries"""
+        for provider in self.get_installed_providers():
+            LOGGER.debug(f'[AuthModule][__init_settings] Installed provider: {provider}')
+            provider_config_list: List[dict] = auth_settings_values.get('providers')
+            LOGGER.debug(f'[AuthModule][__init_settings] Database provider list: {provider_config_list}')
+            if not any(p["class_name"] == provider.get_name() for p in provider_config_list):
+                LOGGER.warning(f'[AuthModule][__init_settings] No config for: {provider.get_name()}')
+                auth_settings_values['providers'].append(provider.PROVIDER_CONFIG_CLASS.DEFAULT_CONFIG_VALUES)
+        return AuthSettingsDAO(**auth_settings_values)
 
     @classmethod
     def register_provider(cls, provider: AuthenticationProvider) -> AuthenticationProvider:
@@ -98,6 +115,7 @@ class AuthModule:
         return self.__settings
 
     def get_provider(self, provider_name: str) -> AuthenticationProvider:
+        """Get a initialized provider instance"""
         try:
             _provider_class_name: ClassVar[str] = provider_name
             if not AuthModule.provider_exists(provider_name=_provider_class_name):

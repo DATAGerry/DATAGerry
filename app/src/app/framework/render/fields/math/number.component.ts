@@ -16,23 +16,22 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
+import { RenderField } from '../components.fields';
 
-import { AuthSettingsRoutingModule } from './auth-settings-routing.module';
-import { AuthSettingsComponent } from './auth-settings.component';
-import { ReactiveFormsModule } from '@angular/forms';
-import { RenderModule } from '../../framework/render/render.module';
-import { ActiveProvidersPipe } from './active-providers.pipe';
-
-@NgModule({
-  declarations: [AuthSettingsComponent, ActiveProvidersPipe],
-    imports: [
-        CommonModule,
-        AuthSettingsRoutingModule,
-        ReactiveFormsModule,
-        RenderModule
-    ]
+@Component({
+  selector: 'cmdb-number',
+  templateUrl: './number.component.html',
+  styleUrls: ['./number.component.scss']
 })
-export class AuthSettingsModule {
+export class NumberComponent extends RenderField {
+
+  public constructor() {
+    super();
+  }
+
+  public numberChange(event): any {
+    this.value = +event.target.value;
+  }
+
 }

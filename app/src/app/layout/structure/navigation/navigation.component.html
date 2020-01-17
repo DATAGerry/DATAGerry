@@ -54,8 +54,9 @@
           </div>
         </li>
         <!-- nav Import/Export -->
-        <li *permissionLink="['base.import.type.*', 'base.export.type.*', 'base.import.object.*', 'base.export.object.*']"
-            class="nav-item dropdown mr-2">
+        <li
+          *permissionLink="['base.import.type.*', 'base.export.type.*', 'base.import.object.*', 'base.export.object.*']"
+          class="nav-item dropdown mr-2">
           <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
              aria-expanded="false">
             <fa-icon icon="database"></fa-icon>
@@ -101,6 +102,17 @@
             <fa-icon icon="cogs"></fa-icon>
           </a>
           <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-header" *permissionLink="['base.system.view', 'base.system.edit','base.system.reload']">System</div>
+            <a class="dropdown-item" *permissionLink="'base.system.view'" [routerLink]="['/settings/system']">
+              <i class="fas fa-info-circle"></i> System Information</a>
+            <a class="dropdown-item" *permissionLink="'base.system.edit'"
+               [routerLink]="['/settings/auth']">
+              <i class="fas fa-lock"></i> Authentication
+            </a>
+            <a class="dropdown-item" *permissionLink="'base.system.reload'"
+               [routerLink]="['/settings/system/properties']">
+              <i class="fas fa-database"></i> Database Properties
+            </a>
             <div class="dropdown-header"
                  *permissionLink="['base.user-management.user.view', 'base.user-management.group.view']">
               User Management
@@ -115,7 +127,8 @@
               <i class="fas fa-low-vision"></i> Rights
             </a>
             <div *permissionLink="'base.framework.log.view'" class="dropdown-header">Logs</div>
-            <a *permissionLink="'base.framework.log.view'" class="dropdown-item" [routerLink]="['/settings/logs/objects']">
+            <a *permissionLink="'base.framework.log.view'" class="dropdown-item"
+               [routerLink]="['/settings/logs/objects']">
               <fa-icon icon="clipboard-list"></fa-icon>
               Object Logs</a>
           </div>
@@ -127,18 +140,8 @@
             <i class="far fa-question-circle"></i>
           </a>
           <div class="dropdown-menu dropdown-menu-right dropdown">
-            <div class="dropdown-header" *permissionLink="['base.system.view', 'base.system.reload']">System</div>
-            <a class="dropdown-item" *permissionLink="'base.system.view'" [routerLink]="['/settings/system']">
-              <i class="fas fa-info-circle"></i> System Information</a>
-            <!--            <a class="dropdown-item" *permissionLink="'base.system.view'"-->
-            <!--               [swal]="['Oops!', 'Sry this is not implemented yet :/', 'warning']">-->
-            <!--              <i class="fas fa-server"></i> Server Information</a>-->
-            <a class="dropdown-item" *permissionLink="'base.system.reload'"
-               [routerLink]="['/settings/system/properties']">
-              <i class="fas fa-database"></i> Database Properties
-            </a>
             <div class="dropdown-header">Help</div>
-            <a class="dropdown-item"[routerLink]="['/info/about']">
+            <a class="dropdown-item" [routerLink]="['/info/about']">
               <i class="fas fa-cube"></i> About DATAGERRY
             </a>
             <a class="dropdown-item" href="/docs" target="_blank">

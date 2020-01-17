@@ -27,6 +27,7 @@ SYSTEM_RIGHTS = (
     SystemRight(GLOBAL_RIGHT_IDENTIFIER, description='System and settings'),
     (
         SystemRight('view', description='View system configurations and settings'),
+        SystemRight('edit', description='Edit system configurations and settings'),
         SystemRight('reload', description='Reload system configurations')
     )
 )

@@ -47,7 +47,7 @@ class LdapAuthenticationProviderConfig(AuthProviderConfig):
         },
         'search': {
             'basedn': 'dc=example,dc=com',
-            'searchfilter': '(uid=%%username%%)'
+            'searchfilter': '(uid=%username%)'
         }
     }
 
@@ -79,6 +79,7 @@ class LdapAuthenticationProviderConfig(AuthProviderConfig):
                 AuthProviderConfigFormEntry(name='basedn', type='text',
                                             default=DEFAULT_CONFIG_VALUES.get('search').get('basedn')),
                 AuthProviderConfigFormEntry(name='searchfilter', type='text',
+                                            description='%username% will be inserted from the login data',
                                             default=DEFAULT_CONFIG_VALUES.get('search').get('searchfilter'))
             ])
         ]

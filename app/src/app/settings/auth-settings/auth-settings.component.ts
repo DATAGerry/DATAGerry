@@ -19,8 +19,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthSettingsService } from '../services/auth-settings.service';
 import { forkJoin, Observable, Subscription } from 'rxjs';
-import { Form, FormArray, FormControl, FormGroup } from '@angular/forms';
+import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { CmdbMode } from '../../framework/modes.enum';
+import { NgxSpinnerService } from 'ngx-spinner';
+import { ToastService } from '../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-auth-settings',
@@ -50,8 +52,9 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
   private authSettingsSubscription: Subscription;
   private authProvidersSubscription: Subscription;
   private configFormSubscriptions: Subscription;
+  private configFormSaveSubscriptions: Subscription;
 
-  public constructor(private authSettingsService: AuthSettingsService) {
+  public constructor(private authSettingsService: AuthSettingsService, private spinner: NgxSpinnerService, private toast: ToastService) {
     this.authProviderFormGroup = new FormGroup({
       _id: new FormControl('auth'),
       enable_external: new FormControl(false),
@@ -60,6 +63,7 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
     this.authSettingsSubscription = new Subscription();
     this.authProvidersSubscription = new Subscription();
     this.configFormSubscriptions = new Subscription();
+    this.configFormSaveSubscriptions = new Subscription();
   }
 
   public ngOnInit(): void {
@@ -126,10 +130,26 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
     return this.getProviderConfigFormGroup(index).get(sectionName) as FormGroup;
   }
 
+  public getInstalledProviderByName(providerName: string): any {
+    return this.installedProviderList.find(provider => provider.class_name === providerName);
+  }
+
+  public onSave(): void {
+    if (this.authProviderFormGroup.valid) {
+      this.spinner.show();
+      this.configFormSaveSubscriptions = this.authSettingsService.postSettings(this.authProviderFormGroup.value).subscribe((resp: any) => {
+        this.toast.show('Authentication config was updated!');
+      }).add(() => {
+        this.spinner.hide();
+      });
+    }
+  }
+
   public ngOnDestroy(): void {
     this.authSettingsSubscription.unsubscribe();
     this.authProvidersSubscription.unsubscribe();
     this.configFormSubscriptions.unsubscribe();
+    this.configFormSaveSubscriptions.unsubscribe();
   }
 
 }

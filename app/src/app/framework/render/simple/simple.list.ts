@@ -22,14 +22,15 @@ import { CheckboxSimpleComponent } from './choice/checkbox-simple.component';
 import { RadioSimpleComponent } from './choice/radio-simple.component';
 import { SelectSimpleComponent } from './choice/select-simple.component';
 import { RefSimpleComponent } from './special/ref-simple.component';
-import {DateSimpleComponent} from "./date/date-simple.component";
+import { DateSimpleComponent } from './date/date-simple.component';
 
-export const simpleComponents: {[type: string]: any} = {
+export const simpleComponents: { [type: string]: any } = {
   text: TextSimpleComponent,
   password: PasswordSimpleComponent,
   email: TextSimpleComponent,
   tel: TextSimpleComponent,
   textarea: TextSimpleComponent,
+  number: TextSimpleComponent,
   href: TextSimpleComponent,
   checkbox: CheckboxSimpleComponent,
   radio: RadioSimpleComponent,

@@ -47,6 +47,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { RefSimpleComponent } from './simple/special/ref-simple.component';
 import { DateComponent } from './fields/date/date.component';
 import { DateSimpleComponent } from './simple/date/date-simple.component';
+import { NumberComponent } from './fields/math/number.component';
 
 
 @NgModule({
@@ -57,6 +58,7 @@ import { DateSimpleComponent } from './simple/date/date-simple.component';
     EmailComponent,
     PhoneComponent,
     HrefComponent,
+    NumberComponent,
     RadioComponent,
     SelectComponent,
     RefComponent,
@@ -96,7 +98,8 @@ import { DateSimpleComponent } from './simple/date/date-simple.component';
     SelectSimpleComponent,
     RefSimpleComponent,
     DateSimpleComponent,
-    DateComponent
+    DateComponent,
+    NumberComponent
   ],
   exports: [
     RenderElementComponent,

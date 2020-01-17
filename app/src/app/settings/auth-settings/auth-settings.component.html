@@ -2,7 +2,7 @@
 <hr/>
 <div class="row">
   <div class="col-md-9">
-    <form class="renderForm" [formGroup]="authProviderFormGroup">
+    <form class="renderForm" [formGroup]="authProviderFormGroup" (ngSubmit)="onSave()">
       <cmdb-render-element [parentFormGroup]="authProviderFormGroup" [mode]="renderMode"
                            [data]="authSettingsFormConfig"></cmdb-render-element>
       <div *ngIf="authSettings && authProviderControlConfigFormMap && isPatched" id="providerSettings">
@@ -49,31 +49,33 @@
               </div>
             </div>
           </div>
+          <div class="card-footer text-muted text-right">
+            <span class="badge badge-primary">
+              {{getInstalledProviderByName(providerSettings?.class_name).external === true ? "External" : "Internal"}}
+            </span>
+          </div>
         </div>
       </div>
       <hr/>
-      <button type="submit" class="btn btn-success float-right"><i class="far fa-save"></i> Save</button>
+      <button type="submit" class="btn btn-success float-right" [disabled]="!authProviderFormGroup.valid">
+        <i class="far fa-save"></i> Save
+      </button>
       <div class="clearfix"></div>
     </form>
   </div>
   <div id="installed-providers" class="col-md-3">
-    <div *ngIf="installedProviderList" class="card">
+    <div *ngIf="installedProviderList && authSettings" class="card">
       <div class="card-header">
         Installed Providers
       </div>
       <ul class="list-group list-group-flush">
         <li *ngFor="let installedProvider of installedProviderList" class="list-group-item">
-          {{installedProvider}}
+          {{installedProvider?.class_name}}
         </li>
       </ul>
       <div class="card-footer text-center text-muted">
-        {{installedProviderList.length}}/{{installedProviderList.length}} activated
+        {{(authProviderFormGroup.get('providers').value | activeProviders).length}}/{{installedProviderList.length}} activated
       </div>
     </div>
-
   </div>
 </div>
-<pre>
-  {{authProviderFormGroup.value | json}}
-</pre>
-<hr/>

@@ -20,12 +20,14 @@ from typing import List
 class AuthProviderConfigFormEntry:
     """Frontend config element"""
 
-    def __init__(self, name: str, type: str, description: str = None, default=None, *args, **kwargs):
+    def __init__(self, name: str, type: str, description: str = None, default=None, **kwargs):
         self.name = name
         self.label = self.name.title().replace("_", " ")
         self.type = type
         self.description = description
         self.default = default
+        for key in kwargs:
+            setattr(self, key, kwargs[key])
 
 
 class AuthProviderConfigFormSection:

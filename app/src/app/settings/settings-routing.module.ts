@@ -35,6 +35,7 @@ const routes: Routes = [
   },
   {
     path: 'auth',
+    canActivateChild: [PermissionGuard],
     data: {
       breadcrumb: 'Authentication'
     },

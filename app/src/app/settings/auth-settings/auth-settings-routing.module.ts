@@ -24,7 +24,8 @@ const routes: Routes = [
     path: '',
     pathMatch: 'full',
     data: {
-      breadcrumb: 'Config'
+      breadcrumb: 'Config',
+      right: 'base.system.edit'
     },
     component: AuthSettingsComponent
   }

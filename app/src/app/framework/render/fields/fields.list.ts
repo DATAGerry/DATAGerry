@@ -28,6 +28,7 @@ import { SelectComponent } from './choice/select.component';
 import { DummyComponent } from './dummy/dummy.component';
 import { RefComponent } from './special/ref.component';
 import { DateComponent } from './date/date.component';
+import { NumberComponent } from './math/number.component';
 
 
 export const fieldComponents: { [type: string]: any } = {
@@ -36,7 +37,7 @@ export const fieldComponents: { [type: string]: any } = {
   email: EmailComponent,
   tel: PhoneComponent,
   textarea: TextareaComponent,
-  number: TextComponent,
+  number: NumberComponent,
   href: HrefComponent,
   checkbox: CheckboxComponent,
   radio: RadioComponent,
