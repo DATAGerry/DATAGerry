@@ -32,7 +32,7 @@ export class RenderField {
   public MODES = CmdbMode;
   public toast: ToastService;
 
-  @Input() public mode: CmdbMode;
+  @Input() public mode: CmdbMode = this.MODES.View;
   @Input() public parentFormGroup: FormGroup;
 
   @Input('data')

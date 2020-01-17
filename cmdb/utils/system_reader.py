@@ -21,7 +21,7 @@ import os
 import re
 from typing import Optional, Any, Union, List
 
-from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.data_storage.database_manager import DatabaseManagerMongo, NoDocumentFound
 from cmdb.utils.cast import auto_cast
 from cmdb.utils.error import CMDBError
 
@@ -309,19 +309,26 @@ class SystemSettingsReader(SystemReader):
             projection={'_id': 1}
         )
 
-    def get_all_values_from_section(self, section) -> dict:
+    def get_all_values_from_section(self, section, default = None) -> dict:
         """
         get all values from a section
         Args:
             section: section name
+            default: if no document was found
 
         Returns:
             key value dict of all elements inside section
         """
-        return self.dbm.find_one_by(
-            collection=SystemSettingsReader.COLLECTION,
-            filter={'_id': section}
-        )
+        try:
+            section_values = self.dbm.find_one_by(
+                collection=SystemSettingsReader.COLLECTION,
+                filter={'_id': section}
+            )
+        except NoDocumentFound:
+            if default:
+                return default
+            raise SectionError(section)
+        return section_values
 
     def get_all(self) -> list:
         return self.dbm.find_all(collection=SystemSettingsReader.COLLECTION)

@@ -25,8 +25,11 @@ import { RenderField } from '../components.fields';
 })
 export class CheckboxComponent extends RenderField {
 
+  public namePrefix: string = 'dummy_';
+
   public constructor() {
     super();
+    this.namePrefix = `${ Math.random().toString(36).slice(-8) }_`;
   }
 
 }

@@ -16,26 +16,18 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FrameworkRoutingModule } from './framework-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-import { TypeService } from './services/type.service';
-import { ObjectService } from './services/object.service';
-import { FrameworkComponent } from './framework.component';
+import { Component, OnInit } from '@angular/core';
 
-@NgModule({
-  declarations: [
-    FrameworkComponent,
-  ],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    FrameworkRoutingModule
-  ],
-  providers: [
-    TypeService,
-    ObjectService
-  ]
+@Component({
+  selector: 'cmdb-collection-list',
+  templateUrl: './collection-list.component.html',
+  styleUrls: ['./collection-list.component.scss']
 })
-export class FrameworkModule { }
+export class CollectionListComponent implements OnInit {
+
+  constructor() { }
+
+  public ngOnInit(): void {
+  }
+
+}

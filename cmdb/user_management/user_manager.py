@@ -63,17 +63,6 @@ class UserManager(CmdbManagerBase):
                 continue
         return user_list
 
-    def get_user_by(self, **requirements) -> User:
-        """Get user by requirement"""
-        try:
-            return User(**self._get_by(collection=User.COLLECTION, **requirements))
-        except NoDocumentFound:
-            raise UserManagerGetError(f'User not found')
-
-    def get_user_by_name(self, user_name) -> User:
-        """Get a user by his user_name"""
-        return self.get_user_by(user_name=user_name)
-
     def get_users_by(self, sort='public_id', **requirements) -> List[User]:
         """Get a list of users by requirement"""
         user_list = []
@@ -86,6 +75,17 @@ class UserManager(CmdbManagerBase):
                 continue
             user_list.append(user_)
         return user_list
+
+    def get_user_by(self, **requirements) -> User:
+        """Get user by requirement"""
+        try:
+            return User(**self._get_by(collection=User.COLLECTION, **requirements))
+        except NoDocumentFound:
+            raise UserManagerGetError(f'User not found')
+
+    def get_user_by_name(self, user_name) -> User:
+        """Get a user by his user_name"""
+        return self.get_user_by(user_name=user_name)
 
     def insert_user(self, user: User) -> int:
         """
@@ -145,7 +145,7 @@ class UserManager(CmdbManagerBase):
 
     def update_group(self, public_id, update_params: dict) -> bool:
         try:
-            ack = self.dbm.update(collection=UserGroup.COLLECTION, public_id=public_id,
+            ack = self._update(collection=UserGroup.COLLECTION, public_id=public_id,
                                   data=update_params)
         except (CMDBError, Exception) as e:
             LOGGER.error(e)

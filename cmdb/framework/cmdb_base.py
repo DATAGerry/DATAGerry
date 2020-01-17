@@ -20,8 +20,8 @@ from cmdb.data_storage.database_manager import DatabaseManagerMongo
 
 
 class CmdbManagerBase:
-    """Represents the base class for object managers. A respective implementation is always adapted to the
-       respective database manager :class:`cmdb.data_storage.DatabaseManager` or the used functionalities.
+    """Represents the base class for cmdb managers. A respective implementation is always adapted to the
+       respective database manager :class:`cmdb.data_storage.DatabaseManager`.
        But should always use at least the super functions listed here.
     """
 
@@ -125,7 +125,7 @@ class CmdbManagerBase:
         """
         return self.dbm.update(
             collection=collection,
-            public_id=public_id,
+            filter={'public_id': public_id},
             data=data
         )
 

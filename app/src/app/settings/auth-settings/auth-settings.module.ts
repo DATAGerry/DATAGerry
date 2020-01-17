@@ -18,24 +18,20 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FrameworkRoutingModule } from './framework-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-import { TypeService } from './services/type.service';
-import { ObjectService } from './services/object.service';
-import { FrameworkComponent } from './framework.component';
+
+import { AuthSettingsRoutingModule } from './auth-settings-routing.module';
+import { AuthSettingsComponent } from './auth-settings.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { RenderModule } from '../../framework/render/render.module';
 
 @NgModule({
-  declarations: [
-    FrameworkComponent,
-  ],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    FrameworkRoutingModule
-  ],
-  providers: [
-    TypeService,
-    ObjectService
-  ]
+  declarations: [AuthSettingsComponent],
+    imports: [
+        CommonModule,
+        AuthSettingsRoutingModule,
+        ReactiveFormsModule,
+        RenderModule
+    ]
 })
-export class FrameworkModule { }
+export class AuthSettingsModule {
+}

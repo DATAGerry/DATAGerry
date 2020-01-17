@@ -16,26 +16,33 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FrameworkRoutingModule } from './framework-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-import { TypeService } from './services/type.service';
-import { ObjectService } from './services/object.service';
-import { FrameworkComponent } from './framework.component';
+import { CmdbDao } from './cmdb-dao';
 
-@NgModule({
-  declarations: [
-    FrameworkComponent,
-  ],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    FrameworkRoutingModule
-  ],
-  providers: [
-    TypeService,
-    ObjectService
-  ]
-})
-export class FrameworkModule { }
+export class CmdbCollection implements CmdbDao {
+  // tslint:disable: variable-name
+  public public_id: number;
+  public template_id: number;
+  public creation_time: {
+    $date: string;
+  };
+  public last_edit_time?: {
+    $date: string;
+  };
+  public object_list: [];
+  // tslint:enable
+}
+
+export class CmdbCollectionTemplate implements CmdbDao {
+  // tslint:disable: variable-name
+  public public_id: number;
+  public name: string;
+  public label?: string;
+  public creation_time: {
+    $date: string;
+  };
+  public last_edit_time?: {
+    $date: string;
+  };
+  public type_order_list?: [];
+  // tslint:enable
+}

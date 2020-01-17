@@ -208,7 +208,7 @@ class CmdbObjectManager(CmdbManagerBase):
         else:
             raise ObjectManagerUpdateError('Wrong CmdbObject init format - expecting CmdbObject or dict')
         update_object.last_edit_time = datetime.utcnow()
-        ack = self.dbm.update(
+        ack = self._update(
             collection=CmdbObject.COLLECTION,
             public_id=update_object.get_public_id(),
             data=update_object.to_database()
@@ -447,7 +447,7 @@ class CmdbObjectManager(CmdbManagerBase):
             update_category = data
         elif isinstance(data, dict):
             update_category = CmdbCategory(**data)
-        ack = self.dbm.update(
+        ack = self._update(
             collection=CmdbCategory.COLLECTION,
             public_id=update_category.get_public_id() or update_category.public_id,
             data=update_category.to_database()
@@ -499,7 +499,7 @@ class CmdbObjectManager(CmdbManagerBase):
     def update_status(self, data):
         try:
             updated_status = CmdbStatus(**data)
-            ack = self.dbm.update(CmdbStatus.COLLECTION, updated_status.get_public_id(), updated_status.to_database())
+            ack = self._update(CmdbStatus.COLLECTION, updated_status.get_public_id(), updated_status.to_database())
         except (CMDBError, Exception) as err:
             LOGGER.error(err)
             raise ObjectManagerUpdateError(err)

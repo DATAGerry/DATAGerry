@@ -124,7 +124,7 @@ class ExportdJobManagement(CmdbManagerBase):
         else:
             raise ExportdJobManagerUpdateError(f'Could not update job with ID: {data.get_public_id()}')
         update_object.last_execute_date = datetime.utcnow()
-        ack = self.dbm.update(
+        ack = self._update(
             collection=ExportdJob.COLLECTION,
             public_id=update_object.get_public_id(),
             data=update_object.to_database()

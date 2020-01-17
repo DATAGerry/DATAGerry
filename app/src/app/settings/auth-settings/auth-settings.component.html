@@ -1,0 +1,79 @@
+<h1>Authentication Config</h1>
+<hr/>
+<div class="row">
+  <div class="col-md-9">
+    <form class="renderForm" [formGroup]="authProviderFormGroup">
+      <cmdb-render-element [parentFormGroup]="authProviderFormGroup" [mode]="renderMode"
+                           [data]="authSettingsFormConfig"></cmdb-render-element>
+      <div *ngIf="authSettings && authProviderControlConfigFormMap && isPatched" id="providerSettings">
+        <div formArrayName="providers" class="card mb-3"
+             *ngFor="let providerSettings of authSettings?.providers; index as i">
+          <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs">
+              <li class="nav-item">
+                <a class="nav-link active" data-toggle="tab" [href]="'#'+providerSettings?.class_name+'_pane_entry'"
+                   role="tab">
+                  {{providerSettings?.class_name}}
+                </a>
+              </li>
+              <ng-container *ngIf="authProviderControlConfigFormMap.get(providerSettings?.class_name)">
+                <li class="nav-item"
+                    *ngFor="let providerSettingSection of authProviderControlConfigFormMap.get(providerSettings?.class_name).sections">
+                  <a class="nav-link" data-toggle="tab"
+                     [href]="'#'+providerSettings?.class_name+'_pane_section_'+providerSettingSection.name" role="tab">
+                    {{providerSettingSection?.label}}
+                  </a>
+                </li>
+              </ng-container>
+            </ul>
+          </div>
+          <div class="card-body">
+            <div *ngIf="authProviderControlConfigFormMap.get(providerSettings?.class_name)" class="tab-content">
+              <div class="tab-pane fade show active" [id]="providerSettings?.class_name+'_pane_entry'" role="tabpanel">
+                <ng-container
+                  *ngFor="let entry of authProviderControlConfigFormMap.get(providerSettings.class_name).entries">
+                  <cmdb-render-element [mode]="renderMode" [data]="entry"
+                                       [parentFormGroup]="getProviderConfigFormGroup(i)">
+                  </cmdb-render-element>
+                </ng-container>
+              </div>
+              <div
+                *ngFor="let providerSettingSection of authProviderControlConfigFormMap.get(providerSettings.class_name).sections"
+                class="tab-pane fade" [id]="providerSettings?.class_name+'_pane_section_'+providerSettingSection.name"
+                role="tabpanel">
+                <ng-container *ngFor="let sectionEntry of providerSettingSection.entries">
+                  <cmdb-render-element [mode]="renderMode" [data]="sectionEntry"
+                                       [parentFormGroup]="getProviderConfigSectionFormGroup(i, providerSettingSection.name)">
+                  </cmdb-render-element>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr/>
+      <button type="submit" class="btn btn-success float-right"><i class="far fa-save"></i> Save</button>
+      <div class="clearfix"></div>
+    </form>
+  </div>
+  <div id="installed-providers" class="col-md-3">
+    <div *ngIf="installedProviderList" class="card">
+      <div class="card-header">
+        Installed Providers
+      </div>
+      <ul class="list-group list-group-flush">
+        <li *ngFor="let installedProvider of installedProviderList" class="list-group-item">
+          {{installedProvider}}
+        </li>
+      </ul>
+      <div class="card-footer text-center text-muted">
+        {{installedProviderList.length}}/{{installedProviderList.length}} activated
+      </div>
+    </div>
+
+  </div>
+</div>
+<pre>
+  {{authProviderFormGroup.value | json}}
+</pre>
+<hr/>

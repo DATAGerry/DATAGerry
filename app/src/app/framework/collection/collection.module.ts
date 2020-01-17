@@ -19,14 +19,22 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+import { DataTablesModule } from 'angular-datatables';
 import { CollectionRoutingModule } from './collection-routing.module';
 import { CollectionComponent } from './collection.component';
+import { CollectionTemplateListComponent } from './collection-template-list/collection-template-list.component';
+import { CollectionTemplateAddComponent } from './collection-template-add/collection-template-add.component';
+import { CollectionListComponent } from './collection-list/collection-list.component';
+import { CollectionAddComponent } from './collection-add/collection-add.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
-  declarations: [CollectionComponent],
+  declarations: [CollectionComponent, CollectionTemplateListComponent, CollectionTemplateAddComponent, CollectionListComponent, CollectionAddComponent],
   imports: [
     CommonModule,
-    CollectionRoutingModule
+    CollectionRoutingModule,
+    DataTablesModule,
+    ReactiveFormsModule
   ]
 })
 export class CollectionModule { }

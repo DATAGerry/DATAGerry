@@ -66,7 +66,7 @@ class CmdbLogManager(CmdbManagerBase):
             new_log = CmdbLog(**log_data)
             ack = self._insert(CmdbMetaLog.COLLECTION, new_log.to_database())
         except (CMDBError, Exception) as err:
-            LOGGER.error(err.message)
+            LOGGER.error(err)
             raise LogManagerInsertError(err)
         return ack
 

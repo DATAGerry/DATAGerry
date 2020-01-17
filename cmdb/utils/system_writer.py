@@ -41,25 +41,13 @@ class SystemWriter:
         """
         self.writer = writer
 
-    def write(self, _id: str, data: dict) -> str:
+    def write(self, _id: str, data: dict):
         """
         write data into database
         it' the only module where no public_id is used
         Args:
             _id: database entry identifier
             data: data to write
-
-        Returns:
-            acknowledgment: based on database manager
-        """
-        raise NotImplementedError
-
-    def update(self, _id: str or int, data: dict) -> str:
-        """
-        update entry in database
-        Args:
-            _id: database entry identifier
-            data: data to update
 
         Returns:
             acknowledgment: based on database manager
@@ -87,49 +75,12 @@ class SystemSettingsWriter(SystemWriter):
         """
         super(SystemSettingsWriter, self).__init__(database_manager)
 
-    def write(self, _id: str, data: dict) -> str:
+    def write(self, _id: str, data: dict):
         """
         Write new settings in database
-        Args:
-            _id: new settings_id
-            data: data to write
-        Returns:
-            acknowledgment: based on database manager
-        TODO: REFACTOR
-
         """
-        try:
-            writing_document = self.writer.find_one_by(collection=self.COLLECTION, filter={'_id': _id})
-        except NoDocumentFound:
-            self.writer.insert_with_internal(collection=self.COLLECTION, _id=_id, data=data)
-            writing_document = self.writer.find_one_by(collection=self.COLLECTION, filter={'_id': _id})
 
-        writing_document.update(data)
-        ack = self.writer.update_with_internal(
-            collection=self.COLLECTION,
-            _id=writing_document['_id'],
-            data=writing_document
-        )
-        return ack
-
-    def update(self, _id: str or int, data: dict) -> str:
-        """
-        Update existing setting in database
-        Args:
-            _id: settings entry id
-            data: data to update
-
-        Returns:
-            acknowledgment: based on database manager
-
-        TODO: REFACTOR
-        """
-        from cmdb.data_storage.database_utils import convert_form_data
-        new_data = convert_form_data(data)
-        current_setting = self.writer.find_one_by(collection=self.COLLECTION, filter={'_id': _id})
-        current_setting.update(new_data)
-        ack = self.writer.update_with_internal(collection=self.COLLECTION, _id=_id, data=current_setting)
-        return ack
+        return self.writer.update(collection=self.COLLECTION, filter={'_id': _id}, data=data, upsert=True)
 
     def verify(self, _id: str, data: dict = None) -> bool:
         """

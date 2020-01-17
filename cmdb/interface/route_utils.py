@@ -116,9 +116,11 @@ def insert_request_user(func):
     """
 
     @functools.wraps(func)
-    def get_user(*args, **kwargs):
-        from flask import request
-        from cmdb.user_management.user_manager import user_manager
+    def get_request_user(*args, **kwargs):
+        from flask import request, current_app
+        with current_app.app_context():
+            user_manager = current_app.user_manager
+
         token = request.headers['Authorization']
         try:
             decrypted_token = TokenValidator().decode_token(token)
@@ -132,7 +134,7 @@ def insert_request_user(func):
         kwargs.update({'request_user': user})
         return func(*args, **kwargs)
 
-    return get_user
+    return get_request_user
 
 
 def right_required(required_right: str, excepted: dict = None):

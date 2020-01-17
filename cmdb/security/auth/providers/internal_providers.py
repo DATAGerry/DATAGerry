@@ -18,7 +18,8 @@ import logging
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.auth_errors import AuthenticationError
-from cmdb.security.auth.providers.provider_config import AuthProviderConfig
+from cmdb.security.auth.provider_config import AuthProviderConfig
+from cmdb.security.auth.provider_config_form import AuthProviderConfigForm
 from cmdb.user_management import User
 from cmdb.user_management.user_manager import UserManager, UserManagerGetError
 from cmdb.utils import SecurityManager
@@ -28,6 +29,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class LocalAuthenticationProviderConfig(AuthProviderConfig):
+    PROVIDER_CONFIG_FORM: AuthProviderConfigForm = AuthProviderConfig._BASE_PROVIDER_CONFIG_FORM
 
     def __init__(self, active: bool, **kwargs):
         super(LocalAuthenticationProviderConfig, self).__init__(active, **kwargs)
@@ -35,26 +37,22 @@ class LocalAuthenticationProviderConfig(AuthProviderConfig):
 
 class LocalAuthenticationProvider(AuthenticationProvider):
     PROVIDER_CONFIG_CLASS = LocalAuthenticationProviderConfig
-    DEFAULT_PROVIDER_CONFIG = LocalAuthenticationProviderConfig(
-        active=True
-    )
 
     def __init__(self, config: LocalAuthenticationProviderConfig = None, *args, **kwargs):
-        self.__dbm = DatabaseManagerMongo(
-            **SystemConfigReader().get_all_values_from_section('Database')
-        )
-        self.__scm = SecurityManager(self.__dbm)
-        self.__user_manager = UserManager(self.__dbm, self.__scm)
-        self.__config: LocalAuthenticationProviderConfig = config or LocalAuthenticationProvider.DEFAULT_PROVIDER_CONFIG
-        super(LocalAuthenticationProvider, self).__init__(self.__config)
+        super(LocalAuthenticationProvider, self).__init__(config)
 
     def authenticate(self, user_name: str, password: str, **kwargs) -> User:
+        __dbm = DatabaseManagerMongo(
+            **SystemConfigReader().get_all_values_from_section('Database')
+        )
+        __scm = SecurityManager(__dbm)
+        __user_manager = UserManager(__dbm, __scm)
         LOGGER.info(f'[LocalAuthenticationProvider] Try login for user {user_name}')
         try:
-            user: User = self.__user_manager.get_user_by_name(user_name=user_name)
+            user: User = __user_manager.get_user_by_name(user_name=user_name)
         except UserManagerGetError as umge:
             raise AuthenticationError(LocalAuthenticationProvider.get_name(), umge.message)
-        login_pass = self.__scm.generate_hmac(password)
+        login_pass = __scm.generate_hmac(password)
         if login_pass == user.get_password():
             return user
         raise AuthenticationError(LocalAuthenticationProvider.get_name(), 'User not exists')

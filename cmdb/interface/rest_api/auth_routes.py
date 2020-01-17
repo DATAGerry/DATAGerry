@@ -16,17 +16,17 @@
 
 import logging
 from datetime import datetime
-from typing import List
+from typing import List, ClassVar
 
 from flask import request, current_app, abort
 
 from cmdb.interface.route_utils import make_response, RootBlueprint
-from cmdb.security.auth import AuthModule, AuthSettingsDAO
+from cmdb.security.auth import AuthModule, AuthSettingsDAO, AuthenticationProvider
 from cmdb.security.auth.auth_errors import AuthenticationError
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management.user_manager import UserManager
 from cmdb.user_management.user_manager import user_manager, UserManagerGetError
-from cmdb.utils import SystemSettingsReader
+from cmdb.utils import SystemSettingsReader, SystemSettingsWriter
 
 try:
     from cmdb.utils.error import CMDBError
@@ -39,14 +39,33 @@ LOGGER = logging.getLogger(__name__)
 with current_app.app_context():
     user_manager: UserManager = current_app.user_manager
     system_settings_reader: SystemSettingsReader = SystemSettingsReader(current_app.database_manager)
+    system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(current_app.database_manager)
 
 
 @auth_blueprint.route('/settings/', methods=['GET'])
 @auth_blueprint.route('/settings', methods=['GET'])
 def get_auth_settings():
-    auth_settings_values = system_settings_reader.get_all_values_from_section('auth')
+    auth_settings_values = system_settings_reader.get_all_values_from_section('auth',
+                                                                              default=AuthModule.__DEFAULT_SETTINGS__)
+    LOGGER.debug(auth_settings_values)
     auth_module = AuthModule(AuthSettingsDAO(**auth_settings_values))
     return make_response(auth_module.settings)
+
+
+@auth_blueprint.route('/settings/', methods=['POST', 'PUT'])
+@auth_blueprint.route('/settings', methods=['POST', 'PUT'])
+def update_auth_settings():
+    new_auth_settings_values = request.get_json()
+    if not new_auth_settings_values:
+        return abort(400, 'No new data was provided')
+    try:
+        new_auth_setting_instance = AuthSettingsDAO(**new_auth_settings_values, default=AuthModule.__DEFAULT_SETTINGS__)
+    except Exception as err:
+        return abort(400, err)
+    update_result = system_setting_writer.write(_id='auth', data=new_auth_setting_instance.__dict__)
+    if update_result.acknowledged:
+        return make_response(system_settings_reader.get_section('auth'))
+    return abort(400, 'Could not update auth settings')
 
 
 @auth_blueprint.route('/providers/', methods=['GET'])
@@ -59,13 +78,25 @@ def get_installed_providers():
     return make_response(provider_names)
 
 
-@auth_blueprint.route('/providers/config/<string:provider_class>/', methods=['GET'])
-@auth_blueprint.route('/providers/config/<string:provider_class>', methods=['GET'])
+@auth_blueprint.route('/providers/<string:provider_class>/config/', methods=['GET'])
+@auth_blueprint.route('/providers/<string:provider_class>/config', methods=['GET'])
 def get_provider_config(provider_class: str):
     auth_settings_values = system_settings_reader.get_all_values_from_section('auth')
     auth_module = AuthModule(AuthSettingsDAO(**auth_settings_values))
     try:
-        provider_class_config = auth_module.settings.get_provider_settings(provider_class).config
+        provider_class_config = auth_module.get_provider(provider_class).get_config()
+    except StopIteration:
+        return abort(404, 'Provider not found')
+    return make_response(provider_class_config)
+
+
+@auth_blueprint.route('/providers/<string:provider_class>/config_form/', methods=['GET'])
+@auth_blueprint.route('/providers/<string:provider_class>/config_form', methods=['GET'])
+def get_provider_config_form(provider_class: str):
+    auth_settings_values = system_settings_reader.get_all_values_from_section('auth')
+    auth_module = AuthModule(AuthSettingsDAO(**auth_settings_values))
+    try:
+        provider_class_config = auth_module.get_provider(provider_class).get_config().PROVIDER_CONFIG_FORM
     except StopIteration:
         return abort(404, 'Provider not found')
     return make_response(provider_class_config)
@@ -92,10 +123,11 @@ def post_login():
         if not auth_module.provider_exists(provider_class_name):
             return abort(501, f'[LOGIN] Provider {provider_class_name} does not exists or is not installed')
 
-        provider = auth_module.get_provider(provider_class_name)
-        provider_config_class = provider.PROVIDER_CONFIG_CLASS
-        provider_settings = auth_module.settings.get_provider_settings(provider.get_name())
-        provider_config_instance = provider_config_class(**provider_settings)
+        provider: ClassVar[AuthenticationProvider] = auth_module.get_provider_class(provider_class_name)
+        provider_config_class: ClassVar[str] = provider.PROVIDER_CONFIG_CLASS
+        provider_config_settings = auth_module.settings.get_provider_settings(provider.get_name())
+        LOGGER.debug(provider_config_settings)
+        provider_config_instance = provider_config_class(**provider_config_settings)
         provider_instance = provider(config=provider_config_instance)
         if not provider_config_instance.is_active():
             return abort(503, f'Provider {provider_class_name} is deactivated')

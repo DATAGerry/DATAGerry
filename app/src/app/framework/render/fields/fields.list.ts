@@ -36,6 +36,7 @@ export const fieldComponents: { [type: string]: any } = {
   email: EmailComponent,
   tel: PhoneComponent,
   textarea: TextareaComponent,
+  number: TextComponent,
   href: HrefComponent,
   checkbox: CheckboxComponent,
   radio: RadioComponent,

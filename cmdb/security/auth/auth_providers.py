@@ -15,8 +15,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+from typing import ClassVar
 
-from cmdb.security.auth.providers.provider_config import AuthProviderConfig
+from cmdb.security.auth.provider_config import AuthProviderConfig
+from cmdb.user_management import User
 
 LOGGER = logging.getLogger(__name__)
 
@@ -25,8 +27,7 @@ class AuthenticationProvider:
     """Provider super class"""
     PASSWORD_ABLE: bool = True
     EXTERNAL_PROVIDER: bool = False
-    PROVIDER_CONFIG_CLASS = AuthProviderConfig
-    DEFAULT_PROVIDER_CONFIG = None
+    PROVIDER_CONFIG_CLASS: ClassVar[AuthProviderConfig] = AuthProviderConfig
 
     def __init__(self, config: AuthProviderConfig = None, *args, **kwargs):
         """
@@ -34,10 +35,13 @@ class AuthenticationProvider:
         Args:
             config: Configuration object
         """
-        self.__config = config or self.DEFAULT_PROVIDER_CONFIG
+        self.config = config or self.PROVIDER_CONFIG_CLASS(**self.PROVIDER_CONFIG_CLASS.DEFAULT_CONFIG_VALUES)
 
-    def authenticate(self, user, password: str, **kwargs) -> bool:
+    def authenticate(self, user_name: str, password: str, **kwargs) -> User:
         raise NotImplementedError
+
+    def get_config(self) -> AuthProviderConfig:
+        return self.config
 
     @classmethod
     def is_password_able(cls):
