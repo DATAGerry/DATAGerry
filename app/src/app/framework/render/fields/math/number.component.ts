@@ -34,4 +34,8 @@ export class NumberComponent extends RenderField {
     this.value = +event.target.value;
   }
 
+  public set value(valueList: any) {
+    this.innerValue = +valueList;
+  }
+
 }
