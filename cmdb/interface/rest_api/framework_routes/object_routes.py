@@ -65,7 +65,12 @@ def get_object_list(request_user: User):
         list of rendered objects
     """
     try:
-        object_list = object_manager.get_all_objects()
+        filter_state = {'sort': 'public_id'}
+        if _fetch_only_active_objs():
+            filter_state['active'] = {"$eq": True}
+
+        object_list = object_manager.get_objects_by(**filter_state)
+
         if request.args.get('start') is not None:
             start = int(request.args.get('start'))
             length = int(request.args.get('length'))
@@ -144,9 +149,12 @@ def iterate_over_type_object_list(type_id: int, request_user: User):
 @right_required('base.framework.object.view')
 def get_objects_by_type(public_id, request_user: User):
     """Return all objects by type_id"""
-
     try:
-        object_list = object_manager.get_objects_by(sort="type_id", type_id=public_id)
+        filter_state = {'type_id': public_id}
+        if _fetch_only_active_objs():
+            filter_state['active'] = {"$eq": True}
+
+        object_list = object_manager.get_objects_by(sort="type_id", **filter_state)
     except CMDBError:
         return abort(400)
 
@@ -154,50 +162,6 @@ def get_objects_by_type(public_id, request_user: User):
         start = int(request.args.get('start'))
         length = int(request.args.get('length'))
         object_list = object_list[start:start + length]
-
-    if len(object_list) < 1:
-        return make_response(object_list, 204)
-
-    rendered_list = RenderList(object_list, request_user).render_result_list()
-    resp = make_response(rendered_list)
-    return resp
-
-
-@object_blueprint.route('/filter/<string:value>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_objects_by_searchterm(value, request_user: User):
-    """Return all objects by search term"""
-    try:
-        type = {}
-        term = value
-        try:
-            term = int(value)
-        except:
-            if value in ['True', 'true']:
-                term = True
-            elif value in ['False', 'false']:
-                term = False
-            elif isinstance(value, str):
-                term = {'$regex': value}
-
-        if request.args.get('type') is not None:
-            type = {'type_id': int(request.args.get('type'))}
-
-        query: dict = {'$and': [
-            {'fields': {'$elemMatch': {'value': term}}},
-            type
-        ]}
-        object_list = object_manager.get_objects_by(sort="type_id", **query)
-
-        if request.args.get('start') is not None:
-            start = int(request.args.get('start'))
-            length = int(request.args.get('length'))
-            object_list = object_list[start:start + length]
-
-    except CMDBError:
-        return abort(400)
 
     if len(object_list) < 1:
         return make_response(object_list, 204)
@@ -215,7 +179,11 @@ def get_objects_by_types(type_ids):
     """Return all objects by type_id
     TODO: Refactore to render results"""
     try:
-        query = _build_query({'type_id': type_ids}, q_operator='$or')
+        filter_state = {'type_id': type_ids}
+        if _fetch_only_active_objs():
+            filter_state['active'] = {"$eq": True}
+
+        query = _build_query(filter_state, q_operator='$or')
         all_objects_list = object_manager.get_objects_by(sort="type_id", **query)
 
     except CMDBError:
@@ -234,7 +202,11 @@ def get_objects_by_public_id(public_ids):
     TODO: Refactore to render results"""
 
     try:
-        query = _build_query({'public_id': public_ids}, q_operator='$or')
+        filter_state = {'public_id': public_ids}
+        if _fetch_only_active_objs():
+            filter_state['active'] = {"$eq": True}
+
+        query = _build_query(filter_state, q_operator='$or')
         all_objects_list = object_manager.get_objects_by(sort="public_id", **query)
 
     except CMDBError:
@@ -249,6 +221,14 @@ def get_objects_by_public_id(public_ids):
 def count_object_by_type(type_id):
     try:
         count = object_manager.count_objects_by_type(type_id)
+        if _fetch_only_active_objs():
+            filter_state = {'type_id': type_id, 'active': {'$eq': True}}
+            result = []
+            cursor = object_manager.group_objects_by_value('active', filter_state)
+            for document in cursor:
+                result.append(document)
+            count = result[0]['count'] if result else 0
+
         resp = make_response(count)
     except CMDBError:
         return abort(400)
@@ -260,6 +240,12 @@ def count_object_by_type(type_id):
 def count_objects():
     try:
         count = object_manager.count_objects()
+        if _fetch_only_active_objs():
+            result = []
+            cursor = object_manager.group_objects_by_value('active', {'active': {"$eq": True}})
+            for document in cursor:
+                result.append(document)
+            count = result[0]['count'] if result else 0
         resp = make_response(count)
     except CMDBError:
         return abort(400)
@@ -270,8 +256,11 @@ def count_objects():
 @login_required
 def group_objects_by_type_id(value):
     try:
+        filter_state = None
+        if _fetch_only_active_objs():
+            filter_state = {'active': {"$eq": True}}
         result = []
-        cursor = object_manager.group_objects_by_value(value)
+        cursor = object_manager.group_objects_by_value(value, filter_state)
         max_length = 0
         for document in cursor:
             document['label'] = object_manager.get_type(document['_id']).label
@@ -799,3 +788,16 @@ def _build_query(args, q_operator='$and'):
 
     except CMDBError:
         pass
+
+
+def _fetch_only_active_objs():
+    """
+        Checking if request have cookie parameter for object active state
+        Returns:
+            True if cookie is set or value is true else false
+        """
+    if request.args.get('onlyActiveObjCookie') is not None:
+        value = request.args.get('onlyActiveObjCookie')
+        if value in ['True', 'true']:
+            return True
+    return False

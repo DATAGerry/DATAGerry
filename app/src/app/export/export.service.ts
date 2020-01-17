@@ -18,6 +18,7 @@
 
 import { Injectable } from '@angular/core';
 import { ApiCallService } from '../services/api-call.service';
+import {map} from "rxjs/operators";
 
 const httpOptions = {
   observe: 'response',
@@ -35,7 +36,11 @@ export class FileService {
   }
 
   public callFileFormatRoute() {
-    return this.api.callGetRoute<any>(this.servicePrefix + '/');
+    return this.api.callGet<any>(this.servicePrefix + '/').pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
   }
 
   public callExportRoute(route: string, exportType: string) {

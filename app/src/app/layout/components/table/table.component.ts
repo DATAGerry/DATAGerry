@@ -32,6 +32,7 @@ import { TableColumn} from './models/table-column';
 import { TableColumnAction} from './models/table-columns-action';
 import { RenderResult } from '../../../framework/models/cmdb-render';
 import { FileService } from '../../../export/export.service';
+import {ObjectService} from "../../../framework/services/object.service";
 
 @Component({
   selector: 'cmdb-table',
@@ -61,7 +62,7 @@ export class TableComponent implements OnInit, OnDestroy {
   public formatList: any[] = [];
 
   constructor(private userService: UserService, private apiCallService: ApiCallService,
-              private fileService: FileService, private router: Router,
+              private objService: ObjectService, private fileService: FileService, private router: Router,
               private modalService: NgbModal, private fileSaverService: FileSaverService,
               private datePipe: DatePipe) {
     this.add = {
@@ -220,7 +221,8 @@ export class TableComponent implements OnInit, OnDestroy {
       modalComponent.result.then((result) => {
         if (result) {
           this.apiCallService.callDeleteManyRoute(this.linkRoute + 'delete/' + publicIds ).subscribe(data => {
-            this.apiCallService.callGetRoute('render/').subscribe((objs: RenderResult[]) => {
+            this.apiCallService.callGet('render/').subscribe((objs: RenderResult[]) => {
+              console.log(objs);
               this.items.next(objs);
             });
           });
@@ -247,7 +249,7 @@ export class TableComponent implements OnInit, OnDestroy {
         if (result) {
           const id = value.object_information.object_id;
           this.apiCallService.callDeleteRoute(this.linkRoute + id).subscribe(data => {
-            this.apiCallService.callGetRoute('object/').subscribe((objs: RenderResult[]) => {
+            this.objService.getObjects(null, 0, 25).subscribe((objs: RenderResult[]) => {
               this.items.next(objs);
               this.rerender();
               this.dtTrigger.next();

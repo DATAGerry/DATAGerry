@@ -121,17 +121,31 @@ export class TypeService<T = CmdbType> implements ApiService {
     );
   }
 
-  public cleanupRemovedFields(publicID: number): Observable<any> {
-    return this.api.callGetRoute(this.servicePrefix + '/cleanup/remove/' + publicID).pipe(
+  public countTypes(): Observable<any> {
+    return this.api.callGet<T[]>(this.servicePrefix + '/count/').pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
     );
   }
 
-  public cleanupInsertedFields(publicID: number): Observable<any> {
-    return this.api.callGetRoute(this.servicePrefix + '/cleanup/update/' + publicID).pipe(
+  public cleanupRemovedFields(publicID: number): Observable<any> {
+    return this.api.callGet(this.servicePrefix + '/cleanup/remove/' + publicID).pipe(
       map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public cleanupInsertedFields(publicID: number): Observable<any> {
+    return this.api.callGet(this.servicePrefix + '/cleanup/update/' + publicID).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
         return apiResponse.body;
       })
     );

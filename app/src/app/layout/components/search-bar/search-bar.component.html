@@ -14,17 +14,17 @@
     No objects found
   </div>
 
-  <ng-container *ngFor="let element of autoResult">
+  <div *ngFor="let element of autoResult"
+       routerLink="/framework/object/view/{{element?.object_information.object_id}}"
+       routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
     <div class="card-header">
       {{element?.type_information.type_label}}#{{element?.object_information.object_id}}
       <span class="badge badge-primary pull-right">{{element?.object_information.active}}</span>
     </div>
-    <div class="card-body" *ngFor="let field of element?.match_fields"
-         routerLink="/framework/object/view/{{element?.object_information.object_id}}"
-         routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+    <div class="card-body" *ngFor="let field of element?.match_fields">
       <strong>Field</strong> : {{field.label}}<br>
       <strong>Value</strong> : <span [innerHTML]="highlight(field.value)"></span><br>
       <small class="text-muted pull-right">more ...</small>
     </div>
-  </ng-container>
+  </div>
 </div>

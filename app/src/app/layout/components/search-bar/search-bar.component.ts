@@ -22,6 +22,7 @@ import { Router } from '@angular/router';
 import { debounceTime, map } from 'rxjs/operators';
 import { ApiCallService } from '../../../services/api-call.service';
 import { RenderResult } from '../../../framework/models/cmdb-render';
+import {SearchService} from "../../../services/search.service";
 
 @Component({
   selector: 'cmdb-search-bar',
@@ -31,13 +32,11 @@ import { RenderResult } from '../../../framework/models/cmdb-render';
 
 export class SearchBarComponent implements OnInit {
 
-  private readonly apiURL: string = '/search/?value=';
   private searchTerm: string = '';
-
   public searchForm: FormGroup;
   public autoResult: RenderResult[] = [];
 
-  constructor(private route: Router, private api: ApiCallService) {
+  constructor(private route: Router, private searchService: SearchService) {
     this.searchForm = new FormGroup({
       term: new FormControl(null, Validators.required)
     });
@@ -47,10 +46,12 @@ export class SearchBarComponent implements OnInit {
     this.searchForm.valueChanges.subscribe(val => {
       this.searchTerm = val.term == null ? '' : val.term;
       if (this.searchTerm.length > 0) {
-        this.api.callGetRoute(this.apiURL + this.searchTerm, {params: {limit: '5'}})
+        this.searchService.getSearchresults(this.searchTerm, 0, 5, 5, 'undefined')
           .pipe(
             debounceTime(500)  // WAIT FOR 500 MILISECONDS AFTER EACH KEY STROKE.
-          ).subscribe( (data: RenderResult[]) => this.autoResult = data);
+          ).subscribe( (data: RenderResult[]) => {
+            this.autoResult = data;
+        });
       }
     });
   }

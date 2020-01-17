@@ -108,24 +108,23 @@ class CmdbObjectManager(CmdbManagerBase):
         formatted_type_id = {'type_id': public_id}
         return self.dbm.count(CmdbObject.COLLECTION, formatted_type_id)
 
-    def group_objects_by_value(self, value: str):
+    def group_objects_by_value(self, value: str, match=None):
         """This method does not actually
            performs the find() operation
            but instead returns
            a objects grouped by type of the documents that meet the selection criteria.
 
            Args:
-               collection (str): name of database collection
                value (str): grouped by value
+               match (dict): stage filters the documents to only pass documents.
            Returns:
                returns the objects grouped by value of the documents
            """
-        agr = [
-            {'$group':
-                {'_id': '$'+value, 'count': {'$sum': 1}}
-             },
-            {'$sort': {'count': -1}}
-        ]
+        agr = []
+        if match:
+            agr.append({'$match': match})
+        agr.append({'$group': {'_id': '$'+value, 'count': {'$sum': 1}}})
+        agr.append({'$sort': {'count': -1}})
 
         return self.dbm.group(CmdbObject.COLLECTION, agr)
 

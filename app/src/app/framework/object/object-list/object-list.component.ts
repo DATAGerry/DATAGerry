@@ -44,18 +44,13 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
   public dtElement: DataTableDirective;
   public dtOptions: any = {}; // : DataTables.Settings = {};
   public dtTrigger: Subject<any> = new Subject();
-  @ViewChild('dtTableElement', {static: false}) dtTableElement: ElementRef;
-
-  private url: string ;
   private records: number;
 
   readonly dtButtons: any[] = [];
   public summaries: any[] = [];
-  public columnFields: any[] = [];
   public items: any[] = [];
 
   public columns: any[] = [];
-
   public masterSelected: boolean = false;
 
   public pageTitle: string = 'List';
@@ -82,12 +77,10 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   private getMetaData(id) {
-    this.url = 'object/';
     this.masterSelected = false;
     this.pageTitle = 'Object List';
     this.hasSummaries = false;
     if (typeof id !== 'undefined') {
-      this.url = this.url + 'type/' + id;
       this.typeID = id;
       this.hasSummaries = true;
       this.typeService.getType(id).subscribe((data: CmdbType) => {
@@ -95,9 +88,12 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
         this.faIcon = data.render_meta.icon;
         this.pageTitle = data.label + ' list';
       });
-      this.objService.countObjectsByType(this.typeID).subscribe(count => this.records = count);
+      this.objService.countObjectsByType(this.typeID).subscribe(totals => {
+        this.records = totals;
+        this.hasSummaries = totals > 0;
+      });
     } else {
-      this.objService.countObjects().subscribe(count => this.records = count);
+      this.objService.countObjects().subscribe(totals => this.records = totals);
     }
   }
 
@@ -114,7 +110,6 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     const START = 'start';
     const LENGTH = 'length';
     const SEARCH = 'search';
-    const FIELDS = 'fields';
     this.reload();
     this.dtOptions = {
       // <"col-sm-3" B >
@@ -126,24 +121,16 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
       processing: true,
       ordering: false,
       ajax: (dataTablesParameters: RenderResult[], callback) => {
-        const param = {
-          start: dataTablesParameters[START],
-          length: dataTablesParameters[LENGTH],
-        };
-        if (this.typeID != null) {
-          const type = 'type';
-          param[type] = that.typeID;
-        }
+        const startx =  dataTablesParameters[START];
+        const lengthx = dataTablesParameters[LENGTH];
 
         if (dataTablesParameters[SEARCH].value !== null
           && dataTablesParameters[SEARCH].value !== ''
           && dataTablesParameters[SEARCH].value !== undefined) {
-          const was = 'object/filter/' + dataTablesParameters[SEARCH].value;
-          that.apiCallService.callGetRoute( was, {params: param}).subscribe(resp => {
-            that.objectLists = resp === null ? [] : resp;
-            if (resp != null) {
-              that.objectLists = resp !== null ? resp : [];
-              that.summaries = resp !== null ? resp[0].summaries : [];
+          that.objService.getObjects(that.typeID, startx, lengthx).subscribe(resp => {
+            that.objectLists = resp;
+            if (resp.length > 0) {
+              that.summaries = resp[0].summaries;
               that.selectedObjects.length = 0;
               that.masterSelected = false;
             }
@@ -154,11 +141,10 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
             });
           });
         } else {
-          that.apiCallService.callGetRoute(this.url, {params: param}).subscribe(resp => {
-            that.objectLists = resp === null ? [] : resp;
-            if (resp != null) {
-              that.objectLists = resp !== null ? resp : [];
-              that.summaries = resp !== null ? resp[0].summaries : [];
+          that.objService.getObjects(that.typeID, startx, lengthx).subscribe(resp => {
+            that.objectLists = resp;
+            if (resp.length > 0) {
+              that.summaries = resp[0].summaries;
               that.selectedObjects.length = 0;
               that.masterSelected = false;
             }
@@ -227,7 +213,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
           if (newSettings.columns && newSettings.columns.length > 1) {
             dtInstance.destroy();
             this.dtOptions = Promise.resolve(newSettings);
-            this.displayTable(this.dtTableElement);
+            // this.displayTable(this.dtTableElement);
           }
         }
       });
