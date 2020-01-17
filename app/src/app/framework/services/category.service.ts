@@ -41,19 +41,47 @@ export class CategoryService {
   }
 
   public getCategory(publicID: number) {
-    return this.api.callGetRoute<CmdbCategory>(this.servicePrefix + '/' + publicID);
+    return this.api.callGet<CmdbCategory>(this.servicePrefix + '/' + publicID).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
   public getRootCategory() {
-    return this.api.callGetRoute<CmdbCategory>(this.servicePrefix + '/root/');
+    return this.api.callGet<CmdbCategory>(this.servicePrefix + '/root/').pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
   public getCategoryList() {
-    return this.api.callGetRoute<CmdbCategory[]>(this.servicePrefix + '/');
+    return this.api.callGet<CmdbCategory[]>(this.servicePrefix + '/').pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
   public getCategoryTree() {
-    return this.api.callGetRoute<CmdbCategory[]>(this.servicePrefix + '/tree');
+    return this.api.callGet<CmdbCategory[]>(this.servicePrefix + '/tree').pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
   public postCategory(data: CmdbCategory) {

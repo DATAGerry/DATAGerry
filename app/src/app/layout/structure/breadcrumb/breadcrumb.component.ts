@@ -22,6 +22,8 @@ import { BreadcrumbItem } from './breadcrumb.model';
 import { BreadcrumbService } from './breadcrumb.service';
 import { ActivatedRoute, NavigationEnd, PRIMARY_OUTLET, Router } from '@angular/router';
 
+export const COOCKIENAME = 'onlyActiveObjCookie';
+
 @Component({
   selector: 'cmdb-breadcrumb',
   templateUrl: './breadcrumb.component.html',
@@ -36,6 +38,7 @@ export class BreadcrumbComponent implements OnInit {
   @Input()
   public addClass: string;
 
+  public isChecked: boolean;
 
   public constructor(public breadcrumbService: BreadcrumbService, private activatedRoute: ActivatedRoute, private router: Router) {
 
@@ -56,6 +59,7 @@ export class BreadcrumbComponent implements OnInit {
       )).subscribe(event => {
       this.breadcrumbService.store(this.getBreadcrumbs(this.activatedRoute.root));
     });
+    this.isChecked = this.readCookies(COOCKIENAME) === 'true';
   }
 
   private getBreadcrumbs(route: ActivatedRoute, url: string= '', breadcrumbs: BreadcrumbItem[]= []): BreadcrumbItem[] {
@@ -88,5 +92,27 @@ export class BreadcrumbComponent implements OnInit {
 
       return this.getBreadcrumbs(child, url, breadcrumbs);
     }
+  }
+
+  public checkState(event: any) {
+    this.writeCookies(COOCKIENAME, event.currentTarget.checked.toString());
+    window.location.reload();
+  }
+
+  readCookies(name: string) {
+    const result = new RegExp('(?:^|; )' + encodeURIComponent(name) + '=([^;]*)').exec(document.cookie);
+    return result ? result[1] : 'true';
+  }
+
+  writeCookies(name: string, value: string, days?: number) {
+    if (!days) {
+      days = 365 * 20;
+    }
+
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+
+    const expires = '; expires=' + date.toUTCString();
+    document.cookie = name + '=' + value + expires + '; path=/';
   }
 }

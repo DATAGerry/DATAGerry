@@ -19,6 +19,7 @@
 
 import { Injectable } from '@angular/core';
 import { ApiCallService } from '../../services/api-call.service';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -31,14 +32,35 @@ export class ExternalSystemService {
   }
 
   public getExternSytemList() {
-    return this.api.callGetRoute<any[]>(this.servicePrefix + '/');
+    return this.api.callGet<any[]>(this.servicePrefix + '/').pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
   public getExternSytemParams(name: string) {
-    return this.api.callGetRoute<any>(this.servicePrefix + '/parameters/' + name);
+    return this.api.callGet<any>(this.servicePrefix + '/parameters/' + name).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
   public getExternSytemVariables(name: string) {
-    return this.api.callGetRoute<any>(this.servicePrefix + '/variables/' + name);
+    return this.api.callGet<any>(this.servicePrefix + '/variables/' + name).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 }

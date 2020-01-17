@@ -52,12 +52,12 @@
        class="table framework-table table-striped table-bordered">
   <thead>
   <tr>
-    <th class="toggle-check nosort" style="text-align: center">
+    <th class="toggle-check nosort text-center">
       <input type="checkbox" [(ngModel)]="masterSelected"  class="select-all-checkbox" (change)="checkUncheckAll()"/>
     </th>
-    <th class="toggle-active">Active</th>
-    <th class="toggle-id">ID</th>
-    <th class="toggle-type">Type</th>
+    <th class="toggle-active text-center">Active</th>
+    <th class="toggle-id text-center">ID</th>
+    <th class="toggle-type text-center">Type</th>
     <!-- BEGIN: summarie fields : show only if objects are categorized -->
     <ng-container *ngIf="hasSummaries">
       <ng-container *ngFor="let obj of typeInstance.render_meta.summary.fields">
@@ -65,19 +65,19 @@
       </ng-container>
     </ng-container>
     <!-- END: summarie fields -->
-    <th class="toggle-autor">Author</th>
-    <th class="toggle-last-modified">Last modified</th>
-    <th class="toggle-action">Action</th>
+    <th class="toggle-autor text-center">Author</th>
+    <th class="toggle-last-modified text-center">Last modified</th>
+    <th class="toggle-action text-center">Action</th>
   </tr>
   </thead>
   <tbody *ngIf="objectLists?.length != 0">
   <tr class="odd" role="row" *ngFor="let obj of objectLists">
-    <td><input type="checkbox" class="select-checkbox" name="{{obj?.object_information?.object_id}}" (click)="updateDisplay(obj?.object_information?.object_id.toString())"></td>
-    <td>
+    <td class="text-center"><input type="checkbox" class="select-checkbox" name="{{obj?.object_information?.object_id}}" (click)="updateDisplay(obj?.object_information?.object_id.toString())"></td>
+    <td class="text-center">
       <cmdb-active-badge [activeStatus]="obj?.object_information.active"></cmdb-active-badge>
     </td>
-    <td>{{obj?.object_information.object_id}}</td>
-    <td>{{obj?.type_information.type_label}}</td>
+    <td class="text-center">{{obj?.object_information.object_id}}</td>
+    <td class="text-center">{{obj?.type_information.type_label}}</td>
     <!-- BEGIN: summarie contens : show only if objects are categorized  -->
     <ng-container *ngIf="hasSummaries" >
       <td *ngFor="let field of obj.summaries" class="toggle-{{field.name}}">
@@ -85,9 +85,9 @@
       </td>
     </ng-container>
     <!-- END: summarie contens -->
-    <td>{{obj?.type_information.author_name}}</td>
-    <td>{{obj?.object_information.creation_time?.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
-    <td>
+    <td class="text-center">{{obj?.type_information.author_name}}</td>
+    <td class="text-center">{{obj?.object_information.creation_time?.$date | date:"dd/MM/yy - hh:mm:ss"}}</td>
+    <td class="text-center">
       <a class="text-dark"
          [routerLink]="[hasSummaries ? '/framework/object/type/view' : '/framework/object/view',obj?.object_information.object_id]">
         <fa-icon [icon]="['far', 'eye']"></fa-icon>

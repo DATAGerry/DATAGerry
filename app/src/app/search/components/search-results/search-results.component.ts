@@ -23,9 +23,10 @@ import { ApiCallService } from '../../../services/api-call.service';
 import { RenderResult } from '../../../framework/models/cmdb-render';
 import { Subject } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {TypeService} from '../../../framework/services/type.service';
-import {ObjectService} from "../../../framework/services/object.service";
+import { FormControl, FormGroup, Validators} from '@angular/forms';
+import { TypeService } from '../../../framework/services/type.service';
+import { ObjectService } from '../../../framework/services/object.service';
+import { SearchService } from '../../../services/search.service';
 
 
 @Component({
@@ -44,16 +45,15 @@ export class SearchResultsComponent implements AfterViewInit, OnDestroy, OnInit 
   public results: RenderResult[] = [];
   public searchForm: FormGroup;
   public typeList: any[];
-  private url: any;
-  private param: any = {value: ''};
+  private searchTerm: string = '';
+  private typeID: any = 'undefined';
   public records: number;
 
   constructor(private apiCall: ApiCallService, private typeService: TypeService, private objService: ObjectService,
-              private router: Router, private spinner: NgxSpinnerService, private route: ActivatedRoute) {
+              private router: Router, private spinner: NgxSpinnerService, private route: ActivatedRoute,
+              private searchService: SearchService) {
     this.route.queryParams.subscribe(qParams => {
-      this.url = 'search/';
-      this.param.value = qParams.value;
-
+      this.searchTerm = qParams.value;
       this.typeService.getTypeList().subscribe((list) => {
         this.typeList = list;
       });
@@ -67,16 +67,16 @@ export class SearchResultsComponent implements AfterViewInit, OnDestroy, OnInit 
         active: new FormControl( false, Validators.required),
       });
     });
-    this.router.routeReuseStrategy.shouldReuseRoute = function () {
+    // tslint:disable-next-line:only-arrow-functions
+    this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
     };
   }
 
   ngOnInit(): void {
-    if (this.param.value !== '') {
-
-      this.apiCall.callGetRoute('search/count/', {params: this.param}).subscribe(test => {
-        this.records = test;
+    if (this.searchTerm !== '') {
+      this.searchService.countSearchResult(this.searchTerm, this.typeID).subscribe(c => {
+        this.records = c;
       });
     }
     this.callObjects();
@@ -96,24 +96,24 @@ export class SearchResultsComponent implements AfterViewInit, OnDestroy, OnInit 
       processing: true,
       ordering: false,
       ajax: (dataTablesParameters: RenderResult[], callback) => {
-        that.param[START] = dataTablesParameters[START];
-        that.param[LENGTH] = dataTablesParameters[LENGTH];
-
+        const startx = dataTablesParameters[START];
+        const lenthx = dataTablesParameters[LENGTH];
         if (dataTablesParameters[SEARCH].value !== null
           && dataTablesParameters[SEARCH].value !== ''
           && dataTablesParameters[SEARCH].value !== undefined) {
-          const was = 'object/filter/' + dataTablesParameters[SEARCH].value;
-          that.apiCall.callGetRoute(was, {params: that.param}).subscribe(resp => {
-            that.results = resp === null ? [] : resp;
-            callback({
-              data: [],
-              recordsTotal: that.results.length,
-              recordsFiltered: that.results.length,
-            });
+          that.searchService.getSearchresults(dataTablesParameters[SEARCH].value, startx, lenthx, 0, this.typeID)
+            .subscribe(resp => {
+              that.results = resp;
+              that.records = that.results.length;
+              callback({
+                data: [],
+                recordsTotal: this.records,
+                recordsFiltered: this.records,
+              });
           });
         } else {
-          that.apiCall.callGetRoute(this.url, {params: that.param}).subscribe(resp => {
-            that.results = resp === null ? [] : resp;
+          that.searchService.getSearchresults(this.searchTerm, startx, lenthx, 0, this.typeID).subscribe(resp => {
+            that.results = resp;
             callback({
               data: [],
               recordsTotal: that.records,
@@ -126,7 +126,11 @@ export class SearchResultsComponent implements AfterViewInit, OnDestroy, OnInit 
       language: {
         search: '',
         searchPlaceholder: 'Filter...'
-      }
+      },
+      columnDefs: [
+        { width: '5%', targets: [0, 1, 2] },
+        { width: '8%', targets: [-1, -2, 3 ]},
+      ],
     };
   }
 
@@ -135,16 +139,10 @@ export class SearchResultsComponent implements AfterViewInit, OnDestroy, OnInit 
   }
 
   public reload() {
-    const searchTerm = this.searchForm.get('term').value;
-    const typeID = this.searchForm.get('type').value == null ? 'undefined' : this.searchForm.get('type').value.public_id;
-    const objectState = this.searchForm.get('active').value;
+    this.searchTerm =  this.searchForm.get('term').value;
+    this.typeID = this.searchForm.get('type').value == null ? 'undefined' : this.searchForm.get('type').value.public_id;
 
-    this.param.value = searchTerm;
-    this.param.type_id = typeID;
-    this.param.active = objectState;
-
-    const newParams = {params: {value: searchTerm, type_id: typeID}}
-    this.apiCall.callGetRoute('search/count/', newParams).subscribe(lenx => {
+    this.searchService.countSearchResult(this.searchTerm, this.typeID).subscribe(lenx => {
       this.records = lenx;
     });
 

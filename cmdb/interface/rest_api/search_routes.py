@@ -59,7 +59,7 @@ def get_search(request_user: User):
 @login_required
 @insert_request_user
 def text_search(search_input, request_user: User):
-    return _get_response({'value': search_input}, q_operator='$or', current_user=request_user)
+    return _get_response({'value': search_input}, q_operator='$and', current_user=request_user)
 
 
 @search_blueprint.route("/count/", methods=['GET'])
@@ -92,7 +92,12 @@ def count_search_result():
                     return abort(400)
 
         result_query.append({q_operator: query_list})
-        query = {"$or": result_query}
+        if request.args.get('onlyActiveObjCookie') is not None:
+            value = request.args.get('onlyActiveObjCookie')
+            if value in ['True', 'true']:
+                query_list.append({'active': {"$eq": True}})
+
+        query = {"$or": result_query} if query_list else {}
         object_list = object_manager.search_objects_with_limit(query, limit=0)
 
         return make_response(len(object_list))
@@ -122,12 +127,18 @@ def _get_response(args, q_operator='$and', current_user: User = None, limit=0):
                     if key == "value":
                         # Collect for later render evaluation
                         match_values.append(value)
-                        query_list.append({'fields.'+key: {'$regex': v, '$options': "i"}})
+                        query_list.append({'fields.'+key: {'$regex': v}})
                 except (ValueError, TypeError):
                     return abort(400)
 
         result_query.append({q_operator: query_list})
-        query = {"$or": result_query}
+        if request.args.get('onlyActiveObjCookie') is not None:
+            value = request.args.get('onlyActiveObjCookie')
+            if value in ['True', 'true']:
+                query_list.append({'active': {"$eq": True}})
+
+        query = {"$or": result_query} if query_list else {}
+        print(query)
         object_list = object_manager.search_objects_with_limit(query, limit=limit)
 
         if request.args.get('start') is not None:
