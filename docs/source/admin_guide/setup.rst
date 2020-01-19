@@ -254,3 +254,16 @@ To access the DATAGERRY frontend, use the following parameters:
 .. note::
     If you can't access the webfrontend of DATAGERRY, check the firewall settings of your server. Port 4000 should ba
     accessible.
+
+
+
+Setting up Nginx as reverse proxy
+=================================
+We recomend to run Nginx as reverse proxy for DATAGERRY. After installing Nginx for your platform, you can adapt the 
+following example configuration for Nginx (nginx.conf):
+
+.. include:: ../../../contrib/nginx/nginx.conf
+    :literal:
+
+This will Nginx listen on port 80 (HTTP) and 443 (HTTPS) and create a redirect from HTTP to HTTPS. If someone access 
+*https://<host>/*, Nginx will contact *http://127.0.0.1:4000*, where DATAGERRY is listening.
