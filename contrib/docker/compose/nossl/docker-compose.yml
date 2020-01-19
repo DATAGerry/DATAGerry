@@ -1,7 +1,7 @@
 version: "3.0"
 services:
   nginx:
-    image: nethinks/nginx
+    image: nethinks/nginx:latest
     ports:
     - "80:80"
     depends_on:
@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
 
   datagerry:
-    image: nethinks/datagerry:undefined
+    image: nethinks/datagerry:latest
     depends_on:
     - db
     - broker

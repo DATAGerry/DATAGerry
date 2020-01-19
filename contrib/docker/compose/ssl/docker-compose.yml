@@ -1,0 +1,41 @@
+version: "3.0"
+services:
+  nginx:
+    image: nethinks/nginx:latest
+    ports:
+    - "443:443"
+    depends_on:
+    - datagerry
+    environment:
+      NGINX_SSL_CERT: "/data/cert/cert.pem"
+      NGINX_SSL_KEY: "/data/cert/key.pem"
+      NGINX_LOCATION_DEFAULT: "/;/;http://datagerry:4000"
+    restart: unless-stopped
+    volumes:
+      - ./cert:/data/cert
+
+  datagerry:
+    image: nethinks/datagerry:latest
+    depends_on:
+    - db
+    - broker
+    environment:
+      DATAGERRY_Database_host: "db"
+      DATAGERRY_MessageQueueing_host: "broker"
+    restart: unless-stopped
+
+  db:
+    image: mongo:4.2-bionic
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
+    
+  broker:
+    image: rabbitmq:3.8
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+volumes:
+  rabbitmq-data:
+  mongodb-data:
+  mongodb-config:
