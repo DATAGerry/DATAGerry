@@ -258,7 +258,6 @@ class CmdbObjectManager(CmdbManagerBase):
             if active_flag:
                 referenced_query.update({'active': {"$eq": True}})
 
-            print(referenced_query)
             referenced_by_objects = referenced_by_objects + self.get_objects_by(**referenced_query)
 
         return referenced_by_objects
