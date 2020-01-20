@@ -1,9 +1,17 @@
 version: "3.0"
 services:
-  datagerry:
-    image: nethinks/datagerry:undefined
+  nginx:
+    image: nethinks/nginx:latest
     ports:
-    - "4000:4000"
+    - "80:80"
+    depends_on:
+    - datagerry
+    environment:
+      NGINX_LOCATION_DEFAULT: "/;/;http://datagerry:4000"
+    restart: unless-stopped
+
+  datagerry:
+    image: nethinks/datagerry:latest
     depends_on:
     - db
     - broker

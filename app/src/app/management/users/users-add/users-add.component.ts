@@ -39,7 +39,7 @@ export class UsersAddComponent implements OnInit, OnDestroy {
   @ViewChild('passWordInput', { static: false }) public passWordToggle: ElementRef;
 
   public addForm: FormGroup;
-  public authProviders: string[];
+  public authProviders: any[] = [];
   public groupList: Group[];
   private currentPasswordStrength: number = 0;
   public preview: any = undefined;
@@ -74,14 +74,14 @@ export class UsersAddComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-
-    this.authProvidersSubscription = this.authService.getAuthProviders().subscribe((authList: string[]) => {
-      this.authProviders = authList;
+    this.authProvidersSubscription = this.authService.getAuthProviders().subscribe((providerList: any[]) => {
+      for (const provider of providerList) {
+        this.authProviders.push(provider.class_name);
+      }
     });
     this.groupListSubscription = this.groupService.getGroupList().subscribe((groupList: Group[]) => {
       this.groupList = groupList;
     });
-    this.authenticator.disable();
   }
 
   public ngOnDestroy(): void {

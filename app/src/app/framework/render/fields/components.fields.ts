@@ -28,7 +28,7 @@ export interface ComponentsFields {
 
 export class RenderField {
   private innerData: any;
-  private innerValue: any;
+  public innerValue: any;
   public MODES = CmdbMode;
   public toast: ToastService;
 
