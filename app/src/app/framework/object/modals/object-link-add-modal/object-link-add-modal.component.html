@@ -9,7 +9,7 @@
   <div class="modal-body">
     <div class="form-group">
       <label for="secondary">Enter Public ID:</label>
-      <input type="number" class="form-control" formControlName="secondary" name="secondary" id="secondary"
+      <input type="number" class="form-control" min="0" formControlName="secondary" name="secondary" id="secondary"
              [ngClass]="{ 'is-valid': secondary.valid && (secondary.dirty || secondary.touched),
                  'is-invalid': secondary.invalid && (secondary.dirty || secondary.touched)}"/>
       <small id="secondaryHelp" class="form-text text-muted float-left">Select the Public ID of another object</small>
