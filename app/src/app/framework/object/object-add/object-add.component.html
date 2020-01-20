@@ -1,4 +1,19 @@
-<h1>Add new object: <strong>{{typeInstance?.label}}</strong></h1>
+<div class="container p-0 m-0">
+  <div class="row">
+    <div class="col-sm-10">
+      <h1>Add new object: <strong>{{typeInstance?.label}}</strong></h1>
+    </div>
+    <div class="col-sm-2">
+      <div class="btn-group p-1" role="group">
+        <button type="submit" class="btn btn-outline-success mr-2"
+                (click)="saveObject()"
+                [disabled]="!renderForm.valid">Save</button>
+        <button class="btn btn-outline-danger mr-2"
+                routerLink="/framework/object/type/{{typeInstance?.public_id}}">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
 <hr/>
 <ng-template [ngIf]="!typeInstance" [ngIfElse]="renderTemplate">
   <form [formGroup]="typeIDForm" novalidate>
@@ -30,7 +45,7 @@
                  [typeInstance]="typeInstance"></cmdb-render>
     <div id="object-form-action" class="shadow p-3 mb-5 bg-white rounded text-center">
       <div class="row d-flex justify-content-center align-items-center">
-        <p class="pt-3 mx-4">Do you wand to save the new object of
+        <p class="pt-3 mx-4">Do you want to save the new object of
           <strong>{{typeInstance?.label}}</strong> you made before quitting?</p>
         <div class="btn-group" role="group">
           <button type="submit" class="btn btn-outline-success mr-2"
