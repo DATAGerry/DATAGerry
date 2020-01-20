@@ -72,7 +72,8 @@ export class ObjectService<T = RenderResult> implements ApiService {
   }
 
   public getObjectsByType(typeID: number): Observable<T[]> {
-    return this.api.callGet<T[]>(`${this.servicePrefix}/type/${typeID}`).pipe(
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) }
+    return this.api.callGet<T[]>(`${this.servicePrefix}/type/${typeID}`, this.http, httpObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -154,7 +155,8 @@ export class ObjectService<T = RenderResult> implements ApiService {
 
   // Custom calls
   public getObjectReferences(publicID: number) {
-    return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/reference/${publicID}`).pipe(
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) };
+    return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/reference/${publicID}`, this.http, httpObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];

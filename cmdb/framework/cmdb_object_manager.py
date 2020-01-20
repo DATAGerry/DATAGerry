@@ -228,7 +228,7 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = self._update_many(CmdbObject.COLLECTION, filter, update)
         return ack
 
-    def get_object_references(self, public_id: int) -> list:
+    def get_object_references(self, public_id: int, active_flag=None) -> list:
         # Type of given object id
         type_id = self.get_object(public_id=public_id).get_type_id()
 
@@ -255,6 +255,10 @@ class CmdbObjectManager(CmdbManagerBase):
             referenced_query = {"type_id": possible_object_types['type_id'], "fields": {
                 "$elemMatch": {"$and": [{"name": possible_object_types['field_name']}],
                                "$or": [{"value": int(public_id)}, {"value": str(public_id)}]}}}
+            if active_flag:
+                referenced_query.update({'active': {"$eq": True}})
+
+            print(referenced_query)
             referenced_by_objects = referenced_by_objects + self.get_objects_by(**referenced_query)
 
         return referenced_by_objects
