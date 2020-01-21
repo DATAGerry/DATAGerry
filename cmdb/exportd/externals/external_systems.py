@@ -557,3 +557,46 @@ class ExternalSystemCpanelDns(ExternalSystem):
         except:
             return ""
         return ""
+
+
+class ExternalSystemCsv(ExternalSystem):
+
+    parameters = [
+        {"name": "csv_filename", "required": False, "description": "name of the output CSV file. Default: stdout",
+         "default": "/tmp/testfile.csv"},
+        {"name": "csv_delimiter", "required": False, "description": "CSV delimiter. Default: ';'", "default": ";"},
+        {"name": "csv_enclosure", "required": False, "description": "CSV enclosure. Default: '“'", "default": '”'}
+    ]
+
+    variables = [{}]
+
+    def __init__(self, destination_parms, export_vars):
+        super(ExternalSystemCsv, self).__init__(destination_parms, export_vars)
+        self.__variables = export_vars
+
+        # get parameters for cPanel access
+        self.filename = self._destination_parms.get("csv_filename")
+        self.delimiter = self._destination_parms.get("csv_delimiter")
+        self.enclosure = self._destination_parms.get("csv_enclosure")
+        self.header = set([])
+        self.rows = []
+
+    def prepare_export(self):
+        pass
+
+    def add_object(self, cmdb_object):
+        row = {}
+        fields = cmdb_object.fields
+        for key in self.__variables:
+            self.header.add(key)
+            for field in fields:
+                row.update({key: str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object))})
+        self.rows.append(row)
+
+    def finish_export(self):
+        import csv
+        with open(self.filename, 'w', newline='') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=self.header, delimiter=self.delimiter, quotechar=self.enclosure)
+            writer.writeheader()
+            for row in self.rows:
+                writer.writerow(row)
