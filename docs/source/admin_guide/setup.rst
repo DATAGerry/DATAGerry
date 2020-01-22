@@ -62,6 +62,35 @@ To access the DATAGERRY frontend, use the following parameters:
     password: admin
 
 
+We provide Docker images for every version of DATAGERRY in `Docker Hub <https://hub.docker.com/r/nethinks/datagerry>`_.
+You can use one of the following Docker tags:
+
+latest
+    The latest tag is a symlink to the latest stable version of DATAGERRY. It is nice for a quickstart but will also do
+    an automatic upgrade to the next major release if one is available. For production, we recommend the <release> tag
+    below.
+
+<release> (e.g. 1.0.1)
+    Every release has its own tag. So, if you want to use a specific version (or prevent your environment from automatic
+    upgrades, just use a specific version as a Docker tag.
+
+branches_<branch-name> (e.g. branches_development)
+    If you follow our development process and want to test a specific branch from our git repository, just use this tag.
+    Please keep in mind, that these things aren't released yet and a branch is a work-in-progress. So it can change at 
+    any time and break existing things. We don't recommend to use these images in production.
+
+To use a specific Docker tag, just replace the following line of the docker-compose.yml:
+
+.. code-block:: console
+
+    # replace this line
+    image: nethinks/datagerry:latest
+
+    # by the following:
+    image: nethinks/datagerry:<tagname>
+    # example:
+    image: nethinks/datagerry:1.0.2
+
 
 RPM setup
 =========
