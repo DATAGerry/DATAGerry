@@ -68,6 +68,16 @@ class ExportdJobManagement(CmdbManagerBase):
         except (CMDBError, Exception) as e:
             raise ObjectManagerGetError(err=e)
 
+    def get_job_by_args(self, **requirements) -> ExportdJob:
+        try:
+            found_type_list = self._get_many(collection=ExportdJob.COLLECTION, limit=1, **requirements)
+            if len(found_type_list) > 0:
+                return ExportdJob(**found_type_list[0])
+            else:
+                raise ObjectManagerGetError(err='More than 1 type matches this requirement')
+        except (CMDBError, Exception) as e:
+            raise ObjectManagerGetError(err=e)
+
     def get_job_by_event_based(self, state):
         formatted_filter = {'scheduling.event.active': state}
         job_list = []

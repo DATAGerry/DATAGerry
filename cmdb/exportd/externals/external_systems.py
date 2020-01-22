@@ -17,8 +17,10 @@
 import ipaddress
 import xml.etree.ElementTree as ET
 import requests
+import json
 import re
 from cmdb.exportd.exporter_base import ExternalSystem, ExportVariable
+from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
 
 
 class ExternalSystemDummy(ExternalSystem):
@@ -29,12 +31,7 @@ class ExternalSystemDummy(ExternalSystem):
         {"name": "password", "required": True, "description": "Password for Login", "default": "1234"}
     ]
 
-    variables = [
-        {"name": "dummy1", "required": False, "description": "No dummy1 are needed."},
-        {"name": "dummy2", "required": False, "description": "No dummy2 are needed."},
-        {"name": "dummy3", "required": False, "description": "No dummy3 are needed."},
-        {"name": "dummy4", "required": False, "description": "No dummy4 are needed."}
-    ]
+    variables = [{}]
 
     def __init__(self, destination_parms, export_vars):
         super(ExternalSystemDummy, self).__init__(destination_parms, export_vars)
@@ -42,32 +39,28 @@ class ExternalSystemDummy(ExternalSystem):
         self.__ip = self._destination_parms.get("ip-address")
         self.__user = self._destination_parms.get("ssid-name")
         self.__password = self._destination_parms.get("password")
+        self.rows = {}
         if not (self.__ip and self.__user and self.__password):
             self.error("missing parameters")
-        # init export vars
-        self.__objectid = self._export_vars.get("objectid", ExportVariable("objectid", ""))
-        self.__dummy1 = self._export_vars.get("dummy1", ExportVariable("dummy1", ""))
-        self.__dummy2 = self._export_vars.get("dummy2", ExportVariable("dummy2", ""))
-        self.__dummy3 = self._export_vars.get("dummy3", ExportVariable("dummy3", ""))
-        self.__dummy4 = self._export_vars.get("dummy4", ExportVariable("dummy4", ""))
 
     def prepare_export(self):
-        print("prepare export")
-        print("destination parms: IP-Address={} SSID={} Password={}".format(self.__ip, self.__user, self.__password))
+        pass
 
     def add_object(self, cmdb_object):
-        # print values of export variables
-        object_id = self.__objectid.get_value(cmdb_object)
-        dummy1 = self.__dummy1.get_value(cmdb_object)
-        dummy2 = self.__dummy2.get_value(cmdb_object)
-        dummy3 = self.__dummy3.get_value(cmdb_object)
-        dummy4 = self.__dummy4.get_value(cmdb_object)
-        print("object {}".format(object_id))
-        print("dummy1: {}; dummy2: {}; dummy3: {}; dummy4: {}".format(dummy1, dummy2, dummy3, dummy4))
-        print("")
+        row = {}
+        fields = cmdb_object.fields
+        for key in self._export_vars:
+            for field in fields:
+                row.update(
+                    {str(cmdb_object.object_information['object_id']):
+                        {key: str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object))}
+                     })
+        self.rows.update(row)
 
     def finish_export(self):
-        print("finish export")
+        print(self.rows)
+        header = ExportdHeader(json.dumps(self.rows))
+        return header
 
 
 class ExternalSystemOpenNMS(ExternalSystem):

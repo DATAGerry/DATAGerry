@@ -19,19 +19,20 @@ import logging
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
-from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager, LogManagerDeleteError
+from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
+from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import load_class
 from cmdb.utils.system_reader import SystemConfigReader
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
-from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
+from cmdb.framework.cmdb_render import CmdbRender, RenderList
 
 LOGGER = logging.getLogger(__name__)
 
 
-class ExportJob(ExportdJobManagement):
+class ExportdManagerBase(ExportdJobManagement):
 
     def __init__(self, job: ExportdJob):
         self.job = job
@@ -48,7 +49,7 @@ class ExportJob(ExportdJobManagement):
             database_manager=database_manager)
 
         self.sources = self.__get_sources()
-        super(ExportJob, self).__init__(database_manager)
+        super(ExportdManagerBase, self).__init__(database_manager)
 
     def __get_exportvars(self):
         exportvars = {}
@@ -78,9 +79,10 @@ class ExportJob(ExportdJobManagement):
 
         return destinations
 
-    def execute(self, event, user_id: int, user_name: str):
+    def execute(self, event, user_id: int, user_name: str, log_flag: bool = True) -> ExportdHeader:
         # get cmdb objects from all sources
         cmdb_objects = set()
+        exportd_header = ExportdHeader()
         for source in self.sources:
             cmdb_objects.update(source.get_objects())
 
@@ -90,20 +92,22 @@ class ExportJob(ExportdJobManagement):
             external_system.prepare_export()
             for cmdb_object in cmdb_objects:
                 external_system.add_object(cmdb_object)
-            external_system.finish_export()
+            exportd_header = external_system.finish_export()
 
-            try:
-                log_params = {
-                    'job_id': self.job.get_public_id(),
-                    'state': True,
-                    'user_id': user_id,
-                    'user_name': user_name,
-                    'event': event.get_type(),
-                    'message': external_system.msg_string,
-                }
-                self.log_manager.insert_log(action=LogAction.EXECUTE, log_type=ExportdJobLog.__name__, **log_params)
-            except LogManagerInsertError as err:
-                LOGGER.error(err)
+            if log_flag:
+                try:
+                    log_params = {
+                        'job_id': self.job.get_public_id(),
+                        'state': True,
+                        'user_id': user_id,
+                        'user_name': user_name,
+                        'event': event.get_type(),
+                        'message': external_system.msg_string,
+                    }
+                    self.log_manager.insert_log(action=LogAction.EXECUTE, log_type=ExportdJobLog.__name__, **log_params)
+                except LogManagerInsertError as err:
+                    LOGGER.error(err)
+        return exportd_header
 
 
 class ExportVariable:
@@ -243,7 +247,7 @@ class ExternalSystem:
     def add_object(self, cmdb_object):
         pass
 
-    def finish_export(self):
+    def finish_export(self) -> ExportdHeader:
         pass
 
     def error(self, msg):

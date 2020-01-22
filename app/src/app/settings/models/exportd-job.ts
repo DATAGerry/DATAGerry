@@ -34,5 +34,6 @@ export class ExportdJob {
   public scheduling: any;
   public running: boolean;
   public state: any;
+  public exportd_type: string;
   // tslint:enable
 }

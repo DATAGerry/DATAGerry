@@ -69,6 +69,7 @@ export class ExportdJobSettingsBuilderComponent implements OnInit {
     this.taskInstance.name = this.basicStep.basicForm.get('name').value;
     this.taskInstance.label = this.basicStep.basicForm.get('label').value;
     this.taskInstance.active = this.basicStep.basicForm.get('active').value;
+    this.taskInstance.exportd_type = this.basicStep.basicForm.get('exportdType').value;
     this.taskInstance.description = this.basicStep.basicForm.get('description').value;
 
     this.taskInstance.destination = this.destinationStep.destinationForm.get('destination').value;

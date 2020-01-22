@@ -21,6 +21,7 @@ import { Component, Injectable, Input, OnInit} from '@angular/core';
 import { CmdbMode } from '../../../../framework/modes.enum';
 import { AbstractControl, FormControl, FormGroup, Validators} from '@angular/forms';
 import { checkJobExistsValidator, ExportdJobService} from '../../../services/exportd-job.service';
+import { ExportdType} from '../../../models/modes_job.enum';
 
 @Component({
   selector: 'cmdb-task-basic-step',
@@ -38,15 +39,19 @@ export class ExportdJobBasicStepComponent implements OnInit {
 
   @Input() public mode: CmdbMode;
   public modes = CmdbMode;
-
   public basicForm: FormGroup;
+  public readonly typeSelect: any[] = [
+    {label: 'PUSH', content: ExportdType.PUSH, description: 'Run job directly.'},
+    {label: 'PULL', content: ExportdType.PULL, description: 'Get the output of a job directly via REST.'}
+    ];
 
   constructor(private exportdService: ExportdJobService) {
     this.basicForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl('', Validators.required),
       description: new FormControl(''),
-      active: new FormControl(true)
+      active: new FormControl(true),
+      exportdType: new FormControl(ExportdType.PUSH)
     });
   }
 
@@ -66,7 +71,7 @@ export class ExportdJobBasicStepComponent implements OnInit {
         this.basicForm.get('name').markAsDirty({ onlySelf: true });
         this.basicForm.get('name').markAsTouched({ onlySelf: true });
       });
-    } else if (this.mode === CmdbMode.Edit) {
+    } else if (CmdbMode.Edit) {
       this.basicForm.markAllAsTouched();
     }
   }

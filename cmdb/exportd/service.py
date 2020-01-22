@@ -152,7 +152,7 @@ class ExportdThread(Thread):
 
             exportd_job_manager.update_job(self.job, self.user_manager.get_user(self.user_id), event_start=False)
             # execute Exportd job
-            job = cmdb.exportd.exporter_base.ExportJob(self.job)
+            job = cmdb.exportd.exporter_base.ExportdManagerBase(self.job)
             job.execute(self.event, cur_user.get_public_id(), cur_user.get_name())
 
         except Exception as err:
