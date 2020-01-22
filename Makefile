@@ -17,6 +17,7 @@
 # set environment variables
 BUILDVAR_VERSION = undefined
 BUILDVAR_VERSION_EXT = undefined
+BUILDVAR_DOCKER_TAG = undefined
 BIN_PYINSTALLER = pyinstaller
 BIN_SPHINX = sphinx-build
 BIN_PYTEST = pytest
@@ -127,7 +128,7 @@ docker: rpm
 	mkdir -p ${DIR_DOCKER_BUILD}/src/files
 	cp contrib/docker/Dockerfile ${DIR_DOCKER_BUILD}/src
 	cp ${DIR_RPM_BUILD}/RPMS/x86_64/DATAGERRY-*.rpm ${DIR_DOCKER_BUILD}/src/files
-	docker build -f ${DIR_DOCKER_BUILD}/src/Dockerfile -t nethinks/datagerry:${BUILDVAR_VERSION} ${DIR_DOCKER_BUILD}/src
+	docker build -f ${DIR_DOCKER_BUILD}/src/Dockerfile -t nethinks/datagerry:${BUILDVAR_DOCKER_TAG} ${DIR_DOCKER_BUILD}/src
 
 
 # execute tests

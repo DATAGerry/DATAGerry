@@ -26,7 +26,7 @@ jobs:
             - run: echo "export VERSION_PATH=\"$CIRCLE_TAG\"" >> $BASH_ENV
             - run: echo "export VERSION_DOCKER_TAG=\"$VERSION_STRING\"" >> $BASH_ENV
       # build datagerry
-      - run: BUILDVAR_VERSION=$VERSION_STRING BUILDVAR_VERSION_EXT=$VERSION_ID make -e
+      - run: BUILDVAR_VERSION=$VERSION_STRING BUILDVAR_VERSION_EXT=$VERSION_ID BUILDVAR_DOCKER_TAG=$VERSION_DOCKER_TAG make -e
       # run tests (temp. disabled for redesign, see NET-71)
       #- run: make tests
       # copy datagerry to files.datagerry.com
