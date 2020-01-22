@@ -16,14 +16,17 @@ jobs:
       - run: echo "export VERSION_STRING=\"$CIRCLE_BRANCH\"" >> $BASH_ENV
       - run: echo "export VERSION_ID=\"$CIRCLE_BRANCH-$CIRCLE_SHA1\"" >> $BASH_ENV
       - run: echo "export VERSION_PATH=\"branches/$CIRCLE_BRANCH\"" >> $BASH_ENV
+      - run: echo "export VERSION_DOCKER_TAG=\"branches_$VERSION_STRING\"" >> $BASH_ENV
+      # setup version strings for tagged versions (=releases)
       - when:
           condition: <<parameters.version-is-tagged>>
           steps:
             - run: echo "export VERSION_STRING=\"$CIRCLE_TAG\"" >> $BASH_ENV
             - run: echo "export VERSION_ID=\"$CIRCLE_TAG\"" >> $BASH_ENV
             - run: echo "export VERSION_PATH=\"$CIRCLE_TAG\"" >> $BASH_ENV
+            - run: echo "export VERSION_DOCKER_TAG=\"$VERSION_STRING\"" >> $BASH_ENV
       # build datagerry
-      - run: BUILDVAR_VERSION=$VERSION_STRING BUILDVAR_VERSION_EXT=$VERSION_ID make -e
+      - run: BUILDVAR_VERSION=$VERSION_STRING BUILDVAR_VERSION_EXT=$VERSION_ID BUILDVAR_DOCKER_TAG=$VERSION_DOCKER_TAG make -e
       # run tests (temp. disabled for redesign, see NET-71)
       #- run: make tests
       # copy datagerry to files.datagerry.com
@@ -35,7 +38,7 @@ jobs:
       - run: sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/targz/datagerry-*.tar.gz  $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH/targz
       # publish docker image to hub.docker.com
       - run: echo "$DOCKER_TOKEN" | docker login --username $DOCKER_USER --password-stdin
-      - run: docker push nethinks/datagerry:$VERSION_STRING
+      - run: docker push nethinks/datagerry:$VERSION_DOCKER_TAG
       # copy documenation to docs.datagerry.com
       - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH_DOCS/$VERSION_PATH"
       - run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "rm -Rf $SCP_PATH_DOCS/$VERSION_PATH/*"
