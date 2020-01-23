@@ -19,7 +19,7 @@ Collection of system readers which loads configuration files and settings
 """
 import os
 import re
-from typing import Optional, Any, Union, List
+from typing import Any, Union, List
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo, NoDocumentFound
 from cmdb.utils.cast import auto_cast

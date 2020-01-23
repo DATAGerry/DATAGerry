@@ -37,11 +37,19 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
 
   // Form
   public authProviderFormGroup: FormGroup;
-  public authSettingsFormConfig: any = {
+  public authSettingsFormConfig: any[] = [
+    {
     name: 'enable_external',
     label: 'Enable External',
     type: 'checkbox'
-  };
+    },
+    {
+      name: 'token_lifetime',
+      label: 'Token lifetime',
+      description: 'How long should the token be valid?',
+      type: 'number'
+    }
+  ];
   public authProviderControlConfigFormMap: Map<string, any> = new Map<string, any>();
 
   // Data

@@ -3,8 +3,10 @@
 <div class="row">
   <div class="col-md-9">
     <form class="renderForm" [formGroup]="authProviderFormGroup" (ngSubmit)="onSave()">
-      <cmdb-render-element [parentFormGroup]="authProviderFormGroup" [mode]="renderMode"
-                           [data]="authSettingsFormConfig"></cmdb-render-element>
+      <ng-container *ngFor="let settingConf of authSettingsFormConfig">
+        <cmdb-render-element [parentFormGroup]="authProviderFormGroup" [mode]="renderMode"
+                             [data]="settingConf"></cmdb-render-element>
+      </ng-container>
       <div *ngIf="authSettings && authProviderControlConfigFormMap && isPatched" id="providerSettings">
         <div formArrayName="providers" class="card mb-3"
              *ngFor="let providerSettings of authSettings?.providers; index as i">

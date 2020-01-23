@@ -40,6 +40,7 @@ class AuthModule:
     __DEFAULT_SETTINGS__ = {
         '_id': 'auth',
         'enable_external': True,
+        'token_lifetime': 1400,
         'providers': [
             {
                 'class_name': provider.get_name(),
