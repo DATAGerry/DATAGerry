@@ -14,10 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import logging
-from typing import List, ClassVar
+from typing import List
 
-from cmdb.security.auth.auth_providers import AuthenticationProvider
-from cmdb.security.auth.provider_config import AuthProviderConfig
+from cmdb.security.token import DEFAULT_TOKEN_LIFETIME
 
 LOGGER = logging.getLogger(__name__)
 
@@ -28,39 +27,22 @@ class AuthSettingsDAO:
     __DOCUMENT_IDENTIFIER = 'auth'
     __DEFAULT_EXTERNAL_ENABLED = False
 
-    def __init__(self, providers: List[dict] = None, enable_external: bool = None, *args, **kwargs):
-
+    def __init__(self, providers: List[dict] = None, enable_external: bool = None, token_lifetime: int = None, *args,
+                 **kwargs):
         self._id: str = AuthSettingsDAO.__DOCUMENT_IDENTIFIER
-        self.providers: List[dict] = providers
-        # self.__init_provider_list(providers=providers)
+        self.providers: List[dict] = providers or []
+        self.token_lifetime: int = token_lifetime or DEFAULT_TOKEN_LIFETIME
         self.enable_external: bool = enable_external or AuthSettingsDAO.__DEFAULT_EXTERNAL_ENABLED
-
-    def __init_provider_list(self, providers: List[dict]):
-        from cmdb.security.auth import AuthModule
-
-        for provider in providers:
-            try:
-                _provider_class_name: ClassVar[str] = provider.get('class_name')
-                if not AuthModule.provider_exists(provider_name=_provider_class_name):
-                    continue
-                _provider_class: ClassVar[AuthenticationProvider] = AuthModule.get_provider_class(_provider_class_name)
-                _provider_config_class: ClassVar[AuthProviderConfig] = _provider_class.PROVIDER_CONFIG_CLASS
-                _provider_config_values: dict = provider.get('config', _provider_config_class.DEFAULT_CONFIG_VALUES)
-
-                _provider_config_instance = _provider_config_class(**_provider_config_values)
-                _provider_instance: AuthenticationProvider = _provider_class(config=_provider_config_instance)
-                LOGGER.debug(f'[AuthSettingsDAO] _provider_instance: {_provider_instance.__dict__}')
-                self.providers.append({
-                    'class_name': _provider_instance.get_name(),
-                    'config': _provider_instance.get_config().__dict__
-                })
-            except Exception as err:
-                LOGGER.error(f'[AuthSettingsDAO] {err}')
-                continue
 
     def get_id(self) -> str:
         """Get the database document identifier"""
         return self._id
+
+    def get_token_lifetime(self, default: int = DEFAULT_TOKEN_LIFETIME) -> int:
+        """Get the lifetime parameter for tokens"""
+        if not self.token_lifetime:
+            self.token_lifetime = default
+        return self.token_lifetime
 
     def get_provider_list(self) -> List[dict]:
         """Get the list of providers with config"""

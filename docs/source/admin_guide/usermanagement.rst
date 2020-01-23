@@ -51,9 +51,3 @@ The following rights are necessary to use the frontend::
 
 
 
-External Authentication
-=======================
-
-.. note::
-    The support for external authentication providers (like LDAP) will be available soon.
-

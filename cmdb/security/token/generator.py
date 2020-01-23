@@ -20,14 +20,16 @@ from datetime import datetime, timedelta
 from authlib.jose import jwt, JWT
 
 from cmdb import __title__
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.security.auth import AuthModule
 from cmdb.security.key.holder import KeyHolder
-from cmdb.utils.system_reader import SectionError, SystemConfigReader
+from cmdb.security.token import DEFAULT_TOKEN_LIFETIME
+from cmdb.utils.system_reader import SystemConfigReader, SystemSettingsReader
 
 LOGGER = logging.getLogger(__name__)
 
 
 class TokenGenerator:
-    DEFAULT_EXPIRE_TIME = 1400
 
     DEFAULT_CLAIMS = {
         'iss': {
@@ -36,17 +38,18 @@ class TokenGenerator:
         }
     }
 
-    def __init__(self):
+    def __init__(self, database_manager: DatabaseManagerMongo = None):
         self.key_holder = KeyHolder()
         self.header = {
             'alg': 'RS512'
         }
+        self.database_manager = database_manager or DatabaseManagerMongo(
+            **SystemConfigReader().get_all_values_from_section('Database')
+        )
+        self.auth_module = AuthModule(SystemSettingsReader(self.database_manager))
 
     def get_expire_time(self) -> datetime:
-        try:
-            expire_time = int(SystemConfigReader().get_value('expire', 'Token'))
-        except (KeyError, SectionError):
-            expire_time = self.DEFAULT_EXPIRE_TIME
+        expire_time = int(self.auth_module.settings.get_token_lifetime(DEFAULT_TOKEN_LIFETIME))
         return datetime.now() + timedelta(minutes=expire_time)
 
     def generate_token(self, payload: dict, optional_claims: dict = None) -> JWT:

@@ -14,3 +14,4 @@ Admin Guide
     objects
     exportd
     usermanagement
+    authentication
