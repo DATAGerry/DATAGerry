@@ -176,9 +176,6 @@ class CmdbManagerBase:
             **filter_query
         )
 
-    def _search(self, collection: str, requirements, limit=0):
-        return self._get_many(collection, limit=limit, **requirements)
-
 
 class ManagerGetError(CMDBError):
 
