@@ -141,33 +141,6 @@ class CmdbObjectManager(CmdbManagerBase):
                         self._find_query_fields(item, match_fields=match_fields)
         return match_fields
 
-    def _re_search_fields(self, search_object, regex):
-        """returns list of matched fields"""
-        match_list = list()
-        for index in regex:
-            for field in search_object.fields:
-                if re.search(index, str(field['value'])):
-                    match_list.append(field['name'])
-        return match_list
-
-    def search_objects(self, query: dict) -> dict:
-        return self.search_objects_with_limit(query, limit=0)
-
-    def search_objects_with_limit(self, query: dict, limit=0) -> dict:
-        result_list = dict()
-        for result_objects in self._search(CmdbObject.COLLECTION, query, limit=limit):
-            try:
-                re_query = self._find_query_fields(query)
-                result_object_instance = CmdbObject(**result_objects)
-                matched_fields = self._re_search_fields(result_object_instance, re_query)
-
-                result_list.update({
-                    result_object_instance: matched_fields
-                })
-            except (CMDBError, re.error):
-                continue
-        return result_list
-
     def insert_object(self, data: (CmdbObject, dict)) -> int:
         """
         Insert new CMDB Object
