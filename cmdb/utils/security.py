@@ -31,11 +31,10 @@ class SecurityManager:
     DEFAULT_ALG = 'HS512'
     DEFAULT_EXPIRES = int(10)
 
-    def __init__(self, database_manager, expire_time=None):
+    def __init__(self, database_manager):
         self.ssr = SystemSettingsReader(database_manager)
         self.ssw = SystemSettingsWriter(database_manager)
         self.salt = "cmdb"
-        self.expire_time = expire_time or SecurityManager.DEFAULT_EXPIRES
 
     def generate_hmac(self, data):
         import hashlib

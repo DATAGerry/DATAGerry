@@ -108,7 +108,7 @@ class SetupRoutine:
         from cmdb.user_management.user_manager import UserManager
         from cmdb.utils.security import SecurityManager
         scm = SecurityManager(self.setup_database_manager)
-        usm = UserManager(self.setup_database_manager, scm)
+        usm = UserManager(self.setup_database_manager)
 
         try:
             admin_user = usm.get_user(1)
@@ -188,7 +188,7 @@ class SetupRoutine:
         from cmdb.user_management import __FIXED_GROUPS__
         from cmdb.utils.security import SecurityManager
         scm = SecurityManager(self.setup_database_manager)
-        usm = UserManager(self.setup_database_manager, scm)
+        usm = UserManager(self.setup_database_manager)
 
         for group in __FIXED_GROUPS__:
             usm.insert_group(group)

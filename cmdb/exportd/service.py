@@ -22,14 +22,13 @@ import sched
 
 from threading import Thread
 from datetime import datetime
-from cmdb.exportd.exportd_job.exportd_job_manager import exportd_job_manager
+from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_job.exportd_job import ExecuteState
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.utils.system_reader import SystemConfigReader
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
 from cmdb.user_management.user_manager import UserManager
-from cmdb.utils.security import SecurityManager
 
 
 LOGGER = logging.getLogger(__name__)
@@ -122,19 +121,19 @@ class ExportdThread(Thread):
         )
         self.log_manager = ExportdLogManager(
             database_manager=self.__dbm)
-        self.user_manager = UserManager(database_manager=self.__dbm,
-                                        security_manager=SecurityManager(self.__dbm))
+        self.exportd_job_manager = ExportdJobManagement(database_manager=self.__dbm)
+        self.user_manager = UserManager(database_manager=self.__dbm)
 
     def run(self):
         try:
             if self.type_id:
-                for obj in exportd_job_manager.get_job_by_event_based(True):
+                for obj in self.exportd_job_manager.get_job_by_event_based(True):
                     if next((item for item in obj.get_sources() if item["type_id"] == self.type_id), None):
                         if obj.get_active() and obj.scheduling["event"]["active"]:
                             self.job = obj
                             self.worker()
             elif self.is_active:
-                self.job = exportd_job_manager.get_job(self.job_id)
+                self.job = self.exportd_job_manager.get_job(self.job_id)
                 self.worker()
         except Exception as ex:
             LOGGER.error(ex)
@@ -150,7 +149,7 @@ class ExportdThread(Thread):
             # get current user
             cur_user = self.user_manager.get_user(self.user_id)
 
-            exportd_job_manager.update_job(self.job, self.user_manager.get_user(self.user_id), event_start=False)
+            self.exportd_job_manager.update_job(self.job, self.user_manager.get_user(self.user_id), event_start=False)
             # execute Exportd job
             job = cmdb.exportd.exporter_base.ExportdManagerBase(self.job)
             job.execute(self.event, cur_user.get_public_id(), cur_user.get_name())
@@ -174,7 +173,7 @@ class ExportdThread(Thread):
         finally:
             # update job for UI
             self.job.state = ExecuteState.SUCCESSFUL.name if not self.exception_handling else ExecuteState.FAILED.name
-            exportd_job_manager.update_job(self.job, self.user_manager.get_user(self.user_id), event_start=False)
+            self.exportd_job_manager.update_job(self.job, self.user_manager.get_user(self.user_id), event_start=False)
 
 
 

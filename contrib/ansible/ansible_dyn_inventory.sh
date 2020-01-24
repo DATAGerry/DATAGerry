@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2019 NETHINKS GmbH
 #
@@ -14,16 +16,23 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import pytest
-from cmdb.interface.rest_api import create_rest_api
+# small helper script for ansible dynamic inventory 
 
-pytest_plugins = 'tests/pytest_plugins/pytest_mongodb'
+# config variables
+DATAGERRY_EXPORT_TASK=ansible-router
+DATAGERRY_REST_URL=http://127.0.0.1:4000/rest
+DATAGERRY_REST_USER=admin
+DATAGERRY_REST_PASSWORD=admin
 
-
-@pytest.fixture
-def client():
-    app = create_rest_api(None)
-    app.config.testing = True
-    app.debug = True
-
-    return app.test_client()
+# create output
+if [ "$1" == "--list" ]
+then
+	# execute task
+	curl \
+		-X GET \
+		-u "${DATAGERRY_REST_USER}:${DATAGERRY_REST_PASSWORD}" \
+		--silent \
+		${DATAGERRY_REST_URL}/exportdjob/pull/${DATAGERRY_EXPORT_TASK}
+else
+	echo "[]"
+fi

@@ -27,7 +27,6 @@ import { SidebarCategoryComponent } from './structure/sidebar/sidebar-category.c
 import { ContentHeaderComponent } from './components/content-header/content-header.component';
 import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.component';
 import { LowercaseDirective } from './directives/lowercase.directive';
-import { SearchBarComponent } from './components/search-bar/search-bar.component';
 import { FooterComponent } from './structure/footer/footer.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
@@ -50,7 +49,7 @@ import { UserDisplayComponent } from './components/user-display/user-display.com
 import { ChartsComponent } from './components/charts/charts.component';
 import { ToastModule } from './toast/toast.module';
 import { AuthModule } from '../auth/auth.module';
-import { NgxSpinnerComponent, NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
+import { NgxSpinnerComponent, NgxSpinnerModule } from 'ngx-spinner';
 import { LoadingScreenComponent } from './structure/loading-screen/loading-screen.component';
 
 export const LAYOUT_COMPONENT_ROUTES: Routes = [
@@ -90,7 +89,6 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     SidebarCategoryComponent,
     ContentHeaderComponent,
     ActiveBadgeComponent,
-    SearchBarComponent,
     TableComponent,
     ModalComponent,
     TypeLabelComponent,
@@ -109,7 +107,6 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     FooterComponent,
     ContentHeaderComponent,
     ActiveBadgeComponent,
-    SearchBarComponent,
     TableComponent,
     TypeLabelComponent,
     IconPickerComponent,

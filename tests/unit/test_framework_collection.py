@@ -35,7 +35,7 @@ class TestFrameworkCollectionTemplate:
     ])
     def test_init(self, collection_template_instance_class):
         type_tuple_list = [CmdbCollectionTemplate.generate_type_tuple(1, 10)]
-        right_init_params = {'public_id': 1, 'name': 'test', 'type_tuple_list': type_tuple_list}
+        right_init_params = {'public_id': 1, 'name': 'test', 'type_order_list': type_tuple_list}
         init_instance = CmdbCollectionTemplate(**right_init_params)
         assert isinstance(init_instance, collection_template_instance_class)
 

@@ -26,7 +26,7 @@ from cmdb.security.auth.auth_errors import AuthenticationError
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import User
 from cmdb.user_management.user_manager import UserManager
-from cmdb.user_management.user_manager import user_manager, UserManagerGetError
+from cmdb.user_management.user_manager import UserManagerGetError
 from cmdb.utils import SystemSettingsReader, SystemSettingsWriter
 
 try:

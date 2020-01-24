@@ -70,8 +70,7 @@ class CmdbRender:
     def __init__(self, object_instance: CmdbObject,
                  type_instance: CmdbType,
                  render_user: User,
-                 match_values: [] = None):
-        from cmdb.user_management.user_manager import user_manager
+                 match_values: [] = None, user_manager: UserManager = None):
         self.object_instance: CmdbObject = object_instance
         self.type_instance: CmdbType = type_instance
         self.__usm: UserManager = user_manager
@@ -288,10 +287,11 @@ class RenderList:
     @timing('RenderList')
     def render_result_list(self, search_fields=None):
         from cmdb.utils.system_reader import SystemConfigReader
-
-        object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
+        database_manager = DatabaseManagerMongo(
             **SystemConfigReader().get_all_values_from_section('Database')
-        ))
+        )
+        object_manager = CmdbObjectManager(database_manager=database_manager)
+        user_manager = UserManager(database_manager=database_manager)
 
         preparation_objects = []
         for passed_object in self.object_list:
@@ -299,7 +299,7 @@ class RenderList:
                 type_instance=object_manager.get_type(passed_object.type_id),
                 object_instance=passed_object,
                 match_values=search_fields,
-                render_user=self.request_user)
+                render_user=self.request_user, user_manager=user_manager)
             current_render_result = tmp_render.result()
             preparation_objects.append(current_render_result)
         return preparation_objects
