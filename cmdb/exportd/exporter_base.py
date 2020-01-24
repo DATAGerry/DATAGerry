@@ -22,6 +22,8 @@ from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
+from cmdb.user_management import UserManager
+from cmdb.utils import SecurityManager
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import load_class
 from cmdb.utils.system_reader import SystemConfigReader
@@ -121,8 +123,7 @@ class ExportVariable:
         database_manager = DatabaseManagerMongo(
             **scr.get_all_values_from_section('Database')
         )
-        from cmdb.user_management.user_manager import user_manager
-        self.__user_manager = user_manager
+        self.__user_manager = UserManager(database_manager)
         self.__object_manager = CmdbObjectManager(
             database_manager=database_manager
         )
@@ -157,10 +158,11 @@ class ExportVariable:
                 field_name = field["name"]
                 if field["type"] == "ref" and field["value"] and iteration > 0:
                     # resolve type
-                    iteration = iteration - 1 
+                    iteration = iteration - 1
                     current_object = self.__object_manager.get_object(field["value"])
                     type_instance = self.__object_manager.get_type(current_object.get_type_id())
-                    cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance, render_user=None)
+                    cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance,
+                                                    render_user=None, user_manager=self.__user_manager)
                     data["fields"][field_name] = self.get_objectdata(cmdb_render_object.result(), iteration)
                 else:
                     data["fields"][field_name] = field["value"]

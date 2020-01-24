@@ -73,8 +73,7 @@ def create_rest_api(event_queue):
     )
 
     user_manager = UserManager(
-        database_manager=app_database,
-        security_manager=security_manager
+        database_manager=app_database
     )
 
     exportd_job_manager = ExportdJobManagement(

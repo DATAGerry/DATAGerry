@@ -18,15 +18,17 @@ import logging
 import json
 
 from bson import json_util
+from flask import request, current_app
 
 from cmdb.interface.route_utils import make_response, RootBlueprint, abort, login_required, insert_request_user, \
     right_required
 from cmdb.user_management import User
 from cmdb.user_management.user_group import UserGroup
-from cmdb.user_management.user_manager import user_manager, UserManagerInsertError, UserManagerGetError, \
+from cmdb.user_management.user_manager import UserManager, UserManagerInsertError, UserManagerGetError, \
     UserManagerUpdateError, UserManagerDeleteError
 
-from flask import request
+with current_app.app_context():
+    user_manager: UserManager = current_app.user_manager
 
 try:
     from cmdb.utils.error import CMDBError

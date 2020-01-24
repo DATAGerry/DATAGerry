@@ -52,7 +52,7 @@ class LocalAuthenticationProvider(AuthenticationProvider):
             **SystemConfigReader().get_all_values_from_section('Database')
         )
         __scm = SecurityManager(__dbm)
-        __user_manager = UserManager(__dbm, __scm)
+        __user_manager = UserManager(__dbm)
         LOGGER.info(f'[LocalAuthenticationProvider] Try login for user {user_name}')
         try:
             user: User = __user_manager.get_user_by_name(user_name=user_name)

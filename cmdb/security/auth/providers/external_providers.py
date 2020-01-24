@@ -119,8 +119,7 @@ class LdapAuthenticationProvider(AuthenticationProvider):
         __dbm = DatabaseManagerMongo(
             **SystemConfigReader().get_all_values_from_section('Database')
         )
-        __scm = SecurityManager(__dbm)
-        __user_manager = UserManager(__dbm, __scm)
+        __user_manager = UserManager(__dbm)
         try:
             ldap_connection_status = self.connect()
             LOGGER.debug(f'[LdapAuthenticationProvider] Connection status: {ldap_connection_status}')

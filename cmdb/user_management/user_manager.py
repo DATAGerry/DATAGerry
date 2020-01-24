@@ -33,8 +33,8 @@ LOGGER = logging.getLogger(__name__)
 
 class UserManager(CmdbManagerBase):
 
-    def __init__(self, database_manager: DatabaseManagerMongo, security_manager: SecurityManager):
-        self.scm = security_manager
+    def __init__(self, database_manager: DatabaseManagerMongo):
+        self.scm = SecurityManager(database_manager)
         self.rights = self._load_rights()
         super(UserManager, self).__init__(database_manager)
 
@@ -260,20 +260,3 @@ class UserManagerDeleteError(ManagerDeleteError):
 
     def __init__(self, err):
         super(UserManagerDeleteError, self).__init__(err)
-
-
-def get_user_manager():
-    # TODO: refactor for single instance
-    system_config_reader = SystemConfigReader()
-    database_manager = DatabaseManagerMongo(
-        **system_config_reader.get_all_values_from_section('Database')
-    )
-    return UserManager(
-        database_manager=database_manager,
-        security_manager=get_security_manager(
-            database_manager=database_manager
-        )
-    )
-
-
-user_manager = get_user_manager()

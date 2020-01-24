@@ -20,7 +20,7 @@ from functools import wraps
 from authlib.jose.errors import ExpiredTokenError
 
 from cmdb.user_management import User
-from cmdb.user_management.user_manager import UserManagerGetError
+from cmdb.user_management.user_manager import UserManagerGetError, UserManager
 from cmdb.utils.wraps import LOGGER
 
 try:
@@ -28,7 +28,7 @@ try:
 except ImportError:
     CMDBError = Exception
 
-from flask import Blueprint, request, abort
+from flask import Blueprint, request, abort, current_app
 
 from cmdb.security.token.validator import TokenValidator, ValidationError
 from cmdb.utils import json_encoding
@@ -142,10 +142,12 @@ def right_required(required_right: str, excepted: dict = None):
     requires: insert_request_user
     """
 
+    with current_app.app_context():
+        user_manager: UserManager = current_app.user_manager
+
     def _page_right(func):
         @functools.wraps(func)
         def _decorate(*args, **kwargs):
-            from cmdb.user_management.user_manager import user_manager
             try:
                 current_user: User = kwargs['request_user']
             except KeyError:

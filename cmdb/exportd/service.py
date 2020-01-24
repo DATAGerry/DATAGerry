@@ -122,8 +122,7 @@ class ExportdThread(Thread):
         )
         self.log_manager = ExportdLogManager(
             database_manager=self.__dbm)
-        self.user_manager = UserManager(database_manager=self.__dbm,
-                                        security_manager=SecurityManager(self.__dbm))
+        self.user_manager = UserManager(database_manager=self.__dbm)
 
     def run(self):
         try:
