@@ -593,3 +593,81 @@ class ExternalSystemCsv(ExternalSystem):
             writer.writeheader()
             for row in self.rows:
                 writer.writerow(row)
+
+
+class ExternalSystemAnsible(ExternalSystem):
+
+    parameters = []
+
+    variables = [
+        {
+            "name": "hostname",
+            "required": True,
+            "description": "hostname or IP that Ansible uses for connecting to the host. e.g. - test.example.com"
+        },
+        {
+            "name": "group_",
+            "required": True,
+            "description": "Ansible group membership. e.g. - group_webservers"
+        },
+        {
+            "name": "hostvar_",
+            "required": False,
+            "description": "host variables that should be given to Ansible. e.g. - hostvar_snmpread"
+        }
+    ]
+
+    def __init__(self, destination_parms, export_vars):
+        super(ExternalSystemAnsible, self).__init__(destination_parms, export_vars)
+        self.__variables = export_vars
+
+        # initialize store for created ansible groups
+        self.ansible_groups = {}
+
+        # initialize store for hostvars
+        self.ansible_hostvars = {}
+
+        # initialize store for hostname
+        self.host_list = []
+
+    def add_object(self, cmdb_object):
+        # get hostname for ansible inventory
+        hostname = self._export_vars.get("hostname", ExportVariable("hostname", "default")).get_value(cmdb_object)
+        self.host_list.append(hostname)
+
+        # walk through all variables to get groups and hostvars
+        groups = []
+        hostvars = {}
+
+        for v_name in self.__variables:
+            # check if it is a "group_" variable
+            matches = re.search(r'group_(.*)$', v_name)
+            if matches:
+                group_name = matches.group(1)
+                group_value = self._export_vars.get(v_name, ExportVariable(v_name, "")).get_value(cmdb_object)
+                # check if the value is true
+                if group_value:
+                    groups.append(group_name)
+
+            # check if it is a "hostvar_" variable
+            matches = re.search(r'hostvar_(.*)$', v_name)
+            if matches:
+                host_var_name = matches.group(1)
+                host_var_value = self._export_vars.get(v_name, ExportVariable(v_name, "")).get_value(cmdb_object)
+                hostvars.update({host_var_name: host_var_value})
+
+        # write hostvars to ansible hostvars store
+        self.ansible_hostvars.update({hostname: hostvars})
+
+        # write to ansible group store
+        for group in groups:
+            self.ansible_groups.update({group: {'hosts': self.host_list}})
+
+    def finish_export(self):
+
+        # create JSON and print
+        groups = self.ansible_groups
+        groups.update({'_meta': {'hostvars': self.ansible_hostvars}})
+        print(json.dumps(groups))
+        header = ExportdHeader(json.dumps(groups))
+        return header
