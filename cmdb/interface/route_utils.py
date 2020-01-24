@@ -199,7 +199,9 @@ def parse_authorization_header(header):
         auth_type, auth_info = value.split(None, 1)
         auth_type = auth_type.lower()
     except ValueError:
-        return None
+        # Fallback for old versions
+        auth_type = b"bearer"
+        auth_info = value
 
     if auth_type == b"basic":
         try:
