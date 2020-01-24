@@ -47,12 +47,12 @@
           <ng-select id="exportdType" [items]="typeSelect"
                      bindLabel="label"
                      bindValue="content"
-                     formControlName="exportdType">
+                     formControlName="exportd_type">
             <ng-template ng-option-tmp let-item="item" let-index="index">
               {{item.label}} : {{item.description}}
             </ng-template>
           </ng-select>
-          <small id="typeDescriptionInputHelp" class="form-text text-muted">Default is PUSH: Run job directly.</small>
+          <small id="typeInputHelp" class="form-text text-muted">Default is PUSH: Run job directly.</small>
           <div class="clearfix"></div>
         </div>
         <div class="clearfix"></div>

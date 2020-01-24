@@ -29,7 +29,14 @@
   <tr *ngFor="let task of taskList | async">
     <th scope="row">{{task.public_id}}</th>
     <td><cmdb-active-badge [activeStatus]="task.active"></cmdb-active-badge></td>
-    <td>{{task.exportd_type}}</td>
+    <td>
+      <span class="badge">
+        <i [attr.class]="task.exportd_type == typeMode.PULL
+             ?'fas fa-cloud-download-alt text-primary'
+             :'fas fa-cloud-upload-alt text-primary'"></i>
+        {{task.exportd_type}}
+      </span>
+    </td>
     <td>{{task.label}}</td>
     <td>
       <ul>
@@ -59,7 +66,7 @@
     </td>
     <td *permissionLink="['base.exportd.job.run']">
       <button type="button" class="btn badge-pill btn-success"
-              (click)="run_job_manual(task)">
+              (click)="run_job_manual(task)" [disabled]="task.exportd_type == typeMode.PULL">
         Run Now <fa-icon icon="play"></fa-icon>
       </button>
     </td>

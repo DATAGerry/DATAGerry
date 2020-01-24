@@ -27,7 +27,7 @@ import { ToastService } from '../../../layout/toast/toast.service';
 import { ModalComponent } from '../../../layout/helpers/modal/modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subscription, timer } from 'rxjs';
-import { ExecuteState } from '../../models/modes_job.enum';
+import {ExecuteState, ExportdType} from '../../models/modes_job.enum';
 
 @Component({
   selector: 'cmdb-task-settings-list',
@@ -43,6 +43,7 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
   public taskList: BehaviorSubject<ExportdJob[]> = new BehaviorSubject<ExportdJob[]>([]);
 
   public modes = ExecuteState;
+  public typeMode = ExportdType;
   private subscription: Subscription;
 
   constructor(private taskService: ExportdJobService, private router: Router,
@@ -54,7 +55,7 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
       rowGroup: {
         enable: true,
         endRender(rows) {
-          return `Number of users in this group: ${ rows.count() }`;
+          return `Number of jobs in this group: ${ rows.count() }`;
         },
         dataSrc: 2
       },
