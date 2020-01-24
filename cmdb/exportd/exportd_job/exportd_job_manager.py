@@ -187,18 +187,3 @@ class ExportdJobManagerDeleteError(ManagerDeleteError):
 
     def __init__(self, err):
         super(ExportdJobManagerDeleteError, self).__init__(err)
-
-
-def get_exoportd_job_manager():
-    ssc = SystemConfigReader()
-    database_options = ssc.get_all_values_from_section('Database')
-    dbm = DatabaseManagerMongo(
-            **database_options
-    )
-    return ExportdJobManagement(
-        event_queue=None,
-        database_manager=dbm
-    )
-
-
-exportd_job_manager = get_exoportd_job_manager()
