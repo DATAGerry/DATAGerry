@@ -37,7 +37,7 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
 
   // Form
   public authProviderFormGroup: FormGroup;
-  public authSettingsFormConfig: any[] = [
+  public: any[] = [
     {
     name: 'enable_external',
     label: 'Enable External',

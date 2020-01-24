@@ -16,7 +16,6 @@
 
 import pytest
 from cmdb.interface.rest_api import create_rest_api
-from tests.unit.test_security_keys import key_holder, key_dir
 
 pytest_plugins = 'tests/pytest_plugins/pytest_mongodb'
 
