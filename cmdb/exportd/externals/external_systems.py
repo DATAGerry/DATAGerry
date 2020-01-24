@@ -669,3 +669,5 @@ class ExternalSystemAnsible(ExternalSystem):
         groups = self.ansible_groups
         groups.update({'_meta': {'hostvars': self.ansible_hostvars}})
         print(json.dumps(groups))
+        header = ExportdHeader(json.dumps(groups))
+        return header
