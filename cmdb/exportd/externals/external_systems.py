@@ -48,17 +48,14 @@ class ExternalSystemDummy(ExternalSystem):
 
     def add_object(self, cmdb_object):
         row = {}
-        fields = cmdb_object.fields
         for key in self._export_vars:
-            for field in fields:
-                row.update(
-                    {str(cmdb_object.object_information['object_id']):
-                        {key: str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object))}
-                     })
+            row.update(
+                {str(cmdb_object.object_information['object_id']):
+                    {key: str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object))}
+                 })
         self.rows.update(row)
 
     def finish_export(self):
-        print(self.rows)
         header = ExportdHeader(json.dumps(self.rows))
         return header
 
@@ -579,11 +576,9 @@ class ExternalSystemCsv(ExternalSystem):
 
     def add_object(self, cmdb_object):
         row = {}
-        fields = cmdb_object.fields
         for key in self.__variables:
             self.header.add(key)
-            for field in fields:
-                row.update({key: str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object))})
+            row.update({key: str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object))})
         self.rows.append(row)
 
     def finish_export(self):
@@ -665,9 +660,8 @@ class ExternalSystemAnsible(ExternalSystem):
 
     def finish_export(self):
 
-        # create JSON and print
+        # create JSON
         groups = self.ansible_groups
         groups.update({'_meta': {'hostvars': self.ansible_hostvars}})
-        print(json.dumps(groups))
         header = ExportdHeader(json.dumps(groups))
         return header
