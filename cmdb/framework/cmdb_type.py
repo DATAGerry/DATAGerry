@@ -114,6 +114,12 @@ class CmdbType(CmdbDAO):
         except IndexError:
             return None
 
+    def get_icon(self):
+        try:
+            return self.render_meta['icon']
+        except IndexError:
+            return None
+
     def has_sections(self):
         if len(self.get_sections()) == 0:
             return False

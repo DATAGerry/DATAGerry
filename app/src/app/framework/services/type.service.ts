@@ -18,14 +18,23 @@
 
 import { Injectable } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
-import { ApiCallService, ApiService, HttpInterceptorHandler } from '../../services/api-call.service';
+import {ApiCallService, ApiService, HttpInterceptorHandler, resp} from '../../services/api-call.service';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
-import { UserService } from '../../management/services/user.service';
-import { HttpBackend, HttpClient } from '@angular/common/http';
+import {HttpBackend, HttpClient, HttpHeaders} from '@angular/common/http';
 import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
 import { AuthService } from '../../auth/services/auth.service';
+
+export const httpObserveOptions = {
+  headers: new HttpHeaders({
+    'Content-Type': 'application/json'
+  }),
+  observe: resp
+};
+
+export const PARAMETER = 'params';
+export const COOCKIENAME = 'onlyActiveObjCookie';
 
 export const checkTypeExistsValidator = (typeService: TypeService<CmdbType>, time: number = 500) => {
   return (control: FormControl) => {
@@ -52,7 +61,8 @@ export class TypeService<T = CmdbType> implements ApiService {
   public servicePrefix: string = 'type';
   private typeList: T[];
 
-  constructor(private api: ApiCallService, private backend: HttpBackend, private authService: AuthService) {
+  constructor(private api: ApiCallService, private backend: HttpBackend,
+              private authService: AuthService, private http: HttpClient) {
     // STRUCTURE IS DEPRECATED PLEASE NOT USE
     this.getTypeList().subscribe((respTypeList: T[]) => {
       this.typeList = respTypeList;
@@ -113,6 +123,15 @@ export class TypeService<T = CmdbType> implements ApiService {
     );
   }
 
+  public groupTypeByCategory(publicID: number): Observable<any> {
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) };
+    return this.api.callGet<T[]>(this.servicePrefix + '/group/category/' + publicID, this.http, httpObserveOptions).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
   public updateTypeByCategoryID(publicID: number): Observable<any> {
     return this.api.callPut<T>(this.servicePrefix + '/category/' + publicID, null).pipe(
       map((apiResponse) => {
@@ -158,5 +177,9 @@ export class TypeService<T = CmdbType> implements ApiService {
   }
 
 
+  readCookies(name: string) {
+    const result = new RegExp('(?:^|; )' + encodeURIComponent(name) + '=([^;]*)').exec(document.cookie);
+    return result ? result[1] : 'true';
+  }
 }
 

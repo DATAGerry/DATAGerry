@@ -30,9 +30,8 @@ export class SidebarCategoryComponent implements OnInit {
 
   @Input() categoryData: any;
   public categoryPopUp: any[];
-  public categoryTypeList: CmdbType[];
 
-  constructor(private objService: ObjectService, private typeService: TypeService) {
+  constructor(private typeService: TypeService) {
   }
 
   ngOnInit() {
@@ -41,39 +40,17 @@ export class SidebarCategoryComponent implements OnInit {
 
   private initCategoryTypeList() {
     if (this.categoryData.category.root) {
-      this.typeService.getTypeListByCategory(0).subscribe((data: CmdbType[]) => {
-        this.categoryTypeList = data;
+      this.typeService.groupTypeByCategory(0).subscribe((data: CmdbType[]) => {
+        this.categoryPopUp = data;
       });
     } else {
-      this.typeService.getTypeListByCategory(this.categoryData.category.public_id).subscribe((data: CmdbType[]) => {
-        this.categoryTypeList = data;
+      this.typeService.groupTypeByCategory(this.categoryData.category.public_id).subscribe((data: CmdbType[]) => {
+        this.categoryPopUp = data;
       });
     }
   }
 
   public get_objects_by_type() {
-    this.categoryPopUp = [];
     this.initCategoryTypeList();
-
-    for (const type of this.categoryTypeList) {
-      const typeID = type.public_id;
-      let currentTypeLabel = '';
-      let currentTypeIcon = '';
-      let amount = '';
-      this.typeService.getType(typeID).subscribe((data: CmdbType) => {
-        currentTypeLabel = data.label;
-        currentTypeIcon = data.render_meta.icon;
-        this.objService.countObjectsByType( typeID).subscribe(ack => {
-          amount = ack;
-          const popUp = {
-            id: typeID,
-            label: currentTypeLabel,
-            count: amount,
-            icon: currentTypeIcon
-          };
-          this.categoryPopUp.push(popUp);
-        });
-      });
-    }
   }
 }

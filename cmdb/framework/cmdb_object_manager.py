@@ -316,6 +316,26 @@ class CmdbObjectManager(CmdbManagerBase):
             ack.append(CmdbType(**data))
         return ack
 
+    def group_type_by_value(self, value: str, match=None):
+        """This method does not actually
+           performs the find() operation
+           but instead returns
+           a objects grouped by type of the documents that meet the selection criteria.
+
+           Args:
+               value (str): grouped by value
+               match (dict): stage filters the documents to only pass documents.
+           Returns:
+               returns the objects grouped by value of the documents
+           """
+        agr = []
+        if match:
+            agr.append({'$match': match})
+        agr.append({'$group': {'_id': '$'+value, 'count': {'$sum': 1}}})
+        agr.append({'$sort': {'count': -1}})
+
+        return self.dbm.group(CmdbType.COLLECTION, agr)
+
     def insert_type(self, data: (CmdbType, dict)):
         if isinstance(data, CmdbType):
             new_type = data

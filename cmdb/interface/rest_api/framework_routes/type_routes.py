@@ -219,6 +219,45 @@ def get_type_by_category(public_id, request_user: User):
     return make_response(type_list)
 
 
+@type_blueprint.route('/group/category/<int:public_id>/', methods=['GET'])
+@type_blueprint.route('/group/category/<int:public_id>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.framework.type.view')
+def group_type_by_category(public_id, request_user: User):
+    try:
+        result = []
+        filter_match = {}
+        active_flag = False
+        if request.args.get('onlyActiveObjCookie') is not None:
+            value = request.args.get('onlyActiveObjCookie')
+            if value in ['True', 'true']:
+                active_flag = True
+
+        # group type by category
+        cursor = object_manager.group_type_by_value('public_id', {'category_id': public_id})
+        for document in cursor:
+            filter_match.update({'type_id': document['_id']})
+            document['id'] = document['_id']
+            document['label'] = object_manager.get_type(document['_id']).label
+            document['icon'] = object_manager.get_type(document['_id']).get_icon()
+            # count objects by type
+            if active_flag:
+                filter_match.update({'active': {'$eq': True}})
+                cursor = object_manager.group_objects_by_value('active', filter_match)
+                total = []
+                for obj in cursor:
+                    total.append(obj)
+                document['total'] = total[0]['count'] if total else 0
+            else:
+                document['total'] = object_manager.count_objects_by_type(document['_id'])
+            result.append(document)
+        resp = make_response(result)
+    except ObjectManagerGetError:
+        return abort(404, 'Not types in this Category')
+    return resp
+
+
 @type_blueprint.route('/category/<int:public_id>/', methods=['PUT'])
 @type_blueprint.route('/category/<int:public_id>', methods=['PUT'])
 @login_required
