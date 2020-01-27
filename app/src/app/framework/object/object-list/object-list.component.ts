@@ -180,13 +180,6 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
   ngOnDestroy(): void {
     // Do not forget to unsubscribe the event
     this.dtTrigger.unsubscribe();
-
-    // If a table is initialized while it is hidden,
-    // the browser calculates the width of the columns
-    this.dtElement.dtInstance.then((dtInstance: any) => {
-      dtInstance.columns.adjust()
-        .responsive.recalc();
-    });
   }
 
   reload(): void {
@@ -200,116 +193,13 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     }
   }
 
-  async rerender(newSettings?: DataTables.Settings) {
-    try {
-      await this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-        if (newSettings) {
-          // FIX To ensure that the DT doesn't break when we don't get columns
-          if (this.dtOptions.columns !== undefined) {
-            // console.log('ASDFASfd')
-            // this.buildDtTable();
-          }
-          this.buildDtTable();
-          if (newSettings.columns && newSettings.columns.length > 1) {
-            dtInstance.destroy();
-            this.dtOptions = Promise.resolve(newSettings);
-            // this.displayTable(this.dtTableElement);
-          }
-        }
-      });
-    } catch (error) {
-      console.log(`DT Rerender Exception: ${error}`);
-    }
-    return Promise.resolve(null);
-  }
-
-  private displayTable(renderIn: ElementRef): void {
-    this.dtElement.dtInstance = new Promise((resolve, reject) => {
-      Promise.resolve(this.dtOptions).then(dtOptions => {
-        // Using setTimeout as a "hack" to be "part" of NgZone
-        setTimeout(() => {
-          $(renderIn.nativeElement).empty();
-          const dt = $(renderIn.nativeElement).DataTable(dtOptions);
-          resolve(dt);
-        });
-      }).catch(error => reject(error));
-    });
-  }
-
 //  LOGIC
 
   /*
     Build table increments
    */
-
   private buildDtTable() {
-    // this.buildDefaultDtButtons();
-    // this.buildAdvancedButtons();
     this.buildDefaultDtOptions();
-    // this.buildAdvancedDtOptions();
-  }
-
-  private buildDefaultDtButtons() {
-    this.dtButtons.length = 0;
-    this.dtButtons.push(
-      {
-        // add new
-        text: '<i class="fas fa-plus"></i> Add',
-        className: 'btn btn-success btn-sm mr-1',
-        action: function() {
-          if (this.typeID === null) {
-            this.router.navigate(['/framework/object/add']);
-          } else {
-            this.router.navigate(['/framework/object/add/' + this.typeID]);
-          }
-
-        }.bind(this)
-      }
-    );
-  }
-
-  private buildAdvancedButtons() {
-    if (this.hasSummaries) {
-      const that = this;
-      this.dtButtons.push(
-        {
-          extend: 'collection',
-          className: 'btn btn-secondary btn-sm mr-1 dropdown-toggle',
-          text: '<i class="fas fa-cog"></i>',
-          collectionLayout: 'dropdown-menu overflow-auto',
-          // tslint:disable-next-line:only-arrow-functions
-          buttons() {
-            const columnButton = [];
-            // tslint:disable-next-line:prefer-for-of
-            if (that.typeInstance.fields == null) {
-              that.typeInstance.fields = [];
-            }
-            let i = 0;
-            for (const obj of that.typeInstance.fields) {
-              {
-                columnButton.push(
-                  {
-                    text: that.typeInstance.fields[i].label,
-                    extend: 'columnToggle',
-                    columns: '.toggle-' + that.typeInstance.fields[i].name,
-                    className: 'dropdown-item ' + that.typeInstance.fields[i].name,
-                  });
-              }
-              i++;
-            }
-            columnButton.push({
-              extend: 'colvisRestore',
-              text: 'Restore',
-              className: 'btn btn-secondary btn-sm btn-block',
-              action() {
-                that.reload();
-              }
-            });
-            return columnButton;
-          }
-        },
-      );
-    }
   }
 
   private buildDefaultDtOptions() {
@@ -339,35 +229,9 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     };
   }
 
-  private buildAdvancedDtOptions() {
-    if (this.hasSummaries) {
-      const visTargets: any[] = [0, 1, 2, 3, -3, -2, -1];
-      this.typeService.getType(this.typeID).subscribe(data => {
-        for (const summary of data.render_meta.summary.fields) {
-          visTargets.push(data.fields.findIndex(i => i.name === summary.name) + 4);
-        }
-        this.dtOptions.columnDefs = [
-          { visible: true, targets: visTargets },
-          { visible: false, targets: '_all' },
-          { orderable: false, className: 'select-checkbox', targets:   0 },
-        ];
-        this.dtOptions.order = [[2, 'asc']];
-        this.dtOptions.ordering = true;
-      });
-    }
-  }
-
   /*
     Table action events
    */
-
-  public addColumn() {
-    const table: any = $('#object-list-datatable');
-    const dataTable: any = table.DataTable();
-    const columns: any = dataTable.columns();
-    console.log(columns.data());
-  }
-
   checkUncheckAll() {
     this.selectedObjects = [];
     const allCheckbox: any = document.getElementsByClassName('select-checkbox');
