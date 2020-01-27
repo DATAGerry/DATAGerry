@@ -252,6 +252,7 @@ def group_type_by_category(public_id, request_user: User):
             else:
                 document['total'] = object_manager.count_objects_by_type(document['_id'])
             result.append(document)
+        result = sorted(result, key=lambda i: i['label'])
         resp = make_response(result)
     except ObjectManagerGetError:
         return abort(404, 'Not types in this Category')
