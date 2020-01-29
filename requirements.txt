@@ -12,7 +12,7 @@ Click==7.0
 cryptography==2.6.1
 docutils==0.15.2
 et-xmlfile==1.0.1
-Faker==1.0.4
+Faker==1.0.8
 Flask==1.0.2
 Flask-Caching==1.7.0
 Flask-Cors==3.0.7
@@ -41,7 +41,7 @@ pyasn1==0.4.8
 pycparser==2.19
 pycryptodome==3.8.1
 Pygments==2.4.2
-PyInstaller==3.4
+PyInstaller==3.6
 pymongo==3.7.2
 pyparsing==2.4.2
 pytest==4.4.0
