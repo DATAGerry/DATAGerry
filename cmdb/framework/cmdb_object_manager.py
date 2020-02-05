@@ -22,7 +22,10 @@ The implementation of the manager used is always realized using the respective s
 """
 import logging
 import re
+import json
 
+from cmdb.data_storage.database_utils import object_hook
+from bson import json_util
 from datetime import datetime
 from typing import List
 
@@ -126,7 +129,42 @@ class CmdbObjectManager(CmdbManagerBase):
         agr.append({'$group': {'_id': '$'+value, 'count': {'$sum': 1}}})
         agr.append({'$sort': {'count': -1}})
 
-        return self.dbm.group(CmdbObject.COLLECTION, agr)
+        return self.dbm.aggregate(CmdbObject.COLLECTION, agr)
+
+    def sort_objects_by_field_value(self, value: str, order=-1, match=None):
+        """This method does not actually
+           performs the find() operation
+           but instead returns
+           a objects sorted by value of the documents that meet the selection criteria.
+
+           Args:
+               value (str): sorted by value
+               order : Ascending/Descending Sort e.g. -1
+               match (dict): stage filters the documents to only pass documents.
+           Returns:
+               returns the list of CMDB Objects sorted by value of the documents
+           """
+        agr = []
+        if match:
+            agr.append({'$match': match})
+        agr.append({"$addFields": {
+                "order": {
+                    "$filter": {
+                      "input": "$fields",
+                      "as": "fields",
+                      "cond": {"$eq": ["$$fields.name", value]}
+                    }
+                }
+            }})
+        agr.append({'$sort': {'order': order}})
+
+        object_list = []
+        cursor = self.dbm.aggregate(CmdbObject.COLLECTION, agr)
+        for document in cursor:
+            put_data = json.loads(json_util.dumps(document), object_hook=object_hook)
+            object_list.append(CmdbObject(**put_data))
+
+        return object_list
 
     def count_objects(self):
         return self.dbm.count(collection=CmdbObject.COLLECTION)
@@ -334,7 +372,7 @@ class CmdbObjectManager(CmdbManagerBase):
         agr.append({'$group': {'_id': '$'+value, 'count': {'$sum': 1}}})
         agr.append({'$sort': {'count': -1}})
 
-        return self.dbm.group(CmdbType.COLLECTION, agr)
+        return self.dbm.aggregate(CmdbType.COLLECTION, agr)
 
     def insert_type(self, data: (CmdbType, dict)):
         if isinstance(data, CmdbType):

@@ -16,10 +16,11 @@
 
 import json
 import logging
-from datetime import datetime
-
 import pytz
+
+from datetime import datetime
 from bson import json_util
+
 from flask import abort, jsonify, request, current_app
 
 from cmdb.data_storage.database_utils import object_hook, default
@@ -100,45 +101,114 @@ def get_native_object_list(request_user: User):
     return resp
 
 
-@object_blueprint.route('/iterate/<int:type_id>/', methods=['POST'])
-@object_blueprint.route('/iterate/<int:type_id>', methods=['POST'])
+@object_blueprint.route('/dt/type/<int:type_id>', methods=['GET'])
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def iterate_over_type_object_list(type_id: int, request_user: User):
-    """Generates a table response"""
-    table_config = json.dumps(request.json)
-
+def get_dt_objects_by_type(type_id, request_user: User):
+    """Return all objects by type_id"""
     try:
-        table_config = json.loads(table_config, object_hook=json_util.object_hook)
-    except TypeError:
+        table_config = request.args
+        filter_state = {'type_id': type_id}
+
+        if _fetch_only_active_objs():
+            filter_state['active'] = {"$eq": True}
+
+        start_at = int(table_config.get('start'))
+        site_length = int(table_config.get('length'))
+        order_column = table_config.get('order') if table_config.get('order') else 'type_id'
+        order_direction = 1 if table_config.get('direction') == 'asc' else -1
+
+        if order_column in ['active', 'public_id', 'type_id', 'author_id', 'creation_time']:
+            object_list = object_manager.get_objects_by(sort=order_column, direction=order_direction, **filter_state)
+        else:
+            object_list = object_manager.sort_objects_by_field_value(value=order_column, order=order_direction, match=filter_state)
+        totals = len(object_list)
+        object_list = object_list[start_at:start_at + site_length]
+
+    except CMDBError:
         return abort(400)
 
-    LOGGER.debug(table_config)
-
-    start_at = int(table_config['start'])
-    site_length = int(table_config['length'])
-    order_column = int(table_config['order'][0]['column'])
-    order_direction = table_config['order'][0]['dir']
-    if order_direction == 'asc':
-        order_direction = 1
-    else:
-        order_direction = -1
-
-    LOGGER.debug(table_config['columns'][order_column])
-
-    try:
-        object_list = object_manager.get_objects_by(type_id=type_id, direction=order_direction)
-        to_render_list = object_list[start_at:start_at + site_length]
-    except ObjectManagerGetError:
-        return abort(404)
-
-    rendered_list = RenderList(to_render_list, request_user).render_result_list()
+    rendered_list = RenderList(object_list, request_user).render_result_list()
 
     table_response = {
         'data': rendered_list,
-        'recordsTotal': len(object_list),
-        'recordsFiltered': len(object_list)
+        'recordsTotal': totals,
+        'recordsFiltered': totals
+    }
+    return make_response(table_response)
+
+
+@object_blueprint.route('/dt/filter/type/<int:type_id>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.framework.object.view')
+def get_dt_filter_objects_by_type(type_id, request_user: User):
+    """Return all objects by type_id"""
+    try:
+        table_config = request.args
+
+        start_at = int(table_config.get('start'))
+        site_length = int(table_config.get('length'))
+        search_for = table_config.get('search')
+        order_column = table_config.get('order') if table_config.get('order') else 'type_id'
+        order_direction = 1 if table_config.get('direction') == 'asc' else -1
+
+        # Prepare search term
+        if search_for in ['true', 'True']:
+            search_for = True
+        elif search_for in ['false', 'False']:
+            search_for = False
+        elif search_for.isdigit():
+            search_for = int(search_for)
+
+        # Search default values
+        filter_arg = []
+        filter_arg.append({'type_id': type_id})
+        if _fetch_only_active_objs():
+            filter_arg.append({'active': {"$eq": True}})
+        if isinstance(search_for, bool):
+            filter_arg.append({'active': {"$eq": search_for}})
+
+        # Search search term over entire object
+        or_conditions = []
+        if isinstance(search_for, str) or isinstance(search_for, int):
+            search_term = {'$regex': str(search_for), '$options': 'i'}
+        else:
+            search_term = search_for
+
+        or_conditions.append({'fields': {'$elemMatch': {'value': search_term}}})
+        # ToDo: Find - convert string to date
+        # or_conditions.append({'creation_time': {'$toDate': str(search_for)}})
+
+        if isinstance(search_for, int):
+            if order_column in ['public_id', 'author_id']:
+                or_conditions.append({'$where': "this.public_id.toString().includes(%s)" % search_for})
+                or_conditions.append({'$where': "this.author_id.toString().includes(%s)" % search_for})
+            else:
+                or_conditions.append({'public_id': search_for})
+                or_conditions.append({'author_id': search_for})
+
+        # Linking queries
+        filter_arg.append({'$or': or_conditions})
+        filter_state = {'$and': filter_arg}
+
+        if order_column in ['active', 'public_id', 'type_id', 'author_id', 'creation_time']:
+            object_list = object_manager.get_objects_by(sort=order_column, direction=order_direction, **filter_state)
+        else:
+            object_list = object_manager.sort_objects_by_field_value(value=order_column, order=order_direction, match=filter_state)
+        totals = len(object_list)
+        object_list = object_list[start_at:start_at + site_length]
+
+    except CMDBError:
+        return abort(400)
+
+    rendered_list = RenderList(object_list, request_user).render_result_list()
+
+    table_response = {
+        'data': rendered_list,
+        'recordsTotal': totals,
+        'recordsFiltered': totals
     }
     return make_response(table_response)
 

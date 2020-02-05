@@ -17,56 +17,49 @@
 */
 
 
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import { ApiCallService } from '../../../services/api-call.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { NgxSpinnerService } from 'ngx-spinner';
-import { ObjectService } from '../../services/object.service';
+import {Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
+
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { CmdbMode } from '../../modes.enum';
-import { FileSaverService } from 'ngx-filesaver';
-import { DatePipe } from '@angular/common';
-import { CmdbType } from '../../models/cmdb-type';
-import { TypeService } from '../../services/type.service';
+import { ObjectService } from '../../services/object.service';
 import { RenderResult } from '../../models/cmdb-render';
+import { DatePipe } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FileService } from '../../../export/export.service';
+import { FileSaverService } from 'ngx-filesaver';
+import { DataTableFilter, DataTablesResult } from '../../models/cmdb-datatable';
+import { TypeService } from '../../services/type.service';
+import { CmdbType } from '../../models/cmdb-type';
 
 @Component({
   selector: 'cmdb-object-list',
   templateUrl: './object-list.component.html',
   styleUrls: ['./object-list.component.scss'],
+  providers: [DatePipe]
 })
-export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
 
+export class ObjectListComponent implements OnInit, OnDestroy {
+  @ViewChild('dtTableElement', {static: false}) dtTableElement: ElementRef;
   @ViewChild(DataTableDirective, {static: false})
   public dtElement: DataTableDirective;
-  public dtOptions: any = {}; // : DataTables.Settings = {};
+  public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();
-  private records: number;
+  public objects: DataTablesResult;
 
-  readonly dtButtons: any[] = [];
-  public summaries: any[] = [];
-  public items: any[] = [];
-
-  public columns: any[] = [];
-  public masterSelected: boolean = false;
-
+  // Header
   public pageTitle: string = 'List';
   public faIcon: string;
-  public objectLists: RenderResult[];
-  public hasSummaries: boolean = false;
-  public formatList: any[] = [];
-  public selectedObjects: string[] = [];
-  public typeID: number = null;
-  public typeInstance: CmdbType = undefined;
-  public mode: CmdbMode = CmdbMode.Simple;
 
-  constructor(private apiCallService: ApiCallService, private objService: ObjectService,
-              private fileService: FileService, private route: ActivatedRoute, private router: Router,
-              private spinner: NgxSpinnerService, private fileSaverService: FileSaverService,
-              private datePipe: DatePipe, private typeService: TypeService) {
+  // Header Buttons
+  public typeID;
+  public formatList: any[] = [];
+
+  // Select properties
+  public selectedObjects: string[] = [];
+
+  constructor(private objectService: ObjectService, private typeService: TypeService, private datePipe: DatePipe,
+              private fileSaverService: FileSaverService, private fileService: FileService,
+              private router: Router, private route: ActivatedRoute, private renderer: Renderer2) {
     this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
@@ -76,174 +69,241 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     };
   }
 
-  private getMetaData(id) {
-    this.masterSelected = false;
-    this.pageTitle = 'Object List';
-    this.hasSummaries = false;
-    if (typeof id !== 'undefined') {
-      this.typeID = id;
-      this.hasSummaries = true;
-      this.typeService.getType(id).subscribe((data: CmdbType) => {
-        this.typeInstance = data;
-        this.faIcon = data.render_meta.icon;
-        this.pageTitle = data.label + ' list';
+  ngOnInit() {
+    this.route.params.subscribe((params) => {
+      this.typeID = params.publicID;
+      this.typeService.getType(this.typeID).subscribe((tInstance: CmdbType) => {
+        this.faIcon = tInstance.render_meta.icon;
+        this.pageTitle = tInstance.label + ' list';
       });
-      this.objService.countObjectsByType(this.typeID).subscribe(totals => {
-        this.records = totals;
-        this.hasSummaries = totals > 0;
-      });
-    } else {
-      this.objService.countObjects().subscribe(totals => this.records = totals);
-    }
-  }
-
-  ngOnInit(): void {
-    this.route.params.subscribe((id) => {
-      this.getMetaData(id.publicID);
-      this.getObjects();
-      this.buildDtTable();
+      this.dtOptionbuilder(params.publicID);
     });
   }
 
-  public getObjects() {
+  private dtOptionbuilder(typeID: number) {
     const that = this;
-    const START = 'start';
-    const LENGTH = 'length';
-    const SEARCH = 'search';
-    this.reload();
     this.dtOptions = {
-      // <"col-sm-3" B >
-      dom: '<"row" <"col-sm-3" l>  <"col" f> >' +
+      pagingType: 'full_numbers',
+      order: [[ 2, 'asc' ]],
+      dom:
+        '<"row" <"col-sm-3" l> <"col-sm-3" B > <"col" f> >' +
         '<"row" <"col-sm-12"tr>>' +
         '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
-      pagingType: 'full_numbers',
       serverSide: true,
       processing: true,
-      ordering: false,
-      ajax: (dataTablesParameters: RenderResult[], callback) => {
-        const startx =  dataTablesParameters[START];
-        const lengthx = dataTablesParameters[LENGTH];
+      ajax: (dtParams: any, callback) => {
+        const filter: DataTableFilter = new DataTableFilter();
+        filter.start = dtParams.start;
+        filter.length = dtParams.length;
+        filter.orderBy = dtParams.columns[dtParams.order[0].column].name;
+        filter.direction = dtParams.order[0].dir;
+        filter.search = dtParams.search.value;
 
-        if (dataTablesParameters[SEARCH].value !== null
-          && dataTablesParameters[SEARCH].value !== ''
-          && dataTablesParameters[SEARCH].value !== undefined) {
-          that.objService.getObjects(that.typeID, startx, lengthx).subscribe(resp => {
-            that.objectLists = resp;
-            if (resp.length > 0) {
-              that.summaries = resp[0].summaries;
-              that.selectedObjects.length = 0;
-              that.masterSelected = false;
-            }
+        if (filter.search !== null
+          && filter.search !== ''
+          && filter.search !== undefined) {
+          that.objectService.getObjectsByFilter(typeID, filter).subscribe((resp: any) => {
+            that.selectedObjects.length = 0;
+            that.objects = resp;
+            // Render columns afterwards
+            this.rerender(this.dtOptions);
+
             callback({
-              data: [],
-              recordsTotal: that.records,
-              recordsFiltered: that.records
+              data: that.objects.data,
+              recordsTotal: that.objects.recordsTotal,
+              recordsFiltered: that.objects.recordsFiltered,
             });
           });
         } else {
-          that.objService.getObjects(that.typeID, startx, lengthx).subscribe(resp => {
-            that.objectLists = resp;
-            if (resp.length > 0) {
-              that.summaries = resp[0].summaries;
-              that.selectedObjects.length = 0;
-              that.masterSelected = false;
-            }
+          that.objectService.getObjects(typeID, filter).subscribe((resp: any) => {
+            that.selectedObjects.length = 0;
+            that.objects = resp;
+            // Render columns afterwards
+            this.rerender(this.dtOptions);
+
             callback({
-              data: [],
-              recordsTotal: that.records,
-              recordsFiltered: that.records,
+              data: that.objects.data,
+              recordsTotal: that.objects.recordsTotal,
+              recordsFiltered: that.objects.recordsFiltered,
             });
           });
         }
       },
-      language: {
-        search: '',
-        searchPlaceholder: 'Filter...'
+      buttons: {
+        dom: {
+          container: {
+            className: 'dt-buttons btn-group btn-group-sm'
+          },
+        },
+        buttons: [
+          {
+            extend: 'selectAll',
+            className: 'btn btn-primary btn-sm mr-1 ',
+            text: 'Select All',
+            action( e, dt, data, button, config ) {
+              that.selectedObjects = [];
+              dt.rows().every(function(rowIdx, tableLoop, rowLoop) {
+                dt.row(this).select();
+                const id = dt.rows({selected:  true}).data()[rowIdx].object_information.object_id.toString();
+                that.updateDisplay(id);
+              });
+            }
+          },
+          {
+            extend: 'selectNone',
+            className: 'btn btn-primary btn-sm mr-1 ',
+            text: 'Select None',
+            action( e, dt, data, button, config ) {
+              dt.rows().every(function(rowIdx, tableLoop, rowLoop) {
+                dt.row(this).deselect();
+                that.selectedObjects = [];
+              });
+            }
+          },
+          {
+            extend: 'colvis',
+            columns: ':not(":first,:last")',
+            className: 'btn btn-secondary btn-sm mr-1 dropdown-toggle',
+            text: '<i class="fas fa-cog"></i>',
+            collectionLayout: 'dropdown-menu overflow-auto',
+
+            postfixButtons: [ {
+              extend: 'colvisRestore',
+              text: 'Restore',
+              className: 'btn btn-secondary btn-lg btn-block',
+            } ]
+          }
+        ]
       },
-      columnDefs: [
-        { className: 'dt-head-center', width: '1%', targets: 0 },
-        { className: 'dt-head-center', width: '5%', targets: [1, 2] },
-        { className: 'dt-head-center', width: '8%', targets: [-1, -2, -3, 3 ]},
-      ],
+      rowCallback: (row: Node, data: RenderResult) => {
+        const self = this;
+        $('td:first-child', row).unbind('click');
+        $('td:first-child', row).bind('click', () => {
+          self.updateDisplay(data.object_information.object_id.toString());
+        });
+        return row;
+      },
+      select: {
+        style:    'multi',
+        selector: 'td:first-child'
+      },
+      columns: [
+        { data: null, defaultContent: '', className: 'select-checkbox', sortable: false, orderable: false },
+        {
+          data: 'object_information.active', title: 'Active', name: 'active',
+          render(data) {
+            if (data) {
+              return '<span class="badge badge-success"> A </span>';
+            }
+            return '<span class="badge badge-danger"> D </span>';
+          }
+        },
+        {data: 'object_information.object_id', title: 'ID', name: 'public_id'}
+      ]
     };
+
+    this.renderer.listen('document', 'click', (event) => {
+      const actionClassList = (event.target as Element).classList;
+      if (actionClassList.contains('delete-object')) {
+        this.delObject(parseInt((event.target as Element).id, 10));
+      }
+    });
   }
 
-  ngAfterViewInit(): void {
-    this.dtTrigger.next();
+  async rerender(newSettings?: DataTables.Settings) {
+    try {
+      await this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+        if (newSettings) {
+          const that = this;
+          // FIX To ensure that the DT doesn't break when we don't get columns
+          if (newSettings.columns) {
+            for (let i = 0; i < this.objects.data[0].fields.length; i++) {
+              newSettings.columns.push(
+                { data: 'fields.' + i + '.value',
+                  title: this.objects.data[0].fields[i].label,
+                  name: this.objects.data[0].fields[i].name,
+                });
+            }
+            newSettings.columns.push(
+              {data: 'object_information.author_name', title: 'Author', name: 'author_id'},
+              {data: 'object_information.creation_time', title: 'Creation Time', name: 'creation_time',
+                render(data) {
+                    return that.datePipe.transform(data.$date, 'dd/MM/yyyy - h:mm:ss');
+                }
+              },
+              {
+                data: null,
+                title: 'Action',
+                className: 'text-dark text-center',
+                orderable: false,
+                render(data) {
+                  const view = '<a class="text-dark mr-1" href="/framework/object/type/view/'
+                    + data.object_information.object_id + '"><i class="far fa-eye"></i></a>';
+                  const edit = '<a class="text-dark mr-1" href="/framework/object/edit/'
+                    + data.object_information.object_id + '"><i class="far fa-edit"></i></a>';
+                  const del = '<span id="' + data.object_information.object_id
+                    + '" class="far fa-trash-alt mr-1 delete-object"></span>';
+                  return view + edit + del;
+                }
+              }
+            );
+            newSettings.columnDefs = [
+              { className: 'text-center', width: '20px', targets: 0, orderable: false },
+              { className: 'text-center', width: '5%', targets: [1, 2] },
+              { className: 'text-center', width: '8%', targets: [-1, -2, -3, 3 ]},
+            ];
+            that.buildAdvancedDtOptions();
+          }
+          if (newSettings.columns && newSettings.columns.length > 1) {
+            dtInstance.destroy();
+            this.dtOptions = Promise.resolve(newSettings);
+            this.displayTable(this.dtTableElement);
+          }
+        }
+      });
+    } catch (error) {
+      console.log(`DT Rerender Exception: ${error}`)
+    }
+    return Promise.resolve(null);
   }
 
-  public getMergeNameToLabel(value: string) {
-    return this.summaries.find(x => x.name === value);
+  private buildAdvancedDtOptions() {
+    const summaries = this.objects.data[0].summaries;
+    const that = this;
+    if (summaries != null) {
+      const visTargets: any[] = [0, 1, 2, -3, -2, -1];
+      for (const summary of summaries) {
+        visTargets.push(this.objects.data[0].fields.findIndex(i => i.name === summary.name) + 4);
+      }
+      this.dtOptions.columnDefs = [
+        {orderable: false, targets: 'nosort'},
+        {visible: true, targets: visTargets},
+        {visible: false, targets: '_all'}
+      ];
+    }
   }
 
+  private displayTable(renderIn: ElementRef): void {
+    this.dtElement.dtInstance = new Promise((resolve, reject) => {
+      Promise.resolve(this.dtOptions).then(dtOptions => {
+        // Using setTimeout as a "hack" to be "part" of NgZone
+        setTimeout(() => {
+          $(renderIn.nativeElement).empty();
+          const dt = $(renderIn.nativeElement).DataTable(dtOptions);
+          resolve(dt);
+        });
+      }).catch(error => reject(error));
+    });
+  }
+
+  private ajaxReload(): void {
+    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+      dtInstance.ajax.reload();
+    });
+  }
 
   ngOnDestroy(): void {
-    // Do not forget to unsubscribe the event
     this.dtTrigger.unsubscribe();
-  }
-
-  reload(): void {
-    if (typeof this.dtElement !== 'undefined' && typeof this.dtElement.dtInstance !== 'undefined') {
-      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-        // Destroy the table first
-        dtInstance.destroy();
-        // Call the dtTrigger to rerender again
-        this.dtTrigger.next();
-      });
-    }
-  }
-
-//  LOGIC
-
-  /*
-    Build table increments
-   */
-  private buildDtTable() {
-    this.buildDefaultDtOptions();
-  }
-
-  private buildDefaultDtOptions() {
-    const buttons = this.dtButtons;
-    this.dtOptions.order = [[2, 'asc']];
-    this.dtOptions.select = {
-      style:    'multi',
-      selector: 'td:first-child'
-    };
-    this.dtOptions.language = {
-      search: '',
-      searchPlaceholder: 'Filter...'
-    };
-    this.dtOptions.dom =
-      '<"row" <"col-sm-3" l> <"col-sm-3" B > <"col" f> >' +
-      '<"row" <"col-sm-12"tr>>' +
-      '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >';
-    // Configure the buttons
-    // Declare the use of the extension in the dom parameter
-    this.dtOptions.buttons = {
-      dom: {
-        container: {
-          className: 'dt-buttons btn-group btn-group-sm'
-        }
-      },
-      buttons,
-    };
-  }
-
-  /*
-    Table action events
-   */
-  checkUncheckAll() {
-    this.selectedObjects = [];
-    const allCheckbox: any = document.getElementsByClassName('select-checkbox');
-
-    for (const box of allCheckbox) {
-      box.checked = this.masterSelected;
-      this.selectedObjects.push(box.name);
-    }
-    if (!this.masterSelected) {
-      this.selectedObjects = [];
-    }
-
   }
 
   public updateDisplay(publicID: any): void {
@@ -255,8 +315,8 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
     }
   }
 
-  public delObject(value: any) {
-    const modalComponent = this.objService.openModalComponent(
+  public delObject(publicID: number) {
+    const modalComponent = this.objectService.openModalComponent(
       'Delete Object',
       'Are you sure you want to delete this Object?',
       'Cancel',
@@ -264,11 +324,8 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
 
     modalComponent.result.then((result) => {
       if (result) {
-        const id = value.object_information.object_id;
-        this.apiCallService.callDeleteRoute('object/' + id).subscribe(data => {
-          this.route.params.subscribe((typeId) => {
-            this.getObjects();
-          });
+        this.objectService.deleteObject(publicID).subscribe(data => {
+          this.ajaxReload();
         });
       }
     });
@@ -276,7 +333,7 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
 
   public delManyObjects() {
     if (this.selectedObjects.length > 0) {
-      const modalComponent = this.objService.openModalComponent(
+      const modalComponent = this.objectService.openModalComponent(
         'Delete selected Objects',
         'Are you sure, you want to delete all selected objects?',
         'Cancel',
@@ -285,10 +342,8 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
       modalComponent.result.then((result) => {
         if (result) {
           if (this.selectedObjects.length > 0) {
-            this.apiCallService.callDeleteManyRoute('object/delete/' + this.selectedObjects.toString()).subscribe(data => {
-              this.route.params.subscribe((id) => {
-                this.getObjects();
-              });
+            this.objectService.deleteManyObjects(this.selectedObjects.toString()).subscribe(data => {
+              this.ajaxReload();
             });
           }
         }
@@ -297,8 +352,8 @@ export class ObjectListComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   public exportingFiles(exportType: any) {
-    if (this.selectedObjects.length === 0 || this.selectedObjects.length === this.items.length) {
-      this.fileService.getObjectFileByType(this.objectLists[0].type_information.type_id, exportType.id)
+    if (this.selectedObjects.length === 0) {
+      this.fileService.getObjectFileByType(this.objects.data[0].type_information.type_id, exportType.id)
         .subscribe(res => this.downLoadFile(res, exportType));
     } else {
       this.fileService.callExportRoute('/file/object/' + this.selectedObjects.toString(), exportType.id)
