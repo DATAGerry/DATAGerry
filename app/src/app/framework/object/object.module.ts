@@ -20,7 +20,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { ObjectRoutingModule } from './object-routing.module';
-import { ObjectListComponent } from './object-list/object-list.component';
 import { ObjectViewComponent } from './object-view/object-view.component';
 import { DataTablesModule } from 'angular-datatables';
 import { LayoutModule } from '../../layout/layout.module';
@@ -61,7 +60,6 @@ import { ObjectListByTypeComponent } from './object-list-by-type/object-list-by-
     ObjectLinkDeleteModalComponent
   ],
   declarations: [
-    ObjectListComponent,
     ObjectViewComponent,
     ObjectHeaderComponent,
     ObjectQrComponent,
@@ -83,7 +81,8 @@ import { ObjectListByTypeComponent } from './object-list-by-type/object-list-by-
     ObjectLogUserComponent,
     ObjectLinkAddModalComponent,
     ObjectLinkDeleteModalComponent,
-    ObjectListByTypeComponent],
+    ObjectListByTypeComponent,
+    ],
   imports: [
     CommonModule,
     ObjectRoutingModule,

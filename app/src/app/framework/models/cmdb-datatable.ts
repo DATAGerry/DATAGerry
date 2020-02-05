@@ -25,6 +25,7 @@ export class DataTableFilter {
 }
 
 export class DataTablesResult {
+  public columns: any[];
   public data: any[];
   public recordsTotal: any;
   public recordsFiltered: any;

@@ -18,22 +18,22 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { ObjectListComponent } from './object-list/object-list.component';
 import { ObjectViewComponent } from './object-view/object-view.component';
 import { ObjectAddComponent } from './object-add/object-add.component';
 import { ObjectEditComponent } from './object-edit/object-edit.component';
 import { ObjectCopyComponent } from './object-copy/object-copy.component';
 import { ObjectLogComponent } from './object-log/object-log.component';
+import { ObjectListByTypeComponent } from './object-list-by-type/object-list-by-type.component';
 
 const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
     data: {
-      breadcrumb: 'List',
-      right: 'base.framework.object.view'
+      breadcrumb: 'Add New Object',
+      right: 'base.framework.type.view'
     },
-    component: ObjectListComponent
+    component: ObjectAddComponent
   },
   {
     path: 'add',
@@ -73,7 +73,7 @@ const routes: Routes = [
       breadcrumb: 'Object Type List',
       right: 'base.framework.object.view'
     },
-    component: ObjectListComponent,
+    component: ObjectListByTypeComponent,
   },
   {
     path: 'view/:publicID',
