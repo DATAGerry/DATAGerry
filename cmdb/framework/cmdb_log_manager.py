@@ -23,8 +23,12 @@ from cmdb.framework.cmdb_log import CMDBError, LOGGER, LogAction
 
 
 class CmdbLogManager(CmdbManagerBase):
+
     def __init__(self, database_manager=None):
         super(CmdbLogManager, self).__init__(database_manager)
+
+    def search(self):
+        pass
 
     # CRUD functions
     def get_log(self, public_id: int):

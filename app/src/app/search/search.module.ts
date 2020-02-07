@@ -19,16 +19,20 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { ApiCallService } from '../services/api-call.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DataTablesModule } from 'angular-datatables';
 
 import { SearchRoutingModule } from './search-routing.module';
 import { LayoutModule } from '../layout/layout.module';
 import { NgxSpinnerModule } from 'ngx-spinner';
+import { SearchComponent } from './search.component';
+import { SearchResultComponent } from './search-result/search-result.component';
+import { SearchResultPreviewComponent } from './search-result/search-result-preview.component';
+import { RenderModule } from '../framework/render/render.module';
 
 @NgModule({
-  declarations: [],
+  entryComponents: [SearchResultPreviewComponent],
+  declarations: [SearchComponent, SearchResultComponent, SearchResultPreviewComponent],
   imports: [
     CommonModule,
     SearchRoutingModule,
@@ -37,8 +41,8 @@ import { NgxSpinnerModule } from 'ngx-spinner';
     ReactiveFormsModule,
     DataTablesModule,
     NgxSpinnerModule,
+    RenderModule,
   ],
-
   providers: []
 })
 export class SearchModule {

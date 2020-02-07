@@ -38,6 +38,9 @@ class UserManager(CmdbManagerBase):
         self.rights = self._load_rights()
         super(UserManager, self).__init__(database_manager)
 
+    def search(self):
+        pass
+
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
 

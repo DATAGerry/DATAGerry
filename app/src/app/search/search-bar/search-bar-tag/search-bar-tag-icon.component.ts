@@ -15,25 +15,17 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { SearchBarTag } from './search-bar-tag';
 
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
-import { PermissionGuard } from '../auth/guards/permission.guard';
-import { SearchComponent } from './search.component';
-
-const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    canActivate: [PermissionGuard],
-    component: SearchComponent
-  }
-];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
-  exports: [RouterModule]
+@Component({
+  selector: 'cmdb-search-bar-tag-icon',
+  templateUrl: './search-bar-tag-icon.component.html',
+  styleUrls: ['./search-bar-tag-icon.component.scss']
 })
-export class SearchRoutingModule {
+export class SearchBarTagIconComponent {
+
+  @Input() public tag: SearchBarTag;
+
+
 }

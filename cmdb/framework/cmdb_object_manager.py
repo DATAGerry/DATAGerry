@@ -21,7 +21,6 @@ The implementation of the manager used is always realized using the respective s
 
 """
 import logging
-import re
 import json
 
 from cmdb.data_storage.database_utils import object_hook
@@ -41,6 +40,7 @@ from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.framework.cmdb_type import CmdbType
+from cmdb.search.query import Query
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import User
 
@@ -57,6 +57,13 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
+
+    def search(self, collection, query: Query, *args, **kwargs) -> List:
+        LOGGER.debug(f'[ObjectManager][Search] {args} | {kwargs}')
+        try:
+            return self._search(collection=collection, query=query, **kwargs)
+        except Exception as err:
+            raise ObjectManagerGetError(err)
 
     def get_object(self, public_id: int):
         try:
@@ -126,7 +133,7 @@ class CmdbObjectManager(CmdbManagerBase):
         agr = []
         if match:
             agr.append({'$match': match})
-        agr.append({'$group': {'_id': '$'+value, 'count': {'$sum': 1}}})
+        agr.append({'$group': {'_id': '$' + value, 'count': {'$sum': 1}}})
         agr.append({'$sort': {'count': -1}})
 
         return self.dbm.aggregate(CmdbObject.COLLECTION, agr)
@@ -178,33 +185,6 @@ class CmdbObjectManager(CmdbManagerBase):
                     for item in items:
                         self._find_query_fields(item, match_fields=match_fields)
         return match_fields
-
-    def _re_search_fields(self, search_object, regex):
-        """returns list of matched fields"""
-        match_list = list()
-        for index in regex:
-            for field in search_object.fields:
-                if re.search(index, str(field['value'])):
-                    match_list.append(field['name'])
-        return match_list
-
-    def search_objects(self, query: dict) -> dict:
-        return self.search_objects_with_limit(query, limit=0)
-
-    def search_objects_with_limit(self, query: dict, limit=0) -> dict:
-        result_list = dict()
-        for result_objects in self._search(CmdbObject.COLLECTION, query, limit=limit):
-            try:
-                re_query = self._find_query_fields(query)
-                result_object_instance = CmdbObject(**result_objects)
-                matched_fields = self._re_search_fields(result_object_instance, re_query)
-
-                result_list.update({
-                    result_object_instance: matched_fields
-                })
-            except (CMDBError, re.error):
-                continue
-        return result_list
 
     def insert_object(self, data: (CmdbObject, dict)) -> int:
         """
@@ -641,7 +621,7 @@ class CmdbObjectManager(CmdbManagerBase):
     def insert_collection_template(self, data: dict) -> int:
         # Insert data
         try:
-            possible_id: int = self.dbm.get_highest_id(collection=CmdbCollectionTemplate.COLLECTION)+1
+            possible_id: int = self.dbm.get_highest_id(collection=CmdbCollectionTemplate.COLLECTION) + 1
             data.update({'public_id': possible_id})
             data.update({'creation_time': datetime.utcnow()})
             collection_template_id = self._insert(CmdbCollectionTemplate.COLLECTION, data)

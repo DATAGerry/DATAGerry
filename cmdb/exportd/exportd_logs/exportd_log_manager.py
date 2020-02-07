@@ -27,6 +27,9 @@ class ExportdLogManager(CmdbManagerBase):
     def __init__(self, database_manager=None):
         super(ExportdLogManager, self).__init__(database_manager)
 
+    def search(self):
+        pass
+
     # CRUD functions
     def get_all_logs(self):
         log_list = []

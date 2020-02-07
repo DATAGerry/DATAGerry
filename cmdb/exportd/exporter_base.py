@@ -162,7 +162,6 @@ class ExportVariable:
             output = ''
         return output
 
-
 class ExportSource:
 
     def __init__(self, job: ExportdJob, object_manager: CmdbObjectManager = None):

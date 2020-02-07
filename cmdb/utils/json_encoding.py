@@ -20,6 +20,7 @@ import re
 
 from cmdb.framework.cmdb_render import RenderVisualization
 from cmdb.importer.importer_response import ImportMessage, BaseImporterResponse
+from cmdb.search.search_result import SearchResults, SearchResultMap
 from cmdb.security.auth import AuthSettingsDAO, AuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
 from cmdb.security.auth.provider_config_form import AuthProviderConfigFormEntry, \
@@ -61,6 +62,10 @@ def default(obj):
         return obj.__dict__
     if isinstance(obj, ImportMessage):
         return obj.__dict__
+    if isinstance(obj, SearchResults):
+        return obj.to_json()
+    if isinstance(obj, SearchResultMap):
+        return obj.to_json()
     if isinstance(obj, AuthSettingsDAO) or isinstance(obj, AuthenticationProvider):
         return obj.__dict__
     if isinstance(obj, AuthProviderConfig) or isinstance(obj, AuthProviderConfigForm) \
