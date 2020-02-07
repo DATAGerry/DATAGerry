@@ -130,22 +130,23 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       },
       buttons: {
         dom: {
-          container: {
-            className: 'dt-buttons btn-group btn-group-sm'
-          },
+          button: {
+            tag: 'span'
+          }
         },
         buttons: [
           {
             extend: 'colvis',
             columns: ':not(":first,:last")',
             className: 'btn btn-secondary btn-sm mr-1 dropdown-toggle',
-            text: '<i class="fas fa-cog"></i>',
             collectionLayout: 'dropdown-menu overflow-auto',
+            text: '<i class="fas fa-cog"></i>',
 
             postfixButtons: [ {
               extend: 'colvisRestore',
               text: 'Restore',
-              className: 'btn btn-secondary btn-lg btn-block',
+              tag: 'button',
+              className: 'btn btn-secondary btn-sm btn-block mt-2 mb-2',
             } ]
           }
         ]
