@@ -136,7 +136,7 @@ def post_login():
         provider: ClassVar[AuthenticationProvider] = auth_module.get_provider_class(provider_class_name)
         provider_config_class: ClassVar[str] = provider.PROVIDER_CONFIG_CLASS
         provider_config_settings = auth_module.settings.get_provider_settings(provider.get_name())
-        LOGGER.debug(provider_config_settings)
+
         provider_config_instance = provider_config_class(**provider_config_settings)
         provider_instance = provider(config=provider_config_instance)
         if not provider_config_instance.is_active():
