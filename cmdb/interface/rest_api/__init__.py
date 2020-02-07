@@ -73,8 +73,7 @@ def create_rest_api(event_queue):
     )
 
     user_manager = UserManager(
-        database_manager=app_database,
-        security_manager=security_manager
+        database_manager=app_database
     )
 
     exportd_job_manager = ExportdJobManagement(
@@ -181,6 +180,8 @@ def register_error_pages(app):
     from cmdb.interface.error_handlers import forbidden
     from cmdb.interface.error_handlers import unauthorized
     from cmdb.interface.error_handlers import bad_request
+    from cmdb.interface.error_handlers import service_unavailable
+
     app.register_error_handler(400, bad_request)
     app.register_error_handler(401, unauthorized)
     app.register_error_handler(403, forbidden)
@@ -190,3 +191,4 @@ def register_error_pages(app):
     app.register_error_handler(410, page_gone)
     app.register_error_handler(500, internal_server_error)
     app.register_error_handler(501, not_implemented)
+    app.register_error_handler(503, service_unavailable)

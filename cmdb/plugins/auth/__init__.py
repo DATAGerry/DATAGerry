@@ -15,7 +15,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from cmdb.plugins.plugin_system import PluginBase
-from cmdb.user_management.user_authentication import AuthenticationProvider, NoValidAuthenticationProviderError
+from cmdb.security.auth.auth_errors import NoValidAuthenticationProviderError
+from cmdb.security.auth import AuthenticationProvider
 
 
 class AuthPluginBase(PluginBase):

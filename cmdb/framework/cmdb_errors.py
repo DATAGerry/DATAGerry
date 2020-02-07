@@ -102,22 +102,22 @@ class FieldNotFoundError(CMDBError):
 class ObjectManagerGetError(CMDBError):
 
     def __init__(self, err):
-        self.message = f'Error while GET operation - E: ${err}'
+        self.message = f'Error while GET operation - E: {err}'
 
 
 class ObjectManagerInsertError(CMDBError):
 
     def __init__(self, err):
-        self.message = f'Error while INSERT operation - E: ${err}'
+        self.message = f'Error while INSERT operation - E: {err}'
 
 
 class ObjectManagerUpdateError(CMDBError):
 
     def __init__(self, err):
-        self.message = f'Error while UPDATE operation - E: ${err}'
+        self.message = f'Error while UPDATE operation - E: {err}'
 
 
 class ObjectManagerDeleteError(CMDBError):
 
     def __init__(self, err):
-        self.message = f'Error while DELETE operation - E: ${err}'
+        self.message = f'Error while DELETE operation - E: {err}'

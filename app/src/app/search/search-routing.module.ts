@@ -18,27 +18,16 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { SearchResultsComponent } from './components/search-results/search-results.component';
 import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
-import {PermissionGuard} from '../auth/guards/permission.guard';
+import { PermissionGuard } from '../auth/guards/permission.guard';
+import { SearchComponent } from './search.component';
 
 const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
     canActivate: [PermissionGuard],
-    data: {
-      breadcrumb: 'Search for ',
-      right: 'base.framework.object.view'
-    },
-    component: SearchResultsComponent
-  },
-  {
-    path: ':value',
-    data: {
-      breadcrumb: 'Search for '
-    },
-    component: SearchResultsComponent
+    component: SearchComponent
   }
 ];
 

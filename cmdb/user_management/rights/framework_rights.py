@@ -52,6 +52,15 @@ class CategoryRight(FrameworkRight):
         super(CategoryRight, self).__init__(name, level, description=description)
 
 
+class CollectionRight(FrameworkRight):
+    MIN_LEVEL = BaseRight.PERMISSION
+    MAX_LEVEL = BaseRight.SECURE
+    PREFIX = '{}.{}'.format(FrameworkRight.PREFIX, 'collection')
+
+    def __init__(self, name: str, level: int = BaseRight.PROTECTED, description: str = None):
+        super(CollectionRight, self).__init__(name, level, description=description)
+
+
 class LogRight(FrameworkRight):
     MIN_LEVEL = BaseRight.PROTECTED
     MAX_LEVEL = BaseRight.DANGER

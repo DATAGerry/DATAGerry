@@ -19,6 +19,10 @@ Collection of system readers which loads configuration files and settings
 """
 import os
 import re
+from typing import Any, Union, List
+
+from cmdb.data_storage.database_manager import DatabaseManagerMongo, NoDocumentFound
+from cmdb.utils.cast import auto_cast
 from cmdb.utils.error import CMDBError
 
 
@@ -27,19 +31,19 @@ class SystemReader:
     Reader super class
     """
 
-    def get_value(self, name, section):
+    def get_value(self, name: str, section: str, default: Any = None) -> Any:
         """
         get specific value from a section
         Args:
             name: key name of value
-            section: section identifer
-
+            section: section identifier
+            default: if value not found return default
         Returns:
             value
         """
         raise NotImplementedError
 
-    def get_sections(self):
+    def get_sections(self) -> List[str]:
         """
         get all sections from config
         Returns:
@@ -47,22 +51,13 @@ class SystemReader:
         """
         raise NotImplementedError
 
-    def get_all_values_from_section(self, section):
+    def get_all_values_from_section(self, section: str) -> dict:
         """
         get list of all values in section
         Args:
             section: section key
-
         Returns:
             key/value list of all values inside a section
-        """
-        raise NotImplementedError
-
-    def setup(self):
-        """
-        performs an setup on call
-        Returns:
-            setup informations
         """
         raise NotImplementedError
 
@@ -82,7 +77,7 @@ class SystemConfigReader:
 
     def __new__(cls, config_name=None, config_location=None):
         if not SystemConfigReader.instance:
-            SystemConfigReader.instance = SystemConfigReader._SystemConfigReader(config_name, config_location)
+            SystemConfigReader.instance = SystemConfigReader.__SystemConfigReader(config_name, config_location)
         return SystemConfigReader.instance
 
     def __getattr__(self, name):
@@ -91,7 +86,7 @@ class SystemConfigReader:
     def __setattr__(self, name, value):
         return setattr(self.instance, name, value)
 
-    class _SystemConfigReader(SystemReader):
+    class __SystemConfigReader(SystemReader):
 
         DEFAULT_CONFIG_FILE_LESS = False
         CONFIG_LOADED = True
@@ -105,7 +100,7 @@ class SystemConfigReader:
                 config_location: directory of config file
             """
             import configparser
-            self.config = configparser.RawConfigParser()
+            self.config = configparser.ConfigParser()
             if config_name is None:
                 self.config_file_less = True
                 self.config_status = SystemConfigReader.CONFIG_LOADED
@@ -132,6 +127,9 @@ class SystemConfigReader:
             if not self.config_file_less:
                 raise ConfigFileSetError(self.config_file)
             self.config.add_section(section)
+
+        def get_section(self, section):
+            return self.config.sections(section)
 
         def set(self, section, option, value):
             """
@@ -171,13 +169,13 @@ class SystemConfigReader:
             else:
                 raise ConfigFileNotFound(self.config_name)
 
-        def get_value(self, name, section):
+        def get_value(self, name: str, section: str, default: Any = None):
             """
             get a value from a given section
             Args:
                 name: key of value
                 section: section of the value
-
+                default: default value
             Returns:
                 value
             """
@@ -191,9 +189,11 @@ class SystemConfigReader:
             if self.config_status == SystemConfigReader.CONFIG_LOADED:
                 if self.config.has_section(section):
                     if name not in self.config[section]:
+                        if default:
+                            return default
                         raise KeyError(name)
                     else:
-                        return self.config[section][name]
+                        return auto_cast(self.config[section][name])
                 else:
                     raise SectionError(section)
             else:
@@ -269,21 +269,17 @@ class SystemSettingsReader(SystemReader):
     Settings reader loads settings from database
     """
     COLLECTION = 'settings.conf'
-    SETUP_INITS = [
-        {
-            'TODO'
-        }
-    ]
 
-    def __init__(self, database_manager):
+    def __init__(self, database_manager: DatabaseManagerMongo):
         """
         init system settings reader
         Args:
             database_manager: database manager
         """
-        self.dbm = database_manager
+        self.dbm: DatabaseManagerMongo = database_manager
+        super(SystemSettingsReader, self).__init__()
 
-    def get_value(self, name, section):
+    def get_value(self, name, section) -> Union[dict, list]:
         """
         get a value from a given section
         Args:
@@ -293,11 +289,14 @@ class SystemSettingsReader(SystemReader):
         Returns:
             value
         """
-
         return self.dbm.find_one_by(
             collection=SystemSettingsReader.COLLECTION,
             filter={'_id': section}
         )[name]
+
+    def get_section(self, section_name: str) -> dict:
+        query_filter = {'_id': section_name}
+        return self.dbm.find_one_by(collection=SystemSettingsReader.COLLECTION, filter=query_filter)
 
     def get_sections(self):
         """
@@ -310,19 +309,29 @@ class SystemSettingsReader(SystemReader):
             projection={'_id': 1}
         )
 
-    def get_all_values_from_section(self, section):
+    def get_all_values_from_section(self, section, default = None) -> dict:
         """
         get all values from a section
         Args:
             section: section name
+            default: if no document was found
 
         Returns:
             key value dict of all elements inside section
         """
-        return self.dbm.find_all(
-            collection=SystemSettingsReader.COLLECTION,
-            filter={'_id': section}
-        )
+        try:
+            section_values = self.dbm.find_one_by(
+                collection=SystemSettingsReader.COLLECTION,
+                filter={'_id': section}
+            )
+        except NoDocumentFound:
+            if default:
+                return default
+            raise SectionError(section)
+        return section_values
+
+    def get_all(self) -> list:
+        return self.dbm.find_all(collection=SystemSettingsReader.COLLECTION)
 
     def setup(self):
         """
@@ -352,6 +361,7 @@ class SystemEnvironmentReader(SystemReader):
                 if section not in self.__config:
                     self.__config[section] = {}
                 self.__config[section][name] = value
+        super(SystemEnvironmentReader, self).__init__()
 
     def get_value(self, name, section):
         return self.__config[section][name]
@@ -363,7 +373,8 @@ class SystemEnvironmentReader(SystemReader):
         return self.__config[section]
 
     def setup(self):
-        pass
+        raise NotImplementedError
+
 
 class ConfigFileSetError(CMDBError):
     """

@@ -45,6 +45,14 @@ export const httpObserveOptions = {
   observe: resp
 };
 
+export const httpObservePostOptions = {
+  headers: new HttpHeaders({
+    'Content-Type': 'application/json'
+  }),
+  params: {},
+  observe: resp
+};
+
 export const httpFileOptions = {
   headers: new HttpHeaders({}),
   params: {},
@@ -74,8 +82,8 @@ export class ApiCallService {
     this.apiURL = `${ this.connectionService.currentConnection }/${ this.apiPrefix }/`;
   }
 
-  public callGet<T>(route: string, client: HttpClient = this.http): Observable<any> {
-    return client.get<T>(this.apiURL + route, httpObserveOptions).pipe(catchError(ApiCallService.handleError));
+  public callGet<T>(route: string, client: HttpClient = this.http, httpGetOptions: any = httpObserveOptions): Observable<any> {
+    return client.get<T>(this.apiURL + route, httpGetOptions).pipe(catchError(ApiCallService.handleError));
   }
 
   public callPost<T>(route: string, data, httpPostOptions = httpObserveOptions): Observable<any> {
@@ -88,17 +96,6 @@ export class ApiCallService {
 
   public callDelete<T>(route: string, httpDeleteOptions = httpObserveOptions): Observable<any> {
     return this.http.delete<T>(this.apiURL + route, httpDeleteOptions).pipe(catchError(ApiCallService.handleError));
-  }
-
-  /* DEPRECATED API METHODS - ONLY USE TOP METHODS */
-
-  public callGetRoute<T>(route: string, params?: any): Observable<any> {
-    return this.http.get<T>(this.apiURL + route, params).pipe(
-      map((res) => {
-        return res;
-      }),
-      catchError(ApiCallService.handleError)
-    );
   }
 
   public callPostRoute<T>(route: string, data, options: any = httpOptions) {

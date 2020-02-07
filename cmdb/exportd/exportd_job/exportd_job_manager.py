@@ -41,6 +41,9 @@ class ExportdJobManagement(CmdbManagerBase):
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
 
+    def search(self):
+        pass
+
     def get_job(self, public_id: int) -> ExportdJob:
         try:
             result = self.dbm.find_one(collection=ExportdJob.COLLECTION, public_id=public_id)
@@ -59,6 +62,16 @@ class ExportdJobManagement(CmdbManagerBase):
         return job_list
 
     def get_job_by_name(self, **requirements) -> ExportdJob:
+        try:
+            found_type_list = self._get_many(collection=ExportdJob.COLLECTION, limit=1, **requirements)
+            if len(found_type_list) > 0:
+                return ExportdJob(**found_type_list[0])
+            else:
+                raise ObjectManagerGetError(err='More than 1 type matches this requirement')
+        except (CMDBError, Exception) as e:
+            raise ObjectManagerGetError(err=e)
+
+    def get_job_by_args(self, **requirements) -> ExportdJob:
         try:
             found_type_list = self._get_many(collection=ExportdJob.COLLECTION, limit=1, **requirements)
             if len(found_type_list) > 0:
@@ -124,7 +137,7 @@ class ExportdJobManagement(CmdbManagerBase):
         else:
             raise ExportdJobManagerUpdateError(f'Could not update job with ID: {data.get_public_id()}')
         update_object.last_execute_date = datetime.utcnow()
-        ack = self.dbm.update(
+        ack = self._update(
             collection=ExportdJob.COLLECTION,
             public_id=update_object.get_public_id(),
             data=update_object.to_database()
@@ -177,18 +190,3 @@ class ExportdJobManagerDeleteError(ManagerDeleteError):
 
     def __init__(self, err):
         super(ExportdJobManagerDeleteError, self).__init__(err)
-
-
-def get_exoportd_job_manager():
-    ssc = SystemConfigReader()
-    database_options = ssc.get_all_values_from_section('Database')
-    dbm = DatabaseManagerMongo(
-            **database_options
-    )
-    return ExportdJobManagement(
-        event_queue=None,
-        database_manager=dbm
-    )
-
-
-exportd_job_manager = get_exoportd_job_manager()

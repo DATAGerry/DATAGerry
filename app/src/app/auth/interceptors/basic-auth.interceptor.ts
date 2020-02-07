@@ -25,7 +25,8 @@ import { User } from '../../management/models/user';
 @Injectable()
 export class BasicAuthInterceptor implements HttpInterceptor {
 
-  constructor() {}
+  constructor() {
+  }
 
   public intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const currentUser = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('current-user'))).value;
@@ -33,9 +34,9 @@ export class BasicAuthInterceptor implements HttpInterceptor {
     if (currentUser && currentUserToken) {
       request = request.clone({
         setHeaders: {
-            'Authorization': `${ currentUserToken }`,
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
+          Authorization: `Bearer ${ currentUserToken }`,
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache'
         }
       });
     }

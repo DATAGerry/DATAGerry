@@ -34,6 +34,14 @@ const routes: Routes = [
     component: SettingsComponent
   },
   {
+    path: 'auth',
+    canActivateChild: [PermissionGuard],
+    data: {
+      breadcrumb: 'Authentication'
+    },
+    loadChildren: () => import('./auth-settings/auth-settings.module').then(m => m.AuthSettingsModule)
+  },
+  {
     path: 'system',
     canActivateChild: [PermissionGuard],
     data: {

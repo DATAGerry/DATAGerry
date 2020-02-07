@@ -26,7 +26,7 @@ import { FrameworkComponent } from './framework.component';
 
 @NgModule({
   declarations: [
-    FrameworkComponent
+    FrameworkComponent,
   ],
   imports: [
     CommonModule,

@@ -62,11 +62,25 @@ export class ExportdJobService<T = ExportdJob> implements ApiService {
   }
 
   public getTask(publicID: number) {
-    return this.api.callGetRoute<ExportdJob>(this.servicePrefix + '/' + publicID);
+    return this.api.callGet<ExportdJob>(this.servicePrefix + '/' + publicID).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
   public getTaskList() {
-    return this.api.callGetRoute<ExportdJob[]>(this.servicePrefix + '/');
+    return this.api.callGet<ExportdJob[]>(this.servicePrefix + '/').pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
   // CRUD calls
@@ -83,7 +97,14 @@ export class ExportdJobService<T = ExportdJob> implements ApiService {
   }
 
   public run_task(publicID: number) {
-    return this.api.callGetRoute<ExportdJob>(this.servicePrefix + '/manual/' + publicID);
+    return this.api.callGet<ExportdJob>(this.servicePrefix + '/manual/' + publicID).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
   }
 
   // Validation functions

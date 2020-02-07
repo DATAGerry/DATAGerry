@@ -23,13 +23,19 @@ Warnings:
 
 import logging
 
+from flask import current_app
+
 from cmdb.interface.route_utils import make_response, RootBlueprint, login_required
-from cmdb.user_management.user_manager import user_manager
+from cmdb.user_management import UserManager
 
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
     CMDBError = Exception
+
+with current_app.app_context():
+    user_manager: UserManager = current_app.user_manager
+
 
 LOGGER = logging.getLogger(__name__)
 right_blueprint = RootBlueprint('right_rest', __name__, url_prefix='/right')

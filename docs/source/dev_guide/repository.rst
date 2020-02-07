@@ -44,5 +44,23 @@ A tag should be set by creating a release in the GitHub WebUI. CircleCI will sta
 tag and will create binaries, Docker images and documentation. Add the built tar.gz and binary to the GitHub release.
 
 
-.. note::
-    On our two plattforms files.datagerry.com and docs.datagerry.com, the latest symlink should be set to new tag.
+latest symlink
+--------------
+
+A *latest* symlink should be set to the latest stable version of DATAGERRY. At the moment, we have to do that manually
+after the CI process was done. Maybe we'll autmate that in the future.
+
+The symlink needs to be set on:
+
+ * files.datagerry.com
+ * docs.datagerry.com
+ * Docker hub
+
+To set the latest tag for our Docker image on Docker Hub, the image for the release needs to be downloaded, retagged and
+uploaded agaign.
+
+.. code-block:: console
+
+    docker pull nethinks/datagerry:1.0.2
+    docker tag nethinks/datagerry:1.0.2 nethinks/datagerry
+    docker push nethinks/datagerry:latest

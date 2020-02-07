@@ -21,7 +21,6 @@ import json
 from datetime import datetime
 
 from flask import abort, request, jsonify, current_app
-from cmdb.utils.wraps import json_required
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagerGetError,\
     ExportdJobManagerInsertError, ExportdJobManagerUpdateError, ExportdJobManagerDeleteError
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
@@ -233,3 +232,47 @@ def get_run_job_manual(public_id, request_user: User):
 
     resp = make_response(ack)
     return resp
+
+
+@exportd_job_blueprint.route('/pull/<int:public_id>/', methods=['GET'])
+@exportd_job_blueprint.route('/pull/<int:public_id>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.exportd.job.run')
+def get_job_output_by_id(public_id, request_user: User):
+    try:
+        job = exportd_manager.get_job_by_args(public_id=public_id, exportd_type='PULL')
+        resp = worker(job, request_user)
+    except ObjectManagerGetError as err:
+        return abort(404, err.message)
+    return resp
+
+
+@exportd_job_blueprint.route('/pull/<string:name>/', methods=['GET'])
+@exportd_job_blueprint.route('/pull/<string:name>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.exportd.job.run')
+def get_job_output_by_name(name, request_user: User):
+    try:
+        job = exportd_manager.get_job_by_args(name=name, exportd_type='PULL')
+        resp = worker(job, request_user)
+    except ObjectManagerGetError as err:
+        return abort(404, err.message)
+    return resp
+
+
+def worker(job: ExportdJob, request_user: User):
+    from flask import make_response as make_res
+    from cmdb.exportd.exporter_base import ExportdManagerBase
+    from cmdb.event_management.event import Event
+    try:
+        event = Event("cmdb.exportd.pull")
+        content = ExportdManagerBase(job).execute(event, request_user.public_id, request_user.get_name(), False)
+        response = make_res(content.data, content.status)
+        response.headers['Content-Type'] = '%s; charset=%s' % (content.mimetype, content.charset)
+        return response
+    except Exception as err:
+        LOGGER.error(err)
+        return abort(404)
+

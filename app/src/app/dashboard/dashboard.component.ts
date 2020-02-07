@@ -63,16 +63,17 @@ export class DashboardComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.api.callGetRoute('object/count/').subscribe((count) => {
-      this.objectCount = count;
+
+    this.objectService.countObjects().subscribe((totals) => {
+      this.objectCount = totals;
     });
 
-    this.api.callGetRoute('type/count/').subscribe((count) => {
-      this.typeCount = count;
+    this.typeService.countTypes().subscribe(totals => {
+      this.typeCount = totals;
     });
 
-    this.api.callGetRoute('user/count/').subscribe((count) => {
-      this.userCount = count;
+    this.userService.countUsers().subscribe((totals: any) => {
+      this.userCount = totals;
     });
 
     this.generateObjectChar();

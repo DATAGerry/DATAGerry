@@ -31,6 +31,11 @@ class ExecuteState(Enum):
     RUNNING = 4
 
 
+class ExportdJobType(Enum):
+    PUSH = 0
+    PULL = 1
+
+
 class ExportdJob(JobManagementBase):
     """
         Exportd Job
@@ -42,7 +47,7 @@ class ExportdJob(JobManagementBase):
 
     def __init__(self, name, label, description, active, author_id,
                  last_execute_date, sources, destination,
-                 variables, scheduling, state=None, **kwargs):
+                 variables, scheduling, exportd_type=ExportdJobType.PUSH.name, state=None, **kwargs):
         """
         Args:
             name: name of this job
@@ -63,6 +68,7 @@ class ExportdJob(JobManagementBase):
         self.variables = variables
         self.scheduling = scheduling
         self.state = state or 0
+        self.exportd_type = exportd_type or ExportdJobType.PUSH.name
         super(ExportdJob, self).__init__(**kwargs)
 
     def get_public_id(self) -> int:
@@ -152,11 +158,19 @@ class ExportdJob(JobManagementBase):
 
     def get_state(self):
         """
-        Get type of executation of the job
+        Get state of executation of the job
         Returns:
             str:
         """
         return self.state
+
+    def get_exportd_typ(self):
+        """
+        Get type of executation of the job
+        Returns:
+            str:
+        """
+        return self.exportd_type
 
     def get_author_id(self):
         return self.author_id

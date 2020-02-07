@@ -58,6 +58,9 @@ export class RenderElementComponent extends RenderField implements OnInit {
         this.componentRef.instance.toast = this.toast;
         const fieldControl = new FormControl('');
         const validators = [];
+        if (this.mode === CmdbMode.View || CmdbMode.Edit) {
+          fieldControl.patchValue(this.value);
+        }
         if (this.data.required) {
           validators.push(Validators.required);
         }
@@ -68,9 +71,10 @@ export class RenderElementComponent extends RenderField implements OnInit {
         if (this.mode === CmdbMode.View) {
           fieldControl.disable();
         }
-        if (this.mode === CmdbMode.View || CmdbMode.Edit) {
-          fieldControl.patchValue(this.value);
+        if (this.data.disabled) {
+          fieldControl.disable();
         }
+
         this.componentRef.instance.parentFormGroup.addControl(
           this.data.name, fieldControl
         );

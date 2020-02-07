@@ -13,15 +13,19 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import logging
+from abc import ABC, abstractmethod
 from typing import List
 
 from cmdb.utils.error import CMDBError
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 
+LOGGER = logging.getLogger(__name__)
 
-class CmdbManagerBase:
-    """Represents the base class for object managers. A respective implementation is always adapted to the
-       respective database manager :class:`cmdb.data_storage.DatabaseManager` or the used functionalities.
+
+class CmdbManagerBase(ABC):
+    """Represents the base class for cmdb managers. A respective implementation is always adapted to the
+       respective database manager :class:`cmdb.data_storage.DatabaseManager`.
        But should always use at least the super functions listed here.
     """
 
@@ -35,6 +39,19 @@ class CmdbManagerBase:
 
         """
         self.dbm: DatabaseManagerMongo = database_manager
+
+    def _count(self, collection: str) -> int:
+        """get the number of objects in given collection
+        Args:
+            collection: Collection name
+
+        Returns:
+            (int): number of found objects
+        """
+        return self.dbm.count(collection=collection)
+
+    def _search(self, collection: str, query, *args, **kwargs) -> List:
+        return self.dbm.search(collection, filter=query, *args, **kwargs)
 
     def _get(self, collection: str, public_id: int) -> dict:
         """get document from the database by their public id
@@ -51,7 +68,23 @@ class CmdbManagerBase:
             public_id=public_id
         )
 
-    def _get_many(self, collection: str, sort='public_id', direction: int = -1, limit=0, **requirements: dict) -> List[dict]:
+    def _get_by(self, collection: str, **requirements: dict) -> dict:
+        """get document from the database by requirements
+
+        Args:
+            collection:
+            **requirements:
+
+        Returns:
+
+        """
+        requirements_filter = {}
+        for k, req in requirements.items():
+            requirements_filter.update({k: req})
+        return self.dbm.find_one_by(collection=collection, filter=requirements_filter)
+
+    def _get_many(self, collection: str, sort='public_id', direction: int = -1, limit=0, **requirements: dict) -> List[
+        dict]:
         """get all documents from the database which have the passing requirements
 
         Args:
@@ -86,9 +119,6 @@ class CmdbManagerBase:
             data=data
         )
 
-    def _insert_many(self, collection: str, d):
-        pass  # TODO
-
     def _update(self, collection: str, public_id: int, data: dict) -> object:
         """
         update document/object in database
@@ -102,7 +132,7 @@ class CmdbManagerBase:
         """
         return self.dbm.update(
             collection=collection,
-            public_id=public_id,
+            filter={'public_id': public_id},
             data=data
         )
 
@@ -152,9 +182,6 @@ class CmdbManagerBase:
             collection=collection,
             **filter_query
         )
-
-    def _search(self, collection: str, requirements, limit=0):
-        return self._get_many(collection, limit=limit, **requirements)
 
 
 class ManagerGetError(CMDBError):

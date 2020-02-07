@@ -18,11 +18,39 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { CollectionTemplateListComponent } from './collection-template-list/collection-template-list.component';
+import { CollectionListComponent } from './collection-list/collection-list.component';
+import { CollectionAddComponent } from './collection-add/collection-add.component';
 
-const routes: Routes = [];
+const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    component: CollectionListComponent,
+    data: {
+      breadcrumb: 'List'
+    }
+  },
+  {
+    path: 'add',
+    component: CollectionAddComponent,
+    data: {
+      breadcrumb: 'Add'
+    }
+  },
+  {
+    path: 'template',
+    pathMatch: 'full',
+    component: CollectionTemplateListComponent,
+    data: {
+      breadcrumb: 'Template'
+    }
+  }
+];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class CollectionRoutingModule { }
+export class CollectionRoutingModule {
+}

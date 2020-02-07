@@ -19,21 +19,20 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { ApiCallService } from '../services/api-call.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DataTablesModule } from 'angular-datatables';
 
-import { SearchResultsComponent } from './components/search-results/search-results.component';
 import { SearchRoutingModule } from './search-routing.module';
 import { LayoutModule } from '../layout/layout.module';
 import { NgxSpinnerModule } from 'ngx-spinner';
-import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
-import {NgSelectModule} from "@ng-select/ng-select";
-import {RenderModule} from "../framework/render/render.module";
-
+import { SearchComponent } from './search.component';
+import { SearchResultComponent } from './search-result/search-result.component';
+import { SearchResultPreviewComponent } from './search-result/search-result-preview.component';
+import { RenderModule } from '../framework/render/render.module';
 
 @NgModule({
-  declarations: [SearchResultsComponent],
+  entryComponents: [SearchResultPreviewComponent],
+  declarations: [SearchComponent, SearchResultComponent, SearchResultPreviewComponent],
   imports: [
     CommonModule,
     SearchRoutingModule,
@@ -42,12 +41,9 @@ import {RenderModule} from "../framework/render/render.module";
     ReactiveFormsModule,
     DataTablesModule,
     NgxSpinnerModule,
-    FontAwesomeModule,
-    NgSelectModule,
-    RenderModule
+    RenderModule,
   ],
-
-  providers: [ApiCallService]
+  providers: []
 })
 export class SearchModule {
 }

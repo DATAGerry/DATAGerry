@@ -16,7 +16,9 @@
 
 import logging
 from flask import current_app
-from cmdb.interface.route_utils import RootBlueprint
+from cmdb.interface.route_utils import RootBlueprint, login_required, insert_request_user, make_response, right_required
+from cmdb.user_management import User
+from cmdb.utils import SystemSettingsReader
 
 LOGGER = logging.getLogger(__name__)
 try:
@@ -30,3 +32,29 @@ with current_app.app_context():
     from cmdb.interface.rest_api.settings_routes.system_routes import system_blueprint
 
     settings_blueprint.register_nested_blueprint(system_blueprint)
+
+    system_settings_reader = SystemSettingsReader(database_manager=current_app.database_manager)
+
+
+@settings_blueprint.route('/<string:section>/', methods=['GET'])
+@settings_blueprint.route('/<string:section>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.system.view')
+def get_settings_from_section(section: str, request_user: User):
+    section_settings = system_settings_reader.get_all_values_from_section(section=section)
+    if len(section_settings) < 1:
+        return make_response([], 204)
+    return make_response(section_settings)
+
+
+@settings_blueprint.route('/<string:section>/<string:name>/', methods=['GET'])
+@settings_blueprint.route('/<string:section>/<string:name>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.system.view')
+def get_value_from_section(section: str, name: str, request_user: User):
+    section_settings = system_settings_reader.get_value(name=name, section=section)
+    if len(section_settings) < 1:
+        return make_response([], 204)
+    return make_response(section_settings)

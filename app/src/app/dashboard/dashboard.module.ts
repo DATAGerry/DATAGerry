@@ -26,7 +26,6 @@ import { DashcardComponent } from './components/dashcard/dashcard.component';
 import { NewestViewComponent } from './newest-view/newest-view.component';
 import { DataTablesModule } from 'angular-datatables';
 import { LatestChangesViewComponent } from './latest-changes-view/latest-changes-view.component';
-import { ObjectModule } from '../framework/object/object.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
@@ -36,7 +35,6 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     LayoutModule,
     DashboardRoutingModule,
     DataTablesModule,
-    ObjectModule,
     FontAwesomeModule
   ]
 })

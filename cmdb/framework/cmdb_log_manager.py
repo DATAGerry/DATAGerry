@@ -23,8 +23,12 @@ from cmdb.framework.cmdb_log import CMDBError, LOGGER, LogAction
 
 
 class CmdbLogManager(CmdbManagerBase):
+
     def __init__(self, database_manager=None):
         super(CmdbLogManager, self).__init__(database_manager)
+
+    def search(self):
+        pass
 
     # CRUD functions
     def get_log(self, public_id: int):
@@ -66,7 +70,7 @@ class CmdbLogManager(CmdbManagerBase):
             new_log = CmdbLog(**log_data)
             ack = self._insert(CmdbMetaLog.COLLECTION, new_log.to_database())
         except (CMDBError, Exception) as err:
-            LOGGER.error(err.message)
+            LOGGER.error(err)
             raise LogManagerInsertError(err)
         return ack
 

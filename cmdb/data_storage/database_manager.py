@@ -71,7 +71,7 @@ class DatabaseManager(Generic[CONNECTOR]):
         """
         raise NotImplementedError
 
-    def _import(self, *args, **kwargs):
+    def search(self, *args, **kwargs):
         raise NotImplementedError
 
     def __find(self, *args, **kwargs):
@@ -271,6 +271,9 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
     def get_database_name(self):
         return self.connector.get_database_name()
 
+    def search(self, collection: str, *args, **kwargs):
+        return self.__find(collection, *args, **kwargs)
+
     def __find(self, collection: str, *args, **kwargs):
         """general find function for database search
 
@@ -281,8 +284,9 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
 
         Returns:
             founded document
-
         """
+        if 'projection' not in kwargs:
+            kwargs.update({'projection': {'_id': 0}})
         result = self.connector.get_collection(collection).find(*args, **kwargs)
         return result
 
@@ -372,18 +376,17 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         result = self.connector.get_collection(collection).count(*args, **kwargs)
         return result
 
-    def group(self, collection: str, *args, **kwargs):
+    def aggregate(self, collection: str, *args, **kwargs):
         """This method does not actually
            performs the find() operation
-           but instead returns
-           a objects grouped by type of the documents that meet the selection criteria.
+           but instead Aggregation operations process data records and return computed results.
 
            Args:
                collection (str): name of database collection
                *args: arguments for search operation
                **kwargs: key arguments
            Returns:
-               returns the objects grouped by value of the documents
+               returns computed results
            """
         result = self.connector.get_collection(collection).aggregate(*args, **kwargs)
         return result
@@ -397,43 +400,25 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
 
         Returns:
             int: new public id of the document
-            None: if anything goes wrong while inserting
         """
-        result = None
-        try:
-            self.find_one(collection=collection, public_id=data['public_id'])
-        except NoDocumentFound:
-            try:
-                result = self.connector.get_collection(collection).insert_one(data)
-            except Exception as e:
-                LOGGER.debug(f"Insert error while type module {e}")
-                raise InsertError(e)
-            if result.acknowledged:
-                formatted_id = {'_id': result.inserted_id}
-                projection = {'public_id': 1}
-                cursor_result = self.__find(collection, formatted_id, projection, limit=1)
-                for result in cursor_result.limit(-1):
-                    return result['public_id']
-            return result
-        else:
-            raise PublicIDAlreadyExists(public_id=data['public_id'])
+        if 'public_id' not in data:
+            data['public_id'] = self.get_highest_id(collection=collection) + 1
+        self.connector.get_collection(collection).insert_one(data)
+        return data['public_id']
 
-    def update(self, collection: str, public_id: int, data: dict):
+    def update(self, collection: str, filter: dict, data: dict, *args, **kwargs):
         """update document inside database
 
         Args:
             collection (str): name of database collection
-            public_id (int): public id of document
+            filter (dict): filter of document
             data: data to update
 
         Returns:
             acknowledged
-
         """
-
-        formatted_public_id = {'public_id': public_id}
         formatted_data = {'$set': data}
-        return self.connector.get_collection(collection).update_one(formatted_public_id, formatted_data)
+        return self.connector.get_collection(collection).update_one(filter, formatted_data, *args, **kwargs)
 
     def update_many(self, collection: str, query: dict, update: dict) -> UpdateResult:
         """update all documents that match the filter from a collection.

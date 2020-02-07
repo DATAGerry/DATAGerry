@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import {Component, HostListener, OnInit} from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
 import { ObjectService } from '../../services/object.service';
 import { TypeService } from '../../services/type.service';
@@ -59,6 +59,16 @@ export class ObjectCopyComponent implements OnInit {
         this.typeInstance = typeInstanceResp;
       });
     });
+  }
+
+  @HostListener('window:scroll', ['$event'])
+  onWindowScroll($event) {
+    const dialog = document.getElementById('object-form-action');
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+      dialog.style.display = 'block';
+    } else {
+      dialog.style.display = 'none';
+    }
   }
 
   public copyObject(): void {

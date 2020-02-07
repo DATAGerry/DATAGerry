@@ -10,26 +10,44 @@ DATAGERRY has the following system requirements:
  * MongoDB 4.2+
  * RabbitMQ
 
-There a several setup options for DATAGERRY, which are described in the sections below in detail:
+Although, DATAGERRY comes with an own webserver, we recomend Nginx as a reverse proxy for performance reasons.
 
- * Docker Images
+There are several setup options for DATAGERRY, which are described in the sections below more in detail:
+
+ * Docker Image
  * RPM file (for RHEL/CentOS distributions)
  * tar.gz archive with setup script (for Debian/Ubuntu or other distributions)
+
+If you want to have a fast and easy start, use our Docker Image and docker-compose file.
 
 
 Docker Image
 ============
 The fastest way for getting started with DATAGERRY is using Docker. We provide a docker-compose file, which creates
-three containers (DATAGERRY, MongoDB, RabbitMQ). All data were stored in MongoDB using Docker volumes on the Docker host
-system.
+four containers (DATAGERRY, MongoDB, RabbitMQ, Nginx). All data were stored in MongoDB using Docker volumes on the 
+Docker host system.
 
-To start, copy the follwing docker-compose.yml in a directory of your Docker host, and replace "undefined" with the version
-of DATAGERRY, you want to use:
+To start, copy the following docker-compose.yml in a directory of your Docker host.
 
-.. include:: ../../../contrib/docker/docker-compose.yml
+.. include:: ../../../contrib/docker/compose/ssl/docker-compose.yml
     :literal:
 
-Run docker-compose to start the application:
+Create a subdirectory called *cert* with an SSL certificate (called cert.pem) and key (called key.pem). Your directory
+structure should look like this:
+
+.. code-block:: console
+
+    ./docker-compose.yml
+    ./cert/cert.pem
+    ./cert/key.pem
+
+
+If you don't need SSL and just want to have a quick start, use the follwing docker-compose.yml:
+
+.. include:: ../../../contrib/docker/compose/nossl/docker-compose.yml
+    :literal:
+
+Now, run docker-compose to start the application:
 
 .. code-block:: console
 
@@ -39,9 +57,39 @@ To access the DATAGERRY frontend, use the following parameters:
 
 .. code-block:: console
 
-    http://<<host>:4000
+    http://<<host> or https://<host>
     user: admin
     password: admin
+
+
+We provide Docker images for every version of DATAGERRY in `Docker Hub <https://hub.docker.com/r/nethinks/datagerry>`_.
+You can use one of the following Docker tags:
+
+latest
+    The latest tag is a symlink to the latest stable version of DATAGERRY. It is nice for a quickstart but will also do
+    an automatic upgrade to the next major release if one is available. For production, we recommend the <release> tag
+    below.
+
+<release> (e.g. 1.0.1)
+    Every release has its own tag. So, if you want to use a specific version (or prevent your environment from automatic
+    upgrades, just use a specific version as a Docker tag.
+
+branches_<branch-name> (e.g. branches_development)
+    If you follow our development process and want to test a specific branch from our git repository, just use this tag.
+    Please keep in mind, that these things aren't released yet and a branch is a work-in-progress. So it can change at 
+    any time and break existing things. We don't recommend to use these images in production.
+
+To use a specific Docker tag, just replace the following line of the docker-compose.yml:
+
+.. code-block:: console
+
+    # replace this line
+    image: nethinks/datagerry:latest
+
+    # by the following:
+    image: nethinks/datagerry:<tagname>
+    # example:
+    image: nethinks/datagerry:1.0.2
 
 
 RPM setup
@@ -235,3 +283,16 @@ To access the DATAGERRY frontend, use the following parameters:
 .. note::
     If you can't access the webfrontend of DATAGERRY, check the firewall settings of your server. Port 4000 should ba
     accessible.
+
+
+
+Setting up Nginx as reverse proxy
+=================================
+We recomend to run Nginx as reverse proxy for DATAGERRY. After installing Nginx for your platform, you can adapt the 
+following example configuration for Nginx (nginx.conf):
+
+.. include:: ../../../contrib/nginx/nginx.conf
+    :literal:
+
+This will Nginx listen on port 80 (HTTP) and 443 (HTTPS) and create a redirect from HTTP to HTTPS. If someone access 
+*https://<host>/*, Nginx will contact *http://127.0.0.1:4000*, where DATAGERRY is listening.

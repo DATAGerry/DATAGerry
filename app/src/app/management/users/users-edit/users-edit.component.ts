@@ -37,7 +37,7 @@ export class UsersEditComponent implements OnInit, OnDestroy {
 
   @ViewChild('passWordInput', { static: false }) public passWordToggle: ElementRef;
   public editForm: FormGroup;
-  public authProviders: string[];
+  public authProviders: any[] = [];
   public groupList: Group[];
   private currentPasswordStrength: number = 0;
   public preview: any = undefined;
@@ -66,7 +66,6 @@ export class UsersEditComponent implements OnInit, OnDestroy {
       image: new FormControl(null)
     });
     this.user_name.disable();
-    this.authenticator.disable();
   }
 
   public ngOnInit(): void {
@@ -81,8 +80,10 @@ export class UsersEditComponent implements OnInit, OnDestroy {
       }
     );
 
-    this.authService.getAuthProviders().subscribe((authList: string[]) => {
-      this.authProviders = authList;
+    this.authService.getAuthProviders().subscribe((providerList: any[]) => {
+      for (const provider of providerList) {
+        this.authProviders.push(provider.class_name);
+      }
     });
     this.groupService.getGroupList().subscribe((groupList: Group[]) => {
       this.groupList = groupList;

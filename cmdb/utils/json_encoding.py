@@ -20,6 +20,11 @@ import re
 
 from cmdb.framework.cmdb_render import RenderVisualization
 from cmdb.importer.importer_response import ImportMessage, BaseImporterResponse
+from cmdb.search.search_result import SearchResults, SearchResultMap
+from cmdb.security.auth import AuthSettingsDAO, AuthenticationProvider
+from cmdb.security.auth.provider_config import AuthProviderConfig
+from cmdb.security.auth.provider_config_form import AuthProviderConfigFormEntry, \
+    AuthProviderConfigFormSection, AuthProviderConfigForm
 
 try:
     import uuid
@@ -56,6 +61,15 @@ def default(obj):
     if isinstance(obj, BaseImporterResponse):
         return obj.__dict__
     if isinstance(obj, ImportMessage):
+        return obj.__dict__
+    if isinstance(obj, SearchResults):
+        return obj.to_json()
+    if isinstance(obj, SearchResultMap):
+        return obj.to_json()
+    if isinstance(obj, AuthSettingsDAO) or isinstance(obj, AuthenticationProvider):
+        return obj.__dict__
+    if isinstance(obj, AuthProviderConfig) or isinstance(obj, AuthProviderConfigForm) \
+            or isinstance(obj, AuthProviderConfigFormSection) or isinstance(obj, AuthProviderConfigFormEntry):
         return obj.__dict__
     if isinstance(obj, bytes):
         return obj.decode("utf-8")

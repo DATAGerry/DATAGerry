@@ -47,7 +47,7 @@ with current_app.app_context():
 @right_required('base.user-management.user.*')
 def get_users(request_user: User):
     try:
-        users: List[User] = user_manager.get_all_users()
+        users: List[User] = user_manager.get_users()
     except CMDBError:
         return abort(404)
     if len(users) < 1:
@@ -87,7 +87,7 @@ def get_user_by_name(user_name: str, request_user: User):
 @insert_request_user
 @right_required('base.user-management.user.view')
 def get_users_by_group(public_id: int, request_user: User):
-    user_list = user_manager.get_user_by(group_id=public_id)
+    user_list = user_manager.get_users_by(group_id=public_id)
     if len(user_list) < 1:
         return make_response(user_list, 204)
     return make_response(user_list)

@@ -25,10 +25,6 @@ import { AuthRoutingModule } from './auth-routing.module';
 import { InlineSVGModule } from 'ng-inline-svg';
 import { PermissionLinkDirective } from './directives/permission-link.directive';
 import { PermissionGuard } from './guards/permission.guard';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { BasicAuthInterceptor } from './interceptors/basic-auth.interceptor';
-import { PermissionService } from './services/permission.service';
-import { AuthService } from './services/auth.service';
 
 @NgModule({
   declarations: [LoginComponent, PermissionLinkDirective],

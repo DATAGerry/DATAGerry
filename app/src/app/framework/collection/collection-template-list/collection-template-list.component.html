@@ -1,0 +1,29 @@
+<h1>Collection Template List</h1>
+<hr />
+<button type="button" class="float-right btn btn-success btn-sm"><i
+  class="fas fa-plus-circle"></i> Add
+</button>
+<table class="table" datatable>
+  <thead>
+  <tr>
+    <th scope="col">Public ID</th>
+    <th scope="col">Name</th>
+    <th scope="col">Label</th>
+    <th scope="col">Creation Time</th>
+    <th scope="col">Action</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let collectionTemplate of collectionTemplateList">
+    <th scope="row">{{collectionTemplate.public_id}}</th>
+    <td>{{collectionTemplate.name}}</td>
+    <td>{{collectionTemplate.label}}</td>
+    <td>{{collectionTemplate.creation_time.$date | date: 'medium'}}</td>
+    <td>
+      <a [routerLink]="['/framework/collection/template/edit', collectionTemplate.public_id]" class="mr-2">Edit</a>
+      <a [routerLink]="['/framework/collection/template/delete', collectionTemplate.public_id]">Delete</a>
+    </td>
+  </tr>
+  </tbody>
+</table>
+<div class="clearfix"></div>

@@ -1,0 +1,21 @@
+@import '~src/scss/variables';
+
+.media {
+  height: 100%;
+  i {
+    font-size: 3rem;
+    display: flex;
+  }
+}
+
+.icon{
+  .media{
+    border: $input-border-width solid $input-border-color;
+  }
+}
+
+h5{
+  > a{
+    margin-left: .5rem;
+  }
+}

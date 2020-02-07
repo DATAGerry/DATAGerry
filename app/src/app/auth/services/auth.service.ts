@@ -24,6 +24,7 @@ import { ConnectionService } from '../../connect/connection.service';
 import { User } from '../../management/models/user';
 import { Right } from '../../management/models/right';
 import { PermissionService } from './permission.service';
+import { ApiCallService, ApiService } from '../../services/api-call.service';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -35,11 +36,11 @@ const httpOptions = {
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class AuthService<T = any> implements ApiService  {
 
   // Rest backend
   private restPrefix: string = 'rest';
-  private servicePrefix: string = 'auth';
+  public readonly servicePrefix: string = 'auth';
   private http: HttpClient;
 
   // User storage
@@ -48,7 +49,7 @@ export class AuthService {
   private currentUserTokenSubject: BehaviorSubject<string>;
   public currentUserToken: Observable<string>;
 
-  constructor(private backend: HttpBackend, private connectionService: ConnectionService,
+  constructor(private backend: HttpBackend, private connectionService: ConnectionService, private api: ApiCallService,
               private permissionService: PermissionService) {
     this.http = new HttpClient(backend);
     this.currentUserSubject = new BehaviorSubject<User>(
@@ -69,10 +70,10 @@ export class AuthService {
   }
 
 
-  public getAuthProviders() {
-    return this.http.get(`${ this.connectionService.currentConnection }/${ this.restPrefix }/${ this.servicePrefix }/providers`).pipe(
+  public getAuthProviders(): Observable<T>  {
+    return this.api.callGet<T>(`${ this.servicePrefix }/providers`).pipe(
       map((apiResponse) => {
-        return apiResponse;
+        return apiResponse.body;
       })
     );
   }

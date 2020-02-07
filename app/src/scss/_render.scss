@@ -6,3 +6,18 @@ label {
     color: theme-color('primary');
   }
 }
+
+#object-form-action {
+  display: none;
+  position: fixed;
+  top: calc(#{$navbar-height} - 1px);
+  right: 0;
+  left: $sidebar-width;
+  z-index: 100;
+}
+
+@include media-breakpoint-down('md') {
+  #object-form-action {
+    left: 0;
+  }
+}

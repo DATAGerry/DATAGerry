@@ -13,14 +13,19 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import base64
 import functools
 import json
 from functools import wraps
 
 from authlib.jose.errors import ExpiredTokenError
+from werkzeug._compat import to_unicode
+from werkzeug.http import wsgi_to_bytes
 
+from cmdb.security.auth import AuthModule
+from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import User
-from cmdb.user_management.user_manager import UserManagerGetError
+from cmdb.user_management.user_manager import UserManagerGetError, UserManager
 from cmdb.utils.wraps import LOGGER
 
 try:
@@ -28,10 +33,10 @@ try:
 except ImportError:
     CMDBError = Exception
 
-from flask import Blueprint, request, abort
+from flask import Blueprint, request, abort, current_app
 
 from cmdb.security.token.validator import TokenValidator, ValidationError
-from cmdb.utils import json_encoding
+from cmdb.utils import json_encoding, SystemSettingsReader
 
 DEFAULT_MIME_TYPE = 'application/json'
 
@@ -93,19 +98,11 @@ def login_required(f):
     def decorated(*args, **kwargs):
         """checks if user is logged in and valid
         """
-        auth = request.authorization
-        if auth is None and 'Authorization' in request.headers:
-            token = request.headers['Authorization']
-            try:
-                tv = TokenValidator()
-                decoded_token = tv.decode_token(token)
-                tv.validate_token(decoded_token)
-            except (ValidationError, ExpiredTokenError, CMDBError) as err:
-                LOGGER.error(err)
-                return abort(401)
+        token = parse_authorization_header(request.headers['Authorization'])
+        if token:
+            return f(*args, **kwargs)
         else:
             return abort(401)
-        return f(*args, **kwargs)
 
     return decorated
 
@@ -116,13 +113,15 @@ def insert_request_user(func):
     """
 
     @functools.wraps(func)
-    def get_user(*args, **kwargs):
-        from flask import request
-        from cmdb.user_management.user_manager import user_manager
-        token = request.headers['Authorization']
+    def get_request_user(*args, **kwargs):
+        from flask import request, current_app
+        with current_app.app_context():
+            user_manager = current_app.user_manager
+
+        token = parse_authorization_header(request.headers['Authorization'])
         try:
             decrypted_token = TokenValidator().decode_token(token)
-        except ValidationError:
+        except ValidationError as err:
             return abort(401)
         try:
             user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
@@ -132,7 +131,7 @@ def insert_request_user(func):
         kwargs.update({'request_user': user})
         return func(*args, **kwargs)
 
-    return get_user
+    return get_request_user
 
 
 def right_required(required_right: str, excepted: dict = None):
@@ -140,10 +139,12 @@ def right_required(required_right: str, excepted: dict = None):
     requires: insert_request_user
     """
 
+    with current_app.app_context():
+        user_manager: UserManager = current_app.user_manager
+
     def _page_right(func):
         @functools.wraps(func)
         def _decorate(*args, **kwargs):
-            from cmdb.user_management.user_manager import user_manager
             try:
                 current_user: User = kwargs['request_user']
             except KeyError:
@@ -179,3 +180,57 @@ def right_required(required_right: str, excepted: dict = None):
         return _decorate
 
     return _page_right
+
+
+def parse_authorization_header(header):
+    """
+    Parses the HTTP Auth Header to a JWT Token
+    Args:
+        header: Authorization header of the HTTP Request
+    Examples:
+        request.headers['Authorization'] or something same
+    Returns:
+        Valid JWT token
+    """
+    if not header:
+        return None
+    value = wsgi_to_bytes(header)
+    try:
+        auth_type, auth_info = value.split(None, 1)
+        auth_type = auth_type.lower()
+    except ValueError:
+        # Fallback for old versions
+        auth_type = b"bearer"
+        auth_info = value
+
+    if auth_type == b"basic":
+        try:
+            username, password = base64.b64decode(auth_info).split(b":", 1)
+
+            with current_app.app_context():
+                username = to_unicode(username, "utf-8")
+                password = to_unicode(password, "utf-8")
+
+                user_manager: UserManager = current_app.user_manager
+                user_instance: User = user_manager.get_user_by_name(user_name=username)
+                provider_class_name = user_instance.authenticator
+
+                auth_module = AuthModule(SystemSettingsReader(current_app.database_manager))
+                provider_instance = auth_module.get_provider(provider_class_name)
+                valid_user = provider_instance.authenticate(username, password)
+                tg = TokenGenerator(current_app.database_manager)
+                return tg.generate_token(payload={'user': {
+                    'public_id': valid_user.get_public_id()
+                }})
+        except Exception:
+            return None
+
+    if auth_type == b"bearer":
+        try:
+            tv = TokenValidator()
+            decoded_token = tv.decode_token(auth_info)
+            tv.validate_token(decoded_token)
+            return auth_info
+        except Exception:
+            return None
+    return None

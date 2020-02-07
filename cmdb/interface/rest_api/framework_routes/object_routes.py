@@ -16,10 +16,11 @@
 
 import json
 import logging
-from datetime import datetime
-
 import pytz
+
+from datetime import datetime
 from bson import json_util
+
 from flask import abort, jsonify, request, current_app
 
 from cmdb.data_storage.database_utils import object_hook, default
@@ -65,7 +66,12 @@ def get_object_list(request_user: User):
         list of rendered objects
     """
     try:
-        object_list = object_manager.get_all_objects()
+        filter_state = {'sort': 'public_id'}
+        if _fetch_only_active_objs():
+            filter_state['active'] = {"$eq": True}
+
+        object_list = object_manager.get_objects_by(**filter_state)
+
         if request.args.get('start') is not None:
             start = int(request.args.get('start'))
             length = int(request.args.get('length'))
@@ -95,45 +101,114 @@ def get_native_object_list(request_user: User):
     return resp
 
 
-@object_blueprint.route('/iterate/<int:type_id>/', methods=['POST'])
-@object_blueprint.route('/iterate/<int:type_id>', methods=['POST'])
+@object_blueprint.route('/dt/type/<int:type_id>', methods=['GET'])
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def iterate_over_type_object_list(type_id: int, request_user: User):
-    """Generates a table response"""
-    table_config = json.dumps(request.json)
-
+def get_dt_objects_by_type(type_id, request_user: User):
+    """Return all objects by type_id"""
     try:
-        table_config = json.loads(table_config, object_hook=json_util.object_hook)
-    except TypeError:
+        table_config = request.args
+        filter_state = {'type_id': type_id}
+
+        if _fetch_only_active_objs():
+            filter_state['active'] = {"$eq": True}
+
+        start_at = int(table_config.get('start'))
+        site_length = int(table_config.get('length'))
+        order_column = table_config.get('order') if table_config.get('order') else 'type_id'
+        order_direction = 1 if table_config.get('direction') == 'asc' else -1
+
+        if order_column in ['active', 'public_id', 'type_id', 'author_id', 'creation_time']:
+            object_list = object_manager.get_objects_by(sort=order_column, direction=order_direction, **filter_state)
+        else:
+            object_list = object_manager.sort_objects_by_field_value(value=order_column, order=order_direction, match=filter_state)
+        totals = len(object_list)
+        object_list = object_list[start_at:start_at + site_length]
+
+    except CMDBError:
         return abort(400)
 
-    LOGGER.debug(table_config)
-
-    start_at = int(table_config['start'])
-    site_length = int(table_config['length'])
-    order_column = int(table_config['order'][0]['column'])
-    order_direction = table_config['order'][0]['dir']
-    if order_direction == 'asc':
-        order_direction = 1
-    else:
-        order_direction = -1
-
-    LOGGER.debug(table_config['columns'][order_column])
-
-    try:
-        object_list = object_manager.get_objects_by(type_id=type_id, direction=order_direction)
-        to_render_list = object_list[start_at:start_at + site_length]
-    except ObjectManagerGetError:
-        return abort(404)
-
-    rendered_list = RenderList(to_render_list, request_user).render_result_list()
+    rendered_list = RenderList(object_list, request_user).render_result_list()
 
     table_response = {
         'data': rendered_list,
-        'recordsTotal': len(object_list),
-        'recordsFiltered': len(object_list)
+        'recordsTotal': totals,
+        'recordsFiltered': totals
+    }
+    return make_response(table_response)
+
+
+@object_blueprint.route('/dt/filter/type/<int:type_id>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.framework.object.view')
+def get_dt_filter_objects_by_type(type_id, request_user: User):
+    """Return all objects by type_id"""
+    try:
+        table_config = request.args
+
+        start_at = int(table_config.get('start'))
+        site_length = int(table_config.get('length'))
+        search_for = table_config.get('search')
+        order_column = table_config.get('order') if table_config.get('order') else 'type_id'
+        order_direction = 1 if table_config.get('direction') == 'asc' else -1
+
+        # Prepare search term
+        if search_for in ['true', 'True']:
+            search_for = True
+        elif search_for in ['false', 'False']:
+            search_for = False
+        elif search_for.isdigit():
+            search_for = int(search_for)
+
+        # Search default values
+        filter_arg = []
+        filter_arg.append({'type_id': type_id})
+        if _fetch_only_active_objs():
+            filter_arg.append({'active': {"$eq": True}})
+        if isinstance(search_for, bool):
+            filter_arg.append({'active': {"$eq": search_for}})
+
+        # Search search term over entire object
+        or_conditions = []
+        if isinstance(search_for, str) or isinstance(search_for, int):
+            search_term = {'$regex': str(search_for), '$options': 'i'}
+        else:
+            search_term = search_for
+
+        or_conditions.append({'fields': {'$elemMatch': {'value': search_term}}})
+        # ToDo: Find - convert string to date
+        # or_conditions.append({'creation_time': {'$toDate': str(search_for)}})
+
+        if isinstance(search_for, int):
+            if order_column in ['public_id', 'author_id']:
+                or_conditions.append({'$where': "this.public_id.toString().includes(%s)" % search_for})
+                or_conditions.append({'$where': "this.author_id.toString().includes(%s)" % search_for})
+            else:
+                or_conditions.append({'public_id': search_for})
+                or_conditions.append({'author_id': search_for})
+
+        # Linking queries
+        filter_arg.append({'$or': or_conditions})
+        filter_state = {'$and': filter_arg}
+
+        if order_column in ['active', 'public_id', 'type_id', 'author_id', 'creation_time']:
+            object_list = object_manager.get_objects_by(sort=order_column, direction=order_direction, **filter_state)
+        else:
+            object_list = object_manager.sort_objects_by_field_value(value=order_column, order=order_direction, match=filter_state)
+        totals = len(object_list)
+        object_list = object_list[start_at:start_at + site_length]
+
+    except CMDBError:
+        return abort(400)
+
+    rendered_list = RenderList(object_list, request_user).render_result_list()
+
+    table_response = {
+        'data': rendered_list,
+        'recordsTotal': totals,
+        'recordsFiltered': totals
     }
     return make_response(table_response)
 
@@ -144,9 +219,12 @@ def iterate_over_type_object_list(type_id: int, request_user: User):
 @right_required('base.framework.object.view')
 def get_objects_by_type(public_id, request_user: User):
     """Return all objects by type_id"""
-
     try:
-        object_list = object_manager.get_objects_by(sort="type_id", type_id=public_id)
+        filter_state = {'type_id': public_id}
+        if _fetch_only_active_objs():
+            filter_state['active'] = {"$eq": True}
+
+        object_list = object_manager.get_objects_by(sort="type_id", **filter_state)
     except CMDBError:
         return abort(400)
 
@@ -163,65 +241,25 @@ def get_objects_by_type(public_id, request_user: User):
     return resp
 
 
-@object_blueprint.route('/filter/<string:value>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_objects_by_searchterm(value, request_user: User):
-    """Return all objects by search term"""
-    try:
-        type = {}
-        term = value
-        try:
-            term = int(value)
-        except:
-            if value in ['True', 'true']:
-                term = True
-            elif value in ['False', 'false']:
-                term = False
-            elif isinstance(value, str):
-                term = {'$regex': value}
-
-        if request.args.get('type') is not None:
-            type = {'type_id': int(request.args.get('type'))}
-
-        query: dict = {'$and': [
-            {'fields': {'$elemMatch': {'value': term}}},
-            type
-        ]}
-        object_list = object_manager.get_objects_by(sort="type_id", **query)
-
-        if request.args.get('start') is not None:
-            start = int(request.args.get('start'))
-            length = int(request.args.get('length'))
-            object_list = object_list[start:start + length]
-
-    except CMDBError:
-        return abort(400)
-
-    if len(object_list) < 1:
-        return make_response(object_list, 204)
-
-    rendered_list = RenderList(object_list, request_user).render_result_list()
-    resp = make_response(rendered_list)
-    return resp
-
-
 @object_blueprint.route('/type/<string:type_ids>', methods=['GET'])
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_objects_by_types(type_ids):
-    """Return all objects by type_id
-    TODO: Refactore to render results"""
+def get_objects_by_types(type_ids, request_user: User):
+    """Return all objects by type_id"""
     try:
-        query = _build_query({'type_id': type_ids}, q_operator='$or')
+        filter_state = {'type_id': type_ids}
+        if _fetch_only_active_objs():
+            filter_state['active'] = {"$eq": True}
+
+        query = _build_query(filter_state, q_operator='$or')
         all_objects_list = object_manager.get_objects_by(sort="type_id", **query)
+        rendered_list = RenderList(all_objects_list, request_user).render_result_list()
 
     except CMDBError:
         return abort(400)
 
-    resp = make_response(all_objects_list)
+    resp = make_response(rendered_list)
     return resp
 
 
@@ -229,18 +267,22 @@ def get_objects_by_types(type_ids):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_objects_by_public_id(public_ids):
-    """Return all objects by public_ids
-    TODO: Refactore to render results"""
+def get_objects_by_public_id(public_ids, request_user: User):
+    """Return all objects by public_ids"""
 
     try:
-        query = _build_query({'public_id': public_ids}, q_operator='$or')
+        filter_state = {'public_id': public_ids}
+        if _fetch_only_active_objs():
+            filter_state['active'] = {"$eq": True}
+
+        query = _build_query(filter_state, q_operator='$or')
         all_objects_list = object_manager.get_objects_by(sort="public_id", **query)
+        rendered_list = RenderList(all_objects_list, request_user).render_result_list()
 
     except CMDBError:
         return abort(400)
 
-    resp = make_response(all_objects_list)
+    resp = make_response(rendered_list)
     return resp
 
 
@@ -249,6 +291,14 @@ def get_objects_by_public_id(public_ids):
 def count_object_by_type(type_id):
     try:
         count = object_manager.count_objects_by_type(type_id)
+        if _fetch_only_active_objs():
+            filter_state = {'type_id': type_id, 'active': {'$eq': True}}
+            result = []
+            cursor = object_manager.group_objects_by_value('active', filter_state)
+            for document in cursor:
+                result.append(document)
+            count = result[0]['count'] if result else 0
+
         resp = make_response(count)
     except CMDBError:
         return abort(400)
@@ -260,6 +310,12 @@ def count_object_by_type(type_id):
 def count_objects():
     try:
         count = object_manager.count_objects()
+        if _fetch_only_active_objs():
+            result = []
+            cursor = object_manager.group_objects_by_value('active', {'active': {"$eq": True}})
+            for document in cursor:
+                result.append(document)
+            count = result[0]['count'] if result else 0
         resp = make_response(count)
     except CMDBError:
         return abort(400)
@@ -270,8 +326,11 @@ def count_objects():
 @login_required
 def group_objects_by_type_id(value):
     try:
+        filter_state = None
+        if _fetch_only_active_objs():
+            filter_state = {'active': {"$eq": True}}
         result = []
-        cursor = object_manager.group_objects_by_value(value)
+        cursor = object_manager.group_objects_by_value(value, filter_state)
         max_length = 0
         for document in cursor:
             document['label'] = object_manager.get_type(document['_id']).label
@@ -304,7 +363,8 @@ def get_object(public_id, request_user: User):
         return abort(404)
 
     try:
-        render = CmdbRender(object_instance=object_instance, type_instance=type_instance, render_user=request_user)
+        render = CmdbRender(object_instance=object_instance, type_instance=type_instance, render_user=request_user,
+                            user_list=user_manager.get_users())
         render_result = render.result()
     except RenderError as err:
         LOGGER.error(err)
@@ -332,7 +392,11 @@ def get_native_object(public_id: int, request_user: User):
 @insert_request_user
 def get_objects_by_reference(public_id: int, request_user: User):
     try:
-        reference_list: list = object_manager.get_object_references(public_id=public_id)
+        active_flag = None
+        if _fetch_only_active_objs():
+            active_flag = True
+
+        reference_list: list = object_manager.get_object_references(public_id=public_id, active_flag=active_flag)
         rendered_reference_list = RenderList(reference_list, request_user).render_result_list()
     except ObjectManagerGetError as err:
         LOGGER.error(err)
@@ -448,7 +512,8 @@ def insert_object(request_user: User):
         current_object = object_manager.get_object(new_object_id)
         current_object_render_result = CmdbRender(object_instance=current_object,
                                                   type_instance=current_type_instance,
-                                                  render_user=request_user).result()
+                                                  render_user=request_user,
+                                                  user_list=user_manager.get_users()).result()
     except ObjectManagerGetError as err:
         LOGGER.error(err)
         return abort(404)
@@ -486,7 +551,8 @@ def update_object(public_id: int, request_user: User):
         current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
         current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                   type_instance=current_type_instance,
-                                                  render_user=request_user).result()
+                                                  render_user=request_user,
+                                                  user_list=user_manager.get_users()).result()
     except ObjectManagerGetError as err:
         LOGGER.error(err)
         return abort(404)
@@ -569,7 +635,8 @@ def delete_object(public_id: int, request_user: User):
         current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
         current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                   type_instance=current_type_instance,
-                                                  render_user=request_user).result()
+                                                  render_user=request_user,
+                                                  user_list=user_manager.get_users()).result()
     except ObjectManagerGetError as err:
         LOGGER.error(err)
         return abort(404)
@@ -627,7 +694,7 @@ def delete_many_objects(public_ids, request_user: User):
                 current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
                 current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                           type_instance=current_type_instance,
-                                                          render_user=request_user).result()
+                                                          render_user=request_user, user_list=user_manager.get_users()).result()
             except ObjectManagerGetError as err:
                 LOGGER.error(err)
                 return abort(404)
@@ -710,7 +777,8 @@ def update_object_state(public_id: int, request_user: User):
         current_type_instance = object_manager.get_type(founded_object.get_type_id())
         current_object_render_result = CmdbRender(object_instance=founded_object,
                                                   type_instance=current_type_instance,
-                                                  render_user=request_user).result()
+                                                  render_user=request_user,
+                                                  user_list=user_manager.get_users()).result()
     except ObjectManagerGetError as err:
         LOGGER.error(err)
         return abort(404)
@@ -799,3 +867,16 @@ def _build_query(args, q_operator='$and'):
 
     except CMDBError:
         pass
+
+
+def _fetch_only_active_objs():
+    """
+        Checking if request have cookie parameter for object active state
+        Returns:
+            True if cookie is set or value is true else false
+        """
+    if request.args.get('onlyActiveObjCookie') is not None:
+        value = request.args.get('onlyActiveObjCookie')
+        if value in ['True', 'true']:
+            return True
+    return False

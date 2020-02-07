@@ -19,6 +19,7 @@
 import { Injectable } from '@angular/core';
 import { ApiCallService } from '../../services/api-call.service';
 import {BehaviorSubject, Observable, Subject} from 'rxjs';
+import {CategoryService} from "../../framework/services/category.service";
 
 @Injectable({
   providedIn: 'root'
@@ -27,17 +28,17 @@ export class SidebarService {
 
   private categoryTreeObserver = new BehaviorSubject<any[]>([]);
 
-  constructor(private api: ApiCallService) {}
+  constructor(private cService: CategoryService) {}
 
   public get categoryTree() {
-    this.api.callGetRoute('category/tree').subscribe(item => {
+    this.cService.getCategoryTree().subscribe(item => {
       this.categoryTreeObserver.next(item);
     });
     return this.categoryTreeObserver;
   }
 
   public updateCategoryTree() {
-    this.api.callGetRoute('category/tree').subscribe(item => {
+    this.cService.getCategoryTree().subscribe(item => {
       this.categoryTreeObserver.next(item);
     });
   }

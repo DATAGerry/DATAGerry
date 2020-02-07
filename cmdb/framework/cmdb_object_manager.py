@@ -21,8 +21,10 @@ The implementation of the manager used is always realized using the respective s
 
 """
 import logging
-import re
+import json
 
+from cmdb.data_storage.database_utils import object_hook
+from bson import json_util
 from datetime import datetime
 from typing import List
 
@@ -38,6 +40,7 @@ from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.framework.cmdb_type import CmdbType
+from cmdb.search.query import Query
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import User
 
@@ -54,6 +57,13 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
+
+    def search(self, collection, query: Query, *args, **kwargs) -> List:
+        LOGGER.debug(f'[ObjectManager][Search] {args} | {kwargs}')
+        try:
+            return self._search(collection=collection, query=query, **kwargs)
+        except Exception as err:
+            raise ObjectManagerGetError(err)
 
     def get_object(self, public_id: int):
         try:
@@ -108,26 +118,60 @@ class CmdbObjectManager(CmdbManagerBase):
         formatted_type_id = {'type_id': public_id}
         return self.dbm.count(CmdbObject.COLLECTION, formatted_type_id)
 
-    def group_objects_by_value(self, value: str):
+    def group_objects_by_value(self, value: str, match=None):
         """This method does not actually
            performs the find() operation
            but instead returns
            a objects grouped by type of the documents that meet the selection criteria.
 
            Args:
-               collection (str): name of database collection
                value (str): grouped by value
+               match (dict): stage filters the documents to only pass documents.
            Returns:
                returns the objects grouped by value of the documents
            """
-        agr = [
-            {'$group':
-                {'_id': '$'+value, 'count': {'$sum': 1}}
-             },
-            {'$sort': {'count': -1}}
-        ]
+        agr = []
+        if match:
+            agr.append({'$match': match})
+        agr.append({'$group': {'_id': '$' + value, 'count': {'$sum': 1}}})
+        agr.append({'$sort': {'count': -1}})
 
-        return self.dbm.group(CmdbObject.COLLECTION, agr)
+        return self.dbm.aggregate(CmdbObject.COLLECTION, agr)
+
+    def sort_objects_by_field_value(self, value: str, order=-1, match=None):
+        """This method does not actually
+           performs the find() operation
+           but instead returns
+           a objects sorted by value of the documents that meet the selection criteria.
+
+           Args:
+               value (str): sorted by value
+               order : Ascending/Descending Sort e.g. -1
+               match (dict): stage filters the documents to only pass documents.
+           Returns:
+               returns the list of CMDB Objects sorted by value of the documents
+           """
+        agr = []
+        if match:
+            agr.append({'$match': match})
+        agr.append({"$addFields": {
+                "order": {
+                    "$filter": {
+                      "input": "$fields",
+                      "as": "fields",
+                      "cond": {"$eq": ["$$fields.name", value]}
+                    }
+                }
+            }})
+        agr.append({'$sort': {'order': order}})
+
+        object_list = []
+        cursor = self.dbm.aggregate(CmdbObject.COLLECTION, agr)
+        for document in cursor:
+            put_data = json.loads(json_util.dumps(document), object_hook=object_hook)
+            object_list.append(CmdbObject(**put_data))
+
+        return object_list
 
     def count_objects(self):
         return self.dbm.count(collection=CmdbObject.COLLECTION)
@@ -141,33 +185,6 @@ class CmdbObjectManager(CmdbManagerBase):
                     for item in items:
                         self._find_query_fields(item, match_fields=match_fields)
         return match_fields
-
-    def _re_search_fields(self, search_object, regex):
-        """returns list of matched fields"""
-        match_list = list()
-        for index in regex:
-            for field in search_object.fields:
-                if re.search(index, str(field['value'])):
-                    match_list.append(field['name'])
-        return match_list
-
-    def search_objects(self, query: dict) -> dict:
-        return self.search_objects_with_limit(query, limit=0)
-
-    def search_objects_with_limit(self, query: dict, limit=0) -> dict:
-        result_list = dict()
-        for result_objects in self._search(CmdbObject.COLLECTION, query, limit=limit):
-            try:
-                re_query = self._find_query_fields(query)
-                result_object_instance = CmdbObject(**result_objects)
-                matched_fields = self._re_search_fields(result_object_instance, re_query)
-
-                result_list.update({
-                    result_object_instance: matched_fields
-                })
-            except (CMDBError, re.error):
-                continue
-        return result_list
 
     def insert_object(self, data: (CmdbObject, dict)) -> int:
         """
@@ -208,7 +225,7 @@ class CmdbObjectManager(CmdbManagerBase):
         else:
             raise ObjectManagerUpdateError('Wrong CmdbObject init format - expecting CmdbObject or dict')
         update_object.last_edit_time = datetime.utcnow()
-        ack = self.dbm.update(
+        ack = self._update(
             collection=CmdbObject.COLLECTION,
             public_id=update_object.get_public_id(),
             data=update_object.to_database()
@@ -229,7 +246,7 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = self._update_many(CmdbObject.COLLECTION, filter, update)
         return ack
 
-    def get_object_references(self, public_id: int) -> list:
+    def get_object_references(self, public_id: int, active_flag=None) -> list:
         # Type of given object id
         type_id = self.get_object(public_id=public_id).get_type_id()
 
@@ -256,6 +273,9 @@ class CmdbObjectManager(CmdbManagerBase):
             referenced_query = {"type_id": possible_object_types['type_id'], "fields": {
                 "$elemMatch": {"$and": [{"name": possible_object_types['field_name']}],
                                "$or": [{"value": int(public_id)}, {"value": str(public_id)}]}}}
+            if active_flag:
+                referenced_query.update({'active': {"$eq": True}})
+
             referenced_by_objects = referenced_by_objects + self.get_objects_by(**referenced_query)
 
         return referenced_by_objects
@@ -313,6 +333,26 @@ class CmdbObjectManager(CmdbManagerBase):
         for data in objects:
             ack.append(CmdbType(**data))
         return ack
+
+    def group_type_by_value(self, value: str, match=None):
+        """This method does not actually
+           performs the find() operation
+           but instead returns
+           a objects grouped by type of the documents that meet the selection criteria.
+
+           Args:
+               value (str): grouped by value
+               match (dict): stage filters the documents to only pass documents.
+           Returns:
+               returns the objects grouped by value of the documents
+           """
+        agr = []
+        if match:
+            agr.append({'$match': match})
+        agr.append({'$group': {'_id': '$'+value, 'count': {'$sum': 1}}})
+        agr.append({'$sort': {'count': -1}})
+
+        return self.dbm.aggregate(CmdbType.COLLECTION, agr)
 
     def insert_type(self, data: (CmdbType, dict)):
         if isinstance(data, CmdbType):
@@ -447,7 +487,7 @@ class CmdbObjectManager(CmdbManagerBase):
             update_category = data
         elif isinstance(data, dict):
             update_category = CmdbCategory(**data)
-        ack = self.dbm.update(
+        ack = self._update(
             collection=CmdbCategory.COLLECTION,
             public_id=update_category.get_public_id() or update_category.public_id,
             data=update_category.to_database()
@@ -499,7 +539,7 @@ class CmdbObjectManager(CmdbManagerBase):
     def update_status(self, data):
         try:
             updated_status = CmdbStatus(**data)
-            ack = self.dbm.update(CmdbStatus.COLLECTION, updated_status.get_public_id(), updated_status.to_database())
+            ack = self._update(CmdbStatus.COLLECTION, updated_status.get_public_id(), updated_status.to_database())
         except (CMDBError, Exception) as err:
             LOGGER.error(err)
             raise ObjectManagerUpdateError(err)
@@ -512,11 +552,9 @@ class CmdbObjectManager(CmdbManagerBase):
     def get_collections(self) -> list:
         collection_list = list()
         try:
-            collection_resp = self.dbm.find_all(collection=CmdbCollection.COLLECTION)
+            collection_resp = self._get_many(collection=CmdbCollection.COLLECTION)
         except(CMDBError, Exception) as err:
-            LOGGER.error(err)
             raise ObjectManagerGetError(err)
-
         for collection in collection_resp:
             try:
                 collection_list.append(CmdbCollection(
@@ -552,10 +590,11 @@ class CmdbObjectManager(CmdbManagerBase):
     def delete_collection(self, public_id: int):
         return NotImplementedError
 
+    # CRUD COLLECTION TEMPLATES
     def get_collection_templates(self) -> list:
         collection_template_list = list()
         try:
-            collection_resp = self.dbm.find_all(collection=CmdbCollectionTemplate.COLLECTION)
+            collection_resp = self._get_many(collection=CmdbCollectionTemplate.COLLECTION)
         except(CMDBError, Exception) as err:
             LOGGER.error(err)
             raise ObjectManagerGetError(err)
@@ -572,28 +611,42 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_collection_template(self, public_id: int) -> CmdbCollectionTemplate:
         try:
-            return CmdbCollectionTemplate(**self.dbm.find_one(
+            return CmdbCollectionTemplate(**self._get(
                 collection=CmdbCollectionTemplate.COLLECTION,
                 public_id=public_id
             ))
         except (CMDBError, Exception) as err:
-            LOGGER.error(err)
             raise ObjectManagerGetError(err)
 
-    def insert_collection_template(self, data) -> int:
+    def insert_collection_template(self, data: dict) -> int:
+        # Insert data
         try:
-            new_collection_template = CmdbCollectionTemplate(**data)
-            ack = self.dbm.insert(CmdbCollectionTemplate.COLLECTION, new_collection_template.to_database())
+            possible_id: int = self.dbm.get_highest_id(collection=CmdbCollectionTemplate.COLLECTION) + 1
+            data.update({'public_id': possible_id})
+            data.update({'creation_time': datetime.utcnow()})
+            collection_template_id = self._insert(CmdbCollectionTemplate.COLLECTION, data)
         except (CMDBError, Exception) as err:
-            LOGGER.error(err)
             raise ObjectManagerInsertError(err)
-        return ack
+        # Check if instance is valid
+        try:
+            self.get_collection_template(public_id=collection_template_id)
+        except ObjectManagerGetError as err:
+            # Invalid instance -> delete
+            try:
+                self.delete_collection_template(collection_template_id)
+            except ObjectManagerDeleteError as err_delete:
+                raise ObjectInsertError(f'Instance is invalid, but could not delete template: {err_delete.message}')
+            raise ObjectManagerInsertError(f'Error in instance of new object: {err.message}')
+        return collection_template_id
 
     def update_collection_template(self, data):
         return NotImplementedError
 
-    def delete_collection_template(self, public_id: int):
-        return NotImplementedError
+    def delete_collection_template(self, public_id: int) -> bool:
+        try:
+            return self._delete(CmdbCollectionTemplate.COLLECTION, public_id)
+        except (CMDBError, Exception) as err:
+            raise ObjectManagerDeleteError(err)
 
     # Link CRUD
     def get_link(self, public_id: int):

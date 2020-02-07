@@ -61,22 +61,30 @@ class RenderResult(RenderVisualization):
         self.summaries: list = []
         self.summary_line: str = ''
         self.externals: list = []
-        self.match_fields: list = []
 
 
 class CmdbRender:
-    AUTHOR_ANONYMOUS_NAME = 'anonymous'
+    AUTHOR_ANONYMOUS_NAME = 'unknown'
 
     def __init__(self, object_instance: CmdbObject,
                  type_instance: CmdbType,
-                 render_user: User,
-                 match_values: [] = None):
-        from cmdb.user_management.user_manager import user_manager
+                 render_user: User, user_list: List[User] = None):
         self.object_instance: CmdbObject = object_instance
         self.type_instance: CmdbType = type_instance
-        self.__usm: UserManager = user_manager
+        self.user_list: List[User] = user_list
         self.render_user: User = render_user
-        self.match_values: [] = match_values if match_values is not None else []
+
+    def _render_username_by_id(self, user_id: int) -> str:
+        user: User = None
+        try:
+            user = next(_ for _ in self.user_list if _.public_id == user_id)
+        except Exception:
+            user = None
+        if user:
+            return user.get_name()
+        else:
+            return CmdbRender.AUTHOR_ANONYMOUS_NAME
+
 
     @property
     def object_instance(self) -> CmdbObject:
@@ -129,14 +137,13 @@ class CmdbRender:
             render_result = self.__set_sections(render_result)
             render_result = self.__set_summaries(render_result)
             render_result = self.__set_external(render_result)
-            render_result = self.__set_matched_fieldset(render_result)
         except CMDBError as err:
             raise RenderError(f'Error while generating a CMDBResult: {err.message}')
         return render_result
 
     def __generate_object_information(self, render_result: RenderResult) -> RenderResult:
         try:
-            author_name = self.__usm.get_user(self.object_instance.author_id).get_name()
+            author_name = self._render_username_by_id(self.object_instance.author_id)
         except CMDBError as err:
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
             LOGGER.error(err.message)
@@ -153,7 +160,7 @@ class CmdbRender:
 
     def __generate_type_information(self, render_result: RenderResult) -> RenderResult:
         try:
-            author_name = self.__usm.get_user(self.type_instance.author_id).get_name()
+            author_name = self._render_username_by_id(self.type_instance.author_id)
         except CMDBError as err:
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
             LOGGER.error(err.message)
@@ -197,17 +204,6 @@ class CmdbRender:
                 field['value'] = None
             field_map.append(field)
         return field_map
-
-    def __set_matched_fieldset(self, render_result: RenderResult) -> RenderResult:
-        tmp = []
-        for matched_field in self.match_values:
-            try:
-                tmp.append(self.type_instance.get_field(matched_field))
-            except CMDBError:
-                LOGGER.warning("Could not parse matched field {}".format(matched_field))
-                continue
-        render_result.match_fields = tmp
-        return render_result
 
     def __set_summaries(self, render_result: RenderResult) -> RenderResult:
         # global summary list
@@ -286,20 +282,21 @@ class RenderList:
         self.request_user = request_user
 
     @timing('RenderList')
-    def render_result_list(self, search_fields=None):
+    def render_result_list(self) -> List[RenderResult]:
         from cmdb.utils.system_reader import SystemConfigReader
-
-        object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
+        database_manager = DatabaseManagerMongo(
             **SystemConfigReader().get_all_values_from_section('Database')
-        ))
+        )
+        object_manager = CmdbObjectManager(database_manager=database_manager)
+        user_manager = UserManager(database_manager=database_manager)
+        complete_user_list: List[User] = user_manager.get_users()
 
-        preparation_objects = []
+        preparation_objects: List[RenderResult] = []
         for passed_object in self.object_list:
             tmp_render = CmdbRender(
                 type_instance=object_manager.get_type(passed_object.type_id),
                 object_instance=passed_object,
-                match_values=search_fields,
-                render_user=self.request_user)
+                render_user=self.request_user, user_list=complete_user_list)
             current_render_result = tmp_render.result()
             preparation_objects.append(current_render_result)
         return preparation_objects

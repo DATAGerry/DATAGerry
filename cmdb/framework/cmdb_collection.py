@@ -23,8 +23,10 @@ Integration with the status system should also be possible.
 Notes:
     ONLY IMPLEMENTED IN BACKEND AT THE MOMENT - CANT BE USED!
 """
+from datetime import datetime
+
 from cmdb.framework.cmdb_dao import CmdbDAO
-from typing import Tuple, List
+from typing import List, Dict
 
 
 class CmdbCollection(CmdbDAO):
@@ -37,16 +39,14 @@ class CmdbCollection(CmdbDAO):
         'template_id'
     ]
 
-    def __init__(self, template_id: int, object_list: list = None, **kwargs):
+    def __init__(self, template_id: int, object_list: List[int] = None, creation_time: datetime = None,
+                 last_edit_time: datetime = None, **kwargs):
+        """Constructor of CmdbCollection
         """
-        Constructor of CmdbCollection
-        Args:
-            template_id: public_id of CmdbCollectionTemplate
-            user_id: public_id of CmdbUser
-            object_list: list of objects which types are defined in the template
-        """
-        self.template_id = template_id
-        self.object_list = object_list or []
+        self.template_id: int = template_id
+        self.object_list: List[int] = object_list or []
+        self.creation_time: datetime = creation_time or datetime.utcnow()
+        self.last_edit_time: datetime = last_edit_time
 
         super(CmdbCollection, self).__init__(**kwargs)
 
@@ -68,8 +68,7 @@ class CmdbCollection(CmdbDAO):
 
 
 class CmdbCollectionTemplate(CmdbDAO):
-    """
-    The collection Template Class defines the structure of the respective collection similar to the CMDB types.
+    """The collection Template Class defines the structure of the respective collection similar to the CMDB types.
     However to a much smaller extent. Here only the respective types and the number of objects
     to be initialized are defined.
     """
@@ -80,21 +79,19 @@ class CmdbCollectionTemplate(CmdbDAO):
     INDEX_KEYS = [
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
+    TYPE_DATATYPE = int
+    OBJECT_COUNTER_DATATYPE = int
+    TEMPLATE_DICT = Dict['type_id', 'count']
 
-    TEMPLATE_TUPLE = Tuple[int, int]
-
-    def __init__(self, name: str, label: str = None, type_tuple_list: List[TEMPLATE_TUPLE] = None, **kwargs):
+    def __init__(self, name: str, label: str = None, type_order_list: List[TEMPLATE_DICT] = None,
+                 creation_time: datetime = None, last_edit_time: datetime = None, **kwargs):
+        """Constructor of CmdbCollectionTemplate
         """
-        Constructor of CmdbCollectionTemplate
-        Args:
-            name: name of the collection
-            user_id: original public id of the author
-            type_tuple_list: Tuple of types with numbers of objects
-            label: (optional) Label of the name
-        """
-        self.name: str = name
+        self.name: str = name.lower()
         self.label: str = label or self.name.title()
-        self.type_tuple_list: List[CmdbCollectionTemplate.TEMPLATE_TUPLE] = type_tuple_list or []
+        self.type_order_list: List[CmdbCollectionTemplate.TEMPLATE_DICT] = type_order_list or []
+        self.creation_time: datetime = creation_time or datetime.utcnow()
+        self.last_edit_time: datetime = last_edit_time
         super(CmdbCollectionTemplate, self).__init__(**kwargs)
 
     def get_name(self) -> str:
@@ -114,18 +111,18 @@ class CmdbCollectionTemplate(CmdbDAO):
         """
         return self.label
 
-    def get_type_tuple_list(self) -> List[TEMPLATE_TUPLE]:
+    def get_type_order_list(self) -> List[TEMPLATE_DICT]:
         """
         get list of type tuples
         Returns:
             List of type tuples based on [TYPE_ID, NUMBER_OF_OBJECTS]
         """
-        return self.type_tuple_list
+        return self.type_order_list
 
     @classmethod
-    def generate_type_tuple(cls, type_id: int, count: int) -> TEMPLATE_TUPLE:
+    def generate_type_dict(cls, type_id: TYPE_DATATYPE, count: OBJECT_COUNTER_DATATYPE) -> TEMPLATE_DICT:
         """
-        generate a type tuple
+        generate a type dict
         Args:
             type_id: public_id of type
             count: number of objects
@@ -133,4 +130,4 @@ class CmdbCollectionTemplate(CmdbDAO):
         Returns:
             type tuples based on [TYPE_ID, NUMBER_OF_OBJECTS]
         """
-        return type_id, count
+        return {'type_id': type_id, 'count': count}

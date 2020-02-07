@@ -1,5 +1,5 @@
 ![Image](app/src/assets/img/datagerry_logo.svg)
-DATAGERRY is an OpenSource Asset Management Tool & CMDB, which completely leaves the definition of a data model to the user.
+DATAGERRY is an OpenSource CMDB & Asset Management Tool, which completely leaves the definition of a data model to the user.
 
 Key Functions:
 * Define your own object types (e.g. router, server, location) in a simple webfrontend

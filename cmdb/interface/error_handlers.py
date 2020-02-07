@@ -29,7 +29,7 @@ from typing import Optional
 
 from flask import request, jsonify
 from werkzeug.exceptions import HTTPException, NotFound, BadRequest, Unauthorized, Forbidden, MethodNotAllowed, \
-    NotAcceptable, Gone, InternalServerError
+    NotAcceptable, Gone, InternalServerError, NotImplemented, ServiceUnavailable
 
 LOGGER = logging.getLogger(__name__)
 
@@ -124,6 +124,13 @@ def internal_server_error(error):
 
 def not_implemented(error):
     """501 Not Implemented"""
-    resp = ErrorResponse(status=501, prefix='Not Implemented', description=Gone.description,
+    resp = ErrorResponse(status=501, prefix='Not Implemented', description=NotImplemented.description,
                          message=error.description, joke='... sry we still making this nuts')
+    return resp.make_error(error)
+
+
+def service_unavailable(error):
+    """503 Service Unavailable"""
+    resp = ErrorResponse(status=503, prefix='Service Unavailable', description=ServiceUnavailable.description,
+                         message=error.description)
     return resp.make_error(error)

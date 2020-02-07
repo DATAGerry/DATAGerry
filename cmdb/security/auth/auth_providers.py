@@ -15,26 +15,33 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+from typing import ClassVar
 
-from cmdb.data_storage.database_manager import DatabaseManagerMongo
-# from cmdb.security.auth.auth_errors import WrongUserPasswordError
-# from cmdb.security.auth.provider_base import AuthenticationProvider
-from cmdb.utils import get_security_manager
-from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.security.auth.provider_config import AuthProviderConfig
+from cmdb.user_management import User
 
 LOGGER = logging.getLogger(__name__)
 
 
 class AuthenticationProvider:
-    PASSWORD_ABLE = True
+    """Provider super class"""
+    PASSWORD_ABLE: bool = True
+    EXTERNAL_PROVIDER: bool = False
+    PROVIDER_CONFIG_CLASS: ClassVar[AuthProviderConfig] = AuthProviderConfig
 
-    def authenticate(self, user, password: str, **kwargs) -> bool:
+    def __init__(self, config: AuthProviderConfig = None, *args, **kwargs):
+        """
+        Init constructor for provider classes
+        Args:
+            config: Configuration object
+        """
+        self.config = config or self.PROVIDER_CONFIG_CLASS(**self.PROVIDER_CONFIG_CLASS.DEFAULT_CONFIG_VALUES)
+
+    def authenticate(self, user_name: str, password: str, **kwargs) -> User:
         raise NotImplementedError
 
-    def generate_password(self, *args, **kwargs) -> (str, bytearray):
-        if not self.is_password_able():
-            raise NotPasswordAbleError(self.get_name())
-        raise NotImplementedError
+    def get_config(self) -> AuthProviderConfig:
+        return self.config
 
     @classmethod
     def is_password_able(cls):
@@ -46,35 +53,11 @@ class AuthenticationProvider:
         return cls.__qualname__
 
 
-class LocalAuthenticationProvider(AuthenticationProvider):
-
-    def __init__(self):
-        self.scr = SystemConfigReader()
-        self.__dbm = DatabaseManagerMongo(
-            **self.scr.get_all_values_from_section('Database')
-        )
-        super(AuthenticationProvider, self).__init__()
-
-    def authenticate(self, user, password: str, **kwargs) -> bool:
-        security_manager = get_security_manager(self.__dbm)
-        login_pass = security_manager.generate_hmac(password)
-        if login_pass == user.get_password():
-            return True
-        raise WrongUserPasswordError(user.get_username())
-
-
 class NoValidAuthenticationProviderError(Exception):
     """Exception if auth provider do not exist"""
 
     def __init__(self, authenticator):
         self.message = "The Provider {} is not a valid authentication-provider".format(authenticator)
-
-
-class WrongUserPasswordError(Exception):
-    """Exception if wrong user password"""
-
-    def __init__(self, user):
-        self.message = "The password for the user {} was wrong!".format(user)
 
 
 class NotPasswordAbleError(Exception):

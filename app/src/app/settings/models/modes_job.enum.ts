@@ -23,3 +23,8 @@ export enum ExecuteState {
   FAILED = 'FAILED',
   RUNNING = 'RUNNING',
 }
+
+export enum ExportdType {
+  PUSH = 'PUSH',
+  PULL = 'PULL',
+}

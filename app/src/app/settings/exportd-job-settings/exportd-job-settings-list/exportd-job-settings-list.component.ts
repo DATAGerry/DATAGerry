@@ -27,7 +27,7 @@ import { ToastService } from '../../../layout/toast/toast.service';
 import { ModalComponent } from '../../../layout/helpers/modal/modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subscription, timer } from 'rxjs';
-import { ExecuteState } from '../../models/modes_job.enum';
+import {ExecuteState, ExportdType} from '../../models/modes_job.enum';
 
 @Component({
   selector: 'cmdb-task-settings-list',
@@ -40,10 +40,10 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
   public dtElement: DataTableDirective;
   public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();
-  private reloadDt: boolean = true;
   public taskList: BehaviorSubject<ExportdJob[]> = new BehaviorSubject<ExportdJob[]>([]);
 
   public modes = ExecuteState;
+  public typeMode = ExportdType;
   private subscription: Subscription;
 
   constructor(private taskService: ExportdJobService, private router: Router,
@@ -51,8 +51,17 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.dtOptions = {
+      orderFixed: [2, 'desc'],
+      rowGroup: {
+        enable: true,
+        endRender(rows) {
+          return `Number of jobs in this group: ${ rows.count() }`;
+        },
+        dataSrc: 2
+      },
+      order: [2, 'desc'],
       ordering: true,
-      order: [[1, 'desc']],
+      stateSave: true,
       dom:
         '<"row" <"col-sm-2" l><"col" f> >' +
         '<"row" <"col-sm-12"tr>>' +
@@ -62,12 +71,10 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
         searchPlaceholder: 'Filter...'
       }
     };
-
-    this.subscription = timer(0, 10000).subscribe(result => {
+    this.subscription = timer(0, 30000).subscribe(result => {
       this.taskService.getTaskList().subscribe((list: ExportdJob[]) => {
         this.taskList.next(list);
-        this.rerender(this.reloadDt);
-        this.reloadDt = false;
+        this.rerender();
       });
     });
   }
@@ -82,6 +89,7 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
           error => {},
           () => this.taskService.getTaskList().subscribe((list: ExportdJob[]) => {
             this.taskList.next(list);
+            this.rerender();
             this.toast.show(`Exportd Job was started: Exportd ID: ${job.public_id}`);
           }))
     );
@@ -105,10 +113,8 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
     });
   }
 
-  private rerender(reload: boolean = true): void {
-    if (!reload) {
-      return;
-    } else if (typeof this.dtElement !== 'undefined' && typeof this.dtElement.dtInstance !== 'undefined') {
+  private rerender(): void {
+   if (typeof this.dtElement !== 'undefined' && typeof this.dtElement.dtInstance !== 'undefined') {
       this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
         // Destroy the table first
         dtInstance.destroy();

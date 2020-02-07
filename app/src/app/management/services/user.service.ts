@@ -117,6 +117,17 @@ export class UserService<T = User> implements ApiService {
   }
 
   // Special functions
+  public countUsers(): Observable<T[]> {
+    return this.api.callGet<T>(`${ this.servicePrefix }/count/`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
+  }
+
   public checkUserExists(userName: string) {
     const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
     return this.api.callGet<T>(`${ this.servicePrefix }/${ userName }`, specialClient);
