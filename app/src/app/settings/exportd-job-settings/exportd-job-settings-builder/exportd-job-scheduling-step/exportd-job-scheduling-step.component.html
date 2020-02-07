@@ -1,6 +1,6 @@
 
 <form [formGroup]="eventForm">
-  <fieldset class="form-group card-body">
+  <fieldset class="form-group card-body" [disabled]="taskType == 'PULL'">
     <div class="row">
       <legend class="col-form-label col-sm-2 pt-0">Run Event based:</legend>
       <div class="col-sm-10">
@@ -10,7 +10,12 @@
                    formControlName="active">
             <label class="custom-control-label" for="checkBased2"></label>
           </div>
-          <span class="form-text text-muted">Run Exportd Job on Event (e.g. on object update)</span>
+          <ng-container *ngIf="taskType != 'PULL'; else newDeb" >
+            <span class="form-text text-muted">Run Exportd Job on Event (e.g. on object update)</span>
+          </ng-container>
+          <ng-template #newDeb>
+            <span class="form-text text-muted">PULL Exportd Job cannot be executed on event base</span>
+          </ng-template>
         </div>
       </div>
     </div>

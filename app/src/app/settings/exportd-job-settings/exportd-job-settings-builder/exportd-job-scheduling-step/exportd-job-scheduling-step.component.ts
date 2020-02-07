@@ -19,6 +19,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CmdbMode } from '../../../../framework/modes.enum';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ExportdJob } from '../../../models/exportd-job';
 
 @Component({
   selector: 'cmdb-task-scheduling-step',
@@ -28,15 +29,16 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 export class ExportdJobSchedulingStepComponent implements OnInit {
 
   @Input()
-  set preData(data: any) {
+  set preData(data: ExportdJob) {
     if (data !== undefined && data.scheduling !== undefined ) {
       this.eventForm.patchValue(data.scheduling.event);
+      this.taskType = data.exportd_type;
     }
   }
 
   @Input() public mode: CmdbMode;
   public eventForm: FormGroup;
-
+  public taskType: any;
 
   constructor(private formBuilder: FormBuilder) {
     this.eventForm = this.formBuilder.group({

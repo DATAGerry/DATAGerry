@@ -35,3 +35,57 @@ table.dataTable tr.dtrg-group.dtrg-level-2 td {
 .dataTables_empty {
   display: none;
 }
+
+
+#object-list-datatable {
+
+  .select-checkbox:before {
+    border: 1px solid #bbb;
+    background: white;
+    width: 13px;
+    height:13px;
+    box-shadow: inset 0 1px 1px 0 rgba(0,0,0,.1);
+  }
+
+  button.dt-button,
+  div.dt-button,
+  a.dt-button {
+    position: relative;
+    display: inline-block;
+    box-sizing: border-box;
+    padding: 0.5em 1em;
+    cursor: pointer;
+  }
+
+  div.dt-button-collection {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 350px;
+    margin-top: 3px;
+    padding: 8px 8px 4px 8px;
+    background-color: white;
+    overflow: hidden;
+    z-index: 2002;
+
+    button.dt-button,
+    div.dt-button,
+    a.dt-button {
+      position: relative;
+      left: 0;
+      right: 0;
+      width: 100%;
+      display: block;
+      float: none;
+      margin-bottom: 4px;
+      margin-right: 0;
+
+      &:active:not(.disabled),
+      &.active:not(.disabled) {
+        box-shadow: inset 1px 1px 3px #666;
+      }
+    }
+
+  }
+
+}

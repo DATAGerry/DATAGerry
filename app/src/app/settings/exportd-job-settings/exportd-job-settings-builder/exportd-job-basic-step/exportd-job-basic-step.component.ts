@@ -51,7 +51,7 @@ export class ExportdJobBasicStepComponent implements OnInit {
       label: new FormControl('', Validators.required),
       description: new FormControl(''),
       active: new FormControl(true),
-      exportdType: new FormControl(ExportdType.PUSH)
+      exportd_type: new FormControl(ExportdType.PUSH)
     });
   }
 

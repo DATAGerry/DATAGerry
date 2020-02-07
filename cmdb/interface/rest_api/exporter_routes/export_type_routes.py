@@ -77,12 +77,7 @@ def export_type_by_ids(public_ids):
         except CMDBError as e:
             abort(400, e)
 
-        for obj in type_list:
-            type_obj = obj.__dict__
-            del type_obj['_id']
-
         resp = json.dumps(type_list, default=json_encoding.default, indent=2)
-
     except TypeNotFoundError as e:
         return abort(400, e.message)
     except ModuleNotFoundError as e:

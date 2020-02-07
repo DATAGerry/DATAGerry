@@ -46,19 +46,16 @@ class ExternalSystemDummy(ExternalSystem):
     def prepare_export(self):
         pass
 
-    def add_object(self, cmdb_object):
+    def add_object(self, cmdb_object, template_data):
         row = {}
-        fields = cmdb_object.fields
         for key in self._export_vars:
-            for field in fields:
-                row.update(
-                    {str(cmdb_object.object_information['object_id']):
-                        {key: str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object))}
-                     })
+            row.update(
+                {str(cmdb_object.object_information['object_id']):
+                    {key: str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))}
+                 })
         self.rows.update(row)
 
     def finish_export(self):
-        print(self.rows)
         header = ExportdHeader(json.dumps(self.rows))
         return header
 
@@ -167,19 +164,19 @@ class ExternalSystemOpenNMS(ExternalSystem):
         attributes["foreign-source"] = self._destination_parms["requisition"]
         self.__xml = ET.Element("model-import", attributes)
 
-    def add_object(self, cmdb_object):
+    def add_object(self, cmdb_object, template_data):
         # init error handling
         warning = False
 
         # get node variables
         node_foreignid = cmdb_object.object_information['object_id']
-        node_label = self._export_vars.get("nodelabel", ExportVariable("nodelabel", "undefined")).get_value(cmdb_object)
-        node_location = self._export_vars.get("location", ExportVariable("location", "default")).get_value(cmdb_object)
+        node_label = self._export_vars.get("nodelabel", ExportVariable("nodelabel", "undefined")).get_value(cmdb_object, template_data)
+        node_location = self._export_vars.get("location", ExportVariable("location", "default")).get_value(cmdb_object, template_data)
 
         # get interface information
         interfaces_in = []
-        interfaces_in.append(self._export_vars.get("ip", ExportVariable("ip", "127.0.0.1")).get_value(cmdb_object))
-        interfaces_in.extend(self._export_vars.get("furtherIps", ExportVariable("furtherIps", "[]")).get_value(cmdb_object).split(";"))
+        interfaces_in.append(self._export_vars.get("ip", ExportVariable("ip", "127.0.0.1")).get_value(cmdb_object, template_data))
+        interfaces_in.extend(self._export_vars.get("furtherIps", ExportVariable("furtherIps", "[]")).get_value(cmdb_object, template_data).split(";"))
         # validate interfaces
         interfaces = []
         for interface in interfaces_in:
@@ -193,14 +190,14 @@ class ExternalSystemOpenNMS(ExternalSystem):
         categories = []
         for export_var in self._export_vars:
             if export_var.startswith("category_"):
-                categories.append(self._export_vars.get(export_var).get_value(cmdb_object))
+                categories.append(self._export_vars.get(export_var).get_value(cmdb_object, template_data))
 
         # get asset information
         assets = {}
         for export_var in self._export_vars:
             if export_var.startswith("asset_"):
                 asset_name = export_var.replace("asset_", "", 1)
-                asset_value = self.__check_asset(asset_name, self._export_vars.get(export_var).get_value(cmdb_object))
+                asset_value = self.__check_asset(asset_name, self._export_vars.get(export_var).get_value(cmdb_object, template_data))
                 if asset_value:
                     assets[asset_name] = asset_value
 
@@ -237,9 +234,9 @@ class ExternalSystemOpenNMS(ExternalSystem):
 
         # update SNMP config if option is set
         if self.__snmp_export:
-            snmp_ip = str(self._export_vars.get("ip", ExportVariable("ip", "127.0.0.1")).get_value(cmdb_object))
-            snmp_community = str(self._export_vars.get("snmp_community", ExportVariable("snmp_community", "public")).get_value(cmdb_object))
-            snmp_version = str(self._export_vars.get("snmp_version", ExportVariable("snmp_version", "v2c")).get_value(cmdb_object))
+            snmp_ip = str(self._export_vars.get("ip", ExportVariable("ip", "127.0.0.1")).get_value(cmdb_object, template_data))
+            snmp_community = str(self._export_vars.get("snmp_community", ExportVariable("snmp_community", "public")).get_value(cmdb_object, template_data))
+            snmp_version = str(self._export_vars.get("snmp_version", ExportVariable("snmp_version", "v2c")).get_value(cmdb_object, template_data))
             self.__onms_update_snmpconf_v12(snmp_ip, snmp_community, snmp_version)
 
         # update error counter
@@ -377,10 +374,10 @@ class ExternalSystemCpanelDns(ExternalSystem):
         self.__existing_records = self.get_a_records(self.__domain_name)
         self.__created_records = {}
 
-    def add_object(self, cmdb_object):
+    def add_object(self, cmdb_object, template_data):
         # get variables from object
-        hostname = self.format_hostname(str(self._export_vars.get("hostname", ExportVariable("hostname", "default")).get_value(cmdb_object)))
-        ip = self.format_ip(str(self._export_vars.get("ip", ExportVariable("ip", "")).get_value(cmdb_object)))
+        hostname = self.format_hostname(str(self._export_vars.get("hostname", ExportVariable("hostname", "default")).get_value(cmdb_object, template_data)))
+        ip = self.format_ip(str(self._export_vars.get("ip", ExportVariable("ip", "")).get_value(cmdb_object, template_data)))
 
         # ignore CmdbObject,
         if ip == "" or hostname == "":
@@ -577,13 +574,11 @@ class ExternalSystemCsv(ExternalSystem):
     def prepare_export(self):
         pass
 
-    def add_object(self, cmdb_object):
+    def add_object(self, cmdb_object, template_data):
         row = {}
-        fields = cmdb_object.fields
         for key in self.__variables:
             self.header.add(key)
-            for field in fields:
-                row.update({key: str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object))})
+            row.update({key: str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))})
         self.rows.append(row)
 
     def finish_export(self):
@@ -630,13 +625,14 @@ class ExternalSystemAnsible(ExternalSystem):
         # initialize store for hostname
         self.host_list = []
 
-    def add_object(self, cmdb_object):
+    def add_object(self, cmdb_object, template_data):
         # get hostname for ansible inventory
-        hostname = self._export_vars.get("hostname", ExportVariable("hostname", "default")).get_value(cmdb_object)
-        self.host_list.append(hostname)
+        hostname = self._export_vars.get("hostname", ExportVariable("hostname", "default")).get_value(cmdb_object, template_data)
+
+        if hostname:
+            self.host_list.append(hostname)
 
         # walk through all variables to get groups and hostvars
-        groups = []
         hostvars = {}
 
         for v_name in self.__variables:
@@ -644,30 +640,25 @@ class ExternalSystemAnsible(ExternalSystem):
             matches = re.search(r'group_(.*)$', v_name)
             if matches:
                 group_name = matches.group(1)
-                group_value = self._export_vars.get(v_name, ExportVariable(v_name, "")).get_value(cmdb_object)
+                group_value = self._export_vars.get(v_name, ExportVariable(v_name, "")).get_value(cmdb_object, template_data)
                 # check if the value is true
                 if group_value:
-                    groups.append(group_name)
+                    # write to ansible group store
+                    self.ansible_groups.update({group_name: {'hosts': self.host_list}})
 
             # check if it is a "hostvar_" variable
             matches = re.search(r'hostvar_(.*)$', v_name)
             if matches:
                 host_var_name = matches.group(1)
-                host_var_value = self._export_vars.get(v_name, ExportVariable(v_name, "")).get_value(cmdb_object)
+                host_var_value = self._export_vars.get(v_name, ExportVariable(v_name, "")).get_value(cmdb_object, template_data)
                 hostvars.update({host_var_name: host_var_value})
 
         # write hostvars to ansible hostvars store
         self.ansible_hostvars.update({hostname: hostvars})
 
-        # write to ansible group store
-        for group in groups:
-            self.ansible_groups.update({group: {'hosts': self.host_list}})
-
     def finish_export(self):
-
-        # create JSON and print
+        # create JSON
         groups = self.ansible_groups
         groups.update({'_meta': {'hostvars': self.ansible_hostvars}})
-        print(json.dumps(groups))
         header = ExportdHeader(json.dumps(groups))
         return header
