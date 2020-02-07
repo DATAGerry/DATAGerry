@@ -51,6 +51,7 @@ import { ToastModule } from './toast/toast.module';
 import { AuthModule } from '../auth/auth.module';
 import { NgxSpinnerComponent, NgxSpinnerModule } from 'ngx-spinner';
 import { LoadingScreenComponent } from './structure/loading-screen/loading-screen.component';
+import { SearchBarModule } from '../search/search-bar/search-bar.module';
 
 export const LAYOUT_COMPONENT_ROUTES: Routes = [
   {
@@ -120,6 +121,7 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     NgSelectModule,
     ReactiveFormsModule,
     NgxSpinnerModule,
+    SearchBarModule,
     NgbModule,
     FormsModule,
     DataTablesModule,

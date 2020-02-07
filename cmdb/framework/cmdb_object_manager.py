@@ -21,7 +21,6 @@ The implementation of the manager used is always realized using the respective s
 
 """
 import logging
-import re
 
 from datetime import datetime
 from typing import List
@@ -38,6 +37,7 @@ from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.framework.cmdb_type import CmdbType
+from cmdb.search.query import Query
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import User
 
@@ -54,6 +54,13 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
+
+    def search(self, collection, query: Query, *args, **kwargs) -> List:
+        LOGGER.debug(f'[ObjectManager][Search] {args} | {kwargs}')
+        try:
+            return self._search(collection=collection, query=query, **kwargs)
+        except Exception as err:
+            raise ObjectManagerGetError(err)
 
     def get_object(self, public_id: int):
         try:
@@ -123,7 +130,7 @@ class CmdbObjectManager(CmdbManagerBase):
         agr = []
         if match:
             agr.append({'$match': match})
-        agr.append({'$group': {'_id': '$'+value, 'count': {'$sum': 1}}})
+        agr.append({'$group': {'_id': '$' + value, 'count': {'$sum': 1}}})
         agr.append({'$sort': {'count': -1}})
 
         return self.dbm.group(CmdbObject.COLLECTION, agr)
@@ -556,7 +563,7 @@ class CmdbObjectManager(CmdbManagerBase):
     def insert_collection_template(self, data: dict) -> int:
         # Insert data
         try:
-            possible_id: int = self.dbm.get_highest_id(collection=CmdbCollectionTemplate.COLLECTION)+1
+            possible_id: int = self.dbm.get_highest_id(collection=CmdbCollectionTemplate.COLLECTION) + 1
             data.update({'public_id': possible_id})
             data.update({'creation_time': datetime.utcnow()})
             collection_template_id = self._insert(CmdbCollectionTemplate.COLLECTION, data)

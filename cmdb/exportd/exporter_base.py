@@ -162,7 +162,7 @@ class ExportVariable:
                     current_object = self.__object_manager.get_object(field["value"])
                     type_instance = self.__object_manager.get_type(current_object.get_type_id())
                     cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance,
-                                                    render_user=None, user_manager=self.__user_manager)
+                                                    render_user=None, user_list=self.__user_manager.get_users())
                     data["fields"][field_name] = self.get_objectdata(cmdb_render_object.result(), iteration)
                 else:
                     data["fields"][field_name] = field["value"]

@@ -16,24 +16,17 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
-import { PermissionGuard } from '../auth/guards/permission.guard';
-import { SearchComponent } from './search.component';
+import { RenderResult } from '../../framework/models/cmdb-render';
 
-const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    canActivate: [PermissionGuard],
-    component: SearchComponent
-  }
-];
+export class SearchResult {
+  public result: RenderResult;
+  public matches: any[];
+}
 
-@NgModule({
-  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
-  exports: [RouterModule]
-})
-export class SearchRoutingModule {
+export class SearchResultList {
+  public limit: number;
+  public skip?: number;
+  // tslint:disable-next-line:variable-name
+  public total_results: number;
+  public results?: SearchResult[];
 }

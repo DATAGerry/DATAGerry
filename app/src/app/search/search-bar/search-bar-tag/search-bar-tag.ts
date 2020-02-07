@@ -15,25 +15,12 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+export class SearchBarTagSettings {
+  [key: string]: string | number;
+}
 
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
-import { PermissionGuard } from '../auth/guards/permission.guard';
-import { SearchComponent } from './search.component';
-
-const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    canActivate: [PermissionGuard],
-    component: SearchComponent
-  }
-];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
-  exports: [RouterModule]
-})
-export class SearchRoutingModule {
+export class SearchBarTag {
+  public searchText: string | number;
+  public searchForm: string;
+  public settings: SearchBarTagSettings;
 }

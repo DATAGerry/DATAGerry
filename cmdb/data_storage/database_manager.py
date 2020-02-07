@@ -71,7 +71,7 @@ class DatabaseManager(Generic[CONNECTOR]):
         """
         raise NotImplementedError
 
-    def _import(self, *args, **kwargs):
+    def search(self, *args, **kwargs):
         raise NotImplementedError
 
     def __find(self, *args, **kwargs):
@@ -271,6 +271,9 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
     def get_database_name(self):
         return self.connector.get_database_name()
 
+    def search(self, collection: str, *args, **kwargs):
+        return self.__find(collection, *args, **kwargs)
+
     def __find(self, collection: str, *args, **kwargs):
         """general find function for database search
 
@@ -282,7 +285,6 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         Returns:
             founded document
         """
-        LOGGER.debug(f'__find call with args: {args} and kwargs: {kwargs}')
         if 'projection' not in kwargs:
             kwargs.update({'projection': {'_id': 0}})
         result = self.connector.get_collection(collection).find(*args, **kwargs)

@@ -1,0 +1,28 @@
+<div class="search-result">
+  <div class="row">
+    <div class="icon col-md-2">
+      <div class="media d-flex justify-content-center align-content-center flex-wrap">
+        <i [class]="searchResult.result.type_information.icon"></i>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <h5>
+        <cmdb-active-badge [activeStatus]="searchResult.result.object_information.active"></cmdb-active-badge>
+        <a [routerLink]="['/','framework', 'object', 'view', searchResult.result.object_information.object_id]">{{searchResult.result.type_information.type_label}}
+          #{{searchResult.result.object_information.object_id}}</a>
+      </h5>
+      <div class="summary">Summary: {{searchResult.result.summary_line}}</div>
+      <div class="matched">Matched fields: {{searchResult.result.summary_line}}</div>
+    </div>
+    <div class="preview col-md-2">
+      <div class="media d-flex justify-content-center align-content-center flex-wrap">
+        <button (click)="openPreview()" class="btn btn-light"><i class="far fa-file-powerpoint"></i></button>
+      </div>
+    </div>
+  </div>
+  <div class="result-separator row">
+    <div class="col-md-12">
+      <ng-content></ng-content>
+    </div>
+  </div>
+</div>

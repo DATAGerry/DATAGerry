@@ -45,6 +45,14 @@ export const httpObserveOptions = {
   observe: resp
 };
 
+export const httpObservePostOptions = {
+  headers: new HttpHeaders({
+    'Content-Type': 'application/json'
+  }),
+  params: {},
+  observe: resp
+};
+
 export const httpFileOptions = {
   headers: new HttpHeaders({}),
   params: {},

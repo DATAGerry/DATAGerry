@@ -13,34 +13,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import logging
+from typing import NewType
 
-from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, List
-
-from cmdb.framework.cmdb_base import CmdbManagerBase
-
-LOGGER = logging.getLogger(__name__)
-
-M: TypeVar = TypeVar('M', bound=CmdbManagerBase)
-
-
-class Search(Generic[M], ABC):
-
-    DEFAULT_SKIP: int = 0
-    DEFAULT_LIMIT: int = 25
-
-    def __init__(self, manager: M):
-        self.__manager: M = manager
-
-    @property
-    def manager(self) -> M:
-        return self.__manager
-
-    @manager.setter
-    def manager(self, manager: M):
-        self.__manager: M = manager
-
-    @abstractmethod
-    def search(self, *args, **kwargs) -> List:
-        raise NotImplementedError
+Query = NewType('Query', dict)

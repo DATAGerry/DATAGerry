@@ -1,0 +1,13 @@
+<div class="search-bar">
+  <cmdb-search-bar-tags *ngFor="let tag of tags" [tag]="tag" (changeEmitter)="updateTag($event)"
+                        (deleteEmitter)="removeTag($event)">
+    {{tag.searchText}}
+  </cmdb-search-bar-tags>
+  <input class="search-input" type="text" #tagInput (keyup.tab)="addTag(tagInput.value)"
+         (focusout)="addTag(tagInput.value)"
+         (keyup.arrowDown)="addTag(tagInput.value, true)" (keyup.enter)="addTag(tagInput.value); callSearch()"/>
+  <div class="search-bar-append">
+    <button *ngIf="tags.length > 0" (click)="clearAll()" type="button"><span>&times;</span></button>
+    <button (click)="callSearch()" type="button"><i class="fas fa-search"></i></button>
+  </div>
+</div>

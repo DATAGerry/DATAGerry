@@ -1,0 +1,6 @@
+<ng-container [ngSwitch]="tag.searchForm">
+  <i class="fas fa-font" *ngSwitchCase="'textSearch'"></i>
+  <i class="fas fa-qrcode" *ngSwitchCase="'publicID'"></i>
+  <i class="fas fa-object-group" *ngSwitchCase="'typeID'"></i>
+  <i class="fas fa-font" *ngSwitchDefault></i>
+</ng-container>

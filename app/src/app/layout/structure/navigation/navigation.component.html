@@ -24,6 +24,11 @@
     </ul>
 
     <div id="navbar-content" class="collapse navbar-collapse container-content clearfix">
+      <ul id="navbar-search-bar" class="nav navbar-nav flex-grow-1 mr-auto float-left">
+        <li class="nav-item w-100">
+          <cmdb-search-bar></cmdb-search-bar>
+        </li>
+      </ul>
       <ul class="nav navbar-nav flex-row float-right">
         <!-- nav Framework -->
         <li *permissionLink="['base.framework.object.view', 'base.framework.type.view', 'base.framework.category.view']"

@@ -1,0 +1,67 @@
+@import '~src/scss/variables';
+
+$search-bar-width: 100%;
+$search-input-font-size: 0.8rem;
+
+:host {
+  display: inline-block;
+  width: $search-bar-width;
+  height: $input-height;
+  padding: $input-padding-y $input-padding-x;
+  line-height: $input-line-height;
+  color: $input-color;
+  background-color: $input-bg;
+  background-clip: padding-box;
+  border: $input-border-width solid $input-border-color;
+
+  @include border-radius($input-border-radius, 0);
+  @include transition($input-transition);
+
+}
+
+.search-bar{
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+
+  cmdb-search-bar-tags {
+    position: relative;
+    margin-top: -2px;
+    margin-right: .4rem;
+
+    &:first-child {
+      margin-left: -$input-padding-y;
+    }
+
+    &:last-child {
+      margin-left: .2rem;
+    }
+  }
+
+  .search-input {
+    margin-left: 0;
+    border: 0;
+    padding: 0;
+    position: relative;
+    flex: 1 1 0%;
+    font-size: $search-input-font-size;
+  }
+
+  .search-bar-append{
+    display: flex;
+
+    button{
+      border: 0;
+      background: 0;
+      padding: 0;
+      color: $gray-500;
+      margin-left: .3rem;
+      &:hover{
+        color: $gray-700;
+      }
+    }
+  }
+
+}
+

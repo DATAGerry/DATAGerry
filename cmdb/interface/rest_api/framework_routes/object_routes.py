@@ -294,7 +294,7 @@ def get_object(public_id, request_user: User):
 
     try:
         render = CmdbRender(object_instance=object_instance, type_instance=type_instance, render_user=request_user,
-                            user_manager=user_manager)
+                            user_list=user_manager.get_users())
         render_result = render.result()
     except RenderError as err:
         LOGGER.error(err)
@@ -443,7 +443,7 @@ def insert_object(request_user: User):
         current_object_render_result = CmdbRender(object_instance=current_object,
                                                   type_instance=current_type_instance,
                                                   render_user=request_user,
-                                                  user_manager=user_manager).result()
+                                                  user_list=user_manager.get_users()).result()
     except ObjectManagerGetError as err:
         LOGGER.error(err)
         return abort(404)
@@ -482,7 +482,7 @@ def update_object(public_id: int, request_user: User):
         current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                   type_instance=current_type_instance,
                                                   render_user=request_user,
-                                                  user_manager=user_manager).result()
+                                                  user_list=user_manager.get_users()).result()
     except ObjectManagerGetError as err:
         LOGGER.error(err)
         return abort(404)
@@ -566,7 +566,7 @@ def delete_object(public_id: int, request_user: User):
         current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                   type_instance=current_type_instance,
                                                   render_user=request_user,
-                                                  user_manager=user_manager).result()
+                                                  user_list=user_manager.get_users()).result()
     except ObjectManagerGetError as err:
         LOGGER.error(err)
         return abort(404)
@@ -624,7 +624,7 @@ def delete_many_objects(public_ids, request_user: User):
                 current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
                 current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                           type_instance=current_type_instance,
-                                                          render_user=request_user, user_manager=user_manager).result()
+                                                          render_user=request_user, user_list=user_manager.get_users()).result()
             except ObjectManagerGetError as err:
                 LOGGER.error(err)
                 return abort(404)
@@ -708,7 +708,7 @@ def update_object_state(public_id: int, request_user: User):
         current_object_render_result = CmdbRender(object_instance=founded_object,
                                                   type_instance=current_type_instance,
                                                   render_user=request_user,
-                                                  user_manager=user_manager).result()
+                                                  user_list=user_manager.get_users()).result()
     except ObjectManagerGetError as err:
         LOGGER.error(err)
         return abort(404)
