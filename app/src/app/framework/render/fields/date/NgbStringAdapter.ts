@@ -7,39 +7,19 @@ export class NgbStringAdapter extends NgbDateAdapter<Date> {
   }
 
   fromModel(date: any): NgbDateStruct {
-
-    if (date instanceof Date) {
-      return date ? {
-        year: date.getFullYear(),
-        month: date.getMonth() + 1,
-        day: date.getDate()
-      } : null;
-    }
-
-    if (Number(date)) {
-      const newDate =  new Date(date);
-      return newDate ? {
-        year: newDate.getFullYear(),
-        month: newDate.getMonth() + 1,
-        day: newDate.getDate()
-      } : null;
-    }
-
-    if (date && date.item) {
-      const newDate =  new Date(date.item);
-      return newDate ? {
-        year: newDate.getFullYear(),
-        month: newDate.getMonth() + 1,
-        day: newDate.getDate()
-      } : null;
-    }
-
     if (typeof date === 'string') {
       const newDate =  new Date(date);
       return newDate ? {
         year: newDate.getFullYear(),
         month: newDate.getMonth() + 1,
         day: newDate.getDate()
+      } : null;
+    } else if (date != null) {
+      date = new Date(date.$date);
+      return date ? {
+        year: date.getFullYear(),
+        month: date.getMonth() + 1,
+        day: date.getDate()
       } : null;
     }
     return null;
@@ -49,7 +29,7 @@ export class NgbStringAdapter extends NgbDateAdapter<Date> {
     if (date != null) {
       const d = new Date(date.year, date.month - 1, date.day);
       d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-      return d;
+      return {$date: d.getTime()};
     }
     return null;
   }
