@@ -17,12 +17,13 @@ import base64
 import functools
 import json
 from functools import wraps
+from typing import ClassVar
 
 from authlib.jose.errors import ExpiredTokenError
 from werkzeug._compat import to_unicode
 from werkzeug.http import wsgi_to_bytes
 
-from cmdb.security.auth import AuthModule
+from cmdb.security.auth import AuthModule, AuthenticationProvider
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import User
 from cmdb.user_management.user_manager import UserManagerGetError, UserManager
@@ -98,12 +99,14 @@ def login_required(f):
     def decorated(*args, **kwargs):
         """checks if user is logged in and valid
         """
-        token = parse_authorization_header(request.headers['Authorization'])
+        try:
+            token = parse_authorization_header(request.headers['Authorization'])
+        except Exception as err:
+            return abort(401)
         if token:
             return f(*args, **kwargs)
         else:
             return abort(401)
-
     return decorated
 
 
@@ -216,12 +219,21 @@ def parse_authorization_header(header):
                 provider_class_name = user_instance.authenticator
 
                 auth_module = AuthModule(SystemSettingsReader(current_app.database_manager))
-                provider_instance = auth_module.get_provider(provider_class_name)
+
+                provider: ClassVar[AuthenticationProvider] = auth_module.get_provider_class(provider_class_name)
+                provider_config_class: ClassVar[str] = provider.PROVIDER_CONFIG_CLASS
+                provider_config_settings = auth_module.settings.get_provider_settings(provider.get_name())
+
+                provider_config_instance = provider_config_class(**provider_config_settings)
+                provider_instance = provider(config=provider_config_instance)
                 valid_user = provider_instance.authenticate(username, password)
-                tg = TokenGenerator(current_app.database_manager)
-                return tg.generate_token(payload={'user': {
-                    'public_id': valid_user.get_public_id()
-                }})
+                if valid_user:
+                    tg = TokenGenerator(current_app.database_manager)
+                    return tg.generate_token(payload={'user': {
+                        'public_id': valid_user.get_public_id()
+                    }})
+                else:
+                    return None
         except Exception:
             return None
 
