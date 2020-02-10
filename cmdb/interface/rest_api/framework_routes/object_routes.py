@@ -129,7 +129,7 @@ def get_dt_objects_by_type(type_id, request_user: User):
     except CMDBError:
         return abort(400)
 
-    rendered_list = RenderList(object_list, request_user).render_result_list()
+    rendered_list = RenderList(object_list, request_user, dt_render=True).render_result_list()
 
     table_response = {
         'data': rendered_list,
@@ -203,7 +203,7 @@ def get_dt_filter_objects_by_type(type_id, request_user: User):
     except CMDBError:
         return abort(400)
 
-    rendered_list = RenderList(object_list, request_user).render_result_list()
+    rendered_list = RenderList(object_list, request_user, dt_render=True).render_result_list()
 
     table_response = {
         'data': rendered_list,

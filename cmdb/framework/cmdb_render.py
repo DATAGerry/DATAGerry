@@ -33,6 +33,7 @@ from datetime import datetime
 
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_type import CmdbType
+from cmdb.framework.special.dt_html_parser import DtHtmlParser
 from cmdb.user_management.user_manager import User, UserManager
 
 LOGGER = logging.getLogger(__name__)
@@ -68,11 +69,14 @@ class CmdbRender:
 
     def __init__(self, object_instance: CmdbObject,
                  type_instance: CmdbType,
-                 render_user: User, user_list: List[User] = None):
+                 render_user: User, user_list: List[User] = None,
+                 object_manager: CmdbObjectManager = None, dt_render=False):
         self.object_instance: CmdbObject = object_instance
         self.type_instance: CmdbType = type_instance
         self.user_list: List[User] = user_list
         self.render_user: User = render_user
+        self.object_manager = object_manager
+        self.dt_render = dt_render
 
     def _render_username_by_id(self, user_id: int) -> str:
         user: User = None
@@ -197,9 +201,13 @@ class CmdbRender:
 
     def __merge_fields_value(self) -> list:
         field_map = []
+        html_parser = DtHtmlParser(self.object_manager)
         for field in self.type_instance.fields:
+            html_parser.current_field = field
             try:
                 field['value'] = [x for x in self.object_instance.fields if x['name'] == field['name']][0]['value']
+                if self.dt_render:
+                    field['value'] = html_parser.field_to_html(field['type'])
             except (ValueError, IndexError):
                 field['value'] = None
             field_map.append(field)
@@ -277,9 +285,10 @@ class CmdbRender:
 
 class RenderList:
 
-    def __init__(self, object_list: List[CmdbObject], request_user: User):
+    def __init__(self, object_list: List[CmdbObject], request_user: User, dt_render=False):
         self.object_list: List[CmdbObject] = object_list
         self.request_user = request_user
+        self.dt_render = dt_render
 
     @timing('RenderList')
     def render_result_list(self) -> List[RenderResult]:
@@ -296,7 +305,8 @@ class RenderList:
             tmp_render = CmdbRender(
                 type_instance=object_manager.get_type(passed_object.type_id),
                 object_instance=passed_object,
-                render_user=self.request_user, user_list=complete_user_list)
+                render_user=self.request_user, user_list=complete_user_list,
+                object_manager=object_manager, dt_render=self.dt_render )
             current_render_result = tmp_render.result()
             preparation_objects.append(current_render_result)
         return preparation_objects
