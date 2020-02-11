@@ -14,6 +14,7 @@ export class TypeMetaStepComponent implements OnInit {
   public externalLinks = [];
   public hrefInterpolCounter;
   private currentFields: any[] = [];
+  private currentSummaries: any[] = [];
 
   @Input()
   set preData(data: any) {
@@ -49,13 +50,22 @@ export class TypeMetaStepComponent implements OnInit {
 
   @Input()
   public set fields(value: any[]) {
-    this.currentFields = value;
+    const preFields = JSON.parse(JSON.stringify( value ));
+    if (preFields != null) {
+      preFields.push({label: 'Object ID', name: 'object_id'});
+    }
+    this.currentFields = preFields;
+    this.currentSummaries = value;
     this.checkSummaryFields();
     this.checkExternalLinks();
   }
 
   public get fields(): any[] {
     return this.currentFields;
+  }
+
+  public get summaries(): any[] {
+    return this.currentSummaries;
   }
 
   private static occurrences(s, subString): number {
@@ -130,7 +140,7 @@ export class TypeMetaStepComponent implements OnInit {
     if (sumFields.length > 0) {
       const validList = [];
       sumFields.filter((item) => {
-        this.fields.map(field => field.name).includes(item) ? validList.push(item) : console.log(item);
+        this.summaries.map(field => field.name).includes(item) ? validList.push(item) : console.log(item);
       });
       this.summaryForm.patchValue({fields: validList});
     }

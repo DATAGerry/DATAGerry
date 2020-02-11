@@ -261,11 +261,14 @@ class CmdbRender:
                     # for every field get the value data from object_instance
                     for ext_link_field in ext_link_instance.fields:
                         try:
-                            _ = self.object_instance.get_value(ext_link_field)
-                            if _ is None or _ == '':
+                            if ext_link_field == 'object_id':
+                                field_value = self.object_instance.public_id
+                            else:
+                                field_value = self.object_instance.get_value(ext_link_field)
+                            if field_value is None or field_value == '':
                                 # if value is empty or does not exists
                                 raise ValueError(ext_link_field)
-                            field_list.append(_)
+                            field_list.append(field_value)
                         except CMDBError:
                             # if error append missing data
                             missing_list.append(ext_link_instance)
