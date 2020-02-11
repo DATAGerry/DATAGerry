@@ -22,4 +22,11 @@ export class DateComponent extends RenderField implements  OnInit {
     }
   }
 
+  public get currentDate() {
+    const currentDate = this.parentFormGroup.get(this.data.name).value;
+    if (currentDate && currentDate.$date) {
+      return new Date(currentDate.$date);
+    }
+    return currentDate;
+  }
 }
