@@ -30,7 +30,8 @@ class DtHtmlParser:
         """Dispatch method"""
         method_name = str(field_type)
         # Get the method from 'self'. Default to a lambda.
-        method = getattr(self, method_name, lambda: '<span>%s<span>' % self.current_field['value'])
+        default = '<span>%s<span>' % '' if not self.current_field['value'] else self.current_field['value']
+        method = getattr(self, method_name, lambda: default)
         # Call the method as we return it
         return method()
 
@@ -45,7 +46,7 @@ class DtHtmlParser:
 
     def date(self):
         from datetime import datetime
-        datetime_str = self.current_field['value']
+        datetime_str = '' if not self.current_field['value'] else self.current_field['value']
         if isinstance(datetime_str, datetime):
             datetime_str = datetime_str.strftime('%d/%m/%Y')
         return '<span>%s<span>' % datetime_str
