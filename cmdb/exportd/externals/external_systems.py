@@ -26,38 +26,29 @@ from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
 
 class ExternalSystemDummy(ExternalSystem):
 
-    parameters = [
-        {"name": "ip-address", "required": False, "description": "Set static IP addresses", "default": "192.168.0.2"},
-        {"name": "ssid-name", "required": True, "description": "Router for Login", "default": "host-name"},
-        {"name": "password", "required": True, "description": "Password for Login", "default": "1234"}
-    ]
+    parameters = []
 
     variables = [{}]
 
     def __init__(self, destination_parms, export_vars):
         super(ExternalSystemDummy, self).__init__(destination_parms, export_vars)
-        # init destination vars
-        self.__ip = self._destination_parms.get("ip-address")
-        self.__user = self._destination_parms.get("ssid-name")
-        self.__password = self._destination_parms.get("password")
-        self.rows = {}
-        if not (self.__ip and self.__user and self.__password):
-            self.error("missing parameters")
+        self.__rows = []
 
     def prepare_export(self):
         pass
 
     def add_object(self, cmdb_object, template_data):
         row = {}
+        row["object_id"] = str(cmdb_object.object_information['object_id'])
+        row["variables"] = {}
         for key in self._export_vars:
-            row.update(
-                {str(cmdb_object.object_information['object_id']):
-                    {key: str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))}
-                 })
-        self.rows.update(row)
+            row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
+        self.__rows.append(row)
 
     def finish_export(self):
-        header = ExportdHeader(json.dumps(self.rows))
+        json_data = json.dumps(self.__rows)
+        print(json_data)
+        header = ExportdHeader(json_data)
         return header
 
 
