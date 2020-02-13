@@ -78,6 +78,19 @@ def get_category(public_id, request_user: User):
     return make_response(category_instance)
 
 
+@categories_blueprint.route('/<string:name>/', methods=['GET'])
+@categories_blueprint.route('/<string:name>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.framework.type.view')
+def get_category_by_name(name: str, request_user: User):
+    try:
+        category_instance = object_manager.get_categories_by({'name': name})
+    except ObjectManagerGetError as err:
+        return abort(404, err.message)
+    return make_response(category_instance)
+
+
 @categories_blueprint.route('/root/', methods=['GET'])
 @categories_blueprint.route('/root', methods=['GET'])
 @login_required

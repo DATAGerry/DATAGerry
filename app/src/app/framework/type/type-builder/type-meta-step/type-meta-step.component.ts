@@ -50,8 +50,9 @@ export class TypeMetaStepComponent implements OnInit {
 
   @Input()
   public set fields(value: any[]) {
-    const preFields = JSON.parse(JSON.stringify( value ));
-    if (preFields != null) {
+    let preFields = value;
+    if (value != null) {
+      preFields = JSON.parse(JSON.stringify( value ));
       preFields.push({label: 'Object ID', name: 'object_id'});
     }
     this.currentFields = preFields;
