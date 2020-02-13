@@ -19,6 +19,7 @@ import xml.etree.ElementTree as ET
 import requests
 import json
 import re
+import os
 import subprocess
 from cmdb.exportd.exporter_base import ExternalSystem, ExportVariable
 from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
@@ -686,7 +687,25 @@ class ExternalSystemExecuteScript(ExternalSystem):
         self.__rows.append(row)
 
     def finish_export(self):
+        # create json data
         json_data = json.dumps(self.__rows)
+
+        # check permission to execute script
+        # try to open permission file
+        script_path = os.path.dirname(self.__script)
+        script_name = os.path.basename(self.__script)
+        permission_filename = os.path.join(script_path, ".datagerry_exec.json")
+        try:
+            with open(permission_filename, "r") as permission_file:
+                permission_data = json.load(permission_file)
+                if script_name not in permission_data["allowed_scripts"]:
+                    self.error("You are not allowed to execute this script. Please check your .datagerry_exec.json file.")
+        except OSError:
+            self.error("You are not allowed to execute this script. Could not open .datagerry_exec.json file.")
+        except KeyError:
+            self.error("You are not allowed to execute this script. Please check structure of your .datagerry_exec.json file.")
+
+        # execute script
         try:
             result = subprocess.run(self.__script, timeout=self.__timeout, input=json_data, encoding="utf-8")
             if result.returncode != 0:
