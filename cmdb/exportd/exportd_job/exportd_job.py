@@ -14,8 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import re
-
 from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
 from enum import Enum
 from cmdb.framework.cmdb_dao import CmdbDAO
@@ -64,8 +62,6 @@ class ExportdJob(JobManagementBase):
             variables: has a name and gets its value out of fields of the objects
             **kwargs: optional params
         """
-        if re.search(r'[!@#$%^&*(),.?":{}|<>]', name):
-            raise ValueError(f'ExportdJob#{kwargs["public_id"]} - Name contains invalid characters: {name}')
         self.name = name
         self.label = label
         self.description = description

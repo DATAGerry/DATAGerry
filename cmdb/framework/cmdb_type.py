@@ -15,7 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import re
 
 from datetime import datetime
 
@@ -54,8 +53,6 @@ class CmdbType(CmdbDAO):
                  label: str = None,
                  clean_db: bool = None,
                  status: list = None, description: str = None, **kwargs):
-        if re.search(r'[!@#$%^&*(),.?":{}|<>]', name):
-            raise ValueError(f'CmdbType#{kwargs["public_id"]} - Name contains invalid characters: {name}')
         self.name = name
         self.label = label or self.name.title()
         self.description = description
