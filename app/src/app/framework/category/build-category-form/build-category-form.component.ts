@@ -20,7 +20,7 @@ import { Component, Input, OnInit, AfterContentInit } from '@angular/core';
 import { CmdbCategory } from '../../models/cmdb-category';
 import { CmdbType } from '../../models/cmdb-type';
 import { FormGroup } from '@angular/forms';
-import { CategoryService } from '../../services/category.service';
+import { CategoryService, checkCategoryExistsValidator } from '../../services/category.service';
 import { TypeService } from '../../services/type.service';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -28,7 +28,7 @@ import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryMode } from '../../modes.enum';
 import { NgxSpinnerService } from 'ngx-spinner';
-import { SidebarService } from "../../../layout/services/sidebar.service";
+import { SidebarService } from '../../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-build-category-form',
@@ -62,9 +62,12 @@ export class BuildCategoryFormComponent implements OnInit, AfterContentInit {
     // Create mode
     if (this.mode === CategoryMode.Create) {
       this.category = new CmdbCategory();
+      this.categoryForm.get('name').setAsyncValidators(checkCategoryExistsValidator(this.categoryService));
       this.categoryForm.get('label').valueChanges.subscribe(value => {
         value = value == null ? '' : value;
         this.categoryForm.get('name').setValue(value.replace(/ /g, '-').toLowerCase());
+        const newValue = this.categoryForm.get('name').value;
+        this.categoryForm.get('name').setValue(newValue.replace(/[^a-z0-9 \-]/gi, '').toLowerCase());
         this.categoryForm.get('name').markAsDirty({onlySelf: true});
         this.categoryForm.get('name').markAsTouched({onlySelf: true});
       });
@@ -188,7 +191,7 @@ export class BuildCategoryFormComponent implements OnInit, AfterContentInit {
       if (root.length) {
         tmpCategory.parent_id = tmpCategory.parent_id === 0 ? root[0].public_id : tmpCategory.parent_id;
       }
-    }, (error) => {console.log(error)},
+    }, (error) => {console.log(error); },
       () => {
         this.categoryService.postCategory(tmpCategory).subscribe(resp => {
             tmpCategory.public_id = +resp;

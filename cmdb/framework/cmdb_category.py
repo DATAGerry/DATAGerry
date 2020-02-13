@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import re
+
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.utils.error import CMDBError
 
@@ -27,8 +29,14 @@ class CmdbCategory(CmdbDAO):
         'name',
     ]
 
+    INDEX_KEYS = [
+        {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
+    ]
+
     def __init__(self, name: str, label: str = None, icon: str = None, parent_id: int = None, root: bool = False,
                  **kwargs):
+        if re.search(r'[!@#$%^&*(),.?":{}|<>]', name):
+            raise ValueError(f'CmdbCategory#{kwargs["public_id"]} - Name contains invalid characters: {name}')
         self.name = name
         self.label = label or self.name.title()
         self.icon = icon or ''

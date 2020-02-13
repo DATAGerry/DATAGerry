@@ -14,8 +14,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import re
+
 from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
 from enum import Enum
+from cmdb.framework.cmdb_dao import CmdbDAO
 
 try:
     from cmdb.utils.error import CMDBError
@@ -45,6 +48,10 @@ class ExportdJob(JobManagementBase):
         'name',
     ]
 
+    INDEX_KEYS = [
+        {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
+    ]
+
     def __init__(self, name, label, description, active, author_id,
                  last_execute_date, sources, destination,
                  variables, scheduling, exportd_type=ExportdJobType.PUSH.name, state=None, **kwargs):
@@ -57,6 +64,8 @@ class ExportdJob(JobManagementBase):
             variables: has a name and gets its value out of fields of the objects
             **kwargs: optional params
         """
+        if re.search(r'[!@#$%^&*(),.?":{}|<>]', name):
+            raise ValueError(f'ExportdJob#{kwargs["public_id"]} - Name contains invalid characters: {name}')
         self.name = name
         self.label = label
         self.description = description
