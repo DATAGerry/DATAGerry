@@ -469,10 +469,12 @@ class CmdbObjectManager(CmdbManagerBase):
         return tree
 
     def get_category(self, public_id: int):
-        return CmdbCategory(**self.dbm.find_one(
-            collection=CmdbCategory.COLLECTION,
-            public_id=public_id)
-                            )
+        try:
+            return CmdbCategory(**self.dbm.find_one(
+                collection=CmdbCategory.COLLECTION,
+                public_id=public_id))
+        except (CMDBError, Exception) as e:
+            raise ObjectManagerGetError(err=e)
 
     def insert_category(self, data: (CmdbCategory, dict)):
         if isinstance(data, CmdbCategory):
