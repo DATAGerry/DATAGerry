@@ -22,11 +22,18 @@ class AuthenticationError(CMDBError):
         self.message = f'Could not authenticate via provider: {provider_name} - error message: {error}'
 
 
-class NoValidAuthenticationProviderError(CMDBError):
+class AuthenticationProviderNotExistsError(CMDBError):
     """Exception if auth provider do not exist"""
 
     def __init__(self, authenticator):
-        self.message = f'The Provider {authenticator} is not a valid authentication-provider'
+        self.message = f'[AUTH] Provider {authenticator} does not exists or is not installed'
+
+
+class AuthenticationProviderNotActivated(CMDBError):
+    """Exception if auth provider is not activated"""
+
+    def __init__(self, message):
+        self.message = message
 
 
 class NotPasswordAbleError(CMDBError):

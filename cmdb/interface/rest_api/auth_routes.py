@@ -22,7 +22,8 @@ from flask import request, current_app, abort
 
 from cmdb.interface.route_utils import make_response, RootBlueprint, login_required, insert_request_user, right_required
 from cmdb.security.auth import AuthModule, AuthSettingsDAO, AuthenticationProvider
-from cmdb.security.auth.auth_errors import AuthenticationError
+from cmdb.security.auth.auth_errors import AuthenticationError, AuthenticationProviderNotExistsError, \
+    AuthenticationProviderNotActivated
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import User
 from cmdb.user_management.user_manager import UserManager
@@ -125,64 +126,11 @@ def post_login():
 
     auth_module = AuthModule(system_settings_reader)
     user_instance = None
-    # search for user in db
     try:
-        founded_user = user_manager.get_user_by_name(user_name=request_user_name)
-        provider_class_name = founded_user.get_authenticator()
-        LOGGER.debug(f'[LOGIN] Founded user: {founded_user} with provider: {provider_class_name}')
-        if not auth_module.provider_exists(provider_class_name):
-            return abort(501, f'[LOGIN] Provider {provider_class_name} does not exists or is not installed')
-
-        provider: ClassVar[AuthenticationProvider] = auth_module.get_provider_class(provider_class_name)
-        provider_config_class: ClassVar[str] = provider.PROVIDER_CONFIG_CLASS
-        provider_config_settings = auth_module.settings.get_provider_settings(provider.get_name())
-
-        provider_config_instance = provider_config_class(**provider_config_settings)
-        provider_instance = provider(config=provider_config_instance)
-        if not provider_config_instance.is_active():
-            return abort(503, f'Provider {provider_class_name} is deactivated')
-        if provider_instance.EXTERNAL_PROVIDER and not auth_module.settings.enable_external:
-            return abort(503, f'External providers are deactivated')
-        try:
-            user_instance = provider_instance.authenticate(request_user_name, request_password)
-        except AuthenticationError as ae:
-            LOGGER.error(f'[LOGIN] User could not login: {ae}')
-
-    # user is not in database - check for other providers
-    except UserManagerGetError as umge:
-        LOGGER.error(f'[LOGIN] {request_user_name} not in database: {umge}')
-        LOGGER.info(f'[LOGIN] Check for other providers - request_user: {request_user_name}')
-
-        # get installed providers
-        provider_list = auth_module.providers
-        LOGGER.debug(f'[LOGIN] Provider list: {provider_list}')
-        external_enabled = auth_module.settings.enable_external
-        for provider in provider_list:
-            LOGGER.debug(f'[LOGIN] using provider: {provider}')
-            provider_config_class = provider.PROVIDER_CONFIG_CLASS
-            provider_settings = auth_module.settings.get_provider_settings(provider.get_name())
-            provider_config_instance = provider_config_class(**provider_settings)
-
-            if not provider_config_instance.is_active():
-                continue
-            if provider.EXTERNAL_PROVIDER and not auth_module.settings.enable_external:
-                continue
-
-            provider_instance = provider(config=provider_config_instance)
-            try:
-                user_instance = provider_instance.authenticate(request_user_name, request_password)
-                # If successfully logged in
-                if user_instance:
-                    break
-            except AuthenticationError as ae:
-                LOGGER.error(
-                    f'[LOGIN] User {request_user_name} could not validate with provider {provider}: {ae}')
-
-            LOGGER.info(f'[LOGIN] Provider instance: {provider_instance}')
+        user_instance = auth_module.login(user_manager, request_user_name, request_password)
+    except (AuthenticationProviderNotExistsError, AuthenticationProviderNotActivated) as err:
+        return abort(503, err.message)
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        LOGGER.error(f'[LOGIN] Error while login: {e}')
         return abort(401)
     finally:
         # If login success generate user instance with token

@@ -107,6 +107,7 @@ def login_required(f):
             return f(*args, **kwargs)
         else:
             return abort(401)
+
     return decorated
 
 
@@ -215,22 +216,16 @@ def parse_authorization_header(header):
                 password = to_unicode(password, "utf-8")
 
                 user_manager: UserManager = current_app.user_manager
-                user_instance: User = user_manager.get_user_by_name(user_name=username)
-                provider_class_name = user_instance.authenticator
-
                 auth_module = AuthModule(SystemSettingsReader(current_app.database_manager))
 
-                provider: ClassVar[AuthenticationProvider] = auth_module.get_provider_class(provider_class_name)
-                provider_config_class: ClassVar[str] = provider.PROVIDER_CONFIG_CLASS
-                provider_config_settings = auth_module.settings.get_provider_settings(provider.get_name())
-
-                provider_config_instance = provider_config_class(**provider_config_settings)
-                provider_instance = provider(config=provider_config_instance)
-                valid_user = provider_instance.authenticate(username, password)
-                if valid_user:
+                try:
+                    user_instance = auth_module.login(user_manager, username, password)
+                except Exception as e:
+                    return None
+                if user_instance:
                     tg = TokenGenerator(current_app.database_manager)
                     return tg.generate_token(payload={'user': {
-                        'public_id': valid_user.get_public_id()
+                        'public_id': user_instance.get_public_id()
                     }})
                 else:
                     return None
