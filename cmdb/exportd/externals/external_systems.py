@@ -19,44 +19,36 @@ import xml.etree.ElementTree as ET
 import requests
 import json
 import re
+import subprocess
 from cmdb.exportd.exporter_base import ExternalSystem, ExportVariable
 from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
 
 
 class ExternalSystemDummy(ExternalSystem):
 
-    parameters = [
-        {"name": "ip-address", "required": False, "description": "Set static IP addresses", "default": "192.168.0.2"},
-        {"name": "ssid-name", "required": True, "description": "Router for Login", "default": "host-name"},
-        {"name": "password", "required": True, "description": "Password for Login", "default": "1234"}
-    ]
+    parameters = []
 
     variables = [{}]
 
     def __init__(self, destination_parms, export_vars):
         super(ExternalSystemDummy, self).__init__(destination_parms, export_vars)
-        # init destination vars
-        self.__ip = self._destination_parms.get("ip-address")
-        self.__user = self._destination_parms.get("ssid-name")
-        self.__password = self._destination_parms.get("password")
-        self.rows = {}
-        if not (self.__ip and self.__user and self.__password):
-            self.error("missing parameters")
+        self.__rows = []
 
     def prepare_export(self):
         pass
 
     def add_object(self, cmdb_object, template_data):
         row = {}
+        row["object_id"] = str(cmdb_object.object_information['object_id'])
+        row["variables"] = {}
         for key in self._export_vars:
-            row.update(
-                {str(cmdb_object.object_information['object_id']):
-                    {key: str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))}
-                 })
-        self.rows.update(row)
+            row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
+        self.__rows.append(row)
 
     def finish_export(self):
-        header = ExportdHeader(json.dumps(self.rows))
+        json_data = json.dumps(self.__rows)
+        print(json_data)
+        header = ExportdHeader(json_data)
         return header
 
 
@@ -662,3 +654,44 @@ class ExternalSystemAnsible(ExternalSystem):
         groups.update({'_meta': {'hostvars': self.ansible_hostvars}})
         header = ExportdHeader(json.dumps(groups))
         return header
+
+
+class ExternalSystemExecuteScript(ExternalSystem):
+
+    parameters = [
+        {"name": "script", "required": True, "description": "The script or binary to execute", "default": "/opt/scripts/export"},
+        {"name": "timeout", "required": True, "description": "Timeout for executing the script in seconds", "default": "30"}
+    ]
+
+    variables = [{}]
+
+    def __init__(self, destination_parms, export_vars):
+        super(ExternalSystemExecuteScript, self).__init__(destination_parms, export_vars)
+        # init destination vars
+        self.__script = self._destination_parms.get("script")
+        self.__timeout = int(self._destination_parms.get("timeout"))
+        self.__rows = []
+        if not (self.__script and self.__timeout):
+            self.error("missing parameters")
+
+    def prepare_export(self):
+        pass
+
+    def add_object(self, cmdb_object, template_data):
+        row = {}
+        row["object_id"] = str(cmdb_object.object_information['object_id'])
+        row["variables"] = {}
+        for key in self._export_vars:
+            row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
+        self.__rows.append(row)
+
+    def finish_export(self):
+        json_data = json.dumps(self.__rows)
+        try:
+            result = subprocess.run(self.__script, timeout=self.__timeout, input=json_data, encoding="utf-8")
+            if result.returncode != 0:
+                self.error("executed script returned an error")
+        except FileNotFoundError:
+            self.error("could not find script or binary")
+        except subprocess.TimeoutExpired:
+            self.error("timeout executing script or binary")
