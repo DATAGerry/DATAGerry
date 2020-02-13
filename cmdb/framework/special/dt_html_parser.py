@@ -49,7 +49,8 @@ class DtHtmlParser:
         datetime_str = '' if not self.current_field['value'] else self.current_field['value']
         if isinstance(datetime_str, datetime):
             datetime_str = datetime_str.strftime('%d/%m/%Y')
-        datetime_str = datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%d/%m/%Y')
+        else:
+            datetime_str = datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M:%S.%fZ').strftime('%d/%m/%Y')
         return '<span>%s<span>' % datetime_str
 
     def ref(self):
