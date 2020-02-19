@@ -16,6 +16,8 @@
 
 import logging
 from enum import Enum
+from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
 
 LOGGER = logging.getLogger(__name__)
 
@@ -27,11 +29,11 @@ class SetupRoutine:
         ERROR = 2
         FINISHED = 3
 
-    def __init__(self):
+    def __init__(self, dbm: DatabaseManagerMongo):
         self.status = SetupRoutine.SetupStatus.NOT
         # check if settings are loaded
-        from cmdb.utils.system_reader import SystemConfigReader
         self.setup_system_config_reader = SystemConfigReader()
+        self.setup_database_manager = dbm
         system_config_reader_status = self.setup_system_config_reader.status()
         if system_config_reader_status is not True:
             self.status = SetupRoutine.SetupStatus.ERROR
@@ -52,12 +54,6 @@ class SetupRoutine:
             raise RuntimeError(
                 'The database manager could not be initialized. Perhaps the database cannot be reached, \
                 or the database was already initialized.'
-            )
-
-        # check database collection
-        if not self.__check_database_collection_valid() and not self.__is_database_empty():
-            raise Exception(
-                'The current database version does not match the valid database version.'
             )
 
         if self.__is_database_empty():
@@ -89,6 +85,21 @@ class SetupRoutine:
                 self.status = SetupRoutine.SetupStatus.ERROR
                 raise RuntimeError(
                     f'Something went wrong during the generation of the user management. \n Error: {err}'
+                )
+
+            # create version updater settings
+            try:
+                from cmdb.updater import UpdaterModule
+                from cmdb.updater.updater_settings import UpdateSettings
+                from cmdb.utils import SystemSettingsReader, SystemSettingsWriter
+                system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(self.setup_database_manager)
+
+                updater_setting_instance = UpdateSettings(**UpdaterModule.get_last_version())
+                system_setting_writer.write(_id='updater', data=updater_setting_instance.__dict__)
+            except Exception as err:
+                self.status = SetupRoutine.SetupStatus.ERROR
+                raise RuntimeError(
+                    f'Something went wrong during the generation of the updater module. \n Error: {err}'
                 )
 
         self.status = SetupRoutine.SetupStatus.FINISHED
@@ -123,66 +134,6 @@ class SetupRoutine:
             LOGGER.info(f'KEY ROUTINE: Password was updated for user failed: {ex}')
         LOGGER.info('KEY ROUTINE: FINISHED')
 
-    def update_database_collection(self):
-        LOGGER.info('UPDATE ROUTINE: Update database collection')
-        from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
-        from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
-        from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
-        self.status = SetupRoutine.SetupStatus.RUNNING
-
-        # check database
-        if not self.__check_database():
-            self.status = SetupRoutine.SetupStatus.ERROR
-            raise RuntimeError(
-                'The database manager could not be initialized. Perhaps the database cannot be reached, \
-                or the database was already initialized.'
-            )
-
-        if not self.__is_database_empty():
-            try:
-                detected_database = self.setup_database_manager.connector.database
-
-                # update collections
-                # framework collections
-                for collection in FRAMEWORK_CLASSES:
-                    try:
-                        detected_database.validate_collection(collection.COLLECTION)['valid']
-                    except:
-                        self.setup_database_manager.create_collection(collection.COLLECTION)
-                        # set unique indexes
-                        self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
-                        LOGGER.info(f'UPDATE ROUTINE: Database collection {collection.COLLECTION} was created.')
-
-                # user management collections
-                for collection in USER_MANAGEMENT_COLLECTION:
-                    try:
-                        detected_database.validate_collection(collection.COLLECTION)['valid']
-                    except:
-                        self.setup_database_manager.create_collection(collection.COLLECTION)
-                        # set unique indexes
-                        self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
-                        LOGGER.info(f'UPDATE ROUTINE: Database collection {collection.COLLECTION} was created.')
-
-                # exportdJob management collections
-                for collection in JOB_MANAGEMENT_COLLECTION:
-                    try:
-                        detected_database.validate_collection(collection.COLLECTION)['valid']
-                    except:
-                        self.setup_database_manager.create_collection(collection.COLLECTION)
-                        # set unique indexes
-                        self.setup_database_manager.create_indexes(collection.COLLECTION,
-                                                                   collection.get_index_keys())
-                        LOGGER.info(f'UPDATE ROUTINE: Database collection {collection.COLLECTION} was created.')
-            except Exception as ex:
-                LOGGER.info(f'UPDATE ROUTINE: Database collection validation failed: {ex}')
-        else:
-            LOGGER.info('UPDATE ROUTINE: The update is faulty because no collection was detected.')
-
-        LOGGER.info('UPDATE ROUTINE: Update database collection finished.')
-        self.status = SetupRoutine.SetupStatus.FINISHED
-        LOGGER.info('SETUP ROUTINE: FINISHED!')
-        return self.status
-
     def __create_user_management(self):
         from cmdb.user_management.user_manager import UserManager, User
         from cmdb.user_management import __FIXED_GROUPS__
@@ -210,13 +161,8 @@ class SetupRoutine:
 
     def __check_database(self):
         LOGGER.info('SETUP ROUTINE: Checking database connection')
-        from cmdb.data_storage.database_manager import DatabaseManagerMongo
         from cmdb.data_storage.database_connection import ServerTimeoutError
         try:
-            self.setup_database_manager = DatabaseManagerMongo(
-                **self.setup_system_config_reader.get_all_values_from_section('Database')
-            )
-
             connection_test = self.setup_database_manager.connector.is_connected()
         except ServerTimeoutError:
             connection_test = False
@@ -225,33 +171,6 @@ class SetupRoutine:
 
     def __is_database_empty(self) -> bool:
         return not self.setup_database_manager.connector.database.list_collection_names()
-
-    def __check_database_collection_valid(self) -> bool:
-        LOGGER.info('SETUP ROUTINE: Checking database collection validation')
-        from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
-        from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
-        from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
-        detected_database = self.setup_database_manager.connector.database
-        collection_test = False
-
-        try:
-            # framework collections
-            for collection in FRAMEWORK_CLASSES:
-                collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
-            # user management collections
-            for collection in USER_MANAGEMENT_COLLECTION:
-                collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
-            # exportdJob management collections
-            for collection in JOB_MANAGEMENT_COLLECTION:
-                collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)[
-                    'valid']
-        except Exception as ex:
-            LOGGER.info(f'SETUP ROUTINE: Database collection validation for "{collection.COLLECTION}" failed. '
-                        f'msgerror: {ex}')
-            collection_test = False
-
-        LOGGER.info(f'SETUP ROUTINE: Database collection validation status {collection_test}')
-        return collection_test
 
     def __init_database(self):
         database_name = self.setup_system_config_reader.get_value('database_name', 'Database')

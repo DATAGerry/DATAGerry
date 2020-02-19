@@ -231,7 +231,7 @@ class CmdbObjectManager(CmdbManagerBase):
             data=update_object.to_database()
         )
         # create cmdb.core.object.updated event
-        if self._event_queue:
+        if self._event_queue and request_user:
             event = Event("cmdb.core.object.updated", {"id": update_object.get_public_id(),
                                                        "type_id": update_object.get_type_id(),
                                                        "user_id": request_user.get_public_id()})
@@ -353,6 +353,24 @@ class CmdbObjectManager(CmdbManagerBase):
         agr.append({'$sort': {'count': -1}})
 
         return self.dbm.aggregate(CmdbType.COLLECTION, agr)
+
+    def get_type_aggregate(self, arguments):
+        """This method does not actually
+           performs the find() operation
+           but instead returns
+           a objects sorted by value of the documents that meet the selection criteria.
+
+           Args:
+               arguments: query search for
+           Returns:
+               returns the list of CMDB Types sorted by value of the documents
+           """
+        type_list = []
+        cursor = self.dbm.aggregate(CmdbType.COLLECTION, arguments)
+        for document in cursor:
+            put_data = json.loads(json_util.dumps(document), object_hook=object_hook)
+            type_list.append(CmdbType(**put_data))
+        return type_list
 
     def insert_type(self, data: (CmdbType, dict)):
         if isinstance(data, CmdbType):
