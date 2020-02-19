@@ -25,6 +25,7 @@ from cmdb.interface.route_utils import NestedBlueprint, make_response, login_req
     insert_request_user
 from cmdb.user_management import User
 from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.utils import SystemSettingsReader
 
 LOGGER = logging.getLogger(__name__)
 try:
@@ -34,6 +35,9 @@ except ImportError:
 
 system_blueprint = NestedBlueprint(settings_blueprint, url_prefix='/system')
 
+with current_app.app_context():
+    system_settings_reader: SystemSettingsReader = SystemSettingsReader(current_app.database_manager)
+
 
 @system_blueprint.route('/', methods=['GET'])
 @login_required
@@ -42,9 +46,17 @@ system_blueprint = NestedBlueprint(settings_blueprint, url_prefix='/system')
 @current_app.cache.cached(timeout=50)
 def get_datagerry_information(request_user: User):
     from cmdb import __title__, __version__, __runtime__
+
+    try:
+        db_version = system_settings_reader.get_all_values_from_section('updater').get('version')
+    except Exception as err:
+        LOGGER.warning(err)
+        db_version = 0
+
     datagerry_infos = {
         'title': __title__,
         'version': __version__,
+        'db_version': db_version,
         'runtime': (time.time() - __runtime__),
         'starting_parameters': sys.argv
     }
