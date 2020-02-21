@@ -16,11 +16,9 @@
 
 
 import logging
-import pkgutil
-import inspect
 
-from . import versions
-from cmdb.utils.helpers import process_bar
+from cmdb.utils.helpers import process_bar, load_class
+from cmdb.utils import SystemSettingsReader
 
 LOGGER = logging.getLogger(__name__)
 
@@ -42,17 +40,16 @@ class UpdateSettings:
         """Get the current version"""
         return self.version
 
-    def run_updates(self, version):
-        package = versions
-        files = []
-        for finder, modname, ispkg in pkgutil.iter_modules(package.__path__):
-            files.append({'finder': finder, 'modname': modname, 'version': modname.replace('updater_', '')})
+    def run_updates(self, version: int, ssr: SystemSettingsReader):
+        from cmdb.updater import UpdaterModule
+        ssr.get_all_values_from_section('updater')
+        updater_instance = UpdaterModule(ssr)
+        versions = updater_instance.__UPDATER_VERSIONS_POOL__
+        current_version = updater_instance.get_last_version()['version']
 
-        for num, file in enumerate(sorted(files)):
-            current_version = int(file['version'])
+        for num, file in enumerate(sorted(versions)):
             if current_version > version:
-                process_bar('Process', len(files), num + 1)
-                module = file['finder'].find_module(file['modname']).load_module(file['modname'])
-                for name, obj in inspect.getmembers(module):
-                    if inspect.isclass(obj) and name in 'Update%s' % current_version:
-                       obj().start_update()
+                process_bar('Process', len(versions), num + 1)
+                updater_class = load_class(f'cmdb.updater.versions.updater_{current_version}.Update{current_version}')
+                updater_instance = updater_class()
+                updater_instance.start_update()

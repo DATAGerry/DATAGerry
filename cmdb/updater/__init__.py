@@ -14,9 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import pkgutil
-from . import versions
-
 from cmdb.utils import SystemSettingsReader
 from cmdb.updater.updater_settings import UpdateSettings
 
@@ -29,10 +26,13 @@ class UpdaterModule:
         'version': 0,
     }
 
+    __UPDATER_VERSIONS_POOL__ = [20200214]
+
     def __init__(self, system_settings_reader: SystemSettingsReader):
         auth_settings_values = system_settings_reader.\
             get_all_values_from_section('updater', default=UpdaterModule.get_last_version())
         self.__settings: UpdateSettings = self.__init_settings(auth_settings_values)
+        self.system_settings_reader = system_settings_reader
 
     def __init_settings(self, auth_settings_values: dict) -> UpdateSettings:
         """Merge default values with database entries"""
@@ -45,9 +45,6 @@ class UpdaterModule:
 
     @staticmethod
     def get_last_version() -> dict:
-        package = versions
-        arr_versions = []
-        for finder, modname, ispkg in pkgutil.iter_modules(package.__path__):
-            arr_versions.append({'version': modname.replace('updater_', '')})
+        arr_versions = sorted(UpdaterModule.__UPDATER_VERSIONS_POOL__)
         return {'_id': 'updater',
-                'version': int(arr_versions[len(arr_versions)-1]['version'].replace('updater_', ''))}
+                'version': arr_versions[len(arr_versions)-1]}

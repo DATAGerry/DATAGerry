@@ -121,8 +121,8 @@ class UpdateRoutine:
             # update version updater settings
             try:
                 updater_settings_values = UpdaterModule.__DEFAULT_SETTINGS__
+                ssr = SystemSettingsReader(self.setup_database_manager)
                 try:
-                    ssr = SystemSettingsReader(self.setup_database_manager)
                     updater_settings_values = ssr.get_all_values_from_section('updater')
                     updater_setting_instance = UpdateSettings(**updater_settings_values)
                 except Exception:
@@ -132,7 +132,7 @@ class UpdateRoutine:
                     system_setting_writer.write(_id='updater', data=updater_setting_instance.__dict__)
 
                 # start running update files
-                updater_setting_instance.run_updates(updater_settings_values.get('version'))
+                updater_setting_instance.run_updates(updater_settings_values.get('version'), ssr)
 
             except Exception as err:
                 self.status = UpdateRoutine.UpateStatus.ERROR

@@ -93,9 +93,9 @@ class CheckRoutine:
             ssr = SystemSettingsReader(self.setup_database_manager)
             ssr.get_all_values_from_section('updater')
 
-            auth_module = UpdaterModule(ssr)
-            new_version = auth_module.get_last_version()
-            current_version = auth_module.settings.version
+            upd_module = UpdaterModule(ssr)
+            new_version = upd_module.get_last_version()['version']
+            current_version = upd_module.settings.version
 
             if new_version > current_version:
                 LOGGER.error(
