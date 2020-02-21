@@ -17,9 +17,10 @@
 
 import logging
 import pkgutil
+import inspect
 
 from . import versions
-from cmdb.utils.helpers import process_bar, load_class
+from cmdb.utils.helpers import process_bar
 
 LOGGER = logging.getLogger(__name__)
 
@@ -44,13 +45,14 @@ class UpdateSettings:
     def run_updates(self, version):
         package = versions
         files = []
-        for importer, modname, ispkg in pkgutil.iter_modules(package.__path__):
-            files.append(modname)
+        for finder, modname, ispkg in pkgutil.iter_modules(package.__path__):
+            files.append({'finder': finder, 'modname': modname, 'version': modname.replace('updater_', '')})
 
-        for num, filename in enumerate(sorted(files)):
-            current_version = int(filename.replace('updater_', ''))
+        for num, file in enumerate(sorted(files)):
+            current_version = int(file['version'])
             if current_version > version:
                 process_bar('Process', len(files), num + 1)
-                updater_class = load_class(f'cmdb.updater.versions.updater_{current_version}.Update{current_version}')
-                updater_instance = updater_class()
-                updater_instance.start_update()
+                module = file['finder'].find_module(file['modname']).load_module(file['modname'])
+                for name, obj in inspect.getmembers(module):
+                    if inspect.isclass(obj) and name in 'Update%s' % current_version:
+                       obj().start_update()
