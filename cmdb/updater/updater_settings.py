@@ -42,8 +42,11 @@ class UpdateSettings:
 
     def run_updates(self, version):
         pattern = "updater_*.py"
-        files = fnmatch.filter(sorted(os.listdir("./updater/versions")), pattern)
-        print('\nStart UPDATE ROUTINE\n')
+
+        import pkg_resources
+        filepath = pkg_resources.resource_filename(__name__, "versions")
+
+        files = fnmatch.filter(sorted(os.listdir(filepath)), pattern)
         for num, filename in enumerate(files):
             current_version = int(os.path.splitext(filename)[0].replace('updater_', ''))
             if current_version > version:
@@ -51,4 +54,3 @@ class UpdateSettings:
                 updater_class = load_class(f'cmdb.updater.versions.updater_{current_version}.Update{current_version}')
                 updater_instance = updater_class()
                 updater_instance.start_update()
-        print('End UPDATE ROUTINE')
