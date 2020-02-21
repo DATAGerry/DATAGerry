@@ -97,6 +97,7 @@ Currently the follwowing ExternalSystems are supported:
 
     "ExternalSystemDummy", "A dummy for testing Exportd - will only print some debug output"
     "ExternalSystemExcuteScript", "Executes a script on the DATAGERRY machine"
+    "ExternalSystemGenericRestCall", "Sends a HTTP POST to an userdefined URL"
     "ExternalSystemOpenNMS", "Add nodes to the monitoring system OpenNMS with the OpenNMS REST API"
 
 
@@ -153,3 +154,48 @@ Please see the following example file:
 
 
 DATAGERRY will not execute scripts, that are not listed in a *.datagerry_exec.json* file.
+
+
+
+ExternalSystemGenericRestCall
+-----------------------------
+This class will send an HTTP POST request to an user-defined URL. A JSON structure with object IDs and export variables 
+will be sent as data within the HTTP request. 
+
+The exporter class has the following parameters:
+
+.. csv-table::
+    :header: "parameter", "required", "description"
+    :align: left
+
+    "url", "True", "URL for HTTP POST request"
+    "timeout", "True", "timeout for executing the REST call in seconds"
+    "username", "False", "Username for a HTTP basic authentication. If empty, no authentication will be done."
+    "password", "False", "Password for a HTTP basic authentication."
+
+
+You can define any export variables. All defined export variables will be sent as JSON structure within the HTTP
+request. Please see the following section for an example JSON structure:
+
+.. code-block:: json
+
+    [
+        {
+            "object_id": 1234,
+            "variables": 
+                {
+                    "var1": "value1",
+                    "var2": "value2"
+                }
+        },
+        {
+            "object_id": 1235,
+            "variables": 
+                {
+                    "var1": "value1",
+                    "var2": "value2"
+                }
+        }
+    ]
+
+

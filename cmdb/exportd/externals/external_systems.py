@@ -719,7 +719,7 @@ class ExternalSystemExecuteScript(ExternalSystem):
 class ExternalSystemGenericRestCall(ExternalSystem):
 
     parameters = [
-        {"name": "url", "required": True, "description": "URL for HTTP PUT/POST", "default": "https://localhost:8443/dg_export"},
+        {"name": "url", "required": True, "description": "URL for HTTP POST", "default": "https://localhost:8443/dg_export"},
         {"name": "timeout", "required": True, "description": "Timeout for executing the REST call in seconds", "default": "30"},
         {"name": "username", "required": False, "description": "Username for a HTTP basic authentication. If empty, no authentication will be done.", "default": ""},
         {"name": "password", "required": False, "description": "Password for a HTTP basic authentication.", "default": ""}
