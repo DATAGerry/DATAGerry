@@ -24,19 +24,19 @@ from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerUpdat
 LOGGER = logging.getLogger(__name__)
 
 
-class Update20200314(Updater):
+class Update20200214(Updater):
 
     def author(self):
         return 'sdu'
 
     def creation_date(self):
-        return '20200314'
+        return '20200214'
 
     def description(self):
         return 'Update the fieldtype date of CMDB objects: From string to date.'
 
     def increase_updater_version(self, value):
-        super(Update20200314, self).increase_updater_version(value)
+        super(Update20200214, self).increase_updater_version(value)
 
     def start_update(self):
 
@@ -56,7 +56,7 @@ class Update20200314(Updater):
             sys.stdout.write('\tRun: ' + str(round(progress * 100, 0)) + '%' + ' ' * ((lenx+7) - i))
             sys.stdout.flush()
         sys.stdout.write('\b\b\b\bDone!\n\n')
-        self.increase_updater_version(20200314)
+        self.increase_updater_version(20200214)
 
     def worker(self, type):
         try:
