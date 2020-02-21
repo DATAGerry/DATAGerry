@@ -714,3 +714,58 @@ class ExternalSystemExecuteScript(ExternalSystem):
             self.error("could not find script or binary")
         except subprocess.TimeoutExpired:
             self.error("timeout executing script or binary")
+
+
+class ExternalSystemGenericRestCall(ExternalSystem):
+
+    parameters = [
+        {"name": "url", "required": True, "description": "URL for HTTP PUT/POST", "default": "https://localhost:8443/dg_export"},
+        {"name": "timeout", "required": True, "description": "Timeout for executing the REST call in seconds", "default": "30"},
+        {"name": "username", "required": False, "description": "Username for a HTTP basic authentication. If empty, no authentication will be done.", "default": ""},
+        {"name": "password", "required": False, "description": "Password for a HTTP basic authentication.", "default": ""}
+    ]
+
+    variables = [{}]
+
+    def __init__(self, destination_parms, export_vars):
+        super(ExternalSystemGenericRestCall, self).__init__(destination_parms, export_vars)
+        # init destination vars
+        self.__url = self._destination_parms.get("url")
+        self.__timeout = int(self._destination_parms.get("timeout"))
+        self.__username = self._destination_parms.get("username")
+        self.__password = self._destination_parms.get("password")
+        self.__rows = []
+        if not (self.__url and self.__timeout):
+            self.error("missing parameters")
+
+    def prepare_export(self):
+        pass
+
+    def add_object(self, cmdb_object, template_data):
+        row = {}
+        row["object_id"] = str(cmdb_object.object_information['object_id'])
+        row["variables"] = {}
+        for key in self._export_vars:
+            row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
+        self.__rows.append(row)
+
+    def finish_export(self):
+        # create json data
+        json_data = json.dumps(self.__rows)
+
+        # execute REST call
+        headers = {
+            "Content-Type": "application/json"
+        }
+        auth = None
+        if self.__username:
+            auth = (self.__username, self.__password)
+        try:
+            response = requests.post(self.__url, data=json_data, headers=headers, auth=auth, verify=False,
+                                     timeout=self.__timeout)
+            if response.status_code > 202:
+                self.error("Error communicating to REST endpoint: HTTP/{}".format(str(response.status_code)))
+        except requests.exceptions.ConnectionError:
+            self.error("Can't connect to REST endpoint")
+        except requests.exceptions.Timeout:
+            self.error("Timeout connecting to REST endpoint")
