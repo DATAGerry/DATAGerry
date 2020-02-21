@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import pkgutil
+from . import versions
 
 from cmdb.utils import SystemSettingsReader
 from cmdb.updater.updater_settings import UpdateSettings
@@ -43,8 +45,9 @@ class UpdaterModule:
 
     @staticmethod
     def get_last_version() -> dict:
-        import os
-        files = sorted(os.listdir("./updater/versions"))
+        package = versions
+        arr_versions = []
+        for finder, modname, ispkg in pkgutil.iter_modules(package.__path__):
+            arr_versions.append({'version': modname.replace('updater_', '')})
         return {'_id': 'updater',
-                'version': int(os.path.splitext(files[len(files) - 1])[0].replace('updater_', ''))}
-
+                'version': int(arr_versions[len(arr_versions)-1]['version'].replace('updater_', ''))}

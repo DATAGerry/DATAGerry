@@ -85,7 +85,6 @@ class CheckRoutine:
         Returns: True else raise error
 
             """
-        import os
         from cmdb.updater import UpdaterModule
         from cmdb.utils import SystemSettingsReader
         from cmdb.utils.system_reader import SectionError
@@ -94,10 +93,8 @@ class CheckRoutine:
             ssr = SystemSettingsReader(self.setup_database_manager)
             ssr.get_all_values_from_section('updater')
 
-            files = sorted(os.listdir("./updater/versions"))
-            new_version = int(os.path.splitext(files[len(files) - 1])[0].replace('updater_', ''))
-
             auth_module = UpdaterModule(ssr)
+            new_version = auth_module.get_last_version()
             current_version = auth_module.settings.version
 
             if new_version > current_version:
