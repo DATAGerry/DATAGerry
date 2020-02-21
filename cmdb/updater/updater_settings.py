@@ -16,8 +16,9 @@
 
 
 import logging
-import os
-import fnmatch
+import pkgutil
+
+from . import versions
 from cmdb.utils.helpers import process_bar, load_class
 
 LOGGER = logging.getLogger(__name__)
@@ -41,14 +42,13 @@ class UpdateSettings:
         return self.version
 
     def run_updates(self, version):
-        pattern = "updater_*.py"
+        package = versions
+        files = []
+        for importer, modname, ispkg in pkgutil.iter_modules(package.__path__):
+            files.append(modname)
 
-        import pkg_resources
-        filepath = pkg_resources.resource_filename(__name__, "versions")
-
-        files = fnmatch.filter(sorted(os.listdir(filepath)), pattern)
-        for num, filename in enumerate(files):
-            current_version = int(os.path.splitext(filename)[0].replace('updater_', ''))
+        for num, filename in enumerate(sorted(files)):
+            current_version = int(filename.replace('updater_', ''))
             if current_version > version:
                 process_bar('Process', len(files), num + 1)
                 updater_class = load_class(f'cmdb.updater.versions.updater_{current_version}.Update{current_version}')
