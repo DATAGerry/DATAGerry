@@ -24,7 +24,7 @@ class CheckRoutine:
     class CheckStatus(Enum):
         NOT = 0
         RUNNING = 1
-        ERROR = 2
+        HAS_UPDATES = 2
         FINISHED = 3
 
     def __init__(self, dbm):
@@ -75,6 +75,7 @@ class CheckRoutine:
             LOGGER.info(f'CHECK ROUTINE: Database collection validation for "{collection.COLLECTION}" failed. '
                         f'msgerror: {ex}')
             collection_test = False
+            self.status = CheckRoutine.CheckStatus.HAS_UPDATES
 
         LOGGER.info(f'CHECK ROUTINE: Database collection validation status {collection_test}')
         return collection_test
@@ -106,6 +107,7 @@ class CheckRoutine:
                 return False
         except SectionError as err:
             LOGGER.error(err.message)
+            self.status = CheckRoutine.CheckStatus.HAS_UPDATES
             return False
         return True
 

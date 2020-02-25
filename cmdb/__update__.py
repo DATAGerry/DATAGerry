@@ -64,11 +64,8 @@ class UpdateRoutine:
     def __is_database_empty(self) -> bool:
         return not self.setup_database_manager.connector.database.list_collection_names()
 
-    def update_database_collection(self):
+    def start_update(self):
         LOGGER.info('UPDATE ROUTINE: Update database collection')
-        from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
-        from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
-        from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
         self.status = UpdateRoutine.UpateStatus.RUNNING
 
         # check database
@@ -80,65 +77,8 @@ class UpdateRoutine:
             )
 
         if not self.__is_database_empty():
-            # update database collections
-            try:
-                detected_database = self.setup_database_manager.connector.database
-
-                # update collections
-                # framework collections
-                for collection in FRAMEWORK_CLASSES:
-                    try:
-                        detected_database.validate_collection(collection.COLLECTION)['valid']
-                    except:
-                        self.setup_database_manager.create_collection(collection.COLLECTION)
-                        # set unique indexes
-                        self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
-                        LOGGER.info(f'UPDATE ROUTINE: Database collection {collection.COLLECTION} was created.')
-
-                # user management collections
-                for collection in USER_MANAGEMENT_COLLECTION:
-                    try:
-                        detected_database.validate_collection(collection.COLLECTION)['valid']
-                    except:
-                        self.setup_database_manager.create_collection(collection.COLLECTION)
-                        # set unique indexes
-                        self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
-                        LOGGER.info(f'UPDATE ROUTINE: Database collection {collection.COLLECTION} was created.')
-
-                # exportdJob management collections
-                for collection in JOB_MANAGEMENT_COLLECTION:
-                    try:
-                        detected_database.validate_collection(collection.COLLECTION)['valid']
-                    except:
-                        self.setup_database_manager.create_collection(collection.COLLECTION)
-                        # set unique indexes
-                        self.setup_database_manager.create_indexes(collection.COLLECTION,
-                                                                   collection.get_index_keys())
-                        LOGGER.info(f'UPDATE ROUTINE: Database collection {collection.COLLECTION} was created.')
-            except Exception as ex:
-                LOGGER.info(f'UPDATE ROUTINE: Database collection validation failed: {ex}')
-
-            # update version updater settings
-            try:
-                updater_settings_values = UpdaterModule.__DEFAULT_SETTINGS__
-                ssr = SystemSettingsReader(self.setup_database_manager)
-                try:
-                    updater_settings_values = ssr.get_all_values_from_section('updater')
-                    updater_setting_instance = UpdateSettings(**updater_settings_values)
-                except Exception:
-                    # create updater section if not exist
-                    system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(self.setup_database_manager)
-                    updater_setting_instance = UpdateSettings(**updater_settings_values)
-                    system_setting_writer.write(_id='updater', data=updater_setting_instance.__dict__)
-
-                # start running update files
-                updater_setting_instance.run_updates(updater_settings_values.get('version'), ssr)
-
-            except Exception as err:
-                self.status = UpdateRoutine.UpateStatus.ERROR
-                raise RuntimeError(
-                    f'Something went wrong during the generation of the updater module. \n Error: {err}'
-                )
+            self.update_database_collection()
+            self.update_db_version()
         else:
             LOGGER.info('UPDATE ROUTINE: The update is faulty because no collection was detected.')
 
@@ -146,3 +86,69 @@ class UpdateRoutine:
         self.status = UpdateRoutine.UpateStatus.FINISHED
         LOGGER.info('UPDATE ROUTINE: FINISHED!')
         return self.status
+
+    def update_database_collection(self):
+        from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
+        from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
+        from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
+
+        # update database collections
+        try:
+            detected_database = self.setup_database_manager.connector.database
+
+            # update collections
+            # framework collections
+            for collection in FRAMEWORK_CLASSES:
+                try:
+                    detected_database.validate_collection(collection.COLLECTION)['valid']
+                except:
+                    self.setup_database_manager.create_collection(collection.COLLECTION)
+                    # set unique indexes
+                    self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+                    LOGGER.info(f'UPDATE ROUTINE: Database collection {collection.COLLECTION} was created.')
+
+            # user management collections
+            for collection in USER_MANAGEMENT_COLLECTION:
+                try:
+                    detected_database.validate_collection(collection.COLLECTION)['valid']
+                except:
+                    self.setup_database_manager.create_collection(collection.COLLECTION)
+                    # set unique indexes
+                    self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+                    LOGGER.info(f'UPDATE ROUTINE: Database collection {collection.COLLECTION} was created.')
+
+            # exportdJob management collections
+            for collection in JOB_MANAGEMENT_COLLECTION:
+                try:
+                    detected_database.validate_collection(collection.COLLECTION)['valid']
+                except:
+                    self.setup_database_manager.create_collection(collection.COLLECTION)
+                    # set unique indexes
+                    self.setup_database_manager.create_indexes(collection.COLLECTION,
+                                                               collection.get_index_keys())
+                    LOGGER.info(f'UPDATE ROUTINE: Database collection {collection.COLLECTION} was created.')
+        except Exception as ex:
+            LOGGER.info(f'UPDATE ROUTINE: Database collection validation failed: {ex}')
+
+    def update_db_version(self):
+        # update version updater settings
+        try:
+            updater_settings_values = UpdaterModule.__DEFAULT_SETTINGS__
+            ssr = SystemSettingsReader(self.setup_database_manager)
+            try:
+                updater_settings_values = ssr.get_all_values_from_section('updater')
+                updater_setting_instance = UpdateSettings(**updater_settings_values)
+            except Exception:
+                # create updater section if not exist
+                system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(self.setup_database_manager)
+                updater_setting_instance = UpdateSettings(**updater_settings_values)
+                system_setting_writer.write(_id='updater', data=updater_setting_instance.__dict__)
+
+            # start running update files
+            updater_setting_instance.run_updates(updater_settings_values.get('version'), ssr)
+
+        except Exception as err:
+            self.status = UpdateRoutine.UpateStatus.ERROR
+            raise RuntimeError(
+                f'Something went wrong during the generation of the updater module. \n Error: {err}'
+            )
