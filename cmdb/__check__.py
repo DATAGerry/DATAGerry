@@ -41,11 +41,11 @@ class CheckRoutine:
         # check database
         if not self.__is_database_empty():
             if not (self.__check_database_collection_valid() and self.has_updates()):
-                raise Exception(
+                LOGGER.warning(
                     'The current database version does not match the valid database version.'
                 )
 
-        self.status = CheckRoutine.CheckStatus.FINISHED
+        self.status = CheckRoutine.CheckStatus.HAS_UPDATES
         LOGGER.info('SETUP ROUTINE: FINISHED!')
         return self.status
 
