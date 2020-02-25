@@ -187,13 +187,6 @@ If all requirements were installed, we'll can install the downloaded DATAGERRY R
 
 To change the parameters for connecting to MongoDB and RabbitMQ, edit the configuration file /etc/datagerry/cmdb.conf
 
-Now, the database structure can be created:
-
-.. code-block:: console
-
-    $ datagerry -c /etc/datagerry/cmdb.conf --setup
-
-
 After that, activate and start DATAGERRY with Systemd:
 
 .. code-block:: console
@@ -256,13 +249,6 @@ Extract the provided tar.gz archive and execute the setup script as root:
     $ sudo ./setup.sh
 
 To change the parameters for connecting to MongoDB and RabbitMQ, edit the configuration file /etc/datagerry/cmdb.conf
-
-Now, the database structure can be created:
-
-.. code-block:: console
-
-    $ datagerry -c /etc/datagerry/cmdb.conf --setup
-
 
 After that, activate and start DATAGERRY with Systemd:
 
