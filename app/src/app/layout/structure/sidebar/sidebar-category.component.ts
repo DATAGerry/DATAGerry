@@ -39,8 +39,8 @@ export class SidebarCategoryComponent implements OnInit {
   }
 
   private initCategoryTypeList() {
-    if (this.categoryData.category.root) {
-      this.typeService.groupTypeByCategory(0).subscribe((data: CmdbType[]) => {
+    if (this.categoryData.category.public_id === 0) {
+      this.typeService.getUncategorizedTypes().subscribe((data: CmdbType[]) => {
         this.categoryPopUp = data;
       });
     } else {

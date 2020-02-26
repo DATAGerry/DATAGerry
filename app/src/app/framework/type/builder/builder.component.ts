@@ -36,7 +36,7 @@ import {FormGroup} from '@angular/forms';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {PreviewModalComponent} from './modals/preview-modal/preview-modal.component';
 import {DiagnosticModalComponent} from './modals/diagnostic-modal/diagnostic-modal.component';
-import {DateControl} from "./controls/specials/date.control";
+import {DateControl} from './controls/specials/date.control';
 
 declare var $: any;
 

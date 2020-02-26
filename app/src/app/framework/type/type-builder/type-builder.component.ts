@@ -74,7 +74,7 @@ export class TypeBuilderComponent implements OnInit {
     const catID: number = this.basicStep.basicCategoryForm.value.category_id;
     if (catID !== 0) {
       this.categoryService.getCategory(catID).subscribe((item: CmdbCategory) => {
-        this.selectedCategoryID = item.root ? 0 : catID;
+        this.selectedCategoryID = catID;
       });
     }
     const defaultIcon = this.basicStep.basicMetaIconForm.get('icon').value === '' ?
@@ -111,9 +111,9 @@ export class TypeBuilderComponent implements OnInit {
   }
 
   public saveType() {
+    this.typeInstance.category_id = this.selectedCategoryID;
     if (this.mode === CmdbMode.Create) {
       let newTypeID = null;
-      this.typeInstance.category_id = this.selectedCategoryID;
       this.typeService.postType(this.typeInstance).subscribe(typeIDResp => {
           newTypeID = typeIDResp;
           this.router.navigate(['/framework/type/'], {queryParams: {typeAddSuccess: newTypeID}});

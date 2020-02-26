@@ -115,6 +115,14 @@ export class TypeService<T = CmdbType> implements ApiService {
     );
   }
 
+  public getUncategorizedTypes(): Observable<any> {
+    return this.api.callGet<T[]>(this.servicePrefix + '/uncategorized/').pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
   public getTypeListByCategory(publicID: number): Observable<any> {
     return this.api.callGet<T[]>(this.servicePrefix + '/category/' + publicID).pipe(
       map((apiResponse) => {
@@ -122,6 +130,7 @@ export class TypeService<T = CmdbType> implements ApiService {
       })
     );
   }
+
 
   public groupTypeByCategory(publicID: number): Observable<any> {
     httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) };

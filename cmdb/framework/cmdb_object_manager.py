@@ -456,7 +456,7 @@ class CmdbObjectManager(CmdbManagerBase):
                 LOGGER.debug(e.message)
         return ack
 
-    def _get_category_nodes(self, parent_list: list) -> dict:
+    def _get_category_nodes(self, parent_list: list):
         edge = []
         for cat_child in parent_list:
             next_children = self.get_categories_by(_filter={'parent_id': cat_child.get_public_id()})
@@ -482,6 +482,19 @@ class CmdbObjectManager(CmdbManagerBase):
         })
         if len(root_categories) > 0:
             tree = self._get_category_nodes(root_categories)
+            category_pid_list = []
+            for category in root_categories:
+                category_pid_list.append(category.get_public_id())
+            if self.get_types_by(**{'category_id': {'$nin': category_pid_list}}):
+                tree.append(
+                    {'category': {
+                        'icon': 'fas fa-exclamation-triangle',
+                        'label': 'Uncategorized',
+                        'name': 'uncategorized',
+                        'parent_id': 0,
+                        'public_id': 0
+                    }}
+                )
         else:
             raise NoRootCategories()
         return tree

@@ -20,6 +20,7 @@ import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { TypeService } from '../../../framework/services/type.service';
 import { SidebarService } from '../../services/sidebar.service';
+import {CmdbType} from "../../../framework/models/cmdb-type";
 
 @Component({
   selector: 'cmdb-sidebar',
@@ -39,8 +40,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.renderer.addClass(document.body, 'sidebar-fixed');
     this.sidebarService.categoryTree.asObservable().subscribe(tree => {
-      this.categoryTree = tree;
-      this.defaultCategoryTree = tree;
+        this.categoryTree = tree;
+        this.defaultCategoryTree = tree;
     });
 
     this.filterTerm.statusChanges.subscribe(() => {

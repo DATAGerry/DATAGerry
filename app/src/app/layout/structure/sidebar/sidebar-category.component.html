@@ -6,7 +6,12 @@
    (click)="get_objects_by_type()">
   <span class="shorten-long-text"
         data-toggle="tooltip" title="{{categoryData?.category.label}}">
-    {{categoryData.category.label}}
+    <ng-template [ngIf]="categoryData.category.icon.length" [ngIfElse]="noIcon">
+      <i class="{{categoryData.category.icon}} " aria-hidden="true"></i> {{categoryData.category.label}}
+    </ng-template>
+    <ng-template #noIcon>
+      {{categoryData.category.label}}
+    </ng-template>
   </span>
 </a>
 

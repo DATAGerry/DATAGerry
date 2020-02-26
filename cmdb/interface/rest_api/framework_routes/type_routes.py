@@ -219,6 +219,24 @@ def get_type_by_category(public_id, request_user: User):
     return make_response(type_list)
 
 
+@type_blueprint.route('/uncategorized/', methods=['GET'])
+@type_blueprint.route('/uncategorized', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.framework.type.view')
+def get_uncategorized_types(request_user: User):
+    try:
+        category_pid_list = []
+        categories = object_manager.get_all_categories()
+        for category in categories:
+            category_pid_list.append(category.public_id)
+        type_list = object_manager.get_types_by(**{'category_id': {'$nin': category_pid_list}})
+    except ObjectManagerGetError as err:
+        LOGGER.error(err.message)
+        return abort(404, 'Something went wrong in getting uncategorised types')
+    return make_response(type_list)
+
+
 @type_blueprint.route('/group/category/<int:public_id>/', methods=['GET'])
 @type_blueprint.route('/group/category/<int:public_id>', methods=['GET'])
 @login_required
