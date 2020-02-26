@@ -191,7 +191,7 @@ def main(args):
                 update_status = update_routine.get_updater_status()
                 LOGGER.warning(f'The update did not go through as expected - Status {update_status}')
             if update_status == UpdateRoutine.UpateStatus.FINISHED:
-                pass
+                check_status = CheckRoutine.CheckStatus.FINISHED
             else:
                 exit(1)
         if check_status == CheckRoutine.CheckStatus.FINISHED:

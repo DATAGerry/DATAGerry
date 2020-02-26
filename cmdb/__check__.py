@@ -35,8 +35,8 @@ class CheckRoutine:
         return self.status
 
     def checker(self):
-        LOGGER.info('SETUP ROUTINE: STARTED...')
-        self.status = CheckRoutine.CheckStatus.RUNNING
+        LOGGER.info('CHECK ROUTINE: STARTED...')
+        self.status = CheckRoutine.CheckStatus.FINISHED
 
         # check database
         if not self.__is_database_empty():
@@ -44,9 +44,8 @@ class CheckRoutine:
                 LOGGER.warning(
                     'The current database version does not match the valid database version.'
                 )
-
-        self.status = CheckRoutine.CheckStatus.HAS_UPDATES
-        LOGGER.info('SETUP ROUTINE: FINISHED!')
+                self.status = CheckRoutine.CheckStatus.HAS_UPDATES
+        LOGGER.info('CHECK ROUTINE: FINISHED!')
         return self.status
 
     def __is_database_empty(self) -> bool:
@@ -75,7 +74,6 @@ class CheckRoutine:
             LOGGER.info(f'CHECK ROUTINE: Database collection validation for "{collection.COLLECTION}" failed. '
                         f'msgerror: {ex}')
             collection_test = False
-            self.status = CheckRoutine.CheckStatus.HAS_UPDATES
 
         LOGGER.info(f'CHECK ROUTINE: Database collection validation status {collection_test}')
         return collection_test
@@ -107,7 +105,6 @@ class CheckRoutine:
                 return False
         except SectionError as err:
             LOGGER.error(err.message)
-            self.status = CheckRoutine.CheckStatus.HAS_UPDATES
             return False
         return True
 
