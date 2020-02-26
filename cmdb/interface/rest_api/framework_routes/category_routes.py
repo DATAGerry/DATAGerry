@@ -91,20 +91,6 @@ def get_category_by_name(name: str, request_user: User):
     return make_response(category_instance)
 
 
-@categories_blueprint.route('/root/', methods=['GET'])
-@categories_blueprint.route('/root', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.category.view')
-def get_root_category(request_user: User):
-    try:
-        category_instance = object_manager.get_categories_by(_filter={'root': True})
-    except ObjectManagerGetError as e:
-        LOGGER.error(f'Root category was not found!: {e}')
-        return abort(404, 'Root category was not found!')
-    return make_response(category_instance)
-
-
 @categories_blueprint.route('/', methods=['POST'])
 @login_required
 @insert_request_user

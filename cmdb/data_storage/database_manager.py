@@ -420,6 +420,20 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         formatted_data = {'$set': data}
         return self.connector.get_collection(collection).update_one(filter, formatted_data, *args, **kwargs)
 
+    def unset_update_many(self, collection: str, filter: dict, data: str, *args, **kwargs):
+        """update document inside database
+
+        Args:
+            collection (str): name of database collection
+            filter (dict): filter of document
+            data: data to delete
+
+        Returns:
+            acknowledged
+        """
+        formatted_data = {'$unset': {data: 1}}
+        return self.connector.get_collection(collection).update_many(filter, formatted_data, *args, **kwargs)
+
     def update_many(self, collection: str, query: dict, update: dict) -> UpdateResult:
         """update all documents that match the filter from a collection.
 

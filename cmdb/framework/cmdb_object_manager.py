@@ -581,6 +581,15 @@ class CmdbObjectManager(CmdbManagerBase):
     def delete_status(self, public_id: int):
         return NotImplementedError
 
+    # DOKUMENT FIELD CRUD
+    def unset_update(self, collection: str, field: str):
+        try:
+            ack = self._unset_update_many(collection, field)
+        except (CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise ObjectManagerUpdateError(err)
+        return ack.acknowledged
+
     # COLLECTIONS/TEMPLATES CRUD
     def get_collections(self) -> list:
         collection_list = list()

@@ -136,6 +136,23 @@ class CmdbManagerBase(ABC):
             data=data
         )
 
+    def _unset_update_many(self, collection: str, data: str) -> object:
+        """
+        update document/object in database
+        Args:
+            collection (str): name of the database collection
+            public_id (int): public id of object
+            data: field to be deleted
+
+        Returns:
+            acknowledgment of database
+        """
+        return self.dbm.unset_update_many(
+            collection=collection,
+            filter={},
+            data=data
+        )
+
     def _update_many(self, collection: str, query: dict, update: dict):
         """
         update all documents that match the filter from a collection.
