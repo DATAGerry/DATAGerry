@@ -37,12 +37,7 @@ export class CategoryAddComponent implements OnInit {
   ngOnInit() {
     this.categoryAddForm = new FormGroup({
       name: new FormControl('', Validators.required),
-      label: new FormControl('', Validators.required),
-      root: new FormControl({value: false, disabled: true}, Validators.required)
-    });
-
-    this.categoryService.getRootCategory().subscribe((category: CmdbCategory[]) => {
-      this.categoryAddForm.get('root').setValue(!category.length);
+      label: new FormControl('', Validators.required)
     });
   }
 

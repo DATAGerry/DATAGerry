@@ -52,21 +52,23 @@ def _activate_debug():
 def _check_database():
     """
     Checks whether the specified connection of the configuration is reachable.
-    Returns: True if response otherwise False
+    Returns: Datebase if response
 
     """
-
+    from cmdb.data_storage.database_connection import ServerTimeoutError
     ssc = SystemConfigReader()
     LOGGER.info(f'Checking database connection with {ssc.config_name} data')
     database_options = ssc.get_all_values_from_section('Database')
     dbm = DatabaseManagerMongo(
         **database_options
     )
-    connection_test = dbm.connector.is_connected()
+    try:
+        connection_test = dbm.connector.is_connected()
+    except ServerTimeoutError:
+        connection_test = False
     LOGGER.debug(f'Database status is {connection_test}')
     if connection_test is True:
-        dbm.connector.disconnect()
-        return connection_test
+        return dbm
     retries = 0
     while retries < 3:
         retries += 1
@@ -75,9 +77,8 @@ def _check_database():
 
         connection_test = dbm.connector.is_connected()
         if connection_test:
-            dbm.connector.disconnect()
-            return connection_test
-    return connection_test
+            return dbm
+    return None
 
 
 def _start_app():
@@ -125,14 +126,9 @@ def build_arg_parser() -> Namespace:
         prog='DATAGERRY',
         usage="usage: {} [options]".format(__title__),
     )
-    _parser.add_argument('--setup', action='store_true', default=False, dest='setup',
-                         help="init cmdb")
 
     _parser.add_argument('--keys', action='store_true', default=False, dest='keys',
                          help="init keys")
-
-    _parser.add_argument('--update', action='store_true', default=False, dest='update',
-                         help="update cmdb")
 
     _parser.add_argument('--test', action='store_true', default=False, dest='test_data',
                          help="generate and insert test data")
@@ -161,33 +157,63 @@ def main(args):
         _activate_debug()
     _init_config_reader(args.config_file)
     from cmdb.data_storage.database_connection import DatabaseConnectionError
+
+    # create / check connection database manager
+    dbm = None
     try:
-        conn = _check_database()
-        if not conn:
-            raise DatabaseConnectionError()
+        dbm = _check_database()
+        if not dbm:
+            raise DatabaseConnectionError('')
         LOGGER.info("Database connection established.")
     except CMDBError as conn_error:
         LOGGER.critical(conn_error.message)
         exit(1)
-    if args.setup:
-        from cmdb.__setup__ import SetupRoutine
-        setup_routine = SetupRoutine()
-        setup_status = None
-        try:
-            setup_status = setup_routine.setup()
-        except RuntimeError as err:
-            LOGGER.error(err)
-            setup_status = setup_routine.get_setup_status()
-            LOGGER.warning(f'The setup did not go through as expected - Status {setup_status}')
 
-        if setup_status == SetupRoutine.SetupStatus.FINISHED:
-            pass
+    # check db-settings and run update if needed
+    if args.start:
+        from cmdb.__check__ import CheckRoutine
+        check_routine = CheckRoutine(dbm)
+        # check db-settings
+        try:
+            check_status = check_routine.checker()
+        except Exception as err:
+            LOGGER.error(err)
+            check_status = check_routine.get_check_status()
+            LOGGER.error(f'The check did not go through as expected. Please run an update. \n Error: {err}')
+        if check_status == CheckRoutine.CheckStatus.HAS_UPDATES:
+            # run update
+            from cmdb.__update__ import UpdateRoutine
+            update_routine = UpdateRoutine()
+            try:
+                update_status = update_routine.start_update()
+            except RuntimeError as err:
+                LOGGER.error(err)
+                update_status = update_routine.get_updater_status()
+                LOGGER.warning(f'The update did not go through as expected - Status {update_status}')
+            if update_status == UpdateRoutine.UpateStatus.FINISHED:
+                check_status = CheckRoutine.CheckStatus.FINISHED
+            else:
+                exit(1)
+        if check_status == CheckRoutine.CheckStatus.FINISHED:
+            # run setup if needed
+            from cmdb.__setup__ import SetupRoutine
+            setup_routine = SetupRoutine(dbm)
+            try:
+                setup_status = setup_routine.setup()
+            except RuntimeError as err:
+                LOGGER.error(err)
+                setup_status = setup_routine.get_setup_status()
+                LOGGER.warning(f'The setup did not go through as expected - Status {setup_status}')
+            if setup_status == SetupRoutine.SetupStatus.FINISHED:
+                pass
+            else:
+                exit(1)
         else:
-            exit(1)
+            pass
 
     if args.keys:
         from cmdb.__setup__ import SetupRoutine
-        setup_routine = SetupRoutine()
+        setup_routine = SetupRoutine(dbm)
         setup_status = None
         try:
             setup_routine.init_keys()
@@ -197,22 +223,6 @@ def main(args):
             LOGGER.warning(f'The key generation did not go through as expected - Status {setup_status}')
         if setup_status == SetupRoutine.SetupStatus.FINISHED:
             exit(0)
-        else:
-            exit(1)
-
-    if args.update:
-        from cmdb.__setup__ import SetupRoutine
-        setup_routine = SetupRoutine()
-        setup_status = None
-        try:
-            setup_status = setup_routine.update_database_collection()
-        except RuntimeError as err:
-            LOGGER.error(err)
-            setup_status = setup_routine.get_setup_status()
-            LOGGER.warning(f'The setup did not go through as expected - Status {setup_status}')
-
-        if setup_status == SetupRoutine.SetupStatus.FINISHED:
-            pass
         else:
             exit(1)
 
@@ -239,6 +249,7 @@ def main(args):
             traceback.print_tb(e.__traceback__)
             dbm.drop(db_name)  # cleanup database
             exit(1)
+
     if args.start:
         _start_app()
     sleep(0.2)  # prevent logger output

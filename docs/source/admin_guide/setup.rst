@@ -187,13 +187,6 @@ If all requirements were installed, we'll can install the downloaded DATAGERRY R
 
 To change the parameters for connecting to MongoDB and RabbitMQ, edit the configuration file /etc/datagerry/cmdb.conf
 
-Now, the database structure can be created:
-
-.. code-block:: console
-
-    $ datagerry -c /etc/datagerry/cmdb.conf --setup
-
-
 After that, activate and start DATAGERRY with Systemd:
 
 .. code-block:: console
@@ -257,13 +250,6 @@ Extract the provided tar.gz archive and execute the setup script as root:
 
 To change the parameters for connecting to MongoDB and RabbitMQ, edit the configuration file /etc/datagerry/cmdb.conf
 
-Now, the database structure can be created:
-
-.. code-block:: console
-
-    $ datagerry -c /etc/datagerry/cmdb.conf --setup
-
-
 After that, activate and start DATAGERRY with Systemd:
 
 .. code-block:: console
@@ -296,3 +282,11 @@ following example configuration for Nginx (nginx.conf):
 
 This will Nginx listen on port 80 (HTTP) and 443 (HTTPS) and create a redirect from HTTP to HTTPS. If someone access 
 *https://<host>/*, Nginx will contact *http://127.0.0.1:4000*, where DATAGERRY is listening.
+
+
+
+Update DATAGERRY
+================
+To update DATAGERRY to a new version, simply install the new version and start DATAGERRY. During the first start,
+DATAGERRY will detect the version of the existing database and apply required updates. This may take a few seconds or
+minutes. After that, the application will be started. 

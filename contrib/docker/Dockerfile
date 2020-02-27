@@ -14,4 +14,4 @@ RUN rpm -ivh /tmp/DATAGERRY-*.rpm \
 ENV LANG ${build_locale}.utf8
 
 # start DATAGERRY
-CMD ["/usr/bin/datagerry", "-c", "/etc/datagerry/cmdb.conf", "--setup", "-s"]
+CMD ["/usr/bin/datagerry", "-c", "/etc/datagerry/cmdb.conf", "-s"]

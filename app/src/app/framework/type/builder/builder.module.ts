@@ -21,7 +21,7 @@ import { CommonModule } from '@angular/common';
 import { BuilderComponent } from './builder.component';
 import { DndModule } from 'ngx-drag-drop';
 import { RenderModule } from '../../render/render.module';
-import { FormsModule } from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { ConfigEditComponent } from './configs/config-edit.component';
 import { TextFieldEditComponent } from './configs/edits/text-field-edit.component';
@@ -37,6 +37,7 @@ import {NgbDatepickerModule, NgbModalModule} from '@ng-bootstrap/ng-bootstrap';
 import { RenderElementComponent } from '../../render/render-element/render-element.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { DateFieldEditComponent } from './configs/edits/date-field-edit.component';
+import { AddCategoryModalComponent } from './modals/add-category-modal/add-category-modal.component';
 
 @NgModule({
   entryComponents: [
@@ -50,6 +51,7 @@ import { DateFieldEditComponent } from './configs/edits/date-field-edit.componen
     DateFieldEditComponent,
     PreviewModalComponent,
     DiagnosticModalComponent,
+    AddCategoryModalComponent,
     RenderElementComponent
   ],
   declarations: [
@@ -64,7 +66,8 @@ import { DateFieldEditComponent } from './configs/edits/date-field-edit.componen
     CheckFieldEditComponent,
     PreviewModalComponent,
     DiagnosticModalComponent,
-    DateFieldEditComponent
+    DateFieldEditComponent,
+    AddCategoryModalComponent
   ],
   imports: [
     CommonModule,
@@ -74,7 +77,8 @@ import { DateFieldEditComponent } from './configs/edits/date-field-edit.componen
     NgbModalModule,
     NgSelectModule,
     FontAwesomeModule,
-    NgbDatepickerModule
+    NgbDatepickerModule,
+    ReactiveFormsModule
   ],
   exports: [
     BuilderComponent

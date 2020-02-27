@@ -12,7 +12,6 @@
   <thead>
   <tr>
     <th scope="col">ID</th>
-    <th scope="col">State</th>
     <th scope="col">Label</th>
     <th scope="col">Parent</th>
     <th scope="col" *permissionLink="['base.framework.category.edit', 'base.framework.category.delete']">Action</th>
@@ -21,21 +20,18 @@
   <tbody>
   <tr *ngFor="let category of categoryList">
     <th scope="row">{{category.public_id}}</th>
-    <td><span [className]="category.root == true ? 'badge badge-primary' : ' badge badge-secondary'">
-      {{category.root == true ? 'root' : 'basic'}}</span>
-    </td>
     <td>{{category.label}}</td>
-    <td>{{categoryService.findCategory(category.parent_id)?.name}}</td>
+    <td>
+      <h6><span [className]="categoryService.findCategory(category.parent_id)?.name ? 'badge badge-secondary' : ''">
+      {{categoryService.findCategory(category.parent_id)?.label}}</span></h6>
+    </td>
     <td *permissionLink="['base.framework.category.edit', 'base.framework.category.delete']">
       <a *permissionLink="'base.framework.category.edit'"
          class="ml-1 text-dark" [routerLink]="['/framework/category/edit/', category?.public_id]">
         <fa-icon [icon]="['far', 'edit']"></fa-icon>
       </a>
       <ng-container *permissionLink="'base.framework.category.delete'">
-        <a class="ml-1 text-dark" *ngIf="category.root" [swal]="['Oops!', 'Sry root can not be deleted', 'warning']">
-          <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
-        </a>
-        <a class="ml-1 text-dark" *ngIf="!category.root" (click)="onDelete(category.public_id)">
+        <a class="ml-1 text-dark" (click)="onDelete(category.public_id)">
           <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
         </a>
       </ng-container>

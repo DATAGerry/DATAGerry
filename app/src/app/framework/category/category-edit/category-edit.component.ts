@@ -35,8 +35,7 @@ export class CategoryEditComponent implements OnInit {
   ngOnInit() {
     this.categoryEditForm = new FormGroup({
       name: new FormControl('', Validators.required),
-      label: new FormControl('', Validators.required),
-      root: new FormControl({value: true, disabled: true}, Validators.required)
+      label: new FormControl('', Validators.required)
     });
   }
 

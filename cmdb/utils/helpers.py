@@ -18,6 +18,8 @@
 Collection of different helper classes and functions
 """
 import re
+import time
+import sys
 import importlib
 
 
@@ -85,3 +87,27 @@ def str_to_bool(s):
         return False
     else:
         raise ValueError
+
+
+def process_bar(name, total, progress):
+    """
+    Displays or updates a console progress bar.
+    Args:
+        name: Process bar name
+        total: max. processes
+        progress: current process
+    """
+    through_of = "\t| [%s/%s]" % (progress, total)
+    bar_length, status = 50, ""
+    progress = float(progress) / float(total)
+    if progress >= 1.:
+        progress, status = 1, "\r\n"
+    block = int(round(bar_length * progress))
+    text = '\r{}:[{}] {:.0f}% {} {} \n'.format(
+        name,
+        "#" * block + "-" * (bar_length - block),
+        round(progress * 100, 0),
+        through_of,
+        status)
+    sys.stdout.write(text)
+    sys.stdout.flush()

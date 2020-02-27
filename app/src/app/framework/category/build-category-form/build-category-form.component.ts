@@ -87,21 +87,12 @@ export class BuildCategoryFormComponent implements OnInit, AfterContentInit {
       () => {
         this.categoryForm.get('label').setValue(this.category.label);
         this.categoryForm.get('name').setValue(this.category.name);
-        this.categoryForm.get('root').setValue(this.category.root);
 
-        if (this.category.root) {
-          this.typeService.getTypeListByCategory(0).subscribe((typeList: CmdbType[]) => {
-            this.typeList = [];
-            this.categoryList = [];
-            this.assignedTypes = typeList;
-            this.toUpdateTypes = typeList;
-          });
-        } else {
-          this.typeService.getTypeListByCategory(this.categoryID).subscribe((typeList: CmdbType[]) => {
-            this.assignedTypes = typeList;
-            this.toUpdateTypes = typeList;
-          });
-        }
+        this.typeService.getTypeListByCategory(this.categoryID).subscribe((typeList: CmdbType[]) => {
+          this.assignedTypes = typeList;
+          this.toUpdateTypes = typeList;
+        });
+
         if (this.category.parent_id !== 0) {
           this.categoryService.getCategory(this.category.parent_id).subscribe((value: CmdbCategory) => {
             this.parentCategories.push(value);
@@ -118,7 +109,7 @@ export class BuildCategoryFormComponent implements OnInit, AfterContentInit {
         this.spinner.hide();
       });
     }
-    this.typeService.getTypeListByCategory(0).subscribe((typeList: CmdbType[]) => {
+    this.typeService.getUncategorizedTypes().subscribe((typeList: CmdbType[]) => {
       this.typeList = typeList;
     });
   }
@@ -175,9 +166,7 @@ export class BuildCategoryFormComponent implements OnInit, AfterContentInit {
     const tmpCategory: CmdbCategory = this.category;
     tmpCategory.name = this.categoryForm.get('name').value;
     tmpCategory.label = this.categoryForm.get('label').value;
-    tmpCategory.root = this.categoryForm.get('root').value;
     tmpCategory.parent_id = this.parentCategories.length > 0 ? this.parentCategories.pop().public_id : 0;
-    tmpCategory.parent_id = tmpCategory.root ? 0 : tmpCategory.parent_id;
 
     if (this.mode === CategoryMode.Create) {
       this.addCategory(tmpCategory);
@@ -187,22 +176,15 @@ export class BuildCategoryFormComponent implements OnInit, AfterContentInit {
   }
 
   public addCategory(tmpCategory: CmdbCategory): void {
-    this.categoryService.getRootCategory().subscribe( (root: CmdbCategory[]) => {
-      if (root.length) {
-        tmpCategory.parent_id = tmpCategory.parent_id === 0 ? root[0].public_id : tmpCategory.parent_id;
-      }
-    }, (error) => {console.log(error); },
+    this.categoryService.postCategory(tmpCategory).subscribe(resp => {
+        tmpCategory.public_id = +resp;
+      }, (error) => {
+        console.error(error);
+      },
       () => {
-        this.categoryService.postCategory(tmpCategory).subscribe(resp => {
-            tmpCategory.public_id = +resp;
-          }, (error) => {
-            console.error(error);
-          },
-          () => {
-            this.reloadData('Category was created');
-          });
-        this.categoryForm.reset();
+        this.reloadData('Category # ' + tmpCategory.public_id + ' was created');
       });
+    this.categoryForm.reset();
   }
 
   public editCategory(tmpCategory: CmdbCategory): void {
@@ -211,7 +193,7 @@ export class BuildCategoryFormComponent implements OnInit, AfterContentInit {
     }, (error) => {
       console.error(error);
     }, () => {
-      this.reloadData('Category was updated');
+      this.reloadData('Category # ' + tmpCategory.public_id + ' was updated');
     });
   }
 
@@ -221,9 +203,13 @@ export class BuildCategoryFormComponent implements OnInit, AfterContentInit {
     }, (error) => {
       console.log(error);
     }, () => {
-      this.toUpdateTypes.forEach( type => {
-        type.category_id = type.category_id === undefined ? this.category.public_id : type.category_id;
-        this.typeService.putType(type).subscribe((updateResp: CmdbType) => {
+      this.toUpdateTypes.forEach( typeInstance => {
+        if (typeInstance.hasOwnProperty('total')) {
+          const total = 'total';
+          delete typeInstance[total];
+        }
+        typeInstance.category_id = typeInstance.category_id === undefined ? this.category.public_id : typeInstance.category_id;
+        this.typeService.putType(typeInstance).subscribe((updateResp: CmdbType) => {
           console.log(updateResp.public_id);
         });
       });

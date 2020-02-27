@@ -95,6 +95,107 @@ Currently the follwowing ExternalSystems are supported:
     :header: "ExternalSystem", "description"
     :align: left
 
-    "ExternalSystemOpenNMS", "Add nodes to the monitoring system OpenNMS with the OpenNMS REST API"
     "ExternalSystemDummy", "A dummy for testing Exportd - will only print some debug output"
+    "ExternalSystemExcuteScript", "Executes a script on the DATAGERRY machine"
+    "ExternalSystemGenericRestCall", "Sends a HTTP POST to an userdefined URL"
+    "ExternalSystemOpenNMS", "Add nodes to the monitoring system OpenNMS with the OpenNMS REST API"
+
+
+ExternalSystemExecuteScript
+---------------------------
+This class will execute an external script or binary on the DATAGERRY machine. A JSON structure with object IDs and
+export variables will be passed to the external script/binary via stdin. 
+
+The exporter class has the following parameters:
+
+.. csv-table::
+    :header: "parameter", "required", "description"
+    :align: left
+
+    "script", "True", "full path to the script that should be executed"
+    "timeout", "True", "timeout for executing the script"
+
+
+You can define any export variables. All defined export variables will be sent to the executed script/binary via stdin
+within a JSON structure. Please see the following section for an example JSON structure:
+
+.. code-block:: json
+
+    [
+        {
+            "object_id": 1234,
+            "variables": 
+                {
+                    "var1": "value1",
+                    "var2": "value2"
+                }
+        },
+        {
+            "object_id": 1235,
+            "variables": 
+                {
+                    "var1": "value1",
+                    "var2": "value2"
+                }
+        }
+    ]
+
+
+As executing a script or binary on the machine can be a bit of a security concern, we added some extra security feature
+for this exporter class. DATAGERRY will look for a file named *.datagerry_exec.json* inside the directory for the script
+that should be executed. In that file, every script or binary that should be executed by DATAGERRY needs to be listed.
+Please see the following example file:
+
+.. code-block:: json
+
+    {
+        "allowed_scripts": ["test2.py"]
+    }
+
+
+DATAGERRY will not execute scripts, that are not listed in a *.datagerry_exec.json* file.
+
+
+
+ExternalSystemGenericRestCall
+-----------------------------
+This class will send an HTTP POST request to an user-defined URL. A JSON structure with object IDs and export variables 
+will be sent as data within the HTTP request. 
+
+The exporter class has the following parameters:
+
+.. csv-table::
+    :header: "parameter", "required", "description"
+    :align: left
+
+    "url", "True", "URL for HTTP POST request"
+    "timeout", "True", "timeout for executing the REST call in seconds"
+    "username", "False", "Username for a HTTP basic authentication. If empty, no authentication will be done."
+    "password", "False", "Password for a HTTP basic authentication."
+
+
+You can define any export variables. All defined export variables will be sent as JSON structure within the HTTP
+request. Please see the following section for an example JSON structure:
+
+.. code-block:: json
+
+    [
+        {
+            "object_id": 1234,
+            "variables": 
+                {
+                    "var1": "value1",
+                    "var2": "value2"
+                }
+        },
+        {
+            "object_id": 1235,
+            "variables": 
+                {
+                    "var1": "value1",
+                    "var2": "value2"
+                }
+        }
+    ]
+
 

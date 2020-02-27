@@ -230,7 +230,7 @@ class CmdbObjectManager(CmdbManagerBase):
             data=update_object.to_database()
         )
         # create cmdb.core.object.updated event
-        if self._event_queue:
+        if self._event_queue and request_user:
             event = Event("cmdb.core.object.updated", {"id": update_object.get_public_id(),
                                                        "type_id": update_object.get_type_id(),
                                                        "user_id": request_user.get_public_id()})
@@ -353,6 +353,24 @@ class CmdbObjectManager(CmdbManagerBase):
 
         return self.dbm.aggregate(CmdbType.COLLECTION, agr)
 
+    def get_type_aggregate(self, arguments):
+        """This method does not actually
+           performs the find() operation
+           but instead returns
+           a objects sorted by value of the documents that meet the selection criteria.
+
+           Args:
+               arguments: query search for
+           Returns:
+               returns the list of CMDB Types sorted by value of the documents
+           """
+        type_list = []
+        cursor = self.dbm.aggregate(CmdbType.COLLECTION, arguments)
+        for document in cursor:
+            put_data = json.loads(json_util.dumps(document), object_hook=object_hook)
+            type_list.append(CmdbType(**put_data))
+        return type_list
+
     def insert_type(self, data: (CmdbType, dict)):
         if isinstance(data, CmdbType):
             new_type = data
@@ -432,7 +450,7 @@ class CmdbObjectManager(CmdbManagerBase):
                 continue
         return ack
 
-    def _get_category_nodes(self, parent_list: list) -> dict:
+    def _get_category_nodes(self, parent_list: list):
         edge = []
         for cat_child in parent_list:
             next_children = self.get_categories_by(_filter={'parent_id': cat_child.get_public_id()})
@@ -458,15 +476,31 @@ class CmdbObjectManager(CmdbManagerBase):
         })
         if len(root_categories) > 0:
             tree = self._get_category_nodes(root_categories)
+            all_categories = self.get_all_categories()
+            category_pid_list = []
+            for category in all_categories:
+                category_pid_list.append(category.get_public_id())
+            if self.get_types_by(**{'category_id': {'$nin': category_pid_list}}):
+                tree.append(
+                    {'category': {
+                        'icon': 'fas fa-exclamation-triangle',
+                        'label': 'Uncategorized',
+                        'name': 'uncategorized',
+                        'parent_id': 0,
+                        'public_id': 0
+                    }}
+                )
         else:
             raise NoRootCategories()
         return tree
 
     def get_category(self, public_id: int):
-        return CmdbCategory(**self.dbm.find_one(
-            collection=CmdbCategory.COLLECTION,
-            public_id=public_id)
-                            )
+        try:
+            return CmdbCategory(**self.dbm.find_one(
+                collection=CmdbCategory.COLLECTION,
+                public_id=public_id))
+        except (CMDBError, Exception) as e:
+            raise ObjectManagerGetError(err=e)
 
     def insert_category(self, data: (CmdbCategory, dict)):
         if isinstance(data, CmdbCategory):
@@ -541,6 +575,15 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def delete_status(self, public_id: int):
         return NotImplementedError
+
+    # DOKUMENT FIELD CRUD
+    def unset_update(self, collection: str, field: str):
+        try:
+            ack = self._unset_update_many(collection, field)
+        except (CMDBError, Exception) as err:
+            LOGGER.error(err)
+            raise ObjectManagerUpdateError(err)
+        return ack.acknowledged
 
     # COLLECTIONS/TEMPLATES CRUD
     def get_collections(self) -> list:
