@@ -482,8 +482,9 @@ class CmdbObjectManager(CmdbManagerBase):
         })
         if len(root_categories) > 0:
             tree = self._get_category_nodes(root_categories)
+            all_categories = self.get_all_categories()
             category_pid_list = []
-            for category in root_categories:
+            for category in all_categories:
                 category_pid_list.append(category.get_public_id())
             if self.get_types_by(**{'category_id': {'$nin': category_pid_list}}):
                 tree.append(

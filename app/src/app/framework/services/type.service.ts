@@ -116,7 +116,8 @@ export class TypeService<T = CmdbType> implements ApiService {
   }
 
   public getUncategorizedTypes(): Observable<any> {
-    return this.api.callGet<T[]>(this.servicePrefix + '/uncategorized/').pipe(
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) };
+    return this.api.callGet<T[]>(this.servicePrefix + '/uncategorized/', this.http, httpObserveOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
