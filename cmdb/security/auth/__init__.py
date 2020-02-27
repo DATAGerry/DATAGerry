@@ -26,7 +26,7 @@ from cmdb.security.auth.providers.internal_providers import LocalAuthenticationP
 from cmdb.security.auth.provider_config import AuthProviderConfig
 from cmdb.user_management import UserManager, User
 from cmdb.user_management.user_manager import UserManagerGetError
-from cmdb.utils import SystemSettingsReader
+from cmdb.utils.system_reader import SystemSettingsReader
 
 LOGGER = logging.getLogger(__name__)
 

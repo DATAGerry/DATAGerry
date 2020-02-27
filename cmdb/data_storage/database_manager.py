@@ -271,9 +271,6 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
     def get_database_name(self):
         return self.connector.get_database_name()
 
-    def search(self, collection: str, *args, **kwargs):
-        return self.__find(collection, *args, **kwargs)
-
     def __find(self, collection: str, *args, **kwargs):
         """general find function for database search
 
@@ -498,7 +495,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return result
 
     def create(self, db_name: str):
-        """create database/collection
+        """create database
 
         Args:
             db_name (str): name of database

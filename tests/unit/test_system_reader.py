@@ -35,6 +35,6 @@ class TestSystemReader:
 class TestSystemConfigReader:
 
     def test_config_less_instance(self):
-        from cmdb.utils.system_reader import SystemConfigReader
+        from cmdb.utils.system_config import SystemConfigReader
         system_config_reader = SystemConfigReader()
         assert system_config_reader.config_file_less is True

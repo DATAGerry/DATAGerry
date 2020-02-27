@@ -16,19 +16,19 @@
 
 import logging
 from datetime import datetime
-from typing import List, ClassVar
+from typing import List
 
 from flask import request, current_app, abort
 
 from cmdb.interface.route_utils import make_response, RootBlueprint, login_required, insert_request_user, right_required
-from cmdb.security.auth import AuthModule, AuthSettingsDAO, AuthenticationProvider
-from cmdb.security.auth.auth_errors import AuthenticationError, AuthenticationProviderNotExistsError, \
+from cmdb.security.auth import AuthModule, AuthSettingsDAO
+from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, \
     AuthenticationProviderNotActivated
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import User
 from cmdb.user_management.user_manager import UserManager
-from cmdb.user_management.user_manager import UserManagerGetError
-from cmdb.utils import SystemSettingsReader, SystemSettingsWriter
+from cmdb.utils.system_reader import SystemSettingsReader
+from cmdb.utils.system_writer import SystemSettingsWriter
 
 try:
     from cmdb.utils.error import CMDBError

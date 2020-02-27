@@ -20,7 +20,8 @@ from flask import current_app, request, abort
 
 from cmdb.interface.route_utils import RootBlueprint, make_response, insert_request_user, login_required
 from cmdb.search import Search
-from cmdb.search.query import Query
+from cmdb.search.query import Query, Pipeline
+from cmdb.search.query.pipe_builder import PipelineBuilder
 from cmdb.search.query.query_builder import QueryBuilder
 from cmdb.search.searchers import SearcherFramework
 from cmdb.user_management.user import User
@@ -37,13 +38,31 @@ LOGGER = logging.getLogger(__name__)
 search_blueprint = RootBlueprint('search_rest', __name__, url_prefix='/search')
 
 
+@search_blueprint.route('/quick/count/<string:regex>', methods=['GET'])
+@login_required
+@insert_request_user
+def quick_search_result_counter(regex: str, request_user: User):
+    plb = PipelineBuilder()
+    regex = plb.regex_('fields.value', f'{regex}', 'imsx')
+    pipe_match = plb.match_(regex)
+    plb.add_pipe(pipe_match)
+    pipe_count = plb.count_('count')
+    plb.add_pipe(pipe_count)
+    pipeline = plb.pipeline
+    sf = SearcherFramework(object_manager)
+    result = list(sf.aggregate(pipeline))
+    if len(result) > 0:
+        return make_response(result[0]['count'])
+    else:
+        return make_response(0)
+
+
 @search_blueprint.route('/', methods=['GET', 'POST'])
 @login_required
 @insert_request_user
 def search_framework(request_user: User):
     try:
         limit = request.args.get('limit', Search.DEFAULT_LIMIT, int)
-        LOGGER.debug(f'[SearchRoutes][Limit]: {limit}')
         skip = request.args.get('skip', Search.DEFAULT_SKIP, int)
         search_parameters: dict = request.args.get('query') or '{}'
     except ValueError as err:
@@ -59,10 +78,10 @@ def search_framework(request_user: User):
         LOGGER.error(f'[Search Framework]: {err}')
         return abort(400, err)
 
-    query_builder = QueryBuilder()
-    query: Query = query_builder.build(search_parameters)
+    builder = PipelineBuilder()
+    query: Pipeline = builder.build(search_parameters)
 
     searcher = SearcherFramework(manager=object_manager)
-    result = searcher.search(query=query, request_user=request_user, limit=limit, skip=skip)
+    result = searcher.aggregate(pipeline=query, request_user=request_user, limit=limit, skip=skip)
 
     return make_response(result)

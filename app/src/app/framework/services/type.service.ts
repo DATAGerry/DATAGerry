@@ -18,11 +18,11 @@
 
 import { Injectable } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
-import {ApiCallService, ApiService, HttpInterceptorHandler, resp} from '../../services/api-call.service';
+import { ApiCallService, ApiService, HttpInterceptorHandler, resp } from '../../services/api-call.service';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
-import {HttpBackend, HttpClient, HttpHeaders} from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpHeaders } from '@angular/common/http';
 import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
 import { AuthService } from '../../auth/services/auth.service';
 
@@ -85,6 +85,14 @@ export class TypeService<T = CmdbType> implements ApiService {
 
   public getTypeList(): Observable<T[]> {
     return this.api.callGet<CmdbType[]>(this.servicePrefix + '/').pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public getTypesBy(regex: string): Observable<T[]> {
+    return this.api.callGet<CmdbType[]>(this.servicePrefix + '/by/' + regex).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })

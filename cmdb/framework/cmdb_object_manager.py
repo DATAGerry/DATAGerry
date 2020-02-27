@@ -40,7 +40,7 @@ from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.framework.cmdb_type import CmdbType
-from cmdb.search.query import Query
+from cmdb.search.query import Query, Pipeline
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import User
 
@@ -58,10 +58,9 @@ class CmdbObjectManager(CmdbManagerBase):
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
 
-    def search(self, collection, query: Query, *args, **kwargs) -> List:
-        LOGGER.debug(f'[ObjectManager][Search] {args} | {kwargs}')
+    def search(self, collection, pipeline: Pipeline, *args, **kwargs) -> List:
         try:
-            return self._search(collection=collection, query=query, **kwargs)
+            return self._search(collection=collection, pipeline=pipeline, **kwargs)
         except Exception as err:
             raise ObjectManagerGetError(err)
 
@@ -423,19 +422,14 @@ class CmdbObjectManager(CmdbManagerBase):
                 LOGGER.debug(e.message)
         return ack
 
-    def get_categories_by(self, _filter: dict) -> list:
-        """
-        get all categories by requirements
-        """
+    def get_categories_by(self, sort='public_id', **requirements: dict) -> List[CmdbCategory]:
         ack = []
-        query_filter = _filter
-        root_categories = self.dbm.find_all(collection=CmdbCategory.COLLECTION, filter=query_filter)
-        for cat_obj in root_categories:
+        categories = self._get_many(collection=CmdbCategory.COLLECTION,  sort=sort, **requirements)
+        for cat_obj in categories:
             try:
                 ack.append(CmdbCategory(**cat_obj))
             except CMDBError as e:
-                LOGGER.debug("Error while parsing Category")
-                LOGGER.debug(e.message)
+                continue
         return ack
 
     def _get_category_nodes(self, parent_list: list) -> dict:
@@ -456,7 +450,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_category_tree(self) -> dict:
         tree = list()
-        root_categories = self.get_categories_by(_filter={
+        root_categories = self.get_categories_by(**{
             '$or': [
                 {'parent_id': {'$exists': False}},
                 {'parent_id': 0}

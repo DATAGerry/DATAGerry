@@ -24,7 +24,7 @@ from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import load_class
-from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.utils.system_config import SystemConfigReader
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
 from cmdb.framework.cmdb_render import CmdbRender, RenderList

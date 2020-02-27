@@ -14,16 +14,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import logging
-from typing import List
 
-from cmdb.framework import CmdbObject
+from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.framework.cmdb_render import RenderList, RenderResult
 from cmdb.search import Search
-from cmdb.search.query import Query
+from cmdb.search.query import Query, Pipeline
 from cmdb.search.search_result import SearchResults
 from cmdb.user_management import User
-from cmdb.utils.error import CMDBError
 
 LOGGER = logging.getLogger(__name__)
 
@@ -33,19 +30,16 @@ class SearcherFramework(Search[CmdbObjectManager]):
     def __init__(self, manager: CmdbObjectManager):
         super(SearcherFramework, self).__init__(manager=manager)
 
+    def aggregate(self, pipeline: Pipeline, request_user: User = None, limit: int = Search.DEFAULT_LIMIT,
+                  skip: int = Search.DEFAULT_SKIP, *args, **kwargs) -> SearchResults:
+        LOGGER.debug(pipeline)
+        search_result = self.manager.search(collection=CmdbObject.COLLECTION, pipeline=pipeline)
+        LOGGER.debug(search_result)
+        return None
+
     def search(self, query: Query, request_user: User = None, limit: int = Search.DEFAULT_LIMIT,
                skip: int = Search.DEFAULT_SKIP) -> SearchResults:
         raw_search_result = self.manager.search(collection=CmdbObject.COLLECTION, query=query, limit=limit, skip=skip)
         raw_result_list = list(raw_search_result)
-        object_list: List[CmdbObject] = []
-        for _ in raw_result_list:
-            try:
-                object_list.append(CmdbObject(**_))
-            except CMDBError:
-                # Remove object if not valid
-                raw_result_list.remove(_)
-                continue
-        render_list = RenderList(object_list=object_list, request_user=request_user).render_result_list()
-        result = SearchResults[RenderResult](render_list, total_results=raw_search_result.count(), limit=limit,
-                                             skip=skip)
-        return result
+
+        return raw_search_result

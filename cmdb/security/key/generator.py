@@ -15,8 +15,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
-from cmdb.utils import SystemSettingsWriter
-from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.utils.system_writer import SystemSettingsWriter
+from cmdb.utils.system_config import SystemConfigReader
 
 
 class KeyGenerator:

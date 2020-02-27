@@ -21,7 +21,7 @@ import {catchError, map, switchMap} from 'rxjs/operators';
 import {ApiCallService, ApiService, HttpInterceptorHandler} from '../../services/api-call.service';
 import { CmdbCategory } from '../models/cmdb-category';
 import { FormControl } from '@angular/forms';
-import { timer } from 'rxjs';
+import { Observable, timer } from 'rxjs';
 import {HttpBackend, HttpClient} from '@angular/common/http';
 import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
 
@@ -69,6 +69,14 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
         if (apiResponse.status === 204) {
           return [];
         }
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public getCategoriesBy(regex: string): Observable<T[]> {
+    return this.api.callGet<CmdbCategory[]>(this.servicePrefix + '/by/' + regex).pipe(
+      map((apiResponse) => {
         return apiResponse.body;
       })
     );

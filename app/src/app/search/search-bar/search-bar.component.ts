@@ -18,10 +18,10 @@
 
 import {
   Component,
-  ElementRef,
+  ElementRef, NgZone,
   OnDestroy,
   OnInit,
-  QueryList,
+  QueryList, Renderer2,
   ViewChild,
   ViewChildren
 } from '@angular/core';
@@ -31,6 +31,11 @@ import { CmdbType } from '../../framework/models/cmdb-type';
 import { Subscription } from 'rxjs';
 import { SearchBarTagComponent } from './search-bar-tag/search-bar-tag.component';
 import { ActivatedRoute, NavigationEnd, Route, Router } from '@angular/router';
+import { FormControl, FormGroup } from '@angular/forms';
+import { debounceTime } from 'rxjs/operators';
+import { CategoryService } from '../../framework/services/category.service';
+import { CmdbCategory } from '../../framework/models/cmdb-category';
+import { SearchService } from '../search.service';
 
 @Component({
   selector: 'cmdb-search-bar',
@@ -41,21 +46,35 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   // Child components
   @ViewChild('tagInput', { static: false }) tagInput: ElementRef;
+  @ViewChild('inputDropdown', { static: false }) inputDropdown: ElementRef;
   @ViewChildren(SearchBarTagComponent) searchBarTagComponents: QueryList<SearchBarTagComponent>;
 
   // Tags data
   public tags: SearchBarTag[] = [];
-  public typeList: CmdbType[] = [];
+
+  // Form
+  public searchBarForm: FormGroup;
+
+  // Dropdown
+  public possibleTextResults: number = 0;
+  public possibleTypes: CmdbType[] = [];
+  public possibleCategories: CmdbCategory[] = [];
 
   // Subscriptions
   private routeChangeSubscription: Subscription;
-  private typeListSubscription: Subscription;
+  private textRegexSubscription: Subscription;
+  private typeRegexSubscription: Subscription;
+  private inputControlSubscription: Subscription;
 
-  constructor(private router: Router, private route: ActivatedRoute, private typeService: TypeService) {
-    this.tags = [];
-    this.typeList = [];
-    this.typeListSubscription = new Subscription();
-    this.routeChangeSubscription = this.router.events.subscribe((event) => {
+  constructor(private router: Router, private route: ActivatedRoute, private searchService: SearchService,
+              private typeService: TypeService, private categoryService: CategoryService) {
+    this.searchBarForm = new FormGroup({
+      inputControl: new FormControl('')
+    });
+    this.textRegexSubscription = new Subscription();
+    this.typeRegexSubscription = new Subscription();
+    this.inputControlSubscription = new Subscription();
+    /*this.routeChangeSubscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         const searchQuery = this.route.snapshot.queryParams.query;
         if (searchQuery !== undefined) {
@@ -64,40 +83,51 @@ export class SearchBarComponent implements OnInit, OnDestroy {
           this.tags = [];
         }
       }
-    });
+    });*/
   }
 
   public ngOnInit(): void {
-    this.typeListSubscription = this.typeService.getTypeList().subscribe((typeList: CmdbType[]) => {
-      this.typeList = typeList;
+
+    this.inputControl.valueChanges.pipe(debounceTime(300)).subscribe((changes: string) => {
+      if (changes !== '') {
+        /*this.textRegexSubscription = this.searchService.getEstimateValueResults(changes).subscribe((counter: number) => {
+          this.possibleTextResults = counter;
+        });*/
+        this.typeRegexSubscription = this.typeService.getTypesBy(changes).subscribe((typeList: CmdbType[]) => {
+          this.possibleTypes = typeList;
+        });
+        this.typeRegexSubscription = this.categoryService.getCategoriesBy(changes).subscribe((categoryList: CmdbCategory[]) => {
+          this.possibleCategories = categoryList;
+        });
+      } else {
+        this.possibleTextResults = 0;
+        this.possibleTypes = [];
+        this.possibleCategories = [];
+      }
+
     });
   }
 
-  public addTag(input: string | number, open: boolean = false) {
-    if (input !== '') {
-      const inputType = (!isNaN(+input) ? 'number' : 'string');
-      let searchForm = 'textSearch';
-      const settings = {} as SearchBarTagSettings;
-      const possibleType = this.typeList.find(x => (x.label === input || x.name === input));
-      if (possibleType) {
-        searchForm = 'typeID';
-        settings.publicID = possibleType.public_id;
-      } else if (inputType === 'string') {
-        searchForm = 'textSearch';
-      } else if (inputType === 'number') {
-        searchForm = 'publicID';
-      }
+  public get inputControl(): FormControl {
+    return this.searchBarForm.get('inputControl') as FormControl;
+  }
 
-      this.tagInput.nativeElement.value = '';
-      const index = (this.tags.push({ searchText: input, searchForm, settings } as SearchBarTag) - 1);
-      // Try to open dropdown
-      if (open) {
-        setTimeout(() => {
-          const searchTagComponent = this.searchBarTagComponents.toArray()[index];
-          searchTagComponent.toggleDropDown();
-        }, 120);
-      }
+  public addTag(searchForm: string, params?: any) {
+    const searchTerm = this.inputControl.value;
+    const tag = new SearchBarTag(searchTerm, searchForm);
+    switch (searchForm) {
+      case 'type':
+        const typeIDs: number[] = [];
+        for (const type of params) {
+          typeIDs.push(type.public_id);
+        }
+        tag.settings = { types: typeIDs } as SearchBarTagSettings;
+        break;
+      default:
+        break;
     }
+    console.log(tag);
+    console.log(params);
   }
 
   public updateTag(changes: SearchBarTag) {
@@ -132,7 +162,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy(): void {
     this.routeChangeSubscription.unsubscribe();
-    this.typeListSubscription.unsubscribe();
+    this.textRegexSubscription.unsubscribe();
+    this.typeRegexSubscription.unsubscribe();
+    this.inputControlSubscription.unsubscribe();
   }
 
 }

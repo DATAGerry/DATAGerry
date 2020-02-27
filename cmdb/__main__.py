@@ -32,7 +32,7 @@ try:
 except ImportError:
     CMDBError = Exception
 
-from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.utils.system_config import SystemConfigReader
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 
 # setup logging for startup

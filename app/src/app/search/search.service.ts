@@ -33,6 +33,14 @@ export class SearchService<T = SearchResultList> implements ApiService {
   public constructor(private api: ApiCallService) {
   }
 
+  public getEstimateValueResults(regex: string): Observable<number> {
+    return this.api.callGet<number>(this.servicePrefix + '/quick/count/' + regex).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
   public postSearch(query: any, params?: HttpParams): Observable<T> {
     const httpOptions = httpObservePostOptions;
     if (params) {

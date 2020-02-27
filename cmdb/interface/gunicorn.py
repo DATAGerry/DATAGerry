@@ -24,7 +24,7 @@ import cmdb.process_management.service
 from cmdb.interface.net_app import create_app
 from cmdb.interface.docs import create_docs_server
 from cmdb.interface.rest_api import create_rest_api
-from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.utils.system_config import SystemConfigReader
 from cmdb.utils.logger import get_logging_conf
 from gunicorn.app.base import BaseApplication
 

@@ -16,11 +16,16 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 export class SearchBarTagSettings {
-  [key: string]: string | number;
+  [key: string]: string | number | [] | any[];
 }
 
 export class SearchBarTag {
   public searchText: string | number;
   public searchForm: string;
-  public settings: SearchBarTagSettings;
+  public settings?: SearchBarTagSettings;
+
+  constructor(searchText: string | number, searchForm: string) {
+    this.searchText = searchText;
+    this.searchForm = searchForm;
+  }
 }

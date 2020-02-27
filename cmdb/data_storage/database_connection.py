@@ -37,9 +37,21 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Connector(Generic[CLIENT]):
+    """
+    Base class of the connection holder (connector).
+    This class is called by the managers, which allows an indirect forwarding to the respective database client.
+    """
     DEFAULT_CONNECTION_TIMEOUT = 3000
 
     def __init__(self, client: CLIENT, host: str, port: int, database_name: str):
+        """
+        Constructor of Connector class
+        Args:
+            client: Generic connection client instance (e.g. PyMongoClient)
+            host: ip address or hostname of the database
+            port: port of the database
+            database_name: optional table/collection name which DATAGERRY can use (e.g. CMDB)
+        """
         self.client: CLIENT = client
         self.host: str = host
         self.port: int = port

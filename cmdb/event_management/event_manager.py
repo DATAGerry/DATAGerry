@@ -24,7 +24,7 @@ import multiprocessing
 import threading
 import pika
 from cmdb.event_management.event import Event
-from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.utils.system_config import SystemConfigReader
 
 LOGGER = logging.getLogger(__name__)
 

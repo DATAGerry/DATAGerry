@@ -20,20 +20,22 @@ from typing import List
 
 from cmdb.framework.cmdb_category import CmdbCategory
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerUpdateError
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.interface.route_utils import make_response, RootBlueprint, login_required, insert_request_user, right_required
 
 from flask import request, abort, current_app
 from bson import json_util
 
+from cmdb.search.query.query_builder import QueryBuilder
 from cmdb.user_management import User
-
-with current_app.app_context():
-    object_manager = current_app.object_manager
 
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
     CMDBError = Exception
+
+with current_app.app_context():
+    object_manager: CmdbObjectManager = current_app.object_manager
 
 LOGGER = logging.getLogger(__name__)
 categories_blueprint = RootBlueprint('categories_rest', __name__, url_prefix='/category')
@@ -45,6 +47,23 @@ categories_blueprint = RootBlueprint('categories_rest', __name__, url_prefix='/c
 @right_required('base.framework.category.view')
 def get_categories(request_user: User):
     categories_list: List[CmdbCategory] = object_manager.get_all_categories()
+    if len(categories_list) == 0:
+        return make_response(categories_list, 204)
+    return make_response(categories_list)
+
+
+@categories_blueprint.route('/by/<string:regex>/', methods=['GET'])
+@categories_blueprint.route('/by/<string:regex>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.framework.category.view')
+def get_categories_by_name(regex: str, request_user: User):
+    query_builder = QueryBuilder()
+
+    query_name = query_builder.regex_('name', f'{regex}', 'imsx')
+    query_label = query_builder.regex_('label', f'{regex}', 'imsx')
+    query = query_builder.or_([query_name, query_label])
+    categories_list: List[CmdbCategory] = object_manager.get_categories_by(**query)
     if len(categories_list) == 0:
         return make_response(categories_list, 204)
     return make_response(categories_list)

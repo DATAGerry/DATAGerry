@@ -27,6 +27,7 @@ from cmdb.security.auth import AuthModule, AuthenticationProvider
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import User
 from cmdb.user_management.user_manager import UserManagerGetError, UserManager
+from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.wraps import LOGGER
 
 try:
@@ -37,7 +38,8 @@ except ImportError:
 from flask import Blueprint, request, abort, current_app
 
 from cmdb.security.token.validator import TokenValidator, ValidationError
-from cmdb.utils import json_encoding, SystemSettingsReader
+from cmdb.utils import json_encoding
+
 
 DEFAULT_MIME_TYPE = 'application/json'
 

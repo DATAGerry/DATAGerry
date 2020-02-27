@@ -50,8 +50,19 @@ class CmdbManagerBase(ABC):
         """
         return self.dbm.count(collection=collection)
 
-    def _search(self, collection: str, query, *args, **kwargs) -> List:
-        return self.dbm.search(collection, filter=query, *args, **kwargs)
+    def _search(self, collection: str, pipeline, *args, **kwargs) -> List:
+        """search after query requirements
+
+        Args:
+            collection: collection to search
+            query: query or aggregate pipe
+            *args:
+            **kwargs:
+
+        Returns:
+            list of found documents
+        """
+        return self.dbm.aggregate(collection, pipeline=pipeline, *args, **kwargs)
 
     def _get(self, collection: str, public_id: int) -> dict:
         """get document from the database by their public id
@@ -83,8 +94,8 @@ class CmdbManagerBase(ABC):
             requirements_filter.update({k: req})
         return self.dbm.find_one_by(collection=collection, filter=requirements_filter)
 
-    def _get_many(self, collection: str, sort='public_id', direction: int = -1, limit=0, **requirements: dict) -> List[
-        dict]:
+    def _get_many(self, collection: str, sort='public_id', direction: int = -1, limit=0, **requirements: dict) -> \
+            List[dict]:
         """get all documents from the database which have the passing requirements
 
         Args:

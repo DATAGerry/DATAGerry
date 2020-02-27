@@ -24,7 +24,7 @@ from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.user_management import UserManager
-from cmdb.utils import SecurityManager
+from cmdb.utils.security import SecurityManager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -36,7 +36,7 @@ LOGGER = logging.getLogger(__name__)
 
 def create_rest_api(event_queue):
     from cmdb.interface.config import app_config
-    from cmdb.utils.system_reader import SystemConfigReader
+    from cmdb.utils.system_config import SystemConfigReader
     system_config_reader = SystemConfigReader()
 
     try:
@@ -119,8 +119,8 @@ def create_rest_api(event_queue):
 
 
 def register_converters(app):
-    from cmdb.interface.custom_converters import DictConverter
-    app.url_map.converters['dict'] = DictConverter
+    from cmdb.interface.custom_converters import RegexConverter
+    app.url_map.converters['regex'] = RegexConverter
 
 
 def register_blueprints(app):

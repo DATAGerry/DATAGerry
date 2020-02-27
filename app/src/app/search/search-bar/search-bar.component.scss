@@ -7,19 +7,20 @@ $search-input-font-size: 0.8rem;
   display: inline-block;
   width: $search-bar-width;
   height: $input-height;
-  padding: $input-padding-y $input-padding-x;
   line-height: $input-line-height;
   color: $input-color;
   background-color: $input-bg;
   background-clip: padding-box;
+}
+
+#search-bar {
+
+  padding: $input-padding-y $input-padding-x;
   border: $input-border-width solid $input-border-color;
 
   @include border-radius($input-border-radius, 0);
   @include transition($input-transition);
 
-}
-
-.search-bar{
   position: relative;
   display: flex;
   flex-wrap: wrap;
@@ -48,16 +49,17 @@ $search-input-font-size: 0.8rem;
     font-size: $search-input-font-size;
   }
 
-  .search-bar-append{
+  .search-bar-append {
     display: flex;
 
-    button{
+    button {
       border: 0;
       background: 0;
       padding: 0;
       color: $gray-500;
       margin-left: .3rem;
-      &:hover{
+
+      &:hover {
         color: $gray-700;
       }
     }
@@ -65,3 +67,49 @@ $search-input-font-size: 0.8rem;
 
 }
 
+ul#search-bar-accordion {
+
+  &:focus{
+    display: block !important;
+  }
+  //display: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  list-style: none;
+  padding-left: 0;
+  background: $white;
+  position: absolute;
+  width: 100%;
+  height: auto;
+  top: 100%;
+  bottom: auto;
+  left: 0;
+  margin-left: -$input-border-width;
+  border: $input-border-width solid $input-border-color;
+
+  ul {
+    list-style: inherit;
+    padding-left: inherit;
+  }
+
+  span {
+    display: inline-block;
+    width: 100%;
+    cursor: pointer;
+    > span{
+      display: inline;
+    }
+
+    &:hover, &:focus {
+      background: $gray-200;
+    }
+
+    i {
+      font-weight: 700;
+    }
+  }
+}
+
+.search-input:focus ~ #search-bar-accordion {
+  display: block !important;
+}

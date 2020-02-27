@@ -24,7 +24,8 @@ from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.security.auth import AuthModule
 from cmdb.security.key.holder import KeyHolder
 from cmdb.security.token import DEFAULT_TOKEN_LIFETIME
-from cmdb.utils.system_reader import SystemConfigReader, SystemSettingsReader
+from cmdb.utils.system_reader import SystemSettingsReader
+from cmdb.utils.system_config import SystemConfigReader
 
 LOGGER = logging.getLogger(__name__)
 

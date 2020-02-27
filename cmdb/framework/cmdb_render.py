@@ -295,7 +295,7 @@ class RenderList:
 
     @timing('RenderList')
     def render_result_list(self) -> List[RenderResult]:
-        from cmdb.utils.system_reader import SystemConfigReader
+        from cmdb.utils.system_config import SystemConfigReader
         database_manager = DatabaseManagerMongo(
             **SystemConfigReader().get_all_values_from_section('Database')
         )

@@ -30,7 +30,7 @@ class SetupRoutine:
     def __init__(self):
         self.status = SetupRoutine.SetupStatus.NOT
         # check if settings are loaded
-        from cmdb.utils.system_reader import SystemConfigReader
+        from cmdb.utils.system_config import SystemConfigReader
         self.setup_system_config_reader = SystemConfigReader()
         system_config_reader_status = self.setup_system_config_reader.status()
         if system_config_reader_status is not True:
