@@ -161,7 +161,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   public ngOnDestroy(): void {
-    this.routeChangeSubscription.unsubscribe();
+    // ToDo: provisionally commented out. To be used later.
+    // this.routeChangeSubscription.unsubscribe();
     this.textRegexSubscription.unsubscribe();
     this.typeRegexSubscription.unsubscribe();
     this.inputControlSubscription.unsubscribe();

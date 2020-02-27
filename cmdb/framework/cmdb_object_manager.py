@@ -431,7 +431,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_all_categories(self):
         ack = []
-        cats = self.dbm.find_all(collection=CmdbCategory.COLLECTION, sort=[('public_id', 1)])
+        cats = self._get_many(collection=CmdbCategory.COLLECTION, sort='public_id')
         for cat_obj in cats:
             try:
                 ack.append(CmdbCategory(**cat_obj))
@@ -453,7 +453,7 @@ class CmdbObjectManager(CmdbManagerBase):
     def _get_category_nodes(self, parent_list: list):
         edge = []
         for cat_child in parent_list:
-            next_children = self.get_categories_by(_filter={'parent_id': cat_child.get_public_id()})
+            next_children = self.get_categories_by(**{'parent_id': cat_child.get_public_id()})
             if len(next_children) > 0:
                 edge.append({
                     'category': cat_child,
@@ -492,28 +492,26 @@ class CmdbObjectManager(CmdbManagerBase):
                 )
         else:
             raise NoRootCategories()
-        return tree
+        return sorted(tree, key=lambda x: x['category'].get_public_id())
 
     def get_category(self, public_id: int):
         try:
-            return CmdbCategory(**self.dbm.find_one(
+            return CmdbCategory(**self._get(
                 collection=CmdbCategory.COLLECTION,
                 public_id=public_id))
         except (CMDBError, Exception) as e:
             raise ObjectManagerGetError(err=e)
 
     def insert_category(self, data: (CmdbCategory, dict)):
-        if isinstance(data, CmdbCategory):
-            new_category = data
-        elif isinstance(data, dict):
+        new_category = data
+        if isinstance(data, dict):
             new_category = CmdbCategory(**data)
 
         return self._insert(collection=CmdbCategory.COLLECTION, data=new_category.to_database())
 
     def update_category(self, data: dict):
-        if isinstance(data, CmdbCategory):
-            update_category = data
-        elif isinstance(data, dict):
+        update_category = data
+        if isinstance(data, dict):
             update_category = CmdbCategory(**data)
         ack = self._update(
             collection=CmdbCategory.COLLECTION,
