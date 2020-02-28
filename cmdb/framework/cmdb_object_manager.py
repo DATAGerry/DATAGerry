@@ -476,6 +476,7 @@ class CmdbObjectManager(CmdbManagerBase):
         })
         if len(root_categories) > 0:
             tree = self._get_category_nodes(root_categories)
+            tree = sorted(tree, key=lambda x: x['category'].get_public_id())
             all_categories = self.get_all_categories()
             category_pid_list = []
             for category in all_categories:
@@ -492,7 +493,7 @@ class CmdbObjectManager(CmdbManagerBase):
                 )
         else:
             raise NoRootCategories()
-        return sorted(tree, key=lambda x: x['category'].get_public_id())
+        return tree
 
     def get_category(self, public_id: int):
         try:
