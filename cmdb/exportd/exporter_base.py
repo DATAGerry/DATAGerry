@@ -126,12 +126,12 @@ class ExportdManagerBase(ExportdJobManagement):
                     current_object = self.__object_manager.get_object(field["value"])
                     type_instance = self.__object_manager.get_type(current_object.get_type_id())
                     cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance,
-                                                    render_user=None, user_manager=None)
+                                                    render_user=None)
                     data["fields"][field_name] = self.__get_objectdata(cmdb_render_object.result(), iteration)
                 else:
                     data["fields"][field_name] = field["value"]
-            except Exception as e:
-                pass
+            except Exception as err:
+                LOGGER.error(err)
         return data
 
 
