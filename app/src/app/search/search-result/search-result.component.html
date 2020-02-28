@@ -11,8 +11,8 @@
         <a [routerLink]="['/','framework', 'object', 'view', searchResult.result.object_information.object_id]">{{searchResult.result.type_information.type_label}}
           #{{searchResult.result.object_information.object_id}}</a>
       </h5>
-      <div class="summary">Summary: {{searchResult.result.summary_line}}</div>
-      <div class="matched">Matched fields: {{searchResult.result.summary_line}}</div>
+      <div class="summary"><strong>Summary:</strong> {{searchResult.result.summary_line}}</div>
+      <div class="matched"><strong>Matched fields:</strong> {{searchResult.result.summary_line}}</div>
     </div>
     <div class="preview col-md-2">
       <div class="media d-flex justify-content-center align-content-center flex-wrap">

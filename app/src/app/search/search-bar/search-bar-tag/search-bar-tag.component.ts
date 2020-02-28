@@ -29,7 +29,7 @@ import * as $ from 'jquery';
   templateUrl: './search-bar-tag.component.html',
   styleUrls: ['./search-bar-tag.component.scss']
 })
-export class SearchBarTagComponent implements OnInit, OnDestroy {
+export class SearchBarTagComponent implements OnDestroy {
 
   // Elements
   @ViewChild('dropdownTrigger', { static: false }) dropdownTrigger: ElementRef;
@@ -39,47 +39,23 @@ export class SearchBarTagComponent implements OnInit, OnDestroy {
   @Output() public changeEmitter: EventEmitter<SearchBarTag>;
   @Output() public deleteEmitter: EventEmitter<SearchBarTag>;
 
-  // Forms
-  public settingsFormGroup: FormGroup;
-
-  // Subscriptions
-  private settingsFormChangesSubscription: Subscription;
 
   public constructor() {
+    /**
+     * Default constructor
+     * Change form is deactivated
+     */
     this.changeEmitter = new EventEmitter<SearchBarTag>();
     this.deleteEmitter = new EventEmitter<SearchBarTag>();
-    this.settingsFormChangesSubscription = new Subscription();
+    // this.settingsFormChangesSubscription = new Subscription();
   }
 
-  public ngOnInit(): void {
-    this.settingsFormGroup = new FormGroup({
-      searchText: new FormControl('', Validators.required),
-      searchForm: new FormControl('textSearch'),
-      settings: new FormGroup({
-      })
-    });
-    this.settingsFormGroup.patchValue(this.tag);
-    this.settingsFormChangesSubscription = this.settingsFormGroup.valueChanges.pipe(debounceTime(500))
-      .subscribe((changes) => {
-        this.tag = Object.assign(this.tag, changes);
-        this.changeEmitter.emit(this.tag);
-      });
-  }
 
   public emitDelete() {
     this.deleteEmitter.emit(this.tag);
   }
 
   public ngOnDestroy(): void {
-    this.settingsFormChangesSubscription.unsubscribe();
-  }
-
-  public get settingsControl(): FormGroup {
-    return this.settingsFormGroup.get('settings') as FormGroup;
-  }
-
-  public toggleDropDown(): void {
-    // Note: nasty quick hack - sry @michael - bootstrap has a known bug here - MH
-    $(this.dropdownTrigger.nativeElement).click();
+    // this.settingsFormChangesSubscription.unsubscribe();
   }
 }

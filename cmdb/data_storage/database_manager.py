@@ -385,8 +385,10 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
            Returns:
                returns computed results
            """
-        result = self.connector.get_collection(collection).aggregate(*args, **kwargs)
-        return result
+        return self.connector.get_collection(collection).aggregate(*args, **kwargs)
+
+    def search(self, collection: str, *args, **kwargs):
+        return self.connector.get_collection(collection).find(*args, **kwargs)
 
     def insert(self, collection: str, data: dict) -> int:
         """adds document to database

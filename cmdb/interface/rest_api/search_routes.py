@@ -18,8 +18,10 @@ import logging
 
 from flask import current_app, request, abort
 
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.interface.route_utils import RootBlueprint, make_response, insert_request_user, login_required
 from cmdb.search import Search
+from cmdb.search.params import SearchParam
 from cmdb.search.query import Query, Pipeline
 from cmdb.search.query.pipe_builder import PipelineBuilder
 from cmdb.search.query.query_builder import QueryBuilder
@@ -32,7 +34,7 @@ except ImportError:
     CMDBError = Exception
 
 with current_app.app_context():
-    object_manager = current_app.object_manager
+    object_manager: CmdbObjectManager = current_app.object_manager
 
 LOGGER = logging.getLogger(__name__)
 search_blueprint = RootBlueprint('search_rest', __name__, url_prefix='/search')
@@ -49,8 +51,11 @@ def quick_search_result_counter(regex: str, request_user: User):
     pipe_count = plb.count_('count')
     plb.add_pipe(pipe_count)
     pipeline = plb.pipeline
-    sf = SearcherFramework(object_manager)
-    result = list(sf.aggregate(pipeline))
+    try:
+        result = list(object_manager.aggregate(collection='framework.objects', pipeline=pipeline))
+    except Exception as err:
+        LOGGER.error(f'[Search count]: {err}')
+        return abort(400)
     if len(result) > 0:
         return make_response(result[0]['count'])
     else:
@@ -64,24 +69,30 @@ def search_framework(request_user: User):
     try:
         limit = request.args.get('limit', Search.DEFAULT_LIMIT, int)
         skip = request.args.get('skip', Search.DEFAULT_SKIP, int)
-        search_parameters: dict = request.args.get('query') or '{}'
+        search_params: dict = request.args.get('query') or '{}'
     except ValueError as err:
         return abort(400, err)
     try:
         if request.method == 'GET':
-            search_parameters = json.loads(search_parameters)
+            search_params = json.loads(search_params)
         elif request.method == 'POST':
-            search_parameters = json.loads(request.data)
+            search_params = json.loads(request.data)
         else:
             return abort(405)
     except Exception as err:
         LOGGER.error(f'[Search Framework]: {err}')
         return abort(400, err)
 
-    builder = PipelineBuilder()
-    query: Pipeline = builder.build(search_parameters)
+    try:
+        builder = PipelineBuilder()
+        search_parameters = SearchParam.from_request(search_params)
+        query: Pipeline = builder.build(search_parameters)
 
-    searcher = SearcherFramework(manager=object_manager)
-    result = searcher.aggregate(pipeline=query, request_user=request_user, limit=limit, skip=skip)
+        searcher = SearcherFramework(manager=object_manager)
+        result = searcher.aggregate(pipeline=query, request_user=request_user, limit=limit, skip=skip)
+        LOGGER.debug(result.__dict__)
+    except Exception as err:
+        LOGGER.error(f'[Search Framework Rest]: {err}')
+        return make_response([], 204)
 
     return make_response(result)

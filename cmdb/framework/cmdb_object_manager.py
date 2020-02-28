@@ -58,9 +58,15 @@ class CmdbObjectManager(CmdbManagerBase):
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
 
-    def search(self, collection, pipeline: Pipeline, *args, **kwargs) -> List:
+    def aggregate(self, collection, pipeline: Pipeline, **kwargs):
         try:
-            return self._search(collection=collection, pipeline=pipeline, **kwargs)
+            return self._aggregate(collection=collection, pipeline=pipeline, **kwargs)
+        except Exception as err:
+            raise ObjectManagerGetError(err)
+
+    def search(self, collection, query: Query, **kwargs):
+        try:
+            return self._search(collection=collection, query=query, **kwargs)
         except Exception as err:
             raise ObjectManagerGetError(err)
 

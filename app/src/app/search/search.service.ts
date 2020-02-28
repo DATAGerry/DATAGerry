@@ -48,6 +48,9 @@ export class SearchService<T = SearchResultList> implements ApiService {
     }
     return this.api.callPost<T>(`${ this.servicePrefix }/`, query, httpOptions).pipe(
       map((apiResponse) => {
+        if (apiResponse.statusCode === 204) {
+          return [];
+        }
         return apiResponse.body;
       })
     );

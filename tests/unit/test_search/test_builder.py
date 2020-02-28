@@ -38,6 +38,7 @@ class TestBuilder:
         """Test base method operations"""
         expressions: List[dict] = [{_: _} for _ in range(0, 10)]
         field: str = 'f'
+        page: int = 10
         values: List[Any] = [_ for _ in range(0, 10)]
         value = values[0]
         criteria: dict = {'test': 1}
@@ -61,6 +62,8 @@ class TestBuilder:
         assert Builder.regex_(field, regex) == {field: {'$regex': regex, '$options': ''}}
         assert Builder.match_(criteria) == {'$match': criteria}
         assert Builder.count_(field) == {'$count': field}
+        assert Builder.limit_(page) == {'$limit': page}
+        assert Builder.skip_(page) == {'$skip': page}
 
     def test_query_builder(self):
         """Test the query builder"""

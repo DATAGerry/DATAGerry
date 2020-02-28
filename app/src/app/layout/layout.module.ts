@@ -53,6 +53,8 @@ import { NgxSpinnerComponent, NgxSpinnerModule } from 'ngx-spinner';
 import { LoadingScreenComponent } from './structure/loading-screen/loading-screen.component';
 import { SearchBarModule } from '../search/search-bar/search-bar.module';
 
+import { JwPaginationComponent } from 'jw-angular-pagination';
+
 export const LAYOUT_COMPONENT_ROUTES: Routes = [
   {
     path: '',
@@ -98,7 +100,8 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     UserImageComponent,
     UserDisplayComponent,
     ChartsComponent,
-    LoadingScreenComponent
+    LoadingScreenComponent,
+    JwPaginationComponent
   ],
   exports: [
     NgxSpinnerComponent,
@@ -114,6 +117,7 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     UserImageComponent,
     UserDisplayComponent,
     ChartsComponent,
+    JwPaginationComponent
   ],
   imports: [
     CommonModule,

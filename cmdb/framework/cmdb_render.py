@@ -89,7 +89,6 @@ class CmdbRender:
         else:
             return CmdbRender.AUTHOR_ANONYMOUS_NAME
 
-
     @property
     def object_instance(self) -> CmdbObject:
         """
@@ -288,28 +287,29 @@ class CmdbRender:
 
 class RenderList:
 
-    def __init__(self, object_list: List[CmdbObject], request_user: User, dt_render=False):
+    def __init__(self, object_list: List[CmdbObject], request_user: User, dt_render=False,
+                 object_manager: CmdbObjectManager = None):
         self.object_list: List[CmdbObject] = object_list
         self.request_user = request_user
         self.dt_render = dt_render
-
-    @timing('RenderList')
-    def render_result_list(self) -> List[RenderResult]:
         from cmdb.utils.system_config import SystemConfigReader
         database_manager = DatabaseManagerMongo(
             **SystemConfigReader().get_all_values_from_section('Database')
         )
-        object_manager = CmdbObjectManager(database_manager=database_manager)
-        user_manager = UserManager(database_manager=database_manager)
-        complete_user_list: List[User] = user_manager.get_users()
+        self.object_manager = object_manager or CmdbObjectManager(database_manager=database_manager)
+        self.user_manager = UserManager(database_manager=database_manager)
+
+    @timing('RenderList')
+    def render_result_list(self) -> List[RenderResult]:
+        complete_user_list: List[User] = self.user_manager.get_users()
 
         preparation_objects: List[RenderResult] = []
         for passed_object in self.object_list:
             tmp_render = CmdbRender(
-                type_instance=object_manager.get_type(passed_object.type_id),
+                type_instance=self.object_manager.get_type(passed_object.type_id),
                 object_instance=passed_object,
                 render_user=self.request_user, user_list=complete_user_list,
-                object_manager=object_manager, dt_render=self.dt_render )
+                object_manager=self.object_manager, dt_render=self.dt_render)
             current_render_result = tmp_render.result()
             preparation_objects.append(current_render_result)
         return preparation_objects

@@ -41,7 +41,7 @@ import { RenderModule } from '../framework/render/render.module';
     ReactiveFormsModule,
     DataTablesModule,
     NgxSpinnerModule,
-    RenderModule,
+    RenderModule
   ],
   providers: []
 })

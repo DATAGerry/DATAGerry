@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SearchService } from './search.service';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -24,12 +24,22 @@ import { Subscription } from 'rxjs';
 import { SearchResultList } from './models/search-result';
 import { HttpParams } from '@angular/common/http';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { JwPaginationComponent } from 'jw-angular-pagination';
 
 @Component({
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.scss']
 })
 export class SearchComponent implements OnInit, OnDestroy {
+
+  // Pagination
+  private readonly defaultLimit: number = 10;
+  private skip: number = 0;
+  public limit: number = this.defaultLimit;
+  public currentPage: number = 1;
+  public maxNumberOfSites: number[];
+  @ViewChild('paginationComponent', { static: false }) pagination: JwPaginationComponent;
+  private initSearch: boolean = true;
 
   // Form
   public searchInputForm: FormGroup;
@@ -50,7 +60,8 @@ export class SearchComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.queryParameterSubscription = this.route.queryParamMap.subscribe(params => {
       this.queryParameters = params.get('query');
-      // this.onSearch();
+      this.initSearch = true;
+      this.onSearch();
     });
   }
 
@@ -61,12 +72,25 @@ export class SearchComponent implements OnInit, OnDestroy {
   public onSearch(): void {
     this.spinner.show();
     let params = new HttpParams();
-    params = params.set('limit', '0');
-    params = params.set('skip', '0');
+    params = params.set('limit', this.limit.toString());
+    params = params.set('skip', this.skip.toString());
     this.searchService.postSearch(this.queryParameters, params).subscribe((results: SearchResultList) => {
       this.searchResultList = results;
+      if (this.initSearch) {
+        this.maxNumberOfSites = Array.from({ length: (this.searchResultList.total_results) }, (v, k) => k + 1);
+        this.initSearch = false;
+      }
       this.spinner.hide();
     });
+  }
+
+  public onChangePage(event): void {
+    if (this.currentPage !== this.pagination.pager.currentPage) {
+      this.currentPage = this.pagination.pager.currentPage;
+      this.skip = this.currentPage * this.limit;
+      this.onSearch();
+    }
+
   }
 
   public ngOnDestroy(): void {
