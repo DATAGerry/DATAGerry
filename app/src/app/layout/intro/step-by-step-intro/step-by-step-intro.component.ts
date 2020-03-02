@@ -31,7 +31,7 @@ export class StepByStepIntroComponent implements OnInit, OnDestroy {
   private readonly STEPS = 'steps';
   private readonly EXECUTE = 'execute';
 
-  private introInstance  = new BehaviorSubject<any[]>([]);
+  public introInstance  = new BehaviorSubject<any[]>([]);
   private subscription: Subscription;
   private isReady: boolean = false;
 
