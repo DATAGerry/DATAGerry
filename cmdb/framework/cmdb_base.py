@@ -50,7 +50,7 @@ class CmdbManagerBase(ABC):
         """
         return self.dbm.count(collection=collection)
 
-    def _search(self, collection: str, pipeline, *args, **kwargs) -> List:
+    def _aggregate(self, collection: str, pipeline, **kwargs):
         """search after query requirements
 
         Args:
@@ -62,7 +62,21 @@ class CmdbManagerBase(ABC):
         Returns:
             list of found documents
         """
-        return self.dbm.aggregate(collection, pipeline=pipeline, *args, **kwargs)
+        return self.dbm.aggregate(collection, pipeline=pipeline, **kwargs)
+
+    def _search(self, collection: str, query, **kwargs):
+        """search after query requirements
+
+        Args:
+            collection: collection to search
+            query: query or aggregate pipe
+            *args:
+            **kwargs:
+
+        Returns:
+            list of found documents
+        """
+        return self.dbm.search(collection, filter=query, **kwargs)
 
     def _get(self, collection: str, public_id: int) -> dict:
         """get document from the database by their public id

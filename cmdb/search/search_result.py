@@ -28,12 +28,13 @@ class SearchResultMap(Generic[R]):
         return {'result': self.result.__dict__, 'matches': self.matches}
 
 
-class SearchResults(Generic[R]):
+class SearchResult(Generic[R]):
 
-    def __init__(self, results: List[R], total_results: int, limit: int, skip: int):
+    def __init__(self, results: List[R], total_results: int, alive: bool, limit: int, skip: int):
         self.limit: int = limit
         self.skip: int = skip
         self.total_results: int = total_results
+        self.alive = alive
         self.results: List[SearchResultMap] = [SearchResultMap[R](result=result) for result in results]
 
     def __len__(self):

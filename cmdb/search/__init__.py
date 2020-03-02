@@ -29,7 +29,7 @@ M: TypeVar = TypeVar('M', bound=CmdbManagerBase)
 class Search(Generic[M], ABC):
 
     DEFAULT_SKIP: int = 0
-    DEFAULT_LIMIT: int = 25
+    DEFAULT_LIMIT: int = 10
 
     def __init__(self, manager: M):
         self.__manager: M = manager

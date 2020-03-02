@@ -40,7 +40,6 @@ from flask import Blueprint, request, abort, current_app
 from cmdb.security.token.validator import TokenValidator, ValidationError
 from cmdb.utils import json_encoding
 
-
 DEFAULT_MIME_TYPE = 'application/json'
 
 
@@ -73,19 +72,18 @@ class NestedBlueprint:
         return self.blueprint.route(rule, **options)
 
 
-def make_response(instance, status_code=200):
+def make_response(instance, status_code=200, indent=2):
     """
     make json http response with indent settings and auto encoding
     Args:
         instance: instance of a cmdbDao instance or instance of the subclass
         status_code: optional status code
+        indent: indent of json response
     Returns:
         http valid response
     """
     from flask import make_response as flask_response
-    # set indent to None of min value exists in the request - DEFAULT: 2 steps
-    # indent = None if 'indent' in request.args else 2
-    indent = 2
+
     # encode the dict data from the object to json data
     resp = flask_response(json.dumps(instance, default=json_encoding.default, indent=indent), status_code)
     # add header information

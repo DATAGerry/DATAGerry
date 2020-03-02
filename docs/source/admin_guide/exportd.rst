@@ -199,3 +199,41 @@ request. Please see the following section for an example JSON structure:
     ]
 
 
+ExternalSystemOpenNMS
+---------------------
+This class will create/update/delete nodes in the monitoring system OpenNMS. DATAGERRY objects were exported to one
+OpenNMS provisioning requisition using the OpenNMS REST API. Foreach exported object, ip, hostname, asset informations
+and surveillance categories can be set. Optionallly an export of SNMP communities (at the moment SNMPv1 and SNMPv2c are
+supported) can be done.
+
+
+The exporter class has the following parameters:
+
+.. csv-table::
+    :header: "parameter", "required", "description"
+    :align: left
+
+    "resturl", "True", "OpenNMS REST URL"
+    "restuser", "True", "OpenNMS REST user"
+    "restpassword", "True", "OpenNMS REST password"
+    "requisition", "True", "OpenNMS requisition to use"
+    "services", "False", "name of services to bind on each node sepetated by space"
+    "exportSnmpConfig", "False", "also export SNMP configuration for nodes"
+    "exportSnmpConfigRetries", "False", "export SNMP configuration for nodes: set SNMP retries"
+    "exportSnmpConfigTimeout", "False", "export SNMP configuration for nodes: set SNMP timeout"
+
+
+The following export variables can be defined:
+
+.. csv-table::
+    :header: "name", "required", "description"
+    :align: left
+
+    "nodelabel", "True", "nodelabel for the OpenNMS node"
+    "ip", "True", "ip address to add in OpenNMS"
+    "furtherIps", "True", "further ip addresses to add to OpenNMS node. Format: IP1;IP2;IP3."
+    "asset\_", "True", "content for asset field e.g. - asset\_city for adding information to the city field"
+    "category\_", "True", "use variable value of the field to define a category e.g. - category\_1"
+    "snmp\_community", "True", "SNMP community of a node. This will be set in OpenNMS, if exportSnmpConfig is set to true."
+    "snmp\_version", "True", "SNMP version of a node. This will be set in OpenNMS, if exportSnmpConfig is set to true. Currently the exporter supports only v1/v2c"
+

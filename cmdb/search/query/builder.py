@@ -106,7 +106,7 @@ class Builder:
 
     # Evaluation
     @classmethod
-    def regex_(cls, field: str, regex: str, options: str = '') -> dict:
+    def regex_(cls, field: str, regex: str, options: str = 'imsx') -> dict:
         """Where values match a specified regular expression"""
         return {field: {'$regex': regex, '$options': options}}
 
@@ -121,3 +121,18 @@ class Builder:
     def count_(cls, name: str) -> dict:
         """Returns a count of the number of documents at this stage of the aggregation pipeline."""
         return {'$count': name}
+
+    @classmethod
+    def skip_(cls, value: int) -> dict:
+        """Skips over the specified number of documents that pass into the stage."""
+        return {'$skip': value}
+
+    @classmethod
+    def limit_(cls, value: int) -> dict:
+        """Limits the number of documents passed to the next stage in the pipeline."""
+        return {'$limit': value}
+
+    @classmethod
+    def facet_(cls, stages: dict) -> dict:
+        """Processes multiple aggregation pipelines within a single stage on the same set of input documents."""
+        return {'$facet': stages}

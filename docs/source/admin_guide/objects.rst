@@ -109,6 +109,19 @@ By default, only summary fields of an object are shown in the table, with the ye
 can be faded in.
 
 
+
+Active und Inactive Objects
+---------------------------
+Objects in DATAGERRY can be active or inactive. Inactive Objects are hidden in the WebUI and were not exported to
+external systems with Exportd. By default, all new created Objects in DATAGERRY are active. You can set an Object to 
+inactive by hitting the small switch on the Object view page.
+
+If you want to see inactive Objects in the WebUI, ckick on the switch under the navigation bar.
+
+.. image:: img/objects_active_switch.png
+    :width: 200
+
+
 Exporting Objects
 -----------------
 Objects can be exported in several formats. Currently we support:

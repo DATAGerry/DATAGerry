@@ -55,6 +55,8 @@ import { SearchBarModule } from '../search/search-bar/search-bar.module';
 import { IntroComponent } from './intro/intro.component';
 import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-step-intro.component';
 
+import { JwPaginationComponent } from 'jw-angular-pagination';
+
 export const LAYOUT_COMPONENT_ROUTES: Routes = [
   {
     path: '',
@@ -102,7 +104,8 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     UserDisplayComponent,
     ChartsComponent,
     LoadingScreenComponent,
-    StepByStepIntroComponent
+    StepByStepIntroComponent,
+    JwPaginationComponent
   ],
   exports: [
     NgxSpinnerComponent,
@@ -118,6 +121,7 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     UserImageComponent,
     UserDisplayComponent,
     ChartsComponent,
+    JwPaginationComponent
   ],
   imports: [
     CommonModule,

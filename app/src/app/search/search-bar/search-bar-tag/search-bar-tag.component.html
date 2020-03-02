@@ -6,30 +6,7 @@
   <button type="button" class="btn btn-primary btn-sm" data-toggle="dropdown" #dropdownTrigger
           data-reference="parent">
     <ng-content></ng-content>
-    <!--<button type="button" class="delete" >
-      <span>&times;</span>
-    </button>-->
   </button>
   <button (click)="emitDelete()" type="button" class="btn btn-primary btn-sm dropdown-toggle dropdown-toggle-split">
   </button>
-  <form [formGroup]="settingsFormGroup" class="dropdown-menu p-4">
-    <div class="form-group row">
-      <label class="col-md-3 col-form-label">Search</label>
-      <div class="col-md-9">
-        <input formControlName="searchText" type="text" class="form-control" name="searchText">
-      </div>
-    </div>
-    <div class="form-group row">
-      <label class="col-md-3 col-form-label">Form</label>
-      <div class="col-md-9">
-        <select formControlName="searchForm" class="custom-select">
-          <option value="textSearch">Text Search</option>
-          <option value="publicID">Object ID</option>
-          <option value="typeID">Type</option>
-        </select>
-      </div>
-    </div>
-    <div class="dropdown-divider"></div>
-    <cmdb-search-bar-tag-settings-form [settingsControl]="settingsControl"></cmdb-search-bar-tag-settings-form>
-  </form>
 </div>

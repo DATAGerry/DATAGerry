@@ -18,10 +18,10 @@
 
 import {
   Component,
-  ElementRef, NgZone,
+  ElementRef,
   OnDestroy,
   OnInit,
-  QueryList, Renderer2,
+  QueryList,
   ViewChild,
   ViewChildren
 } from '@angular/core';
@@ -36,6 +36,9 @@ import { debounceTime } from 'rxjs/operators';
 import { CategoryService } from '../../framework/services/category.service';
 import { CmdbCategory } from '../../framework/models/cmdb-category';
 import { SearchService } from '../search.service';
+import { ObjectService } from '../../framework/services/object.service';
+
+import * as $ from 'jquery';
 
 @Component({
   selector: 'cmdb-search-bar',
@@ -49,6 +52,10 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   @ViewChild('inputDropdown', { static: false }) inputDropdown: ElementRef;
   @ViewChildren(SearchBarTagComponent) searchBarTagComponents: QueryList<SearchBarTagComponent>;
 
+  // Tabs
+  private currentFocus: number = 0;
+  private maxTabLength: number = 5;
+
   // Tags data
   public tags: SearchBarTag[] = [];
 
@@ -57,24 +64,28 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   // Dropdown
   public possibleTextResults: number = 0;
+  public isExistingPublicID: boolean = false;
   public possibleTypes: CmdbType[] = [];
   public possibleCategories: CmdbCategory[] = [];
 
   // Subscriptions
   private routeChangeSubscription: Subscription;
   private textRegexSubscription: Subscription;
+  private isExistingPublicIDSubscription: Subscription;
   private typeRegexSubscription: Subscription;
   private inputControlSubscription: Subscription;
 
   constructor(private router: Router, private route: ActivatedRoute, private searchService: SearchService,
-              private typeService: TypeService, private categoryService: CategoryService) {
+              private typeService: TypeService, private categoryService: CategoryService, private objectService: ObjectService) {
+
     this.searchBarForm = new FormGroup({
       inputControl: new FormControl('')
     });
     this.textRegexSubscription = new Subscription();
+    this.isExistingPublicIDSubscription = new Subscription();
     this.typeRegexSubscription = new Subscription();
     this.inputControlSubscription = new Subscription();
-    /*this.routeChangeSubscription = this.router.events.subscribe((event) => {
+    this.routeChangeSubscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         const searchQuery = this.route.snapshot.queryParams.query;
         if (searchQuery !== undefined) {
@@ -83,16 +94,24 @@ export class SearchBarComponent implements OnInit, OnDestroy {
           this.tags = [];
         }
       }
-    });*/
+    });
   }
 
   public ngOnInit(): void {
 
     this.inputControl.valueChanges.pipe(debounceTime(300)).subscribe((changes: string) => {
       if (changes !== '') {
-        /*this.textRegexSubscription = this.searchService.getEstimateValueResults(changes).subscribe((counter: number) => {
+        this.textRegexSubscription = this.searchService.getEstimateValueResults(changes).subscribe((counter: number) => {
           this.possibleTextResults = counter;
-        });*/
+        });
+        if (!isNaN(+changes)) {
+          this.isExistingPublicIDSubscription = this.objectService.getObject(+changes).subscribe(() => {
+              this.isExistingPublicID = true;
+            },
+            (error) => {
+              this.isExistingPublicID = false;
+            });
+        }
         this.typeRegexSubscription = this.typeService.getTypesBy(changes).subscribe((typeList: CmdbType[]) => {
           this.possibleTypes = typeList;
         });
@@ -116,6 +135,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     const searchTerm = this.inputControl.value;
     const tag = new SearchBarTag(searchTerm, searchForm);
     switch (searchForm) {
+      case 'text':
+        break;
       case 'type':
         const typeIDs: number[] = [];
         for (const type of params) {
@@ -123,16 +144,19 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         }
         tag.settings = { types: typeIDs } as SearchBarTagSettings;
         break;
+      case 'publicID':
+        tag.settings = { publicID: searchTerm } as SearchBarTagSettings;
+        break;
       default:
         break;
     }
-    console.log(tag);
-    console.log(params);
+    this.tags.push(tag);
+    this.inputControl.setValue('', { onlySelf: true });
+    this.setFocusOnElement(1);
   }
 
   public updateTag(changes: SearchBarTag) {
     const index: number = this.tags.indexOf(changes);
-    console.log(changes);
     if (index !== -1) {
       // If searchText was cleared
       if (changes.searchText === '' || changes.searchText === undefined) {
@@ -156,8 +180,53 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   public callSearch() {
     if (this.tags.length > 0) {
+      this.inputControl.setValue('', { onlySelf: true });
       this.router.navigate(['/search'], { queryParams: { query: JSON.stringify(this.tags) } });
     }
+  }
+
+  public openDropdown(currentIDx: number) {
+    $('[tabindex=' + currentIDx + ']').find('[data-toggle="collapse"]').first().click();
+  }
+
+
+  public arrowUp(currentIDx?: number) {
+    const nextElement = $('[tabindex=' + (currentIDx - 1) + ']');
+    if (nextElement.length > 0) {
+      this.setFocusOnElement(+nextElement.attr('tabindex'));
+    } else {
+      for (let i = (currentIDx - 1); i >= 0; i--) {
+        const subElement = $('[tabindex=' + (i - 1) + ']');
+        if (subElement.length > 0) {
+          this.setFocusOnElement(+subElement.attr('tabindex'));
+          break;
+        }
+      }
+    }
+  }
+
+  public arrowDown(currentIDx?: number) {
+    const nextElement = $('[tabindex=' + (currentIDx + 1) + ']');
+    if (nextElement.length > 0) {
+      this.setFocusOnElement(+nextElement.attr('tabindex'));
+    } else {
+      for (let i = (currentIDx + 1); i <= this.maxTabLength; i++) {
+        const subElement = $('[tabindex=' + (i + 1) + ']');
+        if (subElement.length > 0) {
+          this.setFocusOnElement(+subElement.attr('tabindex'));
+          break;
+        }
+      }
+    }
+  }
+
+  public setFocusOnElement(tabIdx?) {
+    if (tabIdx) {
+      this.currentFocus = tabIdx;
+    }
+    setTimeout(() => { // this will make the execution after the above boolean has changed
+      $('[tabindex=' + this.currentFocus + ']').focus();
+    }, 0);
   }
 
   public ngOnDestroy(): void {

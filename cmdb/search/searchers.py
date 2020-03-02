@@ -17,29 +17,77 @@ import logging
 
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.framework.cmdb_render import RenderResult, RenderList
 from cmdb.search import Search
 from cmdb.search.query import Query, Pipeline
-from cmdb.search.search_result import SearchResults
+from cmdb.search.query.pipe_builder import PipelineBuilder
+from cmdb.search.search_result import SearchResult
 from cmdb.user_management import User
 
 LOGGER = logging.getLogger(__name__)
 
 
 class SearcherFramework(Search[CmdbObjectManager]):
+    """Framework searcher implementation for object search"""
 
     def __init__(self, manager: CmdbObjectManager):
+        """Normally uses a instance of CmdbObjectManager as manager"""
         super(SearcherFramework, self).__init__(manager=manager)
 
     def aggregate(self, pipeline: Pipeline, request_user: User = None, limit: int = Search.DEFAULT_LIMIT,
-                  skip: int = Search.DEFAULT_SKIP, *args, **kwargs) -> SearchResults:
-        LOGGER.debug(pipeline)
-        search_result = self.manager.search(collection=CmdbObject.COLLECTION, pipeline=pipeline)
-        LOGGER.debug(search_result)
-        return None
+                  skip: int = Search.DEFAULT_SKIP, **kwargs) -> SearchResult[RenderResult]:
+        """
+        Use mongodb aggregation system with pipeline queries
+        Args:
+            pipeline (Pipeline): list of requirement pipes
+            request_user (User): user who started this search
+            limit (int): max number of documents to return
+            skip (int): number of documents to be skipped
+            **kwargs:
+        Returns:
+            SearchResult with generic list of RenderResults
+        """
+        # Insert skip and limit
+        plb = PipelineBuilder(pipeline)
+
+        # define search output
+        stages: dict = {
+            'metadata': [PipelineBuilder.count_('total')],
+            'data': [
+                PipelineBuilder.skip_(skip),
+                PipelineBuilder.limit_(limit)
+            ]
+        }
+        plb.add_pipe(PipelineBuilder.facet_(stages))
+
+        # make search call
+        raw_search_result = self.manager.aggregate(collection=CmdbObject.COLLECTION, pipeline=plb.pipeline)
+        raw_search_result_list = list(raw_search_result)
+        LOGGER.debug(raw_search_result_list)
+        if len(raw_search_result_list[0]['data']) > 0:
+            raw_search_result_list_entry = raw_search_result_list[0]
+            # parse result list
+            pre_rendered_result_list = [CmdbObject(**raw_result) for raw_result in raw_search_result_list_entry['data']]
+            rendered_result_list = RenderList(pre_rendered_result_list, request_user,
+                                              object_manager=self.manager).render_result_list()
+            total_results = raw_search_result_list_entry['metadata'][0].get('total', 0)
+        else:
+            rendered_result_list = []
+            total_results = 0
+        # generate output
+        search_result = SearchResult[RenderResult](
+            results=rendered_result_list,
+            total_results=total_results,
+            alive=raw_search_result.alive,
+            limit=limit,
+            skip=skip
+        )
+        return search_result
 
     def search(self, query: Query, request_user: User = None, limit: int = Search.DEFAULT_LIMIT,
-               skip: int = Search.DEFAULT_SKIP) -> SearchResults:
-        raw_search_result = self.manager.search(collection=CmdbObject.COLLECTION, query=query, limit=limit, skip=skip)
-        raw_result_list = list(raw_search_result)
-
-        return raw_search_result
+               skip: int = Search.DEFAULT_SKIP) -> SearchResult[RenderResult]:
+        """
+        Uses mongodb find query system
+        TODO!!!
+        """
+        pass

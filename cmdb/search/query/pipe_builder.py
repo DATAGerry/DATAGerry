@@ -16,6 +16,7 @@
 import logging
 from typing import List
 
+from cmdb.search.params import SearchParam
 from cmdb.search.query import Pipeline
 from cmdb.search.query.builder import Builder
 
@@ -51,11 +52,34 @@ class PipelineBuilder(Builder):
         self._pipeline = Pipeline(pipes)
 
     def add_pipe(self, pipe: dict):
+        """Add a pipe to the pipeline"""
         self.pipeline.append(pipe)
 
     def remove_pipe(self, pipe: dict):
+        """Remove a pipe to the pipeline"""
         self.pipeline.remove(pipe)
 
-    def build(self, params: dict) -> Pipeline:
-        LOGGER.debug(f'[PipelineBuilder][Build] params: {params}')
+    def build(self, params: List[SearchParam]) -> Pipeline:
+        """Build a pipeline query out of frontend params"""
+        # clear pipeline
+        self.clear()
+
+        # text builds
+        text_params = [_ for _ in params if _.search_form == 'text']
+        for param in text_params:
+            regex = self.regex_('fields.value', param.search_text)
+            self.add_pipe(self.match_(regex))
+
+        # type builds
+        type_params = [_ for _ in params if _.search_form == 'type']
+        for param in type_params:
+            if param.settings and len(param.settings.get('types', [])) > 0:
+                type_id_in = self.in_('type_id', param.settings['types'])
+                self.add_pipe(self.match_(type_id_in))
+
+        # public builds
+        id_params = [_ for _ in params if _.search_form == 'publicID']
+        for param in id_params:
+            self.add_pipe(self.match_({'public_id': int(param.search_text)}))
+
         return self.pipeline
