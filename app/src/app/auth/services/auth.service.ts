@@ -25,6 +25,11 @@ import { User } from '../../management/models/user';
 import { Right } from '../../management/models/right';
 import { PermissionService } from './permission.service';
 import { ApiCallService, ApiService } from '../../services/api-call.service';
+import {IntroComponent} from "../../layout/intro/intro.component";
+import {StepByStepIntroComponent} from "../../layout/intro/step-by-step-intro/step-by-step-intro.component";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {SpecialService} from "../../framework/services/special.service";
+import {Router} from "@angular/router";
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -49,8 +54,13 @@ export class AuthService<T = any> implements ApiService  {
   private currentUserTokenSubject: BehaviorSubject<string>;
   public currentUserToken: Observable<string>;
 
+  // First Step Intro
+  private startIntroModal: any = undefined;
+  private stepByStepModal: any = undefined;
+
   constructor(private backend: HttpBackend, private connectionService: ConnectionService, private api: ApiCallService,
-              private permissionService: PermissionService) {
+              private permissionService: PermissionService, private router: Router, private introService: NgbModal,
+              private specialService: SpecialService) {
     this.http = new HttpClient(backend);
     this.currentUserSubject = new BehaviorSubject<User>(
       JSON.parse(localStorage.getItem('current-user')));
@@ -90,6 +100,7 @@ export class AuthService<T = any> implements ApiService  {
         localStorage.setItem('access-token', JSON.stringify(user.token));
         this.currentUserSubject.next(user);
         this.currentUserTokenSubject.next(user.token);
+        this.showIntro();
         return user;
       }));
   }
@@ -100,5 +111,45 @@ export class AuthService<T = any> implements ApiService  {
     this.currentUserSubject.next(null);
     this.currentUserTokenSubject.next(null);
     this.permissionService.clearUserRightStorage();
+
+    // Close Intro-Modal if open
+    if (this.startIntroModal !== undefined) {
+      this.startIntroModal.close();
+    }
+    if (this.stepByStepModal !== undefined) {
+      this.stepByStepModal.close();
+    }
+  }
+
+
+  private showIntro() {
+    this.specialService.getIntroStarter().subscribe(value => {
+      const RUN = 'execute';
+      if (!value[RUN]) {
+        const options = { centered: true, backdrop: 'static', keyboard: true, windowClass: 'intro-tour', size: 'lg'};
+        // @ts-ignore
+        this.startIntroModal = this.introService.open(IntroComponent, options);
+        this.startIntroModal.result.then((result) => {
+          if (result) {
+            this.router.navigate(['/framework/category/add']);
+            this.showSteps();
+          }
+        }, (reason) => {
+          console.log(reason);
+        });
+      }
+    });
+  }
+
+  private showSteps() {
+    const options = { backdrop: false, keyboard: true, windowClass: 'step-by-step'};
+    this.stepByStepModal = this.introService.open(StepByStepIntroComponent, options);
+    this.stepByStepModal.result.then((resp) => {
+      if (resp) {
+        this.router.navigate(['/']);
+      }
+    }, (reason) => {
+      console.log(reason);
+    });
   }
 }

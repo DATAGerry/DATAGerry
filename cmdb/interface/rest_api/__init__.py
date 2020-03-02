@@ -143,6 +143,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.exporter_routes.exportd_job_routes import exportd_job_blueprint
     from cmdb.interface.rest_api.exporter_routes.exportd_log_routes import exportd_log_blueprint
     from cmdb.interface.rest_api.external_systems_routes import external_system
+    from cmdb.interface.rest_api.special_routers import special_blueprint
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(object_blueprint)
@@ -163,6 +164,7 @@ def register_blueprints(app):
     app.register_blueprint(exportd_job_blueprint)
     app.register_blueprint(exportd_log_blueprint)
     app.register_blueprint(external_system)
+    app.register_blueprint(special_blueprint)
 
     import cmdb
     if cmdb.__MODE__ == 'DEBUG':

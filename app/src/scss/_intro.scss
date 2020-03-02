@@ -1,0 +1,22 @@
+@import './src/scss/variables';
+
+.modal-open {
+  overflow: auto;
+}
+
+
+.step-by-step {
+  width: fit-content !important;
+  max-width: $sidebar-width;
+  overflow: hidden !important;
+
+  .modal-dialog {
+    margin-top: 0;
+  }
+}
+
+#intro-steps {
+  .modal-content{
+    height: $sidebar-height;
+  }
+}

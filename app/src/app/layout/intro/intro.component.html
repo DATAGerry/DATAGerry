@@ -1,0 +1,22 @@
+<div class="modal-content">
+  <div class="modal-body">
+
+    <img id="login-logo" src="/assets/img/datagerry_logo.svg" class="img-fluid mx-auto d-block w-50"
+           alt="DATAGERRY"/>
+
+    <div class="card text-center border-0">
+      <div class="card-body">
+        <h3 class="card-title">Welcome to your first DATAGERRY launch.</h3>
+
+        <p class="card-text text-muted">
+          Take a short spin through your DATAGERRY CMDB.<br>
+          See how DATAGERRY is making life a bit easier for you.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light mr-auto" (click)="activeModal.dismiss(false)">SKIP</button>
+    <button type="button" class="btn btn-primary" (click)="activeModal.close(true)">Start Tour</button>
+  </div>
+</div>

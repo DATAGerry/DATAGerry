@@ -19,9 +19,19 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiCallService, ApiService } from '../../services/api-call.service';
+import { ApiCallService, ApiService, resp } from '../../services/api-call.service';
 import { CmdbDao } from '../models/cmdb-dao';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 
+export const httpObserveOptions = {
+  headers: new HttpHeaders({
+    'Content-Type': 'application/json'
+  }),
+  observe: resp
+};
+
+export const PARAMETER = 'params';
+export const COOCKIENAME = 'onlyActiveObjCookie';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +39,7 @@ import { CmdbDao } from '../models/cmdb-dao';
 export class SpecialService<T = CmdbDao> implements ApiService {
   public servicePrefix: string = '/';
 
-  constructor(private api: ApiCallService) {
+  constructor(private api: ApiCallService, private http: HttpClient) {
   }
 
   public getNewestObjects(): Observable<T[]> {
@@ -48,4 +58,17 @@ export class SpecialService<T = CmdbDao> implements ApiService {
     );
   }
 
+  public getIntroStarter(): Observable<T[]> {
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) };
+    return this.api.callGet<T[]>(this.servicePrefix + '/special/intro', this.http, httpObserveOptions).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  readCookies(name: string) {
+    const result = new RegExp('(?:^|; )' + encodeURIComponent(name) + '=([^;]*)').exec(document.cookie);
+    return result ? result[1] : 'true';
+  }
 }

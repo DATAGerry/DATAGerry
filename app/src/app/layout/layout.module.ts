@@ -52,6 +52,8 @@ import { AuthModule } from '../auth/auth.module';
 import { NgxSpinnerComponent, NgxSpinnerModule } from 'ngx-spinner';
 import { LoadingScreenComponent } from './structure/loading-screen/loading-screen.component';
 import { SearchBarModule } from '../search/search-bar/search-bar.module';
+import { IntroComponent } from './intro/intro.component';
+import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-step-intro.component';
 
 export const LAYOUT_COMPONENT_ROUTES: Routes = [
   {
@@ -92,13 +94,15 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     ActiveBadgeComponent,
     TableComponent,
     ModalComponent,
+    IntroComponent,
     TypeLabelComponent,
     FooterComponent,
     IconPickerComponent,
     UserImageComponent,
     UserDisplayComponent,
     ChartsComponent,
-    LoadingScreenComponent
+    LoadingScreenComponent,
+    StepByStepIntroComponent
   ],
   exports: [
     NgxSpinnerComponent,
@@ -137,7 +141,9 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     NgbActiveModal
   ],
   entryComponents: [
-    ModalComponent
+    ModalComponent,
+    IntroComponent,
+    StepByStepIntroComponent
   ]
 })
 export class LayoutModule {
