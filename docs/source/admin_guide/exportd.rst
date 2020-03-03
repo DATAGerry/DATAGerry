@@ -29,7 +29,7 @@ Export Jobs can be triggered manually (by clicking on a button in the webui) or 
 of a job were changed (e.g. a new object was added).
 
 Export Jobs can be of type *Push* (default) or *Pull*. Push Jobs are a push to an external system, which runs in a
-background process, while a *Pull* job is triggered by an external system via REST. The client directly the result
+background process, while a *Pull* job is triggered by an external system via REST. The client directly gets the result
 within that REST call.
 
 
@@ -117,8 +117,8 @@ output is formatted as JSON and can be pulled with the DATAGERRY REST API.
 We provide a little wrapper script in the contrib directory, that can be directly used by Ansible with the `inventory
 script plugin <https://docs.ansible.com/ansible/latest/plugins/inventory/script.html>`_:
 
-.. include:: ../../../contrib/ansible/ansible_dyn_inventory.sh
-    :literal:
+.. literalinclude:: ../../../contrib/ansible/ansible_dyn_inventory.sh
+
 
 Download the script and change the config variables to met your DATAGERRY configuration. Start Ansible with the -i flag:
 
@@ -148,7 +148,7 @@ Example::
     #behavior: the object is part of the Ansible group webserver.
 
 .. note::
-    Checkboxes fields in object types are perfect for controlling the group memberships.
+    Checkbox fields in object types are perfect for controlling the group memberships.
 
 You can set host variables for Ansible using the hostvar\_ variables. The variable name is hostvar\_varname, which means,
 you can access the value by using the name varname in Ansible.
