@@ -96,6 +96,7 @@ Currently the follwowing ExternalSystems are supported:
     :align: left
 
     "ExternalSystemAnsible", "Provides a dynamic inventory for Ansible"
+    "ExternalSystemCsv", "Creates a CSV file on the filesystem"
     "ExternalSystemDummy", "A dummy for testing Exportd - will only print some debug output"
     "ExternalSystemExcuteScript", "Executes a script on the DATAGERRY machine"
     "ExternalSystemGenericRestCall", "Sends a HTTP POST to an userdefined URL"
@@ -146,6 +147,26 @@ Example::
 
 You can set host variables for Ansible using the hostvar\_ variables. The variable name is hostvar\_varname, which means,
 you can access the value by using the name varname in Ansible.
+
+
+
+ExternalSystemCsv
+-----------------
+This class will create a CSV file on the filesystem. 
+
+The exporter class has the following parameters:
+
+.. csv-table::
+    :header: "parameter", "required", "description"
+    :align: left
+
+    "csv_filename", "False", "name of the output CSV file. Default: stdout"
+    "csv_delimiter", "False", "CSV delimiter. Default: ';'"
+    "csv_enclosure", "False", "CSV enclosure. Default: '"'"
+
+
+Each export variable will define a row in the CSV file. The header of the row is the export variable name.
+
 
 
 ExternalSystemExecuteScript
