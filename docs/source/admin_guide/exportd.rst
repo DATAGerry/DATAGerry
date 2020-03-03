@@ -96,6 +96,7 @@ Currently the follwowing ExternalSystems are supported:
     :align: left
 
     "ExternalSystemAnsible", "Provides a dynamic inventory for Ansible"
+    "ExternalSystemCpanelDns", "Creates DNS-A Records in cPanel"
     "ExternalSystemCsv", "Creates a CSV file on the filesystem"
     "ExternalSystemDummy", "A dummy for testing Exportd - will only print some debug output"
     "ExternalSystemExcuteScript", "Executes a script on the DATAGERRY machine"
@@ -148,6 +149,39 @@ Example::
 You can set host variables for Ansible using the hostvar\_ variables. The variable name is hostvar\_varname, which means,
 you can access the value by using the name varname in Ansible.
 
+
+
+ExternalSystemCpanelDns
+-----------------------
+This destination adds DNS A-records for CMDB objects to a given DNS zone in cPanel using the cPanel JSON API version 2.
+Any existing A records in that zone, that does not exists as objects in DATAGERRY will be deleted. You can manage other
+record types like CNAME or MX records manually in that zone and the exporter will not touch these records.
+
+To use this exporter, you need a valid cPanel account with username and password and a DNS zone, you can manage.
+The exporter will not create a DNS zone for you. So the DNS zone should already exist, if you want to use this exporter.
+
+The exporter class has the following parameters:
+
+.. csv-table::
+    :header: "parameter", "required", "description"
+    :align: left
+
+    "cpanelApiUrl", "True", "cPanel API base URL"
+    "cpanelApiUser", "True", "cPanel username"
+    "cpanelApiPassword", "True", "cPanel password"
+    "cpanelApiToken", "True", "cPanel API token"
+    "domainName", "True", "DNS Zone managed by cPanel for adding DNS A records"
+    "cpanelApiSslVerify", "False", "disable SSL peer verification"
+
+
+The following variables needs to be set:
+
+.. csv-table::
+    :header: "name", "required", "description"
+    :align: left
+
+    "hostname", "True", "host part of the DNS A record. e.g. - test"
+    "ip", "True", "host part of the DNS A record. e.g. - test"
 
 
 ExternalSystemCsv
