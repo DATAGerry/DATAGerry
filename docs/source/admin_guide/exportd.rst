@@ -28,6 +28,10 @@ fields and the variable hostname can be configured.
 Export Jobs can be triggered manually (by clicking on a button in the webui) or event based, if the configured sources
 of a job were changed (e.g. a new object was added).
 
+Export Jobs can be of type *Push* (default) or *Pull*. Push Jobs are a push to an external system, which runs in a
+background process, while a *Pull* job is triggered by an external system via REST. The client directly the result
+within that REST call.
+
 
 
 Configuration
@@ -106,12 +110,12 @@ Currently the follwowing ExternalSystems are supported:
 
 ExternalSystemAnsible
 ---------------------
-This class will provide a dynamic inventory for `Ansible <https://ansible.com>`. and needs to be configured as Pull
+This class will provide a dynamic inventory for `Ansible <https://ansible.com>`_. and needs to be configured as Pull
 Job. The exporter walks through all CMDB objects that are configured as export source and creates Ansible groups. The
 output is formatted as JSON and can be pulled with the DATAGERRY REST API.
 
 We provide a little wrapper script in the contrib directory, that can be directly used by Ansible with the `inventory
-script plugin <https://docs.ansible.com/ansible/latest/plugins/inventory/script.html>`:
+script plugin <https://docs.ansible.com/ansible/latest/plugins/inventory/script.html>`_:
 
 .. include:: ../../../contrib/ansible/ansible_dyn_inventory.sh
     :literal:
@@ -139,9 +143,9 @@ variable name is group\_groupname and the value is True, if the CMDB object shou
 
 Example::
 
-    variablename: group\_webserver
-    value of the variable for object: True
-    behavior: the object is part of the Ansible group webserver.
+    #variablename: group_webserver
+    #value of the variable for object: True
+    #behavior: the object is part of the Ansible group webserver.
 
 .. note::
     Checkboxes fields in object types are perfect for controlling the group memberships.
@@ -196,7 +200,7 @@ The exporter class has the following parameters:
 
     "csv_filename", "False", "name of the output CSV file. Default: stdout"
     "csv_delimiter", "False", "CSV delimiter. Default: ';'"
-    "csv_enclosure", "False", "CSV enclosure. Default: '"'"
+    "csv_enclosure", "False", "CSV enclosure."
 
 
 Each export variable will define a row in the CSV file. The header of the row is the export variable name.
