@@ -100,7 +100,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
 
     this.inputControl.valueChanges.pipe(debounceTime(300)).subscribe((changes: string) => {
-      if (changes !== '') {
+      if (changes.trim() !== '') {
         this.textRegexSubscription = this.searchService.getEstimateValueResults(changes).subscribe((counter: number) => {
           this.possibleTextResults = counter;
         });
@@ -171,6 +171,15 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     const index: number = this.tags.indexOf(tag);
     if (index !== -1) {
       this.tags.splice(index, 1);
+    }
+  }
+
+  public removeLastTag() {
+    if (this.inputControl.value.trim() === '') {
+      const index: number = this.tags.length - 1;
+      if (index !== -1) {
+        this.tags.splice(index, 1);
+      }
     }
   }
 
