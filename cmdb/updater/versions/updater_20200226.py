@@ -39,8 +39,16 @@ class Update20200226(Updater):
 
     def start_update(self):
         try:
+            # Get root category
+            root_category = self.object_manager.get_categories_by(**{'root': True})
+            # Update all types where category ID is 0,
+            # to root category public ID
+            if len(root_category):
+                self.object_manager.update_many_types(filter={'category_id': 0},
+                                                      update={'$set': {'category_id': root_category[0].get_public_id()}})
+
+            # Remove the property root from category collection
             self.object_manager.unset_update(CmdbCategory.COLLECTION, 'root')
         except (ObjectManagerGetError, ObjectManagerUpdateError, CMDBError) as err:
             raise Exception(err.message)
         self.increase_updater_version(20200226)
-
