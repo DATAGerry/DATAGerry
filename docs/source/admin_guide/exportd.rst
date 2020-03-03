@@ -95,10 +95,112 @@ Currently the follwowing ExternalSystems are supported:
     :header: "ExternalSystem", "description"
     :align: left
 
+    "ExternalSystemAnsible", "Provides a dynamic inventory for Ansible"
+    "ExternalSystemCpanelDns", "Creates DNS-A Records in cPanel"
+    "ExternalSystemCsv", "Creates a CSV file on the filesystem"
     "ExternalSystemDummy", "A dummy for testing Exportd - will only print some debug output"
     "ExternalSystemExcuteScript", "Executes a script on the DATAGERRY machine"
     "ExternalSystemGenericRestCall", "Sends a HTTP POST to an userdefined URL"
     "ExternalSystemOpenNMS", "Add nodes to the monitoring system OpenNMS with the OpenNMS REST API"
+
+
+ExternalSystemAnsible
+---------------------
+This class will provide a dynamic inventory for `Ansible <https://ansible.com>`. and needs to be configured as Pull
+Job. The exporter walks through all CMDB objects that are configured as export source and creates Ansible groups. The
+output is formatted as JSON and can be pulled with the DATAGERRY REST API.
+
+We provide a little wrapper script in the contrib directory, that can be directly used by Ansible with the `inventory
+script plugin <https://docs.ansible.com/ansible/latest/plugins/inventory/script.html>`:
+
+.. include:: ../../../contrib/ansible/ansible_dyn_inventory.sh
+    :literal:
+
+Download the script and change the config variables to met your DATAGERRY configuration. Start Ansible with the -i flag:
+
+.. code-block:: console
+
+    $ ansible -i ansible_dyn_inventory.sh [...]
+
+
+This exporter class has no parameters, but needs some Export Variables to be set:
+
+.. csv-table::
+    :header: "name", "required", "description"
+    :align: left
+
+    "hostname", "True", "hostname or IP that Ansible uses for connecting to the host. e.g. - test.example.com"
+    "group\_", "True", "Ansible group membership. e.g. - group\_webservers"
+    "hostvar\_", "True", "host variables that should be given to Ansible. e.g. - hostvar\_snmpread"
+
+For each CMDB object the export variable hostname has to be set which is used by Ansible to connect to a CMDB object.
+Hosts are organized in Ansible groups. For adding a CMDB object to a specific group, the group\_ variables are used. The
+variable name is group\_groupname and the value is True, if the CMDB object should be a member of the group.
+
+Example::
+
+    variablename: group\_webserver
+    value of the variable for object: True
+    behavior: the object is part of the Ansible group webserver.
+
+.. note::
+    Checkboxes fields in object types are perfect for controlling the group memberships.
+
+You can set host variables for Ansible using the hostvar\_ variables. The variable name is hostvar\_varname, which means,
+you can access the value by using the name varname in Ansible.
+
+
+
+ExternalSystemCpanelDns
+-----------------------
+This destination adds DNS A-records for CMDB objects to a given DNS zone in cPanel using the cPanel JSON API version 2.
+Any existing A records in that zone, that does not exists as objects in DATAGERRY will be deleted. You can manage other
+record types like CNAME or MX records manually in that zone and the exporter will not touch these records.
+
+To use this exporter, you need a valid cPanel account with username and password and a DNS zone, you can manage.
+The exporter will not create a DNS zone for you. So the DNS zone should already exist, if you want to use this exporter.
+
+The exporter class has the following parameters:
+
+.. csv-table::
+    :header: "parameter", "required", "description"
+    :align: left
+
+    "cpanelApiUrl", "True", "cPanel API base URL"
+    "cpanelApiUser", "True", "cPanel username"
+    "cpanelApiPassword", "True", "cPanel password"
+    "cpanelApiToken", "True", "cPanel API token"
+    "domainName", "True", "DNS Zone managed by cPanel for adding DNS A records"
+    "cpanelApiSslVerify", "False", "disable SSL peer verification"
+
+
+The following variables needs to be set:
+
+.. csv-table::
+    :header: "name", "required", "description"
+    :align: left
+
+    "hostname", "True", "host part of the DNS A record. e.g. - test"
+    "ip", "True", "host part of the DNS A record. e.g. - test"
+
+
+ExternalSystemCsv
+-----------------
+This class will create a CSV file on the filesystem. 
+
+The exporter class has the following parameters:
+
+.. csv-table::
+    :header: "parameter", "required", "description"
+    :align: left
+
+    "csv_filename", "False", "name of the output CSV file. Default: stdout"
+    "csv_delimiter", "False", "CSV delimiter. Default: ';'"
+    "csv_enclosure", "False", "CSV enclosure. Default: '"'"
+
+
+Each export variable will define a row in the CSV file. The header of the row is the export variable name.
+
 
 
 ExternalSystemExecuteScript
