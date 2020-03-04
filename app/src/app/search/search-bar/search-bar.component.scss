@@ -48,6 +48,7 @@ $search-input-font-size: 0.8rem;
     min-width: 40px;
     flex: 1 1 0%;
     font-size: $search-input-font-size;
+    outline: none;
   }
 
   .search-bar-append {

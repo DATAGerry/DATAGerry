@@ -45,7 +45,7 @@ search_blueprint = RootBlueprint('search_rest', __name__, url_prefix='/search')
 @insert_request_user
 def quick_search_result_counter(regex: str, request_user: User):
     plb = PipelineBuilder()
-    regex = plb.regex_('fields.value', f'{regex}', 'imsx')
+    regex = plb.regex_('fields.value', f'{regex}', 'ims')
     pipe_match = plb.match_(regex)
     plb.add_pipe(pipe_match)
     pipe_count = plb.count_('count')
@@ -69,6 +69,7 @@ def search_framework(request_user: User):
     try:
         limit = request.args.get('limit', Search.DEFAULT_LIMIT, int)
         skip = request.args.get('skip', Search.DEFAULT_SKIP, int)
+        only_active = _fetch_only_active_objs()
         search_params: dict = request.args.get('query') or '{}'
     except ValueError as err:
         return abort(400, err)
@@ -86,7 +87,7 @@ def search_framework(request_user: User):
     try:
         builder = PipelineBuilder()
         search_parameters = SearchParam.from_request(search_params)
-        query: Pipeline = builder.build(search_parameters)
+        query: Pipeline = builder.build(search_parameters, object_manager, only_active)
 
         searcher = SearcherFramework(manager=object_manager)
         result = searcher.aggregate(pipeline=query, request_user=request_user, limit=limit, skip=skip)
@@ -96,3 +97,16 @@ def search_framework(request_user: User):
         return make_response([], 204)
 
     return make_response(result)
+
+
+def _fetch_only_active_objs():
+    """
+        Checking if request have cookie parameter for object active state
+        Returns:
+            True if cookie is set or value is true else false
+        """
+    if request.args.get('onlyActiveObjCookie') is not None:
+        value = request.args.get('onlyActiveObjCookie')
+        if value in ['True', 'true']:
+            return True
+    return False

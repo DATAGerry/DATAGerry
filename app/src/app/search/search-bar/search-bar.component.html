@@ -4,6 +4,8 @@
     {{tag.searchText}}
   </cmdb-search-bar-tags>
   <input class="search-input" type="text" autofocus [formControl]="inputControl" tabindex="1"
+         data-toggle="tooltip"
+         title="enter your search terms, after each search term use tab to enter the next term, press enter to start the search"
          (keyup.enter)="callSearch()"
          (keydown.backspace)="removeLastTag()"
          (keydown.tab)="addTag('text', $event)"

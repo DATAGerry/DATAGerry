@@ -87,7 +87,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   public onChangePage(event): void {
     if (this.currentPage !== this.pagination.pager.currentPage) {
       this.currentPage = this.pagination.pager.currentPage;
-      this.skip = this.currentPage * this.limit;
+      this.skip = (this.currentPage - 1) * this.limit;
       this.onSearch();
     }
 

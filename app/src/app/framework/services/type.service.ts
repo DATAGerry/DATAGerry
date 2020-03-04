@@ -124,7 +124,7 @@ export class TypeService<T = CmdbType> implements ApiService {
   }
 
   public getUncategorizedTypes(): Observable<any> {
-    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) };
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
     return this.api.callGet<T[]>(this.servicePrefix + '/uncategorized/', this.http, httpObserveOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
@@ -142,7 +142,7 @@ export class TypeService<T = CmdbType> implements ApiService {
 
 
   public groupTypeByCategory(publicID: number): Observable<any> {
-    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) };
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
     return this.api.callGet<T[]>(this.servicePrefix + '/group/category/' + publicID, this.http, httpObserveOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
@@ -192,12 +192,6 @@ export class TypeService<T = CmdbType> implements ApiService {
   public checkTypeExists(typeName: string) {
     const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
     return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`, specialClient);
-  }
-
-
-  readCookies(name: string) {
-    const result = new RegExp('(?:^|; )' + encodeURIComponent(name) + '=([^;]*)').exec(document.cookie);
-    return result ? result[1] : 'true';
   }
 }
 

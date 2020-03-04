@@ -59,16 +59,11 @@ export class SpecialService<T = CmdbDao> implements ApiService {
   }
 
   public getIntroStarter(): Observable<T[]> {
-    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) };
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
     return this.api.callGet<T[]>(this.servicePrefix + '/special/intro', this.http, httpObserveOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
     );
-  }
-
-  readCookies(name: string) {
-    const result = new RegExp('(?:^|; )' + encodeURIComponent(name) + '=([^;]*)').exec(document.cookie);
-    return result ? result[1] : 'true';
   }
 }

@@ -62,7 +62,7 @@ def get_types_by_name(regex: str, request_user: User):
     query_builder = QueryBuilder()
 
     query_name = query_builder.regex_('name', f'{regex}', 'imsx')
-    query_label = query_builder.regex_('label', f'{regex}', 'imsx')
+    query_label = query_builder.regex_('label', f'{regex}', 'ims')
     query = query_builder.or_([query_name, query_label])
     try:
         type_list = object_manager.get_types_by(**query)

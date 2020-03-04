@@ -19,6 +19,7 @@ from typing import List
 from cmdb.search.params import SearchParam
 from cmdb.search.query import Pipeline
 from cmdb.search.query.builder import Builder
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
 LOGGER = logging.getLogger(__name__)
 
@@ -59,15 +60,21 @@ class PipelineBuilder(Builder):
         """Remove a pipe to the pipeline"""
         self.pipeline.remove(pipe)
 
-    def build(self, params: List[SearchParam]) -> Pipeline:
+    def build(self, params: List[SearchParam],
+              obj_manager: CmdbObjectManager = None,
+              active_flag: bool = False) -> Pipeline:
         """Build a pipeline query out of frontend params"""
         # clear pipeline
         self.clear()
 
+        # fetch only active objects
+        if active_flag:
+            self.add_pipe(self.match_({'active': {"$eq": True}}))
+
         # text builds
         text_params = [_ for _ in params if _.search_form == 'text']
         for param in text_params:
-            regex = self.regex_('fields.value', param.search_text)
+            regex = self.regex_('fields.value', param.search_text, 'ims')
             self.add_pipe(self.match_(regex))
 
         # type builds
@@ -75,6 +82,17 @@ class PipelineBuilder(Builder):
         for param in type_params:
             if param.settings and len(param.settings.get('types', [])) > 0:
                 type_id_in = self.in_('type_id', param.settings['types'])
+                self.add_pipe(self.match_(type_id_in))
+
+        # category builds
+        category_params = [_ for _ in params if _.search_form == 'category']
+        for param in category_params:
+            if param.settings and len(param.settings.get('categories', [])) > 0:
+                type_list = obj_manager.get_types_by(**self.in_('category_id', param.settings['categories']))
+                type_ids = []
+                for curr_type in type_list:
+                    type_ids.append(curr_type.get_public_id())
+                type_id_in = self.in_('type_id', type_ids)
                 self.add_pipe(self.match_(type_id_in))
 
         # public builds

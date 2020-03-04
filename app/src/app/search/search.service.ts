@@ -23,9 +23,12 @@ import { map } from 'rxjs/operators';
 import { HttpParams } from '@angular/common/http';
 import { SearchResultList } from './models/search-result';
 
+export const COOCKIENAME = 'onlyActiveObjCookie';
+
 @Injectable({
   providedIn: 'root'
 })
+
 export class SearchService<T = SearchResultList> implements ApiService {
 
   public servicePrefix: string = 'search';
@@ -43,6 +46,7 @@ export class SearchService<T = SearchResultList> implements ApiService {
 
   public postSearch(query: any, params?: HttpParams): Observable<T> {
     const httpOptions = httpObservePostOptions;
+    params = params.set('onlyActiveObjCookie', this.api.readCookies(COOCKIENAME));
     if (params) {
       httpOptions.params = params;
     }
@@ -55,5 +59,4 @@ export class SearchService<T = SearchResultList> implements ApiService {
       })
     );
   }
-
 }

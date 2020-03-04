@@ -144,6 +144,13 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         }
         tag.settings = { types: typeIDs } as SearchBarTagSettings;
         break;
+      case 'category':
+        const categoryIDs: number[] = [];
+        for (const category of params) {
+          categoryIDs.push(category.public_id);
+        }
+        tag.settings = { categories: categoryIDs } as SearchBarTagSettings;
+        break;
       case 'publicID':
         tag.settings = { publicID: searchTerm } as SearchBarTagSettings;
         break;
@@ -188,6 +195,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   public callSearch() {
+    if (this.inputControl.value.trim() !== '') {
+      this.addTag('text');
+    }
     if (this.tags.length > 0) {
       this.inputControl.setValue('', { onlySelf: true });
       this.router.navigate(['/search'], { queryParams: { query: JSON.stringify(this.tags) } });

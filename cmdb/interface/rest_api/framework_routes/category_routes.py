@@ -61,7 +61,7 @@ def get_categories_by_name(regex: str, request_user: User):
     query_builder = QueryBuilder()
 
     query_name = query_builder.regex_('name', f'{regex}', 'imsx')
-    query_label = query_builder.regex_('label', f'{regex}', 'imsx')
+    query_label = query_builder.regex_('label', f'{regex}', 'ims')
     query = query_builder.or_([query_name, query_label])
     categories_list: List[CmdbCategory] = object_manager.get_categories_by(**query)
     if len(categories_list) == 0:
