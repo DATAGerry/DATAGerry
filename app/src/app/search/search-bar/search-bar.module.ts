@@ -22,16 +22,18 @@ import { SearchBarTagComponent } from './search-bar-tag/search-bar-tag.component
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SearchBarTagIconComponent } from './search-bar-tag/search-bar-tag-icon.component';
 import { SearchBarTagSettingsFormComponent } from './search-bar-tag-settings-form/search-bar-tag-settings-form.component';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   declarations: [SearchBarComponent, SearchBarTagComponent, SearchBarTagIconComponent, SearchBarTagSettingsFormComponent],
   exports: [
     SearchBarComponent
   ],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule
-  ]
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        FontAwesomeModule
+    ]
 })
 export class SearchBarModule { }

@@ -21,6 +21,7 @@ export class SearchBarTagSettings {
 
 export class SearchBarTag {
   public searchText: string | number;
+  public searchLabel: string;
   public searchForm: string;
   public settings?: SearchBarTagSettings;
 

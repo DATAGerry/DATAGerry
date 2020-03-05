@@ -50,6 +50,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   // Child components
   @ViewChild('tagInput', { static: false }) tagInput: ElementRef;
   @ViewChild('inputDropdown', { static: false }) inputDropdown: ElementRef;
+  @ViewChild('inputSubDropdown', { static: false }) inputSubDropdown: ElementRef;
   @ViewChildren(SearchBarTagComponent) searchBarTagComponents: QueryList<SearchBarTagComponent>;
 
   // Tabs
@@ -134,6 +135,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   public addTag(searchForm: string, params?: any) {
     const searchTerm = this.inputControl.value;
     const tag = new SearchBarTag(searchTerm, searchForm);
+    tag.searchLabel = searchTerm;
     switch (searchForm) {
       case 'text':
         break;
@@ -142,6 +144,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         for (const type of params) {
           typeIDs.push(type.public_id);
         }
+        tag.searchLabel = params.length === 1 ? params[0].label : searchTerm;
         tag.settings = { types: typeIDs } as SearchBarTagSettings;
         break;
       case 'category':
@@ -149,6 +152,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         for (const category of params) {
           categoryIDs.push(category.public_id);
         }
+        tag.searchLabel = params.length === 1 ? params[0].label : searchTerm;
         tag.settings = { categories: categoryIDs } as SearchBarTagSettings;
         break;
       case 'publicID':
@@ -205,7 +209,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   public openDropdown(currentIDx: number) {
-    $('[tabindex=' + currentIDx + ']').find('[data-toggle="collapse"]').first().click();
+    $('[tabindex=' + (currentIDx) + ']').find('[data-toggle="collapse"]').first().click();
   }
 
 
