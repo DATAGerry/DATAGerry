@@ -29,10 +29,11 @@ import { SearchComponent } from './search.component';
 import { SearchResultComponent } from './search-result/search-result.component';
 import { SearchResultPreviewComponent } from './search-result/search-result-preview.component';
 import { RenderModule } from '../framework/render/render.module';
+import { SearchResultMatchComponent } from './search-result/search-result-match.component';
 
 @NgModule({
   entryComponents: [SearchResultPreviewComponent],
-  declarations: [SearchComponent, SearchResultComponent, SearchResultPreviewComponent],
+  declarations: [SearchComponent, SearchResultComponent, SearchResultPreviewComponent, SearchResultMatchComponent],
   imports: [
     CommonModule,
     SearchRoutingModule,

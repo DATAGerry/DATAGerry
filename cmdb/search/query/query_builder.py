@@ -19,6 +19,7 @@ from cmdb.search.query.builder import Builder
 
 
 class QueryBuilder(Builder):
+    """Query builder for database find search"""
 
     def __init__(self, query: Query = None):
         self._query: Query = query or Query({})
@@ -38,4 +39,4 @@ class QueryBuilder(Builder):
         self._query = Query(value)
 
     def build(self, params: dict) -> Query:
-        return self.query
+        raise NotImplementedError()

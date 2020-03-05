@@ -60,6 +60,30 @@ class PipelineBuilder(Builder):
         """Remove a pipe to the pipeline"""
         self.pipeline.remove(pipe)
 
+    def get_regex_pipes_values(self) -> List[str]:
+        """Extract the regex pipes value from the pipeline"""
+        regex_pipes: List[str] = []
+
+        def gen_dict_extract(key, var) -> str:
+            for k, v in var.items():
+                if k == key:
+                    yield v
+                if isinstance(v, dict):
+                    for result in gen_dict_extract(key, v):
+                        yield result
+                elif isinstance(v, list):
+                    for d in v:
+                        for result in gen_dict_extract(key, d):
+                            yield result
+
+        for pipe in self.pipeline:
+            pipe_extract = list(gen_dict_extract('$regex', pipe))
+            if len(pipe_extract) > 0:
+                for px in pipe_extract:
+                    regex_pipes.append(px)
+
+        return regex_pipes
+
     def build(self, params: List[SearchParam],
               obj_manager: CmdbObjectManager = None,
               active_flag: bool = False) -> Pipeline:

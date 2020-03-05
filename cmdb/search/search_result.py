@@ -13,32 +13,89 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import logging
 from typing import TypeVar, Generic, List
 
+from bson import Regex
+
+LOGGER = logging.getLogger(__name__)
 R: TypeVar = TypeVar('R')
 
 
 class SearchResultMap(Generic[R]):
+    """Result mapper for Result/Match binding
+    """
 
-    def __init__(self, result: R, matches: [] = None):
+    def __init__(self, result: R, matches: List[str] = None):
         self.result = result
-        self.matches = matches
+        self.matches: List[str] = matches
 
     def to_json(self) -> dict:
+        """Quick convert for the database"""
         return {'result': self.result.__dict__, 'matches': self.matches}
 
 
 class SearchResult(Generic[R]):
+    """Generic search result base"""
 
-    def __init__(self, results: List[R], total_results: int, alive: bool, limit: int, skip: int):
+    def __init__(self, results: List[R], total_results: int, alive: bool, limit: int, skip: int,
+                 matches_regex: List[str] = None):
+        """
+        Constructor for search result
+        Args:
+            results: List of generic search results
+            total_results: total number of results
+            alive: flag if spliced search result has more data in database
+            limit: max number of results to return
+            skip: start of index value for the search
+            matches_regex: list of text regex values
+        """
         self.limit: int = limit
         self.skip: int = skip
         self.total_results: int = total_results
         self.alive = alive
-        self.results: List[SearchResultMap] = [SearchResultMap[R](result=result) for result in results]
+        self.results: List[SearchResultMap] = [
+            SearchResultMap[R](result=result, matches=self.find_match_fields(result, matches_regex)) for result in
+            results]
 
     def __len__(self):
+        """
+        Call number of results
+        Returns:
+            number of found objects
+        """
         return len(self.results)
+
+    @staticmethod
+    def find_match_fields(result: R, possible_regex_list=None):
+        """
+        Get list of matched fields inside the searchresult
+        Args:
+            result: Generic search result
+            possible_regex_list: list of text regex from the pipeline builder
+
+        Returns:
+            list of fields where the regex matched
+        """
+        matched_fields = []
+        fields = result.fields
+        if not possible_regex_list:
+            return None
+        for regex_ in possible_regex_list:
+            try:
+                runtime_regex = Regex(regex_, 'imsx').try_compile()
+            except Exception:
+                runtime_regex = regex_
+            for field in fields:
+                try:
+                    res = runtime_regex.findall(str(field.get('value')))
+                    if len(res) > 0:
+                        matched_fields.append(field)
+                except Exception:
+                    continue
+        if len(matched_fields) > 0:
+            return matched_fields
+        return None
 
     def to_json(self) -> dict:
         return {
