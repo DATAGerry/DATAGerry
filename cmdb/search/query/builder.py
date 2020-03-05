@@ -21,6 +21,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Builder:
+    """Base builder prototype"""
 
     def __len__(self):
         raise NotImplementedError()

@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import logging
+from typing import List
 
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
@@ -41,6 +42,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
         Args:
             pipeline (Pipeline): list of requirement pipes
             request_user (User): user who started this search
+            matches_regex (List): list of regex match values
             limit (int): max number of documents to return
             skip (int): number of documents to be skipped
             **kwargs:
@@ -59,11 +61,14 @@ class SearcherFramework(Search[CmdbObjectManager]):
             ]
         }
         plb.add_pipe(PipelineBuilder.facet_(stages))
-
         # make search call
         raw_search_result = self.manager.aggregate(collection=CmdbObject.COLLECTION, pipeline=plb.pipeline)
         raw_search_result_list = list(raw_search_result)
-        LOGGER.debug(raw_search_result_list)
+        try:
+            matches_regex = plb.get_regex_pipes_values()
+        except Exception:
+            matches_regex = []
+
         if len(raw_search_result_list[0]['data']) > 0:
             raw_search_result_list_entry = raw_search_result_list[0]
             # parse result list
@@ -79,6 +84,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
             results=rendered_result_list,
             total_results=total_results,
             alive=raw_search_result.alive,
+            matches_regex=matches_regex,
             limit=limit,
             skip=skip
         )
@@ -88,6 +94,5 @@ class SearcherFramework(Search[CmdbObjectManager]):
                skip: int = Search.DEFAULT_SKIP) -> SearchResult[RenderResult]:
         """
         Uses mongodb find query system
-        TODO!!!
         """
-        pass
+        raise NotImplementedError()
