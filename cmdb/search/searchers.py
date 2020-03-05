@@ -61,12 +61,13 @@ class SearcherFramework(Search[CmdbObjectManager]):
             ]
         }
         plb.add_pipe(PipelineBuilder.facet_(stages))
-        # make search call
+
         raw_search_result = self.manager.aggregate(collection=CmdbObject.COLLECTION, pipeline=plb.pipeline)
         raw_search_result_list = list(raw_search_result)
         try:
             matches_regex = plb.get_regex_pipes_values()
-        except Exception:
+        except Exception as err:
+            LOGGER.error(f'Extract regex pipes: {err}')
             matches_regex = []
 
         if len(raw_search_result_list[0]['data']) > 0:

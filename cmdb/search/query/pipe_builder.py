@@ -77,7 +77,16 @@ class PipelineBuilder(Builder):
                             yield result
 
         for pipe in self.pipeline:
-            pipe_extract = list(gen_dict_extract('$regex', pipe))
+            pipe_extract = []
+            extract_generator = gen_dict_extract('$regex', pipe)
+            while True:
+                try:
+                    pipe_extract.append(next(extract_generator))
+                except StopIteration:
+                    break
+                except Exception:
+                    continue
+
             if len(pipe_extract) > 0:
                 for px in pipe_extract:
                     regex_pipes.append(px)
