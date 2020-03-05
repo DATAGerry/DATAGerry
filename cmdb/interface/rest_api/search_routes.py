@@ -40,10 +40,12 @@ LOGGER = logging.getLogger(__name__)
 search_blueprint = RootBlueprint('search_rest', __name__, url_prefix='/search')
 
 
-@search_blueprint.route('/quick/count/<string:regex>', methods=['GET'])
+@search_blueprint.route('/quick/count', methods=['GET'])
+@search_blueprint.route('/quick/count/', methods=['GET'])
 @login_required
 @insert_request_user
-def quick_search_result_counter(regex: str, request_user: User):
+def quick_search_result_counter(request_user: User):
+    regex = request.args.get('searchValue', Search.DEFAULT_REGEX, str)
     plb = PipelineBuilder()
     regex = plb.regex_('fields.value', f'{regex}', 'ims')
     pipe_match = plb.match_(regex)
