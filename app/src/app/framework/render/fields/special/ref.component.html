@@ -6,7 +6,7 @@
     <div class="input-group">
       <ng-container [ngSwitch]="true">
         <ng-container *ngSwitchCase="mode == MODES.View">
-          <button type="text" class="form-control text-left" disabled>
+          <div class="form-control text-left overflow-auto" readonly>
             <ng-container *ngIf="refObject != null">
               <i class="{{refObject?.type_information?.icon}}"></i> {{refObject?.type_information?.type_label}}
               #{{refObject?.object_information?.object_id}}
@@ -15,13 +15,13 @@
                   <span *ngIf="first"> - </span>{{sum.value}}
                 </ng-template>
                 <ng-template #templateDate>
-                  <span *ngIf="first"> - </span>{{sum.value | date:"dd/MM/yy - hh:mm:ss"}}
+                  <span *ngIf="first"> - </span>{{sum.value | date:"dd/MM/yyyy - hh:mm:ss"}}
                 </ng-template>
                 <span *ngIf="!last"> | </span>
               </span>
             </ng-container>
             <ng-container *ngIf="refObject == null"> No reference set </ng-container>
-          </button>
+          </div>
           <div class="input-group-append">
             <span class="input-group-text">
               <a  [class.ref-disabled]="!controller.value"
@@ -50,7 +50,7 @@
                       <span *ngIf="first"> - </span>{{sum.value}}
                     </ng-template>
                     <ng-template #templateDate>
-                      <span *ngIf="first"> - </span>{{sum.value | date:"dd/MM/yy - hh:mm:ss"}}
+                      <span *ngIf="first"> - </span>{{sum.value | date:"dd/MM/yyyy - hh:mm:ss"}}
                     </ng-template>
                     <span *ngIf="!last"> | </span>
                   </span>
@@ -65,7 +65,7 @@
                     <span *ngIf="first"> - </span>{{sum.value}}
                   </ng-template>
                   <ng-template #templateDate>
-                    <span *ngIf="first"> - </span>{{sum.value | date:"dd/MM/yy - hh:mm:ss"}}
+                    <span *ngIf="first"> - </span>{{sum.value | date:"dd/MM/yyyy - hh:mm:ss"}}
                   </ng-template>
                   <span *ngIf="!last"> | </span>
                 </span>
@@ -79,7 +79,7 @@
                   <span *ngIf="first"> - </span>{{sum.value}}
                 </ng-template>
                 <ng-template #templateDate>
-                  <span *ngIf="first"> - </span>{{sum.value | date:"dd/MM/yy - hh:mm:ss"}}
+                  <span *ngIf="first"> - </span>{{sum.value | date:"dd/MM/yyyy - hh:mm:ss"}}
                 </ng-template>
                 <span *ngIf="!last"> | </span>
               </span>

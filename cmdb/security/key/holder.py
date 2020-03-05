@@ -15,7 +15,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.utils.error import CMDBError
-from cmdb.utils.system_reader import SystemConfigReader, SystemSettingsReader
+from cmdb.utils.system_reader import SystemSettingsReader
+from cmdb.utils.system_config import SystemConfigReader
 
 
 class KeyHolder:

@@ -24,7 +24,7 @@ from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import load_class
-from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.utils.system_config import SystemConfigReader
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
 from cmdb.framework.cmdb_render import CmdbRender, RenderList
@@ -126,12 +126,12 @@ class ExportdManagerBase(ExportdJobManagement):
                     current_object = self.__object_manager.get_object(field["value"])
                     type_instance = self.__object_manager.get_type(current_object.get_type_id())
                     cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance,
-                                                    render_user=None, user_manager=None)
+                                                    render_user=None)
                     data["fields"][field_name] = self.__get_objectdata(cmdb_render_object.result(), iteration)
                 else:
                     data["fields"][field_name] = field["value"]
-            except Exception as e:
-                pass
+            except Exception as err:
+                LOGGER.error(err)
         return data
 
 

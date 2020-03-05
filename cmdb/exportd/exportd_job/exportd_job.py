@@ -16,6 +16,7 @@
 
 from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
 from enum import Enum
+from cmdb.framework.cmdb_dao import CmdbDAO
 
 try:
     from cmdb.utils.error import CMDBError
@@ -43,6 +44,10 @@ class ExportdJob(JobManagementBase):
     COLLECTION = 'exportd.jobs'
     REQUIRED_INIT_KEYS = [
         'name',
+    ]
+
+    INDEX_KEYS = [
+        {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
     def __init__(self, name, label, description, active, author_id,

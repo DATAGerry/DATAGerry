@@ -109,15 +109,9 @@ export class DashboardComponent implements OnInit {
       for (let i = 0; i < data.length; i++) {
         this.labelsCategory.push(data[i].label);
         this.colorsCategory.push(this.getRandomColor());
-        if (data[i].root) {
-          this.typeService.getTypeListByCategory(0).subscribe((list: any[]) => {
-            this.itemsCategory.push(list.length);
-          });
-        } else {
-          this.typeService.getTypeListByCategory(data[i].public_id).subscribe((list: any[]) => {
-            this.itemsCategory.push(list.length);
-          });
-        }
+        this.typeService.getTypeListByCategory(data[i].public_id).subscribe((list: any[]) => {
+          this.itemsCategory.push(list.length);
+        });
         if (i === this.maxChartValue) {
           break;
         }

@@ -33,6 +33,7 @@ from datetime import datetime
 
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_type import CmdbType
+from cmdb.framework.special.dt_html_parser import DtHtmlParser
 from cmdb.user_management.user_manager import User, UserManager
 
 LOGGER = logging.getLogger(__name__)
@@ -68,11 +69,14 @@ class CmdbRender:
 
     def __init__(self, object_instance: CmdbObject,
                  type_instance: CmdbType,
-                 render_user: User, user_list: List[User] = None):
+                 render_user: User, user_list: List[User] = None,
+                 object_manager: CmdbObjectManager = None, dt_render=False):
         self.object_instance: CmdbObject = object_instance
         self.type_instance: CmdbType = type_instance
         self.user_list: List[User] = user_list
         self.render_user: User = render_user
+        self.object_manager = object_manager
+        self.dt_render = dt_render
 
     def _render_username_by_id(self, user_id: int) -> str:
         user: User = None
@@ -84,7 +88,6 @@ class CmdbRender:
             return user.get_name()
         else:
             return CmdbRender.AUTHOR_ANONYMOUS_NAME
-
 
     @property
     def object_instance(self) -> CmdbObject:
@@ -197,9 +200,13 @@ class CmdbRender:
 
     def __merge_fields_value(self) -> list:
         field_map = []
+        html_parser = DtHtmlParser(self.object_manager)
         for field in self.type_instance.fields:
+            html_parser.current_field = field
             try:
                 field['value'] = [x for x in self.object_instance.fields if x['name'] == field['name']][0]['value']
+                if self.dt_render:
+                    field['value'] = html_parser.field_to_html(field['type'])
             except (ValueError, IndexError):
                 field['value'] = None
             field_map.append(field)
@@ -253,11 +260,14 @@ class CmdbRender:
                     # for every field get the value data from object_instance
                     for ext_link_field in ext_link_instance.fields:
                         try:
-                            _ = self.object_instance.get_value(ext_link_field)
-                            if _ is None or _ == '':
+                            if ext_link_field == 'object_id':
+                                field_value = self.object_instance.public_id
+                            else:
+                                field_value = self.object_instance.get_value(ext_link_field)
+                            if field_value is None or field_value == '':
                                 # if value is empty or does not exists
                                 raise ValueError(ext_link_field)
-                            field_list.append(_)
+                            field_list.append(field_value)
                         except CMDBError:
                             # if error append missing data
                             missing_list.append(ext_link_instance)
@@ -277,26 +287,29 @@ class CmdbRender:
 
 class RenderList:
 
-    def __init__(self, object_list: List[CmdbObject], request_user: User):
+    def __init__(self, object_list: List[CmdbObject], request_user: User, dt_render=False,
+                 object_manager: CmdbObjectManager = None):
         self.object_list: List[CmdbObject] = object_list
         self.request_user = request_user
-
-    @timing('RenderList')
-    def render_result_list(self) -> List[RenderResult]:
-        from cmdb.utils.system_reader import SystemConfigReader
+        self.dt_render = dt_render
+        from cmdb.utils.system_config import SystemConfigReader
         database_manager = DatabaseManagerMongo(
             **SystemConfigReader().get_all_values_from_section('Database')
         )
-        object_manager = CmdbObjectManager(database_manager=database_manager)
-        user_manager = UserManager(database_manager=database_manager)
-        complete_user_list: List[User] = user_manager.get_users()
+        self.object_manager = object_manager or CmdbObjectManager(database_manager=database_manager)
+        self.user_manager = UserManager(database_manager=database_manager)
+
+    @timing('RenderList')
+    def render_result_list(self) -> List[RenderResult]:
+        complete_user_list: List[User] = self.user_manager.get_users()
 
         preparation_objects: List[RenderResult] = []
         for passed_object in self.object_list:
             tmp_render = CmdbRender(
-                type_instance=object_manager.get_type(passed_object.type_id),
+                type_instance=self.object_manager.get_type(passed_object.type_id),
                 object_instance=passed_object,
-                render_user=self.request_user, user_list=complete_user_list)
+                render_user=self.request_user, user_list=complete_user_list,
+                object_manager=self.object_manager, dt_render=self.dt_render)
             current_render_result = tmp_render.result()
             preparation_objects.append(current_render_result)
         return preparation_objects

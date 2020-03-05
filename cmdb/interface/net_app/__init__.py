@@ -22,7 +22,7 @@ from flask_cors import CORS
 
 from cmdb.interface.cmdb_app import BaseCmdbApp
 from cmdb.interface.config import app_config
-from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.utils.system_config import SystemConfigReader
 
 try:
     from cmdb.utils.error import CMDBError

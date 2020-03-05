@@ -9,6 +9,7 @@
       <cmdb-search-result *ngFor="let result of searchResultList.results" [searchResult]="result">
         <hr />
       </cmdb-search-result>
+      <jw-pagination #paginationComponent [pageSize]="limit" [items]="maxNumberOfSites" (changePage)="onChangePage($event)"></jw-pagination>
     </ng-container>
   </div>
 </div>

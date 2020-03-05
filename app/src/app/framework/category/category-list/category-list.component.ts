@@ -87,7 +87,7 @@ export class CategoryListComponent implements OnInit, OnDestroy {
                 }, (error) => { console.log(error); },
                   () => {
                     this.sidebarService.updateCategoryTree();
-                    this.toast.show('Category was deleted');
+                    this.toast.show('Category # ' + publicID + ' was deleted');
                 });
               }
             });

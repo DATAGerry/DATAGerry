@@ -13,12 +13,14 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """Database connection and data access
 
 This module controls the connection and access to the database
 
 Attributes:
-    CLIENT (TypeVar): generic type variable for `Connector` class implementation
+    CLIENT (TypeVar): generic type variable for `Client` class implementation
+    CONNECTOR (TypeVar): generic type variable for `Connector` class implementation
 
 """
 from typing import TypeVar

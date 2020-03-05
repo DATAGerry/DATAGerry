@@ -31,6 +31,14 @@ import { CmdbType } from '../../framework/models/cmdb-type';
 import { Subscription } from 'rxjs';
 import { SearchBarTagComponent } from './search-bar-tag/search-bar-tag.component';
 import { ActivatedRoute, NavigationEnd, Route, Router } from '@angular/router';
+import { FormControl, FormGroup } from '@angular/forms';
+import { debounceTime } from 'rxjs/operators';
+import { CategoryService } from '../../framework/services/category.service';
+import { CmdbCategory } from '../../framework/models/cmdb-category';
+import { SearchService } from '../search.service';
+import { ObjectService } from '../../framework/services/object.service';
+
+import * as $ from 'jquery';
 
 @Component({
   selector: 'cmdb-search-bar',
@@ -41,20 +49,43 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   // Child components
   @ViewChild('tagInput', { static: false }) tagInput: ElementRef;
+  @ViewChild('inputDropdown', { static: false }) inputDropdown: ElementRef;
+  @ViewChild('inputSubDropdown', { static: false }) inputSubDropdown: ElementRef;
   @ViewChildren(SearchBarTagComponent) searchBarTagComponents: QueryList<SearchBarTagComponent>;
+
+  // Tabs
+  private currentFocus: number = 0;
+  private maxTabLength: number = 5;
 
   // Tags data
   public tags: SearchBarTag[] = [];
-  public typeList: CmdbType[] = [];
+
+  // Form
+  public searchBarForm: FormGroup;
+
+  // Dropdown
+  public possibleTextResults: number = 0;
+  public isExistingPublicID: boolean = false;
+  public possibleTypes: CmdbType[] = [];
+  public possibleCategories: CmdbCategory[] = [];
 
   // Subscriptions
   private routeChangeSubscription: Subscription;
-  private typeListSubscription: Subscription;
+  private textRegexSubscription: Subscription;
+  private isExistingPublicIDSubscription: Subscription;
+  private typeRegexSubscription: Subscription;
+  private inputControlSubscription: Subscription;
 
-  constructor(private router: Router, private route: ActivatedRoute, private typeService: TypeService) {
-    this.tags = [];
-    this.typeList = [];
-    this.typeListSubscription = new Subscription();
+  constructor(private router: Router, private route: ActivatedRoute, private searchService: SearchService,
+              private typeService: TypeService, private categoryService: CategoryService, private objectService: ObjectService) {
+
+    this.searchBarForm = new FormGroup({
+      inputControl: new FormControl('')
+    });
+    this.textRegexSubscription = new Subscription();
+    this.isExistingPublicIDSubscription = new Subscription();
+    this.typeRegexSubscription = new Subscription();
+    this.inputControlSubscription = new Subscription();
     this.routeChangeSubscription = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         const searchQuery = this.route.snapshot.queryParams.query;
@@ -68,41 +99,75 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.typeListSubscription = this.typeService.getTypeList().subscribe((typeList: CmdbType[]) => {
-      this.typeList = typeList;
+
+    this.inputControl.valueChanges.pipe(debounceTime(300)).subscribe((changes: string) => {
+      if (changes.trim() !== '') {
+        this.textRegexSubscription = this.searchService.getEstimateValueResults(changes).subscribe((counter: number) => {
+          this.possibleTextResults = counter;
+        });
+        if (!isNaN(+changes)) {
+          this.isExistingPublicIDSubscription = this.objectService.getObject(+changes).subscribe(() => {
+              this.isExistingPublicID = true;
+            },
+            (error) => {
+              this.isExistingPublicID = false;
+            });
+        }
+        this.typeRegexSubscription = this.typeService.getTypesBy(changes).subscribe((typeList: CmdbType[]) => {
+          this.possibleTypes = typeList;
+        });
+        this.typeRegexSubscription = this.categoryService.getCategoriesBy(changes).subscribe((categoryList: CmdbCategory[]) => {
+          this.possibleCategories = categoryList;
+        });
+      } else {
+        this.possibleTextResults = 0;
+        this.possibleTypes = [];
+        this.possibleCategories = [];
+      }
+
     });
   }
 
-  public addTag(input: string | number, open: boolean = false) {
-    if (input !== '') {
-      const inputType = (!isNaN(+input) ? 'number' : 'string');
-      let searchForm = 'textSearch';
-      const settings = {} as SearchBarTagSettings;
-      const possibleType = this.typeList.find(x => (x.label === input || x.name === input));
-      if (possibleType) {
-        searchForm = 'typeID';
-        settings.publicID = possibleType.public_id;
-      } else if (inputType === 'string') {
-        searchForm = 'textSearch';
-      } else if (inputType === 'number') {
-        searchForm = 'publicID';
-      }
+  public get inputControl(): FormControl {
+    return this.searchBarForm.get('inputControl') as FormControl;
+  }
 
-      this.tagInput.nativeElement.value = '';
-      const index = (this.tags.push({ searchText: input, searchForm, settings } as SearchBarTag) - 1);
-      // Try to open dropdown
-      if (open) {
-        setTimeout(() => {
-          const searchTagComponent = this.searchBarTagComponents.toArray()[index];
-          searchTagComponent.toggleDropDown();
-        }, 120);
-      }
+  public addTag(searchForm: string, params?: any) {
+    const searchTerm = this.inputControl.value;
+    const tag = new SearchBarTag(searchTerm, searchForm);
+    tag.searchLabel = searchTerm;
+    switch (searchForm) {
+      case 'text':
+        break;
+      case 'type':
+        const typeIDs: number[] = [];
+        for (const type of params) {
+          typeIDs.push(type.public_id);
+        }
+        tag.searchLabel = params.length === 1 ? params[0].label : searchTerm;
+        tag.settings = { types: typeIDs } as SearchBarTagSettings;
+        break;
+      case 'category':
+        const categoryIDs: number[] = [];
+        for (const category of params) {
+          categoryIDs.push(category.public_id);
+        }
+        tag.searchLabel = params.length === 1 ? params[0].label : searchTerm;
+        tag.settings = { categories: categoryIDs } as SearchBarTagSettings;
+        break;
+      case 'publicID':
+        tag.settings = { publicID: searchTerm } as SearchBarTagSettings;
+        break;
+      default:
+        break;
     }
+    this.tags.push(tag);
+    this.inputControl.setValue('', { onlySelf: true });
+    this.setFocusOnElement(1);
   }
 
   public updateTag(changes: SearchBarTag) {
     const index: number = this.tags.indexOf(changes);
-    console.log(changes);
     if (index !== -1) {
       // If searchText was cleared
       if (changes.searchText === '' || changes.searchText === undefined) {
@@ -120,19 +185,79 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     }
   }
 
+  public removeLastTag() {
+    if (this.inputControl.value.trim() === '') {
+      const index: number = this.tags.length - 1;
+      if (index !== -1) {
+        this.tags.splice(index, 1);
+      }
+    }
+  }
+
   public clearAll() {
     this.tags = [];
   }
 
   public callSearch() {
+    if (this.inputControl.value.trim() !== '') {
+      this.addTag('text');
+    }
     if (this.tags.length > 0) {
+      this.inputControl.setValue('', { onlySelf: true });
       this.router.navigate(['/search'], { queryParams: { query: JSON.stringify(this.tags) } });
     }
   }
 
+  public openDropdown(currentIDx: number) {
+    $('[tabindex=' + (currentIDx) + ']').find('[data-toggle="collapse"]').first().click();
+  }
+
+
+  public arrowUp(currentIDx?: number) {
+    const nextElement = $('[tabindex=' + (currentIDx - 1) + ']');
+    if (nextElement.length > 0) {
+      this.setFocusOnElement(+nextElement.attr('tabindex'));
+    } else {
+      for (let i = (currentIDx - 1); i >= 0; i--) {
+        const subElement = $('[tabindex=' + (i - 1) + ']');
+        if (subElement.length > 0) {
+          this.setFocusOnElement(+subElement.attr('tabindex'));
+          break;
+        }
+      }
+    }
+  }
+
+  public arrowDown(currentIDx?: number) {
+    const nextElement = $('[tabindex=' + (currentIDx + 1) + ']');
+    if (nextElement.length > 0) {
+      this.setFocusOnElement(+nextElement.attr('tabindex'));
+    } else {
+      for (let i = (currentIDx + 1); i <= this.maxTabLength; i++) {
+        const subElement = $('[tabindex=' + (i + 1) + ']');
+        if (subElement.length > 0) {
+          this.setFocusOnElement(+subElement.attr('tabindex'));
+          break;
+        }
+      }
+    }
+  }
+
+  public setFocusOnElement(tabIdx?) {
+    if (tabIdx) {
+      this.currentFocus = tabIdx;
+    }
+    setTimeout(() => { // this will make the execution after the above boolean has changed
+      $('[tabindex=' + this.currentFocus + ']').focus();
+    }, 0);
+  }
+
   public ngOnDestroy(): void {
-    this.routeChangeSubscription.unsubscribe();
-    this.typeListSubscription.unsubscribe();
+    // ToDo: provisionally commented out. To be used later.
+    // this.routeChangeSubscription.unsubscribe();
+    this.textRegexSubscription.unsubscribe();
+    this.typeRegexSubscription.unsubscribe();
+    this.inputControlSubscription.unsubscribe();
   }
 
 }

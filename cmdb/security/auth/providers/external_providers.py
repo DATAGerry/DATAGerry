@@ -25,8 +25,7 @@ from cmdb.security.auth.provider_config_form import AuthProviderConfigForm, Auth
     AuthProviderConfigFormSection
 from cmdb.user_management import User, UserManager
 from cmdb.user_management.user_manager import UserManagerGetError, UserManagerInsertError
-from cmdb.utils import SecurityManager
-from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.utils.system_config import SystemConfigReader
 
 LOGGER = logging.getLogger(__name__)
 

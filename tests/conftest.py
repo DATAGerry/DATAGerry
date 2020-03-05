@@ -15,15 +15,46 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import pytest
-from cmdb.interface.rest_api import create_rest_api
+from _pytest.config import Config
 
-pytest_plugins = 'tests/pytest_plugins/pytest_mongodb'
+from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.utils.system_config import SystemConfigReader
+
+pytest_plugins = 'tests/pytest_plugins/pytest_config'
 
 
-@pytest.fixture
-def client():
-    app = create_rest_api(None)
-    app.config.testing = True
-    app.debug = True
+@pytest.fixture(scope="session")
+def config_reader(pytestconfig: Config) -> SystemConfigReader:
+    config_path = pytestconfig.getoption('config-path', '../../etc/cmdb_test.conf')
+    return SystemConfigReader.from_full_path(config_path)
 
-    return app.test_client()
+
+@pytest.fixture(scope="session")
+def database_manager(config_reader) -> DatabaseManagerMongo:
+    database_options = config_reader.get_all_values_from_section('Database')
+    return DatabaseManagerMongo(**database_options)
+
+
+@pytest.fixture(scope="session")
+def object_manager(database_manager) -> CmdbObjectManager:
+    return CmdbObjectManager(database_manager=database_manager)
+
+
+@pytest.fixture(scope="class")
+def object_manager_class(request, object_manager):
+    request.cls.object_manager = object_manager
+
+
+@pytest.fixture(scope="class")
+def database_manager_class(request, database_manager):
+    request.cls.database_manager = database_manager
+
+
+def pytest_sessionstart(session):
+    """
+    Called after the Session object has been created and
+    before performing collection and entering the run test loop.
+    """
+    import cmdb
+    cmdb.__MODE__ = 'TESTING'

@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+
 from datetime import datetime
 
 from cmdb.framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError

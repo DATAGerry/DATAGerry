@@ -17,15 +17,17 @@ import base64
 import functools
 import json
 from functools import wraps
+from typing import ClassVar
 
 from authlib.jose.errors import ExpiredTokenError
 from werkzeug._compat import to_unicode
 from werkzeug.http import wsgi_to_bytes
 
-from cmdb.security.auth import AuthModule
+from cmdb.security.auth import AuthModule, AuthenticationProvider
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import User
 from cmdb.user_management.user_manager import UserManagerGetError, UserManager
+from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.wraps import LOGGER
 
 try:
@@ -36,7 +38,7 @@ except ImportError:
 from flask import Blueprint, request, abort, current_app
 
 from cmdb.security.token.validator import TokenValidator, ValidationError
-from cmdb.utils import json_encoding, SystemSettingsReader
+from cmdb.utils import json_encoding
 
 DEFAULT_MIME_TYPE = 'application/json'
 
@@ -70,19 +72,18 @@ class NestedBlueprint:
         return self.blueprint.route(rule, **options)
 
 
-def make_response(instance, status_code=200):
+def make_response(instance, status_code=200, indent=2):
     """
     make json http response with indent settings and auto encoding
     Args:
         instance: instance of a cmdbDao instance or instance of the subclass
         status_code: optional status code
+        indent: indent of json response
     Returns:
         http valid response
     """
     from flask import make_response as flask_response
-    # set indent to None of min value exists in the request - DEFAULT: 2 steps
-    # indent = None if 'indent' in request.args else 2
-    indent = 2
+
     # encode the dict data from the object to json data
     resp = flask_response(json.dumps(instance, default=json_encoding.default, indent=indent), status_code)
     # add header information
@@ -98,7 +99,10 @@ def login_required(f):
     def decorated(*args, **kwargs):
         """checks if user is logged in and valid
         """
-        token = parse_authorization_header(request.headers['Authorization'])
+        try:
+            token = parse_authorization_header(request.headers['Authorization'])
+        except Exception as err:
+            return abort(401)
         if token:
             return f(*args, **kwargs)
         else:
@@ -212,16 +216,19 @@ def parse_authorization_header(header):
                 password = to_unicode(password, "utf-8")
 
                 user_manager: UserManager = current_app.user_manager
-                user_instance: User = user_manager.get_user_by_name(user_name=username)
-                provider_class_name = user_instance.authenticator
-
                 auth_module = AuthModule(SystemSettingsReader(current_app.database_manager))
-                provider_instance = auth_module.get_provider(provider_class_name)
-                valid_user = provider_instance.authenticate(username, password)
-                tg = TokenGenerator(current_app.database_manager)
-                return tg.generate_token(payload={'user': {
-                    'public_id': valid_user.get_public_id()
-                }})
+
+                try:
+                    user_instance = auth_module.login(user_manager, username, password)
+                except Exception as e:
+                    return None
+                if user_instance:
+                    tg = TokenGenerator(current_app.database_manager)
+                    return tg.generate_token(payload={'user': {
+                        'public_id': user_instance.get_public_id()
+                    }})
+                else:
+                    return None
         except Exception:
             return None
 

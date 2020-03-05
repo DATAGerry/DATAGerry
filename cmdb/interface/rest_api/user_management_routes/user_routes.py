@@ -26,7 +26,7 @@ from cmdb.interface.route_utils import RootBlueprint, make_response, insert_requ
 from cmdb.user_management import User
 from cmdb.user_management.user_manager import UserManagerInsertError, UserManagerGetError, \
     UserManagerUpdateError, UserManagerDeleteError, UserManager
-from cmdb.utils import SecurityManager
+from cmdb.utils.security import SecurityManager
 
 try:
     from cmdb.utils.error import CMDBError

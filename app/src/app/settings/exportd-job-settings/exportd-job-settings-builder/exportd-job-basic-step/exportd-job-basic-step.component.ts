@@ -68,6 +68,8 @@ export class ExportdJobBasicStepComponent implements OnInit {
       this.basicForm.get('name').setAsyncValidators(checkJobExistsValidator(this.exportdService));
       this.basicForm.get('label').valueChanges.subscribe(value => {
         this.basicForm.get('name').setValue(value.replace(/ /g, '-').toLowerCase());
+        const newValue = this.basicForm.get('name').value;
+        this.basicForm.get('name').setValue(newValue.replace(/[^a-z0-9 \-]/gi, '').toLowerCase());
         this.basicForm.get('name').markAsDirty({ onlySelf: true });
         this.basicForm.get('name').markAsTouched({ onlySelf: true });
       });

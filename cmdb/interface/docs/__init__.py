@@ -28,7 +28,7 @@ except ImportError:
 
 LOGGER = logging.getLogger(__name__)
 
-from cmdb.utils.system_reader import SystemConfigReader
+from cmdb.utils.system_config import SystemConfigReader
 
 system_config_reader = SystemConfigReader()
 

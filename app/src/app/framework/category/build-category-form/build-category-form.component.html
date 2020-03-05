@@ -4,7 +4,7 @@
 </cmdb-content-header>
 
 <div class="row">
-  <div [className]="categoryForm.get('root').value ? 'd-none' : 'col-sm-4'">
+  <div class ="col-sm-4">
     <div class="card drag-items">
       <div class="card-header">
         <input class="form-control mr-sm-2" type="search" placeholder="Search Categories" aria-label="Search"
@@ -38,16 +38,11 @@
       </div>
     </div>
   </div>
-  <div [className]="categoryForm.get('root').value ? 'col-sm' : 'col-sm-8'">
+  <div class="col-sm-8">
     <div class="card category-form">
       <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
         <div class="card-header">
           {{mode == 1 ? 'Add new Category' : 'Edit Category'}}
-          <div class="custom-switch float-right">
-            <input class="custom-control-input" id="typeActiveInput" type="checkbox" formControlName="root">
-            <label class ="custom-control-label" for="typeActiveInput">Root</label>
-          </div>
-          <div class="clearfix"></div>
         </div>
 
         <div class="card-body">
@@ -60,7 +55,7 @@
                 <label>Name</label>
                 <input type="text" formControlName="name" class="form-control" placeholder="Name" lowercase readonly>
               </div>
-              <div class="form-group col-md-12" *ngIf="!categoryForm.get('root').value">
+              <div class="form-group col-md-12">
                 <label>Parent Category</label>
                 <div class="card">
                   <div class="card-body">
@@ -88,7 +83,7 @@
                     </section>
                   </div>
                 </div>
-                <small class="form-text text-muted">Each category has only a parent category. <b>Default: Root #0</b></small>
+                <small class="form-text text-muted">Each category has only a parent category.</small>
               </div>
               <div class="form-group col-md-12">
                 <label>Assigned types</label>

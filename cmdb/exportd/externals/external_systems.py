@@ -19,44 +19,37 @@ import xml.etree.ElementTree as ET
 import requests
 import json
 import re
+import os
+import subprocess
 from cmdb.exportd.exporter_base import ExternalSystem, ExportVariable
 from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
 
 
 class ExternalSystemDummy(ExternalSystem):
 
-    parameters = [
-        {"name": "ip-address", "required": False, "description": "Set static IP addresses", "default": "192.168.0.2"},
-        {"name": "ssid-name", "required": True, "description": "Router for Login", "default": "host-name"},
-        {"name": "password", "required": True, "description": "Password for Login", "default": "1234"}
-    ]
+    parameters = []
 
     variables = [{}]
 
     def __init__(self, destination_parms, export_vars):
         super(ExternalSystemDummy, self).__init__(destination_parms, export_vars)
-        # init destination vars
-        self.__ip = self._destination_parms.get("ip-address")
-        self.__user = self._destination_parms.get("ssid-name")
-        self.__password = self._destination_parms.get("password")
-        self.rows = {}
-        if not (self.__ip and self.__user and self.__password):
-            self.error("missing parameters")
+        self.__rows = []
 
     def prepare_export(self):
         pass
 
     def add_object(self, cmdb_object, template_data):
         row = {}
+        row["object_id"] = str(cmdb_object.object_information['object_id'])
+        row["variables"] = {}
         for key in self._export_vars:
-            row.update(
-                {str(cmdb_object.object_information['object_id']):
-                    {key: str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))}
-                 })
-        self.rows.update(row)
+            row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
+        self.__rows.append(row)
 
     def finish_export(self):
-        header = ExportdHeader(json.dumps(self.rows))
+        json_data = json.dumps(self.__rows)
+        print(json_data)
+        header = ExportdHeader(json_data)
         return header
 
 
@@ -662,3 +655,117 @@ class ExternalSystemAnsible(ExternalSystem):
         groups.update({'_meta': {'hostvars': self.ansible_hostvars}})
         header = ExportdHeader(json.dumps(groups))
         return header
+
+
+class ExternalSystemExecuteScript(ExternalSystem):
+
+    parameters = [
+        {"name": "script", "required": True, "description": "The script or binary to execute", "default": "/opt/scripts/export"},
+        {"name": "timeout", "required": True, "description": "Timeout for executing the script in seconds", "default": "30"}
+    ]
+
+    variables = [{}]
+
+    def __init__(self, destination_parms, export_vars):
+        super(ExternalSystemExecuteScript, self).__init__(destination_parms, export_vars)
+        # init destination vars
+        self.__script = self._destination_parms.get("script")
+        self.__timeout = int(self._destination_parms.get("timeout"))
+        self.__rows = []
+        if not (self.__script and self.__timeout):
+            self.error("missing parameters")
+
+    def prepare_export(self):
+        pass
+
+    def add_object(self, cmdb_object, template_data):
+        row = {}
+        row["object_id"] = str(cmdb_object.object_information['object_id'])
+        row["variables"] = {}
+        for key in self._export_vars:
+            row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
+        self.__rows.append(row)
+
+    def finish_export(self):
+        # create json data
+        json_data = json.dumps(self.__rows)
+
+        # check permission to execute script
+        # try to open permission file
+        script_path = os.path.dirname(self.__script)
+        script_name = os.path.basename(self.__script)
+        permission_filename = os.path.join(script_path, ".datagerry_exec.json")
+        try:
+            with open(permission_filename, "r") as permission_file:
+                permission_data = json.load(permission_file)
+                if script_name not in permission_data["allowed_scripts"]:
+                    self.error("You are not allowed to execute this script. Please check your .datagerry_exec.json file.")
+        except OSError:
+            self.error("You are not allowed to execute this script. Could not open .datagerry_exec.json file.")
+        except KeyError:
+            self.error("You are not allowed to execute this script. Please check structure of your .datagerry_exec.json file.")
+
+        # execute script
+        try:
+            result = subprocess.run(self.__script, timeout=self.__timeout, input=json_data, encoding="utf-8")
+            if result.returncode != 0:
+                self.error("executed script returned an error")
+        except FileNotFoundError:
+            self.error("could not find script or binary")
+        except subprocess.TimeoutExpired:
+            self.error("timeout executing script or binary")
+
+
+class ExternalSystemGenericRestCall(ExternalSystem):
+
+    parameters = [
+        {"name": "url", "required": True, "description": "URL for HTTP POST", "default": "https://localhost:8443/dg_export"},
+        {"name": "timeout", "required": True, "description": "Timeout for executing the REST call in seconds", "default": "30"},
+        {"name": "username", "required": False, "description": "Username for a HTTP basic authentication. If empty, no authentication will be done.", "default": ""},
+        {"name": "password", "required": False, "description": "Password for a HTTP basic authentication.", "default": ""}
+    ]
+
+    variables = [{}]
+
+    def __init__(self, destination_parms, export_vars):
+        super(ExternalSystemGenericRestCall, self).__init__(destination_parms, export_vars)
+        # init destination vars
+        self.__url = self._destination_parms.get("url")
+        self.__timeout = int(self._destination_parms.get("timeout"))
+        self.__username = self._destination_parms.get("username")
+        self.__password = self._destination_parms.get("password")
+        self.__rows = []
+        if not (self.__url and self.__timeout):
+            self.error("missing parameters")
+
+    def prepare_export(self):
+        pass
+
+    def add_object(self, cmdb_object, template_data):
+        row = {}
+        row["object_id"] = str(cmdb_object.object_information['object_id'])
+        row["variables"] = {}
+        for key in self._export_vars:
+            row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
+        self.__rows.append(row)
+
+    def finish_export(self):
+        # create json data
+        json_data = json.dumps(self.__rows)
+
+        # execute REST call
+        headers = {
+            "Content-Type": "application/json"
+        }
+        auth = None
+        if self.__username:
+            auth = (self.__username, self.__password)
+        try:
+            response = requests.post(self.__url, data=json_data, headers=headers, auth=auth, verify=False,
+                                     timeout=self.__timeout)
+            if response.status_code > 202:
+                self.error("Error communicating to REST endpoint: HTTP/{}".format(str(response.status_code)))
+        except requests.exceptions.ConnectionError:
+            self.error("Can't connect to REST endpoint")
+        except requests.exceptions.Timeout:
+            self.error("Timeout connecting to REST endpoint")

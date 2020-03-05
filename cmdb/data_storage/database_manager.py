@@ -271,9 +271,6 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
     def get_database_name(self):
         return self.connector.get_database_name()
 
-    def search(self, collection: str, *args, **kwargs):
-        return self.__find(collection, *args, **kwargs)
-
     def __find(self, collection: str, *args, **kwargs):
         """general find function for database search
 
@@ -388,8 +385,10 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
            Returns:
                returns computed results
            """
-        result = self.connector.get_collection(collection).aggregate(*args, **kwargs)
-        return result
+        return self.connector.get_collection(collection).aggregate(*args, **kwargs)
+
+    def search(self, collection: str, *args, **kwargs):
+        return self.connector.get_collection(collection).find(*args, **kwargs)
 
     def insert(self, collection: str, data: dict) -> int:
         """adds document to database
@@ -419,6 +418,20 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         """
         formatted_data = {'$set': data}
         return self.connector.get_collection(collection).update_one(filter, formatted_data, *args, **kwargs)
+
+    def unset_update_many(self, collection: str, filter: dict, data: str, *args, **kwargs):
+        """update document inside database
+
+        Args:
+            collection (str): name of database collection
+            filter (dict): filter of document
+            data: data to delete
+
+        Returns:
+            acknowledged
+        """
+        formatted_data = {'$unset': {data: 1}}
+        return self.connector.get_collection(collection).update_many(filter, formatted_data, *args, **kwargs)
 
     def update_many(self, collection: str, query: dict, update: dict) -> UpdateResult:
         """update all documents that match the filter from a collection.
@@ -498,7 +511,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return result
 
     def create(self, db_name: str):
-        """create database/collection
+        """create database
 
         Args:
             db_name (str): name of database

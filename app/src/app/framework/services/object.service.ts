@@ -51,7 +51,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
 
   // Find calls
   public getObjects(typeID: number, filter: DataTableFilter): Observable<T[]> {
-    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) };
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
     httpObserveOptions[PARAMETER].start = filter.start;
     httpObserveOptions[PARAMETER].length = filter.length;
     httpObserveOptions[PARAMETER].order = filter.orderBy;
@@ -76,7 +76,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
   }
 
   public getObjectsByType(typeID: number): Observable<T[]> {
-    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) };
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
     return this.api.callGet<T[]>(`${this.servicePrefix}/type/${typeID}`, this.http, httpObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
@@ -137,7 +137,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
   // Count calls
 
   public countObjectsByType(typeID: number) {
-    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) };
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
     return this.api.callGet<number>(this.servicePrefix + '/count/' + typeID, this.http, httpObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
@@ -149,7 +149,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
   }
 
   public groupObjectsByType(value: string, params?: any) {
-    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) };
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
     return this.api.callGet<any>(this.servicePrefix + '/group/' + value, this.http, httpObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
@@ -161,7 +161,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
   }
 
   public countObjects() {
-    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) };
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
     return this.api.callGet<number>(`${this.servicePrefix}/count/`, this.http,  httpObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
@@ -174,7 +174,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
 
   // Custom calls
   public getObjectReferences(publicID: number) {
-    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) };
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
     return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/reference/${publicID}`, this.http, httpObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
@@ -219,7 +219,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
   }
 
   public getObjectsByFilter(typeID: number, filter: DataTableFilter) {
-    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) };
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
     httpObserveOptions[PARAMETER].start = filter.start;
     httpObserveOptions[PARAMETER].length = filter.length;
     httpObserveOptions[PARAMETER].order = filter.orderBy;
@@ -233,11 +233,6 @@ export class ObjectService<T = RenderResult> implements ApiService {
         return apiResponse.body;
       })
     );
-  }
-
-  readCookies(name: string) {
-    const result = new RegExp('(?:^|; )' + encodeURIComponent(name) + '=([^;]*)').exec(document.cookie);
-    return result ? result[1] : 'true';
   }
 
   public openModalComponent(title: string,

@@ -18,11 +18,11 @@
 
 import { Injectable } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
-import {ApiCallService, ApiService, HttpInterceptorHandler, resp} from '../../services/api-call.service';
+import { ApiCallService, ApiService, HttpInterceptorHandler, resp } from '../../services/api-call.service';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
-import {HttpBackend, HttpClient, HttpHeaders} from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpHeaders } from '@angular/common/http';
 import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
 import { AuthService } from '../../auth/services/auth.service';
 
@@ -91,6 +91,14 @@ export class TypeService<T = CmdbType> implements ApiService {
     );
   }
 
+  public getTypesBy(regex: string): Observable<T[]> {
+    return this.api.callGet<CmdbType[]>(this.servicePrefix + '/by/' + regex).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
   public postType(typeInstance: CmdbType): Observable<any> {
     return this.api.callPost<T>(this.servicePrefix + '/', typeInstance).pipe(
       map((apiResponse) => {
@@ -115,6 +123,15 @@ export class TypeService<T = CmdbType> implements ApiService {
     );
   }
 
+  public getUncategorizedTypes(): Observable<any> {
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
+    return this.api.callGet<T[]>(this.servicePrefix + '/uncategorized/', this.http, httpObserveOptions).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
   public getTypeListByCategory(publicID: number): Observable<any> {
     return this.api.callGet<T[]>(this.servicePrefix + '/category/' + publicID).pipe(
       map((apiResponse) => {
@@ -123,8 +140,9 @@ export class TypeService<T = CmdbType> implements ApiService {
     );
   }
 
+
   public groupTypeByCategory(publicID: number): Observable<any> {
-    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.readCookies(COOCKIENAME) };
+    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
     return this.api.callGet<T[]>(this.servicePrefix + '/group/category/' + publicID, this.http, httpObserveOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
@@ -174,12 +192,6 @@ export class TypeService<T = CmdbType> implements ApiService {
   public checkTypeExists(typeName: string) {
     const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
     return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`, specialClient);
-  }
-
-
-  readCookies(name: string) {
-    const result = new RegExp('(?:^|; )' + encodeURIComponent(name) + '=([^;]*)').exec(document.cookie);
-    return result ? result[1] : 'true';
   }
 }
 

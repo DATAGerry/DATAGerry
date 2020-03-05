@@ -19,6 +19,7 @@ from abc import ABC, abstractmethod
 from typing import Generic, TypeVar, List
 
 from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb.search.query import Query, Pipeline
 
 LOGGER = logging.getLogger(__name__)
 
@@ -28,7 +29,8 @@ M: TypeVar = TypeVar('M', bound=CmdbManagerBase)
 class Search(Generic[M], ABC):
 
     DEFAULT_SKIP: int = 0
-    DEFAULT_LIMIT: int = 25
+    DEFAULT_LIMIT: int = 10
+    DEFAULT_REGEX: str = ''
 
     def __init__(self, manager: M):
         self.__manager: M = manager
@@ -42,5 +44,9 @@ class Search(Generic[M], ABC):
         self.__manager: M = manager
 
     @abstractmethod
-    def search(self, *args, **kwargs) -> List:
+    def aggregate(self, pipeline: Pipeline, *args, **kwargs) -> List:
+        raise NotImplementedError
+
+    @abstractmethod
+    def search(self, query: Query, *args, **kwargs) -> List:
         raise NotImplementedError

@@ -114,6 +114,11 @@ export class ApiCallService {
     return this.http.delete<T>(this.apiURL + route, params);
   }
 
+  public readCookies(name: string) {
+    const result = new RegExp('(?:^|; )' + encodeURIComponent(name) + '=([^;]*)').exec(document.cookie);
+    return result ? result[1] : 'true';
+  }
+
 }
 
 export interface ApiService {

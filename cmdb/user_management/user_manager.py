@@ -23,10 +23,8 @@ from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerIn
 from cmdb.user_management.user import User
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user_right import BaseRight
-from cmdb.utils import get_security_manager
 from cmdb.utils.error import CMDBError
 from cmdb.utils.security import SecurityManager
-from cmdb.utils.system_reader import SystemConfigReader
 
 LOGGER = logging.getLogger(__name__)
 

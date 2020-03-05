@@ -20,9 +20,8 @@ from werkzeug.routing import BaseConverter
 LOGGER = logging.getLogger(__name__)
 
 
-class DictConverter(BaseConverter):
-
-    def to_python(self, value):
-        """TODO Implement to dict convert"""
-        return value.split('+')
-
+class RegexConverter(BaseConverter):
+    def __init__(self, url_map, *items):
+        super(RegexConverter, self).__init__(url_map)
+        LOGGER.debug(url_map)
+        #self.regex = items[0]

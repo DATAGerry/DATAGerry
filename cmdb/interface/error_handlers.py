@@ -68,35 +68,35 @@ class ErrorResponse:
 def bad_request(error):
     """400 Bad Request"""
     resp = ErrorResponse(status=400, prefix='Bad Request', description=BadRequest.description,
-                         message=error.description, joke='not this kind of nuts!')
+                         message=error.description, joke='... cause the access was nuts!')
     return resp.make_error(error)
 
 
 def unauthorized(error):
     """401 Unauthorized"""
     resp = ErrorResponse(status=401, prefix='Unauthorized', description=Unauthorized.description,
-                         message=error.description, joke='who the nuts?')
+                         message=error.description, joke='Even a blind squirrel finds a nut once in a while.')
     return resp.make_error(error)
 
 
 def forbidden(error):
     """403 Forbidden"""
     resp = ErrorResponse(status=403, prefix='Forbidden', description=Forbidden.description,
-                         message=error.description, joke='what the nuts?!')
+                         message=error.description, joke='a hard nut to crack for you!')
     return resp.make_error(error)
 
 
 def page_not_found(error):
     """404 Not Found"""
     resp = ErrorResponse(status=404, prefix='Not Found', description=NotFound.description,
-                         message=error.description, joke='where are my nuts?!')
+                         message=error.description, joke='Even a blind squirrel finds a nut once in a while.')
     return resp.make_error(error)
 
 
 def method_not_allowed(error):
     """405 Method Not Allowed"""
     resp = ErrorResponse(status=405, prefix='Method Not Allowed', description=MethodNotAllowed.description,
-                         message=error.description, joke='not this nuts!')
+                         message=error.description, joke='to not be able to do something for toffee/nuts.')
     return resp.make_error(error)
 
 
@@ -110,7 +110,7 @@ def not_acceptable(error):
 def page_gone(error):
     """410 Page Gone"""
     resp = ErrorResponse(status=410, prefix='Gone', description=Gone.description,
-                         message=error.description, joke='i ate this nuts...')
+                         message=error.description, joke='i am nuts about it...')
     return resp.make_error(error)
 
 
@@ -118,14 +118,14 @@ def page_gone(error):
 def internal_server_error(error):
     """500 Internal Server Error"""
     resp = ErrorResponse(status=500, prefix='Internal Server Error', description=InternalServerError.description,
-                         message=error.description, joke='oh my nuts done something strange')
+                         message=error.description, joke='Are you nuts?')
     return resp.make_error(error)
 
 
 def not_implemented(error):
     """501 Not Implemented"""
     resp = ErrorResponse(status=501, prefix='Not Implemented', description=NotImplemented.description,
-                         message=error.description, joke='... sry we still making this nuts')
+                         message=error.description, joke='to not be able to do something for toffee/nuts.')
     return resp.make_error(error)
 
 

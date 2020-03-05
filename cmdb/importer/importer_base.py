@@ -89,7 +89,7 @@ class ObjectImporter(BaseImporter):
         if object_manager:
             self.object_manager = object_manager
         else:
-            from cmdb.utils.system_reader import SystemConfigReader
+            from cmdb.utils.system_config import SystemConfigReader
             from cmdb.data_storage.database_manager import DatabaseManagerMongo
             object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
                 **SystemConfigReader().get_all_values_from_section('Database')

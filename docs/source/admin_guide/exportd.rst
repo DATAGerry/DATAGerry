@@ -28,6 +28,10 @@ fields and the variable hostname can be configured.
 Export Jobs can be triggered manually (by clicking on a button in the webui) or event based, if the configured sources
 of a job were changed (e.g. a new object was added).
 
+Export Jobs can be of type *Push* (default) or *Pull*. Push Jobs are a push to an external system, which runs in a
+background process, while a *Pull* job is triggered by an external system via REST. The client directly gets the result
+within that REST call.
+
 
 
 Configuration
@@ -95,6 +99,247 @@ Currently the follwowing ExternalSystems are supported:
     :header: "ExternalSystem", "description"
     :align: left
 
-    "ExternalSystemOpenNMS", "Add nodes to the monitoring system OpenNMS with the OpenNMS REST API"
+    "ExternalSystemAnsible", "Provides a dynamic inventory for Ansible"
+    "ExternalSystemCpanelDns", "Creates DNS-A Records in cPanel"
+    "ExternalSystemCsv", "Creates a CSV file on the filesystem"
     "ExternalSystemDummy", "A dummy for testing Exportd - will only print some debug output"
+    "ExternalSystemExcuteScript", "Executes a script on the DATAGERRY machine"
+    "ExternalSystemGenericRestCall", "Sends a HTTP POST to an userdefined URL"
+    "ExternalSystemOpenNMS", "Add nodes to the monitoring system OpenNMS with the OpenNMS REST API"
+
+
+ExternalSystemAnsible
+---------------------
+This class will provide a dynamic inventory for `Ansible <https://ansible.com>`_. and needs to be configured as Pull
+Job. The exporter walks through all CMDB objects that are configured as export source and creates Ansible groups. The
+output is formatted as JSON and can be pulled with the DATAGERRY REST API.
+
+We provide a little wrapper script in the contrib directory, that can be directly used by Ansible with the `inventory
+script plugin <https://docs.ansible.com/ansible/latest/plugins/inventory/script.html>`_:
+
+.. literalinclude:: ../../../contrib/ansible/ansible_dyn_inventory.sh
+
+
+Download the script and change the config variables to met your DATAGERRY configuration. Start Ansible with the -i flag:
+
+.. code-block:: console
+
+    $ ansible -i ansible_dyn_inventory.sh [...]
+
+
+This exporter class has no parameters, but needs some Export Variables to be set:
+
+.. csv-table::
+    :header: "name", "required", "description"
+    :align: left
+
+    "hostname", "True", "hostname or IP that Ansible uses for connecting to the host. e.g. - test.example.com"
+    "group\_", "True", "Ansible group membership. e.g. - group\_webservers"
+    "hostvar\_", "True", "host variables that should be given to Ansible. e.g. - hostvar\_snmpread"
+
+For each CMDB object the export variable hostname has to be set which is used by Ansible to connect to a CMDB object.
+Hosts are organized in Ansible groups. For adding a CMDB object to a specific group, the group\_ variables are used. The
+variable name is group\_groupname and the value is True, if the CMDB object should be a member of the group.
+
+Example::
+
+    #variablename: group_webserver
+    #value of the variable for object: True
+    #behavior: the object is part of the Ansible group webserver.
+
+.. note::
+    Checkbox fields in object types are perfect for controlling the group memberships.
+
+You can set host variables for Ansible using the hostvar\_ variables. The variable name is hostvar\_varname, which means,
+you can access the value by using the name varname in Ansible.
+
+
+
+ExternalSystemCpanelDns
+-----------------------
+This destination adds DNS A-records for CMDB objects to a given DNS zone in cPanel using the cPanel JSON API version 2.
+Any existing A records in that zone, that does not exists as objects in DATAGERRY will be deleted. You can manage other
+record types like CNAME or MX records manually in that zone and the exporter will not touch these records.
+
+To use this exporter, you need a valid cPanel account with username and password and a DNS zone, you can manage.
+The exporter will not create a DNS zone for you. So the DNS zone should already exist, if you want to use this exporter.
+
+The exporter class has the following parameters:
+
+.. csv-table::
+    :header: "parameter", "required", "description"
+    :align: left
+
+    "cpanelApiUrl", "True", "cPanel API base URL"
+    "cpanelApiUser", "True", "cPanel username"
+    "cpanelApiPassword", "True", "cPanel password"
+    "cpanelApiToken", "True", "cPanel API token"
+    "domainName", "True", "DNS Zone managed by cPanel for adding DNS A records"
+    "cpanelApiSslVerify", "False", "disable SSL peer verification"
+
+
+The following variables needs to be set:
+
+.. csv-table::
+    :header: "name", "required", "description"
+    :align: left
+
+    "hostname", "True", "host part of the DNS A record. e.g. - test"
+    "ip", "True", "host part of the DNS A record. e.g. - test"
+
+
+ExternalSystemCsv
+-----------------
+This class will create a CSV file on the filesystem. 
+
+The exporter class has the following parameters:
+
+.. csv-table::
+    :header: "parameter", "required", "description"
+    :align: left
+
+    "csv_filename", "False", "name of the output CSV file. Default: stdout"
+    "csv_delimiter", "False", "CSV delimiter. Default: ';'"
+    "csv_enclosure", "False", "CSV enclosure."
+
+
+Each export variable will define a row in the CSV file. The header of the row is the export variable name.
+
+
+
+ExternalSystemExecuteScript
+---------------------------
+This class will execute an external script or binary on the DATAGERRY machine. A JSON structure with object IDs and
+export variables will be passed to the external script/binary via stdin. 
+
+The exporter class has the following parameters:
+
+.. csv-table::
+    :header: "parameter", "required", "description"
+    :align: left
+
+    "script", "True", "full path to the script that should be executed"
+    "timeout", "True", "timeout for executing the script"
+
+
+You can define any export variables. All defined export variables will be sent to the executed script/binary via stdin
+within a JSON structure. Please see the following section for an example JSON structure:
+
+.. code-block:: json
+
+    [
+        {
+            "object_id": 1234,
+            "variables": 
+                {
+                    "var1": "value1",
+                    "var2": "value2"
+                }
+        },
+        {
+            "object_id": 1235,
+            "variables": 
+                {
+                    "var1": "value1",
+                    "var2": "value2"
+                }
+        }
+    ]
+
+
+As executing a script or binary on the machine can be a bit of a security concern, we added some extra security feature
+for this exporter class. DATAGERRY will look for a file named *.datagerry_exec.json* inside the directory for the script
+that should be executed. In that file, every script or binary that should be executed by DATAGERRY needs to be listed.
+Please see the following example file:
+
+.. code-block:: json
+
+    {
+        "allowed_scripts": ["test2.py"]
+    }
+
+
+DATAGERRY will not execute scripts, that are not listed in a *.datagerry_exec.json* file.
+
+
+
+ExternalSystemGenericRestCall
+-----------------------------
+This class will send an HTTP POST request to an user-defined URL. A JSON structure with object IDs and export variables 
+will be sent as data within the HTTP request. 
+
+The exporter class has the following parameters:
+
+.. csv-table::
+    :header: "parameter", "required", "description"
+    :align: left
+
+    "url", "True", "URL for HTTP POST request"
+    "timeout", "True", "timeout for executing the REST call in seconds"
+    "username", "False", "Username for a HTTP basic authentication. If empty, no authentication will be done."
+    "password", "False", "Password for a HTTP basic authentication."
+
+
+You can define any export variables. All defined export variables will be sent as JSON structure within the HTTP
+request. Please see the following section for an example JSON structure:
+
+.. code-block:: json
+
+    [
+        {
+            "object_id": 1234,
+            "variables": 
+                {
+                    "var1": "value1",
+                    "var2": "value2"
+                }
+        },
+        {
+            "object_id": 1235,
+            "variables": 
+                {
+                    "var1": "value1",
+                    "var2": "value2"
+                }
+        }
+    ]
+
+
+ExternalSystemOpenNMS
+---------------------
+This class will create/update/delete nodes in the monitoring system OpenNMS. DATAGERRY objects were exported to one
+OpenNMS provisioning requisition using the OpenNMS REST API. Foreach exported object, ip, hostname, asset informations
+and surveillance categories can be set. Optionallly an export of SNMP communities (at the moment SNMPv1 and SNMPv2c are
+supported) can be done.
+
+
+The exporter class has the following parameters:
+
+.. csv-table::
+    :header: "parameter", "required", "description"
+    :align: left
+
+    "resturl", "True", "OpenNMS REST URL"
+    "restuser", "True", "OpenNMS REST user"
+    "restpassword", "True", "OpenNMS REST password"
+    "requisition", "True", "OpenNMS requisition to use"
+    "services", "False", "name of services to bind on each node sepetated by space"
+    "exportSnmpConfig", "False", "also export SNMP configuration for nodes"
+    "exportSnmpConfigRetries", "False", "export SNMP configuration for nodes: set SNMP retries"
+    "exportSnmpConfigTimeout", "False", "export SNMP configuration for nodes: set SNMP timeout"
+
+
+The following export variables can be defined:
+
+.. csv-table::
+    :header: "name", "required", "description"
+    :align: left
+
+    "nodelabel", "True", "nodelabel for the OpenNMS node"
+    "ip", "True", "ip address to add in OpenNMS"
+    "furtherIps", "True", "further ip addresses to add to OpenNMS node. Format: IP1;IP2;IP3."
+    "asset\_", "True", "content for asset field e.g. - asset\_city for adding information to the city field"
+    "category\_", "True", "use variable value of the field to define a category e.g. - category\_1"
+    "snmp\_community", "True", "SNMP community of a node. This will be set in OpenNMS, if exportSnmpConfig is set to true."
+    "snmp\_version", "True", "SNMP version of a node. This will be set in OpenNMS, if exportSnmpConfig is set to true. Currently the exporter supports only v1/v2c"
 

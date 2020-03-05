@@ -129,7 +129,7 @@ def get_dt_objects_by_type(type_id, request_user: User):
     except CMDBError:
         return abort(400)
 
-    rendered_list = RenderList(object_list, request_user).render_result_list()
+    rendered_list = RenderList(object_list, request_user, dt_render=True).render_result_list()
 
     table_response = {
         'data': rendered_list,
@@ -172,7 +172,7 @@ def get_dt_filter_objects_by_type(type_id, request_user: User):
 
         # Search search term over entire object
         or_conditions = []
-        if isinstance(search_for, str) or isinstance(search_for, int):
+        if isinstance(search_for, str) and not isinstance(search_for, bool):
             search_term = {'$regex': str(search_for), '$options': 'i'}
         else:
             search_term = search_for
@@ -181,7 +181,7 @@ def get_dt_filter_objects_by_type(type_id, request_user: User):
         # ToDo: Find - convert string to date
         # or_conditions.append({'creation_time': {'$toDate': str(search_for)}})
 
-        if isinstance(search_for, int):
+        if isinstance(search_for, int) and not isinstance(search_for, bool):
             if order_column in ['public_id', 'author_id']:
                 or_conditions.append({'$where': "this.public_id.toString().includes(%s)" % search_for})
                 or_conditions.append({'$where': "this.author_id.toString().includes(%s)" % search_for})
@@ -203,7 +203,7 @@ def get_dt_filter_objects_by_type(type_id, request_user: User):
     except CMDBError:
         return abort(400)
 
-    rendered_list = RenderList(object_list, request_user).render_result_list()
+    rendered_list = RenderList(object_list, request_user, dt_render=True).render_result_list()
 
     table_response = {
         'data': rendered_list,

@@ -27,13 +27,16 @@ class CmdbCategory(CmdbDAO):
         'name',
     ]
 
-    def __init__(self, name: str, label: str = None, icon: str = None, parent_id: int = None, root: bool = False,
+    INDEX_KEYS = [
+        {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
+    ]
+
+    def __init__(self, name: str, label: str = None, icon: str = None, parent_id: int = None,
                  **kwargs):
         self.name = name
         self.label = label or self.name.title()
         self.icon = icon or ''
         self.parent_id = parent_id or 0
-        self.root = root or False
         super(CmdbCategory, self).__init__(**kwargs)
 
     def get_name(self) -> str:

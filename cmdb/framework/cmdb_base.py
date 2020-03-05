@@ -50,8 +50,33 @@ class CmdbManagerBase(ABC):
         """
         return self.dbm.count(collection=collection)
 
-    def _search(self, collection: str, query, *args, **kwargs) -> List:
-        return self.dbm.search(collection, filter=query, *args, **kwargs)
+    def _aggregate(self, collection: str, pipeline, **kwargs):
+        """search after query requirements
+
+        Args:
+            collection: collection to search
+            query: query or aggregate pipe
+            *args:
+            **kwargs:
+
+        Returns:
+            list of found documents
+        """
+        return self.dbm.aggregate(collection, pipeline=pipeline, **kwargs)
+
+    def _search(self, collection: str, query, **kwargs):
+        """search after query requirements
+
+        Args:
+            collection: collection to search
+            query: query or aggregate pipe
+            *args:
+            **kwargs:
+
+        Returns:
+            list of found documents
+        """
+        return self.dbm.search(collection, filter=query, **kwargs)
 
     def _get(self, collection: str, public_id: int) -> dict:
         """get document from the database by their public id
@@ -83,8 +108,8 @@ class CmdbManagerBase(ABC):
             requirements_filter.update({k: req})
         return self.dbm.find_one_by(collection=collection, filter=requirements_filter)
 
-    def _get_many(self, collection: str, sort='public_id', direction: int = -1, limit=0, **requirements: dict) -> List[
-        dict]:
+    def _get_many(self, collection: str, sort='public_id', direction: int = -1, limit=0, **requirements: dict) -> \
+            List[dict]:
         """get all documents from the database which have the passing requirements
 
         Args:
@@ -133,6 +158,23 @@ class CmdbManagerBase(ABC):
         return self.dbm.update(
             collection=collection,
             filter={'public_id': public_id},
+            data=data
+        )
+
+    def _unset_update_many(self, collection: str, data: str) -> object:
+        """
+        update document/object in database
+        Args:
+            collection (str): name of the database collection
+            public_id (int): public id of object
+            data: field to be deleted
+
+        Returns:
+            acknowledgment of database
+        """
+        return self.dbm.unset_update_many(
+            collection=collection,
+            filter={},
             data=data
         )
 

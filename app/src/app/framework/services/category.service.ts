@@ -17,20 +17,43 @@
 */
 
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
-import { ApiCallService } from '../../services/api-call.service';
+import {catchError, map, switchMap} from 'rxjs/operators';
+import {ApiCallService, ApiService, HttpInterceptorHandler} from '../../services/api-call.service';
 import { CmdbCategory } from '../models/cmdb-category';
-import { CmdbType } from '../models/cmdb-type';
+import { FormControl } from '@angular/forms';
+import { Observable, timer } from 'rxjs';
+import {HttpBackend, HttpClient} from '@angular/common/http';
+import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
+
+export const checkCategoryExistsValidator = (categoryService: CategoryService<CmdbCategory>, time: number = 500) => {
+  return (control: FormControl) => {
+    return timer(time).pipe(switchMap(() => {
+      return categoryService.checkCategoryExists(control.value).pipe(
+        map((response) => {
+          if (response.body.length) {
+            return { typeExists: true };
+          }
+          return null;
+        }),
+        catchError(() => {
+          return new Promise(resolve => {
+            resolve(null);
+          });
+        })
+      );
+    }));
+  };
+};
 
 @Injectable({
   providedIn: 'root'
 })
-export class CategoryService {
+export class CategoryService<T = CmdbCategory> implements ApiService {
 
-  private servicePrefix: string = 'category';
+  public servicePrefix: string = 'category';
   private categoryList: CmdbCategory[];
 
-  constructor(private api: ApiCallService) {
+  constructor(private api: ApiCallService, private backend: HttpBackend) {
     this.getCategoryList().subscribe((list: CmdbCategory[]) => {
       this.categoryList = list;
     });
@@ -46,6 +69,14 @@ export class CategoryService {
         if (apiResponse.status === 204) {
           return [];
         }
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public getCategoriesBy(regex: string): Observable<T[]> {
+    return this.api.callGet<CmdbCategory[]>(this.servicePrefix + '/by/' + regex).pipe(
+      map((apiResponse) => {
         return apiResponse.body;
       })
     );
@@ -96,4 +127,9 @@ export class CategoryService {
     return this.api.callDeleteRoute<number>(this.servicePrefix + '/' + publicID);
   }
 
+  // Validation functions
+  public checkCategoryExists(typeName: string) {
+    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`, specialClient);
+  }
 }

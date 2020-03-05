@@ -20,29 +20,45 @@ import { Injectable } from '@angular/core';
 import { ApiCallService, ApiService, httpObservePostOptions } from '../services/api-call.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { HttpParams } from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import { SearchResultList } from './models/search-result';
+
+export const COOCKIENAME = 'onlyActiveObjCookie';
+export const PARAMS = 'params';
 
 @Injectable({
   providedIn: 'root'
 })
+
 export class SearchService<T = SearchResultList> implements ApiService {
 
   public servicePrefix: string = 'search';
 
-  public constructor(private api: ApiCallService) {
+  public constructor(private api: ApiCallService, private http: HttpClient) {
   }
 
-  public postSearch(query: any, params?: HttpParams): Observable<T> {
-    const httpOptions = httpObservePostOptions;
-    if (params) {
-      httpOptions.params = params;
-    }
-    return this.api.callPost<T>(`${ this.servicePrefix }/`, query, httpOptions).pipe(
+  public getEstimateValueResults(regex: string): Observable<number> {
+    httpObservePostOptions[PARAMS] = {searchValue: regex};
+    return this.api.callGet<number>(this.servicePrefix + '/quick/count/', this.http, httpObservePostOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
     );
   }
 
+  public postSearch(query: any, params?: HttpParams): Observable<T> {
+    const httpOptions = httpObservePostOptions;
+    params = params.set('onlyActiveObjCookie', this.api.readCookies(COOCKIENAME));
+    if (params) {
+      httpOptions.params = params;
+    }
+    return this.api.callPost<T>(`${ this.servicePrefix }/`, query, httpOptions).pipe(
+      map((apiResponse) => {
+        if (apiResponse.statusCode === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
+  }
 }

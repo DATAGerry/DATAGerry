@@ -24,7 +24,7 @@ from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.user_management import UserManager
-from cmdb.utils import SecurityManager
+from cmdb.utils.security import SecurityManager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -36,7 +36,7 @@ LOGGER = logging.getLogger(__name__)
 
 def create_rest_api(event_queue):
     from cmdb.interface.config import app_config
-    from cmdb.utils.system_reader import SystemConfigReader
+    from cmdb.utils.system_config import SystemConfigReader
     system_config_reader = SystemConfigReader()
 
     try:
@@ -119,8 +119,8 @@ def create_rest_api(event_queue):
 
 
 def register_converters(app):
-    from cmdb.interface.custom_converters import DictConverter
-    app.url_map.converters['dict'] = DictConverter
+    from cmdb.interface.custom_converters import RegexConverter
+    app.url_map.converters['regex'] = RegexConverter
 
 
 def register_blueprints(app):
@@ -143,6 +143,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.exporter_routes.exportd_job_routes import exportd_job_blueprint
     from cmdb.interface.rest_api.exporter_routes.exportd_log_routes import exportd_log_blueprint
     from cmdb.interface.rest_api.external_systems_routes import external_system
+    from cmdb.interface.rest_api.special_routers import special_blueprint
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(object_blueprint)
@@ -163,6 +164,7 @@ def register_blueprints(app):
     app.register_blueprint(exportd_job_blueprint)
     app.register_blueprint(exportd_log_blueprint)
     app.register_blueprint(external_system)
+    app.register_blueprint(special_blueprint)
 
     import cmdb
     if cmdb.__MODE__ == 'DEBUG':

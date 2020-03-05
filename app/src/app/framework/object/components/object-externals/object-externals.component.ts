@@ -18,6 +18,7 @@
 
 import { Component, Input } from '@angular/core';
 import { RenderResult } from '../../../models/cmdb-render';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'cmdb-object-externals',
@@ -27,5 +28,9 @@ import { RenderResult } from '../../../models/cmdb-render';
 export class ObjectExternalsComponent {
 
   @Input() renderResult: RenderResult = undefined;
+  constructor(private sanitizer: DomSanitizer) {}
 
+  getSantizeUrl(url: string) {
+    return this.sanitizer.bypassSecurityTrustUrl(url);
+  }
 }

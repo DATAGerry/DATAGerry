@@ -46,6 +46,7 @@ export class ConfigEdit {
   public calculateName(value) {
     if (this.activeEdit) {
       this.data.name = value.replace(/ /g, '-').toLowerCase();
+      this.data.name = this.data.name.replace(/[^a-z0-9 \-]/gi, '').toLowerCase();
     }
   }
 }
