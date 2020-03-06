@@ -82,13 +82,12 @@ class CsvExportType(ExportType):
 
         return self.csv_writer(header, rows)
 
-    def csv_writer(self, header, rows):
+    def csv_writer(self, header, rows, dialect=csv.excel):
         csv_file = io.StringIO()
-        writer = csv.DictWriter(csv_file, fieldnames=header, dialect='excel')
+        writer = csv.DictWriter(csv_file, fieldnames=header, dialect=dialect)
         writer.writeheader()
         for row in rows:
             writer.writerow(row)
-
         csv_file.seek(0)
         return csv_file
 
@@ -116,7 +115,7 @@ class JsonExportType(ExportType):
 
             filter_dict.append(new_dict)
 
-        return json.dumps(filter_dict, default=json_encoding.default, indent=2)
+        return json.dumps(filter_dict, default=json_encoding.default, ensure_ascii=False, indent=2)
 
 
 class XlsxExportType(ExportType):
