@@ -140,7 +140,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
         # init destination vars
         self.__services = self._destination_parms.get("services").split()
         self.__snmp_export = False
-        if bool(self._destination_parms.get("exportSnmpConfig")):
+        if self._destination_parms.get("exportSnmpConfig") in ['true', 'True']:
             self.__snmp_export = True
         # init error handling
         self.__obj_successful = []
