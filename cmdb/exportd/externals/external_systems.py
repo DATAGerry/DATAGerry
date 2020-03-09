@@ -213,9 +213,10 @@ class ExternalSystemOpenNMS(ExternalSystem):
                 ET.SubElement(interface_xml, "monitored-service", service_xml_attr)
         # XML: categories
         for category in categories:
-            cat_xml_attr = {}
-            cat_xml_attr["name"] = str(category)
-            ET.SubElement(node_xml, "category", cat_xml_attr)
+            if category:
+                cat_xml_attr = {}
+                cat_xml_attr["name"] = str(category)
+                ET.SubElement(node_xml, "category", cat_xml_attr)
         # XML: assets
         for asset in assets:
             asset_xml_attr = {}
