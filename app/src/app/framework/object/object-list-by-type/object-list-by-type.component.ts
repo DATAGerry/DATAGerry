@@ -17,7 +17,17 @@
 */
 
 
-import { AfterViewInit, Component, ComponentFactoryResolver, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ComponentFactoryResolver,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  Renderer2,
+  ViewChild
+} from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import { ObjectService } from '../../services/object.service';
@@ -181,13 +191,16 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     };
   }
 
+  @HostListener('document:click', ['$event'])
+  dtDeleteClick(event: any): void {
+    if ((event.target as Element).className.indexOf('delete-object') > -1) {
+      this.delObject(parseInt((event.target as Element).id, 10));
+    }
+  }
+
   ngAfterViewInit(): void {
     this.renderer.listen('document', 'click', (event) => {
       const actionClassList = (event.target as Element).classList;
-      if (actionClassList.contains('delete-object')) {
-        this.delObject(parseInt((event.target as Element).id, 10));
-      }
-
       if (actionClassList.contains('select-all-objects')) {
         const dataTable: any = $('#dt-object-list').DataTable();
         const rows: any = dataTable.rows();
