@@ -29,6 +29,7 @@ from cmdb.importer.importer_config import ObjectImporterConfig
 from cmdb.importer.importer_response import ImporterObjectResponse
 from cmdb.importer.mapper import Mapping, MapEntry
 from cmdb.importer.parser_object import JsonObjectParserResponse, CsvObjectParserResponse, ExcelObjectParserResponse
+from cmdb.importer.improve_object import ImproveObject
 from cmdb.user_management import User
 
 LOGGER = logging.getLogger(__name__)
@@ -79,9 +80,14 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
         for prop in map_properties:
             working_object = self._map_element(prop, entry, working_object)
 
+        # Improve insert object
+        improve_object = ImproveObject(entry, entry.get('fields'), possible_fields)
+
         for entry_field in entry.get('fields'):
             field_exists = next((item for item in possible_fields if item["name"] == entry_field['name']), None)
             if field_exists:
+                improve_object.value = entry_field['value']
+                entry_field['value'] = improve_object.improve_date()
                 working_object.get('fields').append(entry_field)
         return working_object
 
@@ -144,6 +150,11 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
         # Insert properties
         for property_entry in property_entries:
             working_object.update({property_entry.get_name(): entry.get(property_entry.get_value())})
+
+        # Improve insert object
+        improve_object = ImproveObject(entry, field_entries, possible_fields)
+        entry = improve_object.improve_entry()
+
         # Validate insert fields
         for entry_field in field_entries:
             field_exists = next((item for item in possible_fields if item["name"] == entry_field.get_name()), None)
@@ -239,6 +250,10 @@ class ExcelObjectImporter(ObjectImporter, XLSXContent):
         # Insert properties
         for property_entry in property_entries:
             working_object.update({property_entry.get_name(): entry.get(property_entry.get_value())})
+
+        # Improve insert object
+        improve_object = ImproveObject(entry, field_entries, possible_fields)
+        entry = improve_object.improve_entry()
 
         # Validate insert fields
         for field_entry in field_entries:
