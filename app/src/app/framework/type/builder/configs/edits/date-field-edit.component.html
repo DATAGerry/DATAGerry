@@ -22,6 +22,24 @@
                       </textarea>
     <small class="form-text text-muted">short field description or helper text</small>
   </div>
+
+  <div class="form-group">
+    <label>Default value:</label>
+    <div class="input-group">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="yyyy-mm-dd"
+        [(ngModel)]="data.value"
+        ngbDatepicker #d="ngbDatepicker" readonly/>
+      <div class="input-group-append">
+      <span class="input-group-text" (click)="d.toggle()">
+        <fa-icon icon="calendar-alt"></fa-icon>
+      </span>
+      </div>
+    </div>
+  </div>
+
   <div class="form-group">
     <label>Helper text:</label>
     <input [(ngModel)]="data.helperText" type="text" class="form-control" value="{{data.helperText}}">

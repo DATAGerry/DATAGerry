@@ -25,6 +25,8 @@ import { CmdbObject } from '../../models/cmdb-object';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { RenderResult } from '../../models/cmdb-render';
+import { TypeService } from '../../services/type.service';
+import {CmdbType} from "../../models/cmdb-type";
 
 @Component({
   selector: 'cmdb-object-edit',
@@ -34,13 +36,14 @@ import { RenderResult } from '../../models/cmdb-render';
 export class ObjectEditComponent implements OnInit {
 
   public mode: CmdbMode = CmdbMode.Edit;
-  private objectID: number;
   public objectInstance: CmdbObject;
+  public typeInstance: CmdbType;
   public renderResult: RenderResult;
   public renderForm: FormGroup;
   public commitForm: FormGroup;
+  private objectID: number;
 
-  constructor(private api: ApiCallService, private objectService: ObjectService,
+  constructor(private api: ApiCallService, private objectService: ObjectService, private typeService: TypeService,
               private route: ActivatedRoute, private router: Router, private toastService: ToastService) {
     this.route.params.subscribe((params) => {
       this.objectID = params.publicID;
@@ -62,6 +65,9 @@ export class ObjectEditComponent implements OnInit {
         this.objectService.getObject<CmdbObject>(this.objectID, true).subscribe(ob => {
             this.objectInstance = ob;
           });
+        this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
+          this.typeInstance = value;
+        });
       });
   }
 

@@ -19,13 +19,14 @@
 import {Component, HostListener, OnInit} from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
 import { ObjectService } from '../../services/object.service';
-import { TypeService } from '../../services/type.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CmdbMode } from '../../modes.enum';
 import { CmdbObject } from '../../models/cmdb-object';
+import { FormGroup } from '@angular/forms';
+import { UserService } from '../../../management/services/user.service';
+import { RenderResult } from '../../models/cmdb-render';
 import { CmdbType } from '../../models/cmdb-type';
-import {FormControl, FormGroup} from '@angular/forms';
-import {UserService} from '../../../management/services/user.service';
+import { TypeService } from '../../services/type.service';
 
 @Component({
   selector: 'cmdb-object-copy',
@@ -36,8 +37,8 @@ export class ObjectCopyComponent implements OnInit {
 
   public mode: CmdbMode = CmdbMode.Edit;
   private objectID: number;
-  public objectInstance: CmdbObject;
   public typeInstance: CmdbType;
+  public renderResult: RenderResult;
   public renderForm: FormGroup;
 
   constructor(private api: ApiCallService, private objectService: ObjectService, private typeService: TypeService,
@@ -50,15 +51,17 @@ export class ObjectCopyComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.objectService.getObject(this.objectID, true).subscribe((objectInstanceResp: CmdbObject) => {
-      this.objectInstance = objectInstanceResp;
-    }, (error) => {
-      console.error(error);
-    }, () => {
-      this.typeService.getType(this.objectInstance.type_id).subscribe((typeInstanceResp: CmdbType) => {
-        this.typeInstance = typeInstanceResp;
+    this.objectService.getObject(this.objectID).subscribe((rr: RenderResult) => {
+        this.renderResult = rr;
+      },
+      error => {
+        console.error(error);
+      },
+      () => {
+        this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
+          this.typeInstance = value;
+        });
       });
-    });
   }
 
   @HostListener('window:scroll', ['$event'])
@@ -75,8 +78,8 @@ export class ObjectCopyComponent implements OnInit {
     this.renderForm.markAllAsTouched();
     if (this.renderForm.valid) {
       const newObjectInstance = new CmdbObject();
-      newObjectInstance.type_id = this.objectInstance.type_id;
-      newObjectInstance.active = this.typeInstance.active;
+      newObjectInstance.type_id = this.renderResult.type_information.type_id;
+      newObjectInstance.active = this.renderResult.type_information.active;
       newObjectInstance.version = '1.0.0';
       newObjectInstance.author_id = this.userService.getCurrentUser().public_id;
       newObjectInstance.fields = [];

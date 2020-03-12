@@ -50,6 +50,9 @@ export class RenderField {
   }
 
   public get value(): any {
+    if (this.data.value && (!this.innerValue || this.innerValue === '')) {
+      this.innerValue = this.data.value;
+    }
     return this.innerValue;
   }
 

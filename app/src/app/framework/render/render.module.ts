@@ -48,6 +48,7 @@ import { RefSimpleComponent } from './simple/special/ref-simple.component';
 import { DateComponent } from './fields/date/date.component';
 import { DateSimpleComponent } from './simple/date/date-simple.component';
 import { NumberComponent } from './fields/math/number.component';
+import { InputAppendsComponent } from './components/input-appends/input-appends.component';
 
 
 @NgModule({
@@ -99,7 +100,8 @@ import { NumberComponent } from './fields/math/number.component';
     RefSimpleComponent,
     DateSimpleComponent,
     DateComponent,
-    NumberComponent
+    NumberComponent,
+    InputAppendsComponent
   ],
   exports: [
     RenderElementComponent,

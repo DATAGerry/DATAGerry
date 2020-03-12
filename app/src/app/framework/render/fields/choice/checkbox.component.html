@@ -14,17 +14,21 @@
           </div>
         </ng-container>
         <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
-          <div class="custom-control custom-checkbox">
-            <input type="checkbox" name="{{namePrefix + data.name}}" class="custom-control-input"
-                   [formControlName]="data.name" [attr.id]="namePrefix + data.name"
-                   [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
+          <div class="container">
+            <div class="row">
+              <div class="col-sm-auto">
+                <div class="custom-control custom-checkbox">
+                  <input type="checkbox" name="{{namePrefix + data.name}}" class="custom-control-input"
+                         [formControlName]="data.name" [attr.id]="namePrefix + data.name"
+                         [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
                  'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"/>
-            <label class="custom-control-label" for="{{namePrefix + data.name}}"></label>
-          </div>
-          <div *ngIf="data?.helperText" class="input-group-append">
-            <span class="input-group-text">
-              <fa-icon icon="info" placement="left" [ngbTooltip]="data?.helperText"></fa-icon>
-            </span>
+                  <label class="custom-control-label" for="{{namePrefix + data.name}}"></label>
+                </div>
+              </div>
+              <div class="col-sm">
+                <cmdb-input-appends [data]="data" [controll]="controller" [parentFormGroup]="parentFormGroup"></cmdb-input-appends>
+              </div>
+            </div>
           </div>
         </ng-container>
         <div *ngSwitchDefault>

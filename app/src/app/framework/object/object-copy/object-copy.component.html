@@ -1,7 +1,7 @@
 <div class="container-fluid p-0 m-0">
   <div class="row">
     <div class="col-sm-10">
-      <h1>Copy of {{typeInstance?.label}} #{{objectInstance?.public_id}}</h1>
+      <h1>Copy of {{typeInstance?.label}} #{{renderResult?.object_information.object_id}}</h1>
     </div>
     <div class="col-sm-2 text-right">
       <div class="btn-group p-1" role="group">
@@ -9,7 +9,7 @@
                 (click)="copyObject()"
                 [disabled]="!renderForm.valid">Save</button>
         <button class="btn btn-outline-danger"
-                routerLink="/framework/object/view/{{objectInstance?.public_id}}">Cancel</button>
+                routerLink="/framework/object/view/{{renderResult?.object_information.object_id}}">Cancel</button>
       </div>
     </div>
   </div>
@@ -19,17 +19,17 @@
   <div class="card-body">
     <form [formGroup]="renderForm" class="renderForm needs-validation" novalidate autocomplete="off"
           (ngSubmit)="copyObject()">
-      <cmdb-render [typeInstance]="typeInstance" [objectInstance]="objectInstance" [mode]="mode"
+      <cmdb-render [typeInstance]="typeInstance" [renderResult]="renderResult" [mode]="mode"
                    [renderForm]="renderForm"></cmdb-render>
       <div id="object-form-action" class="shadow p-3 mb-5 bg-white rounded text-center">
         <div class="row d-flex justify-content-center align-items-center">
           <p class="pt-3 mx-4">Do you want to save the copy of
-            <strong>{{typeInstance?.label}} #{{objectInstance?.public_id}}</strong> you made before quitting?</p>
+            <strong>{{typeInstance?.label}} #{{renderResult?.object_information.object_id}}</strong> you made before quitting?</p>
           <div class="btn-group" role="group">
             <button type="submit" class="btn btn-outline-success mr-2"
                     [disabled]="!renderForm.valid">Save</button>
             <button class="btn btn-outline-danger"
-                    routerLink="/framework/object/view/{{objectInstance?.public_id}}">Cancel</button>
+                    routerLink="/framework/object/view/{{renderResult?.object_information.object_id}}">Cancel</button>
           </div>
         </div>
       </div>

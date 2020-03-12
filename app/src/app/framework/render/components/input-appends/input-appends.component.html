@@ -1,0 +1,11 @@
+<div class="input-group input-group-sm">
+  <div id="input-appends" class="input-group-append input-group-sm">
+    <span class="input-group-text" *ngIf="data?.default" (click)="changeValueToDefault()">
+      <fa-icon [icon]="['fas', 'pencil-alt']" placement="left" [ngbTooltip]="tipContent"></fa-icon>
+      <ng-template #tipContent><b>Default:</b> {{data.default}}</ng-template>
+    </span>
+    <span class="input-group-text" *ngIf="data?.helperText">
+      <fa-icon icon="info" placement="left" [ngbTooltip]="data?.helperText"></fa-icon>
+    </span>
+  </div>
+</div>

@@ -20,7 +20,7 @@
   <div class="card-body">
     <form [formGroup]="renderForm" class="renderForm needs-validation" novalidate autocomplete="off"
           (ngSubmit)="editObject()">
-      <cmdb-render [renderResult]="renderResult" [mode]="mode"
+      <cmdb-render [renderResult]="renderResult" [typeInstance]="typeInstance" [mode]="mode"
                    [renderForm]="renderForm"></cmdb-render>
       <hr/>
       <form [formGroup]="commitForm" class="renderForm needs-validation" novalidate autocomplete="off">

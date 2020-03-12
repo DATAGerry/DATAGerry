@@ -17,6 +17,10 @@ export class DateComponent extends RenderField implements  OnInit {
   }
 
   ngOnInit(): void {
+    if (this.data.default !== undefined) {
+      const temp = this.data.default;
+      this.data.default = temp.year + '-' + temp.month + '-' + temp.day;
+    }
     if (this.parentFormGroup.get(this.data.name).value === '') {
       this.parentFormGroup.get(this.data.name).setValue(null, {onlySelf: true});
     }

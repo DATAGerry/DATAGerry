@@ -74,8 +74,14 @@ html{
 #ng-select-valid {
   .ng-select-container {
     right: 5px;
+    min-height: 0;
+    height: auto;
+    width: 95%;
+    line-height: 1;
   }
-
+  div.ng-select-container {
+    align-items: unset!important;
+  }
   .ng-arrow-wrapper {
     width: auto;
   }

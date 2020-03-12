@@ -19,6 +19,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { TypeService } from '../../../../services/type.service';
 import { ConfigEdit } from '../config.edit';
+import { RenderResult } from '../../../../models/cmdb-render';
+import { ObjectService } from '../../../../services/object.service';
+import { CmdbType } from '../../../../models/cmdb-type';
+import {CmdbObject} from "../../../../models/cmdb-object";
 
 @Component({
   selector: 'cmdb-ref-field-edit',
@@ -28,16 +32,37 @@ import { ConfigEdit } from '../config.edit';
 export class RefFieldEditComponent extends ConfigEdit implements OnInit {
   @Input() groupList: any;
   @Input() userList: any;
-  public typeList;
+  public typeList: CmdbType[];
+  public objectList: RenderResult[] = [];
 
-  constructor(private typeService: TypeService) {
+  constructor(private typeService: TypeService, private objectService: ObjectService) {
     super();
   }
 
   public ngOnInit(): void {
-    this.typeService.getTypeList().subscribe(res => {
+    this.typeService.getTypeList().subscribe((res: CmdbType[]) => {
       this.typeList = res;
     });
+
+    if (this.data.value !== null && this.data.value !== undefined && this.data.value !== '') {
+      this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
+        this.objectList = res;
+      });
+    }
   }
 
+  public onChange(type: any) {
+    if (type === undefined) {
+      this.objectList = [];
+      this.data.value = '';
+    } else {
+      this.objectService.getObjectsByType(type.public_id).subscribe((res: RenderResult[]) => {
+        this.objectList = res;
+      });
+    }
+  }
+
+  public changeDefault(value: any) {
+    console.log(value);
+  }
 }

@@ -16,14 +16,12 @@
           </div>
         </ng-container>
         <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
-          <textarea [formControlName]="data.name" class="form-control" name="{{data.name}}"
-                    placeholder="{{data?.placeholder}}" rows="{{data?.rows ? data?.rows : 3}}"
-                    [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
+          <div class="input-group">
+            <textarea [formControlName]="data.name" class="form-control" name="{{data.name}}"
+                      placeholder="{{data?.placeholder}}" rows="{{data?.rows ? data?.rows : 3}}"
+                      [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
                  'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"></textarea>
-          <div *ngIf="data?.helperText" class="input-group-append">
-            <span class="input-group-text">
-              <fa-icon icon="info" placement="left" [ngbTooltip]="data?.helperText"></fa-icon>
-            </span>
+            <cmdb-input-appends [data]="data" [controll]="controller" [parentFormGroup]="parentFormGroup"></cmdb-input-appends>
           </div>
         </ng-container>
         <div *ngSwitchDefault>
