@@ -56,7 +56,7 @@ class ImproveObject:
         if isinstance(self.value, str):
             dt_format = ('%Y/%m/%d', '%Y-%m-%d', '%Y.%m.%d', '%Y,%m,%d',
                          '%d/%m/%Y', '%d-%m-%Y', '%d.%m.%Y', '%d,%m,%Y',
-                         '%d.%m.%y %H:%M')
+                         '%d.%m.%y %H:%M', '%d.%m.%y %H:%M:%S')
             for fmt in dt_format:
                 try:
                     return datetime.datetime.strptime(str(self.value), fmt)
