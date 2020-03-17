@@ -41,7 +41,7 @@
   <label>Default value:</label>
   <select [(ngModel)]="data.value" class="form-control">
     <option></option>
-    <option *ngFor="let obj of objectList; let i = index" [value]="obj.object_information.object_id">
+    <option *ngFor="let obj of objectList; let i = index" [value]="changeDefault(obj.object_information.object_id)">
       ID: {{obj.object_information.object_id}} Summaries: {{obj.summary_line}}
     </option>
   </select>

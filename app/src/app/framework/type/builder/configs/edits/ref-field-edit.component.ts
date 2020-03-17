@@ -63,6 +63,7 @@ export class RefFieldEditComponent extends ConfigEdit implements OnInit {
   }
 
   public changeDefault(value: any) {
-    console.log(value);
+    this.data.default = parseInt(value, 10);
+    return this.data.default;
   }
 }

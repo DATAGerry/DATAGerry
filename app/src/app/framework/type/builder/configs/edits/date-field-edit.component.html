@@ -31,7 +31,8 @@
         class="form-control"
         placeholder="yyyy-mm-dd"
         [(ngModel)]="data.value"
-        ngbDatepicker #d="ngbDatepicker" readonly/>
+        ngbDatepicker #d="ngbDatepicker"
+        pattern="[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])"/>
       <div class="input-group-append">
       <span class="input-group-text" (click)="d.toggle()">
         <fa-icon icon="calendar-alt"></fa-icon>
