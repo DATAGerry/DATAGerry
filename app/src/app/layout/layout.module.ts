@@ -121,7 +121,8 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     UserImageComponent,
     UserDisplayComponent,
     ChartsComponent,
-    JwPaginationComponent
+    JwPaginationComponent,
+    SidebarComponent
   ],
   imports: [
     CommonModule,
