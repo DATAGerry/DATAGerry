@@ -25,9 +25,16 @@ import { formatDate } from '@angular/common';
   templateUrl: './date-simple.component.html',
   styleUrls: ['./date-simple.component.scss']
 })
-export class DateSimpleComponent extends RenderField {
+export class DateSimpleComponent extends RenderField implements OnInit{
 
   constructor() {
     super();
+  }
+
+  ngOnInit(): void {
+      const currentDate = this.data.value;
+      if (currentDate && currentDate.$date) {
+        this.data.value =  new Date(currentDate.$date);
+      }
   }
 }
