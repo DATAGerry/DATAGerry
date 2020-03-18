@@ -57,9 +57,9 @@ class DtHtmlParser:
         html_content = 'No reference set'
         if self.current_field['value']:
             try:
-                ref_object = self.object_manager.get_object(self.current_field['value'])
+                ref_object = self.object_manager.get_object(int(self.current_field['value']))
             except ObjectManagerGetError as err:
-                return abort(404)
+                return '<span>%s</span>' % html_content
 
             try:
                 ref_type = self.object_manager.get_type(ref_object.get_type_id())
@@ -72,6 +72,6 @@ class DtHtmlParser:
                     if field != summaries[-1]:
                         html_content += ' | '
             except ObjectManagerGetError as err:
-                return abort(404)
+                return '<span>%s</span>' % html_content
 
         return '<span>%s</span>' % html_content
