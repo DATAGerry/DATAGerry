@@ -17,21 +17,22 @@
 */
 
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { TableColumnAction } from '../../../models/table-columns-action';
+import {Component, Input, OnInit} from '@angular/core';
+import {TableColumnAction} from '../../../models/table-columns-action';
 
 @Component({
-  selector: 'cmdb-action-delete',
-  templateUrl: './action-delete.component.html',
-  styleUrls: ['./action-delete.component.scss']
+  selector: 'cmdb-action-copy',
+  templateUrl: './action-copy.component.html',
+  styleUrls: ['./action-copy.component.scss']
 })
-export class ActionDeleteComponent {
+export class ActionCopyComponent implements OnInit {
 
   @Input() data: TableColumnAction[];
   @Input() publicID: string = '';
-  @Output() deleteValue = new EventEmitter();
 
-  delete(route: string) {
-    this.deleteValue.emit(route);
+  constructor() { }
+
+  ngOnInit() {
   }
+
 }

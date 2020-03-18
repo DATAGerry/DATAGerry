@@ -44,6 +44,7 @@ export class NewestViewComponent implements OnInit {
 
     this.thColumnsActions = [
       { name: 'view', classValue: 'text-dark ml-1', linkRoute: 'framework/object/view/', fontIcon: 'eye', active: true},
+      { name: 'copy', classValue: 'text-dark ml-1', linkRoute: 'framework/object/copy/', fontIcon: 'copy'},
       { name: 'edit', classValue: 'text-dark ml-1', linkRoute: 'framework/object/edit/', fontIcon: 'edit'},
       { name: 'delete', classValue: 'text-dark ml-1', linkRoute: 'object/', fontIcon: 'trash-alt'}];
   }

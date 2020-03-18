@@ -32,8 +32,8 @@ import { TableColumn} from './models/table-column';
 import { TableColumnAction} from './models/table-columns-action';
 import { RenderResult } from '../../../framework/models/cmdb-render';
 import { FileService } from '../../../export/export.service';
-import {ObjectService} from "../../../framework/services/object.service";
-import {DataTableFilter} from "../../../framework/models/cmdb-datatable";
+import { ObjectService } from '../../../framework/services/object.service';
+import { DataTableFilter } from '../../../framework/models/cmdb-datatable';
 
 @Component({
   selector: 'cmdb-table',
@@ -91,6 +91,7 @@ export class TableComponent implements OnInit, OnDestroy {
 
     this.thColumnsActions = [
       { name: 'view', classValue: 'text-dark ml-1', linkRoute: '', fontIcon: 'eye', active: false},
+      { name: 'copy', classValue: 'text-dark ml-1', linkRoute: 'copy/', fontIcon: 'copy'},
       { name: 'edit', classValue: 'text-dark ml-1', linkRoute: 'edit/', fontIcon: 'edit'},
       { name: 'delete', classValue: 'text-dark ml-1', linkRoute: 'delete/', fontIcon: 'trash'}];
   }
@@ -249,7 +250,7 @@ export class TableComponent implements OnInit, OnDestroy {
       modalComponent.result.then((result) => {
         if (result) {
           const id = value.object_information.object_id;
-          const filter: DataTableFilter = new DataTableFilter()
+          const filter: DataTableFilter = new DataTableFilter();
           this.apiCallService.callDeleteRoute(this.linkRoute + id).subscribe(data => {
             this.objService.getObjects(null, filter).subscribe((objs: RenderResult[]) => {
               this.items.next(objs);
