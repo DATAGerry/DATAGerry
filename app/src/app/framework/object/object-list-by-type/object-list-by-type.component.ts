@@ -276,11 +276,13 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
         render(data) {
           const view = '<a class="text-dark mr-1" href="/framework/object/type/view/'
             + data.object_information.object_id + '"><i class="far fa-eye"></i></a>';
+          const copy = '<a class="text-dark mr-1" href="/framework/object/copy/'
+            + data.object_information.object_id + '"><i class="far fa-clone"></i></a>';
           const edit = '<a class="text-dark mr-1" href="/framework/object/edit/'
             + data.object_information.object_id + '"><i class="far fa-edit"></i></a>';
           const del = '<span id="' + data.object_information.object_id
             + '" class="far fa-trash-alt mr-1 delete-object"></span>';
-          return view + edit + del;
+          return view + copy + edit + del;
         }
       }
     );
