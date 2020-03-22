@@ -38,13 +38,22 @@ table.dataTable tr.dtrg-group.dtrg-level-2 td {
 
 
 #object-list-datatable {
-
   .select-checkbox:before {
     border: 1px solid #bbb;
     background: white;
     width: 13px;
     height:13px;
     box-shadow: inset 0 1px 1px 0 rgba(0,0,0,.1);
+  }
+
+  .td-button-actions {
+    span {
+      cursor: pointer;
+      &:hover {
+        color: $black;
+      }
+    }
+
   }
 
   button.dt-button,

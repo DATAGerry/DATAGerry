@@ -16,12 +16,28 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AuthService } from './auth/services/auth.service';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 
 @Component({
   selector: 'cmdb-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+
+  public showSidebar = false;
+
+  constructor(private authenticationService: AuthService, private router: Router) {}
+
+  ngOnInit(): void {
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        const currentUser = this.authenticationService.currentUserValue;
+        const currentUserToken = this.authenticationService.currentUserTokenValue;
+        this.showSidebar = !!(currentUser && currentUserToken);
+      }
+    });
+  }
 }

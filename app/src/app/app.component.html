@@ -1,6 +1,6 @@
 <div id="app-wrapper">
   <router-outlet name="navigation"></router-outlet>
-  <router-outlet name="sidebar"></router-outlet>
+  <cmdb-sidebar *ngIf="showSidebar"></cmdb-sidebar>
   <main id="main">
     <router-outlet name="breadcrumb"></router-outlet>
     <div id="content">

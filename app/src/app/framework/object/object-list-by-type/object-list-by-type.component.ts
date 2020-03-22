@@ -192,8 +192,14 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   }
 
   @HostListener('document:click', ['$event'])
-  dtDeleteClick(event: any): void {
-    if ((event.target as Element).className.indexOf('delete-object') > -1) {
+  dtActionClick(event: any): void {
+    if ((event.target as Element).className.indexOf('view-object-action') > -1) {
+      this.router.navigate(['/framework/object/type/view/', (event.target as Element).id]);
+    } else if ((event.target as Element).className.indexOf('copy-object-action') > -1) {
+      this.router.navigate(['/framework/object/copy/', (event.target as Element).id]);
+    } else if ((event.target as Element).className.indexOf('edit-object-action') > -1) {
+      this.router.navigate(['/framework/object/edit/', (event.target as Element).id]);
+    } else if ((event.target as Element).className.indexOf('delete-object-action') > -1) {
       this.delObject(parseInt((event.target as Element).id, 10));
     }
   }
@@ -271,17 +277,17 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       {
         data: null,
         title: 'Action',
-        className: 'text-dark text-center',
+        className: 'td-button-actions text-center',
         orderable: false,
         render(data) {
-          const view = '<a class="text-dark mr-1" href="/framework/object/type/view/'
-            + data.object_information.object_id + '"><i class="far fa-eye"></i></a>';
-          const copy = '<a class="text-dark mr-1" href="/framework/object/copy/'
-            + data.object_information.object_id + '"><i class="far fa-clone"></i></a>';
-          const edit = '<a class="text-dark mr-1" href="/framework/object/edit/'
-            + data.object_information.object_id + '"><i class="far fa-edit"></i></a>';
-          const del = '<span id="' + data.object_information.object_id
-            + '" class="far fa-trash-alt mr-1 delete-object"></span>';
+          const view = '<span id="' + data.object_information.object_id + '' +
+            '" class="far fa-eye mr-1 view-object-action" title="view"></span>';
+          const copy = '<span id="' + data.object_information.object_id + '' +
+            '" class="far fa-clone mr-1 copy-object-action" title="copy"></span>';
+          const edit = '<span id="' + data.object_information.object_id + '' +
+            '" class="far fa-edit mr-1 edit-object-action" title="edit"a></span>';
+          const del = '<span id="' + data.object_information.object_id + '' +
+            '" class="far fa-trash-alt mr-1 delete-object-action" title="delete"></span>';
           return view + copy + edit + del;
         }
       }
