@@ -16,9 +16,10 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from './auth/services/auth.service';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
+import { ConnectionService } from './connect/connection.service';
 
 @Component({
   selector: 'cmdb-root',
@@ -29,14 +30,15 @@ export class AppComponent implements OnInit {
 
   public showSidebar = false;
 
-  constructor(private authenticationService: AuthService, private router: Router) {}
+  constructor(private authenticationService: AuthService, private connectionService: ConnectionService,
+              private router: Router) {}
 
   ngOnInit(): void {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         const currentUser = this.authenticationService.currentUserValue;
         const currentUserToken = this.authenticationService.currentUserTokenValue;
-        this.showSidebar = !!(currentUser && currentUserToken);
+        this.showSidebar = !!(currentUser && currentUserToken && event.url !== '/connect');
       }
     });
   }
