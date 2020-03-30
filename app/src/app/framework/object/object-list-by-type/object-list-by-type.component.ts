@@ -80,12 +80,12 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
 
   ngOnInit() {
     this.route.params.subscribe((params) => {
-      this.typeID = params.publicID;
+      this.typeID = params.typeID;
       this.typeService.getType(this.typeID).subscribe((tInstance: CmdbType) => {
         this.faIcon = tInstance.render_meta.icon;
         this.pageTitle = tInstance.label + ' list';
       });
-      this.dtOptionbuilder(params.publicID);
+      this.dtOptionbuilder(this.typeID);
     });
   }
 

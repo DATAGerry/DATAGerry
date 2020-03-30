@@ -14,8 +14,13 @@
             </span>
           </div>
         </ng-container>
-        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
+        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
           <div class="input-group input-group-sm">
+            <ng-container *ngIf="mode == MODES.Bulk">
+              <cmdb-object-bulk-input-appends [data]="data"
+                                              [controll]="controller"
+                                              [parentFormGroup]="parentFormGroup" ></cmdb-object-bulk-input-appends>
+            </ng-container>
             <input type="text" name="{{data.name}}" class="form-control" placeholder="yyyy-mm-dd"
                    [formControlName]="data.name"
                    ngbDatepicker #d="ngbDatepicker"

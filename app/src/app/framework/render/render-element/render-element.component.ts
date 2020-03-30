@@ -16,13 +16,13 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, ComponentFactoryResolver, ComponentRef, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
-import { fieldComponents } from '../fields/fields.list';
-import { simpleComponents } from '../simple/simple.list';
-import { RenderField } from '../fields/components.fields';
-import { ToastService } from '../../../layout/toast/toast.service';
-import { FormControl, Validators } from '@angular/forms';
-import { CmdbMode } from '../../modes.enum';
+import {Component, ComponentFactoryResolver, ComponentRef, OnInit, ViewChild, ViewContainerRef} from '@angular/core';
+import {fieldComponents} from '../fields/fields.list';
+import {simpleComponents} from '../simple/simple.list';
+import {RenderField} from '../fields/components.fields';
+import {ToastService} from '../../../layout/toast/toast.service';
+import {FormControl, Validators} from '@angular/forms';
+import {CmdbMode} from '../../modes.enum';
 
 @Component({
   selector: 'cmdb-render-element',
@@ -48,7 +48,8 @@ export class RenderElementComponent extends RenderField implements OnInit {
     switch (this.mode) {
       case CmdbMode.View :
       case CmdbMode.Create:
-      case CmdbMode.Edit: {
+      case CmdbMode.Edit:
+      case CmdbMode.Bulk: {
         this.component = fieldComponents[this.data.type];
         const factory = this.resolver.resolveComponentFactory(this.component);
         this.componentRef = this.containerField.createComponent(factory);
@@ -78,6 +79,14 @@ export class RenderElementComponent extends RenderField implements OnInit {
         this.componentRef.instance.parentFormGroup.addControl(
           this.data.name, fieldControl
         );
+        if (CmdbMode.Bulk === this.mode) {
+          this.componentRef.instance.parentFormGroup.addControl(
+            this.data.name + '-isChanged', new FormControl(false),
+          );
+          this.componentRef.instance.parentFormGroup.addControl(
+            'changedFields', new FormControl(new Map<string, boolean>()),
+          );
+        }
         break;
       }
       case CmdbMode.Simple: {

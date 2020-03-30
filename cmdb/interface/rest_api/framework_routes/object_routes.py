@@ -148,11 +148,13 @@ def get_dt_filter_objects_by_type(type_id, request_user: User):
     try:
         table_config = request.args
 
-        start_at = int(table_config.get('start'))
-        site_length = int(table_config.get('length'))
-        search_for = table_config.get('search')
-        order_column = table_config.get('order') if table_config.get('order') else 'type_id'
+        filter_ids = table_config.getlist('idList')
+        start_at = int(table_config.get('start', 0, int))
+        site_length = int(table_config.get('length', 10, int))
+        search_for = table_config.get('search', '', str)
+        order_column = table_config.get('order', 'type_id', str)
         order_direction = 1 if table_config.get('direction') == 'asc' else -1
+        dt_render = False if table_config.get('dtRender') == 'false' else True
 
         # Prepare search term
         if search_for in ['true', 'True']:
@@ -162,13 +164,15 @@ def get_dt_filter_objects_by_type(type_id, request_user: User):
         elif search_for.isdigit():
             search_for = int(search_for)
 
-        # Search default values
+        # Filter Objects by IDS
         filter_arg = []
+        if filter_ids:
+            filter_arg.append({'public_id': {'$in': list(map(int, filter_ids))}})
+
+        # Search default values
         filter_arg.append({'type_id': type_id})
         if _fetch_only_active_objs():
             filter_arg.append({'active': {"$eq": True}})
-        if isinstance(search_for, bool):
-            filter_arg.append({'active': {"$eq": search_for}})
 
         # Search search term over entire object
         or_conditions = []
@@ -203,7 +207,7 @@ def get_dt_filter_objects_by_type(type_id, request_user: User):
     except CMDBError:
         return abort(400)
 
-    rendered_list = RenderList(object_list, request_user, dt_render=True).render_result_list()
+    rendered_list = RenderList(object_list, request_user, dt_render=dt_render).render_result_list()
 
     table_response = {
         'data': rendered_list,
@@ -545,82 +549,102 @@ def insert_object(request_user: User):
 @insert_request_user
 @right_required('base.framework.object.edit')
 def update_object(public_id: int, request_user: User):
-    # get current object state
-    try:
-        current_object_instance = object_manager.get_object(public_id)
-        current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
-        current_object_render_result = CmdbRender(object_instance=current_object_instance,
-                                                  type_instance=current_type_instance,
-                                                  render_user=request_user,
-                                                  user_list=user_manager.get_users()).result()
-    except ObjectManagerGetError as err:
-        LOGGER.error(err)
-        return abort(404)
-    except RenderError as err:
-        LOGGER.error(err)
-        return abort(500)
 
-    update_comment = ''
-    # load put data
-    try:
-        # get data as str
-        add_data_dump = json.dumps(request.json)
+    object_ids = request.args.getlist('objectIDs')
 
-        # convert into python dict
-        put_data = json.loads(add_data_dump, object_hook=object_hook)
-        # check for comment
-        try:
-            update_comment = put_data['comment']
-            del put_data['comment']
-        except (KeyError, IndexError, ValueError):
-            update_comment = ''
-    except TypeError as e:
-        LOGGER.warning(e)
-        return abort(400)
-
-    # update edit time
-    put_data['last_edit_time'] = datetime.utcnow()
-
-    try:
-        update_object_instance = CmdbObject(**put_data)
-    except ObjectManagerUpdateError as err:
-        LOGGER.error(err)
-        return abort(400)
-
-    # calc version
-
-    changes = current_object_instance / update_object_instance
-
-    if len(changes['new']) == 1:
-        update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
-    elif len(changes['new']) == len(update_object_instance.fields):
-        update_object_instance.update_version(update_object_instance.VERSIONING_MAJOR)
-    elif len(changes['new']) > (len(update_object_instance.fields) / 2):
-        update_object_instance.update_version(update_object_instance.VERSIONING_MINOR)
+    if len(object_ids) > 0:
+        object_ids = list(map(int, object_ids))
     else:
-        update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
+        object_ids = [public_id]
 
-    # insert object
-    try:
-        update_ack = object_manager.update_object(update_object_instance, request_user)
-    except CMDBError as e:
-        LOGGER.warning(e)
-        return abort(500)
+    update_ack = None
 
-    try:
-        # generate log
-        log_data = {
-            'object_id': public_id,
-            'version': current_object_render_result.object_information['version'],
-            'user_id': request_user.get_public_id(),
-            'user_name': request_user.get_name(),
-            'comment': update_comment,
-            'changes': changes,
-            'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
-        }
-        log_manager.insert_log(action=LogAction.EDIT, log_type=CmdbObjectLog.__name__, **log_data)
-    except (CMDBError, LogManagerInsertError) as err:
-        LOGGER.error(err)
+    for obj_id in object_ids:
+        # get current object state
+        try:
+            current_object_instance = object_manager.get_object(obj_id)
+            current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
+            current_object_render_result = CmdbRender(object_instance=current_object_instance,
+                                                      type_instance=current_type_instance,
+                                                      render_user=request_user,
+                                                      user_list=user_manager.get_users()).result()
+        except ObjectManagerGetError as err:
+            LOGGER.error(err)
+            return abort(404)
+        except RenderError as err:
+            LOGGER.error(err)
+            return abort(500)
+
+        update_comment = ''
+        # load put data
+        try:
+            # get data as str
+            add_data_dump = json.dumps(request.json)
+
+            # convert into python dict
+            put_data = json.loads(add_data_dump, object_hook=object_hook)
+            # check for comment
+            try:
+                put_data['public_id'] = obj_id
+                put_data['creation_time'] = current_object_instance.creation_time
+                put_data['author_id'] = current_object_instance.author_id
+
+                if 'active' not in put_data:
+                    put_data['active'] = current_object_instance.active
+                if 'version' not in put_data:
+                    put_data['version'] = current_object_instance.version
+
+                update_comment = put_data['comment']
+                del put_data['comment']
+            except (KeyError, IndexError, ValueError):
+                update_comment = ''
+        except TypeError as e:
+            LOGGER.warning(e)
+            return abort(400)
+
+        # update edit time
+        put_data['last_edit_time'] = datetime.utcnow()
+
+        try:
+            update_object_instance = CmdbObject(**put_data)
+        except ObjectManagerUpdateError as err:
+            LOGGER.error(err)
+            return abort(400)
+
+        # calc version
+
+        changes = current_object_instance / update_object_instance
+
+        if len(changes['new']) == 1:
+            update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
+        elif len(changes['new']) == len(update_object_instance.fields):
+            update_object_instance.update_version(update_object_instance.VERSIONING_MAJOR)
+        elif len(changes['new']) > (len(update_object_instance.fields) / 2):
+            update_object_instance.update_version(update_object_instance.VERSIONING_MINOR)
+        else:
+            update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
+
+        # insert object
+        try:
+            update_ack = object_manager.update_object(update_object_instance, request_user)
+        except CMDBError as e:
+            LOGGER.warning(e)
+            return abort(500)
+
+        try:
+            # generate log
+            log_data = {
+                'object_id': id,
+                'version': current_object_render_result.object_information['version'],
+                'user_id': request_user.get_public_id(),
+                'user_name': request_user.get_name(),
+                'comment': update_comment,
+                'changes': changes,
+                'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
+            }
+            log_manager.insert_log(action=LogAction.EDIT, log_type=CmdbObjectLog.__name__, **log_data)
+        except (CMDBError, LogManagerInsertError) as err:
+            LOGGER.error(err)
 
     return make_response(update_ack)
 

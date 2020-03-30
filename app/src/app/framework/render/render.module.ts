@@ -49,6 +49,7 @@ import { DateComponent } from './fields/date/date.component';
 import { DateSimpleComponent } from './simple/date/date-simple.component';
 import { NumberComponent } from './fields/math/number.component';
 import { InputAppendsComponent } from './components/input-appends/input-appends.component';
+import { ObjectBulkInputAppendsComponent } from './components/object-bulk-input-appends/object-bulk-input-appends.component';
 
 
 @NgModule({
@@ -101,22 +102,23 @@ import { InputAppendsComponent } from './components/input-appends/input-appends.
     DateSimpleComponent,
     DateComponent,
     NumberComponent,
-    InputAppendsComponent
+    InputAppendsComponent,
+    ObjectBulkInputAppendsComponent
   ],
   exports: [
     RenderElementComponent,
     RenderComponent
   ],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    NgbModule,
-    NgSelectModule,
-    FormsModule,
-    ReactiveFormsModule,
-    RouterModule,
-    FontAwesomeModule
-  ]
+    imports: [
+        CommonModule,
+        LayoutModule,
+        NgbModule,
+        NgSelectModule,
+        FormsModule,
+        ReactiveFormsModule,
+        RouterModule,
+        FontAwesomeModule,
+    ]
 })
 export class RenderModule {
 }

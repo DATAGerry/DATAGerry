@@ -92,12 +92,8 @@ export class RenderComponent {
     if (this.renderResult !== undefined) {
       return this.renderResult.fields.find(field => field.name === name);
     } else {
-      const VALUE = 'value';
-      const TYPE = 'type';
       const fields: any = this.typeInstance.fields.find(field => field.name === name);
-      fields.default = fields[VALUE];
-
-      switch (fields[TYPE]) {
+      switch (fields.type) {
         case 'date': {
           if (fields.value instanceof Object) {
             const temp = fields.value;
@@ -112,10 +108,10 @@ export class RenderComponent {
           break;
         }
         default: {
+          fields.default = fields.value;
           break;
         }
       }
-
       return fields;
     }
   }

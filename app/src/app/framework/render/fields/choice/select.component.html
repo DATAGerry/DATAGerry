@@ -11,8 +11,11 @@
             <option *ngFor="let option of data.options" value="{{option.name}}">{{option.label}}</option>
           </select>
         </ng-container>
-        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
-          <div class="input-group input-group-sm">
+        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
+          <div class="input-group input-group-sm" *ngIf="mode == MODES.Bulk">
+            <cmdb-object-bulk-input-appends [data]="data"
+                                            [controll]="controller"
+                                            [parentFormGroup]="parentFormGroup" ></cmdb-object-bulk-input-appends>
             <select [formControlName]="data.name" name="{{data.name}}" class="custom-select"
                     [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
                  'is-invalid': controller.invalid && (controller.dirty || controller.touched)}">

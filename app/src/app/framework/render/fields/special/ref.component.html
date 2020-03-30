@@ -31,7 +31,12 @@
             </span>
           </div>
         </ng-container>
-        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
+        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
+          <ng-container *ngIf="mode == MODES.Bulk">
+            <cmdb-object-bulk-input-appends [data]="data"
+                                            [controll]="controller"
+                                            [parentFormGroup]="parentFormGroup" ></cmdb-object-bulk-input-appends>
+          </ng-container>
           <ng-select
             [items]="objectList"
             id="ng-select-valid"

@@ -13,10 +13,15 @@
             <label class="custom-control-label" for="{{namePrefix + data.name}}"></label>
           </div>
         </ng-container>
-        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
+        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
           <div class="container">
             <div class="row">
-              <div class="col-sm-auto">
+              <div class="col-sm-auto p-0" *ngIf="mode == MODES.Bulk">
+                <cmdb-object-bulk-input-appends [data]="data"
+                                                [controll]="controller"
+                                                [parentFormGroup]="parentFormGroup" ></cmdb-object-bulk-input-appends>
+              </div>
+              <div class="col-sm-4">
                 <div class="custom-control custom-checkbox">
                   <input type="checkbox" name="{{namePrefix + data.name}}" class="custom-control-input"
                          [formControlName]="data.name" [attr.id]="namePrefix + data.name"

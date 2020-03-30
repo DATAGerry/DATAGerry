@@ -15,8 +15,13 @@
             </span>
           </div>
         </ng-container>
-        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
+        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
           <div class="input-group">
+            <ng-container *ngIf="mode == MODES.Bulk">
+              <cmdb-object-bulk-input-appends [data]="data"
+                                              [controll]="controller"
+                                              [parentFormGroup]="parentFormGroup" ></cmdb-object-bulk-input-appends>
+            </ng-container>
             <textarea [formControlName]="data.name" class="form-control" name="{{data.name}}"
                       placeholder="{{data?.placeholder}}" rows="{{data?.rows ? data?.rows : 3}}"
                       [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),

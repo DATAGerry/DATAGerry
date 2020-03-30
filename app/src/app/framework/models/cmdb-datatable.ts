@@ -16,17 +16,21 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { RenderResult } from './cmdb-render';
+
 export class DataTableFilter {
   public start: number = 0;
   public length: number = 10;
   public orderBy: string = 'public_id';
   public direction: string = 'asc';
   public search: string = '';
+  public dtRender: boolean = true;
+  public idList: string[] = [];
 }
 
 export class DataTablesResult {
   public columns: any[];
-  public data: any[];
+  public data: RenderResult[];
   public recordsTotal: any;
   public recordsFiltered: any;
 }

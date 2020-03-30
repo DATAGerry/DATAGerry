@@ -16,22 +16,25 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export enum CmdbMode {
-  View,
-  Create,
-  Edit,
-  Simple,
-  Bulk
-}
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import { CmdbType } from '../../../models/cmdb-type';
+import { CmdbMode } from '../../../modes.enum';
+import { CmdbObject } from '../../../models/cmdb-object';
+import { FormGroup } from '@angular/forms';
 
-export enum LogMode {
-  CREATE,
-  EDIT,
-  ACTIVE_CHANGE
-}
+@Component({
+  selector: 'cmdb-object-bulk-change-editor',
+  templateUrl: './object-bulk-change-editor.component.html',
+  styleUrls: ['./object-bulk-change-editor.component.scss']
+})
+export class ObjectBulkChangeEditorComponent implements OnInit{
 
-export enum CategoryMode {
-  Root,
-  Create,
-  Edit,
+  @Input() typeInstance: CmdbType;
+  @Input() mode: CmdbMode;
+  @Input() objectInstance: CmdbObject;
+  @Input() renderForm: FormGroup;
+  @Input() fieldsGroups: FormGroup;
+
+  public ngOnInit(): void {
+  }
 }
