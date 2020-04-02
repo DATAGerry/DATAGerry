@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import { Component, OnInit, ViewChild} from '@angular/core';
 import { CmdbMode } from '../../modes.enum';
 import { CmdbType } from '../../models/cmdb-type';
 import { ObjectBulkChangeEditorComponent } from './object-bulk-change-editor/object-bulk-change-editor.component';
@@ -25,8 +25,8 @@ import { CmdbObject } from '../../models/cmdb-object';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ObjectService } from '../../services/object.service';
 import { TypeService } from '../../services/type.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {HttpHeaders} from "@angular/common/http";
+import { ActivatedRoute, Router } from '@angular/router';
+import { HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'cmdb-object-bulk-change',
@@ -81,8 +81,10 @@ export class ObjectBulkChangeComponent implements OnInit {
       const newObjectInstance = new CmdbObject();
       newObjectInstance.type_id = this.typeInstance.public_id;
       newObjectInstance.fields = [];
+      this.renderForm.removeControl('active');
+      this.renderForm.removeControl('changedFields');
       Object.keys(this.renderForm.value).forEach((key: string) => {
-        if (key !== key + '-isChanged') {
+        if (key.match('-isChanged') == null) {
           patchValue.push({
             name: key,
             value: this.renderForm.value[key] === null ? '' : this.renderForm.value[key]
