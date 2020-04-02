@@ -20,7 +20,6 @@
 import {
   AfterViewInit,
   Component,
-  ComponentFactoryResolver,
   ElementRef,
   HostListener,
   OnDestroy,
@@ -39,6 +38,7 @@ import { FileSaverService } from 'ngx-filesaver';
 import { DataTableFilter, DataTablesResult } from '../../models/cmdb-datatable';
 import { TypeService } from '../../services/type.service';
 import { CmdbType } from '../../models/cmdb-type';
+import { PermissionService } from '../../../auth/services/permission.service';
 
 @Component({
   selector: 'cmdb-object-list-by-type',
@@ -68,7 +68,8 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
 
   constructor(private objectService: ObjectService, private typeService: TypeService, private datePipe: DatePipe,
               private fileSaverService: FileSaverService, private fileService: FileService,
-              private router: Router, private route: ActivatedRoute, private renderer: Renderer2) {
+              private router: Router, private route: ActivatedRoute, private renderer: Renderer2,
+              private permissionService: PermissionService) {
     this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
@@ -280,14 +281,33 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
         className: 'td-button-actions text-center',
         orderable: false,
         render(data) {
-          const view = '<span id="' + data.object_information.object_id + '' +
-            '" class="far fa-eye mr-1 view-object-action" title="view"></span>';
-          const copy = '<span id="' + data.object_information.object_id + '' +
-            '" class="far fa-clone mr-1 copy-object-action" title="copy"></span>';
-          const edit = '<span id="' + data.object_information.object_id + '' +
-            '" class="far fa-edit mr-1 edit-object-action" title="edit"a></span>';
-          const del = '<span id="' + data.object_information.object_id + '' +
-            '" class="far fa-trash-alt mr-1 delete-object-action" title="delete"></span>';
+          const rights: string[] = that.permissionService.currentUserRights;
+          const baseRights = rights.includes('base.*')
+            || rights.includes('base.system.*')
+            || rights.includes('base.framework.*')
+            || rights.includes('base.framework.object.*');
+          let view = '';
+          let copy = '';
+          let edit = '';
+          let del = '';
+
+          if (rights.includes('base.framework.object.view') || baseRights) {
+            view = '<span id="' + data.object_information.object_id + '' +
+              '" class="far fa-eye mr-1 view-object-action" title="view"></span>';
+          }
+          if (rights.includes('base.framework.object.add') || baseRights) {
+            copy = '<span id="' + data.object_information.object_id + '' +
+              '" class="far fa-clone mr-1 copy-object-action" title="copy"></span>';
+          }
+          if (rights.includes('base.framework.object.edit') || baseRights) {
+            edit = '<span id="' + data.object_information.object_id + '' +
+              '" class="far fa-edit mr-1 edit-object-action" title="edit"a></span>';
+          }
+          if (rights.includes('base.framework.object.delete') || baseRights) {
+            del = '<span id="' + data.object_information.object_id + '' +
+              '" class="far fa-trash-alt mr-1 delete-object-action" title="delete"></span>';
+          }
+
           return view + copy + edit + del;
         }
       }
