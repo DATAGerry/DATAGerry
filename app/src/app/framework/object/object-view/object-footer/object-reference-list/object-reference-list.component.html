@@ -11,7 +11,7 @@
   <tr *ngFor="let reference of referenceList">
     <th scope="row">{{reference.object_information.object_id}}</th>
     <td>
-      <a routerLink="/framework/type/{{reference.type_information.type_id}}">
+      <a routerLink="/framework/object/type/{{reference.type_information.type_id}}">
         {{reference.type_information.type_label}}
       </a>
     </td>
