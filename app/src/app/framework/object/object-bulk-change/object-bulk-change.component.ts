@@ -33,7 +33,7 @@ import { HttpHeaders } from '@angular/common/http';
   templateUrl: './object-bulk-change.component.html',
   styleUrls: ['./object-bulk-change.component.scss']
 })
-export class ObjectBulkChangeComponent implements OnInit {
+export class ObjectBulkChangeComponent {
 
   @ViewChild(ObjectBulkChangeEditorComponent, {static: true})
   public basicStep: ObjectBulkChangeEditorComponent;
@@ -65,12 +65,8 @@ export class ObjectBulkChangeComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
-
-  }
-
   public saveObject() {
-    if (this.renderForm.valid) {
+    if (this.renderForm.valid && this.renderForm.get('changedFields').value.size > 0 ) {
       const httpOptions = {
         headers: new HttpHeaders({
           'Content-Type': 'application/json'
@@ -82,16 +78,15 @@ export class ObjectBulkChangeComponent implements OnInit {
       newObjectInstance.type_id = this.typeInstance.public_id;
       newObjectInstance.fields = [];
       this.renderForm.removeControl('active');
-      this.renderForm.removeControl('changedFields');
       Object.keys(this.renderForm.value).forEach((key: string) => {
-        if (key.match('-isChanged') == null) {
+        if (key.match('-isChanged') == null
+        && this.renderForm.get('changedFields').value.has(key)) {
           patchValue.push({
             name: key,
-            value: this.renderForm.value[key] === null ? '' : this.renderForm.value[key]
+            value: this.renderForm.value[key] === undefined ? '' : this.renderForm.value[key]
           });
         }
       });
-
       newObjectInstance.fields = patchValue;
       this.objectService.putObject(0, newObjectInstance, httpOptions).subscribe((res: boolean) => {
         if (res) {

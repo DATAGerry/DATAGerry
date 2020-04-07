@@ -589,6 +589,14 @@ def update_object(public_id: int, request_user: User):
                 put_data['creation_time'] = current_object_instance.creation_time
                 put_data['author_id'] = current_object_instance.author_id
 
+                old_fields = current_object_instance.get_all_fields()
+                new_fields = put_data['fields']
+                for item in new_fields:
+                    for old in old_fields:
+                        if item['name'] == old['name']:
+                            old['value'] = item['value']
+                put_data['fields'] = old_fields
+
                 if 'active' not in put_data:
                     put_data['active'] = current_object_instance.active
                 if 'version' not in put_data:
