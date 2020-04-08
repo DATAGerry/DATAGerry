@@ -26,7 +26,7 @@ class UpdaterModule:
         'version': 0,
     }
 
-    __UPDATER_VERSIONS_POOL__ = [20200214, 20200226]
+    __UPDATER_VERSIONS_POOL__ = [20200214, 20200226, 20200408]
 
     def __init__(self, system_settings_reader: SystemSettingsReader):
         auth_settings_values = system_settings_reader.\
