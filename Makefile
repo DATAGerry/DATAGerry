@@ -81,6 +81,7 @@ bin: requirements buildvars docs webapp
 		--workpath ${DIR_TEMP} \
 		--hidden-import cmdb.updater.versions.updater_20200214 \
 		--hidden-import cmdb.updater.versions.updater_20200226 \
+		--hidden-import cmdb.updater.versions.updater_20200408 \
 		--hidden-import cmdb.exportd \
 		--hidden-import cmdb.exportd.service \
 		--hidden-import cmdb.exportd.externals \
