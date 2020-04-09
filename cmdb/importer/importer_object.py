@@ -77,11 +77,13 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
         }
         map_properties = mapping.get('properties')
 
+        # Improve insert object
+        improve_object = ImproveObject(entry, map_properties, entry.get('fields'), possible_fields)
+        entry = improve_object.improve_entry()
+
         for prop in map_properties:
             working_object = self._map_element(prop, entry, working_object)
 
-        # Improve insert object
-        improve_object = ImproveObject(entry, entry.get('fields'), possible_fields)
 
         for entry_field in entry.get('fields'):
             field_exists = next((item for item in possible_fields if item["name"] == entry_field['name']), None)
@@ -147,13 +149,13 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
         field_entries: List[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'field'})
         foreign_entries: List[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'ref'})
 
+        # field/properties improvement
+        improve_object = ImproveObject(entry, property_entries, field_entries, possible_fields)
+        entry = improve_object.improve_entry()
+
         # Insert properties
         for property_entry in property_entries:
             working_object.update({property_entry.get_name(): entry.get(property_entry.get_value())})
-
-        # Improve insert object
-        improve_object = ImproveObject(entry, field_entries, possible_fields)
-        entry = improve_object.improve_entry()
 
         # Validate insert fields
         for entry_field in field_entries:
