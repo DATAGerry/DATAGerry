@@ -265,10 +265,11 @@ class CmdbObjectManager(CmdbManagerBase):
         for new_type_init in req_type_list:
             try:
                 current_loop_type = new_type_init
-                ref_field = current_loop_type.get_field_of_type_with_value(input_type='ref', _filter='ref_types',
+                ref_fields = current_loop_type.get_fields_of_type_with_value(input_type='ref', _filter='ref_types',
                                                                            value=type_id)
-                type_init_list.append(
-                    {"type_id": current_loop_type.get_public_id(), "field_name": ref_field['name']})
+                for ref_field in ref_fields:
+                    type_init_list.append(
+                        {"type_id": current_loop_type.get_public_id(), "field_name": ref_field['name']})
             except CMDBError as e:
                 LOGGER.warning('Unsolvable type reference with type {}'.format(e.message))
                 continue
