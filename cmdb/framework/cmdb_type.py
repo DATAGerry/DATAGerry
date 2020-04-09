@@ -132,11 +132,11 @@ class CmdbType(CmdbDAO):
     def count_fields(self) -> int:
         return len(self.fields)
 
-    def get_field_of_type_with_value(self, input_type: str, _filter: str, value) -> dict:
-        field = [x for x in self.fields if x['type'] == input_type and x[_filter] == value]
-        if field:
+    def get_fields_of_type_with_value(self, input_type: str, _filter: str, value) -> list:
+        fields = [x for x in self.fields if x['type'] == input_type and x[_filter] == value]
+        if fields:
             try:
-                return field[0]
+                return fields
             except (RequiredInitKeyNotFoundError, CMDBError) as e:
                 raise FieldInitError(value)
         else:
