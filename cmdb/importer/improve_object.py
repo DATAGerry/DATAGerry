@@ -20,21 +20,30 @@ LOGGER = logging.getLogger(__name__)
 
 
 class ImproveObject:
-    def __init__(self, entry: dict, field_entries, possible_fields):
+    def __init__(self, entry: dict, property_entries, field_entries, possible_fields):
         """
         Basic improve super class for object imports
         Args:
             entry: Numbered values of the fields
+            property_entries: Object properties (active, public_id, etc)
             field_entries: Field attributes
             possible_fields: Field types
         """
         self.entry = entry
+        self.property_entries= property_entries
         self.field_entries = field_entries
         self.possible_fields = possible_fields
         self.value = None
         super(ImproveObject, self)
 
     def improve_entry(self) -> dict:
+        # improve properties
+        for property_entry in self.property_entries:
+            self.value = self.entry.get(property_entry.get_value())
+            if property_entry.get_name() == "active":
+                self.entry.update({property_entry.get_value(): self.improve_boolean()})
+
+        # improve fields
         for entry_field in self.field_entries:
             for item in self.possible_fields:
                 self.value = self.entry.get(entry_field.get_value())
@@ -43,6 +52,17 @@ class ImproveObject:
                 if item['type'] == 'ref' and item["name"] == entry_field.get_name():
                     self.improve_ref()
         return self.entry
+
+
+    def improve_boolean(self):
+        if isinstance(self.value, str):
+            if self.value in ['False', 'false', 'FALSE', '0', 'no']:
+                return False
+            else:
+                return True
+
+        return self.value
+
 
     def improve_date(self):
         import datetime
