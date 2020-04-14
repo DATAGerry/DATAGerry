@@ -566,7 +566,6 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         """
         return self.connector.delete_collection(collection_name)
 
-    @deprecated
     def get_document_with_highest_id(self, collection: str) -> str:
         """get the document with the highest public id inside a collection
 
@@ -579,7 +578,6 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         formatted_sort = [('public_id', self.DESCENDING)]
         return self.find_one_by(collection=collection, sort=formatted_sort)
 
-    @deprecated
     def get_highest_id(self, collection: str) -> int:
         """wrapper function
         calls get_document_with_highest_id() and returns the public_id
@@ -604,18 +602,21 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             })
             new_id = founded_counter['counter'] + 1
         except (NoDocumentFound, Exception) as err:
-            LOGGER.error(err)
-
-            LOGGER.warning(f'Counter for collection {collection} wasn´t found - setup new with data from {collection}')
-            docs_count = self.get_highest_id(collection)
-            self.connector.get_collection(IDCounter.COLLECTION).insert({
-                '_id': collection,
-                'counter': docs_count
-            })
+            docs_count = self._init_public_id_counter(collection)
             new_id = docs_count + 1
         finally:
             self.increment_public_id_counter(collection)
         return new_id
+
+    def _init_public_id_counter(self, collection: str):
+        LOGGER.info(f'Counter for collection {collection} wasn´t found - setup new with data from {collection}')
+        docs_count = self.get_highest_id(collection)
+        self.connector.get_collection(IDCounter.COLLECTION).insert({
+            '_id': collection,
+            'counter': docs_count
+        })
+        return docs_count
+
 
     def increment_public_id_counter(self, collection: str):
         working_collection = self.connector.get_collection(IDCounter.COLLECTION)
@@ -632,6 +633,10 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             '_id': collection
         }
         counter_doc = working_collection.find_one(query)
+        # init counter, if it was not found
+        if counter_doc is None:
+            self._init_public_id_counter(collection)
+            counter_doc = working_collection.find_one(query)
         # update counter only, if value is higher than counter
         if value > counter_doc['counter']:
             counter_doc['counter'] = value
