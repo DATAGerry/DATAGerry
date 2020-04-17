@@ -19,6 +19,7 @@
 import { Injectable } from '@angular/core';
 import {catchError, map, switchMap} from 'rxjs/operators';
 import {ApiCallService, ApiService, HttpInterceptorHandler} from '../../services/api-call.service';
+import { ValidatorService } from '../../services/validator.service';
 import { CmdbCategory } from '../models/cmdb-category';
 import { FormControl } from '@angular/forms';
 import { Observable, timer } from 'rxjs';
@@ -75,7 +76,8 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
   }
 
   public getCategoriesBy(regex: string): Observable<T[]> {
-    return this.api.callGet<CmdbCategory[]>(this.servicePrefix + '/by/' + regex).pipe(
+    regex = ValidatorService.validateRegex(regex);
+    return this.api.callGet<CmdbCategory[]>(this.servicePrefix + '/by/' + encodeURIComponent(regex)).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
