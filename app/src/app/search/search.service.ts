@@ -18,6 +18,7 @@
 
 import { Injectable } from '@angular/core';
 import { ApiCallService, ApiService, httpObservePostOptions } from '../services/api-call.service';
+import { ValidatorService } from '../services/validator.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {HttpClient, HttpParams} from '@angular/common/http';
@@ -38,6 +39,7 @@ export class SearchService<T = SearchResultList> implements ApiService {
   }
 
   public getEstimateValueResults(regex: string): Observable<number> {
+    regex = ValidatorService.validateRegex(regex);
     httpObservePostOptions[PARAMS] = {searchValue: regex};
     return this.api.callGet<number>(this.servicePrefix + '/quick/count/', this.http, httpObservePostOptions).pipe(
       map((apiResponse) => {

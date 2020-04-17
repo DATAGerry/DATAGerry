@@ -19,6 +19,7 @@
 import { Injectable } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
 import { ApiCallService, ApiService, HttpInterceptorHandler, resp } from '../../services/api-call.service';
+import { ValidatorService } from '../../services/validator.service';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
@@ -92,7 +93,8 @@ export class TypeService<T = CmdbType> implements ApiService {
   }
 
   public getTypesBy(regex: string): Observable<T[]> {
-    return this.api.callGet<CmdbType[]>(this.servicePrefix + '/by/' + regex).pipe(
+    regex = ValidatorService.validateRegex(regex);
+    return this.api.callGet<CmdbType[]>(this.servicePrefix + '/by/' + encodeURIComponent(regex)).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
