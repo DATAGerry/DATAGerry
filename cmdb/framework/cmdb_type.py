@@ -133,7 +133,7 @@ class CmdbType(CmdbDAO):
         return len(self.fields)
 
     def get_fields_of_type_with_value(self, input_type: str, _filter: str, value) -> list:
-        fields = [x for x in self.fields if x['type'] == input_type and x[_filter] == value]
+        fields = [x for x in self.fields if x['type'] == input_type and x.get(_filter, None) == value]
         if fields:
             try:
                 return fields
