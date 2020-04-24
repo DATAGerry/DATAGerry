@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import copy
 import json
 import logging
 import pytz
@@ -589,7 +590,7 @@ def update_object(public_id: int, request_user: User):
                 put_data['creation_time'] = current_object_instance.creation_time
                 put_data['author_id'] = current_object_instance.author_id
 
-                old_fields = current_object_instance.get_all_fields()
+                old_fields = copy.deepcopy(current_object_instance.get_all_fields())
                 new_fields = put_data['fields']
                 for item in new_fields:
                     for old in old_fields:
