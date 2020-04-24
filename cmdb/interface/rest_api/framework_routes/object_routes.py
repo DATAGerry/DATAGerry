@@ -642,7 +642,7 @@ def update_object(public_id: int, request_user: User):
         try:
             # generate log
             log_data = {
-                'object_id': id,
+                'object_id': obj_id,
                 'version': current_object_render_result.object_information['version'],
                 'user_id': request_user.get_public_id(),
                 'user_name': request_user.get_name(),
