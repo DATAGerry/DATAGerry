@@ -5,8 +5,17 @@
 <div class="card-body" style="padding: 0 0 1em 0;">
   <button type="button"
           *permissionLink="['base.framework.object.delete']"
+          [disabled]="selectedObjects.length<=0"
           class="btn btn-danger btn-sm mr-1" (click)="delManyObjects()">
     Delete Selected <span class="badge badge-secondary badge-pill">{{selectedObjects.length}}</span>
+  </button>
+
+  <button type="button"
+          *permissionLink="['base.framework.object.edit']"
+          [disabled]="selectedObjects.length<=0"
+          class="btn btn-secondary btn-sm mr-1"
+          [routerLink]="['/framework/object/change/', { typeID: typeID , ids: selectedObjects}]">
+    <i class="fas fa-tasks"></i> Bulk Change <span class="badge badge-primary badge-pill">{{selectedObjects.length}}</span>
   </button>
 
   <button type="button"
@@ -15,14 +24,6 @@
           [routerLink]="['/framework/object/add/', typeID]">
     <i class="fas fa-plus"></i> Add
   </button>
-
-  <ng-container *ngIf="selectedObjects.length>0">
-    <button type="button"
-            class="btn btn-secondary btn-sm mr-1"
-            [routerLink]="['/framework/object/change/', { typeID: typeID , ids: selectedObjects}]">
-      <i class="fas fa-tasks"></i> Bulk Change <span class="badge badge-primary badge-pill">{{selectedObjects.length}}</span>
-    </button>
-  </ng-container>
 
   <span class="card-group float-right">
       <div class="btn-group" *permissionLink="'base.export.object.*'">
