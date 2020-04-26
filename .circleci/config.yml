@@ -13,7 +13,7 @@ jobs:
       # setup docker environment (to allow building docker images)
       - setup_remote_docker
       # handle special characters in branch name
-      - run: echo "export BRANCH_NAME=\"$(subst /,-,${CIRCLE_BRANCH})\"" >> $BASH_ENV
+      - run: echo "export BRANCH_NAME=\"${CIRCLE_BRANCH//\//-}\"" >> $BASH_ENV
       # setup version string
       - run: echo "export VERSION_STRING=\"$BRANCH_NAME\"" >> $BASH_ENV
       - run: echo "export VERSION_ID=\"$BRANCH_NAME-$CIRCLE_SHA1\"" >> $BASH_ENV
