@@ -91,6 +91,13 @@ bin: requirements buildvars docs webapp
 		--hidden-import cmdb.interface.gunicorn \
 		--hidden-import gunicorn.glogging \
 		--hidden-import gunicorn.workers.sync \
+		--hidden-import reportlab.graphics.barcode.common \
+		--hidden-import reportlab.graphics.barcode.code128 \
+		--hidden-import reportlab.graphics.barcode.code93 \
+		--hidden-import reportlab.graphics.barcode.code39 \
+		--hidden-import reportlab.graphics.barcode.usps \
+		--hidden-import reportlab.graphics.barcode.usps4s \
+		--hidden-import reportlab.graphics.barcode.ecc200datamatrix \
 		--add-data cmdb/interface/docs/static:cmdb/interface/docs/static \
 		--add-data cmdb/interface/net_app/DATAGERRYApp:cmdb/interface/net_app/DATAGERRYApp \
 		cmdb/__main__.py
