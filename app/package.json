@@ -49,7 +49,7 @@
     "datatables.net-select": "^1.3.1",
     "datatables.net-select-dt": "^1.3.1",
     "file-saver": "^2.0.2",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "jszip": "^3.2.2",
     "jw-angular-pagination": "^1.1.0",
     "ng-inline-svg": "^9.1.0",
