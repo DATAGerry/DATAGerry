@@ -102,8 +102,8 @@ export class ApiCallService {
     return this.http.post<T>(this.apiURL + route, data, options);
   }
 
-  public callPutRoute<T>(route: string, data) {
-    return this.http.put<T>(this.apiURL + route, data, httpOptions);
+  public callPutRoute<T>(route: string, data, options: any = httpOptions) {
+    return this.http.put<T>(this.apiURL + route, data, options);
   }
 
   public callDeleteManyRoute<T>(route: string, params?: any): Observable<any> {

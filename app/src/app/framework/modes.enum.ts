@@ -20,7 +20,8 @@ export enum CmdbMode {
   View,
   Create,
   Edit,
-  Simple
+  Simple,
+  Bulk
 }
 
 export enum LogMode {

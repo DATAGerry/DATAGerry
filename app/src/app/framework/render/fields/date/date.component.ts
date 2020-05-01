@@ -17,9 +17,24 @@ export class DateComponent extends RenderField implements  OnInit {
   }
 
   ngOnInit(): void {
+    if (this.data.default !== undefined) {
+      const temp = this.data.default;
+      this.data.default = temp.year + '-' + temp.month + '-' + temp.day;
+      if (typeof temp === 'string') {
+        const newDate = new Date(temp);
+        this.parentFormGroup.get(this.data.name).setValue({$date: newDate.getTime()}, {onlySelf: true});
+      }
+    }
     if (this.parentFormGroup.get(this.data.name).value === '') {
       this.parentFormGroup.get(this.data.name).setValue(null, {onlySelf: true});
     }
+    this.parentFormGroup.get(this.data.name).valueChanges.subscribe(value => {
+      if (typeof value === 'string') {
+        const newDate = new Date(value);
+        this.data.value = {$date: newDate.getTime()};
+        this.parentFormGroup.get(this.data.name).setValue({$date: newDate.getTime()}, {onlySelf: true});
+      }
+    });
   }
 
   public get currentDate() {

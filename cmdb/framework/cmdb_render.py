@@ -204,7 +204,10 @@ class CmdbRender:
         for field in self.type_instance.fields:
             html_parser.current_field = field
             try:
-                field['value'] = [x for x in self.object_instance.fields if x['name'] == field['name']][0]['value']
+                curr_field = [x for x in self.object_instance.fields if x['name'] == field['name']][0]
+                if curr_field['name'] == field['name'] and field.get('value'):
+                    field['default'] = field['value']
+                field['value'] = curr_field['value']
                 if self.dt_render:
                     field['value'] = html_parser.field_to_html(field['type'])
             except (ValueError, IndexError):

@@ -3,7 +3,7 @@
     {{data.label}}: <span class="required" *ngIf="data?.required">*</span>
   </label>
   <div class="col-sm-9">
-    <div class="input-group">
+    <div class="input-group input-group-sm">
       <ng-container [ngSwitch]="true">
         <ng-container *ngSwitchCase="mode == MODES.View">
           <div class="form-control text-left overflow-auto" readonly>
@@ -31,7 +31,12 @@
             </span>
           </div>
         </ng-container>
-        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
+        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
+          <ng-container *ngIf="mode == MODES.Bulk">
+            <cmdb-object-bulk-input-appends [data]="data"
+                                            [controll]="controller"
+                                            [parentFormGroup]="parentFormGroup" ></cmdb-object-bulk-input-appends>
+          </ng-container>
           <ng-select
             [items]="objectList"
             id="ng-select-valid"
@@ -85,11 +90,7 @@
               </span>
             </ng-template>
           </ng-select>
-          <div *ngIf="data?.helperText" class="input-group-append">
-            <span class="input-group-text">
-              <fa-icon icon="info" placement="left" [ngbTooltip]="data?.helperText"></fa-icon>
-            </span>
-          </div>
+          <cmdb-input-appends [data]="data" [controll]="controller" [parentFormGroup]="parentFormGroup"></cmdb-input-appends>
         </ng-container>
         <div *ngSwitchDefault>
           <cmdb-mode-error></cmdb-mode-error>

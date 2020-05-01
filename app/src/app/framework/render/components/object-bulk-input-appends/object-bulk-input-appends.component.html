@@ -1,0 +1,10 @@
+
+<div class="input-group input-group-sm">
+  <div class="input-group-prepend">
+    <div class="input-group-text">
+      <form [formGroup]="parentFormGroup">
+        <input type="checkbox" [formControlName]="bulkControlName" (click)="changeCheckBox($event.target)">
+      </form>
+    </div>
+  </div>
+</div>

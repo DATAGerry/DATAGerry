@@ -17,7 +17,16 @@
 */
 
 
-import { AfterViewInit, Component, ComponentFactoryResolver, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  Renderer2,
+  ViewChild
+} from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import { ObjectService } from '../../services/object.service';
@@ -29,6 +38,7 @@ import { FileSaverService } from 'ngx-filesaver';
 import { DataTableFilter, DataTablesResult } from '../../models/cmdb-datatable';
 import { TypeService } from '../../services/type.service';
 import { CmdbType } from '../../models/cmdb-type';
+import { PermissionService } from '../../../auth/services/permission.service';
 
 @Component({
   selector: 'cmdb-object-list-by-type',
@@ -58,7 +68,8 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
 
   constructor(private objectService: ObjectService, private typeService: TypeService, private datePipe: DatePipe,
               private fileSaverService: FileSaverService, private fileService: FileService,
-              private router: Router, private route: ActivatedRoute, private renderer: Renderer2) {
+              private router: Router, private route: ActivatedRoute, private renderer: Renderer2,
+              private permissionService: PermissionService) {
     this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
@@ -70,12 +81,12 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
 
   ngOnInit() {
     this.route.params.subscribe((params) => {
-      this.typeID = params.publicID;
+      this.typeID = params.typeID;
       this.typeService.getType(this.typeID).subscribe((tInstance: CmdbType) => {
         this.faIcon = tInstance.render_meta.icon;
         this.pageTitle = tInstance.label + ' list';
       });
-      this.dtOptionbuilder(params.publicID);
+      this.dtOptionbuilder(this.typeID);
     });
   }
 
@@ -181,13 +192,22 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     };
   }
 
+  @HostListener('document:click', ['$event'])
+  dtActionClick(event: any): void {
+    if ((event.target as Element).className.indexOf('view-object-action') > -1) {
+      this.router.navigate(['/framework/object/type/view/', (event.target as Element).id]);
+    } else if ((event.target as Element).className.indexOf('copy-object-action') > -1) {
+      this.router.navigate(['/framework/object/copy/', (event.target as Element).id]);
+    } else if ((event.target as Element).className.indexOf('edit-object-action') > -1) {
+      this.router.navigate(['/framework/object/edit/', (event.target as Element).id]);
+    } else if ((event.target as Element).className.indexOf('delete-object-action') > -1) {
+      this.delObject(parseInt((event.target as Element).id, 10));
+    }
+  }
+
   ngAfterViewInit(): void {
     this.renderer.listen('document', 'click', (event) => {
       const actionClassList = (event.target as Element).classList;
-      if (actionClassList.contains('delete-object')) {
-        this.delObject(parseInt((event.target as Element).id, 10));
-      }
-
       if (actionClassList.contains('select-all-objects')) {
         const dataTable: any = $('#dt-object-list').DataTable();
         const rows: any = dataTable.rows();
@@ -258,16 +278,37 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       {
         data: null,
         title: 'Action',
-        className: 'text-dark text-center',
+        className: 'td-button-actions text-center',
         orderable: false,
         render(data) {
-          const view = '<a class="text-dark mr-1" href="/framework/object/type/view/'
-            + data.object_information.object_id + '"><i class="far fa-eye"></i></a>';
-          const edit = '<a class="text-dark mr-1" href="/framework/object/edit/'
-            + data.object_information.object_id + '"><i class="far fa-edit"></i></a>';
-          const del = '<span id="' + data.object_information.object_id
-            + '" class="far fa-trash-alt mr-1 delete-object"></span>';
-          return view + edit + del;
+          const rights: string[] = that.permissionService.currentUserRights;
+          const baseRights = rights.includes('base.*')
+            || rights.includes('base.system.*')
+            || rights.includes('base.framework.*')
+            || rights.includes('base.framework.object.*');
+          let view = '';
+          let copy = '';
+          let edit = '';
+          let del = '';
+
+          if (rights.includes('base.framework.object.view') || baseRights) {
+            view = '<span id="' + data.object_information.object_id + '' +
+              '" class="far fa-eye mr-1 view-object-action" title="view"></span>';
+          }
+          if (rights.includes('base.framework.object.add') || baseRights) {
+            copy = '<span id="' + data.object_information.object_id + '' +
+              '" class="far fa-clone mr-1 copy-object-action" title="copy"></span>';
+          }
+          if (rights.includes('base.framework.object.edit') || baseRights) {
+            edit = '<span id="' + data.object_information.object_id + '' +
+              '" class="far fa-edit mr-1 edit-object-action" title="edit"a></span>';
+          }
+          if (rights.includes('base.framework.object.delete') || baseRights) {
+            del = '<span id="' + data.object_information.object_id + '' +
+              '" class="far fa-trash-alt mr-1 delete-object-action" title="delete"></span>';
+          }
+
+          return view + copy + edit + del;
         }
       }
     );

@@ -18,6 +18,7 @@
 
 import { Injectable } from '@angular/core';
 import { ApiCallService, ApiService, resp } from '../../services/api-call.service';
+import { ValidatorService } from '../../services/validator.service';
 import { CmdbObject } from '../models/cmdb-object';
 import { Observable } from 'rxjs';
 import { ModalComponent } from '../../layout/helpers/modal/modal.component';
@@ -107,8 +108,8 @@ export class ObjectService<T = RenderResult> implements ApiService {
     return this.api.callPostRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
   }
 
-  public putObject(publicID: number, objectInstance: CmdbObject): Observable<any> {
-    return this.api.callPutRoute<CmdbObject>(`${this.servicePrefix}/${publicID}/`, objectInstance);
+  public putObject(publicID: number, objectInstance: CmdbObject, options?): Observable<any> {
+    return this.api.callPutRoute<CmdbObject>(`${this.servicePrefix}/${publicID}/`, objectInstance, options);
   }
 
   public changeState(publicID: number, status: boolean) {
@@ -224,7 +225,9 @@ export class ObjectService<T = RenderResult> implements ApiService {
     httpObserveOptions[PARAMETER].length = filter.length;
     httpObserveOptions[PARAMETER].order = filter.orderBy;
     httpObserveOptions[PARAMETER].direction = filter.direction;
-    httpObserveOptions[PARAMETER].search = filter.search;
+    httpObserveOptions[PARAMETER].search = ValidatorService.validateRegex(filter.search);
+    httpObserveOptions[PARAMETER].dtRender = filter.dtRender;
+    httpObserveOptions[PARAMETER].idList = filter.idList;
     return this.api.callGet<DataTablesResult[]>(`${this.servicePrefix}/dt/filter/type/${typeID}`, this.http, httpObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {

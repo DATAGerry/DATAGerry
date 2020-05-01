@@ -181,7 +181,9 @@ class CmdbObjectManager(CmdbManagerBase):
     def count_objects(self):
         return self.dbm.count(collection=CmdbObject.COLLECTION)
 
-    def _find_query_fields(self, query, match_fields=list()):
+    def _find_query_fields(self, query, match_fields=None):
+
+        match_fields = match_fields or list()
         for key, items in query.items():
             if isinstance(items, dict):
                 if 'fields.value' == key:

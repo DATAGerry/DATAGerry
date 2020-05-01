@@ -26,6 +26,7 @@ import {
   ViewChildren
 } from '@angular/core';
 import { SearchBarTag, SearchBarTagSettings } from './search-bar-tag/search-bar-tag';
+import { ValidatorService } from '../../services/validator.service';
 import { TypeService } from '../../framework/services/type.service';
 import { CmdbType } from '../../framework/models/cmdb-type';
 import { Subscription } from 'rxjs';
@@ -138,6 +139,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     tag.searchLabel = searchTerm;
     switch (searchForm) {
       case 'text':
+        tag.searchText = ValidatorService.validateRegex(searchTerm);
         break;
       case 'type':
         const typeIDs: number[] = [];

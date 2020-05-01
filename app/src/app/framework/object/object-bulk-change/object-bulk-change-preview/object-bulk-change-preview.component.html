@@ -1,0 +1,39 @@
+
+<h2>Changed objects: {{renderResult?.recordsTotal}}</h2>
+<hr/>
+
+<div class="bulk-changed-result" *ngFor="let item of renderResult?.data">
+  <div class="row">
+    <div class="col-sm-4">
+      <h5>
+        <cmdb-active-badge [activeStatus]="item.object_information.active"></cmdb-active-badge>
+        <a [routerLink]="['/','framework', 'object', 'view', item.object_information.object_id]">
+          {{item.type_information.type_label}}#{{item.object_information.object_id}}</a>
+      </h5>
+      <div class="summary"><strong>Summary:</strong> {{item.summary_line}}</div>
+    </div>
+    <div class="col-sm-8">
+      <div class="container">
+        <div class="row pb-1" *ngFor="let field of mergeFields(item.fields)">
+          <div class="col-sm-5">
+            <strong>{{field.label}}</strong>:
+            <cmdb-render-element [mode]="SIMPLEMODE" [data]="field"></cmdb-render-element>
+          </div>
+          <div class="col-sm-1"><fa-icon icon="arrow-alt-circle-right"></fa-icon> </div>
+          <div class="col-sm-5">
+            <strong>{{field.label}}</strong>:
+            <cmdb-render-element [mode]="SIMPLEMODE" [data]="changes(field)"></cmdb-render-element>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="result-separator row">
+    <div class="col-md-12">
+      <ng-content></ng-content>
+    </div>
+  </div>
+  <hr />
+</div>
+
+<jw-pagination #paginationBulkChanges [pageSize]="limit" [items]="maxNumberOfSites" (changePage)="onChangePage($event)"></jw-pagination>

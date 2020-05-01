@@ -14,25 +14,24 @@
             </span>
           </div>
         </ng-container>
-        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
-          <input
-            type="text"
-            name="{{data.name}}"
-            class="form-control"
-            placeholder="yyyy-mm-dd"
-            [formControlName]="data.name"
-            ngbDatepicker #d="ngbDatepicker"
-            [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
-            'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"/>
-          <div class="input-group-append">
-            <span class="input-group-text" (click)="d.toggle()">
-              <fa-icon icon="calendar-alt"></fa-icon>
-            </span>
-          </div>
-          <div *ngIf="data?.helperText" class="input-group-append">
-            <span class="input-group-text">
-              <fa-icon icon="info" placement="left" [ngbTooltip]="data?.helperText"></fa-icon>
-            </span>
+        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
+          <div class="input-group input-group-sm">
+            <ng-container *ngIf="mode == MODES.Bulk">
+              <cmdb-object-bulk-input-appends [data]="data"
+                                              [controll]="controller"
+                                              [parentFormGroup]="parentFormGroup" ></cmdb-object-bulk-input-appends>
+            </ng-container>
+            <input type="text" name="{{data.name}}" class="form-control" placeholder="yyyy-mm-dd"
+                   [formControlName]="data.name"
+                   ngbDatepicker #d="ngbDatepicker"
+                   [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
+                   'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"/>
+            <div class="input-group-append input-group-sm">
+              <span class="input-group-text" (click)="d.toggle()">
+                <fa-icon icon="calendar-alt"></fa-icon>
+              </span>
+            </div>
+            <cmdb-input-appends [data]="data" [controll]="controller" [parentFormGroup]="parentFormGroup"></cmdb-input-appends>
           </div>
         </ng-container>
         <div *ngSwitchDefault>

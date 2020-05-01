@@ -71,6 +71,19 @@ html{
   margin-left: 0!important;
 }
 
+#object-typeInstance-render, #object-renderInstance-render {
+  .ng-select-container {
+    right: 5px;
+    min-height: 100%;
+    height: auto;
+    width: 95%;
+    line-height: 1;
+  }
+  div.ng-select-container {
+    align-items: unset!important;
+  }
+}
+
 #ng-select-valid {
   .ng-select-container {
     right: 5px;

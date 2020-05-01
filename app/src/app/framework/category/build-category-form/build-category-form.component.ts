@@ -188,7 +188,7 @@ export class BuildCategoryFormComponent implements OnInit, AfterContentInit {
   }
 
   public editCategory(tmpCategory: CmdbCategory): void {
-    this.categoryService.updateCategory(tmpCategory).subscribe((resp: number) => {
+    this.categoryService.updateCategory(tmpCategory).subscribe(resp => {
       console.log(resp);
     }, (error) => {
       console.error(error);

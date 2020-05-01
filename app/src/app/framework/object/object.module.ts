@@ -53,6 +53,10 @@ import { ObjectLinkAddModalComponent } from './modals/object-link-add-modal/obje
 import { ObjectLinkDeleteModalComponent } from './modals/object-link-delete-modal/object-link-delete-modal.component';
 import { AuthModule } from '../../auth/auth.module';
 import { ObjectListByTypeComponent } from './object-list-by-type/object-list-by-type.component';
+import { ObjectBulkChangeComponent } from './object-bulk-change/object-bulk-change.component';
+import { ObjectBulkChangeEditorComponent } from './object-bulk-change/object-bulk-change-editor/object-bulk-change-editor.component';
+import { ObjectBulkChangePreviewComponent } from './object-bulk-change/object-bulk-change-preview/object-bulk-change-preview.component';
+import { ArchwizardModule } from 'angular-archwizard';
 
 @NgModule({
   entryComponents: [
@@ -82,7 +86,13 @@ import { ObjectListByTypeComponent } from './object-list-by-type/object-list-by-
     ObjectLinkAddModalComponent,
     ObjectLinkDeleteModalComponent,
     ObjectListByTypeComponent,
-    ],
+    ObjectBulkChangeComponent,
+    ObjectBulkChangePreviewComponent,
+    ObjectBulkChangeEditorComponent,
+    ObjectBulkChangePreviewComponent
+  ],
+  exports: [
+  ],
   imports: [
     CommonModule,
     ObjectRoutingModule,
@@ -93,10 +103,11 @@ import { ObjectListByTypeComponent } from './object-list-by-type/object-list-by-
     NgxSpinnerModule,
     FormsModule,
     ReactiveFormsModule,
-    RenderModule,
     NgSelectModule,
     NgbTooltipModule,
-    FontAwesomeModule
+    FontAwesomeModule,
+    ArchwizardModule,
+    RenderModule
   ]
 })
 export class ObjectModule {

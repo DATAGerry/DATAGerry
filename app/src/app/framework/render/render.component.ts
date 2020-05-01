@@ -92,7 +92,27 @@ export class RenderComponent {
     if (this.renderResult !== undefined) {
       return this.renderResult.fields.find(field => field.name === name);
     } else {
-      return this.typeInstance.fields.find(field => field.name === name);
+      const fields: any = this.typeInstance.fields.find(field => field.name === name);
+      switch (fields.type) {
+        case 'date': {
+          if (fields.value instanceof Object) {
+            const temp = fields.value;
+            fields.default = temp.year + '-' + temp.month + '-' + temp.day;
+            fields.value = fields.default;
+          }
+          break;
+        }
+        case 'ref': {
+          fields.default = parseInt(fields.default, 10);
+          fields.value = fields.default;
+          break;
+        }
+        default: {
+          fields.default = fields.value;
+          break;
+        }
+      }
+      return fields;
     }
   }
 

@@ -202,6 +202,28 @@ $sidebar-borders: (
           float: right;
         }
       }
+
+      &:hover {
+        background: $sidebar-nav-link-bg-hover-color;
+        color: $sidebar-nav-link-hover-color;
+
+        i, svg {
+          color: $sidebar-nav-icon-hover-color;
+        }
+      }
+
+      &.active {
+        color: $sidebar-nav-link-active-color;
+        background: $sidebar-nav-link-active-bg-color;
+
+        &:hover {
+          background: $sidebar-nav-link-bg-hover-color;
+        }
+
+        i {
+          color: $sidebar-nav-icon-active-color;
+        }
+      }
     }
 
     .collapse {
