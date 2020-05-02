@@ -562,7 +562,7 @@ class ExternalSystemCsv(ExternalSystem):
         self.filename = self._destination_parms.get("csv_filename")
         self.delimiter = self._destination_parms.get("csv_delimiter")
         self.enclosure = self._destination_parms.get("csv_enclosure")
-        self.header = set([])
+        self.header = []
         self.rows = []
 
     def prepare_export(self):
@@ -571,7 +571,8 @@ class ExternalSystemCsv(ExternalSystem):
     def add_object(self, cmdb_object, template_data):
         row = {}
         for key in self.__variables:
-            self.header.add(key)
+            if key not in self.header:
+                self.header.append(key)
             row.update({key: str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))})
         self.rows.append(row)
 
