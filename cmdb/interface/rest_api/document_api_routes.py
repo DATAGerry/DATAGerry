@@ -16,12 +16,11 @@
 
 
 import logging
-import io
 
-from xhtml2pdf import pisa
 from flask import abort, jsonify, current_app, Response
 from cmdb.utils.helpers import load_class, get_module_classes
 from cmdb.interface.route_utils import make_response, RootBlueprint, login_required
+from cmdb.document_api.documentapi_base import DocumentApiManager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -36,25 +35,8 @@ document_api = RootBlueprint('document_api', __name__, url_prefix='/documentapi'
 @document_api.route('/', methods=['GET'])
 #@login_required
 def send_test_document():
-    html = """
-        <html>
-            <body>
-                <h1>DATAGERRY Test</h1>
-                <img src="data:image/png;base64,iVBORw0KGgoAAA
-                ANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4
-                //8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU
-                5ErkJggg==" alt="Red dot" />
-                <p style="border: 1px solid">Testdata</p>
-            </body>
-        </html>
-    """
-    output = io.BytesIO()
-    # create PDF
-    pdf_creator = pisa.CreatePDF(
-        html,
-        dest=output
-    )
-    output.seek(0)
+    docapi_manager = DocumentApiManager()
+    output = docapi_manager.create_doc()
     return Response(
         output,
         mimetype="application/pdf",
