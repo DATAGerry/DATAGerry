@@ -30,7 +30,7 @@ class ObjectDocumentGenerator:
 
     def generate_doc(self):
         # ToDo: render template
-        rendered_template = self.__template.get_template_content()
+        rendered_template = self.__template.get_template_data()
 
         # create document
         return self.__doctype.create_doc(rendered_template)

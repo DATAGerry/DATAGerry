@@ -20,6 +20,7 @@ import logging
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_log_manager import CmdbLogManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.user_management import UserManager
@@ -32,6 +33,7 @@ class BaseCmdbApp(Flask):
 
     def __init__(self, import_name: str,
                  database_manager: DatabaseManagerMongo,
+                 docapi_manager: DocapiTemplateManager = None,
                  exportd_manager: ExportdJobManagement = None,
                  exportd_log_manager: ExportdLogManager = None,
                  object_manager: CmdbObjectManager = None,
@@ -39,6 +41,7 @@ class BaseCmdbApp(Flask):
                  user_manager: UserManager = None,
                  security_manager: SecurityManager = None):
         self.database_manager: DatabaseManagerMongo = database_manager
+        self.docapi_manager: DocapiTemplateManager = docapi_manager
         self.object_manager: CmdbObjectManager = object_manager
         self.exportd_manager: ExportdJobManagement = exportd_manager
         self.exportd_log_manager: ExportdLogManager = exportd_log_manager
