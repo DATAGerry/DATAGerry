@@ -1,7 +1,7 @@
 @import "~src/scss/variables";
 
 .shorten-long-text{
-  width: calc(#{$sidebar-width} - 75px);
+  //width: calc(#{$sidebar-width} - 75px);
   display: inline-block;
   white-space: nowrap;
   overflow: hidden;
