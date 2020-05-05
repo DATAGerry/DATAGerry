@@ -73,6 +73,8 @@ export class ObjectBulkInputAppendsComponent implements OnInit {
       this.parentFormGroup.get('changedFields').value.set(this.data.name, this.data);
     } else {
       this.parentFormGroup.get('changedFields').value.delete(this.data.name);
+      this.parentFormGroup.get(this.data.name).markAsUntouched({onlySelf: true});
+      this.parentFormGroup.get(this.data.name).setErrors(null);
     }
   }
 }
