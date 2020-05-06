@@ -162,7 +162,7 @@ $sidebar-borders: (
     white-space: nowrap;
     font-size: 14px;
     text-decoration: none;
-    padding: 0.5rem 0.75rem;
+    padding: 8px 24px;
 
     &:not(.collapsed) {
       background-color: lighten($sidebar-bg, 5%);
@@ -186,7 +186,7 @@ $sidebar-borders: (
         content: '\f0da';
         text-align: right;
         display: inline;
-        padding-right: 5px;
+        padding-right: 20px;
         float: left;
       }
 
@@ -199,7 +199,7 @@ $sidebar-borders: (
           content: '\f0d7';
           text-align: right;
           display: inline;
-          padding-right: 5px;
+          padding-right: 20px;
           float: left;
         }
       }
