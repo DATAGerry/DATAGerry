@@ -39,7 +39,7 @@ export class SearchService<T = SearchResultList> implements ApiService {
   }
 
   public getEstimateValueResults(regex: string): Observable<number> {
-    regex = ValidatorService.validateRegex(regex);
+    regex = ValidatorService.validateRegex(regex).trim();
     httpObservePostOptions[PARAMS] = {searchValue: regex};
     return this.api.callGet<number>(this.servicePrefix + '/quick/count/', this.http, httpObservePostOptions).pipe(
       map((apiResponse) => {

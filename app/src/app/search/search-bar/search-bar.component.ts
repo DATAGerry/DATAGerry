@@ -139,7 +139,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     tag.searchLabel = searchTerm;
     switch (searchForm) {
       case 'text':
-        tag.searchText = ValidatorService.validateRegex(searchTerm);
+        tag.searchText = ValidatorService.validateRegex(searchTerm).trim();
         break;
       case 'type':
         const typeIDs: number[] = [];
