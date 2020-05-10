@@ -66,7 +66,7 @@ export class ObjectBulkChangeComponent {
   }
 
   public saveObject() {
-    if (this.renderForm.valid && this.renderForm.get('changedFields').value.size > 0 ) {
+    if (this.renderForm.get('changedFields').value.size > 0 ) {
       const httpOptions = {
         headers: new HttpHeaders({
           'Content-Type': 'application/json'

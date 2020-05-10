@@ -93,7 +93,7 @@ export class TypeService<T = CmdbType> implements ApiService {
   }
 
   public getTypesBy(regex: string): Observable<T[]> {
-    regex = ValidatorService.validateRegex(regex);
+    regex = ValidatorService.validateRegex(regex).trim();
     return this.api.callGet<CmdbType[]>(this.servicePrefix + '/by/' + encodeURIComponent(regex)).pipe(
       map((apiResponse) => {
         return apiResponse.body;
