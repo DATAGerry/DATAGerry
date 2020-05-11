@@ -23,19 +23,23 @@ export class ValidatorService {
 
   public static validateRegex(input: string) {
     let regexObj;
-    //check, if RegExp is valid JavaScript
+    // check, if RegExp is valid JavaScript
     try {
         regexObj = new RegExp(input);
-    } catch(e) {
+    } catch (e) {
         regexObj = new RegExp(input.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'));
     }
-    //replace '#', as they need to be escaped in MongoDB regex
-    if(regexObj.source.includes('#')) {
-        regexObj = new RegExp(regexObj.source.replace('#', '\\#'))
+    // replace '/', as they need to be escaped in MongoDB regex
+    if (regexObj.source.includes('/')) {
+      regexObj = new RegExp(regexObj.source.replace('/', '\\/'));
     }
-    //replace '[]', as they need to be escaped in MongoDB regex
-    if(regexObj.source.includes('[]')) {
-        regexObj = new RegExp(regexObj.source.replace('[]', '\\[\\]'))
+    // replace '#', as they need to be escaped in MongoDB regex
+    if (regexObj.source.includes('#')) {
+        regexObj = new RegExp(regexObj.source.replace('#', '\\#'));
+    }
+    // replace '[]', as they need to be escaped in MongoDB regex
+    if (regexObj.source.includes('[]')) {
+        regexObj = new RegExp(regexObj.source.replace('[]', '\\[\\]'));
     }
     return regexObj.source;
   }
