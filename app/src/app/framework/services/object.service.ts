@@ -225,7 +225,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
     httpObserveOptions[PARAMETER].length = filter.length;
     httpObserveOptions[PARAMETER].order = filter.orderBy;
     httpObserveOptions[PARAMETER].direction = filter.direction;
-    httpObserveOptions[PARAMETER].search = ValidatorService.validateRegex(filter.search);
+    httpObserveOptions[PARAMETER].search = ValidatorService.validateRegex(filter.search).trim();
     httpObserveOptions[PARAMETER].dtRender = filter.dtRender;
     httpObserveOptions[PARAMETER].idList = filter.idList;
     return this.api.callGet<DataTablesResult[]>(`${this.servicePrefix}/dt/filter/type/${typeID}`, this.http, httpObserveOptions).pipe(

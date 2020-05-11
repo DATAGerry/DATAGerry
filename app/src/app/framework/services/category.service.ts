@@ -76,7 +76,7 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
   }
 
   public getCategoriesBy(regex: string): Observable<T[]> {
-    regex = ValidatorService.validateRegex(regex);
+    regex = ValidatorService.validateRegex(regex).trim();
     return this.api.callGet<CmdbCategory[]>(this.servicePrefix + '/by/' + encodeURIComponent(regex)).pipe(
       map((apiResponse) => {
         return apiResponse.body;
