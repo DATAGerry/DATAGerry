@@ -75,7 +75,7 @@ export class ObjectBulkChangePreviewComponent implements OnInit {
   }
 
   public changes(field: any) {
-    const temp = Object.assign([], field);
+    const temp = this.renderForm.get('changedFields').value.get(field.name);
     temp.value = this.renderForm.get(temp.name).value;
     return temp;
   }

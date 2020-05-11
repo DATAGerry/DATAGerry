@@ -84,7 +84,7 @@ export class RenderElementComponent extends RenderField implements OnInit {
             this.data.name + '-isChanged', new FormControl(false),
           );
           this.componentRef.instance.parentFormGroup.addControl(
-            'changedFields', new FormControl(new Map<string, boolean>()),
+            'changedFields', new FormControl(new Map<string, any>()),
           );
         }
         break;

@@ -23,7 +23,7 @@ import { CmdbType } from '../../../../framework/models/cmdb-type';
 import { TypeService } from '../../../../framework/services/type.service';
 import { ExportdJobDestinationsStepComponent } from '../exportd-job-destinations-step/exportd-job-destinations-step.component';
 import { ExternalSystemService } from '../../../services/external_system.service';
-
+import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 
 @Pipe({
   name: 'filterUnique',
@@ -32,7 +32,7 @@ import { ExternalSystemService } from '../../../services/external_system.service
 export class FilterPipe implements PipeTransform {
 
   transform(value: any, args?: any): any {
-    const newArr = []
+    const newArr = [];
     value.forEach((item, index) => {
       if (newArr.findIndex(i => i.className === item.className) === -1) {
         newArr.push(item);
@@ -90,6 +90,7 @@ export class ExportdJobVariablesStepComponent implements OnInit {
   public typeList: CmdbType[] = [];
   public variableForm: FormGroup;
   public variableHelper: any[];
+  public dragVariableName: string = '';
   readonly VARIABLES = 'variables';
 
   constructor(private formBuilder: FormBuilder, private typeService: TypeService,
@@ -153,5 +154,15 @@ export class ExportdJobVariablesStepComponent implements OnInit {
     this.externalService.getExternSytemVariables(value).subscribe(item => {
       this.variableHelper = item;
     });
+  }
+
+  public onDrop(item: DndDropEvent) {
+    const group = this.getVariableAsFormArray().at(item.data.oldIndex);
+    this.getVariableAsFormArray().removeAt(item.data.oldIndex);
+    this.getVariableAsFormArray().insert(item.index, group);
+  }
+
+  public onDndStart(name: string) {
+    this.dragVariableName = name;
   }
 }

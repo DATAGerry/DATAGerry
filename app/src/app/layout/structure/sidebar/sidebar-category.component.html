@@ -15,20 +15,20 @@
   </span>
 </a>
 
-<div class="collapse" id="{{categoryData.category.name}}">
-  <div class="list-group" *ngFor="let type of categoryPopUp;">
+<ul class="collapse" id="{{categoryData.category.name}}" style="margin-left: -30px; margin-top: 1px">
+  <li class="list-group" *ngFor="let type of categoryPopUp;">
     <a class="list-group-item d-flex justify-content-between align-items-center"
         [routerLink]="['/framework/object/type/', type.public_id]" routerLinkActive="active">
-      <p class="mb-1 shorten-long-text"
+      <span class="shorten-long-text"
          data-toggle="tooltip" title="{{type.label}}">
         <i class="{{type.icon}}" aria-hidden="true"></i> {{type.label}}
-      </p>
+      </span>
       <span class="badge badge-primary badge-pill ml-2">{{type.total}}</span>
     </a>
-  </div>
+  </li>
   <ng-template [ngIf]="categoryData.children">
-    <cmdb-sidebar-category *ngFor="let category of categoryData.children;" style="min-width: 230px;"
-                           [categoryData]="category"></cmdb-sidebar-category>
+      <cmdb-sidebar-category *ngFor="let category of categoryData.children;" style="min-width: 230px;"
+                             [categoryData]="category"></cmdb-sidebar-category>
   </ng-template>
 
-</div>
+</ul>

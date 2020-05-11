@@ -16,8 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { CmdbMode } from '../../../modes.enum';
+import {Component, Input, OnInit} from '@angular/core';
 
 @Component({
   selector: 'cmdb-object-bulk-input-appends',
@@ -65,13 +64,13 @@ export class ObjectBulkInputAppendsComponent implements OnInit {
   ngOnInit() {
     this.controller.valueChanges.subscribe(value => {
       this.parentFormGroup.get(this.bulkControlName).setValue(true);
-      this.parentFormGroup.get('changedFields').value.set(this.data.name, true);
+      this.parentFormGroup.get('changedFields').value.set(this.data.name, this.data);
     });
   }
 
   public changeCheckBox(value: any) {
     if (value.checked) {
-      this.parentFormGroup.get('changedFields').value.set(this.data.name, true);
+      this.parentFormGroup.get('changedFields').value.set(this.data.name, this.data);
     } else {
       this.parentFormGroup.get('changedFields').value.delete(this.data.name);
     }
