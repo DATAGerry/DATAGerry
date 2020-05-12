@@ -86,14 +86,14 @@ def create_rest_api(event_queue):
         database_manager=app_database
     )
 
-    docapi_manager = DocapiTemplateManager(
+    docapi_tpl_manager = DocapiTemplateManager(
         database_manager=app_database
     )
 
     # Create APP
     from cmdb.interface.cmdb_app import BaseCmdbApp
 
-    app = BaseCmdbApp(__name__, database_manager=app_database, docapi_manager=docapi_manager,
+    app = BaseCmdbApp(__name__, database_manager=app_database, docapi_tpl_manager=docapi_tpl_manager,
                       exportd_manager=exportd_job_manager, exportd_log_manager=exportd_log_manager,
                       object_manager=object_manager, log_manager=log_manager, user_manager=user_manager,
                       security_manager=security_manager)

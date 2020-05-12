@@ -14,31 +14,22 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from cmdb.document_api.document_generator import ObjectDocumentGenerator
-from cmdb.document_api.document_template import DocumentTemplate
-from cmdb.document_api.doctypes import PdfDocumentType
+from cmdb.framework.cmdb_render import CmdbRender
+from cmdb.docapi.document_generator import ObjectDocumentGenerator
+from cmdb.docapi.doctypes import PdfDocumentType
 
-class DocumentApiManager:
+class DocApiManager:
 
-    def __init__(self):
-        pass
+    def __init__(self, template_manager, object_manager):
+        self.__template_manager = template_manager
+        self.__obm = object_manager
 
-    def create_doc(self):
-        html = """
-        <html>
-            <body>
-                <h1>DATAGERRY Test</h1>
-                <img src="data:image/png;base64,iVBORw0KGgoAAA
-                ANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4
-                //8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU
-                5ErkJggg==" alt="Red dot" />
-                <p style="border: 1px solid">Testdata</p>
-            </body>
-        </html>
-        """
-        template = DocumentTemplate(1, "testfile", "Testfile", html)
-        cmdb_object = None
-        doctype = PdfDocumentType()
-        generator = ObjectDocumentGenerator(template, cmdb_object, doctype)
+    def render_object_template(self, doctpl_id: int, object_id: int):
+        template = self.__template_manager.get_template(doctpl_id)
+        cmdb_object = self.__obm.get_object(object_id)
+        type_instance = self.__obm.get_type(cmdb_object.get_type_id())
+        cmdb_render_object = CmdbRender(object_instance=cmdb_object, type_instance=type_instance,
+                                        render_user=None)
+        generator = ObjectDocumentGenerator(template, self.__obm, cmdb_render_object.result(), PdfDocumentType())
 
         return generator.generate_doc()

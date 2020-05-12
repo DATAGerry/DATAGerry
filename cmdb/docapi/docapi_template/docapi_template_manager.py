@@ -146,13 +146,6 @@ class DocapiTemplateManager(CmdbManagerBase):
         except Exception:
             raise DocapiTemplateManagerDeleteError(f'Could not delete template with ID: {public_id}')
 
-    def render_template(self, public_id: int):
-        template = self.get_template(public_id)
-        cmdb_object = None
-        doctype = PdfDocumentType()
-        generator = ObjectDocumentGenerator(template, cmdb_object, doctype)
-
-        return generator.generate_doc()
 
 class DocapiTemplateManagerGetError(ManagerGetError):
 

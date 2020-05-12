@@ -33,7 +33,7 @@ class BaseCmdbApp(Flask):
 
     def __init__(self, import_name: str,
                  database_manager: DatabaseManagerMongo,
-                 docapi_manager: DocapiTemplateManager = None,
+                 docapi_tpl_manager: DocapiTemplateManager = None,
                  exportd_manager: ExportdJobManagement = None,
                  exportd_log_manager: ExportdLogManager = None,
                  object_manager: CmdbObjectManager = None,
@@ -41,7 +41,7 @@ class BaseCmdbApp(Flask):
                  user_manager: UserManager = None,
                  security_manager: SecurityManager = None):
         self.database_manager: DatabaseManagerMongo = database_manager
-        self.docapi_manager: DocapiTemplateManager = docapi_manager
+        self.docapi_tpl_manager: DocapiTemplateManager = docapi_tpl_manager
         self.object_manager: CmdbObjectManager = object_manager
         self.exportd_manager: ExportdJobManagement = exportd_manager
         self.exportd_log_manager: ExportdLogManager = exportd_log_manager
