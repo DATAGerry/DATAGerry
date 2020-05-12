@@ -94,7 +94,7 @@ def get_category(public_id, request_user: User):
     except ObjectManagerGetError as e:
         LOGGER.error(f'Error while get category with Public ID {public_id}: {e}')
         return abort(404, 'Category was not found!')
-    return make_response(category_instance)
+    return make_response(CmdbCategory.to_json(category_instance))
 
 
 @categories_blueprint.route('/<string:name>/', methods=['GET'])

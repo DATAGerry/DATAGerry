@@ -48,7 +48,7 @@ class UpdateSettings:
         current_version = updater_instance.get_last_version()['version']
 
         for num, file in enumerate(sorted(versions)):
-            if current_version > version:
+            if current_version > version and (version < file):
                 process_bar('Process', len(versions), num + 1)
                 updater_class = load_class(f'cmdb.updater.versions.updater_{current_version}.Update{current_version}')
                 updater_instance = updater_class()

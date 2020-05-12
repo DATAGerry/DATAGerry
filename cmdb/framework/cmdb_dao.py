@@ -58,15 +58,13 @@ class CmdbDAO:
     VERSIONING_MINOR = 1
     VERSIONING_PATCH = 0
 
-    def __init__(self, **kwargs):
+    def __init__(self, public_id):
         """
         All parameters inside *kwargs will be auto convert to attributes
         Args:
             **kwargs: list of parameters
         """
-        self.public_id = None
-        for key in kwargs:
-            setattr(self, key, kwargs[key])
+        self.public_id: int = public_id
 
     def get_public_id(self) -> int:
         """
@@ -136,6 +134,14 @@ class CmdbDAO:
             index_list.append(IndexModel(**index))
         return index_list
 
+    @classmethod
+    def from_database(cls, data: dict) -> "CmdbDAO":
+        raise NotImplementedError()
+
+    @classmethod
+    def to_json(cls, instance: "CmdbDAO") -> dict:
+        raise NotImplementedError()
+
     def update_version(self, update) -> str:
         """
         Update the version number of the object
@@ -187,16 +193,6 @@ class CmdbDAO:
             dict: attribute dict of object
         """
         return self.__dict__
-
-    def to_json(self) -> dict:
-        """
-        converts attribute dict to json - maybe later for database updates
-        Returns:
-            dict: json dump with database default encoding of the object attributes
-        """
-        from cmdb.data_storage.database_utils import default
-        import json
-        return json.dumps(self.__dict__, default=default)
 
     def __repr__(self):
         from cmdb.utils.helpers import debug_print

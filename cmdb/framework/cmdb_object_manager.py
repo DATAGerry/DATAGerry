@@ -160,14 +160,14 @@ class CmdbObjectManager(CmdbManagerBase):
         if match:
             agr.append({'$match': match})
         agr.append({"$addFields": {
-                "order": {
-                    "$filter": {
-                      "input": "$fields",
-                      "as": "fields",
-                      "cond": {"$eq": ["$$fields.name", value]}
-                    }
+            "order": {
+                "$filter": {
+                    "input": "$fields",
+                    "as": "fields",
+                    "cond": {"$eq": ["$$fields.name", value]}
                 }
-            }})
+            }
+        }})
         agr.append({'$sort': {'order': order}})
 
         object_list = []
@@ -268,7 +268,7 @@ class CmdbObjectManager(CmdbManagerBase):
             try:
                 current_loop_type = new_type_init
                 ref_fields = current_loop_type.get_fields_of_type_with_value(input_type='ref', _filter='ref_types',
-                                                                           value=type_id)
+                                                                             value=type_id)
                 for ref_field in ref_fields:
                     type_init_list.append(
                         {"type_id": current_loop_type.get_public_id(), "field_name": ref_field['name']})
@@ -357,7 +357,7 @@ class CmdbObjectManager(CmdbManagerBase):
         agr = []
         if match:
             agr.append({'$match': match})
-        agr.append({'$group': {'_id': '$'+value, 'count': {'$sum': 1}}})
+        agr.append({'$group': {'_id': '$' + value, 'count': {'$sum': 1}}})
         agr.append({'$sort': {'count': -1}})
 
         return self.dbm.aggregate(CmdbType.COLLECTION, agr)
@@ -438,20 +438,17 @@ class CmdbObjectManager(CmdbManagerBase):
             self._event_queue.put(event)
         return ack
 
-    def get_all_categories(self):
-        ack = []
-        cats = self._get_many(collection=CmdbCategory.COLLECTION, sort='public_id')
-        for cat_obj in cats:
-            try:
-                ack.append(CmdbCategory(**cat_obj))
-            except CMDBError as e:
-                LOGGER.debug("Error while parsing Category")
-                LOGGER.debug(e.message)
-        return ack
+    def get_all_categories(self) -> List[CmdbCategory]:
+        """Get complete category tree"""
+        try:
+            raw_categories = self._get_many(collection=CmdbCategory.COLLECTION, sort='public_id')
+            return [CmdbCategory.from_database(category) for category in raw_categories]
+        except Exception as err:
+            raise ObjectManagerGetError(err)
 
     def get_categories_by(self, sort='public_id', **requirements: dict) -> List[CmdbCategory]:
         ack = []
-        categories = self._get_many(collection=CmdbCategory.COLLECTION,  sort=sort, **requirements)
+        categories = self._get_many(collection=CmdbCategory.COLLECTION, sort=sort, **requirements)
         for cat_obj in categories:
             try:
                 ack.append(CmdbCategory(**cat_obj))
@@ -504,31 +501,27 @@ class CmdbObjectManager(CmdbManagerBase):
             raise NoRootCategories()
         return tree
 
-    def get_category(self, public_id: int):
+    def get_category(self, public_id: int) -> CmdbCategory:
         try:
-            return CmdbCategory(**self._get(
+            raw_category: dict = self._get(
                 collection=CmdbCategory.COLLECTION,
-                public_id=public_id))
+                public_id=public_id)
         except (CMDBError, Exception) as e:
             raise ObjectManagerGetError(err=e)
+        return CmdbCategory.from_database(raw_category)
 
-    def insert_category(self, data: (CmdbCategory, dict)):
-        new_category = data
-        if isinstance(data, dict):
-            new_category = CmdbCategory(**data)
+    def insert_category(self, category: CmdbCategory):
+        try:
+            return self._insert(collection=CmdbCategory.COLLECTION, data=CmdbCategory.to_json(category))
+        except Exception as err:
+            raise ObjectManagerInsertError(err=err)
 
-        return self._insert(collection=CmdbCategory.COLLECTION, data=new_category.to_database())
-
-    def update_category(self, data: dict):
-        update_category = data
-        if isinstance(data, dict):
-            update_category = CmdbCategory(**data)
-        ack = self._update(
+    def update_category(self, category: CmdbCategory):
+        return self._update(
             collection=CmdbCategory.COLLECTION,
-            public_id=update_category.get_public_id() or update_category.public_id,
-            data=update_category.to_database()
+            public_id=category.get_public_id(),
+            data=CmdbCategory.to_json(category)
         )
-        return ack
 
     def delete_category(self, public_id: int):
         ack = self._delete(CmdbCategory.COLLECTION, public_id)

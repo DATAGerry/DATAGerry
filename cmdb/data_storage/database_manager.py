@@ -555,16 +555,16 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             raise CollectionAlreadyExists(collection_name)
         return collection_name
 
-    def delete_collection(self, collection_name):
+    def delete_collection(self, collection):
         """
         Delete MongoDB collection
         Args:
-            collection_name: collection name
+            collection: collection name
 
         Returns:
             delete ack
         """
-        return self.connector.delete_collection(collection_name)
+        return self.connector.delete_collection(collection)
 
     def get_document_with_highest_id(self, collection: str) -> str:
         """get the document with the highest public id inside a collection
@@ -616,7 +616,6 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             'counter': docs_count
         })
         return docs_count
-
 
     def increment_public_id_counter(self, collection: str):
         working_collection = self.connector.get_collection(IDCounter.COLLECTION)
