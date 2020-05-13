@@ -369,7 +369,6 @@ def cleanup_removed_fields(public_id, request_user: User):
                                                     update={'$pull': {'fields': {"name": field}}})
 
     except Exception as error:
-        print(error)
         return abort(500)
 
     return make_response(update_type_instance)

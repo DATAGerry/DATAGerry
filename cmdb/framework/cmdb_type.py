@@ -49,10 +49,8 @@ class CmdbType(CmdbDAO):
     ]
 
     def __init__(self, name: str, active: bool, author_id: int, creation_time: datetime,
-                 render_meta: dict, fields: list, category_id: int, version: str = '1.0.0', access: list = None,
-                 label: str = None,
-                 clean_db: bool = None,
-                 status: list = None, description: str = None, **kwargs):
+                 render_meta: dict, fields: list, version: str = '1.0.0', access: list = None,
+                 label: str = None, clean_db: bool = None, status: list = None, description: str = None, **kwargs):
         self.name = name
         self.label = label or self.name.title()
         self.description = description
@@ -65,7 +63,6 @@ class CmdbType(CmdbDAO):
         self.creation_time = creation_time
         self.render_meta = render_meta
         self.fields = fields or []
-        self.category_id = category_id or 0
         super(CmdbType, self).__init__(**kwargs)
 
     def get_name(self) -> str:

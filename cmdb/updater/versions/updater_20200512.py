@@ -51,9 +51,11 @@ class Update20200512(Updater):
                 self.object_manager.insert_category(category)
             except ObjectManagerInsertError as err:
                 LOGGER.debug(err)
+        self.__clear_up_types()
         super(Update20200512, self).increase_updater_version(20200512)
 
     def __convert_category_to_new_structure(self, old_raw_category: dict) -> CmdbCategory:
+        """Converts a category from old < 20200512 structure to new format """
         old_raw_category['meta'] = {
             'icon': old_raw_category.get('icon', '')
         }
@@ -61,10 +63,15 @@ class Update20200512(Updater):
         category.types = self.__get_types_in_category(old_raw_category.get('public_id'))
         return category
 
-    def __get_types_in_category(self, category_id: int):
+    def __get_types_in_category(self, category_id: int) -> List[int]:
+        """Get a list of type ids by calling the old structure and load the category_id field from types
+        Notes:
+            Do not use type_instance.category_id here - doesnt exists anymore
+        """
         return [type.get('public_id') for type in
                 self.database_manager.find_all(collection=CmdbType.COLLECTION,
                                                filter={'category_id': category_id})]
 
     def __clear_up_types(self):
-        pass
+        """Removes the category_id field from type collection"""
+        self.database_manager.unset_update_many(collection=CmdbType.COLLECTION, filter={}, data='category_id')

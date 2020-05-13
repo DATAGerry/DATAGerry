@@ -58,13 +58,15 @@ class CmdbDAO:
     VERSIONING_MINOR = 1
     VERSIONING_PATCH = 0
 
-    def __init__(self, public_id):
+    def __init__(self, public_id, **kwargs):
         """
         All parameters inside *kwargs will be auto convert to attributes
         Args:
             **kwargs: list of parameters
         """
         self.public_id: int = public_id
+        for key in kwargs:
+            setattr(self, key, kwargs[key])
 
     def get_public_id(self) -> int:
         """
