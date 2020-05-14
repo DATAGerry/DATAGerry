@@ -17,6 +17,7 @@
 """
 Object/Type render
 """
+from datetime import datetime
 from typing import List
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
@@ -208,9 +209,12 @@ class CmdbRender:
                 if curr_field['name'] == field['name'] and field.get('value'):
                     field['default'] = field['value']
                 field['value'] = curr_field['value']
+                # handle dates that are stored as strings
+                if field['type'] == 'date' and isinstance(field['value'], str) and field['value']:
+                    field['value'] = datetime.strptime(field['value'], '%Y-%m-%d %H:%M:%S')
                 if self.dt_render:
                     field['value'] = html_parser.field_to_html(field['type'])
-            except (ValueError, IndexError):
+            except (ValueError, IndexError) as e:
                 field['value'] = None
             field_map.append(field)
         return field_map
