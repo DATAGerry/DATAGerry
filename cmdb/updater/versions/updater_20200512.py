@@ -26,22 +26,17 @@ class Update20200512(Updater):
     def start_update(self):
         collection = CmdbCategory.COLLECTION
         new_categories: List[CmdbCategory] = []
-        raw_root_categories_old_structure: List[dict] = self.database_manager.find_all(collection=collection,
-                                                                                       filter={'parent_id': 0})
-        for old_raw_root_category in raw_root_categories_old_structure:
-            new_categories.append(self.__convert_category_to_new_structure(old_raw_root_category))
+        raw_categories_old_structure: List[dict] = self.database_manager.find_all(collection=collection,
+                                                                                  filter={})
+        for old_raw_category in raw_categories_old_structure:
+            new_categories.append(self.__convert_category_to_new_structure(old_raw_category))
 
-        qb = QueryBuilder()
-        qb.query = QueryBuilder.gt_('parent_id', 0)
+        """qb = QueryBuilder()
+        qb.query = QueryBuilder.and_(
+            [QueryBuilder.gt_('parent_id', 0), {'parent_id': QueryBuilder.not_(QueryBuilder.type_(10))}])
+
         raw_sub_categories_old_structure: List[dict] = self.database_manager.find_all(collection=collection,
-                                                                                      filter=qb.query)
-        for old_raw_sub_category in raw_sub_categories_old_structure:
-            parent_id = old_raw_sub_category.get('parent_id')
-            parent_index, parent_category = next(
-                (parent_index, parent_category) for parent_index, parent_category in enumerate(new_categories) if
-                parent_category.get_public_id() == parent_id)
-            parent_category.children.append(self.__convert_category_to_new_structure(old_raw_sub_category))
-            new_categories[parent_index] = parent_category
+                                                                                      filter=qb.query)"""
 
         self.database_manager.delete_collection(collection=CmdbCategory.COLLECTION)
         self.database_manager.create_collection(CmdbCategory.COLLECTION)
@@ -49,8 +44,8 @@ class Update20200512(Updater):
         for category in new_categories:
             try:
                 self.object_manager.insert_category(category)
-            except ObjectManagerInsertError as err:
-                LOGGER.debug(err)
+            except ObjectManagerInsertError:
+                continue
         self.__clear_up_types()
         super(Update20200512, self).increase_updater_version(20200512)
 
@@ -59,7 +54,12 @@ class Update20200512(Updater):
         old_raw_category['meta'] = {
             'icon': old_raw_category.get('icon', '')
         }
-        category = CmdbCategory.from_database(old_raw_category)
+        parent = old_raw_category.get('parent_id', None)
+        if parent == 0:
+            parent = None
+
+        old_raw_category['parent'] = parent
+        category = CmdbCategory.from_data(old_raw_category)
         category.types = self.__get_types_in_category(old_raw_category.get('public_id'))
         return category
 

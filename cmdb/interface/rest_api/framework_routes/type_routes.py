@@ -23,7 +23,8 @@ from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.search.query.query_builder import QueryBuilder
 from cmdb.user_management import User
 from cmdb.interface.route_utils import make_response, RootBlueprint, login_required, insert_request_user, right_required
-from cmdb.framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError, ObjectManagerGetError
+from cmdb.framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError, ObjectManagerGetError, \
+    ObjectManagerInitError
 from cmdb.framework.cmdb_type import CmdbType
 
 try:
@@ -43,10 +44,20 @@ with current_app.app_context():
 @insert_request_user
 @right_required('base.framework.type.view')
 def get_types(request_user: User):
+    """
+    Get all types as a list
+    
+    Returns:
+        200 - List of all types
+        204 - Empty content no types in database
+    """
     try:
         type_list = object_manager.get_all_types()
-    except ObjectManagerGetError as e:
-        LOGGER.error(f'Error while getting all types as list: {e}')
+    except ObjectManagerInitError as err:
+        LOGGER.error(err.message)
+        return abort(500)
+    except ObjectManagerGetError as err:
+        LOGGER.error(f'Error while getting all types as list: {err.message}')
         return abort(500)
     if len(type_list) == 0:
         return make_response(type_list, 204)

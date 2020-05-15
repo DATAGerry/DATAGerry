@@ -306,7 +306,6 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         cursor_result = self.__find(collection, formatted_public_id, limit=1, sort=formatted_sort, *args, **kwargs)
         for result in cursor_result:
             return result
-        raise NoDocumentFound(collection, public_id)
 
     def find_one_by(self, collection: str, *args, **kwargs) -> dict:
         """find one specific document by special requirements

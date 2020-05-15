@@ -28,21 +28,24 @@ from bson import json_util
 from datetime import datetime
 from typing import List
 
-from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
+from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists, NoDocumentFound
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
-from cmdb.framework.cmdb_category import CmdbCategory
+from cmdb.framework.cmdb_category import CmdbCategory, CategoryTree
 from cmdb.framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplate
+from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
 from cmdb.framework.cmdb_errors import WrongInputFormatError, UpdateError, TypeInsertError, TypeAlreadyExists, \
     TypeNotFoundError, ObjectInsertError, ObjectDeleteError, NoRootCategories, ObjectManagerGetError, \
-    ObjectManagerInsertError, ObjectManagerUpdateError, ObjectManagerDeleteError
+    ObjectManagerInsertError, ObjectManagerUpdateError, ObjectManagerDeleteError, ObjectManagerInitError
 from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.framework.cmdb_type import CmdbType
 from cmdb.search.query import Query, Pipeline
+from cmdb.search.query.query_builder import QueryBuilder
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import User
+from cmdb.utils.wraps import deprecated
 
 LOGGER = logging.getLogger(__name__)
 
@@ -309,12 +312,15 @@ class CmdbObjectManager(CmdbManagerBase):
             self._event_queue.put(event)
         return ack
 
-    def get_all_types(self):
-        ack = []
-        types = self._get_many(collection=CmdbType.COLLECTION)
-        for type_obj in types:
-            ack.append(CmdbType(**type_obj))
-        return ack
+    def get_all_types(self) -> List[CmdbType]:
+        try:
+            raw_types: List[dict] = self._get_many(collection=CmdbType.COLLECTION)
+        except Exception as err:
+            raise ObjectManagerGetError(err=err)
+        try:
+            return [CmdbType(**type) for type in raw_types]
+        except Exception as err:
+            raise ObjectManagerInitError(err=err)
 
     def get_type(self, public_id: int):
         try:
@@ -322,8 +328,10 @@ class CmdbObjectManager(CmdbManagerBase):
                 collection=CmdbType.COLLECTION,
                 public_id=public_id)
                             )
-        except (CMDBError, Exception) as e:
-            raise ObjectManagerGetError(err=e)
+        except RequiredInitKeyNotFoundError as err:
+            raise ObjectManagerInitError(err=err.message)
+        except Exception as err:
+            raise ObjectManagerGetError(err=err)
 
     def get_type_by(self, **requirements) -> CmdbType:
         try:
@@ -439,93 +447,90 @@ class CmdbObjectManager(CmdbManagerBase):
         return ack
 
     def get_all_categories(self) -> List[CmdbCategory]:
-        """Get complete category tree"""
+        """Get all categories as nested list"""
         try:
             raw_categories = self._get_many(collection=CmdbCategory.COLLECTION, sort='public_id')
-            return [CmdbCategory.from_database(category) for category in raw_categories]
+        except Exception as err:
+            raise ObjectManagerGetError(err)
+        try:
+            return [CmdbCategory.from_data(category) for category in raw_categories]
+        except Exception as err:
+            raise ObjectManagerInitError(err)
+
+    def get_category_by(self, **requirements) -> CmdbCategory:
+        """Get a single category by requirements
+        Notes:
+            Even if multiple categories match the requirements only the first matched will be returned
+        """
+        try:
+            raw_category = self._get_by(collection=CmdbCategory.COLLECTION, **requirements)
         except Exception as err:
             raise ObjectManagerGetError(err)
 
+        try:
+            return CmdbCategory.from_data(raw_category)
+        except Exception as err:
+            raise ObjectManagerInitError(err)
+
     def get_categories_by(self, sort='public_id', **requirements: dict) -> List[CmdbCategory]:
-        ack = []
-        categories = self._get_many(collection=CmdbCategory.COLLECTION, sort=sort, **requirements)
-        for cat_obj in categories:
-            try:
-                ack.append(CmdbCategory(**cat_obj))
-            except CMDBError as e:
-                continue
-        return ack
+        try:
+            raw_categories = self._get_many(collection=CmdbCategory.COLLECTION, sort=sort, **requirements)
+        except Exception as err:
+            raise ObjectManagerGetError(err)
+        try:
+            return [CmdbCategory.from_data(category) for category in raw_categories]
+        except Exception as err:
+            raise ObjectManagerInitError(err)
 
+    @deprecated
     def _get_category_nodes(self, parent_list: list):
-        edge = []
-        for cat_child in parent_list:
-            next_children = self.get_categories_by(**{'parent_id': cat_child.get_public_id()})
-            if len(next_children) > 0:
-                edge.append({
-                    'category': cat_child,
-                    'children': self._get_category_nodes(next_children)
-                })
-            else:
-                edge.append({
-                    'category': cat_child,
-                    'children': None
-                })
-        return edge
+        raise DeprecationWarning(
+            'Since the category structure has been changed this function no longer necessary')
 
-    def get_category_tree(self) -> dict:
-        tree = list()
-        root_categories = self.get_categories_by(**{
-            '$or': [
-                {'parent_id': {'$exists': False}},
-                {'parent_id': 0}
-            ]
-        })
-        if len(root_categories) > 0:
-            tree = self._get_category_nodes(root_categories)
-            tree = sorted(tree, key=lambda x: x['category'].get_public_id())
+    def get_category_tree(self) -> CategoryTree:
+        try:
             all_categories = self.get_all_categories()
-            category_pid_list = []
-            for category in all_categories:
-                category_pid_list.append(category.get_public_id())
-            if self.get_types_by(**{'category_id': {'$nin': category_pid_list}}):
-                tree.append(
-                    {'category': {
-                        'icon': 'fas fa-exclamation-triangle',
-                        'label': 'Uncategorized',
-                        'name': 'uncategorized',
-                        'parent_id': 0,
-                        'public_id': 0
-                    }}
-                )
-        else:
-            raise NoRootCategories()
-        return tree
+        except Exception as err:
+            raise ObjectManagerGetError(err=err)
+        return CategoryTree(categories=all_categories)
 
     def get_category(self, public_id: int) -> CmdbCategory:
+        """Get a category from the database"""
         try:
             raw_category: dict = self._get(
                 collection=CmdbCategory.COLLECTION,
                 public_id=public_id)
-        except (CMDBError, Exception) as e:
-            raise ObjectManagerGetError(err=e)
-        return CmdbCategory.from_database(raw_category)
+        except Exception as err:
+            raise ObjectManagerGetError(err=err)
+        try:
+            return CmdbCategory.from_data(raw_category)
+        except Exception as err:
+            raise ObjectManagerInitError(err=err)
 
     def insert_category(self, category: CmdbCategory):
+        """Add a new category into the database or add the children list an existing category"""
         try:
             return self._insert(collection=CmdbCategory.COLLECTION, data=CmdbCategory.to_json(category))
         except Exception as err:
             raise ObjectManagerInsertError(err=err)
 
     def update_category(self, category: CmdbCategory):
-        return self._update(
-            collection=CmdbCategory.COLLECTION,
-            public_id=category.get_public_id(),
-            data=CmdbCategory.to_json(category)
-        )
+        """Update a existing category into the database"""
+        try:
+            return self._update(
+                collection=CmdbCategory.COLLECTION,
+                public_id=category.get_public_id(),
+                data=CmdbCategory.to_json(category)
+            )
+        except Exception as err:
+            raise ObjectManagerUpdateError(err=err)
 
     def delete_category(self, public_id: int):
-        ack = self._delete(CmdbCategory.COLLECTION, public_id)
-        return ack
+        """Remove a category from the database"""
+        try:
+            return self._delete(CmdbCategory.COLLECTION, public_id)
+        except Exception as err:
+            raise ObjectManagerDeleteError(err=err)
 
     # STATUS CRUD
     def get_statuses(self) -> list:

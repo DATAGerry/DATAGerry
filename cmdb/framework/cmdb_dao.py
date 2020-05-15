@@ -137,7 +137,7 @@ class CmdbDAO:
         return index_list
 
     @classmethod
-    def from_database(cls, data: dict) -> "CmdbDAO":
+    def from_data(cls, data: dict) -> "CmdbDAO":
         raise NotImplementedError()
 
     @classmethod
@@ -306,4 +306,3 @@ class RequiredInitKeyNotFoundError(CMDBError):
 
     def __init__(self, key_name):
         self.message = 'Following initialization key was not found inside the document: {}'.format(key_name)
-        super().__init__()

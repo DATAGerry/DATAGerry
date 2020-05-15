@@ -137,3 +137,9 @@ class Builder:
     def facet_(cls, stages: dict) -> dict:
         """Processes multiple aggregation pipelines within a single stage on the same set of input documents."""
         return {'$facet': stages}
+
+    # Type Expression Operators
+    @classmethod
+    def type_(cls, expression) -> dict:
+        """Return the BSON data type of the field."""
+        return {'$type': expression}
