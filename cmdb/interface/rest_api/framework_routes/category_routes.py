@@ -152,13 +152,11 @@ def get_category_by_name(name: str, request_user: User):
     return make_response(CmdbCategory.to_json(category_instance))
 
 
-@categories_blueprint.route('/', defaults={'parent_category_id': None}, methods=['POST'])
-@categories_blueprint.route('/<int:parent_category_id>/', methods=['POST'])
-@categories_blueprint.route('/<int:parent_category_id>', methods=['POST'])
+@categories_blueprint.route('/', methods=['POST'])
 @login_required
 @insert_request_user
 @right_required('base.framework.category.add')
-def add_category(parent_category_id: int, request_user: User):
+def add_category(request_user: User):
     """HTTP POST call - add a new category from json post data"""
     try:
         request_data = request.get_data().decode('UTF-8')
@@ -173,7 +171,7 @@ def add_category(parent_category_id: int, request_user: User):
         return abort(400, str(err))
 
     try:
-        insert_acknowledge = object_manager.insert_category(new_category, parent_category_id)
+        insert_acknowledge = object_manager.insert_category(new_category)
     except ObjectManagerInsertError as err:
         return abort(400, err.message)
     return make_response(insert_acknowledge)
