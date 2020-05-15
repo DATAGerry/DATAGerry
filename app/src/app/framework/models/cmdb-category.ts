@@ -26,7 +26,21 @@ export class CmdbCategory implements CmdbDao {
   public name: string;
   public label: string;
   public icon: string;
-  public parent_id: number;
+  public meta: {
+    icon: string,
+    order: number
+  };
+  public parent: any;
   // tslint:enable
+}
+
+export class CmdbCategoryNode{
+  
+}
+
+export class CmdbCategoryTree {
+
+  public category: CmdbCategory;
+
 }
 

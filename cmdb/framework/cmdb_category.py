@@ -131,43 +131,43 @@ class CmdbCategory(CmdbDAO):
 
 
 class CategoryTree:
-    class CategoryNodes:
+    class CategoryNode:
         """Class of a category node inside the category tree"""
 
-        def __init__(self, category: CmdbCategory, children: List["CategoryTree.CategoryNodes"]):
+        def __init__(self, category: CmdbCategory, children: List["CategoryTree.CategoryNode"]):
             self.category: CmdbCategory = category
-            self.children: List["CategoryTree.CategoryNodes"] = children or []
+            self.children: List["CategoryTree.CategoryNode"] = children or []
 
         @classmethod
-        def to_json(cls, instance: "CategoryTree.CategoryNodes"):
+        def to_json(cls, instance: "CategoryTree.CategoryNode"):
             """Get the node as json"""
             return {
                 'category': CmdbCategory.to_json(instance.category),
-                'children': [CategoryTree.CategoryNodes.to_json(child_node) for child_node in instance.children]
+                'children': [CategoryTree.CategoryNode.to_json(child_node) for child_node in instance.children]
             }
 
     def __init__(self, categories: List[CmdbCategory]):
         self._categories = categories
-        self._tree: List[CategoryTree.CategoryNodes] = self.__create_tree(self._categories)
+        self._tree: List[CategoryTree.CategoryNode] = self.__create_tree(self._categories)
 
     def __len__(self) -> int:
         """Get length of tree - this means the number of root categories"""
         return len(self._tree)
 
     @property
-    def tree(self) -> List[CategoryNodes]:
+    def tree(self) -> List[CategoryNode]:
         """Get the tree"""
         if not self._tree:
             self._tree = CategoryTree.__create_tree(self._categories)
         return self._tree
 
     @classmethod
-    def __create_tree(cls, categories, parent: int = None) -> List[CategoryNodes]:
+    def __create_tree(cls, categories, parent: int = None) -> List[CategoryNode]:
         """Generate the category tree from list structure"""
         tree = []
         for category in [category for category in categories if category.get_parent() == parent]:
             children = CategoryTree.__create_tree(categories, category.get_public_id())
-            tree.append(CategoryTree.CategoryNodes(category, children))
+            tree.append(CategoryTree.CategoryNode(category, children))
         return tree
 
     @classmethod
@@ -179,4 +179,4 @@ class CategoryTree:
     @classmethod
     def to_json(cls, instance: "CategoryTree"):
         """Get the complete category tree as json"""
-        return [CategoryTree.CategoryNodes.to_json(node) for node in instance.tree]
+        return [CategoryTree.CategoryNode.to_json(node) for node in instance.tree]
