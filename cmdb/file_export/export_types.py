@@ -21,6 +21,7 @@ import io
 import openpyxl
 import tempfile
 import json
+import re
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
 
@@ -166,7 +167,7 @@ class XlsxExportType(ExportType):
             # insert header value
             if run_header:
                 # get active worksheet and rename it
-                title = object_manager.get_type(obj[type_id]).label
+                title = self.__normalize_sheet_title(object_manager.get_type(obj[type_id]).label)
                 sheet = workbook.create_sheet(title, p)
                 header = sheet.cell(row=1, column=1)
                 header.value = 'public_id'
@@ -196,6 +197,9 @@ class XlsxExportType(ExportType):
             p = p + 1
 
         return workbook
+
+    def __normalize_sheet_title(self, input_data):
+        return re.sub('[\\*?:/\[\]]', '_', input_data)
 
 
 class XmlExportType(ExportType):
