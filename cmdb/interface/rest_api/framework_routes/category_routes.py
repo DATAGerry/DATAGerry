@@ -52,8 +52,8 @@ def get_categories(request_user: User):
     return make_response(categories_list)
 
 
-@categories_blueprint.route('/by/<string:regex>/', methods=['GET'])
-@categories_blueprint.route('/by/<string:regex>', methods=['GET'])
+@categories_blueprint.route('/by/<path:regex>/', methods=['GET'])
+@categories_blueprint.route('/by/<path:regex>', methods=['GET'])
 @login_required
 @insert_request_user
 @right_required('base.framework.category.view')
