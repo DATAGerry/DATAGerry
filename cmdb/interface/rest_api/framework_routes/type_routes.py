@@ -53,8 +53,8 @@ def get_types(request_user: User):
     return make_response(type_list)
 
 
-@type_blueprint.route('/by/<string:regex>/', methods=['GET'])
-@type_blueprint.route('/by/<string:regex>', methods=['GET'])
+@type_blueprint.route('/by/<path:regex>/', methods=['GET'])
+@type_blueprint.route('/by/<path:regex>', methods=['GET'])
 @login_required
 @insert_request_user
 @right_required('base.framework.type.view')
