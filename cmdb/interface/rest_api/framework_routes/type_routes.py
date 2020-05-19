@@ -44,41 +44,43 @@ with current_app.app_context():
 @insert_request_user
 @right_required('base.framework.type.view')
 def get_types(request_user: User):
-    """
-    Get all types as a list
-    
-    Returns:
-        200 - List of all types
-        204 - Empty content no types in database
-    """
+    """Get all types as a list"""
     try:
         type_list = object_manager.get_all_types()
-    except ObjectManagerInitError as err:
-        LOGGER.error(err.message)
-        return abort(500)
-    except ObjectManagerGetError as err:
-        LOGGER.error(f'Error while getting all types as list: {err.message}')
-        return abort(500)
+    except (ObjectManagerInitError, ObjectManagerGetError) as err:
+        return abort(500, err.message)
     if len(type_list) == 0:
         return make_response(type_list, 204)
     return make_response(type_list)
 
 
-@type_blueprint.route('/by/<string:regex>/', methods=['GET'])
-@type_blueprint.route('/by/<string:regex>', methods=['GET'])
+@type_blueprint.route('/find/<string:regex>/', defaults={'regex_options': 'imsx'}, methods=['GET'])
+@type_blueprint.route('/find/<string:regex>', defaults={'regex_options': 'imsx'}, methods=['GET'])
+@type_blueprint.route('/find/<string:regex>/<string:regex_options>/', methods=['GET'])
+@type_blueprint.route('/find/<string:regex>/<string:regex_options>', methods=['GET'])
 @login_required
 @insert_request_user
 @right_required('base.framework.type.view')
-def get_types_by_name(regex: str, request_user: User):
+def find_types_by_name(regex: str, regex_options: str, request_user: User):
     query_builder = QueryBuilder()
 
-    query_name = query_builder.regex_('name', f'{regex}', 'imsx')
-    query_label = query_builder.regex_('label', f'{regex}', 'ims')
+    if not regex or (regex == '') or regex is None or len(regex) == 0:
+        return abort(400, 'No valid selection parameter was passed!')
+
+    if any(ro not in 'imsx' for ro in regex_options):
+        return abort(400, 'No valid regex options!')
+
+    query_name = query_builder.regex_('name', f'{regex}', regex_options)
+    query_label = query_builder.regex_('label', f'{regex}', regex_options)
     query = query_builder.or_([query_name, query_label])
+
     try:
         type_list = object_manager.get_types_by(**query)
-    except ObjectManagerGetError as e:
-        return abort(500)
+    except ObjectManagerInitError as err:
+        return abort(500, err.message)
+    except ObjectManagerGetError as err:
+        return abort(400, err.message)
+
     if len(type_list) == 0:
         return make_response(type_list, 204)
     return make_response(type_list)
@@ -247,11 +249,19 @@ def count_types(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.type.view')
-def get_type_by_category(public_id, request_user: User):
+def get_types_by_category(public_id, request_user: User):
     try:
-        type_list = object_manager.get_types_by(**{'category_id': public_id})
-    except ObjectManagerGetError:
-        return abort(404, 'Not types in this Category')
+        category = object_manager.get_category(public_id=public_id)
+    except ObjectManagerGetError as err:
+        return abort(404, err.message)
+    if category.get_number_of_types() == 0:
+        return make_response([], 204)
+
+    type_ids = category.get_types()
+    try:
+        type_list = object_manager.get_types_by(public_id={'$in': type_ids})
+    except ObjectManagerGetError as err:
+        return abort(404, err.message)
     return make_response(type_list)
 
 

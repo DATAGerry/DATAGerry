@@ -344,11 +344,11 @@ class CmdbObjectManager(CmdbManagerBase):
             raise ObjectManagerGetError(err=e)
 
     def get_types_by(self, sort='public_id', **requirements):
-        ack = []
-        objects = self._get_many(collection=CmdbType.COLLECTION, sort=sort, **requirements)
-        for data in objects:
-            ack.append(CmdbType(**data))
-        return ack
+        try:
+            return [CmdbType(**data) for data in
+                    self._get_many(collection=CmdbType.COLLECTION, sort=sort, **requirements)]
+        except Exception as err:
+            raise ObjectManagerGetError(err=err)
 
     def group_type_by_value(self, value: str, match=None):
         """This method does not actually
@@ -433,7 +433,24 @@ class CmdbObjectManager(CmdbManagerBase):
         return self.dbm.count(collection=CmdbType.COLLECTION)
 
     def delete_type(self, public_id: int):
-        ack = self._delete(CmdbType.COLLECTION, public_id)
+        """Delete a type by the public id
+        Also removes the id from the category type list if existing
+        """
+        try:
+            ack = self._delete(CmdbType.COLLECTION, public_id)
+        except Exception as err:
+            raise ObjectManagerDeleteError(err=err)
+
+        if ack:
+            try:
+                category = self.get_category_by(types=public_id)
+                category.types.remove(public_id)
+                self.update_category(category=category)
+            # If no category with this ID
+            except ObjectManagerGetError:
+                pass
+            except ObjectManagerUpdateError as err:
+                LOGGER.error(err.message)
         if self._event_queue:
             event = Event("cmdb.core.objecttype.deleted", {"id": public_id})
             self._event_queue.put(event)
@@ -473,6 +490,7 @@ class CmdbObjectManager(CmdbManagerBase):
             raise ObjectManagerInitError(err)
 
     def get_categories_by(self, sort='public_id', **requirements: dict) -> List[CmdbCategory]:
+        """Get a list of categories by special requirements"""
         try:
             raw_categories = self._get_many(collection=CmdbCategory.COLLECTION, sort=sort, **requirements)
         except Exception as err:
@@ -488,11 +506,13 @@ class CmdbObjectManager(CmdbManagerBase):
             'Since the category structure has been changed this function no longer necessary')
 
     def get_category_tree(self) -> CategoryTree:
+        """Get the complete category tree"""
         try:
-            all_categories = self.get_all_categories()
+            categories = self.get_all_categories()
+            types = self.get_all_types()
         except Exception as err:
             raise ObjectManagerGetError(err=err)
-        return CategoryTree(categories=all_categories)
+        return CategoryTree(categories=categories, types=types)
 
     def get_category(self, public_id: int) -> CmdbCategory:
         """Get a category from the database"""
@@ -502,6 +522,8 @@ class CmdbObjectManager(CmdbManagerBase):
                 public_id=public_id)
         except Exception as err:
             raise ObjectManagerGetError(err=err)
+        if not raw_category:
+            raise ObjectManagerGetError(err=f'No category with the id: {public_id} was found')
         try:
             return CmdbCategory.from_data(raw_category)
         except Exception as err:

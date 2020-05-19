@@ -124,6 +124,7 @@ def find_categories_by_name(regex: str, regex_options: str, request_user: User):
 @insert_request_user
 @right_required('base.framework.category.view')
 def get_category_tree(request_user: User):
+    """HTTP GET call for full category tree"""
     try:
         tree = object_manager.get_category_tree()
     except ObjectManagerInitError as err:

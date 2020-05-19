@@ -13,8 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from typing import List
+from typing import List, Union
 
+from cmdb.framework import CmdbType
 from cmdb.framework.cmdb_dao import CmdbDAO
 
 
@@ -57,12 +58,12 @@ class CmdbCategory(CmdbDAO):
             return False
 
     def __init__(self, public_id: int, name: str, label: str = None, meta: __CmdbCategoryMeta = None,
-                 parent: int = None, types: List[int] = None):
+                 parent: int = None, types: Union[List[int], List[CmdbType]] = None):
         self.name: str = name
         self.label: str = label
         self.meta: CmdbCategory.__CmdbCategoryMeta = meta
         self.parent: int = parent
-        self.types: List[int] = types
+        self.types: Union[List[int], List[CmdbType]] = types
         super(CmdbCategory, self).__init__(public_id=public_id)
 
     @classmethod
@@ -119,7 +120,11 @@ class CmdbCategory(CmdbDAO):
         """Get the public id of the parent"""
         return self.parent
 
-    def get_types(self) -> List[int]:
+    def has_types(self) -> bool:
+        """Check if this category has types"""
+        return True if self.get_number_of_types() > 0 else False
+
+    def get_types(self) -> Union[List[int], List[CmdbType]]:
         """Get list of type ids in this category"""
         if not self.types:
             self.types = []
@@ -131,24 +136,30 @@ class CmdbCategory(CmdbDAO):
 
 
 class CategoryTree:
+    """Base tree holder"""
+
     class CategoryNode:
         """Class of a category node inside the category tree"""
 
-        def __init__(self, category: CmdbCategory, children: List["CategoryTree.CategoryNode"]):
+        def __init__(self, category: CmdbCategory, children: List["CategoryTree.CategoryNode"] = None,
+                     types: List[CmdbType] = None):
             self.category: CmdbCategory = category
             self.children: List["CategoryTree.CategoryNode"] = children or []
+            self.types: List[CmdbType] = [type_ for type_ in types if type_.public_id in self.category.types]
 
         @classmethod
         def to_json(cls, instance: "CategoryTree.CategoryNode"):
             """Get the node as json"""
             return {
                 'category': CmdbCategory.to_json(instance.category),
-                'children': [CategoryTree.CategoryNode.to_json(child_node) for child_node in instance.children]
+                'children': [CategoryTree.CategoryNode.to_json(child_node) for child_node in instance.children],
+                'types': [CmdbType.to_json(type) for type in instance.types]
             }
 
-    def __init__(self, categories: List[CmdbCategory]):
+    def __init__(self, categories: List[CmdbCategory], types: List[CmdbType] = None):
         self._categories = categories
-        self._tree: List[CategoryTree.CategoryNode] = self.__create_tree(self._categories)
+        self._types = types
+        self._tree: List[CategoryTree.CategoryNode] = self.__create_tree(self._categories, types=self._types)
 
     def __len__(self) -> int:
         """Get length of tree - this means the number of root categories"""
@@ -158,17 +169,21 @@ class CategoryTree:
     def tree(self) -> List[CategoryNode]:
         """Get the tree"""
         if not self._tree:
-            self._tree = CategoryTree.__create_tree(self._categories)
+            self._tree = CategoryTree.__create_tree(self._categories, types=self._types)
         return self._tree
 
     @classmethod
-    def __create_tree(cls, categories, parent: int = None) -> List[CategoryNode]:
-        """Generate the category tree from list structure"""
-        tree = []
-        for category in [category for category in categories if category.get_parent() == parent]:
-            children = CategoryTree.__create_tree(categories, category.get_public_id())
-            tree.append(CategoryTree.CategoryNode(category, children))
-        return tree
+    def __create_tree(cls, categories, parent: int = None, types: List[CmdbType] = None) -> List[CategoryNode]:
+        """
+        Generate the category tree from list structure
+        Args:
+            categories: list of root/child categories
+            parent: the parent id of the current subset, None if root list
+            types: list of all possible types
+        """
+        return [category for category in [CategoryTree.CategoryNode(category, CategoryTree.__create_tree(
+            categories, category.get_public_id(), types), types) for category in categories if
+                                          category.get_parent() == parent]]
 
     @classmethod
     def from_data(cls, raw_categories: List[dict]) -> "CategoryTree":
