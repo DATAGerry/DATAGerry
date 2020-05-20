@@ -126,7 +126,7 @@ def add_type(request_user: User):
         new_type_data['creation_time'] = datetime.utcnow()
     except TypeError as e:
         LOGGER.warning(e)
-        abort(400)
+        return abort(400)
     try:
         type_instance = CmdbType(**new_type_data)
     except CMDBError as e:
