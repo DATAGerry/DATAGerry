@@ -4,19 +4,31 @@
       <li class="nav-title">General</li>
       <li class="nav-item">
         <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-          <fa-icon icon="tachometer-alt"></fa-icon> Dashboard</a>
+          <fa-icon icon="tachometer-alt"></fa-icon>
+          Dashboard</a>
       </li>
       <li class="nav-item">
         <a *permissionLink="['base.framework.object.add']"
            class="nav-link" routerLink="/framework/object/add" routerLinkActive="active">
-          <fa-icon icon="plus"></fa-icon> Add Object</a>
+          <fa-icon icon="plus"></fa-icon>
+          Add Object</a>
       </li>
-      <div id="sidebar-categories">
-        <li class="nav-title">Object Menu</li>
-        <input id="category_filter" class="form-control form-control-sm" type="text" placeholder="Filter.." [formControl]="filterTerm">
+      <div id="sidebar-categories" *ngIf="categoryTree">
+        <li class="nav-title">Categories</li>
+        <input id="category_filter" class="form-control form-control-sm" type="text" placeholder="Filter.."
+               [formControl]="filterTerm">
         <div class="list-group panel category_list">
-          <cmdb-sidebar-category *ngFor="let category of categoryTree;"
-                                 [categoryData]="category"></cmdb-sidebar-category>
+          <cmdb-sidebar-category *ngFor="let categoryNode of categoryTree;"
+                                 [categoryNode]="categoryNode"></cmdb-sidebar-category>
+          <ng-container *ngIf="unCategorizedTypes">
+            <a [routerLink]="['/framework/object/type/', type.public_id]" routerLinkActive="active"
+               *ngFor="let type of unCategorizedTypes" class="list-group-item">
+              <span class="shorten-long-text" data-toggle="tooltip" title="{{type.label}}">
+                  <i *ngIf="type.render_meta['icon']" class="{{type.render_meta['icon']}}"
+                     aria-hidden="true"></i> {{type.label}}
+              </span>
+            </a>
+          </ng-container>
         </div>
       </div>
     </ul>

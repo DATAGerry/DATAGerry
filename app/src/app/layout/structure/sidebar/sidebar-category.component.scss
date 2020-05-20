@@ -1,9 +1,6 @@
 @import "~src/scss/variables";
 
-.shorten-long-text{
-  width: calc(#{$sidebar-width} - 75px);
-  display: inline-block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.collapse-element {
+  margin-left: -30px;
+  margin-top: 1px;
 }

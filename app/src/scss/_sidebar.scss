@@ -110,6 +110,14 @@ $sidebar-borders: (
     }
   }
 
+  .shorten-long-text {
+    width: calc(#{$sidebar-width} - 75px);
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .nav-dropdown-toggle {
     i:last-of-type, svg:last-of-type {
       float: right;

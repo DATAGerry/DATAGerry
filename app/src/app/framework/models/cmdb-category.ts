@@ -17,12 +17,14 @@
 */
 
 import { CmdbDao } from './cmdb-dao';
+import { CmdbType } from './cmdb-type';
 
 
 export class CmdbCategory implements CmdbDao {
 
   // tslint:disable: variable-name
   public public_id: number;
+  // tslint:enable
   public name: string;
   public label: string;
   public icon: string;
@@ -31,16 +33,15 @@ export class CmdbCategory implements CmdbDao {
     order: number
   };
   public parent: any;
-  // tslint:enable
 }
 
-export class CmdbCategoryNode{
-  
-}
-
-export class CmdbCategoryTree {
-
+export class CmdbCategoryNode {
   public category: CmdbCategory;
+  public children: CmdbCategoryNode[];
+  public types: CmdbType[];
+}
+
+export class CmdbCategoryTree extends Array<CmdbCategoryNode> {
 
 }
 

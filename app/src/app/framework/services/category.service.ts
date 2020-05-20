@@ -52,16 +52,9 @@ export const checkCategoryExistsValidator = (categoryService: CategoryService<Cm
 export class CategoryService<T = CmdbCategory> implements ApiService {
 
   public servicePrefix: string = 'category';
-  private categoryList: CmdbCategory[];
 
   constructor(private api: ApiCallService, private backend: HttpBackend) {
-    this.getCategoryList().subscribe((list: CmdbCategory[]) => {
-      this.categoryList = list;
-    });
-  }
 
-  public findCategory(publicID: number): CmdbCategory {
-    return this.categoryList.find(category => category.public_id === publicID);
   }
 
   public getCategory(publicID: number) {
@@ -77,23 +70,13 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
 
   public getCategoriesBy(regex: string): Observable<T[]> {
     regex = ValidatorService.validateRegex(regex).trim();
-    return this.api.callGet<CmdbCategory[]>(this.servicePrefix + '/by/' + encodeURIComponent(regex)).pipe(
+    return this.api.callGet<CmdbCategory[]>(this.servicePrefix + '/find/' + encodeURIComponent(regex)).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
     );
   }
 
-  public getRootCategory() {
-    return this.api.callGet<CmdbCategory>(this.servicePrefix + '/root/').pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
-  }
 
   public getCategoryList() {
     return this.api.callGet<CmdbCategory[]>(this.servicePrefix + '/').pipe(
@@ -107,7 +90,7 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
   }
 
   public getCategoryTree() {
-    return this.api.callGet<CmdbCategory[]>(this.servicePrefix + '/tree').pipe(
+    return this.api.callGet<CmdbCategory[]>(this.servicePrefix + '/tree/').pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];

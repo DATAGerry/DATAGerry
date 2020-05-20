@@ -20,43 +20,25 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { CategoryRoutingModule } from './category-routing.module';
-import { CategoryListComponent } from './category-list/category-list.component';
 import { DndModule } from 'ngx-drag-drop';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LayoutModule } from '../../layout/layout.module';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { CategoryAddComponent } from './category-add/category-add.component';
-import { FilterPipe } from './filter.pipe';
-import { DataTablesModule } from 'angular-datatables';
-import { CategoryEditComponent } from './category-edit/category-edit.component';
-import { BuildCategoryFormComponent } from './build-category-form/build-category-form.component';
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
-import {AuthModule} from "../../auth/auth.module";
+import { CategoryComponent } from './category.component';
 
 @NgModule({
-  declarations: [
-    CategoryListComponent,
-    CategoryAddComponent,
-    FilterPipe,
-    CategoryEditComponent,
-    BuildCategoryFormComponent],
-  exports: [
-    FilterPipe
-  ],
-    imports: [
-        CommonModule,
-        CategoryRoutingModule,
-        DndModule,
-        ReactiveFormsModule,
-        LayoutModule,
-        NgSelectModule,
-        FontAwesomeModule,
-        FormsModule,
-        DataTablesModule,
-        SweetAlert2Module,
-        AuthModule
-    ]
+  declarations: [CategoryComponent],
+  imports: [
+    CommonModule,
+    CategoryRoutingModule,
+    DndModule,
+    ReactiveFormsModule,
+    LayoutModule,
+    NgSelectModule,
+    FontAwesomeModule,
+    FormsModule
+  ]
 })
 export class CategoryModule {
 }

@@ -18,9 +18,11 @@
 
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import { CmdbCategoryTree } from '../../../framework/models/cmdb-category';
+import { CategoryService } from '../../../framework/services/category.service';
+import { Subscription } from 'rxjs';
+import { CmdbType } from '../../../framework/models/cmdb-type';
 import { TypeService } from '../../../framework/services/type.service';
-import { SidebarService } from '../../services/sidebar.service';
-import {CmdbType} from "../../../framework/models/cmdb-type";
 
 @Component({
   selector: 'cmdb-sidebar',
@@ -28,62 +30,34 @@ import {CmdbType} from "../../../framework/models/cmdb-type";
   styleUrls: ['./sidebar.component.scss'],
 })
 export class SidebarComponent implements OnInit, OnDestroy {
-  public categoryTree: any;
-  private defaultCategoryTree: any[];
-  private filterCategoryTree: any[];
+  // Category data
+  public categoryTree: CmdbCategoryTree;
+  private categoryTreeSubscription: Subscription;
+  // Type data
+  public unCategorizedTypes: CmdbType[] = [];
+  private unCategorizedTypesSubscription: Subscription;
+  // Filter
   public filterTerm: FormControl = new FormControl('');
 
-  constructor(private typeService: TypeService, private sidebarService: SidebarService, private renderer: Renderer2) {
-
+  constructor(private categoryService: CategoryService, private typeService: TypeService, private renderer: Renderer2) {
+    this.categoryTreeSubscription = new Subscription();
+    this.unCategorizedTypesSubscription = new Subscription();
   }
 
   public ngOnInit(): void {
     this.renderer.addClass(document.body, 'sidebar-fixed');
-    this.sidebarService.categoryTree.asObservable().subscribe(tree => {
-        this.categoryTree = tree;
-        this.defaultCategoryTree = tree;
+    this.categoryTreeSubscription = this.categoryService.getCategoryTree().subscribe((categoryTree: CmdbCategoryTree) => {
+       this.categoryTree = categoryTree;
     });
-
-    this.filterTerm.statusChanges.subscribe(() => {
-      this.filterCategoryTree = [];
-      this.categoryTree = this.transform(this.categoryTree, this.filterTerm.value);
+    this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes().subscribe((types: CmdbType[]) => {
+      this.unCategorizedTypes = types;
     });
   }
 
   public ngOnDestroy(): void {
+    this.categoryTreeSubscription.unsubscribe();
+    this.unCategorizedTypesSubscription.unsubscribe();
     this.renderer.removeClass(document.body, 'sidebar-fixed');
   }
 
-  private transform(filterList: any[], searchText: string): any[] {
-    if (!filterList) {
-      return [];
-    }
-    if (!searchText) {
-      return this.defaultCategoryTree;
-    }
-
-    searchText = searchText.toLowerCase();
-
-    filterList.forEach(it => {
-      let isAvailable = it.category.label.toLowerCase().includes(searchText);
-      if (isAvailable) {
-        if (this.filterCategoryTree.includes(it) === false) {
-          this.filterCategoryTree.push(it);
-        }
-      } else {
-        this.typeService.getTypeListByCategory(it.category.public_id).subscribe(typeList => {
-          for (const obj of typeList) {
-            isAvailable = obj.label.toLowerCase().includes(searchText);
-            if (isAvailable) {
-              if (this.filterCategoryTree.includes(it) === false) {
-                this.filterCategoryTree.push(it);
-              }
-            }
-          }
-        });
-      }
-      this.transform(it.children, searchText);
-    });
-    return this.filterCategoryTree;
-  }
 }
