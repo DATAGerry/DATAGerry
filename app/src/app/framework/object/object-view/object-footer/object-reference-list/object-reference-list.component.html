@@ -19,7 +19,13 @@
       <i class="{{reference?.type_information?.icon}}"></i> {{reference?.type_information?.type_label}}
       #{{reference?.object_information?.object_id}}
       <span *ngFor="let sum of reference?.summaries; let last = last; let first = first">
-        <span *ngIf="first"> - </span>{{sum.value}}<span *ngIf="!last"> | </span>
+        <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
+            <span *ngIf="first"> - </span>{{sum.value}}
+        </ng-template>
+        <ng-template #templateDate>
+            <span *ngIf="first"> - </span>{{(sum.value && sum.value.$date)? (sum.value.$date | date:"dd/MM/yyyy") : " - "}}
+        </ng-template>
+        <span *ngIf="!last"> | </span>
       </span>
     </td>
     <td>

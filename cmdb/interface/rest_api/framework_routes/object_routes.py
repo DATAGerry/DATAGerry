@@ -177,7 +177,7 @@ def get_dt_filter_objects_by_type(type_id, request_user: User):
 
         # Search search term over entire object
         or_conditions = []
-        if isinstance(search_for, str) and not isinstance(search_for, bool):
+        if not isinstance(search_for, bool):
             search_term = {'$regex': str(search_for), '$options': 'i'}
         else:
             search_term = search_for
