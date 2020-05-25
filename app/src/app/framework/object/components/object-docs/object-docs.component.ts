@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { ObjectDocument } from '../../../models/cmdb-documents';
+import { DocapiService } from '../../../../docapi/docapi.service';
 
 @Component({
   selector: 'cmdb-object-docs',
@@ -9,14 +10,12 @@ import { ObjectDocument } from '../../../models/cmdb-documents';
 })
 export class ObjectDocsComponent implements OnInit {
 
-  docs: ObjectDocument[] = [
-    {id: 1, name: 'label', label: 'Label'},
-    {id: 2, name: 'contract', label: 'Support Contract'}
-  ];
+  docs: ObjectDocument[];
 
-  constructor() { }
+  constructor(private docapiService: DocapiService) { }
 
   ngOnInit() {
+    this.docs = this.docapiService.getObjectDocumentsForType();
   }
 
 }
