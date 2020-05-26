@@ -15,4 +15,10 @@ $breadcrumb-height: 46px;
   li {
     line-height: 1.8;
   }
+
+  #active-switch {
+    overflow: hidden;
+    margin-left: auto;
+    padding-left: 3.25rem
+  }
 }
