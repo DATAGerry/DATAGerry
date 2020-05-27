@@ -15,8 +15,8 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export class ObjectDocument {
-  public id: number;
+export class DocTemplate {
+  public public_id: number;
   public name: string;
   public label: string;
 }

@@ -98,6 +98,10 @@ export class ApiCallService {
     return this.http.delete<T>(this.apiURL + route, httpDeleteOptions).pipe(catchError(ApiCallService.handleError));
   }
 
+  public callGetRoute<T>(route: string, options: any = httpOptions) {
+    return this.http.get<T>(this.apiURL + route, options);
+  }
+
   public callPostRoute<T>(route: string, data, options: any = httpOptions) {
     return this.http.post<T>(this.apiURL + route, data, options);
   }

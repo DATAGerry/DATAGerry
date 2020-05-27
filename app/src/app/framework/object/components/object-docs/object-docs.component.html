@@ -7,7 +7,7 @@
       <ul class="fa-ul">
         <li *ngFor="let doc of docs">
           <i class="fas fa-file-alt mr-1" aria-hidden="true"></i>
-          <a class="card-link" target="_blank">{{doc.label}}</a>
+          <a class="card-link" [routerLink]="" (click)="downloadDocument(doc.public_id, renderResult.object_information.object_id, doc.name)">{{doc.label}}</a>
         </li>
       </ul>
     </div>
