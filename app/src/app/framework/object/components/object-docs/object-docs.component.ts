@@ -30,13 +30,13 @@ import { FileSaverService } from 'ngx-filesaver';
 })
 export class ObjectDocsComponent implements OnInit {
 
-  @Input() renderResult: RenderResult = undefined;
+  @Input() renderResult: RenderResult;
   docs: DocTemplate[];
 
   constructor(private docapiService: DocapiService, private fileSaverService: FileSaverService) { }
 
   ngOnInit() {
-    this.docapiService.getDocTemplateList().subscribe((docs: DocTemplate[]) => {
+    this.docapiService.getObjectDocTemplateList(39).subscribe((docs: DocTemplate[]) => {
         this.docs = docs;
     });
   }

@@ -51,6 +51,23 @@ export class DocapiService<T = DocTemplate> implements ApiService {
     );
   }
 
+
+  getObjectDocTemplateList(typeId: number) : Observable<T[]> {
+    const searchfilter = {
+        template_type: 'OBJECT',
+        template_parameters: { type: typeId }
+    }
+    return this.api.callGet<T>(`${ this.servicePrefix }/template/by/${JSON.stringify(searchfilter)}`).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
+  }
+
+
   getRenderedObjectDoc(templateId: number, objectId: number) {
     return this.api.callGetRoute<any>(`${ this.servicePrefix }/template/${ templateId }/render/${ objectId }`, fileHttpOptions);
   }

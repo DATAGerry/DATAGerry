@@ -63,6 +63,20 @@ def get_template_list(request_user: User):
     return make_response(tpl_list)
 
 
+@docapi_blueprint.route('/template/by/<string:searchfilter>/', methods=['GET'])
+@docapi_blueprint.route('/template/by/<string:searchfilter>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.framework.object.view')
+def get_template_list_filtered(searchfilter: str, request_user: User):
+    try:
+        filterdict = json.loads(searchfilter)
+        tpl = docapi_tpl_manager.get_templates_by(**filterdict)
+    except DocapiTemplateManagerGetError as err:
+        return abort(404, err.message)
+    return make_response(tpl)
+
+
 @docapi_blueprint.route('/template/<int:public_id>/', methods=['GET'])
 @docapi_blueprint.route('/template/<int:public_id>', methods=['GET'])
 @login_required

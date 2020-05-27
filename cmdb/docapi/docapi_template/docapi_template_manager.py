@@ -57,26 +57,25 @@ class DocapiTemplateManager(CmdbManagerBase):
                 continue
         return tpl_list
 
+    def get_templates_by(self, **requirements):
+        try:
+            ack = []
+            templates = self._get_many(collection=DocapiTemplate.COLLECTION, limit=0, **requirements)
+            for template in templates:
+                ack.append(DocapiTemplate(**template))
+            return ack
+        except (CMDBError, Exception) as e:
+            raise DocapiTemplateManagerGetError(err=e)
+
     def get_template_by_name(self, **requirements) -> DocapiTemplate:
         try:
             templates = self._get_many(collection=DocapiTemplate.COLLECTION, limit=1, **requirements)
             if len(templates) > 0:
-                return DocapiTemplates(**templates[0])
+                return DocapiTemplate(**templates[0])
             else:
                 raise DocapiTempateManagerGetError(err='More than 1 type matches this requirement')
         except (CMDBError, Exception) as e:
             raise DocapiTemplateManagerGetError(err=e)
-
-    def get_template_by_args(self, **requirements) -> DocapiTemplate:
-        try:
-            templates = self._get_many(collection=DocapiTemplate.COLLECTION, limit=1, **requirements)
-            if len(templates) > 0:
-                return DocapiTemplates(**templates[0])
-            else:
-                raise DocapiTempateManagerGetError(err='More than 1 type matches this requirement')
-        except (CMDBError, Exception) as e:
-            raise DocapiTemplateManagerGetError(err=e)
-
 
     def insert_template(self, data: (DocapiTemplate, dict)) -> int:
         """
