@@ -52,7 +52,6 @@ $ng-select-value-padding-left: 10px !default;
 $ng-select-value-font-size: 0.9em !default;
 
 .ng-select {
-  height: auto !important;
   &.ng-select-opened {
     > .ng-select-container {
       background: $ng-select-bg;
