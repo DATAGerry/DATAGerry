@@ -44,4 +44,10 @@ export class DateComponent extends RenderField implements  OnInit {
     }
     return currentDate;
   }
+
+  public copyToClipboard() {
+    const selBox = document.createElement('textarea');
+    selBox.value = formatDate(this.currentDate, 'dd/MM/yyyy', 'en-US');
+    this.generateDataForClipboard(selBox);
+  }
 }
