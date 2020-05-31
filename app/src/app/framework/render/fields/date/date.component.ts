@@ -30,9 +30,7 @@ export class DateComponent extends RenderField implements  OnInit {
     }
     this.parentFormGroup.get(this.data.name).valueChanges.subscribe(value => {
       if (typeof value === 'string') {
-        const newDate = new Date(value);
-        this.data.value = {$date: newDate.getTime()};
-        this.parentFormGroup.get(this.data.name).setValue({$date: newDate.getTime()}, {onlySelf: true});
+        this.parentFormGroup.get(this.data.name).setErrors({'incorrect': true})
       }
     });
   }
