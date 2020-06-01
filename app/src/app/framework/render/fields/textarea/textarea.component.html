@@ -16,7 +16,6 @@
           </div>
         </ng-container>
         <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
-          <div class="input-group">
             <ng-container *ngIf="mode == MODES.Bulk">
               <cmdb-object-bulk-input-appends [data]="data"
                                               [controll]="controller"
@@ -27,7 +26,6 @@
                       [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
                  'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"></textarea>
             <cmdb-input-appends [data]="data" [controll]="controller" [parentFormGroup]="parentFormGroup"></cmdb-input-appends>
-          </div>
         </ng-container>
         <div *ngSwitchDefault>
           <cmdb-mode-error></cmdb-mode-error>
