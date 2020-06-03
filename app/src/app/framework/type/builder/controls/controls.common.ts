@@ -53,7 +53,7 @@ export function randomName(desc: string) {
 
 export class Controller {
 
-  private typeController: ControlsCommon;
+  public typeController: ControlsCommon;
 
   constructor(public name: string, public descr: any) {
     this.typeController = new descr();

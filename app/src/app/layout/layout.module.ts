@@ -56,6 +56,9 @@ import { IntroComponent } from './intro/intro.component';
 import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-step-intro.component';
 
 import { JwPaginationComponent } from 'jw-angular-pagination';
+import { TreeModule } from 'angular-tree-component';
+import { NameDirective } from './directives/name.directive';
+import { NameGuidePipe } from './pipes/name-guide.pipe';
 
 export const LAYOUT_COMPONENT_ROUTES: Routes = [
   {
@@ -105,7 +108,9 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     ChartsComponent,
     LoadingScreenComponent,
     StepByStepIntroComponent,
-    JwPaginationComponent
+    JwPaginationComponent,
+    NameDirective,
+    NameGuidePipe
   ],
   exports: [
     NgxSpinnerComponent,
@@ -122,7 +127,9 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     UserDisplayComponent,
     ChartsComponent,
     JwPaginationComponent,
-    SidebarComponent
+    SidebarComponent,
+    NameDirective,
+    NameGuidePipe
   ],
   imports: [
     CommonModule,
@@ -138,6 +145,7 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     FontAwesomeModule,
     IconPickerModule,
     SweetAlert2Module.forRoot(),
+    TreeModule.forRoot(),
     ToastModule,
     AuthModule
   ],

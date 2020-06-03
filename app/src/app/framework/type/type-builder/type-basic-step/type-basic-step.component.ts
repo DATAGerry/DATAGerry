@@ -19,7 +19,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { checkTypeExistsValidator, TypeService } from '../../../services/type.service';
-import { CategoryService } from '../../../services/category.service';
 import { CmdbMode } from '../../../modes.enum';
 
 
@@ -35,12 +34,6 @@ export class TypeBasicStepComponent implements OnInit {
     if (data !== undefined) {
       this.basicForm.patchValue(data);
       this.basicMetaIconForm.patchValue(data.render_meta === undefined ? '' : data.render_meta);
-      const promise = this.categoryService.getCategory(data.category_id).toPromise();
-      promise.then(() => {
-        this.basicCategoryForm.get('category_id').setValue(data.category_id);
-      }, (error) => {
-        this.basicCategoryForm.get('category_id').setValue(null);
-      });
     }
   }
 
@@ -49,9 +42,8 @@ export class TypeBasicStepComponent implements OnInit {
 
   public basicForm: FormGroup;
   public basicMetaIconForm: FormGroup;
-  public basicCategoryForm: FormGroup;
 
-  constructor(private typeService: TypeService, private categoryService: CategoryService) {
+  constructor(private typeService: TypeService) {
     this.basicForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl('', Validators.required),
@@ -60,9 +52,6 @@ export class TypeBasicStepComponent implements OnInit {
     });
     this.basicMetaIconForm = new FormGroup({
       icon: new FormControl(''),
-    });
-    this.basicCategoryForm = new FormGroup({
-      category_id: new FormControl(0)
     });
   }
 
@@ -84,7 +73,6 @@ export class TypeBasicStepComponent implements OnInit {
         this.basicForm.get('name').markAsDirty({ onlySelf: true });
         this.basicForm.get('name').markAsTouched({ onlySelf: true });
       });
-      this.basicCategoryForm.get('category_id').setValidators(Validators.required);
     } else if (this.mode === CmdbMode.Edit) {
       this.basicForm.markAllAsTouched();
     }

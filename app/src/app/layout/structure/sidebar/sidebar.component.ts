@@ -32,31 +32,53 @@ import { TypeService } from '../../../framework/services/type.service';
 export class SidebarComponent implements OnInit, OnDestroy {
   // Category data
   public categoryTree: CmdbCategoryTree;
+  private sourceCategoryTree: CmdbCategoryTree;
   private categoryTreeSubscription: Subscription;
   // Type data
   public unCategorizedTypes: CmdbType[] = [];
   private unCategorizedTypesSubscription: Subscription;
   // Filter
   public filterTerm: FormControl = new FormControl('');
+  private filterTermSubscription: Subscription;
 
   constructor(private categoryService: CategoryService, private typeService: TypeService, private renderer: Renderer2) {
     this.categoryTreeSubscription = new Subscription();
     this.unCategorizedTypesSubscription = new Subscription();
+    this.filterTermSubscription = new Subscription();
   }
 
   public ngOnInit(): void {
     this.renderer.addClass(document.body, 'sidebar-fixed');
     this.categoryTreeSubscription = this.categoryService.getCategoryTree().subscribe((categoryTree: CmdbCategoryTree) => {
-       this.categoryTree = categoryTree;
+      this.sourceCategoryTree = categoryTree;
+      this.categoryTree = this.sourceCategoryTree;
     });
     this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes().subscribe((types: CmdbType[]) => {
       this.unCategorizedTypes = types;
     });
+    this.filterTermSubscription = this.filterTerm.statusChanges.subscribe(() => {
+      this.categoryTree = this.transformFilter(this.sourceCategoryTree, this.filterTerm.value);
+    });
+  }
+
+  private transformFilter(tree: CmdbCategoryTree, searchText: string): CmdbCategoryTree {
+    if (!searchText) {
+      return tree;
+    }
+    const runtimeTree = new CmdbCategoryTree();
+    for (const node of tree) {
+      if (node.category.label.toLowerCase().includes(searchText.toLowerCase())) {
+        runtimeTree.push(node);
+        continue;
+      }
+    }
+    return runtimeTree;
   }
 
   public ngOnDestroy(): void {
     this.categoryTreeSubscription.unsubscribe();
     this.unCategorizedTypesSubscription.unsubscribe();
+    this.filterTermSubscription.unsubscribe();
     this.renderer.removeClass(document.body, 'sidebar-fixed');
   }
 

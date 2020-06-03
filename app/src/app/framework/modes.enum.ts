@@ -29,9 +29,3 @@ export enum LogMode {
   EDIT,
   ACTIVE_CHANGE
 }
-
-export enum CategoryMode {
-  Root,
-  Create,
-  Edit,
-}

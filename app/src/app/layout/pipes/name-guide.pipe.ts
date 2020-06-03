@@ -13,33 +13,22 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { CmdbDao } from './cmdb-dao';
-import { CmdbType } from './cmdb-type';
+import { Pipe, PipeTransform } from '@angular/core';
 
+@Pipe({
+  name: 'nameGuide'
+})
+export class NameGuidePipe implements PipeTransform {
 
-export class CmdbCategory implements CmdbDao {
+  /**
+   * Converts input values into our name guidelines.
+   * Letters will be transformed to lowercase and spaces replaced with hyphen.
+   */
+  transform(value: any, ...args: any[]): any {
+    return String(value).toLowerCase().replace(/ /g, '-');
+  }
 
-  // tslint:disable: variable-name
-  public public_id: number;
-  // tslint:enable
-  public name: string;
-  public label: string;
-  public icon: string;
-  public meta: {
-    icon: string,
-    order: number
-  };
-  public parent: any;
 }
-
-export class CmdbCategoryNode {
-  public category: CmdbCategory;
-  public children: CmdbCategoryTree;
-  public types: CmdbType[];
-}
-
-export class CmdbCategoryTree extends Array<CmdbCategoryNode> {}
-

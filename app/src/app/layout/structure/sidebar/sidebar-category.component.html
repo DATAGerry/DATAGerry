@@ -1,13 +1,11 @@
 <ng-container *ngIf="categoryNode">
-  <a href="#{{categoryNode.category.name}}"
-     class="list-group-item collapsed" data-toggle="collapse"
-     data-parent="#sidebar-categories"
-     aria-expanded="false">
-  <span class="shorten-long-text"
-        data-toggle="tooltip" title="{{categoryNode.category.label}}">
-      <i *ngIf="categoryNode.category.meta.icon" class="{{categoryNode.category.meta.icon}} "
-         aria-hidden="true"></i> {{categoryNode.category.label}}
-  </span>
+  <a href="#{{categoryNode.category.name}}" class="list-group-item collapsed" data-toggle="collapse"
+     data-parent="#sidebar-categories">
+    <span class="shorten-long-text"
+          data-toggle="tooltip" title="{{categoryNode.category.label}}">
+        <i [ngClass]="categoryNode.category.meta.icon ? categoryNode.category.meta.icon : 'far fa-folder-open'"></i>
+      {{categoryNode.category.label}}
+    </span>
   </a>
   <ul class="collapse collapse-element" id="{{categoryNode.category.name}}">
     <li class="list-group" *ngFor="let type of categoryNode.types;">
@@ -18,6 +16,13 @@
         <i class="{{type.render_meta['icon']}}" aria-hidden="true"></i> {{type.label}}
       </span>
         <span class="badge badge-primary badge-pill ml-2">{{0}}</span>
+      </a>
+    </li>
+    <li class="list-group" *ngIf="categoryNode.types.length == 0">
+      <a class="list-group-item d-flex justify-content-between align-items-center disabled">
+      <span class="shorten-long-text">
+        <i class="fas fa-times"></i> No types assigned
+      </span>
       </a>
     </li>
     <ng-template [ngIf]="categoryNode.children">

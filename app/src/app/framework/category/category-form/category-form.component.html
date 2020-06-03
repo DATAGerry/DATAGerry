@@ -1,0 +1,111 @@
+<div class="row">
+  <div class="col-lg-3 col-md-12">
+    <div class="card">
+      <div class="card-header">
+        Unassigned types
+      </div>
+      <div class="card-body">
+        <div class="list-group">
+          <div *ngFor="let type of unAssignedTypes" class="list-group-item list-group-item-action mt-2">
+            <div [dndDraggable]="type" [dndEffectAllowed]="effect"
+                 class="d-flex w-100 justify-content-between">
+              {{type.label}} #{{type.public_id}}
+              <span dndHandle><i class="fa fa-arrows-alt"></i></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <small>A type can only be assigned to one category.</small>
+      </div>
+    </div>
+  </div>
+  <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()" class="col-lg-9 col-md-12 needs-validation" novalidate>
+    <div class="card">
+      <div class="card-header">
+        Basic information
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="category-name">Name<span class="required">*</span>:</label>
+              <input [formControl]="name" type="text" class="form-control" id="category-name"
+                     placeholder="Enter a unique name" [value]="name.value | nameGuide"
+                     [ngClass]="{ 'is-valid': name.valid && (name.dirty || name.touched), 'is-invalid': name.invalid && (name.dirty || name.touched)}">
+              <small class="form-text text-muted float-left">Unique name with which the category can be
+                identified</small>
+              <div *ngIf="name.invalid && (name.dirty || name.touched)" class="invalid-feedback">
+                <div class="float-right" *ngIf="name.errors.required">
+                  This field is required
+                </div>
+                <div class="float-right" *ngIf="name.errors.categoryExists">
+                  A category with this name already exists
+                </div>
+              </div>
+              <div class="clearfix"></div>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="category-label">Label:</label>
+              <input formControlName="label" type="text" class="form-control" id="category-label"
+                     placeholder="Enter a display label"
+                     [ngClass]="{ 'is-valid': label.valid && (label.dirty || label.touched), 'is-invalid': label.invalid && (label.dirty || label.touched)}">
+              <small class="form-text text-muted">If the field is left blank, a titled variant of the name is
+                displayed.</small>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="category-meta-icon">Icon:</label>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="category-meta-icon-addon"><i [ngClass]="icon.value"></i></span>
+                </div>
+                <input [iconPicker] [ipPosition]="'bottom'" [formControl]="icon" type="text" class="form-control"
+                       id="category-meta-icon"
+                       [ipPlaceHolder]="'Choose an icon'" placeholder="Choose an icon"
+                       [ngClass]="{ 'is-valid': icon.valid && (icon.dirty || icon.touched), 'is-invalid': icon.invalid && (icon.dirty || icon.touched)}">
+              </div>
+              <small class="form-text text-muted">The icon is a meta value, which will only be visible in the
+                frontend.</small>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="form-group">
+              <label for="category-name">Parent:</label>
+              <ng-select formControlName="parent" placeholder="No parent category" [items]="categories"
+                         bindValue="public_id" bindLabel="label" class="form-control"
+                         [ngClass]="{ 'is-valid': parent.valid && (parent.dirty || parent.touched), 'is-invalid': parent.invalid && (parent.dirty || parent.touched)}">
+              </ng-select>
+            </div>
+          </div>
+        </div>
+        <hr/>
+        <div class="row">
+          <div class="col-md-12">
+            <section dndDropzone class="dnd" dndDragoverClass="drag-over-effect"
+                     (dndDrop)="onDrop($event)">
+              <div *ngIf="assignedTypes.length === 0" class="drop-zone" data-content="Drop type here"></div>
+              <div class="drop-zone" dndPlaceholderRef>Drop type here</div>
+              <div *ngFor="let type of assignedTypes"
+                   class="list-group-item list-group-item-action">
+                            <span class="d-flex justify-content-between align-items-center ">
+                              {{type.label}} # {{type.public_id}}
+                              <fa-icon icon="trash-alt" (click)="clickRemoveAssignedType(type)"></fa-icon>
+                            </span>
+              </div>
+
+            </section>
+          </div>
+        </div>
+        <hr/>
+        <button type="reset" class="btn btn-warning" (click)="clickReset()">Reset</button>
+        <button type="submit" class="btn btn-success">Save</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+{{categoryForm.getRawValue() | json}}

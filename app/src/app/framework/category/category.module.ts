@@ -26,9 +26,13 @@ import { LayoutModule } from '../../layout/layout.module';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { CategoryComponent } from './category.component';
+import { TreeModule } from 'angular-tree-component';
+import { CategoryAddComponent } from './category-add/category-add.component';
+import { CategoryFormComponent } from './category-form/category-form.component';
+import { IconPickerModule } from 'ngx-icon-picker';
 
 @NgModule({
-  declarations: [CategoryComponent],
+  declarations: [CategoryComponent, CategoryAddComponent, CategoryFormComponent],
   imports: [
     CommonModule,
     CategoryRoutingModule,
@@ -37,7 +41,9 @@ import { CategoryComponent } from './category.component';
     LayoutModule,
     NgSelectModule,
     FontAwesomeModule,
-    FormsModule
+    FormsModule,
+    TreeModule,
+    IconPickerModule
   ]
 })
 export class CategoryModule {

@@ -15,10 +15,11 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { CmdbCategoryTree } from '../models/cmdb-category';
+import { CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb-category';
 import { CategoryService } from '../services/category.service';
+import { ITreeOptions, TreeComponent, TreeNode } from 'angular-tree-component';
 
 @Component({
   selector: 'cmdb-category',
@@ -27,20 +28,53 @@ import { CategoryService } from '../services/category.service';
 })
 export class CategoryComponent implements OnInit, OnDestroy {
 
-  private categoryTreeSubscription: Subscription;
-  public categoryTree: CmdbCategoryTree;
-
 
   constructor(private categoryService: CategoryService) {
     this.categoryTreeSubscription = new Subscription();
   }
 
+  private categoryTreeSubscription: Subscription;
+  public categoryTree: CmdbCategoryTree;
+
+  public nodes: any[] = [];
+  @ViewChild(TreeComponent, { static: false }) tree: TreeComponent;
+
+  public treeOptions: ITreeOptions = {
+    displayField: 'name',
+    childrenField: 'children',
+    allowDrag: (node) => {
+      return true;
+    },
+    allowDrop: (node) => {
+      return true;
+    },
+    allowDragoverStyling: true
+  };
+
+  static convertNode(node: any): any {
+    const children = [];
+    for (const child of node.children) {
+      children.push(CategoryComponent.convertNode(child));
+    }
+    return {
+      data: node,
+      name: node.category.label,
+      id: node.category.public_id,
+      children
+    };
+  }
 
   public ngOnInit(): void {
     this.categoryTreeSubscription = this.categoryService.getCategoryTree().subscribe((categoryTree: CmdbCategoryTree) => {
       this.categoryTree = categoryTree;
+      for (const categoryNode of this.categoryTree) {
+        const node = CategoryComponent.convertNode(categoryNode);
+        this.nodes.push(node);
+      }
+      this.tree.treeModel.update();
     });
   }
+
 
   public ngOnDestroy(): void {
     this.categoryTreeSubscription.unsubscribe();

@@ -32,8 +32,8 @@ export class SidebarCategoryComponent implements OnInit {
   constructor(private typeService: TypeService) {
   }
 
-  ngOnInit() {
-    console.log(this.categoryNode);
+  public ngOnInit(): void {
+
   }
 
 }

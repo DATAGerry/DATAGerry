@@ -1,0 +1,6 @@
+$list-group-item-padding: 12px 16px;
+
+.category-tree {
+  width: $sidebar-nav-width;
+  @import "node";
+}

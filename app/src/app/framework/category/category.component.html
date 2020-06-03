@@ -1,3 +1,26 @@
-<pre>
-{{categoryTree | json}}
-</pre>
+<h1>Category
+  <div class="float-right">
+    <button [routerLink]="['/framework/category/add']" type="button" class="btn btn-primary">
+      <i class="fas fa-plus-circle"></i> Add
+    </button>
+    <button [routerLink]="['/framework/category/edit']" type="button" class="btn btn-secondary ml-2 text-white">
+      <i class="fas fa-edit"></i> Edit
+    </button>
+  </div>
+  <div class="clearfix"></div>
+</h1>
+<hr/>
+<div class="input-group mb-3">
+  <input type="text" class="form-control" #filter (keyup)="tree.treeModel.filterNodes(filter.value)"
+         placeholder="filter categories"/>
+  <div class="input-group-append">
+    <button class="btn btn-secondary" type="button" (click)="tree.treeModel.clearFilter()">Clear Filter</button>
+  </div>
+</div>
+<div id="category-tree" class="tree">
+  <tree-root #tree [nodes]="nodes" [options]="treeOptions">
+    <ng-template #treeNodeTemplate let-node let-index="index">
+      <span>{{ node.data.name }}</span>
+    </ng-template>
+  </tree-root>
+</div>

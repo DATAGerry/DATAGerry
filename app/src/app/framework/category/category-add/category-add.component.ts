@@ -16,30 +16,22 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { CmdbDao } from './cmdb-dao';
-import { CmdbType } from './cmdb-type';
+import { Component, OnInit } from '@angular/core';
 
+@Component({
+  selector: 'cmdb-category-add',
+  templateUrl: './category-add.component.html',
+  styleUrls: ['./category-add.component.scss']
+})
+export class CategoryAddComponent implements OnInit {
 
-export class CmdbCategory implements CmdbDao {
+  public formValid: boolean = false;
 
-  // tslint:disable: variable-name
-  public public_id: number;
-  // tslint:enable
-  public name: string;
-  public label: string;
-  public icon: string;
-  public meta: {
-    icon: string,
-    order: number
-  };
-  public parent: any;
+  constructor() {
+  }
+
+  public ngOnInit(): void {
+
+  }
+
 }
-
-export class CmdbCategoryNode {
-  public category: CmdbCategory;
-  public children: CmdbCategoryTree;
-  public types: CmdbType[];
-}
-
-export class CmdbCategoryTree extends Array<CmdbCategoryNode> {}
-

@@ -40,6 +40,10 @@
           <div class="dropdown-menu dropdown">
             <div class="dropdown-header">Framework</div>
             <a class="dropdown-item"
+               *permissionLink="'base.framework.object.add'" [routerLink]="['/framework/object']">
+              <i class="fas fa-object-group"></i> Objects
+            </a>
+            <a class="dropdown-item"
                *permissionLink="'base.framework.type.view'" [routerLink]="['/framework/type']">
               <i class="fas fa-object-group"></i> Types
             </a>

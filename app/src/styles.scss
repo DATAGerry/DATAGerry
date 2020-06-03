@@ -32,8 +32,9 @@
 @import "~@fortawesome/fontawesome-free-webfonts/css/fa-brands.css";
 @import "~@fortawesome/fontawesome-free-webfonts/css/fa-solid.css";
 
-/* import archwizard*/
+/* import archwizard */
 @import "~angular-archwizard/archwizard.scss";
+
 
 /* custom global modules */
 @import "scss/variables";
@@ -50,3 +51,9 @@
 @import "scss/card";
 @import "scss/gimmick";
 @import "scss/intro";
+@import "scss/sidebar/tree";
+@import "scss/sidebar/tree";
+@import "scss/dnd";
+
+/* import angular-tree-component */
+@import '~angular-tree-component/dist/angular-tree-component.css';
