@@ -272,7 +272,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       {data: 'object_information.author_name', title: 'Author', name: 'author_id'},
       {data: 'object_information.creation_time', title: 'Creation Time', name: 'creation_time',
         render(data) {
-          return that.datePipe.transform(data.$date, 'dd/MM/yyyy - h:mm:ss');
+          return that.datePipe.transform(data.$date, 'dd/MM/yyyy - HH:mm:ss');
         }
       },
       {
