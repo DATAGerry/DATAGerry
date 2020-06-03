@@ -1,0 +1,6 @@
+@import "~src/scss/variables";
+
+.custom-select:disabled {
+    color: $gray-700;
+    opacity: 1;
+}
