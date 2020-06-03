@@ -54,10 +54,10 @@ def get_types(request_user: User):
     return make_response(type_list)
 
 
-@type_blueprint.route('/find/<string:regex>/', defaults={'regex_options': 'imsx'}, methods=['GET'])
-@type_blueprint.route('/find/<string:regex>', defaults={'regex_options': 'imsx'}, methods=['GET'])
-@type_blueprint.route('/find/<string:regex>/<string:regex_options>/', methods=['GET'])
-@type_blueprint.route('/find/<string:regex>/<string:regex_options>', methods=['GET'])
+@type_blueprint.route('/find/<path:regex>/', defaults={'regex_options': 'imsx'}, methods=['GET'])
+@type_blueprint.route('/find/<path:regex>', defaults={'regex_options': 'imsx'}, methods=['GET'])
+@type_blueprint.route('/find/<path:regex>/<path:regex_options>/', methods=['GET'])
+@type_blueprint.route('/find/<path:regex>/<path:regex_options>', methods=['GET'])
 @login_required
 @insert_request_user
 @right_required('base.framework.type.view')

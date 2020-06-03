@@ -60,7 +60,6 @@ def get_categories(request_user: User):
 
     return make_response(categories_list)
 
-
 @categories_blueprint.route('/<int:public_id>/', methods=['GET'])
 @categories_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
@@ -77,10 +76,10 @@ def get_category(public_id: int, request_user: User):
     return make_response(CmdbCategory.to_json(category_instance))
 
 
-@categories_blueprint.route('/find/<string:regex>/', defaults={'regex_options': 'imsx'}, methods=['GET'])
-@categories_blueprint.route('/find/<string:regex>', defaults={'regex_options': 'imsx'}, methods=['GET'])
-@categories_blueprint.route('/find/<string:regex>/<string:regex_options>/', methods=['GET'])
-@categories_blueprint.route('/find/<string:regex>/<string:regex_options>', methods=['GET'])
+@categories_blueprint.route('/find/<path:regex>/', defaults={'regex_options': 'imsx'}, methods=['GET'])
+@categories_blueprint.route('/find/<path:regex>', defaults={'regex_options': 'imsx'}, methods=['GET'])
+@categories_blueprint.route('/find/<path:regex>/<string:regex_options>/', methods=['GET'])
+@categories_blueprint.route('/find/<path:regex>/<string:regex_options>', methods=['GET'])
 @login_required
 @insert_request_user
 @right_required('base.framework.category.view')
