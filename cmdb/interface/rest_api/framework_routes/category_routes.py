@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
 import json
@@ -28,7 +28,6 @@ from flask import request, abort, current_app
 
 from cmdb.search.query.query_builder import QueryBuilder
 from cmdb.user_management import User
-from cmdb.utils.wraps import deprecated
 
 try:
     from cmdb.utils.error import CMDBError

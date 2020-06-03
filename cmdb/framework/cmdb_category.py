@@ -62,6 +62,8 @@ class CmdbCategory(CmdbDAO):
         self.name: str = name
         self.label: str = label
         self.meta: CmdbCategory.__CmdbCategoryMeta = meta
+        if parent == public_id:
+            raise ValueError(f'Category {name} has his own ID as Parent')
         self.parent: int = parent
         self.types: Union[List[int], List[CmdbType]] = types
         super(CmdbCategory, self).__init__(public_id=public_id)
@@ -91,6 +93,7 @@ class CmdbCategory(CmdbDAO):
             'meta': {
                 'icon': meta.get_icon(),
                 'order': meta.get_order()
+
             },
             'parent': instance.get_parent(),
             'types': instance.get_types()
