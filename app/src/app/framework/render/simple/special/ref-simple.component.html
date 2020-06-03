@@ -10,7 +10,7 @@
         <span *ngIf="first"> - </span>{{sum.value}}
       </ng-template>
       <ng-template #templateDate>
-        <span *ngIf="first"> - </span>{{sum.value | date:"dd/MM/yyyy - hh:mm:ss"}}
+        <span *ngIf="first"> - </span>{{sum.value | date:"dd/MM/yyyy - HH:mm:ss"}}
       </ng-template>
       <span *ngIf="!last"> | </span>
     </span>
