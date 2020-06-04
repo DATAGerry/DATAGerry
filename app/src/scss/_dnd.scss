@@ -6,6 +6,8 @@ $dnd-border-style: dashed;
 
 $drag-over-transform: scale(1.0);
 
+$dnd-handle-cursor: grab;
+
 $dnd-dropzone-transition: all 500ms ease;
 $dnd-dropzone-padding: 15px;
 $dnd-dropzone-content-font-size: .8em;
@@ -30,11 +32,22 @@ $dnd-dropzone-content-color: $dnd-border-color;
         text-transform: $dnd-dropzone-content-transform;
         text-align: $dnd-dropzone-content-position;
         content: attr(data-content);
+
+      }
+
+      &:not(&:empty) {
+        &:after {
+          content: '';
+        }
       }
     }
 
   }
 
+}
+
+.dnd-handle{
+  cursor: $dnd-handle-cursor;
 }
 
 .drag-over-effect {

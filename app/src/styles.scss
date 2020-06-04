@@ -35,7 +35,6 @@
 /* import archwizard */
 @import "~angular-archwizard/archwizard.scss";
 
-
 /* custom global modules */
 @import "scss/variables";
 @import "scss/mixins";
@@ -54,6 +53,4 @@
 @import "scss/sidebar/tree";
 @import "scss/sidebar/tree";
 @import "scss/dnd";
-
-/* import angular-tree-component */
-@import '~angular-tree-component/dist/angular-tree-component.css';
+@import "scss/tree";

@@ -35,7 +35,6 @@
     "@types/chart.js": "^2.9.0",
     "angular-archwizard": "^5.0.0",
     "angular-datatables": "^8.0.0",
-    "angular-tree-component": "^8.5.6",
     "angularx-qrcode": "^1.6.4",
     "bootstrap": "^4.3.1",
     "chart.js": "^2.9.3",

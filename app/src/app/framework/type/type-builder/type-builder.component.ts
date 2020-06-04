@@ -29,6 +29,7 @@ import { CmdbMode } from '../../modes.enum';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { CmdbCategory } from '../../models/cmdb-category';
+import { SidebarService } from '../../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-type-builder',
@@ -57,7 +58,7 @@ export class TypeBuilderComponent implements OnInit {
 
   public constructor(private router: Router, private typeService: TypeService,
                      private toast: ToastService, private userService: UserService,
-                     private categoryService: CategoryService) {
+                     private sidebarService: SidebarService) {
 
   }
 
@@ -109,6 +110,7 @@ export class TypeBuilderComponent implements OnInit {
       let newTypeID = null;
       this.typeService.postType(this.typeInstance).subscribe(typeIDResp => {
           newTypeID = typeIDResp;
+          this.sidebarService.reload();
           this.router.navigate(['/framework/type/'], {queryParams: {typeAddSuccess: newTypeID}});
         },
         (error) => {
@@ -116,6 +118,7 @@ export class TypeBuilderComponent implements OnInit {
         });
     } else if (this.mode === CmdbMode.Edit) {
       this.typeService.putType(this.typeInstance).subscribe((updateResp: CmdbType) => {
+          this.sidebarService.reload();
           this.toast.show(`Type was successfully edit: TypeID: ${updateResp.public_id}`);
           this.router.navigate(['/framework/type/'], {queryParams: {typeEditSuccess: updateResp.public_id}});
         },

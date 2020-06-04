@@ -15,12 +15,11 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { CmdbMode } from '../../modes.enum';
 import { CmdbCategory } from '../../models/cmdb-category';
-import { TypeService } from '../../services/type.service';
 import { CmdbType } from '../../models/cmdb-type';
 import { CategoryService, checkCategoryExistsValidator } from '../../services/category.service';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
@@ -30,7 +29,7 @@ import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
   templateUrl: './category-form.component.html',
   styleUrls: ['./category-form.component.scss']
 })
-export class CategoryFormComponent implements OnInit, OnDestroy {
+export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
 
   /**
    * Modification mode for the form and validation.
@@ -39,9 +38,14 @@ export class CategoryFormComponent implements OnInit, OnDestroy {
   @Input() public mode: CmdbMode = CmdbMode.Create;
   /**
    * Preset data from existing category.
-   * Will be ignored if mode is EDIT.
+   * Will be ignored if mode is CREATE.
    */
-  @Input() public data: any = undefined;
+  @Input() public category: CmdbCategory;
+
+  /**
+   * Inner category holder for assignments
+   */
+  private $category: CmdbCategory = new CmdbCategory();
 
   /**
    * Event call if form is valid and submit button was pressed.
@@ -62,25 +66,26 @@ export class CategoryFormComponent implements OnInit, OnDestroy {
    *
    */
   private categoryServiceSubscription: Subscription = new Subscription();
-  private typeServiceSubscription: Subscription = new Subscription();
+
 
   public categoryForm: FormGroup;
   public categories: CmdbCategory[] = [];
 
-  public unAssignedTypes: CmdbType[] = [];
-  public assignedTypes: CmdbType[] = [];
+  @Input() public unAssignedTypes: CmdbType[] = [];
+  @Input() public assignedTypes: CmdbType[] = [];
 
   public effect: DropEffect = 'move';
+  public readonly fallBackIcon = 'far fa-folder-open';
 
   /**
    * Category form constructor - Inits the category form
    */
-  public constructor(private categoryService: CategoryService, private typeService: TypeService) {
+  public constructor(private categoryService: CategoryService) {
     this.categoryForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl(''),
       meta: new FormGroup({
-        icon: new FormControl(''),
+        icon: new FormControl(null),
         order: new FormControl(null)
       }),
       parent: new FormControl(null),
@@ -89,26 +94,33 @@ export class CategoryFormComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.typeServiceSubscription = this.typeService.getUncategorizedTypes().subscribe((types: CmdbType[]) => {
-      this.unAssignedTypes = types;
-    });
-    this.categoryServiceSubscription = this.categoryService.getCategoryList().subscribe((categories: CmdbCategory[]) => {
-      this.categories = categories;
-    });
-    this.valueChangeSubscription = this.categoryForm.valueChanges.subscribe(() => {
-      this.validationEmitter.emit(this.categoryForm.valid);
-    });
     if (this.mode === CmdbMode.Create) {
       this.name.setAsyncValidators(checkCategoryExistsValidator(this.categoryService));
     } else if (this.mode === CmdbMode.Edit) {
       this.name.disable({ onlySelf: true });
+    }
+    this.categoryServiceSubscription = this.categoryService.getCategoryList().subscribe((categories: CmdbCategory[]) => {
+      this.categories = categories;
+    });
+
+    this.valueChangeSubscription = this.categoryForm.statusChanges.subscribe(() => {
+      this.validationEmitter.emit(this.categoryForm.valid);
+    });
+
+  }
+
+  public ngOnChanges(changes: SimpleChanges): void {
+    if (changes.category !== undefined && changes.category.currentValue !== undefined && (
+      changes.category.previousValue !== changes.category.currentValue
+    )) {
+      this.$category = this.category;
+      this.categoryForm.patchValue(this.$category);
     }
   }
 
   public ngOnDestroy(): void {
     this.valueChangeSubscription.unsubscribe();
     this.categoryServiceSubscription.unsubscribe();
-    this.typeServiceSubscription.unsubscribe();
     this.submitEmitter.unsubscribe();
   }
 
@@ -128,6 +140,10 @@ export class CategoryFormComponent implements OnInit, OnDestroy {
     return this.meta.get('icon') as FormControl;
   }
 
+  public onIconSelect(value: string): void {
+    this.icon.setValue(value);
+  }
+
   public get parent(): FormControl {
     return this.categoryForm.get('parent') as FormControl;
   }
@@ -140,7 +156,7 @@ export class CategoryFormComponent implements OnInit, OnDestroy {
     const index: number = this.assignedTypes.indexOf(item);
     this.assignedTypes.splice(index, 1);
     this.unAssignedTypes.push(item);
-    console.log(index);
+    this.types.removeAt(index);
   }
 
   public clickReset() {
@@ -148,25 +164,32 @@ export class CategoryFormComponent implements OnInit, OnDestroy {
     this.assignedTypes = [];
   }
 
-  public onDragged(event: DragEvent, item: any) {
+  public onDragStart(event: DragEvent) {
+    console.log('Drag started!');
     console.log(event);
   }
 
-  public onDrop(event: DndDropEvent) {
+  public onDragged(item: any, list: any[], effect: DropEffect) {
+    if (effect === 'move') {
+      const index = list.indexOf(item);
+      list.splice(index, 1);
+    }
+  }
+
+  public onDrop(event: DndDropEvent, list?: any[]) {
     let index = event.index;
     if (typeof index === 'undefined') {
-      index = this.assignedTypes.length;
+      index = list.length;
     }
-    this.assignedTypes.splice(index, 0, event.data);
-    // this.unAssignedTypes.splice(this.unAssignedTypes.indexOf(event.data), 1);
+    list.splice(index, 0, event.data);
     this.types.insert(index, new FormControl(event.data.public_id));
   }
 
   public onSubmit(): void {
     this.categoryForm.markAllAsTouched();
     if (this.categoryForm.valid) {
-      const category = this.categoryForm.getRawValue() as CmdbCategory;
-      this.submitEmitter.emit(category);
+      this.$category = Object.assign(this.$category, this.categoryForm.getRawValue() as CmdbCategory);
+      this.submitEmitter.emit(this.$category);
     }
   }
 

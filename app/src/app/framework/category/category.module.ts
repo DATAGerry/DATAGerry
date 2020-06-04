@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
@@ -26,13 +26,16 @@ import { LayoutModule } from '../../layout/layout.module';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { CategoryComponent } from './category.component';
-import { TreeModule } from 'angular-tree-component';
 import { CategoryAddComponent } from './category-add/category-add.component';
 import { CategoryFormComponent } from './category-form/category-form.component';
 import { IconPickerModule } from 'ngx-icon-picker';
+import { CategoryEditComponent } from './category-edit/category-edit.component';
+import { CategoryTreeComponent } from './components/category-tree/category-tree.component';
+import { CategoryNodeComponent } from './components/category-node/category-node.component';
+import { CategoryDeleteComponent } from './category-delete/category-delete.component';
 
 @NgModule({
-  declarations: [CategoryComponent, CategoryAddComponent, CategoryFormComponent],
+  declarations: [CategoryComponent, CategoryAddComponent, CategoryFormComponent, CategoryEditComponent, CategoryTreeComponent, CategoryNodeComponent, CategoryDeleteComponent],
   imports: [
     CommonModule,
     CategoryRoutingModule,
@@ -42,7 +45,6 @@ import { IconPickerModule } from 'ngx-icon-picker';
     NgSelectModule,
     FontAwesomeModule,
     FormsModule,
-    TreeModule,
     IconPickerModule
   ]
 })

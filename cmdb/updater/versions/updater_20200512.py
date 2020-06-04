@@ -52,7 +52,7 @@ class Update20200512(Updater):
     def __convert_category_to_new_structure(self, old_raw_category: dict) -> CmdbCategory:
         """Converts a category from old < 20200512 structure to new format """
         old_raw_category['meta'] = {
-            'icon': old_raw_category.get('icon', '')
+            'icon': old_raw_category.get('icon', None)
         }
         parent = old_raw_category.get('parent_id', None)
         if parent == 0:

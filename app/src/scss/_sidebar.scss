@@ -32,6 +32,8 @@ $sidebar-borders: (
   right: (size: 1px, style: solid, color: $border-color)
 ) !default;
 
+$list-group-item-padding: 12px 16px;
+
 #sidebar {
 
   display: flex;
@@ -112,6 +114,8 @@ $sidebar-borders: (
       }
 
     }
+
+    @import "sidebar/node";
 
   }
 

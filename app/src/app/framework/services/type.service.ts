@@ -136,6 +136,9 @@ export class TypeService<T = CmdbType> implements ApiService {
   public getTypeListByCategory(publicID: number): Observable<any> {
     return this.api.callGet<T[]>(this.servicePrefix + '/category/' + publicID).pipe(
       map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
         return apiResponse.body;
       })
     );

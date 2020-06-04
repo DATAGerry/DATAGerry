@@ -13,20 +13,28 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
-import { CmdbCategoryNode } from '../../../framework/models/cmdb-category';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Params } from '@angular/router';
 
 @Component({
-  selector: 'cmdb-sidebar-category',
-  templateUrl: './sidebar-category.component.html',
-  styleUrls: ['./sidebar-category.component.scss'],
+  selector: 'cmdb-category-delete',
+  templateUrl: './category-delete.component.html',
+  styleUrls: ['./category-delete.component.scss']
 })
-export class SidebarCategoryComponent {
+export class CategoryDeleteComponent implements OnInit {
 
-  @Input() categoryNode: CmdbCategoryNode;
+  public publicID: number;
 
+  constructor(private route: ActivatedRoute) {
+    this.route.params.subscribe((params: Params) => {
+      this.publicID = params.publicID;
+    });
+  }
+
+  ngOnInit() {
+  }
 
 }

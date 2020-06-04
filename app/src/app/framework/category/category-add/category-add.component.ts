@@ -13,25 +13,57 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { CmdbType } from '../../models/cmdb-type';
+import { TypeService } from '../../services/type.service';
+import { Subscription } from 'rxjs';
+import { CmdbCategory } from '../../models/cmdb-category';
+import { CategoryService } from '../../services/category.service';
+import { Router } from '@angular/router';
+import { SidebarService } from '../../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-category-add',
   templateUrl: './category-add.component.html',
   styleUrls: ['./category-add.component.scss']
 })
-export class CategoryAddComponent implements OnInit {
+export class CategoryAddComponent implements OnInit, OnDestroy {
 
   public formValid: boolean = false;
 
-  constructor() {
+  private typeServiceSubscription: Subscription = new Subscription();
+  private categorySubmitSubscription: Subscription = new Subscription();
+
+  public unAssignedTypes: CmdbType[];
+  public assignedTypes: CmdbType[];
+
+  constructor(private categoryService: CategoryService, private typeService: TypeService,
+              private router: Router, private sidebarService: SidebarService) {
+    this.unAssignedTypes = [];
+    this.assignedTypes = [];
   }
 
   public ngOnInit(): void {
+    this.typeServiceSubscription = this.typeService.getUncategorizedTypes().subscribe((types: CmdbType[]) => {
+      this.unAssignedTypes = types;
+    });
+  }
 
+  public ngOnDestroy(): void {
+    this.typeServiceSubscription.unsubscribe();
+    this.categorySubmitSubscription.unsubscribe();
+  }
+
+  public onSave(category: CmdbCategory): void {
+    if (this.formValid) {
+      this.categorySubmitSubscription = this.categoryService.postCategory(category).subscribe(response => {
+        this.sidebarService.reload();
+        this.router.navigate(['/', 'framework', 'category']);
+      });
+    }
   }
 
 }

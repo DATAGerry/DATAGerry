@@ -147,6 +147,7 @@ class CategoryTree:
         def __init__(self, category: CmdbCategory, children: List["CategoryTree.CategoryNode"] = None,
                      types: List[CmdbType] = None):
             self.category: CmdbCategory = category
+            self.node_order: int = self.category.get_meta().get_order()
             self.children: List["CategoryTree.CategoryNode"] = children or []
             self.types: List[CmdbType] = [type_ for type_ in types if type_.public_id in self.category.types]
 
@@ -155,14 +156,24 @@ class CategoryTree:
             """Get the node as json"""
             return {
                 'category': CmdbCategory.to_json(instance.category),
+                'node_order': instance.node_order,
                 'children': [CategoryTree.CategoryNode.to_json(child_node) for child_node in instance.children],
                 'types': [CmdbType.to_json(type) for type in instance.types]
             }
 
+        def get_order(self) -> int:
+            """Get the order value from the main category inside this node.
+            Should be equal to __CmdbCategoryMeta -> order
+            """
+            if not self.node_order:
+                self.node_order = -1
+            return self.node_order
+
     def __init__(self, categories: List[CmdbCategory], types: List[CmdbType] = None):
         self._categories = categories
         self._types = types
-        self._tree: List[CategoryTree.CategoryNode] = self.__create_tree(self._categories, types=self._types)
+        self._tree: List[CategoryTree.CategoryNode] = sorted(self.__create_tree(self._categories, types=self._types),
+                                                             key=lambda node: node.get_order(), reverse=True)
 
     def __len__(self) -> int:
         """Get length of tree - this means the number of root categories"""

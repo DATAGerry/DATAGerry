@@ -13,20 +13,23 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
-import { CmdbCategoryNode } from '../../../framework/models/cmdb-category';
+import { Component, Input, OnInit } from '@angular/core';
+import { CmdbCategoryNode } from '../../../models/cmdb-category';
 
 @Component({
-  selector: 'cmdb-sidebar-category',
-  templateUrl: './sidebar-category.component.html',
-  styleUrls: ['./sidebar-category.component.scss'],
+  selector: 'cmdb-category-node',
+  templateUrl: './category-node.component.html',
+  styleUrls: ['./category-node.component.scss']
 })
-export class SidebarCategoryComponent {
+export class CategoryNodeComponent implements OnInit {
+  @Input() public node: CmdbCategoryNode;
 
-  @Input() categoryNode: CmdbCategoryNode;
+  constructor() { }
 
+  ngOnInit() {
+  }
 
 }

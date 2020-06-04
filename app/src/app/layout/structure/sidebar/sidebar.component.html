@@ -23,15 +23,7 @@
         </div>
         <ng-container *ngIf="unCategorizedTypes">
           <li class="nav-title">Uncategorized</li>
-          <div class="list-group panel">
-            <a [routerLink]="['/framework/object/type/', type.public_id]" routerLinkActive="active"
-               *ngFor="let type of unCategorizedTypes" class="list-group-item">
-              <span class="shorten-long-text" data-toggle="tooltip" title="{{type.label}}">
-                  <i *ngIf="type.render_meta['icon']" class="{{type.render_meta['icon']}}"
-                     aria-hidden="true"></i> {{type.label}}
-              </span>
-            </a>
-          </div>
+          <cmdb-sidebar-type *ngFor="let type of unCategorizedTypes" [type]="type"></cmdb-sidebar-type>
         </ng-container>
       </div>
     </ul>

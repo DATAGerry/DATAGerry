@@ -134,10 +134,10 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
 
   /**
    * Add a new unique category into the database
-   * @param data raw instance of a CmdbCategory
+   * @param category raw instance of a CmdbCategory
    */
-  public postCategory(data: T): Observable<T> {
-    return this.api.callPost<CmdbCategory>(this.servicePrefix + '/', data).pipe(
+  public postCategory(category: T): Observable<T> {
+    return this.api.callPost<CmdbCategory>(this.servicePrefix + '/', category).pipe(
       map((apiResponse: HttpResponse<any>) => {
         if (apiResponse.status === 204) {
           return [];
@@ -149,10 +149,10 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
 
   /**
    * Update a existing category
-   * @param data modified category instance
+   * @param category modified category instance
    */
-  public updateCategory(data: T): Observable<T> {
-    return this.api.callPut<number>(this.servicePrefix + '/', data).pipe(
+  public updateCategory(category: T): Observable<T> {
+    return this.api.callPut<number>(this.servicePrefix + '/', category).pipe(
       map((apiResponse: HttpResponse<T>) => {
         return apiResponse.body;
       })

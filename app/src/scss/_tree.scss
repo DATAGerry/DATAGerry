@@ -1,0 +1,16 @@
+$tree-list-style: none !default;
+$tree-default-margin: 0;
+$tree-default-padding: 0;
+$tree-nested-margin-left: 10px !default;
+
+ul.tree {
+  list-style: $tree-list-style;
+  margin: $tree-default-margin;
+  padding: 0;
+
+  ul {
+    list-style: inherit;
+    padding: inherit;
+    margin-left: $tree-nested-margin-left;
+  }
+}

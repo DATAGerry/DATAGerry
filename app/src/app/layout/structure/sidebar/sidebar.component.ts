@@ -23,6 +23,7 @@ import { CategoryService } from '../../../framework/services/category.service';
 import { Subscription } from 'rxjs';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { TypeService } from '../../../framework/services/type.service';
+import { SidebarService } from '../../services/sidebar.service';
 
 @Component({
   selector: 'cmdb-sidebar',
@@ -41,7 +42,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   public filterTerm: FormControl = new FormControl('');
   private filterTermSubscription: Subscription;
 
-  constructor(private categoryService: CategoryService, private typeService: TypeService, private renderer: Renderer2) {
+  constructor(private sidebarService: SidebarService, private categoryService: CategoryService,
+              private typeService: TypeService, private renderer: Renderer2) {
     this.categoryTreeSubscription = new Subscription();
     this.unCategorizedTypesSubscription = new Subscription();
     this.filterTermSubscription = new Subscription();
@@ -49,12 +51,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.renderer.addClass(document.body, 'sidebar-fixed');
-    this.categoryTreeSubscription = this.categoryService.getCategoryTree().subscribe((categoryTree: CmdbCategoryTree) => {
+    this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable().subscribe((categoryTree: CmdbCategoryTree) => {
       this.sourceCategoryTree = categoryTree;
       this.categoryTree = this.sourceCategoryTree;
-    });
-    this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes().subscribe((types: CmdbType[]) => {
-      this.unCategorizedTypes = types;
+      this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes().subscribe((types: CmdbType[]) => {
+        this.unCategorizedTypes = types;
+      });
     });
     this.filterTermSubscription = this.filterTerm.statusChanges.subscribe(() => {
       this.categoryTree = this.transformFilter(this.sourceCategoryTree, this.filterTerm.value);

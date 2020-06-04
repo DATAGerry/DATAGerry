@@ -1,4 +1,4 @@
-$text-width-shortener: 30px;
+$text-width-shortener: 70px;
 
 .list-group-item {
   border-radius: 0;
@@ -6,7 +6,7 @@ $text-width-shortener: 30px;
   color: $sidebar-nav-link-color;
   border: none;
   white-space: nowrap;
-  font-size: 14px;
+  font-size: 13px;
   text-decoration: none;
   padding: $list-group-item-padding;
 
@@ -19,7 +19,7 @@ $text-width-shortener: 30px;
 
   .shorten-long-text{
     width: calc(#{$sidebar-width} - #{$text-width-shortener});
-    display: block;
+    display: inline-block;
     white-space: nowrap;
     overflow-x: hidden;
     text-overflow: ellipsis;
@@ -28,10 +28,31 @@ $text-width-shortener: 30px;
   .list-group-item {
     i:first-of-type, svg:first-of-type {
       display: inline-block;
-      width: 24px;
-      margin-right: 4px;
+      width: 20px;
       color: $sidebar-nav-icon-color;
-      font-size: 14px;
+      font-size: 13px;
+    }
+
+    &[aria-expanded='false']::after {
+      font-family: 'Font Awesome 5 Free', sans-serif;
+      font-weight: 900;
+      content: '\f0da';
+      text-align: right;
+      display: inline;
+      float: right;
+    }
+
+    &[aria-expanded='true'] {
+      background-color: darken($sidebar-bg, 25%);;
+
+      &::after {
+        font-family: 'Font Awesome 5 Free', sans-serif;
+        font-weight: 900;
+        content: '\f0d7';
+        text-align: right;
+        display: inline;
+        float: right;
+      }
     }
 
     &[aria-expanded='true']{

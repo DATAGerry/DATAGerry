@@ -13,20 +13,26 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
-import { CmdbCategoryNode } from '../../../framework/models/cmdb-category';
+import { Component, Input, OnInit } from '@angular/core';
+import { CmdbCategoryTree } from '../../../models/cmdb-category';
+import { DropEffect } from 'ngx-drag-drop';
 
 @Component({
-  selector: 'cmdb-sidebar-category',
-  templateUrl: './sidebar-category.component.html',
-  styleUrls: ['./sidebar-category.component.scss'],
+  selector: 'cmdb-category-tree',
+  templateUrl: './category-tree.component.html',
+  styleUrls: ['./category-tree.component.scss']
 })
-export class SidebarCategoryComponent {
+export class CategoryTreeComponent implements OnInit {
 
-  @Input() categoryNode: CmdbCategoryNode;
+  @Input() public tree: CmdbCategoryTree;
+  public effect: DropEffect = 'move';
 
+  constructor() { }
+
+  ngOnInit() {
+  }
 
 }
