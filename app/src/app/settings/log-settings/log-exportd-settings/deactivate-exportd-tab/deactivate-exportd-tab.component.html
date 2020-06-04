@@ -22,7 +22,7 @@
         <td>{{deactiveLog.event}}</td>
         <td>{{deactiveLog.action_name}}</td>
         <td>{{deactiveLog.user_name}}</td>
-        <td>{{deactiveLog.log_time?.$date | date:"dd/MM/yyyy - hh:mm:ss"}}</td>
+        <td>{{deactiveLog.log_time?.$date | date:"dd/MM/yyyy - HH:mm:ss"}}</td>
         <td>{{deactiveLog.message}}</td>
         <td *permissionLink="['base.exportd.log.delete']">
           <a class="text-dark ml-1" (click)="deleteEmitter.emit(deactiveLog.public_id); rerender()">
