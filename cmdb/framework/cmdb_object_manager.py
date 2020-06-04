@@ -79,7 +79,7 @@ class CmdbObjectManager(CmdbManagerBase):
                 )
             )
         except (CMDBError, Exception) as err:
-            raise ObjectManagerGetError(err.message)
+            raise ObjectManagerGetError(str(err))
 
     def get_objects(self, public_ids: list):
         object_list = []

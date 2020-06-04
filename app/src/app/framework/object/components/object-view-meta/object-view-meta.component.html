@@ -5,7 +5,7 @@
       <th scope="row">{{meta?.key}}</th>
       <td *ngIf="!isObject(meta?.value); else dateTmpl">{{meta?.value}}</td>
       <ng-template #dateTmpl>
-        <td>{{meta?.value | date:"dd/MM/yyyy - hh:mm:ss"}}</td>
+        <td>{{meta?.value | date:"dd/MM/yyyy - HH:mm:ss"}}</td>
       </ng-template>
     </ng-container>
   </tr>
