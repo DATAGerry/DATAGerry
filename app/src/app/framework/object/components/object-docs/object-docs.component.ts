@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnChanges, Input, SimpleChanges } from '@angular/core';
 
 import { RenderResult } from '../../../models/cmdb-render';
 import { DocTemplate } from '../../../models/cmdb-doctemplate';
@@ -28,17 +28,19 @@ import { FileSaverService } from 'ngx-filesaver';
   templateUrl: './object-docs.component.html',
   styleUrls: ['./object-docs.component.scss']
 })
-export class ObjectDocsComponent implements OnInit {
+export class ObjectDocsComponent implements OnChanges {
 
   @Input() renderResult: RenderResult;
   docs: DocTemplate[];
 
   constructor(private docapiService: DocapiService, private fileSaverService: FileSaverService) { }
 
-  ngOnInit() {
-    this.docapiService.getObjectDocTemplateList(39).subscribe((docs: DocTemplate[]) => {
-        this.docs = docs;
-    });
+  ngOnChanges(changes: SimpleChanges) {
+    if(changes.renderResult && this.renderResult) {
+        this.docapiService.getObjectDocTemplateList(this.renderResult.type_information.type_id).subscribe((docs: DocTemplate[]) => {
+            this.docs = docs;
+        });
+    }
   }
 
   public downloadDocument(templateId: number, objectId: number, docName: string) {
