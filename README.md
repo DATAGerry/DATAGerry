@@ -26,6 +26,6 @@ See [DATAGERRY website](https://www.datagerry.com) for more details!
 
 
 ## Continous Integration
-| Service        | Master           | Development  |
+| Service        | master           | development  |
 | -------------- |----------------- | ------------ |
-| CircleCI       | [![CircleCI](https://circleci.com/gh/NETHINKS/DATAGERRY/tree/master.svg?style=svg&circle-token=54ae0cae511e32e7bf1eb4b63f30ae60fb8da7ec)](https://circleci.com/gh/NETHINKS/DATAGERRY/tree/master) | [![CircleCI](https://circleci.com/gh/NETHINKS/DATAGERRY/tree/development.svg?style=svg&circle-token=54ae0cae511e32e7bf1eb4b63f30ae60fb8da7ec)](https://circleci.com/gh/NETHINKS/DATAGERRY/tree/development) |
+| Github Actions | ![Continous Integration](https://github.com/NETHINKS/DATAGERRY/workflows/Continous%20Integration/badge.svg?branch=development) | ![Continous Integration](https://github.com/NETHINKS/DATAGERRY/workflows/Continous%20Integration/badge.svg?branch=master) |
