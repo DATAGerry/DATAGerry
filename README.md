@@ -26,6 +26,6 @@ See [DATAGERRY website](https://www.datagerry.com) for more details!
 
 
 ## Continous Integration
-| Service        | master           | development  |
+| Service        | development      | master       |
 | -------------- |----------------- | ------------ |
 | Github Actions | ![Continous Integration](https://github.com/NETHINKS/DATAGERRY/workflows/Continous%20Integration/badge.svg?branch=development) | ![Continous Integration](https://github.com/NETHINKS/DATAGERRY/workflows/Continous%20Integration/badge.svg?branch=master) |
