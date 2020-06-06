@@ -6,8 +6,8 @@ jobs:
     runs-on: ubuntu-latest
     container: nethinks/datagerry_ci
     steps:
-    # checkout the source code
-    - uses: actions/checkout@v2
+    - name: checkout the source code
+      uses: actions/checkout@v2
 
     # extract <branchname> from refs/heads/<branchname> and replace "/" characters 
     - name: extract Github branch name
@@ -19,6 +19,14 @@ jobs:
         echo ::set-env name=VERSION_ID::$(echo ${BRANCH}-${GITHUB_SHA})
         echo ::set-env name=VERSION_PATH::$(echo test/${BRANCH})
         echo ::set-env name=VERSION_DOCKER_TAG::$(echo test_${BRANCH})
+
+    - name: setup build cache for node_modules and python packages
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/app/node_modules
+          /usr/lib/python3.6/site-packages
+        key: ${{ runner.os }}-buildcache
     
     - name: build DATAGERRY
       run:  BUILDVAR_VERSION=${{ env.VERSION_STRING }} BUILDVAR_VERSION_EXT=${{ env.VERSION_ID }} BUILDVAR_DOCKER_TAG=${{ env.VERSION_DOCKER_TAG }} make -e
@@ -39,9 +47,9 @@ jobs:
 
     - name: copy documentation to docs.datagerry.com
       run: |
-        sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH_DOCS/$VERSION_PATH"
-        sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "rm -Rf $SCP_PATH_DOCS/$VERSION_PATH/*"
-        sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r target/docs/*  $SCP_USER@$SCP_HOST:$SCP_PATH_DOCS/$VERSION_PATH
+        sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_PATH"
+        sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "rm -Rf $SCP_PATH/$VERSION_PATH/*"
+        sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r target/docs/*  $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH
       env:
         SCP_HOST: ${{ secrets.SCP_HOST }}
         SCP_USER: ${{ secrets.SCP_USER }}
