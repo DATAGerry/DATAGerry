@@ -16,7 +16,7 @@ development
     branch.
 
 master
-    Branch with a stable version of DATAGERRY. All integration tests and CircleCI should have been passed before merging
+    Branch with a stable version of DATAGERRY. All integration tests and CI should have been passed before merging
     the development branch into master. A merge of development to master will usually be done at the end of a sprint.
 
 version-<version>
@@ -40,8 +40,8 @@ To create a bugfix release of an existing version, do the following steps:
 1. merge bugfixes in an exitsing version-<minorversion> branch
 2. set a tag with the full version number (e.g. 1.2.1) on the last commit on that branch
 
-A tag should be set by creating a release in the GitHub WebUI. CircleCI will start automatically after setting a new 
-tag and will create binaries, Docker images and documentation. Add the built tar.gz and binary to the GitHub release.
+A tag should be set by creating a release in the GitHub WebUI. Github Actions release workflow will start automatically 
+after setting a new release and will create binaries, Docker images and documentation.
 
 
 latest symlink
