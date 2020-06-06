@@ -11,9 +11,9 @@ jobs:
     - name: checkout the source code
       uses: actions/checkout@v2
 
-    # extract <tagname> from refs/heads/<tagname> and replace "/" characters 
+    # extract <tagname> from refs/tags/<tagname> and replace "/" characters 
     - name: extract Github tag name
-      run: echo ::set-env name=TAG::$(TAG_EXTRACTED=${GITHUB_REF#refs/heads/}; echo ${TAG_EXTRACTED//\//-})
+      run: echo ::set-env name=TAG::$(TAG_EXTRACTED=${GITHUB_REF#refs/tags/}; echo ${TAG_EXTRACTED//\//-})
 
     - name: setup version strings
       run: |
