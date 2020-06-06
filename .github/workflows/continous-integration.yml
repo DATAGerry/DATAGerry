@@ -1,0 +1,65 @@
+name: Continous Integration
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: nethinks/datagerry_ci
+    steps:
+    - name: checkout the source code
+      uses: actions/checkout@v2
+
+    # extract <branchname> from refs/heads/<branchname> and replace "/" characters 
+    - name: extract Github branch name
+      run: echo ::set-env name=BRANCH::$(BRANCH_EXTRACTED=${GITHUB_REF#refs/heads/}; echo ${BRANCH_EXTRACTED//\//-})
+
+    - name: setup version strings
+      run: |
+        echo ::set-env name=VERSION_STRING::$(echo ${BRANCH})
+        echo ::set-env name=VERSION_ID::$(echo ${BRANCH}-${GITHUB_SHA})
+        echo ::set-env name=VERSION_PATH::$(echo branches/${BRANCH})
+        echo ::set-env name=VERSION_DOCKER_TAG::$(echo branches_${BRANCH})
+
+    - name: setup build cache for node_modules and python packages
+      uses: actions/cache@v2
+      with:
+        path: |
+          app/node_modules
+          ~/.cache/pip
+        key: ${{ runner.os }}-buildcache
+    
+    - name: build DATAGERRY
+      run:  BUILDVAR_VERSION=${{ env.VERSION_STRING }} BUILDVAR_VERSION_EXT=${{ env.VERSION_ID }} BUILDVAR_DOCKER_TAG=${{ env.VERSION_DOCKER_TAG }} make -e
+
+    - name: copy artifacts to files.datagerry.com
+      run: |
+        sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_PATH/bin"
+        sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/bin/datagerry $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH/bin
+        sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_PATH/rpm"
+        sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/rpm/RPMS/x86_64/DATAGERRY-*.rpm  $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH/rpm
+        sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_PATH/targz"
+        sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/targz/datagerry-*.tar.gz  $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH/targz
+      env:
+        SCP_HOST: ${{ secrets.SCP_HOST }}
+        SCP_USER: ${{ secrets.SCP_USER }}
+        SCP_PASS: ${{ secrets.SCP_PASS }}
+        SCP_PATH: ${{ secrets.SCP_PATH_FILES }}
+
+    - name: copy documentation to docs.datagerry.com
+      run: |
+        sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_PATH"
+        sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "rm -Rf $SCP_PATH/$VERSION_PATH/*"
+        sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r target/docs/*  $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH
+      env:
+        SCP_HOST: ${{ secrets.SCP_HOST }}
+        SCP_USER: ${{ secrets.SCP_USER }}
+        SCP_PASS: ${{ secrets.SCP_PASS }}
+        SCP_PATH: ${{ secrets.SCP_PATH_DOCS }}
+
+    - name: publish docker image to hub.docker.com
+      run: |
+        echo "$DOCKER_TOKEN" | docker login --username $DOCKER_USER --password-stdin
+        docker push nethinks/datagerry:$VERSION_DOCKER_TAG
+      env:
+        DOCKER_USER: ${{ secrets.DOCKER_USER }}
+        DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
