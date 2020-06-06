@@ -20,10 +20,7 @@ jobs:
         echo ::set-env name=VERSION_DOCKER_TAG::$(echo test_${BRANCH})
     
     - name: build DATAGERRY
-      run:  BUILDVAR_VERSION=${{ env.VERSION_STRING }} \
-            BUILDVAR_VERSION_EXT=${{ env.VERSION_ID }} \
-            BUILDVAR_DOCKER_TAG=${{ env.VERSION_DOCKER_TAG }} \
-            make -e
+      run:  BUILDVAR_VERSION=${{ env.VERSION_STRING }} BUILDVAR_VERSION_EXT=${{ env.VERSION_ID }} BUILDVAR_DOCKER_TAG=${{ env.VERSION_DOCKER_TAG }} make -e
 
     #- name: copy artifacts to files.datagerry.com
       #run: |
