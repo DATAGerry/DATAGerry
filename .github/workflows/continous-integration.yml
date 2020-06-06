@@ -1,0 +1,35 @@
+name: Continous Integration
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: nethinks/datagerry_ci
+    steps:
+    # checkout the source code
+    - uses: actions/checkout@v2
+
+    - name: extract Github branch name
+      run: echo ::set-env name=BRANCH::$(echo ${GITHUB_REF#refs/heads/})
+
+    - name: setup version strings
+      run: |
+        echo ::set-env name=VERSION_STRING::$(echo ${BRANCH})
+        echo ::set-env name=VERSION_ID::$(echo ${BRANCH}-${GITHUB_SHA})
+        echo ::set-env name=VERSION_PATH::$(echo test/${BRANCH})
+        echo ::set-env name=VERSION_DOCKER_TAG::$(echo test_${BRANCH})
+    
+    - name: build DATAGERRY
+      run:  BUILDVAR_VERSION=${{ env.VERSION_STRING }} \
+            BUILDVAR_VERSION_EXT=${{ env.VERSION_ID }} \
+            BUILDVAR_DOCKER_TAG=${{ env.VERSION_DOCKER_TAG }} \
+            make -e
+
+    #- name: copy artifacts to files.datagerry.com
+      #run: |
+      #  sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_PATH/bin"
+      #  sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/bin/datagerry $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH/bin
+      #  sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_PATH/rpm"
+      #  sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/rpm/RPMS/x86_64/DATAGERRY-*.rpm  $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH/rpm
+      #  sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_PATH/targz"
+      #  sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/targz/datagerry-*.tar.gz  $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH/targz
