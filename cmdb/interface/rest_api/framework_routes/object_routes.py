@@ -590,7 +590,8 @@ def update_object(public_id: int, request_user: User):
                 put_data['creation_time'] = current_object_instance.creation_time
                 put_data['author_id'] = current_object_instance.author_id
 
-                old_fields = copy.deepcopy(current_object_instance.get_all_fields())
+                old_fields = list(map(lambda x: {k: v for k, v in x.items() if k in ['name', 'value']},
+                                      current_type_instance.get_fields()))
                 new_fields = put_data['fields']
                 for item in new_fields:
                     for old in old_fields:
