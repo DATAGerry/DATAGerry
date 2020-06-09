@@ -38,9 +38,10 @@ import { CmdbMode } from '../../../modes.enum';
 export class ConfigEditComponent implements OnInit {
 
   @Input() data: any;
+  @Input() sections: any[];
   @Input() groupList: Group[];
   @Input() userList: User[];
-  @Input() editingActivated: boolean = false;
+  @Input() canEdit: boolean = false;
   @ViewChild('fieldConfig', {read: ViewContainerRef, static: true}) container;
   private component: any;
   private componentRef: ComponentRef<any>;
@@ -55,8 +56,9 @@ export class ConfigEditComponent implements OnInit {
     const factory = this.resolver.resolveComponentFactory(this.component);
     this.componentRef = this.container.createComponent(factory);
     this.componentRef.instance.data = this.data;
+    this.componentRef.instance.sections = this.sections;
     this.componentRef.instance.groupList = this.groupList;
     this.componentRef.instance.userList = this.userList;
-    this.componentRef.instance.activeEdit = this.editingActivated;
+    this.componentRef.instance.canEdit = this.canEdit;
   }
 }

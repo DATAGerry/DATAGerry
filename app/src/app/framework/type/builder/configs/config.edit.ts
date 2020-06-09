@@ -16,11 +16,11 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 import {Input} from '@angular/core';
-import {CmdbMode} from '../../../modes.enum';
 
 export class ConfigEdit {
   private innerData: any;
-  private editActive: false;
+  private innerSections: any[];
+  private editable: false;
 
   public constructor() {
   }
@@ -34,19 +34,45 @@ export class ConfigEdit {
     return this.innerData;
   }
 
-  @Input('activeEdit')
-  public set activeEdit(value: any) {
-    this.editActive = value;
+  @Input('sections')
+  public set sections(value: any) {
+    this.innerSections = value;
   }
 
-  public get activeEdit(): any {
-    return this.editActive;
+  public get sections(): any {
+    return this.innerSections;
+  }
+
+  @Input('canEdit')
+  public set canEdit(value: any) {
+    this.editable = value;
+  }
+
+  public get canEdit(): any {
+    return this.editable;
   }
 
   public calculateName(value) {
-    if (this.activeEdit) {
+    if (this.canEdit) {
       this.data.name = value.replace(/ /g, '-').toLowerCase();
       this.data.name = this.data.name.replace(/[^a-z0-9 \-]/gi, '').toLowerCase();
+    }
+    if (!this.checkNameUniqueness()) {
+      this.calculateName(this.data.name += '-1');
+    }
+  }
+
+  private checkNameUniqueness() {
+    const {type, name} = this.data;
+    switch (type) {
+      case 'section':
+        return this.sections.filter(el => el.name === name).length <= 1;
+      default:
+        let count = 0;
+        this.sections.forEach((sec) => {
+          count += sec.fields.filter(el => el.name === name).length;
+        });
+        return count <= 1;
     }
   }
 }
