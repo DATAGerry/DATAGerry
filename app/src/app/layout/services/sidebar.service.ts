@@ -11,35 +11,44 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService } from '../../services/api-call.service';
-import {BehaviorSubject, Observable, Subject} from 'rxjs';
-import {CategoryService} from "../../framework/services/category.service";
+import { BehaviorSubject } from 'rxjs';
+import { CmdbCategoryTree } from '../../framework/models/cmdb-category';
+import { CategoryService } from '../../framework/services/category.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SidebarService {
 
-  private categoryTreeObserver = new BehaviorSubject<any[]>([]);
+  /**
+   * Basic tree observer.
+   */
+  private categoryTreeObserver = new BehaviorSubject<CmdbCategoryTree>(new CmdbCategoryTree());
 
-  constructor(private cService: CategoryService) {}
-
-  public get categoryTree() {
-    this.cService.getCategoryTree().subscribe(item => {
-      this.categoryTreeObserver.next(item);
+  constructor(private categoryService: CategoryService) {
+    this.categoryService.getCategoryTree().subscribe((tree: CmdbCategoryTree)  => {
+      this.categoryTreeObserver.next(tree);
     });
+  }
+
+  /**
+   * Get the subject of the current category tree.
+   */
+  public get categoryTree(): BehaviorSubject<CmdbCategoryTree> {
     return this.categoryTreeObserver;
   }
 
-  public updateCategoryTree() {
-    this.cService.getCategoryTree().subscribe(item => {
-      this.categoryTreeObserver.next(item);
+  /**
+   * Reload the category tree.
+   */
+  public reload() {
+    this.categoryService.getCategoryTree().subscribe((tree: CmdbCategoryTree)  => {
+      this.categoryTreeObserver.next(tree);
     });
   }
 }

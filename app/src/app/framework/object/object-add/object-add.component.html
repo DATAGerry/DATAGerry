@@ -21,7 +21,7 @@
       <label class="col-sm-2 col-form-label">Select type:</label>
       <div class="col-sm-10">
         <div class="input-group mb-3">
-          <ng-select [items]="typeList" [groupBy]="groupByFn" [groupValue]="groupValueFn" formControlName="typeID"
+          <ng-select [items]="typeList" formControlName="typeID"
                      bindLabel="label" bindValue="public_id" required>
             <ng-template ng-optgroup-tmp let-item="item">
               <span style="vertical-align: middle;">{{item.name}}</span>

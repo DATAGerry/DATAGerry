@@ -306,7 +306,6 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         cursor_result = self.__find(collection, formatted_public_id, limit=1, sort=formatted_sort, *args, **kwargs)
         for result in cursor_result:
             return result
-        raise NoDocumentFound(collection, public_id)
 
     def find_one_by(self, collection: str, *args, **kwargs) -> dict:
         """find one specific document by special requirements
@@ -555,16 +554,16 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             raise CollectionAlreadyExists(collection_name)
         return collection_name
 
-    def delete_collection(self, collection_name):
+    def delete_collection(self, collection):
         """
         Delete MongoDB collection
         Args:
-            collection_name: collection name
+            collection: collection name
 
         Returns:
             delete ack
         """
-        return self.connector.delete_collection(collection_name)
+        return self.connector.delete_collection(collection)
 
     def get_document_with_highest_id(self, collection: str) -> str:
         """get the document with the highest public id inside a collection
@@ -616,7 +615,6 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             'counter': docs_count
         })
         return docs_count
-
 
     def increment_public_id_counter(self, collection: str):
         working_collection = self.connector.get_collection(IDCounter.COLLECTION)

@@ -1,0 +1,8 @@
+.category-tree {
+  ul{
+    padding-left: 0;
+  }
+  width: $sidebar-nav-width;
+  margin: 0;
+  @import "node";
+}

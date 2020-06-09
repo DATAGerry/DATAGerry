@@ -62,7 +62,8 @@ FRAMEWORK_RIGHTS = (
             CategoryRight('view', description='View category'),
             CategoryRight('add', description='Add category'),
             CategoryRight('edit', BaseRight.PROTECTED, description='Edit category'),
-            CategoryRight('delete', BaseRight.SECURE, description='Delete category')
+            CategoryRight('delete', BaseRight.SECURE, description='Delete category'),
+            CategoryRight('tree', BaseRight.PROTECTED, description='View the complete category tree with types')
         )
     ),
     (

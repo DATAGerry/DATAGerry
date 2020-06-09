@@ -13,30 +13,74 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {CmdbMode} from "../../modes.enum";
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { CmdbType } from '../../models/cmdb-type';
+import { CategoryService } from '../../services/category.service';
+import { TypeService } from '../../services/type.service';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { CmdbCategory } from '../../models/cmdb-category';
+import { CmdbMode } from '../../modes.enum';
+import { SidebarService } from '../../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-category-edit',
   templateUrl: './category-edit.component.html',
   styleUrls: ['./category-edit.component.scss']
 })
-export class CategoryEditComponent implements OnInit {
+export class CategoryEditComponent implements OnInit, OnDestroy {
 
-  public categoryEditForm: FormGroup;
-  public mode = CmdbMode.Edit;
+  public formValid: boolean = false;
+  public publicID: number;
+  public mode: CmdbMode = CmdbMode.Edit;
 
-  constructor() {}
+  private categoryServiceSubscription: Subscription = new Subscription();
+  private typeUnAssignedSubscription: Subscription = new Subscription();
+  private typeAssignedSubscription: Subscription = new Subscription();
+  private categorySubmitSubscription: Subscription = new Subscription();
 
-  ngOnInit() {
-    this.categoryEditForm = new FormGroup({
-      name: new FormControl('', Validators.required),
-      label: new FormControl('', Validators.required)
+  public category: CmdbCategory;
+  public unAssignedTypes: CmdbType[] = [];
+  public assignedTypes: CmdbType[] = [];
+
+  constructor(private categoryService: CategoryService, private typeService: TypeService,
+              private router: Router, private route: ActivatedRoute, private sidebarService: SidebarService) {
+    this.route.params.subscribe((params: Params) => {
+      this.publicID = params.publicID;
     });
+  }
+
+  public ngOnInit(): void {
+    this.categoryServiceSubscription = this.categoryService.getCategory(this.publicID).subscribe((category: CmdbCategory) => {
+      this.category = category;
+
+    });
+    this.typeAssignedSubscription = this.typeService.getTypeListByCategory(this.publicID).subscribe((types: CmdbType[]) => {
+      this.assignedTypes = types;
+    });
+
+    this.typeUnAssignedSubscription = this.typeService.getUncategorizedTypes().subscribe((types: CmdbType[]) => {
+      this.unAssignedTypes = types;
+    });
+  }
+
+  public ngOnDestroy(): void {
+    this.categoryServiceSubscription.unsubscribe();
+    this.typeUnAssignedSubscription.unsubscribe();
+    this.typeAssignedSubscription.unsubscribe();
+    this.categorySubmitSubscription.unsubscribe();
+  }
+
+  public onSave(category: CmdbCategory): void {
+    if (this.formValid) {
+      this.categorySubmitSubscription = this.categoryService.updateCategory(category).subscribe(response => {
+        this.sidebarService.reload();
+        this.router.navigate(['/', 'framework', 'category']);
+      });
+    }
   }
 
 }

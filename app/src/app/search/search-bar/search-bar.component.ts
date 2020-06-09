@@ -117,7 +117,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         this.typeRegexSubscription = this.typeService.getTypesBy(changes).subscribe((typeList: CmdbType[]) => {
           this.possibleTypes = typeList;
         });
-        this.typeRegexSubscription = this.categoryService.getCategoriesBy(changes).subscribe((categoryList: CmdbCategory[]) => {
+        this.typeRegexSubscription = this.categoryService.getCategoriesByName(changes).subscribe((categoryList: CmdbCategory[]) => {
           this.possibleCategories = categoryList;
         });
       } else {

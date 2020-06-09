@@ -28,8 +28,8 @@ import { CategoryService } from '../../services/category.service';
 import { CmdbMode } from '../../modes.enum';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../layout/toast/toast.service';
-import { SidebarService } from '../../../layout/services/sidebar.service';
 import { CmdbCategory } from '../../models/cmdb-category';
+import { SidebarService } from '../../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-type-builder',
@@ -57,8 +57,8 @@ export class TypeBuilderComponent implements OnInit {
   public selectedCategoryID: number = 0;
 
   public constructor(private router: Router, private typeService: TypeService,
-                     private toast: ToastService, private sidebarService: SidebarService,
-                     private userService: UserService, private categoryService: CategoryService) {
+                     private toast: ToastService, private userService: UserService,
+                     private sidebarService: SidebarService) {
 
   }
 
@@ -71,12 +71,6 @@ export class TypeBuilderComponent implements OnInit {
   }
 
   public exitBasicStep() {
-    const catID: number = this.basicStep.basicCategoryForm.value.category_id;
-    if (catID !== 0) {
-      this.categoryService.getCategory(catID).subscribe((item: CmdbCategory) => {
-        this.selectedCategoryID = catID;
-      });
-    }
     const defaultIcon = this.basicStep.basicMetaIconForm.get('icon').value === '' ?
       'fas fa-cube' : this.basicStep.basicMetaIconForm.get('icon').value;
     this.assignToType({icon: defaultIcon}, 'render_meta');
@@ -116,6 +110,7 @@ export class TypeBuilderComponent implements OnInit {
       let newTypeID = null;
       this.typeService.postType(this.typeInstance).subscribe(typeIDResp => {
           newTypeID = typeIDResp;
+          this.sidebarService.reload();
           this.router.navigate(['/framework/type/'], {queryParams: {typeAddSuccess: newTypeID}});
         },
         (error) => {
@@ -123,7 +118,7 @@ export class TypeBuilderComponent implements OnInit {
         });
     } else if (this.mode === CmdbMode.Edit) {
       this.typeService.putType(this.typeInstance).subscribe((updateResp: CmdbType) => {
-          this.sidebarService.updateCategoryTree();
+          this.sidebarService.reload();
           this.toast.show(`Type was successfully edit: TypeID: ${updateResp.public_id}`);
           this.router.navigate(['/framework/type/'], {queryParams: {typeEditSuccess: updateResp.public_id}});
         },

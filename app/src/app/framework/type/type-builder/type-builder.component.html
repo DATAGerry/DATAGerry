@@ -2,7 +2,7 @@
   <aw-wizard-step (stepExit)="exitBasicStep()" stepId="1" stepTitle="Basic informations">
     <cmdb-type-basic-step [preData]="typeInstance" [mode]="mode"></cmdb-type-basic-step>
     <button class="btn btn-primary next" type="button" awNextStep
-            [disabled]="!basicStep.basicForm.valid || !basicStep.basicCategoryForm.valid">Next Step
+            [disabled]="!basicStep.basicForm.valid">Next Step
     </button>
   </aw-wizard-step>
   <aw-wizard-step (stepExit)="exitFieldStep()" stepId="2" stepTitle="Field definitions">

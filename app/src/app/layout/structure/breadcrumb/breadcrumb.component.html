@@ -1,11 +1,8 @@
-<nav aria-label="breadcrumb">
-  <ol [ngClass]="{ 'breadcrumb d-flex': allowBootstrap}"
-      class="{{addClass ? '' + addClass : ''}}">
-
+<nav id="breadcrumb" class="d-flex">
+  <ol class="breadcrumb flex-fill">
     <li class="breadcrumb-item">
       <a routerLink="">Dashboard</a>
     </li>
-
     <ng-container *ngFor="let breadcrumb of breadcrumbService.get() | async; let last = last">
       <li *ngIf="breadcrumb.label !== 'Dashboard'"
           [ngClass]="{ 'breadcrumb-item': allowBootstrap, 'list': true, 'active': last }">
@@ -17,8 +14,7 @@
       </span>
       </li>
     </ng-container>
-
-    <div class="custom-control custom-switch ml-auto" data-toggle="tooltip" data-placement="bottom"
+    <div id="active-switch" class="custom-control custom-switch" data-toggle="tooltip" data-placement="bottom"
          title="Only active objects">
       <input type="checkbox" class="custom-control-input" name="active_cookiee" id="active_cookiee"
              [(ngModel)]="isChecked" (change)="checkState($event)" checked/>
