@@ -18,23 +18,21 @@
 
 import { Component, OnInit } from '@angular/core';
 import { RenderField } from '../../fields/components.fields';
-import { formatDate } from '@angular/common';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'cmdb-date-simple',
   templateUrl: './date-simple.component.html',
   styleUrls: ['./date-simple.component.scss']
 })
-export class DateSimpleComponent extends RenderField implements OnInit{
+export class DateSimpleComponent extends RenderField implements OnInit {
 
-  constructor() {
+  constructor(private datePipe: DatePipe) {
     super();
   }
 
   ngOnInit(): void {
-      const currentDate = this.data.value;
-      if (currentDate && currentDate.$date) {
-        this.data.value =  new Date(currentDate.$date);
-      }
+    const {$date} = this.data ? {$date: null} : this.data.value;
+    if ($date) { this.datePipe.transform(new Date($date), 'dd/MM/yyyy'); }
   }
 }
