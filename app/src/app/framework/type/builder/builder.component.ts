@@ -50,8 +50,8 @@ export class BuilderComponent implements OnInit {
   public sections: any[];
   public userList: User[] = [];
   public groupList: Group[] = [];
+  public canEdit: boolean = false;
   @Input() mode = CmdbMode.View;
-  public activeEdit: boolean = false;
 
   @Input() set builderConfig(data) {
     if (data !== undefined) {
@@ -102,7 +102,7 @@ export class BuilderComponent implements OnInit {
 
   public onDrop(event: DndDropEvent, list: any[]) {
     if (list && (event.dropEffect === 'copy')) {
-      this.activeEdit = true;
+      this.canEdit = true;
     }
 
     if (list

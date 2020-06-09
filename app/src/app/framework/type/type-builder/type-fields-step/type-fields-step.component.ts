@@ -18,7 +18,7 @@
 
 import { AfterContentInit, ChangeDetectorRef, Component, Input, ViewChild } from '@angular/core';
 import { BuilderComponent } from '../../builder/builder.component';
-import {CmdbMode} from "../../../modes.enum";
+import { CmdbMode } from '../../../modes.enum';
 
 @Component({
   selector: 'cmdb-type-fields-step',
