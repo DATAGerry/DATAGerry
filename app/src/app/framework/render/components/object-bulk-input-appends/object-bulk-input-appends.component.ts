@@ -16,63 +16,36 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {RenderField} from '../../fields/components.fields';
 
 @Component({
   selector: 'cmdb-object-bulk-input-appends',
   templateUrl: './object-bulk-input-appends.component.html',
   styleUrls: ['./object-bulk-input-appends.component.scss']
 })
-export class ObjectBulkInputAppendsComponent implements OnInit {
+export class ObjectBulkInputAppendsComponent extends RenderField implements OnInit {
 
-  public dataBind: any;
-  public formGroup: any;
-  public controller: any;
   public bulkControlName: string;
 
-  @Input('data')
-  public set data(value: any) {
-    this.dataBind = value;
-    this.bulkControlName = value.name + '-isChanged';
-  }
-
-  public get data(): any {
-    return this.dataBind;
-  }
-
-  @Input('parentFormGroup')
-  public set parentFormGroup(value: any) {
-    this.formGroup = value;
-  }
-
-  public get parentFormGroup(): any {
-    return this.formGroup;
-  }
-
-  @Input('controll')
-  public set controll(value: any) {
-    this.controller = value;
-  }
-
-  public get controll(): any {
-    return this.controller;
-  }
-
   constructor() {
+    super();
   }
 
   ngOnInit() {
-    this.controller.valueChanges.subscribe(value => {
+    this.bulkControlName = this.data.name + '-isChanged';
+    this.controller.valueChanges.subscribe(() => {
       this.parentFormGroup.get(this.bulkControlName).setValue(true);
-      this.parentFormGroup.get('changedFields').value.set(this.data.name, this.data);
+      this.changeCheckBox();
     });
   }
 
-  public changeCheckBox(value: any) {
-    if (value.checked) {
-      this.parentFormGroup.get('changedFields').value.set(this.data.name, this.data);
+  public changeCheckBox(event: any = {checked: true}) {
+    const {value} = this.parentFormGroup.get('changedFields');
+    if (!event.checked) {
+      value.delete(this.data.name);
     } else {
-      this.parentFormGroup.get('changedFields').value.delete(this.data.name);
+      value.set(this.data.name, this.data);
     }
   }
 }
