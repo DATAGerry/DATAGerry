@@ -17,7 +17,7 @@ export class DateComponent extends RenderField implements  OnInit {
   }
 
   ngOnInit(): void {
-    //format default value
+    // format default value
     if (this.data.default !== undefined  && this.data.default.year && this.data.default.month && this.data.default.day) {
       const temp = this.data.default;
       this.data.default = temp.year + '-' + temp.month + '-' + temp.day;
@@ -31,7 +31,7 @@ export class DateComponent extends RenderField implements  OnInit {
       this.parentFormGroup.get(this.data.name).setValue(null, {onlySelf: true});
     }
 
-    //format string input values to internal date model
+    // format string input values to internal date model
     this.parentFormGroup.get(this.data.name).valueChanges.subscribe(value => {
       if (typeof value === 'string') {
         const pattern = RegExp('[0-9]{4}-([1-9]|0[1-9]|1[012])-([1-9]|0[1-9]|1[0-9]|2[0-9]|3[01])');
@@ -40,13 +40,13 @@ export class DateComponent extends RenderField implements  OnInit {
           newDate.setMinutes(newDate.getMinutes() - newDate.getTimezoneOffset());
           this.parentFormGroup.get(this.data.name).setValue({$date: newDate.getTime()}, {onlySelf: true});
         } else {
-          this.parentFormGroup.get(this.data.name).setErrors({'incorrect': true})
+          this.parentFormGroup.get(this.data.name).setErrors({incorrect: true});
         }
       }
     });
 
-    //trigger the conversion of string to internal date model for default value when adding new objects
-    this.parentFormGroup.get(this.data.name).updateValueAndValidity({onlySelf: false,emitEvent: true });
+    // trigger the conversion of string to internal date model for default value when adding new objects
+    this.parentFormGroup.get(this.data.name).updateValueAndValidity({onlySelf: false, emitEvent: true });
   }
 
   public get currentDate() {

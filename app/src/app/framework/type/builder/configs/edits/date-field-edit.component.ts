@@ -16,16 +16,15 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ConfigEdit } from '../config.edit';
-import {formatDate} from "@angular/common";
 
 @Component({
   selector: 'cmdb-date-field-edit',
   templateUrl: './date-field-edit.component.html',
   styleUrls: ['./date-field-edit.component.scss']
 })
-export class DateFieldEditComponent extends ConfigEdit implements OnInit {
+export class DateFieldEditComponent extends ConfigEdit {
 
   @Input() groupList: any;
   @Input() userList: any;
@@ -35,6 +34,8 @@ export class DateFieldEditComponent extends ConfigEdit implements OnInit {
     super();
   }
 
-  public ngOnInit(): void {
+  public resetDate() {
+    this.data.value = null;
   }
+
 }

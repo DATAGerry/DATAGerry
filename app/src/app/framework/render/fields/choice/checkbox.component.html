@@ -18,7 +18,7 @@
             <div class="row">
               <div class="col-sm-auto p-0" *ngIf="mode == MODES.Bulk">
                 <cmdb-object-bulk-input-appends [data]="data"
-                                                [controll]="controller"
+                                                [mode]="mode"
                                                 [parentFormGroup]="parentFormGroup" ></cmdb-object-bulk-input-appends>
               </div>
               <div class="col-sm-4">
@@ -31,7 +31,7 @@
                 </div>
               </div>
               <div class="col-sm">
-                <cmdb-input-appends [data]="data" [controll]="controller" [parentFormGroup]="parentFormGroup"></cmdb-input-appends>
+                <cmdb-input-appends [data]="data" [mode]="mode" [parentFormGroup]="parentFormGroup"></cmdb-input-appends>
               </div>
             </div>
           </div>
