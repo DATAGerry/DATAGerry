@@ -18,7 +18,7 @@
 
 import { Component, Input } from '@angular/core';
 import { CmdbCategoryTree } from '../../../models/cmdb-category';
-import { DropEffect } from 'ngx-drag-drop';
+import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import { CmdbMode } from '../../../modes.enum';
 
 @Component({
@@ -41,4 +41,20 @@ export class CategoryTreeComponent {
   public effect: DropEffect = 'move';
 
 
+  onDrop(event: DndDropEvent, list?: any[]) {
+
+    if (list
+      && (event.dropEffect === 'copy'
+        || event.dropEffect === 'move')) {
+
+      let index = event.index;
+
+      if (typeof index === 'undefined') {
+
+        index = list.length;
+      }
+
+      list.splice(index, 0, event.data);
+    }
+  }
 }

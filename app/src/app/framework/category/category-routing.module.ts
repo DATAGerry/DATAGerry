@@ -21,7 +21,6 @@ import { Routes, RouterModule } from '@angular/router';
 import { CategoryComponent } from './category.component';
 import { CategoryAddComponent } from './category-add/category-add.component';
 import { CategoryEditComponent } from './category-edit/category-edit.component';
-import { CategoryDeleteComponent } from './category-delete/category-delete.component';
 import { CmdbMode } from '../modes.enum';
 
 const routes: Routes = [
@@ -58,14 +57,6 @@ const routes: Routes = [
       right: 'base.framework.category.edit'
     },
     component: CategoryEditComponent
-  },
-  {
-    path: 'delete/:publicID',
-    data: {
-      breadcrumb: 'Delete',
-      right: 'base.framework.category.delete'
-    },
-    component: CategoryDeleteComponent
   }
 ];
 

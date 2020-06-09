@@ -16,25 +16,83 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
+import { Component, Input } from '@angular/core';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { CmdbCategory } from '../../models/cmdb-category';
+import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-category-delete',
-  templateUrl: './category-delete.component.html',
-  styleUrls: ['./category-delete.component.scss']
+  template: `
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-title">Category deletion</h4>
+      <button type="button" class="close" (click)="modal.dismiss('')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <strong>Are you sure you want to delete <span class="text-primary">{{category.name}}</span> category?</strong>
+      <p>
+        All typs inside this category will be un assigned <span
+        class="text-danger">This operation can not be undone!</span>
+      </p>
+      <form id="deleteCategoryModalForm" [formGroup]="deleteCategoryModalForm" class="needs-validation" novalidate
+            autocomplete="off">
+        <div class="form-group">
+          <label for="categoryNameInput">Type in the name: {{category.name}} <span class="required">*</span></label>
+          <input type="text" formControlName="name" class="form-control"
+                 [ngClass]="{ 'is-valid': name.valid && (name.dirty || name.touched),
+                 'is-invalid': name.invalid && (name.dirty || name.touched)}"
+                 id="categoryNameInput" required>
+          <small id="categoryNameInputHelp" class="form-text text-muted">Type in the name of the category to confirm the
+            deletion.</small>
+          <div *ngIf="name.invalid && (name.dirty || name.touched)"
+               class="invalid-feedback">
+            <div class="float-right" *ngIf="name.errors.required">
+              Name is required
+            </div>
+            <div class="float-right" *ngIf="name.errors.notequal">
+              Your answer is not equal!
+            </div>
+          </div>
+          <div class="clearfix"></div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss('cancel')">Cancel</button>
+      <button type="button" class="btn btn-danger" [disabled]="deleteCategoryModalForm.invalid"
+              (click)="modal.close('delete')">Delete
+      </button>
+    </div>
+  `
 })
-export class CategoryDeleteComponent implements OnInit {
+export class CategoryDeleteComponent {
 
-  public publicID: number;
+  @Input() public category: CmdbCategory;
+  public deleteCategoryModalForm: FormGroup;
 
-  constructor(private route: ActivatedRoute) {
-    this.route.params.subscribe((params: Params) => {
-      this.publicID = params.publicID;
+  constructor(public modal: NgbActiveModal) {
+    this.deleteCategoryModalForm = new FormGroup({
+      name: new FormControl('', [Validators.required, this.equalName()]),
     });
   }
 
-  ngOnInit() {
+  public get name(): FormControl {
+    return this.deleteCategoryModalForm.get('name') as FormControl;
+  }
+
+  public equalName(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: boolean } | null => {
+      if (this.category) {
+        if (control.value !== this.category.name) {
+          return { notequal: true };
+        } else {
+          return null;
+        }
+      }
+
+    };
   }
 
 }

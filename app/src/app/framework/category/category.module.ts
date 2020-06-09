@@ -33,6 +33,7 @@ import { CategoryEditComponent } from './category-edit/category-edit.component';
 import { CategoryTreeComponent } from './components/category-tree/category-tree.component';
 import { CategoryNodeComponent } from './components/category-node/category-node.component';
 import { CategoryDeleteComponent } from './category-delete/category-delete.component';
+import { AuthModule } from '../../auth/auth.module';
 
 @NgModule({
   declarations: [CategoryComponent, CategoryAddComponent, CategoryFormComponent, CategoryEditComponent, CategoryTreeComponent, CategoryNodeComponent, CategoryDeleteComponent],
@@ -45,8 +46,10 @@ import { CategoryDeleteComponent } from './category-delete/category-delete.compo
     NgSelectModule,
     FontAwesomeModule,
     FormsModule,
-    IconPickerModule
-  ]
+    IconPickerModule,
+    AuthModule
+  ],
+  entryComponents: [CategoryDeleteComponent]
 })
 export class CategoryModule {
 }
