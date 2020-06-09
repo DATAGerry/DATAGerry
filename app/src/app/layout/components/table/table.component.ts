@@ -50,6 +50,7 @@ export class TableComponent implements OnInit, OnDestroy {
 
   @Input() thColumns: TableColumn[];
   @Input() thColumnsActions: TableColumnAction[];
+  @Input() order: any[] = [[4, 'desc']];
   @Input() add: {};
   @Input() print: {};
   @Input() dtButtons: any[];
@@ -87,6 +88,7 @@ export class TableComponent implements OnInit, OnDestroy {
       { name: 'type', label: 'Type'},
       { name: 'author', label: 'Author'},
       { name: 'create_time', label: 'Creation Time'},
+      { name: 'last_edit_time', label: 'Modification Time'},
       { name: 'action', label: 'Action'}];
 
     this.thColumnsActions = [
@@ -127,7 +129,7 @@ export class TableComponent implements OnInit, OnDestroy {
   private buildOptions(buttons) {
     this.dtOptions = {
       ordering: true,
-      order: [[1, 'asc']],
+      order: this.order,
       columnDefs: [{
         targets: 'nosort',
         orderable: false,
