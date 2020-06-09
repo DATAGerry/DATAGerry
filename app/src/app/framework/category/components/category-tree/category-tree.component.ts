@@ -16,23 +16,29 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CmdbCategoryTree } from '../../../models/cmdb-category';
 import { DropEffect } from 'ngx-drag-drop';
+import { CmdbMode } from '../../../modes.enum';
 
 @Component({
   selector: 'cmdb-category-tree',
   templateUrl: './category-tree.component.html',
   styleUrls: ['./category-tree.component.scss']
 })
-export class CategoryTreeComponent implements OnInit {
+export class CategoryTreeComponent {
 
+  /**
+   * Edit mode of tree
+   */
+  @Input() public mode: CmdbMode = CmdbMode.View;
+
+  /**
+   * Root element of the category tree
+   */
   @Input() public tree: CmdbCategoryTree;
+
   public effect: DropEffect = 'move';
 
-  constructor() { }
-
-  ngOnInit() {
-  }
 
 }

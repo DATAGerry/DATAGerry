@@ -1,5 +1,6 @@
+<i [ngClass]="node.category.meta.icon ? node.category.meta.icon : 'far fa-folder-open'"></i>
 <ng-content></ng-content>
-<span class="dnd-handle ml-2" dndHandle><i class="fa fa-arrows-alt"></i></span>
+<!--<span class="dnd-handle ml-2" dndHandle><i class="fa fa-arrows-alt"></i></span>
 <span class="float-right">
   <a class="ml-2" [routerLink]="['/','framework','category','edit', node.category.public_id]">
     <i class="fas fa-edit"></i>
@@ -7,4 +8,4 @@
   <a class="ml-2" [routerLink]="['/','framework','category','delete', node.category.public_id]">
     <i class="fas fa-trash"></i>
   </a>
-</span>
+</span>-->

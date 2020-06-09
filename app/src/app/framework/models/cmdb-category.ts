@@ -27,12 +27,12 @@ export class CmdbCategory implements CmdbDao {
   // tslint:enable
   public name: string;
   public label: string;
-  public icon: string;
   public meta: {
     icon: string,
     order: number
   };
   public parent: any;
+  public types: number[];
 }
 
 export class CmdbCategoryNode {

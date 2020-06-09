@@ -1,16 +1,58 @@
 $tree-list-style: none !default;
 $tree-default-margin: 0;
 $tree-default-padding: 0;
-$tree-nested-margin-left: 10px !default;
+$tree-nested-margin-left: 1rem !default;
+$tree-node-icon-margin: 0 .5em 0 0;
 
-ul.tree {
-  list-style: $tree-list-style;
-  margin: $tree-default-margin;
-  padding: 0;
+.tree-view {
+  position: relative;
+  line-height: 1.5;
+  color: #212529;
 
   ul {
-    list-style: inherit;
-    padding: inherit;
-    margin-left: $tree-nested-margin-left;
+    padding-left: 5px;
+    list-style: none;
+
+    li {
+      position: relative;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      padding-left: 15px;
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      box-sizing: border-box;
+
+      i{
+        &:first-of-type{
+          margin-right: .5em;
+        }
+      }
+
+      &:before {
+        position: absolute;
+        top: 15px;
+        left: 0;
+        width: 10px;
+        height: 1px;
+        margin: auto;
+        content: '';
+        background-color: #666;
+      }
+
+      &:after {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 1px;
+        height: 100%;
+        content: '';
+        background-color: #666;
+      }
+
+      &:last-child:after {
+        height: 15px;
+      }
+    }
   }
 }

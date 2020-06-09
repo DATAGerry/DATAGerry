@@ -21,7 +21,7 @@
           <cmdb-sidebar-category *ngFor="let categoryNode of categoryTree;"
                                  [categoryNode]="categoryNode"></cmdb-sidebar-category>
         </div>
-        <ng-container *ngIf="unCategorizedTypes">
+        <ng-container *ngIf="unCategorizedTypes && unCategorizedTypes.length > 0">
           <li class="nav-title">Uncategorized</li>
           <cmdb-sidebar-type *ngFor="let type of unCategorizedTypes" [type]="type"></cmdb-sidebar-type>
         </ng-container>

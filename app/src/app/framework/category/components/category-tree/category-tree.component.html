@@ -1,6 +1,7 @@
-<ul *ngIf="tree" class="tree dnd">
-  <li *ngFor="let node of tree" class="tree-node">
-    <cmdb-category-node [dndDraggable]="tree" [dndEffectAllowed]="effect" [node]="node">{{node.category.label}}</cmdb-category-node>
+<ul *ngIf="tree">
+  <li *ngFor="let node of tree">
+    <cmdb-category-node [dndDraggable]="tree" [dndEffectAllowed]="effect"
+                        [node]="node">{{node.category.label}}</cmdb-category-node>
     <cmdb-category-tree [tree]="node.children"></cmdb-category-tree>
   </li>
 </ul>

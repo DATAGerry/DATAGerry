@@ -2,4 +2,3 @@
 <hr/>
 <cmdb-category-form [unAssignedTypes]="unAssignedTypes" [assignedTypes]="assignedTypes"
                     (validationEmitter)="formValid = $event" (submitEmitter)="onSave($event)"></cmdb-category-form>
-{{formValid | json}}

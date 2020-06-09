@@ -32,12 +32,27 @@ import { SidebarService } from '../../../layout/services/sidebar.service';
 })
 export class CategoryAddComponent implements OnInit, OnDestroy {
 
+  /**
+   * Validation indication for button disable
+   */
   public formValid: boolean = false;
 
+  /**
+   * Subscription for getUncategorizedTypes
+   */
   private typeServiceSubscription: Subscription = new Subscription();
+  /**
+   * Subscription for category add call
+   */
   private categorySubmitSubscription: Subscription = new Subscription();
 
+  /**
+   * List of uncategorized types
+   */
   public unAssignedTypes: CmdbType[];
+  /**
+   * Instance list of types based on the ids inside the category types list
+   */
   public assignedTypes: CmdbType[];
 
   constructor(private categoryService: CategoryService, private typeService: TypeService,
@@ -57,6 +72,10 @@ export class CategoryAddComponent implements OnInit, OnDestroy {
     this.categorySubmitSubscription.unsubscribe();
   }
 
+  /**
+   * Call save function from service
+   * @param category Raw data from form
+   */
   public onSave(category: CmdbCategory): void {
     if (this.formValid) {
       this.categorySubmitSubscription = this.categoryService.postCategory(category).subscribe(response => {

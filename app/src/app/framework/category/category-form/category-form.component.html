@@ -5,7 +5,13 @@
         Unassigned types
       </div>
       <div class="card-body">
-        <div class="list-group">
+        <div class="alert alert-warning alert-dismissible fade show mb-0" role="alert" *ngIf="unAssignedTypes.length == 0">
+          <strong>No types!</strong> All existing types are assigned.
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div *ngIf="unAssignedTypes.length > 0" class="list-group">
           <div *ngFor="let type of unAssignedTypes" class="list-group-item list-group-item-action mt-2">
             <div [dndDraggable]="type" [dndEffectAllowed]="effect" (dndStart)="onDragStart($event)"
                  (dndMoved)="onDragged(type, unAssignedTypes, 'move')"
@@ -85,30 +91,34 @@
         </div>
         <hr/>
         <div class="row">
-          <div class="col-md-12">
+          <div class="col-md-12 dnd">
             <label for="category-types">Types:</label>
-            <section id="category-types" dndDropzone class="dnd" (dndDrop)="onDrop($event, assignedTypes)">
-              <div class="drop-zone" data-content="Drop type here">
-                <div *ngFor="let type of assignedTypes"
+            <section id="category-types" dndDropzone class="drop-zone" data-content="Drop type here" (dndDrop)="onDrop($event, assignedTypes, true)">
+                <div class="drop-zone" dndPlaceholderRef data-content="Drop type here"></div>
+                <div *ngFor="let type of assignedTypes" [dndDraggable]="type" [dndEffectAllowed]="effect"
+                     (dndStart)="onDragStart($event)"
+                     (dndMoved)="onDragged(type, assignedTypes, 'move', true)"
                      class="list-group-item list-group-item-action">
                             <span class="d-flex justify-content-between align-items-center ">
                               {{type.label}} # {{type.public_id}}
-                              <fa-icon icon="trash-alt" (click)="clickRemoveAssignedType(type)"></fa-icon>
+                              <span>
+                                <i class="fa fa-arrows-alt dnd-handle" dndHandle></i>
+                                <i class="fa fa-trash-alt ml-2 pointer" (click)="clickRemoveAssignedType(type)"></i>
+                              </span>
                             </span>
-                </div>
               </div>
             </section>
           </div>
         </div>
-        <hr/>
-
+      </div>
+      <div class="card-footer">
         <div class="btn-group float-right" role="group">
           <button type="reset" class="btn btn-outline-warning mr-2" (click)="clickReset()">Reset</button>
           <button type="submit" class="btn btn-success" [disabled]="categoryForm.invalid">Save</button>
         </div>
+        <div class="clearfix"></div>
       </div>
     </div>
   </form>
 </div>
 
-{{categoryForm.value | json}}

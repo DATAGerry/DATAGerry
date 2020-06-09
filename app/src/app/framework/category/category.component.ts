@@ -15,10 +15,13 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb-category';
+import { CmdbCategoryTree } from '../models/cmdb-category';
 import { CategoryService } from '../services/category.service';
+import { CmdbMode } from '../modes.enum';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'cmdb-category',
@@ -27,15 +30,35 @@ import { CategoryService } from '../services/category.service';
 })
 export class CategoryComponent implements OnInit, OnDestroy {
 
+  /**
+   * Root element of the category tree
+   */
   public categoryTree: CmdbCategoryTree;
-  public nodes: CmdbCategoryNode[] = [];
-
+  /**
+   * Rest call subscription for root tree
+   */
   private categoryTreeSubscription: Subscription;
+  /**
+   * Category edit mode
+   * Default is a basic tree view
+   */
+  public mode: CmdbMode = CmdbMode.View;
+  /**
+   * Route data subscription for mode over route data
+   */
+  private routeSubscription: Subscription;
 
-  constructor(private categoryService: CategoryService) {
+  constructor(private categoryService: CategoryService, private route: ActivatedRoute) {
+
     this.categoryTreeSubscription = new Subscription();
-  }
+    this.routeSubscription = new Subscription();
 
+    this.routeSubscription = this.route.data.subscribe((data: any) => {
+      if (data.mode) {
+        this.mode = data.mode;
+      }
+    });
+  }
 
   public ngOnInit(): void {
     this.categoryTreeSubscription = this.categoryService.getCategoryTree().subscribe((categoryTree: CmdbCategoryTree) => {

@@ -62,14 +62,17 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
    * Triggers the validationEmitter output.
    */
   private valueChangeSubscription: Subscription = new Subscription();
+
   /**
-   *
+   * Subscription for the complete category list.
    */
   private categoryServiceSubscription: Subscription = new Subscription();
-
+  /**
+   * Complete category list. Will be used to select the parent id.
+   */
+  public categories: CmdbCategory[] = [];
 
   public categoryForm: FormGroup;
-  public categories: CmdbCategory[] = [];
 
   @Input() public unAssignedTypes: CmdbType[] = [];
   @Input() public assignedTypes: CmdbType[] = [];
@@ -115,6 +118,19 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
     )) {
       this.$category = this.category;
       this.categoryForm.patchValue(this.$category);
+      for (const type of this.$category.types) {
+        this.types.push(new FormControl(type));
+      }
+    }
+    // TODO fix wrong order!!!
+    if (changes.assignedTypes !== undefined && changes.assignedTypes.currentValue !== undefined && (
+      changes.assignedTypes.previousValue !== changes.assignedTypes.currentValue
+    )) {
+      const buffer: CmdbType[] = [];
+      for (const type of this.$category.types) {
+        buffer.push(this.findAssignedTypeByIndex(type));
+      }
+      this.assignedTypes = buffer;
     }
   }
 
@@ -152,6 +168,10 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
     return this.categoryForm.get('types') as FormArray;
   }
 
+  public findAssignedTypeByIndex(idx: number): CmdbType | undefined {
+    return this.assignedTypes[this.assignedTypes.findIndex(x => x.public_id === idx)];
+  }
+
   public clickRemoveAssignedType(item: CmdbType): void {
     const index: number = this.assignedTypes.indexOf(item);
     this.assignedTypes.splice(index, 1);
@@ -169,20 +189,26 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
     console.log(event);
   }
 
-  public onDragged(item: any, list: any[], effect: DropEffect) {
+  public onDragged(item: CmdbType, list: any[], effect: DropEffect, control: boolean = false) {
     if (effect === 'move') {
       const index = list.indexOf(item);
       list.splice(index, 1);
+      if (control) {
+        this.types.removeAt(index);
+      }
     }
+
   }
 
-  public onDrop(event: DndDropEvent, list?: any[]) {
+  public onDrop(event: DndDropEvent, list?: any[], control: boolean = false) {
     let index = event.index;
     if (typeof index === 'undefined') {
       index = list.length;
     }
     list.splice(index, 0, event.data);
-    this.types.insert(index, new FormControl(event.data.public_id));
+    if (control) {
+      this.types.insert(index, new FormControl(event.data.public_id));
+    }
   }
 
   public onSubmit(): void {

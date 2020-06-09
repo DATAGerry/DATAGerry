@@ -20,10 +20,6 @@ $dnd-dropzone-content-color: $dnd-border-color;
   .drop-zone {
 
     transition: $dnd-dropzone-transition;
-    padding: $dnd-dropzone-padding;
-    border-color: $dnd-border-color;
-    border-width: $dnd-border-width;
-    border-style: $dnd-border-style;
 
     &[data-content] {
       &:after {
@@ -31,8 +27,18 @@ $dnd-dropzone-content-color: $dnd-border-color;
         font-size: $dnd-dropzone-content-font-size;
         text-transform: $dnd-dropzone-content-transform;
         text-align: $dnd-dropzone-content-position;
-        content: attr(data-content);
 
+      }
+
+      &:empty {
+
+        padding: $dnd-dropzone-padding;
+        border-color: $dnd-border-color;
+        border-width: $dnd-border-width;
+        border-style: $dnd-border-style;
+        &:after {
+          content: attr(data-content);
+        }
       }
 
       &:not(&:empty) {
