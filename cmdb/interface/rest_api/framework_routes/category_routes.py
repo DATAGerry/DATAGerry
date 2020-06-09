@@ -187,6 +187,7 @@ def update_category(request_user: User):
     except TypeError as te:
         return abort(400, str(te))
 
+    print(update_data)
     try:
         updated_category = CmdbCategory.from_data(update_data)
     except Exception as err:

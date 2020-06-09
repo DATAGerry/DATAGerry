@@ -149,7 +149,9 @@ class CategoryTree:
             self.category: CmdbCategory = category
             self.node_order: int = self.category.get_meta().get_order()
             self.children: List["CategoryTree.CategoryNode"] = children or []
-            self.types: List[CmdbType] = [type_ for type_ in types if type_.public_id in self.category.types]
+            # prevent wrong type order
+            self.types: List[CmdbType] = [type_ for id_ in self.category.types for type_ in types if
+                                          id_ == type_.public_id]
 
         @classmethod
         def to_json(cls, instance: "CategoryTree.CategoryNode"):
@@ -173,7 +175,7 @@ class CategoryTree:
         self._categories = categories
         self._types = types
         self._tree: List[CategoryTree.CategoryNode] = sorted(self.__create_tree(self._categories, types=self._types),
-                                                             key=lambda node: node.get_order(), reverse=True)
+                                                             key=lambda node: node.get_order(), reverse=False)
 
     def __len__(self) -> int:
         """Get length of tree - this means the number of root categories"""

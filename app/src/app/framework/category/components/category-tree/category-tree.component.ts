@@ -17,7 +17,7 @@
 */
 
 import { Component, Input } from '@angular/core';
-import { CmdbCategoryTree } from '../../../models/cmdb-category';
+import { CmdbCategoryNode, CmdbCategoryTree } from '../../../models/cmdb-category';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import { CmdbMode } from '../../../modes.enum';
 
@@ -38,23 +38,47 @@ export class CategoryTreeComponent {
    */
   @Input() public tree: CmdbCategoryTree;
 
+  /**
+   * Possible dnd effect
+   */
   public effect: DropEffect = 'move';
 
-
-  onDrop(event: DndDropEvent, list?: any[]) {
-
-    if (list
-      && (event.dropEffect === 'copy'
-        || event.dropEffect === 'move')) {
-
-      let index = event.index;
-
-      if (typeof index === 'undefined') {
-
-        index = list.length;
-      }
-
-      list.splice(index, 0, event.data);
+  /**
+   * When drag event started
+   * @param item CmdbCategoryNode node element
+   * @param tree parent root CmdbCategoryTree of node
+   * @param effect drag n drop effect
+   */
+  public onDragged(item: CmdbCategoryNode, tree: CmdbCategoryTree, effect: DropEffect) {
+    if (effect === 'move') {
+      const index = tree.indexOf(item);
+      tree.splice(index, 1);
     }
+  }
+
+  /**
+   * Function which is called when event drop
+   * @param event data category node
+   * @param tree selected node
+   */
+  public onDrop(event: DndDropEvent, tree?: CmdbCategoryTree) {
+    let index = event.index;
+    if (typeof index === 'undefined') {
+      index = tree.length;
+    }
+    tree.splice(index, 0, event.data);
+    this.updateTree(tree);
+  }
+
+  /**
+   * Updates the order of the tree based on its index
+   * @param tree root element of the node
+   */
+  public updateTree(tree: CmdbCategoryTree) {
+    for (let i = 0; i < tree.length; i++) {
+      const node = tree[i];
+      node.category.meta.order = i;
+    }
+    return tree;
   }
 }

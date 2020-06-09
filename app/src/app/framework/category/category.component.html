@@ -19,3 +19,8 @@
 <div id="category-tree" class="tree-view">
   <cmdb-category-tree [mode]="mode" [tree]="categoryTree"></cmdb-category-tree>
 </div>
+<div *ngIf="mode == 2;" class="btn-group float-right" role="group">
+  <button  type="submit" class="btn btn-success" (click)="onSave()">Update</button>
+</div>
+<div class="clearfix"></div>
+

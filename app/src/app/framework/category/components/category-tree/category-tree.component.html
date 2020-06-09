@@ -1,6 +1,18 @@
-<ul *ngIf="tree" dndDropzone (dndDrop)="onDrop($event, tree)">
-  <li *ngFor="let node of tree" [dndDraggable]="node">
-    <cmdb-category-node [mode]="mode" [node]="node">{{node.category.label}}</cmdb-category-node>
-    <cmdb-category-tree [mode]="mode" [tree]="node.children"></cmdb-category-tree>
-  </li>
-</ul>
+<ng-container *ngIf="tree">
+  <ul *ngIf="mode == 2; else view" class="dnd drop-zone" [ngClass]="tree.length == 0 ? 'min-h': ''" dndDropzone (dndDrop)="onDrop($event, tree)">
+    <li class="drop-zone p-2" dndPlaceholderRef data-content=" "></li>
+    <li *ngFor="let node of tree; let i = index" [dndDraggable]="node" dndEffectAllowed="move"
+        (dndMoved)="onDragged(node, tree, 'move')">
+      <cmdb-category-node [mode]="mode" [node]="node">{{node.category.label}}</cmdb-category-node>
+      <cmdb-category-tree [mode]="mode" [tree]="node.children"></cmdb-category-tree>
+    </li>
+  </ul>
+  <ng-template #view>
+    <ul>
+      <li *ngFor="let node of tree; let i = index">
+        <cmdb-category-node [mode]="mode" [node]="node">{{node.category.label}}</cmdb-category-node>
+        <cmdb-category-tree [mode]="mode" [tree]="node.children"></cmdb-category-tree>
+      </li>
+    </ul>
+  </ng-template>
+</ng-container>

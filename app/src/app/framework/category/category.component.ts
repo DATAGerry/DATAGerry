@@ -17,11 +17,12 @@
 */
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { CmdbCategoryTree } from '../models/cmdb-category';
+import { forkJoin, Observable, Subscription } from 'rxjs';
+import { CmdbCategory, CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb-category';
 import { CategoryService } from '../services/category.service';
 import { CmdbMode } from '../modes.enum';
 import { ActivatedRoute } from '@angular/router';
+import { SidebarService } from '../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-category',
@@ -48,7 +49,7 @@ export class CategoryComponent implements OnInit, OnDestroy {
    */
   private routeSubscription: Subscription;
 
-  constructor(private categoryService: CategoryService, private route: ActivatedRoute) {
+  constructor(private categoryService: CategoryService, private route: ActivatedRoute, private sidebarService: SidebarService) {
 
     this.categoryTreeSubscription = new Subscription();
     this.routeSubscription = new Subscription();
@@ -68,6 +69,38 @@ export class CategoryComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy(): void {
     this.categoryTreeSubscription.unsubscribe();
+  }
+
+  /**
+   * Rest caller updates every category in tree
+   */
+  public onSave(): void {
+    const observers = this.saveTree(this.categoryTree);
+    forkJoin(observers).subscribe(updateResponse => {
+      this.sidebarService.reload();
+    });
+  }
+
+  /**
+   * Recursive tree call. Will generate the observers for the calls
+   * @param root node root element
+   * @param parentNode node of parent
+   */
+  private saveTree(root: CmdbCategoryTree, parentNode?: CmdbCategoryNode): Observable<any>[] {
+    let observers: Observable<any>[] = [];
+    // tslint:disable-next-line:forin
+    for (let i = 0; i < root.length; i++) {
+      const node = root[i];
+      node.category.meta.order = i;
+      if (parentNode) {
+        node.category.parent = parentNode.category.public_id;
+      }
+      observers.push(this.categoryService.updateCategory(node.category));
+      if (node.children.length > 0) {
+        observers = observers.concat(this.saveTree(node.children, node));
+      }
+    }
+    return observers;
   }
 
 }
