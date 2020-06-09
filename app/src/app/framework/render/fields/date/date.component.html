@@ -17,7 +17,7 @@
         <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
             <ng-container *ngIf="mode == MODES.Bulk">
               <cmdb-object-bulk-input-appends [data]="data"
-                                              [controll]="controller"
+                                              [mode]="mode"
                                               [parentFormGroup]="parentFormGroup" ></cmdb-object-bulk-input-appends>
             </ng-container>
             <input type="text" name="{{data.name}}" class="form-control" placeholder="yyyy-mm-dd"
@@ -30,7 +30,7 @@
                 <fa-icon icon="calendar-alt"></fa-icon>
               </span>
             </div>
-            <cmdb-input-appends [data]="data" [controll]="controller" [parentFormGroup]="parentFormGroup"></cmdb-input-appends>
+            <cmdb-input-appends [data]="data" [mode]="mode" [parentFormGroup]="parentFormGroup"></cmdb-input-appends>
         </ng-container>
         <div *ngSwitchDefault>
           <cmdb-mode-error></cmdb-mode-error>
