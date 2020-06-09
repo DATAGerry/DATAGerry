@@ -18,18 +18,24 @@
 
 import { Component, Input, OnInit } from '@angular/core';
 import { CmdbCategoryNode } from '../../../models/cmdb-category';
+import { CmdbMode } from '../../../modes.enum';
 
 @Component({
   selector: 'cmdb-category-node',
   templateUrl: './category-node.component.html',
   styleUrls: ['./category-node.component.scss']
 })
-export class CategoryNodeComponent implements OnInit {
+export class CategoryNodeComponent {
+
+  /**
+   * Edit mode of tree
+   */
+  @Input() public mode: CmdbMode = CmdbMode.View;
+
+  /**
+   * Current node element
+   */
   @Input() public node: CmdbCategoryNode;
 
-  constructor() { }
-
-  ngOnInit() {
-  }
 
 }
