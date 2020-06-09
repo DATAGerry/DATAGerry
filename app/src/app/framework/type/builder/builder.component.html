@@ -114,7 +114,9 @@
           </div>
           <div class="collapse show" id="section-{{x}}{{section.name}}">
             <div class="card-body">
-              <cmdb-config-edit [editingActivated]="activeEdit" [groupList]="groupList" [userList]="userList" [data]="section"></cmdb-config-edit>
+              <cmdb-config-edit [canEdit]="canEdit" [groupList]="groupList" [userList]="userList"
+                                [sections]="sections"
+                                [data]="section"></cmdb-config-edit>
             </div>
           </div>
           <div class="card-body" [dndDropzone]="['inputs']"
@@ -144,7 +146,9 @@
                   </span>
                 </div>
                 <div class="card-body collapse" id="field-{{x}}{{y}}{{field.name}}">
-                  <cmdb-config-edit [editingActivated]="activeEdit" [groupList]="groupList" [userList]="userList" [data]="field"></cmdb-config-edit>
+                  <cmdb-config-edit [canEdit]="canEdit" [groupList]="groupList" [userList]="userList"
+                                    [sections]="sections"
+                                    [data]="field"></cmdb-config-edit>
                 </div>
               </div>
             </div>
