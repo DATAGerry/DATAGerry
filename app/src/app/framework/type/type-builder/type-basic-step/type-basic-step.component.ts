@@ -16,10 +16,13 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { checkTypeExistsValidator, TypeService } from '../../../services/type.service';
 import { CmdbMode } from '../../../modes.enum';
+import { CategoryService } from '../../../services/category.service';
+import { CmdbCategory } from '../../../models/cmdb-category';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -27,7 +30,7 @@ import { CmdbMode } from '../../../modes.enum';
   templateUrl: './type-basic-step.component.html',
   styleUrls: ['./type-basic-step.component.scss'],
 })
-export class TypeBasicStepComponent implements OnInit {
+export class TypeBasicStepComponent implements OnInit, OnDestroy {
 
   @Input()
   set preData(data: any) {
@@ -43,7 +46,12 @@ export class TypeBasicStepComponent implements OnInit {
   public basicForm: FormGroup;
   public basicMetaIconForm: FormGroup;
 
-  constructor(private typeService: TypeService) {
+  public basicCategoryForm: FormGroup;
+  private categoriesSubscription: Subscription;
+  public categories: CmdbCategory[];
+
+  constructor(private typeService: TypeService, private categoryService: CategoryService) {
+    this.categoriesSubscription = new Subscription();
     this.basicForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl('', Validators.required),
@@ -52,6 +60,9 @@ export class TypeBasicStepComponent implements OnInit {
     });
     this.basicMetaIconForm = new FormGroup({
       icon: new FormControl(''),
+    });
+    this.basicCategoryForm = new FormGroup({
+      category_id: new FormControl(null)
     });
   }
 
@@ -64,6 +75,9 @@ export class TypeBasicStepComponent implements OnInit {
   }
 
   public ngOnInit(): void {
+    this.categoriesSubscription = this.categoryService.getCategoryList().subscribe((categories: CmdbCategory[]) => {
+      this.categories = categories;
+    });
     if (this.mode === CmdbMode.Create) {
       this.basicForm.get('name').setAsyncValidators(checkTypeExistsValidator(this.typeService));
       this.basicForm.get('label').valueChanges.subscribe(value => {
@@ -76,6 +90,10 @@ export class TypeBasicStepComponent implements OnInit {
     } else if (this.mode === CmdbMode.Edit) {
       this.basicForm.markAllAsTouched();
     }
+  }
+
+  public ngOnDestroy(): void {
+    this.categoriesSubscription.unsubscribe();
   }
 
 }

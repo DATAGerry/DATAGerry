@@ -41,24 +41,25 @@ export class TypeBuilderComponent implements OnInit {
 
   @Input() public typeInstance?: CmdbType;
   @Input() public mode: number = CmdbMode.Create;
+  public modes = CmdbMode;
 
-  @ViewChild(TypeBasicStepComponent, {static: true})
+  @ViewChild(TypeBasicStepComponent, { static: true })
   public basicStep: TypeBasicStepComponent;
 
-  @ViewChild(TypeFieldsStepComponent, {static: true})
+  @ViewChild(TypeFieldsStepComponent, { static: true })
   public fieldStep: TypeFieldsStepComponent;
 
-  @ViewChild(TypeMetaStepComponent, {static: true})
+  @ViewChild(TypeMetaStepComponent, { static: true })
   public metaStep: TypeMetaStepComponent;
 
-  @ViewChild(TypeAccessStepComponent, {static: true})
+  @ViewChild(TypeAccessStepComponent, { static: true })
   public accessStep: TypeAccessStepComponent;
 
   public selectedCategoryID: number = 0;
 
   public constructor(private router: Router, private typeService: TypeService,
                      private toast: ToastService, private userService: UserService,
-                     private sidebarService: SidebarService) {
+                     private sidebarService: SidebarService, private categoryService: CategoryService) {
 
   }
 
@@ -71,9 +72,10 @@ export class TypeBuilderComponent implements OnInit {
   }
 
   public exitBasicStep() {
+    this.selectedCategoryID = this.basicStep.basicCategoryForm.value.category_id;
     const defaultIcon = this.basicStep.basicMetaIconForm.get('icon').value === '' ?
       'fas fa-cube' : this.basicStep.basicMetaIconForm.get('icon').value;
-    this.assignToType({icon: defaultIcon}, 'render_meta');
+    this.assignToType({ icon: defaultIcon }, 'render_meta');
     this.assignToType(this.basicStep.basicForm.value);
   }
 
@@ -91,13 +93,13 @@ export class TypeBuilderComponent implements OnInit {
 
       sectionBuffer = sectionBuffer.concat(sectionGlobe);
     }
-    this.assignToType({fields: fieldBuffer});
-    this.assignToType({sections: sectionBuffer}, 'render_meta');
+    this.assignToType({ fields: fieldBuffer });
+    this.assignToType({ sections: sectionBuffer }, 'render_meta');
   }
 
   public exitMetaStep() {
-    this.assignToType({summary: this.metaStep.summaryForm.getRawValue()}, 'render_meta');
-    this.assignToType({external: this.metaStep.externalLinks}, 'render_meta');
+    this.assignToType({ summary: this.metaStep.summaryForm.getRawValue() }, 'render_meta');
+    this.assignToType({ external: this.metaStep.externalLinks }, 'render_meta');
   }
 
   public exitAccessStep() {
@@ -110,8 +112,19 @@ export class TypeBuilderComponent implements OnInit {
       let newTypeID = null;
       this.typeService.postType(this.typeInstance).subscribe(typeIDResp => {
           newTypeID = typeIDResp;
-          this.sidebarService.reload();
-          this.router.navigate(['/framework/type/'], {queryParams: {typeAddSuccess: newTypeID}});
+          if (this.selectedCategoryID) {
+            this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
+              category.types.push(newTypeID);
+              this.categoryService.updateCategory(category).subscribe(() => {
+                this.sidebarService.reload();
+                this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
+              });
+            });
+          } else {
+            this.sidebarService.reload();
+            this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
+          }
+
         },
         (error) => {
           console.error(error);
@@ -119,8 +132,8 @@ export class TypeBuilderComponent implements OnInit {
     } else if (this.mode === CmdbMode.Edit) {
       this.typeService.putType(this.typeInstance).subscribe((updateResp: CmdbType) => {
           this.sidebarService.reload();
-          this.toast.show(`Type was successfully edit: TypeID: ${updateResp.public_id}`);
-          this.router.navigate(['/framework/type/'], {queryParams: {typeEditSuccess: updateResp.public_id}});
+          this.toast.show(`Type was successfully edit: TypeID: ${ updateResp.public_id }`);
+          this.router.navigate(['/framework/type/'], { queryParams: { typeEditSuccess: updateResp.public_id } });
         },
         (error) => {
           console.log(error);

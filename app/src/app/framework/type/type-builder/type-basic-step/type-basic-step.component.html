@@ -56,6 +56,28 @@
     </div>
 
     <div class="col-4">
+      <div class="card mb-3" *ngIf="mode == modes.Create">
+        <div class="card-header">
+          Category:
+          <div *ngIf="basicCategoryForm.get('category_id').value; then categorySelected else categoryUnselected"></div>
+          <ng-template #categorySelected><span class="text-success">SELECTED</span></ng-template>
+          <ng-template #categoryUnselected><span class="text-danger">UNSELECTED</span></ng-template>
+        </div>
+        <div class="card-body">
+          <div *ngIf="categories">
+            <form [formGroup]="basicCategoryForm">
+              <ng-select
+                [items]="categories"
+                bindLabel="label"
+                bindValue="public_id"
+                placeholder="Select category"
+                formControlName="category_id">
+              </ng-select>
+            </form>
+            <br>
+          </div>
+        </div>
+      </div>
       <div class="card">
         <div class="card-header">
           Validation: <span [className]="basicForm.valid ? 'text-success' : 'text-danger'">{{basicForm.status}}</span>
