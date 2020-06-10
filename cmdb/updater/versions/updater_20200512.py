@@ -28,8 +28,8 @@ class Update20200512(Updater):
         new_categories: List[CmdbCategory] = []
         raw_categories_old_structure: List[dict] = self.database_manager.find_all(collection=collection,
                                                                                   filter={})
-        for old_raw_category in raw_categories_old_structure:
-            new_categories.append(self.__convert_category_to_new_structure(old_raw_category))
+        for idx, old_raw_category in enumerate(raw_categories_old_structure):
+            new_categories.append(self.__convert_category_to_new_structure(old_raw_category, index=idx))
 
         """qb = QueryBuilder()
         qb.query = QueryBuilder.and_(
@@ -49,10 +49,11 @@ class Update20200512(Updater):
         self.__clear_up_types()
         super(Update20200512, self).increase_updater_version(20200512)
 
-    def __convert_category_to_new_structure(self, old_raw_category: dict) -> CmdbCategory:
+    def __convert_category_to_new_structure(self, old_raw_category: dict, index: int) -> CmdbCategory:
         """Converts a category from old < 20200512 structure to new format """
         old_raw_category['meta'] = {
-            'icon': old_raw_category.get('icon', None)
+            'icon': old_raw_category.get('icon', None),
+            'order': index
         }
         parent = old_raw_category.get('parent_id', None)
         if parent == 0:
