@@ -13,28 +13,24 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Injectable } from '@angular/core';
-import {catchError, map, switchMap} from 'rxjs/operators';
-import {ApiCallService, ApiService, HttpInterceptorHandler} from '../../services/api-call.service';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import { ApiCallService, ApiService } from '../../services/api-call.service';
 import { ValidatorService } from '../../services/validator.service';
-import { CmdbCategory } from '../models/cmdb-category';
+import { CmdbCategory, CmdbCategoryTree } from '../models/cmdb-category';
 import { FormControl } from '@angular/forms';
 import { Observable, timer } from 'rxjs';
-import {HttpBackend, HttpClient} from '@angular/common/http';
-import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
+import { HttpResponse } from '@angular/common/http';
 
-export const checkCategoryExistsValidator = (categoryService: CategoryService<CmdbCategory>, time: number = 500) => {
+export const checkCategoryExistsValidator = (categoryService: CategoryService, time: number = 500) => {
   return (control: FormControl) => {
     return timer(time).pipe(switchMap(() => {
-      return categoryService.checkCategoryExists(control.value).pipe(
+      return categoryService.getCategoryByName(control.value).pipe(
         map((response) => {
-          if (response.body.length) {
-            return { typeExists: true };
-          }
-          return null;
+          return { categoryExists: true };
         }),
         catchError(() => {
           return new Promise(resolve => {
@@ -51,42 +47,54 @@ export const checkCategoryExistsValidator = (categoryService: CategoryService<Cm
 })
 export class CategoryService<T = CmdbCategory> implements ApiService {
 
+  /**
+   * Fixed URL extension
+   * Nested url path value inside the REST structure
+   */
   public servicePrefix: string = 'category';
-  private categoryList: CmdbCategory[];
 
-  constructor(private api: ApiCallService, private backend: HttpBackend) {
-    this.getCategoryList().subscribe((list: CmdbCategory[]) => {
-      this.categoryList = list;
-    });
+  constructor(private api: ApiCallService) {
+
   }
 
-  public findCategory(publicID: number): CmdbCategory {
-    return this.categoryList.find(category => category.public_id === publicID);
-  }
-
-  public getCategory(publicID: number) {
-    return this.api.callGet<CmdbCategory>(this.servicePrefix + '/' + publicID).pipe(
-      map((apiResponse) => {
+  /**
+   * Get a category by id
+   */
+  public getCategory(publicID: number): Observable<T | null> {
+    return this.api.callGet<T>(this.servicePrefix + '/' + publicID).pipe(
+      map((apiResponse: HttpResponse<T>) => {
         if (apiResponse.status === 204) {
-          return [];
+          return null;
         }
         return apiResponse.body;
       })
     );
   }
 
-  public getCategoriesBy(regex: string): Observable<T[]> {
+  /**
+   * Get a category by name
+   * @param category name or label of the category
+   */
+  public getCategoryByName(category: string): Observable<T | null> {
+    return this.api.callGet<T>(this.servicePrefix + '/' + category).pipe(
+      map((apiResponse: HttpResponse<T>) => {
+        if (apiResponse.status === 204) {
+          return null;
+        }
+        return apiResponse.body;
+      })
+    );
+  }
+
+  /**
+   * Get a list of categories by a regex requirement
+   * Works with name and label
+   * @param regex parameter
+   */
+  public getCategoriesByName(regex: string): Observable<T[]> {
     regex = ValidatorService.validateRegex(regex).trim();
-    return this.api.callGet<CmdbCategory[]>(this.servicePrefix + '/by/' + encodeURIComponent(regex)).pipe(
-      map((apiResponse) => {
-        return apiResponse.body;
-      })
-    );
-  }
-
-  public getRootCategory() {
-    return this.api.callGet<CmdbCategory>(this.servicePrefix + '/root/').pipe(
-      map((apiResponse) => {
+    return this.api.callGet<T[]>(this.servicePrefix + '/find/' + encodeURIComponent(regex)).pipe(
+      map((apiResponse: HttpResponse<T[]>) => {
         if (apiResponse.status === 204) {
           return [];
         }
@@ -95,9 +103,12 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
     );
   }
 
-  public getCategoryList() {
-    return this.api.callGet<CmdbCategory[]>(this.servicePrefix + '/').pipe(
-      map((apiResponse) => {
+  /**
+   * Get all categories as a list
+   */
+  public getCategoryList(): Observable<T[]> {
+    return this.api.callGet<T[]>(this.servicePrefix + '/').pipe(
+      map((apiResponse: HttpResponse<T[]>) => {
         if (apiResponse.status === 204) {
           return [];
         }
@@ -106,9 +117,28 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
     );
   }
 
-  public getCategoryTree() {
-    return this.api.callGet<CmdbCategory[]>(this.servicePrefix + '/tree').pipe(
-      map((apiResponse) => {
+  /**
+   * Get the complete category tree with
+   * nested structure and type instances
+   */
+  public getCategoryTree(): Observable<CmdbCategoryTree | null> {
+    return this.api.callGet<CmdbCategoryTree>(this.servicePrefix + '/tree/').pipe(
+      map((apiResponse: HttpResponse<CmdbCategoryTree>) => {
+        if (apiResponse.status === 204) {
+          return null;
+        }
+        return apiResponse.body;
+      })
+    );
+  }
+
+  /**
+   * Add a new unique category into the database
+   * @param category raw instance of a CmdbCategory
+   */
+  public postCategory(category: T): Observable<T> {
+    return this.api.callPost<CmdbCategory>(this.servicePrefix + '/', category).pipe(
+      map((apiResponse: HttpResponse<any>) => {
         if (apiResponse.status === 204) {
           return [];
         }
@@ -117,21 +147,29 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
     );
   }
 
-  public postCategory(data: CmdbCategory) {
-    return this.api.callPostRoute<CmdbCategory>(this.servicePrefix + '/', data);
+  /**
+   * Update a existing category
+   * @param category modified category instance
+   */
+  public updateCategory(category: T): Observable<T> {
+    return this.api.callPut<number>(this.servicePrefix + '/', category).pipe(
+      map((apiResponse: HttpResponse<T>) => {
+        return apiResponse.body;
+      })
+    );
   }
 
-  public updateCategory(data) {
-    return this.api.callPutRoute<number>(this.servicePrefix + '/', data);
+
+  /**
+   * Delete a existing category
+   * @param publicID the category id
+   */
+  public deleteCategory(publicID: number): Observable<number> {
+    return this.api.callDelete<number>(this.servicePrefix + '/' + publicID).pipe(
+      map((apiResponse: HttpResponse<number>) => {
+        return apiResponse.body;
+      })
+    );
   }
 
-  public deleteCategory(publicID: number) {
-    return this.api.callDeleteRoute<number>(this.servicePrefix + '/' + publicID);
-  }
-
-  // Validation functions
-  public checkCategoryExists(typeName: string) {
-    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`, specialClient);
-  }
 }

@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnInit} from '@angular/core';
+import { Component } from '@angular/core';
 import { RenderField } from '../../fields/components.fields';
 
 @Component({
@@ -24,40 +24,10 @@ import { RenderField } from '../../fields/components.fields';
   templateUrl: './input-appends.component.html',
   styleUrls: ['./input-appends.component.scss']
 })
-export class InputAppendsComponent {
-
-  public dataBind: any;
-  public formGroup: any;
-  public controller: any;
-
-  @Input('data')
-  public set data(value: any) {
-    this.dataBind = value;
-  }
-
-  public get data(): any {
-    return this.dataBind;
-  }
-
-  @Input('parentFormGroup')
-  public set parentFormGroup(value: any) {
-    this.formGroup = value;
-  }
-
-  public get parentFormGroup(): any {
-    return this.formGroup;
-  }
-
-  @Input('controll')
-  public set controll(value: any) {
-    this.controller = value;
-  }
-
-  public get controll(): any {
-    return this.controller;
-  }
+export class InputAppendsComponent  extends RenderField {
 
   constructor() {
+    super();
   }
 
   public changeValueToDefault() {

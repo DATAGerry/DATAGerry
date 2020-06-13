@@ -1,1 +1,4 @@
-<cmdb-build-category-form [mode]="mode" [categoryForm]="categoryAddForm"></cmdb-build-category-form>
+<h1>Add a new category</h1>
+<hr/>
+<cmdb-category-form [unAssignedTypes]="unAssignedTypes" [assignedTypes]="assignedTypes"
+                    (validationEmitter)="formValid = $event" (submitEmitter)="onSave($event)"></cmdb-category-form>

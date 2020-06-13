@@ -16,41 +16,17 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { CmdbType } from '../../../framework/models/cmdb-type';
-import { TypeService } from '../../../framework/services/type.service';
-import { ObjectService } from '../../../framework/services/object.service';
+import { Component, Input } from '@angular/core';
+import { CmdbCategoryNode } from '../../../framework/models/cmdb-category';
 
 @Component({
   selector: 'cmdb-sidebar-category',
   templateUrl: './sidebar-category.component.html',
   styleUrls: ['./sidebar-category.component.scss'],
 })
-export class SidebarCategoryComponent implements OnInit {
+export class SidebarCategoryComponent {
 
-  @Input() categoryData: any;
-  public categoryPopUp: any[];
+  @Input() categoryNode: CmdbCategoryNode;
 
-  constructor(private typeService: TypeService) {
-  }
 
-  ngOnInit() {
-    this.initCategoryTypeList();
-  }
-
-  private initCategoryTypeList() {
-    if (this.categoryData.category.public_id === 0) {
-      this.typeService.getUncategorizedTypes().subscribe((data: CmdbType[]) => {
-        this.categoryPopUp = data;
-      });
-    } else {
-      this.typeService.groupTypeByCategory(this.categoryData.category.public_id).subscribe((data: CmdbType[]) => {
-        this.categoryPopUp = data;
-      });
-    }
-  }
-
-  public get_objects_by_type() {
-    this.initCategoryTypeList();
-  }
 }

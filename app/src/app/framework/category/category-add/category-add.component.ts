@@ -13,32 +13,76 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { CategoryMode } from '../../modes.enum';
-import { CategoryService } from '../../services/category.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { CmdbType } from '../../models/cmdb-type';
+import { TypeService } from '../../services/type.service';
+import { Subscription } from 'rxjs';
 import { CmdbCategory } from '../../models/cmdb-category';
+import { CategoryService } from '../../services/category.service';
+import { Router } from '@angular/router';
+import { SidebarService } from '../../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-category-add',
   templateUrl: './category-add.component.html',
   styleUrls: ['./category-add.component.scss']
 })
-export class CategoryAddComponent implements OnInit {
+export class CategoryAddComponent implements OnInit, OnDestroy {
 
-  public categoryAddForm: FormGroup;
-  public mode = CategoryMode.Create;
+  /**
+   * Validation indication for button disable
+   */
+  public formValid: boolean = false;
 
-  constructor(private categoryService: CategoryService) {}
+  /**
+   * Subscription for getUncategorizedTypes
+   */
+  private typeServiceSubscription: Subscription = new Subscription();
+  /**
+   * Subscription for category add call
+   */
+  private categorySubmitSubscription: Subscription = new Subscription();
 
-  ngOnInit() {
-    this.categoryAddForm = new FormGroup({
-      name: new FormControl('', Validators.required),
-      label: new FormControl('', Validators.required)
+  /**
+   * List of uncategorized types
+   */
+  public unAssignedTypes: CmdbType[];
+  /**
+   * Instance list of types based on the ids inside the category types list
+   */
+  public assignedTypes: CmdbType[];
+
+  constructor(private categoryService: CategoryService, private typeService: TypeService,
+              private router: Router, private sidebarService: SidebarService) {
+    this.unAssignedTypes = [];
+    this.assignedTypes = [];
+  }
+
+  public ngOnInit(): void {
+    this.typeServiceSubscription = this.typeService.getUncategorizedTypes().subscribe((types: CmdbType[]) => {
+      this.unAssignedTypes = types;
     });
+  }
+
+  public ngOnDestroy(): void {
+    this.typeServiceSubscription.unsubscribe();
+    this.categorySubmitSubscription.unsubscribe();
+  }
+
+  /**
+   * Call save function from service
+   * @param category Raw data from form
+   */
+  public onSave(category: CmdbCategory): void {
+    if (this.formValid) {
+      this.categorySubmitSubscription = this.categoryService.postCategory(category).subscribe(response => {
+        this.sidebarService.reload();
+        this.router.navigate(['/', 'framework', 'category']);
+      });
+    }
   }
 
 }

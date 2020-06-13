@@ -13,7 +13,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+from cmdb.framework.cmdb_base import ManagerInitError, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
+    ManagerDeleteError
 from cmdb.utils.error import CMDBError
 
 
@@ -99,25 +100,31 @@ class FieldNotFoundError(CMDBError):
         self.message = 'Field {} was not found inside input_type: {}'.format(field_name, type_name)
 
 
-class ObjectManagerGetError(CMDBError):
+class ObjectManagerInitError(ManagerInitError):
 
     def __init__(self, err):
-        self.message = f'Error while GET operation - E: {err}'
+        super(ObjectManagerInitError, self).__init__(err=err)
 
 
-class ObjectManagerInsertError(CMDBError):
-
-    def __init__(self, err):
-        self.message = f'Error while INSERT operation - E: {err}'
-
-
-class ObjectManagerUpdateError(CMDBError):
+class ObjectManagerGetError(ManagerGetError):
 
     def __init__(self, err):
-        self.message = f'Error while UPDATE operation - E: {err}'
+        super(ObjectManagerGetError, self).__init__(err=err)
 
 
-class ObjectManagerDeleteError(CMDBError):
+class ObjectManagerInsertError(ManagerInsertError):
 
     def __init__(self, err):
-        self.message = f'Error while DELETE operation - E: {err}'
+        super(ObjectManagerInsertError, self).__init__(err=err)
+
+
+class ObjectManagerUpdateError(ManagerUpdateError):
+
+    def __init__(self, err):
+        super(ObjectManagerUpdateError, self).__init__(err=err)
+
+
+class ObjectManagerDeleteError(ManagerDeleteError):
+
+    def __init__(self, err):
+        super(ObjectManagerDeleteError, self).__init__(err=err)

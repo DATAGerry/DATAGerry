@@ -40,19 +40,16 @@ class CmdbType(CmdbDAO):
         'author_id',
         'creation_time',
         'render_meta',
-        'fields',
-        'category_id'
+        'fields'
     ]
 
     INDEX_KEYS = [
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
-    def __init__(self, name: str, active: bool, author_id: int, creation_time: datetime,
-                 render_meta: dict, fields: list, category_id: int, version: str = '1.0.0', access: list = None,
-                 label: str = None,
-                 clean_db: bool = None,
-                 status: list = None, description: str = None, **kwargs):
+    def __init__(self, public_id: int, name: str, active: bool, author_id: int, creation_time: datetime,
+                 render_meta: dict, fields: list, version: str = '1.0.0', access: list = None,
+                 label: str = None, clean_db: bool = None, status: list = None, description: str = None, **validation):
         self.name = name
         self.label = label or self.name.title()
         self.description = description
@@ -65,18 +62,46 @@ class CmdbType(CmdbDAO):
         self.creation_time = creation_time
         self.render_meta = render_meta
         self.fields = fields or []
-        self.category_id = category_id or 0
-        super(CmdbType, self).__init__(**kwargs)
+        super(CmdbType, self).__init__(public_id=public_id, **validation)
+
+    @classmethod
+    def from_data(cls, data: dict) -> "CmdbType":
+        """Create a instance of a type from database"""
+
+        return cls(public_id=data.get('public_id'), name=data.get('name'), active=data.get('active'),
+                   author_id=data.get('author_id'), creation_time=data.get('creation_time'),
+                   render_meta=data.get('render_meta'), fields=data.get('fields'), version=data.get('version'),
+                   access=data.get('access'), label=data.get('label'), clean_db=data.get('clean_db'),
+                   status=data.get('status'), description=data.get('description')
+                   )
+
+    @classmethod
+    def to_json(cls, instance: "CmdbType") -> dict:
+        """Convert a type instance to json conform data"""
+        return {
+            'public_id': instance.get_public_id(),
+            'name': instance.get_name(),
+            'active': instance.active,
+            'author_id': instance.author_id,
+            'creation_time': instance.creation_time,
+            'render_meta': instance.render_meta,
+            'fields': instance.fields,
+            'version': instance.version,
+            'access': instance.access,
+            'label': instance.get_label(),
+            'clean_db': instance.clean_db,
+            'status': instance.status,
+            'description': instance.get_description()
+        }
 
     def get_name(self) -> str:
         """Get the name of the type"""
         return self.name
 
     def get_label(self) -> str:
-        """Get the label
-        Notes:
-            If no label was set the class will set the title of the name
-        """
+        """Get the display name"""
+        if not self.label:
+            self.label = self.name.title()
         return self.label
 
     def get_description(self) -> str:
