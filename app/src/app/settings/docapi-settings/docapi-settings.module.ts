@@ -18,13 +18,24 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ArchwizardModule } from 'angular-archwizard';
+import { LayoutModule } from '../../layout/layout.module';
 import { DocapiSettingsRoutingModule } from './docapi-settings-routing.module';
 import { DocapiSettingsListComponent } from './docapi-settings-list/docapi-settings-list.component';
+import { DocapiSettingsBuilderComponent } from './docapi-settings-builder/docapi-settings-builder.component';
+import { DocapiSettingsAddComponent } from './docapi-settings-add/docapi-settings-add.component';
+import { DocapiSettingsBuilderSettingsStepComponent } from './docapi-settings-builder/docapi-settings-builder-settings-step/docapi-settings-builder-settings-step.component';
+import { DocapiSettingsBuilderContentStepComponent } from './docapi-settings-builder/docapi-settings-builder-content-step/docapi-settings-builder-content-step.component';
 
 @NgModule({
-  declarations: [DocapiSettingsListComponent],
+  declarations: [DocapiSettingsListComponent, DocapiSettingsBuilderComponent, DocapiSettingsAddComponent, DocapiSettingsBuilderSettingsStepComponent, DocapiSettingsBuilderContentStepComponent],
   imports: [
     CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    ArchwizardModule,
+    LayoutModule,
     DocapiSettingsRoutingModule
   ]
 })

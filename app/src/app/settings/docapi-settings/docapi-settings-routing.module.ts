@@ -19,6 +19,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { DocapiSettingsListComponent } from './docapi-settings-list/docapi-settings-list.component';
+import { DocapiSettingsAddComponent } from './docapi-settings-add/docapi-settings-add.component';
 
 const routes: Routes = [
   {
@@ -27,7 +28,15 @@ const routes: Routes = [
       breadcrumb: 'List'
     },
     component: DocapiSettingsListComponent
+  },
+  {
+    path: 'add',
+    data: {
+      breadcrumb: 'Add'
+    },
+    component: DocapiSettingsAddComponent
   }
+
 ];
 
 @NgModule({

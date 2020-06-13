@@ -11,17 +11,26 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
+
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export class DocTemplate {
-  public public_id: number;
-  public name: string;
-  public label: string;
-  public author_id: number;
-  public active: boolean;
-  public description: string;
-  public template_data: string;
-  public template_type: string;
+import { Component, OnInit, Input } from '@angular/core';
+import { CmdbMode } from '../../../framework/modes.enum';
+
+@Component({
+  selector: 'cmdb-docapi-settings-builder',
+  templateUrl: './docapi-settings-builder.component.html',
+  styleUrls: ['./docapi-settings-builder.component.scss']
+})
+export class DocapiSettingsBuilderComponent implements OnInit {
+
+  @Input() public mode: number = CmdbMode.Create;
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
 }

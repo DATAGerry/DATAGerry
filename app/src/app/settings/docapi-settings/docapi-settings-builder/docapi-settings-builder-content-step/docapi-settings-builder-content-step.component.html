@@ -1,0 +1,23 @@
+<div class="mt-3">
+  <div class="row">
+    <div class="col">
+      <form [formGroup]="contentForm" id="contentForm" class="needs-validation" novalidate autocomplete="off">
+        <div class="form-group">
+          <label for="docContentInput">Document Content: <span class="required">*</span></label>
+          <textarea formControlName="content" class="form-control"
+                 [ngClass]="{ 'is-valid': content.valid && (content.dirty || content.touched),
+                 'is-invalid': content.invalid && (content.dirty || content.touched)}"
+                 id="docContentInput" aria-describedby="docContentInputHelp" required></textarea>
+          <div *ngIf="content.invalid && (content.dirty || content.touched)"
+               class="invalid-feedback">
+            <div class="float-right" *ngIf="content.errors.required">
+              Document Content is required.
+            </div>
+          </div>
+          <small id="docLabelInputHelp" class="form-text text-muted">Design the content of your document</small>
+          <div class="clearfix"></div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
