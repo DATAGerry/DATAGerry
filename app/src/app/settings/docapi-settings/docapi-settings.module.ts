@@ -21,6 +21,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ArchwizardModule } from 'angular-archwizard';
 import { LayoutModule } from '../../layout/layout.module';
+import { AuthModule } from "../../auth/auth.module";
 import { DocapiSettingsRoutingModule } from './docapi-settings-routing.module';
 import { DocapiSettingsListComponent } from './docapi-settings-list/docapi-settings-list.component';
 import { DocapiSettingsBuilderComponent } from './docapi-settings-builder/docapi-settings-builder.component';
@@ -36,6 +37,7 @@ import { DocapiSettingsBuilderContentStepComponent } from './docapi-settings-bui
     ReactiveFormsModule,
     ArchwizardModule,
     LayoutModule,
+    AuthModule,
     DocapiSettingsRoutingModule
   ]
 })

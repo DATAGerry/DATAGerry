@@ -16,8 +16,13 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { CmdbMode } from '../../../framework/modes.enum';
+import { DocTemplate } from '../../../framework/models/cmdb-doctemplate';
+import { DocapiService } from '../../../docapi/docapi.service';
+import { DocapiSettingsBuilderSettingsStepComponent } from './docapi-settings-builder-settings-step/docapi-settings-builder-settings-step.component';
+import { DocapiSettingsBuilderContentStepComponent } from './docapi-settings-builder-content-step/docapi-settings-builder-content-step.component';
 
 @Component({
   selector: 'cmdb-docapi-settings-builder',
@@ -27,10 +32,45 @@ import { CmdbMode } from '../../../framework/modes.enum';
 export class DocapiSettingsBuilderComponent implements OnInit {
 
   @Input() public mode: number = CmdbMode.Create;
+  @Input() public docInstance?: DocTemplate;
 
-  constructor() { }
+  @ViewChild(DocapiSettingsBuilderSettingsStepComponent, {static: true})
+  public settingsStep: DocapiSettingsBuilderSettingsStepComponent;
+
+  @ViewChild(DocapiSettingsBuilderContentStepComponent, {static: true})
+  public contentStep: DocapiSettingsBuilderContentStepComponent;
+
+  constructor(private docapiService: DocapiService, private router: Router) { }
 
   ngOnInit() {
+  }
+
+  public saveDoc() {
+    if (this.mode === CmdbMode.Create) {
+      this.docInstance = new DocTemplate();
+    }
+    this.docInstance.name = this.settingsStep.settingsForm.get('name').value;
+    this.docInstance.label = this.settingsStep.settingsForm.get('label').value;
+    this.docInstance.active = this.settingsStep.settingsForm.get('active').value;
+    this.docInstance.description = this.settingsStep.settingsForm.get('description').value;
+    this.docInstance.template_data = this.contentStep.contentForm.get('content').value;
+
+    //ToDo: make configurable
+    this.docInstance.author_id = 1;
+    this.docInstance.template_type = 'OBJECT';
+    this.docInstance.template_parameters = {'type': 39};
+
+    if (this.mode === CmdbMode.Create) {
+      let newId = null;
+      this.docapiService.postDocTemplate(this.docInstance).subscribe(publicIdResp => {
+        newId = publicIdResp;
+        this.router.navigate(['settings/docapi/'], {queryParams: {docAddSuccess: newId}});
+        },
+        (error) => {
+          console.error(error);
+        });
+    }
+
   }
 
 }

@@ -22,6 +22,7 @@ import { HttpInterceptorHandler, ApiCallService, ApiService } from '../services/
 import { HttpBackend, HttpClient, HttpResponse } from '@angular/common/http';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
+import { AuthService } from '../auth/services/auth.service';
 import { DocTemplate } from '../framework/models/cmdb-doctemplate';
 
 const fileHttpOptions = {
@@ -35,13 +36,13 @@ const fileHttpOptions = {
 })
 export class DocapiService<T = DocTemplate> implements ApiService {
 
-  public readonly servicePrefix: string = 'docapi';
+  public readonly servicePrefix: string = 'docapi/template';
 
-  constructor(private api: ApiCallService, private backend: HttpBackend) {
+  constructor(private api: ApiCallService, private backend: HttpBackend, private authService: AuthService) {
   }
 
   getDocTemplateList() : Observable<T[]> {
-    return this.api.callGet<T>(`${ this.servicePrefix }/template/`).pipe(
+    return this.api.callGet<T>(`${ this.servicePrefix }/`).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -57,7 +58,7 @@ export class DocapiService<T = DocTemplate> implements ApiService {
         template_type: 'OBJECT',
         template_parameters: { type: typeId }
     }
-    return this.api.callGet<T>(`${ this.servicePrefix }/template/by/${JSON.stringify(searchfilter)}`).pipe(
+    return this.api.callGet<T>(`${ this.servicePrefix }/by/${JSON.stringify(searchfilter)}`).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -69,8 +70,21 @@ export class DocapiService<T = DocTemplate> implements ApiService {
 
 
   getRenderedObjectDoc(templateId: number, objectId: number) {
-    return this.api.callGetRoute<any>(`${ this.servicePrefix }/template/${ templateId }/render/${ objectId }`, fileHttpOptions);
+    return this.api.callGetRoute<any>(`${ this.servicePrefix }/${ templateId }/render/${ objectId }`, fileHttpOptions);
   }
 
+
+  // CRUD calls
+  public postDocTemplate(docInstance: DocTemplate): Observable<any> {
+    return this.api.callPostRoute<DocTemplate>(this.servicePrefix + '/', docInstance);
+  }
+
+  public putDocTemplate(docInstance: DocTemplate): Observable<any> {
+    return this.api.callPutRoute(this.servicePrefix + '/', docInstance);
+  }
+
+  public deleteDocTemplate(publicID: number) {
+    return this.api.callDeleteRoute<number>(this.servicePrefix + '/' + publicID);
+  }
 
 }

@@ -24,4 +24,5 @@ export class DocTemplate {
   public description: string;
   public template_data: string;
   public template_type: string;
+  public template_parameters: object;
 }

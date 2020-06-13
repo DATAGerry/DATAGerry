@@ -50,6 +50,17 @@ export class DocapiSettingsBuilderSettingsStepComponent implements OnInit {
 
 
   ngOnInit() {
+    if (this.mode === CmdbMode.Create) {
+      this.settingsForm.get('label').valueChanges.subscribe(value => {
+        this.settingsForm.get('name').setValue(value.replace(/ /g, '-').toLowerCase());
+        const newValue = this.settingsForm.get('name').value;
+        this.settingsForm.get('name').setValue(newValue.replace(/[^a-z0-9 \-]/gi, '').toLowerCase());
+        this.settingsForm.get('name').markAsDirty({ onlySelf: true });
+        this.settingsForm.get('name').markAsTouched({ onlySelf: true });
+      });
+    } else if (CmdbMode.Edit) {
+      this.settingsForm.markAllAsTouched();
+    }
   }
 
 }
