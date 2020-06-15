@@ -19,6 +19,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { EditorModule } from '@tinymce/tinymce-angular';
 import { ArchwizardModule } from 'angular-archwizard';
 import { LayoutModule } from '../../layout/layout.module';
 import { AuthModule } from "../../auth/auth.module";
@@ -33,6 +34,7 @@ import { DocapiSettingsBuilderContentStepComponent } from './docapi-settings-bui
   declarations: [DocapiSettingsListComponent, DocapiSettingsBuilderComponent, DocapiSettingsAddComponent, DocapiSettingsBuilderSettingsStepComponent, DocapiSettingsBuilderContentStepComponent],
   imports: [
     CommonModule,
+    EditorModule,
     FormsModule,
     ReactiveFormsModule,
     ArchwizardModule,

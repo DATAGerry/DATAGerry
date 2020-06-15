@@ -23,7 +23,11 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.app.json",
             "assets": [
-              "src/assets"
+              { "glob": "**/*", "input": "./src/assets", "output": "/assets/" },
+              { "glob": "**/*", "input": "./node_modules/tinymce/icons/", "output": "/assets/tinymce/icons/" },
+              { "glob": "**/*", "input": "./node_modules/tinymce/skins/", "output": "/assets/tinymce/skins/" },
+              { "glob": "**/*", "input": "./node_modules/tinymce/themes/", "output": "/assets/tinymce/themes/" },
+              { "glob": "**/*", "input": "./node_modules/tinymce/plugins/", "output": "/assets/tinymce/plugins/" },
             ],
             "styles": [
               "src/styles.scss"
@@ -45,7 +49,8 @@
               "./node_modules/datatables.net-buttons/js/buttons.html5.js",
               "./node_modules/datatables.net-buttons/js/buttons.print.js",
               "./node_modules/datatables.net-select/js/dataTables.select.js",
-              "./node_modules/jszip/dist/jszip.js"
+              "./node_modules/jszip/dist/jszip.js",
+              "./node_modules/tinymce/tinymce.min.js"
             ],
             "es5BrowserSupport": true
           },
