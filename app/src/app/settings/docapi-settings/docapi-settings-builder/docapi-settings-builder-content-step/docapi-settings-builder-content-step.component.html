@@ -4,34 +4,9 @@
       <form [formGroup]="contentForm" id="contentForm" class="needs-validation" novalidate autocomplete="off">
         <div class="form-group">
           <label for="docContentInput">Document Content: <span class="required">*</span></label>
-          <textarea formControlName="content" class="form-control"
-                 [ngClass]="{ 'is-valid': content.valid && (content.dirty || content.touched),
-                 'is-invalid': content.invalid && (content.dirty || content.touched)}"
-                 id="docContentInput" aria-describedby="docContentInputHelp" required></textarea>
-          <div *ngIf="content.invalid && (content.dirty || content.touched)"
-               class="invalid-feedback">
-            <div class="float-right" *ngIf="content.errors.required">
-              Document Content is required.
-            </div>
-          </div>
+          <editor formControlName="content" id="docContentInput" aria-describedby="docContentInputHelp" [init]="editorConfig"></editor>
           <small id="docLabelInputHelp" class="form-text text-muted">Design the content of your document</small>
           <div class="clearfix"></div>
-          <editor
-            [init]="{
-              base_url: '/assets/tinymce',
-              suffix: '.min',
-              height: 500,
-              menubar: false,
-              plugins: [
-                'advlist autolink lists link image charmap print preview anchor',
-                'searchreplace visualblocks code fullscreen',
-                'insertdatetime media table paste code help wordcount'
-              ],
-              toolbar:
-                'undo redo | formatselect | bold italic backcolor | \
-                alignleft aligncenter alignright alignjustify | \
-                bullist numlist outdent indent | removeformat | help'
-             }"></editor>
         </div>
       </form>
     </div>
