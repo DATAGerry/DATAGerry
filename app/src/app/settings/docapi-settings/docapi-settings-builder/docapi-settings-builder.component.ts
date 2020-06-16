@@ -23,6 +23,7 @@ import { CmdbMode } from '../../../framework/modes.enum';
 import { DocTemplate } from '../../../framework/models/cmdb-doctemplate';
 import { DocapiService } from '../../../docapi/docapi.service';
 import { DocapiSettingsBuilderSettingsStepComponent } from './docapi-settings-builder-settings-step/docapi-settings-builder-settings-step.component';
+import { DocapiSettingsBuilderTypeStepComponent } from './docapi-settings-builder-type-step/docapi-settings-builder-type-step.component';
 import { DocapiSettingsBuilderContentStepComponent } from './docapi-settings-builder-content-step/docapi-settings-builder-content-step.component';
 
 @Component({
@@ -37,6 +38,9 @@ export class DocapiSettingsBuilderComponent implements OnInit {
 
   @ViewChild(DocapiSettingsBuilderSettingsStepComponent, {static: true})
   public settingsStep: DocapiSettingsBuilderSettingsStepComponent;
+
+  @ViewChild(DocapiSettingsBuilderTypeStepComponent, {static: true})
+  public typeStep: DocapiSettingsBuilderTypeStepComponent;
 
   @ViewChild(DocapiSettingsBuilderContentStepComponent, {static: true})
   public contentStep: DocapiSettingsBuilderContentStepComponent;
@@ -54,11 +58,10 @@ export class DocapiSettingsBuilderComponent implements OnInit {
     this.docInstance.label = this.settingsStep.settingsForm.get('label').value;
     this.docInstance.active = this.settingsStep.settingsForm.get('active').value;
     this.docInstance.description = this.settingsStep.settingsForm.get('description').value;
+    this.docInstance.template_type = this.typeStep.typeForm.get('template_type').value;
     this.docInstance.template_data = this.contentStep.contentForm.get('template_data').value;
 
     //ToDo: make configurable
-    this.docInstance.author_id = 1;
-    this.docInstance.template_type = 'OBJECT';
     this.docInstance.template_parameters = {'type': 39};
 
     if (this.mode === CmdbMode.Create) {

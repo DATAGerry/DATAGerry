@@ -23,6 +23,7 @@ import { EditorModule } from '@tinymce/tinymce-angular';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ArchwizardModule } from 'angular-archwizard';
 import { DataTablesModule } from 'angular-datatables';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { LayoutModule } from '../../layout/layout.module';
 import { AuthModule } from "../../auth/auth.module";
 import { DocapiSettingsRoutingModule } from './docapi-settings-routing.module';
@@ -32,9 +33,10 @@ import { DocapiSettingsAddComponent } from './docapi-settings-add/docapi-setting
 import { DocapiSettingsBuilderSettingsStepComponent } from './docapi-settings-builder/docapi-settings-builder-settings-step/docapi-settings-builder-settings-step.component';
 import { DocapiSettingsBuilderContentStepComponent } from './docapi-settings-builder/docapi-settings-builder-content-step/docapi-settings-builder-content-step.component';
 import { DocapiSettingsEditComponent } from './docapi-settings-edit/docapi-settings-edit.component';
+import { DocapiSettingsBuilderTypeStepComponent } from './docapi-settings-builder/docapi-settings-builder-type-step/docapi-settings-builder-type-step.component';
 
 @NgModule({
-  declarations: [DocapiSettingsListComponent, DocapiSettingsBuilderComponent, DocapiSettingsAddComponent, DocapiSettingsBuilderSettingsStepComponent, DocapiSettingsBuilderContentStepComponent, DocapiSettingsEditComponent],
+  declarations: [DocapiSettingsListComponent, DocapiSettingsBuilderComponent, DocapiSettingsAddComponent, DocapiSettingsBuilderSettingsStepComponent, DocapiSettingsBuilderContentStepComponent, DocapiSettingsEditComponent, DocapiSettingsBuilderTypeStepComponent],
   imports: [
     CommonModule,
     EditorModule,
@@ -43,6 +45,7 @@ import { DocapiSettingsEditComponent } from './docapi-settings-edit/docapi-setti
     FontAwesomeModule,
     ArchwizardModule,
     DataTablesModule,
+    NgSelectModule,
     LayoutModule,
     AuthModule,
     DocapiSettingsRoutingModule
