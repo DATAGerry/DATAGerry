@@ -30,6 +30,13 @@ declare var tinymce;
 })
 export class DocapiSettingsBuilderContentStepComponent implements OnInit {
 
+  @Input()
+  set preData(data: any) {
+    if (data !== undefined) {
+      this.contentForm.patchValue(data);
+    }
+  }
+
   @Input() public mode: CmdbMode;
   public modes = CmdbMode;
   public contentForm: FormGroup;
@@ -74,12 +81,12 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
 
   constructor() { 
     this.contentForm = new FormGroup({
-      content: new FormControl('', Validators.required)
+      template_data: new FormControl('', Validators.required)
     });
   }
 
   public get content() {
-    return this.contentForm.get('content');
+    return this.contentForm.get('template_data');
   }
 
   ngOnInit() {

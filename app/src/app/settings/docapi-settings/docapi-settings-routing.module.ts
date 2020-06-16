@@ -20,6 +20,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { DocapiSettingsListComponent } from './docapi-settings-list/docapi-settings-list.component';
 import { DocapiSettingsAddComponent } from './docapi-settings-add/docapi-settings-add.component';
+import { DocapiSettingsEditComponent } from './docapi-settings-edit/docapi-settings-edit.component';
 
 const routes: Routes = [
   {
@@ -35,8 +36,14 @@ const routes: Routes = [
       breadcrumb: 'Add'
     },
     component: DocapiSettingsAddComponent
+  },
+  {
+    path: 'edit/:publicId',
+    data: {
+      breadcrumb: 'Edit'
+    },
+    component: DocapiSettingsEditComponent
   }
-
 ];
 
 @NgModule({

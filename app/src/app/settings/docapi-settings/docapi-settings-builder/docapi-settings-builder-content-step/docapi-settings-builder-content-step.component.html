@@ -4,7 +4,7 @@
       <form [formGroup]="contentForm" id="contentForm" class="needs-validation" novalidate autocomplete="off">
         <div class="form-group">
           <label for="docContentInput">Document Content: <span class="required">*</span></label>
-          <editor formControlName="content" id="docContentInput" aria-describedby="docContentInputHelp" [init]="editorConfig"></editor>
+          <editor formControlName="template_data" id="docContentInput" aria-describedby="docContentInputHelp" [init]="editorConfig"></editor>
           <small id="docLabelInputHelp" class="form-text text-muted">Design the content of your document</small>
           <div class="clearfix"></div>
         </div>

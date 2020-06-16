@@ -27,6 +27,13 @@ import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/fo
 })
 export class DocapiSettingsBuilderSettingsStepComponent implements OnInit {
 
+  @Input()
+  set preData(data: any) {
+    if (data !== undefined) {
+      this.settingsForm.patchValue(data);
+    }
+  }
+
   @Input() public mode: CmdbMode;
   public modes = CmdbMode;
   public settingsForm: FormGroup;

@@ -75,6 +75,17 @@ export class DocapiService<T = DocTemplate> implements ApiService {
 
 
   // CRUD calls
+  public getDocTemplate(publicId: number) {
+    return this.api.callGet<DocTemplate>(this.servicePrefix + '/' + publicId).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
+  }
+
   public postDocTemplate(docInstance: DocTemplate): Observable<any> {
     return this.api.callPostRoute<DocTemplate>(this.servicePrefix + '/', docInstance);
   }

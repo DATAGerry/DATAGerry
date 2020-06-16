@@ -1,13 +1,13 @@
 <aw-wizard [navBarLayout]="'large-empty-symbols'">
     <aw-wizard-step stepId="1" stepTitle="Document Settings">
         <ng-template awWizardStepSymbol><i class="fas fa-cogs"></i></ng-template>
-        <cmdb-docapi-settings-builder-settings-step [mode]="mode"></cmdb-docapi-settings-builder-settings-step>
+        <cmdb-docapi-settings-builder-settings-step [preData]="docInstance" [mode]="mode"></cmdb-docapi-settings-builder-settings-step>
         <button class="btn btn-primary prev" type="button" awPreviousStep>Cancel</button>
         <button class="btn btn-primary next" type="button" awNextStep>Next</button>
     </aw-wizard-step>
     <aw-wizard-step stepId="2" stepTitle="Document Content">
         <ng-template awWizardStepSymbol><i class="fas fa-file-image"></i></ng-template>
-        <cmdb-docapi-settings-builder-content-step [mode]="mode"></cmdb-docapi-settings-builder-content-step>
+        <cmdb-docapi-settings-builder-content-step [preData]="docInstance" [mode]="mode"></cmdb-docapi-settings-builder-content-step>
         <button class="btn btn-primary prev" type="button" awPreviousStep>Previous</button>
         <button class="btn btn-success next" type="button" (click)="saveDoc()">Save</button>
     </aw-wizard-step>

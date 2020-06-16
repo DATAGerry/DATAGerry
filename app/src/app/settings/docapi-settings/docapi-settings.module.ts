@@ -29,9 +29,10 @@ import { DocapiSettingsBuilderComponent } from './docapi-settings-builder/docapi
 import { DocapiSettingsAddComponent } from './docapi-settings-add/docapi-settings-add.component';
 import { DocapiSettingsBuilderSettingsStepComponent } from './docapi-settings-builder/docapi-settings-builder-settings-step/docapi-settings-builder-settings-step.component';
 import { DocapiSettingsBuilderContentStepComponent } from './docapi-settings-builder/docapi-settings-builder-content-step/docapi-settings-builder-content-step.component';
+import { DocapiSettingsEditComponent } from './docapi-settings-edit/docapi-settings-edit.component';
 
 @NgModule({
-  declarations: [DocapiSettingsListComponent, DocapiSettingsBuilderComponent, DocapiSettingsAddComponent, DocapiSettingsBuilderSettingsStepComponent, DocapiSettingsBuilderContentStepComponent],
+  declarations: [DocapiSettingsListComponent, DocapiSettingsBuilderComponent, DocapiSettingsAddComponent, DocapiSettingsBuilderSettingsStepComponent, DocapiSettingsBuilderContentStepComponent, DocapiSettingsEditComponent],
   imports: [
     CommonModule,
     EditorModule,

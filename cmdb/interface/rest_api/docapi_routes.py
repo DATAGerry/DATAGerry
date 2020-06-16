@@ -158,7 +158,7 @@ def update_template(request_user: User):
     except CMDBError:
         return abort(400)
     try:
-        docapi_tpl_manager.update_template(update_tpl_instance, request_user, False)
+        docapi_tpl_manager.update_template(update_tpl_instance, request_user)
     except DocapiTemplateManagerUpdateError:
         return abort(500)
     resp = make_response(update_tpl_instance)
@@ -200,31 +200,3 @@ def render_object_template(public_id: int, object_id: int, request_user: User):
             "Content-Disposition": "attachment; filename=output.pdf"
         }
     )
-
-
-@docapi_blueprint.route('/template/testinsert', methods=['GET'])
-def insert_test():
-    # insert test template
-    template = {}
-    template['public_id'] = docapi_tpl_manager.get_new_id()
-    template['name'] = 'test'
-    template['label'] = 'Test'
-    template['description'] = 'only a test'
-    template['active'] = True
-    template['author_id'] = 1
-    template['template_data'] = """
-        <html>
-            <body>
-                <h1>DATAGERRY Object #{{ id }}</h1>
-                <img src="data:image/png;base64,iVBORw0KGgoAAA
-                ANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4
-                //8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU
-                5ErkJggg==" alt="Red dot" />
-                <p style="border: 1px solid">Testdata {{fields['management-hostname']}}</p>
-            </body>
-        </html>
-    """
-    template['template_type'] = DocapiTemplateType.OBJECT.name
-    template['template_parameters'] = {}
-    template_instance = DocapiTemplate(**template)
-    public_id = docapi_tpl_manager.insert_template(template_instance)

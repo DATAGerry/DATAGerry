@@ -18,6 +18,7 @@
 
 import { Component, OnInit, Input, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { ToastService } from '../../../layout/toast/toast.service';
 import { CmdbMode } from '../../../framework/modes.enum';
 import { DocTemplate } from '../../../framework/models/cmdb-doctemplate';
 import { DocapiService } from '../../../docapi/docapi.service';
@@ -40,7 +41,7 @@ export class DocapiSettingsBuilderComponent implements OnInit {
   @ViewChild(DocapiSettingsBuilderContentStepComponent, {static: true})
   public contentStep: DocapiSettingsBuilderContentStepComponent;
 
-  constructor(private docapiService: DocapiService, private router: Router) { }
+  constructor(private docapiService: DocapiService, private router: Router, private toast: ToastService) { }
 
   ngOnInit() {
   }
@@ -53,7 +54,7 @@ export class DocapiSettingsBuilderComponent implements OnInit {
     this.docInstance.label = this.settingsStep.settingsForm.get('label').value;
     this.docInstance.active = this.settingsStep.settingsForm.get('active').value;
     this.docInstance.description = this.settingsStep.settingsForm.get('description').value;
-    this.docInstance.template_data = this.contentStep.contentForm.get('content').value;
+    this.docInstance.template_data = this.contentStep.contentForm.get('template_data').value;
 
     //ToDo: make configurable
     this.docInstance.author_id = 1;
@@ -69,6 +70,14 @@ export class DocapiSettingsBuilderComponent implements OnInit {
         (error) => {
           console.error(error);
         });
+    } else if (this.mode === CmdbMode.Edit) {
+      this.docapiService.putDocTemplate(this.docInstance).subscribe((updateResp: DocTemplate) => {
+        this.toast.show(`DocAPI document successfully edited: ${updateResp.public_id}`);
+        this.router.navigate(['/settings/docapi/'], {queryParams: {docEditSuccess: updateResp.public_id}});
+      },
+      (error) => {
+        console.error(error);
+      });
     }
 
   }
