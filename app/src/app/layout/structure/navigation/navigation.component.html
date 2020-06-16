@@ -78,6 +78,21 @@
               Export Objects</a>
           </div>
         </li>
+        <!-- nav Reporting -->
+        <li *permissionLink="['base.framework.object.edit', 'base.framework.object.delete']" class="nav-item dropdown mr-2">
+          <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+             aria-expanded="false">
+            <fa-icon icon="file-image"></fa-icon>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-header" *permissionLink="['base.exportd.job.view']">DocAPI</div>
+            <a class="dropdown-item" *permissionLink="['base.exportd.job.view']"
+              routerLink="/settings/docapi">
+              <fa-icon icon="file-pdf"></fa-icon>
+              Document Templates</a>
+          </div>
+        </li>
+
         <!-- nav Exportd Job -->
         <li *permissionLink="['base.exportd.job.view', 'base.exportd.log.view']" class="nav-item dropdown mr-2">
           <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"

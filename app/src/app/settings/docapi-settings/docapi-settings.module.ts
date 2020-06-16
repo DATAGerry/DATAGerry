@@ -20,7 +20,9 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EditorModule } from '@tinymce/tinymce-angular';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ArchwizardModule } from 'angular-archwizard';
+import { DataTablesModule } from 'angular-datatables';
 import { LayoutModule } from '../../layout/layout.module';
 import { AuthModule } from "../../auth/auth.module";
 import { DocapiSettingsRoutingModule } from './docapi-settings-routing.module';
@@ -38,7 +40,9 @@ import { DocapiSettingsEditComponent } from './docapi-settings-edit/docapi-setti
     EditorModule,
     FormsModule,
     ReactiveFormsModule,
+    FontAwesomeModule,
     ArchwizardModule,
+    DataTablesModule,
     LayoutModule,
     AuthModule,
     DocapiSettingsRoutingModule
