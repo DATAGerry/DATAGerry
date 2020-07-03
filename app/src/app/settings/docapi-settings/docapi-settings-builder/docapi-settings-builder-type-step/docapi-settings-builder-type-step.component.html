@@ -16,22 +16,22 @@
           <small id="docTypeInputHelp" class="form-text text-muted">Choose your Template type</small>
           <div class="clearfix"></div>
         </div>
-
-        <div class="form-group">
-          <label for="docObjectTypeInput">Object Type: <span class="required">*</span></label>
-          <ng-select id="docObjectTypeInput" [items]="objectTypeList"
-                     bindLabel="label"
-                     bindValue="public_id"
-                     formControlName="template_parameters_input">
-            <ng-template ng-option-tmp let-item="item" let-index="index">
-              {{item.label}}
-            </ng-template>
-          </ng-select>
-          <small id="docTypeInputHelp" class="form-text text-muted">Choose your Object Type for your Template</small>
-          <div class="clearfix"></div>
-        </div>
-
       </form>
+
+      <ng-container [ngSwitch]="typeForm.get('template_type').value">
+        <cmdb-docapi-settings-builder-type-step-object 
+          *ngSwitchCase="'OBJECT'" 
+          [preData]="typeParamPreData" 
+          [mode]="mode"
+          #typeparam>
+        </cmdb-docapi-settings-builder-type-step-object>
+        <cmdb-docapi-settings-builder-type-step-objectlist 
+          *ngSwitchCase="'OBJECTLIST'" 
+          [preData]="typeParamPreData" 
+          [mode]="mode"
+          #typeparam>
+        </cmdb-docapi-settings-builder-type-step-objectlist>
+      </ng-container>
     </div>
   </div>
 </div>

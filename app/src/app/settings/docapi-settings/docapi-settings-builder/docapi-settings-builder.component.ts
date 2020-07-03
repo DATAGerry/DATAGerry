@@ -59,10 +59,8 @@ export class DocapiSettingsBuilderComponent implements OnInit {
     this.docInstance.active = this.settingsStep.settingsForm.get('active').value;
     this.docInstance.description = this.settingsStep.settingsForm.get('description').value;
     this.docInstance.template_type = this.typeStep.typeForm.get('template_type').value;
+    this.docInstance.template_parameters = this.typeStep.typeParamComponent.typeParamForm.value;
     this.docInstance.template_data = this.contentStep.contentForm.get('template_data').value;
-
-    //ToDo: make configurable
-    this.docInstance.template_parameters = {'type': 39};
 
     if (this.mode === CmdbMode.Create) {
       let newId = null;

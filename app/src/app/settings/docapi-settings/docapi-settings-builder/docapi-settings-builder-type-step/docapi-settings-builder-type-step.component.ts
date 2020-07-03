@@ -16,11 +16,11 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ViewChild } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbMode } from '../../../../framework/modes.enum';
 import { CmdbType } from '../../../../framework/models/cmdb-type';
-import { TypeService } from '../../../../framework/services/type.service';
+import { DocapiSettingsBuilderTypeStepBaseComponent } from './docapi-settings-builder-type-step-base/docapi-settings-builder-type-step-base.component';
 
 @Component({
   selector: 'cmdb-docapi-settings-builder-type-step',
@@ -33,6 +33,9 @@ export class DocapiSettingsBuilderTypeStepComponent implements OnInit {
   set preData(data: any) {
     if (data !== undefined) {
       this.typeForm.patchValue(data);
+      if(data.template_parameters) {
+        this.typeParamPreData = data.template_parameters;
+      }
     }
   }
 
@@ -40,22 +43,23 @@ export class DocapiSettingsBuilderTypeStepComponent implements OnInit {
   public modes = CmdbMode;
   public typeForm: FormGroup;
   public readonly docTypeSelect: any[] = [
-    {label: 'Object Template', content: 'OBJECT', description: 'Template for single objects'}
+    {label: 'Object Template', content: 'OBJECT', description: 'Template for single objects'},
+    {label: 'Objectlist Template', content: 'OBJECTLIST', description: 'Template for object list'}
   ];
-  public objectTypeList: CmdbType[] = [];
+
+  @ViewChild('typeparam', {static: false})
+  public typeParamComponent: DocapiSettingsBuilderTypeStepBaseComponent;
+  public typeParamPreData: any;
 
 
-  constructor(private typeService: TypeService) { 
+  constructor() { 
     //setup form
     this.typeForm = new FormGroup({
-      template_type: new FormControl('', Validators.required),
-      template_parameters_input: new FormControl('')
+      template_type: new FormControl('', Validators.required)
     });
   }
 
   ngOnInit() {
-    //load object type list
-    this.typeService.getTypeList().subscribe((value: CmdbType[]) => this.objectTypeList = value);
   }
 
 }

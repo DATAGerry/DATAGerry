@@ -34,9 +34,12 @@ import { DocapiSettingsBuilderSettingsStepComponent } from './docapi-settings-bu
 import { DocapiSettingsBuilderContentStepComponent } from './docapi-settings-builder/docapi-settings-builder-content-step/docapi-settings-builder-content-step.component';
 import { DocapiSettingsEditComponent } from './docapi-settings-edit/docapi-settings-edit.component';
 import { DocapiSettingsBuilderTypeStepComponent } from './docapi-settings-builder/docapi-settings-builder-type-step/docapi-settings-builder-type-step.component';
+import { DocapiSettingsBuilderTypeStepObjectComponent } from './docapi-settings-builder/docapi-settings-builder-type-step/docapi-settings-builder-type-step-object/docapi-settings-builder-type-step-object.component';
+import { DocapiSettingsBuilderTypeStepObjectlistComponent } from './docapi-settings-builder/docapi-settings-builder-type-step/docapi-settings-builder-type-step-objectlist/docapi-settings-builder-type-step-objectlist.component';
+import { DocapiSettingsBuilderTypeStepBaseComponent } from './docapi-settings-builder/docapi-settings-builder-type-step/docapi-settings-builder-type-step-base/docapi-settings-builder-type-step-base.component';
 
 @NgModule({
-  declarations: [DocapiSettingsListComponent, DocapiSettingsBuilderComponent, DocapiSettingsAddComponent, DocapiSettingsBuilderSettingsStepComponent, DocapiSettingsBuilderContentStepComponent, DocapiSettingsEditComponent, DocapiSettingsBuilderTypeStepComponent],
+  declarations: [DocapiSettingsListComponent, DocapiSettingsBuilderComponent, DocapiSettingsAddComponent, DocapiSettingsBuilderSettingsStepComponent, DocapiSettingsBuilderContentStepComponent, DocapiSettingsEditComponent, DocapiSettingsBuilderTypeStepComponent, DocapiSettingsBuilderTypeStepObjectComponent, DocapiSettingsBuilderTypeStepObjectlistComponent, DocapiSettingsBuilderTypeStepBaseComponent],
   imports: [
     CommonModule,
     EditorModule,
