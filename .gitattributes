@@ -1,2 +1,3 @@
 docs/* linguist-documentation
-cmdb/interface/web_app/static/* linguist-vendored
+cmdb/interface/docs/static/* linguist-documentation
+cmdb/interface/net_app/_static/* linguist-vendored
