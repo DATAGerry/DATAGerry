@@ -19,6 +19,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { CmdbMode } from '../../../../framework/modes.enum';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { DocapiService, checkDocTemplateExistsValidator } from '../../../../docapi/docapi.service';
 
 @Component({
   selector: 'cmdb-docapi-settings-builder-settings-step',
@@ -38,7 +39,7 @@ export class DocapiSettingsBuilderSettingsStepComponent implements OnInit {
   public modes = CmdbMode;
   public settingsForm: FormGroup;
 
-  constructor() { 
+  constructor(private docapiService: DocapiService) { 
     this.settingsForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl('', Validators.required),
@@ -58,6 +59,7 @@ export class DocapiSettingsBuilderSettingsStepComponent implements OnInit {
 
   ngOnInit() {
     if (this.mode === CmdbMode.Create) {
+      this.settingsForm.get('name').setAsyncValidators(checkDocTemplateExistsValidator(this.docapiService));
       this.settingsForm.get('label').valueChanges.subscribe(value => {
         this.settingsForm.get('name').setValue(value.replace(/ /g, '-').toLowerCase());
         const newValue = this.settingsForm.get('name').value;

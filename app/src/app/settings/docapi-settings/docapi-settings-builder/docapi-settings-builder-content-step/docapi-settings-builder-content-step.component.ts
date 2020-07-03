@@ -81,7 +81,7 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
 
   constructor() { 
     this.contentForm = new FormGroup({
-      template_data: new FormControl('', Validators.required)
+      template_data: new FormControl('', [Validators.required, Validators.max(15*1024*1024)])
     });
   }
 

@@ -20,10 +20,12 @@ import { Injectable } from '@angular/core';
 
 import { HttpInterceptorHandler, ApiCallService, ApiService } from '../services/api-call.service';
 import { HttpBackend, HttpClient, HttpResponse } from '@angular/common/http';
+import { FormControl } from '@angular/forms';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
 import { AuthService } from '../auth/services/auth.service';
 import { DocTemplate } from '../framework/models/cmdb-doctemplate';
+import { BasicAuthInterceptor } from '../auth/interceptors/basic-auth.interceptor';
 
 const fileHttpOptions = {
   observe: 'response',
@@ -74,6 +76,7 @@ export class DocapiService<T = DocTemplate> implements ApiService {
   }
 
 
+
   // CRUD calls
   public getDocTemplate(publicId: number) {
     return this.api.callGet<DocTemplate>(this.servicePrefix + '/' + publicId).pipe(
@@ -98,4 +101,28 @@ export class DocapiService<T = DocTemplate> implements ApiService {
     return this.api.callDeleteRoute<number>(this.servicePrefix + '/' + publicID);
   }
 
+  // Validation functions
+  public checkDocTemplateExists(docName: string) {
+    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ docName }`, specialClient);
+  }
+
 }
+
+//Form Validators
+export const checkDocTemplateExistsValidator = (docApiService: DocapiService<DocTemplate>, time: number = 500) => {
+  return (control: FormControl) => {
+    return timer(time).pipe(switchMap(() => {
+      return docApiService.checkDocTemplateExists(control.value).pipe(
+        map(() => {
+          return { docTemplateExists: true };
+        }),
+        catchError(() => {
+          return new Promise(resolve => {
+            resolve(null);
+          });
+        })
+      );
+    }));
+  };
+};
