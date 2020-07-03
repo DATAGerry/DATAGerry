@@ -54,7 +54,7 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
     toolbar:
       'undo redo | formatselect | bold italic backcolor | \
       alignleft aligncenter alignright alignjustify | \
-      bullist numlist outdent indent | image | removeformat | help',
+      bullist numlist outdent indent | image | removeformat | help | objectdata',
     paste_data_images: true,
     automatic_uploads: true,
     file_picker_types: 'image',
@@ -76,6 +76,23 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
         reader.readAsDataURL(file);
       };
       input.click();
+    },
+    setup: function (editor) {
+      editor.ui.registry.addMenuButton('objectdata', {
+        text: 'Object Data',
+        fetch: function (callback) {
+        var items = [
+          {
+            type: 'menuitem',
+            text: 'Public ID',
+            onAction: function () {
+              editor.insertContent('{{ id }}');
+            }
+          },
+        ];
+        callback(items);
+        }
+      });
     }
   }
 
