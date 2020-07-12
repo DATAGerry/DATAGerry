@@ -17,8 +17,9 @@
 */
 
 import { Component, OnInit, Input } from '@angular/core';
-import { CmdbMode } from '../../../../framework/modes.enum';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { CmdbMode } from '../../../../framework/modes.enum';
+import { TemplateHelperService } from '../../../services/template-helper.service';
 
 
 declare var tinymce;
@@ -37,9 +38,19 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
     }
   }
 
+  @Input()
+  set typeParam(data: any) {
+    if(data) {
+      if(data.type) {
+        this.templateHelperData = this.templateHelperService.getObjectTemplateHelperData(data.type);
+      }
+    }
+  }
+
   @Input() public mode: CmdbMode;
   public modes = CmdbMode;
   public contentForm: FormGroup;
+  public templateHelperData: any;
 
   public editorConfig = {
     base_url: '/assets/tinymce',
@@ -54,7 +65,7 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
     toolbar:
       'undo redo | formatselect | bold italic backcolor | \
       alignleft aligncenter alignright alignjustify | \
-      bullist numlist outdent indent | image | removeformat | help | objectdata',
+      bullist numlist outdent indent | image | removeformat | help | templatedata',
     paste_data_images: true,
     automatic_uploads: true,
     file_picker_types: 'image',
@@ -77,26 +88,18 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
       };
       input.click();
     },
-    setup: function (editor) {
-      editor.ui.registry.addMenuButton('objectdata', {
-        text: 'Object Data',
-        fetch: function (callback) {
-        var items = [
-          {
-            type: 'menuitem',
-            text: 'Public ID',
-            onAction: function () {
-              editor.insertContent('{{ id }}');
-            }
-          },
-        ];
-        callback(items);
+    setup: (editor) => {
+      editor.ui.registry.addMenuButton('templatedata', {
+        text: 'Template Data',
+        fetch: (callback) => {
+          let items = this.getTemplateDataMenuItems(editor);
+          callback(items);
         }
       });
     }
   }
 
-  constructor() { 
+  constructor(private templateHelperService: TemplateHelperService) { 
     this.contentForm = new FormGroup({
       template_data: new FormControl('', [Validators.required, Validators.max(15*1024*1024)])
     });
@@ -105,6 +108,33 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
   public get content() {
     return this.contentForm.get('template_data');
   }
+
+  public getTemplateDataMenuItems(editor, templateHelperData = this.templateHelperData) {
+    let items = [];
+    for(const item of templateHelperData) {
+      if(item.subdata) {
+        items.push({
+          type: 'nestedmenuitem',
+          text: item.label,
+          getSubmenuItems: () => {
+            return this.getTemplateDataMenuItems(editor, item.subdata);
+          }
+        });
+      }
+      else {
+        items.push({
+          type: 'menuitem',
+          text: item.label,
+          onAction: function () {
+            editor.insertContent(item.templatedata);
+          }
+        });
+      }
+    }
+
+    return items;
+  }
+
 
   ngOnInit() {
   }
