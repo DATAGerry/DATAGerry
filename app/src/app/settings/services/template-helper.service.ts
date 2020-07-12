@@ -38,16 +38,16 @@ export class TemplateHelperService {
       for (const field of cmdbTypeObj.fields) {
         if(field.type === "ref" && iteration > 0) {
           iteration = iteration - 1;
-          prefix = prefix + "['" + field.name + "']";
+          let changedPrefix = (prefix ? prefix + "['fields']['" + field.name + "']" : "['" + field.name + "']");
           templateHelperData.push(<TemplateHelpdataElement>({
             label: field.label,
-            subdata: this.getObjectTemplateHelperData(field.ref_types, prefix, iteration)
+            subdata: this.getObjectTemplateHelperData(field.ref_types, changedPrefix, iteration)
           }));
         }
         else {
         templateHelperData.push(<TemplateHelpdataElement>({
           label: field.label,
-          templatedata: "{{fields" + prefix + "['fields']['" + field.name + "']}}"
+          templatedata: (prefix ? "{{fields" + prefix + "['fields']['" + field.name + "']}}" : "{{fields['" + field.name + "']}}")
           }));
         }
       }
