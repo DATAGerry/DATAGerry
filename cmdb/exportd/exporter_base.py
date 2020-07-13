@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import jinja2
 import logging
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
@@ -29,6 +28,7 @@ from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
 from cmdb.framework.cmdb_render import CmdbRender, RenderList
 from cmdb.templates.template_data import ObjectTemplateData
+from cmdb.templates.template_engine import TemplateEngine
 
 LOGGER = logging.getLogger(__name__)
 
@@ -132,9 +132,9 @@ class ExportVariable:
                 value_template = templ['template']
 
         # render template
-        template = jinja2.Template(value_template)
+        template_engine = TemplateEngine()
         try:
-            output = template.render(template_data)
+            output = template_engine.render_template_string(value_template, template_data)
             if output == 'None':
                 output = ''
         except Exception as ex:

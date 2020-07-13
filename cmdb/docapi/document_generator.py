@@ -14,8 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import jinja2
-
+from cmdb.templates.template_engine import TemplateEngine
 from cmdb.templates.template_data import ObjectTemplateData
 
 class DocumentGenerator:
@@ -33,10 +32,9 @@ class ObjectDocumentGenerator:
         self.__doctype = doctype
 
     def generate_doc(self):
-        # ToDo: error handling
         template_data = ObjectTemplateData(self.__object_manager, self.__cmdb_object).get_template_data()
-        template = jinja2.Template(self.__template.get_template_data())
-        rendered_template = template.render(template_data)
+        template_engine = TemplateEngine()
+        rendered_template = template_engine.render_template_string(self.__template.get_template_data(), template_data)
 
         # create document
         return self.__doctype.create_doc(rendered_template)
