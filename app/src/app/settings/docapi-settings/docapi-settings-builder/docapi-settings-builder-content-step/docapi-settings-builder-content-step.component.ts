@@ -61,12 +61,12 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
       'advlist autolink lists link image charmap print preview anchor',
       'searchreplace visualblocks code fullscreen',
       'insertdatetime media table paste code help wordcount',
-      'noneditable'
+      'noneditable, pagebreak'
     ],
     toolbar:
       'undo redo | formatselect | bold italic backcolor | \
       alignleft aligncenter alignright alignjustify | \
-      bullist numlist outdent indent | image | removeformat | help | cmdbdata | barcode',
+      bullist numlist outdent indent | image | removeformat | pagebreak | help | cmdbdata | barcode',
     noneditable_noneditable_class: 'mceNonEditable',
     paste_data_images: true,
     automatic_uploads: true,
@@ -90,6 +90,7 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
       };
       input.click();
     },
+    pagebreak_separator: '<pdf:nextpage />',
     extended_valid_elements: 'pdf:barcode[*]',
     custom_elements: 'pdf:barcode',
     valid_children: '-pdf:barcode[*]',
