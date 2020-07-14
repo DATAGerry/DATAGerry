@@ -56,16 +56,18 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
     base_url: '/assets/tinymce',
     suffix: '.min',
     height: 500,
-    menubar: false,
+    menubar: true,
     plugins: [
       'advlist autolink lists link image charmap print preview anchor',
       'searchreplace visualblocks code fullscreen',
-      'insertdatetime media table paste code help wordcount'
+      'insertdatetime media table paste code help wordcount',
+      'noneditable'
     ],
     toolbar:
       'undo redo | formatselect | bold italic backcolor | \
       alignleft aligncenter alignright alignjustify | \
-      bullist numlist outdent indent | image | removeformat | help | templatedata',
+      bullist numlist outdent indent | image | removeformat | help | cmdbdata | barcode',
+    noneditable_noneditable_class: 'mceNonEditable',
     paste_data_images: true,
     automatic_uploads: true,
     file_picker_types: 'image',
@@ -88,11 +90,22 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
       };
       input.click();
     },
+    extended_valid_elements: 'pdf:barcode[*]',
+    custom_elements: 'pdf:barcode',
+    valid_children: '-pdf:barcode[*]',
+    content_css: '/assets/css/tinymce_custom.css',
     setup: (editor) => {
-      editor.ui.registry.addMenuButton('templatedata', {
-        text: 'Template Data',
+      editor.ui.registry.addMenuButton('cmdbdata', {
+        text: 'CMDB Data',
         fetch: (callback) => {
-          let items = this.getTemplateDataMenuItems(editor);
+          let items = this.getCmdbDataMenuItems(editor);
+          callback(items);
+        }
+      });
+      editor.ui.registry.addMenuButton('barcode', {
+        text: 'Barcode',
+        fetch: (callback) => {
+          let items = this.getBarcodeMenuItems(editor);
           callback(items);
         }
       });
@@ -109,7 +122,7 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
     return this.contentForm.get('template_data');
   }
 
-  public getTemplateDataMenuItems(editor, templateHelperData = this.templateHelperData) {
+  public getCmdbDataMenuItems(editor, templateHelperData = this.templateHelperData) {
     let items = [];
     for(const item of templateHelperData) {
       if(item.subdata) {
@@ -117,7 +130,7 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
           type: 'nestedmenuitem',
           text: item.label,
           getSubmenuItems: () => {
-            return this.getTemplateDataMenuItems(editor, item.subdata);
+            return this.getCmdbDataMenuItems(editor, item.subdata);
           }
         });
       }
@@ -131,12 +144,81 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
         });
       }
     }
-
     return items;
   }
 
 
-  ngOnInit() {
+  public getBarcodeMenuItems(editor) {
+    let items = [];
+    items.push({
+      type: 'menuitem',
+      text: 'QR Code',
+      onAction: function() {
+        let selection = editor.selection.getNode();
+        let preData = {};
+        if(selection.tagName === 'PDF:BARCODE') {
+          preData['type'] = selection.attributes.getNamedItem('type').value;
+          preData['content'] = selection.attributes.getNamedItem('value').value;
+        }
+        editor.windowManager.open({
+          title: 'Insert Barcode',
+          body: {
+            type: 'panel',
+            items: [
+              {
+                type: 'input',
+                name: 'content',
+                label: 'Barcode Content'
+              },
+              {
+                type: 'selectbox',
+                name: 'type',
+                label: 'Barcode Type',
+                items: [
+                  { value: 'qr', text: 'QR' },
+                  { value: 'code128', text: 'Code 128' },
+                ]
+              }
+            ]
+          },
+          buttons: [
+            {
+              type: 'submit',
+              text: 'OK'
+            }
+          ],
+          initialData: preData,
+          onSubmit: function(dialogApi) {
+            let barcodeContent = dialogApi.getData()['content'];
+            let barcodeType = dialogApi.getData()['type'];
+            let barcodeElementAttr = {
+              class: 'mceNonEditable',
+              type: barcodeType,
+              value: barcodeContent
+            };
+            if(barcodeType === 'qr') {
+              barcodeElementAttr['barwidth'] = '3cm';
+              barcodeElementAttr['barheight'] = '3cm';
+            }
+            let barcodeElement = editor.dom.create('pdf:barcode', barcodeElementAttr);
+            //edit barcode: remove existing and set cur
+            if(preData['content']) {
+              let selectionNext = editor.selection.getNode().nextSibling;
+              editor.dom.remove(selection);
+              if(selectionNext) {
+                editor.selection.setCursorLocation(selectionNext);
+              }
+            }
+            //insert new barcode
+            editor.insertContent(barcodeElement.outerHTML);
+            dialogApi.close();
+          }
+        });
+      }
+    });
+    return items;
   }
+
+  ngOnInit() { }
 
 }
