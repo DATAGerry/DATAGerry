@@ -23,6 +23,7 @@ export class DocTemplate {
   public active: boolean;
   public description: string;
   public template_data: string;
+  public template_style: object;
   public template_type: string;
-  public template_parameters: object;
+  public template_parameters: string;
 }

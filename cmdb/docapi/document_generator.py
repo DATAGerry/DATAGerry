@@ -32,9 +32,17 @@ class ObjectDocumentGenerator:
         self.__doctype = doctype
 
     def generate_doc(self):
+        # render template data
         template_data = ObjectTemplateData(self.__object_manager, self.__cmdb_object).get_template_data()
         template_engine = TemplateEngine()
         rendered_template = template_engine.render_template_string(self.__template.get_template_data(), template_data)
 
+        # create full HTML document
+        html = '<html><head>'
+        html = html + '<title>' + self.__template.get_label() + '</title>'
+        html = html + '<style>' + self.__template.get_template_style() + '</style>'
+        html = html + '</head>'
+        html = html + '<body>' + rendered_template + '</body></html>'
+
         # create document
-        return self.__doctype.create_doc(rendered_template)
+        return self.__doctype.create_doc(html)

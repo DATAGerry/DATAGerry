@@ -15,6 +15,12 @@
         <ng-template awWizardStepSymbol><i class="fas fa-file-image"></i></ng-template>
         <cmdb-docapi-settings-builder-content-step [preData]="docInstance" [typeParam]="typeStep?.typeParamComponent?.typeParamForm.value" [mode]="mode"></cmdb-docapi-settings-builder-content-step>
         <button class="btn btn-primary prev" type="button" awPreviousStep>Previous</button>
-        <button class="btn btn-success next" type="button" (click)="saveDoc()" [disabled]="!contentStep.contentForm.valid">Save</button>
+        <button class="btn btn-success next" type="button" awNextStep [disabled]="!contentStep.contentForm.valid">Next</button>
+    </aw-wizard-step>
+    <aw-wizard-step stepId="4" stepTitle="Template Custom Style">
+        <ng-template awWizardStepSymbol><i class="fas fa-file-image"></i></ng-template>
+        <cmdb-docapi-settings-builder-style-step [preData]="docInstance" [mode]="mode"></cmdb-docapi-settings-builder-style-step>
+        <button class="btn btn-primary prev" type="button" awPreviousStep>Previous</button>
+        <button class="btn btn-success next" type="button" (click)="saveDoc()">Save</button>
     </aw-wizard-step>
 </aw-wizard>
