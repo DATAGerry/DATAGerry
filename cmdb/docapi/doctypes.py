@@ -42,7 +42,8 @@ class PdfDocumentType:
         # create PDF
         pdf_creator = pisa.CreatePDF(
             input_data,
-            dest=output
+            dest=output,
+            encoding='utf8'
         )
         output.seek(0)
         return output
