@@ -56,17 +56,18 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
     base_url: '/assets/tinymce',
     suffix: '.min',
     height: 500,
-    menubar: true,
+    menubar: false,
     plugins: [
-      'advlist autolink lists link image charmap print preview anchor',
-      'searchreplace visualblocks code fullscreen',
-      'insertdatetime media table paste code help wordcount',
+      'advlist autolink lists link image charmap',
+      'searchreplace visualblocks code',
+      'insertdatetime media table paste',
       'noneditable, pagebreak'
     ],
-    toolbar:
-      'undo redo | formatselect | bold italic backcolor | \
+    toolbar1:
+      'undo redo | formatselect | bold italic backcolor removeformat | \
       alignleft aligncenter alignright alignjustify | \
-      bullist numlist outdent indent | image | removeformat | pagebreak | help | cmdbdata | barcode',
+      bullist numlist outdent indent | image table pagebreak | code ',
+    toolbar2: 'cmdbdata',
     noneditable_noneditable_class: 'mceNonEditable',
     paste_data_images: true,
     automatic_uploads: true,
@@ -98,15 +99,9 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
     setup: (editor) => {
       editor.ui.registry.addMenuButton('cmdbdata', {
         text: 'CMDB Data',
+        icon: 'plus',
         fetch: (callback) => {
           let items = this.getCmdbDataMenuItems(editor);
-          callback(items);
-        }
-      });
-      editor.ui.registry.addMenuButton('barcode', {
-        text: 'Barcode',
-        fetch: (callback) => {
-          let items = this.getBarcodeMenuItems(editor);
           callback(items);
         }
       });
@@ -123,22 +118,42 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
     return this.contentForm.get('template_data');
   }
 
-  public getCmdbDataMenuItems(editor, templateHelperData = this.templateHelperData) {
+  public getCmdbDataMenuItems(editor) {
+    let items = [];
+    items.push(this.getBarcodeMenuItem(editor));
+    items.push({
+      type: 'nestedmenuitem',
+      text: 'Object Template Data',
+      icon: 'code-sample',
+      getSubmenuItems: () => {
+        return this.getObjectDataMenuItems(editor);
+      }
+    });
+    return items;
+  }
+
+  public getObjectDataMenuItems(editor, templateHelperData = this.templateHelperData) {
     let items = [];
     for(const item of templateHelperData) {
       if(item.subdata) {
         items.push({
           type: 'nestedmenuitem',
           text: item.label,
+          icon: 'chevron-right',
           getSubmenuItems: () => {
-            return this.getCmdbDataMenuItems(editor, item.subdata);
+            return this.getObjectDataMenuItems(editor, item.subdata);
           }
         });
       }
       else {
+        let icon = 'sourcecode';
+        if(item.label === 'Public ID') {
+          icon = 'character-count';
+        }
         items.push({
           type: 'menuitem',
           text: item.label,
+          icon: icon,
           onAction: function () {
             editor.insertContent(item.templatedata);
           }
@@ -149,11 +164,11 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
   }
 
 
-  public getBarcodeMenuItems(editor) {
-    let items = [];
-    items.push({
+  public getBarcodeMenuItem(editor) {
+    let item = {
       type: 'menuitem',
-      text: 'QR Code',
+      text: 'Barcode',
+      icon: 'align-justify',
       onAction: function() {
         let selection = editor.selection.getNode();
         let preData = {};
@@ -216,8 +231,8 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
           }
         });
       }
-    });
-    return items;
+    };
+    return item;
   }
 
   ngOnInit() { }
