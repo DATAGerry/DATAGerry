@@ -75,7 +75,7 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
     file_picker_callback: function (cb, value, meta) {
       let input = document.createElement('input');
       input.setAttribute('type', 'file');
-      input.setAttribute('accept', 'image/*');
+      input.setAttribute('accept', 'image/png,image/jpeg');
       input.onchange = function () {
         let file = input.files[0];
         let reader = new FileReader();
