@@ -1,7 +1,7 @@
 <cmdb-content-header [faIcon]="'cube'" title="DocAPI Document Templates"></cmdb-content-header>
 <div class="card-body" style="padding: 0 0 1em 0;">
   <button type="button"
-          *permissionLink="['base.framework.object.add']"
+          *permissionLink="['base.docapi.template.add']"
           class="btn btn-success btn-sm"
           [routerLink]="['/settings/docapi/add']">
     <i class="fas fa-plus"></i> Add
@@ -13,19 +13,19 @@
     <tr>
       <th>ID</th>
       <th>Label</th>
-      <th *permissionLink="['base.framework.object.edit', 'base.framework.object.delete']">Action</th>
+      <th *permissionLink="['base.docapi.template.edit', 'base.docapi.template.delete']">Action</th>
     </tr>
   </thead>
   <tbody>
     <tr *ngFor="let docTemplate of docTemplateList | async">
       <td>{{docTemplate.public_id}}</td>
       <td>{{docTemplate.label}}</td>
-      <td *permissionLink="['base.framework.object.edit', 'base.framework.object.delete']">
-        <a class="ml-1 text-dark mr-1" *permissionLink="['base.framework.object.edit']"
+      <td *permissionLink="['base.docapi.template.edit', 'base.docapi.template.delete']">
+        <a class="ml-1 text-dark mr-1" *permissionLink="['base.docapi.template.edit']"
             [routerLink]="['/settings/docapi/edit/', docTemplate?.public_id]">
           <fa-icon [icon]="['far', 'edit']"></fa-icon>
         </a>
-        <a class="ml-1 text-dark mr-1" *permissionLink="['base.framework.object.delete']">
+        <a class="ml-1 text-dark mr-1" *permissionLink="['base.docapi.template.delete']">
           <fa-icon [icon]="['far', 'trash-alt']" (click)="delDocTemplate(docTemplate?.public_id)"></fa-icon>
         </a>
       </td>

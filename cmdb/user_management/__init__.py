@@ -41,7 +41,8 @@ __USER_GROUP_RIGHTS__: List[str] = [
     'base.framework.category.view',
     'base.framework.log.view',
     'base.user-management.user.view',
-    'base.user-management.group.view'
+    'base.user-management.group.view',
+    'base.docapi.template.view'
 ]
 
 __FIXED_GROUPS__: List[UserGroup] = [
