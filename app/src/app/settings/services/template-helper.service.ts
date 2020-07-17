@@ -28,20 +28,24 @@ export class TemplateHelperService {
 
   constructor(private typeService: TypeService) { }
 
-  public getObjectTemplateHelperData(typeId: number, prefix: string = '', iteration: number = 3) {
+  public async getObjectTemplateHelperData(typeId: number, prefix: string = '', iteration: number = 3) {
     let templateHelperData = [];
     templateHelperData.push(<TemplateHelpdataElement>({
       label: 'Public ID',
       templatedata: (prefix ? "{{fields" + prefix + "['id']}}" : "{{id}}")
     }));
-    this.typeService.getType(typeId).subscribe(cmdbTypeObj => {
+    await this.typeService.getType(typeId).subscribe(async cmdbTypeObj => {
       for (const field of cmdbTypeObj.fields) {
         if(field.type === "ref" && iteration > 0) {
           iteration = iteration - 1;
           let changedPrefix = (prefix ? prefix + "['fields']['" + field.name + "']" : "['" + field.name + "']");
+          let subdata = undefined;
+          await this.getObjectTemplateHelperData(field.ref_types, changedPrefix, iteration).then(data => {
+            subdata = data;
+          });
           templateHelperData.push(<TemplateHelpdataElement>({
             label: field.label,
-            subdata: this.getObjectTemplateHelperData(field.ref_types, changedPrefix, iteration)
+            subdata
           }));
         }
         else {
@@ -51,7 +55,7 @@ export class TemplateHelperService {
           }));
         }
       }
-    }, 
+    },
     (error) => {
       console.error(error);
     });

@@ -40,9 +40,11 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
 
   @Input()
   set typeParam(data: any) {
-    if(data) {
-      if(data.type) {
-        this.templateHelperData = this.templateHelperService.getObjectTemplateHelperData(data.type);
+    if (data) {
+      if (data.type) {
+        this.templateHelperService.getObjectTemplateHelperData(data.type).then(helperData => {
+          this.templateHelperData = helperData;
+        });
       }
     }
   }
@@ -108,9 +110,9 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
     }
   }
 
-  constructor(private templateHelperService: TemplateHelperService) { 
+  constructor(private templateHelperService: TemplateHelperService) {
     this.contentForm = new FormGroup({
-      template_data: new FormControl('', [Validators.required, Validators.max(15*1024*1024)])
+      template_data: new FormControl('', [Validators.required, Validators.max(15 * 1024 * 1024)])
     });
   }
 
@@ -134,8 +136,8 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
 
   public getObjectDataMenuItems(editor, templateHelperData = this.templateHelperData) {
     let items = [];
-    for(const item of templateHelperData) {
-      if(item.subdata) {
+    for (const item of templateHelperData) {
+      if (item.subdata) {
         items.push({
           type: 'nestedmenuitem',
           text: item.label,
@@ -144,10 +146,9 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
             return this.getObjectDataMenuItems(editor, item.subdata);
           }
         });
-      }
-      else {
+      } else {
         let icon = 'sourcecode';
-        if(item.label === 'Public ID') {
+        if (item.label === 'Public ID') {
           icon = 'character-count';
         }
         items.push({
@@ -169,10 +170,10 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
       type: 'menuitem',
       text: 'Barcode',
       icon: 'align-justify',
-      onAction: function() {
+      onAction: function () {
         let selection = editor.selection.getNode();
         let preData = {};
-        if(selection.tagName === 'PDF:BARCODE') {
+        if (selection.tagName === 'PDF:BARCODE') {
           preData['type'] = selection.attributes.getNamedItem('type').value;
           preData['content'] = selection.attributes.getNamedItem('value').value;
         }
@@ -204,7 +205,7 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
             }
           ],
           initialData: preData,
-          onSubmit: function(dialogApi) {
+          onSubmit: function (dialogApi) {
             let barcodeContent = dialogApi.getData()['content'];
             let barcodeType = dialogApi.getData()['type'];
             let barcodeElementAttr = {
@@ -212,16 +213,16 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
               type: barcodeType,
               value: barcodeContent
             };
-            if(barcodeType === 'qr') {
+            if (barcodeType === 'qr') {
               barcodeElementAttr['barwidth'] = '3cm';
               barcodeElementAttr['barheight'] = '3cm';
             }
             let barcodeElement = editor.dom.create('pdf:barcode', barcodeElementAttr);
             //edit barcode: remove existing and set cur
-            if(preData['content']) {
+            if (preData['content']) {
               let selectionNext = editor.selection.getNode().nextSibling;
               editor.dom.remove(selection);
-              if(selectionNext) {
+              if (selectionNext) {
                 editor.selection.setCursorLocation(selectionNext);
               }
             }
@@ -235,6 +236,7 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
     return item;
   }
 
-  ngOnInit() { }
+  ngOnInit() {
+  }
 
 }

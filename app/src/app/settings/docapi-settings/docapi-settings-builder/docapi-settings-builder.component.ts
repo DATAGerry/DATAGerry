@@ -37,19 +37,20 @@ export class DocapiSettingsBuilderComponent implements OnInit {
   @Input() public mode: number = CmdbMode.Create;
   @Input() public docInstance?: DocTemplate;
 
-  @ViewChild(DocapiSettingsBuilderSettingsStepComponent, {static: true})
+  @ViewChild(DocapiSettingsBuilderSettingsStepComponent, { static: true })
   public settingsStep: DocapiSettingsBuilderSettingsStepComponent;
 
-  @ViewChild(DocapiSettingsBuilderTypeStepComponent, {static: true})
+  @ViewChild(DocapiSettingsBuilderTypeStepComponent, { static: true })
   public typeStep: DocapiSettingsBuilderTypeStepComponent;
 
-  @ViewChild(DocapiSettingsBuilderContentStepComponent, {static: true})
+  @ViewChild(DocapiSettingsBuilderContentStepComponent, { static: true })
   public contentStep: DocapiSettingsBuilderContentStepComponent;
 
-  @ViewChild(DocapiSettingsBuilderStyleStepComponent, {static: true})
+  @ViewChild(DocapiSettingsBuilderStyleStepComponent, { static: true })
   public styleStep: DocapiSettingsBuilderStyleStepComponent;
 
-  constructor(private docapiService: DocapiService, private router: Router, private toast: ToastService) { }
+  constructor(private docapiService: DocapiService, private router: Router, private toast: ToastService) {
+  }
 
   ngOnInit() {
   }
@@ -70,20 +71,20 @@ export class DocapiSettingsBuilderComponent implements OnInit {
     if (this.mode === CmdbMode.Create) {
       let newId = null;
       this.docapiService.postDocTemplate(this.docInstance).subscribe(publicIdResp => {
-        newId = publicIdResp;
-        this.router.navigate(['settings/docapi/'], {queryParams: {docAddSuccess: newId}});
+          newId = publicIdResp;
+          this.router.navigate(['settings/docapi/'], { queryParams: { docAddSuccess: newId } });
         },
         (error) => {
           console.error(error);
         });
     } else if (this.mode === CmdbMode.Edit) {
       this.docapiService.putDocTemplate(this.docInstance).subscribe((updateResp: DocTemplate) => {
-        this.toast.show(`DocAPI document successfully edited: ${updateResp.public_id}`);
-        this.router.navigate(['/settings/docapi/'], {queryParams: {docEditSuccess: updateResp.public_id}});
-      },
-      (error) => {
-        console.error(error);
-      });
+          this.toast.show(`DocAPI document successfully edited: ${ updateResp.public_id }`);
+          this.router.navigate(['/settings/docapi/'], { queryParams: { docEditSuccess: updateResp.public_id } });
+        },
+        (error) => {
+          console.error(error);
+        });
     }
 
   }

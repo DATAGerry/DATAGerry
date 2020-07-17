@@ -25,7 +25,7 @@ import { ArchwizardModule } from 'angular-archwizard';
 import { DataTablesModule } from 'angular-datatables';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { LayoutModule } from '../../layout/layout.module';
-import { AuthModule } from "../../auth/auth.module";
+import { AuthModule } from '../../auth/auth.module';
 import { DocapiSettingsRoutingModule } from './docapi-settings-routing.module';
 import { DocapiSettingsListComponent } from './docapi-settings-list/docapi-settings-list.component';
 import { DocapiSettingsBuilderComponent } from './docapi-settings-builder/docapi-settings-builder.component';
@@ -55,4 +55,5 @@ import { DocapiSettingsBuilderStyleStepComponent } from './docapi-settings-build
     DocapiSettingsRoutingModule
   ]
 })
-export class DocapiSettingsModule { }
+export class DocapiSettingsModule {
+}
