@@ -56,7 +56,7 @@
     </div>
 
     <div class="col-4">
-      <div class="card mb-3" *ngIf="mode == modes.Create">
+      <div class="card mb-3" *ngIf="mode == modes.Create || mode == modes.Edit">
         <div class="card-header">
           Category:
           <div *ngIf="basicCategoryForm.get('category_id').value; then categorySelected else categoryUnselected"></div>
@@ -74,7 +74,12 @@
                 formControlName="category_id">
               </ng-select>
             </form>
-            <br>
+          </div>
+          <div class="mt-2">
+            <button class="btn btn-primary btn-block" role="button" aria-pressed="true" (click)="addCategoryModal()">
+              <fa-icon icon="plus"></fa-icon>
+              Add new Category
+            </button>
           </div>
         </div>
       </div>

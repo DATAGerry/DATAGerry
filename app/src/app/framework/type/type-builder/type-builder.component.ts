@@ -107,7 +107,6 @@ export class TypeBuilderComponent implements OnInit {
   }
 
   public saveType() {
-    this.typeInstance.category_id = this.selectedCategoryID;
     if (this.mode === CmdbMode.Create) {
       let newTypeID = null;
       this.typeService.postType(this.typeInstance).subscribe(typeIDResp => {

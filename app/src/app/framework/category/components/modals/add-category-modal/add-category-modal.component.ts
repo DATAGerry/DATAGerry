@@ -19,12 +19,11 @@ export class AddCategoryModalComponent implements OnInit {
               private categoryService: CategoryService) {
     this.catAddForm = new FormGroup({
       name: new FormControl('', Validators.required),
-      label: new FormControl('', Validators.required),
-      parentID: new FormControl(null)
+      label: new FormControl('', Validators.required)
     });
   }
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
       this.catAddForm.get('name').setAsyncValidators(checkCategoryExistsValidator(this.categoryService));
       this.catAddForm.get('label').valueChanges.subscribe(value => {
         value = value == null ? '' : value;

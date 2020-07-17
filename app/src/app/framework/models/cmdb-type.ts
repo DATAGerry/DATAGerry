@@ -34,8 +34,6 @@ export class CmdbType implements CmdbDao {
   public last_edit_time: any;
   public render_meta: any;
   public fields: any[];
-  public category_name?: string;
-  public category_id: number;
   public clean_db: boolean;
 
   public has_references(): boolean {

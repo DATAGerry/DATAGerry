@@ -60,6 +60,7 @@ def get_categories(request_user: User):
 
     return make_response(categories_list)
 
+
 @categories_blueprint.route('/<int:public_id>/', methods=['GET'])
 @categories_blueprint.route('/<int:public_id>', methods=['GET'])
 @login_required
