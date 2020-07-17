@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, Input, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, EventEmitter, Output } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbMode } from '../../../../framework/modes.enum';
 import { CmdbType } from '../../../../framework/models/cmdb-type';
@@ -33,7 +33,7 @@ export class DocapiSettingsBuilderTypeStepComponent implements OnInit {
   set preData(data: any) {
     if (data !== undefined) {
       this.typeForm.patchValue(data);
-      if(data.template_parameters) {
+      if (data.template_parameters) {
         this.typeParamPreData = data.template_parameters;
       }
     }
@@ -43,22 +43,32 @@ export class DocapiSettingsBuilderTypeStepComponent implements OnInit {
   public modes = CmdbMode;
   public typeForm: FormGroup;
   public readonly docTypeSelect: any[] = [
-    {label: 'Object Template', content: 'OBJECT', description: 'Template for single objects'}
+    { label: 'Object Template', content: 'OBJECT', description: 'Template for single objects' }
   ];
 
-  @ViewChild('typeparam', {static: false})
+  @ViewChild('typeparam', { static: false })
   public typeParamComponent: DocapiSettingsBuilderTypeStepBaseComponent;
   public typeParamPreData: any;
 
+  public typeValid: boolean = false;
+  public typeChildValid: boolean = false;
 
-  constructor() { 
+  @Output() public formValidEmitter: EventEmitter<boolean>;
+
+
+  constructor() {
     //setup form
+    this.formValidEmitter = new EventEmitter<boolean>();
     this.typeForm = new FormGroup({
       template_type: new FormControl('', Validators.required)
     });
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
+    this.typeForm.valueChanges.subscribe(() => {
+      this.typeValid = this.typeForm.valid;
+      this.formValidEmitter.emit(this.typeValid && this.typeChildValid);
+    });
   }
 
 }

@@ -32,7 +32,8 @@ export class DocapiSettingsBuilderTypeStepObjectComponent extends DocapiSettings
 
   public objectTypeList: CmdbType[] = [];
 
-  constructor(private typeService: TypeService) { 
+
+  constructor(private typeService: TypeService) {
     super();
     //setup form
     this.typeParamForm = new FormGroup({
@@ -40,8 +41,12 @@ export class DocapiSettingsBuilderTypeStepObjectComponent extends DocapiSettings
     });
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
     //load object type list
+    this.typeParamForm.valueChanges.subscribe(() => {
+      this.formValid = this.typeParamForm.valid;
+      this.formValidationEmitter.emit(this.formValid);
+    });
     this.typeService.getTypeList().subscribe((value: CmdbType[]) => this.objectTypeList = value);
   }
 

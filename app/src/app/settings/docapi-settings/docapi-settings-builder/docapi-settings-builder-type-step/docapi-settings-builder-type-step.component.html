@@ -19,18 +19,12 @@
       </form>
 
       <ng-container [ngSwitch]="typeForm.get('template_type').value">
-        <cmdb-docapi-settings-builder-type-step-object 
-          *ngSwitchCase="'OBJECT'" 
-          [preData]="typeParamPreData" 
+        <cmdb-docapi-settings-builder-type-step-object
+          *ngSwitchCase="'OBJECT'"
+          [preData]="typeParamPreData"
           [mode]="mode"
-          #typeparam>
+          #typeparam (formValidationEmitter)="typeChildValid = $event">
         </cmdb-docapi-settings-builder-type-step-object>
-        <cmdb-docapi-settings-builder-type-step-objectlist 
-          *ngSwitchCase="'OBJECTLIST'" 
-          [preData]="typeParamPreData" 
-          [mode]="mode"
-          #typeparam>
-        </cmdb-docapi-settings-builder-type-step-objectlist>
       </ng-container>
     </div>
   </div>

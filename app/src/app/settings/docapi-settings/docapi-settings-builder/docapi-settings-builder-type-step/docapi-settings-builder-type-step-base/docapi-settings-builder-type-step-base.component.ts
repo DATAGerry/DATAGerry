@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbMode } from '../../../../../framework/modes.enum';
 
@@ -35,10 +35,15 @@ export class DocapiSettingsBuilderTypeStepBaseComponent implements OnInit {
   }
 
   @Input() public mode: CmdbMode;
+
+  @Output() public formValidationEmitter: EventEmitter<boolean>;
+  public formValid: boolean = false;
   public typeParamForm: FormGroup;
   public modes = CmdbMode;
 
-  constructor() { }
+  constructor() {
+    this.formValidationEmitter = new EventEmitter<boolean>();
+  }
 
   ngOnInit() {
   }

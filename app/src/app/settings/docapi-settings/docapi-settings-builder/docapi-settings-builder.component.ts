@@ -42,6 +42,8 @@ export class DocapiSettingsBuilderComponent implements OnInit {
 
   @ViewChild(DocapiSettingsBuilderTypeStepComponent, { static: true })
   public typeStep: DocapiSettingsBuilderTypeStepComponent;
+  public typeStepFormValid: boolean = false;
+  public typeParam: any = undefined;
 
   @ViewChild(DocapiSettingsBuilderContentStepComponent, { static: true })
   public contentStep: DocapiSettingsBuilderContentStepComponent;
