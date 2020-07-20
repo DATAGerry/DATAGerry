@@ -43,8 +43,8 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
       this.basicMetaIconForm.patchValue(data.render_meta === undefined ? '' : data.render_meta);
 
       this.categoryService.getCategoryList().subscribe(categories => {
-        const categoryID = categories.find(category => category.types.includes(data.public_id)).public_id;
-        this.basicCategoryForm.patchValue({ category_id: categoryID});
+        this.originalCategoryID = categories.find(category => category.types.includes(data.public_id)).public_id;
+        this.basicCategoryForm.patchValue({ category_id: this.originalCategoryID});
       });
     }
   }
@@ -57,6 +57,7 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
 
   public basicCategoryForm: FormGroup;
   private categoriesSubscription: Subscription;
+  public originalCategoryID: number = undefined;
   public categories: CmdbCategory[];
 
   constructor(private typeService: TypeService, private categoryService: CategoryService, private modalService: NgbModal,

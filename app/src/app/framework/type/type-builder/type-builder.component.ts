@@ -130,6 +130,23 @@ export class TypeBuilderComponent implements OnInit {
         });
     } else if (this.mode === CmdbMode.Edit) {
       this.typeService.putType(this.typeInstance).subscribe((updateResp: CmdbType) => {
+          if (this.basicStep.originalCategoryID !== this.selectedCategoryID) {
+            this.categoryService.getCategory(this.basicStep.originalCategoryID).subscribe((category: CmdbCategory) => {
+              const index = category.types.indexOf(this.typeInstance.public_id, 0);
+              if (index > -1) {
+                category.types.splice(index, 1);
+              }
+              this.categoryService.updateCategory(category).subscribe(() => {
+                console.log('Type id removed from category');
+              });
+            });
+            this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
+              category.types.push(this.typeInstance.public_id);
+              this.categoryService.updateCategory(category).subscribe(() => {
+                console.log('Type id added to category');
+              });
+            });
+          }
           this.sidebarService.reload();
           this.toast.show(`Type was successfully edit: TypeID: ${ updateResp.public_id }`);
           this.router.navigate(['/framework/type/'], { queryParams: { typeEditSuccess: updateResp.public_id } });
