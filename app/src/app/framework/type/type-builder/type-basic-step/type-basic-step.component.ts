@@ -86,7 +86,7 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.categoriesSubscription = this.categoryService.getCategoryList().subscribe((categories: CmdbCategory[]) => {
+    this.categoriesSubscription = this.categoryService.getCategoryList('tree').subscribe((categories: CmdbCategory[]) => {
       this.categories = categories;
     });
     if (this.mode === CmdbMode.Create) {

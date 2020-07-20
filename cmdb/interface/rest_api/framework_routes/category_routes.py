@@ -47,9 +47,14 @@ categories_blueprint = RootBlueprint('categories_rest', __name__, url_prefix='/c
 @right_required('base.framework.category.view')
 def get_categories(request_user: User):
     """HTTP GET call for all categories without any kind of selection"""
+    request_arguments = request.args
     try:
-        categories_list: List[dict] = [CmdbCategory.to_json(category) for category in
-                                       object_manager.get_all_categories()]
+        if request_arguments.get('order') == 'tree':
+            flatted_tree: List[CmdbCategory] = object_manager.get_category_tree().flat()
+            categories_list: List[dict] = [CmdbCategory.to_json(node) for node in flatted_tree]
+        else:
+            categories_list: List[dict] = [CmdbCategory.to_json(category) for category in
+                                           object_manager.get_all_categories()]
     except ObjectManagerInitError as err:
         return abort(500, err.message)
     except ObjectManagerGetError as err:

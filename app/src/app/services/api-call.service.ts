@@ -42,6 +42,7 @@ export const httpObserveOptions = {
   headers: new HttpHeaders({
     'Content-Type': 'application/json'
   }),
+  params: {},
   observe: resp
 };
 
@@ -83,7 +84,7 @@ export class ApiCallService {
   }
 
   public callGet<T>(route: string, client: HttpClient = this.http, httpGetOptions: any = httpObserveOptions): Observable<any> {
-    return client.get<T>(this.apiURL + route, httpGetOptions).pipe(catchError(ApiCallService.handleError));
+    return this.http.get<T>(this.apiURL + route, httpGetOptions).pipe(catchError(ApiCallService.handleError));
   }
 
   public callPost<T>(route: string, data, httpPostOptions = httpObserveOptions): Observable<any> {
