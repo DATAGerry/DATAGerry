@@ -24,6 +24,7 @@ from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManager
+from cmdb.media_library.media_file_manager import MediaFileManagement
 from cmdb.user_management import UserManager
 from cmdb.utils.security import SecurityManager
 
@@ -86,6 +87,10 @@ def create_rest_api(event_queue):
         database_manager=app_database
     )
 
+    media_file_manager = MediaFileManagement(
+        database_manager=app_database
+    )
+
     docapi_tpl_manager = DocapiTemplateManager(
         database_manager=app_database
     )
@@ -94,8 +99,9 @@ def create_rest_api(event_queue):
     from cmdb.interface.cmdb_app import BaseCmdbApp
 
     app = BaseCmdbApp(__name__, database_manager=app_database, docapi_tpl_manager=docapi_tpl_manager,
-                      exportd_manager=exportd_job_manager, exportd_log_manager=exportd_log_manager,
-                      object_manager=object_manager, log_manager=log_manager, user_manager=user_manager,
+                      media_file_manager=media_file_manager, exportd_manager=exportd_job_manager,
+                      exportd_log_manager=exportd_log_manager, object_manager=object_manager,
+                      log_manager=log_manager, user_manager=user_manager,
                       security_manager=security_manager)
 
     # Import App Extensions
@@ -149,6 +155,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.exporter_routes.exportd_log_routes import exportd_log_blueprint
     from cmdb.interface.rest_api.external_systems_routes import external_system
     from cmdb.interface.rest_api.docapi_routes import docapi_blueprint
+    from cmdb.interface.rest_api.media_library_routes.media_file_routes import media_file_blueprint
     from cmdb.interface.rest_api.special_routers import special_blueprint
 
     app.register_blueprint(auth_blueprint)
@@ -171,6 +178,7 @@ def register_blueprints(app):
     app.register_blueprint(exportd_log_blueprint)
     app.register_blueprint(external_system)
     app.register_blueprint(docapi_blueprint)
+    app.register_blueprint(media_file_blueprint)
     app.register_blueprint(special_blueprint)
 
     import cmdb

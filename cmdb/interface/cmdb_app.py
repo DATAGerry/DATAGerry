@@ -23,6 +23,7 @@ from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
+from cmdb.media_library.media_file_manager import MediaFileManagement
 from cmdb.user_management import UserManager
 from cmdb.utils.security import SecurityManager
 
@@ -37,6 +38,7 @@ class BaseCmdbApp(Flask):
                  exportd_manager: ExportdJobManagement = None,
                  exportd_log_manager: ExportdLogManager = None,
                  object_manager: CmdbObjectManager = None,
+                 media_file_manager: MediaFileManagement = None,
                  log_manager: CmdbLogManager = None,
                  user_manager: UserManager = None,
                  security_manager: SecurityManager = None):
@@ -45,6 +47,7 @@ class BaseCmdbApp(Flask):
         self.object_manager: CmdbObjectManager = object_manager
         self.exportd_manager: ExportdJobManagement = exportd_manager
         self.exportd_log_manager: ExportdLogManager = exportd_log_manager
+        self.media_file_manager: MediaFileManagement = media_file_manager
         self.log_manager: CmdbLogManager = log_manager
         self.user_manager: UserManager = user_manager
         self.security_manager: SecurityManager = security_manager

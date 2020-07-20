@@ -47,6 +47,7 @@ def default(obj):
     from cmdb.user_management import UserManagementBase
     from cmdb.user_management.user_right import BaseRight
     from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
+    from cmdb.media_library.media_file_base import MediaFileManagementBase
     from cmdb.docapi.docapi_template.docapi_template_base import TemplateManagementBase
     """Helper function for converting cmdb objects to json"""
     if isinstance(obj, CmdbDAO):
@@ -54,6 +55,8 @@ def default(obj):
     if isinstance(obj, UserManagementBase):
         return obj.__dict__
     if isinstance(obj, JobManagementBase):
+        return obj.__dict__
+    if isinstance(obj, MediaFileManagementBase):
         return obj.__dict__
     if isinstance(obj, TemplateManagementBase):
         return obj.__dict__

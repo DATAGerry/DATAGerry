@@ -31,10 +31,12 @@ import { HttpErrorInterceptor } from './error/interceptors/http-error.intercepto
 import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
 import { AuthModule } from './auth/auth.module';
 import { ErrorMessageModule } from './error/error-message/error-message.module';
+import { FileManagerComponent } from './file-manager/file-manager.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    FileManagerComponent
   ],
   imports: [
     BrowserModule,

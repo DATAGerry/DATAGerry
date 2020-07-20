@@ -58,6 +58,7 @@ import { ObjectBulkChangeEditorComponent } from './object-bulk-change/object-bul
 import { ObjectBulkChangePreviewComponent } from './object-bulk-change/object-bulk-change-preview/object-bulk-change-preview.component';
 import { ArchwizardModule } from 'angular-archwizard';
 import { ObjectDocsComponent } from './components/object-docs/object-docs.component';
+import { ObjectAttachmentsComponent } from './components/object-attachments/object-attachments.component';
 
 @NgModule({
   entryComponents: [
@@ -91,7 +92,8 @@ import { ObjectDocsComponent } from './components/object-docs/object-docs.compon
     ObjectBulkChangePreviewComponent,
     ObjectBulkChangeEditorComponent,
     ObjectBulkChangePreviewComponent,
-    ObjectDocsComponent
+    ObjectDocsComponent,
+    ObjectAttachmentsComponent
   ],
   exports: [
   ],

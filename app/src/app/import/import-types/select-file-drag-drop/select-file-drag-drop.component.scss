@@ -1,7 +1,9 @@
+@import './src/scss/variables';
+
 #uploadfileform {
   .uploadfilestart, .uploadfiledone{
     background: None;
-    border: 2px dashed orangered;
+    border: 2px dashed $gray-400;
     border-radius: 5px;
   }
 

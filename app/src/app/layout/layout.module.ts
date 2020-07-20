@@ -58,8 +58,9 @@ import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-ste
 import { JwPaginationComponent } from 'jw-angular-pagination';
 import { NameDirective } from './directives/name.directive';
 import { NameGuidePipe } from './pipes/name-guide.pipe';
-import { SidebarService } from './services/sidebar.service';
 import { SidebarTypeComponent } from './structure/sidebar/sidebar-type.component';
+import { FileDragDropDirective } from './directives/fileDragDrop.directive';
+import { FileSizePipe } from './pipes/file-size.pipe';
 
 export const LAYOUT_COMPONENT_ROUTES: Routes = [
   {
@@ -112,6 +113,8 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     JwPaginationComponent,
     NameDirective,
     NameGuidePipe,
+    FileDragDropDirective,
+    FileSizePipe,
     SidebarTypeComponent
   ],
   exports: [
@@ -131,7 +134,9 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     JwPaginationComponent,
     SidebarComponent,
     NameDirective,
-    NameGuidePipe
+    NameGuidePipe,
+    FileDragDropDirective,
+    FileSizePipe
   ],
   imports: [
     CommonModule,

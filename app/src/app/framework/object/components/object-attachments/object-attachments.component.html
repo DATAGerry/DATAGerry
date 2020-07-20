@@ -1,0 +1,31 @@
+<div class="card card mb-3">
+  <div class="card-body">
+    <h6 class="card-title mb-4 font-weight-bold"><i class="fas fa-paperclip"></i> Attachments</h6>
+    <div id="uploadfileform">
+      <div appDragDrop id="uploadFileContainer" class="card-body jumbotron text-center align-items-center text-center"
+           (click)="fileInput.click()" (fileDropped)="uploadFile($event)">
+        <fa-icon class="attachment-fa-icon" icon="cloud-upload-alt"></fa-icon>
+        <h6 class="attachment-subtitle">Drop files here or click to upload.</h6>
+        <input hidden type="file" #fileInput (change)="uploadFile($event.target.files)">
+      </div>
+
+      <div class="container border p-2 mb-2" *ngFor="let attachment of attachments">
+        <div class="row align-items-center">
+          <div class="col-auto">
+            <i class="far fa-file-alt"></i>
+          </div>
+          <div class="col pl-0">
+            <a (click)="downloadFile(attachment.name)" class="text-muted font-weight-bold">{{attachment.name}}</a>
+            <p class="mb-0">{{attachment.size | fileSize}}</p>
+          </div>
+          <div class="col-auto">
+            <!-- Button -->
+            <a href="javascript:void(0);" class="btn btn-link btn-lg text-muted align-items-end">
+              <i class="far fa-trash-alt"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

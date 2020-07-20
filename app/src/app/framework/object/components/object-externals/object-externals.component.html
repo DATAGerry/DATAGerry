@@ -1,9 +1,7 @@
 <ng-container *ngIf="renderResult?.externals && renderResult?.externals.length>0">
   <div id="cmdb-object-externals" class="card">
-    <div class="card-header">
-      External Links
-    </div>
     <div class="card-body">
+      <h6 class="card-title mb-4 font-weight-bold"><i class="fas fa-link"></i> External Links</h6>
       <ul class="fa-ul">
         <li *ngFor="let ext of renderResult?.externals">
           <i class="{{ext.icon}} mr-1" aria-hidden="true"></i>
