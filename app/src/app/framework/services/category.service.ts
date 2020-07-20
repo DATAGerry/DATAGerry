@@ -18,12 +18,12 @@
 
 import { Injectable } from '@angular/core';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { ApiCallService, ApiService } from '../../services/api-call.service';
+import { ApiCallService, ApiService, httpObserveOptions } from '../../services/api-call.service';
 import { ValidatorService } from '../../services/validator.service';
 import { CmdbCategory, CmdbCategoryTree } from '../models/cmdb-category';
 import { FormControl } from '@angular/forms';
 import { Observable, timer } from 'rxjs';
-import { HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 
 export const checkCategoryExistsValidator = (categoryService: CategoryService, time: number = 500) => {
   return (control: FormControl) => {
@@ -53,8 +53,8 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    */
   public servicePrefix: string = 'category';
 
-  constructor(private api: ApiCallService) {
-
+  constructor(private api: ApiCallService, private client: HttpClient) {
+    // TODO: Remove incorrect usage of client structure in all framework services
   }
 
   /**
@@ -106,8 +106,10 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
   /**
    * Get all categories as a list
    */
-  public getCategoryList(): Observable<T[]> {
-    return this.api.callGet<T[]>(this.servicePrefix + '/').pipe(
+  public getCategoryList(order: string = null): Observable<T[]> {
+    const options = httpObserveOptions;
+    options.params = {order};
+    return this.api.callGet<T[]>(this.servicePrefix + '/', this.client, options).pipe(
       map((apiResponse: HttpResponse<T[]>) => {
         if (apiResponse.status === 204) {
           return [];

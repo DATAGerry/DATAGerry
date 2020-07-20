@@ -18,23 +18,6 @@
           <label for="nameCategoryID">Name</label>
           <input type="text" class="form-control" formControlName="name" id="nameCategoryID" placeholder="Name" readonly>
         </div>
-        <div class="form-group">
-          <label for="parentCategoryID">Parent Category</label>
-          <ng-select [items]="categoryList"
-                     formControlName="parentID"
-                     id="parentCategoryID"
-                     bindLabel="label"
-                     bindValue="public_id"
-                     placeholder="Select parent category">
-            <ng-template ng-label-tmp let-item="item">
-              {{item.label}} # {{item.public_id}}
-            </ng-template>
-            <ng-template ng-option-tmp let-item="item" let-index="index">
-              {{item.label}} # {{item.public_id}}
-            </ng-template>
-          </ng-select>
-          <small id="parentCategoryHelp" class="form-text text-muted">Each category has only a parent category.</small>
-        </div>
       </form>
     </div>
     <div class="modal-footer">
