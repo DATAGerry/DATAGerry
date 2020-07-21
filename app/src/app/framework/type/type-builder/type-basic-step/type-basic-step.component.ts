@@ -23,6 +23,10 @@ import { CmdbMode } from '../../../modes.enum';
 import { CategoryService } from '../../../services/category.service';
 import { CmdbCategory } from '../../../models/cmdb-category';
 import { Subscription } from 'rxjs';
+import { AddCategoryModalComponent } from '../../../category/components/modals/add-category-modal/add-category-modal.component';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { SidebarService } from '../../../../layout/services/sidebar.service';
+import { ToastService } from '../../../../layout/toast/toast.service';
 
 
 @Component({
@@ -37,6 +41,11 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
     if (data !== undefined) {
       this.basicForm.patchValue(data);
       this.basicMetaIconForm.patchValue(data.render_meta === undefined ? '' : data.render_meta);
+
+      this.categoryService.getCategoryList().subscribe(categories => {
+        this.originalCategoryID = categories.find(category => category.types.includes(data.public_id)).public_id;
+        this.basicCategoryForm.patchValue({ category_id: this.originalCategoryID});
+      });
     }
   }
 
@@ -48,9 +57,11 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
 
   public basicCategoryForm: FormGroup;
   private categoriesSubscription: Subscription;
+  public originalCategoryID: number = undefined;
   public categories: CmdbCategory[];
 
-  constructor(private typeService: TypeService, private categoryService: CategoryService) {
+  constructor(private typeService: TypeService, private categoryService: CategoryService, private modalService: NgbModal,
+              private sidebarService: SidebarService, private toast: ToastService) {
     this.categoriesSubscription = new Subscription();
     this.basicForm = new FormGroup({
       name: new FormControl('', Validators.required),
@@ -75,7 +86,7 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.categoriesSubscription = this.categoryService.getCategoryList().subscribe((categories: CmdbCategory[]) => {
+    this.categoriesSubscription = this.categoryService.getCategoryList('tree').subscribe((categories: CmdbCategory[]) => {
       this.categories = categories;
     });
     if (this.mode === CmdbMode.Create) {
@@ -94,6 +105,32 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy(): void {
     this.categoriesSubscription.unsubscribe();
+  }
+
+  public addCategoryModal() {
+    const newCategory = new CmdbCategory();
+    const addCategoryModal = this.modalService.open(AddCategoryModalComponent, { scrollable: true });
+    addCategoryModal.result.then((result: FormGroup) => {
+      if (result) {
+        let categoryID = null;
+        newCategory.name = result.get('name').value;
+        newCategory.label = result.get('label').value;
+        this.categoryService.postCategory(newCategory).subscribe(newID => {
+            this.basicCategoryForm.get('category_id').setValue(newID);
+            categoryID = newID;
+          }, error => {
+          },
+          () => {
+            this.categoriesSubscription = this.categoryService.getCategoryList().subscribe((categories: Array<CmdbCategory>) => {
+              this.categories = categories;
+            });
+            this.sidebarService.reload();
+            this.toast.show('Category # ' + categoryID + ' was created');
+          });
+      }
+    }, (reason) => {
+      console.log(reason);
+    });
   }
 
 }

@@ -171,6 +171,17 @@ class CategoryTree:
                 self.node_order = -1
             return self.node_order
 
+        def flatten(self) -> List[CmdbCategory]:
+            """Flats a category node and its children"""
+            return [self.category] + sum(
+                (c.flatten() for c in self.children),
+                [],
+            )
+
+        def __repr__(self):
+            """String representation of the category node"""
+            return f'CategoryNode(CategoryID={self.category.public_id})'
+
     def __init__(self, categories: List[CmdbCategory], types: List[CmdbType] = None):
         self._categories = categories
         self._types = types
@@ -180,6 +191,13 @@ class CategoryTree:
     def __len__(self) -> int:
         """Get length of tree - this means the number of root categories"""
         return len(self._tree)
+
+    def flat(self) -> List[CmdbCategory]:
+        """Returns a flatted tree with tree like category order"""
+        flatted = []
+        for node in self.tree:
+            flatted += node.flatten()
+        return flatted
 
     @property
     def tree(self) -> List[CategoryNode]:

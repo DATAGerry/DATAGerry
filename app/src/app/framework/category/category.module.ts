@@ -34,9 +34,10 @@ import { CategoryTreeComponent } from './components/category-tree/category-tree.
 import { CategoryNodeComponent } from './components/category-node/category-node.component';
 import { CategoryDeleteComponent } from './category-delete/category-delete.component';
 import { AuthModule } from '../../auth/auth.module';
+import { AddCategoryModalComponent } from './components/modals/add-category-modal/add-category-modal.component';
 
 @NgModule({
-  declarations: [CategoryComponent, CategoryAddComponent, CategoryFormComponent, CategoryEditComponent, CategoryTreeComponent, CategoryNodeComponent, CategoryDeleteComponent],
+  declarations: [CategoryComponent, CategoryAddComponent, CategoryFormComponent, CategoryEditComponent, CategoryTreeComponent, CategoryNodeComponent, AddCategoryModalComponent, CategoryDeleteComponent],
   imports: [
     CommonModule,
     CategoryRoutingModule,
@@ -49,7 +50,7 @@ import { AuthModule } from '../../auth/auth.module';
     IconPickerModule,
     AuthModule
   ],
-  entryComponents: [CategoryDeleteComponent]
+  entryComponents: [AddCategoryModalComponent, CategoryDeleteComponent]
 })
 export class CategoryModule {
 }
