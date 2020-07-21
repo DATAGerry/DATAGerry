@@ -1,5 +1,5 @@
 <ng-container *ngIf="docs?.length > 0">
-  <div id="cmdb-object-docs" class="card mb-3">
+  <div id="cmdb-object-docs" class="card mb-3" *permissionLink="['base.docapi.template.view']" >
     <div class="card-body">
       <h6 class="card-title mb-4 font-weight-bold"><i class="fas fa-file-alt"></i> Documents</h6>
       <ul class="fa-ul">

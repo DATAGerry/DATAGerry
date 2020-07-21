@@ -38,7 +38,7 @@ class MediaFile(MediaFileManagementBase):
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
-    def __init__(self, name, chunk_size, upload_date, metadata, size, **kwargs):
+    def __init__(self, filename, chunkSize, uploadDate, metadata, length, **kwargs):
         """
         Args:
             filename: name of this file
@@ -48,11 +48,11 @@ class MediaFile(MediaFileManagementBase):
             variables: has a name and gets its value out of fields of the objects
             **kwargs: optional params
         """
-        self.name = name
-        self.chunk_size = chunk_size
-        self.upload_date = upload_date
+        self.name = filename
+        self.chunk_size = chunkSize
+        self.upload_date = uploadDate
         self.metadata = metadata
-        self.size = size
+        self.size = length
 
         super(MediaFile, self).__init__(**kwargs)
 

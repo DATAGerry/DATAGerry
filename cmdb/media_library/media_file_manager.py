@@ -39,28 +39,19 @@ class MediaFileManagement(CmdbManagerBase):
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
 
-    def get_media_file(self, file_name: str):
+    def get_media_file(self, file_name: str, filter_metadata):
         try:
-            result = self.fs_bucket.get_last_version(filename=file_name, metadata={'ref_to': 3170})
+            result = self.fs_bucket.get_last_version(filename=file_name, **filter_metadata)
         except (MediaFileManagerGetError, Exception) as err:
             LOGGER.error(err)
             raise err
-        return result.read()
+        return result
 
-    def get_all_media_files(self):
+    def get_all_media_files(self, filter_metadata):
         media_file_list = []
-        for file_name in self.fs_bucket.list():
+        for grid_out in self.fs_bucket.find(filter=filter_metadata):
             try:
-                # media_file_list.append(self.fs_bucket.get_last_version(filename=file_name))
-                new_file = {}
-                grid_out = self.fs_bucket.get_last_version(filename=file_name)
-                new_file['public_id'] = self.get_new_id(MediaFile.COLLECTION)
-                new_file['name'] = grid_out.filename
-                new_file['chunk_size'] = grid_out.chunk_size
-                new_file['upload_date'] = grid_out.upload_date
-                new_file['metadata'] = grid_out.metadata
-                new_file['size'] = grid_out.length
-                media_file_list.append(MediaFile(**new_file))
+                media_file_list.append(MediaFile(**grid_out._file))
             except CMDBError:
                 continue
         return media_file_list
@@ -77,19 +68,37 @@ class MediaFileManagement(CmdbManagerBase):
         try:
             with self.fs_bucket.new_file(filename=data.filename) as media_file:
                 media_file.write(data)
-                media_file.metadata = FileMetadata(**metadata)
+                media_file.public_id = self.get_new_id(MediaFile.COLLECTION)
+                media_file.metadata = FileMetadata(**metadata).__dict__
         except CMDBError as e:
             raise MediaFileManagerInsertError(e)
-        return media_file
+        return media_file._id
 
-    def delete_media_file(self, file_name: str) -> bool:
+    def delete_media_file(self, public_id) -> bool:
+        """
+        Delete MediaFile Object
+        Args:
+            public_id(int): init media_file
+        Returns:
+            bool: If deleted return true else false
+        """
         try:
-            file_list = self.fs_bucket.find({"filename": file_name}, no_cursor_timeout=True)
-            for grid_out in file_list:
-                self.fs_bucket.delete(grid_out['_id'])
+            file_id = self.fs_bucket.get_last_version(**{'public_id': public_id})._id
+            self.fs_bucket.delete(file_id)
             return True
         except Exception:
-            raise MediaFileManagerDeleteError(f'Could not delete job with ID: {file_name}')
+            raise MediaFileManagerDeleteError(f'Could not delete file with ID: {file_id}')
+
+    def exist_media_file(self, file_name: str, filter_metadata) -> bool:
+        """
+        Check is MediaFile Object exist
+        Args:
+            file_name(str): init media_file
+            filter_metadata: Metadata as filter
+        Returns:
+            bool: If exist return true else false
+        """
+        return self.fs_bucket.exists(filename=file_name, **filter_metadata)
 
 
 class MediaFileManagerGetError(ManagerGetError):

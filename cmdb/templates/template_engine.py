@@ -14,36 +14,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import io
-from xhtml2pdf import pisa
+import logging
+import jinja2
 
-class DocumentType:
-    FILE_EXTENSION = None
-    ICON = None
-    LABEL = None
+LOGGER = logging.getLogger(__name__)
 
-    def __init__(self):
-        pass
-
-    def create_doc(self, input_data):
-        pass
-
-
-class PdfDocumentType:
-    FILE_EXTENSION = "pdf"
-    ICON = "file-pdf"
-    LABEL = "PDF"
+class TemplateEngine:
 
     def __init__(self):
         pass
 
-    def create_doc(self, input_data):
-        output = io.BytesIO()
-        # create PDF
-        pdf_creator = pisa.CreatePDF(
-            input_data,
-            dest=output,
-            encoding='utf8'
-        )
-        output.seek(0)
-        return output
+    def render_template_string(self, template_string, template_data):
+        environment = jinja2.Environment(undefined=jinja2.ChainableUndefined)
+        template = environment.from_string(template_string)
+        return template.render(template_data)

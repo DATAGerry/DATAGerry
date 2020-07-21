@@ -11,7 +11,9 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 export class ModalComponent {
 
   @Input() title = 'Information';
+  @Input() modalIcon = 'trash';
   @Input() modalMessage = 'Are you sure, you want to delete all selected objects?';
+  @Input() subModalMessage = '';
   @Input() buttonDeny = 'Cancel';
   @Input() buttonAccept = 'Accept';
 

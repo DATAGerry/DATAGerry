@@ -36,8 +36,9 @@ export class ObjectDocsComponent implements OnChanges {
   constructor(private docapiService: DocapiService, private fileSaverService: FileSaverService) { }
 
   ngOnChanges(changes: SimpleChanges) {
-    if(changes.renderResult && this.renderResult) {
-        this.docapiService.getObjectDocTemplateList(this.renderResult.type_information.type_id).subscribe((docs: DocTemplate[]) => {
+    if (changes.renderResult && this.renderResult) {
+        this.docapiService.getObjectDocTemplateList(this.renderResult.type_information.type_id)
+          .subscribe((docs: DocTemplate[]) => {
             this.docs = docs;
         });
     }
@@ -50,7 +51,7 @@ export class ObjectDocsComponent implements OnChanges {
   }
 
   public saveFile(data: any, filename: string) {
-    this.fileSaverService.save(data.body, filename)
+    this.fileSaverService.save(data.body, filename);
   }
 
 }

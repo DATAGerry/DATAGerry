@@ -43,7 +43,7 @@ export class DocapiService<T = DocTemplate> implements ApiService {
   constructor(private api: ApiCallService, private backend: HttpBackend, private authService: AuthService) {
   }
 
-  getDocTemplateList() : Observable<T[]> {
+  getDocTemplateList(): Observable<T[]> {
     return this.api.callGet<T>(`${ this.servicePrefix }/`).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {

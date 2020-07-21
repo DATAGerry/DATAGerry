@@ -16,18 +16,8 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { CmdbDao } from '../../framework/models/cmdb-dao';
-
-export class FileMetadata implements CmdbDao {
-
-  // a set of data that describes and gives information about other data.
-  // tslint:disable:variable-name
-  public readonly public_id: number;
-  public reference: number;
-  public reference_type: string;
-  public mime_type: string;
-  public folder: boolean;
-  public author_id: number;
-  public permission: any;
-  // tslint:enable:variable-name
+export class TemplateHelpdataElement {
+  public label: string;
+  public subdata: any;
+  public templatedata: string;
 }

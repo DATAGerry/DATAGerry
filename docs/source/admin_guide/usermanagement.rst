@@ -48,6 +48,7 @@ The following rights are necessary to use the frontend::
     base.framework.log.view
     base.user-management.user.view
     base.user-management.group.view
+    base.docapi.template.view
 
 
 

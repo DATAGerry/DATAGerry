@@ -18,7 +18,10 @@ import logging
 
 from flask import abort, request, current_app, Response
 from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError
-from cmdb.interface.route_utils import make_response, RootBlueprint
+from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user, login_required, right_required
+from cmdb.user_management import User
+from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import get_element_from_data_request, \
+    get_file_in_request, generate_metadata_filter
 
 
 with current_app.app_context():
@@ -37,19 +40,16 @@ media_file_blueprint = RootBlueprint('media_file_blueprint', __name__, url_prefi
 
 
 @media_file_blueprint.route('/', methods=['GET'])
-# @login_required
-# @insert_request_user
-# @right_required('base.framework.object.view')
+@login_required
 def get_object_list():
     """
     get all objects in database
-    Args:
-        request_user: auto inserted user who made the request.
+
     Returns:
         list of media_files
     """
     try:
-        media_file_list = media_file_manager.get_all_media_files()
+        media_file_list = media_file_manager.get_all_media_files(generate_metadata_filter('metadata', request))
     except ObjectManagerGetError as err:
         LOGGER.error(err.message)
         return abort(404)
@@ -60,9 +60,37 @@ def get_object_list():
 
 
 @media_file_blueprint.route('/', methods=['POST'])
-def add_new_file():
+@login_required
+@insert_request_user
+def add_new_file(request_user: User):
+    """ This method saves a file to the specified section of the document for storing workflow data.
+        Any existing value that matches filename and the metadata is deleted. Before saving a value.
+        GridFS document under the specified key is deleted.
+
+        File:
+            File is stored under 'request.files["file"]'
+
+        Metadata:
+            Metadata are stored under 'request.form["Metadata"]'
+
+        Args:
+            request_user (User): the instance of the started user
+        Returns:
+            int: ObjectId of GridFS File.
+        """
     try:
-        ack = media_file_manager.insert_media_file(request.files['file'], request.files['metadata'])
+        file = get_file_in_request('file')
+        filter_metadata = generate_metadata_filter('metadata', request)
+
+        # Check if file exists
+        is_exist_file = media_file_manager.exist_media_file(file.filename, filter_metadata)
+        if is_exist_file:
+            grid_fs_file = media_file_manager.get_media_file(file.filename, filter_metadata)
+            media_file_manager.delete_media_file(grid_fs_file._file['public_id'])
+
+        metadata = get_element_from_data_request('metadata', request)
+        metadata['author_id'] = request_user.public_id
+        ack = media_file_manager.insert_media_file(data=file, metadata=metadata)
     except ObjectInsertError:
         return abort(500)
 
@@ -71,9 +99,11 @@ def add_new_file():
 
 
 @media_file_blueprint.route('/download/<path:filename>', methods=['POST'])
+@login_required
 def download_media_file(filename: str):
     try:
-        grid_fs_file = media_file_manager.get_media_file(filename)
+        filter_metadata = generate_metadata_filter('metadata', request)
+        grid_fs_file = media_file_manager.get_media_file(filename, filter_metadata).read()
     except ObjectInsertError:
         return abort(500)
 
@@ -87,12 +117,27 @@ def download_media_file(filename: str):
     )
 
 
-@media_file_blueprint.route('/<path:filename>', methods=['DELETE'])
-def delete_media_file(filename: str):
+@media_file_blueprint.route('<int:public_id>', methods=['DELETE'])
+@login_required
+def delete_media_file(public_id: int):
     try:
-        ack = media_file_manager.delete_media_file(file_name=filename)
+        ack = media_file_manager.delete_media_file(public_id)
     except ObjectDeleteError:
         return abort(500)
 
     resp = make_response(ack)
     return resp
+
+# ToDo:  New concept for deletion
+# @media_file_blueprint.route('/<path:filename>', methods=['DELETE'])
+# @login_required
+# @insert_request_user
+# def delete_media_file(filename: str, request_user: User):
+#     try:
+#         filter_metadata = generate_metadata_filter('metadata', request)
+#         ack = media_file_manager.delete_media_file(file_name=filename, filter_metadata=filter_metadata)
+#     except ObjectDeleteError:
+#         return abort(500)
+#
+#     resp = make_response(ack)
+#     return resp

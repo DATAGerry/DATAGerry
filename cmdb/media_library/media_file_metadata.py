@@ -18,11 +18,13 @@ from bson import objectid
 
 
 class FileMetadata:
-    def __init__(self, reference, reference_type, mime_type, author_id, permissions):
+    def __init__(self, author_id, permissions=None, reference=None, reference_type=None,
+                 folder: bool = False, mime_type="application/json"):
         self.reference = reference
         self.reference_type = reference_type
         self.mime_type = mime_type
         self.author_id = author_id
+        self.folder = folder
         self.permission = permissions
 
     def get_ref_to(self) -> objectid:

@@ -40,7 +40,7 @@ class DocapiTemplate(TemplateManagementBase):
     ]
 
     def __init__(self, name, label, description, active, author_id,
-                template_data, template_type, template_parameters, **kwargs):
+                 template_data, template_style, template_type, template_parameters, **kwargs):
         """
         Args:
             name: name of this template
@@ -48,6 +48,7 @@ class DocapiTemplate(TemplateManagementBase):
             active: is template active
             author_id: author of this template
             template_data: the content of this template (e.g. HTML string or reference to an HTML file)
+            template_style: style of template
             template_type: type of docapi template
             template_parameters: parameter of this template depending on the type
             **kwargs: optional params
@@ -58,6 +59,7 @@ class DocapiTemplate(TemplateManagementBase):
         self.active = active
         self.author_id = author_id
         self.template_data = template_data
+        self.template_style = template_style
         self.template_type = template_type or DocapiTemplateType.OBJECT.name
         self.template_parameters = template_parameters
         super(DocapiTemplate, self).__init__(**kwargs)
@@ -136,6 +138,14 @@ class DocapiTemplate(TemplateManagementBase):
             str:
         """
         return self.template_data
+
+    def get_template_style(self):
+        """
+        Get style of this template
+        Returns:
+            str:
+        """
+        return self.template_style
 
     def get_template_type(self):
         """

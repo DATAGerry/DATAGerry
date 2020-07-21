@@ -24,6 +24,7 @@ import { DocTemplate } from '../../../framework/models/cmdb-doctemplate';
 import { DocapiService } from '../../../docapi/docapi.service';
 import { DocapiSettingsBuilderSettingsStepComponent } from './docapi-settings-builder-settings-step/docapi-settings-builder-settings-step.component';
 import { DocapiSettingsBuilderTypeStepComponent } from './docapi-settings-builder-type-step/docapi-settings-builder-type-step.component';
+import { DocapiSettingsBuilderStyleStepComponent } from './docapi-settings-builder-style-step/docapi-settings-builder-style-step.component';
 import { DocapiSettingsBuilderContentStepComponent } from './docapi-settings-builder-content-step/docapi-settings-builder-content-step.component';
 
 @Component({
@@ -36,16 +37,22 @@ export class DocapiSettingsBuilderComponent implements OnInit {
   @Input() public mode: number = CmdbMode.Create;
   @Input() public docInstance?: DocTemplate;
 
-  @ViewChild(DocapiSettingsBuilderSettingsStepComponent, {static: true})
+  @ViewChild(DocapiSettingsBuilderSettingsStepComponent, { static: true })
   public settingsStep: DocapiSettingsBuilderSettingsStepComponent;
 
-  @ViewChild(DocapiSettingsBuilderTypeStepComponent, {static: true})
+  @ViewChild(DocapiSettingsBuilderTypeStepComponent, { static: true })
   public typeStep: DocapiSettingsBuilderTypeStepComponent;
+  public typeStepFormValid: boolean = false;
+  public typeParam: any = undefined;
 
-  @ViewChild(DocapiSettingsBuilderContentStepComponent, {static: true})
+  @ViewChild(DocapiSettingsBuilderContentStepComponent, { static: true })
   public contentStep: DocapiSettingsBuilderContentStepComponent;
 
-  constructor(private docapiService: DocapiService, private router: Router, private toast: ToastService) { }
+  @ViewChild(DocapiSettingsBuilderStyleStepComponent, { static: true })
+  public styleStep: DocapiSettingsBuilderStyleStepComponent;
+
+  constructor(private docapiService: DocapiService, private router: Router, private toast: ToastService) {
+  }
 
   ngOnInit() {
   }
@@ -61,24 +68,25 @@ export class DocapiSettingsBuilderComponent implements OnInit {
     this.docInstance.template_type = this.typeStep.typeForm.get('template_type').value;
     this.docInstance.template_parameters = this.typeStep.typeParamComponent.typeParamForm.value;
     this.docInstance.template_data = this.contentStep.contentForm.get('template_data').value;
+    this.docInstance.template_style = this.styleStep.styleForm.get('template_style').value;
 
     if (this.mode === CmdbMode.Create) {
       let newId = null;
       this.docapiService.postDocTemplate(this.docInstance).subscribe(publicIdResp => {
-        newId = publicIdResp;
-        this.router.navigate(['settings/docapi/'], {queryParams: {docAddSuccess: newId}});
+          newId = publicIdResp;
+          this.router.navigate(['settings/docapi/'], { queryParams: { docAddSuccess: newId } });
         },
         (error) => {
           console.error(error);
         });
     } else if (this.mode === CmdbMode.Edit) {
       this.docapiService.putDocTemplate(this.docInstance).subscribe((updateResp: DocTemplate) => {
-        this.toast.show(`DocAPI document successfully edited: ${updateResp.public_id}`);
-        this.router.navigate(['/settings/docapi/'], {queryParams: {docEditSuccess: updateResp.public_id}});
-      },
-      (error) => {
-        console.error(error);
-      });
+          this.toast.show(`DocAPI document successfully edited: ${ updateResp.public_id }`);
+          this.router.navigate(['/settings/docapi/'], { queryParams: { docEditSuccess: updateResp.public_id } });
+        },
+        (error) => {
+          console.error(error);
+        });
     }
 
   }

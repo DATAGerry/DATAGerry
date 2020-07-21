@@ -9,20 +9,25 @@
         <input hidden type="file" #fileInput (change)="uploadFile($event.target.files)">
       </div>
 
-      <div class="container border p-2 mb-2" *ngFor="let attachment of attachments">
-        <div class="row align-items-center">
+      <div class="container-fluid border p-2 mb-2" *ngFor="let attachment of attachments">
+        <div class="row align-items-center flex-nowrap">
           <div class="col-auto">
             <i class="far fa-file-alt"></i>
           </div>
-          <div class="col pl-0">
+          <div class="col-7 pl-0">
             <a (click)="downloadFile(attachment.name)" class="text-muted font-weight-bold">{{attachment.name}}</a>
             <p class="mb-0">{{attachment.size | fileSize}}</p>
           </div>
-          <div class="col-auto">
+          <div class="col-auto" [hidden]="attachment.inProcess">
             <!-- Button -->
-            <a href="javascript:void(0);" class="btn btn-link btn-lg text-muted align-items-end">
+            <a (click)="deleteFile(attachment.public_id)" class="btn btn-link btn-sm text-muted align-items-end">
               <i class="far fa-trash-alt"></i>
             </a>
+          </div>
+        </div>
+        <div class="progress" [hidden]="!attachment.inProcess">
+          <div class="progress-bar progress-bar-striped progress-bar-animated"
+               role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width:100%">
           </div>
         </div>
       </div>

@@ -19,17 +19,24 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiCallService, ApiService, httpFileOptions } from '../../services/api-call.service';
-import { HttpResponse } from '@angular/common/http';
+import {ApiCallService, ApiService, httpFileOptions, resp} from '../../services/api-call.service';
+import {HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
 import { ValidatorService } from '../../services/validator.service';
 import { FileMetadata } from '../model/metadata';
 
+export const httpObserveOptions = {
+  headers: new HttpHeaders({
+    'Content-Type': 'application/json'
+  }),
+  observe: 'response'
+};
 
 const httpOptions = {
   observe: 'response',
   responseType: 'blob'
 };
 
+export const PARAMETER = 'params';
 
 @Injectable({
   providedIn: 'root'
@@ -38,9 +45,23 @@ const httpOptions = {
 export class FileService<T = any> implements ApiService {
   public servicePrefix: string = 'media_file';
 
-  constructor(private api: ApiCallService) {
+  constructor(private api: ApiCallService, private http: HttpClient) {
   }
 
+  /**
+   * Get all files as a list
+   */
+  public getAllFilesList(params: any): Observable<T[]> {
+    httpObserveOptions[PARAMETER] = {metadata : JSON.stringify(params)};
+    return this.api.callGet<T[]>(this.servicePrefix + '/', this.http, httpObserveOptions).pipe(
+      map((apiResponse: HttpResponse<T[]>) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
+  }
 
   /**
    * Add a new file into the database (GridFS)
@@ -65,9 +86,12 @@ export class FileService<T = any> implements ApiService {
   /**
    * Download a file by name
    * @param filename name of the file
+   * @param metadata raw instance
    */
-  public getFileByName(filename: string) {
-    return this.api.callPostRoute(this.servicePrefix + '/download/' + filename, null, httpOptions);
+  public getFileByName(filename: string, metadata) {
+    const formData = new FormData();
+    formData.append('metadata', JSON.stringify(metadata));
+    return this.api.callPostRoute(this.servicePrefix + '/download/' + filename, formData, httpOptions);
   }
 
   /**
@@ -75,7 +99,7 @@ export class FileService<T = any> implements ApiService {
    * Works with name
    * @param regex parameter
    */
-  public getFilesListByName(regex: string): Observable<T[]> {
+  public getFilesListByRegex(regex: string): Observable<T[]> {
     regex = ValidatorService.validateRegex(regex).trim();
     return this.api.callGet<T[]>(this.servicePrefix + '/download/' + encodeURIComponent(regex)).pipe(
       map((apiResponse: HttpResponse<T[]>) => {
@@ -90,10 +114,10 @@ export class FileService<T = any> implements ApiService {
 
   /**
    * Delete a existing files
-   * @param filename the category id
+   * @param fileID the file id
    */
-  public deleteFile(filename: string): Observable<number> {
-    return this.api.callDelete<number>(this.servicePrefix + '/' + filename).pipe(
+  public deleteFile(fileID: number): Observable<number> {
+    return this.api.callDelete<number>(this.servicePrefix + '/' + fileID).pipe(
       map((apiResponse: HttpResponse<number>) => {
         return apiResponse.body;
       })

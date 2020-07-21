@@ -49,13 +49,13 @@ class DocapiTemplateManager(CmdbManagerBase):
         return DocapiTemplate(**result)
 
     def get_all_templates(self):
-        tpl_list = []
-        for tpl in self.dbm.find_all(collection=DocapiTemplate.COLLECTION):
+        template_list = []
+        for template in self.dbm.find_all(collection=DocapiTemplate.COLLECTION):
             try:
-                tpl_list.append(DocapiTemplate(**tpl))
+                template_list.append(DocapiTemplate(**template))
             except CMDBError:
                 continue
-        return tpl_list
+        return template_list
 
     def get_templates_by(self, **requirements):
         try:
@@ -73,7 +73,7 @@ class DocapiTemplateManager(CmdbManagerBase):
             if len(templates) > 0:
                 return DocapiTemplate(**templates[0])
             else:
-                raise DocapiTempateManagerGetError(err='More than 1 type matches this requirement')
+                raise DocapiTemplateManagerGetError(err='More than 1 type matches this requirement')
         except (CMDBError, Exception) as e:
             raise DocapiTemplateManagerGetError(err=e)
 
@@ -167,4 +167,4 @@ class DocapiTemplateManagerUpdateError(ManagerUpdateError):
 class DocapiTemplateManagerDeleteError(ManagerDeleteError):
 
     def __init__(self, err):
-        super(DocapiTemplatManagerDeleteError, self).__init__(err)
+        super(DocapiTemplateManagerDeleteError, self).__init__(err)

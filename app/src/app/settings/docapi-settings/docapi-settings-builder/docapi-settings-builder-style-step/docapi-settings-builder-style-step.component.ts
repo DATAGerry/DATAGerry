@@ -16,33 +16,32 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
+import { CmdbMode } from '../../../../framework/modes.enum';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
-import { CmdbMode } from '../../../../../framework/modes.enum';
 
 @Component({
-  selector: 'cmdb-docapi-settings-builder-type-step-base',
-  templateUrl: './docapi-settings-builder-type-step-base.component.html',
-  styleUrls: ['./docapi-settings-builder-type-step-base.component.scss']
+  selector: 'cmdb-docapi-settings-builder-style-step',
+  templateUrl: './docapi-settings-builder-style-step.component.html',
+  styleUrls: ['./docapi-settings-builder-style-step.component.scss']
 })
-export class DocapiSettingsBuilderTypeStepBaseComponent implements OnInit {
+export class DocapiSettingsBuilderStyleStepComponent implements OnInit {
 
   @Input()
   set preData(data: any) {
-    if (data) {
-      this.typeParamForm.patchValue(data);
+    if (data !== undefined) {
+      this.styleForm.patchValue(data);
     }
   }
 
   @Input() public mode: CmdbMode;
-
-  @Output() public formValidationEmitter: EventEmitter<boolean>;
-  public formValid: boolean = false;
-  public typeParamForm: FormGroup;
   public modes = CmdbMode;
+  public styleForm: FormGroup;
 
-  constructor() {
-    this.formValidationEmitter = new EventEmitter<boolean>();
+  constructor() { 
+    this.styleForm = new FormGroup({
+      template_style: new FormControl('')
+    });
   }
 
   ngOnInit() {

@@ -22,7 +22,7 @@ idna==2.6
 imagesize==1.1.0
 itsdangerous==1.1.0
 jdcal==1.4.1
-Jinja2==2.10
+Jinja2==2.11
 jsonpickle==1.1
 jwcrypto==0.6.0
 ldap3==2.6.1

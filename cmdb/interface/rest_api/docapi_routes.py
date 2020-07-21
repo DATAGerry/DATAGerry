@@ -45,7 +45,7 @@ docapi_blueprint = RootBlueprint('docapi', __name__, url_prefix='/docapi')
 @docapi_blueprint.route('/template/', methods=['GET'])
 @login_required
 @insert_request_user
-@right_required('base.framework.object.view')
+@right_required('base.docapi.template.view')
 def get_template_list(request_user: User):
     """
     get all objects in database
@@ -67,7 +67,7 @@ def get_template_list(request_user: User):
 @docapi_blueprint.route('/template/by/<string:searchfilter>', methods=['GET'])
 @login_required
 @insert_request_user
-@right_required('base.framework.object.view')
+@right_required('base.docapi.template.view')
 def get_template_list_filtered(searchfilter: str, request_user: User):
     try:
         filterdict = json.loads(searchfilter)
@@ -81,7 +81,7 @@ def get_template_list_filtered(searchfilter: str, request_user: User):
 @docapi_blueprint.route('/template/<int:public_id>', methods=['GET'])
 @login_required
 @insert_request_user
-@right_required('base.framework.object.view')
+@right_required('base.docapi.template.view')
 def get_template(public_id, request_user: User):
     """
         get template in database
@@ -101,7 +101,7 @@ def get_template(public_id, request_user: User):
 @docapi_blueprint.route('/template/<string:name>', methods=['GET'])
 @login_required
 @insert_request_user
-@right_required('base.framework.object.view')
+@right_required('base.docapi.template.view')
 def get_template_by_name(name: str, request_user: User):
     try:
         tpl = docapi_tpl_manager.get_template_by_name(name=name)
@@ -114,7 +114,7 @@ def get_template_by_name(name: str, request_user: User):
 @docapi_blueprint.route('/template/', methods=['POST'])
 @login_required
 @insert_request_user
-@right_required('base.framework.object.add')
+@right_required('base.docapi.template.add')
 def add_template(request_user: User):
     from bson import json_util
     add_data_dump = json.dumps(request.json)
@@ -143,7 +143,7 @@ def add_template(request_user: User):
 @docapi_blueprint.route('/template/', methods=['PUT'])
 @login_required
 @insert_request_user
-@right_required('base.framework.object.edit')
+@right_required('base.docapi.template.edit')
 def update_template(request_user: User):
     from bson import json_util
     add_data_dump = json.dumps(request.json)
@@ -169,7 +169,7 @@ def update_template(request_user: User):
 @docapi_blueprint.route('/template/<int:public_id>', methods=['DELETE'])
 @login_required
 @insert_request_user
-@right_required('base.framework.object.delete')
+@right_required('base.docapi.template.delete')
 def delete_template(public_id: int, request_user: User):
     try:
         ack = docapi_tpl_manager.delete_template(public_id=public_id, request_user=request_user)
@@ -185,7 +185,7 @@ def delete_template(public_id: int, request_user: User):
 @docapi_blueprint.route('/template/<int:public_id>/render/<int:object_id>', methods=['GET'])
 @login_required
 @insert_request_user
-@right_required('base.framework.object.delete')
+@right_required('base.framework.object.view')
 def render_object_template(public_id: int, object_id: int, request_user: User):
     docapi_manager = DocApiManager(docapi_tpl_manager, object_manager)
     output = docapi_manager.render_object_template(public_id, object_id)

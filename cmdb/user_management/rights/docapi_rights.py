@@ -14,36 +14,21 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import io
-from xhtml2pdf import pisa
 
-class DocumentType:
-    FILE_EXTENSION = None
-    ICON = None
-    LABEL = None
-
-    def __init__(self):
-        pass
-
-    def create_doc(self, input_data):
-        pass
+from cmdb.user_management.user_right import BaseRight
 
 
-class PdfDocumentType:
-    FILE_EXTENSION = "pdf"
-    ICON = "file-pdf"
-    LABEL = "PDF"
+class DocapiRight(BaseRight):
+    MIN_LEVEL = BaseRight.PROTECTED
+    PREFIX = '{}.{}'.format(BaseRight.PREFIX, 'docapi')
 
-    def __init__(self):
-        pass
+    def __init__(self, name: str, level: int = 50, description: str = None):
+        super(DocapiRight, self).__init__(level, name, description=description)
 
-    def create_doc(self, input_data):
-        output = io.BytesIO()
-        # create PDF
-        pdf_creator = pisa.CreatePDF(
-            input_data,
-            dest=output,
-            encoding='utf8'
-        )
-        output.seek(0)
-        return output
+
+class DocapiTemplateRight(DocapiRight):
+    MIN_LEVEL = BaseRight.PROTECTED
+    PREFIX = '{}.{}'.format(DocapiRight.PREFIX, 'template')
+
+    def __init__(self, name: str, level: int = 50, description: str = None):
+        super(DocapiTemplateRight, self).__init__(name, level, description=description)

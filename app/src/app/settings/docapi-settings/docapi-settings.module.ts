@@ -25,7 +25,7 @@ import { ArchwizardModule } from 'angular-archwizard';
 import { DataTablesModule } from 'angular-datatables';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { LayoutModule } from '../../layout/layout.module';
-import { AuthModule } from "../../auth/auth.module";
+import { AuthModule } from '../../auth/auth.module';
 import { DocapiSettingsRoutingModule } from './docapi-settings-routing.module';
 import { DocapiSettingsListComponent } from './docapi-settings-list/docapi-settings-list.component';
 import { DocapiSettingsBuilderComponent } from './docapi-settings-builder/docapi-settings-builder.component';
@@ -37,9 +37,10 @@ import { DocapiSettingsBuilderTypeStepComponent } from './docapi-settings-builde
 import { DocapiSettingsBuilderTypeStepObjectComponent } from './docapi-settings-builder/docapi-settings-builder-type-step/docapi-settings-builder-type-step-object/docapi-settings-builder-type-step-object.component';
 import { DocapiSettingsBuilderTypeStepObjectlistComponent } from './docapi-settings-builder/docapi-settings-builder-type-step/docapi-settings-builder-type-step-objectlist/docapi-settings-builder-type-step-objectlist.component';
 import { DocapiSettingsBuilderTypeStepBaseComponent } from './docapi-settings-builder/docapi-settings-builder-type-step/docapi-settings-builder-type-step-base/docapi-settings-builder-type-step-base.component';
+import { DocapiSettingsBuilderStyleStepComponent } from './docapi-settings-builder/docapi-settings-builder-style-step/docapi-settings-builder-style-step.component';
 
 @NgModule({
-  declarations: [DocapiSettingsListComponent, DocapiSettingsBuilderComponent, DocapiSettingsAddComponent, DocapiSettingsBuilderSettingsStepComponent, DocapiSettingsBuilderContentStepComponent, DocapiSettingsEditComponent, DocapiSettingsBuilderTypeStepComponent, DocapiSettingsBuilderTypeStepObjectComponent, DocapiSettingsBuilderTypeStepObjectlistComponent, DocapiSettingsBuilderTypeStepBaseComponent],
+  declarations: [DocapiSettingsListComponent, DocapiSettingsBuilderComponent, DocapiSettingsAddComponent, DocapiSettingsBuilderSettingsStepComponent, DocapiSettingsBuilderContentStepComponent, DocapiSettingsEditComponent, DocapiSettingsBuilderTypeStepComponent, DocapiSettingsBuilderTypeStepObjectComponent, DocapiSettingsBuilderTypeStepObjectlistComponent, DocapiSettingsBuilderTypeStepBaseComponent, DocapiSettingsBuilderStyleStepComponent],
   imports: [
     CommonModule,
     EditorModule,
@@ -54,4 +55,5 @@ import { DocapiSettingsBuilderTypeStepBaseComponent } from './docapi-settings-bu
     DocapiSettingsRoutingModule
   ]
 })
-export class DocapiSettingsModule { }
+export class DocapiSettingsModule {
+}
