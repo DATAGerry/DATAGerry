@@ -12,15 +12,15 @@
       <div class="container-fluid border p-2 mb-2" *ngFor="let attachment of attachments">
         <div class="row align-items-center flex-nowrap">
           <div class="col-auto">
-            <i class="far fa-file-alt"></i>
+            <fa-icon class="far" [icon]="['far', 'file-alt']"></fa-icon>
           </div>
-          <div class="col-7 pl-0">
-            <a (click)="downloadFile(attachment.name)" class="text-muted font-weight-bold">{{attachment.name}}</a>
-            <p class="mb-0">{{attachment.size | fileSize}}</p>
+          <div class="col-8 px-0">
+            <a (click)="downloadFile(attachment.name)">{{attachment.name}}</a>
+            <p class="mb-0 text-muted">{{attachment.size | fileSize}}</p>
           </div>
-          <div class="col-auto" [hidden]="attachment.inProcess">
+          <div class="col-auto px-0" [hidden]="attachment.inProcess">
             <!-- Button -->
-            <a (click)="deleteFile(attachment.public_id)" class="btn btn-link btn-sm text-muted align-items-end">
+            <a (click)="deleteFile(attachment.public_id)" class="btn btn-link btn-sm align-items-end">
               <i class="far fa-trash-alt"></i>
             </a>
           </div>
