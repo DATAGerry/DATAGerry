@@ -63,12 +63,12 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
       'advlist autolink lists link image charmap',
       'searchreplace visualblocks code',
       'insertdatetime media table paste',
-      'noneditable, pagebreak'
+      'noneditable, pagebreak, hr'
     ],
     toolbar1:
-      'undo redo | formatselect | bold italic backcolor removeformat | \
+      'undo redo | formatselect | bold italic underline forecolor backcolor removeformat | \
       alignleft aligncenter alignright alignjustify | \
-      bullist numlist outdent indent | image table pagebreak | code ',
+      bullist numlist outdent indent | image table hr pagebreak | code ',
     toolbar2: 'cmdbdata',
     noneditable_noneditable_class: 'mceNonEditable',
     paste_data_images: true,
