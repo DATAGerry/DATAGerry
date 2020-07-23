@@ -17,3 +17,4 @@ features to Datagerry,apply patches or develop plugins.
     processmanagement
     logging
     eventhandling
+    rest
