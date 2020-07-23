@@ -1,3 +1,0 @@
-Route, Description, Options, Example
-``/``, Insert specific write of data, object data, http://localhost/<module>/
-``/many/``, Insert many objects, - , http://localhost/<module>/many/

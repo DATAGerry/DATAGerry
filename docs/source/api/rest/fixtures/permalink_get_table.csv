@@ -1,3 +1,0 @@
-Route, Description, Options, Example
-``/``, Default route should give all data, - , http://localhost/<module>/
-``/<int:public_id>``, Specific object from this module, public id: generic public id identifier , http://localhost/<module>/1
