@@ -6,9 +6,15 @@
   padding-left: 20px;
 }
 
+.admonition-todo {
+  background: $white;
+  border-left: 3px solid theme-color('black');
+  padding-left: 20px;
+}
+
 .warning {
   background: $gray-200;
-  border-left: 3px solid theme-color('danger');
+  border-left: 3px solid theme-color('primary');
   padding-left: 20px;
 }
 
