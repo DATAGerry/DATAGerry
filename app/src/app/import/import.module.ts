@@ -22,7 +22,6 @@ import { CommonModule } from '@angular/common';
 import { ImportRoutingModule } from './import-routing.module';
 import { ImportComponent } from './import.component';
 import { LayoutModule } from '../layout/layout.module';
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { ImportObjectsComponent } from './import-objects/import-objects.component';
 import { ArchwizardModule } from 'angular-archwizard';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
@@ -76,7 +75,6 @@ import { DataTablesModule } from 'angular-datatables';
     CommonModule,
     LayoutModule,
     ImportRoutingModule,
-    SweetAlert2Module,
     DndModule,
     ArchwizardModule,
     ReactiveFormsModule,
