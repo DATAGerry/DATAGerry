@@ -22,7 +22,6 @@ import { CommonModule } from '@angular/common';
 import { SettingsRoutingModule } from './settings-routing.module';
 import { LayoutModule } from '../layout/layout.module';
 import { SettingsComponent } from './settings.component';
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import {AuthModule} from "../auth/auth.module";
 
 @NgModule({
@@ -33,7 +32,6 @@ import {AuthModule} from "../auth/auth.module";
         CommonModule,
         LayoutModule,
         SettingsRoutingModule,
-        SweetAlert2Module,
         AuthModule
     ]
 })

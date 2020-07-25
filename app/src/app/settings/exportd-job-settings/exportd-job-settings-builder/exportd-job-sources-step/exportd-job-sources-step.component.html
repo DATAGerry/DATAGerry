@@ -95,9 +95,8 @@
                     </table>
                   </ng-container>
                 <ng-template [ngIf]="source.get('type_id').value === null" [ngIfElse]="loadCondition">
-                  <div class="lessons-list">
-                    <button type="button" class="btn btn-outline-secondary"
-                            [swal]="['Oops!', 'Please choose a type first', 'warning']">+ Add Condition</button>
+                  <div class="alert alert-warning">
+                    Please choose a type first!
                   </div>
                 </ng-template>
                 <ng-template #loadCondition>

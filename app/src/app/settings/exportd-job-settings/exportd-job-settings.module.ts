@@ -38,7 +38,6 @@ import { DndModule } from 'ngx-drag-drop';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { DeleteLogJobModalComponent, ExportdJobLogsComponent } from './exportd-job-logs/exportd-job-logs.component';
 import { ExportdJobSettingsCopyComponent } from './exportd-job-settings-copy/exportd-job-settings-copy.component';
 import {AuthModule} from "../../auth/auth.module";
@@ -72,7 +71,6 @@ import {AuthModule} from "../../auth/auth.module";
         NgSelectModule,
         NgbTooltipModule,
         FormsModule,
-        SweetAlert2Module,
         NgbProgressbarModule,
         AuthModule
     ]
