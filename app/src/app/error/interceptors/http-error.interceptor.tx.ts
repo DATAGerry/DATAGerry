@@ -63,7 +63,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
       const statusCode = error.status;
 
       if (this.INFO_ERRORS.indexOf(statusCode) !== -1) {
-        //this.errorService.add(error.error as BackendHttpError);
+        // this.errorService.add(error.error as BackendHttpError);
       } else if (this.REDIRECT_ERRORS.indexOf(statusCode) !== -1) {
         if (statusCode === this.CONNECTION_REFUSED || statusCode === this.INTERNAL_SERVER_ERROR) {
           this.router.navigate(['/connect/']);
