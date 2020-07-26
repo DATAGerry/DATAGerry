@@ -61,7 +61,7 @@ export class FooterComponent implements OnInit, OnDestroy {
     }, 1000);
   }
 
-  public calcRestTime(countDownDate){
+  public calcRestTime(countDownDate) {
     const now = Math.floor(Date.now() / 1000);
     const distance = countDownDate - now;
 
