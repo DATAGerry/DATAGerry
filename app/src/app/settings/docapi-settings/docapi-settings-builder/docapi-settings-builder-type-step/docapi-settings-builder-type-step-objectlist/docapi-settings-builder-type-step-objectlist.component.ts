@@ -20,7 +20,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbType } from '../../../../../framework/models/cmdb-type';
 import { TypeService } from '../../../../../framework/services/type.service';
-import { DocapiSettingsBuilderTypeStepBaseComponent } from '../docapi-settings-builder-type-step-base/docapi-settings-builder-type-step-base.component';
+import {
+  DocapiSettingsBuilderTypeStepBaseComponent
+} from '../docapi-settings-builder-type-step-base/docapi-settings-builder-type-step-base.component';
 
 @Component({
   selector: 'cmdb-docapi-settings-builder-type-step-objectlist',
