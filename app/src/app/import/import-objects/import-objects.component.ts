@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
@@ -21,7 +21,6 @@ import { CmdbType } from '../../framework/models/cmdb-type';
 import { ImporterConfig, ImporterFile, ImportResponse } from './import-object.models';
 import { ImportService } from '../import.service';
 import { Subscription } from 'rxjs';
-import { NgxSpinner } from 'ngx-spinner/lib/ngx-spinner.enum';
 import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
@@ -118,7 +117,8 @@ export class ImportObjectsComponent implements OnInit, AfterViewInit, OnDestroy 
 
   public onParseData() {
     this.spinner.show();
-    this.parseDataSubscription = this.importService.postObjectParser(this.importerFile.file, this.importerFile.fileFormat, this.parserConfig).subscribe(
+    this.parseDataSubscription = this.importService.postObjectParser(
+      this.importerFile.file, this.importerFile.fileFormat, this.parserConfig).subscribe(
       (parsedData) => {
         this.parsedData = parsedData;
       },
