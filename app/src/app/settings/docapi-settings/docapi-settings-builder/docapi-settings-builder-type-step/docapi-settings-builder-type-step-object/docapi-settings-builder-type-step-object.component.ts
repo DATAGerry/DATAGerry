@@ -20,7 +20,9 @@ import { Component, OnInit, Input } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbType } from '../../../../../framework/models/cmdb-type';
 import { TypeService } from '../../../../../framework/services/type.service';
-import { DocapiSettingsBuilderTypeStepBaseComponent } from '../docapi-settings-builder-type-step-base/docapi-settings-builder-type-step-base.component';
+import {
+  DocapiSettingsBuilderTypeStepBaseComponent
+} from '../docapi-settings-builder-type-step-base/docapi-settings-builder-type-step-base.component';
 
 @Component({
   selector: 'cmdb-docapi-settings-builder-type-step-object',
@@ -35,14 +37,14 @@ export class DocapiSettingsBuilderTypeStepObjectComponent extends DocapiSettings
 
   constructor(private typeService: TypeService) {
     super();
-    //setup form
+    // setup form
     this.typeParamForm = new FormGroup({
       type: new FormControl('', Validators.required)
     });
   }
 
   public ngOnInit(): void {
-    //load object type list
+    // load object type list
     this.typeParamForm.valueChanges.subscribe(() => {
       this.formValid = this.typeParamForm.valid;
       this.formValidationEmitter.emit(this.formValid);
