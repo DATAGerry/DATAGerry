@@ -22,7 +22,6 @@ import { ConfigEdit } from '../config.edit';
 import { RenderResult } from '../../../../models/cmdb-render';
 import { ObjectService } from '../../../../services/object.service';
 import { CmdbType } from '../../../../models/cmdb-type';
-import {CmdbObject} from "../../../../models/cmdb-object";
 
 @Component({
   selector: 'cmdb-ref-field-edit',
