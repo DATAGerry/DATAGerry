@@ -17,13 +17,18 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService, HttpInterceptorHandler, httpObserveOptions } from '../../services/api-call.service';
+import {
+  ApiCallService,
+  ApiService,
+  HttpInterceptorHandler,
+  httpObserveOptions
+} from '../../services/api-call.service';
 import { Group } from '../models/group';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { HttpBackend, HttpClient, HttpParams} from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpParams } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
-import { BasicAuthInterceptor } from "../../auth/interceptors/basic-auth.interceptor";
+import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
 
 export const checkGroupExistsValidator = (groupService: GroupService, time: number = 500) => {
   return (control: FormControl) => {
