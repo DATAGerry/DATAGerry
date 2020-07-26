@@ -18,7 +18,7 @@
 
 import { Component, OnInit, Input } from '@angular/core';
 import { CmdbMode } from '../../../../framework/modes.enum';
-import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { DocapiService, checkDocTemplateExistsValidator } from '../../../../docapi/docapi.service';
 
 @Component({
@@ -39,7 +39,7 @@ export class DocapiSettingsBuilderSettingsStepComponent implements OnInit {
   public modes = CmdbMode;
   public settingsForm: FormGroup;
 
-  constructor(private docapiService: DocapiService) { 
+  constructor(private docapiService: DocapiService) {
     this.settingsForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl('', Validators.required),
