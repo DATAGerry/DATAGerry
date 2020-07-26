@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
@@ -29,7 +29,8 @@ import { CollectionAddComponent } from './collection-add/collection-add.componen
 import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
-  declarations: [CollectionComponent, CollectionTemplateListComponent, CollectionTemplateAddComponent, CollectionListComponent, CollectionAddComponent],
+  declarations: [CollectionComponent, CollectionTemplateListComponent, CollectionTemplateAddComponent,
+    CollectionListComponent, CollectionAddComponent],
   imports: [
     CommonModule,
     CollectionRoutingModule,
