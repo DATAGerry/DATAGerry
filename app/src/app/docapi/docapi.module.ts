@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthModule } from "../auth/auth.module";
+import { AuthModule } from '../auth/auth.module';
 
 @NgModule({
   declarations: [],
@@ -9,4 +9,5 @@ import { AuthModule } from "../auth/auth.module";
     AuthModule
   ]
 })
-export class DocapiModule { }
+export class DocapiModule {
+}
