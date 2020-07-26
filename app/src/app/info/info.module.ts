@@ -26,7 +26,7 @@ import { TeamComponent } from './components/team/team.component';
 import { LayoutModule } from '../layout/layout.module';
 import { LicenseComponent } from './components/license/license.component';
 import { InfoComponent } from './info.component';
-import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   declarations: [AboutComponent, ContactComponent, TeamComponent, LicenseComponent, InfoComponent],
@@ -37,4 +37,5 @@ import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
     FontAwesomeModule
   ]
 })
-export class InfoModule { }
+export class InfoModule {
+}
