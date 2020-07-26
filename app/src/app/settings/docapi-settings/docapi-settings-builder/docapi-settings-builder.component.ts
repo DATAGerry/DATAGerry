@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, OnInit, Input, ViewChild } from '@angular/core';
@@ -22,10 +22,14 @@ import { ToastService } from '../../../layout/toast/toast.service';
 import { CmdbMode } from '../../../framework/modes.enum';
 import { DocTemplate } from '../../../framework/models/cmdb-doctemplate';
 import { DocapiService } from '../../../docapi/docapi.service';
-import { DocapiSettingsBuilderSettingsStepComponent } from './docapi-settings-builder-settings-step/docapi-settings-builder-settings-step.component';
+import {
+  DocapiSettingsBuilderSettingsStepComponent
+} from './docapi-settings-builder-settings-step/docapi-settings-builder-settings-step.component';
 import { DocapiSettingsBuilderTypeStepComponent } from './docapi-settings-builder-type-step/docapi-settings-builder-type-step.component';
 import { DocapiSettingsBuilderStyleStepComponent } from './docapi-settings-builder-style-step/docapi-settings-builder-style-step.component';
-import { DocapiSettingsBuilderContentStepComponent } from './docapi-settings-builder-content-step/docapi-settings-builder-content-step.component';
+import {
+  DocapiSettingsBuilderContentStepComponent
+} from './docapi-settings-builder-content-step/docapi-settings-builder-content-step.component';
 
 @Component({
   selector: 'cmdb-docapi-settings-builder',
