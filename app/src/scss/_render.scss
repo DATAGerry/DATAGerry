@@ -8,7 +8,7 @@ label {
 }
 
 #object-form-action {
-  display: none;
+  display: block;
   position: fixed;
   top: calc(#{$navbar-height} - 1px);
   right: 0;
@@ -19,5 +19,45 @@ label {
 @include media-breakpoint-down('md') {
   #object-form-action {
     left: 0;
+  }
+}
+
+// Object-View Navbar
+
+.object-view-navbar {
+
+  background: white;
+
+  .total-title span {
+    display: block;
+  }
+
+  .icon {
+    margin-right: 10px;
+    font-size: 1.25em;
+    color: $success;
+  }
+
+  .dropdown-toggle::after {
+    margin: 0.5em 0 0 0.5em;
+  }
+
+  .justify-object-view-items {
+    justify-content: center !important; ;
+  }
+}
+
+@media (max-width: 768px) {
+  .object-view-navbar{
+    span {
+      font-size: 0.9em;
+    }
+    .justify-object-view-items {
+      justify-content: start !important;
+      padding-top: 0.5em;
+    }
+    .display-3 {
+      font-size: 2rem !important;
+    }
   }
 }

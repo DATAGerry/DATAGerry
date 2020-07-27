@@ -1,16 +1,51 @@
-<div class="row">
-  <div id="object-view" class="col-md-9">
-    <cmdb-object-header [renderResult]="renderResult" (stateChange)="logChange($event)"></cmdb-object-header>
-    <cmdb-object-view-render [mode]="mode" [renderResult]="renderResult"></cmdb-object-view-render>
+
+  <div class="container-fluid">
+    <div class="row object-view-navbar">
+      <div class="col-md-12">
+        <div class="row align-items-center justify-content-center">
+          <!-- Back to list widget-->
+          <div class="col-xl-2 col-md-4 col-6 border-right pt-1">
+            <div routerLink="/framework/object/type/{{renderResult?.type_information?.type_id}}"
+                 style="cursor: pointer"
+                 class="total-title d-flex justify-object-view-items">
+              <div class="icon"><i class="fas fa-reply"></i></div>
+              <div class="name"><strong class="text-uppercase">Back to List</strong>
+                <span>Total {{recordsTotal}}</span>
+              </div>
+            </div>
+          </div>
+          <!-- External links widget-->
+          <div class="col-xl-2 col-md-4 col-6 border-right pt-1">
+            <cmdb-object-externals [renderResult]="renderResult"></cmdb-object-externals>
+          </div>
+          <!-- Attachments widget-->
+          <div class="col-xl-2 col-md-4 col-6 border-right pt-1">
+            <cmdb-object-attachments></cmdb-object-attachments>
+          </div>
+          <!-- Documents widget-->
+          <div class="col-xl-2 col-md-4 col-6 border-right pt-1">
+            <cmdb-object-docs [renderResult]="renderResult"></cmdb-object-docs>
+          </div>
+          <!-- Action widget-->
+          <div class="col-xl-2 col-md-4 col-6 border-right pt-1">
+            <cmdb-object-actions [renderResult]="renderResult"></cmdb-object-actions>
+          </div>
+          <!-- Cube widget-->
+          <div class="col-xl-2 col-md-4 col-6">
+            <div class="d-flex justify-content-center">
+              <cmdb-object-type-label [typeInformation]="renderResult?.type_information"></cmdb-object-type-label>
+            </div>
+          </div>
+        </div>
+        <hr>
+      </div>
+      <div id="object-view" class="col-md-12">
+        <cmdb-object-header [renderResult]="renderResult" (stateChange)="logChange($event)"></cmdb-object-header>
+        <cmdb-object-view-render [mode]="mode" [renderResult]="renderResult"></cmdb-object-view-render>
+      </div>
+      <div id="object-view-footer" class="col-12">
+        <cmdb-object-footer [renderResult]="renderResult"></cmdb-object-footer>
+      </div>
+    </div>
   </div>
-  <div id="object-view-sidebar" class="col-md-3">
-    <cmdb-object-type-label [typeInformation]="renderResult?.type_information"></cmdb-object-type-label>
-    <cmdb-object-externals [renderResult]="renderResult"></cmdb-object-externals>
-    <cmdb-object-actions [renderResult]="renderResult"></cmdb-object-actions>
-    <cmdb-object-docs [renderResult]="renderResult"></cmdb-object-docs>
-    <cmdb-object-attachments></cmdb-object-attachments>
-  </div>
-  <div id="object-view-footer" class="col-12">
-    <cmdb-object-footer [renderResult]="renderResult"></cmdb-object-footer>
-  </div>
-</div>
+

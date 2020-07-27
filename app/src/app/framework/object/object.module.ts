@@ -93,7 +93,7 @@ import { ObjectAttachmentsComponent } from './components/object-attachments/obje
     ObjectBulkChangeEditorComponent,
     ObjectBulkChangePreviewComponent,
     ObjectDocsComponent,
-    ObjectAttachmentsComponent
+    ObjectAttachmentsComponent,
   ],
   exports: [
   ],

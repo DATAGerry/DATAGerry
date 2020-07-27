@@ -1,30 +1,37 @@
-<div id="object-action-list" class="card">
-  <div class="card-body">
-    <div class="list-group list-group-flush">
-      <a routerLink="/framework/object/type/{{renderResult?.type_information?.type_id}}"
-         class="list-group-item py-2 list-group-item-action">
-        <fa-icon icon="list"></fa-icon> List objects
-      </a>
-      <a *permissionLink="'base.framework.object.add'"
-         routerLink="/framework/object/add/{{renderResult?.type_information?.type_id}}"
-         class="list-group-item py-2 list-group-item-action list-group-item-action">
-        <fa-icon [icon]="['fas', 'plus']"></fa-icon> Add new {{renderResult?.type_information?.type_label}} object
-      </a>
-      <a *permissionLink="'base.framework.object.edit'"
-         routerLink="/framework/object/copy/{{renderResult?.object_information?.object_id}}"
-         class="list-group-item py-2 list-group-item-action list-group-item-action">
-        <fa-icon [icon]="['far', 'clone']"></fa-icon> Copy object
-      </a>
-      <a *permissionLink="'base.framework.object.edit'"
-         routerLink="/framework/object/edit/{{renderResult?.object_information?.object_id}}"
-         class="list-group-item py-2 list-group-item-action list-group-item-action">
-        <fa-icon [icon]="['far', 'edit']"></fa-icon> Edit object
-      </a>
-      <a *permissionLink="'base.framework.object.delete'"
-         class="list-group-item py-2 ist-group-item-action list-group-item-action"
-         (click)="deleteObject(renderResult?.object_information?.object_id)">
-        <fa-icon [icon]="['far', 'trash-alt']"></fa-icon> Delete object
-      </a>
+
+<div class="dropdown">
+  <div class="dropdown-toggle total-title d-flex justify-object-view-items"
+       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <div class="icon"><i class="fa fa-cogs"></i></div>
+    <div>
+      <strong class="text-uppercase">Actions</strong>
+      <span>{{renderResult?.type_information?.type_label}}</span>
     </div>
+  </div>
+  <div class="dropdown-menu dropdown-menu-lg-right w-100">
+    <a *permissionLink="'base.framework.object.add'"
+       routerLink="/framework/object/add/{{renderResult?.type_information?.type_id}}"
+       class="dropdown-item list-group-item-action">
+      <span class="mr-1"><i class="fas fa-plus"></i></span>
+      <span>Create Object</span>
+    </a>
+    <a *permissionLink="'base.framework.object.edit'"
+       routerLink="/framework/object/copy/{{renderResult?.object_information?.object_id}}"
+       class="dropdown-item list-group-item-action">
+        <span class="mr-1"><i class="fas fa-clone"></i></span>
+        <span>Copy Object</span>
+    </a>
+    <a *permissionLink="'base.framework.object.edit'"
+       routerLink="/framework/object/edit/{{renderResult?.object_information?.object_id}}"
+       class="dropdown-item list-group-item-action">
+      <span class="mr-1"><i class="fas fa-edit"></i></span>
+      <span>Edit Object</span>
+    </a>
+    <a *permissionLink="'base.framework.object.delete'"
+       class="dropdown-item list-group-item-action"
+       (click)="deleteObject(renderResult?.object_information?.object_id)">
+      <span class="mr-1"><i class="fas fa-trash-alt"></i></span>
+      <span>Delete Object</span>
+    </a>
   </div>
 </div>

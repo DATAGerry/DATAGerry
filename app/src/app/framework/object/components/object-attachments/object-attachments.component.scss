@@ -1,6 +1,8 @@
 @import './src/scss/variables';
 
-#uploadfileform {
+#uploadFileForm {
+  margin: 1em;
+
   #uploadFileContainer, .uploadfiledone{
     background: None;
     border: 2px dashed $gray-400;
@@ -28,5 +30,11 @@
 
   .far {
     padding: 10px;
+  }
+
+  .pre-scrollable {
+    max-height: 50vh;
+    overflow-y: scroll;
+    overflow-x: hidden;
   }
 }

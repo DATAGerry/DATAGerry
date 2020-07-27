@@ -16,11 +16,13 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import {Component, HostListener, OnInit} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { CmdbMode } from '../../modes.enum';
 import { RenderResult } from '../../models/cmdb-render';
+import { DataTableFilter, DataTablesResult } from '../../models/cmdb-datatable';
+import {consoleTestResultHandler} from "tslint/lib/test";
 
 @Component({
   selector: 'cmdb-object-view',
@@ -32,6 +34,7 @@ export class ObjectViewComponent implements OnInit {
   public mode: CmdbMode = CmdbMode.View;
   private objectID: number;
   public renderResult: RenderResult;
+  public recordsTotal: number = 0;
 
   constructor(public objectService: ObjectService, private activateRoute: ActivatedRoute) {
     this.activateRoute.params.subscribe((params) => {
@@ -43,6 +46,12 @@ export class ObjectViewComponent implements OnInit {
   public ngOnInit(): void {
     this.objectService.getObject(this.objectID).subscribe((result: RenderResult) => {
       this.renderResult = result;
+      if (result) {
+        this.objectService.getObjectsByFilter(result.type_information.type_id, new DataTableFilter())
+          .subscribe((resp: DataTablesResult) => {
+            this.recordsTotal = resp.recordsTotal;
+          });
+      }
     }, (error) => {
       console.error(error);
     });

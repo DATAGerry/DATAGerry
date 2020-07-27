@@ -1,13 +1,25 @@
-<ng-container *ngIf="docs?.length > 0">
-  <div id="cmdb-object-docs" class="card mb-3" *permissionLink="['base.docapi.template.view']" >
-    <div class="card-body">
-      <h6 class="card-title mb-4 font-weight-bold"><i class="fas fa-file-alt"></i> Documents</h6>
-      <ul class="fa-ul">
-        <li *ngFor="let doc of docs">
-          <i class="fas fa-file-alt mr-1" aria-hidden="true"></i>
-          <a class="card-link" [routerLink]="" (click)="downloadDocument(doc.public_id, renderResult.object_information.object_id, doc.name)">{{doc.label}}</a>
-        </li>
-      </ul>
+
+<div class="dropdown">
+  <div class="dropdown-toggle total-title d-flex justify-object-view-items"
+       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <div class="icon"><i class="fa fa-file-pdf"></i></div>
+    <div class="name"><strong class="text-uppercase">Documents</strong>
+      <span> Total {{docs?.length}}</span>
     </div>
   </div>
-</ng-container>
+  <ng-container *permissionLink="['base.docapi.template.view']">
+    <div *ngIf="docs?.length > 0" class="dropdown-menu dropdown-menu-lg-right w-auto">
+      <div class="overflow-auto" style="max-height:20vh">
+        <a *ngFor="let doc of docs" class="dropdown-item">
+          <span><i class="fas fa-file-alt mr-1" aria-hidden="true"></i></span>
+          <span class="name">
+            <a class="card-link" [routerLink]=""
+               (click)="downloadDocument(doc.public_id, renderResult.object_information?.object_id, doc.name)">
+              {{doc.label}}
+            </a>
+          </span>
+        </a>
+      </div>
+    </div>
+  </ng-container>
+</div>
