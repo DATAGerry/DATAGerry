@@ -37,7 +37,8 @@ import { AuthModule } from '../../auth/auth.module';
 import { AddCategoryModalComponent } from './components/modals/add-category-modal/add-category-modal.component';
 
 @NgModule({
-  declarations: [CategoryComponent, CategoryAddComponent, CategoryFormComponent, CategoryEditComponent, CategoryTreeComponent, CategoryNodeComponent, AddCategoryModalComponent, CategoryDeleteComponent],
+  declarations: [CategoryComponent, CategoryAddComponent, CategoryFormComponent, CategoryEditComponent,
+    CategoryTreeComponent, CategoryNodeComponent, AddCategoryModalComponent, CategoryDeleteComponent],
   imports: [
     CommonModule,
     CategoryRoutingModule,

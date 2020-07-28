@@ -13,34 +13,37 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, Input } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbType } from '../../../../../framework/models/cmdb-type';
 import { TypeService } from '../../../../../framework/services/type.service';
-import { DocapiSettingsBuilderTypeStepBaseComponent } from '../docapi-settings-builder-type-step-base/docapi-settings-builder-type-step-base.component';
+import {
+  DocapiSettingsBuilderTypeStepBaseComponent
+} from '../docapi-settings-builder-type-step-base/docapi-settings-builder-type-step-base.component';
 
 @Component({
   selector: 'cmdb-docapi-settings-builder-type-step-objectlist',
   templateUrl: './docapi-settings-builder-type-step-objectlist.component.html',
   styleUrls: ['./docapi-settings-builder-type-step-objectlist.component.scss']
 })
-export class DocapiSettingsBuilderTypeStepObjectlistComponent extends DocapiSettingsBuilderTypeStepBaseComponent implements OnInit {
+export class DocapiSettingsBuilderTypeStepObjectlistComponent
+  extends DocapiSettingsBuilderTypeStepBaseComponent implements OnInit {
 
   public objectTypeList: CmdbType[] = [];
 
-  constructor(private typeService: TypeService) { 
+  constructor(private typeService: TypeService) {
     super();
-    //setup form
+    // setup form
     this.typeParamForm = new FormGroup({
       type: new FormControl('', Validators.required)
     });
   }
 
   ngOnInit() {
-    //load object type list
+    // load object type list
     this.typeService.getTypeList().subscribe((value: CmdbType[]) => this.objectTypeList = value);
   }
 }

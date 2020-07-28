@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import {
@@ -67,7 +67,7 @@ export class FileConfigComponent extends FileConfig implements OnInit, OnChanges
     this.fileConfig.clear();
   }
 
-  private resetConfigSub(){
+  private resetConfigSub() {
     this.configChangeSubscription = this.configForm.valueChanges.subscribe(() => {
       this.configChange.emit(this.configForm.getRawValue());
     });

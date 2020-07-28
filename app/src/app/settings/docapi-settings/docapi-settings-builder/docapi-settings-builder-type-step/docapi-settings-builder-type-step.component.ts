@@ -13,14 +13,15 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, OnInit, Input, ViewChild, EventEmitter, Output } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbMode } from '../../../../framework/modes.enum';
-import { CmdbType } from '../../../../framework/models/cmdb-type';
-import { DocapiSettingsBuilderTypeStepBaseComponent } from './docapi-settings-builder-type-step-base/docapi-settings-builder-type-step-base.component';
+import {
+  DocapiSettingsBuilderTypeStepBaseComponent
+} from './docapi-settings-builder-type-step-base/docapi-settings-builder-type-step-base.component';
 
 @Component({
   selector: 'cmdb-docapi-settings-builder-type-step',
@@ -57,7 +58,7 @@ export class DocapiSettingsBuilderTypeStepComponent implements OnInit {
 
 
   constructor() {
-    //setup form
+    // setup form
     this.formValidEmitter = new EventEmitter<boolean>();
     this.typeForm = new FormGroup({
       template_type: new FormControl('', Validators.required)

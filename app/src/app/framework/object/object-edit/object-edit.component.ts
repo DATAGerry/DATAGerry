@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, HostListener, OnInit} from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
 import { ObjectService } from '../../services/object.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -26,7 +26,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { RenderResult } from '../../models/cmdb-render';
 import { TypeService } from '../../services/type.service';
-import {CmdbType} from "../../models/cmdb-type";
+import { CmdbType } from '../../models/cmdb-type';
 
 @Component({
   selector: 'cmdb-object-edit',
@@ -63,8 +63,8 @@ export class ObjectEditComponent implements OnInit {
       },
       () => {
         this.objectService.getObject<CmdbObject>(this.objectID, true).subscribe(ob => {
-            this.objectInstance = ob;
-          });
+          this.objectInstance = ob;
+        });
         this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
           this.typeInstance = value;
         });
