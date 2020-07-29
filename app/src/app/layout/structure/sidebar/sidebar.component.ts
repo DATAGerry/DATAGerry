@@ -33,9 +33,9 @@ import { SidebarService } from '../../services/sidebar.service';
 export class SidebarComponent implements OnInit, OnDestroy {
   // Category data
   public categoryTree: CmdbCategoryTree;
-  private sourceCategoryTree: CmdbCategoryTree;
   private categoryTreeSubscription: Subscription;
   // Type data
+  public typeList: CmdbType[] = [];
   public unCategorizedTypes: CmdbType[] = [];
   private unCategorizedTypesSubscription: Subscription;
   // Filter
@@ -52,29 +52,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.renderer.addClass(document.body, 'sidebar-fixed');
     this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable().subscribe((categoryTree: CmdbCategoryTree) => {
-      this.sourceCategoryTree = categoryTree;
-      this.categoryTree = this.sourceCategoryTree;
+      this.categoryTree = categoryTree;
       this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes().subscribe((types: CmdbType[]) => {
         this.unCategorizedTypes = types;
       });
+      this.typeService.getTypeList().subscribe((types: CmdbType[]) => this.typeList = types);
     });
-    this.filterTermSubscription = this.filterTerm.statusChanges.subscribe(() => {
-      this.categoryTree = this.transformFilter(this.sourceCategoryTree, this.filterTerm.value);
-    });
-  }
-
-  private transformFilter(tree: CmdbCategoryTree, searchText: string): CmdbCategoryTree {
-    if (!searchText) {
-      return tree;
-    }
-    const runtimeTree = new CmdbCategoryTree();
-    for (const node of tree) {
-      if (node.category.label.toLowerCase().includes(searchText.toLowerCase())) {
-        runtimeTree.push(node);
-        continue;
-      }
-    }
-    return runtimeTree;
   }
 
   public ngOnDestroy(): void {

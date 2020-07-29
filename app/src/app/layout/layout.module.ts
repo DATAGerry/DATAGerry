@@ -60,6 +60,8 @@ import { NameGuidePipe } from './pipes/name-guide.pipe';
 import { SidebarTypeComponent } from './structure/sidebar/sidebar-type.component';
 import { FileDragDropDirective } from './directives/fileDragDrop.directive';
 import { FileSizePipe } from './pipes/file-size.pipe';
+import { CategoryTreeFilterPipe } from './pipes/categoryTreeFilter.pipe';
+import { TypeFilterPipe } from './pipes/typeFilter.pipe';
 
 export const LAYOUT_COMPONENT_ROUTES: Routes = [
   {
@@ -114,7 +116,9 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     NameGuidePipe,
     FileDragDropDirective,
     FileSizePipe,
-    SidebarTypeComponent
+    SidebarTypeComponent,
+    CategoryTreeFilterPipe,
+    TypeFilterPipe
   ],
   exports: [
     NgxSpinnerComponent,
@@ -135,7 +139,9 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     NameDirective,
     NameGuidePipe,
     FileDragDropDirective,
-    FileSizePipe
+    FileSizePipe,
+    CategoryTreeFilterPipe,
+    TypeFilterPipe
   ],
   imports: [
     CommonModule,
