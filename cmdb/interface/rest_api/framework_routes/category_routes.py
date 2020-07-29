@@ -38,7 +38,7 @@ with current_app.app_context():
     object_manager: CmdbObjectManager = current_app.object_manager
 
 LOGGER = logging.getLogger(__name__)
-categories_blueprint = RootBlueprint('categories_rest', __name__, url_prefix='/category')
+categories_blueprint = RootBlueprint('categories', __name__)
 
 
 @categories_blueprint.route('/', methods=['GET'])
