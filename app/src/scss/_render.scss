@@ -8,7 +8,7 @@ label {
 }
 
 #object-form-action {
-  display: block;
+  display: none;
   position: fixed;
   top: calc(#{$navbar-height} - 1px);
   right: 0;
