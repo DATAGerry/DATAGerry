@@ -22,7 +22,8 @@ from flask import current_app
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.cmdb_log import CmdbObjectLog, LogAction
 from cmdb.framework.cmdb_log_manager import LogManagerGetError, LogManagerDeleteError
-from cmdb.interface.route_utils import RootBlueprint, make_response, login_required, right_required, insert_request_user
+from cmdb.interface.route_utils import make_response, login_required, right_required, insert_request_user
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import User
 
 try:

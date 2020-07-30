@@ -104,6 +104,8 @@ def create_rest_api(event_queue):
                       log_manager=log_manager, user_manager=user_manager,
                       security_manager=security_manager)
 
+    app.url_map.strict_slashes = True
+
     # Import App Extensions
     from flask_cors import CORS
     CORS(app)

@@ -29,8 +29,9 @@ from cmdb.importer.importer_config import ObjectImporterConfig
 from cmdb.importer.importer_response import ImporterObjectResponse
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.interface.rest_api.import_routes import importer_blueprint
-from cmdb.interface.route_utils import NestedBlueprint, make_response, insert_request_user, login_required, \
+from cmdb.interface.route_utils import make_response, insert_request_user, login_required, \
     right_required
+from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.interface.rest_api.importer_routes.importer_route_utils import get_file_in_request, \
     get_element_from_data_request, generate_parsed_output
 from cmdb.user_management import User

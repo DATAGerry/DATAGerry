@@ -16,7 +16,8 @@
 
 import logging
 from flask import current_app
-from cmdb.interface.route_utils import RootBlueprint, login_required, insert_request_user, make_response, right_required
+from cmdb.interface.route_utils import login_required, insert_request_user, make_response, right_required
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import User
 from cmdb.utils.system_reader import SystemSettingsReader
 

@@ -17,7 +17,8 @@
 import logging
 
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.interface.route_utils import make_response, RootBlueprint, login_required
+from cmdb.interface.route_utils import make_response, login_required
+from cmdb.interface.blueprint import RootBlueprint
 
 from flask import request, abort, current_app
 

@@ -22,7 +22,8 @@ from flask import abort, request, jsonify, current_app
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.search.query.query_builder import QueryBuilder
 from cmdb.user_management import User
-from cmdb.interface.route_utils import make_response, RootBlueprint, login_required, insert_request_user, right_required
+from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError, ObjectManagerGetError, \
     ObjectManagerInitError
 from cmdb.framework.cmdb_type import CmdbType

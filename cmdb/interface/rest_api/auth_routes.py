@@ -20,7 +20,8 @@ from typing import List
 
 from flask import request, current_app, abort
 
-from cmdb.interface.route_utils import make_response, RootBlueprint, login_required, insert_request_user, right_required
+from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.security.auth import AuthModule, AuthSettingsDAO
 from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, \
     AuthenticationProviderNotActivated

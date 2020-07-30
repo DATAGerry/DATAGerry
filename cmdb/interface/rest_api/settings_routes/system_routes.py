@@ -21,8 +21,9 @@ import time
 from flask import current_app
 
 from cmdb.interface.rest_api.setting_routes import settings_blueprint
-from cmdb.interface.route_utils import NestedBlueprint, make_response, login_required, right_required, \
+from cmdb.interface.route_utils import make_response, login_required, right_required, \
     insert_request_user
+from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.user_management import User
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.utils.system_reader import SystemSettingsReader

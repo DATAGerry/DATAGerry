@@ -22,12 +22,14 @@ from cmdb.framework.cmdb_category import CmdbCategory, CategoryTree
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerUpdateError, \
     ObjectManagerInitError, ObjectManagerDeleteError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.interface.route_utils import make_response, RootBlueprint, login_required, insert_request_user, right_required
+from cmdb.interface.route_utils import make_response, login_required, insert_request_user, \
+    right_required
+from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
 
 from flask import request, abort, current_app
 
 from cmdb.search.query.query_builder import QueryBuilder
-from cmdb.user_management import User
+from cmdb.user_management.user import User
 
 try:
     from cmdb.utils.error import CMDBError
@@ -38,14 +40,12 @@ with current_app.app_context():
     object_manager: CmdbObjectManager = current_app.object_manager
 
 LOGGER = logging.getLogger(__name__)
-categories_blueprint = RootBlueprint('categories', __name__)
+categories_blueprint = APIBlueprint('categories', __name__)
 
 
 @categories_blueprint.route('/', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.category.view')
-def get_categories(request_user: User):
+@categories_blueprint.protect(auth=True)
+def get_categories():
     """HTTP GET call for all categories without any kind of selection"""
     request_arguments = request.args
     try:
@@ -66,12 +66,8 @@ def get_categories(request_user: User):
     return make_response(categories_list)
 
 
-@categories_blueprint.route('/<int:public_id>/', methods=['GET'])
 @categories_blueprint.route('/<int:public_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.category.view')
-def get_category(public_id: int, request_user: User):
+def get_category(public_id: int):
     """HTTP GET call for a single category by the public id"""
     try:
         category_instance = object_manager.get_category(public_id)

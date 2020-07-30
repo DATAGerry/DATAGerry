@@ -19,7 +19,8 @@ import logging
 from flask import current_app
 from werkzeug.exceptions import abort
 
-from cmdb.interface.route_utils import RootBlueprint, make_response
+from cmdb.interface.route_utils import make_response
+from cmdb.interface.blueprint import RootBlueprint
 
 debug_blueprint = RootBlueprint('debug_rest', __name__, url_prefix='/debug')
 LOGGER = logging.getLogger(__name__)
