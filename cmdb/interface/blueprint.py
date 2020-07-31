@@ -1,7 +1,8 @@
 from functools import wraps
 
-from flask import Blueprint, abort
+from flask import Blueprint, abort, request
 
+from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.route_utils import auth_is_valid
 
 
@@ -27,8 +28,23 @@ class APIBlueprint(Blueprint):
 
         return _protect
 
-    def parse_collection_parameter(self):
-        pass
+    @classmethod
+    def parse_collection_parameters(cls, **optional):
+
+        def _parse(f):
+            @wraps(f)
+            def _decorate(*args, **kwargs):
+                params = CollectionParameters.from_http(
+                    str(request.query_string, 'utf-8'),
+                    request.args.to_dict(),
+                    **optional
+                )
+                kwargs['params'] = params
+                return f(*args, **kwargs)
+
+            return _decorate
+
+        return _parse
 
     def register_nested_blueprint(self, nested_blueprint):
         """Add a 'sub' blueprint to root element
