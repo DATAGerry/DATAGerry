@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbMode } from '../../../modes.enum';
 import { CmdbObject } from '../../../models/cmdb-object';
@@ -34,5 +34,11 @@ export class ObjectBulkChangeEditorComponent {
   @Input() objectInstance: CmdbObject;
   @Input() renderForm: FormGroup;
   @Input() fieldsGroups: FormGroup;
+  @Input() activeState: boolean;
 
+  @Output() activeChange = new EventEmitter();
+
+  public toggleChange() {
+    this.activeChange.emit();
+  }
 }

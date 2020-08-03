@@ -1,4 +1,24 @@
-<form [formGroup]="renderForm" class="renderForm needs-validation" novalidate autocomplete="off">
-  <cmdb-render [mode]="mode" [renderForm]="renderForm"
-               [typeInstance]="typeInstance"></cmdb-render>
-</form>
+
+<div id="object-header" class="card">
+  <div class="card-header d-flex justify-content-between">
+    <div>
+      <div *permissionLink="'base.framework.object.edit'" class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input active-control" id="object-view-active"
+               (change)="toggleChange()" [checked]="activeState">
+        <label class="custom-control-label" for="object-view-active"></label>
+      </div>
+    </div>
+    <div id="object-view-title">
+      <cmdb-active-badge [activeStatus]="activeState"></cmdb-active-badge>
+      {{typeInstance?.label}} #{{objectInstance?.public_id}}
+    </div>
+    <div id="object-view-version"></div>
+  </div>
+  <div class="card-body">
+    <form [formGroup]="renderForm" class="renderForm needs-validation" novalidate autocomplete="off">
+      <cmdb-render [mode]="mode" [renderForm]="renderForm"
+                   [typeInstance]="typeInstance"></cmdb-render>
+    </form>
+  </div>
+</div>
+<br>

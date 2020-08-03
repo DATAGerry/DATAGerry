@@ -4,7 +4,8 @@
     <cmdb-object-bulk-change-editor
       [mode]="mode"
       [renderForm]="renderForm"
-      [typeInstance]="typeInstance"></cmdb-object-bulk-change-editor>
+      [activeState]="activeState"
+      [typeInstance]="typeInstance" (activeChange)="toggleChange()"></cmdb-object-bulk-change-editor>
     <button class="btn btn-warning prev" type="button"
             [routerLink]="['/framework/object/type', typeInstance?.public_id]"
             awPreviousStep>Back to {{typeInstance?.label}}</button>
@@ -13,7 +14,7 @@
   </aw-wizard-step>
   <aw-wizard-step stepId="2" stepTitle="Preview">
     <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
-    <cmdb-object-bulk-change-preview [renderForm]="renderForm"></cmdb-object-bulk-change-preview>
+    <cmdb-object-bulk-change-preview [activeState]="activeState" [renderForm]="renderForm"></cmdb-object-bulk-change-preview>
     <button class="btn btn-primary prev" type="button" awPreviousStep>Go to previous step</button>
     <button class="btn btn-success next" type="button" (click)="saveObject()">Save</button>
   </aw-wizard-step>
