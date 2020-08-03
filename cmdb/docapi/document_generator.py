@@ -25,6 +25,13 @@ class DocumentGenerator:
 
 class ObjectDocumentGenerator:
 
+    # default CSS to make the document styling in TinyMCE look like the styling in the PDF
+    default_css = """
+        img {
+            zoom: 70%;
+        }
+    """
+
     def __init__(self, template, object_manager, cmdb_object, doctype):
         self.__template = template
         self.__object_manager = object_manager
@@ -40,7 +47,7 @@ class ObjectDocumentGenerator:
         # create full HTML document
         html = '<html><head>'
         html = html + '<title>' + self.__template.get_label() + '</title>'
-        html = html + '<style>' + self.__template.get_template_style() + '</style>'
+        html = html + '<style>' + self.default_css + self.__template.get_template_style() + '</style>'
         html = html + '</head>'
         html = html + '<body>' + rendered_template + '</body></html>'
 
