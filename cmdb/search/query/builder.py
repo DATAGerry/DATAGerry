@@ -141,7 +141,7 @@ class Builder:
     @classmethod
     def sort_(cls, sort: str, order: int) -> dict:
         """Sorts all input documents and returns them to the pipeline in sorted order."""
-        if order != 1 or order != -1:
+        if order != 1 and order != -1:
             raise ValueError('Order value must be 1 (ascending) or -1 (descending)')
         return {'$sort': {sort: order}}
 
