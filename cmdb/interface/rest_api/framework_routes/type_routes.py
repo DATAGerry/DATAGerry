@@ -267,7 +267,7 @@ def get_types_by_category(public_id, request_user: User):
 @insert_request_user
 @right_required('base.framework.type.view')
 def get_uncategorized_types(request_user: User):
-    categories = object_manager.get_all_categories()
+    categories = object_manager.get_categories()
     types = object_manager.get_all_types()
 
     categorized_types = []

@@ -158,7 +158,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.external_systems_routes import external_system
     from cmdb.interface.rest_api.docapi_routes import docapi_blueprint
     from cmdb.interface.rest_api.media_library_routes.media_file_routes import media_file_blueprint
-    from cmdb.interface.rest_api.special_routers import special_blueprint
+    from cmdb.interface.rest_api.special_routes import special_blueprint
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(object_blueprint)

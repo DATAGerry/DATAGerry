@@ -26,7 +26,7 @@ the elements for the database.
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_type import CmdbType
-from cmdb.framework.cmdb_category import CmdbCategory
+from cmdb.framework.dao.category import CategoryDAO
 from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplate
@@ -38,7 +38,7 @@ CmdbLog.register_log_type(CmdbObjectLog.__name__, CmdbObjectLog)
 __COLLECTIONS__ = [
     CmdbObject,
     CmdbType,
-    CmdbCategory,
+    CategoryDAO,
     CmdbStatus,
     CmdbMetaLog,
     CmdbLink,

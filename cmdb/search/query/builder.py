@@ -29,7 +29,7 @@ class Builder:
     def clear(self):
         raise NotImplementedError()
 
-    def build(self, params: dict):
+    def build(self, *args, **kwargs):
         raise NotImplementedError()
 
     # Logical Query Operators

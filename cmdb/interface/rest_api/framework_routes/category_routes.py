@@ -18,13 +18,16 @@ import logging
 import json
 from typing import List
 
-from cmdb.framework.cmdb_category import CmdbCategory, CategoryTree
+from cmdb.framework.dao.category import CategoryDAO, CategoryTree
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerUpdateError, \
     ObjectManagerInitError, ObjectManagerDeleteError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.framework.manager.category_manager import CategoryManager
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.response import GetSingleResponse, GetMultiResponse
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user, \
     right_required
-from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
+from cmdb.interface.blueprint import APIBlueprint
 
 from flask import request, abort, current_app
 
@@ -38,6 +41,7 @@ except ImportError:
 
 with current_app.app_context():
     object_manager: CmdbObjectManager = current_app.object_manager
+    category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
 
 LOGGER = logging.getLogger(__name__)
 categories_blueprint = APIBlueprint('categories', __name__)
@@ -45,37 +49,23 @@ categories_blueprint = APIBlueprint('categories', __name__)
 
 @categories_blueprint.route('/', methods=['GET'])
 @categories_blueprint.protect(auth=True)
-def get_categories():
+@categories_blueprint.parse_collection_parameters()
+def get_categories(params: CollectionParameters):
     """HTTP GET call for all categories without any kind of selection"""
-    request_arguments = request.args
-    try:
-        if request_arguments.get('order') == 'tree':
-            flatted_tree: List[CmdbCategory] = object_manager.get_category_tree().flat()
-            categories_list: List[dict] = [CmdbCategory.to_json(node) for node in flatted_tree]
-        else:
-            categories_list: List[dict] = [CmdbCategory.to_json(category) for category in
-                                           object_manager.get_all_categories()]
-    except ObjectManagerInitError as err:
-        return abort(500, err.message)
-    except ObjectManagerGetError as err:
-        return abort(400, err.message)
+    print(params)
+    categories_list: List[CategoryDAO] = category_manager.get(params.filter, limit=params.limit, skip=params.skip,
+                                                              sort=params.sort, order=params.order)
+    api_response = GetMultiResponse([CategoryDAO.to_json(category) for category in categories_list], 10)
 
-    if len(categories_list) == 0:
-        return make_response([], 204)
-
-    return make_response(categories_list)
+    return make_response(api_response.export())
 
 
 @categories_blueprint.route('/<int:public_id>', methods=['GET'])
 def get_category(public_id: int):
     """HTTP GET call for a single category by the public id"""
-    try:
-        category_instance = object_manager.get_category(public_id)
-    except ObjectManagerInitError as err:
-        return abort(500, err.message)
-    except ObjectManagerGetError as err:
-        return abort(404, err.message)
-    return make_response(CmdbCategory.to_json(category_instance))
+    category_instance = category_manager.get_one(public_id)
+    api_response = GetSingleResponse(CategoryDAO.to_json(category_instance))
+    return make_response(api_response.export())
 
 
 @categories_blueprint.route('/find/<path:regex>/', defaults={'regex_options': 'imsx'}, methods=['GET'])
@@ -105,7 +95,7 @@ def find_categories_by_name(regex: str, regex_options: str, request_user: User):
     query = query_builder.or_([query_name, query_label])
 
     try:
-        categories: List[CmdbCategory] = object_manager.get_categories_by(**query)
+        categories: List[CategoryDAO] = object_manager.get_categories_by(**query)
     except ObjectManagerInitError as err:
         return abort(500, err.message)
     except ObjectManagerGetError as err:
@@ -114,7 +104,7 @@ def find_categories_by_name(regex: str, regex_options: str, request_user: User):
     if len(categories) == 0:
         return make_response([], 204)
 
-    categories_in_json = [CmdbCategory.to_json(category) for category in categories]
+    categories_in_json = [CategoryDAO.to_json(category) for category in categories]
     return make_response(categories_in_json)
 
 
@@ -150,7 +140,7 @@ def get_category_by_name(name: str, request_user: User):
         return abort(404, err.message)
     except ObjectManagerInitError as err:
         return abort(501, err.message)
-    return make_response(CmdbCategory.to_json(category_instance))
+    return make_response(CategoryDAO.to_json(category_instance))
 
 
 @categories_blueprint.route('/', methods=['POST'])
@@ -165,9 +155,9 @@ def add_category(request_user: User):
     except TypeError as te:
         return abort(400, str(te))
 
-    insert_data['public_id'] = int(object_manager.get_new_id(CmdbCategory.COLLECTION))
+    insert_data['public_id'] = int(object_manager.get_new_id(CategoryDAO.COLLECTION))
     try:
-        new_category = CmdbCategory.from_data(insert_data)
+        new_category = CategoryDAO.from_data(insert_data)
     except Exception as err:
         return abort(400, str(err))
 
@@ -189,7 +179,7 @@ def update_category(request_user: User):
     except TypeError as te:
         return abort(400, str(te))
     try:
-        updated_category = CmdbCategory.from_data(update_data)
+        updated_category = CategoryDAO.from_data(update_data)
     except Exception as err:
         return abort(400, str(err))
 

@@ -28,21 +28,20 @@ from bson import json_util
 from datetime import datetime
 from typing import List
 
-from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists, NoDocumentFound
+from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
-from cmdb.framework.cmdb_category import CmdbCategory, CategoryTree
+from cmdb.framework.dao.category import CategoryDAO, CategoryTree
 from cmdb.framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplate
 from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
-from cmdb.framework.cmdb_errors import WrongInputFormatError, UpdateError, TypeInsertError, TypeAlreadyExists, \
-    TypeNotFoundError, ObjectInsertError, ObjectDeleteError, NoRootCategories, ObjectManagerGetError, \
+from cmdb.framework.cmdb_errors import WrongInputFormatError, TypeInsertError, TypeAlreadyExists, \
+    ObjectInsertError, ObjectDeleteError, ObjectManagerGetError, \
     ObjectManagerInsertError, ObjectManagerUpdateError, ObjectManagerDeleteError, ObjectManagerInitError
 from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.framework.cmdb_type import CmdbType
 from cmdb.search.query import Query, Pipeline
-from cmdb.search.query.query_builder import QueryBuilder
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import User
 from cmdb.utils.wraps import deprecated
@@ -463,40 +462,42 @@ class CmdbObjectManager(CmdbManagerBase):
             self._event_queue.put(event)
         return ack
 
-    def get_all_categories(self) -> List[CmdbCategory]:
+    def get_categories(self) -> List[CategoryDAO]:
         """Get all categories as nested list"""
         try:
-            raw_categories = self._get_many(collection=CmdbCategory.COLLECTION, sort='public_id')
+            raw_categories = self._get_many(collection=CategoryDAO.COLLECTION, sort='public_id')
         except Exception as err:
             raise ObjectManagerGetError(err)
         try:
-            return [CmdbCategory.from_data(category) for category in raw_categories]
+            return [CategoryDAO.from_data(category) for category in raw_categories]
         except Exception as err:
             raise ObjectManagerInitError(err)
 
-    def get_category_by(self, **requirements) -> CmdbCategory:
+    @deprecated
+    def get_category_by(self, **requirements) -> CategoryDAO:
         """Get a single category by requirements
         Notes:
             Even if multiple categories match the requirements only the first matched will be returned
         """
         try:
-            raw_category = self._get_by(collection=CmdbCategory.COLLECTION, **requirements)
+            raw_category = self._get_by(collection=CategoryDAO.COLLECTION, **requirements)
         except Exception as err:
             raise ObjectManagerGetError(err)
 
         try:
-            return CmdbCategory.from_data(raw_category)
+            return CategoryDAO.from_data(raw_category)
         except Exception as err:
             raise ObjectManagerInitError(err)
 
-    def get_categories_by(self, sort='public_id', **requirements: dict) -> List[CmdbCategory]:
+    @deprecated
+    def get_categories_by(self, sort='public_id', **requirements: dict) -> List[CategoryDAO]:
         """Get a list of categories by special requirements"""
         try:
-            raw_categories = self._get_many(collection=CmdbCategory.COLLECTION, sort=sort, **requirements)
+            raw_categories = self._get_many(collection=CategoryDAO.COLLECTION, sort=sort, **requirements)
         except Exception as err:
             raise ObjectManagerGetError(err)
         try:
-            return [CmdbCategory.from_data(category) for category in raw_categories]
+            return [CategoryDAO.from_data(category) for category in raw_categories]
         except Exception as err:
             raise ObjectManagerInitError(err)
 
@@ -508,41 +509,36 @@ class CmdbObjectManager(CmdbManagerBase):
     def get_category_tree(self) -> CategoryTree:
         """Get the complete category tree"""
         try:
-            categories = self.get_all_categories()
+            categories = self.get_categories()
             types = self.get_all_types()
         except Exception as err:
             raise ObjectManagerGetError(err=err)
         return CategoryTree(categories=categories, types=types)
 
-    def get_category(self, public_id: int) -> CmdbCategory:
+    def get_category(self, public_id: int) -> CategoryDAO:
         """Get a category from the database"""
         try:
             raw_category: dict = self._get(
-                collection=CmdbCategory.COLLECTION,
+                collection=CategoryDAO.COLLECTION,
                 public_id=public_id)
+            return CategoryDAO.from_data(raw_category)
         except Exception as err:
             raise ObjectManagerGetError(err=err)
-        if not raw_category:
-            raise ObjectManagerGetError(err=f'No category with the id: {public_id} was found')
-        try:
-            return CmdbCategory.from_data(raw_category)
-        except Exception as err:
-            raise ObjectManagerInitError(err=err)
 
-    def insert_category(self, category: CmdbCategory):
+    def insert_category(self, category: CategoryDAO):
         """Add a new category into the database or add the children list an existing category"""
         try:
-            return self._insert(collection=CmdbCategory.COLLECTION, data=CmdbCategory.to_json(category))
+            return self._insert(collection=CategoryDAO.COLLECTION, data=CategoryDAO.to_json(category))
         except Exception as err:
             raise ObjectManagerInsertError(err=err)
 
-    def update_category(self, category: CmdbCategory):
+    def update_category(self, category: CategoryDAO):
         """Update a existing category into the database"""
         try:
             return self._update(
-                collection=CmdbCategory.COLLECTION,
+                collection=CategoryDAO.COLLECTION,
                 public_id=category.get_public_id(),
-                data=CmdbCategory.to_json(category)
+                data=CategoryDAO.to_json(category)
             )
         except Exception as err:
             raise ObjectManagerUpdateError(err=err)
@@ -550,7 +546,7 @@ class CmdbObjectManager(CmdbManagerBase):
     def delete_category(self, public_id: int):
         """Remove a category from the database"""
         try:
-            return self._delete(CmdbCategory.COLLECTION, public_id)
+            return self._delete(CategoryDAO.COLLECTION, public_id)
         except Exception as err:
             raise ObjectManagerDeleteError(err=err)
 

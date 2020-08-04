@@ -271,6 +271,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
     def get_database_name(self):
         return self.connector.get_database_name()
 
+    @deprecated
     def __find(self, collection: str, *args, **kwargs):
         """general find function for database search
 
@@ -287,6 +288,10 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         result = self.connector.get_collection(collection).find(*args, **kwargs)
         return result
 
+    def find(self, collection: str, *args, **kwargs):
+        """General find function"""
+        return self.connector.get_collection(collection).find(*args, **kwargs)
+
     def find_one(self, collection: str, public_id: int, *args, **kwargs):
         """calls __find with single return
 
@@ -301,10 +306,8 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
 
         """
 
-        formatted_public_id = {'public_id': public_id}
-        formatted_sort = [('public_id', DatabaseManager.DESCENDING)]
-        cursor_result = self.__find(collection, formatted_public_id, limit=1, sort=formatted_sort, *args, **kwargs)
-        for result in cursor_result:
+        cursor_result = self.__find(collection, {'public_id': public_id}, limit=1, *args, **kwargs)
+        for result in cursor_result.limit(-1):
             return result
 
     def find_one_by(self, collection: str, *args, **kwargs) -> dict:

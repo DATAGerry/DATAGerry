@@ -40,7 +40,7 @@ special_blueprint = RootBlueprint('special_rest', __name__, url_prefix='/special
 def get_intro_starter():
     try:
         steps = []
-        categories_total = len(object_manager.get_all_categories())
+        categories_total = len(object_manager.get_categories())
         types_total = object_manager.count_types()
         objects_total = object_manager.count_objects()
 

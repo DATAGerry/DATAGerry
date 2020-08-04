@@ -136,7 +136,7 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
 
   /**
    * Add a new unique category into the database
-   * @param category raw instance of a CmdbCategory
+   * @param category raw instance of a CategoryDAO
    */
   public postCategory(category: T): Observable<T> {
     return this.api.callPost<CmdbCategory>(this.servicePrefix + '/', category).pipe(

@@ -21,7 +21,7 @@ NOTE: This module is highly experimental and should only be used for development
 
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_type import CmdbType
-from cmdb.framework.cmdb_category import CmdbCategory
+from cmdb.framework.dao.category import CategoryDAO
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user import User
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
@@ -1149,21 +1149,21 @@ class DataGenerator:
     @staticmethod
     def generate_categories() -> list:
         category_list = [
-            CmdbCategory(**{
+            CategoryDAO(**{
                 "public_id": 1,
                 "name": "product_categories",
                 "label": "Product Categories",
                 "root": True,
                 "parent_id": 0,
             }),
-            CmdbCategory(**{
+            CategoryDAO(**{
                 "public_id": 2,
                 "name": "infrastructure",
                 "label": "Infrastructure",
                 "root": False,
                 "parent_id": 1,
             }),
-            CmdbCategory(**{
+            CategoryDAO(**{
                 "public_id": 3,
                 "name": "devices",
                 "label": "Devices",
