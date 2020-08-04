@@ -30,6 +30,10 @@ class ObjectDocumentGenerator:
         img {
             zoom: 70%;
         }
+
+        td {
+            padding: 1px;
+        }
     """
 
     def __init__(self, template, object_manager, cmdb_object, doctype):
