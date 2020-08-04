@@ -36,8 +36,7 @@ class APIBlueprint(Blueprint):
             def _decorate(*args, **kwargs):
                 params = CollectionParameters.from_http(
                     str(request.query_string, 'utf-8'),
-                    request.args.to_dict(),
-                    **optional
+                    **request.args.to_dict(),
                 )
                 kwargs['params'] = params
                 return f(*args, **kwargs)

@@ -43,14 +43,14 @@ class FrameworkQueryBuilder(Builder):
     def build(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> \
             Union[Query, Pipeline]:
         self.clear()
-        self.query = [
-            {'$match': filter},
-            {'$sort': {f'{sort}': order}},
-            {'$facet': {
-                'meta': [{ '$count': "total"}, { '$addFields': {'page': 3}}],
-                'data': [{ '$skip': skip}, { '$limit': limit}]
-        }}
-        ]
+        self.query = Pipeline([])
+        self.query.append(self.match_(filter))
+        self.query.append(self.sort_(sort=sort, order=order))
+        # TODO: Calculate page
+        self.query.append(self.facet_({
+            'meta': [self.count_('total'), {'$addFields': {'page': 1}}],
+            'data': [self.skip_(skip), self.limit_(limit)]
+        }))
         return self.query
 
 
@@ -63,11 +63,12 @@ class FrameworkManager(ManagerBase):
 
     def get(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs):
         query: Query = self.query_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-        return list(super(FrameworkManager, self)._get(self.collection, filter=filter, limit=limit, skip=skip,
-                                                       sort=[(sort, order)]))
+        collection_result = super(FrameworkManager, self)._aggregate(self.collection, query)
+        print(collection_result.next())
+        return collection_result
 
     def get_one(self, public_id: PublicID):
         cursor_result = super(FrameworkManager, self)._get(self.collection, filter={'public_id': public_id}, limit=1)
-        for result in cursor_result.limit(-1):
-            return result
+        for resource_result in cursor_result.limit(-1):
+            return resource_result
         return None

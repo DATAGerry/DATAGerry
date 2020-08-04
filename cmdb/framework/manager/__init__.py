@@ -24,7 +24,7 @@ class ManagerBase:
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.__database_manager: DatabaseManagerMongo = database_manager
 
-    def __aggregate(self, collection: Collection, *args, **kwargs):
+    def _aggregate(self, collection: Collection, *args, **kwargs):
         return self.__database_manager.aggregate(collection, *args, **kwargs)
 
     def _get(self, collection: Collection, filter=None, *args, **kwargs):
