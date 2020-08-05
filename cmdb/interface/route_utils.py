@@ -85,7 +85,8 @@ def auth_is_valid() -> bool:
         LOGGER.error(err)
         return False
 
-def user_has_right() -> bool:
+
+def user_has_right(required_right: str) -> bool:
     from flask import request, current_app
     with current_app.app_context():
         user_manager = current_app.user_manager
@@ -97,9 +98,10 @@ def user_has_right() -> bool:
         return abort(401)
     try:
         user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
-    except ValueError:
-        return abort(401)
-    user = user_manager.get_user(user_id)
+        user = user_manager.get_user(user_id)
+        return user_manager.group_has_right(user.get_group(), required_right)
+    except UserManagerGetError:
+        return False
 
 
 def insert_request_user(func):

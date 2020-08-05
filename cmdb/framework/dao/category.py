@@ -24,6 +24,38 @@ class CategoryDAO(CmdbDAO):
     Category
     """
     COLLECTION = 'framework.categories'
+    SCHEMA = {
+        'name': {
+            'type': 'string',
+            'required': True,
+            'regex': '(\w+)-*(\w)([\w-]*)'  # kebab case validation
+        },
+        'label': {
+            'type': 'string',
+            'required': False
+        },
+        'parent': {
+            'type': 'integer',
+            'nullable': True
+        },
+        'types': {
+            'type': 'list',
+            'empty': True
+        },
+        'meta': {
+            'type': 'dict',
+            'schema': {
+                'icon': {
+                    'type': 'string'
+                },
+                'order': {
+                    'type': 'integer',
+                    'min': 1,
+                    'nullable': True
+                }
+            }
+        }
+    }
 
     INDEX_KEYS = [
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True},

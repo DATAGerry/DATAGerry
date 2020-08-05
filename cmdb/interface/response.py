@@ -20,6 +20,7 @@ from typing import List
 from flask import make_response as flask_response
 from werkzeug.wrappers import BaseResponse
 
+from cmdb.framework.utils import PublicID
 from cmdb.interface import DEFAULT_MIME_TYPE
 
 
@@ -51,7 +52,7 @@ class BaseAPIResponse:
         self.operation_type: OperationType = operation_type
         self.time: str = datetime.now().isoformat()
 
-    def make_response(self) -> BaseResponse:
+    def make_response(self, *args, **kwargs) -> BaseResponse:
         """Abstract method for http response
         Returns:
             http BaseResponse
@@ -77,8 +78,26 @@ class GetSingleResponse(BaseAPIResponse):
 
     def export(self, text: str = 'json') -> dict:
         return {**{
-            'result': None
+            'result': self.result
         }, **super(GetSingleResponse, self).export()}
+
+
+class InsertSingleResponse(BaseAPIResponse):
+    __slots__ = 'result_id'
+
+    def __init__(self, result_id: PublicID):
+        self.result_id = result_id
+        super(InsertSingleResponse, self).__init__(operation_type=OperationType.INSERT)
+
+    def make_response(self, prefix) -> BaseResponse:
+        response = make_api_response(self.export(), 201)
+        response.headers['location'] = f'{prefix}/{self.result_id}'
+        return response
+
+    def export(self, text: str = 'json') -> dict:
+        return {**{
+            'result_id': self.result_id
+        }, **super(InsertSingleResponse, self).export()}
 
 
 class GetMultiResponse(BaseAPIResponse):

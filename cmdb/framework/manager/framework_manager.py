@@ -61,13 +61,13 @@ class FrameworkManager(ManagerBase):
         self.query_builder = FrameworkQueryBuilder()
         super(FrameworkManager, self).__init__(database_manager)
 
-    def get(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs):
+    def get_many(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs):
         query: Query = self.query_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
         collection_result = super(FrameworkManager, self)._aggregate(self.collection, query)
         collection_result.next()
         return collection_result
 
-    def get_one(self, public_id: PublicID):
+    def get(self, public_id: PublicID):
         cursor_result = super(FrameworkManager, self)._get(self.collection, filter={'public_id': public_id}, limit=1)
         for resource_result in cursor_result.limit(-1):
             return resource_result

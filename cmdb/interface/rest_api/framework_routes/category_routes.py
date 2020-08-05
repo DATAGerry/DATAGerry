@@ -18,6 +18,9 @@ import logging
 import json
 from typing import List
 
+from cerberus import Validator
+from flask import request, abort, current_app
+
 from cmdb.framework.dao.category import CategoryDAO, CategoryTree
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerUpdateError, \
     ObjectManagerInitError, ObjectManagerDeleteError
@@ -28,16 +31,7 @@ from cmdb.interface.response import GetSingleResponse, GetMultiResponse
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user, \
     right_required
 from cmdb.interface.blueprint import APIBlueprint
-
-from flask import request, abort, current_app
-
-from cmdb.search.query.query_builder import QueryBuilder
 from cmdb.user_management.user import User
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
 
 with current_app.app_context():
     object_manager: CmdbObjectManager = current_app.object_manager
@@ -47,124 +41,33 @@ LOGGER = logging.getLogger(__name__)
 categories_blueprint = APIBlueprint('categories', __name__)
 
 
+
 @categories_blueprint.route('/', methods=['GET'])
-@categories_blueprint.protect(auth=True)
+@categories_blueprint.protect(auth=True, right='base.framework.category.view')
 @categories_blueprint.parse_collection_parameters()
 def get_categories(params: CollectionParameters):
     """HTTP GET call for all categories without any kind of selection"""
-    categories_list: List[CategoryDAO] = category_manager.get(params.filter, limit=params.limit, skip=params.skip,
-                                                              sort=params.sort, order=params.order)
+    categories_list: List[CategoryDAO] = category_manager.get_many(params.filter, limit=params.limit, skip=params.skip,
+                                                                   sort=params.sort, order=params.order)
     api_response = GetMultiResponse([CategoryDAO.to_json(category) for category in categories_list], 10)
-
     return api_response.make_response()
 
 
 @categories_blueprint.route('/<int:public_id>', methods=['GET'])
+@categories_blueprint.protect(auth=True, right='base.framework.category.view')
 def get_category(public_id: int):
     """HTTP GET call for a single category by the public id"""
-    category_instance = category_manager.get_one(public_id)
+    category_instance = category_manager.get(public_id)
     api_response = GetSingleResponse(CategoryDAO.to_json(category_instance))
-    return make_response(api_response.export())
-
-
-@categories_blueprint.route('/find/<path:regex>/', defaults={'regex_options': 'imsx'}, methods=['GET'])
-@categories_blueprint.route('/find/<path:regex>', defaults={'regex_options': 'imsx'}, methods=['GET'])
-@categories_blueprint.route('/find/<path:regex>/<string:regex_options>/', methods=['GET'])
-@categories_blueprint.route('/find/<path:regex>/<string:regex_options>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.category.view')
-def find_categories_by_name(regex: str, regex_options: str, request_user: User):
-    """HTTP GET call for a list of categories by a given regex name
-    Examples:
-        Input `ex` matches for example, Example, test_example
-    Notes:
-        The regex will match for name parameter and label
-    """
-    query_builder = QueryBuilder()
-
-    if not regex or (regex == '') or regex is None or len(regex) == 0:
-        return abort(400, 'No valid selection parameter was passed!')
-
-    if any(ro not in 'imsx' for ro in regex_options):
-        return abort(400, 'No valid regex options!')
-
-    query_name = query_builder.regex_('name', f'{regex}', regex_options)
-    query_label = query_builder.regex_('label', f'{regex}', regex_options)
-    query = query_builder.or_([query_name, query_label])
-
-    try:
-        categories: List[CategoryDAO] = object_manager.get_categories_by(**query)
-    except ObjectManagerInitError as err:
-        return abort(500, err.message)
-    except ObjectManagerGetError as err:
-        return abort(400, err.message)
-
-    if len(categories) == 0:
-        return make_response([], 204)
-
-    categories_in_json = [CategoryDAO.to_json(category) for category in categories]
-    return make_response(categories_in_json)
-
-
-@categories_blueprint.route('/tree/', methods=['GET'])
-@categories_blueprint.route('/tree', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.category.view')
-def get_category_tree(request_user: User):
-    """HTTP GET call for full category tree"""
-    try:
-        tree = object_manager.get_category_tree()
-    except ObjectManagerInitError as err:
-        return abort(500, err.message)
-    except ObjectManagerGetError as err:
-        return abort(404, err.message)
-
-    if len(tree) == 0:
-        return make_response([], 204)
-    return make_response(CategoryTree.to_json(tree))
-
-
-@categories_blueprint.route('/<string:name>/', methods=['GET'])
-@categories_blueprint.route('/<string:name>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.view')
-def get_category_by_name(name: str, request_user: User):
-    """HTTP GET call - get a specific category by its name"""
-    try:
-        category_instance = object_manager.get_category_by(name=name)
-    except ObjectManagerGetError as err:
-        return abort(404, err.message)
-    except ObjectManagerInitError as err:
-        return abort(501, err.message)
-    return make_response(CategoryDAO.to_json(category_instance))
+    return api_response.make_response()
 
 
 @categories_blueprint.route('/', methods=['POST'])
-@login_required
-@insert_request_user
-@right_required('base.framework.category.add')
-def add_category(request_user: User):
-    """HTTP POST call - add a new category from json post data"""
-    try:
-        request_data = request.get_data().decode('UTF-8')
-        insert_data = json.loads(request_data)
-    except TypeError as te:
-        return abort(400, str(te))
-
-    insert_data['public_id'] = int(object_manager.get_new_id(CategoryDAO.COLLECTION))
-    try:
-        new_category = CategoryDAO.from_data(insert_data)
-    except Exception as err:
-        return abort(400, str(err))
-
-    try:
-        insert_acknowledge = object_manager.insert_category(new_category)
-    except ObjectManagerInsertError as err:
-        return abort(400, err.message)
-    return make_response(insert_acknowledge)
+@categories_blueprint.protect(auth=True, right='base.framework.category.add')
+@categories_blueprint.validate(CategoryDAO.SCHEMA)
+def insert_category(document: dict):
+    print(document)
+    return ""
 
 
 @categories_blueprint.route('/', methods=['PUT'])

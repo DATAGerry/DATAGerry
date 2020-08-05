@@ -1,9 +1,10 @@
 from functools import wraps
 
+from cerberus import Validator
 from flask import Blueprint, abort, request
 
 from cmdb.interface.api_parameters import CollectionParameters
-from cmdb.interface.route_utils import auth_is_valid
+from cmdb.interface.route_utils import auth_is_valid, user_has_right
 
 
 class APIBlueprint(Blueprint):
@@ -13,15 +14,18 @@ class APIBlueprint(Blueprint):
         self.nested_blueprints = []
         super(APIBlueprint, self).__init__(*args, **kwargs)
 
-    def protect(self, auth: bool = True, right: str = None, excepted: dict = None):
+    @staticmethod
+    def protect(auth: bool = True, right: str = None):
+        """Active auth and right protection for flask routes"""
+
         def _protect(f):
             @wraps(f)
             def _decorate(*args, **kwargs):
                 if auth and not auth_is_valid():
                     return abort(401)
 
-                if right:
-                    pass
+                if right and not user_has_right(right):
+                    return abort(401)
                 return f(*args, **kwargs)
 
             return _decorate
@@ -29,11 +33,29 @@ class APIBlueprint(Blueprint):
         return _protect
 
     @classmethod
+    def validate(cls, schema=None):
+        validator = Validator(schema, purge_unknown=True)
+
+        def _validate(f):
+            @wraps(f)
+            def _decorate(*args, **kwargs):
+                data = request.get_json()
+                validation_result = validator.validate(data)
+                if not validation_result:
+                    return abort(400, {'validation_error': validator.errors})
+                return f(document=validator.document, *args, **kwargs)
+
+            return _decorate
+
+        return _validate
+
+    @classmethod
     def parse_collection_parameters(cls):
         """
         Wrapper function for the flask routes.
         Auto parses the collection based parameters to the route.
         """
+
         def _parse(f):
             @wraps(f)
             def _decorate(*args, **kwargs):
@@ -44,7 +66,9 @@ class APIBlueprint(Blueprint):
                 except Exception as e:
                     return abort(400, str(e))
                 return f(params=params, *args, **kwargs)
+
             return _decorate
+
         return _parse
 
     def register_nested_blueprint(self, nested_blueprint):
