@@ -39,7 +39,6 @@ from cmdb.security.token.validator import TokenValidator, ValidationError
 from cmdb.utils import json_encoding
 
 DEFAULT_MIME_TYPE = 'application/json'
-API_VERSION = '1.0'
 
 
 def make_response(instance, status_code=200, indent=2):

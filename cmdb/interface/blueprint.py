@@ -10,8 +10,8 @@ class APIBlueprint(Blueprint):
     """Wrapper class for Blueprints with nested elements"""
 
     def __init__(self, *args, **kwargs):
-        super(APIBlueprint, self).__init__(*args, **kwargs)
         self.nested_blueprints = []
+        super(APIBlueprint, self).__init__(*args, **kwargs)
 
     def protect(self, auth: bool = True, right: str = None, excepted: dict = None):
         def _protect(f):
@@ -29,20 +29,22 @@ class APIBlueprint(Blueprint):
         return _protect
 
     @classmethod
-    def parse_collection_parameters(cls, **optional):
-
+    def parse_collection_parameters(cls):
+        """
+        Wrapper function for the flask routes.
+        Auto parses the collection based parameters to the route.
+        """
         def _parse(f):
             @wraps(f)
             def _decorate(*args, **kwargs):
-                params = CollectionParameters.from_http(
-                    str(request.query_string, 'utf-8'),
-                    **request.args.to_dict(),
-                )
-                kwargs['params'] = params
-                return f(*args, **kwargs)
-
+                try:
+                    params = CollectionParameters.from_http(
+                        str(request.query_string, 'utf-8'), **request.args.to_dict()
+                    )
+                except Exception as e:
+                    return abort(400, str(e))
+                return f(params=params, *args, **kwargs)
             return _decorate
-
         return _parse
 
     def register_nested_blueprint(self, nested_blueprint):

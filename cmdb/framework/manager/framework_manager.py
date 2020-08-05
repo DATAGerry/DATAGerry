@@ -64,7 +64,7 @@ class FrameworkManager(ManagerBase):
     def get(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs):
         query: Query = self.query_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
         collection_result = super(FrameworkManager, self)._aggregate(self.collection, query)
-        print(collection_result.next())
+        collection_result.next()
         return collection_result
 
     def get_one(self, public_id: PublicID):

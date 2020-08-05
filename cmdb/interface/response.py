@@ -13,11 +13,20 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+from json import dumps
 from datetime import datetime
 from enum import Enum
 from typing import List
 from flask import make_response as flask_response
 from werkzeug.wrappers import BaseResponse
+
+from cmdb.interface import DEFAULT_MIME_TYPE
+
+
+def make_api_response(view, status: int = 200, mime: str = None) -> BaseResponse:
+    response = flask_response(dumps(view), status)
+    response.mimetype = mime or DEFAULT_MIME_TYPE
+    return response
 
 
 class OperationType(Enum):
@@ -64,7 +73,7 @@ class GetSingleResponse(BaseAPIResponse):
         super(GetSingleResponse, self).__init__(operation_type=OperationType.GET)
 
     def make_response(self) -> BaseResponse:
-        return flask_response(self.export())
+        return make_api_response(self.export())
 
     def export(self, text: str = 'json') -> dict:
         return {**{
@@ -82,7 +91,7 @@ class GetMultiResponse(BaseAPIResponse):
         super(GetMultiResponse, self).__init__(operation_type=OperationType.GET)
 
     def make_response(self) -> BaseResponse:
-        return flask_response(self.export())
+        return make_api_response(self.export())
 
     def export(self, text: str = 'json') -> dict:
         return {**{

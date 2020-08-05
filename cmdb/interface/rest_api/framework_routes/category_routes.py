@@ -52,12 +52,11 @@ categories_blueprint = APIBlueprint('categories', __name__)
 @categories_blueprint.parse_collection_parameters()
 def get_categories(params: CollectionParameters):
     """HTTP GET call for all categories without any kind of selection"""
-    print(params)
     categories_list: List[CategoryDAO] = category_manager.get(params.filter, limit=params.limit, skip=params.skip,
                                                               sort=params.sort, order=params.order)
     api_response = GetMultiResponse([CategoryDAO.to_json(category) for category in categories_list], 10)
 
-    return make_response(api_response.export())
+    return api_response.make_response()
 
 
 @categories_blueprint.route('/<int:public_id>', methods=['GET'])
