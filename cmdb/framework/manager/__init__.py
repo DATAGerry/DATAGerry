@@ -24,6 +24,9 @@ class ManagerBase:
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.__database_manager: DatabaseManagerMongo = database_manager
 
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.__database_manager.connector.disconnect()
+
     def _aggregate(self, collection: Collection, *args, **kwargs):
         return self.__database_manager.aggregate(collection, *args, **kwargs)
 
