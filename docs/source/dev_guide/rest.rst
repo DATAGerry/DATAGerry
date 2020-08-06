@@ -9,9 +9,6 @@ Both formal and structural definitions are designed. This ``SHOULD`` also help t
 All guidelines mentioned here ``SHOULD`` be followed if technically or conceptually possible. Individual variations ``MAY`` be possible,
 but ``MUST`` then be described in the documentation.
 
-.. todo::
-    Add examples for every guideline - MH
-
 .. warning::
     This guideline has just been created and will probably be implemented by default starting with DATAGERRY version 1.3.0.
     Possible variations within the implementation are therefore possible and also probable. We will work on the individual parts one after the other.
@@ -104,7 +101,7 @@ Besides, a URL ``MUST NOT`` end with a trailing slash.
 Methods
 -------
 The API ``MUST`` only provide the methods necessary for the situation.
-This ``SHOULD`` be implemented strictly according to `RFC 7231<https://tools.ietf.org/html/rfc7231>`_.
+This ``SHOULD`` be implemented strictly according to `RFC 7231 <https://tools.ietf.org/html/rfc7231>`_.
 
 +--------+---------------------------------------------------------+---------------+---------------+
 | Method | Description                                             | HTTP Response | Is Idempotent |
