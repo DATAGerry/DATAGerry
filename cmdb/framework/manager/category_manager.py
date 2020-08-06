@@ -17,6 +17,7 @@ from typing import List, Union
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework import CategoryDAO
+from cmdb.framework.manager import ManagerGetError
 from cmdb.framework.manager.framework_manager import FrameworkManager
 from cmdb.framework.utils import PublicID
 
@@ -33,6 +34,8 @@ class CategoryManager(FrameworkManager):
 
     def get(self, public_id: Union[PublicID, int]) -> CategoryDAO:
         result = super(CategoryManager, self).get(public_id=public_id)
+        if not result:
+            raise ManagerGetError('Category not found!')
         return CategoryDAO.from_data(result)
 
     def insert(self, category: dict) -> PublicID:

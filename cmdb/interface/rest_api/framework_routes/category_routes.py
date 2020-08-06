@@ -35,14 +35,7 @@ categories_blueprint = APIBlueprint('categories', __name__)
 @categories_blueprint.protect(auth=True, right='base.framework.category.view')
 @categories_blueprint.parse_collection_parameters()
 def get_categories(params: CollectionParameters):
-    """
-
-    .. http:get:: /users/(int:user_id)/posts/(tag)
-        The posts tagged with `tag` that the user (`user_id`) wrote.
-
-    """
-    with current_app.app_context():
-        category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
+    category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
     try:
         categories_list: List[CategoryDAO] = category_manager.get_many(
             params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
@@ -57,8 +50,7 @@ def get_categories(params: CollectionParameters):
 @categories_blueprint.protect(auth=True, right='base.framework.category.view')
 def get_category(public_id: int):
     """HTTP GET call for a single category by the public id"""
-    with current_app.app_context():
-        category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
+    category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
     try:
         category_instance = category_manager.get(public_id)
     except ManagerGetError as err:
@@ -71,8 +63,7 @@ def get_category(public_id: int):
 @categories_blueprint.protect(auth=True, right='base.framework.category.add')
 @categories_blueprint.validate(CategoryDAO.SCHEMA)
 def insert_category(document: dict):
-    with current_app.app_context():
-        category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
+    category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
     try:
         result_id: PublicID = category_manager.insert(document)
     except ManagerInsertError as err:
@@ -84,10 +75,9 @@ def insert_category(document: dict):
 @categories_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @categories_blueprint.protect(auth=True, right='base.framework.category.delete')
 def delete_category(public_id: int):
-    with current_app.app_context():
-        category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
+    category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
     try:
-        delete_response = category_manager.delete(public_id=public_id)
+        delete_response = category_manager.delete(public_id=PublicID(public_id))
         api_response = DeleteSingleResponse(raw=delete_response.raw_result, model=CategoryDAO.MODEL)
     except ManagerDeleteError as err:
         return abort(404, err.message)
