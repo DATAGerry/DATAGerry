@@ -26,10 +26,14 @@ class CategoryManager(FrameworkManager):
     def __init__(self, database_manager: DatabaseManagerMongo):
         super(CategoryManager, self).__init__(CategoryDAO.COLLECTION, database_manager=database_manager)
 
-    def get_many(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> List[CategoryDAO]:
+    def get_many(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
+            -> List[CategoryDAO]:
         return [CategoryDAO.from_data(category) for category in
                 super(CategoryManager, self).get_many(filter=filter, limit=limit, skip=skip, sort=sort, order=order)]
 
     def get(self, public_id: Union[PublicID, int]) -> CategoryDAO:
         result = super(CategoryManager, self).get(public_id=public_id)
         return CategoryDAO.from_data(result)
+
+    def insert(self, category: dict) -> PublicID:
+        return super(CategoryManager, self).insert(category)

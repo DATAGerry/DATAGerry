@@ -17,18 +17,20 @@ from typing import List, Union
 
 from cmdb.framework import CmdbType
 from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.framework.utils import Model
 
 
 class CategoryDAO(CmdbDAO):
     """
     Category
     """
-    COLLECTION = 'framework.categories'
-    SCHEMA = {
+    COLLECTION: str = 'framework.categories'
+    MODEL: Model = 'Category'
+    SCHEMA: dict = {
         'name': {
             'type': 'string',
             'required': True,
-            'regex': '(\w+)-*(\w)([\w-]*)'  # kebab case validation
+            'regex': '(\w+)-*(\w)([\w-]*)'  # kebab case validation,
         },
         'label': {
             'type': 'string',
@@ -36,11 +38,13 @@ class CategoryDAO(CmdbDAO):
         },
         'parent': {
             'type': 'integer',
-            'nullable': True
+            'nullable': True,
+            'default': None
         },
         'types': {
             'type': 'list',
-            'empty': True
+            'empty': True,
+            'default': []
         },
         'meta': {
             'type': 'dict',

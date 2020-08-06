@@ -25,9 +25,11 @@ from cmdb.framework.dao.category import CategoryDAO, CategoryTree
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerUpdateError, \
     ObjectManagerInitError, ObjectManagerDeleteError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.framework.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError
 from cmdb.framework.manager.category_manager import CategoryManager
+from cmdb.framework.utils import PublicID
 from cmdb.interface.api_parameters import CollectionParameters
-from cmdb.interface.response import GetSingleResponse, GetMultiResponse
+from cmdb.interface.response import GetSingleResponse, GetMultiResponse, InsertSingleResponse, DeleteSingleResponse
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user, \
     right_required
 from cmdb.interface.blueprint import APIBlueprint
@@ -41,15 +43,18 @@ LOGGER = logging.getLogger(__name__)
 categories_blueprint = APIBlueprint('categories', __name__)
 
 
-
 @categories_blueprint.route('/', methods=['GET'])
 @categories_blueprint.protect(auth=True, right='base.framework.category.view')
 @categories_blueprint.parse_collection_parameters()
 def get_categories(params: CollectionParameters):
     """HTTP GET call for all categories without any kind of selection"""
-    categories_list: List[CategoryDAO] = category_manager.get_many(params.filter, limit=params.limit, skip=params.skip,
-                                                                   sort=params.sort, order=params.order)
-    api_response = GetMultiResponse([CategoryDAO.to_json(category) for category in categories_list], 10)
+    try:
+        categories_list: List[CategoryDAO] = category_manager.get_many(
+            params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    api_response = GetMultiResponse([CategoryDAO.to_json(category) for category in categories_list], 10,
+                                    model=CategoryDAO.MODEL)
     return api_response.make_response()
 
 
@@ -57,8 +62,11 @@ def get_categories(params: CollectionParameters):
 @categories_blueprint.protect(auth=True, right='base.framework.category.view')
 def get_category(public_id: int):
     """HTTP GET call for a single category by the public id"""
-    category_instance = category_manager.get(public_id)
-    api_response = GetSingleResponse(CategoryDAO.to_json(category_instance))
+    try:
+        category_instance = category_manager.get(public_id)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    api_response = GetSingleResponse(CategoryDAO.to_json(category_instance), model=CategoryDAO.MODEL)
     return api_response.make_response()
 
 
@@ -66,8 +74,12 @@ def get_category(public_id: int):
 @categories_blueprint.protect(auth=True, right='base.framework.category.add')
 @categories_blueprint.validate(CategoryDAO.SCHEMA)
 def insert_category(document: dict):
-    print(document)
-    return ""
+    try:
+        result_id: PublicID = category_manager.insert(document)
+    except ManagerInsertError as err:
+        return abort(400, err.message)
+    api_response = InsertSingleResponse(result_id, model=CategoryDAO.MODEL)
+    return api_response.make_response(prefix='category')
 
 
 @categories_blueprint.route('/', methods=['PUT'])
@@ -94,15 +106,13 @@ def update_category(request_user: User):
     return resp
 
 
-@categories_blueprint.route('/<int:public_id>/', methods=['DELETE'])
 @categories_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@login_required
-@insert_request_user
-@right_required('base.framework.category.delete')
-def delete_category(public_id: int, request_user: User):
+@categories_blueprint.protect(auth=True, right='base.framework.category.delete')
+def delete_category(public_id: int):
     """HTTP DELETE call"""
     try:
-        delete_response = object_manager.delete_category(public_id)
-    except ObjectManagerDeleteError as err:
-        return abort(400, err.message)
-    return make_response(delete_response)
+        delete_response = category_manager.delete(public_id)
+        api_response = DeleteSingleResponse(raw=delete_response.raw_result, model=CategoryDAO.MODEL)
+    except ManagerDeleteError as err:
+        return abort(404, err.message)
+    return api_response.make_response()

@@ -22,7 +22,6 @@ from cmdb.framework.manager import ManagerBase
 from cmdb.framework.utils import PublicID, Collection
 from cmdb.search import Query, Pipeline
 from cmdb.search.query.builder import Builder
-from cmdb.search.query.pipe_builder import PipelineBuilder
 
 C = TypeVar('C', bound=CmdbDAO)
 
@@ -31,17 +30,34 @@ class FrameworkQueryBuilder(Builder):
     """Query/Pipeline builder class for the framework manager"""
 
     def __init__(self):
+        """Init a query or a pipeline to None"""
         self.query: Union[Query, Pipeline] = None
         super(FrameworkQueryBuilder, self).__init__()
 
     def __len__(self):
+        """Get the length of the query"""
         return len(self.query)
 
     def clear(self):
+        """`Delete` the query content"""
         self.query = None
 
     def build(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> \
             Union[Query, Pipeline]:
+        """
+        Converts the parameters from the call to a mongodb aggregation pipeline
+        Args:
+            filter: dict query which the elements have to match.
+            limit: max number of documents to return.
+            skip: number of documents to skip first.
+            sort: sort field
+            order: sort order
+            *args:
+            **kwargs:
+
+        Returns:
+            The `FrameworkQueryBuilder` query pipeline with the parameter contents.
+        """
         self.clear()
         self.query = Pipeline([])
         self.query.append(self.match_(filter))
@@ -55,20 +71,59 @@ class FrameworkQueryBuilder(Builder):
 
 
 class FrameworkManager(ManagerBase):
+    """Framework manager implementation for all framework based CRUD operations."""
 
     def __init__(self, collection: Collection, database_manager: DatabaseManagerMongo):
+        """
+        Set the collection name and the database connection.
+        Args:
+            collection: Name of the database collection
+            database_manager: Active database manager instance
+        """
         self.collection: Collection = collection
         self.query_builder = FrameworkQueryBuilder()
         super(FrameworkManager, self).__init__(database_manager)
 
     def get_many(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs):
+        """
+        Get multi elements from a collection by passed parameters.
+        If you want to get all elements in a collection, just pass a empty dict as filter.
+        Args:
+            filter: match requirements of field values
+            limit: max number of elements to return
+            skip: number of elements to skip first
+            sort: sort field
+            order: sort order
+            *args:
+            **kwargs:
+
+        Returns:
+            List of raw element data as a list of dicts
+        """
         query: Query = self.query_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
         collection_result = super(FrameworkManager, self)._aggregate(self.collection, query)
         collection_result.next()
         return collection_result
 
     def get(self, public_id: PublicID):
+        """
+        Get a single element by its id
+        Args:
+            public_id: ID of the element inside the datbase
+
+        Returns:
+            Raw result of the element
+        """
         cursor_result = super(FrameworkManager, self)._get(self.collection, filter={'public_id': public_id}, limit=1)
         for resource_result in cursor_result.limit(-1):
             return resource_result
         return None
+
+    def insert(self, instance: dict) -> PublicID:
+        return super(FrameworkManager, self)._insert(self.collection, instance)
+
+    def update(self):
+        pass
+
+    def delete(self, public_id: PublicID):
+        return super(FrameworkManager, self)._delete(self.collection, public_id=public_id)
