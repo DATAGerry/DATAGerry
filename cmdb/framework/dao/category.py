@@ -30,7 +30,7 @@ class CategoryDAO(CmdbDAO):
         'name': {
             'type': 'string',
             'required': True,
-            'regex': '(\w+)-*(\w)([\w-]*)'  # kebab case validation,
+            'regex': r'(\w+)-*(\w)([\w-]*)'  # kebab case validation,
         },
         'label': {
             'type': 'string',
@@ -153,7 +153,7 @@ class CategoryDAO(CmdbDAO):
 
     def has_parent(self) -> bool:
         """Check if category has parent"""
-        return True if self.parent else False
+        return bool(self.parent)
 
     def get_parent(self) -> int:
         """Get the public id of the parent"""
