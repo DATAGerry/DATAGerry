@@ -25,6 +25,8 @@ from cmdb.interface import DEFAULT_MIME_TYPE
 
 
 # TODO: develop a error based response concept - MH
+from cmdb.interface.pagination import APIPagination
+
 
 def make_api_response(view, status: int = 200, mime: str = None) -> BaseResponse:
     response = flask_response(dumps(view), status)
@@ -95,12 +97,13 @@ class GetSingleResponse(BaseAPIResponse):
 
 
 class GetMultiResponse(BaseAPIResponse):
-    __slots__ = 'results', 'count', 'total'
+    __slots__ = 'results', 'count', 'total', 'pagination'
 
-    def __init__(self, results: List[dict], total: int, model: Model = None):
+    def __init__(self, results: List[dict], total: int, pagination: APIPagination, model: Model = None):
         self.results: List[dict] = results
         self.count: int = len(self.results)
         self.total: int = total
+        self.pagination: APIPagination = pagination
         super(GetMultiResponse, self).__init__(operation_type=OperationType.GET, model=model)
 
     def make_response(self) -> BaseResponse:

@@ -19,6 +19,7 @@ from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework import CategoryDAO
 from cmdb.framework.manager import ManagerGetError
 from cmdb.framework.manager.framework_manager import FrameworkManager
+from cmdb.framework.manager.results import IterationResult
 from cmdb.framework.utils import PublicID
 
 
@@ -27,17 +28,14 @@ class CategoryManager(FrameworkManager):
     def __init__(self, database_manager: DatabaseManagerMongo):
         super(CategoryManager, self).__init__(CategoryDAO.COLLECTION, database_manager=database_manager)
 
-    def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs):
-        aggregation_response = next(
-            super(CategoryManager, self).iterate(filter=filter, limit=limit, skip=skip, sort=sort, order=order))
-        print(aggregation_response)
-        aggregation_response['data'] = [CategoryDAO.from_data(category) for category in aggregation_response['data']]
-        return aggregation_response
+    def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
+            -> IterationResult[CategoryDAO]:
+        iteration_result: IterationResult[CategoryDAO] = super(CategoryManager, self).iterate(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+        iteration_result.convert_to(CategoryDAO)
+        return iteration_result
 
     def get(self, public_id: Union[PublicID, int]) -> CategoryDAO:
         result = super(CategoryManager, self).get(public_id=public_id)
-        if not result:
-            raise ManagerGetError('Category not found!')
         return CategoryDAO.from_data(result)
 
     def insert(self, category: dict) -> PublicID:

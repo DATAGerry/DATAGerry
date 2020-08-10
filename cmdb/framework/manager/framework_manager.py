@@ -18,7 +18,9 @@ from typing import Union, List
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.manager import ManagerBase, ManagerGetError
-from cmdb.framework.manager.error.framework_errors import FrameworkGetError, FrameworkNotFoundError
+from cmdb.framework.manager.error.framework_errors import FrameworkGetError, FrameworkNotFoundError, \
+    FrameworkIterationError
+from cmdb.framework.manager.results import IterationResult
 from cmdb.framework.utils import PublicID, Collection
 from cmdb.search import Query, Pipeline
 from cmdb.search.query.builder import Builder
@@ -29,7 +31,7 @@ class FrameworkQueryBuilder(Builder):
 
     def __init__(self):
         """Init a query or a pipeline to None"""
-        self.query: Union[Query, Pipeline] = Query({})
+        self.query: Union[Query, Pipeline] = Pipeline([])
         super(FrameworkQueryBuilder, self).__init__()
 
     def __len__(self):
@@ -61,8 +63,8 @@ class FrameworkQueryBuilder(Builder):
         self.query.append(self.match_(filter))
         self.query.append(self.sort_(sort=sort, order=order))
         self.query.append(self.facet_({
-            'meta': self.count_('total'),
-            'data': [self.skip_(skip), self.limit_(limit)]
+            'meta': [self.count_('total')],
+            'results': [self.skip_(skip), self.limit_(limit)]
         }))
         return self.query
 
@@ -78,13 +80,16 @@ class FrameworkManager(ManagerBase):
             database_manager: Active database manager instance
         """
         self.collection: Collection = collection
-        self.query_builder = FrameworkQueryBuilder()
+        self.builder = FrameworkQueryBuilder()
         super(FrameworkManager, self).__init__(database_manager)
 
-    def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs):
+    def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult:
         """
         Get multi elements from a collection by passed parameters.
-        If you want to get all elements in a collection, just pass a empty dict as filter.
+
+        Notes:
+            If you want to get all elements in a collection, just pass a empty dict as filter.
+
         Args:
             filter: match requirements of field values
             limit: max number of elements to return
@@ -95,11 +100,17 @@ class FrameworkManager(ManagerBase):
             **kwargs:
 
         Returns:
-            List of raw element data as a list of dicts
+            IterationResult
+
+        Raises:
+            FrameworkIterationError - if something happens during the database aggregation.
         """
-        query: Query = self.query_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-        collection_result = super(FrameworkManager, self)._aggregate(self.collection, query)
-        return collection_result
+        try:
+            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            aggregation_result = super(FrameworkManager, self)._aggregate(self.collection, query)
+        except ManagerGetError as err:
+            raise FrameworkIterationError(err=err)
+        return IterationResult.from_aggregation(aggregation_result)
 
     def get_many(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwarg) -> List[CmdbDAO]:
         try:
@@ -108,7 +119,7 @@ class FrameworkManager(ManagerBase):
             raise FrameworkGetError(err)
         return list(cursor_result)
 
-    def get(self, public_id: PublicID) -> CmdbDAO:
+    def get(self, public_id: PublicID) -> dict:
         """
         Get a single framework resource by its id.
         Args:

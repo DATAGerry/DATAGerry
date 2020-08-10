@@ -51,3 +51,18 @@ class FrameworkNotFoundError(FrameworkGetError):
     def __init__(self, message):
         self.message = message
         super(FrameworkNotFoundError, self).__init__()
+
+
+class FrameworkIterationError(FrameworkGetError):
+    """Framework error if the iteration over the collection throws an error"""
+
+    def __init__(self, err: Exception = None):
+        super(FrameworkIterationError, self).__init__(err=err)
+
+
+class FrameworkIterationOutOfBoundsError(FrameworkGetError):
+    """Framework error if a skip bigger than the total number of elements was called"""
+
+    def __init__(self, message: str = '', err: Exception = None):
+        self.message = message
+        super(FrameworkIterationOutOfBoundsError, self).__init__(err=err)
