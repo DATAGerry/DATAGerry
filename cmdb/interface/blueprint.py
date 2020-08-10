@@ -50,10 +50,13 @@ class APIBlueprint(Blueprint):
         return _validate
 
     @classmethod
-    def parse_collection_parameters(cls):
+    def parse_collection_parameters(cls, **optional):
         """
         Wrapper function for the flask routes.
         Auto parses the collection based parameters to the route.
+
+        Args:
+            **optional: dict of optional collection parameters for given route function.
         """
 
         def _parse(f):
@@ -61,7 +64,7 @@ class APIBlueprint(Blueprint):
             def _decorate(*args, **kwargs):
                 try:
                     params = CollectionParameters.from_http(
-                        str(request.query_string, 'utf-8'), **request.args.to_dict()
+                        str(request.query_string, 'utf-8'), **{**optional, **request.args.to_dict()}
                     )
                 except Exception as e:
                     return abort(400, str(e))

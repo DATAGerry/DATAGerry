@@ -13,25 +13,30 @@ class SortOrder(Enum):
 class ApiParameters:
     """Rest API Parameter superclass"""
 
-    def __init__(self, query_string: Parameter = None, **filter):
+    def __init__(self, query_string: Parameter = None, **kwargs):
         self.query_string: Parameter = query_string or Parameter('')
-        self.filter: dict = filter or {}
+        self.optional = kwargs
+
+    @classmethod
+    def from_http(cls, *args, **kwargs) -> "ApiParameters":
+        raise NotImplementedError
 
     def __repr__(self):
-        return f'Parameters: Query({self.query_string}) | Filter({self.filter})'
+        return f'Parameters: Query({self.query_string}) | Optional({self.optional})'
 
 
 class CollectionParameters(ApiParameters):
     """Rest API class for collection parsing"""
 
     def __init__(self, query_string: Parameter, limit: int = None, sort: str = None,
-                 order: int = None, page: int = None, **filter):
+                 order: int = None, page: int = None, filter: dict = None, **kwargs):
         self.limit: int = int(limit or 10)
         self.sort: str = sort or Parameter('public_id')
         self.order: int = int(order or SortOrder.ASCENDING.value)
         self.page: int = int(page or 1)
         self.skip: int = (self.page - 1) * self.limit
-        super(CollectionParameters, self).__init__(query_string=query_string, **filter)
+        self.filter: dict = filter or {}
+        super(CollectionParameters, self).__init__(query_string=query_string, **kwargs)
 
     @classmethod
     def from_http(cls, query_string: str, **parameters) -> "CollectionParameters":
