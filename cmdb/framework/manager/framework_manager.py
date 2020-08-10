@@ -13,17 +13,15 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from typing import TypeVar, Union
-from functools import wraps
+from typing import Union, List
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
-from cmdb.framework import CmdbDAO
-from cmdb.framework.manager import ManagerBase
+from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.framework.manager import ManagerBase, ManagerGetError
+from cmdb.framework.manager.error.framework_errors import FrameworkGetError, FrameworkNotFoundError
 from cmdb.framework.utils import PublicID, Collection
 from cmdb.search import Query, Pipeline
 from cmdb.search.query.builder import Builder
-
-C = TypeVar('C', bound=CmdbDAO)
 
 
 class FrameworkQueryBuilder(Builder):
@@ -31,7 +29,7 @@ class FrameworkQueryBuilder(Builder):
 
     def __init__(self):
         """Init a query or a pipeline to None"""
-        self.query: Union[Query, Pipeline] = None
+        self.query: Union[Query, Pipeline] = Query({})
         super(FrameworkQueryBuilder, self).__init__()
 
     def __len__(self):
@@ -62,9 +60,8 @@ class FrameworkQueryBuilder(Builder):
         self.query = Pipeline([])
         self.query.append(self.match_(filter))
         self.query.append(self.sort_(sort=sort, order=order))
-        # TODO: Calculate page
         self.query.append(self.facet_({
-            'meta': [self.count_('total'), {'$addFields': {'page': 1}}],
+            'meta': self.count_('total'),
             'data': [self.skip_(skip), self.limit_(limit)]
         }))
         return self.query
@@ -84,7 +81,7 @@ class FrameworkManager(ManagerBase):
         self.query_builder = FrameworkQueryBuilder()
         super(FrameworkManager, self).__init__(database_manager)
 
-    def get_many(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs):
+    def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs):
         """
         Get multi elements from a collection by passed parameters.
         If you want to get all elements in a collection, just pass a empty dict as filter.
@@ -102,22 +99,38 @@ class FrameworkManager(ManagerBase):
         """
         query: Query = self.query_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
         collection_result = super(FrameworkManager, self)._aggregate(self.collection, query)
-        collection_result.next()
         return collection_result
 
-    def get(self, public_id: PublicID):
+    def get_many(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwarg) -> List[CmdbDAO]:
+        try:
+            cursor_result = super(FrameworkManager, self)._get(filter, limit, skip, sort, order, *args, **kwarg)
+        except ManagerGetError as err:
+            raise FrameworkGetError(err)
+        return list(cursor_result)
+
+    def get(self, public_id: PublicID) -> CmdbDAO:
         """
-        Get a single element by its id
+        Get a single framework resource by its id.
         Args:
-            public_id: ID of the element inside the datbase
+            public_id: ID of the element inside the database.
 
         Returns:
-            Raw result of the element
+            Raw result of the element.
+
+        Raises:
+            - FrameworkGetError if something breaks with loading the resource from the database.
+            - FrameworkNotFoundError if the PublicID is not in the selected database collection.
         """
-        cursor_result = super(FrameworkManager, self)._get(self.collection, filter={'public_id': public_id}, limit=1)
+        try:
+            cursor_result = super(FrameworkManager, self)._get(self.collection, filter={'public_id': public_id},
+                                                               limit=1)
+        except ManagerGetError as err:
+            raise FrameworkGetError(err)
         for resource_result in cursor_result.limit(-1):
             return resource_result
-        return None
+        else:
+            raise FrameworkNotFoundError(
+                f'A resource with the PublicID {public_id} was not found inside {self.collection}')
 
     def insert(self, instance: dict) -> PublicID:
         return super(FrameworkManager, self)._insert(self.collection, instance)

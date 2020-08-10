@@ -17,14 +17,14 @@ from typing import List, Union
 
 from cmdb.framework import CmdbType
 from cmdb.framework.cmdb_dao import CmdbDAO
-from cmdb.framework.utils import Model
+from cmdb.framework.utils import Model, Collection
 
 
 class CategoryDAO(CmdbDAO):
     """
     Category
     """
-    COLLECTION: str = 'framework.categories'
+    COLLECTION: Collection = 'framework.categories'
     MODEL: Model = 'Category'
     SCHEMA: dict = {
         'name': {

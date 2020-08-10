@@ -15,8 +15,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+from typing import Union
 
-from cmdb.framework.utils import Model
+from cmdb.framework.utils import Model, Collection
 
 try:
     from cmdb.utils.error import CMDBError
@@ -46,7 +47,7 @@ class CmdbDAO:
 
     DAO_ASCENDING = 1
     DAO_DESCENDING = -1
-    COLLECTION: str = 'framework.*'
+    COLLECTION: Union[str, Collection] = 'framework.*'
     MODEL: Model = ''
     SCHEMA: dict = {}
     __SUPER_INIT_KEYS = [

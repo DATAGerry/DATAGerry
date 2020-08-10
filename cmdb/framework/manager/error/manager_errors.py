@@ -22,26 +22,26 @@ from cmdb.utils.error import CMDBError
 class ManagerGetError(CMDBError):
     """Manager exception for get operations"""
 
-    def __init__(self, err):
+    def __init__(self, err=None):
         self.message = f'Error while GET operation - E: {err}'
 
 
 class ManagerInsertError(CMDBError):
     """Manager exception for insert operations"""
 
-    def __init__(self, err):
+    def __init__(self, err=None):
         self.message = f'Error while INSERT operation - E: {err}'
 
 
 class ManagerUpdateError(CMDBError):
     """Manager exception for update operations"""
 
-    def __init__(self, err):
+    def __init__(self, err=None):
         self.message = f'Error while UPDATE operation - E: {err}'
 
 
 class ManagerDeleteError(CMDBError):
     """Manager exception for delete operations"""
 
-    def __init__(self, err):
+    def __init__(self, err=None):
         self.message = f'Error while DELETE operation - E: {err}'

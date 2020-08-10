@@ -15,7 +15,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
-from cmdb.framework.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
+from cmdb.framework.manager.error.manager_errors import ManagerGetError, ManagerInsertError, \
+    ManagerUpdateError, ManagerDeleteError
 from cmdb.framework.utils import Collection, PublicID
 
 
@@ -24,8 +25,7 @@ class ManagerBase:
     Manager base class for all core CRUD function.
     Will be replacing `CmdbManagerBase` in the future.
     TODO:
-        - Develop a manager response concept.
-        - Refactor the old cmdb datas to the new concept.
+        - Refactor the old cmdb data to the new concept.
     """
 
     def __init__(self, database_manager: DatabaseManagerMongo):
@@ -42,7 +42,10 @@ class ManagerBase:
         self.__database_manager.connector.disconnect()
 
     def _aggregate(self, collection: Collection, *args, **kwargs):
-        return self.__database_manager.aggregate(collection, *args, **kwargs)
+        try:
+            return self.__database_manager.aggregate(collection, *args, **kwargs)
+        except Exception as err:
+            raise ManagerGetError(err)
 
     def _get(self, collection: Collection, filter=None, *args, **kwargs):
         try:

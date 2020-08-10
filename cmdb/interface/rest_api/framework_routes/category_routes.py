@@ -15,7 +15,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-from typing import List
 
 from flask import abort, current_app
 
@@ -37,12 +36,13 @@ categories_blueprint = APIBlueprint('categories', __name__)
 def get_categories(params: CollectionParameters):
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
     try:
-        categories_list: List[CategoryDAO] = category_manager.get_many(
+        iteration = category_manager.iterate(
             params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+        print(iteration)
     except ManagerGetError as err:
         return abort(404, err.message)
-    api_response = GetMultiResponse([CategoryDAO.to_json(category) for category in categories_list], 10,
-                                    model=CategoryDAO.MODEL)
+    category_list = [CategoryDAO.to_json(category) for category in iteration['data']]
+    api_response = GetMultiResponse(category_list, iteration['meta']['total'], model=CategoryDAO.MODEL)
     return api_response.make_response()
 
 
