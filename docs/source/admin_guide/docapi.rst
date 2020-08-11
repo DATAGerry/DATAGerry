@@ -145,6 +145,47 @@ following example CSSs:
         size: 80mm 60mm;
     }
 
+
+
+Advanced Layouts
+----------------
+For advanced, custom layouts, the xhtml2pdf library introduces the frame concept. Define *div* elements in your HTML and
+give them an ID as you can see in the following example:
+
+.. code-block:: html
+
+    <div id="header_left">
+        <p><img src="blob:http://127.0.0.1:4200/c79d0ae1-9e16-48d4-98d3-e706d7584959" alt="" width="203" height="61" /></p>
+    </div>
+    <div id="header_right">
+        <p><img src="blob:http://127.0.0.1:4200/7cb05eec-8ee1-4dc9-8e2b-f0aabb0154be" alt="" width="205" height="41" /></p>
+    </div>
+
+
+These elements then can be positioned exactly in the CSS section:
+
+.. code-block:: css
+
+    @page {
+        @frame header_left {
+            left: 0px; 
+            top: 0px;
+            width: 300px;
+            height: 100px;
+            -pdf-frame-content: header_left;
+        }
+
+        @frame header_right {
+            left: 400px; 
+            top: 0px;
+            width: 300px;
+            height: 100px;
+            -pdf-frame-content: header_right;
+        }
+    }
+
+
+    
 Custom Fonts
 ------------
 To use custom fonts, please make them available to the DATAGERRY server via HTTP. With the @font-face keyword, the font
