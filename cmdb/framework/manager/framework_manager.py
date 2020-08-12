@@ -114,7 +114,7 @@ class FrameworkManager(ManagerBase):
 
     def get_many(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwarg) -> List[CmdbDAO]:
         try:
-            cursor_result = super(FrameworkManager, self)._get(filter, limit, skip, sort, order, *args, **kwarg)
+            cursor_result = super(FrameworkManager, self)._get(self.collection, filter, limit, skip, sort, order, *args, **kwarg)
         except ManagerGetError as err:
             raise FrameworkGetError(err)
         return list(cursor_result)
