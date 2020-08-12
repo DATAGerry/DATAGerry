@@ -12,15 +12,15 @@
             <cmdb-object-externals [renderResult]="renderResult"></cmdb-object-externals>
           </div>
           <!-- Attachments widget-->
-          <div class="col-xl-2 col-md-4 col-6 border-left pt-1">
+          <div class="col-xl-2 col-md-6 col-6 border-left pt-1">
             <cmdb-object-attachments></cmdb-object-attachments>
           </div>
           <!-- Documents widget-->
-          <div class="col-xl-2 col-md-4 col-6 border-left pt-1">
+          <div class="docsWidget col-xl-2 col-md-6 col-6 border-left pt-1">
             <cmdb-object-docs *permissionLink="['base.docapi.template.view']" [renderResult]="renderResult"></cmdb-object-docs>
           </div>
           <!-- Cube widget-->
-          <div class="col-xl-2 col-md-4 col-6 border-left pt-1 last-widget">
+          <div class="col-xl-2 col-md-6 col-6 border-left pt-1 last-widget">
             <div class="d-flex justify-content-center">
               <cmdb-object-type-label [typeInformation]="renderResult?.type_information"></cmdb-object-type-label>
             </div>

@@ -54,9 +54,14 @@ label {
   button:hover {
     color: $sidebar-nav-link-bg-hover-color;
   }
+  div:empty.last-widget {
+    display: none;
+  }
 }
 
-@media (max-width: 768px) {
+/* Medium devices (landscape tablets, 768px and up) */
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media (max-width: 768px), (max-width: 1200px) {
   .object-view-navbar{
     span {
       font-size: 0.9em;
@@ -64,11 +69,14 @@ label {
     .justify-object-view-items {
       justify-content: start !important;
     }
-    .last-widget {
+
+    .docsWidget:not(:empty) + .last-widget {
       display: none;
     }
+
     .display-3 {
       font-size: 2rem !important;
     }
   }
 }
+
