@@ -20,6 +20,7 @@ definition of object types to the user.
     :name: guides
 
 .. toctree::
-    api/index
+    api/introduction
+    api/rest/index
     :caption: API
     :name: api

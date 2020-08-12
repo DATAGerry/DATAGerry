@@ -1,6 +1,11 @@
-.. api:
+.. api-rest:
+
+****
+REST
+****
 
 .. toctree::
-    framework/index
+    framework
+
     :caption: Framework
     :name: framework

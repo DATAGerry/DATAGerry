@@ -28,6 +28,7 @@ class APIPager:
     def __init__(self, page: int, page_size: int, total_pages: int = None):
         """
         Constructor of the APIPager.
+
         Args:
             page: Current page number.
             page_size: Number of elements on this page.
@@ -62,6 +63,7 @@ class APIPagination:
     def __update_query(query: str, key: str, value: Any) -> str:
         """
         Update any query string parameter
+
         Args:
             query: query string
             key: key which will be changes
@@ -78,6 +80,7 @@ class APIPagination:
     def __set_page(query: str, page: int):
         """
         Set the query page parameter
+
         Args:
             query: query string
             page: page value
@@ -125,6 +128,7 @@ class APIPagination:
     def create(cls, url: str, page: int, total_pages: int):
         """
         Create a APIPagination from the url and the pager data
+
         Args:
             url: Full url path
             page: current page number

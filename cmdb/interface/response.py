@@ -58,7 +58,9 @@ class BaseAPIResponse:
         self.time: str = datetime.now().isoformat()
 
     def make_response(self, *args, **kwargs) -> BaseResponse:
-        """Abstract method for http response
+        """
+        Abstract method for http response
+
         Returns:
             http BaseResponse
         """
@@ -67,6 +69,7 @@ class BaseAPIResponse:
     def export(self, text: str = 'json') -> dict:
         """
         Get the raw information about this response.
+
         Args:
             text: return type - not used at the moment
 
