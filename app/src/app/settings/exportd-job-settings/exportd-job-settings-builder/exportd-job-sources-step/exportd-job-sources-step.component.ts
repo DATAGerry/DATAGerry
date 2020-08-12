@@ -16,11 +16,12 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnInit} from '@angular/core';
-import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {CmdbMode} from '../../../../framework/modes.enum';
-import {CmdbType} from '../../../../framework/models/cmdb-type';
-import {TypeService} from '../../../../framework/services/type.service';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { CmdbMode } from '../../../../framework/modes.enum';
+import { CmdbType } from '../../../../framework/models/cmdb-type';
+import { TypeService } from '../../../../framework/services/type.service';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -28,7 +29,9 @@ import {TypeService} from '../../../../framework/services/type.service';
   templateUrl: './exportd-job-sources-step.component.html',
   styleUrls: ['./exportd-job-sources-step.component.scss']
 })
-export class ExportdJobSourcesStepComponent implements OnInit {
+export class ExportdJobSourcesStepComponent implements OnInit, OnDestroy {
+
+  private typeSubscription: Subscription;
 
   @Input()
   set preData(data: any) {
@@ -49,7 +52,7 @@ export class ExportdJobSourcesStepComponent implements OnInit {
 
         // Create condition
         let i = 0;
-        while ( i < forArray.controls.length) {
+        while (i < forArray.controls.length) {
           for (const item of data.sources[i].condition) {
             const control = forArray.controls[i].get('condition') as FormArray;
             control.push(this.createCondition());
@@ -64,27 +67,30 @@ export class ExportdJobSourcesStepComponent implements OnInit {
   }
 
   @Input() public mode: CmdbMode;
-  public typeList: CmdbType[] = [];
+  public typeList: CmdbType[];
   public operators: any[] = ['!=', '=='];
   public sourcesForm: FormGroup;
   readonly SOURCES = 'sources';
 
-  constructor(private formBuilder: FormBuilder, private typeService: TypeService) {}
+  constructor(private formBuilder: FormBuilder, private typeService: TypeService) {
+    this.typeSubscription = new Subscription();
+    this.typeList = [];
+  }
 
-  ngOnInit() {
+  public ngOnInit(): void {
     this.sourcesForm = this.formBuilder.group({
       sources: this.formBuilder.array([this.createSource()])
     });
-    this.typeService.getTypeList().subscribe((value: CmdbType[]) => this.typeList = value);
+    this.typeSubscription = this.typeService.getTypeList().subscribe((value: CmdbType[]) => this.typeList = value);
 
     if (this.mode === CmdbMode.Create) {
       this.delCondition(0, 0);
     }
   }
 
-  public getFields(item: any) {
+  public getFields(publicID: any) {
     try {
-      return this.typeService.findType(item).fields;
+      return this.typeList.find(id => id.public_id === publicID).fields;
     } catch (e) {
       return [];
     }
@@ -127,5 +133,9 @@ export class ExportdJobSourcesStepComponent implements OnInit {
   public delCondition(index, event): void {
     const control = this.getSourceAsFormArray().at(event).get('condition') as FormArray;
     control.removeAt(index);
+  }
+
+  public ngOnDestroy(): void {
+    this.typeSubscription.unsubscribe();
   }
 }
