@@ -46,9 +46,8 @@ def get_categories(params: CollectionParameters):
     except ManagerGetError as err:
         return abort(404, err.message)
     category_list = [CategoryDAO.to_json(category) for category in iteration_result.results]
-    pagination: APIPagination = APIPagination.create(request.url, params=params, total=iteration_result.total)
     api_response = GetMultiResponse(category_list, total=iteration_result.total, page=params.page, limit=params.limit,
-                                    pagination=pagination, model=CategoryDAO.MODEL)
+                                    url=request.url, model=CategoryDAO.MODEL)
     return api_response.make_response()
 
 

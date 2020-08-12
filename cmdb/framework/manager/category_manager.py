@@ -30,7 +30,8 @@ class CategoryManager(FrameworkManager):
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
             -> IterationResult[CategoryDAO]:
-        iteration_result: IterationResult[CategoryDAO] = super(CategoryManager, self).iterate(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+        iteration_result: IterationResult[CategoryDAO] = super(CategoryManager, self).iterate(
+            filter=filter, limit=limit, skip=skip, sort=sort, order=order)
         iteration_result.convert_to(CategoryDAO)
         return iteration_result
 

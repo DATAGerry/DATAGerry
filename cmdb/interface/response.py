@@ -24,7 +24,7 @@ from werkzeug.wrappers import BaseResponse
 from cmdb.framework.utils import PublicID, Model
 from cmdb.interface import DEFAULT_MIME_TYPE
 
-from cmdb.interface.pagination import APIPagination
+from cmdb.interface.pagination import APIPagination, APIPager
 
 
 def make_api_response(view, status: int = 200, mime: str = None) -> BaseResponse:
@@ -97,16 +97,14 @@ class GetSingleResponse(BaseAPIResponse):
 
 
 class GetMultiResponse(BaseAPIResponse):
-    __slots__ = 'results', 'count', 'total', 'page', 'total_pages', 'pagination'
+    __slots__ = 'results', 'count', 'total', 'pager', 'pagination'
 
-    def __init__(self, results: List[dict], total: int, page: int, limit: int, pagination: APIPagination,
-                 url: str = None, model: Model = None):
+    def __init__(self, results: List[dict], total: int, page: int, limit: int, url: str = None, model: Model = None):
         self.results: List[dict] = results
         self.count: int = len(self.results)
         self.total: int = total
-        self.page: int = page
-        self.total_pages: int = ceil(total / limit)
-        self.pagination: APIPagination = pagination
+        self.pager: APIPager = APIPager(page=page, page_size=limit, total_pages=ceil(total / limit))
+        self.pagination: APIPagination = APIPagination.create(url, self.pager.page, self.pager.total_pages)
         super(GetMultiResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model)
 
     def make_response(self) -> BaseResponse:
@@ -117,8 +115,7 @@ class GetMultiResponse(BaseAPIResponse):
             'results': self.results,
             'count': self.count,
             'total': self.total,
-            'page': self.page,
-            'total_pages': self.total_pages,
+            'pager': self.pager.to_dict(),
             'pagination': self.pagination.to_dict()
         }, **super(GetMultiResponse, self).export()}
 

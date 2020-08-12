@@ -114,7 +114,8 @@ class FrameworkManager(ManagerBase):
 
     def get_many(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwarg) -> List[CmdbDAO]:
         try:
-            cursor_result = super(FrameworkManager, self)._get(self.collection, filter, limit, skip, sort, order, *args, **kwarg)
+            cursor_result = super(FrameworkManager, self)._get(self.collection, filter, limit, skip, sort, order, *args,
+                                                               **kwarg)
         except ManagerGetError as err:
             raise FrameworkGetError(err)
         return list(cursor_result)
@@ -146,8 +147,8 @@ class FrameworkManager(ManagerBase):
     def insert(self, instance: dict) -> PublicID:
         return super(FrameworkManager, self)._insert(self.collection, instance)
 
-    def update(self):
-        pass
+    def update(self, public_id: PublicID, instance: CmdbDAO):
+        return super(FrameworkManager, self)._update(self.collection, filter={'public_id': public_id}, data=instance)
 
     def delete(self, public_id: PublicID):
         return super(FrameworkManager, self)._delete(self.collection, public_id=public_id)
