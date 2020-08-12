@@ -51,11 +51,11 @@ class APIPagination:
     Reference to RFC 5988 and should be used as a cursor.
     """
 
-    def __init__(self, current: str, first, prev=None, next=None, last=None):
+    def __init__(self, current: str, first, prev=None, next_=None, last=None):
         self.current = current
         self.first = first
         self.prev = prev
-        self.next = next
+        self.next = next_
         self.last = last
 
     @staticmethod
@@ -138,7 +138,7 @@ class APIPagination:
         last_url = parse.urlunparse(cls.__last_url(parsed_url, total_pages))
         prev_url = parse.urlunparse(cls.__pre_url(parsed_url, page))
         next_url = parse.urlunparse(cls.__next_url(parsed_url, page, total_pages))
-        return cls(current=url, first=first_url, prev=prev_url, next=next_url, last=last_url)
+        return cls(current=url, first=first_url, prev=prev_url, next_=next_url, last=last_url)
 
     def to_dict(self) -> dict:
         return {
