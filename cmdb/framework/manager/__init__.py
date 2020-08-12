@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+from typing import Any
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.manager.error.manager_errors import ManagerGetError, ManagerInsertError, \
@@ -42,30 +43,81 @@ class ManagerBase:
         self.__database_manager.connector.disconnect()
 
     def _aggregate(self, collection: Collection, *args, **kwargs):
+        """
+        Calls mongodb aggregation
+        Args:
+            collection: Name of the collection
+            *args:
+            **kwargs:
+
+        Returns:
+            - A :class:`~pymongo.command_cursor.CommandCursor` over the result set.
+        """
         try:
             return self.__database_manager.aggregate(collection, *args, **kwargs)
         except Exception as err:
             raise ManagerGetError(err)
 
     def _get(self, collection: Collection, filter=None, *args, **kwargs):
+        """
+        Calls mongodb find operation
+        Args:
+            collection: Name of the collection
+            filter: Match dictionary
+            *args:
+            **kwargs:
+
+        Returns:
+            - A :class:`~pymongo.command_cursor.CommandCursor` over the result set.
+        """
         try:
             return self.__database_manager.find(collection, filter=filter, *args, **kwargs)
         except Exception as err:
             raise ManagerGetError(err)
 
-    def _insert(self, collection: Collection, data):
+    def _insert(self, collection: Collection, data: Any):
+        """
+        Calls mongodb insert operation
+        Args:
+            collection: Name of the collection
+            data: Insert data (normally a dict)
+
+        Returns:
+            - An instance of :class:`~pymongo.results.InsertOneResult`.
+        """
         try:
             return self.__database_manager.insert(collection, data=data)
         except Exception as err:
             raise ManagerInsertError(err)
 
     def _update(self, collection: Collection, filter, data, *args, **kwargs):
+        """
+        Calls a mongodb update operation
+        Args:
+            collection: Name of the collection
+            filter: Match dictionary
+            data: Update data (normally a dict)
+            *args:
+            **kwargs:
+
+        Returns:
+            - An instance of :class:`~pymongo.results.UpdateResult`.
+        """
         try:
             return self.__database_manager.update(collection, filter=filter, data=data, *args, **kwargs)
         except Exception as err:
             raise ManagerUpdateError(err)
 
     def _delete(self, collection: Collection, public_id: PublicID):
+        """
+        Calls a mongodb delete operation
+        Args:
+            collection: Name of the collection
+            public_id: Public ID of Document
+
+        Returns:
+            - An instance of :class:`~pymongo.results.DeleteResult`.
+        """
         try:
             return self.__database_manager.delete(collection, public_id=public_id)
         except Exception as err:
