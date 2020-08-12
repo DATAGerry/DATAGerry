@@ -1,4 +1,5 @@
 @import 'variables';
+@import 'sidebar';
 
 label {
   span.required {
@@ -8,7 +9,7 @@ label {
 }
 
 #object-form-action {
-  display: none;
+  visibility: hidden;
   position: fixed;
   top: calc(#{$navbar-height} - 1px);
   right: 0;
@@ -44,6 +45,14 @@ label {
 
   .justify-object-view-items {
     justify-content: center !important; ;
+    padding-top: 0.5em;
+  }
+
+  button {
+    color: $sidebar-nav-title-color;
+  }
+  button:hover {
+    color: $sidebar-nav-link-bg-hover-color;
   }
 }
 
@@ -54,7 +63,9 @@ label {
     }
     .justify-object-view-items {
       justify-content: start !important;
-      padding-top: 0.5em;
+    }
+    .last-widget {
+      display: none;
     }
     .display-3 {
       font-size: 2rem !important;

@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, EventEmitter, HostListener, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import { Component, EventEmitter, HostListener, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { TypeService } from '../../services/type.service';
 import { CmdbType } from '../../models/cmdb-type';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
@@ -91,13 +91,13 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
 
   }
 
-  @HostListener('window:scroll', ['$event'])
-  onWindowScroll($event) {
+  @HostListener('window:scroll')
+  onWindowScroll() {
     const dialog = document.getElementById('object-form-action');
     if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-      dialog.style.display = 'block';
+      dialog.style.visibility = 'visible';
     } else {
-      dialog.style.display = 'none';
+      dialog.style.visibility = 'hidden';
     }
   }
 

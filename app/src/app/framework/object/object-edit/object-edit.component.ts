@@ -75,9 +75,9 @@ export class ObjectEditComponent implements OnInit {
   onWindowScroll($event) {
     const dialog = document.getElementById('object-form-action');
     if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-      dialog.style.display = 'block';
+      dialog.style.visibility = 'visible';
     } else {
-      dialog.style.display = 'none';
+      dialog.style.visibility = 'hidden';
     }
   }
 
