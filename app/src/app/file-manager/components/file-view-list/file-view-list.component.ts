@@ -16,23 +16,27 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { CmdbDao } from '../../framework/models/cmdb-dao';
+import { Component, OnInit } from '@angular/core';
+import { FileElement } from '../../model/file-element';
+import { FileMetadata } from '../../model/metadata';
+import { FileService } from '../../service/file.service';
 
-export class FileMetadata implements CmdbDao {
+@Component({
+  selector: 'cmdb-file-view-list',
+  templateUrl: './file-view-list.component.html',
+  styleUrls: ['./file-view-list.component.scss']
+})
+export class FileViewListComponent implements OnInit {
 
-  // a set of data that describes and gives information about other data.
-  // tslint:disable:variable-name
-  public readonly public_id: number;
-  public reference: number;
-  public reference_type: string;
-  public mime_type: string;
-  public folder: boolean;
-  public parent: number;
-  public author_id: number;
-  public permission: any;
-  // tslint:enable:variable-name
+  public files: FileElement[];
+  private metadata: FileMetadata = new FileMetadata();
 
-  public constructor(init?: Partial<FileMetadata>) {
-    Object.assign(this, init);
+  constructor(private fileService: FileService) { }
+
+  ngOnInit() {
+    this.fileService.getAllFilesList(this.metadata).subscribe((data: any) => {
+      this.files = data;
+    });
   }
+
 }

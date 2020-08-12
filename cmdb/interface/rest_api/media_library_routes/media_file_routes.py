@@ -90,12 +90,32 @@ def add_new_file(request_user: User):
 
         metadata = get_element_from_data_request('metadata', request)
         metadata['author_id'] = request_user.public_id
+        metadata['mime_type'] = file.mimetype
         ack = media_file_manager.insert_media_file(data=file, metadata=metadata)
     except ObjectInsertError:
         return abort(500)
 
     resp = make_response(ack)
     return resp
+
+
+@media_file_blueprint.route('/<string:name>/', methods=['GET'])
+@media_file_blueprint.route('/<string:name>', methods=['GET'])
+@login_required
+def get_type_by_name(name: str):
+    """ Validation: Check folder name for uniqueness
+
+        Args:
+            name: folderName must be unique
+
+        Returns: True if exist else False
+
+        """
+    try:
+        media_file = media_file_manager.exist_media_file(name, {'metadata.folder': True})
+    except ObjectManagerGetError as err:
+        return abort(404, err.message)
+    return make_response(media_file)
 
 
 @media_file_blueprint.route('/download/<path:filename>', methods=['POST'])
