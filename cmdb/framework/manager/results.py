@@ -54,5 +54,6 @@ class IterationResult(Generic[C]):
         Returns:
             A IterationResult instance.
         """
-        aggregation_result = next(aggregation)
-        return cls(aggregation_result['results'], total=aggregation_result['meta'][0]['total'])
+        if len(aggregation['results']) == 0:
+            return cls(aggregation['results'], total=0)
+        return cls(aggregation['results'], total=aggregation['meta'][0]['total'])

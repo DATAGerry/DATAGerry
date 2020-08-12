@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import NewType
+from typing import NewType, List, Union
 
 Parameter = NewType('Parameter', str)
 
@@ -29,13 +29,13 @@ class CollectionParameters(ApiParameters):
     """Rest API class for collection parsing"""
 
     def __init__(self, query_string: Parameter, limit: int = None, sort: str = None,
-                 order: int = None, page: int = None, filter: dict = None, **kwargs):
+                 order: int = None, page: int = None, filter: Union[List[dict], dict] = None, **kwargs):
         self.limit: int = int(limit or 10)
         self.sort: str = sort or Parameter('public_id')
         self.order: int = int(order or SortOrder.ASCENDING.value)
         self.page: int = int((page or 1) or page < 1)
         self.skip: int = (self.page - 1) * self.limit
-        self.filter: dict = filter or {}
+        self.filter: Union[List[dict], dict] = filter or {}
         super(CollectionParameters, self).__init__(query_string=query_string, **kwargs)
 
     @classmethod
@@ -49,4 +49,7 @@ class CollectionParameters(ApiParameters):
         Returns:
             CollectionParameters instance
         """
+        from json import loads
+        if 'filter' in parameters:
+            parameters['filter'] = loads(parameters['filter'])
         return cls(Parameter(query_string), **parameters)

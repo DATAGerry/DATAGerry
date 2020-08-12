@@ -21,7 +21,7 @@ from flask import abort, current_app, request
 from cmdb.framework.dao.category import CategoryDAO
 from cmdb.framework.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError
 from cmdb.framework.manager.category_manager import CategoryManager
-from cmdb.framework.manager.error.framework_errors import FrameworkIterationError
+from cmdb.framework.manager.error.framework_errors import FrameworkIterationError, FrameworkQueryEmptyError
 from cmdb.framework.manager.results import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.interface.api_parameters import CollectionParameters

@@ -53,6 +53,14 @@ class FrameworkNotFoundError(FrameworkGetError):
         super(FrameworkNotFoundError, self).__init__()
 
 
+class FrameworkQueryEmptyError(FrameworkGetError):
+    """Error if a requested query has no results."""
+
+    def __init__(self, message):
+        self.message = message
+        super(FrameworkQueryEmptyError, self).__init__()
+
+
 class FrameworkIterationError(FrameworkGetError):
     """Framework error if the iteration over the collection throws an error"""
 

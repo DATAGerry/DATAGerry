@@ -19,7 +19,7 @@ from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.manager import ManagerBase, ManagerGetError
 from cmdb.framework.manager.error.framework_errors import FrameworkGetError, FrameworkNotFoundError, \
-    FrameworkIterationError
+    FrameworkIterationError, FrameworkQueryEmptyError
 from cmdb.framework.manager.results import IterationResult
 from cmdb.framework.utils import PublicID, Collection
 from cmdb.search import Query, Pipeline
@@ -42,12 +42,12 @@ class FrameworkQueryBuilder(Builder):
         """`Delete` the query content"""
         self.query = None
 
-    def build(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> \
+    def build(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> \
             Union[Query, Pipeline]:
         """
         Converts the parameters from the call to a mongodb aggregation pipeline
         Args:
-            filter: dict query which the elements have to match.
+            filter: dict or list of dict query/queries which the elements have to match.
             limit: max number of documents to return.
             skip: number of documents to skip first.
             sort: sort field
@@ -60,7 +60,13 @@ class FrameworkQueryBuilder(Builder):
         """
         self.clear()
         self.query = Pipeline([])
-        self.query.append(self.match_(filter))
+
+        if isinstance(filter, dict):
+            self.query.append(self.match_(filter))
+        elif isinstance(filter, list):
+            for f in filter:
+                self.query.append(self.match_(f))
+
         self.query.append(self.sort_(sort=sort, order=order))
         self.query.append(self.facet_({
             'meta': [self.count_('total')],
@@ -107,7 +113,7 @@ class FrameworkManager(ManagerBase):
         """
         try:
             query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-            aggregation_result = super(FrameworkManager, self)._aggregate(self.collection, query)
+            aggregation_result = next(super(FrameworkManager, self)._aggregate(self.collection, query))
         except ManagerGetError as err:
             raise FrameworkIterationError(err=err)
         return IterationResult.from_aggregation(aggregation_result)
