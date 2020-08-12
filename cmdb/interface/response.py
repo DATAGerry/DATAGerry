@@ -16,6 +16,7 @@
 from json import dumps
 from datetime import datetime
 from enum import Enum
+from math import ceil
 from typing import List
 from flask import make_response as flask_response
 from werkzeug.wrappers import BaseResponse
@@ -23,8 +24,6 @@ from werkzeug.wrappers import BaseResponse
 from cmdb.framework.utils import PublicID, Model
 from cmdb.interface import DEFAULT_MIME_TYPE
 
-
-# TODO: develop a error based response concept - MH
 from cmdb.interface.pagination import APIPagination
 
 
@@ -48,12 +47,13 @@ class OperationType(Enum):
 
 class BaseAPIResponse:
     """Basic `abstract` response class"""
-    __slots__ = 'operation_type', 'time', 'model'
+    __slots__ = 'url', 'operation_type', 'time', 'model'
 
-    def __init__(self, operation_type: OperationType, model: Model = None):
+    def __init__(self, operation_type: OperationType, url: str = None, model: Model = None):
         if operation_type.value not in set(item.value for item in OperationType):
             raise TypeError(f'{operation_type} is not a valid response operation')
         self.operation_type: OperationType = operation_type
+        self.url = url or ''
         self.model: Model = model or ''
         self.time: str = datetime.now().isoformat()
 
@@ -83,9 +83,9 @@ class BaseAPIResponse:
 class GetSingleResponse(BaseAPIResponse):
     __slots__ = 'result'
 
-    def __init__(self, result: dict, model: Model = None):
+    def __init__(self, result: dict, url: str = None, model: Model = None):
         self.result: dict = result
-        super(GetSingleResponse, self).__init__(operation_type=OperationType.GET, model=model)
+        super(GetSingleResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model)
 
     def make_response(self) -> BaseResponse:
         return make_api_response(self.export())
@@ -97,14 +97,17 @@ class GetSingleResponse(BaseAPIResponse):
 
 
 class GetMultiResponse(BaseAPIResponse):
-    __slots__ = 'results', 'count', 'total', 'pagination'
+    __slots__ = 'results', 'count', 'total', 'page', 'total_pages', 'pagination'
 
-    def __init__(self, results: List[dict], total: int, pagination: APIPagination, model: Model = None):
+    def __init__(self, results: List[dict], total: int, page: int, limit: int, pagination: APIPagination,
+                 url: str = None, model: Model = None):
         self.results: List[dict] = results
         self.count: int = len(self.results)
         self.total: int = total
+        self.page: int = page
+        self.total_pages: int = ceil(total / limit)
         self.pagination: APIPagination = pagination
-        super(GetMultiResponse, self).__init__(operation_type=OperationType.GET, model=model)
+        super(GetMultiResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model)
 
     def make_response(self) -> BaseResponse:
         return make_api_response(self.export())
@@ -113,20 +116,23 @@ class GetMultiResponse(BaseAPIResponse):
         return {**{
             'results': self.results,
             'count': self.count,
-            'total': self.total
+            'total': self.total,
+            'page': self.page,
+            'total_pages': self.total_pages,
+            'pagination': self.pagination.to_dict()
         }, **super(GetMultiResponse, self).export()}
 
 
 class InsertSingleResponse(BaseAPIResponse):
     __slots__ = 'result_id'
 
-    def __init__(self, result_id: PublicID, model: Model = None):
+    def __init__(self, result_id: PublicID, url: str = None, model: Model = None):
         self.result_id: PublicID = result_id
-        super(InsertSingleResponse, self).__init__(operation_type=OperationType.INSERT, model=model)
+        super(InsertSingleResponse, self).__init__(operation_type=OperationType.INSERT, url=url, model=model)
 
     def make_response(self, prefix: str = '') -> BaseResponse:
         response = make_api_response(self.export(), 201)
-        response.headers['location'] = f'/rest/{prefix}/{self.result_id}'
+        response.headers['location'] = f'{self.url}/{self.result_id}'
         return response
 
     def export(self, text: str = 'json') -> dict:
@@ -138,9 +144,9 @@ class InsertSingleResponse(BaseAPIResponse):
 class DeleteSingleResponse(BaseAPIResponse):
     __slots__ = 'raw'
 
-    def __init__(self, raw: dict, model: Model):
+    def __init__(self, raw: dict, url: str = None, model: Model = None):
         self.raw = raw
-        super(DeleteSingleResponse, self).__init__(operation_type=OperationType.DELETE, model=model)
+        super(DeleteSingleResponse, self).__init__(operation_type=OperationType.DELETE, url=url, model=model)
 
     def make_response(self) -> BaseResponse:
         return make_api_response(self.export(), 202)

@@ -16,7 +16,7 @@
 
 import logging
 
-from flask import abort, current_app
+from flask import abort, current_app, request
 
 from cmdb.framework.dao.category import CategoryDAO
 from cmdb.framework.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError
@@ -25,6 +25,7 @@ from cmdb.framework.manager.error.framework_errors import FrameworkIterationErro
 from cmdb.framework.manager.results import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.pagination import APIPagination
 from cmdb.interface.response import GetSingleResponse, GetMultiResponse, InsertSingleResponse, DeleteSingleResponse
 from cmdb.interface.blueprint import APIBlueprint
 
@@ -45,7 +46,9 @@ def get_categories(params: CollectionParameters):
     except ManagerGetError as err:
         return abort(404, err.message)
     category_list = [CategoryDAO.to_json(category) for category in iteration_result.results]
-    api_response = GetMultiResponse(category_list, iteration_result.total, model=CategoryDAO.MODEL)
+    pagination: APIPagination = APIPagination.create(request.url, params=params, total=iteration_result.total)
+    api_response = GetMultiResponse(category_list, total=iteration_result.total, page=params.page, limit=params.limit,
+                                    pagination=pagination, model=CategoryDAO.MODEL)
     return api_response.make_response()
 
 
@@ -58,7 +61,8 @@ def get_category(public_id: int):
         category_instance = category_manager.get(public_id)
     except ManagerGetError as err:
         return abort(404, err.message)
-    api_response = GetSingleResponse(CategoryDAO.to_json(category_instance), model=CategoryDAO.MODEL)
+    api_response = GetSingleResponse(CategoryDAO.to_json(category_instance), url=request.url,
+                                     model=CategoryDAO.MODEL)
     return api_response.make_response()
 
 
