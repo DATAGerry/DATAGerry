@@ -152,6 +152,24 @@ class InsertSingleResponse(BaseAPIResponse):
         }, **super(InsertSingleResponse, self).export(*args, **kwargs)}
 
 
+class UpdateSingleResponse(BaseAPIResponse):
+    __slots__ = 'result'
+
+    def __init__(self, result: dict, url: str = None, model: Model = None):
+        self.result: dict = result
+        super(UpdateSingleResponse, self).__init__(operation_type=OperationType.UPDATE, url=url, model=model)
+
+    def make_response(self, prefix: str = '', *args, **kwargs) -> BaseResponse:
+        response = make_api_response(self.export(), 201)
+        response.headers['location'] = f'{self.url}/{self.result_id}'
+        return response
+
+    def export(self, text: str = 'json', *args, **kwargs) -> dict:
+        return {**{
+            'result': self.result
+        }, **super(UpdateSingleResponse, self).export(*args, **kwargs)}
+
+
 class DeleteSingleResponse(BaseAPIResponse):
     __slots__ = 'raw'
 

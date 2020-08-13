@@ -35,7 +35,7 @@ export class GetMultiResponse<T = CmdbDao> extends APIResponse {
   results: Array<T>;
   count: number;
   total: number;
-  parameters: CollectionParameters;
-  pager: APIPager;
-  pagination: APIPagination;
+  parameters?: CollectionParameters;
+  pager?: APIPager;
+  pagination?: APIPagination;
 }
