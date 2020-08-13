@@ -17,6 +17,7 @@ from typing import List, Union
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework import CategoryDAO
+from cmdb.framework.dao.category import CategoryTree
 from cmdb.framework.manager import ManagerGetError
 from cmdb.framework.manager.framework_manager import FrameworkManager
 from cmdb.framework.manager.results import IterationResult
@@ -41,3 +42,6 @@ class CategoryManager(FrameworkManager):
 
     def insert(self, category: dict) -> PublicID:
         return super(CategoryManager, self).insert(category)
+
+    def tree(self) -> CategoryTree:
+        pass

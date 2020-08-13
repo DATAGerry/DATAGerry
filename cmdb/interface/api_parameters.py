@@ -21,6 +21,12 @@ class ApiParameters:
     def from_http(cls, *args, **kwargs) -> "ApiParameters":
         raise NotImplementedError
 
+    def to_dict(self) -> dict:
+        """Get the object as a dict"""
+        return {
+            'optional': self.optional
+        }
+
     def __repr__(self):
         return f'Parameters: Query({self.query_string}) | Optional({self.optional})'
 
@@ -53,3 +59,16 @@ class CollectionParameters(ApiParameters):
         if 'filter' in parameters:
             parameters['filter'] = loads(parameters['filter'])
         return cls(Parameter(query_string), **parameters)
+
+    def to_dict(self) -> dict:
+        """Get the object as a dict"""
+        return {
+            **{
+                'limit': self.limit,
+                'sort': self.sort,
+                'order': self.order,
+                'page': self.page,
+                'filter': self.filter,
+            },
+            **super(CollectionParameters, self).to_dict()
+        }

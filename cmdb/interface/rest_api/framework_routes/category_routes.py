@@ -37,15 +37,19 @@ categories_blueprint = APIBlueprint('categories', __name__)
 @categories_blueprint.parse_collection_parameters(view='list')
 def get_categories(params: CollectionParameters):
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
-    try:
-        iteration_result: IterationResult[CategoryDAO] = category_manager.iterate(
-            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
-    except FrameworkIterationError as err:
-        return abort(400, err.message)
-    except ManagerGetError as err:
-        return abort(404, err.message)
-    category_list = [CategoryDAO.to_json(category) for category in iteration_result.results]
-    api_response = GetMultiResponse(category_list, total=iteration_result.total, page=params.page, limit=params.limit,
+
+    if params.optional.get('view') == 'tree':
+        pass
+    else:
+        try:
+            iteration_result: IterationResult[CategoryDAO] = category_manager.iterate(
+                filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+        except FrameworkIterationError as err:
+            return abort(400, err.message)
+        except ManagerGetError as err:
+            return abort(404, err.message)
+        category_list = [CategoryDAO.to_json(category) for category in iteration_result.results]
+    api_response = GetMultiResponse(category_list, total=iteration_result.total, params=params,
                                     url=request.url, model=CategoryDAO.MODEL)
     return api_response.make_response()
 
