@@ -118,10 +118,9 @@ class FrameworkManager(ManagerBase):
             raise FrameworkIterationError(err=err)
         return IterationResult.from_aggregation(aggregation_result)
 
-    def get_many(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwarg) -> List[CmdbDAO]:
+    def get_many(self, *args, **kwarg) -> List[dict]:
         try:
-            cursor_result = super(FrameworkManager, self)._get(self.collection, filter, limit, skip, sort, order, *args,
-                                                               **kwarg)
+            cursor_result = super(FrameworkManager, self)._get(self.collection, *args, **kwarg)
         except ManagerGetError as err:
             raise FrameworkGetError(err)
         return list(cursor_result)

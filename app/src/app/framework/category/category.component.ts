@@ -32,6 +32,11 @@ import { SidebarService } from '../../layout/services/sidebar.service';
 export class CategoryComponent implements OnInit, OnDestroy {
 
   /**
+   * Current category collection
+   */
+  public categories: Array<CmdbCategory>;
+
+  /**
    * Root element of the category tree
    */
   public categoryTree: CmdbCategoryTree;
@@ -51,8 +56,10 @@ export class CategoryComponent implements OnInit, OnDestroy {
 
   constructor(private categoryService: CategoryService, private route: ActivatedRoute, private sidebarService: SidebarService) {
 
-    this.categoryTreeSubscription = new Subscription();
-    this.routeSubscription = new Subscription();
+    this.categories = [];
+
+    // this.categoryTreeSubscription = new Subscription();
+    // this.routeSubscription = new Subscription();
 
     this.routeSubscription = this.route.data.subscribe((data: any) => {
       if (data.mode) {

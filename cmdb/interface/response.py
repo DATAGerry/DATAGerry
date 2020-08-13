@@ -26,10 +26,11 @@ from cmdb.interface import DEFAULT_MIME_TYPE
 from cmdb.interface.api_parameters import CollectionParameters
 
 from cmdb.interface.pagination import APIPagination, APIPager
+from cmdb.utils import json_encoding
 
 
-def make_api_response(view, status: int = 200, mime: str = None) -> BaseResponse:
-    response = flask_response(dumps(view), status)
+def make_api_response(view, status: int = 200, mime: str = None, indent: int = 2) -> BaseResponse:
+    response = flask_response(dumps(view, default=json_encoding.default, indent=indent), status)
     response.mimetype = mime or DEFAULT_MIME_TYPE
     return response
 
@@ -91,7 +92,7 @@ class GetSingleResponse(BaseAPIResponse):
         self.result: dict = result
         super(GetSingleResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model)
 
-    def make_response(self) -> BaseResponse:
+    def make_response(self, *args, **kwargs) -> BaseResponse:
         return make_api_response(self.export())
 
     def export(self, text: str = 'json') -> dict:
@@ -114,17 +115,22 @@ class GetMultiResponse(BaseAPIResponse):
         self.pagination: APIPagination = APIPagination.create(url, self.pager.page, self.pager.total_pages)
         super(GetMultiResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model)
 
-    def make_response(self) -> BaseResponse:
-        return make_api_response(self.export())
+    def make_response(self, *args, **kwargs) -> BaseResponse:
+        return make_api_response(self.export(*args, **kwargs))
 
-    def export(self, text: str = 'json') -> dict:
+    def export(self, text: str = 'json', complete: bool = True) -> dict:
+        extra = {}
+        if complete:
+            extra = {
+                'parameters': self.parameters.to_dict(),
+                'pager': self.pager.to_dict(),
+                'pagination': self.pagination.to_dict()
+            }
         return {**{
             'results': self.results,
             'count': self.count,
             'total': self.total,
-            'parameters': self.parameters.to_dict(),
-            'pager': self.pager.to_dict(),
-            'pagination': self.pagination.to_dict()
+            **extra
         }, **super(GetMultiResponse, self).export()}
 
 
@@ -135,15 +141,15 @@ class InsertSingleResponse(BaseAPIResponse):
         self.result_id: PublicID = result_id
         super(InsertSingleResponse, self).__init__(operation_type=OperationType.INSERT, url=url, model=model)
 
-    def make_response(self, prefix: str = '') -> BaseResponse:
+    def make_response(self, prefix: str = '', *args, **kwargs) -> BaseResponse:
         response = make_api_response(self.export(), 201)
         response.headers['location'] = f'{self.url}/{self.result_id}'
         return response
 
-    def export(self, text: str = 'json') -> dict:
+    def export(self, text: str = 'json', *args, **kwargs) -> dict:
         return {**{
             'result_id': self.result_id
-        }, **super(InsertSingleResponse, self).export()}
+        }, **super(InsertSingleResponse, self).export(*args, **kwargs)}
 
 
 class DeleteSingleResponse(BaseAPIResponse):
@@ -153,8 +159,8 @@ class DeleteSingleResponse(BaseAPIResponse):
         self.raw = raw
         super(DeleteSingleResponse, self).__init__(operation_type=OperationType.DELETE, url=url, model=model)
 
-    def make_response(self) -> BaseResponse:
-        return make_api_response(self.export(), 202)
+    def make_response(self, *args, **kwargs) -> BaseResponse:
+        return make_api_response(self.export(*args, **kwargs), 202)
 
     def export(self, text: str = 'json') -> dict:
         return {**{

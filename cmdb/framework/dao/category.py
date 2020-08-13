@@ -176,6 +176,7 @@ class CategoryDAO(CmdbDAO):
 
 class CategoryTree:
     """Base tree holder"""
+    MODEL: Model = 'CategoryTree'
 
     class CategoryNode:
         """Class of a category node inside the category tree"""

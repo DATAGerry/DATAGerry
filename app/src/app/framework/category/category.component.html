@@ -16,9 +16,17 @@
   <div class="clearfix"></div>
 </h1>
 <hr/>
-<div id="category-tree" class="tree-view">
-  <cmdb-category-tree [mode]="mode" [tree]="categoryTree"></cmdb-category-tree>
+<div class="row">
+  <div id="category-tree" class="col-md-6">
+    <div class="tree-view">
+<!--      <cmdb-category-tree [mode]="mode" [tree]="categoryTree"></cmdb-category-tree>-->
+    </div>
+  </div>
+  <div id="category-list" class="col-md-6">
+    {{categories | json}}
+  </div>
 </div>
+
 <div *ngIf="mode == 2;" class="btn-group float-right" role="group">
   <button  type="submit" class="btn btn-success" (click)="onSave()">Update</button>
 </div>

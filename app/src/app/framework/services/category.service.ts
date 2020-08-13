@@ -24,6 +24,7 @@ import { CmdbCategory, CmdbCategoryTree } from '../models/cmdb-category';
 import { FormControl } from '@angular/forms';
 import { Observable, timer } from 'rxjs';
 import { HttpClient, HttpResponse } from '@angular/common/http';
+import { GetSingleResponse } from '../../services/models/api-response';
 
 export const checkCategoryExistsValidator = (categoryService: CategoryService, time: number = 500) => {
   return (control: FormControl) => {
@@ -48,25 +49,24 @@ export const checkCategoryExistsValidator = (categoryService: CategoryService, t
 export class CategoryService<T = CmdbCategory> implements ApiService {
 
   /**
-   * Fixed URL extension
    * Nested url path value inside the REST structure
    */
-  public servicePrefix: string = 'category';
+  public servicePrefix: string = 'categories';
 
   constructor(private api: ApiCallService, private client: HttpClient) {
-    // TODO: Remove incorrect usage of client structure in all framework services
+
   }
 
   /**
    * Get a category by id
    */
-  public getCategory(publicID: number): Observable<T | null> {
+  public getCategory(publicID: number): Observable<T> | undefined {
     return this.api.callGet<T>(this.servicePrefix + '/' + publicID).pipe(
-      map((apiResponse: HttpResponse<T>) => {
+      map((apiResponse: HttpResponse<GetSingleResponse<T>>) => {
         if (apiResponse.status === 204) {
-          return null;
+          return undefined;
         }
-        return apiResponse.body;
+        return apiResponse.body.result;
       })
     );
   }
@@ -106,10 +106,8 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
   /**
    * Get all categories as a list
    */
-  public getCategoryList(order: string = null): Observable<T[]> {
-    const options = httpObserveOptions;
-    options.params = {order};
-    return this.api.callGet<T[]>(this.servicePrefix + '/', this.client, options).pipe(
+  public getCategoryList(filter?: any, limit?, sort?: string, order?: number, page?: number): Observable<T[]> {
+    return this.api.callGet<T[]>(this.servicePrefix + '/').pipe(
       map((apiResponse: HttpResponse<T[]>) => {
         if (apiResponse.status === 204) {
           return [];
@@ -123,8 +121,8 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * Get the complete category tree with
    * nested structure and type instances
    */
-  public getCategoryTree(): Observable<CmdbCategoryTree | null> {
-    return this.api.callGet<CmdbCategoryTree>(this.servicePrefix + '/tree/').pipe(
+  public getCategoryTree(): Observable<CmdbCategoryTree> {
+    return this.api.callGet<CmdbCategoryTree>(this.servicePrefix).pipe(
       map((apiResponse: HttpResponse<CmdbCategoryTree>) => {
         if (apiResponse.status === 204) {
           return null;

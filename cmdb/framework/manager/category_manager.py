@@ -17,6 +17,7 @@ from typing import List, Union
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework import CategoryDAO
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.dao.category import CategoryTree
 from cmdb.framework.manager import ManagerGetError
 from cmdb.framework.manager.framework_manager import FrameworkManager
@@ -43,5 +44,11 @@ class CategoryManager(FrameworkManager):
     def insert(self, category: dict) -> PublicID:
         return super(CategoryManager, self).insert(category)
 
+    @property
     def tree(self) -> CategoryTree:
-        pass
+        # Currently only a work around until the other manager were converted to the new format - MH
+        types = CmdbObjectManager(database_manager=self._database_manager).get_all_types()
+        categories = [CategoryDAO.from_data(category) for category in
+                      super(CategoryManager, self).get_many({})]
+
+        return CategoryTree(categories=categories, types=types)

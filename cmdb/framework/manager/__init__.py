@@ -36,11 +36,11 @@ class ManagerBase:
         Args:
             database_manager: Database manager instance
         """
-        self.__database_manager: DatabaseManagerMongo = database_manager
+        self._database_manager: DatabaseManagerMongo = database_manager
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Auto disconnect the database connection when the Manager get destroyed."""
-        self.__database_manager.connector.disconnect()
+        self._database_manager.connector.disconnect()
 
     def _aggregate(self, collection: Collection, *args, **kwargs):
         """
@@ -54,7 +54,7 @@ class ManagerBase:
             - A :class:`~pymongo.command_cursor.CommandCursor` over the result set.
         """
         try:
-            return self.__database_manager.aggregate(collection, *args, **kwargs)
+            return self._database_manager.aggregate(collection, *args, **kwargs)
         except Exception as err:
             raise ManagerGetError(err)
 
@@ -71,7 +71,7 @@ class ManagerBase:
             - A :class:`~pymongo.command_cursor.CommandCursor` over the result set.
         """
         try:
-            return self.__database_manager.find(collection, filter=filter, *args, **kwargs)
+            return self._database_manager.find(collection, filter=filter, *args, **kwargs)
         except Exception as err:
             raise ManagerGetError(err)
 
@@ -86,7 +86,7 @@ class ManagerBase:
             - An instance of :class:`~pymongo.results.InsertOneResult`.
         """
         try:
-            return self.__database_manager.insert(collection, data=data)
+            return self._database_manager.insert(collection, data=data)
         except Exception as err:
             raise ManagerInsertError(err)
 
@@ -104,7 +104,7 @@ class ManagerBase:
             - An instance of :class:`~pymongo.results.UpdateResult`.
         """
         try:
-            return self.__database_manager.update(collection, filter=filter, data=data, *args, **kwargs)
+            return self._database_manager.update(collection, filter=filter, data=data, *args, **kwargs)
         except Exception as err:
             raise ManagerUpdateError(err)
 
@@ -119,6 +119,6 @@ class ManagerBase:
             - An instance of :class:`~pymongo.results.DeleteResult`.
         """
         try:
-            return self.__database_manager.delete(collection, public_id=public_id)
+            return self._database_manager.delete(collection, public_id=public_id)
         except Exception as err:
             raise ManagerDeleteError(err)

@@ -18,7 +18,7 @@ import logging
 
 from flask import abort, current_app, request
 
-from cmdb.framework.dao.category import CategoryDAO
+from cmdb.framework.dao.category import CategoryDAO, CategoryTree
 from cmdb.framework.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError
 from cmdb.framework.manager.category_manager import CategoryManager
 from cmdb.framework.manager.error.framework_errors import FrameworkIterationError
@@ -37,20 +37,23 @@ categories_blueprint = APIBlueprint('categories', __name__)
 @categories_blueprint.parse_collection_parameters(view='list')
 def get_categories(params: CollectionParameters):
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
-
-    if params.optional.get('view') == 'tree':
-        pass
-    else:
-        try:
+    try:
+        if params.optional['view'] == 'tree':
+            tree: CategoryTree = category_manager.tree
+            api_response = GetMultiResponse(CategoryTree.to_json(tree), total=len(tree), params=params,
+                                            url=request.url, model=CategoryTree.MODEL)
+            return api_response.make_response(complete=False)
+        else:
             iteration_result: IterationResult[CategoryDAO] = category_manager.iterate(
                 filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
-        except FrameworkIterationError as err:
-            return abort(400, err.message)
-        except ManagerGetError as err:
-            return abort(404, err.message)
-        category_list = [CategoryDAO.to_json(category) for category in iteration_result.results]
-    api_response = GetMultiResponse(category_list, total=iteration_result.total, params=params,
-                                    url=request.url, model=CategoryDAO.MODEL)
+            category_list = [CategoryDAO.to_json(category) for category in iteration_result.results]
+            api_response = GetMultiResponse(category_list, total=iteration_result.total, params=params,
+                                            url=request.url, model=CategoryDAO.MODEL)
+    except FrameworkIterationError as err:
+        return abort(400, err.message)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+
     return api_response.make_response()
 
 

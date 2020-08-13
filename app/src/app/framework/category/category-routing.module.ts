@@ -22,6 +22,7 @@ import { CategoryComponent } from './category.component';
 import { CategoryAddComponent } from './category-add/category-add.component';
 import { CategoryEditComponent } from './category-edit/category-edit.component';
 import { CmdbMode } from '../modes.enum';
+import { CategoryViewComponent } from './category-view/category-view.component';
 
 const routes: Routes = [
   {
@@ -32,6 +33,14 @@ const routes: Routes = [
       right: 'base.framework.category.view'
     },
     component: CategoryComponent
+  },
+  {
+    path: 'view/:publicID',
+    data: {
+      breadcrumb: 'View',
+      right: 'base.framework.category.view'
+    },
+    component: CategoryViewComponent
   },
   {
     path: 'add',
