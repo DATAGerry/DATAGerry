@@ -1,0 +1,20 @@
+<table class="table framework-table table-striped">
+  <thead>
+  <tr>
+    <th scope="col"><input type="checkbox"></th>
+    <th scope="col">Name</th>
+    <th scope="col">Size</th>
+    <th scope="col">Type</th>
+    <th scope="col">Modifier</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let item of files">
+    <th scope="row"><input type="checkbox"></th>
+    <td>{{item.name}}</td>
+    <td>{{item.size | fileSize}}</td>
+    <td>{{item.metadata?.folder ? "Folder" : item.metadata?.mime_type}}</td>
+    <td>{{item.metadata?.author_id}}</td>
+  </tr>
+  </tbody>
+</table>

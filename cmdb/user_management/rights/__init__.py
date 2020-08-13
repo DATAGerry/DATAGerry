@@ -22,6 +22,7 @@ from cmdb.user_management.rights.framework_rights import FrameworkRight, ObjectR
     LogRight, CollectionRight
 from cmdb.user_management.rights.export_rights import ExportRight, ExportObjectRight, ExportTypeRight
 from cmdb.user_management.rights.exportd_rights import ExportdRight, ExportdJobRight, ExportdLogRight
+from cmdb.user_management.rights.docapi_rights import DocapiRight, DocapiTemplateRight
 
 SYSTEM_RIGHTS = (
     SystemRight(GLOBAL_RIGHT_IDENTIFIER, description='System and settings'),
@@ -62,7 +63,8 @@ FRAMEWORK_RIGHTS = (
             CategoryRight('view', description='View category'),
             CategoryRight('add', description='Add category'),
             CategoryRight('edit', BaseRight.PROTECTED, description='Edit category'),
-            CategoryRight('delete', BaseRight.SECURE, description='Delete category')
+            CategoryRight('delete', BaseRight.SECURE, description='Delete category'),
+            CategoryRight('tree', BaseRight.PROTECTED, description='View the complete category tree with types')
         )
     ),
     (
@@ -146,6 +148,18 @@ EXPORTD_RIGHTS = (
     )
 )
 
+DOCAPI_RIGHTS = (
+    DocapiRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage DocAPI'),
+    (
+        DocapiTemplateRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage DocAPI templates'),
+        (
+            DocapiTemplateRight('view', description='View template'),
+            DocapiTemplateRight('add', description='Add template'),
+            DocapiTemplateRight('edit', BaseRight.SECURE, description='Edit template'),
+            DocapiTemplateRight('delete', BaseRight.SECURE, description='Delete template'),
+        ),
+    )
+)
 __all__ = (
     BaseRight(
         BaseRight.NOTSET, GLOBAL_RIGHT_IDENTIFIER, description='Base application right'
@@ -155,5 +169,6 @@ __all__ = (
     EXPORT_RIGHTS,
     IMPORT_RIGHTS,
     USER_MANAGEMENT_RIGHTS,
-    EXPORTD_RIGHTS
+    EXPORTD_RIGHTS,
+    DOCAPI_RIGHTS
 )

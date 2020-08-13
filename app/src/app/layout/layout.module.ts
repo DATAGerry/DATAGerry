@@ -36,7 +36,6 @@ import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ModalComponent } from './helpers/modal/modal.component';
 import { TableModule } from './components/table/table.module';
 import { TypeLabelComponent } from './helpers/type-label/type-label.component';
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
@@ -56,6 +55,13 @@ import { IntroComponent } from './intro/intro.component';
 import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-step-intro.component';
 
 import { JwPaginationComponent } from 'jw-angular-pagination';
+import { NameDirective } from './directives/name.directive';
+import { NameGuidePipe } from './pipes/name-guide.pipe';
+import { SidebarTypeComponent } from './structure/sidebar/sidebar-type.component';
+import { FileDragDropDirective } from './directives/fileDragDrop.directive';
+import { FileSizePipe } from './pipes/file-size.pipe';
+import { CategoryTreeFilterPipe } from './pipes/categoryTreeFilter.pipe';
+import { TypeFilterPipe } from './pipes/typeFilter.pipe';
 
 export const LAYOUT_COMPONENT_ROUTES: Routes = [
   {
@@ -105,7 +111,14 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     ChartsComponent,
     LoadingScreenComponent,
     StepByStepIntroComponent,
-    JwPaginationComponent
+    JwPaginationComponent,
+    NameDirective,
+    NameGuidePipe,
+    FileDragDropDirective,
+    FileSizePipe,
+    SidebarTypeComponent,
+    CategoryTreeFilterPipe,
+    TypeFilterPipe
   ],
   exports: [
     NgxSpinnerComponent,
@@ -122,7 +135,13 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     UserDisplayComponent,
     ChartsComponent,
     JwPaginationComponent,
-    SidebarComponent
+    SidebarComponent,
+    NameDirective,
+    NameGuidePipe,
+    FileDragDropDirective,
+    FileSizePipe,
+    CategoryTreeFilterPipe,
+    TypeFilterPipe
   ],
   imports: [
     CommonModule,
@@ -137,7 +156,6 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     TableModule,
     FontAwesomeModule,
     IconPickerModule,
-    SweetAlert2Module.forRoot(),
     ToastModule,
     AuthModule
   ],

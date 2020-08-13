@@ -1,15 +1,17 @@
-<ng-container *ngIf="renderResult?.externals && renderResult?.externals.length>0">
-  <div id="cmdb-object-externals" class="card">
-    <div class="card-header">
-      External Links
-    </div>
-    <div class="card-body">
-      <ul class="fa-ul">
-        <li *ngFor="let ext of renderResult?.externals">
-          <i class="{{ext.icon}} mr-1" aria-hidden="true"></i>
-          <a class="card-link" target="_blank" [href]=getSantizeUrl(ext.href)>{{ext.label}}</a>
-        </li>
-      </ul>
+<div class="dropdown">
+  <div class="dropdown-toggle total-title d-flex justify-object-view-items"
+       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <div class="icon"><i class="fa fa-link"></i></div>
+    <div class="name"><strong class="text-uppercase">External links</strong>
+      <span> Total {{renderResult?.externals.length}}</span>
     </div>
   </div>
-</ng-container>
+  <div *ngIf="renderResult?.externals.length > 0" class="dropdown-menu dropdown-menu-lg-right w-auto">
+    <div class="overflow-auto" style="max-height:20vh">
+      <a *ngFor="let ext of renderResult?.externals" class="dropdown-item">
+        <span><i class="{{ext.icon}} mr-1" aria-hidden="true"></i></span>
+        <span class="name"><a class="card-link" target="_blank" [href]=getSantizeUrl(ext.href)>{{ext.label}}</a></span>
+      </a>
+    </div>
+  </div>
+</div>

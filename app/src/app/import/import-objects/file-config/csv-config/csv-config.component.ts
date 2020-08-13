@@ -24,7 +24,7 @@ import { FormControl } from '@angular/forms';
   templateUrl: './csv-config.component.html',
   styleUrls: ['./csv-config.component.scss']
 })
-export class CsvConfigComponent extends FileConfig implements OnInit{
+export class CsvConfigComponent extends FileConfig implements OnInit {
 
   public constructor() {
     super();

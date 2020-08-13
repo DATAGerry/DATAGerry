@@ -30,20 +30,20 @@ import { GroupsDeleteComponent } from './groups-delete/groups-delete.component';
 import { LayoutModule } from '../../layout/layout.module';
 import { GroupSelectPipe } from './groups-delete/group-select.pipe';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import {AuthModule} from "../../auth/auth.module";
+import { AuthModule } from '../../auth/auth.module';
 
 @NgModule({
   declarations: [GroupsListComponent, GroupsAddComponent, GroupsEditComponent, GroupsDeleteComponent, GroupSelectPipe],
-    imports: [
-        CommonModule,
-        GroupsRoutingModule,
-        DataTablesModule,
-        ReactiveFormsModule,
-        NgSelectModule,
-        LayoutModule,
-        FontAwesomeModule,
-        AuthModule
-    ]
+  imports: [
+    CommonModule,
+    GroupsRoutingModule,
+    DataTablesModule,
+    ReactiveFormsModule,
+    NgSelectModule,
+    LayoutModule,
+    FontAwesomeModule,
+    AuthModule
+  ]
 })
 export class GroupsModule {
 }

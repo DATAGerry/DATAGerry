@@ -22,7 +22,6 @@ import { CommonModule } from '@angular/common';
 import { ImportRoutingModule } from './import-routing.module';
 import { ImportComponent } from './import.component';
 import { LayoutModule } from '../layout/layout.module';
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { ImportObjectsComponent } from './import-objects/import-objects.component';
 import { ArchwizardModule } from 'angular-archwizard';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
@@ -44,11 +43,9 @@ import { TypeMappingBaseComponent } from './import-objects/type-mapping/type-map
 import { CsvMappingComponent } from './import-objects/type-mapping/csv-mapping/csv-mapping.component';
 import { MappingControlPipe } from './import-objects/type-mapping/mapping-control.pipe';
 import { SelectFileDragDropComponent } from './import-types/select-file-drag-drop/select-file-drag-drop.component';
-import { SelectFileDragDropDirective } from './import-types/select-file-drag-drop/select-file-drag-drop.directive';
 import { TypePreviewComponent } from './import-types/type-preview/type-preview.component';
 import { CategoryModule } from '../framework/category/category.module';
 import { ImportTypeCompleteComponent } from './import-types/import-type-complete/import-type-complete.component';
-import { FileSizePipe } from './import-types/file-size.pipe';
 import { ImportCompleteComponent } from './import-objects/import-complete/import-complete.component';
 import { DataTablesModule } from 'angular-datatables';
 
@@ -70,17 +67,14 @@ import { DataTablesModule } from 'angular-datatables';
     CsvMappingComponent,
     MappingControlPipe,
     SelectFileDragDropComponent,
-    SelectFileDragDropDirective,
     TypePreviewComponent,
     ImportTypeCompleteComponent,
-    FileSizePipe,
     ImportCompleteComponent,
   ],
   imports: [
     CommonModule,
     LayoutModule,
     ImportRoutingModule,
-    SweetAlert2Module,
     DndModule,
     ArchwizardModule,
     ReactiveFormsModule,

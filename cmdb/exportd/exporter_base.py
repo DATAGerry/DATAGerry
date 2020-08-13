@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import jinja2
 import logging
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
@@ -28,6 +27,8 @@ from cmdb.utils.system_config import SystemConfigReader
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
 from cmdb.framework.cmdb_render import CmdbRender, RenderList
+from cmdb.templates.template_data import ObjectTemplateData
+from cmdb.templates.template_engine import TemplateEngine
 
 LOGGER = logging.getLogger(__name__)
 
@@ -94,7 +95,7 @@ class ExportdManagerBase(ExportdJobManagement):
 
             for cmdb_object in cmdb_objects:
                 # setup objectdata for use in ExportVariable templates
-                template_data = self.__get_objectdata(cmdb_object, 3)
+                template_data = ObjectTemplateData(self.__object_manager, cmdb_object).get_template_data()
                 external_system.add_object(cmdb_object, template_data)
             exportd_header = external_system.finish_export()
 
@@ -112,27 +113,6 @@ class ExportdManagerBase(ExportdJobManagement):
                 except LogManagerInsertError as err:
                     LOGGER.error(err)
         return exportd_header
-
-    def __get_objectdata(self, cmdb_object, iteration):
-        data = {}
-        data["id"] = cmdb_object.object_information['object_id']
-        data["fields"] = {}
-        for field in cmdb_object.fields:
-            try:
-                field_name = field["name"]
-                if field["type"] == "ref" and field["value"] and iteration > 0:
-                    # resolve type
-                    iteration = iteration - 1
-                    current_object = self.__object_manager.get_object(field["value"])
-                    type_instance = self.__object_manager.get_type(current_object.get_type_id())
-                    cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance,
-                                                    render_user=None)
-                    data["fields"][field_name] = self.__get_objectdata(cmdb_render_object.result(), iteration)
-                else:
-                    data["fields"][field_name] = field["value"]
-            except Exception as err:
-                LOGGER.error(err)
-        return data
 
 
 class ExportVariable:
@@ -152,9 +132,9 @@ class ExportVariable:
                 value_template = templ['template']
 
         # render template
-        template = jinja2.Template(value_template)
+        template_engine = TemplateEngine()
         try:
-            output = template.render(template_data)
+            output = template_engine.render_template_string(value_template, template_data)
             if output == 'None':
                 output = ''
         except Exception as ex:

@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, EventEmitter, HostListener, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import { Component, EventEmitter, HostListener, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { TypeService } from '../../services/type.service';
 import { CmdbType } from '../../models/cmdb-type';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
@@ -28,7 +28,6 @@ import { UserService } from '../../../management/services/user.service';
 import { ObjectService } from '../../services/object.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryService } from '../../services/category.service';
-import { error } from 'selenium-webdriver';
 import { CmdbCategory } from '../../models/cmdb-category';
 
 @Component({
@@ -39,7 +38,7 @@ import { CmdbCategory } from '../../models/cmdb-category';
 export class ObjectAddComponent implements OnInit, OnDestroy {
 
   public typeList: CmdbType[];
-  public preperatedTypeList: any[];
+  public categoryList: CmdbCategory[] = [];
   public typeIDForm: FormGroup;
   private typeIDSubject: BehaviorSubject<number>;
   public typeID: Observable<number>;
@@ -79,24 +78,11 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.typeService.getTypeList().subscribe((typeList: CmdbType[]) => {
       this.typeList = typeList;
-      this.preperatedTypeList = [];
     }, (e) => {
       console.error(e);
     }, () => {
       this.categoryService.getCategoryList().subscribe((categoryList: CmdbCategory[]) => {
-        categoryList.forEach( category => {
-          for ( const type of this.typeList ) {
-            if ((type.category_id === category.public_id)
-              || (type.category_id === 0) ) {
-              type.category_name = category.label;
-              this.preperatedTypeList.push(type);
-            }
-          }
-        });
-      }, (e) => {
-        console.log(e);
-      }, () => {
-        this.typeList = this.preperatedTypeList;
+        this.categoryList = categoryList;
       });
     });
     this.typeIDForm = new FormGroup({
@@ -105,23 +91,19 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
 
   }
 
-  @HostListener('window:scroll', ['$event'])
-  onWindowScroll($event) {
+  @HostListener('window:scroll')
+  onWindowScroll() {
     const dialog = document.getElementById('object-form-action');
     if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-      dialog.style.display = 'block';
+      dialog.style.visibility = 'visible';
     } else {
-      dialog.style.display = 'none';
+      dialog.style.visibility = 'hidden';
     }
   }
 
   public ngOnDestroy(): void {
     this.typeIDSubject.unsubscribe();
   }
-
-  groupByFn = (item) => item.category_name;
-
-  groupValueFn = (_: string, children: any[]) => ({name: children[0].category_name, total: children.length});
 
 
   public get formTypeID() {

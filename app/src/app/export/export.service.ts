@@ -18,7 +18,7 @@
 
 import { Injectable } from '@angular/core';
 import { ApiCallService } from '../services/api-call.service';
-import {map} from "rxjs/operators";
+import { map } from 'rxjs/operators';
 
 const httpOptions = {
   observe: 'response',

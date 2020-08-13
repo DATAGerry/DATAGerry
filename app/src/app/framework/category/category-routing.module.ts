@@ -13,14 +13,15 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { CategoryListComponent } from './category-list/category-list.component';
+import { CategoryComponent } from './category.component';
 import { CategoryAddComponent } from './category-add/category-add.component';
 import { CategoryEditComponent } from './category-edit/category-edit.component';
+import { CmdbMode } from '../modes.enum';
 
 const routes: Routes = [
   {
@@ -30,7 +31,7 @@ const routes: Routes = [
       breadcrumb: 'List',
       right: 'base.framework.category.view'
     },
-    component: CategoryListComponent
+    component: CategoryComponent
   },
   {
     path: 'add',
@@ -39,6 +40,15 @@ const routes: Routes = [
       right: 'base.framework.category.add'
     },
     component: CategoryAddComponent
+  },
+  {
+    path: 'edit',
+    data: {
+      breadcrumb: 'Edit',
+      right: 'base.framework.category.edit',
+      mode: CmdbMode.Edit
+    },
+    component: CategoryComponent
   },
   {
     path: 'edit/:publicID',

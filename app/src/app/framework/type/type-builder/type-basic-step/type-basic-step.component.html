@@ -56,7 +56,7 @@
     </div>
 
     <div class="col-4">
-      <div class="card">
+      <div class="card mb-3" *ngIf="mode == modes.Create || mode == modes.Edit">
         <div class="card-header">
           Category:
           <div *ngIf="basicCategoryForm.get('category_id').value; then categorySelected else categoryUnselected"></div>
@@ -64,26 +64,26 @@
           <ng-template #categoryUnselected><span class="text-danger">UNSELECTED</span></ng-template>
         </div>
         <div class="card-body">
-          <div *ngIf="(categoryList | async)?.length">
+          <div *ngIf="categories">
             <form [formGroup]="basicCategoryForm">
               <ng-select
-                [items]="categoryList | async"
+                [items]="categories"
                 bindLabel="label"
                 bindValue="public_id"
                 placeholder="Select category"
                 formControlName="category_id">
               </ng-select>
             </form>
-            <br>
           </div>
-          <div>
+          <div class="mt-2">
             <button class="btn btn-primary btn-block" role="button" aria-pressed="true" (click)="addCategoryModal()">
-              <fa-icon icon="plus"></fa-icon> Add new Category</button>
+              <fa-icon icon="plus"></fa-icon>
+              Add new Category
+            </button>
           </div>
         </div>
       </div>
-
-      <div class="card mt-3">
+      <div class="card">
         <div class="card-header">
           Validation: <span [className]="basicForm.valid ? 'text-success' : 'text-danger'">{{basicForm.status}}</span>
         </div>

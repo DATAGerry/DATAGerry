@@ -16,18 +16,17 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Injectable, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { checkTypeExistsValidator, TypeService } from '../../../services/type.service';
+import { CmdbMode } from '../../../modes.enum';
 import { CategoryService } from '../../../services/category.service';
 import { CmdbCategory } from '../../../models/cmdb-category';
-import { Observable } from 'rxjs';
-import { CmdbMode } from '../../../modes.enum';
-import { AddCategoryModalComponent } from '../../builder/modals/add-category-modal/add-category-modal.component';
+import { Subscription } from 'rxjs';
+import { AddCategoryModalComponent } from '../../../category/components/modals/add-category-modal/add-category-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastService } from '../../../../layout/toast/toast.service';
 import { SidebarService } from '../../../../layout/services/sidebar.service';
-import {catchError, map} from 'rxjs/operators';
+import { ToastService } from '../../../../layout/toast/toast.service';
 
 
 @Component({
@@ -35,18 +34,17 @@ import {catchError, map} from 'rxjs/operators';
   templateUrl: './type-basic-step.component.html',
   styleUrls: ['./type-basic-step.component.scss'],
 })
-export class TypeBasicStepComponent implements OnInit {
+export class TypeBasicStepComponent implements OnInit, OnDestroy {
 
   @Input()
   set preData(data: any) {
     if (data !== undefined) {
       this.basicForm.patchValue(data);
       this.basicMetaIconForm.patchValue(data.render_meta === undefined ? '' : data.render_meta);
-      const promise = this.categoryService.getCategory(data.category_id).toPromise();
-      promise.then(() => {
-        this.basicCategoryForm.get('category_id').setValue(data.category_id);
-      }, (error) => {
-        this.basicCategoryForm.get('category_id').setValue(null);
+
+      this.categoryService.getCategoryList().subscribe(categories => {
+        this.originalCategoryID = categories.find(category => category.types.includes(data.public_id)).public_id;
+        this.basicCategoryForm.patchValue({ category_id: this.originalCategoryID});
       });
     }
   }
@@ -56,11 +54,15 @@ export class TypeBasicStepComponent implements OnInit {
 
   public basicForm: FormGroup;
   public basicMetaIconForm: FormGroup;
-  public basicCategoryForm: FormGroup;
-  public categoryList: Observable<CmdbCategory[]>;
 
-  constructor(private typeService: TypeService, private categoryService: CategoryService,
-              private modalService: NgbModal, private toast: ToastService, private sidebarService: SidebarService) {
+  public basicCategoryForm: FormGroup;
+  private categoriesSubscription: Subscription;
+  public originalCategoryID: number = undefined;
+  public categories: CmdbCategory[];
+
+  constructor(private typeService: TypeService, private categoryService: CategoryService, private modalService: NgbModal,
+              private sidebarService: SidebarService, private toast: ToastService) {
+    this.categoriesSubscription = new Subscription();
     this.basicForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl('', Validators.required),
@@ -71,7 +73,7 @@ export class TypeBasicStepComponent implements OnInit {
       icon: new FormControl(''),
     });
     this.basicCategoryForm = new FormGroup({
-      category_id: new FormControl(0)
+      category_id: new FormControl(null)
     });
   }
 
@@ -84,6 +86,9 @@ export class TypeBasicStepComponent implements OnInit {
   }
 
   public ngOnInit(): void {
+    this.categoriesSubscription = this.categoryService.getCategoryList('tree').subscribe((categories: CmdbCategory[]) => {
+      this.categories = categories;
+    });
     if (this.mode === CmdbMode.Create) {
       this.basicForm.get('name').setAsyncValidators(checkTypeExistsValidator(this.typeService));
       this.basicForm.get('label').valueChanges.subscribe(value => {
@@ -93,30 +98,33 @@ export class TypeBasicStepComponent implements OnInit {
         this.basicForm.get('name').markAsDirty({ onlySelf: true });
         this.basicForm.get('name').markAsTouched({ onlySelf: true });
       });
-      this.basicCategoryForm.get('category_id').setValidators(Validators.required);
     } else if (this.mode === CmdbMode.Edit) {
       this.basicForm.markAllAsTouched();
     }
-    this.categoryList = this.categoryService.getCategoryList();
+  }
+
+  public ngOnDestroy(): void {
+    this.categoriesSubscription.unsubscribe();
   }
 
   public addCategoryModal() {
     const newCategory = new CmdbCategory();
-    const addCategoryModal = this.modalService.open(AddCategoryModalComponent, {scrollable: true});
+    const addCategoryModal = this.modalService.open(AddCategoryModalComponent, { scrollable: true });
     addCategoryModal.result.then((result: FormGroup) => {
       if (result) {
         let categoryID = null;
         newCategory.name = result.get('name').value;
         newCategory.label = result.get('label').value;
-        newCategory.parent_id = result.get('parentID').value;
-        newCategory.icon = '';
         this.categoryService.postCategory(newCategory).subscribe(newID => {
-          this.basicCategoryForm.get('category_id').setValue(newID);
-          categoryID = newID;
-        }, error => {},
+            this.basicCategoryForm.get('category_id').setValue(newID);
+            categoryID = newID;
+          }, error => {
+          },
           () => {
-            this.categoryList = this.categoryService.getCategoryList();
-            this.sidebarService.updateCategoryTree();
+            this.categoriesSubscription = this.categoryService.getCategoryList().subscribe((categories: Array<CmdbCategory>) => {
+              this.categories = categories;
+            });
+            this.sidebarService.reload();
             this.toast.show('Category # ' + categoryID + ' was created');
           });
       }
@@ -124,4 +132,5 @@ export class TypeBasicStepComponent implements OnInit {
       console.log(reason);
     });
   }
+
 }

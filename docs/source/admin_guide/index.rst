@@ -13,5 +13,6 @@ Admin Guide
     gettingstarted
     objects
     exportd
+    docapi
     usermanagement
     authentication

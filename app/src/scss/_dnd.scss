@@ -1,0 +1,61 @@
+@import './src/scss/variables';
+
+$dnd-border-color: rgba($gray-700, 70%);
+$dnd-border-width: 2px;
+$dnd-border-style: dashed;
+
+$drag-over-transform: scale(1.0);
+
+$dnd-handle-cursor: grab;
+
+$dnd-dropzone-transition: all 500ms ease;
+$dnd-dropzone-padding: 15px;
+$dnd-dropzone-content-font-size: .8em;
+$dnd-dropzone-content-position: center;
+$dnd-dropzone-content-transform: uppercase;
+$dnd-dropzone-content-color: $dnd-border-color;
+
+.dnd {
+
+  .drop-zone {
+
+    transition: $dnd-dropzone-transition;
+
+    &[data-content] {
+      &:after {
+        display: block;
+        font-size: $dnd-dropzone-content-font-size;
+        text-transform: $dnd-dropzone-content-transform;
+        text-align: $dnd-dropzone-content-position;
+
+      }
+
+      &:empty {
+
+        padding: $dnd-dropzone-padding;
+        border-color: $dnd-border-color;
+        border-width: $dnd-border-width;
+        border-style: $dnd-border-style;
+        &:after {
+          content: attr(data-content);
+        }
+      }
+
+      &:not(&:empty) {
+        &:after {
+          content: '';
+        }
+      }
+    }
+
+  }
+
+}
+
+.dnd-handle{
+  cursor: $dnd-handle-cursor;
+}
+
+.drag-over-effect {
+  transform: $drag-over-transform;
+}

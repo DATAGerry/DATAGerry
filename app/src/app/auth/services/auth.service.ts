@@ -22,14 +22,13 @@ import { map } from 'rxjs/operators';
 import { HttpBackend, HttpClient, HttpHeaders } from '@angular/common/http';
 import { ConnectionService } from '../../connect/connection.service';
 import { User } from '../../management/models/user';
-import { Right } from '../../management/models/right';
 import { PermissionService } from './permission.service';
 import { ApiCallService, ApiService } from '../../services/api-call.service';
-import {IntroComponent} from "../../layout/intro/intro.component";
-import {StepByStepIntroComponent} from "../../layout/intro/step-by-step-intro/step-by-step-intro.component";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {SpecialService} from "../../framework/services/special.service";
-import {Router} from "@angular/router";
+import { IntroComponent } from '../../layout/intro/intro.component';
+import { StepByStepIntroComponent } from '../../layout/intro/step-by-step-intro/step-by-step-intro.component';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { SpecialService } from '../../framework/services/special.service';
+import { Router } from '@angular/router';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -41,7 +40,7 @@ const httpOptions = {
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService<T = any> implements ApiService  {
+export class AuthService<T = any> implements ApiService {
 
   // Rest backend
   private restPrefix: string = 'rest';
@@ -80,7 +79,7 @@ export class AuthService<T = any> implements ApiService  {
   }
 
 
-  public getAuthProviders(): Observable<T>  {
+  public getAuthProviders(): Observable<T> {
     return this.api.callGet<T>(`${ this.servicePrefix }/providers`).pipe(
       map((apiResponse) => {
         return apiResponse.body;
@@ -126,7 +125,7 @@ export class AuthService<T = any> implements ApiService  {
     this.specialService.getIntroStarter().subscribe(value => {
       const RUN = 'execute';
       if (!value[RUN]) {
-        const options = { centered: true, backdrop: 'static', keyboard: true, windowClass: 'intro-tour', size: 'lg'};
+        const options = { centered: true, backdrop: 'static', keyboard: true, windowClass: 'intro-tour', size: 'lg' };
         // @ts-ignore
         this.startIntroModal = this.introService.open(IntroComponent, options);
         this.startIntroModal.result.then((result) => {
@@ -142,7 +141,7 @@ export class AuthService<T = any> implements ApiService  {
   }
 
   private showSteps() {
-    const options = { backdrop: false, keyboard: true, windowClass: 'step-by-step'};
+    const options = { backdrop: false, keyboard: true, windowClass: 'step-by-step' };
     this.stepByStepModal = this.introService.open(StepByStepIntroComponent, options);
     this.stepByStepModal.result.then((resp) => {
       if (resp) {

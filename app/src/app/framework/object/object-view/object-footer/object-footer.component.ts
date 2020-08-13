@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
@@ -24,7 +24,7 @@ import { RenderResult } from '../../../models/cmdb-render';
   templateUrl: './object-footer.component.html',
   styleUrls: ['./object-footer.component.scss']
 })
-export class ObjectFooterComponent implements OnChanges{
+export class ObjectFooterComponent implements OnChanges {
 
   public objectID: number;
   private rr: RenderResult;

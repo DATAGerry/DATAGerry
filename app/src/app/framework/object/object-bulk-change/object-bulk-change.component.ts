@@ -44,6 +44,7 @@ export class ObjectBulkChangeComponent {
   public typeInstance: CmdbType;
   public mode: CmdbMode = CmdbMode.Bulk;
   public objectInstance: CmdbObject;
+  public activeState: boolean = true;
   public renderForm: FormGroup;
   public fieldsGroups: FormGroup;
   private objectIDs: string[];
@@ -65,6 +66,11 @@ export class ObjectBulkChangeComponent {
     });
   }
 
+  public toggleChange() {
+    this.activeState = this.activeState !== true;
+    this.renderForm.get('changedFields').value.set('activeObj-isChanged', this.activeState);
+  }
+
   public saveObject() {
     if (this.renderForm.get('changedFields').value.size > 0 ) {
       const httpOptions = {
@@ -75,8 +81,10 @@ export class ObjectBulkChangeComponent {
       };
       const patchValue = [];
       const newObjectInstance = new CmdbObject();
+      newObjectInstance.active = this.activeState;
       newObjectInstance.type_id = this.typeInstance.public_id;
       newObjectInstance.fields = [];
+      this.renderForm.get('changedFields').value.delete('activeObj-isChanged');
       this.renderForm.removeControl('active');
       Object.keys(this.renderForm.value).forEach((key: string) => {
         if (key.match('-isChanged') == null

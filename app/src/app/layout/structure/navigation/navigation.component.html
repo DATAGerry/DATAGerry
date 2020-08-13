@@ -30,6 +30,10 @@
         </li>
       </ul>
       <ul class="nav navbar-nav flex-row float-right">
+<!--        <li class="nav-item mr-2">-->
+<!--          <a class="nav-link"  [routerLink]="['/filemanager/explorer']" role="button" data-toggle="dropdown" aria-haspopup="true"-->
+<!--             aria-expanded="false"><i class="fas fa-folder"></i></a>-->
+<!--        </li>-->
         <!-- nav Framework -->
         <li *permissionLink="['base.framework.object.view', 'base.framework.type.view', 'base.framework.category.view']"
             class="nav-item dropdown mr-2">
@@ -39,6 +43,10 @@
           </a>
           <div class="dropdown-menu dropdown">
             <div class="dropdown-header">Framework</div>
+            <a class="dropdown-item"
+               *permissionLink="'base.framework.object.add'" [routerLink]="['/framework/object']">
+              <i class="fas fa-object-group"></i> Objects
+            </a>
             <a class="dropdown-item"
                *permissionLink="'base.framework.type.view'" [routerLink]="['/framework/type']">
               <i class="fas fa-object-group"></i> Types
@@ -74,6 +82,21 @@
               Export Objects</a>
           </div>
         </li>
+        <!-- nav Reporting -->
+        <li *permissionLink="['base.docapi.template.edit', 'base.docapi.template.delete']" class="nav-item dropdown mr-2">
+          <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+             aria-expanded="false">
+            <fa-icon icon="file-image"></fa-icon>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-header" *permissionLink="['base.docapi.template.view']">DocAPI</div>
+            <a class="dropdown-item" *permissionLink="['base.docapi.template.view']"
+              routerLink="/settings/docapi">
+              <fa-icon icon="file-pdf"></fa-icon>
+              Document Templates</a>
+          </div>
+        </li>
+
         <!-- nav Exportd Job -->
         <li *permissionLink="['base.exportd.job.view', 'base.exportd.log.view']" class="nav-item dropdown mr-2">
           <a class="dropdown-toggle nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"

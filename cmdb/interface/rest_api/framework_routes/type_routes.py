@@ -23,7 +23,8 @@ from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.search.query.query_builder import QueryBuilder
 from cmdb.user_management import User
 from cmdb.interface.route_utils import make_response, RootBlueprint, login_required, insert_request_user, right_required
-from cmdb.framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError, ObjectManagerGetError
+from cmdb.framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError, ObjectManagerGetError, \
+    ObjectManagerInitError
 from cmdb.framework.cmdb_type import CmdbType
 
 try:
@@ -43,31 +44,43 @@ with current_app.app_context():
 @insert_request_user
 @right_required('base.framework.type.view')
 def get_types(request_user: User):
+    """Get all types as a list"""
     try:
         type_list = object_manager.get_all_types()
-    except ObjectManagerGetError as e:
-        LOGGER.error(f'Error while getting all types as list: {e}')
-        return abort(500)
+    except (ObjectManagerInitError, ObjectManagerGetError) as err:
+        return abort(500, err.message)
     if len(type_list) == 0:
         return make_response(type_list, 204)
     return make_response(type_list)
 
 
-@type_blueprint.route('/by/<path:regex>/', methods=['GET'])
-@type_blueprint.route('/by/<path:regex>', methods=['GET'])
+@type_blueprint.route('/find/<path:regex>/', defaults={'regex_options': 'imsx'}, methods=['GET'])
+@type_blueprint.route('/find/<path:regex>', defaults={'regex_options': 'imsx'}, methods=['GET'])
+@type_blueprint.route('/find/<path:regex>/<path:regex_options>/', methods=['GET'])
+@type_blueprint.route('/find/<path:regex>/<path:regex_options>', methods=['GET'])
 @login_required
 @insert_request_user
 @right_required('base.framework.type.view')
-def get_types_by_name(regex: str, request_user: User):
+def find_types_by_name(regex: str, regex_options: str, request_user: User):
     query_builder = QueryBuilder()
 
-    query_name = query_builder.regex_('name', f'{regex}', 'imsx')
-    query_label = query_builder.regex_('label', f'{regex}', 'ims')
+    if not regex or (regex == '') or regex is None or len(regex) == 0:
+        return abort(400, 'No valid selection parameter was passed!')
+
+    if any(ro not in 'imsx' for ro in regex_options):
+        return abort(400, 'No valid regex options!')
+
+    query_name = query_builder.regex_('name', f'{regex}', regex_options)
+    query_label = query_builder.regex_('label', f'{regex}', regex_options)
     query = query_builder.or_([query_name, query_label])
+
     try:
         type_list = object_manager.get_types_by(**query)
-    except ObjectManagerGetError as e:
-        return abort(500)
+    except ObjectManagerInitError as err:
+        return abort(500, err.message)
+    except ObjectManagerGetError as err:
+        return abort(400, err.message)
+
     if len(type_list) == 0:
         return make_response(type_list, 204)
     return make_response(type_list)
@@ -113,7 +126,7 @@ def add_type(request_user: User):
         new_type_data['creation_time'] = datetime.utcnow()
     except TypeError as e:
         LOGGER.warning(e)
-        abort(400)
+        return abort(400)
     try:
         type_instance = CmdbType(**new_type_data)
     except CMDBError as e:
@@ -133,11 +146,6 @@ def add_type(request_user: User):
 @insert_request_user
 @right_required('base.framework.type.edit')
 def update_type(request_user: User):
-    """
-    TODO: Generate
-    update
-    log
-    """
     from bson import json_util
     add_data_dump = json.dumps(request.json)
     try:
@@ -236,11 +244,19 @@ def count_types(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.type.view')
-def get_type_by_category(public_id, request_user: User):
+def get_types_by_category(public_id, request_user: User):
     try:
-        type_list = object_manager.get_types_by(**{'category_id': public_id})
-    except ObjectManagerGetError:
-        return abort(404, 'Not types in this Category')
+        category = object_manager.get_category(public_id=public_id)
+    except ObjectManagerGetError as err:
+        return abort(404, err.message)
+    if category.get_number_of_types() == 0:
+        return make_response([], 204)
+
+    type_ids = category.get_types()
+    try:
+        type_list = object_manager.get_types_by(public_id={'$in': type_ids})
+    except ObjectManagerGetError as err:
+        return abort(404, err.message)
     return make_response(type_list)
 
 
@@ -250,94 +266,16 @@ def get_type_by_category(public_id, request_user: User):
 @insert_request_user
 @right_required('base.framework.type.view')
 def get_uncategorized_types(request_user: User):
-    try:
-        category_pid_list = []
-        categories = object_manager.get_all_categories()
-        for category in categories:
-            category_pid_list.append(category.public_id)
+    categories = object_manager.get_all_categories()
+    types = object_manager.get_all_types()
 
-        result = []
-        filter_match = {}
-        active_flag = False
-        if request.args.get('onlyActiveObjCookie') is not None:
-            value = request.args.get('onlyActiveObjCookie')
-            if value in ['True', 'true']:
-                active_flag = True
+    categorized_types = []
+    for category in categories:
+        categorized_types += category.types
 
-        # group type by category
-        cursor = object_manager.get_types_by(**{'category_id': {'$nin': category_pid_list}})
-        for document in cursor:
-            filter_match.update({'type_id': document.get_public_id()})
-            # count objects by type
-            if active_flag:
-                filter_match.update({'active': {'$eq': True}})
-                cursor = object_manager.group_objects_by_value('active', filter_match)
-                total = []
-                for obj in cursor:
-                    total.append(obj)
-                setattr(document, 'total', total[0]['count'] if total else 0)
-            else:
-                setattr(document, 'total', object_manager.count_objects_by_type(document.get_public_id()))
-            result.append(document)
-        result = sorted(result, key=lambda i: i.get_label())
-        resp = make_response(result)
-    except ObjectManagerGetError:
-        return abort(404, 'Something went wrong in getting uncategorised types')
-    return resp
+    uncategorized_types = [type_ for type_ in types if type_.get_public_id() not in categorized_types]
 
-
-@type_blueprint.route('/group/category/<int:public_id>/', methods=['GET'])
-@type_blueprint.route('/group/category/<int:public_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.view')
-def group_type_by_category(public_id, request_user: User):
-    try:
-        result = []
-        filter_match = {}
-        active_flag = False
-        if request.args.get('onlyActiveObjCookie') is not None:
-            value = request.args.get('onlyActiveObjCookie')
-            if value in ['True', 'true']:
-                active_flag = True
-
-        # group type by category
-        cursor = object_manager.group_type_by_value('public_id', {'category_id': public_id})
-        for document in cursor:
-            filter_match.update({'type_id': document['_id']})
-            document['public_id'] = document['_id']
-            document['label'] = object_manager.get_type(document['_id']).label
-            document['icon'] = object_manager.get_type(document['_id']).get_icon()
-            # count objects by type
-            if active_flag:
-                filter_match.update({'active': {'$eq': True}})
-                cursor = object_manager.group_objects_by_value('active', filter_match)
-                total = []
-                for obj in cursor:
-                    total.append(obj)
-                document['total'] = total[0]['count'] if total else 0
-            else:
-                document['total'] = object_manager.count_objects_by_type(document['_id'])
-            result.append(document)
-        result = sorted(result, key=lambda i: i['label'])
-        resp = make_response(result)
-    except ObjectManagerGetError:
-        return abort(404, 'Not types in this Category')
-    return resp
-
-
-@type_blueprint.route('/category/<int:public_id>/', methods=['PUT'])
-@type_blueprint.route('/category/<int:public_id>', methods=['PUT'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.edit')
-def update_type_by_category(public_id, request_user: User):
-    try:
-        ack = object_manager.update_many_types(filter={'category_id': public_id},
-                                               update={'$set': {'category_id': 0}})
-    except CMDBError:
-        return abort(500)
-    return make_response(ack.raw_result)
+    return make_response(uncategorized_types)
 
 
 @type_blueprint.route('/cleanup/remove/<int:public_id>/', methods=['GET'])
@@ -369,7 +307,6 @@ def cleanup_removed_fields(public_id, request_user: User):
                                                     update={'$pull': {'fields': {"name": field}}})
 
     except Exception as error:
-        print(error)
         return abort(500)
 
     return make_response(update_type_instance)

@@ -62,6 +62,13 @@ const routes: Routes = [
       breadcrumb: 'Exportd Job'
     },
     loadChildren: () => import('./exportd-job-settings/exportd-job-settings.module').then(m => m.ExportdJobSettingsModule)
+  },
+  {
+    path: 'docapi',
+    data: {
+      breadcrumb: 'DocAPI'
+    },
+    loadChildren: () => import('./docapi-settings/docapi-settings.module').then(m => m.DocapiSettingsModule)
   }
 ];
 

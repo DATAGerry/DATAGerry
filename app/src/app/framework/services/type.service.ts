@@ -94,7 +94,7 @@ export class TypeService<T = CmdbType> implements ApiService {
 
   public getTypesBy(regex: string): Observable<T[]> {
     regex = ValidatorService.validateRegex(regex).trim();
-    return this.api.callGet<CmdbType[]>(this.servicePrefix + '/by/' + encodeURIComponent(regex)).pipe(
+    return this.api.callGet<CmdbType[]>(this.servicePrefix + '/find/' + encodeURIComponent(regex)).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -126,7 +126,6 @@ export class TypeService<T = CmdbType> implements ApiService {
   }
 
   public getUncategorizedTypes(): Observable<any> {
-    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
     return this.api.callGet<T[]>(this.servicePrefix + '/uncategorized/', this.http, httpObserveOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
@@ -137,24 +136,9 @@ export class TypeService<T = CmdbType> implements ApiService {
   public getTypeListByCategory(publicID: number): Observable<any> {
     return this.api.callGet<T[]>(this.servicePrefix + '/category/' + publicID).pipe(
       map((apiResponse) => {
-        return apiResponse.body;
-      })
-    );
-  }
-
-
-  public groupTypeByCategory(publicID: number): Observable<any> {
-    httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    return this.api.callGet<T[]>(this.servicePrefix + '/group/category/' + publicID, this.http, httpObserveOptions).pipe(
-      map((apiResponse) => {
-        return apiResponse.body;
-      })
-    );
-  }
-
-  public updateTypeByCategoryID(publicID: number): Observable<any> {
-    return this.api.callPut<T>(this.servicePrefix + '/category/' + publicID, null).pipe(
-      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
         return apiResponse.body;
       })
     );

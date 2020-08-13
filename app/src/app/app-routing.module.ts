@@ -19,8 +19,6 @@
 import { NgModule, isDevMode } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from './auth/guards/auth.guard';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { HttpErrorInterceptor } from './error/interceptors/http-error.interceptor.tx';
 
 const routes: Routes = [
   {
@@ -103,6 +101,14 @@ const routes: Routes = [
       breadcrumb: 'Info'
     },
     loadChildren: () => import('./info/info.module').then(m => m.InfoModule)
+  },
+  {
+    path: 'filemanager',
+    canActivate: [AuthGuard],
+    data: {
+      breadcrumb: 'Filemanager'
+    },
+    loadChildren: () => import('./file-manager/file-manager.module').then(m => m.FileManagerModule)
   },
   {
     path: 'debug',

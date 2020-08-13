@@ -57,11 +57,16 @@ import { ObjectBulkChangeComponent } from './object-bulk-change/object-bulk-chan
 import { ObjectBulkChangeEditorComponent } from './object-bulk-change/object-bulk-change-editor/object-bulk-change-editor.component';
 import { ObjectBulkChangePreviewComponent } from './object-bulk-change/object-bulk-change-preview/object-bulk-change-preview.component';
 import { ArchwizardModule } from 'angular-archwizard';
+import { ObjectDocsComponent } from './components/object-docs/object-docs.component';
+import { ObjectAttachmentsComponent } from './components/object-attachments/object-attachments.component';
+// tslint:disable-next-line:max-line-length
+import { AddAttachmentsDialogComponent } from './components/object-attachments/modal/add-attachments-dialog/add-attachments-dialog.component';
 
 @NgModule({
   entryComponents: [
     ObjectLinkAddModalComponent,
-    ObjectLinkDeleteModalComponent
+    ObjectLinkDeleteModalComponent,
+    AddAttachmentsDialogComponent
   ],
   declarations: [
     ObjectViewComponent,
@@ -89,7 +94,10 @@ import { ArchwizardModule } from 'angular-archwizard';
     ObjectBulkChangeComponent,
     ObjectBulkChangePreviewComponent,
     ObjectBulkChangeEditorComponent,
-    ObjectBulkChangePreviewComponent
+    ObjectBulkChangePreviewComponent,
+    ObjectDocsComponent,
+    ObjectAttachmentsComponent,
+    AddAttachmentsDialogComponent,
   ],
   exports: [
   ],

@@ -1,0 +1,29 @@
+ <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Add new Category</h3>
+      <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="catAddForm">
+        <div class="form-group">
+          <label for="labelCategoryID">Label</label>
+          <input type="text" class="form-control" formControlName="label" id="labelCategoryID"
+                 [ngClass]="{ 'is-valid': catAddForm.valid && (catAddForm.dirty || catAddForm.touched),
+                 'is-invalid': catAddForm.invalid && (catAddForm.dirty || catAddForm.touched)}"
+                 placeholder="Label">
+        </div>
+        <div class="form-group">
+          <label for="nameCategoryID">Name</label>
+          <input type="text" class="form-control" formControlName="name" id="nameCategoryID" placeholder="Name" readonly>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" data-dismiss="modal" [disabled]="!catAddForm.valid"
+              (click)="activeModal.close(catAddForm)">Save
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="activeModal.close(null)">Cancel</button>
+    </div>
+  </div>

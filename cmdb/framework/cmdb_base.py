@@ -226,6 +226,12 @@ class CmdbManagerBase(ABC):
         )
 
 
+class ManagerInitError(CMDBError):
+
+    def __init__(self, err):
+        self.message = f'Error while INIT operation - E: ${err}'
+
+
 class ManagerGetError(CMDBError):
 
     def __init__(self, err):

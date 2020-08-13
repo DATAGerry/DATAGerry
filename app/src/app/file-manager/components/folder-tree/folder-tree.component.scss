@@ -1,0 +1,45 @@
+@import './src/scss/variables';
+
+/* Remove default bullets */
+ul, #folder-tree-view {
+  list-style-type: none;
+}
+
+/* Remove margins and padding from the parent ul */
+#folder-tree-view {
+  margin: 0;
+  padding: 0;
+}
+
+/* Style the caret/folder */
+.caret {
+  cursor: pointer;
+  user-select: none; /* Prevent text selection */
+}
+
+/* Create the caret/folder with a unicode, and style it */
+.caret::before {
+  font-family: "Font Awesome 5 Free", sans-serif;
+  content: "\f07b";
+  color: black;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+/* The caret/folder icon when clicked on */
+.caret-down::before {
+  font-family: "Font Awesome 5 Free", sans-serif;
+  content: "\f07c";
+}
+
+/* The caret/folder hover */
+.caret:hover, .caret-down:hover {
+  background: $gray-400;
+}
+
+/* The nested list */
+.nested {
+  display: block;
+  padding-left: 1.75em;
+}
+

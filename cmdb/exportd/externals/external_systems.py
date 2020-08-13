@@ -782,3 +782,30 @@ class ExternalSystemGenericRestCall(ExternalSystem):
             self.error("Can't connect to REST endpoint")
         except requests.exceptions.Timeout:
             self.error("Timeout connecting to REST endpoint")
+
+
+class ExternalSystemGenericPullJson(ExternalSystem):
+
+    parameters = []
+
+    variables = [{}]
+
+    def __init__(self, destination_parms, export_vars):
+        super(ExternalSystemGenericPullJson, self).__init__(destination_parms, export_vars)
+        self.__rows = []
+
+    def prepare_export(self):
+        pass
+
+    def add_object(self, cmdb_object, template_data):
+        row = {}
+        row["object_id"] = str(cmdb_object.object_information['object_id'])
+        row["variables"] = {}
+        for key in self._export_vars:
+            row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
+        self.__rows.append(row)
+
+    def finish_export(self):
+        json_data = json.dumps(self.__rows)
+        header = ExportdHeader(json_data)
+        return header

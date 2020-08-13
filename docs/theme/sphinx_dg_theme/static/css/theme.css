@@ -3810,7 +3810,7 @@ input[type="button"].btn-block {
   position: relative;
   padding: 0.75rem 1.25rem;
   margin-bottom: 1rem;
-  border: 2px solid transparent;
+  border: 1px solid transparent;
   border-radius: 0px; }
 
 .alert-heading {
@@ -7369,9 +7369,14 @@ a.text-nethinks:hover, a.text-nethinks:focus {
   border-left: 3px solid #e94d18;
   padding-left: 20px; }
 
+.admonition-todo {
+  background: #FFFFFF;
+  border-left: 3px solid;
+  padding-left: 20px; }
+
 .warning {
   background: #e9ecef;
-  border-left: 3px solid;
+  border-left: 3px solid #e94d18;
   padding-left: 20px; }
 
 h1:hover .headerlink, h2:hover .headerlink, h3:hover .headerlink, h4:hover .headerlink, h5:hover .headerlink {

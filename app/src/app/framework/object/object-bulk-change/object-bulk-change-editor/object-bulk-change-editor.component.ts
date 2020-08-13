@@ -13,10 +13,10 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbMode } from '../../../modes.enum';
 import { CmdbObject } from '../../../models/cmdb-object';
@@ -27,14 +27,18 @@ import { FormGroup } from '@angular/forms';
   templateUrl: './object-bulk-change-editor.component.html',
   styleUrls: ['./object-bulk-change-editor.component.scss']
 })
-export class ObjectBulkChangeEditorComponent implements OnInit{
+export class ObjectBulkChangeEditorComponent {
 
   @Input() typeInstance: CmdbType;
   @Input() mode: CmdbMode;
   @Input() objectInstance: CmdbObject;
   @Input() renderForm: FormGroup;
   @Input() fieldsGroups: FormGroup;
+  @Input() activeState: boolean;
 
-  public ngOnInit(): void {
+  @Output() activeChange = new EventEmitter();
+
+  public toggleChange() {
+    this.activeChange.emit();
   }
 }
