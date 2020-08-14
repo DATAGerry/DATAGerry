@@ -43,7 +43,6 @@ export class CategoryViewComponent implements OnInit, OnDestroy {
   constructor(private categoryService: CategoryService, private typeService: TypeService, private route: ActivatedRoute) {
     this.route.params.pipe(takeUntil(this.unSubscribe)).subscribe((params: Params) => {
       this.publicIDSubject.next(params.publicID);
-      console.log(params.publicID);
     });
   }
 

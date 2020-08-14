@@ -27,11 +27,11 @@ abstract class APIResponse {
   time: string;
 }
 
-export class GetSingleResponse<T = CmdbDao> extends APIResponse {
+export class APIGetSingleResponse<T = CmdbDao> extends APIResponse {
   result: T;
 }
 
-export class GetMultiResponse<T = CmdbDao> extends APIResponse {
+export class APIGetMultiResponse<T = CmdbDao> extends APIResponse {
   results: Array<T>;
   count: number;
   total: number;

@@ -36,21 +36,23 @@ import { CategoryDeleteComponent } from './category-delete/category-delete.compo
 import { AuthModule } from '../../auth/auth.module';
 import { AddCategoryModalComponent } from './components/modals/add-category-modal/add-category-modal.component';
 import { CategoryViewComponent } from './category-view/category-view.component';
+import { DataTablesModule } from 'angular-datatables';
 
 @NgModule({
   declarations: [CategoryComponent, CategoryAddComponent, CategoryFormComponent, CategoryEditComponent, CategoryTreeComponent, CategoryNodeComponent, AddCategoryModalComponent, CategoryDeleteComponent, CategoryViewComponent],
-  imports: [
-    CommonModule,
-    CategoryRoutingModule,
-    DndModule,
-    ReactiveFormsModule,
-    LayoutModule,
-    NgSelectModule,
-    FontAwesomeModule,
-    FormsModule,
-    IconPickerModule,
-    AuthModule
-  ],
+    imports: [
+        CommonModule,
+        CategoryRoutingModule,
+        DndModule,
+        ReactiveFormsModule,
+        LayoutModule,
+        NgSelectModule,
+        FontAwesomeModule,
+        FormsModule,
+        IconPickerModule,
+        AuthModule,
+        DataTablesModule
+    ],
   entryComponents: [AddCategoryModalComponent, CategoryDeleteComponent]
 })
 export class CategoryModule {

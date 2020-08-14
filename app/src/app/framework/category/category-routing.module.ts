@@ -30,7 +30,8 @@ const routes: Routes = [
     pathMatch: 'full',
     data: {
       breadcrumb: 'List',
-      right: 'base.framework.category.view'
+      right: 'base.framework.category.view',
+      mode: CmdbMode.View
     },
     component: CategoryComponent
   },
@@ -63,7 +64,8 @@ const routes: Routes = [
     path: 'edit/:publicID',
     data: {
       breadcrumb: 'Edit',
-      right: 'base.framework.category.edit'
+      right: 'base.framework.category.edit',
+      mode: CmdbMode.Edit
     },
     component: CategoryEditComponent
   }

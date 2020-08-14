@@ -16,66 +16,126 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { forkJoin, Observable, Subscription } from 'rxjs';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { BehaviorSubject, forkJoin, Observable, ReplaySubject, Subject } from 'rxjs';
 import { CmdbCategory, CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb-category';
 import { CategoryService } from '../services/category.service';
 import { CmdbMode } from '../modes.enum';
 import { ActivatedRoute } from '@angular/router';
 import { SidebarService } from '../../layout/services/sidebar.service';
+import { takeUntil } from 'rxjs/operators';
+import { APIGetMultiResponse } from '../../services/models/api-response';
+import { CollectionParameters } from '../../services/models/api-parameter';
 
 @Component({
   selector: 'cmdb-category',
   templateUrl: './category.component.html',
   styleUrls: ['./category.component.scss']
 })
-export class CategoryComponent implements OnInit, OnDestroy {
+export class CategoryComponent implements OnInit, AfterViewInit, OnDestroy {
+
+  /**
+   * Global unsubscriber for http calls to the rest backend.
+   */
+  private unSubscribe: ReplaySubject<void> = new ReplaySubject();
 
   /**
    * Current category collection
    */
   public categories: Array<CmdbCategory>;
+  public categoriesAPIResponse: APIGetMultiResponse<CmdbCategory>;
 
   /**
    * Root element of the category tree
    */
   public categoryTree: CmdbCategoryTree;
+
   /**
-   * Rest call subscription for root tree
+   * Current display mode
    */
-  private categoryTreeSubscription: Subscription;
+  private displayMode: Observable<CmdbMode>;
+
   /**
-   * Category edit mode
-   * Default is a basic tree view
+   * Current display mode subject
    */
-  public mode: CmdbMode = CmdbMode.View;
-  /**
-   * Route data subscription for mode over route data
-   */
-  private routeSubscription: Subscription;
+  private displayModeSubject: BehaviorSubject<CmdbMode> = new BehaviorSubject<CmdbMode>(CmdbMode.View);
+
+  public dtOptions: DataTables.Settings = {};
+  public dtTrigger: Subject<void> = new Subject();
 
   constructor(private categoryService: CategoryService, private route: ActivatedRoute, private sidebarService: SidebarService) {
-
     this.categories = [];
-
-    // this.categoryTreeSubscription = new Subscription();
-    // this.routeSubscription = new Subscription();
-
-    this.routeSubscription = this.route.data.subscribe((data: any) => {
-      if (data.mode) {
-        this.mode = data.mode;
-      }
-    });
+    this.displayMode = this.displayModeSubject.asObservable();
+    this.displayModeSubject.next(this.route.snapshot.data.mode);
   }
 
   public ngOnInit(): void {
-    this.categoryTreeSubscription = this.categoryService.getCategoryTree().subscribe((categoryTree: CmdbCategoryTree) => {
-      this.categoryTree = categoryTree;
+    this.displayMode.pipe(takeUntil(this.unSubscribe)).subscribe((mode: number) => {
+      this.categoryService.getCategoryTree().pipe(
+        takeUntil(this.unSubscribe)).subscribe((categoryTree: CmdbCategoryTree) => {
+        this.categoryTree = categoryTree;
+      });
     });
+    this.dtOptions = {
+      columns: [
+        {
+          title: 'PublicID',
+          name: 'public_id',
+          data: 'public_id'
+        },
+        {
+          title: 'Name',
+          name: 'name',
+          data: 'name'
+        },
+        {
+          title: 'Label',
+          name: 'label',
+          data: 'label'
+        },
+        {
+          title: 'ParentID',
+          name: 'parent',
+          data: 'parent'
+        }
+      ],
+      searching: false,
+      serverSide: true,
+      processing: true,
+      ajax: (params: any, callback) => {
+
+        const apiParameters: CollectionParameters = {
+          page: Math.ceil(params.start / params.length) + 1,
+          limit: params.length,
+          sort: params.columns[params.order[0].column].name,
+          order: params.order[0].dir === 'desc' ? -1 : 1,
+        };
+
+        this.categoryService.getCategoryIteration(apiParameters).pipe(
+          takeUntil(this.unSubscribe)).subscribe((response: APIGetMultiResponse<CmdbCategory>) => {
+          this.categoriesAPIResponse = response;
+          this.categories = this.categoriesAPIResponse.results;
+          callback({
+            recordsTotal: response.total,
+            recordsFiltered: response.total,
+            data: this.categories
+          });
+        });
+      }
+    };
+  }
+
+  public ngAfterViewInit(): void {
+    this.dtTrigger.next();
   }
 
   public ngOnDestroy(): void {
-    this.categoryTreeSubscription.unsubscribe();
+    this.unSubscribe.next();
+    this.unSubscribe.complete();
+  }
+
+  public get mode(): CmdbMode {
+    return this.displayModeSubject.getValue();
   }
 
   /**
