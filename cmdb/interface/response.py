@@ -61,21 +61,24 @@ class OperationType(Enum):
 
 class BaseAPIResponse:
     """Basic `abstract` response class"""
-    __slots__ = 'url', 'operation_type', 'time', 'model'
+    __slots__ = 'url', 'operation_type', 'time', 'model', 'body'
 
-    def __init__(self, operation_type: OperationType, url: str = None, model: Model = None):
+    def __init__(self, operation_type: OperationType, url: str = None, model: Model = None, body: bool = None):
         """
+        Constructor of a basic api response.
 
         Args:
             operation_type:
             url:
             model:
+            body
         """
         if operation_type.value not in set(item.value for item in OperationType):
             raise TypeError(f'{operation_type} is not a valid response operation')
         self.operation_type: OperationType = operation_type
         self.url = url or ''
         self.model: Model = model or ''
+        self.body = body or True
         self.time: str = datetime.now().isoformat()
 
     def make_response(self, *args, **kwargs) -> BaseResponse:
@@ -110,7 +113,7 @@ class GetSingleResponse(BaseAPIResponse):
     """
     __slots__ = 'result'
 
-    def __init__(self, result: dict, url: str = None, model: Model = None):
+    def __init__(self, result: dict, url: str = None, model: Model = None, body: bool = None):
         """
         Constructor of GetSingleResponse.
 
@@ -120,7 +123,8 @@ class GetSingleResponse(BaseAPIResponse):
             model: model type of body
         """
         self.result: dict = result
-        super(GetSingleResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model)
+        super(GetSingleResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model,
+                                                body=body)
 
     def make_response(self, *args, **kwargs) -> BaseResponse:
         """
@@ -133,7 +137,11 @@ class GetSingleResponse(BaseAPIResponse):
         Returns:
             Instance of BaseResponse with a HTTP 200 status code.
         """
-        return make_api_response(self.export())
+        if self.body:
+            response = make_api_response(self.export(*args, **kwargs))
+        else:
+            response = make_api_response(None)
+        return response
 
     def export(self, text: str = 'json') -> dict:
         """Get content of the response as dict."""
@@ -149,7 +157,7 @@ class GetMultiResponse(BaseAPIResponse):
     __slots__ = 'results', 'count', 'total', 'parameters', 'pager', 'pagination'
 
     def __init__(self, results: List[dict], total: int, params: CollectionParameters, url: str = None,
-                 model: Model = None):
+                 model: Model = None, body: bool = None):
         """
         Constructor of GetMultiResponse.
 
@@ -159,6 +167,7 @@ class GetMultiResponse(BaseAPIResponse):
             params: HTTP query parameters.
             url: Requested url.
             model: Data-Model of the results.
+            body_less: If http response should not have a body.
 
         """
         self.results: List[dict] = results
@@ -168,7 +177,8 @@ class GetMultiResponse(BaseAPIResponse):
         self.pager: APIPager = APIPager(page=params.page, page_size=params.limit,
                                         total_pages=ceil(total / params.limit))
         self.pagination: APIPagination = APIPagination.create(url, self.pager.page, self.pager.total_pages)
-        super(GetMultiResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model)
+        super(GetMultiResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model,
+                                               body=body)
 
     def make_response(self, *args, **kwargs) -> BaseResponse:
         """
@@ -181,7 +191,12 @@ class GetMultiResponse(BaseAPIResponse):
         Returns:
             Instance of BaseResponse.
         """
-        return make_api_response(self.export(*args, **kwargs))
+        if self.body:
+            response = make_api_response(self.export(*args, **kwargs))
+        else:
+            response = make_api_response(None)
+        response.headers['X-Total-Count'] = self.total
+        return response
 
     def export(self, text: str = 'json', pagination: bool = True) -> dict:
         """

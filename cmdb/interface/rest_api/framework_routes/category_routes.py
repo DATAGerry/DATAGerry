@@ -32,28 +32,31 @@ LOGGER = logging.getLogger(__name__)
 categories_blueprint = APIBlueprint('categories', __name__)
 
 
-@categories_blueprint.route('/', methods=['GET'])
+@categories_blueprint.route('/', methods=['GET', 'HEAD'])
 @categories_blueprint.protect(auth=True, right='base.framework.category.view')
 @categories_blueprint.parse_collection_parameters(view='list')
 def get_categories(params: CollectionParameters):
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
+    body = True
+    if request.method == 'HEAD':
+        body = False
+
     try:
         if params.optional['view'] == 'tree':
             tree: CategoryTree = category_manager.tree
             api_response = GetMultiResponse(CategoryTree.to_json(tree), total=len(tree), params=params,
-                                            url=request.url, model=CategoryTree.MODEL)
+                                            url=request.url, model=CategoryTree.MODEL, body=body)
             return api_response.make_response(pagination=False)
         else:
             iteration_result: IterationResult[CategoryDAO] = category_manager.iterate(
                 filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
             category_list = [CategoryDAO.to_json(category) for category in iteration_result.results]
             api_response = GetMultiResponse(category_list, total=iteration_result.total, params=params,
-                                            url=request.url, model=CategoryDAO.MODEL)
+                                            url=request.url, model=CategoryDAO.MODEL, body=body)
     except FrameworkIterationError as err:
         return abort(400, err.message)
     except ManagerGetError as err:
         return abort(404, err.message)
-
     return api_response.make_response()
 
 
