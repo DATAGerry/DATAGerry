@@ -42,7 +42,7 @@ def get_categories(params: CollectionParameters):
             tree: CategoryTree = category_manager.tree
             api_response = GetMultiResponse(CategoryTree.to_json(tree), total=len(tree), params=params,
                                             url=request.url, model=CategoryTree.MODEL)
-            return api_response.make_response(complete=False)
+            return api_response.make_response(pagination=False)
         else:
             iteration_result: IterationResult[CategoryDAO] = category_manager.iterate(
                 filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)

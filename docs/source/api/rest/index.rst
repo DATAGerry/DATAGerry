@@ -5,7 +5,8 @@ REST
 ****
 
 .. toctree::
-    framework
+    :maxdepth: 2
+    :numbered:
 
-    :caption: Framework
-    :name: framework
+    introduction
+    framework
