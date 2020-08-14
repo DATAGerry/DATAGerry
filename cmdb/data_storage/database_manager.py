@@ -271,7 +271,6 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
     def get_database_name(self):
         return self.connector.get_database_name()
 
-    @deprecated
     def __find(self, collection: str, *args, **kwargs):
         """general find function for database search
 
