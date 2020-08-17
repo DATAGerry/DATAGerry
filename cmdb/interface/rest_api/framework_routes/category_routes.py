@@ -37,9 +37,7 @@ categories_blueprint = APIBlueprint('categories', __name__)
 @categories_blueprint.parse_collection_parameters(view='list')
 def get_categories(params: CollectionParameters):
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
-    body = True
-    if request.method == 'HEAD':
-        body = False
+    body = True if not request.method != 'HEAD' else False
 
     try:
         if params.optional['view'] == 'tree':
@@ -60,17 +58,19 @@ def get_categories(params: CollectionParameters):
     return api_response.make_response()
 
 
-@categories_blueprint.route('/<int:public_id>', methods=['GET'])
+@categories_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
 @categories_blueprint.protect(auth=True, right='base.framework.category.view')
 def get_category(public_id: int):
     """HTTP GET call for a single category by the public id"""
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
+    body = True if not request.method != 'HEAD' else False
+
     try:
         category_instance = category_manager.get(public_id)
     except ManagerGetError as err:
         return abort(404, err.message)
     api_response = GetSingleResponse(CategoryDAO.to_json(category_instance), url=request.url,
-                                     model=CategoryDAO.MODEL)
+                                     model=CategoryDAO.MODEL, body=body)
     return api_response.make_response()
 
 
@@ -87,13 +87,25 @@ def insert_category(document: dict):
     return api_response.make_response(prefix='category')
 
 
+@categories_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@categories_blueprint.protect(auth=True, right='base.framework.category.edit')
+@categories_blueprint.validate(CategoryDAO.SCHEMA)
+def update_category(public_id: int):
+    category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
+
+    # return api_response.make_response(prefix='category')
+    pass
+
+
 @categories_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @categories_blueprint.protect(auth=True, right='base.framework.category.delete')
 def delete_category(public_id: int):
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
     try:
-        delete_response = category_manager.delete(public_id=PublicID(public_id))
-        api_response = DeleteSingleResponse(raw=delete_response.raw_result, model=CategoryDAO.MODEL)
+        deleted_category = category_manager.delete(public_id=PublicID(public_id))
+        api_response = DeleteSingleResponse(raw=CategoryDAO.to_json(deleted_category), model=CategoryDAO.MODEL)
+    except ManagerGetError as err:
+        return abort(404, err.message)
     except ManagerDeleteError as err:
         return abort(404, err.message)
     return api_response.make_response()

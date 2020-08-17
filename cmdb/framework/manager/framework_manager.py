@@ -17,9 +17,9 @@ from typing import Union, List
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_dao import CmdbDAO
-from cmdb.framework.manager import ManagerBase, ManagerGetError
+from cmdb.framework.manager import ManagerBase, ManagerGetError, ManagerDeleteError
 from cmdb.framework.manager.error.framework_errors import FrameworkGetError, FrameworkNotFoundError, \
-    FrameworkIterationError, FrameworkQueryEmptyError
+    FrameworkIterationError, FrameworkQueryEmptyError, FrameworkDeleteError
 from cmdb.framework.manager.results import IterationResult
 from cmdb.framework.utils import PublicID, Collection
 from cmdb.search import Query, Pipeline
@@ -149,11 +149,15 @@ class FrameworkManager(ManagerBase):
             raise FrameworkNotFoundError(
                 f'A resource with the PublicID {public_id} was not found inside {self.collection}')
 
-    def insert(self, instance: dict) -> PublicID:
-        return super(FrameworkManager, self)._insert(self.collection, instance)
+    def insert(self, resource: dict) -> PublicID:
+        return super(FrameworkManager, self)._insert(self.collection, resource)
 
     def update(self, public_id: PublicID, instance: CmdbDAO):
         return super(FrameworkManager, self)._update(self.collection, filter={'public_id': public_id}, data=instance)
 
     def delete(self, public_id: PublicID):
-        return super(FrameworkManager, self)._delete(self.collection, public_id=public_id)
+        try:
+            delete_result = super(FrameworkManager, self)._delete(self.collection, public_id=public_id)
+        except ManagerDeleteError as err:
+            raise FrameworkDeleteError(err=err)
+        return delete_result

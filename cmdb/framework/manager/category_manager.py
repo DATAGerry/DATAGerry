@@ -20,6 +20,7 @@ from cmdb.framework import CategoryDAO
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.dao.category import CategoryTree
 from cmdb.framework.manager import ManagerGetError
+from cmdb.framework.manager.error.framework_errors import FrameworkDeleteError
 from cmdb.framework.manager.framework_manager import FrameworkManager
 from cmdb.framework.manager.results import IterationResult
 from cmdb.framework.utils import PublicID
@@ -42,7 +43,14 @@ class CategoryManager(FrameworkManager):
         return CategoryDAO.from_data(result)
 
     def insert(self, category: dict) -> PublicID:
-        return super(CategoryManager, self).insert(category)
+        return super(CategoryManager, self).insert(resource=category)
+
+    def delete(self, public_id: Union[PublicID, int]) -> CategoryDAO:
+        raw_category = self.get(public_id=public_id)
+        delete_result = super(CategoryManager, self).delete(public_id=public_id)
+        if delete_result.deleted_count == 0:
+            raise FrameworkDeleteError(err='No document matched this public id')
+        return raw_category
 
     @property
     def tree(self) -> CategoryTree:

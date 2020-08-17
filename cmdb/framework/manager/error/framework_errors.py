@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+from typing import Union
 
 from cmdb.framework.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
 
@@ -20,28 +21,28 @@ from cmdb.framework.manager import ManagerGetError, ManagerInsertError, ManagerU
 class FrameworkGetError(ManagerGetError):
     """Generic or basic framework error for manager get operations."""
 
-    def __init__(self, err: Exception = None):
+    def __init__(self, err: Union[Exception, str] = None):
         super(FrameworkGetError, self).__init__(err=err)
 
 
 class FrameworkInsertError(ManagerInsertError):
     """Generic or basic framework error for manager insert operations."""
 
-    def __init__(self, err: Exception = None):
+    def __init__(self, err: Union[Exception, str] = None):
         super(FrameworkInsertError, self).__init__(err=err)
 
 
 class FrameworkUpdateError(ManagerUpdateError):
     """Generic or basic framework error for manager update operations."""
 
-    def __init__(self, err: Exception = None):
+    def __init__(self, err: Union[Exception, str] = None):
         super(FrameworkUpdateError, self).__init__(err=err)
 
 
 class FrameworkDeleteError(ManagerDeleteError):
     """Generic or basic framework error for manager delete operations."""
 
-    def __init__(self, err: Exception = None):
+    def __init__(self, err: Union[Exception, str] = None):
         super(FrameworkDeleteError, self).__init__(err=err)
 
 
@@ -64,13 +65,13 @@ class FrameworkQueryEmptyError(FrameworkGetError):
 class FrameworkIterationError(FrameworkGetError):
     """Framework error if the iteration over the collection throws an error"""
 
-    def __init__(self, err: Exception = None):
+    def __init__(self, err: Union[Exception, str] = None):
         super(FrameworkIterationError, self).__init__(err=err)
 
 
 class FrameworkIterationOutOfBoundsError(FrameworkGetError):
     """Framework error if a skip bigger than the total number of elements was called"""
 
-    def __init__(self, message: str = '', err: Exception = None):
+    def __init__(self, message: str = '', err: Union[Exception, str] = None):
         self.message = message
         super(FrameworkIterationOutOfBoundsError, self).__init__(err=err)
