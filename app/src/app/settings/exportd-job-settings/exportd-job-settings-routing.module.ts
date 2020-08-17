@@ -22,7 +22,7 @@ import { ExportdJobSettingsListComponent } from './exportd-job-settings-list/exp
 import { ExportdJobSettingsAddComponent } from './exportd-job-settings-add/exportd-job-settings-add.component';
 import { ExportdJobSettingsEditComponent } from './exportd-job-settings-edit/exportd-job-settings-edit.component';
 import { ExportdJobLogsComponent } from './exportd-job-logs/exportd-job-logs.component';
-import {ExportdJobSettingsCopyComponent} from "./exportd-job-settings-copy/exportd-job-settings-copy.component";
+import { ExportdJobSettingsCopyComponent } from './exportd-job-settings-copy/exportd-job-settings-copy.component';
 
 const routes: Routes = [
   {
@@ -66,4 +66,5 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class ExportdJobSettingsRoutingModule { }
+export class ExportdJobSettingsRoutingModule {
+}

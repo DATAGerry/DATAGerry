@@ -24,7 +24,7 @@ import { FormControl } from '@angular/forms';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
 import { AuthService } from '../auth/services/auth.service';
-import { DocTemplate } from '../framework/models/cmdb-doctemplate';
+import { DocTemplate } from '../framework/models/cmdb-doctemplate';
 import { BasicAuthInterceptor } from '../auth/interceptors/basic-auth.interceptor';
 
 const fileHttpOptions = {
@@ -55,12 +55,12 @@ export class DocapiService<T = DocTemplate> implements ApiService {
   }
 
 
-  getObjectDocTemplateList(typeId: number) : Observable<T[]> {
+  getObjectDocTemplateList(typeId: number): Observable<T[]> {
     const searchfilter = {
-        template_type: 'OBJECT',
-        template_parameters: { type: typeId }
-    }
-    return this.api.callGet<T>(`${ this.servicePrefix }/by/${JSON.stringify(searchfilter)}`).pipe(
+      template_type: 'OBJECT',
+      template_parameters: { type: typeId }
+    };
+    return this.api.callGet<T>(`${ this.servicePrefix }/by/${ JSON.stringify(searchfilter) }`).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -74,7 +74,6 @@ export class DocapiService<T = DocTemplate> implements ApiService {
   getRenderedObjectDoc(templateId: number, objectId: number) {
     return this.api.callGetRoute<any>(`${ this.servicePrefix }/${ templateId }/render/${ objectId }`, fileHttpOptions);
   }
-
 
 
   // CRUD calls
@@ -109,7 +108,7 @@ export class DocapiService<T = DocTemplate> implements ApiService {
 
 }
 
-//Form Validators
+// Form Validators
 export const checkDocTemplateExistsValidator = (docApiService: DocapiService<DocTemplate>, time: number = 500) => {
   return (control: FormControl) => {
     return timer(time).pipe(switchMap(() => {

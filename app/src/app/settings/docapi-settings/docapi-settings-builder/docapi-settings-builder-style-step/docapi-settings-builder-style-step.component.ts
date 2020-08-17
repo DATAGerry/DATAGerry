@@ -38,7 +38,7 @@ export class DocapiSettingsBuilderStyleStepComponent implements OnInit {
   public modes = CmdbMode;
   public styleForm: FormGroup;
 
-  constructor() { 
+  constructor() {
     this.styleForm = new FormGroup({
       template_style: new FormControl('')
     });

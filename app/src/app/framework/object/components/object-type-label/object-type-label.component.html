@@ -1,5 +1,3 @@
-<div *ngIf="typeInformation?.icon" id="object-type-label" class="card">
-  <div class="card-body">
-    <cmdb-type-label [faIcon]="typeInformation?.icon"></cmdb-type-label>
-  </div>
+<div class="display-4" *ngIf="typeInformation?.icon">
+  <cmdb-type-label [faIcon]="typeInformation?.icon"></cmdb-type-label>
 </div>

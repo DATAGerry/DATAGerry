@@ -1,16 +1,40 @@
-<div class="row">
-  <div id="object-view" class="col-md-9">
-    <cmdb-object-header [renderResult]="renderResult" (stateChange)="logChange($event)"></cmdb-object-header>
-    <cmdb-object-view-render [mode]="mode" [renderResult]="renderResult"></cmdb-object-view-render>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="row ml-0 object-view-navbar align-items-center justify-content-center">
+          <!-- Action widget-->
+          <div class="col-xl-4 col-md-6 col-6 pt-1">
+            <cmdb-object-actions [renderResult]="renderResult"></cmdb-object-actions>
+          </div>
+          <!-- External links widget-->
+          <div class="col-xl-2 col-md-6 col-6 border-left pt-1">
+            <cmdb-object-externals [renderResult]="renderResult"></cmdb-object-externals>
+          </div>
+          <!-- Attachments widget-->
+          <div class="col-xl-2 col-md-6 col-6 border-left pt-1">
+            <cmdb-object-attachments></cmdb-object-attachments>
+          </div>
+          <!-- Documents widget-->
+          <div class="docsWidget col-xl-2 col-md-6 col-6 border-left pt-1">
+            <cmdb-object-docs *permissionLink="['base.docapi.template.view']" [renderResult]="renderResult"></cmdb-object-docs>
+          </div>
+          <!-- Cube widget-->
+          <div class="col-xl-2 col-md-6 col-6 border-left pt-1 last-widget">
+            <div class="d-flex justify-content-center">
+              <cmdb-object-type-label [typeInformation]="renderResult?.type_information"></cmdb-object-type-label>
+            </div>
+          </div>
+        </div>
+        <hr>
+      </div>
+      <div id="object-view" class="col-md-12">
+        <cmdb-object-header [renderResult]="renderResult" (stateChange)="logChange($event)"></cmdb-object-header>
+        <cmdb-object-view-render [mode]="mode" [renderResult]="renderResult"></cmdb-object-view-render>
+      </div>
+      <div id="object-view-footer" class="col-12">
+        <cmdb-object-footer [renderResult]="renderResult"></cmdb-object-footer>
+      </div>
+    </div>
   </div>
-  <div id="object-view-sidebar" class="col-md-3">
-    <cmdb-object-type-label [typeInformation]="renderResult?.type_information"></cmdb-object-type-label>
-    <cmdb-object-externals [renderResult]="renderResult"></cmdb-object-externals>
-    <cmdb-object-actions [renderResult]="renderResult"></cmdb-object-actions>
-    <cmdb-object-docs [renderResult]="renderResult"></cmdb-object-docs>
-    <cmdb-object-attachments></cmdb-object-attachments>
-  </div>
-  <div id="object-view-footer" class="col-12">
-    <cmdb-object-footer [renderResult]="renderResult"></cmdb-object-footer>
-  </div>
-</div>
+

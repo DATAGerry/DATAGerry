@@ -42,7 +42,9 @@ media_file_blueprint = RootBlueprint('media_file_blueprint', __name__, url_prefi
 
 @media_file_blueprint.route('/', methods=['GET'])
 @login_required
-def get_object_list():
+@insert_request_user
+@right_required('base.framework.object.view')
+def get_object_list(request_user: User):
     """
     get all objects in database
 
@@ -63,6 +65,7 @@ def get_object_list():
 @media_file_blueprint.route('/', methods=['POST'])
 @login_required
 @insert_request_user
+@right_required('base.framework.object.edit')
 def add_new_file(request_user: User):
     """ This method saves a file to the specified section of the document for storing workflow data.
         Any existing value that matches filename and the metadata is deleted. Before saving a value.
@@ -91,6 +94,7 @@ def add_new_file(request_user: User):
 
         metadata = get_element_from_data_request('metadata', request)
         metadata['author_id'] = request_user.public_id
+        metadata['mime_type'] = file.mimetype
         ack = media_file_manager.insert_media_file(data=file, metadata=metadata)
     except ObjectInsertError:
         return abort(500)
@@ -99,9 +103,30 @@ def add_new_file(request_user: User):
     return resp
 
 
+@media_file_blueprint.route('/<string:name>/', methods=['GET'])
+@media_file_blueprint.route('/<string:name>', methods=['GET'])
+@login_required
+def get_type_by_name(name: str):
+    """ Validation: Check folder name for uniqueness
+
+        Args:
+            name: folderName must be unique
+
+        Returns: True if exist else False
+
+        """
+    try:
+        media_file = media_file_manager.exist_media_file(name, {'metadata.folder': True})
+    except ObjectManagerGetError as err:
+        return abort(404, err.message)
+    return make_response(media_file)
+
+
 @media_file_blueprint.route('/download/<path:filename>', methods=['POST'])
 @login_required
-def download_media_file(filename: str):
+@insert_request_user
+@right_required('base.framework.object.view')
+def download_media_file(request_user: User, filename: str):
     try:
         filter_metadata = generate_metadata_filter('metadata', request)
         grid_fs_file = media_file_manager.get_media_file(filename, filter_metadata).read()
@@ -120,7 +145,9 @@ def download_media_file(filename: str):
 
 @media_file_blueprint.route('<int:public_id>', methods=['DELETE'])
 @login_required
-def delete_media_file(public_id: int):
+@insert_request_user
+@right_required('base.framework.object.edit')
+def delete_media_file(request_user: User, public_id: int):
     try:
         ack = media_file_manager.delete_media_file(public_id)
     except ObjectDeleteError:
@@ -128,17 +155,3 @@ def delete_media_file(public_id: int):
 
     resp = make_response(ack)
     return resp
-
-# ToDo:  New concept for deletion
-# @media_file_blueprint.route('/<path:filename>', methods=['DELETE'])
-# @login_required
-# @insert_request_user
-# def delete_media_file(filename: str, request_user: User):
-#     try:
-#         filter_metadata = generate_metadata_filter('metadata', request)
-#         ack = media_file_manager.delete_media_file(file_name=filename, filter_metadata=filter_metadata)
-#     except ObjectDeleteError:
-#         return abort(500)
-#
-#     resp = make_response(ack)
-#     return resp

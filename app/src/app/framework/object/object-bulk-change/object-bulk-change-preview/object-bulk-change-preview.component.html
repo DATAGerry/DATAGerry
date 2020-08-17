@@ -6,7 +6,7 @@
   <div class="row">
     <div class="col-sm-4">
       <h5>
-        <cmdb-active-badge [activeStatus]="item.object_information.active"></cmdb-active-badge>
+        <cmdb-active-badge [activeStatus]="activeState"></cmdb-active-badge>
         <a [routerLink]="['/','framework', 'object', 'view', item.object_information.object_id]">
           {{item.type_information.type_label}}#{{item.object_information.object_id}}</a>
       </h5>
@@ -14,6 +14,21 @@
     </div>
     <div class="col-sm-8">
       <div class="container">
+        <div class="row pb-1" *ngIf="activeStateChanged() !== undefined">
+          <div class="col-sm-5 text-nowrap">
+            <strong>Active</strong>:
+            <span [ngClass]="item?.object_information?.active ? 'badge badge-success':'badge badge-danger' ">
+             {{item?.object_information?.active ? 'A' : 'D'}}
+            </span>
+          </div>
+          <div class="col-sm-1"><fa-icon icon="arrow-alt-circle-right"></fa-icon> </div>
+          <div class="col-sm-5">
+            <strong>Active</strong>:
+            <span [ngClass]="activeState ? 'badge badge-success':'badge badge-danger' ">
+             {{activeState ? 'A' : 'D'}}
+            </span>
+          </div>
+        </div>
         <div class="row pb-1" *ngFor="let field of mergeFields(item.fields)">
           <div class="col-sm-5">
             <strong>{{field.label}}</strong>:

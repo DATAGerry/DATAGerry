@@ -27,7 +27,12 @@ export class FileMetadata implements CmdbDao {
   public reference_type: string;
   public mime_type: string;
   public folder: boolean;
+  public parent: number;
   public author_id: number;
   public permission: any;
   // tslint:enable:variable-name
+
+  public constructor(init?: Partial<FileMetadata>) {
+    Object.assign(this, init);
+  }
 }

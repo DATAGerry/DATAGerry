@@ -16,6 +16,7 @@
 */
 
 export class DocTemplate {
+  // tslint:disable:variable-name
   public public_id: number;
   public name: string;
   public label: string;
@@ -26,4 +27,5 @@ export class DocTemplate {
   public template_style: string;
   public template_type: string;
   public template_parameters: object;
+  // tslint:enable:variable-name
 }

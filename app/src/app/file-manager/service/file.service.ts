@@ -17,12 +17,36 @@
 */
 
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import {ApiCallService, ApiService, httpFileOptions, resp} from '../../services/api-call.service';
-import {HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
+import { Observable, timer } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import {
+  ApiCallService,
+  ApiService,
+  httpFileOptions,
+  HttpInterceptorHandler
+} from '../../services/api-call.service';
+import { HttpBackend, HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { ValidatorService } from '../../services/validator.service';
 import { FileMetadata } from '../model/metadata';
+import { FormControl } from '@angular/forms';
+import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
+
+export const checkFolderExistsValidator = (fileService: FileService, time: number = 500) => {
+  return (control: FormControl) => {
+    return timer(time).pipe(switchMap(() => {
+      return fileService.checkFolderExists(control.value).pipe(
+        map((apiResponse: HttpResponse<any[]>) => {
+          return apiResponse.body ? { folderExists: true } : null;
+        }),
+        catchError(() => {
+          return new Promise(resolve => {
+            resolve(null);
+          });
+        })
+      );
+    }));
+  };
+};
 
 export const httpObserveOptions = {
   headers: new HttpHeaders({
@@ -45,7 +69,7 @@ export const PARAMETER = 'params';
 export class FileService<T = any> implements ApiService {
   public servicePrefix: string = 'media_file';
 
-  constructor(private api: ApiCallService, private http: HttpClient) {
+  constructor(private api: ApiCallService, private http: HttpClient, private backend: HttpBackend) {
   }
 
   /**
@@ -122,6 +146,15 @@ export class FileService<T = any> implements ApiService {
         return apiResponse.body;
       })
     );
+  }
+
+  /**
+   * Validation: Check folder name for uniqueness
+   *  @param folderName must be unique
+   */
+  public checkFolderExists(folderName: string) {
+    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ folderName }`, specialClient);
   }
 
 }

@@ -26,22 +26,36 @@ import { DataTablesModule } from 'angular-datatables';
 import { ExportdJobSettingsRoutingModule } from './exportd-job-settings-routing.module';
 import { LayoutModule } from '../../layout/layout.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { ExportdJobSettingsBuilderComponent } from './exportd-job-settings-builder/exportd-job-settings-builder.component';
-import {ArchwizardModule} from 'angular-archwizard';
-import { ExportdJobBasicStepComponent } from './exportd-job-settings-builder/exportd-job-basic-step/exportd-job-basic-step.component';
-import { ExportdJobSourcesStepComponent } from './exportd-job-settings-builder/exportd-job-sources-step/exportd-job-sources-step.component';
-import { ExportdJobDestinationsStepComponent } from './exportd-job-settings-builder/exportd-job-destinations-step/exportd-job-destinations-step.component';
-import { ExportdJobVariablesStepComponent, FilterPipe } from './exportd-job-settings-builder/exportd-job-variables-step/exportd-job-variables-step.component';
-import { ExportdJobSchedulingStepComponent } from './exportd-job-settings-builder/exportd-job-scheduling-step/exportd-job-scheduling-step.component';
-import { ExportdJobCompleteStepComponent } from './exportd-job-settings-builder/exportd-job-complete-step/exportd-job-complete-step.component';
+import {
+  ExportdJobSettingsBuilderComponent
+} from './exportd-job-settings-builder/exportd-job-settings-builder.component';
+import { ArchwizardModule } from 'angular-archwizard';
+import {
+  ExportdJobBasicStepComponent
+} from './exportd-job-settings-builder/exportd-job-basic-step/exportd-job-basic-step.component';
+import {
+  ExportdJobSourcesStepComponent
+} from './exportd-job-settings-builder/exportd-job-sources-step/exportd-job-sources-step.component';
+import {
+  ExportdJobDestinationsStepComponent
+} from './exportd-job-settings-builder/exportd-job-destinations-step/exportd-job-destinations-step.component';
+import {
+  ExportdJobVariablesStepComponent,
+  FilterPipe
+} from './exportd-job-settings-builder/exportd-job-variables-step/exportd-job-variables-step.component';
+import {
+  ExportdJobSchedulingStepComponent
+} from './exportd-job-settings-builder/exportd-job-scheduling-step/exportd-job-scheduling-step.component';
+import {
+  ExportdJobCompleteStepComponent
+} from './exportd-job-settings-builder/exportd-job-complete-step/exportd-job-complete-step.component';
 import { DndModule } from 'ngx-drag-drop';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
-import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { DeleteLogJobModalComponent, ExportdJobLogsComponent } from './exportd-job-logs/exportd-job-logs.component';
 import { ExportdJobSettingsCopyComponent } from './exportd-job-settings-copy/exportd-job-settings-copy.component';
-import {AuthModule} from "../../auth/auth.module";
+import { AuthModule } from '../../auth/auth.module';
 
 @NgModule({
   entryComponents: [DeleteLogJobModalComponent],
@@ -60,21 +74,21 @@ import {AuthModule} from "../../auth/auth.module";
     DeleteLogJobModalComponent,
     FilterPipe,
     ExportdJobSettingsCopyComponent],
-    imports: [
-        CommonModule,
-        LayoutModule,
-        ExportdJobSettingsRoutingModule,
-        DataTablesModule,
-        FontAwesomeModule,
-        ArchwizardModule,
-        DndModule,
-        ReactiveFormsModule,
-        NgSelectModule,
-        NgbTooltipModule,
-        FormsModule,
-        SweetAlert2Module,
-        NgbProgressbarModule,
-        AuthModule
-    ]
+  imports: [
+    CommonModule,
+    LayoutModule,
+    ExportdJobSettingsRoutingModule,
+    DataTablesModule,
+    FontAwesomeModule,
+    ArchwizardModule,
+    DndModule,
+    ReactiveFormsModule,
+    NgSelectModule,
+    NgbTooltipModule,
+    FormsModule,
+    NgbProgressbarModule,
+    AuthModule
+  ]
 })
-export class ExportdJobSettingsModule { }
+export class ExportdJobSettingsModule {
+}

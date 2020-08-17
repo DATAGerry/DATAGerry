@@ -13,12 +13,11 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Injectable } from '@angular/core';
 import { TypeService } from '../../framework/services/type.service';
-import { CmdbType } from '../../framework/models/cmdb-type';
 import { TemplateHelpdataElement } from '../models/template-helpdata-element';
 
 @Injectable({
@@ -26,39 +25,39 @@ import { TemplateHelpdataElement } from '../models/template-helpdata-element';
 })
 export class TemplateHelperService {
 
-  constructor(private typeService: TypeService) { }
+  constructor(private typeService: TypeService) {
+  }
 
   public async getObjectTemplateHelperData(typeId: number, prefix: string = '', iteration: number = 3) {
-    let templateHelperData = [];
-    templateHelperData.push(<TemplateHelpdataElement>({
+    const templateHelperData = [];
+    templateHelperData.push(({
       label: 'Public ID',
-      templatedata: (prefix ? "{{fields" + prefix + "['id']}}" : "{{id}}")
-    }));
+      templatedata: (prefix ? '{{fields' + prefix + '[\'id\']}}' : '{{id}}')
+    }) as TemplateHelpdataElement);
     await this.typeService.getType(typeId).subscribe(async cmdbTypeObj => {
-      for (const field of cmdbTypeObj.fields) {
-        if(field.type === "ref" && iteration > 0) {
-          iteration = iteration - 1;
-          let changedPrefix = (prefix ? prefix + "['fields']['" + field.name + "']" : "['" + field.name + "']");
-          let subdata = undefined;
-          await this.getObjectTemplateHelperData(field.ref_types, changedPrefix, iteration).then(data => {
-            subdata = data;
-          });
-          templateHelperData.push(<TemplateHelpdataElement>({
-            label: field.label,
-            subdata
-          }));
+        for (const field of cmdbTypeObj.fields) {
+          if (field.type === 'ref' && iteration > 0) {
+            iteration = iteration - 1;
+            const changedPrefix = (prefix ? prefix + '[\'fields\'][\'' + field.name + '\']' : '[\'' + field.name + '\']');
+            let subdata;
+            await this.getObjectTemplateHelperData(field.ref_types, changedPrefix, iteration).then(data => {
+              subdata = data;
+            });
+            templateHelperData.push(({
+              label: field.label,
+              subdata
+            }) as TemplateHelpdataElement);
+          } else {
+            templateHelperData.push(({
+              label: field.label,
+              templatedata: (prefix ? '{{fields' + prefix + '[\'fields\'][\'' + field.name + '\']}}' : '{{fields[\'' + field.name + '\']}}')
+            }) as TemplateHelpdataElement);
+          }
         }
-        else {
-        templateHelperData.push(<TemplateHelpdataElement>({
-          label: field.label,
-          templatedata: (prefix ? "{{fields" + prefix + "['fields']['" + field.name + "']}}" : "{{fields['" + field.name + "']}}")
-          }));
-        }
-      }
-    },
-    (error) => {
-      console.error(error);
-    });
+      },
+      (error) => {
+        console.error(error);
+      });
 
     return templateHelperData;
   }

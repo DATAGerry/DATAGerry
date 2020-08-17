@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, OnInit, Input } from '@angular/core';
@@ -74,18 +74,18 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
     paste_data_images: true,
     automatic_uploads: true,
     file_picker_types: 'image',
-    file_picker_callback: function (cb, value, meta) {
-      let input = document.createElement('input');
+    file_picker_callback: (cb, value, meta) => {
+      const input = document.createElement('input');
       input.setAttribute('type', 'file');
       input.setAttribute('accept', 'image/png,image/jpeg');
-      input.onchange = function () {
-        let file = input.files[0];
-        let reader = new FileReader();
-        reader.onload = function () {
-          let id = 'blobid' + (new Date()).getTime();
-          let blobCache = tinymce.activeEditor.editorUpload.blobCache;
-          let base64 = (<string>reader.result).split(',')[1];
-          let blobInfo = blobCache.create(id, file, base64);
+      input.onchange = () => {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = () => {
+          const id = 'blobid' + (new Date()).getTime();
+          const blobCache = tinymce.activeEditor.editorUpload.blobCache;
+          const base64 = (reader.result as string).split(',')[1];
+          const blobInfo = blobCache.create(id, file, base64);
           blobCache.add(blobInfo);
           cb(blobInfo.blobUri(), { title: file.name });
         };
@@ -103,12 +103,12 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
         text: 'CMDB Data',
         icon: 'plus',
         fetch: (callback) => {
-          let items = this.getCmdbDataMenuItems(editor);
+          const items = this.getCmdbDataMenuItems(editor);
           callback(items);
         }
       });
     }
-  }
+  };
 
   constructor(private templateHelperService: TemplateHelperService) {
     this.contentForm = new FormGroup({
@@ -121,7 +121,7 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
   }
 
   public getCmdbDataMenuItems(editor) {
-    let items = [];
+    const items = [];
     items.push(this.getBarcodeMenuItem(editor));
     items.push({
       type: 'nestedmenuitem',
@@ -135,7 +135,7 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
   }
 
   public getObjectDataMenuItems(editor, templateHelperData = this.templateHelperData) {
-    let items = [];
+    const items = [];
     for (const item of templateHelperData) {
       if (item.subdata) {
         items.push({
@@ -154,7 +154,7 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
         items.push({
           type: 'menuitem',
           text: item.label,
-          icon: icon,
+          icon,
           onAction: function () {
             editor.insertContent(item.templatedata);
           }
@@ -166,13 +166,13 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
 
 
   public getBarcodeMenuItem(editor) {
-    let item = {
+    const item = {
       type: 'menuitem',
       text: 'Barcode',
       icon: 'align-justify',
-      onAction: function () {
-        let selection = editor.selection.getNode();
-        let preData = {};
+      onAction: () => {
+        const selection = editor.selection.getNode();
+        const preData = {};
         if (selection.tagName === 'PDF:BARCODE') {
           preData['type'] = selection.attributes.getNamedItem('type').value;
           preData['content'] = selection.attributes.getNamedItem('value').value;
@@ -205,10 +205,10 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
             }
           ],
           initialData: preData,
-          onSubmit: function (dialogApi) {
-            let barcodeContent = dialogApi.getData()['content'];
-            let barcodeType = dialogApi.getData()['type'];
-            let barcodeElementAttr = {
+          onSubmit: (dialogApi) => {
+            const barcodeContent = dialogApi.getData()['content'];
+            const barcodeType = dialogApi.getData()['type'];
+            const barcodeElementAttr = {
               class: 'mceNonEditable',
               type: barcodeType,
               value: barcodeContent
@@ -217,7 +217,7 @@ export class DocapiSettingsBuilderContentStepComponent implements OnInit {
               barcodeElementAttr['barwidth'] = '3cm';
               barcodeElementAttr['barheight'] = '3cm';
             }
-            let barcodeElement = editor.dom.create('pdf:barcode', barcodeElementAttr);
+            const barcodeElement = editor.dom.create('pdf:barcode', barcodeElementAttr);
             //edit barcode: remove existing and set cur
             if (preData['content']) {
               let selectionNext = editor.selection.getNode().nextSibling;

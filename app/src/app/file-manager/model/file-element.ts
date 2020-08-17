@@ -28,5 +28,10 @@ export class FileElement implements CmdbDao {
   public metadata: any;
   public size: number;
   public inProcess: boolean = false;
+  public children: any[] = [];
   // tslint:enable:variable-name
+
+  public constructor(init?: Partial<FileElement>) {
+    Object.assign(this, init);
+  }
 }

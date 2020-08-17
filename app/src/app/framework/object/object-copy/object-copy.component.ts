@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, HostListener, OnInit} from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { ApiCallService } from '../../../services/api-call.service';
 import { ObjectService } from '../../services/object.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -64,13 +64,13 @@ export class ObjectCopyComponent implements OnInit {
       });
   }
 
-  @HostListener('window:scroll', ['$event'])
-  onWindowScroll($event) {
+  @HostListener('window:scroll')
+  onWindowScroll() {
     const dialog = document.getElementById('object-form-action');
     if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-      dialog.style.display = 'block';
+      dialog.style.visibility = 'visible';
     } else {
-      dialog.style.display = 'none';
+      dialog.style.visibility = 'hidden';
     }
   }
 

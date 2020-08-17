@@ -46,12 +46,11 @@ class ObjectTemplateData(AbstractTemplateData):
                 field_name = field["name"]
                 if field["type"] == "ref" and field["value"] and iteration > 0:
                     # resolve type
-                    iteration = iteration - 1
                     current_object = self.__object_manager.get_object(field["value"])
                     type_instance = self.__object_manager.get_type(current_object.get_type_id())
                     cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance,
                                                     render_user=None)
-                    data["fields"][field_name] = self.__get_objectdata(cmdb_render_object.result(), iteration)
+                    data["fields"][field_name] = self.__get_objectdata(cmdb_render_object.result(), iteration - 1)
                 else:
                     data["fields"][field_name] = field["value"]
             except Exception as err:

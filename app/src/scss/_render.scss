@@ -1,4 +1,5 @@
 @import 'variables';
+@import 'sidebar';
 
 label {
   span.required {
@@ -8,7 +9,7 @@ label {
 }
 
 #object-form-action {
-  display: none;
+  visibility: hidden;
   position: fixed;
   top: calc(#{$navbar-height} - 1px);
   right: 0;
@@ -21,3 +22,61 @@ label {
     left: 0;
   }
 }
+
+// Object-View Navbar
+
+.object-view-navbar {
+
+  background: white;
+
+  .total-title span {
+    display: block;
+  }
+
+  .icon {
+    margin-right: 10px;
+    font-size: 1.25em;
+    color: $success;
+  }
+
+  .dropdown-toggle::after {
+    margin: 0.5em 0 0 0.5em;
+  }
+
+  .justify-object-view-items {
+    justify-content: center !important; ;
+    padding-top: 0.5em;
+  }
+
+  button {
+    color: $sidebar-nav-title-color;
+  }
+  button:hover {
+    color: $sidebar-nav-link-bg-hover-color;
+  }
+  div:empty.last-widget {
+    display: none;
+  }
+}
+
+/* Medium devices (landscape tablets, 768px and up) */
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media (max-width: 768px), (max-width: 1200px) {
+  .object-view-navbar{
+    span {
+      font-size: 0.9em;
+    }
+    .justify-object-view-items {
+      justify-content: start !important;
+    }
+
+    .docsWidget:not(:empty) + .last-widget {
+      display: none;
+    }
+
+    .display-3 {
+      font-size: 2rem !important;
+    }
+  }
+}
+

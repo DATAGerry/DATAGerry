@@ -21,9 +21,9 @@ import { FileSaverService } from 'ngx-filesaver';
 import { FileService } from '../../../../file-manager/service/file.service';
 import { FileMetadata } from '../../../../file-manager/model/metadata';
 import { ActivatedRoute } from '@angular/router';
+import { NgbModal, NgbModalConfig } from '@ng-bootstrap/ng-bootstrap';
+import { AddAttachmentsDialogComponent } from './modal/add-attachments-dialog/add-attachments-dialog.component';
 import { FileElement } from '../../../../file-manager/model/file-element';
-import { ModalComponent } from '../../../../layout/helpers/modal/modal.component';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'cmdb-object-attachments',
@@ -32,72 +32,30 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 })
 export class ObjectAttachmentsComponent implements OnInit {
 
+  public attachmentsTotal: number = 0;
   private metadata: FileMetadata = new FileMetadata();
-  public attachments: FileElement[] = [];
 
   constructor(private fileService: FileService, private fileSaverService: FileSaverService,
-              private route: ActivatedRoute, private modalService: NgbModal) {
+              private route: ActivatedRoute, private modalService: NgbModal, private config: NgbModalConfig) {
     this.route.params.subscribe((params) => {
       this.metadata.reference = Number(params.publicID);
       this.metadata.reference_type = 'object';
     });
+    config.backdrop = 'static';
+    config.keyboard = false;
   }
 
-  ngOnInit() {
-    this.getFiles();
-  }
-
-  public getFiles() {
+  public ngOnInit(): void {
     this.fileService.getAllFilesList(this.metadata).subscribe((resp: FileElement[]) => {
-      this.attachments = resp;
+      this.attachmentsTotal = resp.length;
     });
   }
 
-  public downloadFile(filename: string) {
-    this.fileService.getFileByName(filename, this.metadata).subscribe((data: any) => {
-      this.fileSaverService.save(data.body, filename);
+  public addAttachments() {
+    const attachmentAddModal = this.modalService.open(AddAttachmentsDialogComponent);
+    attachmentAddModal.componentInstance.metadata = this.metadata;
+    attachmentAddModal.result.then((result) => {
+      this.attachmentsTotal = result.total;
     });
-  }
-
-  public uploadFile(files: FileList) {
-    if (files.length > 0) {
-      Array.from(files).forEach((file: any) => {
-        if (this.attachments.find(el => el.name === file.name)) {
-          const modal = this.replaceFileModal(file.name).then(result => {
-            if (result) {
-              this.attachments = this.attachments.filter(el => el.name !== file.name);
-              return true;
-            } else { return false; }
-          });
-          modal.then(value => {
-            if (value) { this.postFile(file); }
-          });
-        } else { this.postFile(file); }
-      });
-    }
-  }
-
-  private postFile(file: any) {
-    file.inProcess = true;
-    this.attachments.push(file);
-    this.fileService.postFile(file, this.metadata).subscribe(resp => {
-      this.getFiles();
-    }, (err) => console.log(err));
-  }
-
-  public deleteFile(publicID: number) {
-    this.fileService.deleteFile(publicID).subscribe(resp => this.getFiles());
-  }
-
-  private replaceFileModal(filename: string) {
-    const modalComponent = this.modalService.open(ModalComponent);
-    modalComponent.componentInstance.title = `Replace ${filename}`;
-    modalComponent.componentInstance.modalIcon = 'question-circle';
-    modalComponent.componentInstance.modalMessage = `${filename} already exists. Do you want to replace it?`;
-    modalComponent.componentInstance.subModalMessage = `A file with the same name already exists on this Object.
-                                                        Replace it will overwrite its current contents`;
-    modalComponent.componentInstance.buttonDeny = 'Cancel';
-    modalComponent.componentInstance.buttonAccept = 'Replace';
-    return modalComponent.result;
   }
 }

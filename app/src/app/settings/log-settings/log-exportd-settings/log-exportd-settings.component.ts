@@ -16,32 +16,31 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnInit, ViewChild} from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { ExportdJobLogService } from '../../services/exportd-job-log.service';
 import { ActivatedRoute } from '@angular/router';
-import {NgbActiveModal, NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { ExecuteState } from '../../models/modes_job.enum';
 import { ExportdLog } from '../../models/exportd-log';
-import {CmdbLog} from "../../../framework/models/cmdb-log";
-import {forkJoin, Observable} from "rxjs";
-import {DeleteModalComponent} from "../log-object-settings/log-object-settings.component";
+import { forkJoin, Observable } from 'rxjs';
+import { DeleteModalComponent } from '../log-object-settings/log-object-settings.component';
 
 @Component({
   selector: 'cmdb-modal-content',
   template: `
-      <div class="modal-header">
-          <h4 class="modal-title" id="modal-basic-title">Delete Log</h4>
-          <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
-              <span aria-hidden="true">&times;</span>
-          </button>
-      </div>
-      <div class="modal-body">
-          Are you sure you want to delete this log?
-      </div>
-      <div class="modal-footer">
-          <button type="button" class="btn btn-danger" (click)="activeModal.close(this.publicID)">Delete</button>
-      </div>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">Delete Log</h4>
+      <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      Are you sure you want to delete this log?
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-danger" (click)="activeModal.close(this.publicID)">Delete</button>
+    </div>
   `
 })
 export class DeleteExportdModalComponent {
@@ -69,8 +68,8 @@ export class LogExportdSettingsComponent implements OnInit {
   public existingLength: number = 0;
   public modes = ExecuteState;
 
-  constructor( private exportdLogService: ExportdJobLogService, private route: ActivatedRoute,
-               private modalService: NgbModal, private toastService: ToastService) {
+  constructor(private exportdLogService: ExportdJobLogService, private route: ActivatedRoute,
+              private modalService: NgbModal, private toastService: ToastService) {
   }
 
   public ngOnInit(): void {

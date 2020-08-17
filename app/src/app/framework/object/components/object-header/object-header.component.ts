@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
@@ -53,8 +53,8 @@ export class ObjectHeaderComponent {
 
   public toggleChange() {
     this.activeState = this.activeState !== true;
-    this.objectService.changeState(this.objectID, this.activeState).subscribe((resp: boolean) =>{
-      this.toastService.show(`Changed active state to ${this.activeState}`);
+    this.objectService.changeState(this.objectID, this.activeState).subscribe((resp: boolean) => {
+      this.toastService.show(`Changed active state to ${ this.activeState }`);
       this.stateChange.emit(true);
     });
   }

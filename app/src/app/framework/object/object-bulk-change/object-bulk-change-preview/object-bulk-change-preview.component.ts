@@ -34,6 +34,16 @@ export class ObjectBulkChangePreviewComponent implements OnInit {
   @ViewChild('paginationBulkChanges', { static: false }) pagination: JwPaginationComponent;
   @Input()  renderForm: FormGroup;
 
+  private objectState: boolean;
+  @Input()
+  set activeState(value: boolean) {
+    this.objectState = value;
+  }
+
+  get activeState(): boolean {
+    return this.objectState;
+  }
+
   private typeID: number;
   public SIMPLEMODE: CmdbMode = CmdbMode.Simple;
   public renderResult: DataTablesResult;
@@ -72,6 +82,10 @@ export class ObjectBulkChangePreviewComponent implements OnInit {
 
   public mergeFields(fields: any) {
     return fields.filter(field => this.renderForm.get('changedFields').value.get(field.name));
+  }
+
+  public activeStateChanged(): boolean {
+    return this.renderForm.get('changedFields').value.get('activeObj-isChanged');
   }
 
   public changes(field: any) {

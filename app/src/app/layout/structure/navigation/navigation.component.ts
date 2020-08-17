@@ -19,7 +19,6 @@
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Router } from '@angular/router';
-import { PermissionGuard } from '../../../auth/guards/permission.guard';
 
 @Component({
   selector: 'cmdb-navigation',
@@ -48,14 +47,14 @@ export class NavigationComponent implements OnInit, OnDestroy {
   }
 
   private dropdownSubmenu() {
-    $('.dropdown-menu a.dropdown-toggle').on('click', function (e) {
+    $('.dropdown-menu a.dropdown-toggle').on('click', (e) => {
       if (!$(this).next().hasClass('show')) {
         $(this).parents('.dropdown-menu').first().find('.show').removeClass('show');
       }
       const $subMenu = $(this).next('.dropdown-menu');
       $subMenu.toggleClass('show');
       // tslint:disable-next-line:only-arrow-functions
-      $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', function () {
+      $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', () => {
         $('.dropdown-submenu .show').removeClass('show');
       });
       return false;

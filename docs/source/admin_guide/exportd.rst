@@ -104,6 +104,7 @@ Currently the follwowing ExternalSystems are supported:
     "ExternalSystemCsv", "Creates a CSV file on the filesystem"
     "ExternalSystemDummy", "A dummy for testing Exportd - will only print some debug output"
     "ExternalSystemExcuteScript", "Executes a script on the DATAGERRY machine"
+    "ExternalSystemGenericPullJson", "Provides a JSON structure that can be pulled via the DATAGERRY REST API"
     "ExternalSystemGenericRestCall", "Sends a HTTP POST to an userdefined URL"
     "ExternalSystemOpenNMS", "Add nodes to the monitoring system OpenNMS with the OpenNMS REST API"
 
@@ -260,6 +261,56 @@ Please see the following example file:
 
 
 DATAGERRY will not execute scripts, that are not listed in a *.datagerry_exec.json* file.
+
+
+
+ExternalSystemGenericPullJson
+-----------------------------
+This class will provide a JSON structure with object IDs and export variables that can be requested by a user via the 
+DATAGERRY REST API. It needs to be configured as Pull job. The get the JSON structure, have a look at the following
+curl example:
+
+.. code-block:: console
+
+    #!/bin/bash
+
+    # config variables
+    DATAGERRY_EXPORT_TASK=taskname
+    DATAGERRY_REST_URL=http://127.0.0.1:4000/rest
+    DATAGERRY_REST_USER=admin
+    DATAGERRY_REST_PASSWORD=admin
+
+    curl \
+        -X GET \
+        -u "${DATAGERRY_REST_USER}:${DATAGERRY_REST_PASSWORD}" \
+        --silent \
+        ${DATAGERRY_REST_URL}/exportdjob/pull/${DATAGERRY_EXPORT_TASK}
+
+The exporter class has no parameters.
+
+You can define any export variables. All defined export variables will be included in the JSON structure that will be 
+sent as HTTP response. Please see the following section for an example JSON structure:
+
+.. code-block:: json
+
+    [
+        {
+            "object_id": 1234,
+            "variables": 
+                {
+                    "var1": "value1",
+                    "var2": "value2"
+                }
+        },
+        {
+            "object_id": 1235,
+            "variables": 
+                {
+                    "var1": "value1",
+                    "var2": "value2"
+                }
+        }
+    ]
 
 
 
