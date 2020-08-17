@@ -40,10 +40,13 @@ class APIBlueprint(Blueprint):
             @wraps(f)
             def _decorate(*args, **kwargs):
                 data = request.get_json()
-                validation_result = validator.validate(data)
+                try:
+                    validation_result = validator.validate(data)
+                except Exception as err:
+                    return abort(400, str(err))
                 if not validation_result:
                     return abort(400, {'validation_error': validator.errors})
-                return f(document=validator.document, *args, **kwargs)
+                return f(data=validator.document, *args, **kwargs)
 
             return _decorate
 

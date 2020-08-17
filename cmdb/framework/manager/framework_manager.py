@@ -19,7 +19,7 @@ from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.manager import ManagerBase, ManagerGetError, ManagerDeleteError
 from cmdb.framework.manager.error.framework_errors import FrameworkGetError, FrameworkNotFoundError, \
-    FrameworkIterationError, FrameworkQueryEmptyError, FrameworkDeleteError
+    FrameworkIterationError, FrameworkQueryEmptyError, FrameworkDeleteError, FrameworkUpdateError
 from cmdb.framework.manager.results import IterationResult
 from cmdb.framework.utils import PublicID, Collection
 from cmdb.search import Query, Pipeline
@@ -152,8 +152,12 @@ class FrameworkManager(ManagerBase):
     def insert(self, resource: dict) -> PublicID:
         return super(FrameworkManager, self)._insert(self.collection, resource)
 
-    def update(self, public_id: PublicID, instance: CmdbDAO):
-        return super(FrameworkManager, self)._update(self.collection, filter={'public_id': public_id}, data=instance)
+    def update(self, public_id: PublicID, resource: dict):
+        update_result = super(FrameworkManager, self)._update(self.collection, filter={'public_id': public_id},
+                                                              data=resource, upsert=False)
+        if update_result.matched_count != 1:
+            raise FrameworkUpdateError(f'Something happened during the update!')
+        return update_result
 
     def delete(self, public_id: PublicID):
         try:

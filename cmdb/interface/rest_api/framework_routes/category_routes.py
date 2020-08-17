@@ -19,13 +19,14 @@ import logging
 from flask import abort, current_app, request
 
 from cmdb.framework.dao.category import CategoryDAO, CategoryTree
-from cmdb.framework.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError
+from cmdb.framework.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerUpdateError
 from cmdb.framework.manager.category_manager import CategoryManager
 from cmdb.framework.manager.error.framework_errors import FrameworkIterationError
 from cmdb.framework.manager.results import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.interface.api_parameters import CollectionParameters
-from cmdb.interface.response import GetSingleResponse, GetMultiResponse, InsertSingleResponse, DeleteSingleResponse
+from cmdb.interface.response import GetSingleResponse, GetMultiResponse, InsertSingleResponse, DeleteSingleResponse, \
+    UpdateSingleResponse
 from cmdb.interface.blueprint import APIBlueprint
 
 LOGGER = logging.getLogger(__name__)
@@ -77,24 +78,33 @@ def get_category(public_id: int):
 @categories_blueprint.route('/', methods=['POST'])
 @categories_blueprint.protect(auth=True, right='base.framework.category.add')
 @categories_blueprint.validate(CategoryDAO.SCHEMA)
-def insert_category(document: dict):
+def insert_category(data: dict):
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
     try:
-        result_id: PublicID = category_manager.insert(document)
+        result_id: PublicID = category_manager.insert(data)
     except ManagerInsertError as err:
         return abort(400, err.message)
-    api_response = InsertSingleResponse(result_id, model=CategoryDAO.MODEL)
+    api_response = InsertSingleResponse(result_id, url=request.url, model=CategoryDAO.MODEL)
     return api_response.make_response(prefix='category')
 
 
 @categories_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
 @categories_blueprint.protect(auth=True, right='base.framework.category.edit')
 @categories_blueprint.validate(CategoryDAO.SCHEMA)
-def update_category(public_id: int):
+def update_category(public_id: int, data: dict):
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
+    try:
+        category = CategoryDAO.from_data(data=data)
+        update_result = category_manager.update(public_id=PublicID(public_id), resource=CategoryDAO.to_json(category))
+        api_response = UpdateSingleResponse(result=data, url=request.url, model=CategoryDAO.MODEL)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    except ManagerUpdateError as err:
+        return abort(400, err)
+    except Exception as err:
+        return abort(400, err)
 
-    # return api_response.make_response(prefix='category')
-    pass
+    return api_response.make_response()
 
 
 @categories_blueprint.route('/<int:public_id>', methods=['DELETE'])
