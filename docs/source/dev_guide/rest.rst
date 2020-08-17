@@ -127,14 +127,14 @@ Parameters are the only elements for which :ref:`naming` is ``OPTIONAL``.
 Filtering
 ---------
 Most collections ``SHOULD`` have the ability to filter.
-The parameter filter is used as an identifier.
+The ``filter``  parameter ``MUST`` used as an identifier.
 
-- Chained statements are linked using commas (,).
-- Nested elements are described using a period (.).
+- Chained statements are linked using commas (,) or lists.
+- Nested elements are described using a period (.) or dicts.
 
 Sorting
 -------
-To use sort rules, the parameter sort ``MUST`` be used.
+To use sort rules, the ``sort`` parameter  ``MUST`` be used.
 Customize complex sort requirements by letting the sort parameter include a list of comma-separated fields,
 each containing a possible negative signifying a descending sort order.
 
