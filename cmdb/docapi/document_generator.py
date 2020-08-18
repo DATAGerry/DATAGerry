@@ -50,6 +50,8 @@ class ObjectDocumentGenerator:
 
         # create full HTML document
         html = '<html><head>'
+        html = html + '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
+        html = html + '<meta charset="UTF-8" />'
         html = html + '<title>' + self.__template.get_label() + '</title>'
         html = html + '<style>' + self.default_css + self.__template.get_template_style() + '</style>'
         html = html + '</head>'
