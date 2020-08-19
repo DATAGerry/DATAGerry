@@ -39,7 +39,8 @@ const routes: Routes = [
     path: 'view/:publicID',
     data: {
       breadcrumb: 'View',
-      right: 'base.framework.category.view'
+      right: 'base.framework.category.view',
+      mode: CmdbMode.View
     },
     component: CategoryViewComponent
   },

@@ -18,7 +18,7 @@
 
 import { Injectable } from '@angular/core';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { ApiCallService, ApiService, httpObserveOptions, resp } from '../../services/api-call.service';
+import { ApiCallService, ApiService, resp } from '../../services/api-call.service';
 import { ValidatorService } from '../../services/validator.service';
 import { CmdbCategory, CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb-category';
 import { FormControl } from '@angular/forms';
@@ -160,7 +160,14 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * nested structure and type instances
    */
   public getCategoryTree(): Observable<CmdbCategoryTree> {
-    return this.api.callGet<CmdbCategoryTree>(`${ this.servicePrefix }/?view = tree`).pipe(
+    const httpObserveOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      }),
+      params: new HttpParams().append('view', 'tree'),
+      observe: resp
+    };
+    return this.api.callGet<CmdbCategoryTree>(`${ this.servicePrefix }/`, this.client, httpObserveOptions).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<CmdbCategoryNode>>) => {
         if (apiResponse.status === 204) {
           return [];
