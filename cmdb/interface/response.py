@@ -229,18 +229,20 @@ class InsertSingleResponse(BaseAPIResponse):
     """
     API Response for insert call of a single resource.
     """
-    __slots__ = 'result_id'
+    __slots__ = 'result_id', 'raw'
 
-    def __init__(self, result_id: PublicID, url: str = None, model: Model = None):
+    def __init__(self, result_id: PublicID, raw: dict, url: str = None, model: Model = None):
         """
         Constructor of InsertSingleResponse.
 
         Args:
             result_id: The new public id of the inserted resource.
+            raw: The raw document
             url: The request url.
             model: Data model of the inserted resource.
         """
         self.result_id: PublicID = result_id
+        self.raw: dict = raw
         super(InsertSingleResponse, self).__init__(operation_type=OperationType.INSERT, url=url, model=model)
 
     def make_response(self, prefix: str = '', *args, **kwargs) -> BaseResponse:
@@ -262,7 +264,8 @@ class InsertSingleResponse(BaseAPIResponse):
     def export(self, text: str = 'json', *args, **kwargs) -> dict:
         """Get the data response payload as dict"""
         return {**{
-            'result_id': self.result_id
+            'result_id': self.result_id,
+            'raw': self.raw
         }, **super(InsertSingleResponse, self).export(*args, **kwargs)}
 
 

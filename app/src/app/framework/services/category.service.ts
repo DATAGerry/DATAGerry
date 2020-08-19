@@ -24,7 +24,12 @@ import { CmdbCategory, CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb
 import { FormControl } from '@angular/forms';
 import { Observable, timer } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { APIGetMultiResponse, APIGetSingleResponse, APIUpdateSingleResponse } from '../../services/models/api-response';
+import {
+  APIGetMultiResponse,
+  APIGetSingleResponse,
+  APIInsertSingleResponse,
+  APIUpdateSingleResponse
+} from '../../services/models/api-response';
 
 export const checkCategoryExistsValidator = (categoryService: CategoryService, time: number = 500) => {
   return (control: FormControl) => {
@@ -183,20 +188,21 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    */
   public postCategory(category: T): Observable<T> {
     return this.api.callPost<CmdbCategory>(this.servicePrefix + '/', category).pipe(
-      map((apiResponse: HttpResponse<any>) => {
+      map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => {
         if (apiResponse.status === 204) {
-          return [];
+          return null;
         }
-        return apiResponse.body;
+        return apiResponse.body.raw;
       })
     );
   }
 
-  /**
+  /**APIUpdateSingleResponse
    * Update a existing categoryL
    * @param category modified category instance
    */
   public updateCategory(category: T): Observable<T> {
+    // @ts-ignore
     return this.api.callPut<number>(this.servicePrefix + '/' + category.public_id, category).pipe(
       map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
         return apiResponse.body.result;

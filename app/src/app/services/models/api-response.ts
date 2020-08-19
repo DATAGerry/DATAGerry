@@ -40,6 +40,12 @@ export class APIGetMultiResponse<T = CmdbDao> extends APIResponse {
   pagination?: APIPagination;
 }
 
+export class APIInsertSingleResponse<T = CmdbDao> extends APIResponse{
+  result_id: number;
+  raw: T;
+}
+
+
 export class APIUpdateSingleResponse<T = CmdbDao> extends APIResponse{
   result: T;
 }

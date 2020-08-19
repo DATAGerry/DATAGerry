@@ -82,9 +82,13 @@ def insert_category(data: dict):
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
     try:
         result_id: PublicID = category_manager.insert(data)
+        raw_doc = category_manager.get(public_id=result_id)
+    except ManagerGetError as err:
+        return abort(404, err.message)
     except ManagerInsertError as err:
         return abort(400, err.message)
-    api_response = InsertSingleResponse(result_id, url=request.url, model=CategoryDAO.MODEL)
+    api_response = InsertSingleResponse(result_id, raw=CategoryDAO.to_json(raw_doc), url=request.url,
+                                        model=CategoryDAO.MODEL)
     return api_response.make_response(prefix='category')
 
 
