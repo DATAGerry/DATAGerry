@@ -45,7 +45,10 @@ export class APIInsertSingleResponse<T = CmdbDao> extends APIResponse{
   raw: T;
 }
 
-
 export class APIUpdateSingleResponse<T = CmdbDao> extends APIResponse{
   result: T;
+}
+
+export class APIDeleteSingleResponse<T = CmdbDao> extends APIResponse{
+  raw: T;
 }

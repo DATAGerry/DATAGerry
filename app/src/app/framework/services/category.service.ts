@@ -25,6 +25,7 @@ import { FormControl } from '@angular/forms';
 import { Observable, timer } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import {
+  APIDeleteSingleResponse,
   APIGetMultiResponse,
   APIGetSingleResponse,
   APIInsertSingleResponse,
@@ -217,8 +218,8 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    */
   public deleteCategory(publicID: number): Observable<number> {
     return this.api.callDelete<number>(this.servicePrefix + '/' + publicID).pipe(
-      map((apiResponse: HttpResponse<number>) => {
-        return apiResponse.body;
+      map((apiResponse: HttpResponse<APIDeleteSingleResponse<CmdbCategory>>) => {
+        return apiResponse.body.raw.public_id;
       })
     );
   }
