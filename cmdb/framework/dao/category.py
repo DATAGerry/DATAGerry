@@ -27,6 +27,9 @@ class CategoryDAO(CmdbDAO):
     COLLECTION: Collection = 'framework.categories'
     MODEL: Model = 'Category'
     SCHEMA: dict = {
+        'public_id': {
+            'type': 'integer'
+        },
         'name': {
             'type': 'string',
             'required': True,
@@ -54,7 +57,6 @@ class CategoryDAO(CmdbDAO):
                 },
                 'order': {
                     'type': 'integer',
-                    'min': 1,
                     'nullable': True
                 }
             }
@@ -98,7 +100,7 @@ class CategoryDAO(CmdbDAO):
         self.name: str = name
         self.label: str = label
         self.meta: CategoryDAO.__CategoryMeta = meta
-        if parent == public_id:
+        if parent == public_id and (parent is not None):
             raise ValueError(f'Category {name} has his own ID as Parent')
         self.parent: int = parent
         self.types: Union[List[int], List[CmdbType]] = types

@@ -39,3 +39,7 @@ export class APIGetMultiResponse<T = CmdbDao> extends APIResponse {
   pager?: APIPager;
   pagination?: APIPagination;
 }
+
+export class APIUpdateSingleResponse<T = CmdbDao> extends APIResponse{
+  result: T;
+}
