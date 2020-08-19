@@ -17,20 +17,20 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { FileElement } from '../../../../../../file-manager/model/file-element';
-import { FileMetadata } from '../../../../../../file-manager/model/metadata';
-import { ModalComponent } from '../../../../../../layout/helpers/modal/modal.component';
-import { FileService } from '../../../../../../file-manager/service/file.service';
+import { FileMetadata } from '../../../../file-manager/model/metadata';
+import { FileElement } from '../../../../file-manager/model/file-element';
+import { FileService } from '../../../../file-manager/service/file.service';
 import { FileSaverService } from 'ngx-filesaver';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastService } from '../../../../../../layout/toast/toast.service';
+import { ToastService } from '../../../toast/toast.service';
+import { GeneralModalComponent } from '../general-modal/general-modal.component';
 
 @Component({
-  selector: 'cmdb-add-attachments-dialog',
-  templateUrl: './add-attachments-dialog.component.html',
-  styleUrls: ['./add-attachments-dialog.component.scss']
+  selector: 'cmdb-add-attachments-modal',
+  templateUrl: './add-attachments-modal.component.html',
+  styleUrls: ['./add-attachments-modal.component.scss']
 })
-export class AddAttachmentsDialogComponent implements OnInit {
+export class AddAttachmentsModalComponent implements OnInit {
 
   @Input() metadata: FileMetadata = new FileMetadata();
   public inProcess: boolean = false;
@@ -62,19 +62,19 @@ export class AddAttachmentsDialogComponent implements OnInit {
   public uploadFile(files: FileList) {
     if (files.length > 0) {
       Array.from(files).forEach((file: any) => {
-      if (this.checkFileSizeAllow(file)) {
-        if (this.attachments.find(el => el.name === file.name)) {
-          const modal = this.replaceFileModal(file.name).then(result => {
-            if (result) {
-              this.attachments = this.attachments.filter(el => el.name !== file.name);
-              return true;
-            } else { return false; }
-          });
-          modal.then(value => {
-            if (value) { this.postFile(file); }
-          });
-        } else { this.postFile(file); }
-      }
+        if (this.checkFileSizeAllow(file)) {
+          if (this.attachments.find(el => el.name === file.name)) {
+            const promiseModal = this.replaceFileModal(file.name).then(result => {
+              if (result) {
+                this.attachments = this.attachments.filter(el => el.name !== file.name);
+                return true;
+              } else {return false; }
+            });
+            promiseModal.then(value => {
+              if (value) {  this.postFile(file); }
+            });
+          } else { this.postFile(file); }
+        }
       });
     }
   }
@@ -108,7 +108,7 @@ export class AddAttachmentsDialogComponent implements OnInit {
   }
 
   private replaceFileModal(filename: string) {
-    const modalComponent = this.modalService.open(ModalComponent);
+    const modalComponent = this.modalService.open(GeneralModalComponent);
     modalComponent.componentInstance.title = `Replace ${filename}`;
     modalComponent.componentInstance.modalIcon = 'question-circle';
     modalComponent.componentInstance.modalMessage = `${filename} already exists. Do you want to replace it?`;
@@ -118,4 +118,5 @@ export class AddAttachmentsDialogComponent implements OnInit {
     modalComponent.componentInstance.buttonAccept = 'Replace';
     return modalComponent.result;
   }
+
 }

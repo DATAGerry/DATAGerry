@@ -43,3 +43,9 @@ ul, #folder-tree-view {
   padding-left: 1.75em;
 }
 
+
+/* The folder is selected */
+.selected {
+  color: $cmdb-primary;
+  font-weight: bold;
+}

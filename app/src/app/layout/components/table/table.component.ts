@@ -26,7 +26,6 @@ import { DatePipe } from '@angular/common';
 
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ModalComponent } from '../../helpers/modal/modal.component';
 import { FileSaverService } from 'ngx-filesaver';
 import { TableColumn} from './models/table-column';
 import { TableColumnAction} from './models/table-columns-action';
@@ -34,6 +33,7 @@ import { RenderResult } from '../../../framework/models/cmdb-render';
 import { FileService } from '../../../export/export.service';
 import { ObjectService } from '../../../framework/services/object.service';
 import { DataTableFilter } from '../../../framework/models/cmdb-datatable';
+import { GeneralModalComponent } from '../../helpers/modals/general-modal/general-modal.component';
 
 @Component({
   selector: 'cmdb-table',
@@ -216,7 +216,7 @@ export class TableComponent implements OnInit, OnDestroy {
     }
 
     if (publicIds.length > 0) {
-      const modalComponent = this.modalService.open(ModalComponent);
+      const modalComponent = this.modalService.open(GeneralModalComponent);
       modalComponent.componentInstance.title = 'Delete selected Objects';
       modalComponent.componentInstance.modalMessage = 'Are you sure, you want to delete all selected objects?';
       modalComponent.componentInstance.buttonDeny = 'Cancel';
@@ -287,7 +287,7 @@ export class TableComponent implements OnInit, OnDestroy {
   }
 
   private createModal(title: string, modalMessage: string, buttonDeny: string, buttonAccept: string) {
-    const modalComponent = this.modalService.open(ModalComponent);
+    const modalComponent = this.modalService.open(GeneralModalComponent);
     modalComponent.componentInstance.title = title;
     modalComponent.componentInstance.modalMessage = modalMessage;
     modalComponent.componentInstance.buttonDeny = buttonDeny;

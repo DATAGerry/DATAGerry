@@ -30,10 +30,6 @@
         </li>
       </ul>
       <ul class="nav navbar-nav flex-row float-right">
-<!--        <li class="nav-item mr-2">-->
-<!--          <a class="nav-link"  [routerLink]="['/filemanager/explorer']" role="button" data-toggle="dropdown" aria-haspopup="true"-->
-<!--             aria-expanded="false"><i class="fas fa-folder"></i></a>-->
-<!--        </li>-->
         <!-- nav Framework -->
         <li *permissionLink="['base.framework.object.view', 'base.framework.type.view', 'base.framework.category.view']"
             class="nav-item dropdown mr-2">
@@ -145,6 +141,12 @@
             <a class="dropdown-item" [routerLink]="['/management/rights']">
               <i class="fas fa-low-vision"></i> Rights
             </a>
+
+<!--            <div *permissionLink="'base.framework.object.edit'" class="dropdown-header">File Manager</div>-->
+<!--            <a class="nav-link"  *permissionLink="'base.framework.object.edit'"-->
+<!--               [routerLink]="['/filemanager/explorer']" role="button" data-toggle="dropdown" aria-haspopup="true"-->
+<!--               aria-expanded="false"><i class="fas fa-folder"></i> Explorer</a>-->
+
             <div *permissionLink="'base.framework.log.view'" class="dropdown-header">Logs</div>
             <a *permissionLink="'base.framework.log.view'" class="dropdown-item"
                [routerLink]="['/settings/logs/objects']">

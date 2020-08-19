@@ -24,6 +24,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { BehaviorSubject } from 'rxjs';
+import { FileElement } from '../../model/file-element';
 
 @Component({
   selector: 'cmdb-new-folder-dialog',
@@ -32,8 +33,25 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class NewFolderDialogComponent implements OnInit {
 
-  @Input() selectedFileElement: BehaviorSubject<any>;
+  private selectedFileElement: BehaviorSubject<any>;
+
+  @Input()
+  set selectedFileFolder( value: BehaviorSubject<any>) {
+    this.selectedFileElement = value;
+  }
+
+  get selectedFileFolder(): BehaviorSubject<any> {
+    return this.selectedFileElement;
+  }
   public basicForm: FormGroup;
+
+
+  static generateMetaData(parent: BehaviorSubject<any> ): FileMetadata {
+    console.log(parent);
+    return new FileMetadata(
+      {folder: true, ...{ parent: parent.getValue() == null ? null : parent.getValue().public_id }}
+    );
+  }
 
   constructor(private fileService: FileService, public activeModal: NgbActiveModal, private toast: ToastService) {}
 
@@ -41,7 +59,8 @@ export class NewFolderDialogComponent implements OnInit {
     this.basicForm = new FormGroup({
       name: new FormControl('', Validators.required)
     });
-    this.basicForm.get('name').setAsyncValidators(checkFolderExistsValidator(this.fileService));
+    this.basicForm.get('name').setAsyncValidators(checkFolderExistsValidator(this.fileService,
+      NewFolderDialogComponent.generateMetaData(this.selectedFileFolder)));
   }
 
   public get name() {
@@ -49,14 +68,19 @@ export class NewFolderDialogComponent implements OnInit {
   }
 
   public createFolder(): void {
-    const metadata: FileMetadata = new FileMetadata({folder: true});
     const folder = new File(['folder'], this.name.value, {
       type: 'application/json',
     });
-    console.log(this.selectedFileElement.getValue());
-    // this.fileService.postFile( folder, metadata).subscribe(() => {
-    //   this.toast.show(`Folder was successfully created: ${this.name.value}`);
-    //   this.activeModal.close();
-    // });
+    this.fileService.postFile( folder, NewFolderDialogComponent.generateMetaData(this.selectedFileElement))
+      .subscribe(() => {
+        this.toast.show(`Folder was successfully created: ${this.name.value}`);
+        this.reloadElementTree();
+    });
+  }
+
+  public reloadElementTree() {
+    this.fileService.getAllFilesList({folder: true}).subscribe((data: FileElement[]) => {
+      this.activeModal.close({fileTree: data});
+    });
   }
 }

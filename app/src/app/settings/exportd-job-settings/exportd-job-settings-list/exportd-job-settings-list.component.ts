@@ -24,10 +24,10 @@ import { ExportdJobService } from '../../services/exportd-job.service';
 import { ExportdJob } from '../../models/exportd-job';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../layout/toast/toast.service';
-import { ModalComponent } from '../../../layout/helpers/modal/modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subscription, timer } from 'rxjs';
-import {ExecuteState, ExportdType} from '../../models/modes_job.enum';
+import { ExecuteState, ExportdType } from '../../models/modes_job.enum';
+import { GeneralModalComponent } from '../../../layout/helpers/modals/general-modal/general-modal.component';
 
 @Component({
   selector: 'cmdb-task-settings-list',
@@ -97,7 +97,7 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
 
   public delTask(itemID: number) {
 
-    const modalComponent = this.modalService.open(ModalComponent);
+    const modalComponent = this.modalService.open(GeneralModalComponent);
     modalComponent.componentInstance.title = 'Delete Exportd Job';
     modalComponent.componentInstance.modalMessage = 'Are you sure you want to delete this Exportd Job?';
     modalComponent.componentInstance.buttonDeny = 'Cancel';

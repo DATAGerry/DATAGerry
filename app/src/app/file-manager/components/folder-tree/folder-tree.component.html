@@ -1,7 +1,13 @@
 <ul id="folder-tree-view">
   <ng-template #recursiveList let-fileTree>
-    <li *ngFor="let item of fileTree" (click)="listClick($event, item)">
-      <span [class]="item.hasSubFolders ? 'caret caret-down':'caret'">{{item.name}}</span>
+    <li *ngFor="let item of fileTree">
+      <span [ngClass]="item.hasSubFolders ? 'caret caret-down':'caret'"
+            [class.selected]="item.public_id === selectedFileFolder.getValue()?.public_id"
+            (dblclick)="dropTree($event, item)"
+            (click)="loadFolderFiles(item)"
+            (contextmenu)="loadContextMenu()">
+        {{item.name}}
+      </span>
       <ul class="nested" *ngIf="item.children?.length > 0 && item.hasSubFolders">
         <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item.children }"></ng-container>
       </ul>

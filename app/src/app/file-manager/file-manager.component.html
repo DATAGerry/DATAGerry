@@ -6,7 +6,9 @@
           <button type="button" class="btn btn-sm btn-success mr-2" (click)="addFolder()">
             <i class="fas fa-folder"></i> New Folder
           </button>
-          <button type="button" class="btn btn-sm btn-secondary"><i class="fas fa-upload"></i> Upload</button>
+          <button type="button" class="btn btn-sm btn-secondary" (click)="uploadFile()">
+            <i class="fas fa-upload"></i> Upload
+          </button>
         </div>
         <div class="input-group">
           <button type="button" class="btn btn-sm btn-light mr-2"><i class="fas fa-list"></i></button>
@@ -15,7 +17,9 @@
       </div>
     </div>
     <div class="col-3 border-right p-3 pre-scrollable">
-      <cmdb-folder-tree [selectedFileFolder]="selectedFileElement"></cmdb-folder-tree>
+      <cmdb-folder-tree [fileElements]="fileElements"
+                        [fileTree]="fileTree"
+                        [selectedFileFolder]="selectedFolderElement"></cmdb-folder-tree>
     </div>
     <div class="col-9">
       <div class="row">
@@ -30,8 +34,8 @@
             </div>
           </div>
         </div>
-        <div class="col-12 p-0">
-          <cmdb-file-view-list></cmdb-file-view-list>
+        <div class="col-12 p-0 pre-scrollable">
+          <cmdb-file-view-list [fileElements]="fileElements"></cmdb-file-view-list>
         </div>
       </div>
     </div>

@@ -9,7 +9,7 @@
   </tr>
   </thead>
   <tbody>
-  <tr *ngFor="let item of files">
+  <tr *ngFor="let item of fileElements.getValue()">
     <th scope="row"><input type="checkbox"></th>
     <td>{{item.name}}</td>
     <td>{{item.size | fileSize}}</td>

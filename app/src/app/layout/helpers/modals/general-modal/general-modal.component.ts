@@ -16,25 +16,25 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+
 import {Component, Input } from '@angular/core';
-import { FileElement } from '../../model/file-element';
-import { BehaviorSubject } from 'rxjs';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+
 
 @Component({
-  selector: 'cmdb-file-view-list',
-  templateUrl: './file-view-list.component.html',
-  styleUrls: ['./file-view-list.component.scss']
+  selector: 'cmdb-general-modal',
+  templateUrl: './general-modal.component.html',
+  styleUrls: ['./general-modal.component.scss']
 })
-export class FileViewListComponent {
+export class GeneralModalComponent {
 
-  private elementFiles: BehaviorSubject<FileElement[]> = new BehaviorSubject<FileElement[]>([]);
+  @Input() title = 'Information';
+  @Input() modalIcon = 'trash';
+  @Input() modalMessage = 'Are you sure, you want to delete all selected objects?';
+  @Input() subModalMessage = '';
+  @Input() buttonDeny = 'Cancel';
+  @Input() buttonAccept = 'Accept';
 
-  @Input()
-  set fileElements( value: BehaviorSubject<FileElement[]>) {
-    this.elementFiles = value;
-  }
+  constructor(public activeModal: NgbActiveModal) {}
 
-  get fileElements(): BehaviorSubject<FileElement[]> {
-    return this.elementFiles;
-  }
 }

@@ -22,8 +22,8 @@ import { FileService } from '../../../../file-manager/service/file.service';
 import { FileMetadata } from '../../../../file-manager/model/metadata';
 import { ActivatedRoute } from '@angular/router';
 import { NgbModal, NgbModalConfig } from '@ng-bootstrap/ng-bootstrap';
-import { AddAttachmentsDialogComponent } from './modal/add-attachments-dialog/add-attachments-dialog.component';
 import { FileElement } from '../../../../file-manager/model/file-element';
+import { AddAttachmentsModalComponent } from '../../../../layout/helpers/modals/add-attachments-modal/add-attachments-modal.component';
 
 @Component({
   selector: 'cmdb-object-attachments',
@@ -52,7 +52,7 @@ export class ObjectAttachmentsComponent implements OnInit {
   }
 
   public addAttachments() {
-    const attachmentAddModal = this.modalService.open(AddAttachmentsDialogComponent);
+    const attachmentAddModal = this.modalService.open(AddAttachmentsModalComponent);
     attachmentAddModal.componentInstance.metadata = this.metadata;
     attachmentAddModal.result.then((result) => {
       this.attachmentsTotal = result.total;

@@ -31,10 +31,10 @@ import { FileMetadata } from '../model/metadata';
 import { FormControl } from '@angular/forms';
 import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
 
-export const checkFolderExistsValidator = (fileService: FileService, time: number = 500) => {
+export const checkFolderExistsValidator = (fileService: FileService, metadata: any, time: number = 500) => {
   return (control: FormControl) => {
     return timer(time).pipe(switchMap(() => {
-      return fileService.checkFolderExists(control.value).pipe(
+      return fileService.checkFolderExists(control.value, metadata).pipe(
         map((apiResponse: HttpResponse<any[]>) => {
           return apiResponse.body ? { folderExists: true } : null;
         }),
@@ -151,10 +151,12 @@ export class FileService<T = any> implements ApiService {
   /**
    * Validation: Check folder name for uniqueness
    *  @param folderName must be unique
+   *  @param metadata raw instance
    */
-  public checkFolderExists(folderName: string) {
+  public checkFolderExists(folderName: string, metadata: FileMetadata) {
+    httpObserveOptions[PARAMETER] = {metadata : JSON.stringify(metadata)};
     const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ folderName }`, specialClient);
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ folderName }`, specialClient, httpObserveOptions);
   }
 
 }

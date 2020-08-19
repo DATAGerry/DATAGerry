@@ -107,6 +107,14 @@ def add_new_file(request_user: User):
 @login_required
 def get_type_by_name(name: str):
     """ Validation: Check folder name for uniqueness
+        Create a unique directory:
+         - Folders in the same directory are unique.
+         - The same Folder-Name can exist in different directories
+
+        Create subfolders:
+         - Selected folder is considered as parent
+
+        This also applies for files
 
         Args:
             name: folderName must be unique
@@ -115,7 +123,8 @@ def get_type_by_name(name: str):
 
         """
     try:
-        media_file = media_file_manager.exist_media_file(name, {'metadata.folder': True})
+        filter_metadata = generate_metadata_filter('metadata', request)
+        media_file = media_file_manager.exist_media_file(name, filter_metadata)
     except ObjectManagerGetError as err:
         return abort(404, err.message)
     return make_response(media_file)

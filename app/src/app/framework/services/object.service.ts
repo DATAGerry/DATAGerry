@@ -21,12 +21,12 @@ import { ApiCallService, ApiService, resp } from '../../services/api-call.servic
 import { ValidatorService } from '../../services/validator.service';
 import { CmdbObject } from '../models/cmdb-object';
 import { Observable } from 'rxjs';
-import { ModalComponent } from '../../layout/helpers/modal/modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { map } from 'rxjs/operators';
 import { RenderResult } from '../models/cmdb-render';
 import { HttpClient, HttpHeaders} from '@angular/common/http';
-import { DataTableFilter, DataTablesResult} from '../models/cmdb-datatable';
+import { DataTableFilter, DataTablesResult } from '../models/cmdb-datatable';
+import { GeneralModalComponent } from '../../layout/helpers/modals/general-modal/general-modal.component';
 
 export const httpObserveOptions = {
   headers: new HttpHeaders({
@@ -243,7 +243,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
                             buttonDeny: string,
                             buttonAccept: string) {
 
-    const modalComponent = this.modalService.open(ModalComponent);
+    const modalComponent = this.modalService.open(GeneralModalComponent);
     modalComponent.componentInstance.title = title;
     modalComponent.componentInstance.modalMessage = modalMessage;
     modalComponent.componentInstance.buttonDeny = buttonDeny;

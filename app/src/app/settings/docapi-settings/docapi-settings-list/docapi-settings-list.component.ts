@@ -21,10 +21,10 @@ import { Router } from '@angular/router';
 import { DataTableDirective } from 'angular-datatables';
 import { BehaviorSubject, Subject, Subscription, timer } from 'rxjs';
 import { ToastService } from '../../../layout/toast/toast.service';
-import { ModalComponent } from '../../../layout/helpers/modal/modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DocTemplate } from '../../../framework/models/cmdb-doctemplate';
 import { DocapiService } from '../../../docapi/docapi.service';
+import { GeneralModalComponent } from '../../../layout/helpers/modals/general-modal/general-modal.component';
 
 @Component({
   selector: 'cmdb-docapi-settings-list',
@@ -80,7 +80,7 @@ export class DocapiSettingsListComponent implements OnInit, OnDestroy {
   }
 
   public delDocTemplate(publicId: number): void {
-    const modalComponent = this.modalService.open(ModalComponent);
+    const modalComponent = this.modalService.open(GeneralModalComponent);
     modalComponent.componentInstance.title = 'Delete Document Template';
     modalComponent.componentInstance.modalMessage = 'Are you sure you want to delete this Document Template?';
     modalComponent.componentInstance.buttonDeny = 'Cancel';
