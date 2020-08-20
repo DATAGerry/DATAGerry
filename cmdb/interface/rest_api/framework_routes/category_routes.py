@@ -37,6 +37,106 @@ categories_blueprint = APIBlueprint('categories', __name__)
 @categories_blueprint.protect(auth=True, right='base.framework.category.view')
 @categories_blueprint.parse_collection_parameters(view='list')
 def get_categories(params: CollectionParameters):
+    """
+    HTTP `GET`/`HEAD` route for getting a iterable collection of resources.
+
+    Args:
+        params (CollectionParameters): Passed parameters over the http query string + optional `view` parameter.
+
+    Returns:
+        GetMultiResponse: Which includes a IterationResult of the CategoryDAO.
+
+        If the view parameter with tree was set the route returns a GetMultiResponse<CategoryTree>.
+
+    Example:
+        You can pass any parameter based on the CollectionParameters.
+        Optional parameters are passed over the function declaration.
+        The `view` parameter is optional and default `list`, but can be `tree` for the category tree view.
+
+    Raises:
+        FrameworkIterationError: If the collection could not be iterated.
+
+        ManagerGetError: If the collection could not be found.
+
+    .. http:get:: /rest/categories/
+
+       HTTP GET/HEAD rest route. HEAD will be the same result except their will be no body.
+
+       **Example request**:
+
+       .. sourcecode:: http
+
+          GET /rest/categories/ HTTP/1.1
+          Host: datagerry.co
+          Accept: application/json
+
+       **Example response**:
+
+       .. sourcecode:: http
+
+          HTTP/1.1 200 OK
+          Content-Type: application/json
+          Content-Length: 3311
+          X-Total-Count: 1
+
+          {
+              "results": [
+                {
+                  "public_id": 1,
+                  "name": "example",
+                  "label": "Example",
+                  "meta": {
+                    "icon": "",
+                    "order": null
+                  },
+                  "parent": null,
+                  "types": [1]
+                }
+              ],
+              "count": 1,
+              "total": 1,
+              "parameters": {
+                "limit": 10,
+                "sort": "public_id",
+                "order": 1,
+                "page": 1,
+                "filter": {},
+                "optional": {
+                  "view": "list"
+                }
+              },
+              "pager": {
+                "page": 1,
+                "page_size": 10,
+                "total_pages": 1
+              },
+              "pagination": {
+                "current": "http://localhost:4000/rest/categories/",
+                "first": "http://localhost:4000/rest/categories/?page=1",
+                "prev": "http://localhost:4000/rest/categories/?page=1",
+                "next": "http://localhost:4000/rest/categories/?page=1",
+                "last": "http://localhost:4000/rest/categories/?page=1"
+              },
+              "response_type": "GET",
+              "model": "Category",
+              "time": "2020-08-20T10:13:15.350747"
+            }
+
+       :query sort: the sort field name. default is public_id
+       :query order: the sort order value for ascending or descending. default is 1 for ascending
+       :query page: the current view page. default is 1
+       :query limit: max number of results. default is 10
+       :query filter: a mongodb query filter. default is {} which means everything
+       :query view: the category view data-structure. Can be `list` or `tree`. default is `list`
+
+       :reqheader Accept: application/json
+       :reqheader Authorization: jwtoken to authenticate
+       :resheader Content-Type: application/json
+       :statuscode 200: Everything is fine.
+       :statuscode 400: The request or the parameters are wrong formatted.
+       :statuscode 404: No collection or resources found.
+
+    """
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
     body = True if not request.method != 'HEAD' else False
 
@@ -62,7 +162,6 @@ def get_categories(params: CollectionParameters):
 @categories_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
 @categories_blueprint.protect(auth=True, right='base.framework.category.view')
 def get_category(public_id: int):
-    """HTTP GET call for a single category by the public id"""
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
     body = True if not request.method != 'HEAD' else False
 
