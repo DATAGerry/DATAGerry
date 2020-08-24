@@ -24,7 +24,7 @@ import { FileManagerRoutingModule } from './file-manager-routing.module';
 import { TypeService } from '../framework/services/type.service';
 import { ObjectService } from '../framework/services/object.service';
 import { FolderTreeComponent } from './components/folder-tree/folder-tree.component';
-import { FolderNodeComponent } from './components/folder-node/folder-node.component';
+import { ContextmenuComponent } from './components/contextmenu/contextmenu.component';
 import { FileViewListComponent } from './components/file-view-list/file-view-list.component';
 import { NewFolderDialogComponent } from './modal/new-folder-dialog/new-folder-dialog.component';
 import { RenameDialogComponent } from './modal/rename-dialog/rename-dialog.component';
@@ -38,10 +38,10 @@ import { ReactiveFormsModule } from '@angular/forms';
   declarations: [
     FileManagerComponent,
     FolderTreeComponent,
-    FolderNodeComponent,
     FileViewListComponent,
     NewFolderDialogComponent,
     RenameDialogComponent,
+    ContextmenuComponent
   ],
   imports: [
     CommonModule,

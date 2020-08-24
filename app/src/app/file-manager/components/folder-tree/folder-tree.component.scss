@@ -9,6 +9,7 @@ ul, #folder-tree-view {
 #folder-tree-view {
   margin: 0;
   padding: 0;
+  white-space:nowrap;
 }
 
 /* Style the caret/folder */
@@ -35,6 +36,10 @@ ul, #folder-tree-view {
 /* The caret/folder hover */
 .caret:hover, .caret-down:hover {
   background: $gray-400;
+
+  .context-line {
+    visibility: visible;
+  }
 }
 
 /* The nested list */
@@ -48,4 +53,18 @@ ul, #folder-tree-view {
 .selected {
   color: $cmdb-primary;
   font-weight: bold;
+}
+
+
+.context-line {
+  visibility: hidden;
+  z-index: 999;
+  color: $gray-600;
+  i {
+    margin-right: 0.25em;
+
+    &:hover {
+      color: $gray-800;
+    }
+  }
 }

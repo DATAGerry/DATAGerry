@@ -47,7 +47,6 @@ export class NewFolderDialogComponent implements OnInit {
 
 
   static generateMetaData(parent: BehaviorSubject<any> ): FileMetadata {
-    console.log(parent);
     return new FileMetadata(
       {folder: true, ...{ parent: parent.getValue() == null ? null : parent.getValue().public_id }}
     );

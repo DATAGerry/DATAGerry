@@ -24,6 +24,8 @@ import { BehaviorSubject } from 'rxjs';
 import { FileElement } from './model/file-element';
 import { FileMetadata } from './model/metadata';
 import { AddAttachmentsModalComponent } from '../layout/helpers/modals/add-attachments-modal/add-attachments-modal.component';
+import { GeneralModalComponent } from '../layout/helpers/modals/general-modal/general-modal.component';
+import { RenameDialogComponent } from './modal/rename-dialog/rename-dialog.component';
 
 @Component({
   selector: 'cmdb-file-manager',
@@ -50,9 +52,20 @@ export class FileManagerComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.fileService.getAllFilesList(this.metadata).subscribe((data: any) => {
+    this.loadFiles(this.metadata);
+  }
+
+  private loadFiles(metadata: FileMetadata): void {
+    this.fileService.getAllFilesList(metadata).subscribe((data: any) => {
       this.fileElements.next(data);
     });
+  }
+
+  private generateMetadata(): FileMetadata {
+    const folder = this.selectedFolderElement;
+    return new FileMetadata(
+      {folder: false, ...{ parent: folder.getValue() == null ? null : folder.getValue().public_id }}
+    );
   }
 
   public addFolder() {
@@ -64,10 +77,7 @@ export class FileManagerComponent implements OnInit {
   }
 
   public uploadFile() {
-    const folder = this.selectedFolderElement;
-    const metadata = new FileMetadata(
-      {folder: false, ...{ parent: folder.getValue() == null ? null : folder.getValue().public_id }}
-    );
+    const metadata = this.generateMetadata();
     const attachmentAddModal = this.modalService.open(AddAttachmentsModalComponent);
     attachmentAddModal.componentInstance.metadata = metadata;
     attachmentAddModal.result.then(() => {
@@ -75,5 +85,48 @@ export class FileManagerComponent implements OnInit {
         this.fileElements.next(data);
       });
     });
+  }
+
+  public renameFile() {
+    const folderModal = this.modalService.open(RenameDialogComponent);
+    folderModal.componentInstance.selectedFileFolder = this.selectedFolderElement;
+    folderModal.result.then((result) => {
+      if (result) {
+        const fileElement = this.selectedFolderElement.getValue();
+        fileElement.filename = result.filename;
+        this.fileService.putFile(fileElement).subscribe(() => {
+          this.fileService.getAllFilesList({folder: true}).subscribe((data: FileElement[]) => {
+            this.fileTree = data;
+          });
+        });
+      }
+    });
+  }
+
+  public deleteFiles(value: FileElement) {
+    this.selectedFolderElement.next(value);
+    const metadata = this.generateMetadata();
+    this.deleteFileModal(value.name).then(result => {
+      if (result) {
+        this.fileService.deleteFile(value.public_id, metadata).subscribe(() => {
+            this.fileService.getAllFilesList({folder: true}).subscribe((data: FileElement[]) => {
+              this.fileTree = data;
+            });
+          }
+        );
+      }
+    });
+  }
+
+  private deleteFileModal(filename: string) {
+    const deleteModalComponent = this.modalService.open(GeneralModalComponent);
+    deleteModalComponent.componentInstance.title = `Delete ${filename}`;
+    deleteModalComponent.componentInstance.modalMessage =
+      `Are you sure you want to delete ${filename} Folder?`;
+    deleteModalComponent.componentInstance.subModalMessage =
+      `All files associated to this Folder will permanently deleted. This operation can not be undone!`;
+    deleteModalComponent.componentInstance.buttonDeny = 'Cancel';
+    deleteModalComponent.componentInstance.buttonAccept = 'Delete';
+    return deleteModalComponent.result;
   }
 }

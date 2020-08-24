@@ -1,20 +1,26 @@
-<table class="table framework-table table-striped">
+<table class="table framework-table table-striped table-bordered">
   <thead>
   <tr>
-    <th scope="col"><input type="checkbox"></th>
     <th scope="col">Name</th>
     <th scope="col">Size</th>
     <th scope="col">Type</th>
     <th scope="col">Modifier</th>
+    <th scope="col" class="text-center">Action</th>
   </tr>
   </thead>
   <tbody>
-  <tr *ngFor="let item of fileElements.getValue()">
-    <th scope="row"><input type="checkbox"></th>
+  <tr *ngFor="let item of fileElements | async">
     <td>{{item.name}}</td>
     <td>{{item.size | fileSize}}</td>
     <td>{{item.metadata?.folder ? "Folder" : item.metadata?.mime_type}}</td>
     <td>{{item.metadata?.author_id}}</td>
+    <td>
+      <div class="text-center">
+        <i class="fas fa-download mr-1" title="dowload" (click)="downloadFile(item)"></i>
+        <i class="far fa-edit mr-1" title="rename" (click)="renameFile(item)"></i>
+        <i class="far fa-trash-alt" title="delete" (click)="deleteFile(item)"></i>
+      </div>
+    </td>
   </tr>
   </tbody>
 </table>

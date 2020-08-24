@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FileService } from '../../service/file.service';
 import { FileElement } from '../../model/file-element';
 import { FileMetadata } from '../../model/metadata';
@@ -60,6 +60,14 @@ export class FolderTreeComponent implements OnInit, OnChanges {
   get selectedFileFolder(): BehaviorSubject<any> {
     return this.selectedFileElement;
   }
+
+  /**
+   * Marks a property in a child component as a
+   * doorway through which data can travel from the child to the parent.
+   */
+  @Output() createFileElementEvent = new EventEmitter<any>();
+  @Output() renameFileElementEvent = new EventEmitter<any>();
+  @Output() deleteFileElementEvent = new EventEmitter<any>();
 
   constructor(private fileService: FileService) { }
 
@@ -119,6 +127,18 @@ export class FolderTreeComponent implements OnInit, OnChanges {
         this.fileElements.next(data);
       });
     }
+  }
+
+  public createFolder(): void {
+    this.createFileElementEvent.emit(this.selectedFileFolder);
+  }
+
+  public renameFolder(): void {
+    this.renameFileElementEvent.emit();
+  }
+
+  public deleteFolder(value: FileElement): void {
+    this.deleteFileElementEvent.emit(value);
   }
 
   public loadContextMenu() {

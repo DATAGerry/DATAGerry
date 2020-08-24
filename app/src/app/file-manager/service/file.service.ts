@@ -30,6 +30,7 @@ import { ValidatorService } from '../../services/validator.service';
 import { FileMetadata } from '../model/metadata';
 import { FormControl } from '@angular/forms';
 import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
+import {FileElement} from "../model/file-element";
 
 export const checkFolderExistsValidator = (fileService: FileService, metadata: any, time: number = 500) => {
   return (control: FormControl) => {
@@ -106,6 +107,18 @@ export class FileService<T = any> implements ApiService {
     );
   }
 
+  /**
+   * Update file into the database (GridFS)
+   * @param file raw instance
+   */
+  public putFile(file: FileElement): Observable<T> {
+    return this.api.callPut<number>(this.servicePrefix + '/', JSON.stringify(file)).pipe(
+      map((apiResponse: HttpResponse<T>) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
 
   /**
    * Download a file by name
@@ -139,9 +152,11 @@ export class FileService<T = any> implements ApiService {
   /**
    * Delete a existing files
    * @param fileID the file id
+   * @param params metadata raw instance
    */
-  public deleteFile(fileID: number): Observable<number> {
-    return this.api.callDelete<number>(this.servicePrefix + '/' + fileID).pipe(
+  public deleteFile(fileID: number, params): Observable<number> {
+    httpFileOptions[PARAMETER] = {metadata : JSON.stringify(params)};
+    return this.api.callDelete<number>(this.servicePrefix + '/' + fileID, httpFileOptions).pipe(
       map((apiResponse: HttpResponse<number>) => {
         return apiResponse.body;
       })

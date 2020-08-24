@@ -104,7 +104,7 @@ export class AddAttachmentsModalComponent implements OnInit {
   }
 
   public deleteFile(publicID: number) {
-    this.fileService.deleteFile(publicID).subscribe(() => this.getFiles());
+    this.fileService.deleteFile(publicID, {}).subscribe(() => this.getFiles());
   }
 
   private replaceFileModal(filename: string) {

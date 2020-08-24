@@ -19,6 +19,11 @@
 import {Component, Input } from '@angular/core';
 import { FileElement } from '../../model/file-element';
 import { BehaviorSubject } from 'rxjs';
+import {FileService} from "../../service/file.service";
+import {FileSaverService} from "ngx-filesaver";
+import {RenameDialogComponent} from "../../modal/rename-dialog/rename-dialog.component";
+import {FileMetadata} from "../../model/metadata";
+import {NgbModal, NgbModalConfig} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'cmdb-file-view-list',
@@ -26,7 +31,6 @@ import { BehaviorSubject } from 'rxjs';
   styleUrls: ['./file-view-list.component.scss']
 })
 export class FileViewListComponent {
-
   private elementFiles: BehaviorSubject<FileElement[]> = new BehaviorSubject<FileElement[]>([]);
 
   @Input()
@@ -36,5 +40,45 @@ export class FileViewListComponent {
 
   get fileElements(): BehaviorSubject<FileElement[]> {
     return this.elementFiles;
+  }
+
+
+  constructor(private fileService: FileService, private fileSaverService: FileSaverService,
+              private modalService: NgbModal, private config: NgbModalConfig) {
+    config.backdrop = 'static';
+    config.keyboard = false;
+  }
+
+  public downloadFile(value: FileElement) {
+    const {name, metadata} = value;
+    this.fileService.getFileByName(name, metadata).subscribe((data: any) => {
+      this.fileSaverService.save(data.body, name);
+    });
+  }
+
+  public renameFile(value: any) {
+    const folderModal = this.modalService.open(RenameDialogComponent);
+    folderModal.componentInstance.selectedFileFolder = new BehaviorSubject<any>(value);
+    folderModal.result.then((result) => {
+      if (result) {
+        const metadata = new FileMetadata({parent: value.public_id, folder: false });
+        const fileElement = value;
+        fileElement.filename = result.filename;
+        this.fileService.putFile(fileElement).subscribe(() => {
+          this.fileService.getAllFilesList(metadata).subscribe((data: FileElement[]) => {
+            this.fileElements.next(data);
+          });
+        });
+      }
+    });
+  }
+
+  public deleteFile(value: FileElement) {
+    const metadata = new FileMetadata({parent: value.public_id, folder: false });
+    this.fileService.deleteFile(value.public_id, {}).subscribe(() => {
+      this.fileService.getAllFilesList(metadata).subscribe((data: FileElement[]) => {
+        this.fileElements.next(data);
+      });
+    });
   }
 }

@@ -19,7 +19,10 @@
     <div class="col-3 border-right p-3 pre-scrollable">
       <cmdb-folder-tree [fileElements]="fileElements"
                         [fileTree]="fileTree"
-                        [selectedFileFolder]="selectedFolderElement"></cmdb-folder-tree>
+                        [selectedFileFolder]="selectedFolderElement"
+                        (createFileElementEvent)="addFolder()"
+                        (renameFileElementEvent)="renameFile()"
+                        (deleteFileElementEvent)="deleteFiles($event)"></cmdb-folder-tree>
     </div>
     <div class="col-9">
       <div class="row">

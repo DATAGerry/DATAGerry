@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import json
 import logging
 
@@ -53,3 +54,18 @@ def generate_metadata_filter(element, _request):
         LOGGER.error(f'Metadata was not provided - Exception: {ex}')
         return abort(400)
     return filter_metadata
+
+
+def recursive_delete_filter(public_id, media_file_manager, _ids=None) -> []:
+
+    if not _ids:
+        _ids = []
+
+    root = media_file_manager.get_media_file_by_public_id(public_id)
+    all_files = media_file_manager.get_all_media_files({'metadata.parent': root.public_id})
+    _ids.append(root.public_id)
+
+    for item in all_files:
+        recursive_delete_filter(item.public_id, media_file_manager, _ids)
+
+    return _ids
