@@ -31,7 +31,6 @@ import { SelectComponent } from './fields/choice/select.component';
 import { RefComponent } from './fields/special/ref.component';
 import { CheckboxComponent } from './fields/choice/checkbox.component';
 import { TextareaComponent } from './fields/textarea/textarea.component';
-import { LayoutModule } from '../../layout/layout.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -111,7 +110,6 @@ import { ObjectBulkInputAppendsComponent } from './components/object-bulk-input-
   ],
     imports: [
         CommonModule,
-        LayoutModule,
         NgbModule,
         NgSelectModule,
         FormsModule,

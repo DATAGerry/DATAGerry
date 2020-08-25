@@ -95,7 +95,8 @@ export class TableComponent implements OnInit, OnDestroy {
       { name: 'view', classValue: 'text-dark ml-1', linkRoute: '', fontIcon: 'eye', active: false},
       { name: 'copy', classValue: 'text-dark ml-1', linkRoute: 'copy/', fontIcon: 'copy'},
       { name: 'edit', classValue: 'text-dark ml-1', linkRoute: 'edit/', fontIcon: 'edit'},
-      { name: 'delete', classValue: 'text-dark ml-1', linkRoute: 'delete/', fontIcon: 'trash'}];
+      { name: 'delete', classValue: 'text-dark ml-1', linkRoute: 'delete/', fontIcon: 'trash'},
+      { name: 'preview', classValue: 'text-dark ml-1', linkRoute: '/', fontIcon: 'file-powerpoint'}];
   }
 
   ngOnInit(): void {
