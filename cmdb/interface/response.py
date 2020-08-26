@@ -40,10 +40,13 @@ def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2
         indent: display indent
 
     Returns:
-        A valid BaseResponse
+        BaseResponse
     """
+    from cmdb.interface import API_VERSION
+
     response = flask_response(dumps(body, default=json_encoding.default, indent=indent), status)
     response.mimetype = mime or DEFAULT_MIME_TYPE
+    response.headers['X-API-Version'] = API_VERSION
     return response
 
 
