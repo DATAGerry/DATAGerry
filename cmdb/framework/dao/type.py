@@ -20,11 +20,8 @@ from datetime import datetime
 
 from cmdb.framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
 from cmdb.framework.cmdb_errors import ExternalFillError, FieldInitError, FieldNotFoundError
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+from cmdb.framework.utils import Collection, Model
+from cmdb.utils.error import CMDBError
 
 LOGGER = logging.getLogger(__name__)
 
@@ -33,23 +30,38 @@ class TypeDAO(CmdbDAO):
     """
     Definition of an object type - which fields were created and how.
     """
-    COLLECTION = "framework.types"
+    COLLECTION: Collection = "framework.types"
+    MODEL: Model = 'Type'
+    SCHEMA: dict = {
+        'public_id': {
+            'type': 'integer'
+        },
+        'name': {
+            'type': 'string',
+            'required': True,
+            'regex': r'(\w+)-*(\w)([\w-]*)'  # kebab case validation,
+        },
+        'label': {
+            'type': 'string',
+            'required': False
+        },
+    }
 
     INDEX_KEYS = [
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
+    DEFAULT_VERSION: str = '1.0.0'
+
     def __init__(self, public_id: int, name: str, active: bool, author_id: int, creation_time: datetime,
-                 render_meta: dict, fields: list, version: str = '1.0.0', access: list = None,
-                 label: str = None, clean_db: bool = None, status: list = None, description: str = None):
+                 render_meta: dict, fields: list = None, version: str = None, label: str = None, clean_db: bool = None,
+                 description: str = None):
         self.name = name
         self.label = label or self.name.title()
-        self.description = description
-        self.version = version
-        self.status = status
+        self.description = description or ''
+        self.version = version or TypeDAO.DEFAULT_VERSION
         self.active = active
         self.clean_db = clean_db
-        self.access = access or []
         self.author_id = author_id
         self.creation_time = creation_time
         self.render_meta = render_meta
@@ -58,14 +70,21 @@ class TypeDAO(CmdbDAO):
 
     @classmethod
     def from_data(cls, data: dict) -> "TypeDAO":
-        """Create a instance of a type from database"""
+        """Create a instance of TypeDAO from database values"""
+        return cls(
+            public_id=data.get('public_id'),
+            name=data.get('name'),
+            active=data.get('active'),
+            author_id=data.get('author_id'),
+            creation_time=data.get('creation_time'),
+            label=data.get('label', None),
+            version=data.get('version', None),
+            description=data.get('description', None),
+            render_meta=data.get('render_meta', {}),
+            fields=data.get('fields', None),
+            clean_db=data.get('clean_db', True),
 
-        return cls(public_id=data.get('public_id'), name=data.get('name'), active=data.get('active'),
-                   author_id=data.get('author_id'), creation_time=data.get('creation_time'),
-                   render_meta=data.get('render_meta'), fields=data.get('fields'), version=data.get('version'),
-                   access=data.get('access'), label=data.get('label'), clean_db=data.get('clean_db'),
-                   status=data.get('status'), description=data.get('description')
-                   )
+        )
 
     @classmethod
     def to_json(cls, instance: "TypeDAO") -> dict:
@@ -79,10 +98,8 @@ class TypeDAO(CmdbDAO):
             'render_meta': instance.render_meta,
             'fields': instance.fields,
             'version': instance.version,
-            'access': instance.access,
             'label': instance.get_label(),
             'clean_db': instance.clean_db,
-            'status': instance.status,
             'description': instance.get_description()
         }
 
