@@ -20,7 +20,8 @@ import datetime
 import time
 
 from flask import abort, jsonify, current_app, Response
-from cmdb.interface.route_utils import RootBlueprint, login_required
+from cmdb.interface.route_utils import login_required
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.framework.cmdb_errors import TypeNotFoundError
 from cmdb.utils import json_encoding
 

@@ -20,7 +20,8 @@ from flask import current_app, request, abort
 
 from cmdb.framework import CmdbType
 from cmdb.interface.rest_api.import_routes import importer_blueprint
-from cmdb.interface.route_utils import NestedBlueprint, login_required, make_response
+from cmdb.interface.route_utils import login_required, make_response
+from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.utils.error import CMDBError
 
 importer_type_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/type')

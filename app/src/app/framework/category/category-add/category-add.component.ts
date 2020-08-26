@@ -41,6 +41,7 @@ export class CategoryAddComponent implements OnInit, OnDestroy {
    * Subscription for getUncategorizedTypes
    */
   private typeServiceSubscription: Subscription = new Subscription();
+
   /**
    * Subscription for category add call
    */

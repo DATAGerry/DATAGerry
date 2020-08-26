@@ -17,13 +17,56 @@ from typing import List, Union
 
 from cmdb.framework import CmdbType
 from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.framework.utils import Model, Collection
 
 
-class CmdbCategory(CmdbDAO):
+class CategoryDAO(CmdbDAO):
     """
     Category
     """
-    COLLECTION = 'framework.categories'
+    COLLECTION: Collection = 'framework.categories'
+    MODEL: Model = 'Category'
+    SCHEMA: dict = {
+        'public_id': {
+            'type': 'integer'
+        },
+        'name': {
+            'type': 'string',
+            'required': True,
+            'regex': r'(\w+)-*(\w)([\w-]*)'  # kebab case validation,
+        },
+        'label': {
+            'type': 'string',
+            'required': False
+        },
+        'parent': {
+            'type': 'integer',
+            'nullable': True,
+            'default': None
+        },
+        'types': {
+            'type': 'list',
+            'empty': True,
+            'default': []
+        },
+        'meta': {
+            'type': 'dict',
+            'schema': {
+                'icon': {
+                    'type': 'string',
+                    'empty': True
+                },
+                'order': {
+                    'type': 'integer',
+                    'nullable': True
+                }
+            },
+            'default': {
+                'icon': '',
+                'order': None,
+            }
+        }
+    }
 
     INDEX_KEYS = [
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True},
@@ -31,7 +74,7 @@ class CmdbCategory(CmdbDAO):
         {'keys': [('types', CmdbDAO.DAO_ASCENDING)], 'name': 'types', 'unique': False}
     ]
 
-    class __CmdbCategoryMeta:
+    class __CategoryMeta:
 
         def __init__(self, icon: str = '', order: int = None):
             self.icon = icon
@@ -57,24 +100,24 @@ class CmdbCategory(CmdbDAO):
                 return True
             return False
 
-    def __init__(self, public_id: int, name: str, label: str = None, meta: __CmdbCategoryMeta = None,
+    def __init__(self, public_id: int, name: str, label: str = None, meta: __CategoryMeta = None,
                  parent: int = None, types: Union[List[int], List[CmdbType]] = None):
         self.name: str = name
         self.label: str = label
-        self.meta: CmdbCategory.__CmdbCategoryMeta = meta
-        if parent == public_id:
+        self.meta: CategoryDAO.__CategoryMeta = meta
+        if parent == public_id and (parent is not None):
             raise ValueError(f'Category {name} has his own ID as Parent')
         self.parent: int = parent
         self.types: Union[List[int], List[CmdbType]] = types
-        super(CmdbCategory, self).__init__(public_id=public_id)
+        super(CategoryDAO, self).__init__(public_id=public_id)
 
     @classmethod
-    def from_data(cls, data: dict) -> "CmdbCategory":
+    def from_data(cls, data: dict) -> "CategoryDAO":
         """Create a instance of a category from database"""
 
         raw_meta: dict = data.get('meta', None)
         if raw_meta:
-            meta = cls.__CmdbCategoryMeta(icon=raw_meta.get('icon', ''), order=raw_meta.get('order', None))
+            meta = cls.__CategoryMeta(icon=raw_meta.get('icon', ''), order=raw_meta.get('order', None))
         else:
             meta = raw_meta
 
@@ -83,7 +126,7 @@ class CmdbCategory(CmdbDAO):
                    )
 
     @classmethod
-    def to_json(cls, instance: "CmdbCategory") -> dict:
+    def to_json(cls, instance: "CategoryDAO") -> dict:
         """Convert a category instance to json conform data"""
         meta = instance.get_meta()
         return {
@@ -93,7 +136,6 @@ class CmdbCategory(CmdbDAO):
             'meta': {
                 'icon': meta.get_icon(),
                 'order': meta.get_order()
-
             },
             'parent': instance.get_parent(),
             'types': instance.get_types()
@@ -109,15 +151,15 @@ class CmdbCategory(CmdbDAO):
             self.label = self.name.title()
         return self.label
 
-    def get_meta(self) -> __CmdbCategoryMeta:
+    def get_meta(self) -> __CategoryMeta:
         """Get meta data"""
         if not self.meta:
-            self.meta = CmdbCategory.__CmdbCategoryMeta()
+            self.meta = CategoryDAO.__CategoryMeta()
         return self.meta
 
     def has_parent(self) -> bool:
         """Check if category has parent"""
-        return True if self.parent else False
+        return bool(self.parent)
 
     def get_parent(self) -> int:
         """Get the public id of the parent"""
@@ -140,13 +182,14 @@ class CmdbCategory(CmdbDAO):
 
 class CategoryTree:
     """Base tree holder"""
+    MODEL: Model = 'CategoryTree'
 
     class CategoryNode:
         """Class of a category node inside the category tree"""
 
-        def __init__(self, category: CmdbCategory, children: List["CategoryTree.CategoryNode"] = None,
+        def __init__(self, category: CategoryDAO, children: List["CategoryTree.CategoryNode"] = None,
                      types: List[CmdbType] = None):
-            self.category: CmdbCategory = category
+            self.category: CategoryDAO = category
             self.node_order: int = self.category.get_meta().get_order()
             self.children: List["CategoryTree.CategoryNode"] = children or []
             # prevent wrong type order
@@ -157,7 +200,7 @@ class CategoryTree:
         def to_json(cls, instance: "CategoryTree.CategoryNode"):
             """Get the node as json"""
             return {
-                'category': CmdbCategory.to_json(instance.category),
+                'category': CategoryDAO.to_json(instance.category),
                 'node_order': instance.node_order,
                 'children': [CategoryTree.CategoryNode.to_json(child_node) for child_node in instance.children],
                 'types': [CmdbType.to_json(type) for type in instance.types]
@@ -165,13 +208,11 @@ class CategoryTree:
 
         def get_order(self) -> int:
             """Get the order value from the main category inside this node.
-            Should be equal to __CmdbCategoryMeta -> order
+            Should be equal to __CategoryMeta -> order
             """
-            if not self.node_order:
-                self.node_order = -1
             return self.node_order
 
-        def flatten(self) -> List[CmdbCategory]:
+        def flatten(self) -> List[CategoryDAO]:
             """Flats a category node and its children"""
             return [self.category] + sum(
                 (c.flatten() for c in self.children),
@@ -182,17 +223,18 @@ class CategoryTree:
             """String representation of the category node"""
             return f'CategoryNode(CategoryID={self.category.public_id})'
 
-    def __init__(self, categories: List[CmdbCategory], types: List[CmdbType] = None):
+    def __init__(self, categories: List[CategoryDAO], types: List[CmdbType] = None):
         self._categories = categories
         self._types = types
         self._tree: List[CategoryTree.CategoryNode] = sorted(self.__create_tree(self._categories, types=self._types),
-                                                             key=lambda node: node.get_order(), reverse=False)
+                                                             key=lambda node: (
+                                                             node.get_order() is None, node.get_order()))
 
     def __len__(self) -> int:
         """Get length of tree - this means the number of root categories"""
         return len(self._tree)
 
-    def flat(self) -> List[CmdbCategory]:
+    def flat(self) -> List[CategoryDAO]:
         """Returns a flatted tree with tree like category order"""
         flatted = []
         for node in self.tree:
@@ -222,7 +264,7 @@ class CategoryTree:
     @classmethod
     def from_data(cls, raw_categories: List[dict]) -> "CategoryTree":
         """Create the category list from raw data"""
-        categories: List[CmdbCategory] = [CmdbCategory.from_data(category) for category in raw_categories]
+        categories: List[CategoryDAO] = [CategoryDAO.from_data(category) for category in raw_categories]
         return cls(categories=categories)
 
     @classmethod

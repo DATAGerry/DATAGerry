@@ -24,7 +24,6 @@ from cmdb.utils.error import CMDBError
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
-from cmdb.updater import UpdaterModule
 from cmdb.updater.updater_settings import UpdateSettings
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter

@@ -38,5 +38,5 @@ class QueryBuilder(Builder):
     def query(self, value: dict):
         self._query = Query(value)
 
-    def build(self, params: dict) -> Query:
+    def build(self, *args, **kwargs) -> Query:
         raise NotImplementedError()

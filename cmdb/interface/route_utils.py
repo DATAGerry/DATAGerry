@@ -17,13 +17,11 @@ import base64
 import functools
 import json
 from functools import wraps
-from typing import ClassVar
 
-from authlib.jose.errors import ExpiredTokenError
 from werkzeug._compat import to_unicode
 from werkzeug.http import wsgi_to_bytes
 
-from cmdb.security.auth import AuthModule, AuthenticationProvider
+from cmdb.security.auth import AuthModule
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import User
 from cmdb.user_management.user_manager import UserManagerGetError, UserManager
@@ -35,41 +33,12 @@ try:
 except ImportError:
     CMDBError = Exception
 
-from flask import Blueprint, request, abort, current_app
+from flask import request, abort, current_app
 
 from cmdb.security.token.validator import TokenValidator, ValidationError
 from cmdb.utils import json_encoding
 
 DEFAULT_MIME_TYPE = 'application/json'
-
-
-class RootBlueprint(Blueprint):
-    """Wrapper class for Blueprints with nested elements"""
-
-    def __init__(self, *args, **kwargs):
-        super(RootBlueprint, self).__init__(*args, **kwargs)
-        self.nested_blueprints = []
-
-    def register_nested_blueprint(self, nested_blueprint):
-        """Add a 'sub' blueprint to root element
-        Args:
-            nested_blueprint (NestedBlueprint): Blueprint for sub routes
-        """
-        self.nested_blueprints.append(nested_blueprint)
-
-
-class NestedBlueprint:
-    """Default Blueprint class but with parent prefix route
-    """
-
-    def __init__(self, blueprint, url_prefix):
-        self.blueprint = blueprint
-        self.prefix = '/' + url_prefix
-        super(NestedBlueprint, self).__init__()
-
-    def route(self, rule, **options):
-        rule = self.prefix + rule
-        return self.blueprint.route(rule, **options)
 
 
 def make_response(instance, status_code=200, indent=2):
@@ -99,16 +68,40 @@ def login_required(f):
     def decorated(*args, **kwargs):
         """checks if user is logged in and valid
         """
-        try:
-            token = parse_authorization_header(request.headers['Authorization'])
-        except Exception as err:
-            return abort(401)
-        if token:
+        valid = auth_is_valid()
+        if valid:
             return f(*args, **kwargs)
         else:
             return abort(401)
 
     return decorated
+
+
+def auth_is_valid() -> bool:
+    try:
+        parse_authorization_header(request.headers['Authorization'])
+        return True
+    except Exception as err:
+        LOGGER.error(err)
+        return False
+
+
+def user_has_right(required_right: str) -> bool:
+    from flask import request, current_app
+    with current_app.app_context():
+        user_manager = current_app.user_manager
+
+    token = parse_authorization_header(request.headers['Authorization'])
+    try:
+        decrypted_token = TokenValidator().decode_token(token)
+    except ValidationError as err:
+        return abort(401)
+    try:
+        user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
+        user = user_manager.get_user(user_id)
+        return user_manager.group_has_right(user.get_group(), required_right)
+    except UserManagerGetError:
+        return False
 
 
 def insert_request_user(func):

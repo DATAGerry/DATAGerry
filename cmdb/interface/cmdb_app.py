@@ -53,3 +53,16 @@ class BaseCmdbApp(Flask):
         self.security_manager: SecurityManager = security_manager
         self.temp_folder: str = '/tmp/'
         super(BaseCmdbApp, self).__init__(import_name)
+
+    def register_multi_blueprint(self, blueprint, multi_prefix: [str], **options):
+        """
+        Register a blueprint with multiple urls
+        Args:
+            blueprint: Original blueprint
+            multi_prefix: list of url prefixes
+            **options: options of flask blueprint
+        """
+        if 'url_prefix' in options:
+            raise ValueError('Url prefix is not allow if a multi prefix was set')
+        for prefix in multi_prefix:
+            super(BaseCmdbApp, self).register_blueprint(blueprint, url_prefix=prefix, **options)

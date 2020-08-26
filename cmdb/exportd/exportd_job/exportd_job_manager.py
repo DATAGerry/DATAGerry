@@ -25,7 +25,6 @@ from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerIn
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.utils.error import CMDBError
-from cmdb.utils.system_config import SystemConfigReader
 from cmdb.user_management import User
 
 LOGGER = logging.getLogger(__name__)

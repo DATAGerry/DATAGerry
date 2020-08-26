@@ -24,8 +24,6 @@ from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerIn
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import User
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
-from cmdb.docapi.doctypes import PdfDocumentType
-from cmdb.docapi.document_generator import ObjectDocumentGenerator
 
 LOGGER = logging.getLogger(__name__)
 

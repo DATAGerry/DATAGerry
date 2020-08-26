@@ -31,7 +31,8 @@ from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, Obj
 from cmdb.framework.cmdb_log import LogAction, CmdbObjectLog
 from cmdb.framework.cmdb_log_manager import LogManagerInsertError
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
-from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user, login_required, right_required
+from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import User
 
 with current_app.app_context():

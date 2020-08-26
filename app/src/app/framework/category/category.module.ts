@@ -32,26 +32,28 @@ import { IconPickerModule } from 'ngx-icon-picker';
 import { CategoryEditComponent } from './category-edit/category-edit.component';
 import { CategoryTreeComponent } from './components/category-tree/category-tree.component';
 import { CategoryNodeComponent } from './components/category-node/category-node.component';
-import { CategoryDeleteComponent } from './category-delete/category-delete.component';
 import { AuthModule } from '../../auth/auth.module';
 import { AddCategoryModalComponent } from './components/modals/add-category-modal/add-category-modal.component';
+import { CategoryViewComponent } from './category-view/category-view.component';
+import { DataTablesModule } from 'angular-datatables';
+import { DeleteCategoryModalComponent } from './components/modals/delete-category-modal/delete-category-modal.component';
 
 @NgModule({
-  declarations: [CategoryComponent, CategoryAddComponent, CategoryFormComponent, CategoryEditComponent,
-    CategoryTreeComponent, CategoryNodeComponent, AddCategoryModalComponent, CategoryDeleteComponent],
-  imports: [
-    CommonModule,
-    CategoryRoutingModule,
-    DndModule,
-    ReactiveFormsModule,
-    LayoutModule,
-    NgSelectModule,
-    FontAwesomeModule,
-    FormsModule,
-    IconPickerModule,
-    AuthModule
-  ],
-  entryComponents: [AddCategoryModalComponent, CategoryDeleteComponent]
+  declarations: [CategoryComponent, CategoryAddComponent, CategoryFormComponent, CategoryEditComponent, CategoryTreeComponent, CategoryNodeComponent, AddCategoryModalComponent, DeleteCategoryModalComponent, CategoryViewComponent],
+    imports: [
+        CommonModule,
+        CategoryRoutingModule,
+        DndModule,
+        ReactiveFormsModule,
+        LayoutModule,
+        NgSelectModule,
+        FontAwesomeModule,
+        FormsModule,
+        IconPickerModule,
+        AuthModule,
+        DataTablesModule
+    ],
+  entryComponents: [AddCategoryModalComponent, DeleteCategoryModalComponent]
 })
 export class CategoryModule {
 }

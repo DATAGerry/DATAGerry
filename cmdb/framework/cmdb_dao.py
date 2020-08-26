@@ -15,6 +15,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+from typing import Union
+
+from cmdb.framework.utils import Model, Collection
 
 try:
     from cmdb.utils.error import CMDBError
@@ -28,7 +31,7 @@ class CmdbDAO:
     """The data access object is the basic presentation if objects and
     their necessary dependent classes are to be stored in the database.
 
-    Attributes;
+    Attributes:
         DAO_ASCENDING (int): dao sort order ascending
         DAO_DESCENDING (int): dao sort order descending
         COLLECTION (str): name of the database table - should always be overwritten
@@ -44,7 +47,9 @@ class CmdbDAO:
 
     DAO_ASCENDING = 1
     DAO_DESCENDING = -1
-    COLLECTION = 'framework.*'
+    COLLECTION: Union[str, Collection] = 'framework.*'
+    MODEL: Model = ''
+    SCHEMA: dict = {}
     __SUPER_INIT_KEYS = [
         'public_id'
     ]

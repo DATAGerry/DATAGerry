@@ -19,7 +19,8 @@ import logging
 
 from flask import abort, jsonify, current_app
 from cmdb.utils.helpers import load_class, get_module_classes
-from cmdb.interface.route_utils import make_response, RootBlueprint, login_required
+from cmdb.interface.route_utils import make_response, login_required
+from cmdb.interface.blueprint import RootBlueprint
 
 with current_app.app_context():
     exportd_manager = current_app.exportd_manager

@@ -37,7 +37,7 @@ class TokenValidator:
     def decode_token(self, token: (JWT, str, dict)):
         try:
             decoded_token = jwt.decode(s=token, key=self.key_holder.get_public_key())
-        except BadSignatureError as err:
+        except (BadSignatureError, Exception) as err:
             raise ValidationError(err)
         return decoded_token
 

@@ -29,7 +29,7 @@ class Builder:
     def clear(self):
         raise NotImplementedError()
 
-    def build(self, params: dict):
+    def build(self, *args, **kwargs):
         raise NotImplementedError()
 
     # Logical Query Operators
@@ -137,6 +137,13 @@ class Builder:
     def facet_(cls, stages: dict) -> dict:
         """Processes multiple aggregation pipelines within a single stage on the same set of input documents."""
         return {'$facet': stages}
+
+    @classmethod
+    def sort_(cls, sort: str, order: int) -> dict:
+        """Sorts all input documents and returns them to the pipeline in sorted order."""
+        if order != 1 and order != -1:
+            raise ValueError('Order value must be 1 (ascending) or -1 (descending)')
+        return {'$sort': {sort: order}}
 
     # Type Expression Operators
     @classmethod

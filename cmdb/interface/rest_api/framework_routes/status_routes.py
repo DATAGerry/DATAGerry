@@ -24,7 +24,8 @@ from bson import json_util
 
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerUpdateError
 from cmdb.framework.cmdb_status import CmdbStatus
-from cmdb.interface.route_utils import RootBlueprint, make_response
+from cmdb.interface.route_utils import make_response
+from cmdb.interface.blueprint import RootBlueprint
 
 with current_app.app_context():
     object_manager = current_app.object_manager

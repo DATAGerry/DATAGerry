@@ -18,19 +18,30 @@
 
 import { Injectable } from '@angular/core';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { ApiCallService, ApiService, httpObserveOptions } from '../../services/api-call.service';
+import { ApiCallService, ApiService, resp } from '../../services/api-call.service';
 import { ValidatorService } from '../../services/validator.service';
-import { CmdbCategory, CmdbCategoryTree } from '../models/cmdb-category';
+import { CmdbCategory, CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb-category';
 import { FormControl } from '@angular/forms';
 import { Observable, timer } from 'rxjs';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+import {
+  APIDeleteSingleResponse,
+  APIGetMultiResponse,
+  APIGetSingleResponse,
+  APIInsertSingleResponse,
+  APIUpdateSingleResponse
+} from '../../services/models/api-response';
 
 export const checkCategoryExistsValidator = (categoryService: CategoryService, time: number = 500) => {
   return (control: FormControl) => {
     return timer(time).pipe(switchMap(() => {
       return categoryService.getCategoryByName(control.value).pipe(
         map((response) => {
-          return { categoryExists: true };
+          if (response === null) {
+            return null;
+          } else {
+            return { categoryExists: true };
+          }
         }),
         catchError(() => {
           return new Promise(resolve => {
@@ -48,25 +59,67 @@ export const checkCategoryExistsValidator = (categoryService: CategoryService, t
 export class CategoryService<T = CmdbCategory> implements ApiService {
 
   /**
-   * Fixed URL extension
    * Nested url path value inside the REST structure
    */
-  public servicePrefix: string = 'category';
+  public servicePrefix: string = 'categories';
+
+  private httpOptions = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    }),
+    params: new HttpParams(),
+    observe: resp
+  };
 
   constructor(private api: ApiCallService, private client: HttpClient) {
-    // TODO: Remove incorrect usage of client structure in all framework services
+
+  }
+
+  public getCategoryIteration(...options): Observable<APIGetMultiResponse<T>> {
+    let params: HttpParams = new HttpParams();
+    for (const option of options) {
+      for (const key of Object.keys(option)) {
+        params = params.append(key, option[key]);
+      }
+    }
+    const httpObserveOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      }),
+      params,
+      observe: resp
+    };
+    return this.api.callGet<T[]>(this.servicePrefix + '/', this.client, httpObserveOptions).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  /**
+   * Get all categories as a list
+   */
+  public getCategoryList(): Observable<T[]> {
+    return this.api.callGet<T[]>(this.servicePrefix + '/?limit=1000').pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body.results;
+      })
+    );
   }
 
   /**
    * Get a category by id
    */
-  public getCategory(publicID: number): Observable<T | null> {
+  public getCategory(publicID: number): Observable<T> | undefined {
     return this.api.callGet<T>(this.servicePrefix + '/' + publicID).pipe(
-      map((apiResponse: HttpResponse<T>) => {
+      map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => {
         if (apiResponse.status === 204) {
-          return null;
+          return undefined;
         }
-        return apiResponse.body;
+        return apiResponse.body.result;
       })
     );
   }
@@ -76,15 +129,18 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * @param category name or label of the category
    */
   public getCategoryByName(category: string): Observable<T | null> {
-    return this.api.callGet<T>(this.servicePrefix + '/' + category).pipe(
-      map((apiResponse: HttpResponse<T>) => {
-        if (apiResponse.status === 204) {
+    const params = encodeURIComponent(`{"name": "${ category }"}`);
+    return this.api.callGet<T>(this.servicePrefix + `/?filter=` + params, this.client).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        if (apiResponse.body.count === 0) {
           return null;
+        } else {
+          return apiResponse.body.results[0];
         }
-        return apiResponse.body;
       })
     );
   }
+
 
   /**
    * Get a list of categories by a regex requirement
@@ -103,60 +159,53 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
     );
   }
 
-  /**
-   * Get all categories as a list
-   */
-  public getCategoryList(order: string = null): Observable<T[]> {
-    const options = httpObserveOptions;
-    options.params = {order};
-    return this.api.callGet<T[]>(this.servicePrefix + '/', this.client, options).pipe(
-      map((apiResponse: HttpResponse<T[]>) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
-  }
 
   /**
    * Get the complete category tree with
    * nested structure and type instances
    */
-  public getCategoryTree(): Observable<CmdbCategoryTree | null> {
-    return this.api.callGet<CmdbCategoryTree>(this.servicePrefix + '/tree/').pipe(
-      map((apiResponse: HttpResponse<CmdbCategoryTree>) => {
+  public getCategoryTree(): Observable<CmdbCategoryTree> {
+    const httpObserveOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      }),
+      params: new HttpParams().append('view', 'tree'),
+      observe: resp
+    };
+    return this.api.callGet<CmdbCategoryTree>(`${ this.servicePrefix }/`, this.client, httpObserveOptions).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<CmdbCategoryNode>>) => {
         if (apiResponse.status === 204) {
-          return null;
+          return [];
         }
-        return apiResponse.body;
+        return apiResponse.body.results as CmdbCategoryTree;
       })
     );
   }
 
   /**
    * Add a new unique category into the database
-   * @param category raw instance of a CmdbCategory
+   * @param category raw instance of a CategoryDAO
    */
   public postCategory(category: T): Observable<T> {
     return this.api.callPost<CmdbCategory>(this.servicePrefix + '/', category).pipe(
-      map((apiResponse: HttpResponse<any>) => {
+      map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => {
         if (apiResponse.status === 204) {
-          return [];
+          return null;
         }
-        return apiResponse.body;
+        return apiResponse.body.raw;
       })
     );
   }
 
-  /**
-   * Update a existing category
+  /**APIUpdateSingleResponse
+   * Update a existing categoryL
    * @param category modified category instance
    */
   public updateCategory(category: T): Observable<T> {
-    return this.api.callPut<number>(this.servicePrefix + '/', category).pipe(
-      map((apiResponse: HttpResponse<T>) => {
-        return apiResponse.body;
+    // @ts-ignore
+    return this.api.callPut<number>(this.servicePrefix + '/' + category.public_id, category).pipe(
+      map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
+        return apiResponse.body.result;
       })
     );
   }
@@ -168,8 +217,8 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    */
   public deleteCategory(publicID: number): Observable<number> {
     return this.api.callDelete<number>(this.servicePrefix + '/' + publicID).pipe(
-      map((apiResponse: HttpResponse<number>) => {
-        return apiResponse.body;
+      map((apiResponse: HttpResponse<APIDeleteSingleResponse<CmdbCategory>>) => {
+        return apiResponse.body.deleted_entry.public_id;
       })
     );
   }

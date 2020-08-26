@@ -104,6 +104,8 @@ def create_rest_api(event_queue):
                       log_manager=log_manager, user_manager=user_manager,
                       security_manager=security_manager)
 
+    app.url_map.strict_slashes = True
+
     # Import App Extensions
     from flask_cors import CORS
     CORS(app)
@@ -156,19 +158,20 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.external_systems_routes import external_system
     from cmdb.interface.rest_api.docapi_routes import docapi_blueprint
     from cmdb.interface.rest_api.media_library_routes.media_file_routes import media_file_blueprint
-    from cmdb.interface.rest_api.special_routers import special_blueprint
+    from cmdb.interface.rest_api.special_routes import special_blueprint
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(object_blueprint)
     app.register_blueprint(type_blueprint)
     app.register_blueprint(connection_routes)
-    app.register_blueprint(categories_blueprint)
+    app.register_multi_blueprint(categories_blueprint, multi_prefix=['/category', '/categories'])
     app.register_blueprint(user_blueprint)
     app.register_blueprint(group_blueprint)
     app.register_blueprint(right_blueprint)
     app.register_blueprint(search_blueprint)
     app.register_blueprint(file_blueprint)
     app.register_blueprint(type_export_blueprint)
+
     app.register_blueprint(status_blueprint)
     app.register_blueprint(collection_blueprint)
     app.register_blueprint(log_blueprint)

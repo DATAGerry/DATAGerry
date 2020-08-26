@@ -23,8 +23,9 @@ from flask import current_app, request
 from cmdb.framework import CmdbCollectionTemplate
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.interface.route_utils import RootBlueprint, make_response, NestedBlueprint, login_required, \
+from cmdb.interface.route_utils import make_response, login_required, \
     insert_request_user, right_required
+from cmdb.interface.blueprint import RootBlueprint, NestedBlueprint
 from cmdb.user_management import User
 
 with current_app.app_context():

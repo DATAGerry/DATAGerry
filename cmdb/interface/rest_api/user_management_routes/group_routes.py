@@ -20,8 +20,9 @@ import json
 from bson import json_util
 from flask import request, current_app
 
-from cmdb.interface.route_utils import make_response, RootBlueprint, abort, login_required, insert_request_user, \
+from cmdb.interface.route_utils import make_response, abort, login_required, insert_request_user, \
     right_required
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import User
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user_manager import UserManager, UserManagerInsertError, UserManagerGetError, \

@@ -22,8 +22,9 @@ from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerDeleteError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint
-from cmdb.interface.route_utils import make_response, NestedBlueprint, insert_request_user, login_required, \
+from cmdb.interface.route_utils import make_response, insert_request_user, login_required, \
     right_required
+from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.user_management import User
 
 with current_app.app_context():

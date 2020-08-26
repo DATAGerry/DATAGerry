@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from cmdb.framework import CmdbCategory, CmdbType
+from cmdb.framework import CategoryDAO, CmdbType
 from cmdb.framework.cmdb_errors import ObjectManagerInsertError
 from cmdb.search.query.query_builder import QueryBuilder
 from cmdb.updater.updater import Updater
@@ -24,8 +24,8 @@ class Update20200512(Updater):
         raise NotImplementedError
 
     def start_update(self):
-        collection = CmdbCategory.COLLECTION
-        new_categories: List[CmdbCategory] = []
+        collection = CategoryDAO.COLLECTION
+        new_categories: List[CategoryDAO] = []
         raw_categories_old_structure: List[dict] = self.database_manager.find_all(collection=collection,
                                                                                   filter={})
         for idx, old_raw_category in enumerate(raw_categories_old_structure):
@@ -38,9 +38,9 @@ class Update20200512(Updater):
         raw_sub_categories_old_structure: List[dict] = self.database_manager.find_all(collection=collection,
                                                                                       filter=qb.query)"""
 
-        self.database_manager.delete_collection(collection=CmdbCategory.COLLECTION)
-        self.database_manager.create_collection(CmdbCategory.COLLECTION)
-        self.database_manager.create_indexes(CmdbCategory.COLLECTION, CmdbCategory.get_index_keys())
+        self.database_manager.delete_collection(collection=CategoryDAO.COLLECTION)
+        self.database_manager.create_collection(CategoryDAO.COLLECTION)
+        self.database_manager.create_indexes(CategoryDAO.COLLECTION, CategoryDAO.get_index_keys())
         for category in new_categories:
             try:
                 self.object_manager.insert_category(category)
@@ -49,7 +49,7 @@ class Update20200512(Updater):
         self.__clear_up_types()
         super(Update20200512, self).increase_updater_version(20200512)
 
-    def __convert_category_to_new_structure(self, old_raw_category: dict, index: int) -> CmdbCategory:
+    def __convert_category_to_new_structure(self, old_raw_category: dict, index: int) -> CategoryDAO:
         """Converts a category from old < 20200512 structure to new format """
         old_raw_category['meta'] = {
             'icon': old_raw_category.get('icon', None),
@@ -60,7 +60,7 @@ class Update20200512(Updater):
             parent = None
 
         old_raw_category['parent'] = parent
-        category = CmdbCategory.from_data(old_raw_category)
+        category = CategoryDAO.from_data(old_raw_category)
         category.types = self.__get_types_in_category(old_raw_category.get('public_id'))
         return category
 

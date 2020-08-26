@@ -18,7 +18,8 @@ import logging
 
 from flask import abort, request, current_app, Response
 from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError
-from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user, login_required, right_required
+from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import User
 from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import get_element_from_data_request, \
     get_file_in_request, generate_metadata_filter, recursive_delete_filter

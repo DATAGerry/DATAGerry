@@ -18,7 +18,7 @@
 
 import { Component, Input } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { CmdbCategory } from '../../models/cmdb-category';
+import { CmdbCategory } from '../../../../models/cmdb-category';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 
 @Component({
@@ -67,7 +67,7 @@ import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from
     </div>
   `
 })
-export class CategoryDeleteComponent {
+export class DeleteCategoryModalComponent {
 
   @Input() public category: CmdbCategory;
   public deleteCategoryModalForm: FormGroup;

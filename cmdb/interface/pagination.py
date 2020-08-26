@@ -1,0 +1,154 @@
+# DATAGERRY - OpenSource Enterprise CMDB
+# Copyright (C) 2019 NETHINKS GmbH
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+from typing import Any
+from urllib import parse
+
+
+class APIPager:
+    """
+    Pager for api responses.
+    Shows data of the current page and meta data of other pages.
+    """
+
+    __slots__ = 'page', 'page_size', 'total_pages'
+
+    def __init__(self, page: int, page_size: int, total_pages: int = None):
+        """
+        Constructor of the APIPager.
+
+        Args:
+            page: Current page number.
+            page_size: Number of elements on this page.
+            total_pages: Total number of pages for this query.
+        """
+        self.page = page
+        self.page_size = page_size
+        self.total_pages = total_pages
+
+    def to_dict(self) -> dict:
+        return {
+            'page': self.page,
+            'page_size': self.page_size,
+            'total_pages': self.total_pages,
+        }
+
+
+class APIPagination:
+    """
+    Pagination data for rest api calls.
+    Reference to RFC 5988 and should be used as a cursor.
+    """
+
+    def __init__(self, current: str, first, prev=None, next_=None, last=None):
+        self.current = current
+        self.first = first
+        self.prev = prev
+        self.next = next_
+        self.last = last
+
+    @staticmethod
+    def __update_query(query: str, key: str, value: Any) -> str:
+        """
+        Update any query string parameter
+
+        Args:
+            query: query string
+            key: key which will be changes
+            value: new value of the parameter
+
+        Returns:
+            encoded string url
+        """
+        url_dict = dict(parse.parse_qsl(query))
+        url_dict.update(**{key: value})
+        return parse.urlencode(url_dict)
+
+    @staticmethod
+    def __set_page(query: str, page: int):
+        """
+        Set the query page parameter
+
+        Args:
+            query: query string
+            page: page value
+
+        Returns:
+            encoded string url with updated page value
+        """
+        return APIPagination.__update_query(query, 'page', page)
+
+    @staticmethod
+    def __first_url(parsed_url: parse.ParseResult, first_page: int = 1) -> parse.ParseResult:
+        """Set the page parameter of a url to the first page"""
+        query = parsed_url.query
+        new_query = APIPagination.__set_page(query, first_page)
+        return parsed_url._replace(query=new_query)
+
+    @staticmethod
+    def __last_url(parsed_url: parse.ParseResult, total_pages: int) -> parse.ParseResult:
+        """Set the page parameter of a url to the last page"""
+        query = parsed_url.query
+        new_query = APIPagination.__set_page(query, total_pages)
+        return parsed_url._replace(query=new_query)
+
+    @staticmethod
+    def __pre_url(parsed_url: parse.ParseResult, page: int):
+        """Set the page parameter of a url to the previous page"""
+        query = parsed_url.query
+        if page == 1:
+            new_query = APIPagination.__set_page(query, page)
+        else:
+            new_query = APIPagination.__set_page(query, page - 1)
+        return parsed_url._replace(query=new_query)
+
+    @staticmethod
+    def __next_url(parsed_url: parse.ParseResult, page: int, total_pages: int):
+        """Set the page parameter of a url to the last page"""
+        query = parsed_url.query
+        if page == total_pages:
+            new_query = APIPagination.__set_page(query, page)
+        else:
+            new_query = APIPagination.__set_page(query, page + 1)
+        return parsed_url._replace(query=new_query)
+
+    @classmethod
+    def create(cls, url: str, page: int, total_pages: int):
+        """
+        Create a APIPagination from the url and the pager data
+
+        Args:
+            url: Full url path
+            page: current page number
+            total_pages: Total number of pages
+
+        Returns:
+            Instance of a APIPagination
+        """
+        parsed_url: parse.ParseResult = parse.urlparse(url)
+        first_url = parse.urlunparse(cls.__first_url(parsed_url))
+        last_url = parse.urlunparse(cls.__last_url(parsed_url, total_pages))
+        prev_url = parse.urlunparse(cls.__pre_url(parsed_url, page))
+        next_url = parse.urlunparse(cls.__next_url(parsed_url, page, total_pages))
+        return cls(current=url, first=first_url, prev=prev_url, next_=next_url, last=last_url)
+
+    def to_dict(self) -> dict:
+        return {
+            'current': self.current,
+            'first': self.first,
+            'prev': self.prev,
+            'next': self.next,
+            'last': self.last
+        }

@@ -25,7 +25,8 @@ from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagerGetErr
     ExportdJobManagerInsertError, ExportdJobManagerUpdateError, ExportdJobManagerDeleteError
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob, ExecuteState
-from cmdb.interface.route_utils import make_response, RootBlueprint, login_required, insert_request_user, right_required
+from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.user_management import User
 

@@ -86,7 +86,7 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.categoriesSubscription = this.categoryService.getCategoryList('tree').subscribe((categories: CmdbCategory[]) => {
+    this.categoriesSubscription = this.categoryService.getCategoryList().subscribe((categories: CmdbCategory[]) => {
       this.categories = categories;
     });
     if (this.mode === CmdbMode.Create) {
@@ -115,9 +115,9 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
         let categoryID = null;
         newCategory.name = result.get('name').value;
         newCategory.label = result.get('label').value;
-        this.categoryService.postCategory(newCategory).subscribe(newID => {
-            this.basicCategoryForm.get('category_id').setValue(newID);
-            categoryID = newID;
+        this.categoryService.postCategory(newCategory).subscribe((raw: CmdbCategory) => {
+            this.basicCategoryForm.get('category_id').setValue(raw.public_id);
+            categoryID = raw.public_id;
           }, error => {
           },
           () => {

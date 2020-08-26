@@ -17,7 +17,8 @@
 import logging
 
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.interface.route_utils import make_response, RootBlueprint, login_required
+from cmdb.interface.route_utils import make_response, login_required
+from cmdb.interface.blueprint import RootBlueprint
 
 from flask import request, abort, current_app
 
@@ -39,7 +40,7 @@ special_blueprint = RootBlueprint('special_rest', __name__, url_prefix='/special
 def get_intro_starter():
     try:
         steps = []
-        categories_total = len(object_manager.get_all_categories())
+        categories_total = len(object_manager.get_categories())
         types_total = object_manager.count_types()
         objects_total = object_manager.count_objects()
 

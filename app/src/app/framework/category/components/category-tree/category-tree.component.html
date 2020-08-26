@@ -3,8 +3,8 @@
     <li class="drop-zone p-2" dndPlaceholderRef data-content=" "></li>
     <li *ngFor="let node of tree; let i = index" [dndDraggable]="node" dndEffectAllowed="move"
         (dndMoved)="onDragged(node, tree, 'move')">
-      <cmdb-category-node [mode]="mode" [node]="node">{{node.category.label}}</cmdb-category-node>
-      <cmdb-category-tree [mode]="mode" [tree]="node.children"></cmdb-category-tree>
+      <cmdb-category-node [mode]="mode" [node]="node" (change)="change.emit($event)">{{node.category.label}}</cmdb-category-node>
+      <cmdb-category-tree [mode]="mode" [tree]="node.children" (change)="change.emit($event)"></cmdb-category-tree>
     </li>
   </ul>
   <ng-template #view>

@@ -20,7 +20,8 @@ import json
 
 from flask import abort, request, jsonify, current_app, Response
 from cmdb.utils.helpers import load_class, get_module_classes
-from cmdb.interface.route_utils import make_response, RootBlueprint, login_required, insert_request_user, right_required
+from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.docapi.docapi_base import DocApiManager
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate, DocapiTemplateType
 from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManagerGetError, \
