@@ -20,7 +20,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbCategory } from '../../../../models/cmdb-category';
-import { CategoryService, checkCategoryExistsValidator} from '../../../../services/category.service';
+import { CategoryService, checkCategoryExistsValidator } from '../../../../services/category.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
@@ -37,25 +37,26 @@ export class AddCategoryModalComponent implements OnInit {
               private categoryService: CategoryService) {
     this.catAddForm = new FormGroup({
       name: new FormControl('', Validators.required),
-      label: new FormControl('', Validators.required)
+      label: new FormControl('')
     });
   }
 
   public ngOnInit(): void {
-      this.catAddForm.get('name').setAsyncValidators(checkCategoryExistsValidator(this.categoryService));
-      this.catAddForm.get('label').valueChanges.subscribe(value => {
-        value = value == null ? '' : value;
-        this.catAddForm.get('name').setValue(value.replace(/ /g, '-').toLowerCase());
-        const newValue = this.catAddForm.get('name').value;
-        this.catAddForm.get('name').setValue(newValue.replace(/[^a-z0-9 \-]/gi, '').toLowerCase());
-        this.catAddForm.get('name').markAsDirty({onlySelf: true});
-        this.catAddForm.get('name').markAsTouched({onlySelf: true});
-      });
-      this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
-          this.spinner.show();
-          this.categoryList = list;
-        }, error => {},
-        () => this.spinner.hide());
+    this.name.setAsyncValidators(checkCategoryExistsValidator(this.categoryService));
+    this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
+        this.spinner.show();
+        this.categoryList = list;
+      }, error => {
+      },
+      () => this.spinner.hide());
+  }
+
+  public get name(): FormControl {
+    return this.catAddForm.get('name') as FormControl;
+  }
+
+  public get label(): FormControl {
+    return this.catAddForm.get('label') as FormControl;
   }
 
 }

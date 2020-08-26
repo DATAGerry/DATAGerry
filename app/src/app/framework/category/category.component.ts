@@ -163,7 +163,7 @@ export class CategoryComponent implements OnInit, AfterViewInit, OnDestroy {
     // tslint:disable-next-line:forin
     for (let i = 0; i < root.length; i++) {
       const node = root[i];
-      node.category.meta.order = i;
+      node.category.meta.order = i + 1;
       if (parentNode) {
         node.category.parent = parentNode.category.public_id;
       }
