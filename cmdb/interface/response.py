@@ -303,6 +303,7 @@ class UpdateSingleResponse(BaseAPIResponse):
             Instance of BaseResponse with http status code 202
         """
         response = make_api_response(self.export(), 202)
+        response.headers['Location'] = f'{self.url}'
         return response
 
     def export(self, text: str = 'json', *args, **kwargs) -> dict:
