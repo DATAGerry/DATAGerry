@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BehaviorSubject, forkJoin, Observable, ReplaySubject, Subject } from 'rxjs';
 import { CmdbCategory, CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb-category';
 import { CategoryService } from '../services/category.service';
@@ -26,6 +26,7 @@ import { SidebarService } from '../../layout/services/sidebar.service';
 import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
+import { DataTableDirective } from 'angular-datatables';
 
 @Component({
   selector: 'cmdb-category',
@@ -60,8 +61,12 @@ export class CategoryComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   private displayModeSubject: BehaviorSubject<CmdbMode> = new BehaviorSubject<CmdbMode>(CmdbMode.View);
 
+  /**
+   * Datatable datas
+   */
   public dtOptions: DataTables.Settings = {};
   public dtTrigger: Subject<void> = new Subject();
+  @ViewChild(DataTableDirective, { static: false }) dtElement: DataTableDirective;
 
   constructor(private categoryService: CategoryService, private route: ActivatedRoute, private sidebarService: SidebarService) {
     this.categories = [];
@@ -162,12 +167,28 @@ export class CategoryComponent implements OnInit, AfterViewInit, OnDestroy {
       if (parentNode) {
         node.category.parent = parentNode.category.public_id;
       }
+      if (!parentNode && node.category.parent !== null) {
+        node.category.parent = null;
+      }
       observers.push(this.categoryService.updateCategory(node.category));
       if (node.children.length > 0) {
         observers = observers.concat(this.saveTree(node.children, node));
       }
     }
     return observers;
+  }
+
+  public onTreeChange(event: any): void {
+    this.sidebarService.reload();
+    this.ngOnInit();
+    this.rerender();
+  }
+
+  public rerender(): void {
+    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+      dtInstance.destroy();
+      this.dtTrigger.next();
+    });
   }
 
 }

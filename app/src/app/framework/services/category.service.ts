@@ -132,7 +132,6 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
     const params = encodeURIComponent(`{"name": "${ category }"}`);
     return this.api.callGet<T>(this.servicePrefix + `/?filter=` + params, this.client).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
-        console.log(apiResponse.body);
         if (apiResponse.body.count === 0) {
           return null;
         } else {
@@ -219,7 +218,7 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
   public deleteCategory(publicID: number): Observable<number> {
     return this.api.callDelete<number>(this.servicePrefix + '/' + publicID).pipe(
       map((apiResponse: HttpResponse<APIDeleteSingleResponse<CmdbCategory>>) => {
-        return apiResponse.body.raw.public_id;
+        return apiResponse.body.deleted_entry.public_id;
       })
     );
   }

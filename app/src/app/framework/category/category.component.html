@@ -28,7 +28,7 @@
       </div>
       <div class="card-body">
         <div class="tree-view">
-          <cmdb-category-tree [mode]="mode" [tree]="categoryTree"></cmdb-category-tree>
+          <cmdb-category-tree [mode]="mode" [tree]="categoryTree" (change)="onTreeChange($event)"></cmdb-category-tree>
         </div>
       </div>
       <div *ngIf="mode == 2;" class="card-footer">

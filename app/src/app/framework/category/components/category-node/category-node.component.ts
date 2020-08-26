@@ -16,15 +16,14 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { CmdbCategory, CmdbCategoryNode } from '../../../models/cmdb-category';
 import { CmdbMode } from '../../../modes.enum';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { CategoryDeleteComponent } from '../../category-delete/category-delete.component';
 import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap/modal/modal-ref';
 import { CategoryService } from '../../../services/category.service';
 import { Router } from '@angular/router';
-import { SidebarService } from '../../../../layout/services/sidebar.service';
+import { DeleteCategoryModalComponent } from '../modals/delete-category-modal/delete-category-modal.component';
 
 @Component({
   selector: 'cmdb-category-node',
@@ -43,20 +42,24 @@ export class CategoryNodeComponent implements OnDestroy {
    */
   @Input() public node: CmdbCategoryNode;
 
+  /**
+   * Node change emitter
+   */
+  @Output() public change: EventEmitter<{ type: string, value: any }>;
+
   private deleteRef: NgbModalRef;
 
-  public constructor(private deleteModal: NgbModal, private router: Router, private categoryService: CategoryService,
-                     private sidebarService: SidebarService) {
+  public constructor(private deleteModal: NgbModal, private router: Router, private categoryService: CategoryService) {
+    this.change = new EventEmitter<{ type: string, value: any }>();
   }
 
   public onDelete(category: CmdbCategory) {
-    this.deleteRef = this.deleteModal.open(CategoryDeleteComponent);
+    this.deleteRef = this.deleteModal.open(DeleteCategoryModalComponent);
     this.deleteRef.componentInstance.category = category;
     this.deleteRef.result.then((result) => {
       if (result === 'delete') {
-        this.categoryService.deleteCategory(category.public_id).subscribe(() => {
-          this.sidebarService.reload();
-          this.router.navigate(['/', 'framework', 'category']);
+        this.categoryService.deleteCategory(category.public_id).subscribe((id: number) => {
+          this.change.emit({ type: 'delete', value: 'id' });
         });
       }
     });
