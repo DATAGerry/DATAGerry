@@ -261,7 +261,7 @@ class InsertSingleResponse(BaseAPIResponse):
             Instance of BaseResponse with http status code 201.
         """
         response = make_api_response(self.export(), 201)
-        response.headers['location'] = f'{self.url}/{self.result_id}'
+        response.headers['Location'] = f'{self.url}{self.result_id}'
         return response
 
     def export(self, text: str = 'json', *args, **kwargs) -> dict:
