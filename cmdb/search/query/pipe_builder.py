@@ -121,12 +121,10 @@ class PipelineBuilder(Builder):
         category_params = [_ for _ in params if _.search_form == 'category']
         for param in category_params:
             if param.settings and len(param.settings.get('categories', [])) > 0:
-                type_list = obj_manager.get_types_by(**self.in_('category_id', param.settings['categories']))
-                type_ids = []
-                for curr_type in type_list:
-                    type_ids.append(curr_type.get_public_id())
-                type_id_in = self.in_('type_id', type_ids)
-                self.add_pipe(self.match_(type_id_in))
+                categories = obj_manager.get_categories_by(**self.regex_('label', param.search_text))
+                for curr_category in categories:
+                    type_id_in = self.in_('type_id', curr_category.types)
+                    self.add_pipe(self.match_(type_id_in))
 
         # public builds
         id_params = [_ for _ in params if _.search_form == 'publicID']
