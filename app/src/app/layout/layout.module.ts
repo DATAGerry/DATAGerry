@@ -63,6 +63,8 @@ import { CategoryTreeFilterPipe } from './pipes/categoryTreeFilter.pipe';
 import { TypeFilterPipe } from './pipes/typeFilter.pipe';
 import { AddAttachmentsModalComponent } from './helpers/modals/add-attachments-modal/add-attachments-modal.component';
 import { GeneralModalComponent } from './helpers/modals/general-modal/general-modal.component';
+import { RenderModule } from '../framework/render/render.module';
+import { ObjectPreviewModalComponent} from '../framework/object/modals/object-preview-modal/object-preview-modal.component';
 
 export const LAYOUT_COMPONENT_ROUTES: Routes = [
   {
@@ -121,7 +123,8 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     CategoryTreeFilterPipe,
     TypeFilterPipe,
     AddAttachmentsModalComponent,
-    GeneralModalComponent
+    GeneralModalComponent,
+    ObjectPreviewModalComponent
   ],
   exports: [
     NgxSpinnerComponent,
@@ -160,7 +163,8 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     FontAwesomeModule,
     IconPickerModule,
     ToastModule,
-    AuthModule
+    AuthModule,
+    RenderModule
   ],
   providers: [
     BreadcrumbService,
@@ -170,7 +174,8 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     GeneralModalComponent,
     AddAttachmentsModalComponent,
     IntroComponent,
-    StepByStepIntroComponent
+    StepByStepIntroComponent,
+    ObjectPreviewModalComponent
   ]
 })
 export class LayoutModule {

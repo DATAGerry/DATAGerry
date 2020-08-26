@@ -1,0 +1,9 @@
+<ng-container *ngFor="let action of data">
+  <ng-container *ngIf="action.name === 'preview' && action.active !== false">
+    <span *permissionLink="['base.framework.object.view']"
+       class="{{action.classValue}}"
+       (click)="preview()">
+      <fa-icon [icon]="['far', action.fontIcon]"></fa-icon>
+    </span>
+  </ng-container>
+</ng-container>
