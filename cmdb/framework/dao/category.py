@@ -53,12 +53,17 @@ class CategoryDAO(CmdbDAO):
             'type': 'dict',
             'schema': {
                 'icon': {
-                    'type': 'string'
+                    'type': 'string',
+                    'empty': True
                 },
                 'order': {
                     'type': 'integer',
                     'nullable': True
                 }
+            },
+            'default': {
+                'icon': '',
+                'order': None,
             }
         }
     }
@@ -131,7 +136,6 @@ class CategoryDAO(CmdbDAO):
             'meta': {
                 'icon': meta.get_icon(),
                 'order': meta.get_order()
-
             },
             'parent': instance.get_parent(),
             'types': instance.get_types()
@@ -206,8 +210,6 @@ class CategoryTree:
             """Get the order value from the main category inside this node.
             Should be equal to __CategoryMeta -> order
             """
-            if not self.node_order:
-                self.node_order = -1
             return self.node_order
 
         def flatten(self) -> List[CategoryDAO]:
@@ -225,7 +227,8 @@ class CategoryTree:
         self._categories = categories
         self._types = types
         self._tree: List[CategoryTree.CategoryNode] = sorted(self.__create_tree(self._categories, types=self._types),
-                                                             key=lambda node: node.get_order(), reverse=False)
+                                                             key=lambda node: (
+                                                             node.get_order() is None, node.get_order()))
 
     def __len__(self) -> int:
         """Get length of tree - this means the number of root categories"""
