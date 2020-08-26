@@ -32,6 +32,9 @@ class TypeDAO(CmdbDAO):
     """
     COLLECTION: Collection = "framework.types"
     MODEL: Model = 'Type'
+
+    DEFAULT_VERSION: str = '1.0.0'
+
     SCHEMA: dict = {
         'public_id': {
             'type': 'integer'
@@ -45,22 +48,45 @@ class TypeDAO(CmdbDAO):
             'type': 'string',
             'required': False
         },
+        'author_id': {
+            'type': 'integer',
+            'required': True
+        },
+        'active': {
+            'type': 'boolean',
+            'required': False,
+            'default': True
+        },
+        'fields': {
+            'type': 'list',
+            'default': []
+        },
+        'version': {
+            'type': 'string',
+            'default': DEFAULT_VERSION
+        },
+        'description': {
+            'type': 'string'
+        },
+        'clean_db': {
+            'type': 'boolean',
+            'required': False,
+            'default': True
+        }
     }
 
     INDEX_KEYS = [
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
-    DEFAULT_VERSION: str = '1.0.0'
-
-    def __init__(self, public_id: int, name: str, active: bool, author_id: int, creation_time: datetime,
-                 render_meta: dict, fields: list = None, version: str = None, label: str = None, clean_db: bool = None,
-                 description: str = None):
+    def __init__(self, public_id: int, name: str, author_id: int, creation_time: datetime, render_meta: dict,
+                 active: bool = True, fields: list = None, version: str = None, label: str = None,
+                 clean_db: bool = None, description: str = None):
         self.name = name
         self.label = label or self.name.title()
         self.description = description or ''
         self.version = version or TypeDAO.DEFAULT_VERSION
-        self.active = active
+        self.active: bool = active
         self.clean_db = clean_db
         self.author_id = author_id
         self.creation_time = creation_time
@@ -74,7 +100,7 @@ class TypeDAO(CmdbDAO):
         return cls(
             public_id=data.get('public_id'),
             name=data.get('name'),
-            active=data.get('active'),
+            active=data.get('active', True),
             author_id=data.get('author_id'),
             creation_time=data.get('creation_time'),
             label=data.get('label', None),
@@ -91,16 +117,16 @@ class TypeDAO(CmdbDAO):
         """Convert a type instance to json conform data"""
         return {
             'public_id': instance.get_public_id(),
-            'name': instance.get_name(),
+            'name': instance.name,
             'active': instance.active,
             'author_id': instance.author_id,
             'creation_time': instance.creation_time,
+            'label': instance.label,
+            'version': instance.version,
+            'description': instance.description,
             'render_meta': instance.render_meta,
             'fields': instance.fields,
-            'version': instance.version,
-            'label': instance.get_label(),
             'clean_db': instance.clean_db,
-            'description': instance.get_description()
         }
 
     def get_name(self) -> str:
@@ -112,10 +138,6 @@ class TypeDAO(CmdbDAO):
         if not self.label:
             self.label = self.name.title()
         return self.label
-
-    def get_description(self) -> str:
-        """Get the description"""
-        return self.description
 
     def get_externals(self):
         """Get the render meta values of externals"""
@@ -174,7 +196,7 @@ class TypeDAO(CmdbDAO):
             except (RequiredInitKeyNotFoundError, CMDBError) as e:
                 raise FieldInitError(value)
         else:
-            raise FieldNotFoundError(value, self.get_name())
+            raise FieldNotFoundError(value, self.name)
 
     def get_field(self, name) -> dict:
         field = [x for x in self.fields if x['name'] == name]
@@ -184,7 +206,7 @@ class TypeDAO(CmdbDAO):
             except (RequiredInitKeyNotFoundError, CMDBError) as e:
                 LOGGER.warning(e.message)
                 raise FieldInitError(name)
-        raise FieldNotFoundError(name, self.get_name())
+        raise FieldNotFoundError(name, self.name)
 
 
 class _ExternalLink:

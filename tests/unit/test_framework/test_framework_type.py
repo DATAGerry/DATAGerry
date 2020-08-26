@@ -18,7 +18,7 @@ import pytest
 
 from datetime import datetime
 
-from cmdb.framework.dao.type import TypeDAO
+from cmdb.framework.cmdb_type import CmdbType
 from cmdb.framework.cmdb_errors import TypeAlreadyExists, TypeNotFoundError
 
 
@@ -33,15 +33,15 @@ def object_manager(mongodb):
 
 
 @pytest.mark.parametrize('type_instance_class', [
-    TypeDAO
+    CmdbType
 ])
 def test_cmdb_object_type_init(type_instance_class):
     from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
     with pytest.raises(RequiredInitKeyNotFoundError):
-        TypeDAO(name='example', active=True, author_id=1, creation_time=datetime.utcnow(),
-                render_meta={}, fields=[])
-    type_instance = TypeDAO(name='example', active=True, author_id=1, creation_time=datetime.utcnow(),
-                            render_meta={}, fields=[], public_id=1)
+        CmdbType(name='example', active=True, author_id=1, creation_time=datetime.utcnow(),
+                 render_meta={}, fields=[])
+    type_instance = CmdbType(name='example', active=True, author_id=1, creation_time=datetime.utcnow(),
+                             render_meta={}, fields=[], public_id=1)
     assert isinstance(type_instance, type_instance_class)
 
 
@@ -51,8 +51,8 @@ def test_cmdb_object_type_calls():
         'external': [],
         'sections': []
     }
-    type_instance = TypeDAO(name='example', active=True, author_id=1, creation_time=datetime.utcnow(),
-                            render_meta=_render_data, fields=[], public_id=1)
+    type_instance = CmdbType(name='example', active=True, author_id=1, creation_time=datetime.utcnow(),
+                             render_meta=_render_data, fields=[], public_id=1)
 
     assert type_instance.has_externals() is False
     assert type_instance.has_summaries() is False
@@ -78,8 +78,8 @@ class TestFrameworkType:
             'external': [],
             'sections': []
         }
-        type_instance_new_1 = TypeDAO(name='example2', active=True, author_id=1, creation_time=datetime.utcnow(),
-                                      render_meta=_render_data, fields=[], public_id=2)
+        type_instance_new_1 = CmdbType(name='example2', active=True, author_id=1, creation_time=datetime.utcnow(),
+                                       render_meta=_render_data, fields=[], public_id=2)
         # CmdbObjectType insert
         ack = object_manager.insert_type(type_instance_new_1)
         assert ack == 2
@@ -87,16 +87,16 @@ class TestFrameworkType:
         assert type_instance_new_2.get_name() == 'example2'
 
         # dict insert
-        type_instance_new_3 = TypeDAO(name='example3', active=True, author_id=1, creation_time=datetime.utcnow(),
-                                      render_meta=_render_data, fields=[], public_id=3)
+        type_instance_new_3 = CmdbType(name='example3', active=True, author_id=1, creation_time=datetime.utcnow(),
+                                       render_meta=_render_data, fields=[], public_id=3)
         object_manager.insert_type(type_instance_new_3.__dict__)
         type_instance_new_3 = object_manager.get_type(public_id=3)
         assert type_instance_new_3.get_name() == 'example3'
 
         # insert error test
-        type_instance_new_4 = TypeDAO(name='example3', active=True, author_id=1, creation_time=datetime.utcnow(),
-                                      render_meta=_render_data, fields=[],
-                                      public_id=type_instance_new_3.get_public_id())
+        type_instance_new_4 = CmdbType(name='example3', active=True, author_id=1, creation_time=datetime.utcnow(),
+                                       render_meta=_render_data, fields=[],
+                                       public_id=type_instance_new_3.get_public_id())
         with pytest.raises(TypeAlreadyExists):
             object_manager.insert_type(type_instance_new_4)
 
@@ -106,8 +106,8 @@ class TestFrameworkType:
             'external': [],
             'sections': []
         }
-        type_instance_update_1 = TypeDAO(name='exampleX', active=True, author_id=1, creation_time=datetime.utcnow(),
-                                         render_meta=_render_data, fields=[], public_id=1)
+        type_instance_update_1 = CmdbType(name='exampleX', active=True, author_id=1, creation_time=datetime.utcnow(),
+                                          render_meta=_render_data, fields=[], public_id=1)
         object_manager.update_type(type_instance_update_1)
         type_get_instance = object_manager.get_type(public_id=1)
         assert type_get_instance.get_name() == type_instance_update_1.get_name()
