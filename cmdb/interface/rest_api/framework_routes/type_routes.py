@@ -51,8 +51,8 @@ def get_types(request_user: User):
     except (ObjectManagerInitError, ObjectManagerGetError) as err:
         return abort(500, err.message)
     if len(type_list) == 0:
-        return make_response(type_list, 204)
-    return make_response(type_list)
+        return make_response([], 204)
+    return make_response([TypeDAO.to_json(type_) for type_ in type_list])
 
 
 @type_blueprint.route('/find/<path:regex>/', defaults={'regex_options': 'imsx'}, methods=['GET'])
@@ -83,8 +83,8 @@ def find_types_by_name(regex: str, regex_options: str, request_user: User):
         return abort(400, err.message)
 
     if len(type_list) == 0:
-        return make_response(type_list, 204)
-    return make_response(type_list)
+        return make_response([], 204)
+    return make_response(make_response([TypeDAO.to_json(type_) for type_ in type_list]))
 
 
 @type_blueprint.route('/<int:public_id>/', methods=['GET'])
@@ -97,7 +97,7 @@ def get_type(public_id: int, request_user: User):
         type_instance = object_manager.get_type(public_id)
     except ObjectManagerGetError as err:
         return abort(404, err.message)
-    return make_response(type_instance)
+    return make_response(TypeDAO.to_json(type_instance))
 
 
 @type_blueprint.route('/<string:name>/', methods=['GET'])
@@ -110,7 +110,7 @@ def get_type_by_name(name: str, request_user: User):
         type_instance = object_manager.get_type_by(name=name)
     except ObjectManagerGetError as err:
         return abort(404, err.message)
-    return make_response(type_instance)
+    return make_response(TypeDAO.to_json(type_instance))
 
 
 @type_blueprint.route('/', methods=['POST'])
@@ -129,7 +129,7 @@ def add_type(request_user: User):
         LOGGER.warning(e)
         return abort(400)
     try:
-        type_instance = TypeDAO(**new_type_data)
+        type_instance = TypeDAO.from_data(new_type_data)
     except CMDBError as e:
         LOGGER.debug(e)
         return abort(400)
@@ -155,7 +155,7 @@ def update_type(request_user: User):
         LOGGER.warning(e)
         abort(400)
     try:
-        update_type_instance = TypeDAO(**new_type_data)
+        update_type_instance = TypeDAO.from_data(new_type_data)
     except CMDBError:
         return abort(400)
     try:
@@ -172,7 +172,7 @@ def update_type(request_user: User):
     except CMDBError:
         return abort(500)
 
-    resp = make_response(update_type_instance)
+    resp = make_response(TypeDAO.to_json(update_type_instance))
     return resp
 
 
@@ -258,7 +258,7 @@ def get_types_by_category(public_id, request_user: User):
         type_list = object_manager.get_types_by(public_id={'$in': type_ids})
     except ObjectManagerGetError as err:
         return abort(404, err.message)
-    return make_response(type_list)
+    return make_response([TypeDAO.to_json(type_) for type_ in type_list])
 
 
 @type_blueprint.route('/uncategorized/', methods=['GET'])
@@ -276,7 +276,7 @@ def get_uncategorized_types(request_user: User):
 
     uncategorized_types = [type_ for type_ in types if type_.get_public_id() not in categorized_types]
 
-    return make_response(uncategorized_types)
+    return make_response([TypeDAO.to_json(type_) for type_ in uncategorized_types])
 
 
 @type_blueprint.route('/cleanup/remove/<int:public_id>/', methods=['GET'])
@@ -310,7 +310,7 @@ def cleanup_removed_fields(public_id, request_user: User):
     except Exception as error:
         return abort(500)
 
-    return make_response(update_type_instance)
+    return make_response(TypeDAO.to_json(update_type_instance))
 
 
 @type_blueprint.route('/cleanup/update/<int:public_id>/', methods=['GET'])
@@ -339,4 +339,4 @@ def cleanup_updated_push_fields(public_id, request_user: User):
     except CMDBError:
         return abort(500)
 
-    return make_response(update_type_instance)
+    return make_response(TypeDAO.to_json(update_type_instance))

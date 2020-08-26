@@ -317,13 +317,13 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerGetError(err=err)
         try:
-            return [TypeDAO(**type) for type in raw_types]
+            return [TypeDAO.from_data(type) for type in raw_types]
         except Exception as err:
             raise ObjectManagerInitError(err=err)
 
     def get_type(self, public_id: int):
         try:
-            return TypeDAO(**self.dbm.find_one(
+            return TypeDAO.from_data(self.dbm.find_one(
                 collection=TypeDAO.COLLECTION,
                 public_id=public_id)
                            )
@@ -336,7 +336,7 @@ class CmdbObjectManager(CmdbManagerBase):
         try:
             found_type_list = self._get_many(collection=TypeDAO.COLLECTION, limit=1, **requirements)
             if len(found_type_list) > 0:
-                return TypeDAO(**found_type_list[0])
+                return TypeDAO.from_data(found_type_list[0])
             else:
                 raise ObjectManagerGetError(err='More than 1 type matches this requirement')
         except (CMDBError, Exception) as e:
@@ -344,7 +344,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_types_by(self, sort='public_id', **requirements):
         try:
-            return [TypeDAO(**data) for data in
+            return [TypeDAO.from_data(data) for data in
                     self._get_many(collection=TypeDAO.COLLECTION, sort=sort, **requirements)]
         except Exception as err:
             raise ObjectManagerGetError(err=err)
@@ -384,14 +384,14 @@ class CmdbObjectManager(CmdbManagerBase):
         cursor = self.dbm.aggregate(TypeDAO.COLLECTION, arguments)
         for document in cursor:
             put_data = json.loads(json_util.dumps(document), object_hook=object_hook)
-            type_list.append(TypeDAO(**put_data))
+            type_list.append(TypeDAO.from_data(put_data))
         return type_list
 
     def insert_type(self, data: (TypeDAO, dict)):
         if isinstance(data, TypeDAO):
             new_type = data
         elif isinstance(data, dict):
-            new_type = TypeDAO(**data)
+            new_type = TypeDAO.from_data(data)
         else:
             raise WrongInputFormatError(TypeDAO, data, "Possible data: dict or TypeDAO")
         try:
@@ -410,7 +410,7 @@ class CmdbObjectManager(CmdbManagerBase):
         if isinstance(data, TypeDAO):
             update_type = data
         elif isinstance(data, dict):
-            update_type = TypeDAO(**data)
+            update_type = TypeDAO.from_data(data)
         else:
             raise WrongInputFormatError(TypeDAO, data, "Possible data: dict or TypeDAO")
 

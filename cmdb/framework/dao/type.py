@@ -28,13 +28,19 @@ LOGGER = logging.getLogger(__name__)
 
 class TypeDAO(CmdbDAO):
     """
-    Definition of an object type - which fields were created and how.
+    Data access object of the framework type.
+
+    Attributes:
+        COLLECTION (Collection):    Name of the database collection.
+        MODEL (Model):              Name of the DAO.
+        DEFAULT_VERSION (str):      The default "starting" version number.
+        SCHEMA (dict):              The validation schema for this DAO.
+        INDEX_KEYS (list):          List of index keys for the database.
     """
+
     COLLECTION: Collection = "framework.types"
     MODEL: Model = 'Type'
-
     DEFAULT_VERSION: str = '1.0.0'
-
     SCHEMA: dict = {
         'public_id': {
             'type': 'integer'
@@ -78,6 +84,9 @@ class TypeDAO(CmdbDAO):
     INDEX_KEYS = [
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
+
+    __slots__ = 'public_id', 'name', 'label', 'description', 'version', 'active', 'clean_db', 'author_id', \
+                'creation_time', 'render_meta', 'fields',
 
     def __init__(self, public_id: int, name: str, author_id: int, creation_time: datetime, render_meta: dict,
                  active: bool = True, fields: list = None, version: str = None, label: str = None,
@@ -207,6 +216,11 @@ class TypeDAO(CmdbDAO):
                 LOGGER.warning(e.message)
                 raise FieldInitError(name)
         raise FieldNotFoundError(name, self.name)
+
+    class __TypeMeta:
+
+        def __init__(self, sections: list, externals: list, summary):
+            pass
 
 
 class _ExternalLink:
