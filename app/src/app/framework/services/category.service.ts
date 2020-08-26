@@ -149,12 +149,15 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    */
   public getCategoriesByName(regex: string): Observable<T[]> {
     regex = ValidatorService.validateRegex(regex).trim();
-    return this.api.callGet<T[]>(this.servicePrefix + '/find/' + encodeURIComponent(regex)).pipe(
-      map((apiResponse: HttpResponse<T[]>) => {
-        if (apiResponse.status === 204) {
-          return [];
+    const filter = encodeURIComponent(`{"$or": [{"name": {"$regex": "${ regex }", "$options": "ismx"}}, {"label": {"$regex": "${ regex }", "$options": "ismx"}}]}`);
+
+    return this.api.callGet<T[]>(this.servicePrefix + '/?filter=' + filter).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        if (apiResponse.body.count === 0) {
+          return null;
+        } else {
+          return apiResponse.body.results;
         }
-        return apiResponse.body;
       })
     );
   }
