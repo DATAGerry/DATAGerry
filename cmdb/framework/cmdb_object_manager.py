@@ -40,7 +40,7 @@ from cmdb.framework.cmdb_errors import WrongInputFormatError, TypeInsertError, T
 from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_status import CmdbStatus
-from cmdb.framework.cmdb_type import CmdbType
+from cmdb.framework.dao.type import TypeDAO
 from cmdb.search.query import Query, Pipeline
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import User
@@ -311,32 +311,32 @@ class CmdbObjectManager(CmdbManagerBase):
             self._event_queue.put(event)
         return ack
 
-    def get_all_types(self) -> List[CmdbType]:
+    def get_all_types(self) -> List[TypeDAO]:
         try:
-            raw_types: List[dict] = self._get_many(collection=CmdbType.COLLECTION)
+            raw_types: List[dict] = self._get_many(collection=TypeDAO.COLLECTION)
         except Exception as err:
             raise ObjectManagerGetError(err=err)
         try:
-            return [CmdbType(**type) for type in raw_types]
+            return [TypeDAO(**type) for type in raw_types]
         except Exception as err:
             raise ObjectManagerInitError(err=err)
 
     def get_type(self, public_id: int):
         try:
-            return CmdbType(**self.dbm.find_one(
-                collection=CmdbType.COLLECTION,
+            return TypeDAO(**self.dbm.find_one(
+                collection=TypeDAO.COLLECTION,
                 public_id=public_id)
-                            )
+                           )
         except RequiredInitKeyNotFoundError as err:
             raise ObjectManagerInitError(err=err.message)
         except Exception as err:
             raise ObjectManagerGetError(err=err)
 
-    def get_type_by(self, **requirements) -> CmdbType:
+    def get_type_by(self, **requirements) -> TypeDAO:
         try:
-            found_type_list = self._get_many(collection=CmdbType.COLLECTION, limit=1, **requirements)
+            found_type_list = self._get_many(collection=TypeDAO.COLLECTION, limit=1, **requirements)
             if len(found_type_list) > 0:
-                return CmdbType(**found_type_list[0])
+                return TypeDAO(**found_type_list[0])
             else:
                 raise ObjectManagerGetError(err='More than 1 type matches this requirement')
         except (CMDBError, Exception) as e:
@@ -344,8 +344,8 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_types_by(self, sort='public_id', **requirements):
         try:
-            return [CmdbType(**data) for data in
-                    self._get_many(collection=CmdbType.COLLECTION, sort=sort, **requirements)]
+            return [TypeDAO(**data) for data in
+                    self._get_many(collection=TypeDAO.COLLECTION, sort=sort, **requirements)]
         except Exception as err:
             raise ObjectManagerGetError(err=err)
 
@@ -367,7 +367,7 @@ class CmdbObjectManager(CmdbManagerBase):
         agr.append({'$group': {'_id': '$' + value, 'count': {'$sum': 1}}})
         agr.append({'$sort': {'count': -1}})
 
-        return self.dbm.aggregate(CmdbType.COLLECTION, agr)
+        return self.dbm.aggregate(TypeDAO.COLLECTION, agr)
 
     def get_type_aggregate(self, arguments):
         """This method does not actually
@@ -381,21 +381,21 @@ class CmdbObjectManager(CmdbManagerBase):
                returns the list of CMDB Types sorted by value of the documents
            """
         type_list = []
-        cursor = self.dbm.aggregate(CmdbType.COLLECTION, arguments)
+        cursor = self.dbm.aggregate(TypeDAO.COLLECTION, arguments)
         for document in cursor:
             put_data = json.loads(json_util.dumps(document), object_hook=object_hook)
-            type_list.append(CmdbType(**put_data))
+            type_list.append(TypeDAO(**put_data))
         return type_list
 
-    def insert_type(self, data: (CmdbType, dict)):
-        if isinstance(data, CmdbType):
+    def insert_type(self, data: (TypeDAO, dict)):
+        if isinstance(data, TypeDAO):
             new_type = data
         elif isinstance(data, dict):
-            new_type = CmdbType(**data)
+            new_type = TypeDAO(**data)
         else:
-            raise WrongInputFormatError(CmdbType, data, "Possible data: dict or CmdbType")
+            raise WrongInputFormatError(TypeDAO, data, "Possible data: dict or TypeDAO")
         try:
-            ack = self._insert(collection=CmdbType.COLLECTION, data=new_type.to_database())
+            ack = self._insert(collection=TypeDAO.COLLECTION, data=new_type.to_database())
             LOGGER.debug(f"Inserted new type with ack {ack}")
             if self._event_queue:
                 event = Event("cmdb.core.objecttype.added", {"id": new_type.get_public_id()})
@@ -406,16 +406,16 @@ class CmdbObjectManager(CmdbManagerBase):
             raise TypeInsertError(new_type.get_public_id())
         return ack
 
-    def update_type(self, data: (CmdbType, dict)):
-        if isinstance(data, CmdbType):
+    def update_type(self, data: (TypeDAO, dict)):
+        if isinstance(data, TypeDAO):
             update_type = data
         elif isinstance(data, dict):
-            update_type = CmdbType(**data)
+            update_type = TypeDAO(**data)
         else:
-            raise WrongInputFormatError(CmdbType, data, "Possible data: dict or CmdbType")
+            raise WrongInputFormatError(TypeDAO, data, "Possible data: dict or TypeDAO")
 
         ack = self._update(
-            collection=CmdbType.COLLECTION,
+            collection=TypeDAO.COLLECTION,
             public_id=update_type.get_public_id(),
             data=update_type.to_database()
         )
@@ -425,18 +425,18 @@ class CmdbObjectManager(CmdbManagerBase):
         return ack
 
     def update_many_types(self, filter: dict, update: dict):
-        ack = self._update_many(CmdbType.COLLECTION, filter, update)
+        ack = self._update_many(TypeDAO.COLLECTION, filter, update)
         return ack
 
     def count_types(self):
-        return self.dbm.count(collection=CmdbType.COLLECTION)
+        return self.dbm.count(collection=TypeDAO.COLLECTION)
 
     def delete_type(self, public_id: int):
         """Delete a type by the public id
         Also removes the id from the category type list if existing
         """
         try:
-            ack = self._delete(CmdbType.COLLECTION, public_id)
+            ack = self._delete(TypeDAO.COLLECTION, public_id)
         except Exception as err:
             raise ObjectManagerDeleteError(err=err)
 
@@ -456,7 +456,7 @@ class CmdbObjectManager(CmdbManagerBase):
         return ack
 
     def delete_many_types(self, filter_query: dict, public_ids):
-        ack = self._delete_many(CmdbType.COLLECTION, filter_query)
+        ack = self._delete_many(TypeDAO.COLLECTION, filter_query)
         if self._event_queue:
             event = Event("cmdb.core.objecttypes.deleted", {"ids": public_ids})
             self._event_queue.put(event)

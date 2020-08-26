@@ -26,7 +26,7 @@ from cmdb.interface.route_utils import make_response, login_required, insert_req
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError, ObjectManagerGetError, \
     ObjectManagerInitError
-from cmdb.framework.cmdb_type import CmdbType
+from cmdb.framework.dao.type import TypeDAO
 
 try:
     from cmdb.utils.error import CMDBError
@@ -123,13 +123,13 @@ def add_type(request_user: User):
     add_data_dump = json.dumps(request.json)
     try:
         new_type_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
-        new_type_data['public_id'] = object_manager.get_new_id(CmdbType.COLLECTION)
+        new_type_data['public_id'] = object_manager.get_new_id(TypeDAO.COLLECTION)
         new_type_data['creation_time'] = datetime.utcnow()
     except TypeError as e:
         LOGGER.warning(e)
         return abort(400)
     try:
-        type_instance = CmdbType(**new_type_data)
+        type_instance = TypeDAO(**new_type_data)
     except CMDBError as e:
         LOGGER.debug(e)
         return abort(400)
@@ -155,7 +155,7 @@ def update_type(request_user: User):
         LOGGER.warning(e)
         abort(400)
     try:
-        update_type_instance = CmdbType(**new_type_data)
+        update_type_instance = TypeDAO(**new_type_data)
     except CMDBError:
         return abort(400)
     try:

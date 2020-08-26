@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from cmdb.framework import CategoryDAO, CmdbType
+from cmdb.framework import CategoryDAO, TypeDAO
 from cmdb.framework.cmdb_errors import ObjectManagerInsertError
 from cmdb.search.query.query_builder import QueryBuilder
 from cmdb.updater.updater import Updater
@@ -70,9 +70,9 @@ class Update20200512(Updater):
             Do not use type_instance.category_id here - doesnt exists anymore
         """
         return [type.get('public_id') for type in
-                self.database_manager.find_all(collection=CmdbType.COLLECTION,
+                self.database_manager.find_all(collection=TypeDAO.COLLECTION,
                                                filter={'category_id': category_id})]
 
     def __clear_up_types(self):
         """Removes the category_id field from type collection"""
-        self.database_manager.unset_update_many(collection=CmdbType.COLLECTION, filter={}, data='category_id')
+        self.database_manager.unset_update_many(collection=TypeDAO.COLLECTION, filter={}, data='category_id')

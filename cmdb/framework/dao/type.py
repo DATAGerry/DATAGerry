@@ -29,19 +29,11 @@ except ImportError:
 LOGGER = logging.getLogger(__name__)
 
 
-class CmdbType(CmdbDAO):
+class TypeDAO(CmdbDAO):
     """
     Definition of an object type - which fields were created and how.
     """
     COLLECTION = "framework.types"
-    REQUIRED_INIT_KEYS = [
-        'name',
-        'active',
-        'author_id',
-        'creation_time',
-        'render_meta',
-        'fields'
-    ]
 
     INDEX_KEYS = [
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
@@ -49,7 +41,7 @@ class CmdbType(CmdbDAO):
 
     def __init__(self, public_id: int, name: str, active: bool, author_id: int, creation_time: datetime,
                  render_meta: dict, fields: list, version: str = '1.0.0', access: list = None,
-                 label: str = None, clean_db: bool = None, status: list = None, description: str = None, **validation):
+                 label: str = None, clean_db: bool = None, status: list = None, description: str = None):
         self.name = name
         self.label = label or self.name.title()
         self.description = description
@@ -62,10 +54,10 @@ class CmdbType(CmdbDAO):
         self.creation_time = creation_time
         self.render_meta = render_meta
         self.fields = fields or []
-        super(CmdbType, self).__init__(public_id=public_id, **validation)
+        super(TypeDAO, self).__init__(public_id=public_id)
 
     @classmethod
-    def from_data(cls, data: dict) -> "CmdbType":
+    def from_data(cls, data: dict) -> "TypeDAO":
         """Create a instance of a type from database"""
 
         return cls(public_id=data.get('public_id'), name=data.get('name'), active=data.get('active'),
@@ -76,7 +68,7 @@ class CmdbType(CmdbDAO):
                    )
 
     @classmethod
-    def to_json(cls, instance: "CmdbType") -> dict:
+    def to_json(cls, instance: "TypeDAO") -> dict:
         """Convert a type instance to json conform data"""
         return {
             'public_id': instance.get_public_id(),
