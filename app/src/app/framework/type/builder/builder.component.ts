@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {Controller} from './controls/controls.common';
 import {DndDropEvent, DropEffect} from 'ngx-drag-drop';
 import {SectionControl} from './controls/section.control';
@@ -33,7 +33,7 @@ import {CheckboxControl} from './controls/choice/checkbox.control';
 import {GroupService} from '../../../management/services/group.service';
 import {CmdbMode} from '../../modes.enum';
 import {FormGroup} from '@angular/forms';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import {PreviewModalComponent} from './modals/preview-modal/preview-modal.component';
 import {DiagnosticModalComponent} from './modals/diagnostic-modal/diagnostic-modal.component';
 import {DateControl} from './controls/specials/date.control';
@@ -45,12 +45,13 @@ declare var $: any;
   templateUrl: './builder.component.html',
   styleUrls: ['./builder.component.scss']
 })
-export class BuilderComponent implements OnInit {
+export class BuilderComponent implements OnInit, OnDestroy{
 
   public sections: any[];
   public userList: User[] = [];
   public groupList: Group[] = [];
   public canEdit: boolean = false;
+  private modalRef: NgbModalRef;
   @Input() mode = CmdbMode.View;
 
   @Input() set builderConfig(data) {
@@ -98,6 +99,11 @@ export class BuilderComponent implements OnInit {
   public ngOnInit(): void {
     this.sections = [];
     this.builderFormGroup = new FormGroup({});
+  }
+  public ngOnDestroy(): void {
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
   }
 
   public onDrop(event: DndDropEvent, list: any[]) {
