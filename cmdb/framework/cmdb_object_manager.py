@@ -387,23 +387,18 @@ class CmdbObjectManager(CmdbManagerBase):
             type_list.append(TypeDAO.from_data(put_data))
         return type_list
 
-    def insert_type(self, data: (TypeDAO, dict)):
-        if isinstance(data, TypeDAO):
-            new_type = data
-        elif isinstance(data, dict):
-            new_type = TypeDAO.from_data(data)
-        else:
-            raise WrongInputFormatError(TypeDAO, data, "Possible data: dict or TypeDAO")
+    def insert_type(self, data: dict):
+
         try:
-            ack = self._insert(collection=TypeDAO.COLLECTION, data=new_type.to_database())
+            ack = self._insert(collection=TypeDAO.COLLECTION, data=data)
             LOGGER.debug(f"Inserted new type with ack {ack}")
             if self._event_queue:
-                event = Event("cmdb.core.objecttype.added", {"id": new_type.get_public_id()})
+                event = Event("cmdb.core.objecttype.added", {"id": ack})
                 self._event_queue.put(event)
-        except PublicIDAlreadyExists:
-            raise TypeAlreadyExists(type_id=new_type.get_public_id())
-        except (CMDBError, InsertError):
-            raise TypeInsertError(new_type.get_public_id())
+        except PublicIDAlreadyExists as err:
+            raise TypeAlreadyExists(type_id=str(err))
+        except (CMDBError, InsertError) as err:
+            raise TypeInsertError(str(err))
         return ack
 
     def update_type(self, data: (TypeDAO, dict)):

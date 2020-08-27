@@ -117,7 +117,7 @@ def get_type_by_name(name: str, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.type.add')
-def add_type(request_user: User):
+def insert_type(request_user: User):
     from bson import json_util
     from datetime import datetime
     add_data_dump = json.dumps(request.json)
@@ -128,13 +128,9 @@ def add_type(request_user: User):
     except TypeError as e:
         LOGGER.warning(e)
         return abort(400)
+
     try:
-        type_instance = TypeDAO.from_data(new_type_data)
-    except CMDBError as e:
-        LOGGER.debug(e)
-        return abort(400)
-    try:
-        ack = object_manager.insert_type(type_instance)
+        ack = object_manager.insert_type(new_type_data)
     except TypeInsertError:
         return abort(500)
 

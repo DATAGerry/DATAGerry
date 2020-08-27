@@ -283,7 +283,7 @@ class TypeDAO(CmdbDAO):
     @classmethod
     def from_data(cls, data: dict) -> "TypeDAO":
         """Create a instance of TypeDAO from database values"""
-
+        print(data)
         return cls(
             public_id=data.get('public_id'),
             name=data.get('name'),
