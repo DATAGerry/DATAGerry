@@ -9,7 +9,7 @@
   <ng-select [items]="typeList"
              bindLabel="label"
              bindValue="public_id"
-             [multiple] = false
+             [multiple] = true
              (change)="onChange($event)"
              [(ngModel)]="data.ref_types">
   </ng-select>
