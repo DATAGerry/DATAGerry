@@ -69,7 +69,7 @@ class NoRootCategories(CMDBError):
 
 
 class ExternalFillError(CMDBError):
-    """Error if href of _ExternalLink could not filled with input data"""
+    """Error if href of TypeExternalLink could not filled with input data"""
 
     def __init__(self, inputs, error):
         super().__init__()

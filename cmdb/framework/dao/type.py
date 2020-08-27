@@ -17,6 +17,7 @@
 import logging
 
 from datetime import datetime
+from typing import List
 
 from cmdb.framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
 from cmdb.framework.cmdb_errors import ExternalFillError, FieldInitError, FieldNotFoundError
@@ -24,6 +25,160 @@ from cmdb.framework.utils import Collection, Model
 from cmdb.utils.error import CMDBError
 
 LOGGER = logging.getLogger(__name__)
+
+
+class TypeSummary:
+    __slots__ = 'fields'
+
+    def __init__(self, fields: list = None):
+        self.fields = fields or []
+
+    def has_fields(self):
+        if len(self.fields) > 0:
+            return True
+        return False
+
+    def set_fields(self, fields):
+        self.fields = fields
+
+    @classmethod
+    def from_data(cls, data: dict) -> "TypeSummary":
+        return cls(fields=data.get('fields', None))
+
+    @classmethod
+    def to_json(cls, instance: "TypeSummary") -> dict:
+        return {
+            'fields': instance.fields
+        }
+
+
+class TypeSection:
+    __slots__ = 'type', 'name', 'label', 'fields'
+
+    def __init__(self, type: str, name: str, label: str = None, fields: list = None):
+        self.type = type
+        self.name = name
+        self.label = label or self.name.title()
+        self.fields = fields or []
+
+    @classmethod
+    def from_data(cls, data: dict) -> "TypeSection":
+        return cls(
+            type=data.get('type'),
+            name=data.get('name'),
+            label=data.get('label', None),
+            fields=data.get('fields', None)
+        )
+
+    @classmethod
+    def to_json(cls, instance: "TypeSection") -> dict:
+        return {
+            'type': instance.type,
+            'name': instance.name,
+            'label': instance.label,
+            'fields': instance.fields
+        }
+
+
+class TypeExternalLink:
+
+    __slots__ = 'name', 'href', 'label', 'icon', 'fields'
+
+    def __init__(self, name: str, href: str, label: str = None, icon: str = None, fields: list = None):
+        self.name = name
+        self.href = href
+        self.label = label or self.name.title()
+        self.icon = icon
+        self.fields = fields or []
+
+    @classmethod
+    def from_data(cls, data: dict) -> "TypeExternalLink":
+        return cls(
+            name=data.get('name'),
+            href=data.get('href'),
+            label=data.get('label', None),
+            icon=data.get('icon', None),
+            fields=data.get('fields', None)
+        )
+
+    @classmethod
+    def to_json(cls, instance: "TypeExternalLink") -> dict:
+        return {
+            'name': instance.name,
+            'href': instance.href,
+            'label': instance.label,
+            'icon': instance.icon,
+            'fields': instance.fields
+        }
+
+    def has_icon(self):
+        """
+        check if external link has a icon
+        """
+        if self.icon:
+            return True
+        return False
+
+    def link_requires_fields(self):
+        """
+        the type of arguments passed to it and formats it according to the format codes defined in the string
+        checks if the href link requires field informations.
+        Examples:
+            http://example.org/{}/dynamic/ -> True
+            http://example.org/static/ -> False
+        Returns:
+            bool
+        """
+        import re
+        if re.search('{.*?}', self.href):
+            return True
+        return False
+
+    def has_fields(self):
+        """
+        check if external link has field definitions
+        """
+        if len(self.fields) > 0:
+            return True
+        return False
+
+    def fill_href(self, inputs):
+        """fills the href brackets with data"""
+        try:
+            self.href = self.href.format(*inputs)
+        except Exception as e:
+            raise ExternalFillError(inputs, e)
+
+
+class TypeRenderMeta:
+    """Class of the type dao `render_meta` field"""
+
+    __slots__ = 'icon', 'sections', 'externals', 'summary'
+
+    def __init__(self, icon: str = None, sections: List[TypeSection] = None, externals: List[TypeExternalLink] = None,
+                 summary: TypeSummary = None):
+        self.icon: str = icon
+        self.sections: List[TypeSection] = sections or []
+        self.externals: List[TypeExternalLink] = externals or []
+        self.summary: TypeSummary = summary or TypeSummary(fields=None)
+
+    @classmethod
+    def from_data(cls, data: dict) -> "TypeRenderMeta":
+        return cls(
+            icon=data.get('icon', None),
+            sections=[TypeSection.from_data(section) for section in data.get('sections', [])],
+            externals=[TypeExternalLink.from_data(external) for external in data.get('externals', [])],
+            summary=TypeSummary.from_data(data.get('summary', None))
+        )
+
+    @classmethod
+    def to_json(cls, instance: "TypeRenderMeta") -> dict:
+        return {
+            'icon': instance.icon,
+            'sections': [TypeSection.to_json(section) for section in instance.sections],
+            'externals': [TypeExternalLink.to_json(external) for external in instance.externals],
+            'summary': TypeSummary.to_json(instance.summary)
+        }
 
 
 class TypeDAO(CmdbDAO):
@@ -78,6 +233,28 @@ class TypeDAO(CmdbDAO):
             'type': 'boolean',
             'required': False,
             'default': True
+        },
+        'render_meta': {
+            'type': 'dict',
+            'allow_unknown': False,
+            'schema': {
+                'icon': {
+                    'type': 'string',
+                    'nullable': True
+                },
+                'sections': {
+                    'type': 'list',
+                    'empty': True
+                },
+                'externals': {
+                    'type': 'list',
+                    'empty': True
+                },
+                'summary': {
+                    'type': 'dict',
+                    'empty': True
+                }
+            }
         }
     }
 
@@ -88,7 +265,7 @@ class TypeDAO(CmdbDAO):
     __slots__ = 'public_id', 'name', 'label', 'description', 'version', 'active', 'clean_db', 'author_id', \
                 'creation_time', 'render_meta', 'fields',
 
-    def __init__(self, public_id: int, name: str, author_id: int, creation_time: datetime, render_meta: dict,
+    def __init__(self, public_id: int, name: str, author_id: int, creation_time: datetime, render_meta: TypeRenderMeta,
                  active: bool = True, fields: list = None, version: str = None, label: str = None,
                  clean_db: bool = None, description: str = None):
         self.name = name
@@ -99,13 +276,14 @@ class TypeDAO(CmdbDAO):
         self.clean_db = clean_db
         self.author_id = author_id
         self.creation_time = creation_time
-        self.render_meta = render_meta
+        self.render_meta: TypeRenderMeta = render_meta
         self.fields = fields or []
         super(TypeDAO, self).__init__(public_id=public_id)
 
     @classmethod
     def from_data(cls, data: dict) -> "TypeDAO":
         """Create a instance of TypeDAO from database values"""
+
         return cls(
             public_id=data.get('public_id'),
             name=data.get('name'),
@@ -115,7 +293,7 @@ class TypeDAO(CmdbDAO):
             label=data.get('label', None),
             version=data.get('version', None),
             description=data.get('description', None),
-            render_meta=data.get('render_meta', {}),
+            render_meta=TypeRenderMeta.from_data(data.get('render_meta', {})),
             fields=data.get('fields', None),
             clean_db=data.get('clean_db', True),
 
@@ -133,7 +311,7 @@ class TypeDAO(CmdbDAO):
             'label': instance.label,
             'version': instance.version,
             'description': instance.description,
-            'render_meta': instance.render_meta,
+            'render_meta': TypeRenderMeta.to_json(instance.render_meta),
             'fields': instance.fields,
             'clean_db': instance.clean_db,
         }
@@ -148,41 +326,38 @@ class TypeDAO(CmdbDAO):
             self.label = self.name.title()
         return self.label
 
-    def get_externals(self):
+    def get_externals(self) -> List[TypeExternalLink]:
         """Get the render meta values of externals"""
-        return self.render_meta['external']
+        return self.render_meta.externals
 
     def has_externals(self) -> bool:
         """Check if type has external links"""
         return True if len(self.get_externals()) > 0 else False
 
-    def get_external(self, name):
-        ext_data = next(ext for ext in self.render_meta['external'] if ext["name"] == name)
-        return _ExternalLink(**ext_data)
+    def get_external(self, name) -> TypeExternalLink:
+        return next((external for external in self.get_externals() if external.name == name), None)
 
     def has_summaries(self):
-        if len(self.render_meta['summary'].get('fields')) > 0:
-            return True
-        return False
+        return self.render_meta.summary.has_fields()
 
     def get_summary(self):
         complete_field_list = []
-        for field_name in self.render_meta['summary']['fields']:
+        for field_name in self.render_meta.summary.fields:
             complete_field_list.append(self.get_field(field_name))
-        return _Summary(fields=complete_field_list)
+        return TypeSummary(fields=complete_field_list)
 
-    def get_sections(self):
-        return sorted(self.render_meta['sections'], key=lambda k: k['position'])
+    def get_sections(self) -> List[TypeSection]:
+        return self.render_meta.sections
 
     def get_section(self, name):
         try:
-            return self.render_meta['sections'][name]
+            return next((section for section in self.get_sections() if section.name == name), None)
         except IndexError:
             return None
 
     def get_icon(self):
         try:
-            return self.render_meta['icon']
+            return self.render_meta.icon
         except IndexError:
             return None
 
@@ -216,70 +391,3 @@ class TypeDAO(CmdbDAO):
                 LOGGER.warning(e.message)
                 raise FieldInitError(name)
         raise FieldNotFoundError(name, self.name)
-
-    class __TypeMeta:
-
-        def __init__(self, sections: list, externals: list, summary):
-            pass
-
-
-class _ExternalLink:
-
-    def __init__(self, name: str, href: str, label: str = None, icon: str = None, fields: list = None):
-        self.name = name
-        self.href = href
-        self.label = label or self.name.title()
-        self.icon = icon
-        self.fields = fields or []
-
-    def has_icon(self):
-        """
-        check if external link has a icon
-        """
-        if self.icon:
-            return True
-        return False
-
-    def link_requires_fields(self):
-        """
-        the type of arguments passed to it and formats it according to the format codes defined in the string
-        checks if the href link requires field informations.
-        Examples:
-            http://example.org/{}/dynamic/ -> True
-            http://example.org/static/ -> False
-        Returns:
-            bool
-        """
-        import re
-        if re.search('{.*?}', self.href):
-            return True
-        return False
-
-    def has_fields(self):
-        """
-        check if external link has field definitions
-        """
-        if len(self.fields) > 0:
-            return True
-        return False
-
-    def fill_href(self, inputs):
-        """fills the href brackets with data"""
-        try:
-            self.href = self.href.format(*inputs)
-        except Exception as e:
-            raise ExternalFillError(inputs, e)
-
-
-class _Summary:
-
-    def __init__(self, fields: list = None):
-        self.fields = fields or []
-
-    def has_fields(self):
-        if len(self.fields) > 0:
-            return True
-        return False
-
-    def set_fields(self, fields):
-        self.fields = fields
