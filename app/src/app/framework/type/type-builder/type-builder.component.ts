@@ -21,7 +21,6 @@ import { TypeBasicStepComponent } from './type-basic-step/type-basic-step.compon
 import { CmdbType } from '../../models/cmdb-type';
 import { TypeFieldsStepComponent } from './type-fields-step/type-fields-step.component';
 import { TypeMetaStepComponent } from './type-meta-step/type-meta-step.component';
-import { TypeAccessStepComponent } from './type-access-step/type-access-step.component';
 import { TypeService } from '../../services/type.service';
 import { UserService } from '../../../management/services/user.service';
 import { CategoryService } from '../../services/category.service';
@@ -51,9 +50,6 @@ export class TypeBuilderComponent implements OnInit {
 
   @ViewChild(TypeMetaStepComponent, { static: true })
   public metaStep: TypeMetaStepComponent;
-
-  @ViewChild(TypeAccessStepComponent, { static: true })
-  public accessStep: TypeAccessStepComponent;
 
   public selectedCategoryID: number = 0;
 
@@ -100,10 +96,6 @@ export class TypeBuilderComponent implements OnInit {
   public exitMetaStep() {
     this.assignToType({ summary: this.metaStep.summaryForm.getRawValue() }, 'render_meta');
     this.assignToType({ external: this.metaStep.externalLinks }, 'render_meta');
-  }
-
-  public exitAccessStep() {
-    this.assignToType(this.accessStep.accessForm.value, 'access');
   }
 
   public saveType() {

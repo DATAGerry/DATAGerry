@@ -29,7 +29,6 @@ import { TypeBasicStepComponent } from './type-builder/type-basic-step/type-basi
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TypeFieldsStepComponent } from './type-builder/type-fields-step/type-fields-step.component';
 import { QRCodeModule } from 'angularx-qrcode';
-import { TypeAccessStepComponent } from './type-builder/type-access-step/type-access-step.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TypeValidationStepComponent } from './type-builder/type-validation-step/type-validation-step.component';
 import { RenderModule } from '../render/render.module';
@@ -49,7 +48,6 @@ import { AuthModule } from '../../auth/auth.module';
     TypeBasicStepComponent,
     TypeFieldsStepComponent,
     TypeBuilderComponent,
-    TypeAccessStepComponent,
     TypeValidationStepComponent,
     TypeEditComponent,
     TypeMetaStepComponent,
