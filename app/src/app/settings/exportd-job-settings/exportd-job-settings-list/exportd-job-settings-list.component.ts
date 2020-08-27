@@ -24,7 +24,7 @@ import { ExportdJobService } from '../../services/exportd-job.service';
 import { ExportdJob } from '../../models/exportd-job';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../layout/toast/toast.service';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import { Subscription, timer } from 'rxjs';
 import { ExecuteState, ExportdType } from '../../models/modes_job.enum';
 import { GeneralModalComponent } from '../../../layout/helpers/modals/general-modal/general-modal.component';
@@ -45,6 +45,7 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
   public modes = ExecuteState;
   public typeMode = ExportdType;
   private subscription: Subscription;
+  private modalRef: NgbModalRef;
 
   constructor(private taskService: ExportdJobService, private router: Router,
               private toast: ToastService, private modalService: NgbModal) { }
@@ -97,12 +98,12 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
 
   public delTask(itemID: number) {
 
-    const modalComponent = this.modalService.open(GeneralModalComponent);
-    modalComponent.componentInstance.title = 'Delete Exportd Job';
-    modalComponent.componentInstance.modalMessage = 'Are you sure you want to delete this Exportd Job?';
-    modalComponent.componentInstance.buttonDeny = 'Cancel';
-    modalComponent.componentInstance.buttonAccept = 'Delete';
-    modalComponent.result.then((result) => {
+    this.modalRef = this.modalService.open(GeneralModalComponent);
+    this.modalRef.componentInstance.title = 'Delete Exportd Job';
+    this.modalRef.componentInstance.modalMessage = 'Are you sure you want to delete this Exportd Job?';
+    this.modalRef.componentInstance.buttonDeny = 'Cancel';
+    this.modalRef.componentInstance.buttonAccept = 'Delete';
+    this.modalRef.result.then((result) => {
       if (result) {
         this.taskService.deleteTask(itemID).subscribe(resp => console.log(resp),
           error => {},
@@ -129,5 +130,8 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
     // Do not forget to unsubscribe the event
     this.dtTrigger.unsubscribe();
     this.subscription.unsubscribe();
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
   }
 }

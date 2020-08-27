@@ -22,7 +22,7 @@ import { CmdbLink } from '../../../../models/cmdb-link';
 import { forkJoin, Observable, Subject, Subscription } from 'rxjs';
 import { DataTableDirective } from 'angular-datatables';
 import { RenderResult } from '../../../../models/cmdb-render';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import { ObjectLinkAddModalComponent } from '../../../modals/object-link-add-modal/object-link-add-modal.component';
 import { ObjectService } from '../../../../services/object.service';
 import { ObjectLinkDeleteModalComponent } from '../../../modals/object-link-delete-modal/object-link-delete-modal.component';
@@ -55,6 +55,7 @@ export class ObjectLinksComponent implements OnInit, OnDestroy {
   private linkPartnerSubscription: Subscription;
   private linkListSubscription: Subscription;
   public partnerObjects: RenderResult[];
+  private modalRef: NgbModalRef;
 
   // Table
   @ViewChild(DataTableDirective, { static: true })
@@ -83,12 +84,15 @@ export class ObjectLinksComponent implements OnInit, OnDestroy {
     this.linkPartnerSubscription.unsubscribe();
     this.linkListSubscription.unsubscribe();
     this.dtTrigger.unsubscribe();
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
   }
 
   public onShowAddModal(): void {
-    const modalRef = this.modalService.open(ObjectLinkAddModalComponent);
-    modalRef.componentInstance.primaryRenderResult = this.renderResult;
-    modalRef.componentInstance.closeEmitter.subscribe((closeResponse: string) => {
+    this.modalRef = this.modalService.open(ObjectLinkAddModalComponent);
+    this.modalRef.componentInstance.primaryRenderResult = this.renderResult;
+    this.modalRef.componentInstance.closeEmitter.subscribe((closeResponse: string) => {
       if (closeResponse === 'save') {
           this.loadLinks();
       }
@@ -96,9 +100,9 @@ export class ObjectLinksComponent implements OnInit, OnDestroy {
   }
 
   public onShowDeleteModal(linkID: number): void {
-    const modalRef = this.modalService.open(ObjectLinkDeleteModalComponent);
-    modalRef.componentInstance.publicID = linkID;
-    modalRef.componentInstance.closeEmitter.subscribe((closeResponse: string) => {
+    this.modalRef = this.modalService.open(ObjectLinkDeleteModalComponent);
+    this.modalRef.componentInstance.publicID = linkID;
+    this.modalRef.componentInstance.closeEmitter.subscribe((closeResponse: string) => {
       if (closeResponse === 'deleted') {
         this.loadLinks();
       }
