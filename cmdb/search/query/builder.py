@@ -139,6 +139,36 @@ class Builder:
         return {'$facet': stages}
 
     @classmethod
+    def group_(cls, _id: str, value: dict = None) -> dict:
+        """Groups input documents by the specified _id expression and for each distinct grouping, outputs a document."""
+        statement = {'_id': _id}
+        if value:
+            statement.update(value)
+        return {'$group': statement}
+
+    @classmethod
+    def lookup_(cls, _from: str, _local: str, _foreign: str, _as: str) -> dict:
+        """ Performs a left outer join to an unsharded collection in the same database to filter in documents
+            from the “joined” collection for processing.
+            Args:
+                _from:      Specifies the collection in the same database to perform the join with.
+                _local:     Specifies the field from the documents input to the $lookup stage.
+                _foreign:   Specifies the field from the documents in the from collection.
+                _as:        Specifies the name of the new array field to add to the input documents.
+            """
+        return {'$lookup': {'from': _from, 'localField': _local, 'foreignField': _foreign, 'as': _as}}
+
+    @classmethod
+    def unwind_(cls, path: str):
+        """Duplicates each document in the pipeline, once per array element."""
+        return {'$unwind': path}
+
+    @classmethod
+    def project_(cls, specification: dict):
+        """Passes along the documents with the requested fields to the next stage in the pipeline."""
+        return {'$project': specification}
+
+    @classmethod
     def sort_(cls, sort: str, order: int) -> dict:
         """Sorts all input documents and returns them to the pipeline in sorted order."""
         if order != 1 and order != -1:

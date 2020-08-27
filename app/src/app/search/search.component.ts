@@ -76,6 +76,7 @@ export class SearchComponent implements OnInit, OnDestroy {
     params = params.set('skip', this.skip.toString());
     this.searchService.postSearch(this.queryParameters, params).subscribe((results: SearchResultList) => {
       this.searchResultList = results;
+      console.log(results);
       if (this.initSearch) {
         this.maxNumberOfSites = Array.from({ length: (this.searchResultList.total_results) }, (v, k) => k + 1);
         this.initSearch = false;
