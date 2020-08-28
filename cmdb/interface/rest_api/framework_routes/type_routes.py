@@ -150,9 +150,10 @@ def update_type(request_user: User):
     except TypeError as e:
         LOGGER.warning(e)
         abort(400)
+
     try:
         update_type_instance = TypeDAO.from_data(new_type_data)
-    except CMDBError:
+    except CMDBError as e:
         return abort(400)
     try:
         old_fields = object_manager.get_type(update_type_instance.get_public_id()).get_fields()

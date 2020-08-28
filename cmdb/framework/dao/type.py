@@ -81,7 +81,6 @@ class TypeSection:
 
 
 class TypeExternalLink:
-
     __slots__ = 'name', 'href', 'label', 'icon', 'fields'
 
     def __init__(self, name: str, href: str, label: str = None, icon: str = None, fields: list = None):
@@ -167,7 +166,8 @@ class TypeRenderMeta:
         return cls(
             icon=data.get('icon', None),
             sections=[TypeSection.from_data(section) for section in data.get('sections', [])],
-            externals=[TypeExternalLink.from_data(external) for external in data.get('externals', [])],
+            externals=[TypeExternalLink.from_data(external) for external in
+                       data.get('externals', None) or data.get('external', [])],
             summary=TypeSummary.from_data(data.get('summary', None))
         )
 

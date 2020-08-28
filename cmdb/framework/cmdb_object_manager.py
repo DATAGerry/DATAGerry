@@ -424,7 +424,7 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = self._update(
             collection=TypeDAO.COLLECTION,
             public_id=update_type.get_public_id(),
-            data=update_type.to_database()
+            data=TypeDAO.to_json(update_type)
         )
         if self._event_queue:
             event = Event("cmdb.core.objecttype.updated", {"id": update_type.get_public_id()})
