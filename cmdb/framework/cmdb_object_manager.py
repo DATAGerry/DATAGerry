@@ -260,7 +260,19 @@ class CmdbObjectManager(CmdbManagerBase):
         type_id = self.get_object(public_id=public_id).get_type_id()
 
         # query for all types with ref input type with value of type id
-        req_type_query = {"fields": {"$elemMatch": {"type": "ref", "$and": [{"ref_types": int(type_id)}]}}}
+        req_type_query = {
+            "fields": {
+                "$and": [
+                    {"$elemMatch": {
+                        "type": "ref",
+                    }},
+                    {"$or": [
+                        {"ref_types": type_id},
+                        {"ref_types": {"$in": [type_id]}}
+                    ]}
+                ]
+            }
+        }
 
         # get type list with given query
         req_type_list = self.get_types_by(**req_type_query)
@@ -326,7 +338,7 @@ class CmdbObjectManager(CmdbManagerBase):
             return TypeDAO.from_data(self.dbm.find_one(
                 collection=TypeDAO.COLLECTION,
                 public_id=public_id)
-                           )
+            )
         except RequiredInitKeyNotFoundError as err:
             raise ObjectManagerInitError(err=err.message)
         except Exception as err:

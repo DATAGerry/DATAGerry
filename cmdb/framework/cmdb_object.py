@@ -80,7 +80,7 @@ class CmdbObject(CmdbDAO):
         """
         if self.type_id == 0 or self.type_id is None:
             raise TypeNotSetError(self.get_public_id())
-        return self.type_id
+        return int(self.type_id)
 
     def update_view_counter(self) -> int:
         """update the number of times this object was viewed
