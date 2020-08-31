@@ -21,7 +21,6 @@ import { CmdbDao } from './cmdb-dao';
 
 export class CmdbType implements CmdbDao {
 
-  // tslint:disable:variable-name
   public readonly public_id: number;
   public name: string;
   public label?: string;
@@ -52,6 +51,4 @@ export class CmdbType implements CmdbDao {
     }
     return refFields;
   }
-
-  // tslint:enable:variable-name
 }

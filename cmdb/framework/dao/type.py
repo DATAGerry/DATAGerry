@@ -268,16 +268,16 @@ class TypeDAO(CmdbDAO):
     def __init__(self, public_id: int, name: str, author_id: int, creation_time: datetime, render_meta: TypeRenderMeta,
                  active: bool = True, fields: list = None, version: str = None, label: str = None,
                  clean_db: bool = None, description: str = None):
-        self.name = name
-        self.label = label or self.name.title()
-        self.description = description or ''
-        self.version = version or TypeDAO.DEFAULT_VERSION
+        self.name: str = name
+        self.label: str = label or self.name.title()
+        self.description: str = description
+        self.version: str = version or TypeDAO.DEFAULT_VERSION
         self.active: bool = active
-        self.clean_db = clean_db
-        self.author_id = author_id
-        self.creation_time = creation_time
+        self.clean_db: bool = clean_db
+        self.author_id: int = author_id
+        self.creation_time: datetime = creation_time
         self.render_meta: TypeRenderMeta = render_meta
-        self.fields = fields or []
+        self.fields: list = fields or []
         super(TypeDAO, self).__init__(public_id=public_id)
 
     @classmethod

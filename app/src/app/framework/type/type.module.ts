@@ -39,6 +39,7 @@ import { TypeDeleteComponent, TypeDeleteConfirmModalComponent } from './type-del
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { AuthModule } from '../../auth/auth.module';
+import { TypeComponent } from './type.component';
 
 @NgModule({
   entryComponents: [TypeDeleteConfirmModalComponent],
@@ -53,6 +54,7 @@ import { AuthModule } from '../../auth/auth.module';
     TypeMetaStepComponent,
     TypeDeleteComponent,
     TypeDeleteConfirmModalComponent,
+    TypeComponent,
   ],
   imports: [
     CommonModule,
