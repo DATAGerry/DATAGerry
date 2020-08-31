@@ -45,6 +45,9 @@ class CategoryManager(FrameworkManager):
     def insert(self, category: dict) -> PublicID:
         return super(CategoryManager, self).insert(resource=category)
 
+    def update(self, public_id: Union[PublicID, int], category: dict):
+        return super(CategoryManager, self).update(public_id=public_id, resource=category)
+
     def delete(self, public_id: Union[PublicID, int]) -> CategoryDAO:
         raw_category = self.get(public_id=public_id)
         delete_result = super(CategoryManager, self).delete(public_id=public_id)
