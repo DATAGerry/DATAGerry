@@ -39,6 +39,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { DateFieldEditComponent } from './configs/edits/date-field-edit.component';
 import { AddCategoryModalComponent } from '../../category/components/modals/add-category-modal/add-category-modal.component';
 import { CategoryModule } from '../../category/category.module';
+import { CleanupModalComponent } from './modals/cleanup-modal/cleanup-modal.component';
 
 @NgModule({
   entryComponents: [
@@ -53,7 +54,8 @@ import { CategoryModule } from '../../category/category.module';
     PreviewModalComponent,
     DiagnosticModalComponent,
     AddCategoryModalComponent,
-    RenderElementComponent
+    RenderElementComponent,
+    CleanupModalComponent
   ],
   declarations: [
     BuilderComponent,
@@ -67,7 +69,8 @@ import { CategoryModule } from '../../category/category.module';
     CheckFieldEditComponent,
     PreviewModalComponent,
     DiagnosticModalComponent,
-    DateFieldEditComponent
+    DateFieldEditComponent,
+    CleanupModalComponent
   ],
   imports: [
     CommonModule,
