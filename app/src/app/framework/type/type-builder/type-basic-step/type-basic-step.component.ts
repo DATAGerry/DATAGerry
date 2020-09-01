@@ -113,8 +113,8 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
 
   public addCategoryModal() {
     const newCategory = new CmdbCategory();
-    const addCategoryModal = this.modalService.open(AddCategoryModalComponent, { scrollable: true });
-    addCategoryModal.result.then((result: FormGroup) => {
+    this.modalRef = this.modalService.open(AddCategoryModalComponent, { scrollable: true });
+    this.modalRef.result.then((result: FormGroup) => {
       if (result) {
         let categoryID = null;
         newCategory.name = result.get('name').value;
