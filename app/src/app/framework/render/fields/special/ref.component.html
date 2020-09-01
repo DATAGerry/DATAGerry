@@ -22,7 +22,7 @@
             </ng-container>
             <ng-container *ngIf="refObject == null"> No reference set </ng-container>
           </div>
-          <div class="input-group-append">
+          <div class="input-group-append" *ngIf="hasRef()" >
             <span class="input-group-text" (click)="showReferencePreview()">
               <fa-icon icon="file-powerpoint"></fa-icon>
             </span>

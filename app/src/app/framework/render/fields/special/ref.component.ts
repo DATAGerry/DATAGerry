@@ -71,6 +71,12 @@ export class RefComponent extends RenderField implements OnInit, OnDestroy {
     const value = item.object_information.object_id + item.type_information.type_label + item.summary_line;
     return value.toLocaleLowerCase().indexOf(term) > -1 || value.toLocaleLowerCase().includes(term);
   }
+  public hasRef() {
+    if (this.refObject) {
+      return true;
+    }
+    return false;
+  }
 
   public showReferencePreview() {
     this.modalRef = this.modalService.open(ObjectPreviewModalComponent, { size: 'lg' });
