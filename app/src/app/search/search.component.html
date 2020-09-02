@@ -1,4 +1,9 @@
-<h2>Results: {{searchResultList?.total_results}}</h2>
+
+<cmdb-search-result-bar [queryParameters]="queryParameters"
+                        [searchResultList]="searchResultList"
+                        [filterResultList]="filterResultList"
+                        (refreshSearch)="reSearch($event)"></cmdb-search-result-bar>
+
 <hr/>
 <div id="search-results" class="row">
   <div class="col-md-12" *ngIf="searchResultList">

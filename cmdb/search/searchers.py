@@ -64,7 +64,15 @@ class SearcherFramework(Search[CmdbObjectManager]):
                 PipelineBuilder.unwind_('$lookup_data'),
                 PipelineBuilder.project_({'_id': 0, 'type_id': 1, 'label': "$lookup_data.label"}),
                 PipelineBuilder.group_("$$ROOT.type_id", {'types': {'$first': "$$ROOT"}, 'total': {'$sum': 1}}),
-                PipelineBuilder.project_({'_id': 0, 'type_id': '$types.type_id', 'label': '$types.label', 'total': 1})
+                PipelineBuilder.project_(
+                    {'_id': 0,
+                     'searchText': '$types.label',
+                     'searchForm': 'type',
+                     'searchLabel': '$types.label',
+                     'settings': {'types': ['$types.type_id']},
+                     'total': 1
+                     }),
+                PipelineBuilder.sort_("total", -1)
             ]
         }
         plb.add_pipe(PipelineBuilder.facet_(stages))

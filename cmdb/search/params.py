@@ -24,21 +24,24 @@ class SearchParam:
         'text',
         'type',
         'category',
+        'disjunction',
         'publicID'
     ]
 
-    def __init__(self, search_text, search_form: str, settings: dict = None):
+    def __init__(self, search_text, search_form: str, settings: dict = None, disjunction: bool = False):
         """SearchParamDAO constructor
         Args:
             search_text: searchable user input for database search
             search_form: kind of search parameter
             settings: optional settings based on the search form
+            disjunction: optional kind of search parameter
         """
         self.search_text = search_text
         if search_form not in self.POSSIBLE_FORM_TYPES:
             raise ValueError(f'{search_form} is not a possible param type ')
         self.search_form = search_form
         self.settings: dict = settings or {}
+        self.disjunction: bool = disjunction
 
     def __repr__(self):
         return f'[SearchParam] {self.search_text} - {self.search_form}'
@@ -49,7 +52,13 @@ class SearchParam:
         param_list: List[cls] = []
         for param in request:
             try:
-                param_list.append(cls(param['searchText'], param['searchForm'], param.get('settings', None)))
+                param_list.append(cls(
+                        param['searchText'],
+                        param['searchForm'],
+                        param.get('settings', None),
+                        param.get('disjunction', True)
+                    )
+                )
             except Exception as err:
                 LOGGER.error(f'[SearchParamDAO](from_request): {err}')
                 continue

@@ -111,11 +111,17 @@ class PipelineBuilder(Builder):
             self.add_pipe(self.match_(regex))
 
         # type builds
+        disjunction_query = []
         type_params = [_ for _ in params if _.search_form == 'type']
         for param in type_params:
             if param.settings and len(param.settings.get('types', [])) > 0:
                 type_id_in = self.in_('type_id', param.settings['types'])
-                self.add_pipe(self.match_(type_id_in))
+                if param.disjunction:
+                    disjunction_query.append(type_id_in)
+                else:
+                    self.add_pipe(self.match_(type_id_in))
+        if len(disjunction_query) > 0:
+            self.add_pipe(self.match_(self.or_(disjunction_query)))
 
         # category builds
         category_params = [_ for _ in params if _.search_form == 'category']

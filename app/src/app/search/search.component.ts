@@ -32,6 +32,17 @@ import { JwPaginationComponent } from 'jw-angular-pagination';
 })
 export class SearchComponent implements OnInit, OnDestroy {
 
+  constructor(private route: ActivatedRoute, private spinner: NgxSpinnerService, private searchService: SearchService) {
+    this.queryParameterSubscription = new Subscription();
+    this.searchInputForm = new FormGroup({
+      input: new FormControl('', Validators.required)
+    });
+  }
+
+  public get input(): AbstractControl {
+    return this.searchInputForm.get('input');
+  }
+
   // Pagination
   private readonly defaultLimit: number = 10;
   private skip: number = 0;
@@ -40,33 +51,25 @@ export class SearchComponent implements OnInit, OnDestroy {
   public maxNumberOfSites: number[];
   @ViewChild('paginationComponent', { static: false }) pagination: JwPaginationComponent;
   private initSearch: boolean = true;
+  private initFilter: boolean = true;
 
   // Form
   public searchInputForm: FormGroup;
   // Results
   public searchResultList: SearchResultList;
+  public filterResultList: any[];
   // Parameters
   public queryParameters: any = [];
   // Subscription
   private queryParameterSubscription: Subscription;
 
-  constructor(private route: ActivatedRoute, private spinner: NgxSpinnerService, private searchService: SearchService) {
-    this.queryParameterSubscription = new Subscription();
-    this.searchInputForm = new FormGroup({
-      input: new FormControl('', Validators.required)
-    });
-  }
-
   public ngOnInit(): void {
     this.queryParameterSubscription = this.route.queryParamMap.subscribe(params => {
       this.queryParameters = params.get('query');
       this.initSearch = true;
+      this.initFilter = true;
       this.onSearch();
     });
-  }
-
-  public get input(): AbstractControl {
-    return this.searchInputForm.get('input');
   }
 
   public onSearch(): void {
@@ -76,10 +79,11 @@ export class SearchComponent implements OnInit, OnDestroy {
     params = params.set('skip', this.skip.toString());
     this.searchService.postSearch(this.queryParameters, params).subscribe((results: SearchResultList) => {
       this.searchResultList = results;
-      console.log(results);
+      this.filterResultList = this.initFilter ? results.groups : this.filterResultList;
       if (this.initSearch) {
         this.maxNumberOfSites = Array.from({ length: (this.searchResultList.total_results) }, (v, k) => k + 1);
         this.initSearch = false;
+        this.initFilter = false;
       }
       this.spinner.hide();
     });
@@ -94,8 +98,14 @@ export class SearchComponent implements OnInit, OnDestroy {
 
   }
 
+  public reSearch(value: any) {
+    this.queryParameters = JSON.stringify(value.query);
+    this.initSearch = true;
+    this.initFilter = value.rebuild ;
+    this.onSearch();
+  }
+
   public ngOnDestroy(): void {
     this.queryParameterSubscription.unsubscribe();
   }
-
 }
