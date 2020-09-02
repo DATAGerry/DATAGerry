@@ -13,7 +13,7 @@
     <div class="col-7 border-left d-flex justify-content-start">
       <div class="d-flex">
         <div class="icon"><i class="fas fa-filter mr-1"></i></div>
-        <div class="name"><strong class="text-uppercase">Documents</strong>
+        <div class="name"><strong class="text-uppercase">Filter</strong>
           <ng-select [items]="filterResultList"
                      bindLabel="searchLabel"
                      multiple="true"
@@ -22,6 +22,11 @@
                      (clear)="rollbackQueryParametersIfNeeded()"
                      (add)="addFilterItem($event)"
                      (remove)="delFilterItem($event.value)">
+            <ng-template ng-label-tmp let-item="item" let-clear="clear">
+              <span class="ng-value-icon right">{{item.total}}</span>
+              <span class="ng-value-label">{{item.searchLabel}}</span>
+              <span class="ng-value-icon left" (click)="clear(item)">×</span>
+            </ng-template>
             <ng-template ng-option-tmp let-item="item" let-index="index">
               <div class="d-flex justify-content-between align-items-center">
                 <span class="text-wrap" title="{{item.searchLabel}}">{{item.searchLabel}}</span>

@@ -28,7 +28,7 @@ label {
 }
 
 @include media-breakpoint-down('md') {
-  #object-form-action {
+  #object-form-action, #result-bar-action {
     left: 0;
   }
 }
