@@ -1,26 +1,48 @@
-<div class="d-flex justify-content-between align-items-center">
-  <h2>Results: {{searchResultList?.total_results}}</h2>
-  <div class="input-group w-auto">
-    <div class="input-group-prepend">
-      <span class="input-group-text"><i class="fas fa-filter mr-1"></i></span>
-    </div>
-    <ng-select [items]="filterResultList"
-               bindLabel="searchLabel"
-               multiple="true"
-               placeholder="Select filter"
-               [(ngModel)]="preSelectedFilterList"
-               (clear)="rollbackQueryParametersIfNeeded()"
-               (add)="addFilterItem($event)"
-               (remove)="delFilterItem($event.value)">
-      <ng-template ng-option-tmp let-item="item" let-index="index">
-        <div class="d-flex justify-content-between align-items-center">
-          <span class="text-wrap" title="{{item.searchLabel}}">{{item.searchLabel}}</span>
-          <span class="badge badge-primary badge-pill">{{item.total}}</span>
+
+<div class="container-fluid">
+  <div class="row object-view-navbar">
+    <div class="col-3">
+      <div class="d-flex justify-content-start">
+        <div class="icon"><i class="far fa-list-alt"></i></div>
+        <div class="name">
+          <strong class="text-uppercase">Results</strong><br>
+          <span> Total {{searchResultList?.total_results}}</span>
         </div>
-      </ng-template>
-    </ng-select>
-    <div class="input-group-append">
-      <span class="input-group-text" title="Copy filter URL" (click)="copyToClipboard()"><i class="fas fa-share-alt"></i></span>
+      </div>
+    </div>
+    <div class="col-7 border-left d-flex justify-content-start">
+      <div class="d-flex">
+        <div class="icon"><i class="fas fa-filter mr-1"></i></div>
+        <div class="name"><strong class="text-uppercase">Documents</strong>
+          <ng-select [items]="filterResultList"
+                     bindLabel="searchLabel"
+                     multiple="true"
+                     placeholder="Select filter"
+                     [(ngModel)]="preSelectedFilterList"
+                     (clear)="rollbackQueryParametersIfNeeded()"
+                     (add)="addFilterItem($event)"
+                     (remove)="delFilterItem($event.value)">
+            <ng-template ng-option-tmp let-item="item" let-index="index">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="text-wrap" title="{{item.searchLabel}}">{{item.searchLabel}}</span>
+                <span class="badge badge-primary badge-pill">{{item.total}}</span>
+              </div>
+            </ng-template>
+          </ng-select>
+        </div>
+      </div>
+    </div>
+    <div class="col-2 border-left">
+      <div class="d-flex justify-content-center">
+        <div class="icon"><i class="fas fa-share-alt"></i></div>
+        <div class="name">
+          <strong class="text-uppercase">Share URL</strong><br>
+          <button type="button" title="Copy filter URL"
+                  class="btn btn-outline-secondary btn-sm btn-block" (click)="copyToClipboard()">
+            <i class="far fa-copy"></i>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

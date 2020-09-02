@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import {Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { SearchResultList } from '../../models/search-result';
 
@@ -36,6 +36,18 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
     this.addPreSelectedFilterItem(this.queryParameters);
   }
 
+  @HostListener('window:scroll')
+  onWindowScroll() {
+    const dialog = document.getElementsByClassName('object-view-navbar') as HTMLCollectionOf<any>;
+    dialog[0].id = 'result-bar-action';
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+      dialog[0].style.visibility = 'visible';
+      dialog[0].classList.add('shadow');
+    } else {
+      dialog[0].classList.remove('shadow');
+      dialog[0].id = '';
+    }
+  }
 
   private addPreSelectedFilterItem(value: string): void {
     JSON.parse(value).filter(f => {

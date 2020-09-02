@@ -17,6 +17,16 @@ label {
   z-index: 100;
 }
 
+#result-bar-action {
+  visibility: hidden;
+  position: fixed;
+  top: calc(#{$navbar-height});
+  right: 0;
+  padding: 1em;
+  left: $sidebar-width + 15px;
+  z-index: 100;
+}
+
 @include media-breakpoint-down('md') {
   #object-form-action {
     left: 0;
