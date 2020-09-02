@@ -609,7 +609,6 @@ class ExternalSystemAnsible(ExternalSystem):
 
     def __init__(self, destination_parms, export_vars):
         super(ExternalSystemAnsible, self).__init__(destination_parms, export_vars)
-
         self.__variables = export_vars
 
         # initialize store for created ansible groups
@@ -618,11 +617,15 @@ class ExternalSystemAnsible(ExternalSystem):
         # initialize store for hostvars
         self.ansible_hostvars = {}
 
+        # initialize store for hostname
+        self.host_list = []
+
     def add_object(self, cmdb_object, template_data):
         # get hostname for ansible inventory
-
         hostname = self._export_vars.get("hostname", ExportVariable("hostname", "default")).get_value(cmdb_object, template_data)
-        type_name = cmdb_object.type_information['type_name']
+
+        if hostname:
+            self.host_list.append(hostname)
 
         # walk through all variables to get groups and hostvars
         groups = []
@@ -635,7 +638,7 @@ class ExternalSystemAnsible(ExternalSystem):
                 group_name = matches.group(1)
                 group_value = self._export_vars.get(v_name, ExportVariable(v_name, "")).get_value(cmdb_object, template_data)
                 # check if the value is true
-                if group_value in ['true', 'True']:
+                if group_name != 'all' and group_value in ['true', 'True']:
                     # write to ansible group store
                     groups.append(group_name)
 
@@ -643,8 +646,11 @@ class ExternalSystemAnsible(ExternalSystem):
             matches = re.search(r'hostvar_(.*)$', v_name)
             if matches:
                 host_var_name = matches.group(1)
-                host_var_value = self.__variables.get(v_name, ExportVariable(v_name, "")).get_value(cmdb_object, template_data)
+                host_var_value = self._export_vars.get(v_name, ExportVariable(v_name, "")).get_value(cmdb_object, template_data)
                 hostvars.update({host_var_name: host_var_value})
+
+        # put all hosts into ansible group all
+        groups.append('all')
 
         # write hostvars to ansible hostvars store
         self.ansible_hostvars.update({hostname: hostvars})
@@ -654,10 +660,7 @@ class ExternalSystemAnsible(ExternalSystem):
             if group not in self.ansible_groups:
                 self.ansible_groups[group] = {}
                 self.ansible_groups[group]['hosts'] = []
-            if group in type_name:
-                self.ansible_groups[group]['hosts'].append(hostname)
-            if any(group_name in s for s in template_data['fields']):
-                self.ansible_groups[group]['hosts'].append(hostname)
+            self.ansible_groups[group]['hosts'].append(hostname)
 
     def finish_export(self):
         # create JSON

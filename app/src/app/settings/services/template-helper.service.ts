@@ -37,10 +37,9 @@ export class TemplateHelperService {
     await this.typeService.getType(typeId).subscribe(async cmdbTypeObj => {
         for (const field of cmdbTypeObj.fields) {
           if (field.type === 'ref' && iteration > 0) {
-            iteration = iteration - 1;
             const changedPrefix = (prefix ? prefix + '[\'fields\'][\'' + field.name + '\']' : '[\'' + field.name + '\']');
             let subdata;
-            await this.getObjectTemplateHelperData(field.ref_types, changedPrefix, iteration).then(data => {
+            await this.getObjectTemplateHelperData(field.ref_types, changedPrefix, iteration - 1).then(data => {
               subdata = data;
             });
             templateHelperData.push(({
