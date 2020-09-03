@@ -18,7 +18,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { FileService } from './service/file.service';
-import { NgbModal, NgbModalConfig } from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbModalConfig, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import { NewFolderDialogComponent } from './modal/new-folder-dialog/new-folder-dialog.component';
 import { BehaviorSubject } from 'rxjs';
 import { FileElement } from './model/file-element';
@@ -45,6 +45,7 @@ export class FileManagerComponent implements OnInit {
    * Metadata for filtering Files from Database
    */
   private metadata: FileMetadata = new FileMetadata({folder: false});
+  private modalRef: NgbModalRef;
 
   constructor(private fileService: FileService, private modalService: NgbModal, private config: NgbModalConfig) {
     config.backdrop = 'static';
@@ -69,18 +70,18 @@ export class FileManagerComponent implements OnInit {
   }
 
   public addFolder() {
-    const folderModal = this.modalService.open(NewFolderDialogComponent);
-    folderModal.componentInstance.selectedFileFolder = this.selectedFolderElement;
-    folderModal.result.then((result) => {
+    this.modalRef = this.modalService.open(NewFolderDialogComponent);
+    this.modalRef.componentInstance.selectedFileFolder = this.selectedFolderElement;
+    this.modalRef.result.then((result) => {
       this.fileTree = result.fileTree;
     });
   }
 
   public uploadFile() {
     const metadata = this.generateMetadata();
-    const attachmentAddModal = this.modalService.open(AddAttachmentsModalComponent);
-    attachmentAddModal.componentInstance.metadata = metadata;
-    attachmentAddModal.result.then(() => {
+    this.modalRef = this.modalService.open(AddAttachmentsModalComponent);
+    this.modalRef.componentInstance.metadata = metadata;
+    this.modalRef.result.then(() => {
       this.fileService.getAllFilesList(metadata).subscribe((data: any) => {
         this.fileElements.next(data);
       });
@@ -88,9 +89,9 @@ export class FileManagerComponent implements OnInit {
   }
 
   public renameFile() {
-    const folderModal = this.modalService.open(RenameDialogComponent);
-    folderModal.componentInstance.selectedFileFolder = this.selectedFolderElement;
-    folderModal.result.then((result) => {
+    this.modalRef = this.modalService.open(RenameDialogComponent);
+    this.modalRef.componentInstance.selectedFileFolder = this.selectedFolderElement;
+    this.modalRef.result.then((result) => {
       if (result) {
         const fileElement = this.selectedFolderElement.getValue();
         fileElement.filename = result.filename;
@@ -119,14 +120,14 @@ export class FileManagerComponent implements OnInit {
   }
 
   private deleteFileModal(filename: string) {
-    const deleteModalComponent = this.modalService.open(GeneralModalComponent);
-    deleteModalComponent.componentInstance.title = `Delete ${filename}`;
-    deleteModalComponent.componentInstance.modalMessage =
+    this.modalRef = this.modalService.open(GeneralModalComponent);
+    this.modalRef.componentInstance.title = `Delete ${filename}`;
+    this.modalRef.componentInstance.modalMessage =
       `Are you sure you want to delete ${filename} Folder?`;
-    deleteModalComponent.componentInstance.subModalMessage =
+    this.modalRef.componentInstance.subModalMessage =
       `All files associated to this Folder will permanently deleted. This operation can not be undone!`;
-    deleteModalComponent.componentInstance.buttonDeny = 'Cancel';
-    deleteModalComponent.componentInstance.buttonAccept = 'Delete';
-    return deleteModalComponent.result;
+    this.modalRef.componentInstance.buttonDeny = 'Cancel';
+    this.modalRef.componentInstance.buttonAccept = 'Delete';
+    return this.modalRef.result;
   }
 }

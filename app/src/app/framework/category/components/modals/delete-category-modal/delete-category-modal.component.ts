@@ -16,8 +16,8 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import {Component, Input, OnDestroy} from '@angular/core';
+import {NgbActiveModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import { CmdbCategory } from '../../../../models/cmdb-category';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 
@@ -67,10 +67,7 @@ import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from
     </div>
   `
 })
-export class DeleteCategoryModalComponent {
-
-  @Input() public category: CmdbCategory;
-  public deleteCategoryModalForm: FormGroup;
+export class DeleteCategoryModalComponent implements OnDestroy {
 
   constructor(public modal: NgbActiveModal) {
     this.deleteCategoryModalForm = new FormGroup({
@@ -80,6 +77,18 @@ export class DeleteCategoryModalComponent {
 
   public get name(): FormControl {
     return this.deleteCategoryModalForm.get('name') as FormControl;
+  }
+
+  @Input() public category: CmdbCategory;
+  public deleteCategoryModalForm: FormGroup;
+  private modalRef: NgbModalRef;
+    ngOnDestroy(): void {
+        throw new Error('Method not implemented.');
+    }
+  public NgOnDestroy(): void {
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
   }
 
   public equalName(): ValidatorFn {

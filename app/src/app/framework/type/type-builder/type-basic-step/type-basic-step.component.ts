@@ -24,7 +24,7 @@ import { CategoryService } from '../../../services/category.service';
 import { CmdbCategory } from '../../../models/cmdb-category';
 import { Subscription } from 'rxjs';
 import { AddCategoryModalComponent } from '../../../category/components/modals/add-category-modal/add-category-modal.component';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import { SidebarService } from '../../../../layout/services/sidebar.service';
 import { ToastService } from '../../../../layout/toast/toast.service';
 
@@ -59,6 +59,7 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
   private categoriesSubscription: Subscription;
   public originalCategoryID: number = undefined;
   public categories: CmdbCategory[];
+  private modalRef: NgbModalRef;
 
   constructor(private typeService: TypeService, private categoryService: CategoryService, private modalService: NgbModal,
               private sidebarService: SidebarService, private toast: ToastService) {
@@ -105,12 +106,15 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy(): void {
     this.categoriesSubscription.unsubscribe();
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
   }
 
   public addCategoryModal() {
     const newCategory = new CmdbCategory();
-    const addCategoryModal = this.modalService.open(AddCategoryModalComponent, { scrollable: true });
-    addCategoryModal.result.then((result: FormGroup) => {
+    this.modalRef = this.modalService.open(AddCategoryModalComponent, { scrollable: true });
+    this.modalRef.result.then((result: FormGroup) => {
       if (result) {
         let categoryID = null;
         newCategory.name = result.get('name').value;

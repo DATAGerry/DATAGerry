@@ -30,10 +30,12 @@ import { SearchResultComponent } from './search-result/search-result.component';
 import { SearchResultPreviewComponent } from './search-result/search-result-preview.component';
 import { RenderModule } from '../framework/render/render.module';
 import { SearchResultMatchComponent } from './search-result/search-result-match.component';
+import { NgSelectModule } from '@ng-select/ng-select';
+import { SearchResultBarComponent } from './search-result/search-result-bar/search-result-bar.component';
 
 @NgModule({
   entryComponents: [SearchResultPreviewComponent],
-  declarations: [SearchComponent, SearchResultComponent, SearchResultPreviewComponent, SearchResultMatchComponent],
+  declarations: [SearchComponent, SearchResultComponent, SearchResultPreviewComponent, SearchResultMatchComponent, SearchResultBarComponent],
   imports: [
     CommonModule,
     SearchRoutingModule,
@@ -42,7 +44,8 @@ import { SearchResultMatchComponent } from './search-result/search-result-match.
     ReactiveFormsModule,
     DataTablesModule,
     NgxSpinnerModule,
-    RenderModule
+    RenderModule,
+    NgSelectModule
   ],
   providers: []
 })

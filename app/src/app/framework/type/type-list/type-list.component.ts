@@ -26,6 +26,8 @@ import { UserService } from '../../../management/services/user.service';
 import { FileSaverService } from 'ngx-filesaver';
 import { DatePipe } from '@angular/common';
 import { FileService } from '../../../export/export.service';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { CleanupModalComponent } from '../builder/modals/cleanup-modal/cleanup-modal.component';
 
 @Component({
   selector: 'cmdb-type-list',
@@ -42,11 +44,12 @@ export class TypeListComponent implements OnInit, OnDestroy {
   public dtTrigger: Subject<any> = new Subject();
   public selectedObjects: string[] = [];
 
-  public remove: boolean = false;
-  public update: boolean = false;
+  // Parameters for CleanUp Modal
+  private modalRef: NgbModalRef;
 
   constructor(private typeService: TypeService, public userService: UserService, private router: Router,
-              private fileService: FileService, private fileSaverService: FileSaverService, private datePipe: DatePipe) {
+              private fileService: FileService, private fileSaverService: FileSaverService, private datePipe: DatePipe,
+              private modalService: NgbModal) {
   }
 
   public ngOnInit(): void {
@@ -86,29 +89,16 @@ export class TypeListComponent implements OnInit, OnDestroy {
       () => { this.dtTrigger.next(); });
   }
 
-  public cleanupDatabase(typeInstance: CmdbType) {
-    if (typeInstance.clean_db === false) {
-      this.typeService.cleanupRemovedFields(typeInstance.public_id).subscribe(() => {
-        this.remove = true;
-      }, error => {console.log(error); },
-        () => {
-          this.typeService.cleanupInsertedFields(typeInstance.public_id).subscribe(() => {
-            this.update = true;
-          }, error => console.log(error),
-            () => {
-              if (this.remove && this.update) {
-                typeInstance.clean_db = true;
-                this.typeService.putType(typeInstance).subscribe(() => {
-                  console.log('ok');
-                });
-              }
-            });
-        });
-    }
+  public callCleanUpModal(typeInstance: CmdbType): void {
+    this.modalRef = this.modalService.open(CleanupModalComponent);
+    this.modalRef.componentInstance.typeInstance = typeInstance;
   }
 
   public ngOnDestroy(): void {
     this.dtTrigger.unsubscribe();
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
   }
 
   public exportingFiles() {

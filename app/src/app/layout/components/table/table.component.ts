@@ -25,7 +25,7 @@ import { ApiCallService } from '../../../services/api-call.service';
 import { DatePipe } from '@angular/common';
 
 import { Router } from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import { FileSaverService } from 'ngx-filesaver';
 import { TableColumn} from './models/table-column';
 import { TableColumnAction} from './models/table-columns-action';
@@ -47,6 +47,7 @@ export class TableComponent implements OnInit, OnDestroy {
   public dtElement: DataTableDirective;
   public dtOptions: any;
   public dtTrigger: Subject<any> = new Subject();
+  private modalRef: NgbModalRef;
 
   @Input() thColumns: TableColumn[];
   @Input() thColumnsActions: TableColumnAction[];
@@ -165,6 +166,9 @@ export class TableComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     // Do not forget to unsubscribe the event
     this.dtTrigger.unsubscribe();
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
   }
 
   public rerender(): void {
@@ -217,13 +221,13 @@ export class TableComponent implements OnInit, OnDestroy {
     }
 
     if (publicIds.length > 0) {
-      const modalComponent = this.modalService.open(GeneralModalComponent);
-      modalComponent.componentInstance.title = 'Delete selected Objects';
-      modalComponent.componentInstance.modalMessage = 'Are you sure, you want to delete all selected objects?';
-      modalComponent.componentInstance.buttonDeny = 'Cancel';
-      modalComponent.componentInstance.buttonAccept = 'Delete';
+      this.modalRef = this.modalService.open(GeneralModalComponent);
+      this.modalRef.componentInstance.title = 'Delete selected Objects';
+      this.modalRef.componentInstance.modalMessage = 'Are you sure, you want to delete all selected objects?';
+      this.modalRef.componentInstance.buttonDeny = 'Cancel';
+      this.modalRef.componentInstance.buttonAccept = 'Delete';
 
-      modalComponent.result.then((result) => {
+      this.modalRef.result.then((result) => {
         if (result) {
           this.apiCallService.callDeleteManyRoute(this.linkRoute + 'delete/' + publicIds ).subscribe(data => {
             this.apiCallService.callGet('render/').subscribe((objs: RenderResult[]) => {
@@ -288,11 +292,11 @@ export class TableComponent implements OnInit, OnDestroy {
   }
 
   private createModal(title: string, modalMessage: string, buttonDeny: string, buttonAccept: string) {
-    const modalComponent = this.modalService.open(GeneralModalComponent);
-    modalComponent.componentInstance.title = title;
-    modalComponent.componentInstance.modalMessage = modalMessage;
-    modalComponent.componentInstance.buttonDeny = buttonDeny;
-    modalComponent.componentInstance.buttonAccept = buttonAccept;
-    return modalComponent;
+    this.modalRef = this.modalService.open(GeneralModalComponent);
+    this.modalRef.componentInstance.title = title;
+    this.modalRef.componentInstance.modalMessage = modalMessage;
+    this.modalRef.componentInstance.buttonDeny = buttonDeny;
+    this.modalRef.componentInstance.buttonAccept = buttonAccept;
+    return this.modalRef;
   }
 }

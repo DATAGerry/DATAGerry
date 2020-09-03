@@ -91,7 +91,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       if (event instanceof NavigationEnd) {
         const searchQuery = this.route.snapshot.queryParams.query;
         if (searchQuery !== undefined) {
-          this.tags = JSON.parse(searchQuery) as SearchBarTag[];
+          this.tags = JSON.parse(searchQuery).filter(tag => tag.searchForm !== 'disjunction') as SearchBarTag[];
         } else {
           this.tags = [];
         }
