@@ -40,9 +40,15 @@ export class TemplateHelperService {
             iteration = iteration - 1;
             const changedPrefix = (prefix ? prefix + '[\'fields\'][\'' + field.name + '\']' : '[\'' + field.name + '\']');
             let subdata;
-            await this.getObjectTemplateHelperData(field.ref_types, changedPrefix, iteration).then(data => {
-              subdata = data;
-            });
+            if (isNaN(field.ref_types)) {
+              await this.getObjectTemplateHelperData(field.ref_types, changedPrefix, iteration).then(data => {
+                subdata = data;
+              });
+            } else if (field.ref_types.length === 1) {
+              await this.getObjectTemplateHelperData(field.ref_types[0], changedPrefix, iteration).then(data => {
+                subdata = data;
+              });
+            }
             templateHelperData.push(({
               label: field.label,
               subdata
