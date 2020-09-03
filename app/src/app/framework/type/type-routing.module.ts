@@ -21,7 +21,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { TypeAddComponent } from './type-add/type-add.component';
 import { TypeEditComponent } from './type-edit/type-edit.component';
 import { TypeDeleteComponent } from './type-delete/type-delete.component';
-import { TypeComponent } from './type.component';
+import { TypeListComponent } from './type-list/type-list.component';
 
 const routes: Routes = [
   {
@@ -31,7 +31,7 @@ const routes: Routes = [
       breadcrumb: 'List',
       right: 'base.framework.type.view'
     },
-    component: TypeComponent
+    component: TypeListComponent
   },
   {
     path: 'add',

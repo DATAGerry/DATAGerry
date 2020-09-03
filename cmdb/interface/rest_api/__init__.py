@@ -24,7 +24,6 @@ from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManager
-from cmdb.interface.rest_api.framework_routes.type_routes import types_blueprint
 from cmdb.media_library.media_file_manager import MediaFileManagement
 from cmdb.user_management import UserManager
 from cmdb.utils.security import SecurityManager
@@ -140,7 +139,7 @@ def register_converters(app):
 def register_blueprints(app):
     from cmdb.interface.rest_api.connection import connection_routes
     from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint
-    from cmdb.interface.rest_api.framework_routes.type_routes import types_blueprint
+    from cmdb.interface.rest_api.framework_routes.type_routes import type_blueprint
     from cmdb.interface.rest_api.auth_routes import auth_blueprint
     from cmdb.interface.rest_api.framework_routes.category_routes import categories_blueprint
     from cmdb.interface.rest_api.user_management_routes.user_routes import user_blueprint
@@ -163,7 +162,7 @@ def register_blueprints(app):
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(object_blueprint)
-    app.register_multi_blueprint(types_blueprint, multi_prefix=['/type', '/types'])
+    app.register_multi_blueprint(type_blueprint, multi_prefix=['/type', '/types'])
     app.register_blueprint(connection_routes)
     app.register_multi_blueprint(categories_blueprint, multi_prefix=['/category', '/categories'])
     app.register_blueprint(user_blueprint)
