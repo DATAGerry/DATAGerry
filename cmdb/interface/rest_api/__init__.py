@@ -162,7 +162,7 @@ def register_blueprints(app):
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(object_blueprint)
-    app.register_blueprint(type_blueprint)
+    app.register_multi_blueprint(type_blueprint, multi_prefix=['/type', '/types'])
     app.register_blueprint(connection_routes)
     app.register_multi_blueprint(categories_blueprint, multi_prefix=['/category', '/categories'])
     app.register_blueprint(user_blueprint)

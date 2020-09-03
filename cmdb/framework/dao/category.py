@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from typing import List, Union
 
-from cmdb.framework import CmdbType
+from cmdb.framework.dao import TypeDAO
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.utils import Model, Collection
 
@@ -101,14 +101,14 @@ class CategoryDAO(CmdbDAO):
             return False
 
     def __init__(self, public_id: int, name: str, label: str = None, meta: __CategoryMeta = None,
-                 parent: int = None, types: Union[List[int], List[CmdbType]] = None):
+                 parent: int = None, types: Union[List[int], List[TypeDAO]] = None):
         self.name: str = name
         self.label: str = label
         self.meta: CategoryDAO.__CategoryMeta = meta
         if parent == public_id and (parent is not None):
             raise ValueError(f'Category {name} has his own ID as Parent')
         self.parent: int = parent
-        self.types: Union[List[int], List[CmdbType]] = types
+        self.types: Union[List[int], List[TypeDAO]] = types
         super(CategoryDAO, self).__init__(public_id=public_id)
 
     @classmethod
@@ -169,7 +169,7 @@ class CategoryDAO(CmdbDAO):
         """Check if this category has types"""
         return True if self.get_number_of_types() > 0 else False
 
-    def get_types(self) -> Union[List[int], List[CmdbType]]:
+    def get_types(self) -> Union[List[int], List[TypeDAO]]:
         """Get list of type ids in this category"""
         if not self.types:
             self.types = []
@@ -188,13 +188,13 @@ class CategoryTree:
         """Class of a category node inside the category tree"""
 
         def __init__(self, category: CategoryDAO, children: List["CategoryTree.CategoryNode"] = None,
-                     types: List[CmdbType] = None):
+                     types: List[TypeDAO] = None):
             self.category: CategoryDAO = category
             self.node_order: int = self.category.get_meta().get_order()
             self.children: List["CategoryTree.CategoryNode"] = children or []
             # prevent wrong type order
-            self.types: List[CmdbType] = [type_ for id_ in self.category.types for type_ in types if
-                                          id_ == type_.public_id]
+            self.types: List[TypeDAO] = [type_ for id_ in self.category.types for type_ in types if
+                                         id_ == type_.public_id]
 
         @classmethod
         def to_json(cls, instance: "CategoryTree.CategoryNode"):
@@ -203,7 +203,7 @@ class CategoryTree:
                 'category': CategoryDAO.to_json(instance.category),
                 'node_order': instance.node_order,
                 'children': [CategoryTree.CategoryNode.to_json(child_node) for child_node in instance.children],
-                'types': [CmdbType.to_json(type) for type in instance.types]
+                'types': [TypeDAO.to_json(type) for type in instance.types]
             }
 
         def get_order(self) -> int:
@@ -223,7 +223,7 @@ class CategoryTree:
             """String representation of the category node"""
             return f'CategoryNode(CategoryID={self.category.public_id})'
 
-    def __init__(self, categories: List[CategoryDAO], types: List[CmdbType] = None):
+    def __init__(self, categories: List[CategoryDAO], types: List[TypeDAO] = None):
         self._categories = categories
         self._types = types
         self._tree: List[CategoryTree.CategoryNode] = sorted(self.__create_tree(self._categories, types=self._types),
@@ -249,7 +249,7 @@ class CategoryTree:
         return self._tree
 
     @classmethod
-    def __create_tree(cls, categories, parent: int = None, types: List[CmdbType] = None) -> List[CategoryNode]:
+    def __create_tree(cls, categories, parent: int = None, types: List[TypeDAO] = None) -> List[CategoryNode]:
         """
         Generate the category tree from list structure
         Args:

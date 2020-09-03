@@ -26,7 +26,7 @@ from cmdb.interface.route_utils import make_response, login_required, insert_req
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError, ObjectManagerGetError, \
     ObjectManagerInitError
-from cmdb.framework.cmdb_type import CmdbType
+from cmdb.framework.dao.type import TypeDAO
 
 try:
     from cmdb.utils.error import CMDBError
@@ -51,8 +51,8 @@ def get_types(request_user: User):
     except (ObjectManagerInitError, ObjectManagerGetError) as err:
         return abort(500, err.message)
     if len(type_list) == 0:
-        return make_response(type_list, 204)
-    return make_response(type_list)
+        return make_response([], 204)
+    return make_response([TypeDAO.to_json(type) for type in type_list])
 
 
 @type_blueprint.route('/find/<path:regex>/', defaults={'regex_options': 'imsx'}, methods=['GET'])
@@ -83,8 +83,8 @@ def find_types_by_name(regex: str, regex_options: str, request_user: User):
         return abort(400, err.message)
 
     if len(type_list) == 0:
-        return make_response(type_list, 204)
-    return make_response(type_list)
+        return make_response([], 204)
+    return make_response([TypeDAO.to_json(type) for type in type_list])
 
 
 @type_blueprint.route('/<int:public_id>/', methods=['GET'])
@@ -97,7 +97,7 @@ def get_type(public_id: int, request_user: User):
         type_instance = object_manager.get_type(public_id)
     except ObjectManagerGetError as err:
         return abort(404, err.message)
-    return make_response(type_instance)
+    return make_response(TypeDAO.to_json(type_instance))
 
 
 @type_blueprint.route('/<string:name>/', methods=['GET'])
@@ -110,7 +110,7 @@ def get_type_by_name(name: str, request_user: User):
         type_instance = object_manager.get_type_by(name=name)
     except ObjectManagerGetError as err:
         return abort(404, err.message)
-    return make_response(type_instance)
+    return make_response(TypeDAO.from_data(type_instance))
 
 
 @type_blueprint.route('/', methods=['POST'])
@@ -123,18 +123,18 @@ def add_type(request_user: User):
     add_data_dump = json.dumps(request.json)
     try:
         new_type_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
-        new_type_data['public_id'] = object_manager.get_new_id(CmdbType.COLLECTION)
+        new_type_data['public_id'] = object_manager.get_new_id(TypeDAO.COLLECTION)
         new_type_data['creation_time'] = datetime.utcnow()
     except TypeError as e:
         LOGGER.warning(e)
         return abort(400)
     try:
-        type_instance = CmdbType(**new_type_data)
+        type_instance = TypeDAO.from_data(new_type_data)
     except CMDBError as e:
         LOGGER.debug(e)
         return abort(400)
     try:
-        ack = object_manager.insert_type(type_instance)
+        ack = object_manager.insert_type(TypeDAO.to_json(type_instance))
     except TypeInsertError:
         return abort(500)
 
@@ -155,7 +155,7 @@ def update_type(request_user: User):
         LOGGER.warning(e)
         abort(400)
     try:
-        update_type_instance = CmdbType(**new_type_data)
+        update_type_instance = TypeDAO.from_data(new_type_data)
     except CMDBError:
         return abort(400)
     try:
@@ -258,7 +258,7 @@ def get_types_by_category(public_id, request_user: User):
         type_list = object_manager.get_types_by(public_id={'$in': type_ids})
     except ObjectManagerGetError as err:
         return abort(404, err.message)
-    return make_response(type_list)
+    return make_response([TypeDAO.to_json(type) for type in type_list])
 
 
 @type_blueprint.route('/uncategorized/', methods=['GET'])
@@ -274,7 +274,7 @@ def get_uncategorized_types(request_user: User):
     for category in categories:
         categorized_types += category.types
 
-    uncategorized_types = [type_ for type_ in types if type_.get_public_id() not in categorized_types]
+    uncategorized_types = [TypeDAO.to_json(type_) for type_ in types if type_.get_public_id() not in categorized_types]
 
     return make_response(uncategorized_types)
 

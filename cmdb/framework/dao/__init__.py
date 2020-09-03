@@ -13,8 +13,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+from cmdb.framework.dao.type import TypeDAO
 from cmdb.framework.dao.category import CategoryDAO
 
 __all__ = [
-    CategoryDAO
+    CategoryDAO,
+    TypeDAO
 ]

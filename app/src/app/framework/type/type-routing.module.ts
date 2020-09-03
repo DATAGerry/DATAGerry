@@ -18,11 +18,10 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { TypeListComponent } from './type-list/type-list.component';
 import { TypeAddComponent } from './type-add/type-add.component';
 import { TypeEditComponent } from './type-edit/type-edit.component';
 import { TypeDeleteComponent } from './type-delete/type-delete.component';
-import { PermissionGuard } from '../../auth/guards/permission.guard';
+import { TypeListComponent } from './type-list/type-list.component';
 
 const routes: Routes = [
   {

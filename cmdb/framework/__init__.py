@@ -25,7 +25,7 @@ the elements for the database.
 """
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.cmdb_type import CmdbType
+from cmdb.framework.dao import TypeDAO
 from cmdb.framework.dao import CategoryDAO
 from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.framework.cmdb_link import CmdbLink
@@ -37,7 +37,7 @@ CmdbLog.register_log_type(CmdbObjectLog.__name__, CmdbObjectLog)
 # List of init collections
 __COLLECTIONS__ = [
     CmdbObject,
-    CmdbType,
+    TypeDAO,
     CategoryDAO,
     CmdbStatus,
     CmdbMetaLog,

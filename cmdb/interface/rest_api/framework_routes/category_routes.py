@@ -399,13 +399,11 @@ def update_category(public_id: int, data: dict):
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
     try:
         category = CategoryDAO.from_data(data=data)
-        update_result = category_manager.update(public_id=PublicID(public_id), resource=CategoryDAO.to_json(category))
+        category_manager.update(public_id=PublicID(public_id), category=CategoryDAO.to_json(category))
         api_response = UpdateSingleResponse(result=data, url=request.url, model=CategoryDAO.MODEL)
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerUpdateError as err:
-        return abort(400, err.message)
-    except Exception as err:
         return abort(400, err.message)
 
     return api_response.make_response()
