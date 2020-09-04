@@ -133,7 +133,7 @@ def insert_category(data: dict):
         return abort(400, err.message)
     api_response = InsertSingleResponse(result_id, raw=CategoryDAO.to_json(raw_doc), url=request.url,
                                         model=CategoryDAO.MODEL)
-    return api_response.make_response(prefix='category')
+    return api_response.make_response(prefix='categories')
 
 
 @categories_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
