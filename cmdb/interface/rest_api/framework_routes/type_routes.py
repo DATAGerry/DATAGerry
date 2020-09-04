@@ -112,5 +112,5 @@ def delete_type(public_id: int):
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerDeleteError as err:
-        return abort(404, err.message)
+        return abort(400, err.message)
     return api_response.make_response()
