@@ -234,6 +234,15 @@ class TypeDAO(CmdbDAO):
             'required': False,
             'default': True
         },
+        'creation_time': {
+            'type': 'dict',
+            'empty': True,
+            'schema': {
+                '$date': {
+                    'type': 'integer'
+                }
+            }
+        },
         'render_meta': {
             'type': 'dict',
             'allow_unknown': False,
@@ -295,7 +304,6 @@ class TypeDAO(CmdbDAO):
             render_meta=TypeRenderMeta.from_data(data.get('render_meta', {})),
             fields=data.get('fields', None),
             clean_db=data.get('clean_db', True),
-
         )
 
     @classmethod
