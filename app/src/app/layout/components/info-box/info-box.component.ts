@@ -8,12 +8,11 @@ import {Component, Input, OnInit} from '@angular/core';
 export class InfoBoxComponent implements OnInit {
 
   @Input() message: string;
-  @Input() icon: string = 'idk';
-  @Input() doc: string;
+  @Input() icon: string = 'far fa-file';
+  @Input() doc: string = 'https://docs.datagerry.com';
 
   constructor() { }
 
   ngOnInit() {
   }
-
 }
