@@ -19,6 +19,12 @@
 import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
+// Fontawesome
+import { FaIconLibrary } from '@fortawesome/angular-fontawesome';
+
+export interface FontAwesomeIcon {
+  [pack: string]: string;
+}
 
 @Component({
   selector: 'cmdb-icon-picker',
@@ -27,24 +33,50 @@ import { FormGroup } from '@angular/forms';
 })
 export class IconPickerComponent {
 
+  private preSelectedIcon: string = 'cube';
+  public icons: FontAwesomeIcon[] = [];
+  public packs: { [key: string]: string } = {fas: 'Solid', far: 'Regular', fab: 'Brands'};
+
   @Input() iconFormGroup: FormGroup;
   @Input() inputDescription: string = 'Symbol for the type label';
-  @Input() preSelectedIcon: string;
-  public fallBackIcon: string;
 
   @Input()
   public set fallbackIcon(value: string) {
-    this.fallBackIcon = value;
+    if (value != null) {
+      if (value.includes('fas fa-')) {
+        this.preSelectedIcon = value.replace('fas fa-', '');
+      } else if (value.includes('far fa-')) {
+        this.preSelectedIcon = value.replace('far fa-', '');
+      } else if (value.includes('fab fa-')) {
+        this.preSelectedIcon = value.replace('fab fa-', '');
+      } else {
+        this.preSelectedIcon = value;
+      }
+    } else {
+      this.preSelectedIcon = 'cube';
+    }
   }
 
   public get fallbackIcon(): string {
-    if (this.fallBackIcon === undefined || this.fallBackIcon === '') {
-      return 'fa fa-cube';
-    }
-    return this.fallBackIcon;
+    return !this.preSelectedIcon ? 'cube' : this.preSelectedIcon;
   }
 
-  onIconPickerSelect(value: string): void {
-    this.iconFormGroup.get('icon').setValue(value);
+  constructor(private library: FaIconLibrary) {
+    // @ts-ignore
+    const fasArray = Object.keys(library.definitions.fas);
+    // @ts-ignore
+    const farArray = Object.keys(library.definitions.far);
+    // @ts-ignore
+    const fabArray = Object.keys(library.definitions.fab);
+
+    fasArray.forEach(icon => this.icons.push({key: 'fas', name: icon}));
+    farArray.forEach(icon => this.icons.push({key: 'far', name: icon}));
+    fabArray.forEach(icon => this.icons.push({key: 'fab', name: icon}));
+  }
+
+  onIconPickerSelect(value: any = {key: 'fas', name: 'cube'}): void {
+    const {key, name} = value;
+    this.iconFormGroup.get('icon').setValue(`${key} fa-${name}`);
+    this.fallbackIcon = name;
   }
 }

@@ -1,19 +1,20 @@
-<div class="form-group">
-  <div [formGroup]="iconFormGroup">
-    <label>Icon</label>
-    <div class="input-group">
-      <div class="input-group-prepend">
-        <span class="input-group-text" id="basic-addon1"><i [ngClass]="iconFormGroup.get('icon').value"></i></span>
-      </div>
-      <input type="text" name="icon" class="form-control"
-             formControlName="icon"
-             [iconPicker]="preSelectedIcon"
-             [ipPosition]="'bottom'"
-             [ipIconPack]="['fa5']"
-             [ipPlaceHolder]="'Choose an icon'"
-             [ipFallbackIcon]="fallbackIcon"
-             (iconPickerSelect)="onIconPickerSelect($event)" readonly/>
-    </div>
-  </div>
-  <small id="iconInputDescription" class="form-text text-muted">{{inputDescription}}</small>
-</div>
+<label>Icon</label>
+<ng-select [items]="icons"
+           bindLabel="name"
+           bindValue="name"
+           (change)="onIconPickerSelect($event)"
+           groupBy="key"
+           [(ngModel)]="fallbackIcon"
+           placeholder="Choose an icon">
+  <ng-template ng-optgroup-tmp let-item="item" let-item$="item$" let-index="index">
+    <h5>{{packs[item.key]}}</h5>
+  </ng-template>
+  <ng-template ng-label-tmp let-item="item">
+    <i class="{{item.key}} fa-{{item.name}}"></i> {{item.name}}
+  </ng-template>
+  <ng-template ng-option-tmp let-item="item" let-index="index">
+      <i class="{{item.key}} fa-{{item.name}}" size="2x"></i> {{item.name}}
+  </ng-template>
+</ng-select>
+
+<small id="iconInputDescription" class="form-text text-muted">{{inputDescription}}</small>
