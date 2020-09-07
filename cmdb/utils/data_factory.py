@@ -20,7 +20,7 @@ NOTE: This module is highly experimental and should only be used for development
 """
 
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.cmdb_type import CmdbType
+from cmdb.framework.dao.type import TypeDAO
 from cmdb.framework.dao.category import CategoryDAO
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user import User
@@ -135,7 +135,7 @@ class DataGenerator:
         generation_date = self._faker.date_time_between(start_date="-100d", end_date="-30d")
 
         type_list.append(
-            CmdbType(
+            TypeDAO(
                 **{
                     "public_id": 1,
                     "label": "Leased Lines",
@@ -282,7 +282,7 @@ class DataGenerator:
             )
         )
         type_list.append(
-            CmdbType(
+            TypeDAO(
                 **{
                     "public_id": 2,
                     "title": "Switch",
@@ -434,7 +434,7 @@ class DataGenerator:
         )
 
         type_list.append(
-            CmdbType(
+            TypeDAO(
                 **{
                     "public_id": 3,
                     "title": "Router",
@@ -584,7 +584,7 @@ class DataGenerator:
             )
         )
         type_list.append(
-            CmdbType(
+            TypeDAO(
                 **{
                     "public_id": 4,
                     "label": "Locations",
@@ -694,7 +694,7 @@ class DataGenerator:
             )
         )
         type_list.append(
-            CmdbType(
+            TypeDAO(
                 **{
                     "public_id": 5,
                     "label": "Servers",

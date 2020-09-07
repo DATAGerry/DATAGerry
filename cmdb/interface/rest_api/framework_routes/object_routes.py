@@ -255,11 +255,7 @@ def get_objects_by_types(type_ids, request_user: User):
     """Return all objects by type_id"""
     try:
         filter_state = {'type_id': type_ids}
-        if _fetch_only_active_objs():
-            filter_state['active'] = {"$eq": True}
-
-        query = _build_query(filter_state, q_operator='$or')
-        all_objects_list = object_manager.get_objects_by(sort="type_id", **query)
+        all_objects_list = object_manager.get_objects_by(sort="type_id", filter={'$or': filter_state})
         rendered_list = RenderList(all_objects_list, request_user).render_result_list()
 
     except CMDBError:
@@ -278,9 +274,6 @@ def get_objects_by_public_id(public_ids, request_user: User):
 
     try:
         filter_state = {'public_id': public_ids}
-        if _fetch_only_active_objs():
-            filter_state['active'] = {"$eq": True}
-
         query = _build_query(filter_state, q_operator='$or')
         all_objects_list = object_manager.get_objects_by(sort="public_id", **query)
         rendered_list = RenderList(all_objects_list, request_user).render_result_list()

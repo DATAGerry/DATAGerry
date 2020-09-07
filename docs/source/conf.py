@@ -16,7 +16,7 @@ import os
 import sys
 
 # TODO Add more routes
-sys.path.insert(0, os.path.abspath('../../cmdb'))
+sys.path.insert(0, os.path.abspath('../../'))
 
 # -- Project information -----------------------------------------------------
 

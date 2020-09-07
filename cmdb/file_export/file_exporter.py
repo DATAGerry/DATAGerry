@@ -44,7 +44,7 @@ class FileExporter:
         """init of FileExporter
 
         Args:
-            object_type: type of object e.g. CmdbObject or CmdbObject by CmdbType ID
+            object_type: type of object e.g. CmdbObject or CmdbObject by TypeDAO ID
             export_type: the ExportType object
             public_id: public id which implements the object / type
             **kwargs: additional data
@@ -53,14 +53,14 @@ class FileExporter:
         self.export_type = export_type
         self.public_id = public_id
 
-        # object_list: list of objects e.g CmdbObject or CmdbType
+        # object_list: list of objects e.g CmdbObject or TypeDAO
         self.object_list = []
         self.response = None
 
     def get_object_type(self):
         """
 
-        Returns: type of object e.g. CmdbObject, CmdbType or CmdbObject by CmdbType ID (object, type, object/type)
+        Returns: type of object e.g. CmdbObject, TypeDAO or CmdbObject by TypeDAO ID (object, type, object/type)
 
         """
         return self.object_type
@@ -68,7 +68,7 @@ class FileExporter:
     def get_object_list(self):
         """
 
-        Returns: list of objects e.g CmdbObject or CmdbType
+        Returns: list of objects e.g CmdbObject or TypeDAO
 
         """
         file_type = self.get_object_type()
