@@ -11,7 +11,7 @@ jobs:
     container: nethinks/datagerry_ci
     steps:
     - name: extract Github branch name
-      run: echo ::set-env name=BRANCH::$(BRANCH_EXTRACTED=${github.event.ref}; echo ${BRANCH_EXTRACTED//\//-})
+      run: echo ::set-env name=BRANCH::$(BRANCH_EXTRACTED=${{github.event.ref}}; echo ${BRANCH_EXTRACTED//\//-})
     - name: setup version strings
       run: |
         echo ::set-env name=VERSION_PATH::$(echo branches/${BRANCH})
