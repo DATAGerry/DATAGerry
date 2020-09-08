@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CmdbCategoryNode, CmdbCategoryTree } from '../../../models/cmdb-category';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import { CmdbMode } from '../../../modes.enum';
@@ -42,6 +42,18 @@ export class CategoryTreeComponent {
    * Possible dnd effect
    */
   public effect: DropEffect = 'move';
+
+  /**
+   * Tree change emitter
+   */
+  @Output() public change: EventEmitter<{ type: string, value: any }>;
+
+  /**
+   * Constructor of CategoryTreeComponent
+   */
+  public constructor() {
+    this.change = new EventEmitter<{ type: string, value: any }>();
+  }
 
   /**
    * When drag event started

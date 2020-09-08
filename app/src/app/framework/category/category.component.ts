@@ -95,12 +95,20 @@ export class CategoryComponent implements OnInit, OnDestroy {
       if (parentNode) {
         node.category.parent = parentNode.category.public_id;
       }
+      if (!parentNode && node.category.parent !== null) {
+        node.category.parent = null;
+      }
       observers.push(this.categoryService.updateCategory(node.category));
       if (node.children.length > 0) {
         observers = observers.concat(this.saveTree(node.children, node));
       }
     }
     return observers;
+  }
+
+  public onTreeChange(event: any): void {
+    this.sidebarService.reload();
+    this.ngOnInit();
   }
 
 }
