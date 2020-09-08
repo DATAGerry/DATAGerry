@@ -1,6 +1,14 @@
-<cmdb-content-header [faIcon]="'cube'" title="Exportd Job List"></cmdb-content-header>
+<span class="d-flex justify-content-between">
+  <h1>Exportd Job List</h1>
+  <h1><i class="far fa fa-info-circle" (click)="showAlert()"></i></h1>
+</span>
+<hr>
 <cmdb-info-box message="Exportd is an interface for exporting objects to external systems like monitoring systems,
-                        ticket systems, backup software or any kind of other system."
+ticket systems, backup software or any kind of other system. Exports are organized in Jobs. A Job contains Sources,
+Destinations and Variables. Export Jobs can be triggered manually (by clicking on a button in the webui) or event based,
+if the configured sources of a job were changed (e.g. a new object was added). Export Jobs can be of type Push (default)
+ or Pull. Push Jobs are a push to an external system, which runs in a background process, while a Pull job is triggered
+ by an external system via REST. The client directly gets the result within that REST call."
                icon="fas fa-sync-alt"
                doc="/docs/admin_guide/exportd.html"></cmdb-info-box>
 <div class="card-body" style="padding: 0 0 1em 0;">

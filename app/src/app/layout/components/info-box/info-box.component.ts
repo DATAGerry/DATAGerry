@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import {Component, Input } from '@angular/core';
 
 @Component({
   selector: 'cmdb-info-box',
@@ -28,4 +28,8 @@ export class InfoBoxComponent {
   @Input() message: string;
   @Input() icon: string = 'far fa-file';
   @Input() doc: string = 'https://docs.datagerry.com';
+
+  public hideAlert(): void {
+    $('#infobox').hide();
+  }
 }

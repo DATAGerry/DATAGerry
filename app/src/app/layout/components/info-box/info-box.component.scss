@@ -1,4 +1,61 @@
+.icon {
+  width: 40px;
+  height: 40px;
+  display: inline-block;
+  position: relative;
+  top: 8px;
+  float: left;
+  margin-left: -44px;
+  z-index: 9999;
+}
 
-.border-padding {
-  padding: 0.75rem 1.25rem !important;
+.text-area {
+  padding: 9px 9px 4px 26px;
+  min-height: 100px;
+}
+
+.icon-background {
+  background: #e94d18;
+}
+
+.icon-background i::before {
+  background: #e94d18;
+}
+
+.icon-background::before {
+  font-family: "Font Awesome 5 Free", sans-serif;
+  font-size: 24px;
+  content: "\f0eb";
+  top: 7px;
+  left: 11px;
+}
+.icon::before, .icon::after {
+  display: inline-block;
+  color: #fff;
+  line-height: normal;
+  position: absolute;
+}
+
+.icon i::before {
+  width: 23px;
+  height: 20px;
+  box-shadow: inset 12px 0 13px rgba(0,0,0,0.5);
+}
+
+.icon i::after {
+  width: 0;
+  height: 0;
+  border: 12px solid transparent;
+  border-bottom-color: #fff;
+  border-left-color: #fff;
+  bottom: -16px !important;
+}
+
+.icon i::before, .icon i::after {
+  content: "";
+  display: inline-block;
+  position: absolute;
+  left: 0;
+  bottom: -15px;
+  transform: rotateX(60deg);
 }

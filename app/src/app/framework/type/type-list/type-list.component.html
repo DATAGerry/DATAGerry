@@ -1,6 +1,14 @@
-<h1>Type list</h1>
+<span class="d-flex justify-content-between">
+  <h1>Type List</h1>
+  <h1><i class="far fa fa-info-circle" (click)="showAlert()"></i></h1>
+</span>
 <hr/>
-<cmdb-info-box message="Object Types are the blueprints for objects."
+<cmdb-info-box message="DATAGERRY is an asset management tool (or CMDB), where you can define the data model for your own.
+
+In DATAGERRY objects are stored. An object can be for example a router, server, location or maintenance contract and
+ consists of multiple fields (e.g. management IP, hostname, … of a router). Each field has a specific data type.
+ A datatype could be for example text, checkbox, date, dropdown or many more. The blueprint for an object is defined
+ in an object type."
                icon="fas fa-cube"
                doc="/docs/admin_guide/objects.html"></cmdb-info-box>
 <div class="card-body clearfix" style="padding: 0 0 1em 0">

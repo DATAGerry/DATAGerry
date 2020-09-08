@@ -134,4 +134,8 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
       this.modalRef.close();
     }
   }
+  public showAlert(): void {
+    $('#infobox').show();
+  }
+
 }

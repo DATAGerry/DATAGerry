@@ -141,4 +141,9 @@ export class TypeListComponent implements OnInit, OnDestroy {
       this.selectedObjects.push(publicID);
     }
   }
+
+  public showAlert(): void {
+    $('#infobox').show();
+  }
+
 }

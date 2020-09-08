@@ -104,4 +104,7 @@ export class DocapiSettingsListComponent implements OnInit, OnDestroy {
       this.modalRef.close();
     }
   }
+  public showAlert(): void {
+    $('#infobox').show();
+  }
 }
