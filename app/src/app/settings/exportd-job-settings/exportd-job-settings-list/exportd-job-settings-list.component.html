@@ -1,5 +1,8 @@
 <cmdb-content-header [faIcon]="'cube'" title="Exportd Job List"></cmdb-content-header>
-
+<cmdb-info-box message="Exportd is an interface for exporting objects to external systems like monitoring systems,
+                        ticket systems, backup software or any kind of other system."
+               icon="fas fa-sync-alt"
+               doc="/docs/admin_guide/exportd.html"></cmdb-info-box>
 <div class="card-body" style="padding: 0 0 1em 0;">
   <button type="button"
           *permissionLink="['base.exportd.job.add']"
