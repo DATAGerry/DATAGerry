@@ -64,8 +64,8 @@ class FrameworkQueryBuilder(Builder):
         if isinstance(filter, dict):
             self.query.append(self.match_(filter))
         elif isinstance(filter, list):
-            for f in filter:
-                self.query.append(self.match_(f))
+            for pipe in filter:
+                self.query.append(pipe)
 
         self.query.append(self.sort_(sort=sort, order=order))
         self.query.append(self.facet_({

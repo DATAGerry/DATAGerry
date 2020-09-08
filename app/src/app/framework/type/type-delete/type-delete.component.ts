@@ -124,13 +124,12 @@ export class TypeDeleteComponent implements OnInit {
     deleteModal.componentInstance.typeLabel = this.typeInstance.label;
     deleteModal.result.then((result) => {
       if (result === 'delete') {
-        this.typeService.deleteType(this.typeID).subscribe((confirm) => {
-          if (confirm === true) {
+        this.typeService.deleteType(this.typeID).subscribe((deletedType) => {
+          if (deletedType.public_id === this.typeID) {
             this.router.navigate(['/']);
           }
         });
       }
-      console.log(result);
     }, (reason) => {
       console.log(reason);
     });

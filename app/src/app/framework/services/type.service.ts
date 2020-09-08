@@ -23,9 +23,15 @@ import { ValidatorService } from '../../services/validator.service';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
-import { HttpBackend, HttpClient, HttpHeaders } from '@angular/common/http';
-import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
-import { AuthService } from '../../auth/services/auth.service';
+import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+import {
+  APIDeleteSingleResponse,
+  APIGetMultiResponse,
+  APIGetSingleResponse,
+  APIInsertSingleResponse,
+  APIUpdateSingleResponse
+} from '../../services/models/api-response';
+import { CmdbCategory } from '../models/cmdb-category';
 
 export const httpObserveOptions = {
   headers: new HttpHeaders({
@@ -40,7 +46,7 @@ export const COOCKIENAME = 'onlyActiveObjCookie';
 export const checkTypeExistsValidator = (typeService: TypeService<CmdbType>, time: number = 500) => {
   return (control: FormControl) => {
     return timer(time).pipe(switchMap(() => {
-      return typeService.checkTypeExists(control.value).pipe(
+      return typeService.getTypesByName(control.value).pipe(
         map(() => {
           return { typeExists: true };
         }),
@@ -59,27 +65,30 @@ export const checkTypeExistsValidator = (typeService: TypeService<CmdbType>, tim
 })
 export class TypeService<T = CmdbType> implements ApiService {
 
-  public servicePrefix: string = 'type';
-  private typeList: T[];
+  public servicePrefix: string = 'types';
 
-  constructor(private api: ApiCallService, private backend: HttpBackend,
-              private authService: AuthService, private http: HttpClient) {
-    // STRUCTURE IS DEPRECATED PLEASE NOT USE
-    this.getTypeList().subscribe((respTypeList: T[]) => {
-      this.typeList = respTypeList;
-    });
+  constructor(private api: ApiCallService, private client: HttpClient) {
   }
 
-  public findType(publicID: number): T {
-    // FUNCTION IS DEPRECATED PLEASE NOT USE
-    // @ts-ignore
-    return this.typeList.find(id => id.public_id === publicID);
+  public getTypesIteration(...options): Observable<APIGetMultiResponse<T>> {
+    // this.api.parseIterationParams(options);
+    let params: HttpParams = new HttpParams();
+    for (const option of options) {
+      for (const key of Object.keys(option)) {
+        params = params.append(key, option[key]);
+      }
+    }
+    return this.api.callGet<T[]>(this.servicePrefix + '/', this.client, httpObserveOptions).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return apiResponse.body;
+      })
+    );
   }
 
   public getType(publicID: number): Observable<T> {
     return this.api.callGet<CmdbType>(this.servicePrefix + '/' + publicID).pipe(
-      map((apiResponse) => {
-        return apiResponse.body;
+      map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => {
+        return apiResponse.body.result as T;
       })
     );
   }
@@ -92,65 +101,138 @@ export class TypeService<T = CmdbType> implements ApiService {
     );
   }
 
-  public getTypesBy(regex: string): Observable<T[]> {
-    regex = ValidatorService.validateRegex(regex).trim();
-    return this.api.callGet<CmdbType[]>(this.servicePrefix + '/find/' + encodeURIComponent(regex)).pipe(
-      map((apiResponse) => {
-        return apiResponse.body;
+  public getTypesByName(name: string, ...options): Observable<Array<T>> {
+    const filter = {
+      $or: [
+        {
+          name: { $regex: name, $options: 'ismx' }
+        },
+        {
+          label: { $regex: name, $options: 'ismx' }
+        }
+      ]
+    };
+    let params: HttpParams = new HttpParams();
+    for (const option of options) {
+      for (const key of Object.keys(option)) {
+        params = params.append(key, option[key]);
+      }
+    }
+    params = params.set('filter', JSON.stringify(filter));
+    return this.api.callGet<T[]>(this.servicePrefix + '/', this.client, params).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return apiResponse.body.results as Array<T>;
       })
     );
   }
 
-  public postType(typeInstance: CmdbType): Observable<any> {
+
+  public postType(typeInstance: CmdbType): Observable<T> {
+    /**
+     * Insert a new type into the database.
+     */
     return this.api.callPost<T>(this.servicePrefix + '/', typeInstance).pipe(
-      map((apiResponse) => {
-        return apiResponse.body;
+      map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => {
+        return apiResponse.body.raw as T;
       })
     );
   }
 
-  public putType(typeInstance: CmdbType): Observable<any> {
+  public putType(typeInstance: CmdbType): Observable<T> {
+    /**
+     * Update a existing type in the database.
+     */
     return this.api.callPut<T>(this.servicePrefix + '/', typeInstance).pipe(
-      map((apiResponse) => {
-        return apiResponse.body;
+      map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
+        return apiResponse.body.result as T;
       })
     );
   }
 
-  public deleteType(publicID: number): Observable<any> {
+  public deleteType(publicID: number): Observable<T> {
+    /**
+     * Delete a existing type in the database.
+     * @returns The deleted type instance.
+     */
     return this.api.callDelete<number>(this.servicePrefix + '/' + publicID).pipe(
-      map((apiResponse) => {
-        return apiResponse.body;
+      map((apiResponse: HttpResponse<APIDeleteSingleResponse<T>>) => {
+        return apiResponse.body.deleted_entry as T;
       })
     );
   }
 
-  public getUncategorizedTypes(): Observable<any> {
-    return this.api.callGet<T[]>(this.servicePrefix + '/uncategorized/', this.http, httpObserveOptions).pipe(
-      map((apiResponse) => {
-        return apiResponse.body;
+  public countUncategorizedTypes(): Observable<number> {
+    const pipeline = [
+      { $match: {} },
+      {
+        $lookup: {
+          from: 'framework.categories',
+          localField: 'public_id',
+          foreignField: 'types',
+          as: 'categories'
+        }
+      },
+      {
+        $match: { categories: { $size: 0 } }
+      },
+      { $project: { categories: 0 } }
+    ];
+
+    const filter = JSON.stringify(pipeline);
+    return this.api.callHead<Array<T>>(this.servicePrefix + `/?filter=${ filter }`).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return +apiResponse.headers.get('X-Total-Count');
       })
     );
   }
 
-  public getTypeListByCategory(publicID: number): Observable<any> {
-    return this.api.callGet<T[]>(this.servicePrefix + '/category/' + publicID).pipe(
+  public getUncategorizedTypes(...options): Observable<APIGetMultiResponse<T>> {
+    const pipeline = [
+      { $match: {} },
+      {
+        $lookup: {
+          from: 'framework.categories',
+          localField: 'public_id',
+          foreignField: 'types',
+          as: 'categories'
+        }
+      },
+      {
+        $match: { categories: { $size: 0 } }
+      },
+      { $project: { categories: 0 } }
+    ];
+
+    const filter = JSON.stringify(pipeline);
+    return this.api.callGet<Array<T>>(this.servicePrefix + `/?filter=${ filter }`).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return apiResponse.body as APIGetMultiResponse<T>;
+      })
+    );
+  }
+
+  public getTypeListByCategory(publicID: number): Observable<Array<T>> {
+    return this.api.callGet<T[]>(this.servicePrefix + '/' + publicID).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
         }
-        return apiResponse.body;
+        return apiResponse.body.r;
       })
     );
   }
 
-  public countTypes(): Observable<any> {
-    return this.api.callGet<T[]>(this.servicePrefix + '/count/').pipe(
-      map((apiResponse) => {
-        return apiResponse.body;
+  public countTypes(): Observable<number> {
+    /**
+     * Get the total number of types in the system.
+     */
+    return this.api.callHead<T[]>(this.servicePrefix + '/').pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return +apiResponse.headers.get('X-Total-Count');
       })
     );
   }
+
 
   public cleanupRemovedFields(publicID: number): Observable<any> {
     return this.api.callGet(this.servicePrefix + '/cleanup/remove/' + publicID).pipe(
@@ -172,12 +254,6 @@ export class TypeService<T = CmdbType> implements ApiService {
         return apiResponse.body;
       })
     );
-  }
-
-  // Validation functions
-  public checkTypeExists(typeName: string) {
-    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`, specialClient);
   }
 }
 

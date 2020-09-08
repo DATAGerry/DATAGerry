@@ -23,7 +23,7 @@ import {
   HttpEvent,
   HttpHandler,
   HttpHeaders,
-  HttpInterceptor, HttpRequest
+  HttpInterceptor, HttpParams, HttpRequest
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -83,6 +83,10 @@ export class ApiCallService {
     this.apiURL = `${ this.connectionService.currentConnection }/${ this.apiPrefix }/`;
   }
 
+  public callHead<T>(route: string, httpGetOptions: any = httpObserveOptions): Observable<any> {
+    return this.http.head<T>(this.apiURL + route, httpGetOptions).pipe(catchError(ApiCallService.handleError));
+  }
+
   public callGet<T>(route: string, client: HttpClient = this.http, httpGetOptions: any = httpObserveOptions): Observable<any> {
     return this.http.get<T>(this.apiURL + route, httpGetOptions).pipe(catchError(ApiCallService.handleError));
   }
@@ -122,6 +126,13 @@ export class ApiCallService {
   public readCookies(name: string) {
     const result = new RegExp('(?:^|; )' + encodeURIComponent(name) + '=([^;]*)').exec(document.cookie);
     return result ? result[1] : 'true';
+  }
+
+  public parseIterationParams(options): HttpParams {
+    let params: HttpParams = new HttpParams();
+    console.log(params);
+
+    return params;
   }
 
 }

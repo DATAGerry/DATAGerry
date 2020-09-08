@@ -35,7 +35,7 @@ types_blueprint = APIBlueprint('types', __name__)
 
 @types_blueprint.route('/', methods=['GET', 'HEAD'])
 @types_blueprint.protect(auth=True, right='base.framework.type.view')
-@types_blueprint.parse_collection_parameters(view='list')
+@types_blueprint.parse_collection_parameters()
 def get_types(params: CollectionParameters):
     type_manager = TypeManager(database_manager=current_app.database_manager)
     body = True if not request.method != 'HEAD' else False

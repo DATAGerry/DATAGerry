@@ -30,7 +30,7 @@ import { CollectionParameters } from '../../services/models/api-parameter';
   templateUrl: './type.component.html',
   styleUrls: ['./type.component.scss']
 })
-export class TypeComponent /* implements OnInit, AfterViewInit, OnDestroy*/ {
+export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /**
    * Datatable datas
@@ -56,7 +56,7 @@ export class TypeComponent /* implements OnInit, AfterViewInit, OnDestroy*/ {
   constructor(private typeService: TypeService) {
     this.types = [];
   }
-  /*
+
   public ngOnInit(): void {
     this.dtOptions = {
       columns: [
@@ -124,7 +124,7 @@ export class TypeComponent /* implements OnInit, AfterViewInit, OnDestroy*/ {
           order: params.order[0].dir === 'desc' ? -1 : 1,
         };
 
-        this.typeService.getTypeIteration(apiParameters).pipe(
+        this.typeService.getTypesIteration(apiParameters).pipe(
           takeUntil(this.unSubscribe)).subscribe((response: APIGetMultiResponse<CmdbType>) => {
           this.typesAPIResponse = response;
           this.types = this.typesAPIResponse.results;
@@ -176,5 +176,5 @@ export class TypeComponent /* implements OnInit, AfterViewInit, OnDestroy*/ {
     } else {
       this.selectedObjects.push(publicID);
     }
-  }*/
+  }
 }
