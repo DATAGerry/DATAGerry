@@ -31,4 +31,4 @@ jobs:
         SCP_HOST: ${{ secrets.SCP_HOST }}
         SCP_USER: ${{ secrets.SCP_USER }}
         SCP_PASS: ${{ secrets.SCP_PASS }}
-          CP_PATH: ${{ secrets.SCP_PATH_DOCS }}
+        SCP_PATH: ${{ secrets.SCP_PATH_DOCS }}
