@@ -24,6 +24,7 @@ import { Subscription } from 'rxjs';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { TypeService } from '../../../framework/services/type.service';
 import { SidebarService } from '../../services/sidebar.service';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
 
 @Component({
   selector: 'cmdb-sidebar',
@@ -53,9 +54,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.renderer.addClass(document.body, 'sidebar-fixed');
     this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable().subscribe((categoryTree: CmdbCategoryTree) => {
       this.categoryTree = categoryTree;
-      this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes().subscribe((types: CmdbType[]) => {
-        this.unCategorizedTypes = types;
+      this.typeService.countUncategorizedTypes().subscribe((numberUncategorizedTypes: number) => {
+        this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes({limit: numberUncategorizedTypes}).subscribe(
+          (apiResponse: APIGetMultiResponse<CmdbType>) => {
+          this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
+        });
       });
+
       this.typeService.getTypeList().subscribe((types: CmdbType[]) => this.typeList = types);
     });
   }

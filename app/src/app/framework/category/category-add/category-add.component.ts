@@ -24,6 +24,7 @@ import { CmdbCategory } from '../../models/cmdb-category';
 import { CategoryService } from '../../services/category.service';
 import { Router } from '@angular/router';
 import { SidebarService } from '../../../layout/services/sidebar.service';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
 
 @Component({
   selector: 'cmdb-category-add',
@@ -63,8 +64,8 @@ export class CategoryAddComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.typeServiceSubscription = this.typeService.getUncategorizedTypes().subscribe((types: CmdbType[]) => {
-      this.unAssignedTypes = types;
+    this.typeServiceSubscription = this.typeService.getUncategorizedTypes().subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
+      this.unAssignedTypes = apiResponse.results as Array<CmdbType>;
     });
   }
 
