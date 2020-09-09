@@ -16,7 +16,7 @@
 from typing import List, Union
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
-from cmdb.framework import TypeDAO
+from cmdb.framework import TypeModel
 from cmdb.framework.manager.error.framework_errors import FrameworkDeleteError
 from cmdb.framework.manager.framework_manager import FrameworkManager
 from cmdb.framework.manager.results import IterationResult
@@ -26,18 +26,18 @@ from cmdb.framework.utils import PublicID
 class TypeManager(FrameworkManager):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
-        super(TypeManager, self).__init__(TypeDAO.COLLECTION, database_manager=database_manager)
+        super(TypeManager, self).__init__(TypeModel.COLLECTION, database_manager=database_manager)
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
-            -> IterationResult[TypeDAO]:
-        iteration_result: IterationResult[TypeDAO] = super(TypeManager, self).iterate(
+            -> IterationResult[TypeModel]:
+        iteration_result: IterationResult[TypeModel] = super(TypeManager, self).iterate(
             filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-        iteration_result.convert_to(TypeDAO)
+        iteration_result.convert_to(TypeModel)
         return iteration_result
 
-    def get(self, public_id: Union[PublicID, int]) -> TypeDAO:
+    def get(self, public_id: Union[PublicID, int]) -> TypeModel:
         result = super(TypeManager, self).get(public_id=public_id)
-        return TypeDAO.from_data(result)
+        return TypeModel.from_data(result)
 
     def insert(self, type: dict) -> PublicID:
         return super(TypeManager, self).insert(resource=type)
@@ -45,7 +45,7 @@ class TypeManager(FrameworkManager):
     def update(self, public_id: Union[PublicID, int], type: dict):
         return super(TypeManager, self).update(public_id=public_id, resource=type)
 
-    def delete(self, public_id: Union[PublicID, int]) -> TypeDAO:
+    def delete(self, public_id: Union[PublicID, int]) -> TypeModel:
         raw_category = self.get(public_id=public_id)
         super(TypeManager, self).delete(public_id=public_id)
         return raw_category

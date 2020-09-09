@@ -18,7 +18,7 @@ import logging
 
 from flask import abort, current_app, request
 
-from cmdb.framework.dao.category import CategoryDAO, CategoryTree
+from cmdb.framework.models.category import CategoryModel, CategoryTree
 from cmdb.framework.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerUpdateError
 from cmdb.framework.manager.category_manager import CategoryManager
 from cmdb.framework.manager.error.framework_errors import FrameworkIterationError
@@ -44,7 +44,7 @@ def get_categories(params: CollectionParameters):
         params (CollectionParameters): Passed parameters over the http query string + optional `view` parameter.
 
     Returns:
-        GetMultiResponse: Which includes a IterationResult of the CategoryDAO.
+        GetMultiResponse: Which includes a IterationResult of the CategoryModel.
         If the view parameter with tree was set the route returns a GetMultiResponse<CategoryTree>.
 
     Example:
@@ -67,11 +67,11 @@ def get_categories(params: CollectionParameters):
                                             url=request.url, model=CategoryTree.MODEL, body=body)
             return api_response.make_response(pagination=False)
         else:
-            iteration_result: IterationResult[CategoryDAO] = category_manager.iterate(
+            iteration_result: IterationResult[CategoryModel] = category_manager.iterate(
                 filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
-            category_list = [CategoryDAO.to_json(category) for category in iteration_result.results]
+            category_list = [CategoryModel.to_json(category) for category in iteration_result.results]
             api_response = GetMultiResponse(category_list, total=iteration_result.total, params=params,
-                                            url=request.url, model=CategoryDAO.MODEL, body=body)
+                                            url=request.url, model=CategoryModel.MODEL, body=body)
     except FrameworkIterationError as err:
         return abort(400, err.message)
     except ManagerGetError as err:
@@ -92,7 +92,7 @@ def get_category(public_id: int):
         ManagerGetError: When the selected category does not exists.
 
     Returns:
-        GetSingleResponse: Which includes the json data of a CategoryDAO.
+        GetSingleResponse: Which includes the json data of a CategoryModel.
     """
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
     body = True if not request.method != 'HEAD' else False
@@ -101,20 +101,20 @@ def get_category(public_id: int):
         category_instance = category_manager.get(public_id)
     except ManagerGetError as err:
         return abort(404, err.message)
-    api_response = GetSingleResponse(CategoryDAO.to_json(category_instance), url=request.url,
-                                     model=CategoryDAO.MODEL, body=body)
+    api_response = GetSingleResponse(CategoryModel.to_json(category_instance), url=request.url,
+                                     model=CategoryModel.MODEL, body=body)
     return api_response.make_response()
 
 
 @categories_blueprint.route('/', methods=['POST'])
 @categories_blueprint.protect(auth=True, right='base.framework.category.add')
-@categories_blueprint.validate(CategoryDAO.SCHEMA)
+@categories_blueprint.validate(CategoryModel.SCHEMA)
 def insert_category(data: dict):
     """
     HTTP `POST` route for insert a single category resource.
 
     Args:
-        data (CategoryDAO.SCHEMA): Insert data of a new category.
+        data (CategoryModel.SCHEMA): Insert data of a new category.
 
     Raises:
         ManagerGetError: If the inserted resource could not be found after inserting.
@@ -131,21 +131,21 @@ def insert_category(data: dict):
         return abort(404, err.message)
     except ManagerInsertError as err:
         return abort(400, err.message)
-    api_response = InsertSingleResponse(result_id, raw=CategoryDAO.to_json(raw_doc), url=request.url,
-                                        model=CategoryDAO.MODEL)
+    api_response = InsertSingleResponse(result_id, raw=CategoryModel.to_json(raw_doc), url=request.url,
+                                        model=CategoryModel.MODEL)
     return api_response.make_response(prefix='categories')
 
 
 @categories_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
 @categories_blueprint.protect(auth=True, right='base.framework.category.edit')
-@categories_blueprint.validate(CategoryDAO.SCHEMA)
+@categories_blueprint.validate(CategoryModel.SCHEMA)
 def update_category(public_id: int, data: dict):
     """
     HTTP `PUT`/`PATCH` route for update a single category resource.
 
     Args:
         public_id (int): Public ID of the updatable category
-        data (CategoryDAO.SCHEMA): New category data to update
+        data (CategoryModel.SCHEMA): New category data to update
 
     Raises:
         ManagerGetError: When the category with the `public_id` was not found.
@@ -156,9 +156,9 @@ def update_category(public_id: int, data: dict):
     """
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
     try:
-        category = CategoryDAO.from_data(data=data)
-        category_manager.update(public_id=PublicID(public_id), category=CategoryDAO.to_json(category))
-        api_response = UpdateSingleResponse(result=data, url=request.url, model=CategoryDAO.MODEL)
+        category = CategoryModel.from_data(data=data)
+        category_manager.update(public_id=PublicID(public_id), category=CategoryModel.to_json(category))
+        api_response = UpdateSingleResponse(result=data, url=request.url, model=CategoryModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerUpdateError as err:
@@ -186,7 +186,7 @@ def delete_category(public_id: int):
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
     try:
         deleted_category = category_manager.delete(public_id=PublicID(public_id))
-        api_response = DeleteSingleResponse(raw=CategoryDAO.to_json(deleted_category), model=CategoryDAO.MODEL)
+        api_response = DeleteSingleResponse(raw=CategoryModel.to_json(deleted_category), model=CategoryModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerDeleteError as err:

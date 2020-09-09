@@ -17,7 +17,7 @@ import logging
 from typing import List
 
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.dao.type import TypeDAO
+from cmdb.framework.models.type import TypeModel
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.cmdb_render import RenderResult, RenderList
 from cmdb.search import Search
@@ -60,7 +60,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
                 PipelineBuilder.limit_(limit)
             ],
             'group': [
-                PipelineBuilder.lookup_(TypeDAO.COLLECTION, 'type_id', 'public_id', 'lookup_data'),
+                PipelineBuilder.lookup_(TypeModel.COLLECTION, 'type_id', 'public_id', 'lookup_data'),
                 PipelineBuilder.unwind_('$lookup_data'),
                 PipelineBuilder.project_({'_id': 0, 'type_id': 1, 'label': "$lookup_data.label"}),
                 PipelineBuilder.group_("$$ROOT.type_id", {'types': {'$first': "$$ROOT"}, 'total': {'$sum': 1}}),

@@ -18,7 +18,7 @@ import logging
 
 from flask import abort, request, current_app
 
-from cmdb.framework.dao.type import TypeDAO
+from cmdb.framework.models.type import TypeModel
 from cmdb.framework.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
 from cmdb.framework.manager.error.framework_errors import FrameworkIterationError
 from cmdb.framework.manager.results import IterationResult
@@ -41,11 +41,11 @@ def get_types(params: CollectionParameters):
     body = True if not request.method != 'HEAD' else False
 
     try:
-        iteration_result: IterationResult[TypeDAO] = type_manager.iterate(
+        iteration_result: IterationResult[TypeModel] = type_manager.iterate(
             filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
-        types = [TypeDAO.to_json(type) for type in iteration_result.results]
+        types = [TypeModel.to_json(type) for type in iteration_result.results]
         api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
-                                        url=request.url, model=TypeDAO.MODEL, body=body)
+                                        url=request.url, model=TypeModel.MODEL, body=body)
     except FrameworkIterationError as err:
         return abort(400, err.message)
     except ManagerGetError as err:
@@ -63,14 +63,14 @@ def get_type(public_id: int):
         type_ = type_manager.get(public_id)
     except ManagerGetError as err:
         return abort(404, err.message)
-    api_response = GetSingleResponse(TypeDAO.to_json(type_), url=request.url,
-                                     model=TypeDAO.MODEL, body=body)
+    api_response = GetSingleResponse(TypeModel.to_json(type_), url=request.url,
+                                     model=TypeModel.MODEL, body=body)
     return api_response.make_response()
 
 
 @types_blueprint.route('/', methods=['POST'])
 @types_blueprint.protect(auth=True, right='base.framework.type.add')
-@types_blueprint.validate(TypeDAO.SCHEMA)
+@types_blueprint.validate(TypeModel.SCHEMA)
 def insert_type(data: dict):
     type_manager = TypeManager(database_manager=current_app.database_manager)
     try:
@@ -80,20 +80,20 @@ def insert_type(data: dict):
         return abort(404, err.message)
     except ManagerInsertError as err:
         return abort(400, err.message)
-    api_response = InsertSingleResponse(result_id, raw=TypeDAO.to_json(raw_doc), url=request.url,
-                                        model=TypeDAO.MODEL)
+    api_response = InsertSingleResponse(result_id, raw=TypeModel.to_json(raw_doc), url=request.url,
+                                        model=TypeModel.MODEL)
     return api_response.make_response(prefix='types')
 
 
 @types_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
 @types_blueprint.protect(auth=True, right='base.framework.type.edit')
-@types_blueprint.validate(TypeDAO.SCHEMA)
+@types_blueprint.validate(TypeModel.SCHEMA)
 def update_type(public_id: int, data: dict):
     type_manager = TypeManager(database_manager=current_app.database_manager)
     try:
-        type = TypeDAO.from_data(data=data)
-        type_manager.update(public_id=PublicID(public_id), type=TypeDAO.to_json(type))
-        api_response = UpdateSingleResponse(result=data, url=request.url, model=TypeDAO.MODEL)
+        type = TypeModel.from_data(data=data)
+        type_manager.update(public_id=PublicID(public_id), type=TypeModel.to_json(type))
+        api_response = UpdateSingleResponse(result=data, url=request.url, model=TypeModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerUpdateError as err:
@@ -108,7 +108,7 @@ def delete_type(public_id: int):
     type_manager = TypeManager(database_manager=current_app.database_manager)
     try:
         deleted_type = type_manager.delete(public_id=PublicID(public_id))
-        api_response = DeleteSingleResponse(raw=TypeDAO.to_json(deleted_type), model=TypeDAO.MODEL)
+        api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerDeleteError as err:

@@ -32,8 +32,8 @@ class CmdbDAO:
     their necessary dependent classes are to be stored in the database.
 
     Attributes:
-        DAO_ASCENDING (int): dao sort order ascending
-        DAO_DESCENDING (int): dao sort order descending
+        DAO_ASCENDING (int): models sort order ascending
+        DAO_DESCENDING (int): models sort order descending
         COLLECTION (str): name of the database table - should always be overwritten
         IGNORED_INIT_KEYS (list, optional): list of default init keys which an specific object won't need
         REQUIRED_INIT_KEYS (list, optional): list of default parameters which an object needs to work
@@ -78,7 +78,7 @@ class CmdbDAO:
         get the public id of current element
 
         Note:
-            Since the dao object is not initializable
+            Since the models object is not initializable
             the child class object will inherit this function
             SHOULD NOT BE OVERWRITTEN!
 
@@ -280,7 +280,7 @@ class VersionTypeError(CMDBError):
 
 class NoVersionError(CMDBError):
     """
-    Error if object from dao child class has no version number
+    Error if object from models child class has no version number
     """
 
     def __init__(self, public_id):

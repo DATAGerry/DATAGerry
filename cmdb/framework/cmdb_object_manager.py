@@ -31,7 +31,7 @@ from typing import List
 from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
-from cmdb.framework.dao.category import CategoryDAO, CategoryTree
+from cmdb.framework.models.category import CategoryModel, CategoryTree
 from cmdb.framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplate
 from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
 from cmdb.framework.cmdb_errors import WrongInputFormatError, TypeInsertError, TypeAlreadyExists, \
@@ -40,7 +40,7 @@ from cmdb.framework.cmdb_errors import WrongInputFormatError, TypeInsertError, T
 from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_status import CmdbStatus
-from cmdb.framework.dao.type import TypeDAO
+from cmdb.framework.models.type import TypeModel
 from cmdb.search.query import Query, Pipeline
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import User
@@ -323,20 +323,20 @@ class CmdbObjectManager(CmdbManagerBase):
             self._event_queue.put(event)
         return ack
 
-    def get_all_types(self) -> List[TypeDAO]:
+    def get_all_types(self) -> List[TypeModel]:
         try:
-            raw_types: List[dict] = self._get_many(collection=TypeDAO.COLLECTION)
+            raw_types: List[dict] = self._get_many(collection=TypeModel.COLLECTION)
         except Exception as err:
             raise ObjectManagerGetError(err=err)
         try:
-            return [TypeDAO.from_data(type) for type in raw_types]
+            return [TypeModel.from_data(type) for type in raw_types]
         except Exception as err:
             raise ObjectManagerInitError(err=err)
 
     def get_type(self, public_id: int):
         try:
-            return TypeDAO.from_data(self.dbm.find_one(
-                collection=TypeDAO.COLLECTION,
+            return TypeModel.from_data(self.dbm.find_one(
+                collection=TypeModel.COLLECTION,
                 public_id=public_id)
             )
         except RequiredInitKeyNotFoundError as err:
@@ -344,11 +344,11 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerGetError(err=err)
 
-    def get_type_by(self, **requirements) -> TypeDAO:
+    def get_type_by(self, **requirements) -> TypeModel:
         try:
-            found_type_list = self._get_many(collection=TypeDAO.COLLECTION, limit=1, **requirements)
+            found_type_list = self._get_many(collection=TypeModel.COLLECTION, limit=1, **requirements)
             if len(found_type_list) > 0:
-                return TypeDAO.from_data(found_type_list[0])
+                return TypeModel.from_data(found_type_list[0])
             else:
                 raise ObjectManagerGetError(err='More than 1 type matches this requirement')
         except (CMDBError, Exception) as e:
@@ -356,8 +356,8 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_types_by(self, sort='public_id', **requirements):
         try:
-            return [TypeDAO.from_data(data) for data in
-                    self._get_many(collection=TypeDAO.COLLECTION, sort=sort, **requirements)]
+            return [TypeModel.from_data(data) for data in
+                    self._get_many(collection=TypeModel.COLLECTION, sort=sort, **requirements)]
         except Exception as err:
             raise ObjectManagerGetError(err=err)
 
@@ -379,7 +379,7 @@ class CmdbObjectManager(CmdbManagerBase):
         agr.append({'$group': {'_id': '$' + value, 'count': {'$sum': 1}}})
         agr.append({'$sort': {'count': -1}})
 
-        return self.dbm.aggregate(TypeDAO.COLLECTION, agr)
+        return self.dbm.aggregate(TypeModel.COLLECTION, agr)
 
     def get_type_aggregate(self, arguments):
         """This method does not actually
@@ -393,16 +393,16 @@ class CmdbObjectManager(CmdbManagerBase):
                returns the list of CMDB Types sorted by value of the documents
            """
         type_list = []
-        cursor = self.dbm.aggregate(TypeDAO.COLLECTION, arguments)
+        cursor = self.dbm.aggregate(TypeModel.COLLECTION, arguments)
         for document in cursor:
             put_data = json.loads(json_util.dumps(document), object_hook=object_hook)
-            type_list.append(TypeDAO.from_data(put_data))
+            type_list.append(TypeModel.from_data(put_data))
         return type_list
 
     def insert_type(self, data: dict):
 
         try:
-            ack = self._insert(collection=TypeDAO.COLLECTION, data=data)
+            ack = self._insert(collection=TypeModel.COLLECTION, data=data)
             LOGGER.debug(f"Inserted new type with ack {ack}")
             if self._event_queue:
                 event = Event("cmdb.core.objecttype.added", {"id": ack})
@@ -413,18 +413,18 @@ class CmdbObjectManager(CmdbManagerBase):
             raise TypeInsertError(str(err))
         return ack
 
-    def update_type(self, data: (TypeDAO, dict)):
-        if isinstance(data, TypeDAO):
+    def update_type(self, data: (TypeModel, dict)):
+        if isinstance(data, TypeModel):
             update_type = data
         elif isinstance(data, dict):
-            update_type = TypeDAO.from_data(data)
+            update_type = TypeModel.from_data(data)
         else:
-            raise WrongInputFormatError(TypeDAO, data, "Possible data: dict or TypeDAO")
+            raise WrongInputFormatError(TypeModel, data, "Possible data: dict or TypeModel")
 
         ack = self._update(
-            collection=TypeDAO.COLLECTION,
+            collection=TypeModel.COLLECTION,
             public_id=update_type.get_public_id(),
-            data=TypeDAO.to_json(update_type)
+            data=TypeModel.to_json(update_type)
         )
         if self._event_queue:
             event = Event("cmdb.core.objecttype.updated", {"id": update_type.get_public_id()})
@@ -432,18 +432,18 @@ class CmdbObjectManager(CmdbManagerBase):
         return ack
 
     def update_many_types(self, filter: dict, update: dict):
-        ack = self._update_many(TypeDAO.COLLECTION, filter, update)
+        ack = self._update_many(TypeModel.COLLECTION, filter, update)
         return ack
 
     def count_types(self):
-        return self.dbm.count(collection=TypeDAO.COLLECTION)
+        return self.dbm.count(collection=TypeModel.COLLECTION)
 
     def delete_type(self, public_id: int):
         """Delete a type by the public id
         Also removes the id from the category type list if existing
         """
         try:
-            ack = self._delete(TypeDAO.COLLECTION, public_id)
+            ack = self._delete(TypeModel.COLLECTION, public_id)
         except Exception as err:
             raise ObjectManagerDeleteError(err=err)
 
@@ -463,48 +463,48 @@ class CmdbObjectManager(CmdbManagerBase):
         return ack
 
     def delete_many_types(self, filter_query: dict, public_ids):
-        ack = self._delete_many(TypeDAO.COLLECTION, filter_query)
+        ack = self._delete_many(TypeModel.COLLECTION, filter_query)
         if self._event_queue:
             event = Event("cmdb.core.objecttypes.deleted", {"ids": public_ids})
             self._event_queue.put(event)
         return ack
 
-    def get_categories(self) -> List[CategoryDAO]:
+    def get_categories(self) -> List[CategoryModel]:
         """Get all categories as nested list"""
         try:
-            raw_categories = self._get_many(collection=CategoryDAO.COLLECTION, sort='public_id')
+            raw_categories = self._get_many(collection=CategoryModel.COLLECTION, sort='public_id')
         except Exception as err:
             raise ObjectManagerGetError(err)
         try:
-            return [CategoryDAO.from_data(category) for category in raw_categories]
+            return [CategoryModel.from_data(category) for category in raw_categories]
         except Exception as err:
             raise ObjectManagerInitError(err)
 
     @deprecated
-    def get_category_by(self, **requirements) -> CategoryDAO:
+    def get_category_by(self, **requirements) -> CategoryModel:
         """Get a single category by requirements
         Notes:
             Even if multiple categories match the requirements only the first matched will be returned
         """
         try:
-            raw_category = self._get_by(collection=CategoryDAO.COLLECTION, **requirements)
+            raw_category = self._get_by(collection=CategoryModel.COLLECTION, **requirements)
         except Exception as err:
             raise ObjectManagerGetError(err)
 
         try:
-            return CategoryDAO.from_data(raw_category)
+            return CategoryModel.from_data(raw_category)
         except Exception as err:
             raise ObjectManagerInitError(err)
 
     @deprecated
-    def get_categories_by(self, sort='public_id', **requirements: dict) -> List[CategoryDAO]:
+    def get_categories_by(self, sort='public_id', **requirements: dict) -> List[CategoryModel]:
         """Get a list of categories by special requirements"""
         try:
-            raw_categories = self._get_many(collection=CategoryDAO.COLLECTION, sort=sort, **requirements)
+            raw_categories = self._get_many(collection=CategoryModel.COLLECTION, sort=sort, **requirements)
         except Exception as err:
             raise ObjectManagerGetError(err)
         try:
-            return [CategoryDAO.from_data(category) for category in raw_categories]
+            return [CategoryModel.from_data(category) for category in raw_categories]
         except Exception as err:
             raise ObjectManagerInitError(err)
 
@@ -522,30 +522,30 @@ class CmdbObjectManager(CmdbManagerBase):
             raise ObjectManagerGetError(err=err)
         return CategoryTree(categories=categories, types=types)
 
-    def get_category(self, public_id: int) -> CategoryDAO:
+    def get_category(self, public_id: int) -> CategoryModel:
         """Get a category from the database"""
         try:
             raw_category: dict = self._get(
-                collection=CategoryDAO.COLLECTION,
+                collection=CategoryModel.COLLECTION,
                 public_id=public_id)
-            return CategoryDAO.from_data(raw_category)
+            return CategoryModel.from_data(raw_category)
         except Exception as err:
             raise ObjectManagerGetError(err=err)
 
-    def insert_category(self, category: CategoryDAO):
+    def insert_category(self, category: CategoryModel):
         """Add a new category into the database or add the children list an existing category"""
         try:
-            return self._insert(collection=CategoryDAO.COLLECTION, data=CategoryDAO.to_json(category))
+            return self._insert(collection=CategoryModel.COLLECTION, data=CategoryModel.to_json(category))
         except Exception as err:
             raise ObjectManagerInsertError(err=err)
 
-    def update_category(self, category: CategoryDAO):
+    def update_category(self, category: CategoryModel):
         """Update a existing category into the database"""
         try:
             return self._update(
-                collection=CategoryDAO.COLLECTION,
+                collection=CategoryModel.COLLECTION,
                 public_id=category.get_public_id(),
-                data=CategoryDAO.to_json(category)
+                data=CategoryModel.to_json(category)
             )
         except Exception as err:
             raise ObjectManagerUpdateError(err=err)
@@ -553,7 +553,7 @@ class CmdbObjectManager(CmdbManagerBase):
     def delete_category(self, public_id: int):
         """Remove a category from the database"""
         try:
-            return self._delete(CategoryDAO.COLLECTION, public_id)
+            return self._delete(CategoryModel.COLLECTION, public_id)
         except Exception as err:
             raise ObjectManagerDeleteError(err=err)
 

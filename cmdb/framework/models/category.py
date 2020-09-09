@@ -15,12 +15,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from typing import List, Union
 
-from cmdb.framework.dao import TypeDAO
+from cmdb.framework.models import TypeModel
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.utils import Model, Collection
 
 
-class CategoryDAO(CmdbDAO):
+class CategoryModel(CmdbDAO):
     """
     Category
     """
@@ -101,18 +101,18 @@ class CategoryDAO(CmdbDAO):
             return False
 
     def __init__(self, public_id: int, name: str, label: str = None, meta: __CategoryMeta = None,
-                 parent: int = None, types: Union[List[int], List[TypeDAO]] = None):
+                 parent: int = None, types: Union[List[int], List[TypeModel]] = None):
         self.name: str = name
         self.label: str = label
-        self.meta: CategoryDAO.__CategoryMeta = meta
+        self.meta: CategoryModel.__CategoryMeta = meta
         if parent == public_id and (parent is not None):
             raise ValueError(f'Category {name} has his own ID as Parent')
         self.parent: int = parent
-        self.types: Union[List[int], List[TypeDAO]] = types
-        super(CategoryDAO, self).__init__(public_id=public_id)
+        self.types: Union[List[int], List[TypeModel]] = types
+        super(CategoryModel, self).__init__(public_id=public_id)
 
     @classmethod
-    def from_data(cls, data: dict) -> "CategoryDAO":
+    def from_data(cls, data: dict) -> "CategoryModel":
         """Create a instance of a category from database"""
 
         raw_meta: dict = data.get('meta', None)
@@ -126,7 +126,7 @@ class CategoryDAO(CmdbDAO):
                    )
 
     @classmethod
-    def to_json(cls, instance: "CategoryDAO") -> dict:
+    def to_json(cls, instance: "CategoryModel") -> dict:
         """Convert a category instance to json conform data"""
         meta = instance.get_meta()
         return {
@@ -154,7 +154,7 @@ class CategoryDAO(CmdbDAO):
     def get_meta(self) -> __CategoryMeta:
         """Get meta data"""
         if not self.meta:
-            self.meta = CategoryDAO.__CategoryMeta()
+            self.meta = CategoryModel.__CategoryMeta()
         return self.meta
 
     def has_parent(self) -> bool:
@@ -169,7 +169,7 @@ class CategoryDAO(CmdbDAO):
         """Check if this category has types"""
         return True if self.get_number_of_types() > 0 else False
 
-    def get_types(self) -> Union[List[int], List[TypeDAO]]:
+    def get_types(self) -> Union[List[int], List[TypeModel]]:
         """Get list of type ids in this category"""
         if not self.types:
             self.types = []
@@ -187,23 +187,23 @@ class CategoryTree:
     class CategoryNode:
         """Class of a category node inside the category tree"""
 
-        def __init__(self, category: CategoryDAO, children: List["CategoryTree.CategoryNode"] = None,
-                     types: List[TypeDAO] = None):
-            self.category: CategoryDAO = category
+        def __init__(self, category: CategoryModel, children: List["CategoryTree.CategoryNode"] = None,
+                     types: List[TypeModel] = None):
+            self.category: CategoryModel = category
             self.node_order: int = self.category.get_meta().get_order()
             self.children: List["CategoryTree.CategoryNode"] = children or []
             # prevent wrong type order
-            self.types: List[TypeDAO] = [type_ for id_ in self.category.types for type_ in types if
-                                         id_ == type_.public_id]
+            self.types: List[TypeModel] = [type_ for id_ in self.category.types for type_ in types if
+                                           id_ == type_.public_id]
 
         @classmethod
         def to_json(cls, instance: "CategoryTree.CategoryNode"):
             """Get the node as json"""
             return {
-                'category': CategoryDAO.to_json(instance.category),
+                'category': CategoryModel.to_json(instance.category),
                 'node_order': instance.node_order,
                 'children': [CategoryTree.CategoryNode.to_json(child_node) for child_node in instance.children],
-                'types': [TypeDAO.to_json(type) for type in instance.types]
+                'types': [TypeModel.to_json(type) for type in instance.types]
             }
 
         def get_order(self) -> int:
@@ -212,7 +212,7 @@ class CategoryTree:
             """
             return self.node_order
 
-        def flatten(self) -> List[CategoryDAO]:
+        def flatten(self) -> List[CategoryModel]:
             """Flats a category node and its children"""
             return [self.category] + sum(
                 (c.flatten() for c in self.children),
@@ -223,7 +223,7 @@ class CategoryTree:
             """String representation of the category node"""
             return f'CategoryNode(CategoryID={self.category.public_id})'
 
-    def __init__(self, categories: List[CategoryDAO], types: List[TypeDAO] = None):
+    def __init__(self, categories: List[CategoryModel], types: List[TypeModel] = None):
         self._categories = categories
         self._types = types
         self._tree: List[CategoryTree.CategoryNode] = sorted(self.__create_tree(self._categories, types=self._types),
@@ -234,7 +234,7 @@ class CategoryTree:
         """Get length of tree - this means the number of root categories"""
         return len(self._tree)
 
-    def flat(self) -> List[CategoryDAO]:
+    def flat(self) -> List[CategoryModel]:
         """Returns a flatted tree with tree like category order"""
         flatted = []
         for node in self.tree:
@@ -249,7 +249,7 @@ class CategoryTree:
         return self._tree
 
     @classmethod
-    def __create_tree(cls, categories, parent: int = None, types: List[TypeDAO] = None) -> List[CategoryNode]:
+    def __create_tree(cls, categories, parent: int = None, types: List[TypeModel] = None) -> List[CategoryNode]:
         """
         Generate the category tree from list structure
         Args:
@@ -264,7 +264,7 @@ class CategoryTree:
     @classmethod
     def from_data(cls, raw_categories: List[dict]) -> "CategoryTree":
         """Create the category list from raw data"""
-        categories: List[CategoryDAO] = [CategoryDAO.from_data(category) for category in raw_categories]
+        categories: List[CategoryModel] = [CategoryModel.from_data(category) for category in raw_categories]
         return cls(categories=categories)
 
     @classmethod

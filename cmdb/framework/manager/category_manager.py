@@ -16,9 +16,9 @@
 from typing import List, Union
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
-from cmdb.framework import CategoryDAO
+from cmdb.framework import CategoryModel
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.framework.dao.category import CategoryTree
+from cmdb.framework.models.category import CategoryTree
 from cmdb.framework.manager import ManagerGetError
 from cmdb.framework.manager.error.framework_errors import FrameworkDeleteError
 from cmdb.framework.manager.framework_manager import FrameworkManager
@@ -29,18 +29,18 @@ from cmdb.framework.utils import PublicID
 class CategoryManager(FrameworkManager):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
-        super(CategoryManager, self).__init__(CategoryDAO.COLLECTION, database_manager=database_manager)
+        super(CategoryManager, self).__init__(CategoryModel.COLLECTION, database_manager=database_manager)
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
-            -> IterationResult[CategoryDAO]:
-        iteration_result: IterationResult[CategoryDAO] = super(CategoryManager, self).iterate(
+            -> IterationResult[CategoryModel]:
+        iteration_result: IterationResult[CategoryModel] = super(CategoryManager, self).iterate(
             filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-        iteration_result.convert_to(CategoryDAO)
+        iteration_result.convert_to(CategoryModel)
         return iteration_result
 
-    def get(self, public_id: Union[PublicID, int]) -> CategoryDAO:
+    def get(self, public_id: Union[PublicID, int]) -> CategoryModel:
         result = super(CategoryManager, self).get(public_id=public_id)
-        return CategoryDAO.from_data(result)
+        return CategoryModel.from_data(result)
 
     def insert(self, category: dict) -> PublicID:
         return super(CategoryManager, self).insert(resource=category)
@@ -48,7 +48,7 @@ class CategoryManager(FrameworkManager):
     def update(self, public_id: Union[PublicID, int], category: dict):
         return super(CategoryManager, self).update(public_id=public_id, resource=category)
 
-    def delete(self, public_id: Union[PublicID, int]) -> CategoryDAO:
+    def delete(self, public_id: Union[PublicID, int]) -> CategoryModel:
         raw_category = self.get(public_id=public_id)
         delete_result = super(CategoryManager, self).delete(public_id=public_id)
         if delete_result.deleted_count == 0:
@@ -59,7 +59,7 @@ class CategoryManager(FrameworkManager):
     def tree(self) -> CategoryTree:
         # Currently only a work around until the other manager were converted to the new format - MH
         types = CmdbObjectManager(database_manager=self._database_manager).get_all_types()
-        categories = [CategoryDAO.from_data(category) for category in
+        categories = [CategoryModel.from_data(category) for category in
                       super(CategoryManager, self).get_many({})]
 
         return CategoryTree(categories=categories, types=types)

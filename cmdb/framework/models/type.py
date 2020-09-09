@@ -150,7 +150,7 @@ class TypeExternalLink:
 
 
 class TypeRenderMeta:
-    """Class of the type dao `render_meta` field"""
+    """Class of the type models `render_meta` field"""
 
     __slots__ = 'icon', 'sections', 'externals', 'summary'
 
@@ -181,9 +181,9 @@ class TypeRenderMeta:
         }
 
 
-class TypeDAO(CmdbDAO):
+class TypeModel(CmdbDAO):
     """
-    Data access object of the framework type.
+    Model class of the framework type.
 
     Attributes:
         COLLECTION (Collection):    Name of the database collection.
@@ -280,18 +280,18 @@ class TypeDAO(CmdbDAO):
         self.name: str = name
         self.label: str = label or self.name.title()
         self.description: str = description
-        self.version: str = version or TypeDAO.DEFAULT_VERSION
+        self.version: str = version or TypeModel.DEFAULT_VERSION
         self.active: bool = active
         self.clean_db: bool = clean_db
         self.author_id: int = author_id
         self.creation_time: datetime = creation_time
         self.render_meta: TypeRenderMeta = render_meta
         self.fields: list = fields or []
-        super(TypeDAO, self).__init__(public_id=public_id)
+        super(TypeModel, self).__init__(public_id=public_id)
 
     @classmethod
-    def from_data(cls, data: dict) -> "TypeDAO":
-        """Create a instance of TypeDAO from database values"""
+    def from_data(cls, data: dict) -> "TypeModel":
+        """Create a instance of TypeModel from database values"""
         return cls(
             public_id=data.get('public_id'),
             name=data.get('name'),
@@ -307,7 +307,7 @@ class TypeDAO(CmdbDAO):
         )
 
     @classmethod
-    def to_json(cls, instance: "TypeDAO") -> dict:
+    def to_json(cls, instance: "TypeModel") -> dict:
         """Convert a type instance to json conform data"""
         return {
             'public_id': instance.get_public_id(),

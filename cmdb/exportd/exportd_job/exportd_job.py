@@ -81,7 +81,7 @@ class ExportdJob(JobManagementBase):
         get the public id of current element
 
         Note:
-            Since the dao object is not initializable
+            Since the models object is not initializable
             the child class object will inherit this function
             SHOULD NOT BE OVERWRITTEN!
 
