@@ -33,7 +33,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
     """Framework searcher implementation for object search"""
 
     def __init__(self, manager: CmdbObjectManager):
-        """Normally uses a instance of CmdbObjectManager as manager"""
+        """Normally uses a instance of CmdbObjectManager as managers"""
         super(SearcherFramework, self).__init__(manager=manager)
 
     def aggregate(self, pipeline: Pipeline, request_user: User = None, limit: int = Search.DEFAULT_LIMIT,

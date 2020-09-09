@@ -15,9 +15,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-This manager represents the core functionalities for the use of CMDB objects.
-All communication with the objects is controlled by this manager.
-The implementation of the manager used is always realized using the respective superclass.
+This managers represents the core functionalities for the use of CMDB objects.
+All communication with the objects is controlled by this managers.
+The implementation of the managers used is always realized using the respective superclass.
 
 """
 import logging

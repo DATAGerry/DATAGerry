@@ -17,9 +17,9 @@ from typing import List, Union
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework import TypeModel
-from cmdb.framework.manager.error.framework_errors import FrameworkDeleteError
-from cmdb.framework.manager.framework_manager import FrameworkManager
-from cmdb.framework.manager.results import IterationResult
+from cmdb.framework.managers.error.framework_errors import FrameworkDeleteError
+from cmdb.framework.managers.framework_manager import FrameworkManager
+from cmdb.framework.managers.results import IterationResult
 from cmdb.framework.utils import PublicID
 
 

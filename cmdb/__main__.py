@@ -158,7 +158,7 @@ def main(args):
     _init_config_reader(args.config_file)
     from cmdb.data_storage.database_connection import DatabaseConnectionError
 
-    # create / check connection database manager
+    # create / check connection database managers
     dbm = None
     try:
         dbm = _check_database()

@@ -15,32 +15,32 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 from typing import Union
 
-from cmdb.framework.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
+from cmdb.framework.managers import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
 
 
 class FrameworkGetError(ManagerGetError):
-    """Generic or basic framework error for manager get operations."""
+    """Generic or basic framework error for managers get operations."""
 
     def __init__(self, err: Union[Exception, str] = None):
         super(FrameworkGetError, self).__init__(err=err)
 
 
 class FrameworkInsertError(ManagerInsertError):
-    """Generic or basic framework error for manager insert operations."""
+    """Generic or basic framework error for managers insert operations."""
 
     def __init__(self, err: Union[Exception, str] = None):
         super(FrameworkInsertError, self).__init__(err=err)
 
 
 class FrameworkUpdateError(ManagerUpdateError):
-    """Generic or basic framework error for manager update operations."""
+    """Generic or basic framework error for managers update operations."""
 
     def __init__(self, err: Union[Exception, str] = None):
         super(FrameworkUpdateError, self).__init__(err=err)
 
 
 class FrameworkDeleteError(ManagerDeleteError):
-    """Generic or basic framework error for manager delete operations."""
+    """Generic or basic framework error for managers delete operations."""
 
     def __init__(self, err: Union[Exception, str] = None):
         super(FrameworkDeleteError, self).__init__(err=err)

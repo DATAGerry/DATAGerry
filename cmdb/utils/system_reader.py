@@ -69,7 +69,7 @@ class SystemSettingsReader(SystemReader):
         """
         init system settings reader
         Args:
-            database_manager: database manager
+            database_manager: database managers
         """
         self.dbm: DatabaseManagerMongo = database_manager
         super(SystemSettingsReader, self).__init__()

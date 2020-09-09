@@ -37,7 +37,7 @@ class SystemWriter:
         """
         Default constructor
         Args:
-            writer: Database manager instance
+            writer: Database managers instance
         """
         self.writer = writer
 
@@ -50,7 +50,7 @@ class SystemWriter:
             data: data to write
 
         Returns:
-            acknowledgment: based on database manager
+            acknowledgment: based on database managers
         """
         raise NotImplementedError
 

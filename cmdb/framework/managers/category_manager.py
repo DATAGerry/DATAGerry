@@ -19,10 +19,10 @@ from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework import CategoryModel
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.models.category import CategoryTree
-from cmdb.framework.manager import ManagerGetError
-from cmdb.framework.manager.error.framework_errors import FrameworkDeleteError
-from cmdb.framework.manager.framework_manager import FrameworkManager
-from cmdb.framework.manager.results import IterationResult
+from cmdb.framework.managers import ManagerGetError
+from cmdb.framework.managers.error.framework_errors import FrameworkDeleteError
+from cmdb.framework.managers.framework_manager import FrameworkManager
+from cmdb.framework.managers.results import IterationResult
 from cmdb.framework.utils import PublicID
 
 
@@ -57,7 +57,7 @@ class CategoryManager(FrameworkManager):
 
     @property
     def tree(self) -> CategoryTree:
-        # Currently only a work around until the other manager were converted to the new format - MH
+        # Currently only a work around until the other managers were converted to the new format - MH
         types = CmdbObjectManager(database_manager=self._database_manager).get_all_types()
         categories = [CategoryModel.from_data(category) for category in
                       super(CategoryManager, self).get_many({})]

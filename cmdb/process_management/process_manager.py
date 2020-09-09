@@ -30,7 +30,7 @@ class ProcessManager:
     """Handling CMDB processes
 
     The CMDB app consists of multiple processes (e.g. webapp, syncd).
-    The process manager starts and stops theses processes in the
+    The process managers starts and stops theses processes in the
     correct order.
     """
 

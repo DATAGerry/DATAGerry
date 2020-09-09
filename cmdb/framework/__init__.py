@@ -19,7 +19,7 @@
 This module presents the core system of the CMDB.
 All initializations and specifications for creating objects,
 object types and their fields are controlled here.
-Except for the manager, this module can be used completely modular.
+Except for the managers, this module can be used completely modular.
 The respective DAO is used to apply the attributes and to convert
 the elements for the database.
 """

@@ -1280,4 +1280,4 @@ class NoDatabaseManagerError(CMDBError):
 
     def __init__(self):
         super().__init__()
-        self.message = 'Database manager was not passed.'
+        self.message = 'Database managers was not passed.'

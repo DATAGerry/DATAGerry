@@ -19,10 +19,10 @@ import logging
 from flask import abort, request, current_app
 
 from cmdb.framework.models.type import TypeModel
-from cmdb.framework.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
-from cmdb.framework.manager.error.framework_errors import FrameworkIterationError
-from cmdb.framework.manager.results import IterationResult
-from cmdb.framework.manager.type_manager import TypeManager
+from cmdb.framework.managers import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
+from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
+from cmdb.framework.managers.results import IterationResult
+from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.utils import PublicID
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
