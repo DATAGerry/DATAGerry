@@ -20,7 +20,7 @@ from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.managers import ManagerBase, ManagerGetError, ManagerDeleteError
 from cmdb.framework.managers.error.framework_errors import FrameworkGetError, FrameworkNotFoundError, \
     FrameworkIterationError, FrameworkQueryEmptyError, FrameworkDeleteError, FrameworkUpdateError
-from cmdb.framework.managers.results import IterationResult
+from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.utils import PublicID, Collection
 from cmdb.search import Query, Pipeline
 from cmdb.search.query.builder import Builder

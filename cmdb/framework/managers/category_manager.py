@@ -22,7 +22,7 @@ from cmdb.framework.models.category import CategoryTree
 from cmdb.framework.managers import ManagerGetError
 from cmdb.framework.managers.error.framework_errors import FrameworkDeleteError
 from cmdb.framework.managers.framework_manager import FrameworkManager
-from cmdb.framework.managers.results import IterationResult
+from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.utils import PublicID
 
 

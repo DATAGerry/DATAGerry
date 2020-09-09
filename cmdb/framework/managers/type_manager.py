@@ -13,13 +13,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from typing import List, Union
+from typing import Union
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework import TypeModel
-from cmdb.framework.managers.error.framework_errors import FrameworkDeleteError
 from cmdb.framework.managers.framework_manager import FrameworkManager
-from cmdb.framework.managers.results import IterationResult
+from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.utils import PublicID
 
 

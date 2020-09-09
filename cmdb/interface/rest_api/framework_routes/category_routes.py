@@ -22,7 +22,7 @@ from cmdb.framework.models.category import CategoryModel, CategoryTree
 from cmdb.framework.managers import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerUpdateError
 from cmdb.framework.managers.category_manager import CategoryManager
 from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
-from cmdb.framework.managers.results import IterationResult
+from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetSingleResponse, GetMultiResponse, InsertSingleResponse, DeleteSingleResponse, \
