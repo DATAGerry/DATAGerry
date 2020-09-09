@@ -6,7 +6,7 @@
   top: 8px;
   float: left;
   margin-left: -44px;
-  z-index: 9999;
+  z-index: 9;
 }
 
 .text-area {
@@ -45,10 +45,11 @@
 .icon i::after {
   width: 0;
   height: 0;
-  border: 12px solid transparent;
+  border: 13px solid transparent;
   border-bottom-color: #fff;
   border-left-color: #fff;
-  bottom: -16px !important;
+  left: -1px !important;
+  bottom: -18px !important;
 }
 
 .icon i::before, .icon i::after {
