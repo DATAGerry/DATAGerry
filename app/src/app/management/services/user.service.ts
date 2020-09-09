@@ -69,7 +69,7 @@ export class UserService<T = User> implements ApiService {
   }
 
   public changeUserPassword(userID: number, newPassword: string) {
-    return this.api.callPutRoute<boolean>(this.servicePrefix + '/' + userID + '/passwd', { password: newPassword });
+    return this.api.callPut<boolean>(this.servicePrefix + '/' + userID + '/passwd', { password: newPassword });
   }
 
   public getUser(publicID: number): Observable<T> {

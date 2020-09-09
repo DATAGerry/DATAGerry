@@ -57,7 +57,8 @@ export const httpObservePostOptions = {
 export const httpFileOptions = {
   headers: new HttpHeaders({}),
   params: {},
-  observe: resp
+  observe: resp,
+  responseType: 'blob'
 };
 
 @Injectable({
@@ -103,24 +104,11 @@ export class ApiCallService {
     return this.http.delete<T>(this.apiURL + route, httpDeleteOptions).pipe(catchError(ApiCallService.handleError));
   }
 
-  public callGetRoute<T>(route: string, options: any = httpOptions) {
-    return this.http.get<T>(this.apiURL + route, options);
-  }
-
-  public callPostRoute<T>(route: string, data, options: any = httpOptions) {
-    return this.http.post<T>(this.apiURL + route, data, options);
-  }
-
-  public callPutRoute<T>(route: string, data, options: any = httpOptions) {
-    return this.http.put<T>(this.apiURL + route, data, options);
-  }
-
   public callDeleteManyRoute<T>(route: string, params?: any): Observable<any> {
+    /**
+     * @deprecated @SD please refactor and remove this.
+     */
     return this.http.get<T>(this.apiURL + route, params);
-  }
-
-  public callDeleteRoute<T>(route: string, params?: any): Observable<any> {
-    return this.http.delete<T>(this.apiURL + route, params);
   }
 
   public readCookies(name: string) {

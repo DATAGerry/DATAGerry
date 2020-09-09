@@ -105,11 +105,11 @@ export class ObjectService<T = RenderResult> implements ApiService {
 
   // CRUD calls
   public postObject(objectInstance: CmdbObject): Observable<any> {
-    return this.api.callPostRoute<CmdbObject>(this.servicePrefix + '/', objectInstance);
+    return this.api.callPost<CmdbObject>(this.servicePrefix + '/', objectInstance);
   }
 
   public putObject(publicID: number, objectInstance: CmdbObject, options?): Observable<any> {
-    return this.api.callPutRoute<CmdbObject>(`${this.servicePrefix}/${publicID}/`, objectInstance, options);
+    return this.api.callPut<CmdbObject>(`${this.servicePrefix}/${publicID}/`, objectInstance);
   }
 
   public changeState(publicID: number, status: boolean) {
@@ -132,7 +132,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
   }
 
   public deleteObject(publicID: any): Observable<any> {
-    return this.api.callDeleteRoute(`${this.servicePrefix}/${publicID}`);
+    return this.api.callDelete(`${this.servicePrefix}/${publicID}`);
   }
 
   // Count calls
