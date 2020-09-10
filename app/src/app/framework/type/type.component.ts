@@ -177,4 +177,8 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
       this.selectedObjects.push(publicID);
     }
   }
+
+  public showAlert(): void {
+    $('#infobox').show();
+  }
 }
