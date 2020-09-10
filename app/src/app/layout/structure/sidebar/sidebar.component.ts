@@ -54,12 +54,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.renderer.addClass(document.body, 'sidebar-fixed');
     this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable().subscribe((categoryTree: CmdbCategoryTree) => {
       this.categoryTree = categoryTree;
-      this.typeService.countUncategorizedTypes().subscribe((numberUncategorizedTypes: number) => {
-        this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes({limit: numberUncategorizedTypes}).subscribe(
-          (apiResponse: APIGetMultiResponse<CmdbType>) => {
+      this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes().subscribe(
+        (apiResponse: APIGetMultiResponse<CmdbType>) => {
           this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
         });
-      });
 
       this.typeService.getTypeList().subscribe((types: CmdbType[]) => this.typeList = types);
     });

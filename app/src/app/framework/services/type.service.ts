@@ -62,6 +62,10 @@ export class TypeService<T = CmdbType> implements ApiService {
   constructor(private api: ApiCallService, private client: HttpClient) {
   }
 
+  /**
+   * Iterate over the type collection
+   * @param options Instance of CollectionParameters
+   */
   public getTypesIteration(options: CollectionParameters = {
     filter: undefined,
     limit: 10,
@@ -69,15 +73,24 @@ export class TypeService<T = CmdbType> implements ApiService {
     order: 1,
     page: 1
   }): Observable<APIGetMultiResponse<T>> {
-    console.log(options);
+    let params: HttpParams = new HttpParams();
+    for (const key in options) {
+      if (options.hasOwnProperty(key)) {
+        params = params.set(key, options[key]);
+      }
+    }
 
-    return this.api.callGet<T[]>(this.servicePrefix + '/', this.client).pipe(
+    return this.api.callGet<T[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
     );
   }
 
+  /**
+   * Get a specific type by the id
+   * @param publicID
+   */
   public getType(publicID: number): Observable<T> {
     return this.api.callGet<CmdbType>(this.servicePrefix + '/' + publicID).pipe(
       map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => {
@@ -86,15 +99,22 @@ export class TypeService<T = CmdbType> implements ApiService {
     );
   }
 
-  public getTypeList(): Observable<T[]> {
-    return this.api.callGet<CmdbType[]>(this.servicePrefix + '/').pipe(
-      map((apiResponse) => {
-        return apiResponse.body;
+  /**
+   * Get the complete type list
+   */
+  public getTypeList(): Observable<Array<T>> {
+    return this.api.callGet<CmdbType[]>(this.servicePrefix + '/?limit=0').pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return apiResponse.body.results as Array<T>;
       })
     );
   }
 
-  public getTypesByName(name: string, ...options): Observable<Array<T>> {
+  /**
+   * Get types by the name or label
+   * @param name
+   */
+  public getTypesByName(name: string): Observable<Array<T>> {
     const filter = {
       $or: [
         {
@@ -106,12 +126,9 @@ export class TypeService<T = CmdbType> implements ApiService {
       ]
     };
     let params: HttpParams = new HttpParams();
-    for (const option of options) {
-      for (const key of Object.keys(option)) {
-        params = params.append(key, option[key]);
-      }
-    }
+
     params = params.set('filter', JSON.stringify(filter));
+    params = params.set('limit', '0');
     return this.api.callGet<T[]>(this.servicePrefix + '/', params).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
@@ -154,7 +171,10 @@ export class TypeService<T = CmdbType> implements ApiService {
     );
   }
 
-  public countUncategorizedTypes(): Observable<number> {
+  /**
+   * Get all uncategorized types
+   */
+  public getUncategorizedTypes(): Observable<APIGetMultiResponse<T>> {
     const pipeline = [
       { $match: {} },
       {
@@ -172,32 +192,7 @@ export class TypeService<T = CmdbType> implements ApiService {
     ];
 
     const filter = JSON.stringify(pipeline);
-    return this.api.callHead<Array<T>>(this.servicePrefix + `/?filter=${ filter }`).pipe(
-      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
-        return +apiResponse.headers.get('X-Total-Count');
-      })
-    );
-  }
-
-  public getUncategorizedTypes(...options): Observable<APIGetMultiResponse<T>> {
-    const pipeline = [
-      { $match: {} },
-      {
-        $lookup: {
-          from: 'framework.categories',
-          localField: 'public_id',
-          foreignField: 'types',
-          as: 'categories'
-        }
-      },
-      {
-        $match: { categories: { $size: 0 } }
-      },
-      { $project: { categories: 0 } }
-    ];
-
-    const filter = JSON.stringify(pipeline);
-    return this.api.callGet<Array<T>>(this.servicePrefix + `/?filter=${ filter }`).pipe(
+    return this.api.callGet<Array<T>>(this.servicePrefix + `/?filter=${ filter }&limit=0`).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body as APIGetMultiResponse<T>;
       })
