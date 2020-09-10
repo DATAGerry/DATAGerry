@@ -18,8 +18,7 @@
 
 import { Injectable } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
-import { ApiCallService, ApiService, HttpInterceptorHandler, resp } from '../../services/api-call.service';
-import { ValidatorService } from '../../services/validator.service';
+import { ApiCallService, ApiService, resp } from '../../services/api-call.service';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
@@ -31,7 +30,7 @@ import {
   APIInsertSingleResponse,
   APIUpdateSingleResponse
 } from '../../services/models/api-response';
-import { CmdbCategory } from '../models/cmdb-category';
+import { CollectionParameters } from '../../services/models/api-parameter';
 
 export const httpObserveOptions = {
   headers: new HttpHeaders({
@@ -70,14 +69,15 @@ export class TypeService<T = CmdbType> implements ApiService {
   constructor(private api: ApiCallService, private client: HttpClient) {
   }
 
-  public getTypesIteration(...options): Observable<APIGetMultiResponse<T>> {
-    // this.api.parseIterationParams(options);
-    let params: HttpParams = new HttpParams();
-    for (const option of options) {
-      for (const key of Object.keys(option)) {
-        params = params.append(key, option[key]);
-      }
-    }
+  public getTypesIteration(options: CollectionParameters = {
+    filter: undefined,
+    limit: 10,
+    sort: 'public_id',
+    order: 1,
+    page: 1
+  }): Observable<APIGetMultiResponse<T>> {
+    console.log(options);
+
     return this.api.callGet<T[]>(this.servicePrefix + '/', this.client, httpObserveOptions).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
