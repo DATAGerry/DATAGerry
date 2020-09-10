@@ -109,7 +109,6 @@ export class ExportdJobService<T = ExportdJob> implements ApiService {
 
   // Validation functions
   public checkJobExists(typeName: string) {
-    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`, specialClient);
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`);
   }
 }

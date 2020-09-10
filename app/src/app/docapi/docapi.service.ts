@@ -18,7 +18,7 @@
 
 import { Injectable } from '@angular/core';
 
-import { HttpInterceptorHandler, ApiCallService, ApiService } from '../services/api-call.service';
+import { HttpInterceptorHandler, ApiCallService, ApiService, httpFileOptions } from '../services/api-call.service';
 import { HttpBackend, HttpClient } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
 import { switchMap, map, catchError } from 'rxjs/operators';
@@ -26,10 +26,6 @@ import { Observable, timer } from 'rxjs';
 import { DocTemplate } from '../framework/models/cmdb-doctemplate';
 import { BasicAuthInterceptor } from '../auth/interceptors/basic-auth.interceptor';
 
-const fileHttpOptions = {
-  observe: 'response',
-  responseType: 'blob'
-};
 
 
 @Injectable({
@@ -71,7 +67,7 @@ export class DocapiService<T = DocTemplate> implements ApiService {
 
 
   getRenderedObjectDoc(templateId: number, objectId: number) {
-    return this.api.callGet<any>(`${ this.servicePrefix }/${ templateId }/render/${ objectId }`, this.http, fileHttpOptions);
+    return this.api.callGet<any>(`${ this.servicePrefix }/${ templateId }/render/${ objectId }`, httpFileOptions);
   }
 
 
@@ -101,8 +97,7 @@ export class DocapiService<T = DocTemplate> implements ApiService {
 
   // Validation functions
   public checkDocTemplateExists(docName: string) {
-    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ docName }`, specialClient);
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ docName }`);
   }
 
 }

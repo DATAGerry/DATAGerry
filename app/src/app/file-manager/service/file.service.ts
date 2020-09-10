@@ -23,13 +23,11 @@ import {
   ApiCallService,
   ApiService,
   httpFileOptions,
-  HttpInterceptorHandler
 } from '../../services/api-call.service';
 import { HttpBackend, HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { ValidatorService } from '../../services/validator.service';
 import { FileMetadata } from '../model/metadata';
 import { FormControl } from '@angular/forms';
-import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
 import { FileElement } from '../model/file-element';
 
 export const checkFolderExistsValidator = (fileService: FileService, metadata: any, time: number = 500) => {
@@ -78,7 +76,7 @@ export class FileService<T = any> implements ApiService {
    */
   public getAllFilesList(params: any): Observable<T[]> {
     httpObserveOptions[PARAMETER] = { metadata: JSON.stringify(params) };
-    return this.api.callGet<T[]>(this.servicePrefix + '/', this.http, httpObserveOptions).pipe(
+    return this.api.callGet<T[]>(this.servicePrefix + '/', httpObserveOptions).pipe(
       map((apiResponse: HttpResponse<T[]>) => {
         if (apiResponse.status === 204) {
           return [];
@@ -170,8 +168,7 @@ export class FileService<T = any> implements ApiService {
    */
   public checkFolderExists(folderName: string, metadata: FileMetadata) {
     httpObserveOptions[PARAMETER] = { metadata: JSON.stringify(metadata) };
-    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ folderName }`, specialClient, httpObserveOptions);
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ folderName }`, httpObserveOptions);
   }
 
 }

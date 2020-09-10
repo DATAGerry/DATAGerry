@@ -21,7 +21,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ApiCallService, ApiService, resp } from '../../services/api-call.service';
 import { CmdbDao } from '../models/cmdb-dao';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import { HttpHeaders } from '@angular/common/http';
 
 export const httpObserveOptions = {
   headers: new HttpHeaders({
@@ -39,7 +39,7 @@ export const COOCKIENAME = 'onlyActiveObjCookie';
 export class SpecialService<T = CmdbDao> implements ApiService {
   public servicePrefix: string = '/';
 
-  constructor(private api: ApiCallService, private http: HttpClient) {
+  constructor(private api: ApiCallService) {
   }
 
   public getNewestObjects(): Observable<T[]> {
@@ -60,7 +60,7 @@ export class SpecialService<T = CmdbDao> implements ApiService {
 
   public getIntroStarter(): Observable<T[]> {
     httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    return this.api.callGet<T[]>(this.servicePrefix + '/special/intro', this.http, httpObserveOptions).pipe(
+    return this.api.callGet<T[]>(this.servicePrefix + '/special/intro', httpObserveOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })

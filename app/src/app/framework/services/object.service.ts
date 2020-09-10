@@ -59,7 +59,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
     httpObserveOptions[PARAMETER].direction = filter.direction;
     httpObserveOptions[FILTER] = filter;
     if (typeID != null) {
-      return this.api.callGet<T[]>(`${this.servicePrefix}/dt/type/${typeID}`, this.http, httpObserveOptions).pipe(
+      return this.api.callGet<T[]>(`${this.servicePrefix}/dt/type/${typeID}`, httpObserveOptions).pipe(
         map((apiResponse) => {
           if (apiResponse.status === 204) {
             return [];
@@ -69,7 +69,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
       );
     }
 
-    return this.api.callGet<T[]>(`${this.servicePrefix}/`, this.http, httpObserveOptions).pipe(
+    return this.api.callGet<T[]>(`${this.servicePrefix}/`, httpObserveOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -78,7 +78,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
 
   public getObjectsByType(typeID: number): Observable<T[]> {
     httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    return this.api.callGet<T[]>(`${this.servicePrefix}/type/${typeID}`, this.http, httpObserveOptions).pipe(
+    return this.api.callGet<T[]>(`${this.servicePrefix}/type/${typeID}`, httpObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -88,7 +88,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
     );
   }
 
-  public getObject<R>(publicID: number, native: boolean = false, specialClient?: HttpClient): Observable<R> {
+  public getObject<R>(publicID: number, native: boolean = false): Observable<R> {
     if (native === true) {
       return this.api.callGet<CmdbObject[]>(`${this.servicePrefix}/${publicID}/native/`).pipe(
         map((apiResponse) => {
@@ -96,7 +96,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
         })
       );
     }
-    return this.api.callGet<R[]>(`${this.servicePrefix}/${publicID}/`, specialClient).pipe(
+    return this.api.callGet<R[]>(`${this.servicePrefix}/${publicID}/`).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -139,7 +139,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
 
   public countObjectsByType(typeID: number) {
     httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    return this.api.callGet<number>(this.servicePrefix + '/count/' + typeID, this.http, httpObserveOptions).pipe(
+    return this.api.callGet<number>(this.servicePrefix + '/count/' + typeID, httpObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -151,7 +151,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
 
   public groupObjectsByType(value: string, params?: any) {
     httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    return this.api.callGet<any>(this.servicePrefix + '/group/' + value, this.http, httpObserveOptions).pipe(
+    return this.api.callGet<any>(this.servicePrefix + '/group/' + value, httpObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -163,7 +163,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
 
   public countObjects() {
     httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    return this.api.callGet<number>(`${this.servicePrefix}/count/`, this.http,  httpObserveOptions).pipe(
+    return this.api.callGet<number>(`${this.servicePrefix}/count/`, httpObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -176,7 +176,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
   // Custom calls
   public getObjectReferences(publicID: number) {
     httpObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/reference/${publicID}`, this.http, httpObserveOptions).pipe(
+    return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/reference/${publicID}`, httpObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -228,7 +228,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
     httpObserveOptions[PARAMETER].search = ValidatorService.validateRegex(filter.search).trim();
     httpObserveOptions[PARAMETER].dtRender = filter.dtRender;
     httpObserveOptions[PARAMETER].idList = filter.idList;
-    return this.api.callGet<DataTablesResult[]>(`${this.servicePrefix}/dt/filter/type/${typeID}`, this.http, httpObserveOptions).pipe(
+    return this.api.callGet<DataTablesResult[]>(`${this.servicePrefix}/dt/filter/type/${typeID}`, httpObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];

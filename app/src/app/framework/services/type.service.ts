@@ -32,13 +32,6 @@ import {
 } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
 
-export const httpObserveOptions = {
-  headers: new HttpHeaders({
-    'Content-Type': 'application/json'
-  }),
-  observe: resp
-};
-
 export const PARAMETER = 'params';
 export const COOCKIENAME = 'onlyActiveObjCookie';
 
@@ -78,7 +71,7 @@ export class TypeService<T = CmdbType> implements ApiService {
   }): Observable<APIGetMultiResponse<T>> {
     console.log(options);
 
-    return this.api.callGet<T[]>(this.servicePrefix + '/', this.client, httpObserveOptions).pipe(
+    return this.api.callGet<T[]>(this.servicePrefix + '/', this.client).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
@@ -119,7 +112,7 @@ export class TypeService<T = CmdbType> implements ApiService {
       }
     }
     params = params.set('filter', JSON.stringify(filter));
-    return this.api.callGet<T[]>(this.servicePrefix + '/', this.client, params).pipe(
+    return this.api.callGet<T[]>(this.servicePrefix + '/', params).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
       })
