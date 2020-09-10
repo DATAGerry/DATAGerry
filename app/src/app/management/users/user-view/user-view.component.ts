@@ -65,7 +65,7 @@ export class UserViewComponent implements OnInit {
     const newPassword = this.passwordChangeForm.get('password').value;
     this.userService.changeUserPassword(this.userInstance.public_id, newPassword).subscribe(res => {
       if (res) {
-        this.toastService.show('Password changed!');
+        this.toastService.info('Password changed!');
         this.passwordChangeForm.reset();
       }
 

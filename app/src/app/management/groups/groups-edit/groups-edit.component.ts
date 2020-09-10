@@ -102,7 +102,7 @@ export class GroupsEditComponent implements OnInit, OnDestroy {
     const updateData = this.editForm.getRawValue();
     const updateSub: Subscription = this.groupService.putGroup(this.groupID, updateData).subscribe(ack => {
         if (ack) {
-          this.toast.show('Group was updated');
+          this.toast.info('Group was updated');
           this.router.navigate(['/management/groups/']);
         }
       },

@@ -88,7 +88,7 @@ export class ExportdJobSettingsBuilderComponent implements OnInit {
         });
     } else if (this.mode === CmdbMode.Edit) {
       this.taskService.putTask(this.taskInstance).subscribe((updateResp: ExportdJob) => {
-          this.toast.show(`Exportd Job was successfully edit: Exportd Job ID: ${updateResp.public_id}`);
+          this.toast.info(`Exportd Job was successfully edit: Exportd Job ID: ${updateResp.public_id}`);
           this.router.navigate(['/settings/exportdjob/'], {queryParams: {typeEditSuccess: updateResp.public_id}});
         },
         (error) => {

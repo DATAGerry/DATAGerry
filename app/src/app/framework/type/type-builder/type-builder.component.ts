@@ -140,7 +140,7 @@ export class TypeBuilderComponent implements OnInit {
             });
           }
           this.sidebarService.reload();
-          this.toast.show(`Type was successfully edit: TypeID: ${ updateResp.public_id }`);
+          this.toast.info(`Type was successfully edit: TypeID: ${ updateResp.public_id }`);
           this.router.navigate(['/framework/type/'], { queryParams: { typeEditSuccess: updateResp.public_id } });
         },
         (error) => {

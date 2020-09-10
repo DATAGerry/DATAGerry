@@ -83,7 +83,7 @@ export class RenderField {
   protected showToast(selBox: any) {
     document.execCommand('copy');
     document.body.removeChild(selBox);
-    this.toast.show('Content was copied to clipboard');
+    this.toast.info('Content was copied to clipboard');
   }
 
 }

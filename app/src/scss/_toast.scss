@@ -1,10 +1,45 @@
-.toast{
-  max-width: 600px;
-}
-:host {
-  position: fixed;
-  top: 0;
-  right: 0;
-  margin: 0.5em;
-  z-index: 1200;
-}
+//.toast{
+//  width: fit-content;
+//  height: fit-content;
+//  max-width: 600px;
+//}
+//:host {
+//  width: 100%;
+//  height: 100%;
+//  position: fixed;
+//  margin: 0.5em;
+//  z-index: 1200;
+//}
+//
+//ngb-toast {
+//  position: relative;
+//  margin: 1em;
+//  z-index: 1200;
+//}
+//
+//.top-left {
+//  top: 0;
+//  left: 0;
+//}
+//
+//.top-right {
+//  top: 0;
+//  right: 0;
+//}
+//
+//.bottom-left {
+//  bottom: 0;
+//  left: 0;
+//}
+//
+//.bottom-right {
+//  bottom: 0;
+//  right: 0;
+//}
+//
+//.center{
+//  bottom: 50%;
+//  top: 50%;
+//  right: 50%;
+//  left: 50%;
+//}

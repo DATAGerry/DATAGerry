@@ -16,29 +16,64 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Injectable, TemplateRef } from '@angular/core';
+import {EventEmitter, Injectable, Output, TemplateRef} from '@angular/core';
+import './toast.js';
+
+declare global {
+  interface Window {
+    showToast(): void;
+  }
+}
 
 @Injectable({
   providedIn: 'root'
 })
+
 export class ToastService {
+
+  @Output() toast: EventEmitter<any> = new EventEmitter();
 
   toasts: any[] = [];
   errorToast: any[] = [];
 
-  public show(textOrTpl: string | TemplateRef<any>, options: any = {}) {
-    this.toasts.push({ textOrTpl, ...options });
+  // public info(textOrTpl: string | TemplateRef<any>, options: any = {}) {
+  //   options.classname += ' bg-info';
+  //   options.headerName = 'Information';
+  //   options.headerClass = 'text-info';
+  //   this.toasts.push({ textOrTpl, ...options });
+  // }
+
+  public info(text: string, options: any = {}) {
+    this.toast.emit();
+    window.showToast();
+    // // $('#info').toast('show');
+    // this.toasts.push({text, ...options});
   }
 
-  public error(textOrTpl: string | TemplateRef<any>, options: any = {}) {
-    this.errorToast.push({ textOrTpl, ...options });
-  }
-
-  public remove(toast) {
-    this.toasts = this.toasts.filter(t => t !== toast);
-  }
-
-  public removeError(toast) {
-    this.errorToast = this.errorToast.filter(t => t !== toast);
-  }
+  // public error(textOrTpl: string | TemplateRef<any>, options: any = {}) {
+  //   options.classname += ' bg-danger';
+  //   this.errorToast.push({ textOrTpl, ...options });
+  // }
+  //
+  // public warning(textOrTpl: string | TemplateRef<any>, options: any = {}) {
+  //   options.classname += ' bg-warning';
+  //   options.headerName = 'Warning';
+  //   options.headerClass = 'text-warning';
+  //   this.toasts.push({ textOrTpl, ...options });
+  // }
+  //
+  // public success(textOrTpl: string | TemplateRef<any>, options: any = {}) {
+  //   options.classname += ' bg-success';
+  //   options.headerName = 'Success';
+  //   options.headerClass = 'text-success';
+  //   this.toasts.push({ textOrTpl, ...options });
+  // }
+  //
+  // public remove(toast) {
+  //   this.toasts = this.toasts.filter(t => t !== toast);
+  // }
+  //
+  // public removeError(toast) {
+  //   this.errorToast = this.errorToast.filter(t => t !== toast);
+  // }
 }

@@ -97,7 +97,10 @@ export class ObjectEditComponent implements OnInit {
       this.objectInstance.comment = this.commitForm.get('comment').value;
       this.objectService.putObject(this.objectID, this.objectInstance).subscribe((res: boolean) => {
         if (res) {
-          this.toastService.show('Object was updated!');
+          this.toastService.info('insert name her Succesfully Updated', {classname: 'top-left'});
+          this.toastService.info('insert name her Succesfully Updated', {classname: 'top-left'});
+          this.toastService.info('insert name her Succesfully Updated', {classname: 'top-left'});
+          this.toastService.info('insert name her Succesfully Updated', {classname: 'top-left'});
           this.router.navigate(['/framework/object/view/' + this.objectID]);
         }
       });

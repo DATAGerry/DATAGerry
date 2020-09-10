@@ -1,26 +1,13 @@
-<ngb-toast
-  *ngFor="let toast of toastService.toasts"
-  [class]="toast.classname"
-  [autohide]="true"
-  [delay]="toast.delay || 5000"
-  (hide)="toastService.remove(toast)"
->
-  <ng-template [ngIf]="isTemplate(toast)" [ngIfElse]="text">
-    <ng-template [ngTemplateOutlet]="toast.textOrTpl"></ng-template>
-  </ng-template>
+<div id="info" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+  <div class="toast-header">
+    <i class="far fa fa-info-circle"></i>
+    <strong class="mr-auto">Bootstrap</strong>
+    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="toast-body">
+    Hello, world! This is a toast message.
+  </div>
+</div>
 
-  <ng-template #text>{{ toast.textOrTpl }}</ng-template>
-</ngb-toast>
-
-<ngb-toast header="An error occurred"
-  *ngFor="let toast of toastService.errorToast"
-  [class]="toast.classname"
-  [autohide]="true"
-  [delay]="toast.delay || 5000"
-  (hide)="toastService.removeError(toast)"
->
-  <ng-template [ngIf]="isTemplate(toast)" [ngIfElse]="text">
-    <ng-template [ngTemplateOutlet]="toast.textOrTpl"></ng-template>
-  </ng-template>
-  <ng-template #text>{{ toast.textOrTpl }}</ng-template>
-</ngb-toast>
