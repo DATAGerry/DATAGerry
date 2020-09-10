@@ -67,10 +67,15 @@ class FrameworkQueryBuilder(Builder):
             for pipe in filter:
                 self.query.append(pipe)
 
+        if limit == 0:
+            results_query = self.skip_(limit)
+        else:
+            results_query = self.skip_(skip), self.limit_(limit)
+
         self.query.append(self.sort_(sort=sort, order=order))
         self.query.append(self.facet_({
             'meta': [self.count_('total')],
-            'results': [self.skip_(skip), self.limit_(limit)]
+            'results': [results_query]
         }))
         return self.query
 
