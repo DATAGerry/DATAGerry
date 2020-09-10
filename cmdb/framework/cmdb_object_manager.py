@@ -261,17 +261,15 @@ class CmdbObjectManager(CmdbManagerBase):
 
         # query for all types with ref input type with value of type id
         req_type_query = {
-            "fields": {
-                "$and": [
-                    {"$elemMatch": {
-                        "type": "ref",
-                    }},
-                    {"$or": [
-                        {"ref_types": type_id},
-                        {"ref_types": {"$in": [type_id]}}
-                    ]}
-                ]
-            }
+            "$and": [
+                {'fields': {'$elemMatch': {'type': 'ref'}}},
+                {'$or':
+                    [
+                        {'fields': {'$elemMatch': {'ref_types': type_id}}},
+                        {'fields': {'$elemMatch': {'ref_types': {'$in': [type_id]}}}}
+                    ]
+                }
+            ]
         }
 
         # get type list with given query

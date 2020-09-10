@@ -1,0 +1,88 @@
+<span class="d-flex justify-content-between">
+  <h1>Type List</h1>
+  <h1><i class="far fa fa-info-circle" (click)="showAlert()"></i></h1>
+</span>
+<hr/>
+<cmdb-info-box message="DATAGERRY is an asset management tool (or CMDB), where you can define the data model for your own.
+
+In DATAGERRY objects are stored. An object can be for example a router, server, location or maintenance contract and
+ consists of multiple fields (e.g. management IP, hostname, … of a router). Each field has a specific data type.
+ A datatype could be for example text, checkbox, date, dropdown or many more. The blueprint for an object is defined
+ in an object type."
+               icon="fas fa-cube"
+               doc="/docs/admin_guide/objects.html"></cmdb-info-box>
+<div class="card-body clearfix" style="padding: 0 0 1em 0">
+  <button type="button"
+          *permissionLink="['base.framework.type.add']"
+          class="btn btn-success btn-sm"
+          [routerLink]="['/framework/type/add']">
+    <i class="fas fa-plus"></i> Add
+  </button>
+  <span class="card-group float-right" *permissionLink="'base.export.type.*'">
+    <div class="btn-group">
+      <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle"
+              data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <fa-icon icon="file-export"></fa-icon> Export
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left" aria-labelledby="exportButton">
+        <li id="export-type" [className]="'dropdown-item'"
+            (click)="exportingFiles()">
+          <fa-icon icon="file-code"></fa-icon> JSON
+          <span *ngIf="selectedObjects.length == 0">( all )</span>
+          <span *ngIf="selectedObjects.length > 0"> ( {{selectedObjects.length}} )</span>
+        </li>
+      </ul>
+    </div>
+  </span>
+</div>
+
+
+<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
+       id="type-list-datatable" class="table table-striped table-bordered">
+  <thead>
+  <tr>
+    <th><input type="checkbox" class="selectAll" name="selectAll" value="all" (click)="selectAll()"></th>
+    <th>Active</th>
+    <th>Public ID</th>
+    <th>Type</th>
+    <th>Author</th>
+    <th>Creation time</th>
+    <th *permissionLink="['base.framework.type.add', 'base.framework.type.edit', 'base.framework.type.delete']">Action</th>
+    <th *permissionLink="['base.framework.type.clean']">Cleanup Database</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let typeInstance of typeList">
+    <td></td>
+    <td><cmdb-active-badge [activeStatus]="typeInstance.active"></cmdb-active-badge></td>
+    <td scope="row">{{typeInstance.public_id}}</td>
+    <td><cmdb-type-label [faIcon]="typeInstance?.render_meta?.icon" [title]="typeInstance.label"></cmdb-type-label></td>
+    <td>{{userService?.getUser(typeInstance?.author_id).user_name | async}}</td>
+    <td>{{typeInstance.creation_time.$date | date:"dd/MM/yyyy - HH:mm:ss"}}</td>
+    <td *permissionLink="['base.framework.type.add', 'base.framework.type.edit', 'base.framework.type.delete']">
+      <a *permissionLink="'base.framework.type.edit'"
+         class="text-dark" routerLink="/framework/type/edit/{{typeInstance.public_id}}">
+        <fa-icon [icon]="['far', 'edit']"></fa-icon>
+      </a>
+      <a *permissionLink="'base.framework.type.add'"
+         class="ml-1 text-dark" [routerLink]="['/framework/type/add/']" [queryParams]="{copy: typeInstance.public_id}">
+        <fa-icon [icon]="['far', 'clone']"></fa-icon>
+      </a>
+      <a *permissionLink="'base.framework.type.delete'"
+         class="ml-1 text-dark" routerLink="/framework/type/delete/{{typeInstance.public_id}}">
+        <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
+      </a>
+    </td>
+    <td *permissionLink="['base.framework.type.clean']">
+      <fieldset [disabled]="typeInstance.clean_db !== false">
+        <button type="button" class="btn badge-pill" (click)="callCleanUpModal(typeInstance)"
+                data-toggle="modal" data-target="#cleanup-progress-modal"
+                [ngClass]="typeInstance.clean_db === false ? 'btn-danger' : 'btn-success'">clean
+          <fa-icon *ngIf="typeInstance.clean_db === false" icon="exclamation-circle"></fa-icon>
+          <fa-icon *ngIf="typeInstance.clean_db !== false" icon="check-circle"></fa-icon>
+        </button>
+      </fieldset>
+    </td>
+  </tr>
+  </tbody>
+</table>

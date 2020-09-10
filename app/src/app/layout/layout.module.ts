@@ -65,6 +65,7 @@ import { AddAttachmentsModalComponent } from './helpers/modals/add-attachments-m
 import { GeneralModalComponent } from './helpers/modals/general-modal/general-modal.component';
 import { RenderModule } from '../framework/render/render.module';
 import { ObjectPreviewModalComponent} from '../framework/object/modals/object-preview-modal/object-preview-modal.component';
+import { InfoBoxComponent } from './components/info-box/info-box.component';
 
 export const LAYOUT_COMPONENT_ROUTES: Routes = [
   {
@@ -124,7 +125,8 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     TypeFilterPipe,
     AddAttachmentsModalComponent,
     GeneralModalComponent,
-    ObjectPreviewModalComponent
+    ObjectPreviewModalComponent,
+    InfoBoxComponent
   ],
   exports: [
     NgxSpinnerComponent,
@@ -147,7 +149,8 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     FileDragDropDirective,
     FileSizePipe,
     CategoryTreeFilterPipe,
-    TypeFilterPipe
+    TypeFilterPipe,
+    InfoBoxComponent
   ],
   imports: [
     CommonModule,

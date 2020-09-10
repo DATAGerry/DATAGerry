@@ -16,12 +16,20 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component } from '@angular/core';
+import {Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'cmdb-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  selector: 'cmdb-info-box',
+  templateUrl: './info-box.component.html',
+  styleUrls: ['./info-box.component.scss']
 })
-export class AppComponent {
+export class InfoBoxComponent {
+
+  @Input() message: string;
+  @Input() icon: string = 'far fa-file';
+  @Input() doc: string = 'https://docs.datagerry.com';
+
+  public hideAlert(): void {
+    $('#infobox').hide();
+  }
 }

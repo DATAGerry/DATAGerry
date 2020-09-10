@@ -32,7 +32,7 @@ import { Subject } from 'rxjs';
 import { ObjectService } from '../../services/object.service';
 import { RenderResult } from '../../models/cmdb-render';
 import { DatePipe } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import { FileService } from '../../../export/export.service';
 import { FileSaverService } from 'ngx-filesaver';
 import { DataTableFilter, DataTablesResult } from '../../models/cmdb-datatable';
@@ -58,6 +58,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   public objects: DataTablesResult;
 
   private modalRef: NgbModalRef;
+  private readonly previousLoadSubscription: any;
 
   // Header
   public pageTitle: string = 'List';
@@ -81,6 +82,12 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
     };
+
+    this.previousLoadSubscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.router.navigated = false;
+      }
+    });
   }
 
   ngOnInit() {
@@ -237,6 +244,10 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
 
     if (this.modalRef) {
       this.modalRef.close();
+    }
+
+    if (this.previousLoadSubscription) {
+      this.previousLoadSubscription.unsubscribe();
     }
   }
 
