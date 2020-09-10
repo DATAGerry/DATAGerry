@@ -216,6 +216,7 @@ export class TypeService<T = CmdbType> implements ApiService {
      */
     return this.api.callHead<T[]>(this.servicePrefix + '/').pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        console.log(apiResponse.headers);
         return +apiResponse.headers.get('X-Total-Count');
       })
     );

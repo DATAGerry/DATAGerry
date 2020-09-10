@@ -108,7 +108,7 @@ def create_rest_api(event_queue):
 
     # Import App Extensions
     from flask_cors import CORS
-    CORS(app)
+    CORS(app, expose_headers=['X-API-Version', 'X-Total-Count'])
     import cmdb
     cache.init_app(app)
     cache.clear()
