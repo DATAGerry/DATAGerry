@@ -254,8 +254,13 @@ def get_objects_by_type(public_id, request_user: User):
 def get_objects_by_types(type_ids, request_user: User):
     """Return all objects by type_id"""
     try:
-        filter_state = {'type_id': type_ids}
-        all_objects_list = object_manager.get_objects_by(sort="type_id", filter={'$or': filter_state})
+        in_types = {'type_id': {'$in': list(map(int, type_ids.split(',')))}}
+        is_active = {'active': {"$eq": False}}
+        if _fetch_only_active_objs:
+            is_active = {'active': {"$eq": True}}
+        query = {'$and': [in_types, is_active]}
+
+        all_objects_list = object_manager.get_objects_by(sort="type_id", **query)
         rendered_list = RenderList(all_objects_list, request_user).render_result_list()
 
     except CMDBError:
@@ -897,7 +902,7 @@ def _build_query(args, q_operator='$and'):
         pass
 
 
-def _fetch_only_active_objs():
+def _fetch_only_active_objs() -> bool:
     """
         Checking if request have cookie parameter for object active state
         Returns:
