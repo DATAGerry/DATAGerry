@@ -69,6 +69,7 @@ export class TypeBuilderComponent implements OnInit {
 
   public exitBasicStep() {
     this.selectedCategoryID = this.basicStep.basicCategoryForm.value.category_id;
+    console.log(this.selectedCategoryID);
     const defaultIcon = this.basicStep.basicMetaIconForm.get('icon').value === '' ?
       'fas fa-cube' : this.basicStep.basicMetaIconForm.get('icon').value;
     this.assignToType({ icon: defaultIcon }, 'render_meta');
@@ -101,8 +102,8 @@ export class TypeBuilderComponent implements OnInit {
   public saveType() {
     if (this.mode === CmdbMode.Create) {
       let newTypeID = null;
-      this.typeService.postType(this.typeInstance).subscribe(typeIDResp => {
-          newTypeID = typeIDResp;
+      this.typeService.postType(this.typeInstance).subscribe((typeIDResp: CmdbType) => {
+          newTypeID = +typeIDResp.public_id;
           if (this.selectedCategoryID) {
             this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
               category.types.push(newTypeID);
