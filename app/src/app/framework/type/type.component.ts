@@ -52,7 +52,6 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public selectedObjects: string[] = [];
 
-
   constructor(private typeService: TypeService) {
     this.types = [];
   }
@@ -81,11 +80,6 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
           data: 'name'
         },
         {
-          title: 'Author',
-          name: 'author_id',
-          data: 'author_id'
-        },
-        {
           title: 'Creation Time',
           name: 'creation_time',
           data: 'creation_time',
@@ -95,11 +89,11 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
           name: 'actions',
         }
       ],
-      columnDefs: [ {
+      columnDefs: [{
         orderable: false,
         className: 'select-checkbox',
-        targets:   0
-      } ],
+        targets: 0
+      }],
       rowCallback: (row: Node, data: any[]) => {
         $('td:first-child', row).unbind('click');
         $('td:first-child', row).bind('click', () => {
@@ -110,10 +104,6 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
       ordering: true,
       searching: false,
       serverSide: true,
-      dom:
-        '<"row" <"col-sm-2" l><"col" f> >' +
-        '<"row" <"col-sm-12"tr>>' +
-        '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
       processing: true,
       ajax: (params: any, callback) => {
 
@@ -125,18 +115,19 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
         };
 
         this.typeService.getTypesIteration(apiParameters).pipe(
-          takeUntil(this.unSubscribe)).subscribe((response: APIGetMultiResponse<CmdbType>) => {
-          this.typesAPIResponse = response;
-          this.types = this.typesAPIResponse.results;
-          callback({
-            recordsTotal: response.total,
-            recordsFiltered: response.total,
-            data: []
-          });
+          takeUntil(this.unSubscribe)).subscribe(
+            (response: APIGetMultiResponse<CmdbType>) => {
+              this.typesAPIResponse = response;
+              this.types = this.typesAPIResponse.results;
+              callback({
+                recordsTotal: response.total,
+                recordsFiltered: response.total,
+                data: []
+              });
         });
       },
       select: {
-        style:    'multi',
+        style: 'multi',
         selector: 'td:first-child'
       },
       order: [[1, 'asc']],
@@ -157,7 +148,7 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
     const dataTable: any = table.DataTable();
     const rows: any = dataTable.rows();
     this.selectedObjects = [];
-    if ($('.selectAll').is( ':checked' )) {
+    if ($('.selectAll').is(':checked')) {
       rows.select();
       let lenx: number = rows.data().length - 1;
       while (lenx >= 0) {
