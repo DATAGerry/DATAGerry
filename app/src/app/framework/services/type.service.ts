@@ -18,11 +18,11 @@
 
 import { Injectable } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
-import { ApiCallService, ApiService, resp } from '../../services/api-call.service';
+import { ApiCallService, ApiService, httpObserveOptions } from '../../services/api-call.service';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
-import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpParams, HttpResponse } from '@angular/common/http';
 import {
   APIDeleteSingleResponse,
   APIGetMultiResponse,
@@ -32,10 +32,8 @@ import {
 } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
 
-export const PARAMETER = 'params';
-export const COOCKIENAME = 'onlyActiveObjCookie';
 
-export const checkTypeExistsValidator = (typeService: TypeService<CmdbType>, time: number = 500) => {
+export const checkTypeExistsValidator = (typeService: TypeService, time: number = 500) => {
   return (control: FormControl) => {
     return timer(time).pipe(switchMap(() => {
       return typeService.getTypesByName(control.value).pipe(
@@ -59,7 +57,7 @@ export class TypeService<T = CmdbType> implements ApiService {
 
   public servicePrefix: string = 'types';
 
-  constructor(private api: ApiCallService, private client: HttpClient) {
+  constructor(private api: ApiCallService) {
   }
 
   /**
@@ -89,7 +87,7 @@ export class TypeService<T = CmdbType> implements ApiService {
 
   /**
    * Get a specific type by the id
-   * @param publicID
+   * @param publicID PublicID of the type
    */
   public getType(publicID: number): Observable<T> {
     return this.api.callGet<CmdbType>(this.servicePrefix + '/' + publicID).pipe(
@@ -112,9 +110,10 @@ export class TypeService<T = CmdbType> implements ApiService {
 
   /**
    * Get types by the name or label
-   * @param name
+   * @param name Name or Label of the type
    */
   public getTypesByName(name: string): Observable<Array<T>> {
+    const options = httpObserveOptions;
     const filter = {
       $or: [
         {
@@ -126,21 +125,20 @@ export class TypeService<T = CmdbType> implements ApiService {
       ]
     };
     let params: HttpParams = new HttpParams();
-
     params = params.set('filter', JSON.stringify(filter));
     params = params.set('limit', '0');
-    return this.api.callGet<T[]>(this.servicePrefix + '/', params).pipe(
+    options.params = params;
+    return this.api.callGet<T[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
       })
     );
   }
 
-
+  /**
+   * Insert a new type into the database.
+   */
   public postType(typeInstance: CmdbType): Observable<T> {
-    /**
-     * Insert a new type into the database.
-     */
     return this.api.callPost<T>(this.servicePrefix + '/', typeInstance).pipe(
       map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => {
         return apiResponse.body.raw as T;
@@ -148,10 +146,10 @@ export class TypeService<T = CmdbType> implements ApiService {
     );
   }
 
+  /**
+   * Update a existing type in the database.
+   */
   public putType(typeInstance: CmdbType): Observable<T> {
-    /**
-     * Update a existing type in the database.
-     */
     return this.api.callPut<T>(this.servicePrefix + '/', typeInstance).pipe(
       map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
         return apiResponse.body.result as T;
@@ -199,21 +197,38 @@ export class TypeService<T = CmdbType> implements ApiService {
     );
   }
 
-  public getTypeListByCategory(publicID: number): Observable<Array<T>> {
-    return this.api.callGet<T[]>(this.servicePrefix + '/' + publicID).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
+  /**
+   * Get a list of types by the category
+   * @param categoryID PublicID of the category
+   */
+  public getTypeListByCategory(categoryID: number): Observable<Array<T>> {
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'framework.categories',
+          let: { type_id: { $toInt: '$public_id' } },
+          pipeline: [
+            { $match: { public_id: categoryID } },
+            { $match: { $expr: { $in: ['$$type_id', '$types'] } } }
+          ],
+          as: 'category'
         }
-        return apiResponse.body.r;
+      },
+      { $match: { category: { $gt: { $size: 0 } } } },
+      { $project: { category: 0 } }
+    ];
+    const filter = JSON.stringify(pipeline);
+    return this.api.callGet<T[]>(this.servicePrefix + `/?filter=${ filter }&limit=0`).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return apiResponse.body.results as Array<T>;
       })
     );
   }
 
+  /**
+   * Get the total number of types in the system.
+   */
   public countTypes(): Observable<number> {
-    /**
-     * Get the total number of types in the system.
-     */
     return this.api.callHead<T[]>(this.servicePrefix + '/').pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         console.log(apiResponse.headers);
