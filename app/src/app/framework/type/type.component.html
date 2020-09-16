@@ -13,6 +13,12 @@ In DATAGERRY objects are stored. An object can be for example a router, server, 
                doc="/docs/admin_guide/objects.html"></cmdb-info-box>
 <div class="card-body clearfix" style="padding: 0 0 1em 0"></div>
 <div id="type-list">
+  <button type="button"
+          *permissionLink="['base.framework.type.add']"
+          class="btn btn-success btn-sm float-right"
+          [routerLink]="['/framework/type/add']">
+    <i class="fas fa-plus"></i> Add
+  </button>
   <table id="type-list-datatable" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
          class="table mw-100 table-striped table-responsive table-bordered" style="width:100%">
     <thead>
@@ -38,7 +44,7 @@ In DATAGERRY objects are stored. An object can be for example a router, server, 
         <cmdb-type-label [faIcon]="typeInstance?.render_meta?.icon" [title]="typeInstance.label"></cmdb-type-label>
       </td>
       <td></td>
-      <td>{{typeInstance.creation_time.$date | date:"dd/MM/yyyy - HH:mm:ss"}}</td>
+      <td>{{typeInstance.creation_time | date:"dd/MM/yyyy - HH:mm:ss"}}</td>
       <td *permissionLink="['base.framework.type.add', 'base.framework.type.edit', 'base.framework.type.delete']">
         <a *permissionLink="'base.framework.type.edit'"
            class="text-dark" routerLink="/framework/type/edit/{{typeInstance.public_id}}">

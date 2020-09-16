@@ -36,9 +36,13 @@ import { CollectionParameters } from '../../services/models/api-parameter';
 export const checkTypeExistsValidator = (typeService: TypeService, time: number = 500) => {
   return (control: FormControl) => {
     return timer(time).pipe(switchMap(() => {
-      return typeService.getTypesByName(control.value).pipe(
-        map(() => {
-          return { typeExists: true };
+      return typeService.getTypeByName(control.value).pipe(
+        map((response) => {
+          if (response === null) {
+            return null;
+          } else {
+            return { typeExists: true };
+          }
         }),
         catchError(() => {
           return new Promise(resolve => {
@@ -112,9 +116,29 @@ export class TypeService<T = CmdbType> implements ApiService {
 
   /**
    * Get types by the name or label
-   * @param name Name or Label of the type
+   * @param name Name of the type
    */
-  public getTypesByName(name: string): Observable<Array<T>> {
+  public getTypeByName(name: string): Observable<T> {
+    const options = httpObserveOptions;
+    const filter = { name };
+    let params: HttpParams = new HttpParams();
+    params = params.set('filter', JSON.stringify(filter));
+    options.params = params;
+    return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        if (apiResponse.body.count === 0) {
+          return null;
+        }
+        return apiResponse.body.results[0] as T;
+      })
+    );
+  }
+
+  /**
+   * Get types by the name or label
+   * @param name Name/Label of the type
+   */
+  public getTypesByNameOrLabel(name: string): Observable<Array<T>> {
     const options = httpObserveOptions;
     const filter = {
       $or: [{ name: { $regex: name, $options: 'ismx' } }, { label: { $regex: name, $options: 'ismx' } }]
