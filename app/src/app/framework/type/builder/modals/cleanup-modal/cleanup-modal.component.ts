@@ -16,11 +16,12 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit} from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { CmdbType } from '../../../../models/cmdb-type';
 import { TypeService } from '../../../../services/type.service';
 import { UserService } from '../../../../../management/services/user.service';
+import { ObjectService } from '../../../../services/object.service';
 
 @Component({
   selector: 'cmdb-cleanup-modal',
@@ -33,16 +34,19 @@ export class CleanupModalComponent implements OnInit {
   public remove: boolean = false;
   public update: boolean = false;
 
-  constructor( private typeService: TypeService, public userService: UserService, public activeModal: NgbActiveModal) {
+  constructor(private typeService: TypeService, private objectService: ObjectService,
+              public userService: UserService, public activeModal: NgbActiveModal) {
   }
 
   ngOnInit() {
     if (this.typeInstance.clean_db === false) {
-      this.typeService.cleanupRemovedFields(this.typeInstance.public_id).subscribe(() => {
+      this.objectService.cleanupRemovedFields(this.typeInstance.public_id).subscribe(() => {
           this.remove = true;
-        }, error => {console.log(error); },
+        }, error => {
+          console.log(error);
+        },
         () => {
-          this.typeService.cleanupInsertedFields(this.typeInstance.public_id).subscribe(() => {
+          this.objectService.cleanupInsertedFields(this.typeInstance.public_id).subscribe(() => {
               this.update = true;
             }, error => console.log(error),
             () => {

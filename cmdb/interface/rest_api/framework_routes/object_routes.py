@@ -124,7 +124,8 @@ def get_dt_objects_by_type(type_id, request_user: User):
         if order_column in ['active', 'public_id', 'type_id', 'author_id', 'creation_time']:
             object_list = object_manager.get_objects_by(sort=order_column, direction=order_direction, **filter_state)
         else:
-            object_list = object_manager.sort_objects_by_field_value(value=order_column, order=order_direction, match=filter_state)
+            object_list = object_manager.sort_objects_by_field_value(value=order_column, order=order_direction,
+                                                                     match=filter_state)
         totals = len(object_list)
         object_list = object_list[start_at:start_at + site_length]
 
@@ -202,7 +203,8 @@ def get_dt_filter_objects_by_type(type_id, request_user: User):
         if order_column in ['active', 'public_id', 'type_id', 'author_id', 'creation_time']:
             object_list = object_manager.get_objects_by(sort=order_column, direction=order_direction, **filter_state)
         else:
-            object_list = object_manager.sort_objects_by_field_value(value=order_column, order=order_direction, match=filter_state)
+            object_list = object_manager.sort_objects_by_field_value(value=order_column, order=order_direction,
+                                                                     match=filter_state)
         totals = len(object_list)
         object_list = object_list[start_at:start_at + site_length]
 
@@ -549,7 +551,6 @@ def insert_object(request_user: User):
 @insert_request_user
 @right_required('base.framework.object.edit')
 def update_object(public_id: int, request_user: User):
-
     object_ids = request.args.getlist('objectIDs')
 
     if len(object_ids) > 0:
@@ -727,7 +728,8 @@ def delete_many_objects(public_ids, request_user: User):
                 current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
                 current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                           type_instance=current_type_instance,
-                                                          render_user=request_user, user_list=user_manager.get_users()).result()
+                                                          render_user=request_user,
+                                                          user_list=user_manager.get_users()).result()
             except ObjectManagerGetError as err:
                 LOGGER.error(err)
                 return abort(404)
@@ -885,6 +887,69 @@ def get_latest(request_user: User):
     if len(rendered_list) < 1:
         return make_response(rendered_list, 204)
     return make_response(rendered_list)
+
+
+@object_blueprint.route('/cleanup/remove/<int:public_id>/', methods=['GET'])
+@object_blueprint.route('/cleanup/remove/<int:public_id>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.framework.type.clean')
+def cleanup_removed_fields(public_id, request_user: User):
+    # REMOVE fields from CmdbObject
+    try:
+        update_type_instance = object_manager.get_type(public_id)
+        type_fields = update_type_instance.get_fields()
+        objects_by_type = object_manager.get_objects_by_type(public_id)
+
+        for obj in objects_by_type:
+            incorrect = []
+            correct = []
+            obj_fields = obj.get_all_fields()
+            for t_field in type_fields:
+                name = t_field["name"]
+                for field in obj_fields:
+                    if name == field["name"]:
+                        correct.append(field["name"])
+                    else:
+                        incorrect.append(field["name"])
+            removed_type_fields = [item for item in incorrect if not item in correct]
+            for field in removed_type_fields:
+                object_manager.remove_object_fields(filter_query={'public_id': obj.public_id},
+                                                    update={'$pull': {'fields': {"name": field}}})
+
+    except Exception as error:
+        return abort(500)
+
+    return make_response(update_type_instance)
+
+
+@object_blueprint.route('/cleanup/update/<int:public_id>/', methods=['GET'])
+@object_blueprint.route('/cleanup/update/<int:public_id>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.framework.type.clean')
+def cleanup_updated_push_fields(public_id, request_user: User):
+    # Update/Push fields to CmdbObject
+    try:
+        update_type_instance = object_manager.get_type(public_id)
+        type_fields = update_type_instance.get_fields()
+        objects_by_type = object_manager.get_objects_by_type(public_id)
+
+        for obj in objects_by_type:
+            for t_field in type_fields:
+                name = t_field["name"]
+                value = None
+                if [item for item in obj.get_all_fields() if item["name"] == name]:
+                    continue
+                if "value" in t_field:
+                    value = t_field["value"]
+                object_manager.update_object_fields(filter={'public_id': obj.public_id},
+                                                    update={
+                                                        '$addToSet': {'fields': {"name": name, "value": value}}})
+    except CMDBError:
+        return abort(500)
+
+    return make_response(update_type_instance)
 
 
 def _build_query(args, q_operator='$and'):

@@ -238,6 +238,28 @@ export class ObjectService<T = RenderResult> implements ApiService {
     );
   }
 
+  public cleanupRemovedFields(publicID: number): Observable<any> {
+    return this.api.callGet(this.servicePrefix + '/cleanup/remove/' + publicID).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public cleanupInsertedFields(publicID: number): Observable<any> {
+    return this.api.callGet(this.servicePrefix + '/cleanup/update/' + publicID).pipe(
+      map((apiResponse) => {
+        if (apiResponse.status === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
+  }
+
   public openModalComponent(title: string,
                             modalMessage: string,
                             buttonDeny: string,

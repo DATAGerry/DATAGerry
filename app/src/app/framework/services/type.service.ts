@@ -78,7 +78,7 @@ export class TypeService<T = CmdbType> implements ApiService {
       }
     }
 
-    return this.api.callGet<T[]>(this.servicePrefix + '/', options).pipe(
+    return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
@@ -101,7 +101,7 @@ export class TypeService<T = CmdbType> implements ApiService {
    * Get the complete type list
    */
   public getTypeList(): Observable<Array<T>> {
-    return this.api.callGet<CmdbType[]>(this.servicePrefix + '/?limit=0').pipe(
+    return this.api.callGet<Array<T>>(this.servicePrefix + '/?limit=0').pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
       })
@@ -115,20 +115,13 @@ export class TypeService<T = CmdbType> implements ApiService {
   public getTypesByName(name: string): Observable<Array<T>> {
     const options = httpObserveOptions;
     const filter = {
-      $or: [
-        {
-          name: { $regex: name, $options: 'ismx' }
-        },
-        {
-          label: { $regex: name, $options: 'ismx' }
-        }
-      ]
+      $or: [{ name: { $regex: name, $options: 'ismx' } }, { label: { $regex: name, $options: 'ismx' } }]
     };
     let params: HttpParams = new HttpParams();
     params = params.set('filter', JSON.stringify(filter));
     params = params.set('limit', '0');
     options.params = params;
-    return this.api.callGet<T[]>(this.servicePrefix + '/', options).pipe(
+    return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
       })
@@ -157,11 +150,11 @@ export class TypeService<T = CmdbType> implements ApiService {
     );
   }
 
+  /**
+   * Delete a existing type in the database.
+   * @returns The deleted type instance.
+   */
   public deleteType(publicID: number): Observable<T> {
-    /**
-     * Delete a existing type in the database.
-     * @returns The deleted type instance.
-     */
     return this.api.callDelete<number>(this.servicePrefix + '/' + publicID).pipe(
       map((apiResponse: HttpResponse<APIDeleteSingleResponse<T>>) => {
         return apiResponse.body.deleted_entry as T;
@@ -175,17 +168,8 @@ export class TypeService<T = CmdbType> implements ApiService {
   public getUncategorizedTypes(): Observable<APIGetMultiResponse<T>> {
     const pipeline = [
       { $match: {} },
-      {
-        $lookup: {
-          from: 'framework.categories',
-          localField: 'public_id',
-          foreignField: 'types',
-          as: 'categories'
-        }
-      },
-      {
-        $match: { categories: { $size: 0 } }
-      },
+      { $lookup: { from: 'framework.categories', localField: 'public_id', foreignField: 'types', as: 'categories' } },
+      { $match: { categories: { $size: 0 } } },
       { $project: { categories: 0 } }
     ];
 
@@ -207,10 +191,7 @@ export class TypeService<T = CmdbType> implements ApiService {
         $lookup: {
           from: 'framework.categories',
           let: { type_id: { $toInt: '$public_id' } },
-          pipeline: [
-            { $match: { public_id: categoryID } },
-            { $match: { $expr: { $in: ['$$type_id', '$types'] } } }
-          ],
+          pipeline: [{ $match: { public_id: categoryID } }, { $match: { $expr: { $in: ['$$type_id', '$types'] } } }],
           as: 'category'
         }
       },
@@ -237,27 +218,5 @@ export class TypeService<T = CmdbType> implements ApiService {
     );
   }
 
-
-  public cleanupRemovedFields(publicID: number): Observable<any> {
-    return this.api.callGet(this.servicePrefix + '/cleanup/remove/' + publicID).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
-  }
-
-  public cleanupInsertedFields(publicID: number): Observable<any> {
-    return this.api.callGet(this.servicePrefix + '/cleanup/update/' + publicID).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
-  }
 }
 
