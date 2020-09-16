@@ -169,7 +169,7 @@ export class TypeService<T = CmdbType> implements ApiService {
    * Update a existing type in the database.
    */
   public putType(typeInstance: CmdbType): Observable<T> {
-    return this.api.callPut<T>(this.servicePrefix + '/', typeInstance).pipe(
+    return this.api.callPut<T>(this.servicePrefix + '/' + typeInstance.public_id, typeInstance).pipe(
       map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
         return apiResponse.body.result as T;
       })
@@ -238,7 +238,6 @@ export class TypeService<T = CmdbType> implements ApiService {
   public countTypes(): Observable<number> {
     return this.api.callHead<T[]>(this.servicePrefix + '/').pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
-        console.log(apiResponse.headers);
         return +apiResponse.headers.get('X-Total-Count');
       })
     );

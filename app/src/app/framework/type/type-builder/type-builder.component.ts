@@ -121,6 +121,7 @@ export class TypeBuilderComponent implements OnInit {
           console.error(error);
         });
     } else if (this.mode === CmdbMode.Edit) {
+
       this.typeService.putType(this.typeInstance).subscribe((updateResp: CmdbType) => {
           if (this.basicStep.originalCategoryID !== this.selectedCategoryID) {
             this.categoryService.getCategory(this.basicStep.originalCategoryID).subscribe((category: CmdbCategory) => {

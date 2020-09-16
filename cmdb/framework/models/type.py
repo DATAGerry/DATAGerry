@@ -241,7 +241,8 @@ class TypeModel(CmdbDAO):
                 '$date': {
                     'type': 'integer'
                 }
-            }
+            },
+            'nullable': True
         },
         'render_meta': {
             'type': 'dict',
