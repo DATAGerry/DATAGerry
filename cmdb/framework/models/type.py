@@ -275,9 +275,9 @@ class TypeModel(CmdbDAO):
     __slots__ = 'public_id', 'name', 'label', 'description', 'version', 'active', 'clean_db', 'author_id', \
                 'creation_time', 'render_meta', 'fields',
 
-    def __init__(self, public_id: int, name: str, author_id: int, creation_time: datetime, render_meta: TypeRenderMeta,
-                 active: bool = True, fields: list = None, version: str = None, label: str = None,
-                 clean_db: bool = None, description: str = None):
+    def __init__(self, public_id: int, name: str, author_id: int, render_meta: TypeRenderMeta,
+                 creation_time: datetime = None, active: bool = True, fields: list = None, version: str = None,
+                 label: str = None, clean_db: bool = None, description: str = None):
         self.name: str = name
         self.label: str = label or self.name.title()
         self.description: str = description
@@ -285,7 +285,7 @@ class TypeModel(CmdbDAO):
         self.active: bool = active
         self.clean_db: bool = clean_db
         self.author_id: int = author_id
-        self.creation_time: datetime = creation_time
+        self.creation_time: datetime = creation_time or datetime.utcnow()
         self.render_meta: TypeRenderMeta = render_meta
         self.fields: list = fields or []
         super(TypeModel, self).__init__(public_id=public_id)
@@ -298,7 +298,7 @@ class TypeModel(CmdbDAO):
             name=data.get('name'),
             active=data.get('active', True),
             author_id=data.get('author_id'),
-            creation_time=data.get('creation_time'),
+            creation_time=data.get('creation_time', None),
             label=data.get('label', None),
             version=data.get('version', None),
             description=data.get('description', None),

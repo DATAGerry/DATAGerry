@@ -77,13 +77,14 @@ export class TypeService<T = CmdbType> implements ApiService {
   }): Observable<APIGetMultiResponse<T>> {
     const options = httpObserveOptions;
     let httpParams: HttpParams = new HttpParams();
-    for (const key in options) {
-      if (params.hasOwnProperty(key)) {
-        httpParams = httpParams.set(key, JSON.stringify(options[key]));
-      }
+    if (params.filter !== undefined) {
+      httpParams = httpParams.set('filter', params.filter);
     }
+    httpParams = httpParams.set('limit', params.limit.toString());
+    httpParams = httpParams.set('sort', params.sort);
+    httpParams = httpParams.set('order', params.order.toString());
+    httpParams = httpParams.set('page', params.page.toString());
     options.params = httpParams;
-
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;

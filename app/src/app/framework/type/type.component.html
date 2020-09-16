@@ -27,7 +27,6 @@ In DATAGERRY objects are stored. An object can be for example a router, server, 
       <th>Active</th>
       <th>Public ID</th>
       <th>Type</th>
-      <th>Author</th>
       <th>Creation time</th>
       <th *permissionLink="['base.framework.type.add', 'base.framework.type.edit', 'base.framework.type.delete']">Action</th>
       <th *permissionLink="['base.framework.type.clean']">Cleanup Database</th>
@@ -43,8 +42,7 @@ In DATAGERRY objects are stored. An object can be for example a router, server, 
       <td>
         <cmdb-type-label [faIcon]="typeInstance?.render_meta?.icon" [title]="typeInstance.label"></cmdb-type-label>
       </td>
-      <td></td>
-      <td>{{typeInstance.creation_time | date:"dd/MM/yyyy - HH:mm:ss"}}</td>
+      <td>{{typeInstance?.creation_time?.$date | date:"dd/MM/yyyy - HH:mm:ss"}}</td>
       <td *permissionLink="['base.framework.type.add', 'base.framework.type.edit', 'base.framework.type.delete']">
         <a *permissionLink="'base.framework.type.edit'"
            class="text-dark" routerLink="/framework/type/edit/{{typeInstance.public_id}}">

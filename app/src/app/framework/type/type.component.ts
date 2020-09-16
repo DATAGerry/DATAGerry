@@ -87,6 +87,11 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
         {
           title: 'Actions',
           name: 'actions',
+        },
+        {
+          title: 'Cleanup',
+          name: 'cleanup',
+          data: 'clean_db'
         }
       ],
       columnDefs: [{
@@ -102,11 +107,11 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
         return row;
       },
       ordering: true,
+      order: [[2, 'desc']],
       searching: false,
       serverSide: true,
       processing: true,
       ajax: (params: any, callback) => {
-
         const apiParameters: CollectionParameters = {
           page: Math.ceil(params.start / params.length) + 1,
           limit: params.length,
@@ -116,21 +121,20 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.typeService.getTypesIteration(apiParameters).pipe(
           takeUntil(this.unSubscribe)).subscribe(
-            (response: APIGetMultiResponse<CmdbType>) => {
-              this.typesAPIResponse = response;
-              this.types = this.typesAPIResponse.results;
-              callback({
-                recordsTotal: response.total,
-                recordsFiltered: response.total,
-                data: []
-              });
-        });
+          (response: APIGetMultiResponse<CmdbType>) => {
+            this.typesAPIResponse = response;
+            this.types = this.typesAPIResponse.results;
+            callback({
+              recordsTotal: response.total,
+              recordsFiltered: response.total,
+              data: []
+            });
+          });
       },
       select: {
         style: 'multi',
         selector: 'td:first-child'
-      },
-      order: [[1, 'asc']],
+      }
     };
   }
 
