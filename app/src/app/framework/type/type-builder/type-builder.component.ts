@@ -69,7 +69,6 @@ export class TypeBuilderComponent implements OnInit {
 
   public exitBasicStep() {
     this.selectedCategoryID = this.basicStep.basicCategoryForm.value.category_id;
-    console.log(this.selectedCategoryID);
     const defaultIcon = this.basicStep.basicMetaIconForm.get('icon').value === '' ?
       'fas fa-cube' : this.basicStep.basicMetaIconForm.get('icon').value;
     this.assignToType({ icon: defaultIcon }, 'render_meta');
