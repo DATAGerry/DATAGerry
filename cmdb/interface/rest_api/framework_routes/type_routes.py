@@ -90,7 +90,6 @@ def insert_type(data: dict):
 @types_blueprint.validate(TypeModel.SCHEMA)
 def update_type(public_id: int, data: dict):
     type_manager = TypeManager(database_manager=current_app.database_manager)
-    print(data)
     try:
         type = TypeModel.from_data(data=data)
 
