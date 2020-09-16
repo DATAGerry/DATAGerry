@@ -49,7 +49,7 @@ def add_type():
             LOGGER.warning(e)
             return abort(400)
         try:
-            type_instance = TypeModel(**new_type_data)
+            type_instance = TypeModel.from_data(new_type_data)
         except CMDBError:
             return abort(400)
         try:
@@ -71,7 +71,7 @@ def update_type():
     data_dump = json.loads(upload, object_hook=json_util.object_hook)
     for add_data_dump in data_dump:
         try:
-            update_type_instance = TypeModel(**add_data_dump)
+            update_type_instance = TypeModel.from_data(add_data_dump)
         except CMDBError:
             return abort(400)
         try:

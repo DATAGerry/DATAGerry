@@ -62,21 +62,23 @@ export class TypeService<T = CmdbType> implements ApiService {
 
   /**
    * Iterate over the type collection
-   * @param options Instance of CollectionParameters
+   * @param params Instance of CollectionParameters
    */
-  public getTypesIteration(options: CollectionParameters = {
+  public getTypesIteration(params: CollectionParameters = {
     filter: undefined,
     limit: 10,
     sort: 'public_id',
     order: 1,
     page: 1
   }): Observable<APIGetMultiResponse<T>> {
-    let params: HttpParams = new HttpParams();
+    const options = httpObserveOptions;
+    let httpParams: HttpParams = new HttpParams();
     for (const key in options) {
-      if (options.hasOwnProperty(key)) {
-        params = params.set(key, options[key]);
+      if (params.hasOwnProperty(key)) {
+        httpParams = httpParams.set(key, JSON.stringify(options[key]));
       }
     }
+    options.params = httpParams;
 
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
