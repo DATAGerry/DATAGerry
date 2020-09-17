@@ -169,9 +169,6 @@ def register_blueprints(app):
     app.register_blueprint(search_blueprint)
     app.register_blueprint(file_blueprint)
     app.register_blueprint(type_export_blueprint)
-
-    app.register_blueprint(status_blueprint)
-    app.register_blueprint(collection_blueprint)
     app.register_blueprint(log_blueprint)
     app.register_blueprint(settings_blueprint)
     app.register_blueprint(importer_blueprint)
