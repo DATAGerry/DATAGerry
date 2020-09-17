@@ -1,0 +1,28 @@
+.center {
+  position: relative;
+  top: 30%;
+  left: 30%;
+}
+
+.meter {
+  height: 5px;
+  position: relative;
+  background: lightgray;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+}
+
+.progress {
+  background-color: gray;
+}
+
+
+@-webkit-keyframes progressBar {
+  0% { width: 0; }
+  100% { width: 100%; }
+}

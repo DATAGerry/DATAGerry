@@ -66,6 +66,7 @@ import { GeneralModalComponent } from './helpers/modals/general-modal/general-mo
 import { RenderModule } from '../framework/render/render.module';
 import { ObjectPreviewModalComponent} from '../framework/object/modals/object-preview-modal/object-preview-modal.component';
 import { InfoBoxComponent } from './components/info-box/info-box.component';
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 export const LAYOUT_COMPONENT_ROUTES: Routes = [
   {

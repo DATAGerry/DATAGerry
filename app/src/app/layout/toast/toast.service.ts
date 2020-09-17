@@ -16,8 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {EventEmitter, Injectable, Output, TemplateRef} from '@angular/core';
-import './toast.js';
+import {EventEmitter, HostBinding, Injectable, Output, TemplateRef} from '@angular/core';
 
 declare global {
   interface Window {
@@ -31,49 +30,67 @@ declare global {
 
 export class ToastService {
 
-  @Output() toast: EventEmitter<any> = new EventEmitter();
-
   toasts: any[] = [];
   errorToast: any[] = [];
+  idGen: number = 0;
 
   // public info(textOrTpl: string | TemplateRef<any>, options: any = {}) {
-  //   options.classname += ' bg-info';
-  //   options.headerName = 'Information';
-  //   options.headerClass = 'text-info';
   //   this.toasts.push({ textOrTpl, ...options });
   // }
 
-  public info(text: string, options: any = {}) {
-    this.toast.emit();
-    window.showToast();
-    // // $('#info').toast('show');
-    // this.toasts.push({text, ...options});
+  public incrementId(): void {
+    this.idGen += 1;
   }
 
-  // public error(textOrTpl: string | TemplateRef<any>, options: any = {}) {
-  //   options.classname += ' bg-danger';
-  //   this.errorToast.push({ textOrTpl, ...options });
-  // }
-  //
-  // public warning(textOrTpl: string | TemplateRef<any>, options: any = {}) {
-  //   options.classname += ' bg-warning';
-  //   options.headerName = 'Warning';
-  //   options.headerClass = 'text-warning';
-  //   this.toasts.push({ textOrTpl, ...options });
-  // }
-  //
-  // public success(textOrTpl: string | TemplateRef<any>, options: any = {}) {
-  //   options.classname += ' bg-success';
-  //   options.headerName = 'Success';
-  //   options.headerClass = 'text-success';
-  //   this.toasts.push({ textOrTpl, ...options });
-  // }
-  //
-  // public remove(toast) {
-  //   this.toasts = this.toasts.filter(t => t !== toast);
-  // }
-  //
-  // public removeError(toast) {
-  //   this.errorToast = this.errorToast.filter(t => t !== toast);
-  // }
+  public info(text: string, options: any = {}, animationDelay: number = 10) {
+    this.incrementId();
+    options.icon = 'fas fa-info-circle';
+    options.classname += ' border-info';
+    options.headerName = 'Information';
+    options.headerClass = 'text-info';
+    options.id = this.idGen.toString();
+    options.delayTime = animationDelay;
+    this.toasts.push({ text, ...options});
+  }
+
+  public error(text: string, options: any = {}, animationDelay: number = 7) {
+    this.incrementId();
+    options.icon = 'fas fa-exclamation-circle';
+    options.classname += ' border-danger';
+    options.headerName = 'An Error Occured';
+    options.headerClass = 'text-danger';
+    options.id = this.idGen.toString();
+    options.delayTime = animationDelay;
+    this.toasts.push({ text, ...options });
+  }
+
+  public warning(text: string, options: any = {}, animationDelay: number = 15) {
+    this.incrementId();
+    options.icon = 'fas fa-exclamation-triangle';
+    options.classname += ' border-warning';
+    options.headerName = 'Warning';
+    options.headerClass = 'text-warning';
+    options.id = this.idGen.toString();
+    options.delayTime = animationDelay;
+    this.toasts.push({ text, ...options });
+  }
+
+  public success(text: string, options: any = {}, animationDelay: number = 5) {
+    this.incrementId();
+    options.icon = 'fas fa-check-circle';
+    options.classname += ' border-success';
+    options.headerName = 'Success';
+    options.headerClass = 'text-success';
+    options.id = this.idGen.toString();
+    options.delayTime = animationDelay;
+    this.toasts.push({ text, ...options });
+  }
+
+  public remove(toast) {
+    this.toasts = this.toasts.filter(t => t !== toast);
+  }
+
+  public removeError(toast) {
+    this.errorToast = this.errorToast.filter(t => t !== toast);
+  }
 }

@@ -1,41 +1,25 @@
-//.toast{
-//  width: fit-content;
-//  height: fit-content;
-//  max-width: 600px;
-//}
-//:host {
-//  width: 100%;
-//  height: 100%;
-//  position: fixed;
-//  margin: 0.5em;
-//  z-index: 1200;
-//}
-//
-//ngb-toast {
-//  position: relative;
-//  margin: 1em;
-//  z-index: 1200;
-//}
-//
-//.top-left {
-//  top: 0;
-//  left: 0;
-//}
-//
-//.top-right {
-//  top: 0;
-//  right: 0;
-//}
-//
-//.bottom-left {
-//  bottom: 0;
-//  left: 0;
-//}
-//
-//.bottom-right {
-//  bottom: 0;
-//  right: 0;
-//}
+
+//css styling for individual placements
+
+.top-left {
+  top: 0;
+  left: 0;
+}
+
+.top-right {
+  top: 0;
+  right: 0;
+}
+
+.bottom-left {
+  bottom: 0;
+  left: 0;
+}
+
+.bottom-right {
+  bottom: 0;
+  right: 0;
+}
 //
 //.center{
 //  bottom: 50%;
@@ -43,3 +27,55 @@
 //  right: 50%;
 //  left: 50%;
 //}
+
+.toast {
+  opacity: 1;
+  position: absolute;
+  border: 0px solid;
+  border-left: 5px solid;
+  min-width: 350px;
+  pointer-events: all;
+  margin: 10px 10px 10px 10px;
+}
+
+//Css for possible hostbinding
+
+.ngb-toasts-bottom-left {
+  bottom: 0;
+  left: 0;
+}
+
+.ngb-toasts-bottom-right {
+  right: 0;
+  bottom: 0;
+}
+
+.ngb-toasts-top-right {
+  top: 0;
+  right: 0;
+}
+
+.ngb-toasts-top-left {
+  top: 0;
+  left: 0;
+}
+
+.ngb-toasts-center {
+  right: 50%;
+  left: 50%;
+  bottom: 50%;
+  top: 50%;
+}
+
+//toast-container styles
+
+cmdb-toast-container {
+  top: 0;
+  right: 0;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1040;
+}
+
