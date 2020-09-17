@@ -56,8 +56,11 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
   public types: Array<CmdbType>;
   public typesAPIResponse: APIGetMultiResponse<CmdbType>;
 
-  public selectedObjects: string[] = [];
+  public selected: Array<number> = [];
+  public all: boolean = false;
 
+  public remove: boolean = false;
+  public update: boolean = false;
   private modalRef: NgbModalRef;
 
   constructor(private typeService: TypeService, private router: Router, private fileService: FileService,
@@ -67,68 +70,13 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public ngOnInit(): void {
     this.dtOptions = {
-      /*columns: [
-        {
-          title: '<input type="checkbox" class="selectAll" name="selectAll" value="all" (click)="selectAll()">',
-          name: 'all',
-          orderable: false,
-          data: '',
-          className: 'select-checkbox',
-          targets: 0
-        },
-        {
-          title: 'Active',
-          name: 'active',
-          data: 'active',
-        },
-        {
-          title: 'PublicID',
-          name: 'public_id',
-          data: 'public_id'
-        },
-        {
-          title: 'Name',
-          name: 'name',
-          data: 'name'
-        },
-        {
-          title: 'Creation Time',
-          name: 'creation_time',
-          data: 'creation_time',
-        },
-        {
-          title: 'Actions',
-          name: 'actions',
-        },
-        {
-          title: 'Cleanup',
-          name: 'cleanup',
-          data: 'clean_db'
-        }
-      ],*/
+      ordering: true,
       columnDefs: [
         {
           orderable: false,
-          className: 'select-checkbox',
-          targets: 0
-        },
-        {
-          orderable: false,
-          targets: [1, 5, 6]
+          targets: [0, 1, 5, 6]
         }
       ],
-      rowCallback: (row: Node, data: any[]) => {
-        $('td:first-child', row).unbind('click');
-        $('td:first-child', row).bind('click', () => {
-          this.updateDisplay(data[2]);
-        });
-        return row;
-      },
-      select: {
-        style: 'multi',
-        selector: 'td:first-child'
-      },
-      ordering: true,
       order: [[2, 'desc']],
       dom:
         '<"row" <"col-sm-2" l><"col" f> >' +
@@ -179,11 +127,11 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public exportingFiles() {
-    if (this.selectedObjects.length === 0 || this.selectedObjects.length === this.types.length) {
+    if (this.selected.length === 0 || this.selected.length === this.types.length) {
       this.fileService.getTypeFile()
         .subscribe(res => this.downLoadFile(res, 'json'));
     } else {
-      this.fileService.callExportTypeRoute('/export/type/' + this.selectedObjects.toString())
+      this.fileService.callExportTypeRoute('/export/type/' + this.selected.toString())
         .subscribe(res => this.downLoadFile(res, 'json'));
     }
   }
@@ -194,28 +142,26 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public selectAll() {
-    const table: any = $('#type-list-datatable');
-    const dataTable: any = table.DataTable();
-    const rows: any = dataTable.rows();
-    this.selectedObjects = [];
-    if ($('.selectAll').is(':checked')) {
-      rows.select();
-      let lenx: number = rows.data().length - 1;
-      while (lenx >= 0) {
-        this.selectedObjects.push(rows.data()[lenx][2]);
-        lenx--;
-      }
+    if (this.all) {
+      this.selected = [];
+      this.all = false;
     } else {
-      rows.deselect();
+      this.selected = [];
+      for (const type of this.types) {
+        this.selected.push(type.public_id);
+      }
+      this.all = true;
     }
   }
 
-  public updateDisplay(publicID: string): void {
-    const index = this.selectedObjects.findIndex(d => d === publicID); // find index in your array
-    if (index > -1) {
-      this.selectedObjects.splice(index, 1); // remove element from array
+  public toggleSelection(publicID: number) {
+    const idx = this.selected.indexOf(publicID);
+    console.log(idx);
+    if (idx === -1) {
+      this.selected.push(publicID);
     } else {
-      this.selectedObjects.push(publicID);
+      this.selected.splice(idx, 1);
+      this.all = false;
     }
   }
 
