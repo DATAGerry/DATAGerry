@@ -27,7 +27,7 @@ from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import User
 from cmdb.user_management.user_manager import UserManagerInsertError, UserManagerGetError, \
     UserManagerUpdateError, UserManagerDeleteError, UserManager
-from cmdb.utils.security import SecurityManager
+from cmdb.security.security import SecurityManager
 
 try:
     from cmdb.utils.error import CMDBError

@@ -1,0 +1,12 @@
+version: 2
+updates:
+
+  - package-ecosystem: "npm"
+    directory: "app"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "pip"
+      directory: "cmdb"
+      schedule:
+        interval: "daily"

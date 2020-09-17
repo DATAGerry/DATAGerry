@@ -26,7 +26,7 @@ from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManager
 from cmdb.media_library.media_file_manager import MediaFileManagement
 from cmdb.user_management import UserManager
-from cmdb.utils.security import SecurityManager
+from cmdb.security.security import SecurityManager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -148,8 +148,6 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.search_routes import search_blueprint
     from cmdb.interface.rest_api.exporter_routes.file_routes import file_blueprint
     from cmdb.interface.rest_api.exporter_routes.export_type_routes import type_export_blueprint
-    from cmdb.interface.rest_api.framework_routes.status_routes import status_blueprint
-    from cmdb.interface.rest_api.framework_routes.collection_routes import collection_blueprint
     from cmdb.interface.rest_api.log_routes import log_blueprint
     from cmdb.interface.rest_api.setting_routes import settings_blueprint
     from cmdb.interface.rest_api.import_routes import importer_blueprint
@@ -171,9 +169,6 @@ def register_blueprints(app):
     app.register_blueprint(search_blueprint)
     app.register_blueprint(file_blueprint)
     app.register_blueprint(type_export_blueprint)
-
-    app.register_blueprint(status_blueprint)
-    app.register_blueprint(collection_blueprint)
     app.register_blueprint(log_blueprint)
     app.register_blueprint(settings_blueprint)
     app.register_blueprint(importer_blueprint)

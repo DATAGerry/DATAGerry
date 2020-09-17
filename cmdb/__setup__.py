@@ -119,7 +119,7 @@ class SetupRoutine:
         self.__check_database()
 
         from cmdb.user_management.user_manager import UserManager
-        from cmdb.utils.security import SecurityManager
+        from cmdb.security.security import SecurityManager
         scm = SecurityManager(self.setup_database_manager)
         usm = UserManager(self.setup_database_manager)
 
@@ -139,7 +139,7 @@ class SetupRoutine:
     def __create_user_management(self):
         from cmdb.user_management.user_manager import UserManager, User
         from cmdb.user_management import __FIXED_GROUPS__
-        from cmdb.utils.security import SecurityManager
+        from cmdb.security.security import SecurityManager
         scm = SecurityManager(self.setup_database_manager)
         usm = UserManager(self.setup_database_manager)
 
