@@ -27,9 +27,7 @@ from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models import TypeModel
 from cmdb.framework.models import CategoryModel
-from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.framework.cmdb_link import CmdbLink
-from cmdb.framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplate
 from cmdb.framework.cmdb_log import CmdbLog, CmdbObjectLog, CmdbMetaLog
 
 CmdbLog.register_log_type(CmdbObjectLog.__name__, CmdbObjectLog)
@@ -39,10 +37,7 @@ __COLLECTIONS__ = [
     CmdbObject,
     TypeModel,
     CategoryModel,
-    CmdbStatus,
     CmdbMetaLog,
-    CmdbLink,
-    CmdbCollection,
-    CmdbCollectionTemplate
+    CmdbLink
 ]
 

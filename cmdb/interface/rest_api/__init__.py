@@ -148,8 +148,6 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.search_routes import search_blueprint
     from cmdb.interface.rest_api.exporter_routes.file_routes import file_blueprint
     from cmdb.interface.rest_api.exporter_routes.export_type_routes import type_export_blueprint
-    from cmdb.interface.rest_api.framework_routes.status_routes import status_blueprint
-    from cmdb.interface.rest_api.framework_routes.collection_routes import collection_blueprint
     from cmdb.interface.rest_api.log_routes import log_blueprint
     from cmdb.interface.rest_api.setting_routes import settings_blueprint
     from cmdb.interface.rest_api.import_routes import importer_blueprint

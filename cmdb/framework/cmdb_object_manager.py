@@ -32,14 +32,12 @@ from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExist
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
 from cmdb.framework.models.category import CategoryModel, CategoryTree
-from cmdb.framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplate
 from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
 from cmdb.framework.cmdb_errors import WrongInputFormatError, TypeInsertError, TypeAlreadyExists, \
     ObjectInsertError, ObjectDeleteError, ObjectManagerGetError, \
     ObjectManagerInsertError, ObjectManagerUpdateError, ObjectManagerDeleteError, ObjectManagerInitError
 from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.framework.models.type import TypeModel
 from cmdb.search.query import Query, Pipeline
 from cmdb.utils.error import CMDBError
@@ -555,56 +553,6 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerDeleteError(err=err)
 
-    # STATUS CRUD
-    def get_statuses(self) -> list:
-        status_list = list()
-        try:
-            collection_resp = self.dbm.find_all(collection=CmdbStatus.COLLECTION)
-        except(CMDBError, Exception) as err:
-            LOGGER.error(err)
-            raise ObjectManagerGetError(err)
-
-        for collection in collection_resp:
-            try:
-                status_list.append(CmdbStatus(
-                    **collection
-                ))
-            except(CMDBError, Exception) as err:
-                LOGGER.error(err)
-                continue
-        return status_list
-
-    def get_status(self, public_id) -> CmdbStatus:
-        try:
-            return CmdbStatus(**self.dbm.find_one(
-                collection=CmdbStatus.COLLECTION,
-                public_id=public_id
-            ))
-        except (CMDBError, Exception) as err:
-            LOGGER.error(err)
-            raise ObjectManagerGetError(err)
-
-    def insert_status(self, data) -> int:
-        try:
-            new_status = CmdbStatus(**data)
-            ack = self.dbm.insert(CmdbStatus.COLLECTION, new_status.to_database())
-        except (CMDBError, Exception) as err:
-            LOGGER.error(err)
-            raise ObjectManagerInsertError(err)
-        return ack
-
-    def update_status(self, data):
-        try:
-            updated_status = CmdbStatus(**data)
-            ack = self._update(CmdbStatus.COLLECTION, updated_status.get_public_id(), updated_status.to_database())
-        except (CMDBError, Exception) as err:
-            LOGGER.error(err)
-            raise ObjectManagerUpdateError(err)
-        return ack.acknowledged
-
-    def delete_status(self, public_id: int):
-        return NotImplementedError
-
     # DOKUMENT FIELD CRUD
     def unset_update(self, collection: str, field: str):
         try:
@@ -613,106 +561,6 @@ class CmdbObjectManager(CmdbManagerBase):
             LOGGER.error(err)
             raise ObjectManagerUpdateError(err)
         return ack.acknowledged
-
-    # COLLECTIONS/TEMPLATES CRUD
-    def get_collections(self) -> list:
-        collection_list = list()
-        try:
-            collection_resp = self._get_many(collection=CmdbCollection.COLLECTION)
-        except(CMDBError, Exception) as err:
-            raise ObjectManagerGetError(err)
-        for collection in collection_resp:
-            try:
-                collection_list.append(CmdbCollection(
-                    **collection
-                ))
-            except(CMDBError, Exception) as err:
-                LOGGER.error(err)
-                continue
-        return collection_list
-
-    def get_collection(self, public_id: int) -> CmdbCollection:
-        try:
-            return CmdbCollection(**self.dbm.find_one(
-                collection=CmdbCollection.COLLECTION,
-                public_id=public_id
-            ))
-        except (CMDBError, Exception) as err:
-            LOGGER.error(err)
-            raise ObjectManagerGetError(err)
-
-    def insert_collection(self, data) -> int:
-        try:
-            new_collection = CmdbCollection(**data)
-            ack = self.dbm.insert(CmdbCollection.COLLECTION, new_collection.to_database())
-        except (CMDBError, Exception) as err:
-            LOGGER.error(err)
-            raise ObjectManagerInsertError(err)
-        return ack
-
-    def update_collection(self, data):
-        return NotImplementedError
-
-    def delete_collection(self, public_id: int):
-        return NotImplementedError
-
-    # CRUD COLLECTION TEMPLATES
-    def get_collection_templates(self) -> list:
-        collection_template_list = list()
-        try:
-            collection_resp = self._get_many(collection=CmdbCollectionTemplate.COLLECTION)
-        except(CMDBError, Exception) as err:
-            LOGGER.error(err)
-            raise ObjectManagerGetError(err)
-
-        for collection in collection_resp:
-            try:
-                collection_template_list.append(CmdbCollectionTemplate(
-                    **collection
-                ))
-            except(CMDBError, Exception) as err:
-                LOGGER.error(err)
-                continue
-        return collection_template_list
-
-    def get_collection_template(self, public_id: int) -> CmdbCollectionTemplate:
-        try:
-            return CmdbCollectionTemplate(**self._get(
-                collection=CmdbCollectionTemplate.COLLECTION,
-                public_id=public_id
-            ))
-        except (CMDBError, Exception) as err:
-            raise ObjectManagerGetError(err)
-
-    def insert_collection_template(self, data: dict) -> int:
-        # Insert data
-        try:
-            possible_id: int = self.dbm.get_highest_id(collection=CmdbCollectionTemplate.COLLECTION) + 1
-            data.update({'public_id': possible_id})
-            data.update({'creation_time': datetime.utcnow()})
-            collection_template_id = self._insert(CmdbCollectionTemplate.COLLECTION, data)
-        except (CMDBError, Exception) as err:
-            raise ObjectManagerInsertError(err)
-        # Check if instance is valid
-        try:
-            self.get_collection_template(public_id=collection_template_id)
-        except ObjectManagerGetError as err:
-            # Invalid instance -> delete
-            try:
-                self.delete_collection_template(collection_template_id)
-            except ObjectManagerDeleteError as err_delete:
-                raise ObjectInsertError(f'Instance is invalid, but could not delete template: {err_delete.message}')
-            raise ObjectManagerInsertError(f'Error in instance of new object: {err.message}')
-        return collection_template_id
-
-    def update_collection_template(self, data):
-        return NotImplementedError
-
-    def delete_collection_template(self, public_id: int) -> bool:
-        try:
-            return self._delete(CmdbCollectionTemplate.COLLECTION, public_id)
-        except (CMDBError, Exception) as err:
-            raise ObjectManagerDeleteError(err)
 
     # Link CRUD
     def get_link(self, public_id: int):
