@@ -70,7 +70,7 @@
     "@angular/compiler-cli": "~8.2.14",
     "@angular/language-service": "~8.2.14",
     "@types/bootstrap": "^4.3.1",
-    "@types/datatables.net": "^1.10.18",
+    "@types/datatables.net": "^1.10.19",
     "@types/datatables.net-select": "^1.2.6",
     "@types/jasmine": "^3.3.16",
     "@types/jasminewd2": "^2.0.8",
