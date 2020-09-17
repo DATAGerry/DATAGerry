@@ -26,7 +26,7 @@ from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManager
 from cmdb.media_library.media_file_manager import MediaFileManagement
 from cmdb.user_management import UserManager
-from cmdb.utils.security import SecurityManager
+from cmdb.security.security import SecurityManager
 
 try:
     from cmdb.utils.error import CMDBError

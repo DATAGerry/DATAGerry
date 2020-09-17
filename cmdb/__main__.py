@@ -19,7 +19,7 @@
 DATAGERRY is a flexible asset management tool and
 open-source configurable management database
 """
-import logging
+import logging.config
 import signal
 from time import sleep
 from argparse import ArgumentParser, Namespace

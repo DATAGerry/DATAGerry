@@ -25,7 +25,7 @@ from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.media_library.media_file_manager import MediaFileManagement
 from cmdb.user_management import UserManager
-from cmdb.utils.security import SecurityManager
+from cmdb.security.security import SecurityManager
 
 LOGGER = logging.getLogger(__name__)
 
