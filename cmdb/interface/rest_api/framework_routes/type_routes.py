@@ -175,15 +175,25 @@ def delete_type(public_id: int):
         ManagerGetError: When the type with the `public_id` was not found.
         ManagerDeleteError: When something went wrong during the deletion.
 
+    Notes:
+        Deleting the type will also delete all objects in this type!
+
     Returns:
         DeleteSingleResponse: Delete result with the deleted type as data.
     """
     type_manager = TypeManager(database_manager=current_app.database_manager)
+    from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+    deprecated_object_manager = CmdbObjectManager(database_manager=current_app.database_manager)
+
     try:
+        objects_ids = [object_.get_public_id() for object_ in deprecated_object_manager.get_objects_by_type(public_id)]
+        deprecated_object_manager.delete_many_objects({'type_id': public_id}, objects_ids, None)
         deleted_type = type_manager.delete(public_id=PublicID(public_id))
         api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerDeleteError as err:
         return abort(400, err.message)
+    except Exception as err:
+        return abort(400, str(err))
     return api_response.make_response()

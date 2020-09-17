@@ -1,3 +1,10 @@
+thead th, thead td {
+  text-align: center;
+}
+tbody th, tbody td {
+  text-align: center;
+}
+
 #type-list-datatable {
   .select-checkbox:before {
     border: 1px solid #bbb;

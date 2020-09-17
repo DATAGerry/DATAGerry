@@ -46,6 +46,10 @@ export class FileService {
     return this.api.callPost(this.servicePrefix + '/object/type/' + typeID + '/' + exportType, null, httpFileOptions);
   }
 
+  public getTypeFile() {
+    return this.api.callPost<any>('export/type/', null, httpFileOptions);
+  }
+
   public callExportTypeRoute(route: string) {
     return this.api.callPost<any>(route , null, httpFileOptions);
   }

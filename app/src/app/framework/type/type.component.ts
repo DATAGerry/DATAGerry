@@ -24,6 +24,12 @@ import { ReplaySubject, Subject } from 'rxjs';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CmdbType } from '../models/cmdb-type';
 import { CollectionParameters } from '../../services/models/api-parameter';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { Router } from '@angular/router';
+import { FileSaverService } from 'ngx-filesaver';
+import { CleanupModalComponent } from './builder/modals/cleanup-modal/cleanup-modal.component';
+import { DatePipe } from '@angular/common';
+import { FileService } from '../../export/export.service';
 
 @Component({
   selector: 'cmdb-type',
@@ -52,17 +58,23 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public selectedObjects: string[] = [];
 
-  constructor(private typeService: TypeService) {
+  private modalRef: NgbModalRef;
+
+  constructor(private typeService: TypeService, private router: Router, private fileService: FileService,
+              private fileSaverService: FileSaverService, private modalService: NgbModal, private datePipe: DatePipe) {
     this.types = [];
   }
 
   public ngOnInit(): void {
     this.dtOptions = {
-      columns: [
+      /*columns: [
         {
           title: '<input type="checkbox" class="selectAll" name="selectAll" value="all" (click)="selectAll()">',
           name: 'all',
-          orderable: false
+          orderable: false,
+          data: '',
+          className: 'select-checkbox',
+          targets: 0
         },
         {
           title: 'Active',
@@ -93,12 +105,18 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
           name: 'cleanup',
           data: 'clean_db'
         }
+      ],*/
+      columnDefs: [
+        {
+          orderable: false,
+          className: 'select-checkbox',
+          targets: 0
+        },
+        {
+          orderable: false,
+          targets: [1, 5, 6]
+        }
       ],
-      columnDefs: [{
-        orderable: false,
-        className: 'select-checkbox',
-        targets: 0
-      }],
       rowCallback: (row: Node, data: any[]) => {
         $('td:first-child', row).unbind('click');
         $('td:first-child', row).bind('click', () => {
@@ -106,8 +124,16 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
         });
         return row;
       },
+      select: {
+        style: 'multi',
+        selector: 'td:first-child'
+      },
       ordering: true,
       order: [[2, 'desc']],
+      dom:
+        '<"row" <"col-sm-2" l><"col" f> >' +
+        '<"row" <"col-sm-12"tr>>' +
+        '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
       searching: false,
       serverSide: true,
       processing: true,
@@ -130,10 +156,6 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
               data: []
             });
           });
-      },
-      select: {
-        style: 'multi',
-        selector: 'td:first-child'
       }
     };
   }
@@ -143,8 +165,32 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public ngOnDestroy(): void {
+    this.dtTrigger.unsubscribe();
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
     this.unSubscribe.next();
     this.unSubscribe.complete();
+  }
+
+  public callCleanUpModal(typeInstance: CmdbType): void {
+    this.modalRef = this.modalService.open(CleanupModalComponent);
+    this.modalRef.componentInstance.typeInstance = typeInstance;
+  }
+
+  public exportingFiles() {
+    if (this.selectedObjects.length === 0 || this.selectedObjects.length === this.types.length) {
+      this.fileService.getTypeFile()
+        .subscribe(res => this.downLoadFile(res, 'json'));
+    } else {
+      this.fileService.callExportTypeRoute('/export/type/' + this.selectedObjects.toString())
+        .subscribe(res => this.downLoadFile(res, 'json'));
+    }
+  }
+
+  public downLoadFile(data: any, exportType: any) {
+    const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
+    this.fileSaverService.save(data.body, timestamp + '.' + exportType);
   }
 
   public selectAll() {
@@ -176,4 +222,5 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
   public showAlert(): void {
     $('#infobox').show();
   }
+
 }
