@@ -7,6 +7,6 @@ updates:
       interval: "daily"
 
   - package-ecosystem: "pip"
-      directory: "cmdb"
-      schedule:
-        interval: "daily"
+    directory: "cmdb"
+    schedule:
+      interval: "daily"
