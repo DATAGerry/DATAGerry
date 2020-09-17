@@ -20,6 +20,8 @@ import datetime
 import time
 
 from flask import abort, jsonify, current_app, Response
+
+from cmdb.framework import TypeModel
 from cmdb.interface.route_utils import login_required
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.framework.cmdb_errors import TypeNotFoundError
@@ -52,15 +54,16 @@ def export_type():
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
 
     return Response(
-            resp,
-            mimetype="text/json",
-            headers={
-                "Content-Disposition":
-                    "attachment; filename=%s.%s" % (timestamp, 'json')
-            }
-        )
+        resp,
+        mimetype="text/json",
+        headers={
+            "Content-Disposition":
+                "attachment; filename=%s.%s" % (timestamp, 'json')
+        }
+    )
 
 
+@type_export_blueprint.route('/<string:public_ids>/', methods=['POST'])
 @type_export_blueprint.route('/<string:public_ids>', methods=['POST'])
 @login_required
 def export_type_by_ids(public_ids):
@@ -74,11 +77,12 @@ def export_type_by_ids(public_ids):
                         query_list.append({key: int(v)})
                     except (ValueError, TypeError):
                         return abort(400)
-            type_list = object_manager.get_types_by(sort="public_id", **{'$or': query_list})
+            type_list_data = json.dumps([TypeModel.to_json(type_) for type_ in
+                                         object_manager.get_types_by(sort="public_id", **{'$or': query_list})],
+                                        default=json_encoding.default, indent=2)
         except CMDBError as e:
             abort(400, e)
 
-        resp = json.dumps(type_list, default=json_encoding.default, indent=2)
     except TypeNotFoundError as e:
         return abort(400, e.message)
     except ModuleNotFoundError as e:
@@ -88,7 +92,7 @@ def export_type_by_ids(public_ids):
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
 
     return Response(
-        resp,
+        type_list_data,
         mimetype="text/json",
         headers={
             "Content-Disposition":

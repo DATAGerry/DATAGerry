@@ -258,7 +258,7 @@ export class TableComponent implements OnInit, OnDestroy {
         if (result) {
           const id = value.object_information.object_id;
           const filter: DataTableFilter = new DataTableFilter();
-          this.apiCallService.callDeleteRoute(this.linkRoute + id).subscribe(data => {
+          this.apiCallService.callDelete(this.linkRoute + id).subscribe(data => {
             this.objService.getObjects(null, filter).subscribe((objs: RenderResult[]) => {
               this.items.next(objs);
               this.rerender();

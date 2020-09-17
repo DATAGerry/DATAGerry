@@ -18,19 +18,14 @@
 
 import { Injectable } from '@angular/core';
 
-import { HttpInterceptorHandler, ApiCallService, ApiService } from '../services/api-call.service';
-import { HttpBackend, HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpInterceptorHandler, ApiCallService, ApiService, httpFileOptions } from '../services/api-call.service';
+import { HttpBackend, HttpClient } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
-import { AuthService } from '../auth/services/auth.service';
 import { DocTemplate } from '../framework/models/cmdb-doctemplate';
 import { BasicAuthInterceptor } from '../auth/interceptors/basic-auth.interceptor';
 
-const fileHttpOptions = {
-  observe: 'response',
-  responseType: 'blob'
-};
 
 
 @Injectable({
@@ -40,7 +35,7 @@ export class DocapiService<T = DocTemplate> implements ApiService {
 
   public readonly servicePrefix: string = 'docapi/template';
 
-  constructor(private api: ApiCallService, private backend: HttpBackend, private authService: AuthService) {
+  constructor(private api: ApiCallService, private http: HttpClient, private backend: HttpBackend) {
   }
 
   getDocTemplateList(): Observable<T[]> {
@@ -72,7 +67,7 @@ export class DocapiService<T = DocTemplate> implements ApiService {
 
 
   getRenderedObjectDoc(templateId: number, objectId: number) {
-    return this.api.callGetRoute<any>(`${ this.servicePrefix }/${ templateId }/render/${ objectId }`, fileHttpOptions);
+    return this.api.callGet<any>(`${ this.servicePrefix }/${ templateId }/render/${ objectId }`, httpFileOptions);
   }
 
 
@@ -89,21 +84,20 @@ export class DocapiService<T = DocTemplate> implements ApiService {
   }
 
   public postDocTemplate(docInstance: DocTemplate): Observable<any> {
-    return this.api.callPostRoute<DocTemplate>(this.servicePrefix + '/', docInstance);
+    return this.api.callPost<DocTemplate>(this.servicePrefix + '/', docInstance);
   }
 
   public putDocTemplate(docInstance: DocTemplate): Observable<any> {
-    return this.api.callPutRoute(this.servicePrefix + '/', docInstance);
+    return this.api.callPut(this.servicePrefix + '/', docInstance);
   }
 
   public deleteDocTemplate(publicID: number) {
-    return this.api.callDeleteRoute<number>(this.servicePrefix + '/' + publicID);
+    return this.api.callDelete<number>(this.servicePrefix + '/' + publicID);
   }
 
   // Validation functions
   public checkDocTemplateExists(docName: string) {
-    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ docName }`, specialClient);
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ docName }`);
   }
 
 }

@@ -53,7 +53,7 @@ class SetupRoutine:
         if not self.__check_database():
             self.status = SetupRoutine.SetupStatus.ERROR
             raise RuntimeError(
-                'The database manager could not be initialized. Perhaps the database cannot be reached, \
+                'The database managers could not be initialized. Perhaps the database cannot be reached, \
                 or the database was already initialized.'
             )
 

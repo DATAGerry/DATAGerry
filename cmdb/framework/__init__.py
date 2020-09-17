@@ -19,14 +19,14 @@
 This module presents the core system of the CMDB.
 All initializations and specifications for creating objects,
 object types and their fields are controlled here.
-Except for the manager, this module can be used completely modular.
+Except for the managers, this module can be used completely modular.
 The respective DAO is used to apply the attributes and to convert
 the elements for the database.
 """
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.dao import TypeDAO
-from cmdb.framework.dao import CategoryDAO
+from cmdb.framework.models import TypeModel
+from cmdb.framework.models import CategoryModel
 from cmdb.framework.cmdb_status import CmdbStatus
 from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_collection import CmdbCollection, CmdbCollectionTemplate
@@ -37,8 +37,8 @@ CmdbLog.register_log_type(CmdbObjectLog.__name__, CmdbObjectLog)
 # List of init collections
 __COLLECTIONS__ = [
     CmdbObject,
-    TypeDAO,
-    CategoryDAO,
+    TypeModel,
+    CategoryModel,
     CmdbStatus,
     CmdbMetaLog,
     CmdbLink,

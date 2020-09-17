@@ -24,13 +24,19 @@ import { ReplaySubject, Subject } from 'rxjs';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CmdbType } from '../models/cmdb-type';
 import { CollectionParameters } from '../../services/models/api-parameter';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { Router } from '@angular/router';
+import { FileSaverService } from 'ngx-filesaver';
+import { CleanupModalComponent } from './builder/modals/cleanup-modal/cleanup-modal.component';
+import { DatePipe } from '@angular/common';
+import { FileService } from '../../export/export.service';
 
 @Component({
   selector: 'cmdb-type',
   templateUrl: './type.component.html',
   styleUrls: ['./type.component.scss']
 })
-export class TypeComponent /* implements OnInit, AfterViewInit, OnDestroy*/ {
+export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /**
    * Datatable datas
@@ -50,73 +56,36 @@ export class TypeComponent /* implements OnInit, AfterViewInit, OnDestroy*/ {
   public types: Array<CmdbType>;
   public typesAPIResponse: APIGetMultiResponse<CmdbType>;
 
-  public selectedObjects: string[] = [];
+  public selected: Array<number> = [];
+  public all: boolean = false;
 
+  public remove: boolean = false;
+  public update: boolean = false;
+  private modalRef: NgbModalRef;
 
-  constructor(private typeService: TypeService) {
+  constructor(private typeService: TypeService, private router: Router, private fileService: FileService,
+              private fileSaverService: FileSaverService, private modalService: NgbModal, private datePipe: DatePipe) {
     this.types = [];
   }
-  /*
+
   public ngOnInit(): void {
     this.dtOptions = {
-      columns: [
+      ordering: true,
+      columnDefs: [
         {
-          title: '<input type="checkbox" class="selectAll" name="selectAll" value="all" (click)="selectAll()">',
-          name: 'all',
-          orderable: false
-        },
-        {
-          title: 'Active',
-          name: 'active',
-          data: 'active',
-        },
-        {
-          title: 'PublicID',
-          name: 'public_id',
-          data: 'public_id'
-        },
-        {
-          title: 'Name',
-          name: 'name',
-          data: 'name'
-        },
-        {
-          title: 'Author',
-          name: 'author_id',
-          data: 'author_id'
-        },
-        {
-          title: 'Creation Time',
-          name: 'creation_time',
-          data: 'creation_time',
-        },
-        {
-          title: 'Actions',
-          name: 'actions',
+          orderable: false,
+          targets: [0, 1, 5, 6]
         }
       ],
-      columnDefs: [ {
-        orderable: false,
-        className: 'select-checkbox',
-        targets:   0
-      } ],
-      rowCallback: (row: Node, data: any[]) => {
-        $('td:first-child', row).unbind('click');
-        $('td:first-child', row).bind('click', () => {
-          this.updateDisplay(data[2]);
-        });
-        return row;
-      },
-      ordering: true,
-      searching: false,
-      serverSide: true,
+      order: [[2, 'desc']],
       dom:
         '<"row" <"col-sm-2" l><"col" f> >' +
         '<"row" <"col-sm-12"tr>>' +
         '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
+      searching: false,
+      serverSide: true,
       processing: true,
       ajax: (params: any, callback) => {
-
         const apiParameters: CollectionParameters = {
           page: Math.ceil(params.start / params.length) + 1,
           limit: params.length,
@@ -124,22 +93,18 @@ export class TypeComponent /* implements OnInit, AfterViewInit, OnDestroy*/ {
           order: params.order[0].dir === 'desc' ? -1 : 1,
         };
 
-        this.typeService.getTypeIteration(apiParameters).pipe(
-          takeUntil(this.unSubscribe)).subscribe((response: APIGetMultiResponse<CmdbType>) => {
-          this.typesAPIResponse = response;
-          this.types = this.typesAPIResponse.results;
-          callback({
-            recordsTotal: response.total,
-            recordsFiltered: response.total,
-            data: []
+        this.typeService.getTypesIteration(apiParameters).pipe(
+          takeUntil(this.unSubscribe)).subscribe(
+          (response: APIGetMultiResponse<CmdbType>) => {
+            this.typesAPIResponse = response;
+            this.types = this.typesAPIResponse.results;
+            callback({
+              recordsTotal: response.total,
+              recordsFiltered: response.total,
+              data: []
+            });
           });
-        });
-      },
-      select: {
-        style:    'multi',
-        selector: 'td:first-child'
-      },
-      order: [[1, 'asc']],
+      }
     };
   }
 
@@ -148,33 +113,60 @@ export class TypeComponent /* implements OnInit, AfterViewInit, OnDestroy*/ {
   }
 
   public ngOnDestroy(): void {
+    this.dtTrigger.unsubscribe();
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
     this.unSubscribe.next();
     this.unSubscribe.complete();
   }
 
-  public selectAll() {
-    const table: any = $('#type-list-datatable');
-    const dataTable: any = table.DataTable();
-    const rows: any = dataTable.rows();
-    this.selectedObjects = [];
-    if ($('.selectAll').is( ':checked' )) {
-      rows.select();
-      let lenx: number = rows.data().length - 1;
-      while (lenx >= 0) {
-        this.selectedObjects.push(rows.data()[lenx][2]);
-        lenx--;
-      }
+  public callCleanUpModal(typeInstance: CmdbType): void {
+    this.modalRef = this.modalService.open(CleanupModalComponent);
+    this.modalRef.componentInstance.typeInstance = typeInstance;
+  }
+
+  public exportingFiles() {
+    if (this.selected.length === 0 || this.selected.length === this.types.length) {
+      this.fileService.getTypeFile()
+        .subscribe(res => this.downLoadFile(res, 'json'));
     } else {
-      rows.deselect();
+      this.fileService.callExportTypeRoute('/export/type/' + this.selected.toString())
+        .subscribe(res => this.downLoadFile(res, 'json'));
     }
   }
 
-  public updateDisplay(publicID: string): void {
-    const index = this.selectedObjects.findIndex(d => d === publicID); // find index in your array
-    if (index > -1) {
-      this.selectedObjects.splice(index, 1); // remove element from array
+  public downLoadFile(data: any, exportType: any) {
+    const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
+    this.fileSaverService.save(data.body, timestamp + '.' + exportType);
+  }
+
+  public selectAll() {
+    if (this.all) {
+      this.selected = [];
+      this.all = false;
     } else {
-      this.selectedObjects.push(publicID);
+      this.selected = [];
+      for (const type of this.types) {
+        this.selected.push(type.public_id);
+      }
+      this.all = true;
     }
-  }*/
+  }
+
+  public toggleSelection(publicID: number) {
+    const idx = this.selected.indexOf(publicID);
+    console.log(idx);
+    if (idx === -1) {
+      this.selected.push(publicID);
+    } else {
+      this.selected.splice(idx, 1);
+      this.all = false;
+    }
+  }
+
+  public showAlert(): void {
+    $('#infobox').show();
+  }
+
 }

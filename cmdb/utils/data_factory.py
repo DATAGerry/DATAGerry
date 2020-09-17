@@ -20,8 +20,8 @@ NOTE: This module is highly experimental and should only be used for development
 """
 
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.dao.type import TypeDAO
-from cmdb.framework.dao.category import CategoryDAO
+from cmdb.framework.models.type import TypeModel
+from cmdb.framework.models.category import CategoryModel
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user import User
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
@@ -135,7 +135,7 @@ class DataGenerator:
         generation_date = self._faker.date_time_between(start_date="-100d", end_date="-30d")
 
         type_list.append(
-            TypeDAO(
+            TypeModel(
                 **{
                     "public_id": 1,
                     "label": "Leased Lines",
@@ -282,7 +282,7 @@ class DataGenerator:
             )
         )
         type_list.append(
-            TypeDAO(
+            TypeModel(
                 **{
                     "public_id": 2,
                     "title": "Switch",
@@ -434,7 +434,7 @@ class DataGenerator:
         )
 
         type_list.append(
-            TypeDAO(
+            TypeModel(
                 **{
                     "public_id": 3,
                     "title": "Router",
@@ -584,7 +584,7 @@ class DataGenerator:
             )
         )
         type_list.append(
-            TypeDAO(
+            TypeModel(
                 **{
                     "public_id": 4,
                     "label": "Locations",
@@ -694,7 +694,7 @@ class DataGenerator:
             )
         )
         type_list.append(
-            TypeDAO(
+            TypeModel(
                 **{
                     "public_id": 5,
                     "label": "Servers",
@@ -1149,21 +1149,21 @@ class DataGenerator:
     @staticmethod
     def generate_categories() -> list:
         category_list = [
-            CategoryDAO(**{
+            CategoryModel(**{
                 "public_id": 1,
                 "name": "product_categories",
                 "label": "Product Categories",
                 "root": True,
                 "parent_id": 0,
             }),
-            CategoryDAO(**{
+            CategoryModel(**{
                 "public_id": 2,
                 "name": "infrastructure",
                 "label": "Infrastructure",
                 "root": False,
                 "parent_id": 1,
             }),
-            CategoryDAO(**{
+            CategoryModel(**{
                 "public_id": 3,
                 "name": "devices",
                 "label": "Devices",
@@ -1280,4 +1280,4 @@ class NoDatabaseManagerError(CMDBError):
 
     def __init__(self):
         super().__init__()
-        self.message = 'Database manager was not passed.'
+        self.message = 'Database managers was not passed.'

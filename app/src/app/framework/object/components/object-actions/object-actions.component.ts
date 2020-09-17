@@ -30,7 +30,7 @@ export class ObjectActionsComponent implements OnDestroy {
 
     this.modalRef.result.then((result) => {
       if (result) {
-        this.api.callDeleteRoute('/object/' + publicID).subscribe((res: boolean) => {
+        this.api.callDelete('/object/' + publicID).subscribe((res: boolean) => {
           if (res) {
             this.router.navigate(['/']);
           }

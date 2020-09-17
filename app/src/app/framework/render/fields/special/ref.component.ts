@@ -44,14 +44,13 @@ export class RefComponent extends RenderField implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.data.default = parseInt(this.data.default, 10);
-    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
     if (this.data.ref_types) {
       this.objectService.getObjectsByType(this.data.ref_types).subscribe((objectList: RenderResult[]) => {
         this.objectList = objectList;
       });
     }
     if (this.controller.value !== '' && this.data.value) {
-      this.objectService.getObject(this.controller.value, false, specialClient).subscribe((refObject: RenderResult) => {
+      this.objectService.getObject(this.controller.value, false).subscribe((refObject: RenderResult) => {
           this.refObject = refObject;
         },
         (error) => {

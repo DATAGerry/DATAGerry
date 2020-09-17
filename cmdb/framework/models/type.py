@@ -150,7 +150,7 @@ class TypeExternalLink:
 
 
 class TypeRenderMeta:
-    """Class of the type dao `render_meta` field"""
+    """Class of the type models `render_meta` field"""
 
     __slots__ = 'icon', 'sections', 'externals', 'summary'
 
@@ -181,9 +181,9 @@ class TypeRenderMeta:
         }
 
 
-class TypeDAO(CmdbDAO):
+class TypeModel(CmdbDAO):
     """
-    Data access object of the framework type.
+    Model class of the framework type.
 
     Attributes:
         COLLECTION (Collection):    Name of the database collection.
@@ -234,6 +234,16 @@ class TypeDAO(CmdbDAO):
             'required': False,
             'default': True
         },
+        'creation_time': {
+            'type': 'dict',
+            'empty': True,
+            'schema': {
+                '$date': {
+                    'type': 'integer'
+                }
+            },
+            'nullable': True
+        },
         'render_meta': {
             'type': 'dict',
             'allow_unknown': False,
@@ -265,41 +275,40 @@ class TypeDAO(CmdbDAO):
     __slots__ = 'public_id', 'name', 'label', 'description', 'version', 'active', 'clean_db', 'author_id', \
                 'creation_time', 'render_meta', 'fields',
 
-    def __init__(self, public_id: int, name: str, author_id: int, creation_time: datetime, render_meta: TypeRenderMeta,
-                 active: bool = True, fields: list = None, version: str = None, label: str = None,
-                 clean_db: bool = None, description: str = None):
+    def __init__(self, public_id: int, name: str, author_id: int, render_meta: TypeRenderMeta,
+                 creation_time: datetime = None, active: bool = True, fields: list = None, version: str = None,
+                 label: str = None, clean_db: bool = None, description: str = None):
         self.name: str = name
         self.label: str = label or self.name.title()
         self.description: str = description
-        self.version: str = version or TypeDAO.DEFAULT_VERSION
+        self.version: str = version or TypeModel.DEFAULT_VERSION
         self.active: bool = active
         self.clean_db: bool = clean_db
         self.author_id: int = author_id
-        self.creation_time: datetime = creation_time
+        self.creation_time: datetime = creation_time or datetime.utcnow()
         self.render_meta: TypeRenderMeta = render_meta
         self.fields: list = fields or []
-        super(TypeDAO, self).__init__(public_id=public_id)
+        super(TypeModel, self).__init__(public_id=public_id)
 
     @classmethod
-    def from_data(cls, data: dict) -> "TypeDAO":
-        """Create a instance of TypeDAO from database values"""
+    def from_data(cls, data: dict) -> "TypeModel":
+        """Create a instance of TypeModel from database values"""
         return cls(
             public_id=data.get('public_id'),
             name=data.get('name'),
             active=data.get('active', True),
             author_id=data.get('author_id'),
-            creation_time=data.get('creation_time'),
+            creation_time=data.get('creation_time', None),
             label=data.get('label', None),
             version=data.get('version', None),
             description=data.get('description', None),
             render_meta=TypeRenderMeta.from_data(data.get('render_meta', {})),
             fields=data.get('fields', None),
             clean_db=data.get('clean_db', True),
-
         )
 
     @classmethod
-    def to_json(cls, instance: "TypeDAO") -> dict:
+    def to_json(cls, instance: "TypeModel") -> dict:
         """Convert a type instance to json conform data"""
         return {
             'public_id': instance.get_public_id(),

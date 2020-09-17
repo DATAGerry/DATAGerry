@@ -16,7 +16,7 @@
 from typing import Any
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
-from cmdb.framework.manager.error.manager_errors import ManagerGetError, ManagerInsertError, \
+from cmdb.framework.managers.error.manager_errors import ManagerGetError, ManagerInsertError, \
     ManagerUpdateError, ManagerDeleteError
 from cmdb.framework.utils import Collection, PublicID
 
@@ -34,7 +34,7 @@ class ManagerBase:
         Init/Open the database connection.
 
         Args:
-            database_manager: Database manager instance
+            database_manager: Database managers instance
         """
         self._database_manager: DatabaseManagerMongo = database_manager
 

@@ -17,17 +17,17 @@ from typing import Union, List
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_dao import CmdbDAO
-from cmdb.framework.manager import ManagerBase, ManagerGetError, ManagerDeleteError
-from cmdb.framework.manager.error.framework_errors import FrameworkGetError, FrameworkNotFoundError, \
+from cmdb.framework.managers import ManagerBase, ManagerGetError, ManagerDeleteError
+from cmdb.framework.managers.error.framework_errors import FrameworkGetError, FrameworkNotFoundError, \
     FrameworkIterationError, FrameworkQueryEmptyError, FrameworkDeleteError, FrameworkUpdateError
-from cmdb.framework.manager.results import IterationResult
+from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.utils import PublicID, Collection
 from cmdb.search import Query, Pipeline
 from cmdb.search.query.builder import Builder
 
 
 class FrameworkQueryBuilder(Builder):
-    """Query/Pipeline builder class for the framework manager"""
+    """Query/Pipeline builder class for the framework managers"""
 
     def __init__(self):
         """Init a query or a pipeline to None"""
@@ -64,26 +64,31 @@ class FrameworkQueryBuilder(Builder):
         if isinstance(filter, dict):
             self.query.append(self.match_(filter))
         elif isinstance(filter, list):
-            for f in filter:
-                self.query.append(self.match_(f))
+            for pipe in filter:
+                self.query.append(pipe)
+
+        if limit == 0:
+            results_query = [self.skip_(limit)]
+        else:
+            results_query = [self.skip_(skip), self.limit_(limit)]
 
         self.query.append(self.sort_(sort=sort, order=order))
         self.query.append(self.facet_({
             'meta': [self.count_('total')],
-            'results': [self.skip_(skip), self.limit_(limit)]
+            'results': results_query
         }))
         return self.query
 
 
 class FrameworkManager(ManagerBase):
-    """Framework manager implementation for all framework based CRUD operations."""
+    """Framework managers implementation for all framework based CRUD operations."""
 
     def __init__(self, collection: Collection, database_manager: DatabaseManagerMongo):
         """
         Set the collection name and the database connection.
         Args:
             collection: Name of the database collection
-            database_manager: Active database manager instance
+            database_manager: Active database managers instance
         """
         self.collection: Collection = collection
         self.builder = FrameworkQueryBuilder()

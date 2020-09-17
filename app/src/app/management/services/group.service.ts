@@ -109,8 +109,7 @@ export class GroupService<T = Group> implements ApiService {
 
   // Special functions
   public checkGroupExists(groupName: string) {
-    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ groupName }`, specialClient);
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ groupName }`);
   }
 
 }

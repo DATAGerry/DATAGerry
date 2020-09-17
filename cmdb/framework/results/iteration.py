@@ -14,9 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Generic, TypeVar, Union, Type, List
+from typing import TypeVar, Generic, List, Union, Type
 
-from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.framework import CmdbDAO
 
 C = TypeVar('C', bound=CmdbDAO)
 

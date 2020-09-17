@@ -101,8 +101,8 @@ export class TypeBuilderComponent implements OnInit {
   public saveType() {
     if (this.mode === CmdbMode.Create) {
       let newTypeID = null;
-      this.typeService.postType(this.typeInstance).subscribe(typeIDResp => {
-          newTypeID = typeIDResp;
+      this.typeService.postType(this.typeInstance).subscribe((typeIDResp: CmdbType) => {
+          newTypeID = +typeIDResp.public_id;
           if (this.selectedCategoryID) {
             this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
               category.types.push(newTypeID);
@@ -121,6 +121,7 @@ export class TypeBuilderComponent implements OnInit {
           console.error(error);
         });
     } else if (this.mode === CmdbMode.Edit) {
+
       this.typeService.putType(this.typeInstance).subscribe((updateResp: CmdbType) => {
           if (this.basicStep.originalCategoryID !== this.selectedCategoryID) {
             this.categoryService.getCategory(this.basicStep.originalCategoryID).subscribe((category: CmdbCategory) => {

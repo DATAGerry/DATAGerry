@@ -63,7 +63,7 @@ class AbstractCmdbService:
         self._event_shutdown = threading.Event()
         signal.signal(signal.SIGTERM, self._shutdown)
 
-        # start event manager
+        # start event managers
         self._event_manager = cmdb.event_management.event_manager.EventManagerAmqp(self._event_shutdown,
                                                                                    self._handle_event,
                                                                                    self._name,
