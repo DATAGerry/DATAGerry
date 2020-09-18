@@ -16,116 +16,106 @@
 
 from datetime import datetime
 
-from cmdb.user_management.user_base import UserManagementBase
+from cmdb.framework import CmdbDAO
+from cmdb.framework.utils import Collection, Model
 
 
-class UserModel(UserManagementBase):
-    """
-    UserModel class
-    """
-    COLLECTION = 'management.users'
-    REQUIRED_INIT_KEYS = ['user_name', 'registration_time', 'group_id']
+class UserModel(CmdbDAO):
+    COLLECTION: Collection = 'management.users'
+    MODEL: Model = 'User'
     INDEX_KEYS = [
-        {'keys': [('user_name', UserManagementBase.ASCENDING)], 'name': 'user_name', 'unique': True}
+        {'keys': [('user_name', CmdbDAO.DAO_ASCENDING)], 'name': 'user_name', 'unique': True}
     ]
     DEFAULT_AUTHENTICATOR: str = 'LocalAuthenticationProvider'
+    DEFAULT_GROUP: int = 2
 
-    def __init__(self, user_name, group_id, registration_time, active=True, password=None, last_login_time=None,
-                 image=None, first_name=None, last_name=None, email=None,
-                 authenticator=DEFAULT_AUTHENTICATOR, **kwargs):
-        """
+    SCHEMA: dict = {
+        'public_id': {
+            'type': 'integer'
+        },
+        'name': {
+            'type': 'string',
+            'required': True,
+        },
+        'active': {
+            'type': 'boolean',
+            'default': 2,
+            'required': False
+        },
+        'group_id': {
+            'type': 'integer',
+            'required': True
+        },
+        'authenticator': {
+            'type': 'string',
+            'default': DEFAULT_GROUP,
+            'required': False
+        }
+    }
 
-        Args:
-            user_name: display/login name of this user
-            group_id: ID of the user group
-            registration_time: time the user was inserted into database
-            password: hmac hashed user password - if auth requires a password
-            first_name: Display firstname
-            last_name: Display lastname
-            email: Email-address
-            authenticator: String presentation of the selected Authenticator
-            **kwargs: optional params
-        """
-        self.user_name = user_name
-        self.password = password
-        self.last_login_time = last_login_time or datetime.utcnow()
-        self.image = image
-        self.active = active
-        self.group_id = group_id
-        self.authenticator = authenticator
-        self.email = email
-        self.registration_time = registration_time
-        self.first_name = first_name
-        self.last_name = last_name
-        super(UserModel, self).__init__(**kwargs)
+    __slots__ = 'public_id', 'user_name', 'active', 'group_id', 'registration_time', 'password', \
+                'image', 'first_name', 'last_name', 'email', 'authenticator'
 
-    def get_name(self) -> str:
+    def __init__(self, public_id: int, user_name: str, active: bool, group_id: int = None,
+                 registration_time: datetime = None, password: str = None, image: str = None, first_name: str = None,
+                 last_name: str = None, email: str = None, authenticator: str = None):
+
+        self.user_name: str = user_name
+        self.active: bool = active
+
+        self.group_id: int = group_id or UserModel.DEFAULT_GROUP
+        self.authenticator: str = authenticator or UserModel.DEFAULT_AUTHENTICATOR
+        self.registration_time: datetime = registration_time or datetime.utcnow()
+
+        self.email: str = email
+        self.password: str = password
+        self.image: str = image
+        self.first_name: str = first_name
+        self.last_name: str = last_name
+
+        super(UserModel, self).__init__(public_id=public_id)
+
+    def get_display_name(self) -> str:
         """
-        Get the name of the user
-        Display by first_name + last_name
-        If not set the user_name will be returned
+        Get the display name of the user.
+        The display is first_name + last_name
+
         Returns:
-            str: display name
+            str: first_name + last_name or user_name if not first- and lastname is set
         """
         if self.first_name is None or self.last_name is None:
             return self.user_name
         else:
             return f'{self.first_name} {self.last_name}'
 
-    def get_first_name(self) -> str:
-        """
-        Get firstname
-        Returns:
-            str: firstname
-        """
-        return self.first_name
+    @classmethod
+    def from_data(cls, data: dict) -> "UserModel":
+        return cls(
+            public_id=data.get('public_id'),
+            user_name=data.get('user_name'),
+            active=data.get('active'),
+            group_id=data.get('group_id', None),
+            registration_time=data.get('registration_time', None),
+            authenticator=data.get('authenticator', None),
+            email=data.get('email', None),
+            password=data.get('password', None),
+            image=data.get('image', None),
+            first_name=data.get('first_name', None),
+            last_name=data.get('last_name', None)
+        )
 
-    def get_last_name(self) -> str:
-        """
-        Get lastname
-        Returns:
-            str: lastname
-        """
-        return self.last_name
-
-    def get_username(self) -> str:
-        """
-        Get username
-        Returns:
-            str: username/loginname
-        """
-        return self.user_name
-
-    def get_email(self):
-        """
-        Get email
-        Returns:
-            str: Returns none if string is empty
-        """
-        if self.email is None or self.email == "":
-            return None
-        return self.email
-
-    def get_password(self) -> (str, bytes):
-        """
-        Get user password
-        Returns:
-            str: returns the hast
-        """
-        return self.password
-
-    def get_group(self) -> int:
-        """
-        Get the public if of the user group
-        Returns:
-            int: group public id
-        """
-        return self.group_id
-
-    def get_authenticator(self) -> str:
-        """
-        Get the Authenticator
-        Returns:
-            str: returns string representation of the authenticator class
-        """
-        return self.authenticator
+    @classmethod
+    def to_json(cls, instance: "UserModel") -> dict:
+        return {
+            'public_id': instance.public_id,
+            'user_name': instance.user_name,
+            'active': instance.active,
+            'group_id': instance.group_id,
+            'registration_time': instance.registration_time,
+            'authenticator': instance.authenticator,
+            'email': instance.email,
+            'password': instance.password,
+            'image': instance.image,
+            'first_name': instance.first_name,
+            'last_name': instance.last_name
+        }

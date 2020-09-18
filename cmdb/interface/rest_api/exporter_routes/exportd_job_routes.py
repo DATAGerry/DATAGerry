@@ -110,7 +110,7 @@ def add_job(request_user: UserModel):
         new_job_data['public_id'] = exportd_manager.get_new_id(ExportdJob.COLLECTION)
         new_job_data['last_execute_date'] = datetime.utcnow()
         new_job_data['author_id'] = request_user.get_public_id()
-        new_job_data['author_name'] = request_user.get_name()
+        new_job_data['author_name'] = request_user.get_display_name()
         new_job_data['state'] = ExecuteState.SUCCESSFUL.name
     except TypeError as e:
         LOGGER.warning(e)
@@ -131,7 +131,7 @@ def add_job(request_user: UserModel):
             'job_id': job_instance.get_public_id(),
             'state': True,
             'user_id': request_user.get_public_id(),
-            'user_name': request_user.get_name(),
+            'user_name': request_user.get_display_name(),
             'event': LogAction.CREATE.name,
             'message': '',
         }
@@ -173,7 +173,7 @@ def update_job(request_user: UserModel):
                 'job_id': update_job_instance.get_public_id(),
                 'state': True,
                 'user_id': request_user.get_public_id(),
-                'user_name': request_user.get_name(),
+                'user_name': request_user.get_display_name(),
                 'event': LogAction.EDIT.name,
                 'message': '',
             }
@@ -198,7 +198,7 @@ def delete_job(public_id: int, request_user: UserModel):
                 'job_id': job_instance.get_public_id(),
                 'state': True,
                 'user_id': request_user.get_public_id(),
-                'user_name': request_user.get_name(),
+                'user_name': request_user.get_display_name(),
                 'event': LogAction.DELETE.name,
                 'message': '',
             }
@@ -269,7 +269,7 @@ def worker(job: ExportdJob, request_user: UserModel):
     from cmdb.event_management.event import Event
     try:
         event = Event("cmdb.exportd.pull")
-        content = ExportdManagerBase(job).execute(event, request_user.public_id, request_user.get_name(), False)
+        content = ExportdManagerBase(job).execute(event, request_user.public_id, request_user.get_display_name(), False)
         response = make_res(content.data, content.status)
         response.headers['Content-Type'] = '%s; charset=%s' % (content.mimetype, content.charset)
         return response

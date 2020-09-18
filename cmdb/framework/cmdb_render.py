@@ -85,7 +85,7 @@ class CmdbRender:
         except Exception:
             user = None
         if user:
-            return user.get_name()
+            return user.get_display_name()
         else:
             return CmdbRender.AUTHOR_ANONYMOUS_NAME
 

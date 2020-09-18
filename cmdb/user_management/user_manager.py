@@ -95,7 +95,7 @@ class UserManager(CmdbManagerBase):
         try:
             return self.dbm.insert(collection=UserModel.COLLECTION, data=user.to_database())
         except (CMDBError, Exception):
-            raise UserManagerInsertError(f'Could not insert {user.get_username()}')
+            raise UserManagerInsertError(f'Could not insert {user.user_name}')
 
     def update_user(self, public_id, update_params: dict):
         try:
@@ -191,7 +191,7 @@ class UserManager(CmdbManagerBase):
         selected_levels = []
         for right in self.rights:
             if right.get_level() <= min_level:
-                selected_levels.append(right.get_name())
+                selected_levels.append(right.get_display_name())
         return selected_levels
 
     def get_all_rights(self):

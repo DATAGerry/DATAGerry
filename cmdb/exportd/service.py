@@ -152,7 +152,7 @@ class ExportdThread(Thread):
             self.exportd_job_manager.update_job(self.job, self.user_manager.get_user(self.user_id), event_start=False)
             # execute Exportd job
             job = cmdb.exportd.exporter_base.ExportdManagerBase(self.job)
-            job.execute(self.event, cur_user.get_public_id(), cur_user.get_name())
+            job.execute(self.event, cur_user.get_public_id(), cur_user.get_display_name())
 
         except Exception as err:
             LOGGER.error(err)
@@ -163,7 +163,7 @@ class ExportdThread(Thread):
                     'job_id': self.job.get_public_id(),
                     'state': False,
                     'user_id': cur_user.get_public_id(),
-                    'user_name': cur_user.get_name(),
+                    'user_name': cur_user.get_display_name(),
                     'event': self.event.get_type(),
                     'message': ['Successful'] if not err else err.args,
                 }

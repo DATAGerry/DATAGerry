@@ -532,7 +532,7 @@ def insert_object(request_user: UserModel):
         log_params = {
             'object_id': new_object_id,
             'user_id': request_user.get_public_id(),
-            'user_name': request_user.get_name(),
+            'user_name': request_user.get_display_name(),
             'comment': 'Object was created',
             'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
             'version': current_object.version
@@ -647,7 +647,7 @@ def update_object(public_id: int, request_user: UserModel):
                 'object_id': obj_id,
                 'version': current_object_render_result.object_information['version'],
                 'user_id': request_user.get_public_id(),
-                'user_name': request_user.get_name(),
+                'user_name': request_user.get_display_name(),
                 'comment': update_comment,
                 'changes': changes,
                 'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
@@ -691,7 +691,7 @@ def delete_object(public_id: int, request_user: UserModel):
             'object_id': public_id,
             'version': current_object_render_result.object_information['version'],
             'user_id': request_user.get_public_id(),
-            'user_name': request_user.get_name(),
+            'user_name': request_user.get_display_name(),
             'comment': 'Object was deleted',
             'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
         }
@@ -751,7 +751,7 @@ def delete_many_objects(public_ids, request_user: UserModel):
                     'object_id': current_object_instance.get_public_id(),
                     'version': current_object_render_result.object_information['version'],
                     'user_id': request_user.get_public_id(),
-                    'user_name': request_user.get_name(),
+                    'user_name': request_user.get_display_name(),
                     'comment': 'Object was deleted',
                     'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
                 }
@@ -830,7 +830,7 @@ def update_object_state(public_id: int, request_user: UserModel):
             'object_id': public_id,
             'version': founded_object.version,
             'user_id': request_user.get_public_id(),
-            'user_name': request_user.get_name(),
+            'user_name': request_user.get_display_name(),
             'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
             'comment': 'Active status has changed',
             'changes': change,

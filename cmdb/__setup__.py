@@ -126,12 +126,12 @@ class SetupRoutine:
         try:
             admin_user = usm.get_user(1)
             LOGGER.warning('KEY ROUTINE: Admin user detected')
-            LOGGER.info(f'KEY ROUTINE: Enter new password for user: {admin_user.get_username()}')
+            LOGGER.info(f'KEY ROUTINE: Enter new password for user: {admin_user.user_name}')
             admin_pass = str(input('New admin password: '))
             new_password = scm.generate_hmac(admin_pass)
             admin_user.password = new_password
             usm.update_user(admin_user.get_public_id(), admin_user.__dict__)
-            LOGGER.info(f'KEY ROUTINE: Password was updated for user: {admin_user.get_username()}')
+            LOGGER.info(f'KEY ROUTINE: Password was updated for user: {admin_user.user_name}')
         except Exception as ex:
             LOGGER.info(f'KEY ROUTINE: Password was updated for user failed: {ex}')
         LOGGER.info('KEY ROUTINE: FINISHED')

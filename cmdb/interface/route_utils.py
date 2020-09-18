@@ -99,7 +99,7 @@ def user_has_right(required_right: str) -> bool:
     try:
         user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
         user = user_manager.get_user(user_id)
-        return user_manager.group_has_right(user.get_group(), required_right)
+        return user_manager.group_has_right(user.group, required_right)
     except UserManagerGetError:
         return False
 
@@ -167,7 +167,7 @@ def right_required(required_right: str, excepted: dict = None):
                         return func(*args, **kwargs)
 
             try:
-                has_right = user_manager.group_has_right(current_user.get_group(), required_right)
+                has_right = user_manager.group_has_right(current_user.group_id, required_right)
             except UserManagerGetError:
                 return abort(404, 'Group or right not exists')
             if not has_right:

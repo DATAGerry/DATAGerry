@@ -154,7 +154,7 @@ class AuthModule:
         user_instance = None
         try:
             founded_user = user_manager.get_user_by_name(user_name=user_name)
-            provider_class_name = founded_user.get_authenticator()
+            provider_class_name = founded_user.authenticator
             LOGGER.debug(f'[AUTH] Founded user: {founded_user} with provider: {provider_class_name}')
             if not self.provider_exists(provider_class_name):
                 raise AuthenticationProviderNotExistsError(provider_class_name)

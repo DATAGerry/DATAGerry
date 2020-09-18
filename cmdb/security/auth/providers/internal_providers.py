@@ -59,7 +59,7 @@ class LocalAuthenticationProvider(AuthenticationProvider):
         except UserManagerGetError as umge:
             raise AuthenticationError(LocalAuthenticationProvider.get_name(), umge.message)
         login_pass = __scm.generate_hmac(password)
-        if login_pass == user.get_password():
+        if login_pass == user.password:
             return user
         raise AuthenticationError(LocalAuthenticationProvider.get_name(), 'UserModel not exists')
 
