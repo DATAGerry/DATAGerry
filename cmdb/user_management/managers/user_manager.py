@@ -80,6 +80,7 @@ class UserManager(AccountManager):
     def update(self, public_id: Union[PublicID, int], user: Union[UserModel, dict]):
         """
         Update a existing user in the system.
+
         Args:
             public_id (int): PublicID of the user in the system.
             user(UserModel): Instance or dict of UserModel
