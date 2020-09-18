@@ -234,16 +234,6 @@ class TypeModel(CmdbDAO):
             'required': False,
             'default': True
         },
-        'creation_time': {
-            'type': 'dict',
-            'empty': True,
-            'schema': {
-                '$date': {
-                    'type': 'integer'
-                }
-            },
-            'nullable': True
-        },
         'render_meta': {
             'type': 'dict',
             'allow_unknown': False,
