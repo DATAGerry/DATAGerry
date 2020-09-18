@@ -146,6 +146,10 @@ class CmdbDAO:
         raise NotImplementedError()
 
     @classmethod
+    def to_data(cls, instance: "CmdbDAO") -> dict:
+        raise NotImplementedError()
+
+    @classmethod
     def to_json(cls, instance: "CmdbDAO") -> dict:
         raise NotImplementedError()
 

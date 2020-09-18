@@ -13,9 +13,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+from json import dumps
 from datetime import datetime
 
+from cmdb.data_storage.database_utils import default
 from cmdb.framework import CmdbDAO
 from cmdb.framework.utils import Collection, Model
 
@@ -103,6 +104,11 @@ class UserModel(CmdbDAO):
             first_name=data.get('first_name', None),
             last_name=data.get('last_name', None)
         )
+
+    @classmethod
+    def to_data(cls, instance: "UserModel") -> str:
+        return dumps(cls.to_json(instance), default=default)
+
 
     @classmethod
     def to_json(cls, instance: "UserModel") -> dict:
