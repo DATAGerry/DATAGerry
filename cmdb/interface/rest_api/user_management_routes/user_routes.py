@@ -36,7 +36,7 @@ users_blueprint = APIBlueprint('users', __name__)
 @users_blueprint.parse_collection_parameters()
 def get_users(params: CollectionParameters):
     user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
-    body = True if not request.method != 'HEAD' else False
+    body = request.method == 'HEAD'
 
     try:
         iteration_result: IterationResult[UserModel] = user_manager.iterate(
@@ -55,7 +55,7 @@ def get_users(params: CollectionParameters):
 @users_blueprint.protect(auth=True, right='base.user-management.user.view')
 def get_user(public_id: int):
     user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
-    body = True if not request.method != 'HEAD' else False
+    body = request.method == 'HEAD'
 
     try:
         user: UserModel = user_manager.get(public_id)
