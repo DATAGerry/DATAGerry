@@ -57,9 +57,8 @@ class CategoryManager(FrameworkManager):
 
     @property
     def tree(self) -> CategoryTree:
-        # Currently only a work around until the other managers were converted to the new format - MH
         types = CmdbObjectManager(database_manager=self._database_manager).get_all_types()
-        categories = [CategoryModel.from_data(category) for category in
-                      super(CategoryManager, self).get_many({})]
-
+        category_iteration_results = super(CategoryManager, self).iterate(
+            filter={}, limit=0, skip=0, sort='public_id', order=1).results
+        categories = [CategoryModel.from_data(category) for category in category_iteration_results]
         return CategoryTree(categories=categories, types=types)

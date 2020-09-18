@@ -46,6 +46,7 @@ class FrameworkQueryBuilder(Builder):
             Union[Query, Pipeline]:
         """
         Converts the parameters from the call to a mongodb aggregation pipeline
+
         Args:
             filter: dict or list of dict query/queries which the elements have to match.
             limit: max number of documents to return.
@@ -86,6 +87,7 @@ class FrameworkManager(ManagerBase):
     def __init__(self, collection: Collection, database_manager: DatabaseManagerMongo):
         """
         Set the collection name and the database connection.
+
         Args:
             collection: Name of the database collection
             database_manager: Active database managers instance
@@ -123,16 +125,10 @@ class FrameworkManager(ManagerBase):
             raise FrameworkIterationError(err=err)
         return IterationResult.from_aggregation(aggregation_result)
 
-    def get_many(self, *args, **kwarg) -> List[dict]:
-        try:
-            cursor_result = super(FrameworkManager, self)._get(self.collection, *args, **kwarg)
-        except ManagerGetError as err:
-            raise FrameworkGetError(err)
-        return list(cursor_result)
-
     def get(self, public_id: PublicID) -> dict:
         """
         Get a single framework resource by its id.
+
         Args:
             public_id: ID of the element inside the database.
 
@@ -155,9 +151,28 @@ class FrameworkManager(ManagerBase):
                 f'A resource with the PublicID {public_id} was not found inside {self.collection}')
 
     def insert(self, resource: dict) -> PublicID:
+        """
+        Insert a new framework resource by raw data.
+
+        Args:
+            resource(dict): Raw resource information.
+
+        Returns:
+            PublicID: public_id of the new inserted resource.
+        """
         return super(FrameworkManager, self)._insert(self.collection, resource)
 
     def update(self, public_id: PublicID, resource: dict):
+        """
+        Update a existing framework resource by its id.
+
+        Args:
+            public_id(PublicID): public_id of the resource which will be updated.
+            resource(dict): New resource data.
+
+        Raises:
+            - FrameworkUpdateError: If something went wrong during update.
+        """
         update_result = super(FrameworkManager, self)._update(self.collection, filter={'public_id': public_id},
                                                               data=resource, upsert=False)
         if update_result.matched_count != 1:
@@ -165,6 +180,15 @@ class FrameworkManager(ManagerBase):
         return update_result
 
     def delete(self, public_id: PublicID):
+        """
+        Delete a existing resource by its id.
+
+        Args:
+            public_id(PublicID): The public_id of the resource which will be deleted.
+
+        Raises:
+            - FrameworkDeleteError: If something went wrong during delete.
+        """
         try:
             delete_result = super(FrameworkManager, self)._delete(self.collection, public_id=public_id)
         except ManagerDeleteError as err:
