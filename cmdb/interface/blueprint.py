@@ -37,11 +37,14 @@ class APIBlueprint(Blueprint):
         def _protect(f):
             @wraps(f)
             def _decorate(*args, **kwargs):
-                if auth and not auth_is_valid():
-                    return abort(401)
+                if auth:
+                    if not auth_is_valid():
+                        return abort(401)
 
-                if right and not user_has_right(right):
-                    return abort(401)
+                # Dont need right validation if no auth
+                if auth and right:
+                    if not user_has_right(right):
+                        return abort(401)
                 return f(*args, **kwargs)
 
             return _decorate
