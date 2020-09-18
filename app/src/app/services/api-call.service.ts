@@ -96,8 +96,8 @@ export class ApiCallService {
     return this.http.post<T>(this.apiURL + route, data, httpPostOptions).pipe(catchError(ApiCallService.handleError));
   }
 
-  public callPut<T>(route: string, data): Observable<any> {
-    return this.http.put<T>(this.apiURL + route, data, httpObserveOptions).pipe(catchError(ApiCallService.handleError));
+  public callPut<T>(route: string, data, httpPutOptions = httpObserveOptions): Observable<any> {
+    return this.http.put<T>(this.apiURL + route, data, httpPutOptions).pipe(catchError(ApiCallService.handleError));
   }
 
   public callDelete<T>(route: string, httpDeleteOptions = httpObserveOptions): Observable<any> {
