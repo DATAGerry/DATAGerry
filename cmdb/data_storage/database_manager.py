@@ -28,14 +28,14 @@ from cmdb.data_storage import CONNECTOR
 from cmdb.data_storage.database_connection import MongoConnector
 from cmdb.data_storage.database_framework_counter import IDCounter
 from cmdb.utils.error import CMDBError
-from cmdb.utils.wraps import deprecated
+from gridfs import GridFS
 
 LOGGER = logging.getLogger(__name__)
 
 
 class DatabaseManager(Generic[CONNECTOR]):
     """
-    Default database manager with no implementation
+    Default database managers with no implementation
 
     """
 
@@ -287,6 +287,10 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         result = self.connector.get_collection(collection).find(*args, **kwargs)
         return result
 
+    def find(self, collection: str, *args, **kwargs):
+        """General find function"""
+        return self.connector.get_collection(collection).find(*args, **kwargs)
+
     def find_one(self, collection: str, public_id: int, *args, **kwargs):
         """calls __find with single return
 
@@ -301,10 +305,8 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
 
         """
 
-        formatted_public_id = {'public_id': public_id}
-        formatted_sort = [('public_id', DatabaseManager.DESCENDING)]
-        cursor_result = self.__find(collection, formatted_public_id, limit=1, sort=formatted_sort, *args, **kwargs)
-        for result in cursor_result:
+        cursor_result = self.__find(collection, {'public_id': public_id}, limit=1, *args, **kwargs)
+        for result in cursor_result.limit(-1):
             return result
 
     def find_one_by(self, collection: str, *args, **kwargs) -> dict:
@@ -639,6 +641,16 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         if value > counter_doc['counter']:
             counter_doc['counter'] = value
             self.connector.get_collection(IDCounter.COLLECTION).update(query, counter_doc)
+
+
+class DatabaseGridFS(GridFS):
+    """
+        Creation a GridFSBucket instance to use
+        """
+
+    def __init__(self, database, collection_name):
+        super().__init__(database, collection_name)
+        self.message = "Collection {} already exists".format(collection_name)
 
 
 class InsertError(CMDBError):

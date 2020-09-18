@@ -31,7 +31,8 @@ from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, Obj
 from cmdb.framework.cmdb_log import LogAction, CmdbObjectLog
 from cmdb.framework.cmdb_log_manager import LogManagerInsertError
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
-from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user, login_required, right_required
+from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import User
 
 with current_app.app_context():
@@ -123,7 +124,8 @@ def get_dt_objects_by_type(type_id, request_user: User):
         if order_column in ['active', 'public_id', 'type_id', 'author_id', 'creation_time']:
             object_list = object_manager.get_objects_by(sort=order_column, direction=order_direction, **filter_state)
         else:
-            object_list = object_manager.sort_objects_by_field_value(value=order_column, order=order_direction, match=filter_state)
+            object_list = object_manager.sort_objects_by_field_value(value=order_column, order=order_direction,
+                                                                     match=filter_state)
         totals = len(object_list)
         object_list = object_list[start_at:start_at + site_length]
 
@@ -201,7 +203,8 @@ def get_dt_filter_objects_by_type(type_id, request_user: User):
         if order_column in ['active', 'public_id', 'type_id', 'author_id', 'creation_time']:
             object_list = object_manager.get_objects_by(sort=order_column, direction=order_direction, **filter_state)
         else:
-            object_list = object_manager.sort_objects_by_field_value(value=order_column, order=order_direction, match=filter_state)
+            object_list = object_manager.sort_objects_by_field_value(value=order_column, order=order_direction,
+                                                                     match=filter_state)
         totals = len(object_list)
         object_list = object_list[start_at:start_at + site_length]
 
@@ -253,11 +256,12 @@ def get_objects_by_type(public_id, request_user: User):
 def get_objects_by_types(type_ids, request_user: User):
     """Return all objects by type_id"""
     try:
-        filter_state = {'type_id': type_ids}
-        if _fetch_only_active_objs():
-            filter_state['active'] = {"$eq": True}
+        in_types = {'type_id': {'$in': list(map(int, type_ids.split(',')))}}
+        is_active = {'active': {"$eq": False}}
+        if _fetch_only_active_objs:
+            is_active = {'active': {"$eq": True}}
+        query = {'$and': [in_types, is_active]}
 
-        query = _build_query(filter_state, q_operator='$or')
         all_objects_list = object_manager.get_objects_by(sort="type_id", **query)
         rendered_list = RenderList(all_objects_list, request_user).render_result_list()
 
@@ -277,9 +281,6 @@ def get_objects_by_public_id(public_ids, request_user: User):
 
     try:
         filter_state = {'public_id': public_ids}
-        if _fetch_only_active_objs():
-            filter_state['active'] = {"$eq": True}
-
         query = _build_query(filter_state, q_operator='$or')
         all_objects_list = object_manager.get_objects_by(sort="public_id", **query)
         rendered_list = RenderList(all_objects_list, request_user).render_result_list()
@@ -550,7 +551,6 @@ def insert_object(request_user: User):
 @insert_request_user
 @right_required('base.framework.object.edit')
 def update_object(public_id: int, request_user: User):
-
     object_ids = request.args.getlist('objectIDs')
 
     if len(object_ids) > 0:
@@ -728,7 +728,8 @@ def delete_many_objects(public_ids, request_user: User):
                 current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
                 current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                           type_instance=current_type_instance,
-                                                          render_user=request_user, user_list=user_manager.get_users()).result()
+                                                          render_user=request_user,
+                                                          user_list=user_manager.get_users()).result()
             except ObjectManagerGetError as err:
                 LOGGER.error(err)
                 return abort(404)
@@ -888,6 +889,69 @@ def get_latest(request_user: User):
     return make_response(rendered_list)
 
 
+@object_blueprint.route('/cleanup/remove/<int:public_id>/', methods=['GET'])
+@object_blueprint.route('/cleanup/remove/<int:public_id>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.framework.type.clean')
+def cleanup_removed_fields(public_id, request_user: User):
+    # REMOVE fields from CmdbObject
+    try:
+        update_type_instance = object_manager.get_type(public_id)
+        type_fields = update_type_instance.get_fields()
+        objects_by_type = object_manager.get_objects_by_type(public_id)
+
+        for obj in objects_by_type:
+            incorrect = []
+            correct = []
+            obj_fields = obj.get_all_fields()
+            for t_field in type_fields:
+                name = t_field["name"]
+                for field in obj_fields:
+                    if name == field["name"]:
+                        correct.append(field["name"])
+                    else:
+                        incorrect.append(field["name"])
+            removed_type_fields = [item for item in incorrect if not item in correct]
+            for field in removed_type_fields:
+                object_manager.remove_object_fields(filter_query={'public_id': obj.public_id},
+                                                    update={'$pull': {'fields': {"name": field}}})
+
+    except Exception as error:
+        return abort(500)
+
+    return make_response(update_type_instance)
+
+
+@object_blueprint.route('/cleanup/update/<int:public_id>/', methods=['GET'])
+@object_blueprint.route('/cleanup/update/<int:public_id>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.framework.type.clean')
+def cleanup_updated_push_fields(public_id, request_user: User):
+    # Update/Push fields to CmdbObject
+    try:
+        update_type_instance = object_manager.get_type(public_id)
+        type_fields = update_type_instance.get_fields()
+        objects_by_type = object_manager.get_objects_by_type(public_id)
+
+        for obj in objects_by_type:
+            for t_field in type_fields:
+                name = t_field["name"]
+                value = None
+                if [item for item in obj.get_all_fields() if item["name"] == name]:
+                    continue
+                if "value" in t_field:
+                    value = t_field["value"]
+                object_manager.update_object_fields(filter={'public_id': obj.public_id},
+                                                    update={
+                                                        '$addToSet': {'fields': {"name": name, "value": value}}})
+    except CMDBError:
+        return abort(500)
+
+    return make_response(update_type_instance)
+
+
 def _build_query(args, q_operator='$and'):
     query_list = []
     try:
@@ -903,7 +967,7 @@ def _build_query(args, q_operator='$and'):
         pass
 
 
-def _fetch_only_active_objs():
+def _fetch_only_active_objs() -> bool:
     """
         Checking if request have cookie parameter for object active state
         Returns:

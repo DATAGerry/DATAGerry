@@ -18,9 +18,10 @@ import logging
 
 from flask import current_app, request, abort
 
-from cmdb.framework import CmdbType
+from cmdb.framework import TypeModel
 from cmdb.interface.rest_api.import_routes import importer_blueprint
-from cmdb.interface.route_utils import NestedBlueprint, login_required, make_response
+from cmdb.interface.route_utils import login_required, make_response
+from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.utils.error import CMDBError
 
 importer_type_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/type')
@@ -42,13 +43,13 @@ def add_type():
     new_type_list = json.loads(upload, object_hook=json_util.object_hook)
     for new_type_data in new_type_list:
         try:
-            new_type_data['public_id'] = object_manager.get_new_id(CmdbType.COLLECTION)
+            new_type_data['public_id'] = object_manager.get_new_id(TypeModel.COLLECTION)
             new_type_data['creation_time'] = datetime.utcnow()
         except TypeError as e:
             LOGGER.warning(e)
             return abort(400)
         try:
-            type_instance = CmdbType(**new_type_data)
+            type_instance = TypeModel.from_data(new_type_data)
         except CMDBError:
             return abort(400)
         try:
@@ -70,7 +71,7 @@ def update_type():
     data_dump = json.loads(upload, object_hook=json_util.object_hook)
     for add_data_dump in data_dump:
         try:
-            update_type_instance = CmdbType(**add_data_dump)
+            update_type_instance = TypeModel.from_data(add_data_dump)
         except CMDBError:
             return abort(400)
         try:

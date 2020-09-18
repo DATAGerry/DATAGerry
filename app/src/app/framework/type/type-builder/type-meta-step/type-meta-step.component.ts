@@ -21,7 +21,7 @@ export class TypeMetaStepComponent implements OnInit {
     if (data !== undefined) {
       if (data.render_meta !== undefined) {
         this.summaryForm.patchValue(data.render_meta.summary);
-        this.externalLinks = data.render_meta.external;
+        this.externalLinks = data.render_meta.externals;
       }
     }
   }

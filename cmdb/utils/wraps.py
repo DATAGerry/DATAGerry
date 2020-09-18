@@ -33,22 +33,10 @@ LOGGER = logging.getLogger(__name__)
 def deprecated(f):
     @wraps(f)
     def _deprecated(*args, **kwargs):
-        LOGGER.warning('This method is likely to be deprecated soon!')
-
+        LOGGER.debug(f'{f} is likely to be deprecated soon!')
         return f(*args, **kwargs)
 
     return _deprecated
-
-
-def json_required(f):
-    @wraps(f)
-    def _json_required(*args, **kwargs):
-        if not request or not request.json:
-            LOGGER.warning("Not json | {}".format(request))
-            return abort(400)
-        return f(*args, **kwargs)
-
-    return _json_required
 
 
 def timing(msg=None):

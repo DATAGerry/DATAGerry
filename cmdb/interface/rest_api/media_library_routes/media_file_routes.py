@@ -18,10 +18,11 @@ import logging
 
 from flask import abort, request, current_app, Response
 from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError
-from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user, login_required, right_required
+from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import User
 from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import get_element_from_data_request, \
-    get_file_in_request, generate_metadata_filter
+    get_file_in_request, generate_metadata_filter, recursive_delete_filter
 
 
 with current_app.app_context():
@@ -43,7 +44,7 @@ media_file_blueprint = RootBlueprint('media_file_blueprint', __name__, url_prefi
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_object_list(request_user: User):
+def get_file_list(request_user: User):
     """
     get all objects in database
 
@@ -102,11 +103,47 @@ def add_new_file(request_user: User):
     return resp
 
 
+@media_file_blueprint.route('/', methods=['PUT'])
+@login_required
+@insert_request_user
+@right_required('base.framework.object.edit')
+def update_file(request_user: User):
+    try:
+
+        import json
+        from bson import json_util
+        add_data_dump = json.dumps(request.json)
+
+        new_file_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
+
+        # Check if file exists
+        curr_file = media_file_manager.get_media_file_by_public_id(new_file_data['public_id'])._file
+        curr_file['public_id'] = new_file_data['public_id']
+        curr_file['filename'] = new_file_data['filename']
+        curr_file['metadata'] = new_file_data['metadata']
+        curr_file['metadata']['author_id'] = new_file_data['metadata']['author_id'] = request_user.get_public_id()
+
+        ack = media_file_manager.updata_media_file(curr_file)
+    except ObjectInsertError:
+        return abort(500)
+
+    resp = make_response(ack)
+    return resp
+
+
 @media_file_blueprint.route('/<string:name>/', methods=['GET'])
 @media_file_blueprint.route('/<string:name>', methods=['GET'])
 @login_required
-def get_type_by_name(name: str):
+def get_file_by_name(name: str):
     """ Validation: Check folder name for uniqueness
+        Create a unique directory:
+         - Folders in the same directory are unique.
+         - The same Folder-Name can exist in different directories
+
+        Create subfolders:
+         - Selected folder is considered as parent
+
+        This also applies for files
 
         Args:
             name: folderName must be unique
@@ -115,7 +152,8 @@ def get_type_by_name(name: str):
 
         """
     try:
-        media_file = media_file_manager.exist_media_file(name, {'metadata.folder': True})
+        filter_metadata = generate_metadata_filter('metadata', request)
+        media_file = media_file_manager.exist_media_file(name, filter_metadata)
     except ObjectManagerGetError as err:
         return abort(404, err.message)
     return make_response(media_file)
@@ -146,11 +184,11 @@ def download_media_file(request_user: User, filename: str):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.edit')
-def delete_media_file(request_user: User, public_id: int):
+def delete_file(request_user: User, public_id: int):
     try:
-        ack = media_file_manager.delete_media_file(public_id)
+        for _id in recursive_delete_filter(public_id, media_file_manager):
+            media_file_manager.delete_media_file(_id)
     except ObjectDeleteError:
         return abort(500)
 
-    resp = make_response(ack)
-    return resp
+    return make_response(True)

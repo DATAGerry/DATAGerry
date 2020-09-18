@@ -38,7 +38,7 @@ class SearchResultMap(Generic[R]):
 class SearchResult(Generic[R]):
     """Generic search result base"""
 
-    def __init__(self, results: List[R], total_results: int, alive: bool, limit: int, skip: int,
+    def __init__(self, results: List[R], total_results: int, groups: List[R], alive: bool, limit: int, skip: int,
                  matches_regex: List[str] = None):
         """
         Constructor for search result
@@ -54,6 +54,7 @@ class SearchResult(Generic[R]):
         self.skip: int = skip
         self.total_results: int = total_results
         self.alive = alive
+        self.groups = groups
         self.results: List[SearchResultMap] = [
             SearchResultMap[R](result=result, matches=self.find_match_fields(result, matches_regex)) for result in
             results]
@@ -101,6 +102,7 @@ class SearchResult(Generic[R]):
         return {
             'limit': self.limit,
             'skip': self.skip,
+            'groups': self.groups,
             'total_results': self.total_results,
             'number_of_results': len(self),
             'results': self.results

@@ -19,7 +19,8 @@ import logging
 from flask import current_app, request, abort
 
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.interface.route_utils import RootBlueprint, make_response, insert_request_user, login_required
+from cmdb.interface.route_utils import make_response, insert_request_user, login_required
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.search import Search
 from cmdb.search.params import SearchParam
 from cmdb.search.query import Query, Pipeline

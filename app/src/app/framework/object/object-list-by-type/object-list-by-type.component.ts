@@ -32,13 +32,15 @@ import { Subject } from 'rxjs';
 import { ObjectService } from '../../services/object.service';
 import { RenderResult } from '../../models/cmdb-render';
 import { DatePipe } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import { FileService } from '../../../export/export.service';
 import { FileSaverService } from 'ngx-filesaver';
 import { DataTableFilter, DataTablesResult } from '../../models/cmdb-datatable';
 import { TypeService } from '../../services/type.service';
 import { CmdbType } from '../../models/cmdb-type';
 import { PermissionService } from '../../../auth/services/permission.service';
+import {ObjectPreviewModalComponent} from '../modals/object-preview-modal/object-preview-modal.component';
+import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'cmdb-object-list-by-type',
@@ -55,6 +57,9 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   public dtTrigger: Subject<any> = new Subject();
   public objects: DataTablesResult;
 
+  private modalRef: NgbModalRef;
+  private readonly previousLoadSubscription: any;
+
   // Header
   public pageTitle: string = 'List';
   public faIcon: string;
@@ -69,7 +74,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   constructor(private objectService: ObjectService, private typeService: TypeService, private datePipe: DatePipe,
               private fileSaverService: FileSaverService, private fileService: FileService,
               private router: Router, private route: ActivatedRoute, private renderer: Renderer2,
-              private permissionService: PermissionService) {
+              private permissionService: PermissionService, private modalService: NgbModal) {
     this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
@@ -77,6 +82,12 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     this.router.routeReuseStrategy.shouldReuseRoute = function() {
       return false;
     };
+
+    this.previousLoadSubscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.router.navigated = false;
+      }
+    });
   }
 
   ngOnInit() {
@@ -194,7 +205,9 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
 
   @HostListener('document:click', ['$event'])
   dtActionClick(event: any): void {
-    if ((event.target as Element).className.indexOf('view-object-action') > -1) {
+    if ((event.target as Element).className.indexOf('preview-object-action') > -1) {
+      this.previewObject(parseInt((event.target as Element).id, 10));
+    } else if ((event.target as Element).className.indexOf('view-object-action') > -1) {
       this.router.navigate(['/framework/object/type/view/', (event.target as Element).id]);
     } else if ((event.target as Element).className.indexOf('copy-object-action') > -1) {
       this.router.navigate(['/framework/object/copy/', (event.target as Element).id]);
@@ -228,6 +241,14 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
 
   ngOnDestroy(): void {
     this.dtTrigger.unsubscribe();
+
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
+
+    if (this.previousLoadSubscription) {
+      this.previousLoadSubscription.unsubscribe();
+    }
   }
 
   async rerender(newSettings?: DataTables.Settings) {
@@ -290,10 +311,14 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
           let copy = '';
           let edit = '';
           let del = '';
+          let preview = '';
 
           if (rights.includes('base.framework.object.view') || baseRights) {
             view = '<span id="' + data.object_information.object_id + '' +
               '" class="far fa-eye mr-1 view-object-action" title="view"></span>';
+
+            preview = '<span id="' + data.object_information.object_id + '' +
+              '" class="far fa-file-powerpoint mr-1 preview-object-action" title="preview"></span>';
           }
           if (rights.includes('base.framework.object.add') || baseRights) {
             copy = '<span id="' + data.object_information.object_id + '' +
@@ -301,14 +326,14 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
           }
           if (rights.includes('base.framework.object.edit') || baseRights) {
             edit = '<span id="' + data.object_information.object_id + '' +
-              '" class="far fa-edit mr-1 edit-object-action" title="edit"a></span>';
+              '" class="far fa-edit mr-1 edit-object-action" title="edit"></span>';
           }
           if (rights.includes('base.framework.object.delete') || baseRights) {
             del = '<span id="' + data.object_information.object_id + '' +
               '" class="far fa-trash-alt mr-1 delete-object-action" title="delete"></span>';
           }
 
-          return view + copy + edit + del;
+          return view + copy + edit + preview + del;
         }
       }
     );
@@ -378,6 +403,13 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       }
     });
   }
+  private previewObject(publicID: number) {
+    this.objectService.getObject(publicID).subscribe(resp => {
+      this.modalRef = this.modalService.open(ObjectPreviewModalComponent, { size: 'lg' });
+      this.modalRef.componentInstance.renderResult = resp;
+    });
+  }
+
 
   public delManyObjects() {
     if (this.selectedObjects.length > 0) {

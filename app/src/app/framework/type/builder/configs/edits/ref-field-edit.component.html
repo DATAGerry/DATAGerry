@@ -9,8 +9,8 @@
   <ng-select [items]="typeList"
              bindLabel="label"
              bindValue="public_id"
-             [multiple] = false
-             (change)="onChange($event)"
+             [multiple] = true
+             (change)="onChange()"
              [(ngModel)]="data.ref_types">
   </ng-select>
   <small class="form-text text-muted">Multiple types possible</small>

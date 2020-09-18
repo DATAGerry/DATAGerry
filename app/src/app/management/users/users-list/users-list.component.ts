@@ -23,7 +23,7 @@ import { DataTableDirective } from 'angular-datatables';
 import { forkJoin, Subject, Subscription } from 'rxjs';
 import { User } from '../../models/user';
 import { Group } from '../../models/group';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import { UsersPasswdModalComponent } from '../modals/users-passwd-modal/users-passwd-modal.component';
 import { AuthService } from '../../../auth/services/auth.service';
 import { NgxSpinnerService } from 'ngx-spinner';
@@ -39,6 +39,7 @@ export class UsersListComponent implements OnInit, AfterViewInit, OnDestroy {
   public userList: User[];
   public groupList: Group[];
   private dataSubscription: Subscription;
+  private modalRef: NgbModalRef;
 
   // Table
   private readonly sortingColumnID: number = 1;
@@ -98,6 +99,9 @@ export class UsersListComponent implements OnInit, AfterViewInit, OnDestroy {
   public ngOnDestroy(): void {
     this.dataSubscription.unsubscribe();
     this.dtTrigger.unsubscribe();
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
   }
 
   public findGroup(publicID) {
@@ -105,8 +109,8 @@ export class UsersListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public openDeleteModal(user: User) {
-    const deleteModal = this.modalService.open(UsersPasswdModalComponent, { size: 'lg' });
-    deleteModal.componentInstance.user = user;
+    this.modalRef = this.modalService.open(UsersPasswdModalComponent, { size: 'lg' });
+    this.modalRef.componentInstance.user = user;
   }
 
 

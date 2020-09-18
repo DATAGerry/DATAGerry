@@ -22,6 +22,7 @@ import { CategoryComponent } from './category.component';
 import { CategoryAddComponent } from './category-add/category-add.component';
 import { CategoryEditComponent } from './category-edit/category-edit.component';
 import { CmdbMode } from '../modes.enum';
+import { CategoryViewComponent } from './category-view/category-view.component';
 
 const routes: Routes = [
   {
@@ -29,9 +30,19 @@ const routes: Routes = [
     pathMatch: 'full',
     data: {
       breadcrumb: 'List',
-      right: 'base.framework.category.view'
+      right: 'base.framework.category.view',
+      mode: CmdbMode.View
     },
     component: CategoryComponent
+  },
+  {
+    path: 'view/:publicID',
+    data: {
+      breadcrumb: 'View',
+      right: 'base.framework.category.view',
+      mode: CmdbMode.View
+    },
+    component: CategoryViewComponent
   },
   {
     path: 'add',
@@ -54,7 +65,8 @@ const routes: Routes = [
     path: 'edit/:publicID',
     data: {
       breadcrumb: 'Edit',
-      right: 'base.framework.category.edit'
+      right: 'base.framework.category.edit',
+      mode: CmdbMode.Edit
     },
     component: CategoryEditComponent
   }

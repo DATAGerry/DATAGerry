@@ -16,9 +16,9 @@
 
 import logging
 
-from gridfs import GridFS
+from datetime import datetime
 
-from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.data_storage.database_manager import DatabaseManagerMongo, DatabaseGridFS
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.utils.error import CMDBError
@@ -33,7 +33,7 @@ class MediaFileManagement(CmdbManagerBase):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.dbm = database_manager
-        self.fs_bucket = GridFS(self.dbm.get_connector().get_database(), MediaFile.COLLECTION)
+        self.fs = DatabaseGridFS(self.dbm.get_connector().get_database(), MediaFile.COLLECTION)
         super().__init__(database_manager)
 
     def get_new_id(self, collection: str) -> int:
@@ -41,7 +41,16 @@ class MediaFileManagement(CmdbManagerBase):
 
     def get_media_file(self, file_name: str, filter_metadata):
         try:
-            result = self.fs_bucket.get_last_version(filename=file_name, **filter_metadata)
+            result = self.fs.get_last_version(filename=file_name, **filter_metadata)
+        except (MediaFileManagerGetError, Exception) as err:
+            LOGGER.error(err)
+            raise err
+        return result
+
+    def get_media_file_by_public_id(self, public_id: int, filter_metadata=None):
+        try:
+            filter_metadata = {'public_id': public_id}
+            result = self.fs.get_last_version(**filter_metadata)
         except (MediaFileManagerGetError, Exception) as err:
             LOGGER.error(err)
             raise err
@@ -49,7 +58,7 @@ class MediaFileManagement(CmdbManagerBase):
 
     def get_all_media_files(self, filter_metadata):
         media_file_list = []
-        for grid_out in self.fs_bucket.find(filter=filter_metadata):
+        for grid_out in self.fs.find(filter=filter_metadata):
             try:
                 media_file_list.append(MediaFile(**grid_out._file))
             except CMDBError:
@@ -66,13 +75,28 @@ class MediaFileManagement(CmdbManagerBase):
             Filename of the new MediaFile in database
         """
         try:
-            with self.fs_bucket.new_file(filename=data.filename) as media_file:
+            with self.fs.new_file(filename=data.filename) as media_file:
                 media_file.write(data)
                 media_file.public_id = self.get_new_id(MediaFile.COLLECTION)
                 media_file.metadata = FileMetadata(**metadata).__dict__
         except CMDBError as e:
             raise MediaFileManagerInsertError(e)
         return media_file._id
+
+    def updata_media_file(self, data):
+        # if isinstance(data, dict):
+        #     update_object = MediaFile(**data)
+        # elif isinstance(data, MediaFile):
+        #     update_object = data
+        # else:
+        #     raise FileNotFoundError('Wrong Media file init format - expecting FileMedia or dict')
+        data['uploadDate'] = datetime.utcnow()
+        ack = self._update(
+            collection='media.libary.files',
+            public_id=data['public_id'],
+            data=data
+        )
+        return ack.acknowledged
 
     def delete_media_file(self, public_id) -> bool:
         """
@@ -83,8 +107,8 @@ class MediaFileManagement(CmdbManagerBase):
             bool: If deleted return true else false
         """
         try:
-            file_id = self.fs_bucket.get_last_version(**{'public_id': public_id})._id
-            self.fs_bucket.delete(file_id)
+            file_id = self.fs.get_last_version(**{'public_id': public_id})._id
+            self.fs.delete(file_id)
             return True
         except Exception:
             raise MediaFileManagerDeleteError(f'Could not delete file with ID: {file_id}')
@@ -98,7 +122,7 @@ class MediaFileManagement(CmdbManagerBase):
         Returns:
             bool: If exist return true else false
         """
-        return self.fs_bucket.exists(filename=file_name, **filter_metadata)
+        return self.fs.exists(filename=file_name, **filter_metadata)
 
 
 class MediaFileManagerGetError(ManagerGetError):

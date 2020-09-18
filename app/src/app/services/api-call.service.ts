@@ -23,7 +23,7 @@ import {
   HttpEvent,
   HttpHandler,
   HttpHeaders,
-  HttpInterceptor, HttpRequest
+  HttpInterceptor, HttpParams, HttpRequest
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -57,7 +57,8 @@ export const httpObservePostOptions = {
 export const httpFileOptions = {
   headers: new HttpHeaders({}),
   params: {},
-  observe: resp
+  observe: resp,
+  responseType: 'blob'
 };
 
 @Injectable({
@@ -83,7 +84,11 @@ export class ApiCallService {
     this.apiURL = `${ this.connectionService.currentConnection }/${ this.apiPrefix }/`;
   }
 
-  public callGet<T>(route: string, client: HttpClient = this.http, httpGetOptions: any = httpObserveOptions): Observable<any> {
+  public callHead<T>(route: string, httpGetOptions: any = httpObserveOptions): Observable<any> {
+    return this.http.head<T>(this.apiURL + route, httpGetOptions).pipe(catchError(ApiCallService.handleError));
+  }
+
+  public callGet<T>(route: string, httpGetOptions: any = httpObserveOptions): Observable<any> {
     return this.http.get<T>(this.apiURL + route, httpGetOptions).pipe(catchError(ApiCallService.handleError));
   }
 
@@ -99,24 +104,11 @@ export class ApiCallService {
     return this.http.delete<T>(this.apiURL + route, httpDeleteOptions).pipe(catchError(ApiCallService.handleError));
   }
 
-  public callGetRoute<T>(route: string, options: any = httpOptions) {
-    return this.http.get<T>(this.apiURL + route, options);
-  }
-
-  public callPostRoute<T>(route: string, data, options: any = httpOptions) {
-    return this.http.post<T>(this.apiURL + route, data, options);
-  }
-
-  public callPutRoute<T>(route: string, data, options: any = httpOptions) {
-    return this.http.put<T>(this.apiURL + route, data, options);
-  }
-
   public callDeleteManyRoute<T>(route: string, params?: any): Observable<any> {
+    /**
+     * @deprecated @SD please refactor and remove this.
+     */
     return this.http.get<T>(this.apiURL + route, params);
-  }
-
-  public callDeleteRoute<T>(route: string, params?: any): Observable<any> {
-    return this.http.delete<T>(this.apiURL + route, params);
   }
 
   public readCookies(name: string) {

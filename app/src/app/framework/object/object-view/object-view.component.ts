@@ -16,8 +16,8 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, HostListener, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { CmdbMode } from '../../modes.enum';
 import { RenderResult } from '../../models/cmdb-render';
@@ -28,17 +28,29 @@ import { DataTableFilter, DataTablesResult } from '../../models/cmdb-datatable';
   templateUrl: './object-view.component.html',
   styleUrls: ['./object-view.component.scss']
 })
-export class ObjectViewComponent implements OnInit {
+export class ObjectViewComponent implements OnInit, OnDestroy{
 
   public mode: CmdbMode = CmdbMode.View;
   private objectID: number;
+  private readonly previousLoadSubscription: any;
   public renderResult: RenderResult;
   public recordsTotal: number = 0;
 
-  constructor(public objectService: ObjectService, private activateRoute: ActivatedRoute) {
+  constructor(public objectService: ObjectService, private activateRoute: ActivatedRoute, private router: Router) {
     this.activateRoute.params.subscribe((params) => {
       this.objectID = params.publicID;
       this.ngOnInit();
+    });
+
+    // tslint:disable-next-line:only-arrow-functions
+    this.router.routeReuseStrategy.shouldReuseRoute = function() {
+      return false;
+    };
+
+    this.previousLoadSubscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.router.navigated = false;
+      }
     });
   }
 
@@ -73,4 +85,9 @@ export class ObjectViewComponent implements OnInit {
     // TODO: Update log list after object changed
   }
 
+  public ngOnDestroy(): void {
+    if (this.previousLoadSubscription) {
+      this.previousLoadSubscription.unsubscribe();
+    }
+  }
 }

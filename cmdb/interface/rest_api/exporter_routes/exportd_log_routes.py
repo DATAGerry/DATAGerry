@@ -22,7 +22,8 @@ from cmdb.exportd.exportd_logs.exportd_log import ExportdJobLog, LogAction
 
 
 from flask import abort, current_app, jsonify
-from cmdb.interface.route_utils import make_response, RootBlueprint, insert_request_user, login_required, right_required
+from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import User
 
 try:

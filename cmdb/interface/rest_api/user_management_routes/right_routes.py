@@ -25,7 +25,8 @@ import logging
 
 from flask import current_app
 
-from cmdb.interface.route_utils import make_response, RootBlueprint, login_required
+from cmdb.interface.route_utils import make_response, login_required
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import UserManager
 
 try:

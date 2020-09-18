@@ -17,6 +17,7 @@ import logging
 from typing import List
 
 from cmdb.framework.cmdb_object import CmdbObject
+from cmdb.framework.models.type import TypeModel
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.cmdb_render import RenderResult, RenderList
 from cmdb.search import Search
@@ -32,7 +33,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
     """Framework searcher implementation for object search"""
 
     def __init__(self, manager: CmdbObjectManager):
-        """Normally uses a instance of CmdbObjectManager as manager"""
+        """Normally uses a instance of CmdbObjectManager as managers"""
         super(SearcherFramework, self).__init__(manager=manager)
 
     def aggregate(self, pipeline: Pipeline, request_user: User = None, limit: int = Search.DEFAULT_LIMIT,
@@ -42,7 +43,6 @@ class SearcherFramework(Search[CmdbObjectManager]):
         Args:
             pipeline (Pipeline): list of requirement pipes
             request_user (User): user who started this search
-            matches_regex (List): list of regex match values
             limit (int): max number of documents to return
             skip (int): number of documents to be skipped
             **kwargs:
@@ -58,6 +58,21 @@ class SearcherFramework(Search[CmdbObjectManager]):
             'data': [
                 PipelineBuilder.skip_(skip),
                 PipelineBuilder.limit_(limit)
+            ],
+            'group': [
+                PipelineBuilder.lookup_(TypeModel.COLLECTION, 'type_id', 'public_id', 'lookup_data'),
+                PipelineBuilder.unwind_('$lookup_data'),
+                PipelineBuilder.project_({'_id': 0, 'type_id': 1, 'label': "$lookup_data.label"}),
+                PipelineBuilder.group_("$$ROOT.type_id", {'types': {'$first': "$$ROOT"}, 'total': {'$sum': 1}}),
+                PipelineBuilder.project_(
+                    {'_id': 0,
+                     'searchText': '$types.label',
+                     'searchForm': 'type',
+                     'searchLabel': '$types.label',
+                     'settings': {'types': ['$types.type_id']},
+                     'total': 1
+                     }),
+                PipelineBuilder.sort_("total", -1)
             ]
         }
         plb.add_pipe(PipelineBuilder.facet_(stages))
@@ -77,13 +92,16 @@ class SearcherFramework(Search[CmdbObjectManager]):
             rendered_result_list = RenderList(pre_rendered_result_list, request_user,
                                               object_manager=self.manager).render_result_list()
             total_results = raw_search_result_list_entry['metadata'][0].get('total', 0)
+            group_result_list = raw_search_result_list[0]['group']
         else:
             rendered_result_list = []
+            group_result_list = []
             total_results = 0
         # generate output
         search_result = SearchResult[RenderResult](
             results=rendered_result_list,
             total_results=total_results,
+            groups=group_result_list,
             alive=raw_search_result.alive,
             matches_regex=matches_regex,
             limit=limit,

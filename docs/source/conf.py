@@ -15,11 +15,8 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('../../cmdb/'))
-sys.path.insert(0, os.path.abspath('../../cmdb/framework/'))
-sys.path.insert(0, os.path.abspath('../../cmdb/data_storage/'))
-sys.path.insert(0, os.path.abspath('../../cmdb/event_management/'))
-sys.path.insert(0, os.path.abspath('../../cmdb/user_management/'))
+# TODO Add more routes
+sys.path.insert(0, os.path.abspath('../../'))
 
 # -- Project information -----------------------------------------------------
 
@@ -48,7 +45,8 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'sphinxcontrib.httpdomain'
 ]
 
 # Napoleon settings
@@ -157,6 +155,9 @@ texinfo_documents = [
 ]
 
 # -- Extension configuration -------------------------------------------------
+
+# REST API Config
+http_index_localname = 'REST API'
 
 # -- Options for todo extension ----------------------------------------------
 # If true, `todo` and `todoList` produce output, else they produce nothing.

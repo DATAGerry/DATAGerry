@@ -18,7 +18,6 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TypeListComponent } from './type-list/type-list.component';
 import { TypeRoutingModule } from './type-routing.module';
 import { LayoutModule } from '../../layout/layout.module';
 import { DataTablesModule } from 'angular-datatables';
@@ -29,7 +28,6 @@ import { TypeBasicStepComponent } from './type-builder/type-basic-step/type-basi
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TypeFieldsStepComponent } from './type-builder/type-fields-step/type-fields-step.component';
 import { QRCodeModule } from 'angularx-qrcode';
-import { TypeAccessStepComponent } from './type-builder/type-access-step/type-access-step.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TypeValidationStepComponent } from './type-builder/type-validation-step/type-validation-step.component';
 import { RenderModule } from '../render/render.module';
@@ -40,21 +38,21 @@ import { TypeDeleteComponent, TypeDeleteConfirmModalComponent } from './type-del
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { AuthModule } from '../../auth/auth.module';
+import { TypeComponent } from './type.component';
 
 @NgModule({
   entryComponents: [TypeDeleteConfirmModalComponent],
   declarations: [
-    TypeListComponent,
     TypeAddComponent,
     TypeBasicStepComponent,
     TypeFieldsStepComponent,
     TypeBuilderComponent,
-    TypeAccessStepComponent,
     TypeValidationStepComponent,
     TypeEditComponent,
     TypeMetaStepComponent,
     TypeDeleteComponent,
     TypeDeleteConfirmModalComponent,
+    TypeComponent,
   ],
   imports: [
     CommonModule,

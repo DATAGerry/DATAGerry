@@ -82,7 +82,7 @@ class ObjectImporter(BaseImporter):
             file_type: file type - used with content-type
             config: importer configuration
             parser: the parser instance based on content-type
-            object_manager: a instance of the object manager
+            object_manager: a instance of the object managers
             request_user: the instance of the started user
         """
         self.parser = parser

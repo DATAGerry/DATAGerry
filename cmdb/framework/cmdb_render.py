@@ -17,7 +17,6 @@
 """
 Object/Type render
 """
-from datetime import datetime
 from typing import List
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
@@ -33,7 +32,7 @@ import logging
 from datetime import datetime
 
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.cmdb_type import CmdbType
+from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeSection
 from cmdb.framework.special.dt_html_parser import DtHtmlParser
 from cmdb.user_management.user_manager import User, UserManager
 
@@ -69,11 +68,11 @@ class CmdbRender:
     AUTHOR_ANONYMOUS_NAME = 'unknown'
 
     def __init__(self, object_instance: CmdbObject,
-                 type_instance: CmdbType,
+                 type_instance: TypeModel,
                  render_user: User, user_list: List[User] = None,
                  object_manager: CmdbObjectManager = None, dt_render=False):
         self.object_instance: CmdbObject = object_instance
-        self.type_instance: CmdbType = type_instance
+        self.type_instance: TypeModel = type_instance
         self.user_list: List[User] = user_list
         self.render_user: User = render_user
         self.object_manager = object_manager
@@ -111,21 +110,21 @@ class CmdbRender:
             self._object_instance = object_instance
 
     @property
-    def type_instance(self) -> CmdbType:
+    def type_instance(self) -> TypeModel:
         """
-        Object of the class CmdbType that has already been instantiated.
+        Object of the class TypeModel that has already been instantiated.
         The data should come from the database and already be validated.
         This already happens when the object is instantiated.
         """
         return self._type_instance
 
     @type_instance.setter
-    def type_instance(self, type_instance: CmdbType):
+    def type_instance(self, type_instance: TypeModel):
         """
         Property setter for type_instance. The render only checks whether the passed object
         belongs to the correct class, not whether it is valid.
         """
-        if not isinstance(type_instance, CmdbType):
+        if not isinstance(type_instance, TypeModel):
             raise TypeInstanceError()
         self._type_instance = type_instance
 
@@ -169,9 +168,9 @@ class CmdbRender:
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
             LOGGER.error(err.message)
         try:
-            self.type_instance.render_meta['icon']
+            self.type_instance.render_meta.icon
         except KeyError:
-            self.type_instance.render_meta['icon'] = ''
+            self.type_instance.render_meta.icon = ''
         render_result.type_information = {
             'type_id': self.type_instance.get_public_id(),
             'type_name': self.type_instance.name,
@@ -179,7 +178,7 @@ class CmdbRender:
             'creation_time': self.type_instance.creation_time,
             'author_id': self.type_instance.author_id,
             'author_name': author_name,
-            'icon': self.type_instance.render_meta['icon'],
+            'icon': self.type_instance.render_meta.icon,
             'active': self.type_instance.active,
             'clean_db': self.type_instance.clean_db,
             'version': self.type_instance.version
@@ -193,7 +192,8 @@ class CmdbRender:
 
     def __set_sections(self, render_result: RenderResult) -> RenderResult:
         try:
-            render_result.sections = self.type_instance.render_meta['sections']
+            render_result.sections = [TypeSection.to_json(section) for section in
+                                      self.type_instance.render_meta.sections]
         except (IndexError, ValueError):
             render_result.sections = []
         return render_result
@@ -242,7 +242,7 @@ class CmdbRender:
         """
         get filled external links
         Returns:
-            list of filled external links (_ExternalLink)
+            list of filled external links (TypeExternalLink)
         """
         # global external list
         external_list = []
@@ -256,8 +256,8 @@ class CmdbRender:
             # if data are missing or empty append here
             missing_list = []
             try:
-                # get _ExternalLink definitions from type
-                ext_link_instance = self.type_instance.get_external(ext_link['name'])
+                # get TypeExternalLink definitions from type
+                ext_link_instance = self.type_instance.get_external(ext_link.name)
                 # check if link requires data - regex check for {}
                 if ext_link_instance.link_requires_fields():
                     # check if has fields
@@ -286,7 +286,7 @@ class CmdbRender:
                     continue
             except (CMDBError, Exception):
                 continue
-            external_list.append(ext_link_instance.__dict__)
+            external_list.append(TypeExternalLink.to_json(ext_link_instance))
             render_result.externals = external_list
         return render_result
 
@@ -333,7 +333,7 @@ class RenderError(CMDBError):
 
 class TypeInstanceError(CMDBError):
     """
-    Error class raised when the passed object is not an instance of CmdbType.
+    Error class raised when the passed object is not an instance of TypeModel.
     """
 
     def __init__(self):

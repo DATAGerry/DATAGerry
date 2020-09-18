@@ -33,7 +33,6 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { TableComponent } from './components/table/table.component';
 import { DataTablesModule } from 'angular-datatables';
 import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { ModalComponent } from './helpers/modal/modal.component';
 import { TableModule } from './components/table/table.module';
 import { TypeLabelComponent } from './helpers/type-label/type-label.component';
 
@@ -62,6 +61,11 @@ import { FileDragDropDirective } from './directives/fileDragDrop.directive';
 import { FileSizePipe } from './pipes/file-size.pipe';
 import { CategoryTreeFilterPipe } from './pipes/categoryTreeFilter.pipe';
 import { TypeFilterPipe } from './pipes/typeFilter.pipe';
+import { AddAttachmentsModalComponent } from './helpers/modals/add-attachments-modal/add-attachments-modal.component';
+import { GeneralModalComponent } from './helpers/modals/general-modal/general-modal.component';
+import { RenderModule } from '../framework/render/render.module';
+import { ObjectPreviewModalComponent} from '../framework/object/modals/object-preview-modal/object-preview-modal.component';
+import { InfoBoxComponent } from './components/info-box/info-box.component';
 
 export const LAYOUT_COMPONENT_ROUTES: Routes = [
   {
@@ -101,7 +105,7 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     ContentHeaderComponent,
     ActiveBadgeComponent,
     TableComponent,
-    ModalComponent,
+    GeneralModalComponent,
     IntroComponent,
     TypeLabelComponent,
     FooterComponent,
@@ -118,7 +122,11 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     FileSizePipe,
     SidebarTypeComponent,
     CategoryTreeFilterPipe,
-    TypeFilterPipe
+    TypeFilterPipe,
+    AddAttachmentsModalComponent,
+    GeneralModalComponent,
+    ObjectPreviewModalComponent,
+    InfoBoxComponent
   ],
   exports: [
     NgxSpinnerComponent,
@@ -141,7 +149,8 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     FileDragDropDirective,
     FileSizePipe,
     CategoryTreeFilterPipe,
-    TypeFilterPipe
+    TypeFilterPipe,
+    InfoBoxComponent
   ],
   imports: [
     CommonModule,
@@ -157,16 +166,19 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     FontAwesomeModule,
     IconPickerModule,
     ToastModule,
-    AuthModule
+    AuthModule,
+    RenderModule
   ],
   providers: [
     BreadcrumbService,
     NgbActiveModal
   ],
   entryComponents: [
-    ModalComponent,
+    GeneralModalComponent,
+    AddAttachmentsModalComponent,
     IntroComponent,
-    StepByStepIntroComponent
+    StepByStepIntroComponent,
+    ObjectPreviewModalComponent
   ]
 })
 export class LayoutModule {

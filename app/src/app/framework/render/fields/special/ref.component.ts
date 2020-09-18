@@ -16,39 +16,41 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RenderField } from '../components.fields';
 import { ObjectService } from '../../../services/object.service';
 import { RenderResult } from '../../../models/cmdb-render';
-import { Observable } from 'rxjs';
 import { HttpBackend, HttpClient } from '@angular/common/http';
 import { HttpInterceptorHandler } from '../../../../services/api-call.service';
 import { BasicAuthInterceptor } from '../../../../auth/interceptors/basic-auth.interceptor';
 import { AuthService } from '../../../../auth/services/auth.service';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { ObjectPreviewModalComponent } from '../../../object/modals/object-preview-modal/object-preview-modal.component';
 
 @Component({
   templateUrl: './ref.component.html',
   styleUrls: ['./ref.component.scss']
 })
-export class RefComponent extends RenderField implements OnInit {
+export class RefComponent extends RenderField implements OnInit, OnDestroy {
 
   public objectList: RenderResult[] = [];
   public refObject: RenderResult;
+  private modalRef: NgbModalRef;
 
-  public constructor(private objectService: ObjectService, private backend: HttpBackend, private authService: AuthService) {
+  public constructor(private objectService: ObjectService, private backend: HttpBackend,
+                     private authService: AuthService, private modalService: NgbModal) {
     super();
   }
 
   public ngOnInit(): void {
     this.data.default = parseInt(this.data.default, 10);
-    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
     if (this.data.ref_types) {
       this.objectService.getObjectsByType(this.data.ref_types).subscribe((objectList: RenderResult[]) => {
         this.objectList = objectList;
       });
     }
     if (this.controller.value !== '' && this.data.value) {
-      this.objectService.getObject(this.controller.value, false, specialClient).subscribe((refObject: RenderResult) => {
+      this.objectService.getObject(this.controller.value, false).subscribe((refObject: RenderResult) => {
           this.refObject = refObject;
         },
         (error) => {
@@ -57,9 +59,20 @@ export class RefComponent extends RenderField implements OnInit {
     }
   }
 
+  public ngOnDestroy(): void {
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
+  }
+
   public searchRef(term: string, item: any) {
     term = term.toLocaleLowerCase();
     const value = item.object_information.object_id + item.type_information.type_label + item.summary_line;
     return value.toLocaleLowerCase().indexOf(term) > -1 || value.toLocaleLowerCase().includes(term);
+  }
+
+  public showReferencePreview() {
+    this.modalRef = this.modalService.open(ObjectPreviewModalComponent, { size: 'lg' });
+    this.modalRef.componentInstance.renderResult = this.refObject;
   }
 }

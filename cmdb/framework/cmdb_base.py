@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import logging
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import List
 
 from cmdb.utils.error import CMDBError
@@ -25,17 +25,17 @@ LOGGER = logging.getLogger(__name__)
 
 class CmdbManagerBase(ABC):
     """Represents the base class for cmdb managers. A respective implementation is always adapted to the
-       respective database manager :class:`cmdb.data_storage.DatabaseManager`.
+       respective database managers :class:`cmdb.data_storage.DatabaseManager`.
        But should always use at least the super functions listed here.
     """
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         """Example:
-            Depending on the condition or whether a fork process is used, the database manager can also be seen
-            directly in the declaration of the object manager
+            Depending on the condition or whether a fork process is used, the database managers can also be seen
+            directly in the declaration of the object managers
 
         Args:
-            database_manager (DatabaseManager): initialisation of an database manager
+            database_manager (DatabaseManager): initialisation of an database managers
 
         """
         self.dbm: DatabaseManagerMongo = database_manager

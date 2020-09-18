@@ -18,7 +18,7 @@
 import logging
 from cmdb.updater.updater import Updater
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerUpdateError, CMDBError
-from cmdb.framework.cmdb_category import CmdbCategory
+from cmdb.framework.models.category import CategoryModel
 
 LOGGER = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ class Update20200226(Updater):
                                                       update={'$set': {'category_id': root_category[0].get_public_id()}})
 
             # Remove the property root from category collection
-            self.object_manager.unset_update(CmdbCategory.COLLECTION, 'root')
+            self.object_manager.unset_update(CategoryModel.COLLECTION, 'root')
         except (ObjectManagerGetError, ObjectManagerUpdateError, CMDBError) as err:
             raise Exception(err.message)
         self.increase_updater_version(20200226)

@@ -111,22 +111,26 @@ class PipelineBuilder(Builder):
             self.add_pipe(self.match_(regex))
 
         # type builds
+        disjunction_query = []
         type_params = [_ for _ in params if _.search_form == 'type']
         for param in type_params:
             if param.settings and len(param.settings.get('types', [])) > 0:
                 type_id_in = self.in_('type_id', param.settings['types'])
-                self.add_pipe(self.match_(type_id_in))
+                if param.disjunction:
+                    disjunction_query.append(type_id_in)
+                else:
+                    self.add_pipe(self.match_(type_id_in))
+        if len(disjunction_query) > 0:
+            self.add_pipe(self.match_(self.or_(disjunction_query)))
 
         # category builds
         category_params = [_ for _ in params if _.search_form == 'category']
         for param in category_params:
             if param.settings and len(param.settings.get('categories', [])) > 0:
-                type_list = obj_manager.get_types_by(**self.in_('category_id', param.settings['categories']))
-                type_ids = []
-                for curr_type in type_list:
-                    type_ids.append(curr_type.get_public_id())
-                type_id_in = self.in_('type_id', type_ids)
-                self.add_pipe(self.match_(type_id_in))
+                categories = obj_manager.get_categories_by(**self.regex_('label', param.search_text))
+                for curr_category in categories:
+                    type_id_in = self.in_('type_id', curr_category.types)
+                    self.add_pipe(self.match_(type_id_in))
 
         # public builds
         id_params = [_ for _ in params if _.search_form == 'publicID']

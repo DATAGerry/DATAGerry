@@ -22,9 +22,7 @@ import { CmdbType } from './cmdb-type';
 
 export class CmdbCategory implements CmdbDao {
 
-  // tslint:disable: variable-name
   public public_id: number;
-  // tslint:enable
   public name: string;
   public label: string;
   public meta: {

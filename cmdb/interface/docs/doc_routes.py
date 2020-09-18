@@ -18,7 +18,7 @@
 Blueprint for documentation routes
 """
 
-from cmdb.interface.route_utils import RootBlueprint
+from cmdb.interface.blueprint import RootBlueprint
 
 doc_pages = RootBlueprint("doc_pages", __name__, static_folder="static", static_url_path="")
 

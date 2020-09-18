@@ -18,3 +18,8 @@ definition of object types to the user.
     dev_guide/index
     :caption: Guides
     :name: guides
+
+.. toctree::
+    api/rest/index
+    :caption: API
+    :name: api

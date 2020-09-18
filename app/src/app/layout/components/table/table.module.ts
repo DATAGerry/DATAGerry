@@ -16,10 +16,10 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActionViewComponent } from './components/actions/action-view/action-view.component';
+import { ActionPreviewComponent } from './components/actions/action-preview/action-preview.component';
 import { ActionEditComponent } from './components/actions/action-edit/action-edit.component';
 import { ActionDeleteComponent } from './components/actions/action-delete/action-delete.component';
 import { ActionsComponent } from './components/actions/actions.component';
@@ -31,6 +31,7 @@ import { ActionCopyComponent } from './components/actions/action-copy/action-cop
 @NgModule({
   declarations: [
     ActionViewComponent,
+    ActionPreviewComponent,
     ActionEditComponent,
     ActionDeleteComponent,
     ActionsComponent,

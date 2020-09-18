@@ -22,7 +22,10 @@
             </ng-container>
             <ng-container *ngIf="refObject == null"> No reference set </ng-container>
           </div>
-          <div class="input-group-append">
+          <div class="input-group-append" *ngIf="refObject != null" >
+            <span class="input-group-text" (click)="showReferencePreview()">
+              <fa-icon icon="file-powerpoint"></fa-icon>
+            </span>
             <span class="input-group-text">
               <a  [class.ref-disabled]="!controller.value"
                 [routerLink]="'/framework/object/view/'+ controller.value">

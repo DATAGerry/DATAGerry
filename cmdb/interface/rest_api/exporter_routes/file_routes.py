@@ -19,7 +19,8 @@ import logging
 from flask import abort, jsonify
 from cmdb.framework.cmdb_errors import TypeNotFoundError
 from cmdb.file_export.file_exporter import FileExporter
-from cmdb.interface.route_utils import make_response, RootBlueprint, login_required
+from cmdb.interface.route_utils import make_response, login_required
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.utils.helpers import load_class
 
 try:

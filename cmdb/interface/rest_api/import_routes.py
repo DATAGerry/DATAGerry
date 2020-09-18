@@ -17,7 +17,7 @@
 import logging
 
 from flask import current_app
-from cmdb.interface.route_utils import RootBlueprint
+from cmdb.interface.blueprint import RootBlueprint
 
 with current_app.app_context():
     object_manager = current_app.object_manager

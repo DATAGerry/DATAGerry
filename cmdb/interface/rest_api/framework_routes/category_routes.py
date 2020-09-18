@@ -15,206 +15,182 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import json
-from typing import List
+from datetime import datetime
 
-from cmdb.framework.cmdb_category import CmdbCategory, CategoryTree
-from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerUpdateError, \
-    ObjectManagerInitError, ObjectManagerDeleteError
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.interface.route_utils import make_response, RootBlueprint, login_required, insert_request_user, right_required
+from flask import abort, current_app, request
 
-from flask import request, abort, current_app
-
-from cmdb.search.query.query_builder import QueryBuilder
-from cmdb.user_management import User
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
-
-with current_app.app_context():
-    object_manager: CmdbObjectManager = current_app.object_manager
+from cmdb.framework.models.category import CategoryModel, CategoryTree
+from cmdb.framework.managers import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerUpdateError
+from cmdb.framework.managers.category_manager import CategoryManager
+from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
+from cmdb.framework.results.iteration import IterationResult
+from cmdb.framework.utils import PublicID
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.response import GetSingleResponse, GetMultiResponse, InsertSingleResponse, DeleteSingleResponse, \
+    UpdateSingleResponse
+from cmdb.interface.blueprint import APIBlueprint
 
 LOGGER = logging.getLogger(__name__)
-categories_blueprint = RootBlueprint('categories_rest', __name__, url_prefix='/category')
+categories_blueprint = APIBlueprint('categories', __name__)
 
 
-@categories_blueprint.route('/', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.category.view')
-def get_categories(request_user: User):
-    """HTTP GET call for all categories without any kind of selection"""
-    request_arguments = request.args
-    try:
-        if request_arguments.get('order') == 'tree':
-            flatted_tree: List[CmdbCategory] = object_manager.get_category_tree().flat()
-            categories_list: List[dict] = [CmdbCategory.to_json(node) for node in flatted_tree]
-        else:
-            categories_list: List[dict] = [CmdbCategory.to_json(category) for category in
-                                           object_manager.get_all_categories()]
-    except ObjectManagerInitError as err:
-        return abort(500, err.message)
-    except ObjectManagerGetError as err:
-        return abort(400, err.message)
-
-    if len(categories_list) == 0:
-        return make_response([], 204)
-
-    return make_response(categories_list)
-
-
-@categories_blueprint.route('/<int:public_id>/', methods=['GET'])
-@categories_blueprint.route('/<int:public_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.category.view')
-def get_category(public_id: int, request_user: User):
-    """HTTP GET call for a single category by the public id"""
-    try:
-        category_instance = object_manager.get_category(public_id)
-    except ObjectManagerInitError as err:
-        return abort(500, err.message)
-    except ObjectManagerGetError as err:
-        return abort(404, err.message)
-    return make_response(CmdbCategory.to_json(category_instance))
-
-
-@categories_blueprint.route('/find/<path:regex>/', defaults={'regex_options': 'imsx'}, methods=['GET'])
-@categories_blueprint.route('/find/<path:regex>', defaults={'regex_options': 'imsx'}, methods=['GET'])
-@categories_blueprint.route('/find/<path:regex>/<string:regex_options>/', methods=['GET'])
-@categories_blueprint.route('/find/<path:regex>/<string:regex_options>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.category.view')
-def find_categories_by_name(regex: str, regex_options: str, request_user: User):
-    """HTTP GET call for a list of categories by a given regex name
-    Examples:
-        Input `ex` matches for example, Example, test_example
-    Notes:
-        The regex will match for name parameter and label
+@categories_blueprint.route('/', methods=['GET', 'HEAD'])
+@categories_blueprint.protect(auth=True, right='base.framework.category.view')
+@categories_blueprint.parse_collection_parameters(view='list')
+def get_categories(params: CollectionParameters):
     """
-    query_builder = QueryBuilder()
+    HTTP `GET`/`HEAD` route for getting a iterable collection of resources.
 
-    if not regex or (regex == '') or regex is None or len(regex) == 0:
-        return abort(400, 'No valid selection parameter was passed!')
+    Args:
+        params (CollectionParameters): Passed parameters over the http query string + optional `view` parameter.
 
-    if any(ro not in 'imsx' for ro in regex_options):
-        return abort(400, 'No valid regex options!')
+    Returns:
+        GetMultiResponse: Which includes a IterationResult of the CategoryModel.
+        If the view parameter with tree was set the route returns a GetMultiResponse<CategoryTree>.
 
-    query_name = query_builder.regex_('name', f'{regex}', regex_options)
-    query_label = query_builder.regex_('label', f'{regex}', regex_options)
-    query = query_builder.or_([query_name, query_label])
+    Example:
+        You can pass any parameter based on the CollectionParameters.
+        Optional parameters are passed over the function declaration.
+        The `view` parameter is optional and default `list`, but can be `tree` for the category tree view.
+
+    Raises:
+        FrameworkIterationError: If the collection could not be iterated.
+        ManagerGetError: If the collection could not be found.
+
+    """
+    category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
+    body = True if not request.method != 'HEAD' else False
 
     try:
-        categories: List[CmdbCategory] = object_manager.get_categories_by(**query)
-    except ObjectManagerInitError as err:
-        return abort(500, err.message)
-    except ObjectManagerGetError as err:
+        if params.optional['view'] == 'tree':
+            tree: CategoryTree = category_manager.tree
+            api_response = GetMultiResponse(CategoryTree.to_json(tree), total=len(tree), params=params,
+                                            url=request.url, model=CategoryTree.MODEL, body=body)
+            return api_response.make_response(pagination=False)
+        else:
+            iteration_result: IterationResult[CategoryModel] = category_manager.iterate(
+                filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+            category_list = [CategoryModel.to_json(category) for category in iteration_result.results]
+            api_response = GetMultiResponse(category_list, total=iteration_result.total, params=params,
+                                            url=request.url, model=CategoryModel.MODEL, body=body)
+    except FrameworkIterationError as err:
         return abort(400, err.message)
-
-    if len(categories) == 0:
-        return make_response([], 204)
-
-    categories_in_json = [CmdbCategory.to_json(category) for category in categories]
-    return make_response(categories_in_json)
-
-
-@categories_blueprint.route('/tree/', methods=['GET'])
-@categories_blueprint.route('/tree', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.category.view')
-def get_category_tree(request_user: User):
-    """HTTP GET call for full category tree"""
-    try:
-        tree = object_manager.get_category_tree()
-    except ObjectManagerInitError as err:
-        return abort(500, err.message)
-    except ObjectManagerGetError as err:
+    except ManagerGetError as err:
         return abort(404, err.message)
-
-    if len(tree) == 0:
-        return make_response([], 204)
-    return make_response(CategoryTree.to_json(tree))
+    return api_response.make_response()
 
 
-@categories_blueprint.route('/<string:name>/', methods=['GET'])
-@categories_blueprint.route('/<string:name>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.view')
-def get_category_by_name(name: str, request_user: User):
-    """HTTP GET call - get a specific category by its name"""
+@categories_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
+@categories_blueprint.protect(auth=True, right='base.framework.category.view')
+def get_category(public_id: int):
+    """
+    HTTP `GET`/`HEAD` route for a single category resource.
+
+    Args:
+        public_id (int): Public ID of the category.
+
+    Raises:
+        ManagerGetError: When the selected category does not exists.
+
+    Returns:
+        GetSingleResponse: Which includes the json data of a CategoryModel.
+    """
+    category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
+    body = True if not request.method != 'HEAD' else False
+
     try:
-        category_instance = object_manager.get_category_by(name=name)
-    except ObjectManagerGetError as err:
+        category_instance = category_manager.get(public_id)
+    except ManagerGetError as err:
         return abort(404, err.message)
-    except ObjectManagerInitError as err:
-        return abort(501, err.message)
-    return make_response(CmdbCategory.to_json(category_instance))
+    api_response = GetSingleResponse(CategoryModel.to_json(category_instance), url=request.url,
+                                     model=CategoryModel.MODEL, body=body)
+    return api_response.make_response()
 
 
 @categories_blueprint.route('/', methods=['POST'])
-@login_required
-@insert_request_user
-@right_required('base.framework.category.add')
-def add_category(request_user: User):
-    """HTTP POST call - add a new category from json post data"""
-    try:
-        request_data = request.get_data().decode('UTF-8')
-        insert_data = json.loads(request_data)
-    except TypeError as te:
-        return abort(400, str(te))
+@categories_blueprint.protect(auth=True, right='base.framework.category.add')
+@categories_blueprint.validate(CategoryModel.SCHEMA)
+def insert_category(data: dict):
+    """
+    HTTP `POST` route for insert a single category resource.
 
-    insert_data['public_id'] = int(object_manager.get_new_id(CmdbCategory.COLLECTION))
-    try:
-        new_category = CmdbCategory.from_data(insert_data)
-    except Exception as err:
-        return abort(400, str(err))
+    Args:
+        data (CategoryModel.SCHEMA): Insert data of a new category.
 
+    Raises:
+        ManagerGetError: If the inserted resource could not be found after inserting.
+        ManagerInsertError: If something went wrong during insertion.
+
+    Returns:
+        InsertSingleResponse: Insert response with the new category and its public_id.
+    """
+    category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
+    data.setdefault('creation_time', datetime.utcnow())
     try:
-        insert_acknowledge = object_manager.insert_category(new_category)
-    except ObjectManagerInsertError as err:
+        result_id: PublicID = category_manager.insert(data)
+        raw_doc = category_manager.get(public_id=result_id)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    except ManagerInsertError as err:
         return abort(400, err.message)
-    return make_response(insert_acknowledge)
+    api_response = InsertSingleResponse(result_id, raw=CategoryModel.to_json(raw_doc), url=request.url,
+                                        model=CategoryModel.MODEL)
+    return api_response.make_response(prefix='categories')
 
 
-@categories_blueprint.route('/', methods=['PUT'])
-@login_required
-@insert_request_user
-@right_required('base.framework.category.edit')
-def update_category(request_user: User):
+@categories_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@categories_blueprint.protect(auth=True, right='base.framework.category.edit')
+@categories_blueprint.validate(CategoryModel.SCHEMA)
+def update_category(public_id: int, data: dict):
+    """
+    HTTP `PUT`/`PATCH` route for update a single category resource.
+
+    Args:
+        public_id (int): Public ID of the updatable category
+        data (CategoryModel.SCHEMA): New category data to update
+
+    Raises:
+        ManagerGetError: When the category with the `public_id` was not found.
+        ManagerUpdateError: When something went wrong during the update.
+
+    Returns:
+        UpdateSingleResponse: With update result of the new updated category.
+    """
+    category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
     try:
-        request_data = request.get_data().decode('UTF-8')
-        update_data = json.loads(request_data)
-    except TypeError as te:
-        return abort(400, str(te))
-    try:
-        updated_category = CmdbCategory.from_data(update_data)
-    except Exception as err:
-        return abort(400, str(err))
+        category = CategoryModel.from_data(data=data)
+        category_manager.update(public_id=PublicID(public_id), category=CategoryModel.to_json(category))
+        api_response = UpdateSingleResponse(result=data, url=request.url, model=CategoryModel.MODEL)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    except ManagerUpdateError as err:
+        return abort(400, err.message)
 
-    try:
-        ack = object_manager.update_category(updated_category)
-    except ObjectManagerUpdateError as err:
-        return abort(500, err.message)
-
-    resp = make_response(ack.modified_count)
-    return resp
+    return api_response.make_response()
 
 
-@categories_blueprint.route('/<int:public_id>/', methods=['DELETE'])
 @categories_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@login_required
-@insert_request_user
-@right_required('base.framework.category.delete')
-def delete_category(public_id: int, request_user: User):
-    """HTTP DELETE call"""
+@categories_blueprint.protect(auth=True, right='base.framework.category.delete')
+def delete_category(public_id: int):
+    """
+    HTTP `DELETE` route for delete a single category resource.
+
+    Args:
+        public_id (int): Public ID of the deletable category
+
+    Raises:
+        ManagerGetError: When the category with the `public_id` was not found.
+        ManagerDeleteError: When something went wrong during the deletion.
+
+    Returns:
+        DeleteSingleResponse: Delete result with the deleted category as data.
+    """
+    category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
     try:
-        delete_response = object_manager.delete_category(public_id)
-    except ObjectManagerDeleteError as err:
-        return abort(400, err.message)
-    return make_response(delete_response)
+        deleted_category = category_manager.delete(public_id=PublicID(public_id))
+        api_response = DeleteSingleResponse(raw=CategoryModel.to_json(deleted_category), model=CategoryModel.MODEL)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    except ManagerDeleteError as err:
+        return abort(404, err.message)
+    return api_response.make_response()

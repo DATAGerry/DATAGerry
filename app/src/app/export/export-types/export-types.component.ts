@@ -50,7 +50,7 @@ export class ExportTypesComponent implements OnInit {
     const fileExtension: any = this.formExport.get('format').value;
 
     if (fileExtension != null && typeID != null) {
-      this.exportService.callExportTypeRoute('/export/type/' + typeID.toString())
+      this.exportService.callExportTypeRoute('export/type/' + typeID.toString())
         .subscribe(res => this.downLoadFile(res));
     }
   }

@@ -16,24 +16,25 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import { FileSaverService } from 'ngx-filesaver';
 import { FileService } from '../../../../file-manager/service/file.service';
 import { FileMetadata } from '../../../../file-manager/model/metadata';
 import { ActivatedRoute } from '@angular/router';
-import { NgbModal, NgbModalConfig } from '@ng-bootstrap/ng-bootstrap';
-import { AddAttachmentsDialogComponent } from './modal/add-attachments-dialog/add-attachments-dialog.component';
+import {NgbModal, NgbModalConfig, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import { FileElement } from '../../../../file-manager/model/file-element';
+import { AddAttachmentsModalComponent } from '../../../../layout/helpers/modals/add-attachments-modal/add-attachments-modal.component';
 
 @Component({
   selector: 'cmdb-object-attachments',
   templateUrl: './object-attachments.component.html',
   styleUrls: ['./object-attachments.component.scss']
 })
-export class ObjectAttachmentsComponent implements OnInit {
+export class ObjectAttachmentsComponent implements OnInit, OnDestroy{
 
   public attachmentsTotal: number = 0;
   private metadata: FileMetadata = new FileMetadata();
+  private modalRef: NgbModalRef;
 
   constructor(private fileService: FileService, private fileSaverService: FileSaverService,
               private route: ActivatedRoute, private modalService: NgbModal, private config: NgbModalConfig) {
@@ -50,11 +51,16 @@ export class ObjectAttachmentsComponent implements OnInit {
       this.attachmentsTotal = resp.length;
     });
   }
+  public ngOnDestroy(): void {
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
+  }
 
   public addAttachments() {
-    const attachmentAddModal = this.modalService.open(AddAttachmentsDialogComponent);
-    attachmentAddModal.componentInstance.metadata = this.metadata;
-    attachmentAddModal.result.then((result) => {
+    this.modalRef = this.modalService.open(AddAttachmentsModalComponent);
+    this.modalRef.componentInstance.metadata = this.metadata;
+    this.modalRef.result.then((result) => {
       this.attachmentsTotal = result.total;
     });
   }

@@ -16,13 +16,13 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, ViewChild} from '@angular/core';
+import { Component, ViewChild} from '@angular/core';
 import { CmdbMode } from '../../modes.enum';
 import { CmdbType } from '../../models/cmdb-type';
 import { ObjectBulkChangeEditorComponent } from './object-bulk-change-editor/object-bulk-change-editor.component';
 import { ObjectBulkChangePreviewComponent } from './object-bulk-change-preview/object-bulk-change-preview.component';
 import { CmdbObject } from '../../models/cmdb-object';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 import { ObjectService } from '../../services/object.service';
 import { TypeService } from '../../services/type.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -61,7 +61,6 @@ export class ObjectBulkChangeComponent {
       this.fieldsGroups = new FormGroup({
       });
       this.renderForm = new FormGroup({
-        active: new FormControl(true),
       });
     });
   }
@@ -85,7 +84,6 @@ export class ObjectBulkChangeComponent {
       newObjectInstance.type_id = this.typeInstance.public_id;
       newObjectInstance.fields = [];
       this.renderForm.get('changedFields').value.delete('activeObj-isChanged');
-      this.renderForm.removeControl('active');
       Object.keys(this.renderForm.value).forEach((key: string) => {
         if (key.match('-isChanged') == null
         && this.renderForm.get('changedFields').value.has(key)) {
