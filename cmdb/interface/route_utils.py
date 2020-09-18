@@ -23,7 +23,7 @@ from werkzeug.http import wsgi_to_bytes
 
 from cmdb.security.auth import AuthModule
 from cmdb.security.token.generator import TokenGenerator
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 from cmdb.user_management.user_manager import UserManagerGetError, UserManager
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.wraps import LOGGER
@@ -143,7 +143,7 @@ def right_required(required_right: str, excepted: dict = None):
         @functools.wraps(func)
         def _decorate(*args, **kwargs):
             try:
-                current_user: User = kwargs['request_user']
+                current_user: UserModel = kwargs['request_user']
             except KeyError:
                 return abort(400, 'No request user was provided')
 

@@ -20,7 +20,7 @@ from flask import abort, request, current_app, Response
 from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import get_element_from_data_request, \
     get_file_in_request, generate_metadata_filter, recursive_delete_filter
 
@@ -44,7 +44,7 @@ media_file_blueprint = RootBlueprint('media_file_blueprint', __name__, url_prefi
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_file_list(request_user: User):
+def get_file_list(request_user: UserModel):
     """
     get all objects in database
 
@@ -66,7 +66,7 @@ def get_file_list(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.edit')
-def add_new_file(request_user: User):
+def add_new_file(request_user: UserModel):
     """ This method saves a file to the specified section of the document for storing workflow data.
         Any existing value that matches filename and the metadata is deleted. Before saving a value.
         GridFS document under the specified key is deleted.
@@ -78,7 +78,7 @@ def add_new_file(request_user: User):
             Metadata are stored under 'request.form["Metadata"]'
 
         Args:
-            request_user (User): the instance of the started user
+            request_user (UserModel): the instance of the started user
         Returns:
             int: ObjectId of GridFS File.
         """
@@ -107,7 +107,7 @@ def add_new_file(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.edit')
-def update_file(request_user: User):
+def update_file(request_user: UserModel):
     try:
 
         import json
@@ -163,7 +163,7 @@ def get_file_by_name(name: str):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def download_media_file(request_user: User, filename: str):
+def download_media_file(request_user: UserModel, filename: str):
     try:
         filter_metadata = generate_metadata_filter('metadata', request)
         grid_fs_file = media_file_manager.get_media_file(filename, filter_metadata).read()
@@ -184,7 +184,7 @@ def download_media_file(request_user: User, filename: str):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.edit')
-def delete_file(request_user: User, public_id: int):
+def delete_file(request_user: UserModel, public_id: int):
     try:
         for _id in recursive_delete_filter(public_id, media_file_manager):
             media_file_manager.delete_media_file(_id)

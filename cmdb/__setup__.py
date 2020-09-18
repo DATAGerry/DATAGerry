@@ -79,7 +79,7 @@ class SetupRoutine:
                 )
 
             # create user management
-            LOGGER.info('SETUP ROUTINE: User management')
+            LOGGER.info('SETUP ROUTINE: UserModel management')
             try:
                 self.__create_user_management()
             except Exception as err:
@@ -137,7 +137,7 @@ class SetupRoutine:
         LOGGER.info('KEY ROUTINE: FINISHED')
 
     def __create_user_management(self):
-        from cmdb.user_management.user_manager import UserManager, User
+        from cmdb.user_management.user_manager import UserManager, UserModel
         from cmdb.user_management import __FIXED_GROUPS__
         from cmdb.security.security import SecurityManager
         scm = SecurityManager(self.setup_database_manager)
@@ -151,7 +151,7 @@ class SetupRoutine:
         admin_pass = 'admin'
 
         import datetime
-        admin_user = User(
+        admin_user = UserModel(
             public_id=1,
             user_name=admin_name,
             password=scm.generate_hmac(admin_pass),

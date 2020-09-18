@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from cmdb.user_management.user_right import BaseRight
+from cmdb.user_management.models.right import BaseRight
 
 
 class FrameworkRight(BaseRight):

@@ -24,7 +24,7 @@ from cmdb.search import Search
 from cmdb.search.query import Query, Pipeline
 from cmdb.search.query.pipe_builder import PipelineBuilder
 from cmdb.search.search_result import SearchResult
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 
 LOGGER = logging.getLogger(__name__)
 
@@ -36,13 +36,13 @@ class SearcherFramework(Search[CmdbObjectManager]):
         """Normally uses a instance of CmdbObjectManager as managers"""
         super(SearcherFramework, self).__init__(manager=manager)
 
-    def aggregate(self, pipeline: Pipeline, request_user: User = None, limit: int = Search.DEFAULT_LIMIT,
+    def aggregate(self, pipeline: Pipeline, request_user: UserModel = None, limit: int = Search.DEFAULT_LIMIT,
                   skip: int = Search.DEFAULT_SKIP, **kwargs) -> SearchResult[RenderResult]:
         """
         Use mongodb aggregation system with pipeline queries
         Args:
             pipeline (Pipeline): list of requirement pipes
-            request_user (User): user who started this search
+            request_user (UserModel): user who started this search
             limit (int): max number of documents to return
             skip (int): number of documents to be skipped
             **kwargs:
@@ -109,7 +109,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
         )
         return search_result
 
-    def search(self, query: Query, request_user: User = None, limit: int = Search.DEFAULT_LIMIT,
+    def search(self, query: Query, request_user: UserModel = None, limit: int = Search.DEFAULT_LIMIT,
                skip: int = Search.DEFAULT_SKIP) -> SearchResult[RenderResult]:
         """
         Uses mongodb find query system

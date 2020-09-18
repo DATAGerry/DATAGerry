@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from cmdb.user_management.rights.import_rights import ImportRight, ImportObjectRight, ImportTypeRight
-from cmdb.user_management.user_right import GLOBAL_RIGHT_IDENTIFIER, BaseRight
+from cmdb.user_management.models.right import GLOBAL_RIGHT_IDENTIFIER, BaseRight
 from cmdb.user_management.rights.system_rights import SystemRight
 from cmdb.user_management.rights.user_management_rights import UserManagementRight, UserRight, GroupRight
 from cmdb.user_management.rights.framework_rights import FrameworkRight, ObjectRight, TypeRight, CategoryRight, \
@@ -106,7 +106,7 @@ IMPORT_RIGHTS = (
 )
 
 USER_MANAGEMENT_RIGHTS = (
-    UserManagementRight(GLOBAL_RIGHT_IDENTIFIER, description='User management'),
+    UserManagementRight(GLOBAL_RIGHT_IDENTIFIER, description='UserModel management'),
     (
         UserRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage users'),
         (

@@ -24,7 +24,7 @@ from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.providers.external_providers import LdapAuthenticationProvider
 from cmdb.security.auth.providers.internal_providers import LocalAuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
-from cmdb.user_management import UserManager, User
+from cmdb.user_management import UserManager, UserModel
 from cmdb.user_management.user_manager import UserManagerGetError
 from cmdb.utils.system_reader import SystemSettingsReader
 
@@ -137,7 +137,7 @@ class AuthModule:
             LOGGER.error(f'[AuthModule] {err}')
             return None
 
-    def login(self, user_manager: UserManager, user_name: str, password: str) -> Union[User, None]:
+    def login(self, user_manager: UserManager, user_name: str, password: str) -> Union[UserModel, None]:
         """
         Performs a login try with given username and password
         If the user is not found, iterate over all installed and activated providers
@@ -147,7 +147,7 @@ class AuthModule:
             password: Password
 
         Returns:
-            User: instance if user was found and password was correct
+            UserModel: instance if user was found and password was correct
             None: if something went wrong
         """
         user_name = user_name.lower()
@@ -172,7 +172,7 @@ class AuthModule:
             try:
                 user_instance = provider_instance.authenticate(user_name, password)
             except AuthenticationError as ae:
-                LOGGER.error(f'[LOGIN] User could not login: {ae}')
+                LOGGER.error(f'[LOGIN] UserModel could not login: {ae}')
 
         except UserManagerGetError as umge:
             LOGGER.error(f'[AUTH] {user_name} not in database: {umge}')
@@ -198,7 +198,7 @@ class AuthModule:
                         break
                 except AuthenticationError as ae:
                     LOGGER.error(
-                        f'[AUTH] User {user_name} could not validate with provider {provider}: {ae}')
+                        f'[AUTH] UserModel {user_name} could not validate with provider {provider}: {ae}')
                 LOGGER.info(f'[AUTH] Provider instance: {provider_instance}')
         except Exception as e:
             import traceback

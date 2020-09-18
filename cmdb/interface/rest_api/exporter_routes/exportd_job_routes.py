@@ -28,7 +28,7 @@ from cmdb.exportd.exportd_job.exportd_job import ExportdJob, ExecuteState
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 
 with current_app.app_context():
     exportd_manager = current_app.exportd_manager
@@ -48,7 +48,7 @@ exportd_job_blueprint = RootBlueprint('exportd_job_blueprint', __name__, url_pre
 @login_required
 @insert_request_user
 @right_required('base.exportd.job.view')
-def get_exportd_job_list(request_user: User):
+def get_exportd_job_list(request_user: UserModel):
     """
     get all objects in database
     Returns:
@@ -70,7 +70,7 @@ def get_exportd_job_list(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.exportd.job.view')
-def get_exportd_job(public_id, request_user: User):
+def get_exportd_job(public_id, request_user: UserModel):
     """
         get job in database
         Returns:
@@ -90,7 +90,7 @@ def get_exportd_job(public_id, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.exportd.job.view')
-def get_type_by_name(name: str, request_user: User):
+def get_type_by_name(name: str, request_user: UserModel):
     try:
         job_instance = exportd_manager.get_job_by_name(name=name)
     except ObjectManagerGetError as err:
@@ -102,7 +102,7 @@ def get_type_by_name(name: str, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.exportd.job.add')
-def add_job(request_user: User):
+def add_job(request_user: UserModel):
     from bson import json_util
     add_data_dump = json.dumps(request.json)
     try:
@@ -147,7 +147,7 @@ def add_job(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.exportd.job.edit')
-def update_job(request_user: User):
+def update_job(request_user: UserModel):
     from bson import json_util
     add_data_dump = json.dumps(request.json)
     new_job_data = None
@@ -190,7 +190,7 @@ def update_job(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.exportd.job.delete')
-def delete_job(public_id: int, request_user: User):
+def delete_job(public_id: int, request_user: UserModel):
     try:
         try:
             job_instance = exportd_manager.get_job(public_id)
@@ -221,7 +221,7 @@ def delete_job(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.exportd.job.run')
-def get_run_job_manual(public_id, request_user: User):
+def get_run_job_manual(public_id, request_user: UserModel):
     """
      run job manual
     """
@@ -240,7 +240,7 @@ def get_run_job_manual(public_id, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.exportd.job.run')
-def get_job_output_by_id(public_id, request_user: User):
+def get_job_output_by_id(public_id, request_user: UserModel):
     try:
         job = exportd_manager.get_job_by_args(public_id=public_id, exportd_type='PULL')
         resp = worker(job, request_user)
@@ -254,7 +254,7 @@ def get_job_output_by_id(public_id, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.exportd.job.run')
-def get_job_output_by_name(name, request_user: User):
+def get_job_output_by_name(name, request_user: UserModel):
     try:
         job = exportd_manager.get_job_by_args(name=name, exportd_type='PULL')
         resp = worker(job, request_user)
@@ -263,7 +263,7 @@ def get_job_output_by_name(name, request_user: User):
     return resp
 
 
-def worker(job: ExportdJob, request_user: User):
+def worker(job: ExportdJob, request_user: UserModel):
     from flask import make_response as make_res
     from cmdb.exportd.exporter_base import ExportdManagerBase
     from cmdb.event_management.event import Event

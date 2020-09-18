@@ -17,14 +17,13 @@
 import logging
 
 from cmdb.user_management.user_base import UserManagementBase
-from cmdb.user_management.user_right import GLOBAL_RIGHT_IDENTIFIER
+from cmdb.user_management.models.right import GLOBAL_RIGHT_IDENTIFIER
 from cmdb.utils.error import CMDBError
-from cmdb.utils.wraps import timing
 
 LOGGER = logging.getLogger(__name__)
 
 
-class UserGroup(UserManagementBase):
+class UserGroupModel(UserManagementBase):
     COLLECTION = 'management.groups'
     REQUIRED_INIT_KEYS = ['name']
     INDEX_KEYS = [
@@ -36,7 +35,7 @@ class UserGroup(UserManagementBase):
         self.label: str = label or name.title()
         self.rights: list = rights or []
         self.deletable: bool = deletable
-        super(UserGroup, self).__init__(**kwargs)
+        super(UserGroupModel, self).__init__(**kwargs)
 
     def get_name(self) -> str:
         return self.name

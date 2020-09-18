@@ -24,7 +24,7 @@ from datetime import datetime
 
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 from cmdb.user_management.user_manager import UserManagerInsertError, UserManagerGetError, \
     UserManagerUpdateError, UserManagerDeleteError, UserManager
 from cmdb.security.security import SecurityManager
@@ -46,9 +46,9 @@ with current_app.app_context():
 @login_required
 @insert_request_user
 @right_required('base.user-management.user.*')
-def get_users(request_user: User):
+def get_users(request_user: UserModel):
     try:
-        users: List[User] = user_manager.get_users()
+        users: List[UserModel] = user_manager.get_users()
     except CMDBError:
         return abort(404)
     if len(users) < 1:
@@ -61,9 +61,9 @@ def get_users(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.user-management.user.view', excepted={'public_id': 'public_id'})
-def get_user(public_id, request_user: User):
+def get_user(public_id, request_user: UserModel):
     try:
-        user: User = user_manager.get_user(public_id=public_id)
+        user: UserModel = user_manager.get_user(public_id=public_id)
     except UserManagerGetError:
         return abort(404)
     return make_response(user)
@@ -74,9 +74,9 @@ def get_user(public_id, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.user-management.user.view')
-def get_user_by_name(user_name: str, request_user: User):
+def get_user_by_name(user_name: str, request_user: UserModel):
     try:
-        user: User = user_manager.get_user_by_name(user_name=user_name)
+        user: UserModel = user_manager.get_user_by_name(user_name=user_name)
     except UserManagerGetError:
         return abort(404)
 
@@ -87,7 +87,7 @@ def get_user_by_name(user_name: str, request_user: User):
 @user_blueprint.route('/group/<int:public_id>', methods=['GET'])
 @insert_request_user
 @right_required('base.user-management.user.view')
-def get_users_by_group(public_id: int, request_user: User):
+def get_users_by_group(public_id: int, request_user: UserModel):
     user_list = user_manager.get_users_by(group_id=public_id)
     if len(user_list) < 1:
         return make_response(user_list, 204)
@@ -98,7 +98,7 @@ def get_users_by_group(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.user-management.user.add')
-def add_user(request_user: User):
+def add_user(request_user: UserModel):
     http_post_request_data = json.dumps(request.json)
     new_user_data = json.loads(http_post_request_data, object_hook=json_util.object_hook)
 
@@ -107,14 +107,14 @@ def add_user(request_user: User):
     except (UserManagerGetError, Exception):
         pass
     else:
-        return abort(400, f'User with the username {new_user_data["user_name"]} already exists')
+        return abort(400, f'UserModel with the username {new_user_data["user_name"]} already exists')
 
-    new_user_data['public_id'] = user_manager.get_new_id(User.COLLECTION)
+    new_user_data['public_id'] = user_manager.get_new_id(UserModel.COLLECTION)
     new_user_data['group_id'] = int(new_user_data['group_id'])
     new_user_data['registration_time'] = datetime.utcnow()
     new_user_data['password'] = security_manager.generate_hmac(new_user_data['password'])
     try:
-        new_user = User(**new_user_data)
+        new_user = UserModel(**new_user_data)
     except (CMDBError, Exception) as err:
         return abort(400, err.message)
     try:
@@ -130,7 +130,7 @@ def add_user(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.user-management.user.edit')
-def update_user(public_id: int, request_user: User):
+def update_user(public_id: int, request_user: UserModel):
     http_put_request_data = json.dumps(request.json)
     user_data = json.loads(http_put_request_data)
 
@@ -152,7 +152,7 @@ def update_user(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.user-management.user.delete')
-def delete_user(public_id: int, request_user: User):
+def delete_user(public_id: int, request_user: UserModel):
     if public_id == request_user.get_public_id():
         return abort(403, 'You cant delete yourself!')
     try:
@@ -173,7 +173,7 @@ def delete_user(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.user-management.user.view')
-def count_users(request_user: User):
+def count_users(request_user: UserModel):
     try:
         count = user_manager.count_user()
     except CMDBError:
@@ -188,12 +188,12 @@ def count_users(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.user-management.user.*', {'public_id': 'public_id'})
-def change_user_password(public_id: int, request_user: User):
+def change_user_password(public_id: int, request_user: UserModel):
     try:
         user_manager.get_user(public_id=public_id)
     except UserManagerGetError as e:
-        LOGGER.error(f'User was not found: {e}')
-        return abort(404, f'User with Public ID: {public_id} not found!')
+        LOGGER.error(f'UserModel was not found: {e}')
+        return abort(404, f'UserModel with Public ID: {public_id} not found!')
     password = security_manager.generate_hmac(request.json.get('password'))
     try:
         ack = user_manager.update_user(public_id, {'password': password}).acknowledged

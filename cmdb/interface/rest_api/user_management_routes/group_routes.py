@@ -23,8 +23,8 @@ from flask import request, current_app
 from cmdb.interface.route_utils import make_response, abort, login_required, insert_request_user, \
     right_required
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.user_management import User
-from cmdb.user_management.user_group import UserGroup
+from cmdb.user_management import UserModel
+from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.user_manager import UserManager, UserManagerInsertError, UserManagerGetError, \
     UserManagerUpdateError, UserManagerDeleteError
 
@@ -44,7 +44,7 @@ group_blueprint = RootBlueprint('group_rest', __name__, url_prefix='/group')
 @login_required
 @insert_request_user
 @right_required('base.user-management.group.view')
-def get_all_groups(request_user: User):
+def get_all_groups(request_user: UserModel):
     try:
         group_list = user_manager.get_groups()
     except UserManagerGetError as err:
@@ -60,7 +60,7 @@ def get_all_groups(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.user-management.group.view', {'group_id': 'public_id'})
-def get_group(public_id: int, request_user: User):
+def get_group(public_id: int, request_user: UserModel):
     try:
         group_instance = user_manager.get_group(public_id)
     except UserManagerGetError as err:
@@ -74,7 +74,7 @@ def get_group(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.user-management.group.view')
-def get_group_by_name(group_name: str, request_user: User):
+def get_group_by_name(group_name: str, request_user: UserModel):
     try:
         group = user_manager.get_group_by(name=group_name)
     except UserManagerGetError:
@@ -86,13 +86,13 @@ def get_group_by_name(group_name: str, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.user-management.group.add')
-def add_group(request_user: User):
+def add_group(request_user: UserModel):
     http_post_request_data = json.dumps(request.json)
     new_group_data = json.loads(http_post_request_data, object_hook=json_util.object_hook)
-    new_group_data['public_id'] = user_manager.get_new_id(UserGroup.COLLECTION)
+    new_group_data['public_id'] = user_manager.get_new_id(UserGroupModel.COLLECTION)
 
     try:
-        new_group = UserGroup(**new_group_data)
+        new_group = UserGroupModel(**new_group_data)
     except (CMDBError, Exception) as err:
         LOGGER.error(err.message)
         return abort(400)
@@ -110,7 +110,7 @@ def add_group(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.user-management.group.edit')
-def edit_group(public_id: int, request_user: User):
+def edit_group(public_id: int, request_user: UserModel):
     updated_group_params = json.dumps(request.json)
     try:
         response = user_manager.update_group(public_id,
@@ -126,7 +126,7 @@ def edit_group(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.user-management.group.delete')
-def delete_group(public_id: int, request_user: User):
+def delete_group(public_id: int, request_user: UserModel):
     action = request.args.get('action')
     options = None
     if request.args.get('options'):

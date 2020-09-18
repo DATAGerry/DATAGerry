@@ -26,7 +26,7 @@ from cmdb.security.auth import AuthModule, AuthSettingsDAO
 from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, \
     AuthenticationProviderNotActivated
 from cmdb.security.token.generator import TokenGenerator
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 from cmdb.user_management.user_manager import UserManager
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
@@ -50,7 +50,7 @@ with current_app.app_context():
 @login_required
 @insert_request_user
 @right_required('base.system.view')
-def get_auth_settings(request_user: User):
+def get_auth_settings(request_user: UserModel):
     auth_module = AuthModule(system_settings_reader)
     return make_response(auth_module.settings)
 
@@ -60,7 +60,7 @@ def get_auth_settings(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.system.edit')
-def update_auth_settings(request_user: User):
+def update_auth_settings(request_user: UserModel):
     new_auth_settings_values = request.get_json()
     if not new_auth_settings_values:
         return abort(400, 'No new data was provided')
@@ -79,7 +79,7 @@ def update_auth_settings(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.system.view')
-def get_installed_providers(request_user: User):
+def get_installed_providers(request_user: UserModel):
     provider_names: List[dict] = []
     auth_module = AuthModule(system_settings_reader)
     for provider in auth_module.providers:
@@ -92,7 +92,7 @@ def get_installed_providers(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.system.view')
-def get_provider_config(provider_class: str, request_user: User):
+def get_provider_config(provider_class: str, request_user: UserModel):
     auth_module = AuthModule(system_settings_reader)
     try:
         provider_class_config = auth_module.get_provider(provider_class).get_config()
@@ -106,7 +106,7 @@ def get_provider_config(provider_class: str, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.system.view')
-def get_provider_config_form(provider_class: str, request_user: User):
+def get_provider_config_form(provider_class: str, request_user: UserModel):
     auth_module = AuthModule(system_settings_reader)
     try:
         provider_class_config = auth_module.get_provider(provider_class).get_config().PROVIDER_CONFIG_FORM

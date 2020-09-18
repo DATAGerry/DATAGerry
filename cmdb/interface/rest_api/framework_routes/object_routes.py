@@ -33,7 +33,7 @@ from cmdb.framework.cmdb_log_manager import LogManagerInsertError
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 
 with current_app.app_context():
     object_manager = current_app.object_manager
@@ -59,7 +59,7 @@ with current_app.app_context():
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_object_list(request_user: User):
+def get_object_list(request_user: UserModel):
     """
     get all objects in database
     Args:
@@ -94,7 +94,7 @@ def get_object_list(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_native_object_list(request_user: User):
+def get_native_object_list(request_user: UserModel):
     try:
         object_list = object_manager.get_all_objects()
     except CMDBError:
@@ -107,7 +107,7 @@ def get_native_object_list(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_dt_objects_by_type(type_id, request_user: User):
+def get_dt_objects_by_type(type_id, request_user: UserModel):
     """Return all objects by type_id"""
     try:
         table_config = request.args
@@ -146,7 +146,7 @@ def get_dt_objects_by_type(type_id, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_dt_filter_objects_by_type(type_id, request_user: User):
+def get_dt_filter_objects_by_type(type_id, request_user: UserModel):
     """Return all objects by type_id"""
     try:
         table_config = request.args
@@ -225,7 +225,7 @@ def get_dt_filter_objects_by_type(type_id, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_objects_by_type(public_id, request_user: User):
+def get_objects_by_type(public_id, request_user: UserModel):
     """Return all objects by type_id"""
     try:
         filter_state = {'type_id': public_id}
@@ -253,7 +253,7 @@ def get_objects_by_type(public_id, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_objects_by_types(type_ids, request_user: User):
+def get_objects_by_types(type_ids, request_user: UserModel):
     """Return all objects by type_id"""
     try:
         in_types = {'type_id': {'$in': list(map(int, type_ids.split(',')))}}
@@ -276,7 +276,7 @@ def get_objects_by_types(type_ids, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_objects_by_public_id(public_ids, request_user: User):
+def get_objects_by_public_id(public_ids, request_user: UserModel):
     """Return all objects by public_ids"""
 
     try:
@@ -355,7 +355,7 @@ def group_objects_by_type_id(value):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_object(public_id, request_user: User):
+def get_object(public_id, request_user: UserModel):
     try:
         object_instance = object_manager.get_object(public_id)
     except ObjectManagerGetError as err:
@@ -384,7 +384,7 @@ def get_object(public_id, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_native_object(public_id: int, request_user: User):
+def get_native_object(public_id: int, request_user: UserModel):
     try:
         object_instance = object_manager.get_object(public_id)
     except CMDBError:
@@ -396,7 +396,7 @@ def get_native_object(public_id: int, request_user: User):
 @object_blueprint.route('/reference/<int:public_id>/', methods=['GET'])
 @object_blueprint.route('/reference/<int:public_id>', methods=['GET'])
 @insert_request_user
-def get_objects_by_reference(public_id: int, request_user: User):
+def get_objects_by_reference(public_id: int, request_user: UserModel):
     try:
         active_flag = None
         if _fetch_only_active_objs():
@@ -417,7 +417,7 @@ def get_objects_by_reference(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_objects_by_user(public_id: int, request_user: User):
+def get_objects_by_user(public_id: int, request_user: UserModel):
     try:
         object_list = object_manager.get_objects_by(sort="type_id", author_id=public_id)
     except ObjectManagerGetError as err:
@@ -436,7 +436,7 @@ def get_objects_by_user(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_new_objects_since(timestamp: int, request_user: User):
+def get_new_objects_since(timestamp: int, request_user: UserModel):
     request_date = datetime.fromtimestamp(timestamp, pytz.utc)
     query = {
         'creation_time': {
@@ -461,7 +461,7 @@ def get_new_objects_since(timestamp: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_changed_objects_since(timestamp: int, request_user: User):
+def get_changed_objects_since(timestamp: int, request_user: UserModel):
     request_date = datetime.fromtimestamp(timestamp, pytz.utc)
     query = {
         'last_edit_time': {
@@ -488,7 +488,7 @@ def get_changed_objects_since(timestamp: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.add')
-def insert_object(request_user: User):
+def insert_object(request_user: UserModel):
     from bson import json_util
     from datetime import datetime
     add_data_dump = json.dumps(request.json)
@@ -550,7 +550,7 @@ def insert_object(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.edit')
-def update_object(public_id: int, request_user: User):
+def update_object(public_id: int, request_user: UserModel):
     object_ids = request.args.getlist('objectIDs')
 
     if len(object_ids) > 0:
@@ -663,7 +663,7 @@ def update_object(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.delete')
-def delete_object(public_id: int, request_user: User):
+def delete_object(public_id: int, request_user: UserModel):
     try:
         current_object_instance = object_manager.get_object(public_id)
         current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
@@ -707,7 +707,7 @@ def delete_object(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.delete')
-def delete_many_objects(public_ids, request_user: User):
+def delete_many_objects(public_ids, request_user: UserModel):
     try:
         ids = []
         operator_in = {'$in': []}
@@ -774,7 +774,7 @@ def delete_many_objects(public_ids, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.activation')
-def get_object_state(public_id: int, request_user: User):
+def get_object_state(public_id: int, request_user: UserModel):
     try:
         founded_object = object_manager.get_object(public_id=public_id)
     except ObjectManagerGetError as err:
@@ -788,7 +788,7 @@ def get_object_state(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.activation')
-def update_object_state(public_id: int, request_user: User):
+def update_object_state(public_id: int, request_user: UserModel):
     if isinstance(request.json, bool):
         state = request.json
     else:
@@ -848,7 +848,7 @@ def update_object_state(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_newest(request_user: User):
+def get_newest(request_user: UserModel):
     """
     get object with newest creation time
     Args:
@@ -871,7 +871,7 @@ def get_newest(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_latest(request_user: User):
+def get_latest(request_user: UserModel):
     """
     get object with newest last edit time
     Args:
@@ -894,7 +894,7 @@ def get_latest(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.type.clean')
-def cleanup_removed_fields(public_id, request_user: User):
+def cleanup_removed_fields(public_id, request_user: UserModel):
     # REMOVE fields from CmdbObject
     try:
         update_type_instance = object_manager.get_type(public_id)
@@ -928,7 +928,7 @@ def cleanup_removed_fields(public_id, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.type.clean')
-def cleanup_updated_push_fields(public_id, request_user: User):
+def cleanup_updated_push_fields(public_id, request_user: UserModel):
     # Update/Push fields to CmdbObject
     try:
         update_type_instance = object_manager.get_type(public_id)

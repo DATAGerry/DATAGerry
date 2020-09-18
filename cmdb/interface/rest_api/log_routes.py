@@ -24,7 +24,7 @@ from cmdb.framework.cmdb_log import CmdbObjectLog, LogAction
 from cmdb.framework.cmdb_log_manager import LogManagerGetError, LogManagerDeleteError
 from cmdb.interface.route_utils import make_response, login_required, right_required, insert_request_user
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 
 try:
     from cmdb.utils.error import CMDBError
@@ -44,7 +44,7 @@ with current_app.app_context():
 @login_required
 @insert_request_user
 @right_required('base.framework.log.view')
-def get_log(public_id: int, request_user: User):
+def get_log(public_id: int, request_user: UserModel):
     try:
         selected_log = log_manager.get_log(public_id=public_id)
     except LogManagerGetError:
@@ -78,7 +78,7 @@ def update_log(public_id, *args, **kwargs):
 @login_required
 @insert_request_user
 @right_required('base.framework.log.delete')
-def delete_log(public_id: int, request_user: User):
+def delete_log(public_id: int, request_user: UserModel):
     try:
         delete_ack = log_manager.delete_log(public_id=public_id)
     except LogManagerDeleteError as err:
@@ -92,7 +92,7 @@ def delete_log(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.log.view')
-def get_logs_with_existing_objects(request_user: User):
+def get_logs_with_existing_objects(request_user: UserModel):
     existing_list = []
     deleted_list = []
     passed_objects = []
@@ -134,7 +134,7 @@ def get_logs_with_existing_objects(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.log.view')
-def get_logs_with_deleted_objects(request_user: User):
+def get_logs_with_deleted_objects(request_user: UserModel):
     existing_list = []
     deleted_list = []
     passed_objects = []
@@ -176,7 +176,7 @@ def get_logs_with_deleted_objects(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.log.view')
-def get_object_delete_logs(request_user: User):
+def get_object_delete_logs(request_user: UserModel):
     try:
         query = {
             'log_type': CmdbObjectLog.__name__,
@@ -197,7 +197,7 @@ def get_object_delete_logs(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.log.view')
-def get_logs_by_objects(public_id: int, request_user: User):
+def get_logs_by_objects(public_id: int, request_user: UserModel):
     try:
         object_logs = log_manager.get_object_logs(public_id=public_id)
     except ObjectManagerGetError as err:
@@ -213,7 +213,7 @@ def get_logs_by_objects(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.log.view')
-def get_corresponding_object_logs(public_id: int, request_user: User):
+def get_corresponding_object_logs(public_id: int, request_user: UserModel):
     try:
         selected_log = log_manager.get_log(public_id=public_id)
         query = {

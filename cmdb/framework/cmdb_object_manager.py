@@ -41,7 +41,7 @@ from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.search.query import Query, Pipeline
 from cmdb.utils.error import CMDBError
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 from cmdb.utils.wraps import deprecated
 
 LOGGER = logging.getLogger(__name__)
@@ -224,7 +224,7 @@ class CmdbObjectManager(CmdbManagerBase):
             raise ObjectInsertError(e)
         return ack
 
-    def update_object(self, data: (dict, CmdbObject), request_user: User) -> str:
+    def update_object(self, data: (dict, CmdbObject), request_user: UserModel) -> str:
         if isinstance(data, dict):
             update_object = CmdbObject(**data)
         elif isinstance(data, CmdbObject):
@@ -298,7 +298,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
         return referenced_by_objects
 
-    def delete_object(self, public_id: int, request_user: User):
+    def delete_object(self, public_id: int, request_user: UserModel):
         try:
             if self._event_queue:
                 event = Event("cmdb.core.object.deleted",
@@ -311,7 +311,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except (CMDBError, Exception):
             raise ObjectDeleteError(msg=public_id)
 
-    def delete_many_objects(self, filter_query: dict, public_ids, request_user: User):
+    def delete_many_objects(self, filter_query: dict, public_ids, request_user: UserModel):
         ack = self._delete_many(CmdbObject.COLLECTION, filter_query)
         if self._event_queue:
             event = Event("cmdb.core.objects.deleted", {"ids": public_ids,

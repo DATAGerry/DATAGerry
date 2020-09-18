@@ -19,9 +19,9 @@ from datetime import datetime
 from cmdb.user_management.user_base import UserManagementBase
 
 
-class User(UserManagementBase):
+class UserModel(UserManagementBase):
     """
-    User class
+    UserModel class
     """
     COLLECTION = 'management.users'
     REQUIRED_INIT_KEYS = ['user_name', 'registration_time', 'group_id']
@@ -57,7 +57,7 @@ class User(UserManagementBase):
         self.registration_time = registration_time
         self.first_name = first_name
         self.last_name = last_name
-        super(User, self).__init__(**kwargs)
+        super(UserModel, self).__init__(**kwargs)
 
     def get_name(self) -> str:
         """

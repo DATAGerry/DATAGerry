@@ -18,7 +18,7 @@ import logging
 from typing import ClassVar
 
 from cmdb.security.auth.provider_config import AuthProviderConfig
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 
 LOGGER = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class AuthenticationProvider:
         """
         self.config = config or self.PROVIDER_CONFIG_CLASS(**self.PROVIDER_CONFIG_CLASS.DEFAULT_CONFIG_VALUES)
 
-    def authenticate(self, user_name: str, password: str, **kwargs) -> User:
+    def authenticate(self, user_name: str, password: str, **kwargs) -> UserModel:
         raise NotImplementedError
 
     def get_config(self) -> AuthProviderConfig:

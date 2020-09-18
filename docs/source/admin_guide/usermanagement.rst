@@ -1,16 +1,16 @@
 ***************
-User Management
+UserModel Management
 ***************
 
 Local Users and Groups
 ======================
-Local users and groups can be configured in the WebUI under "Settings" -> "User Management". A user is part of one
+Local users and groups can be configured in the WebUI under "Settings" -> "UserModel Management". A user is part of one
 group. Access rights are defined for a specific group.
 
 The following groups are defined by default and cannot be deleted:
 
  * Administrator
- * User
+ * UserModel
 
 Also, a user cannot delete itself.
 

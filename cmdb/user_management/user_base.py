@@ -85,5 +85,5 @@ class UserManagementBase:
 class NoUserIDError(NoPublicIDError):
 
     def __init__(self, user_id=None):
-        self.message = f'User ID not set - UserID: {user_id}'
+        self.message = f'UserModel ID not set - UserID: {user_id}'
         super(NoPublicIDError, self).__init__(self.message)

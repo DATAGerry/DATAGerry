@@ -20,7 +20,7 @@ from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.auth_errors import AuthenticationError
 from cmdb.security.auth.provider_config import AuthProviderConfig
 from cmdb.security.auth.provider_config_form import AuthProviderConfigForm, AuthProviderConfigFormEntry
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 from cmdb.user_management.user_manager import UserManager, UserManagerGetError
 from cmdb.security.security import SecurityManager
 from cmdb.utils.system_config import SystemConfigReader
@@ -47,7 +47,7 @@ class LocalAuthenticationProvider(AuthenticationProvider):
     def __init__(self, config: LocalAuthenticationProviderConfig = None, *args, **kwargs):
         super(LocalAuthenticationProvider, self).__init__(config)
 
-    def authenticate(self, user_name: str, password: str, **kwargs) -> User:
+    def authenticate(self, user_name: str, password: str, **kwargs) -> UserModel:
         __dbm = DatabaseManagerMongo(
             **SystemConfigReader().get_all_values_from_section('Database')
         )
@@ -55,13 +55,13 @@ class LocalAuthenticationProvider(AuthenticationProvider):
         __user_manager = UserManager(__dbm)
         LOGGER.info(f'[LocalAuthenticationProvider] Try login for user {user_name}')
         try:
-            user: User = __user_manager.get_user_by_name(user_name=user_name)
+            user: UserModel = __user_manager.get_user_by_name(user_name=user_name)
         except UserManagerGetError as umge:
             raise AuthenticationError(LocalAuthenticationProvider.get_name(), umge.message)
         login_pass = __scm.generate_hmac(password)
         if login_pass == user.get_password():
             return user
-        raise AuthenticationError(LocalAuthenticationProvider.get_name(), 'User not exists')
+        raise AuthenticationError(LocalAuthenticationProvider.get_name(), 'UserModel not exists')
 
     def is_active(self) -> bool:
         """Local auth is always activated"""

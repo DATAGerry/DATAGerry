@@ -45,7 +45,7 @@ _RE_TYPE = type(re.compile("foo"))
 def default(obj):
     from cmdb.framework import CmdbDAO
     from cmdb.user_management import UserManagementBase
-    from cmdb.user_management.user_right import BaseRight
+    from cmdb.user_management.models.right import BaseRight
     from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
     from cmdb.media_library.media_file_base import MediaFileManagementBase
     from cmdb.docapi.docapi_template.docapi_template_base import TemplateManagementBase

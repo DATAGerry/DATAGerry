@@ -23,11 +23,10 @@ from cmdb.interface.route_utils import make_response, insert_request_user, login
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.search import Search
 from cmdb.search.params import SearchParam
-from cmdb.search.query import Query, Pipeline
+from cmdb.search.query import Pipeline
 from cmdb.search.query.pipe_builder import PipelineBuilder
-from cmdb.search.query.query_builder import QueryBuilder
 from cmdb.search.searchers import SearcherFramework
-from cmdb.user_management.user import User
+from cmdb.user_management.models.user import UserModel
 
 try:
     from cmdb.utils.error import CMDBError
@@ -45,7 +44,7 @@ search_blueprint = RootBlueprint('search_rest', __name__, url_prefix='/search')
 @search_blueprint.route('/quick/count/', methods=['GET'])
 @login_required
 @insert_request_user
-def quick_search_result_counter(request_user: User):
+def quick_search_result_counter(request_user: UserModel):
     regex = request.args.get('searchValue', Search.DEFAULT_REGEX, str)
     plb = PipelineBuilder()
     regex = plb.regex_('fields.value', f'{regex}', 'ims')
@@ -68,7 +67,7 @@ def quick_search_result_counter(request_user: User):
 @search_blueprint.route('/', methods=['GET', 'POST'])
 @login_required
 @insert_request_user
-def search_framework(request_user: User):
+def search_framework(request_user: UserModel):
     try:
         limit = request.args.get('limit', Search.DEFAULT_LIMIT, int)
         skip = request.args.get('skip', Search.DEFAULT_SKIP, int)
