@@ -16,13 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {EventEmitter, HostBinding, Injectable, Output, TemplateRef} from '@angular/core';
-
-declare global {
-  interface Window {
-    showToast(): void;
-  }
-}
+import {Injectable} from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
@@ -30,67 +24,80 @@ declare global {
 
 export class ToastService {
 
-  toasts: any[] = [];
-  errorToast: any[] = [];
-  idGen: number = 0;
+  public toastsright: any[] = [];
+  public toastsleft: any[] = [];
+  public toastsdownleft: any[] = [];
+  public toastsdownright: any[] = [];
+  public toastscenter: any[] = [];
 
-  // public info(textOrTpl: string | TemplateRef<any>, options: any = {}) {
-  //   this.toasts.push({ textOrTpl, ...options });
-  // }
 
-  public incrementId(): void {
-    this.idGen += 1;
+  public showToast(text: string, options: any = {}, direction?: string) {
+    switch (direction) {
+      case 'right': {
+        this.toastsright.push({text, ...options});
+        break;
+      }
+      case 'left': {
+        this.toastsleft.push({text, ...options});
+        break;
+      }
+      case 'downleft': {
+        this.toastsdownleft.push({text, ...options});
+        break;
+      }
+      case 'downright': {
+        this.toastsdownright.push({text, ...options});
+        break;
+      }
+      case 'center': {
+        this.toastscenter.push({text, ...options});
+        break;
+      }
+      default: {
+        this.toastsright.push({text, ...options});
+        break;
+      }
+    }
   }
 
-  public info(text: string, options: any = {}, animationDelay: number = 10) {
-    this.incrementId();
-    options.icon = 'fas fa-info-circle';
-    options.classname += ' border-info';
-    options.headerName = 'Information';
-    options.headerClass = 'text-info';
-    options.id = this.idGen.toString();
-    options.delayTime = animationDelay;
-    this.toasts.push({ text, ...options});
-  }
-
-  public error(text: string, options: any = {}, animationDelay: number = 7) {
-    this.incrementId();
-    options.icon = 'fas fa-exclamation-circle';
-    options.classname += ' border-danger';
+  public error(text: string, options: any = {}, direction?: string) {
+    options.classname += ' bg-danger';
     options.headerName = 'An Error Occured';
     options.headerClass = 'text-danger';
-    options.id = this.idGen.toString();
-    options.delayTime = animationDelay;
-    this.toasts.push({ text, ...options });
+    options.icon = 'fas fa-exclamation-circle';
+    this.showToast(text, options, direction);
   }
-
-  public warning(text: string, options: any = {}, animationDelay: number = 15) {
-    this.incrementId();
-    options.icon = 'fas fa-exclamation-triangle';
-    options.classname += ' border-warning';
+  public warning(text: string, options: any = {}, direction?: string) {
+    options.classname += ' bg-warning';
     options.headerName = 'Warning';
     options.headerClass = 'text-warning';
-    options.id = this.idGen.toString();
-    options.delayTime = animationDelay;
-    this.toasts.push({ text, ...options });
+    options.icon = 'fas fa-exclamation-triangle';
+    this.showToast(text, options, direction);
   }
 
-  public success(text: string, options: any = {}, animationDelay: number = 5) {
-    this.incrementId();
-    options.icon = 'fas fa-check-circle';
-    options.classname += ' border-success';
+  public success(text: string, options: any = {}, direction?: string) {
+    options.classname += ' bg-success';
     options.headerName = 'Success';
     options.headerClass = 'text-success';
-    options.id = this.idGen.toString();
-    options.delayTime = animationDelay;
-    this.toasts.push({ text, ...options });
+    options.icon = 'fas fa-check-circle';
+    this.showToast(text, options, direction);
   }
+
+  public info(text: string, options: any = {}, direction?: string) {
+    options.classname += ' bg-info';
+    options.headerName = 'Information';
+    options.headerClass = 'text-info';
+    options.icon = 'fas fa-info-circle';
+    this.showToast(text, options, direction);
+  }
+
 
   public remove(toast) {
-    this.toasts = this.toasts.filter(t => t !== toast);
+    this.toastscenter =  this.toastscenter.filter(t => t !== toast);
+    this.toastsdownright =  this.toastsdownright.filter(t => t !== toast);
+    this.toastsdownleft =  this.toastsdownleft.filter(t => t !== toast);
+    this.toastsleft =  this.toastsleft.filter(t => t !== toast);
+    this.toastsright =  this.toastsright.filter(t => t !== toast);
   }
 
-  public removeError(toast) {
-    this.errorToast = this.errorToast.filter(t => t !== toast);
-  }
 }

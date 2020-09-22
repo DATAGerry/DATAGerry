@@ -1,7 +1,45 @@
+:host {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 1040;
+}
+
+.toast {
+  overflow: visible;
+  opacity: 1;
+  pointer-events: all;
+}
+
+.fixed {
+  position: fixed;
+  pointer-events: none;
+  margin: 1em;
+}
+
+.left {
+  left: 0;
+}
+
+.top {
+  top: 0;
+}
+
+.bottom {
+  bottom: 0;
+}
+
+.right {
+  right: 0;
+}
+
 .center {
-  position: relative;
-  top: 30%;
-  left: 30%;
+  height: fit-content;
+  width: fit-content;
+  right: 45%;
+  left: 45%;
+  top: 45%;
+  bottom: 45%;
 }
 
 .meter {

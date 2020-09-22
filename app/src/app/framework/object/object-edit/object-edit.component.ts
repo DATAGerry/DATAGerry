@@ -97,13 +97,11 @@ export class ObjectEditComponent implements OnInit {
       this.objectInstance.comment = this.commitForm.get('comment').value;
       this.objectService.putObject(this.objectID, this.objectInstance).subscribe((res: boolean) => {
         if (res) {
-          this.toastService.info('insert name her Succesfully Updated', {direction: 'top-right'});
-          this.toastService.warning('insert name her Succesfully Updated', {direction: 'top-left'});
-          this.toastService.error('insert name her Succesfully Updated', {direction: 'bottom-left'});
-          this.toastService.success('insert name her', {direction: 'bottom-right'});
-          this.toastService.warning('insert name her Succesfully Updated', {direction: 'top-left'});
-          this.toastService.error('insert name her Succesfully Updated', {direction: 'bottom-left'});
-          this.toastService.success('insert name her', {direction: 'bottom-right'});
+          this.toastService.info('insert name her Succesfully Updated', {}, 'right');
+          this.toastService.error('insert name her Succesfully Updated', {}, 'left');
+          this.toastService.warning('insert name her Succesfully Updated', {}, 'downright');
+          this.toastService.success('insert name her Succesfully Updated', {}, 'downleft');
+          this.toastService.showToast('insert name her Succesfully Updated', {headerName: 'I Play Pokemon Go'}, 'center');
           this.router.navigate(['/framework/object/view/' + this.objectID]);
         }
       });

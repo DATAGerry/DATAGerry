@@ -137,7 +137,7 @@ export class UsersAddComponent implements OnInit, OnDestroy {
     if (this.addForm.valid) {
       const addUser: User = this.addForm.getRawValue();
       this.userService.postUser(addUser).subscribe(addResp => {
-        this.toastService.info(`User was added with ID: ${ addResp }`);
+        this.toastService.showToast(`User was added with ID: ${ addResp }`);
       }, (error) => {
         this.toastService.error(error.error.description);
       }, () => {

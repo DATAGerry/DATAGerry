@@ -47,7 +47,7 @@ export class ObjectSummaryComponent {
     selBox.select();
     document.execCommand('copy');
     document.body.removeChild(selBox);
-    this.toast.info('Summary was copied to clipboard');
+    this.toast.showToast('Summary was copied to clipboard');
   }
 }
 

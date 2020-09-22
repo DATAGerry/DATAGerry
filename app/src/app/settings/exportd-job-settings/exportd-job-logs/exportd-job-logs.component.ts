@@ -130,7 +130,7 @@ export class ExportdJobLogsComponent implements OnInit, OnDestroy {
     deleteModalRef.componentInstance.publicID = publicID;
     deleteModalRef.result.then(result => {
         this.jobLogService.deleteLog(publicID).subscribe(ack => {
-            this.toastService.info('Log was deleted!');
+            this.toastService.showToast('Log was deleted!');
           }, (error) => {
             console.error(error);
           },
