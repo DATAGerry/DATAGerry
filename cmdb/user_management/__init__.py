@@ -22,7 +22,6 @@ from typing import List
 
 from cmdb.user_management.models.user import UserModel
 
-from cmdb.user_management.user_base import UserManagementBase
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.user_manager import UserManager
 
@@ -46,6 +45,6 @@ __USER_GROUP_RIGHTS__: List[str] = [
 ]
 
 __FIXED_GROUPS__: List[UserGroupModel] = [
-    UserGroupModel(public_id=1, name='admin', label='Administrator', rights=__ADMIN_GROUP_RIGHTS__, deletable=False),
-    UserGroupModel(public_id=2, name='user', label='UserModel', rights=__USER_GROUP_RIGHTS__, deletable=False)
+    UserGroupModel(public_id=1, name='admin', label='Administrator', rights=__ADMIN_GROUP_RIGHTS__),
+    UserGroupModel(public_id=2, name='user', label='UserModel', rights=__USER_GROUP_RIGHTS__)
 ]

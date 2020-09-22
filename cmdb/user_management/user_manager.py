@@ -157,16 +157,13 @@ class UserManager(CmdbManagerBase):
         try:
             return self.dbm.insert(collection=UserGroupModel.COLLECTION, data=insert_group.to_database())
         except Exception:
-            raise UserManagerInsertError(insert_group.get_name())
+            raise UserManagerInsertError(insert_group.name)
 
     def delete_group(self, public_id, user_action: str = None, options: dict = None) -> bool:
         try:
             delete_group: UserGroupModel = self.get_group(public_id)
         except UserManagerGetError:
             raise UserManagerDeleteError(f'Could not find group with ID: {public_id}')
-
-        if not delete_group.is_deletable():
-            raise UserManagerDeleteError(f'Group {delete_group.get_label()} is not deletable!')
 
         try:
             ack = self.dbm.delete(collection=UserGroupModel.COLLECTION, public_id=public_id).acknowledged

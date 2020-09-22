@@ -16,32 +16,26 @@
 
 import logging
 
-from cmdb.user_management.user_base import UserManagementBase
+from cmdb.framework import CmdbDAO
+from cmdb.framework.utils import Collection, Model
 from cmdb.user_management.models.right import GLOBAL_RIGHT_IDENTIFIER
 from cmdb.utils.error import CMDBError
 
 LOGGER = logging.getLogger(__name__)
 
 
-class UserGroupModel(UserManagementBase):
-    COLLECTION = 'management.groups'
-    REQUIRED_INIT_KEYS = ['name']
+class UserGroupModel(CmdbDAO):
+    COLLECTION: Collection = 'management.groups'
+    MODEL: Model = 'Group'
     INDEX_KEYS = [
-        {'keys': [('name', UserManagementBase.ASCENDING)], 'name': 'name', 'unique': True}
+        {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
-    def __init__(self, name: str, label: str = None, rights: list = None, deletable: bool = True, **kwargs):
+    def __init__(self, public_id: int, name: str, label: str = None, rights: list = None):
         self.name: str = name
         self.label: str = label or name.title()
         self.rights: list = rights or []
-        self.deletable: bool = deletable
-        super(UserGroupModel, self).__init__(**kwargs)
-
-    def get_name(self) -> str:
-        return self.name
-
-    def get_label(self) -> str:
-        return self.label
+        super(UserGroupModel, self).__init__(public_id=public_id)
 
     def set_rights(self, rights: list):
         self.rights = rights
@@ -71,9 +65,6 @@ class UserGroupModel(UserManagementBase):
                 return True
             return False
         return self.has_extended_right(right_name=parent_right_name)
-
-    def is_deletable(self) -> bool:
-        return self.deletable
 
 
 class RightNotFoundError(CMDBError):
