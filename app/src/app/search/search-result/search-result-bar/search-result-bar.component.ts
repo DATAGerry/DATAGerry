@@ -131,6 +131,6 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
   protected showToast(selBox: any) {
     document.execCommand('copy');
     document.body.removeChild(selBox);
-    this.toast.showToast('Content was copied to clipboard');
+    this.toast.info('Content was copied to clipboard');
   }
 }

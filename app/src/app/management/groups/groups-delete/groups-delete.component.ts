@@ -78,7 +78,7 @@ export class GroupsDeleteComponent implements OnInit, OnDestroy {
         {group_id: this.deleteForm.get('deleteGroupOption').value})
         .subscribe(ack => {
             if (ack) {
-              this.toast.showToast('Group was deleted');
+              this.toast.success('Group was deleted');
               this.router.navigate(['/management/groups/']);
             }
           },

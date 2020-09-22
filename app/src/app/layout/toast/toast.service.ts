@@ -32,6 +32,9 @@ export class ToastService {
 
 
   public showToast(text: string, options: any = {}, direction?: string) {
+    if (!options.icon) {
+      options.icon = 'fas fa-info-circle';
+    }
     switch (direction) {
       case 'right': {
         this.toastsright.push({text, ...options});

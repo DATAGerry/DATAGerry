@@ -85,7 +85,7 @@ export class DocapiSettingsBuilderComponent implements OnInit {
         });
     } else if (this.mode === CmdbMode.Edit) {
       this.docapiService.putDocTemplate(this.docInstance).subscribe((updateResp: DocTemplate) => {
-          this.toast.showToast(`DocAPI document successfully edited: ${ updateResp.public_id }`);
+          this.toast.success(`DocAPI document successfully edited: ${ updateResp.public_id }`);
           this.router.navigate(['/settings/docapi/'], { queryParams: { docEditSuccess: updateResp.public_id } });
         },
         (error) => {

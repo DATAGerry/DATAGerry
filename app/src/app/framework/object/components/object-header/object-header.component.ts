@@ -54,7 +54,7 @@ export class ObjectHeaderComponent {
   public toggleChange() {
     this.activeState = this.activeState !== true;
     this.objectService.changeState(this.objectID, this.activeState).subscribe((resp: boolean) => {
-      this.toastService.showToast(`Changed active state to ${ this.activeState }`);
+      this.toastService.info(`Changed active state to ${ this.activeState }`);
       this.stateChange.emit(true);
     });
   }

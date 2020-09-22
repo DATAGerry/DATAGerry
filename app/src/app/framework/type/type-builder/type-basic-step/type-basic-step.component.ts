@@ -129,7 +129,7 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
               this.categories = categories;
             });
             this.sidebarService.reload();
-            this.toast.showToast('Category # ' + categoryID + ' was created');
+            this.toast.success('Category # ' + categoryID + ' was created');
           });
       }
     }, (reason) => {
