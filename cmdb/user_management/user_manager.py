@@ -93,7 +93,7 @@ class UserManager(CmdbManagerBase):
         TODO: Refactor for dict use
         """
         try:
-            return self.dbm.insert(collection=UserModel.COLLECTION, data=user.to_database())
+            return self.dbm.insert(collection=UserModel.COLLECTION, data=user.__dict__)
         except (CMDBError, Exception):
             raise UserManagerInsertError(f'Could not insert {user.user_name}')
 
@@ -155,7 +155,7 @@ class UserManager(CmdbManagerBase):
 
     def insert_group(self, insert_group: UserGroupModel) -> int:
         try:
-            return self.dbm.insert(collection=UserGroupModel.COLLECTION, data=insert_group.to_database())
+            return self.dbm.insert(collection=UserGroupModel.COLLECTION, data=insert_group.__dict__)
         except Exception:
             raise UserManagerInsertError(insert_group.name)
 

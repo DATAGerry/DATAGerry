@@ -137,7 +137,7 @@ def post_login():
         # If login success generate user instance with token
         if user_instance:
             user_instance.last_login_time = datetime.utcnow()
-            user_manager.update_user(user_instance.public_id, user_instance.to_database())
+            user_manager.update_user(user_instance.public_id, user_instance.__dict__)
             tg = TokenGenerator()
             token = tg.generate_token(payload={'user': {
                 'public_id': user_instance.get_public_id()

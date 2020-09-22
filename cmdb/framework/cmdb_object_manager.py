@@ -213,7 +213,7 @@ class CmdbObjectManager(CmdbManagerBase):
         try:
             ack = self.dbm.insert(
                 collection=CmdbObject.COLLECTION,
-                data=new_object.to_database()
+                data=new_object.__dict__
             )
             if self._event_queue:
                 event = Event("cmdb.core.object.added", {"id": new_object.get_public_id(),
@@ -235,7 +235,7 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = self._update(
             collection=CmdbObject.COLLECTION,
             public_id=update_object.get_public_id(),
-            data=update_object.to_database()
+            data=update_object.__dict__
         )
         # create cmdb.core.object.updated event
         if self._event_queue and request_user:
@@ -588,7 +588,7 @@ class CmdbObjectManager(CmdbManagerBase):
     def insert_link(self, data: dict):
         try:
             new_link = CmdbLink(public_id=self.get_new_id(collection=CmdbLink.COLLECTION), **data)
-            return self._insert(CmdbLink.COLLECTION, new_link.to_database())
+            return self._insert(CmdbLink.COLLECTION, new_link.__dict__)
         except (CMDBError, Exception) as err:
             raise ObjectManagerInsertError(err)
 

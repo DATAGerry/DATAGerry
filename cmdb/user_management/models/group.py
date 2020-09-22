@@ -15,10 +15,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+from typing import List
 
 from cmdb.framework import CmdbDAO
 from cmdb.framework.utils import Collection, Model
-from cmdb.user_management.models.right import GLOBAL_RIGHT_IDENTIFIER
+from cmdb.user_management.models.right import GLOBAL_RIGHT_IDENTIFIER, BaseRight
 from cmdb.utils.error import CMDBError
 
 LOGGER = logging.getLogger(__name__)
@@ -31,11 +32,45 @@ class UserGroupModel(CmdbDAO):
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
-    def __init__(self, public_id: int, name: str, label: str = None, rights: list = None):
+    SCHEMA: dict = {
+        'public_id': {
+            'type': 'integer'
+        },
+        'name': {
+            'type': 'string',
+            'required': True,
+        },
+        'label': {
+            'type': 'string',
+            'required': False,
+        }
+    }
+
+    __slots__ = 'public_id', 'name', 'label', 'rights'
+
+    def __init__(self, public_id: int, name: str, label: str = None, rights: List[BaseRight] = None):
         self.name: str = name
         self.label: str = label or name.title()
         self.rights: list = rights or []
         super(UserGroupModel, self).__init__(public_id=public_id)
+
+    @classmethod
+    def from_data(cls, data: dict) -> "UserGroupModel":
+        rights = []
+        return cls(
+            public_id=data.get('public_id'),
+            name=data.get('name'),
+            label=data.get('label', None),
+            rights=rights
+        )
+
+    @classmethod
+    def to_data(cls, instance: "UserGroupModel") -> dict:
+        raise NotImplementedError()
+
+    @classmethod
+    def to_json(cls, instance: "UserGroupModel") -> dict:
+        raise NotImplementedError()
 
     def set_rights(self, rights: list):
         self.rights = rights
