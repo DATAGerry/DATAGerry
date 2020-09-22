@@ -15,8 +15,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+from json import dumps
 from typing import List
 
+from cmdb.data_storage.database_utils import default
 from cmdb.framework import CmdbDAO
 from cmdb.framework.utils import Collection, Model
 from cmdb.user_management.models.right import GLOBAL_RIGHT_IDENTIFIER, BaseRight
@@ -55,7 +57,7 @@ class UserGroupModel(CmdbDAO):
         super(UserGroupModel, self).__init__(public_id=public_id)
 
     @classmethod
-    def from_data(cls, data: dict) -> "UserGroupModel":
+    def from_data(cls, data: dict, rights: List[BaseRight]) -> "UserGroupModel":
         rights = []
         return cls(
             public_id=data.get('public_id'),
@@ -65,12 +67,22 @@ class UserGroupModel(CmdbDAO):
         )
 
     @classmethod
-    def to_data(cls, instance: "UserGroupModel") -> dict:
-        raise NotImplementedError()
+    def to_data(cls, instance: "UserGroupModel"):
+        return dumps({
+            'public_id': instance.public_id,
+            'name': instance.name,
+            'label': instance.label,
+            'rights': [right.name for right in instance.rights]
+        }, default=default)
 
     @classmethod
-    def to_json(cls, instance: "UserGroupModel") -> dict:
-        raise NotImplementedError()
+    def to_dict(cls, instance: "UserGroupModel") -> dict:
+        return {
+            'public_id': instance.public_id,
+            'name': instance.name,
+            'label': instance.label,
+            'rights': [right.name for right in instance.rights]
+        }
 
     def set_rights(self, rights: list):
         self.rights = rights

@@ -13,16 +13,14 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+from enum import Enum
 
-import logging
 from cmdb.utils.error import CMDBError
-
-LOGGER = logging.getLogger(__name__)
 
 GLOBAL_RIGHT_IDENTIFIER = '*'
 
 
-class BaseRight:
+class Levels(Enum):
     CRITICAL = 100
     DANGER = 80
     SECURE = 50
@@ -30,61 +28,51 @@ class BaseRight:
     PERMISSION = 10
     NOTSET = 0
 
-    MIN_LEVEL = NOTSET
-    MAX_LEVEL = CRITICAL
 
-    _MASTER = False
+_levelToName = {
+    Levels.CRITICAL: 'CRITICAL',
+    Levels.DANGER: 'DANGER',
+    Levels.SECURE: 'SECURE',
+    Levels.PROTECTED: 'PROTECTED',
+    Levels.PERMISSION: 'PERMISSION',
+    Levels.NOTSET: 'NOTSET',
+}
 
-    PREFIX = 'base'
+_nameToLevel = {
+    'CRITICAL': Levels.CRITICAL,
+    'DANGER': Levels.DANGER,
+    'SECURE': Levels.SECURE,
+    'PROTECTED': Levels.PROTECTED,
+    'PERMISSION': Levels.PERMISSION,
+    'NOTSET': Levels.NOTSET,
+}
 
-    _levelToName = {
-        CRITICAL: 'CRITICAL',
-        DANGER: 'DANGER',
-        SECURE: 'SECURE',
-        PROTECTED: 'PROTECTED',
-        PERMISSION: 'PERMISSION',
-        NOTSET: 'NOTSET',
-    }
 
-    _nameToLevel = {
-        'CRITICAL': CRITICAL,
-        'DANGER': DANGER,
-        'SECURE': SECURE,
-        'PROTECTED': PROTECTED,
-        'PERMISSION': PERMISSION,
-        'NOTSET': NOTSET,
-    }
+class BaseRight:
+    MIN_LEVEL = Levels.NOTSET
+    MAX_LEVEL = Levels.CRITICAL
 
-    def __init__(self, level: int, name: str, label: str = None, description: str = None):
+    DEFAULT_MASTER: bool = False
+    PREFIX: str = 'base'
+
+    __slots__ = '_level', 'name', 'label', 'description', 'is_master'
+
+    def __init__(self, level: Levels, name: str, label: str = None, description: str = None):
         self.level = level
         self.name = '{}.{}'.format(self.PREFIX, name)
         self.label = label or f'{self.get_prefix()}.{self.name.split(".")[-1]}'
-        self.description = description or "No description"
-        if name == GLOBAL_RIGHT_IDENTIFIER:
-            self._MASTER = True
-
-    def __new__(cls, *args, **kwargs):
-        cls._MASTER = cls._MASTER
-        return super(BaseRight, cls).__new__(cls)
+        self.description = description
+        self.is_master = name == GLOBAL_RIGHT_IDENTIFIER
 
     def get_prefix(self):
         return self.PREFIX.split('.')[-1]
 
-    def get_name(self):
-        return self.name
-
     def get_label(self):
         return self.label or f'{self.get_prefix()}.{self.name.split(".")[-1]}'
 
-    def get_description(self):
-        return self.description
-
-    def is_master(self):
-        return self._MASTER
-
     @classmethod
     def get_levels(cls):
-        return cls._levelToName
+        return _levelToName
 
     @property
     def level(self):
@@ -92,23 +80,13 @@ class BaseRight:
 
     @level.setter
     def level(self, value):
-        if value not in BaseRight._levelToName:
+        if value not in Levels:
             raise InvalidLevelRightError(value)
-        if value < self.MIN_LEVEL:
+        if value.value < self.MIN_LEVEL.value:
             raise PoorlyLevelRightError(value, self.MIN_LEVEL)
-        if value > self.MAX_LEVEL:
+        if value.value > self.MAX_LEVEL.value:
             raise MaxLevelRightError(value, self.MAX_LEVEL)
         self._level = value
-
-    def get_level(self):
-        return self.level
-
-    def get_level_name(self):
-        return BaseRight._levelToName[self.level]
-
-    def __repr__(self):
-        from cmdb.utils.helpers import debug_print
-        return debug_print(self)
 
 
 class InvalidLevelRightError(CMDBError):

@@ -15,28 +15,28 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from cmdb.user_management.models.right import BaseRight
+from cmdb.user_management.models.right import BaseRight, Levels
 
 
 class ExportRight(BaseRight):
-    MIN_LEVEL = BaseRight.PROTECTED
+    MIN_LEVEL = Levels.PROTECTED
     PREFIX = '{}.{}'.format(BaseRight.PREFIX, 'export')
 
-    def __init__(self, name: str, level: int = 50, description: str = None):
+    def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
         super(ExportRight, self).__init__(level, name, description=description)
 
 
 class ExportObjectRight(ExportRight):
-    MIN_LEVEL = BaseRight.PROTECTED
+    MIN_LEVEL = Levels.PROTECTED
     PREFIX = '{}.{}'.format(ExportRight.PREFIX, 'object')
 
-    def __init__(self, name: str, level: int = 50, description: str = None):
+    def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
         super(ExportObjectRight, self).__init__(name, level, description=description)
 
 
 class ExportTypeRight(ExportRight):
-    MIN_LEVEL = BaseRight.SECURE
+    MIN_LEVEL = Levels.SECURE
     PREFIX = '{}.{}'.format(ExportRight.PREFIX, 'type')
 
-    def __init__(self, name: str, level: int = 50, description: str = None):
+    def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
         super(ExportTypeRight, self).__init__(name, level, description=description)

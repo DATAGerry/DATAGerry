@@ -13,31 +13,31 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from cmdb.user_management.models.right import BaseRight
+from cmdb.user_management.models.right import BaseRight, Levels
 
 
 class UserManagementRight(BaseRight):
-    MIN_LEVEL = BaseRight.SECURE
-    MAX_LEVEL = BaseRight.DANGER
+    MIN_LEVEL = Levels.SECURE
+    MAX_LEVEL = Levels.DANGER
     PREFIX = '{}.{}'.format(BaseRight.PREFIX, 'user-management')
 
-    def __init__(self, name: str, level: int = MIN_LEVEL, description: str = None):
+    def __init__(self, name: str, level: Levels = MIN_LEVEL, description: str = None):
         super(UserManagementRight, self).__init__(level, name, description=description)
 
 
 class UserRight(UserManagementRight):
-    MIN_LEVEL = BaseRight.SECURE
-    MAX_LEVEL = BaseRight.DANGER
+    MIN_LEVEL = Levels.SECURE
+    MAX_LEVEL = Levels.DANGER
     PREFIX = '{}.{}'.format(UserManagementRight.PREFIX, 'user')
 
-    def __init__(self, name: str, level: int = MIN_LEVEL, description: str = None):
+    def __init__(self, name: str, level: Levels = MIN_LEVEL, description: str = None):
         super(UserRight, self).__init__(name, level, description=description)
 
 
 class GroupRight(UserManagementRight):
-    MIN_LEVEL = BaseRight.SECURE
-    MAX_LEVEL = BaseRight.DANGER
+    MIN_LEVEL = Levels.SECURE
+    MAX_LEVEL = Levels.DANGER
     PREFIX = '{}.{}'.format(UserManagementRight.PREFIX, 'group')
 
-    def __init__(self, name: str, level: int = MIN_LEVEL, description: str = None):
+    def __init__(self, name: str, level: Levels = MIN_LEVEL, description: str = None):
         super(GroupRight, self).__init__(name, level, description=description)

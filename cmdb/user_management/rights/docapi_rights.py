@@ -15,20 +15,20 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from cmdb.user_management.models.right import BaseRight
+from cmdb.user_management.models.right import BaseRight, Levels
 
 
 class DocapiRight(BaseRight):
-    MIN_LEVEL = BaseRight.PROTECTED
+    MIN_LEVEL = Levels.PROTECTED
     PREFIX = '{}.{}'.format(BaseRight.PREFIX, 'docapi')
 
-    def __init__(self, name: str, level: int = 50, description: str = None):
+    def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
         super(DocapiRight, self).__init__(level, name, description=description)
 
 
 class DocapiTemplateRight(DocapiRight):
-    MIN_LEVEL = BaseRight.PROTECTED
+    MIN_LEVEL = Levels.PROTECTED
     PREFIX = '{}.{}'.format(DocapiRight.PREFIX, 'template')
 
-    def __init__(self, name: str, level: int = 50, description: str = None):
+    def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
         super(DocapiTemplateRight, self).__init__(name, level, description=description)

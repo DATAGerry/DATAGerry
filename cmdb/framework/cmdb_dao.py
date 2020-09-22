@@ -142,7 +142,7 @@ class CmdbDAO:
         return index_list
 
     @classmethod
-    def from_data(cls, data: dict) -> "CmdbDAO":
+    def from_data(cls, data: dict, *args, **kwargs) -> "CmdbDAO":
         raise NotImplementedError()
 
     @classmethod
@@ -150,7 +150,7 @@ class CmdbDAO:
         raise NotImplementedError()
 
     @classmethod
-    def to_json(cls, instance: "CmdbDAO") -> dict:
+    def to_dict(cls, instance: "CmdbDAO") -> dict:
         raise NotImplementedError()
 
     def update_version(self, update) -> str:

@@ -107,11 +107,10 @@ class UserModel(CmdbDAO):
 
     @classmethod
     def to_data(cls, instance: "UserModel") -> str:
-        return dumps(cls.to_json(instance), default=default)
-
+        return dumps(cls.to_dict(instance), default=default)
 
     @classmethod
-    def to_json(cls, instance: "UserModel") -> dict:
+    def to_dict(cls, instance: "UserModel") -> dict:
         return {
             'public_id': instance.public_id,
             'user_name': instance.user_name,
