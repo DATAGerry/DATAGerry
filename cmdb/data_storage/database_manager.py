@@ -240,6 +240,10 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
                 return False
         return True
 
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Auto disconnect the database connection when the Manager get destroyed."""
+        self.connector.disconnect()
+
     def _import(self, collection: str, data_list: list):
         try:
             self.delete_collection(collection)
