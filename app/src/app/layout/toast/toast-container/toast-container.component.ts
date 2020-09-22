@@ -34,12 +34,11 @@ export class ToastContainerComponent {
     if (time) {
       return 'progressBars ' + time.toString() + ' s linear';
     }
-    return 'progressBar 20s linear';
+    return 'progressBar 5s linear';
   }
 
   waitTillDisposal(time: number, toast) {
     // tslint:disable-next-line:only-arrow-functions
-    time = 20000;
     function delay(ms: number) {
       return new Promise( resolve => {
         setTimeout(resolve, ms);

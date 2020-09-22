@@ -9,6 +9,11 @@
   overflow: visible;
   opacity: 1;
   pointer-events: all;
+  border: 0px;
+  border: 0px solid;
+  border-left: 5px solid;
+  min-width: 350px;
+  pointer-events: all;
 }
 
 .fixed {
@@ -40,6 +45,12 @@
   left: 45%;
   top: 45%;
   bottom: 45%;
+}
+
+.icon-center {
+  position: absolute;
+  left: 5%;
+  top: 30%;
 }
 
 .meter {

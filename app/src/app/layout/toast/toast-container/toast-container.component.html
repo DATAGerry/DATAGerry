@@ -1,18 +1,20 @@
 <div class="right fixed">
   <div *ngFor="let toast of toastService.toastsright"
-       [@simpleFadeAnimation]="'in'"
-       class="toast {{toast.classname}}">
+       class="toast  bg-white {{toast.classname}} {{toast.direction}}"
+       [@simpleFadeAnimation]="'in'">
     <span>{{waitTillDisposal((toast.delayTime * 1000) || 5000, toast)}}</span>
-    <div class="toast-header {{toast.headerClass}}">
-      <strong class="mr-auto">
-        <i class="{{toast.icon}}"></i>
-        &nbsp;{{toast.headerName}}</strong>
-      <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-        <span aria-hidden="true" (click)="toastService.remove(toast)">×</span>
-      </button>
-    </div>
-    <div class="toast-body">
-      {{toast.text}}
+    <div class="toast-body ">
+      <div class="container">
+        <div class="row">
+          <div class="col-2 pl-0"><i class="{{toast.icon}} {{toast.headerClass}} fa-3x fa-align-center icon-center"></i></div>
+          <div class="col-9"><span><h5>{{toast.headerName}}</h5> {{toast.text}}</span></div>
+          <div class="col-1 pr-0">
+            <button type="button" class="ml-2 mb-2 close" data-dismiss="toast" aria-label="Close">
+              <span aria-hidden="true" (click)="toastService.remove(toast)">×</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="meter">
       <span style="width: 100%"><span class="progress" [style.animation]="parse(toast.delayTime)"></span></span>
@@ -22,19 +24,21 @@
 
 <div class="left fixed">
   <div *ngFor="let toast of toastService.toastsleft"
-       [@simpleFadeAnimation]="'in'"
-       class="toast {{toast.classname}}">
+       class="toast  bg-white {{toast.classname}} {{toast.direction}}"
+       [@simpleFadeAnimation]="'in'">
     <span>{{waitTillDisposal((toast.delayTime * 1000) || 5000, toast)}}</span>
-    <div class="toast-header {{toast.headerClass}}">
-      <strong class="mr-auto">
-        <i class="{{toast.icon}}"></i>
-        &nbsp;{{toast.headerName}}</strong>
-      <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-        <span aria-hidden="true" (click)="toastService.remove(toast)">×</span>
-      </button>
-    </div>
-    <div class="toast-body">
-      {{toast.text}}
+    <div class="toast-body ">
+      <div class="container">
+        <div class="row">
+          <div class="col-2 pl-0"><i class="{{toast.icon}} {{toast.headerClass}} fa-3x fa-align-center icon-center"></i></div>
+          <div class="col-9"><span><h5>{{toast.headerName}}</h5> {{toast.text}}</span></div>
+          <div class="col-1 pr-0">
+            <button type="button" class="ml-2 mb-2 close" data-dismiss="toast" aria-label="Close">
+              <span aria-hidden="true" (click)="toastService.remove(toast)">×</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="meter">
       <span style="width: 100%"><span class="progress" [style.animation]="parse(toast.delayTime)"></span></span>
@@ -44,19 +48,21 @@
 
 <div class="bottom right fixed">
   <div *ngFor="let toast of toastService.toastsdownright"
-       [@simpleFadeAnimation]="'in'"
-       class="toast {{toast.classname}}">
+       class="toast  bg-white {{toast.classname}} {{toast.direction}}"
+       [@simpleFadeAnimation]="'in'">
     <span>{{waitTillDisposal((toast.delayTime * 1000) || 5000, toast)}}</span>
-    <div class="toast-header {{toast.headerClass}}">
-      <strong class="mr-auto">
-      <i class="{{toast.icon}}"></i>
-      &nbsp;{{toast.headerName}}</strong>
-      <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-        <span aria-hidden="true" (click)="toastService.remove(toast)">×</span>
-      </button>
-    </div>
-    <div class="toast-body">
-      {{toast.text}}
+    <div class="toast-body ">
+      <div class="container">
+        <div class="row">
+          <div class="col-2 pl-0"><i class="{{toast.icon}} {{toast.headerClass}} fa-3x fa-align-center icon-center"></i></div>
+          <div class="col-9"><span><h5>{{toast.headerName}}</h5> {{toast.text}}</span></div>
+          <div class="col-1 pr-0">
+            <button type="button" class="ml-2 mb-2 close" data-dismiss="toast" aria-label="Close">
+              <span aria-hidden="true" (click)="toastService.remove(toast)">×</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="meter">
       <span style="width: 100%"><span class="progress" [style.animation]="parse(toast.delayTime)"></span></span>
@@ -66,19 +72,21 @@
 
 <div class="bottom left fixed">
   <div *ngFor="let toast of toastService.toastsdownleft"
-       [@simpleFadeAnimation]="'in'"
-       class="toast {{toast.classname}}">
+       class="toast  bg-white {{toast.classname}} {{toast.direction}}"
+       [@simpleFadeAnimation]="'in'">
     <span>{{waitTillDisposal((toast.delayTime * 1000) || 5000, toast)}}</span>
-    <div class="toast-header {{toast.headerClass}}">
-      <strong class="mr-auto">
-        <i class="{{toast.icon}}"></i>
-        &nbsp;{{toast.headerName}}</strong>
-      <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-        <span aria-hidden="true" (click)="toastService.remove(toast)">×</span>
-      </button>
-    </div>
-    <div class="toast-body">
-      {{toast.text}}
+    <div class="toast-body ">
+      <div class="container">
+        <div class="row">
+          <div class="col-2 pl-0"><i class="{{toast.icon}} {{toast.headerClass}} fa-3x fa-align-center icon-center"></i></div>
+          <div class="col-9"><span><h5>{{toast.headerName}}</h5> {{toast.text}}</span></div>
+          <div class="col-1 pr-0">
+            <button type="button" class="ml-2 mb-2 close" data-dismiss="toast" aria-label="Close">
+              <span aria-hidden="true" (click)="toastService.remove(toast)">×</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="meter">
       <span style="width: 100%"><span class="progress" [style.animation]="parse(toast.delayTime)"></span></span>
@@ -88,24 +96,24 @@
 
 <div class="center fixed">
   <div *ngFor="let toast of toastService.toastscenter"
-       [@simpleFadeAnimation]="'in'"
-       class="toast {{toast.classname}}">
+       class="toast  bg-white {{toast.classname}} {{toast.direction}}"
+       [@simpleFadeAnimation]="'in'">
     <span>{{waitTillDisposal((toast.delayTime * 1000) || 5000, toast)}}</span>
-    <div class="toast-header {{toast.headerClass}}">
-      <strong class="mr-auto">
-        <i class="{{toast.icon}}"></i>
-        &nbsp;{{toast.headerName}}</strong>
-      <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-        <span aria-hidden="true" (click)="toastService.remove(toast)">×</span>
-      </button>
-    </div>
-    <div class="toast-body">
-      {{toast.text}}
+    <div class="toast-body ">
+      <div class="container">
+        <div class="row">
+          <div class="col-2 pl-0"><i class="{{toast.icon}} {{toast.headerClass}} fa-3x fa-align-center icon-center"></i></div>
+          <div class="col-9"><span><h5>{{toast.headerName}}</h5> {{toast.text}}</span></div>
+          <div class="col-1 pr-0">
+            <button type="button" class="ml-2 mb-2 close" data-dismiss="toast" aria-label="Close">
+              <span aria-hidden="true" (click)="toastService.remove(toast)">×</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="meter">
       <span style="width: 100%"><span class="progress" [style.animation]="parse(toast.delayTime)"></span></span>
     </div>
   </div>
 </div>
-
-

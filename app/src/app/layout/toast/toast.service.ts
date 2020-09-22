@@ -61,14 +61,14 @@ export class ToastService {
   }
 
   public error(text: string, options: any = {}, direction?: string) {
-    options.classname += ' bg-danger';
+    options.classname += ' border-danger';
     options.headerName = 'An Error Occured';
     options.headerClass = 'text-danger';
     options.icon = 'fas fa-exclamation-circle';
     this.showToast(text, options, direction);
   }
   public warning(text: string, options: any = {}, direction?: string) {
-    options.classname += ' bg-warning';
+    options.classname += ' border-warning';
     options.headerName = 'Warning';
     options.headerClass = 'text-warning';
     options.icon = 'fas fa-exclamation-triangle';
@@ -76,7 +76,7 @@ export class ToastService {
   }
 
   public success(text: string, options: any = {}, direction?: string) {
-    options.classname += ' bg-success';
+    options.classname += ' border-success';
     options.headerName = 'Success';
     options.headerClass = 'text-success';
     options.icon = 'fas fa-check-circle';
@@ -84,7 +84,7 @@ export class ToastService {
   }
 
   public info(text: string, options: any = {}, direction?: string) {
-    options.classname += ' bg-info';
+    options.classname += ' border-info';
     options.headerName = 'Information';
     options.headerClass = 'text-info';
     options.icon = 'fas fa-info-circle';
