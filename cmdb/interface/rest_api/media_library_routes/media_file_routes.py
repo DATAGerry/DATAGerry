@@ -15,14 +15,21 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+import json
+from bson import json_util
 
-from flask import abort, request, current_app, Response
-from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError
+from flask import abort, request, current_app, Response, jsonify
+from cmdb.media_library.media_file_manager import MediaFileManagerGetError, \
+    MediaFileManagerDeleteError, MediaFileManagerUpdateError, MediaFileManagerInsertError
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
-from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import User
 from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import get_element_from_data_request, \
     get_file_in_request, generate_metadata_filter, recursive_delete_filter
+
+
+from cmdb.interface.response import GetMultiResponse, InsertSingleResponse
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.blueprint import APIBlueprint
 
 
 with current_app.app_context():
@@ -35,16 +42,13 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-media_file_blueprint = RootBlueprint('media_file_blueprint', __name__, url_prefix='/media_file')
-
-# DEFAULT ROUTES
+media_file_blueprint = APIBlueprint('media_file_blueprint', __name__, url_prefix='/media_file')
 
 
-@media_file_blueprint.route('/', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_file_list(request_user: User):
+@media_file_blueprint.route('/', methods=['GET', 'HEAD'])
+@media_file_blueprint.protect(auth=True, right='base.framework.object.view')
+@media_file_blueprint.parse_collection_parameters()
+def get_file_list(params: CollectionParameters):
     """
     get all objects in database
 
@@ -52,14 +56,14 @@ def get_file_list(request_user: User):
         list of media_files
     """
     try:
-        media_file_list = media_file_manager.get_all_media_files(generate_metadata_filter('metadata', request))
-    except ObjectManagerGetError as err:
-        LOGGER.error(err.message)
-        return abort(404)
-    if len(media_file_list) < 1:
-        return make_response(media_file_list, 204)
-
-    return make_response(media_file_list)
+        param = json.loads(params.optional['metadata'])
+        metadata = generate_metadata_filter('metadata', params=param)
+        query = {'limit': params.limit, 'skip': params.skip}
+        output = media_file_manager.get_all_media_files(metadata, **query)
+        api_response = GetMultiResponse(output.result, total=output.total, params=params, url=request.url)
+    except MediaFileManagerGetError as err:
+        return abort(404, err.message)
+    return api_response.make_response()
 
 
 @media_file_blueprint.route('/', methods=['POST'])
@@ -80,7 +84,7 @@ def add_new_file(request_user: User):
         Args:
             request_user (User): the instance of the started user
         Returns:
-            int: ObjectId of GridFS File.
+            New MediaFile.
         """
     try:
         file = get_file_in_request('file')
@@ -95,12 +99,13 @@ def add_new_file(request_user: User):
         metadata = get_element_from_data_request('metadata', request)
         metadata['author_id'] = request_user.public_id
         metadata['mime_type'] = file.mimetype
-        ack = media_file_manager.insert_media_file(data=file, metadata=metadata)
-    except ObjectInsertError:
+
+        result = media_file_manager.insert_media_file(data=file, metadata=metadata)
+    except (MediaFileManagerInsertError, MediaFileManagerGetError):
         return abort(500)
 
-    resp = make_response(ack)
-    return resp
+    api_response = InsertSingleResponse(result['public_id'], raw=result, url=request.url)
+    return api_response.make_response(prefix='library')
 
 
 @media_file_blueprint.route('/', methods=['PUT'])
@@ -109,34 +114,32 @@ def add_new_file(request_user: User):
 @right_required('base.framework.object.edit')
 def update_file(request_user: User):
     try:
-
-        import json
-        from bson import json_util
         add_data_dump = json.dumps(request.json)
-
         new_file_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
 
         # Check if file exists
-        curr_file = media_file_manager.get_media_file_by_public_id(new_file_data['public_id'])._file
-        curr_file['public_id'] = new_file_data['public_id']
-        curr_file['filename'] = new_file_data['filename']
-        curr_file['metadata'] = new_file_data['metadata']
-        curr_file['metadata']['author_id'] = new_file_data['metadata']['author_id'] = request_user.get_public_id()
-
-        ack = media_file_manager.updata_media_file(curr_file)
-    except ObjectInsertError:
+        data = media_file_manager.get_media_file_by_public_id(new_file_data['public_id'])._file
+        data['public_id'] = new_file_data['public_id']
+        data['filename'] = new_file_data['filename']
+        data['metadata'] = new_file_data['metadata']
+        data['metadata']['author_id'] = new_file_data['metadata']['author_id'] = request_user.get_public_id()
+        media_file_manager.updata_media_file(data)
+    except MediaFileManagerUpdateError:
         return abort(500)
 
-    resp = make_response(ack)
+    resp = make_response(data)
     return resp
 
 
 @media_file_blueprint.route('/<string:name>/', methods=['GET'])
 @media_file_blueprint.route('/<string:name>', methods=['GET'])
-@login_required
-def get_file_by_name(name: str):
+@media_file_blueprint.protect(auth=True, right='base.framework.object.view')
+def get_file(name: str):
     """ Validation: Check folder name for uniqueness
-        Create a unique directory:
+
+        For Example
+
+        Create a unique media file element:
          - Folders in the same directory are unique.
          - The same Folder-Name can exist in different directories
 
@@ -146,28 +149,26 @@ def get_file_by_name(name: str):
         This also applies for files
 
         Args:
-            name: folderName must be unique
+            name: name must be unique
 
-        Returns: True if exist else False
+        Returns: MediaFile
 
         """
     try:
         filter_metadata = generate_metadata_filter('metadata', request)
-        media_file = media_file_manager.exist_media_file(name, filter_metadata)
-    except ObjectManagerGetError as err:
+        result = media_file_manager.get_media_file(name, filter_metadata)._file
+    except MediaFileManagerGetError as err:
         return abort(404, err.message)
-    return make_response(media_file)
+    return make_response(result)
 
 
 @media_file_blueprint.route('/download/<path:filename>', methods=['POST'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def download_media_file(request_user: User, filename: str):
+@media_file_blueprint.protect(auth=True, right='base.framework.object.view')
+def download_file(filename: str):
     try:
         filter_metadata = generate_metadata_filter('metadata', request)
         grid_fs_file = media_file_manager.get_media_file(filename, filter_metadata).read()
-    except ObjectInsertError:
+    except MediaFileManagerInsertError:
         return abort(500)
 
     return Response(
@@ -181,14 +182,13 @@ def download_media_file(request_user: User, filename: str):
 
 
 @media_file_blueprint.route('<int:public_id>', methods=['DELETE'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.edit')
-def delete_file(request_user: User, public_id: int):
+@media_file_blueprint.protect(auth=True, right='base.framework.object.edit')
+def delete_file(public_id: int):
     try:
+        deleted = media_file_manager.get_media_file_by_public_id(public_id)
         for _id in recursive_delete_filter(public_id, media_file_manager):
             media_file_manager.delete_media_file(_id)
-    except ObjectDeleteError:
+    except MediaFileManagerDeleteError:
         return abort(500)
 
-    return make_response(True)
+    return make_response(deleted._file)

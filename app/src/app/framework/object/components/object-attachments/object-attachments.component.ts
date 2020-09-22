@@ -18,11 +18,11 @@
 
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import { FileSaverService } from 'ngx-filesaver';
-import { FileService } from '../../../../file-manager/service/file.service';
-import { FileMetadata } from '../../../../file-manager/model/metadata';
+import { FileService } from '../../../../filemanager/service/file.service';
+import { FileMetadata } from '../../../../filemanager/model/metadata';
 import { ActivatedRoute } from '@angular/router';
 import {NgbModal, NgbModalConfig, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
-import { FileElement } from '../../../../file-manager/model/file-element';
+import { FileElement } from '../../../../filemanager/model/file-element';
 import { AddAttachmentsModalComponent } from '../../../../layout/helpers/modals/add-attachments-modal/add-attachments-modal.component';
 
 @Component({
@@ -51,6 +51,7 @@ export class ObjectAttachmentsComponent implements OnInit, OnDestroy{
       this.attachmentsTotal = resp.length;
     });
   }
+
   public ngOnDestroy(): void {
     if (this.modalRef) {
       this.modalRef.close();

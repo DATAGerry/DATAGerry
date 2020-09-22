@@ -29,7 +29,6 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class FolderTreeComponent implements OnInit, OnChanges {
 
-  private elementFiles: any;
   private elementFileTree: FileElement[] = [];
   private metadata: FileMetadata = new FileMetadata();
   private selectedFileElement: any;
@@ -41,15 +40,6 @@ export class FolderTreeComponent implements OnInit, OnChanges {
 
   get fileTree(): FileElement[] {
     return this.elementFileTree;
-  }
-
-  @Input()
-  set fileElements(value: BehaviorSubject<FileElement[]>) {
-    this.elementFiles = value;
-  }
-
-  get fileElements(): BehaviorSubject<FileElement[]> {
-    return this.elementFiles;
   }
 
   @Input()
@@ -67,9 +57,11 @@ export class FolderTreeComponent implements OnInit, OnChanges {
    */
   @Output() createFileElementEvent = new EventEmitter<any>();
   @Output() renameFileElementEvent = new EventEmitter<any>();
+  @Output() moveFileElementEvent = new EventEmitter<any>();
   @Output() deleteFileElementEvent = new EventEmitter<any>();
+  @Output() loadFileElementEvent = new EventEmitter<any>();
 
-  constructor(private fileService: FileService) { }
+  constructor() { }
 
   static createFolderTree(arr): any[] {
     const tree = [];
@@ -95,46 +87,42 @@ export class FolderTreeComponent implements OnInit, OnChanges {
         }
       }
     }
-    return [{name: 'root', hasSubFolders: true, children: tree, metadata: { parent: null } }];
+    return [{name: '/', public_id: null, hasSubFolders: true, children: tree, metadata: { parent: null } }];
   }
 
   ngOnInit(): void {
-    this.getTreeList();
+    this.fileTree = FolderTreeComponent.createFolderTree(this.fileTree);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    this.getTreeList();
-  }
-
-  private getTreeList() {
-    this.metadata.folder = true;
-    this.fileService.getAllFilesList(this.metadata).subscribe((data: FileElement[]) => {
-      this.fileTree = FolderTreeComponent.createFolderTree(data);
-    });
-  }
-
-  public dropTree(event, value): void {
-    this.selectedFileFolder.next(value);
-    value.hasSubFolders = !value.hasSubFolders;
-    event.stopPropagation();
-  }
-
-  public loadFolderFiles(value) {
-    this.selectedFileFolder.next(value);
-    if (value) {
-      const metadata = new FileMetadata({parent: value.public_id, folder: false });
-      this.fileService.getAllFilesList(metadata).subscribe((data: FileElement[]) => {
-        this.fileElements.next(data);
-      });
+    if (changes.fileTree) {
+      this.fileTree = FolderTreeComponent.createFolderTree(changes.fileTree.currentValue);
     }
   }
 
+  public dropTree(event, value): void {
+    if (value.children && value.children.length > 0) {
+      this.selectedFileFolder.next(value);
+      value.hasSubFolders = !value.hasSubFolders;
+      event.stopPropagation();
+    }
+  }
+
+  public loadFolderFiles(value: FileElement) {
+    this.selectedFileFolder.next(value);
+    this.loadFileElementEvent.emit();
+  }
+
   public createFolder(): void {
-    this.createFileElementEvent.emit(this.selectedFileFolder);
+    this.createFileElementEvent.emit();
   }
 
   public renameFolder(): void {
     this.renameFileElementEvent.emit();
+  }
+
+  public moveFolder() {
+    this.moveFileElementEvent.emit();
   }
 
   public deleteFolder(value: FileElement): void {
@@ -142,6 +130,6 @@ export class FolderTreeComponent implements OnInit, OnChanges {
   }
 
   public loadContextMenu() {
-    console.log('loadContextMenu');
+   console.log('loadContextMenu TODO');
   }
 }

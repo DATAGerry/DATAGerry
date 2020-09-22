@@ -2,15 +2,16 @@
   <ng-template #recursiveList let-fileTree>
     <li *ngFor="let item of fileTree">
       <div class="d-flex"
-           [ngClass]="item.hasSubFolders ? 'caret caret-down':'caret'"
+           [ngClass]="item.hasSubFolders ? 'caret caret-down': item.children?.length > 0 ? 'caret caret-with-subs' : 'caret'"
            [class.selected]="item.public_id === selectedFileFolder.getValue()?.public_id"
            (dblclick)="dropTree($event, item)"
            (click)="loadFolderFiles(item)"
            (contextmenu)="loadContextMenu()">
         <span class="mr-auto">{{item.name}}</span>
-        <span class="context-line" [style.display]="item.name === 'root' ? 'none' : 'block'">
+        <span class="context-line" [style.display]="item.name === '/' ? 'none' : 'block'">
           <i class="far fa-file" (click)="createFolder()"></i>
           <i class="far fa-edit" (click)="renameFolder()"></i>
+          <i class="fas fa-expand-arrows-alt" (click)="moveFolder()"></i>
           <i class="far fa-trash-alt" (click)="deleteFolder(item)"></i>
         </span>
       </div>

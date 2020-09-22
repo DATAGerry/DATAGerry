@@ -126,7 +126,7 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     AddAttachmentsModalComponent,
     GeneralModalComponent,
     ObjectPreviewModalComponent,
-    InfoBoxComponent
+    InfoBoxComponent,
   ],
   exports: [
     NgxSpinnerComponent,

@@ -1,0 +1,26 @@
+<div class="modal-content">
+  <div class="modal-header">
+    <h4 class="modal-title">
+      <i class="fas fa-expand-arrows-alt"></i> <span class="mx-3">Move Element</span>
+    </h4>
+    <button type="button" class="close" aria-hidden="true" (click)="activeModal.close(false)">×</button>
+  </div>
+  <form [formGroup]="basicForm">
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="folderNameInput">Folder name: <span class="required">*</span></label>
+        <ng-select id="folderNameInput"
+                   [items]="destinationFolder"
+                   bindLabel="name"
+                   placeholder="Select the destination folder"
+                   formControlName="folder">
+        </ng-select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary mr-1" (click)="activeModal.close(false)">Cancel</button>
+      <button type="button" class="btn btn-primary" [disabled]="!basicForm.get('folder').valid"
+              (click)="activeModal.close({parent: basicForm.get('folder').value.public_id})">OK</button>
+    </div>
+  </form>
+</div>

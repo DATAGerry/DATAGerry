@@ -16,20 +16,22 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+
 import { Component, Input, OnInit } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FileMetadata } from '../../model/metadata';
 import { checkFolderExistsValidator, FileService } from '../../service/file.service';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastService } from '../../../layout/toast/toast.service';
+import { BehaviorSubject } from 'rxjs';
+import { FileElement } from '../../model/file-element';
 
 @Component({
-  selector: 'cmdb-rename-dialog',
-  templateUrl: './rename-dialog.component.html',
-  styleUrls: ['./rename-dialog.component.scss']
+  selector: 'cmdb-new-folder-dialog',
+  templateUrl: './new-folder-dialog.component.html',
+  styleUrls: ['./new-folder-dialog.component.scss']
 })
-export class RenameDialogComponent implements OnInit {
+export class NewFolderDialogComponent implements OnInit {
 
   private selectedFileElement: BehaviorSubject<any>;
 
@@ -44,11 +46,9 @@ export class RenameDialogComponent implements OnInit {
   public basicForm: FormGroup;
 
 
-  static generateMetaData(value: BehaviorSubject<any> ): FileMetadata {
-    const fileElement = value.getValue();
+  static generateMetaData(parent: BehaviorSubject<any> ): FileMetadata {
     return new FileMetadata(
-      {folder: fileElement == null ? false : fileElement.metadata.folder,
-          parent: fileElement == null ? null : fileElement.public_id }
+      {folder: true, ...{ parent: parent.getValue() == null ? null : parent.getValue().public_id }}
     );
   }
 
@@ -59,11 +59,21 @@ export class RenameDialogComponent implements OnInit {
       name: new FormControl('', Validators.required)
     });
     this.basicForm.get('name').setAsyncValidators(checkFolderExistsValidator(this.fileService,
-      RenameDialogComponent.generateMetaData(this.selectedFileFolder)));
+      NewFolderDialogComponent.generateMetaData(this.selectedFileFolder)));
   }
 
   public get name() {
     return this.basicForm.get('name');
   }
 
+  public createFolder(): void {
+    const folder = new File(['folder'], this.name.value, {
+      type: 'application/json',
+    });
+    this.fileService.postFile( folder, NewFolderDialogComponent.generateMetaData(this.selectedFileElement))
+      .subscribe((resp: any) => {
+        this.toast.show(`Folder was successfully created: ${this.name.value}`);
+        this.activeModal.close({data: resp});
+    });
+  }
 }

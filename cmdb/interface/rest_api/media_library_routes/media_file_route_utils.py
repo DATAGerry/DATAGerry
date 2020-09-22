@@ -40,14 +40,15 @@ def get_element_from_data_request(element, _request: Request) -> (dict, None):
         return None
 
 
-def generate_metadata_filter(element, _request):
+def generate_metadata_filter(element, _request=None, params=None):
     filter_metadata = {}
     try:
-        if _request.args.get(element):
-            data = json.loads(_request.args.get(element))
-        else:
-            data = json.loads(_request.form.to_dict()[element])
-
+        data = params
+        if _request:
+            if _request.args.get(element):
+                data = json.loads(_request.args.get(element))
+            if not data:
+                data = json.loads(_request.form.to_dict()[element])
         for key, value in data.items():
             filter_metadata.update({"metadata.%s" % key: value})
     except (IndexError, KeyError, TypeError, Exception) as ex:
@@ -57,15 +58,14 @@ def generate_metadata_filter(element, _request):
 
 
 def recursive_delete_filter(public_id, media_file_manager, _ids=None) -> []:
-
     if not _ids:
         _ids = []
 
     root = media_file_manager.get_media_file_by_public_id(public_id)
-    all_files = media_file_manager.get_all_media_files({'metadata.parent': root.public_id})
+    output = media_file_manager.get_all_media_files({'metadata.parent': root.public_id})
     _ids.append(root.public_id)
 
-    for item in all_files:
+    for item in output.result:
         recursive_delete_filter(item.public_id, media_file_manager, _ids)
 
     return _ids

@@ -17,9 +17,9 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { FileMetadata } from '../../../../file-manager/model/metadata';
-import { FileElement } from '../../../../file-manager/model/file-element';
-import { FileService } from '../../../../file-manager/service/file.service';
+import { FileMetadata } from '../../../../filemanager/model/metadata';
+import { FileElement } from '../../../../filemanager/model/file-element';
+import { FileService } from '../../../../filemanager/service/file.service';
 import { FileSaverService } from 'ngx-filesaver';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../../toast/toast.service';
@@ -41,20 +41,20 @@ export class AddAttachmentsModalComponent implements OnInit {
               private modalService: NgbModal, public activeModal: NgbActiveModal, private toast: ToastService) { }
 
   public ngOnInit(): void {
-    this.fileService.getAllFilesList(this.metadata).subscribe((resp: FileElement[]) => {
-      this.attachments = resp;
+    this.fileService.getAllFilesList(this.metadata).subscribe((resp: any) => {
+      this.attachments = resp.results;
     });
   }
 
   public getFiles() {
-    this.fileService.getAllFilesList(this.metadata).subscribe((resp: FileElement[]) => {
-      this.attachments = resp;
+    this.fileService.getAllFilesList(this.metadata).subscribe((resp: any) => {
+      this.attachments = resp.results;
       this.inProcess = false;
     });
   }
 
   public downloadFile(filename: string) {
-    this.fileService.getFileByName(filename, this.metadata).subscribe((data: any) => {
+    this.fileService.downloadFile(filename, this.metadata).subscribe((data: any) => {
       this.fileSaverService.save(data.body, filename);
     });
   }
@@ -71,7 +71,7 @@ export class AddAttachmentsModalComponent implements OnInit {
               } else {return false; }
             });
             promiseModal.then(value => {
-              if (value) {  this.postFile(file); }
+              if (value) {this.postFile(file); }
             });
           } else { this.postFile(file); }
         }
@@ -95,6 +95,7 @@ export class AddAttachmentsModalComponent implements OnInit {
   }
 
   private postFile(file: any) {
+    console.log(file);
     file.inProcess = true;
     this.inProcess = true;
     this.attachments.push(file);

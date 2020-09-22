@@ -22,9 +22,9 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import {
   ApiCallService,
   ApiService,
-  httpFileOptions,
+  httpFileOptions, httpObserveOptions,
 } from '../../services/api-call.service';
-import { HttpBackend, HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { HttpParams, HttpResponse} from '@angular/common/http';
 import { ValidatorService } from '../../services/validator.service';
 import { FileMetadata } from '../model/metadata';
 import { FormControl } from '@angular/forms';
@@ -33,7 +33,7 @@ import { FileElement } from '../model/file-element';
 export const checkFolderExistsValidator = (fileService: FileService, metadata: any, time: number = 500) => {
   return (control: FormControl) => {
     return timer(time).pipe(switchMap(() => {
-      return fileService.checkFolderExists(control.value, metadata).pipe(
+      return fileService.getFileElement(control.value, metadata).pipe(
         map((apiResponse: HttpResponse<any[]>) => {
           return apiResponse.body ? { folderExists: true } : null;
         }),
@@ -47,18 +47,6 @@ export const checkFolderExistsValidator = (fileService: FileService, metadata: a
   };
 };
 
-export const httpObserveOptions = {
-  headers: new HttpHeaders({
-    'Content-Type': 'application/json'
-  }),
-  observe: 'response'
-};
-
-const httpOptions = {
-  observe: 'response',
-  responseType: 'blob'
-};
-
 export const PARAMETER = 'params';
 
 @Injectable({
@@ -68,14 +56,22 @@ export const PARAMETER = 'params';
 export class FileService<T = any> implements ApiService {
   public servicePrefix: string = 'media_file';
 
-  constructor(private api: ApiCallService, private http: HttpClient, private backend: HttpBackend) {
+  constructor(private api: ApiCallService) {
   }
 
   /**
    * Get all files as a list
    */
-  public getAllFilesList(params: any): Observable<T[]> {
-    httpObserveOptions[PARAMETER] = { metadata: JSON.stringify(params) };
+  public getAllFilesList(metadata: FileMetadata, ...options): Observable<T[]> {
+
+    let params: HttpParams = new HttpParams();
+    for (const option of options) {
+      for (const key of Object.keys(option)) {
+        params = params.append(key, option[key]);
+      }
+    }
+    params = params.append('metadata', JSON.stringify(metadata));
+    httpObserveOptions[PARAMETER] = params;
     return this.api.callGet<T[]>(this.servicePrefix + '/', httpObserveOptions).pipe(
       map((apiResponse: HttpResponse<T[]>) => {
         if (apiResponse.status === 204) {
@@ -95,12 +91,13 @@ export class FileService<T = any> implements ApiService {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('metadata', JSON.stringify(metadata));
-    return this.api.callPost<T>(this.servicePrefix + '/', formData, httpFileOptions).pipe(
+    httpFileOptions.responseType = 'json';
+    return this.api.callPost<any>(`${ this.servicePrefix }/`, formData, httpFileOptions).pipe(
       map((apiResponse: HttpResponse<any>) => {
         if (apiResponse.status === 204) {
           return [];
         }
-        return apiResponse.body;
+        return apiResponse.body.raw;
       })
     );
   }
@@ -123,7 +120,7 @@ export class FileService<T = any> implements ApiService {
    * @param filename name of the file
    * @param metadata raw instance
    */
-  public getFileByName(filename: string, metadata) {
+  public downloadFile(filename: string, metadata) {
     const formData = new FormData();
     formData.append('metadata', JSON.stringify(metadata));
     return this.api.callPost(this.servicePrefix + '/download/' + filename, formData, httpFileOptions);
@@ -152,10 +149,10 @@ export class FileService<T = any> implements ApiService {
    * @param fileID the file id
    * @param params metadata raw instance
    */
-  public deleteFile(fileID: number, params): Observable<number> {
-    httpFileOptions[PARAMETER] = { metadata: JSON.stringify(params) };
-    return this.api.callDelete<number>(this.servicePrefix + '/' + fileID, httpFileOptions).pipe(
-      map((apiResponse: HttpResponse<number>) => {
+  public deleteFile(fileID: number, params): Observable<any> {
+    httpFileOptions[PARAMETER] = {metadata : JSON.stringify(params)};
+    return this.api.callDelete<any>(this.servicePrefix + '/' + fileID, httpFileOptions).pipe(
+      map((apiResponse: HttpResponse<any>) => {
         return apiResponse.body;
       })
     );
@@ -163,12 +160,27 @@ export class FileService<T = any> implements ApiService {
 
   /**
    * Validation: Check folder name for uniqueness
-   *  @param folderName must be unique
+   *  @param filename must be unique
    *  @param metadata raw instance
    */
-  public checkFolderExists(folderName: string, metadata: FileMetadata) {
-    httpObserveOptions[PARAMETER] = { metadata: JSON.stringify(metadata) };
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ folderName }`, httpObserveOptions);
+  public getFileElement(filename: string, metadata: FileMetadata) {
+    httpObserveOptions[PARAMETER] = {metadata : JSON.stringify(metadata)};
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ filename }`, httpObserveOptions);
   }
 
+  /**
+   * This function provides building  file and directory paths.
+   * @param publicID from the selected file
+   * @param path separator
+   * @param tree of all folder files
+   */
+  public pathBuilder(publicID: number, path: string[], tree: FileElement[]) {
+    const temp = tree.find(f => f.public_id === publicID);
+    const checker = temp ? temp.name : '';
+    path.push(checker);
+    if (temp && temp.metadata && temp.metadata.parent) {
+      return this.pathBuilder(temp.metadata.parent, path, tree);
+    }
+    return path.reverse();
+  }
 }

@@ -16,32 +16,23 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
-import { FileManagerComponent } from './file-manager.component';
+import { CmdbDao } from '../../framework/models/cmdb-dao';
 
-const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    data: {
-      breadcrumb: 'Explorer'
-    },
-    component: FileManagerComponent
-  },
-  {
-    path: 'explorer',
-    data: {
-      breadcrumb: 'Explorer'
-    },
-    component: FileManagerComponent
+export class FileElement implements CmdbDao {
+
+  // a set of data that describes and gives information about other data.
+  // tslint:disable:variable-name
+  public readonly public_id: number;
+  public readonly gridOutId: number;
+  public name: string;
+  public metadata: any;
+  public size: number;
+  public inProcess: boolean = false;
+  public children: any[] = [];
+  public hasSubFolders: boolean = false;
+  // tslint:enable:variable-name
+
+  public constructor(init?: Partial<FileElement>) {
+    Object.assign(this, init);
   }
-];
-
-@NgModule({
-  declarations: [],
-  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
-  exports: [RouterModule]
-})
-export class FileManagerRoutingModule { }
+}

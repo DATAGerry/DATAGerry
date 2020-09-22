@@ -1,0 +1,97 @@
+@import "~src/scss/variables";
+
+.fileExplorer {
+  /* Remove default bullets */
+  ul, #folder-tree-view {
+    list-style-type: none;
+  }
+
+  /* Remove margins and padding from the parent ul */
+  #folder-tree-view {
+    margin: 0;
+    padding: 0;
+    white-space:nowrap;
+  }
+
+  /* Style the caret/folder */
+  .caret {
+    cursor: pointer;
+    user-select: none; /* Prevent text selection */
+
+    /* Create the caret/folder with a unicode, and style it */
+    &::before {
+      font-family: "Font Awesome 5 Free", sans-serif;
+      font-weight: 900;
+      content: "\f07b";
+      color: $black;
+      display: inline-block;
+      margin-right: 6px;
+    }
+
+    /* The caret/folder icon when clicked on */
+    &.caret-with-subs::before {
+      content: "\f65e";
+    }
+
+    /* The caret/folder icon when clicked on */
+    &.caret-down::before {
+      content: "\f07c";
+    }
+  }
+
+  /* The caret/folder hover */
+  .caret:hover, .caret-down:hover {
+    background: $gray-400;
+
+    .context-line {
+      visibility: visible;
+    }
+  }
+
+  /* The nested list */
+  .nested {
+    display: block;
+    padding-left: 1.75em;
+  }
+
+
+  /* The folder is selected */
+  .selected {
+    color: $cmdb-primary;
+    font-weight: bold;
+  }
+
+
+  .context-line {
+    visibility: hidden;
+    z-index: 999;
+    color: $gray-600;
+    i {
+      margin-right: 0.25em;
+
+      &:hover {
+        color: $gray-800;
+      }
+    }
+  }
+
+  //.dash-card .count-numbers {
+  //  position: absolute;
+  //  right: 35px;
+  //  top: 20px;
+  //  font-size: 32px;
+  //  display: block;
+  //}
+  //
+  //.dash-card .count-name {
+  //  position: absolute;
+  //  right: 35px;
+  //  top: 65px;
+  //  font-style: italic;
+  //  text-transform: capitalize;
+  //  opacity: 0.5;
+  //  display: block;
+  //  font-size: 18px;
+  //}
+
+}

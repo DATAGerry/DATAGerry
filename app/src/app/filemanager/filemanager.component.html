@@ -16,18 +16,23 @@
         </div>
       </div>
     </div>
-    <div class="col-3 border-right p-3 pre-scrollable">
-      <cmdb-folder-tree [fileElements]="fileElements"
-                        [fileTree]="fileTree"
+    <div class="col-3 border-right p-3 pre-scrollable"  infinite-scroller>
+      <cmdb-folder-tree [fileTree]="fileTree"
                         [selectedFileFolder]="selectedFolderElement"
                         (createFileElementEvent)="addFolder()"
                         (renameFileElementEvent)="renameFile()"
-                        (deleteFileElementEvent)="deleteFiles($event)"></cmdb-folder-tree>
+                        (moveFileElementEvent)="moveFile()"
+                        (deleteFileElementEvent)="deleteFiles($event)"
+                        (loadFileElementEvent)="loadFiles()">
+      </cmdb-folder-tree>
     </div>
     <div class="col-9">
       <div class="row">
         <div class="col-12 p-2 d-flex justify-content-between align-items-center">
-          <span class="col-9">/</span>
+          <span class="col-9">
+            <cmdb-folder-path-viewer [selectedFileFolder]="selectedFolderElement"
+                                     [folderTree]="fileTree"></cmdb-folder-path-viewer>
+          </span>
           <div class="input-group input-group-sm">
             <input type="text" class="form-control" placeholder="Search Collection">
             <div class="input-group-append">
@@ -37,7 +42,7 @@
             </div>
           </div>
         </div>
-        <div class="col-12 p-0 pre-scrollable">
+        <div class="col-12 p-0 pre-scrollable" (scroll)="onScrollHost($event)">
           <cmdb-file-view-list [fileElements]="fileElements"></cmdb-file-view-list>
         </div>
       </div>

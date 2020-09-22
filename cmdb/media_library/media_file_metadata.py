@@ -50,3 +50,17 @@ class FileMetadata:
         if self.permission is None:
             return None
         return self.permission
+
+    @classmethod
+    def to_json(cls, instance) -> dict:
+        """Convert a type instance to json conform data"""
+        return {
+            'public_id': instance.get_public_id(),
+            'reference': instance.get_ref_to(),
+            'reference_type': instance.get_ref_to_type(),
+            'mime_type': instance.get_mime_type(),
+            'author_id': instance.author_id,
+            'folder': instance.folder,
+            'parent': instance.parent,
+            'permission': instance.permission,
+        }
