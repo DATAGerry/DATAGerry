@@ -90,7 +90,7 @@ class UserManager(AccountManager):
             it will be auto converted via the model `to_json` method.
         """
         if isinstance(user, UserModel):
-            user = UserModel.to_json(user)
+            user = UserModel.to_dict(user)
         return super(UserManager, self).update(public_id=public_id, resource=user)
 
     def delete(self, public_id: Union[PublicID, int]) -> UserModel:

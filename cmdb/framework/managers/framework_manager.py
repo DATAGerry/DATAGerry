@@ -84,7 +84,7 @@ class FrameworkQueryBuilder(Builder):
 class FrameworkManager(ManagerBase):
     """Framework managers implementation for all framework based CRUD operations."""
 
-    def __init__(self, collection: Collection, database_manager: DatabaseManagerMongo):
+    def __init__(self, collection: Collection, database_manager: DatabaseManagerMongo = None):
         """
         Set the collection name and the database connection.
 

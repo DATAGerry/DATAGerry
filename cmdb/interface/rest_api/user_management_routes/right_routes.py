@@ -14,72 +14,37 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""
-Query routes for rights system
 
-Warnings:
-    Since the rights system is fixed and not variable, protected routes are not necessary.
-"""
+from flask import request, abort
 
-import logging
+from cmdb.framework.managers import ManagerGetError
+from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
+from cmdb.framework.results import IterationResult
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.response import GetMultiResponse
+from cmdb.user_management.managers.right_manager import RightManager
+from cmdb.user_management.models.right import BaseRight
+from cmdb.user_management.rights import __all__ as right_tree
 
-from flask import current_app
-
-from cmdb.interface.route_utils import make_response, login_required
-from cmdb.interface.blueprint import RootBlueprint
-from cmdb.user_management import UserManager
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
-
-with current_app.app_context():
-    user_manager: UserManager = current_app.user_manager
+rights_blueprint = APIBlueprint('rights', __name__)
 
 
-LOGGER = logging.getLogger(__name__)
-right_blueprint = RootBlueprint('right_rest', __name__, url_prefix='/right')
+@rights_blueprint.route('/', methods=['GET', 'HEAD'])
+@rights_blueprint.protect(auth=False, right=None)
+@rights_blueprint.parse_collection_parameters(sort='name')
+def get_rights(params: CollectionParameters):
+    right_manager = RightManager(right_tree)
+    body = request.method == 'HEAD'
 
-
-@right_blueprint.route('/', methods=['GET'])
-@login_required
-def get_all_rights():
-    right_list = user_manager.get_all_rights()
-    resp = make_response(right_list)
-    return resp
-
-
-@right_blueprint.route('/tree', methods=['GET'])
-@login_required
-def get_right_tree():
-    right_tree = user_manager.get_right_tree()
-    resp = make_response(right_tree)
-    return resp
-
-
-@right_blueprint.route('/<string:name>', methods=['GET'])
-@login_required
-def get_right(name: str):
-    right_instance = user_manager.get_right_by_name(name)
-    return make_response(right_instance)
-
-
-@right_blueprint.route('/level/<int:level>', methods=['GET'])
-@login_required
-def get_rights_with_min_level(level: int):
-    right_list = user_manager.get_right_names_with_min_level(level)
-    return make_response(right_list)
-
-
-@right_blueprint.route('/levels', methods=['GET'])
-@login_required
-def get_security_levels():
-    security_levels = user_manager.get_security_levels()
-    security_list = []
-    for key, value in security_levels.items():
-        temp = [key, value]
-        security_list.append(temp)
-    return make_response(security_list)
-
-# other crud functions are not required because of static right programming
+    try:
+        iteration_result: IterationResult[BaseRight] = right_manager.iterate(
+            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+        rights = [BaseRight.to_dict(type) for type in iteration_result.results]
+        api_response = GetMultiResponse(rights, total=iteration_result.total, params=params,
+                                        url=request.url, model='Right', body=body)
+    except FrameworkIterationError as err:
+        return abort(400, err.message)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    return api_response.make_response()

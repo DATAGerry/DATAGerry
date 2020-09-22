@@ -25,11 +25,9 @@ class ManagerBase:
     """
     Manager base class for all core CRUD function.
     Will be replacing `CmdbManagerBase` in the future.
-    TODO:
-        - Refactor the old cmdb data to the new concept.
     """
 
-    def __init__(self, database_manager: DatabaseManagerMongo):
+    def __init__(self, database_manager: DatabaseManagerMongo = None):
         """
         Init/Open the database connection.
 
@@ -37,10 +35,6 @@ class ManagerBase:
             database_manager: Database managers instance
         """
         self._database_manager: DatabaseManagerMongo = database_manager
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Auto disconnect the database connection when the Manager get destroyed."""
-        self._database_manager.connector.disconnect()
 
     def _aggregate(self, collection: Collection, *args, **kwargs):
         """

@@ -70,6 +70,9 @@ class BaseRight:
     def get_label(self):
         return self.label or f'{self.get_prefix()}.{self.name.split(".")[-1]}'
 
+    def __getitem__(self, item):
+        return self.__getattribute__(item)
+
     @classmethod
     def get_levels(cls):
         return _levelToName
@@ -79,14 +82,24 @@ class BaseRight:
         return self._level
 
     @level.setter
-    def level(self, value):
-        if value not in Levels:
-            raise InvalidLevelRightError(value)
-        if value.value < self.MIN_LEVEL.value:
-            raise PoorlyLevelRightError(value, self.MIN_LEVEL)
-        if value.value > self.MAX_LEVEL.value:
-            raise MaxLevelRightError(value, self.MAX_LEVEL)
-        self._level = value
+    def level(self, level):
+        if level not in Levels:
+            raise InvalidLevelRightError(level)
+        if level.value < self.MIN_LEVEL.value:
+            raise PoorlyLevelRightError(level, self.MIN_LEVEL)
+        if level.value > self.MAX_LEVEL.value:
+            raise MaxLevelRightError(level, self.MAX_LEVEL)
+        self._level = level
+
+    @classmethod
+    def to_dict(cls, instance: "BaseRight") -> dict:
+        return {
+            'level': instance.level,
+            'name': instance.name,
+            'label': instance.label,
+            'description': instance.description,
+            'is_master': instance.is_master
+        }
 
 
 class InvalidLevelRightError(CMDBError):
