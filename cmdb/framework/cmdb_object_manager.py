@@ -255,7 +255,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_object_references(self, public_id: int, active_flag=None) -> list:
         # Type of given object id
-        type_id = self.get_object(public_id=public_id).get_type_id()
+        type_id = self.get_object(public_id=public_id).type_id
 
         # query for all types with ref input type with value of type id
         req_type_query = {
@@ -272,7 +272,6 @@ class CmdbObjectManager(CmdbManagerBase):
 
         # get type list with given query
         req_type_list = self.get_types_by(**req_type_query)
-
         type_init_list = []
         for new_type_init in req_type_list:
             try:
@@ -342,11 +341,8 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def get_type_by(self, **requirements) -> TypeModel:
         try:
-            found_type_list = self._get_many(collection=TypeModel.COLLECTION, limit=1, **requirements)
-            if len(found_type_list) > 0:
-                return TypeModel.from_data(found_type_list[0])
-            else:
-                raise ObjectManagerGetError(err='More than 1 type matches this requirement')
+            found_type_list = self._get_by(collection=TypeModel.COLLECTION, **requirements)
+            return TypeModel.from_data(found_type_list)
         except (CMDBError, Exception) as e:
             raise ObjectManagerGetError(err=e)
 

@@ -44,7 +44,6 @@ with current_app.app_context():
 @login_required
 @insert_request_user
 @right_required('base.system.view')
-@current_app.cache.cached(timeout=50)
 def get_datagerry_information(request_user: UserModel):
     from cmdb import __title__, __version__, __runtime__
 
@@ -69,8 +68,8 @@ def get_datagerry_information(request_user: UserModel):
 @login_required
 @insert_request_user
 @right_required('base.system.view')
-@current_app.cache.cached(timeout=1200)
 def get_config_information(request_user: UserModel):
+
     ssc = SystemConfigReader()
     config_dict = {
         'path': ssc.config_file,
@@ -109,7 +108,6 @@ def reload_config_reader(request_user: UserModel):
 @login_required
 @insert_request_user
 @right_required('base.system.view')
-@current_app.cache.cached(timeout=50)
 def get_system_information(request_user: UserModel):
     system_infos = {
         'platform': sys.platform,
