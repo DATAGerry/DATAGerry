@@ -31,6 +31,14 @@ export class ToastService {
   public toastscenter: any[] = [];
 
 
+  /**
+   * Receives requests to show toasts and determines what position to put
+   * them in based on the direction parameter
+   *
+   * @param text The text contained inside the toast
+   * @param options Contains the toast configurations
+   * @param direction Determines where the toast will be positioned
+   */
   public showToast(text: string, options: any = {}, direction?: string) {
     if (!options.icon) {
       options.icon = 'fas fa-info-circle';
@@ -63,54 +71,66 @@ export class ToastService {
     }
   }
 
-  public error(text: string, options: any = {}, direction?: string) {
+  /**
+   * Error Toast for displaying an error
+   *
+   * @param text your text content
+   * @param options get following parameters {headerName: 'your header name', icon : 'fas fa-cube', classname: class for the toast }
+   * @param direction position of your toast
+   */
+  public error(text: string, options: any = {headerName: 'An Error Occurred', icon: 'fas fa-exclamation-circle'}, direction?: string) {
     options.classname += ' border-danger';
-    options.headerClass += ' text-danger';
-    if (!options.headerName) {
-      options.headerName = 'An Error Occured';
-    }
-    if (!options.icon) {
-      options.icon = 'fas fa-exclamation-circle';
-    }
+    options.iconClass = 'text-danger';
     this.showToast(text, options, direction);
   }
-  public warning(text: string, options: any = {}, direction?: string) {
+
+
+  /**
+   * Warning Toast for displaying warnings
+   *
+   * @param text your text content
+   * @param options get following parameters {headerName: 'your header name', icon : 'fas fa-cube', classname: class for the toast }
+   * @param direction position of your toast
+   */
+  public warning(text: string, options: any = {headerName: 'Warning', icon: 'fas fa-exclamation-triangle'}, direction?: string) {
     options.classname += ' border-warning';
-    options.headerClass += ' text-warning';
-    if (!options.headerName) {
-      options.headerName = 'Warning';
-    }
-    if (!options.icon) {
-      options.icon = 'fas fa-exclamation-triangle';
-    }
+    options.iconClass = 'text-warning';
     this.showToast(text, options, direction);
   }
 
-  public success(text: string, options: any = {}, direction?: string) {
+
+  /**
+   * Success Toast for successfully executing a task
+   *
+   * @param text your text content
+   * @param options get following parameters {headerName: 'your header name', icon : 'fas fa-cube', classname: class for the toast }
+   * @param direction position of your toast
+   */
+  public success(text: string, options: any = {headerName: 'Success', icon: 'fas fa-check-circle'}, direction?: string) {
     options.classname += ' border-success';
-    options.headerClass += ' text-success';
-    if (!options.headerName) {
-      options.headerName = 'Success';
-    }
-    if (!options.icon) {
-      options.icon = 'fas fa-check-circle';
-    }
+    options.iconClass = 'text-success';
     this.showToast(text, options, direction);
   }
 
-  public info(text: string, options: any = {}, direction?: string) {
+  /**
+   * Info Toast for displaying information
+   *
+   * @param text your text content
+   * @param options get following parameters {headerName: 'your header name', icon : 'fas fa-cube', classname: class for the toast }
+   * @param direction position of your toast
+   */
+  public info(text: string, options: any = {headerName: 'Information', icon: 'fas fa-info-circle'}, direction?: string) {
     options.classname += ' border-info';
-    options.headerClass += ' text-info';
-    if (!options.headerName) {
-      options.headerName = 'Information';
-    }
-    if (!options.icon) {
-      options.icon = 'fas fa-info-circle';
-    }
+    options.iconClass = 'text-info';
     this.showToast(text, options, direction);
   }
 
 
+  /**
+   * Removes the toast which was passed to the parameter
+   *
+   * @param toast The toast you want to remove
+   */
   public remove(toast) {
     this.toastscenter =  this.toastscenter.filter(t => t !== toast);
     this.toastsdownright =  this.toastsdownright.filter(t => t !== toast);
