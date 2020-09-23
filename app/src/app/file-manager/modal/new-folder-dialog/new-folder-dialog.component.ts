@@ -72,7 +72,7 @@ export class NewFolderDialogComponent implements OnInit {
     });
     this.fileService.postFile( folder, NewFolderDialogComponent.generateMetaData(this.selectedFileElement))
       .subscribe(() => {
-        this.toast.show(`Folder was successfully created: ${this.name.value}`);
+        this.toast.success(`Folder was successfully created: ${this.name.value}`);
         this.reloadElementTree();
     });
   }

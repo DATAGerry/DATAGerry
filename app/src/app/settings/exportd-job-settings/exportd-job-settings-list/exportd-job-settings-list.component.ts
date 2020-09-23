@@ -91,7 +91,7 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
           () => this.taskService.getTaskList().subscribe((list: ExportdJob[]) => {
             this.taskList.next(list);
             this.rerender();
-            this.toast.show(`Exportd Job was started: Exportd ID: ${job.public_id}`);
+            this.toast.info(`Exportd Job was started: Exportd ID: ${job.public_id}`);
           }))
     );
   }
