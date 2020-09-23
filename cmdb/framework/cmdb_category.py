@@ -148,7 +148,8 @@ class CategoryTree:
                      types: List[CmdbType] = None):
             self.category: CmdbCategory = category
             self.node_order: int = self.category.get_meta().get_order()
-            self.children: List["CategoryTree.CategoryNode"] = children or []
+            self.children: List["CategoryTree.CategoryNode"] = sorted(children or [], key=lambda node: (
+                                                             node.get_order() is None, node.get_order()))
             # prevent wrong type order
             self.types: List[CmdbType] = [type_ for id_ in self.category.types for type_ in types if
                                           id_ == type_.public_id]
