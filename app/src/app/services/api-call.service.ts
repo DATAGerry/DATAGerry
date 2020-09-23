@@ -58,7 +58,7 @@ export const httpFileOptions = {
   headers: new HttpHeaders({}),
   params: {},
   observe: resp,
-  responseType: 'blob'
+  responseType: 'json'
 };
 
 @Injectable({

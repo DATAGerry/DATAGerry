@@ -95,7 +95,6 @@ export class AddAttachmentsModalComponent implements OnInit {
   }
 
   private postFile(file: any) {
-    console.log(file);
     file.inProcess = true;
     this.inProcess = true;
     this.attachments.push(file);

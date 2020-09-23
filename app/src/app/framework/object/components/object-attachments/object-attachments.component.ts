@@ -47,8 +47,8 @@ export class ObjectAttachmentsComponent implements OnInit, OnDestroy{
   }
 
   public ngOnInit(): void {
-    this.fileService.getAllFilesList(this.metadata).subscribe((resp: FileElement[]) => {
-      this.attachmentsTotal = resp.length;
+    this.fileService.getAllFilesList(this.metadata).subscribe((resp: any) => {
+      this.attachmentsTotal = resp.count;
     });
   }
 

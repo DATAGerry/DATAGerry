@@ -91,7 +91,6 @@ export class FileService<T = any> implements ApiService {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('metadata', JSON.stringify(metadata));
-    httpFileOptions.responseType = 'json';
     return this.api.callPost<any>(`${ this.servicePrefix }/`, formData, httpFileOptions).pipe(
       map((apiResponse: HttpResponse<any>) => {
         if (apiResponse.status === 204) {
