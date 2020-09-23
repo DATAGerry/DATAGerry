@@ -1,4 +1,5 @@
 alabaster==0.7.12
+altgraph==0.17
 astroid==2.4.2
 Authlib==0.14.3
 Babel==2.8.0
@@ -32,6 +33,8 @@ pyasn1==0.4.8
 pycparser==2.20
 pycryptodome==3.9.8
 Pygments==2.7.1
+pyinstaller==4.0
+pyinstaller-hooks-contrib==2020.8
 pylint==2.6.0
 pymongo==3.11.0
 pyparsing==2.4.7
