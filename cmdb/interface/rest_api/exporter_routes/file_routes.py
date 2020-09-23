@@ -52,7 +52,7 @@ def get_filetypes():
     return make_response(filetype_list)
 
 
-@file_blueprint.route('/object/<string:public_ids>/<string:export_class>', methods=['POST'])
+@file_blueprint.route('/object/<string:public_ids>/<string:export_class>', methods=['GET'])
 @login_required
 def export_file(public_ids, export_class):
     try:
@@ -69,7 +69,7 @@ def export_file(public_ids, export_class):
     return file_export.export()
 
 
-@file_blueprint.route('/object/type/<int:public_id>/<string:export_class>', methods=['POST'])
+@file_blueprint.route('/object/type/<int:public_id>/<string:export_class>', methods=['GET'])
 @login_required
 def export_file_by_type_id(public_id, export_class):
     try:

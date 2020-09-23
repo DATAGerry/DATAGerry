@@ -39,11 +39,11 @@ export class FileService {
   }
 
   public callExportRoute(route: string, exportType: string) {
-    return this.api.callPost<any>(route + '/' + exportType, httpFileOptions);
+    return this.api.callGet<any>(route + '/' + exportType, httpFileOptions);
   }
 
   public getObjectFileByType(typeID: number, exportType: string) {
-    return this.api.callPost(this.servicePrefix + '/object/type/' + typeID + '/' + exportType, null, httpFileOptions);
+    return this.api.callGet(this.servicePrefix + '/object/type/' + typeID + '/' + exportType, httpFileOptions);
   }
 
   public getTypeFile() {
