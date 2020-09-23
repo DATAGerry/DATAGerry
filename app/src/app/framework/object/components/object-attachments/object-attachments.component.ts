@@ -16,13 +16,12 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FileSaverService } from 'ngx-filesaver';
 import { FileService } from '../../../../filemanager/service/file.service';
 import { FileMetadata } from '../../../../filemanager/model/metadata';
 import { ActivatedRoute } from '@angular/router';
-import {NgbModal, NgbModalConfig, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
-import { FileElement } from '../../../../filemanager/model/file-element';
+import { NgbModal, NgbModalConfig, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { AddAttachmentsModalComponent } from '../../../../layout/helpers/modals/add-attachments-modal/add-attachments-modal.component';
 
 @Component({
@@ -30,7 +29,7 @@ import { AddAttachmentsModalComponent } from '../../../../layout/helpers/modals/
   templateUrl: './object-attachments.component.html',
   styleUrls: ['./object-attachments.component.scss']
 })
-export class ObjectAttachmentsComponent implements OnInit, OnDestroy{
+export class ObjectAttachmentsComponent implements OnInit, OnDestroy {
 
   public attachmentsTotal: number = 0;
   private metadata: FileMetadata = new FileMetadata();
@@ -48,7 +47,7 @@ export class ObjectAttachmentsComponent implements OnInit, OnDestroy{
 
   public ngOnInit(): void {
     this.fileService.getAllFilesList(this.metadata).subscribe((resp: any) => {
-      this.attachmentsTotal = resp.count;
+      this.attachmentsTotal = resp.total;
     });
   }
 

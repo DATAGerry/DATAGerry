@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import {Component, HostListener, Input, OnInit} from '@angular/core';
 import { FileMetadata } from '../../../../filemanager/model/metadata';
 import { FileElement } from '../../../../filemanager/model/file-element';
 import { FileService } from '../../../../filemanager/service/file.service';
@@ -24,6 +24,8 @@ import { FileSaverService } from 'ngx-filesaver';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../../toast/toast.service';
 import { GeneralModalComponent } from '../general-modal/general-modal.component';
+import {CollectionParameters} from "../../../../services/models/api-parameter";
+import {InfiniteScrollService} from "../../../services/infinite-scroll.service";
 
 @Component({
   selector: 'cmdb-add-attachments-modal',
@@ -35,22 +37,50 @@ export class AddAttachmentsModalComponent implements OnInit {
   @Input() metadata: FileMetadata = new FileMetadata();
   public inProcess: boolean = false;
   public attachments: FileElement[] = [];
+  public recordsTotal: number = 0;
   private dataMaxSize: number = 1024 * 1024 * 50;
 
-  constructor(private fileService: FileService, private fileSaverService: FileSaverService,
-              private modalService: NgbModal, public activeModal: NgbActiveModal, private toast: ToastService) { }
+  /**
+   * Detecting scroll direction
+   */
+  private page: number = 0;
+  private lastPage: number;
+  private readonly tag: string = 'attachmentsScroll';
+  private readonly defaultApiParameter: CollectionParameters = {page: 1, limit: 100, order: 1};
 
+
+  constructor(private fileService: FileService, private fileSaverService: FileSaverService,
+              private modalService: NgbModal, public activeModal: NgbActiveModal, private toast: ToastService,
+              private scrollService: InfiniteScrollService) { }
+
+
+  @HostListener('scroll', ['$event']) onScrollHost(e: Event): void {
+    if (this.scrollService.bottomReached(e, this.tag) && this.page <= this.lastPage) {
+      this.getFiles(this.scrollService.getCollectionParameters(this.tag));
+    }
+  }
   public ngOnInit(): void {
-    this.fileService.getAllFilesList(this.metadata).subscribe((resp: any) => {
-      this.attachments = resp.results;
+    this.fileService.getAllFilesList(this.metadata).subscribe((data: any) => {
+      this.attachments.push(...data.results);
+      this.recordsTotal = data.total;
+      this.updatePagination(data);
     });
   }
 
-  public getFiles() {
-    this.fileService.getAllFilesList(this.metadata).subscribe((resp: any) => {
-      this.attachments = resp.results;
-      this.inProcess = false;
-    });
+  public getFiles(apiParameters?: CollectionParameters): void {
+    this.fileService.getAllFilesList(this.metadata, apiParameters ? apiParameters : this.defaultApiParameter)
+      .subscribe((data: any) => {
+        this.attachments.push(...data.results);
+        this.recordsTotal = data.total;
+        this.inProcess = false;
+        this.updatePagination(data);
+      });
+  }
+
+  private updatePagination(data): void {
+    this.page = data.pager.page + 1;
+    this.lastPage = data.pager.total_pages;
+    this.scrollService.setCollectionParameters(this.page, 100, this.tag);
   }
 
   public downloadFile(filename: string) {

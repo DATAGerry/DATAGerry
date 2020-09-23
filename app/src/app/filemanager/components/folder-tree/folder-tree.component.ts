@@ -17,7 +17,6 @@
 */
 
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { FileService } from '../../service/file.service';
 import { FileElement } from '../../model/file-element';
 import { FileMetadata } from '../../model/metadata';
 import { BehaviorSubject } from 'rxjs';
@@ -87,7 +86,7 @@ export class FolderTreeComponent implements OnInit, OnChanges {
         }
       }
     }
-    return [{name: '/', public_id: null, hasSubFolders: true, children: tree, metadata: { parent: null } }];
+    return [{name: '', public_id: null, hasSubFolders: true, children: tree, metadata: { parent: null } }];
   }
 
   ngOnInit(): void {

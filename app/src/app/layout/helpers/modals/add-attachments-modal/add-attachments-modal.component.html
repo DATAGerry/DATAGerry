@@ -4,12 +4,12 @@
           <span class="icon"><i class="fas fa-paperclip"></i></span>
           <span class="name">
             <strong class="text-uppercase">Attachments</strong>
-            <br>Total {{attachments?.length}}
+            <br>Total {{recordsTotal}}
           </span>
         </span>
     <button type="button" class="close" data-dismiss="modal" aria-label="Close"
             [disabled]='inProcess'
-            (click)="activeModal.close({total: attachments.length})">
+            (click)="activeModal.close({total: recordsTotal})">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
@@ -22,7 +22,7 @@
         <h6 class="attachment-subtitle">Drop files here or click to upload.</h6>
         <input id="fileUpload" hidden type="file" #fileInput (change)="uploadFile($event.target.files)">
       </div>
-      <div class="pre-scrollable">
+      <div class="pre-scrollable" (scroll)="onScrollHost($event)">
         <div class="container-fluid border p-2 mb-2 w-auto"
              *ngFor="let attachment of attachments">
           <div class="row align-items-center flex-nowrap">
@@ -53,6 +53,6 @@
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary mr-1"
             [disabled]='inProcess'
-            (click)="activeModal.close({total: attachments.length})">Done</button>
+            (click)="activeModal.close({total: recordsTotal})">Done</button>
   </div>
 </div>

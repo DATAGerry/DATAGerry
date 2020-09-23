@@ -53,7 +53,7 @@ export class FilemanagerComponent implements OnInit, OnDestroy {
   /**
    * Metadata for filtering Files from Database
    */
-  private apiParameter: CollectionParameters = {page: 1, limit: 100, order: 1};
+  private readonly apiParameter: CollectionParameters = {page: 1, limit: 100, order: 1};
   private metadata: FileMetadata = new FileMetadata({folder: false});
   private modalRef: NgbModalRef;
 
@@ -200,6 +200,27 @@ export class FilemanagerComponent implements OnInit, OnDestroy {
   public ngOnDestroy(): void {
     if (this.modalRef) {
       this.modalRef.close();
+    }
+  }
+
+  public mockups() {
+    let i = 0;
+    while (i < 300) {
+      const folder = new File(['folder'], `mockup${i}.json`, {
+        type: 'application/json',
+      });
+      const metadata: FileMetadata = new FileMetadata( {
+          reference : 3242,
+          reference_type : 'object',
+          mime_type : 'application/json',
+          folder: false,
+          parent : null
+        }
+      );
+      this.fileService.postFile( folder, metadata).subscribe((resp: FileElement) => {
+        console.log(resp.public_id);
+      });
+      i++;
     }
   }
 }

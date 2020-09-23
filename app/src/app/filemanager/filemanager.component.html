@@ -16,7 +16,7 @@
         </div>
       </div>
     </div>
-    <div class="col-3 border-right p-3 pre-scrollable"  infinite-scroller>
+    <div class="col-3 border-right p-3 pre-scrollable" style="min-height: 437px">
       <cmdb-folder-tree [fileTree]="fileTree"
                         [selectedFileFolder]="selectedFolderElement"
                         (createFileElementEvent)="addFolder()"
@@ -49,3 +49,5 @@
     </div>
   </div>
 </div>
+
+<button (click)="mockups()">mockups</button>
