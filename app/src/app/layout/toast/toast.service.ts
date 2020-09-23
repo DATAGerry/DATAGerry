@@ -65,32 +65,48 @@ export class ToastService {
 
   public error(text: string, options: any = {}, direction?: string) {
     options.classname += ' border-danger';
-    options.headerName = 'An Error Occured';
-    options.headerClass = 'text-danger';
-    options.icon = 'fas fa-exclamation-circle';
+    options.headerClass += ' text-danger';
+    if (!options.headerName) {
+      options.headerName = 'An Error Occured';
+    }
+    if (!options.icon) {
+      options.icon = 'fas fa-exclamation-circle';
+    }
     this.showToast(text, options, direction);
   }
   public warning(text: string, options: any = {}, direction?: string) {
     options.classname += ' border-warning';
-    options.headerName = 'Warning';
-    options.headerClass = 'text-warning';
-    options.icon = 'fas fa-exclamation-triangle';
+    options.headerClass += ' text-warning';
+    if (!options.headerName) {
+      options.headerName = 'Warning';
+    }
+    if (!options.icon) {
+      options.icon = 'fas fa-exclamation-triangle';
+    }
     this.showToast(text, options, direction);
   }
 
   public success(text: string, options: any = {}, direction?: string) {
     options.classname += ' border-success';
-    options.headerName = 'Success';
-    options.headerClass = 'text-success';
-    options.icon = 'fas fa-check-circle';
+    options.headerClass += ' text-success';
+    if (!options.headerName) {
+      options.headerName = 'Success';
+    }
+    if (!options.icon) {
+      options.icon = 'fas fa-check-circle';
+    }
     this.showToast(text, options, direction);
   }
 
   public info(text: string, options: any = {}, direction?: string) {
     options.classname += ' border-info';
-    options.headerName = 'Information';
-    options.headerClass = 'text-info';
-    options.icon = 'fas fa-info-circle';
+    options.headerClass += ' text-info';
+    if (!options.headerName) {
+      options.headerName = 'Information';
+    }
+    if (!options.icon) {
+      options.icon = 'fas fa-info-circle';
+    }
     this.showToast(text, options, direction);
   }
 

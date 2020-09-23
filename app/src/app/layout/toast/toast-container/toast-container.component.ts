@@ -30,27 +30,5 @@ export class ToastContainerComponent {
   constructor(public toastService: ToastService) {
   }
 
-  parse(time: number) {
-    if (time) {
-      return 'progressBars ' + time.toString() + ' s linear';
-    }
-    return 'progressBar 5s linear';
-  }
-
-  waitTillDisposal(time: number, toast) {
-    // tslint:disable-next-line:only-arrow-functions
-    function delay(ms: number) {
-      return new Promise( resolve => {
-        setTimeout(resolve, ms);
-      });
-    }
-
-    (async () => {
-      await delay(time);
-      if (toast) {
-        this.toastService.remove(toast);
-      }
-    })();
-  }
 
 }
