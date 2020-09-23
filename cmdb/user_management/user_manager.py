@@ -36,15 +36,8 @@ class UserManager(CmdbManagerBase):
         self.rights = self._load_rights()
         super(UserManager, self).__init__(database_manager)
 
-    def search(self):
-        pass
-
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
-
-    def count_user(self) -> int:
-        """Get number of users"""
-        return self._count(collection=UserModel.COLLECTION)
 
     def get_user(self, public_id: int) -> UserModel:
         """Get user by public id"""
@@ -194,11 +187,6 @@ class UserManager(CmdbManagerBase):
     def get_all_rights(self):
         return self.rights
 
-    @staticmethod
-    def get_right_tree():
-        from cmdb.user_management.rights import __all__
-        return __all__
-
     def _load_rights(self):
         from cmdb.user_management.rights import __all__
         return self._load_right_tree(__all__)
@@ -211,10 +199,6 @@ class UserManager(CmdbManagerBase):
             else:
                 rights.append(right)
         return rights
-
-    @staticmethod
-    def get_security_levels():
-        return BaseRight.get_levels()
 
     def get_right_by_name(self, name) -> BaseRight:
         try:
