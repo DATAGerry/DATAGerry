@@ -25,6 +25,7 @@ from time import sleep
 from argparse import ArgumentParser, Namespace
 from cmdb.utils.logger import get_logging_conf
 from cmdb.utils.wraps import timing
+from cmdb.utils.termcolor import colored
 from sys import exit
 
 try:
@@ -230,7 +231,6 @@ def main(args):
 
 
 if __name__ == "__main__":
-    from termcolor import colored
 
     welcome_string = colored('Welcome to DATAGERRY \nStarting system with following parameters: \n{}\n', 'yellow')
     brand_string = colored('''
