@@ -22,7 +22,7 @@ from cmdb.framework.managers.error.framework_errors import FrameworkIterationErr
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.response import GetMultiResponse
+from cmdb.interface.response import GetMultiResponse, GetSingleResponse
 from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.user_management.models.right import BaseRight
 from cmdb.user_management.rights import __all__ as right_tree
@@ -32,19 +32,40 @@ rights_blueprint = APIBlueprint('rights', __name__)
 
 @rights_blueprint.route('/', methods=['GET', 'HEAD'])
 @rights_blueprint.protect(auth=False, right=None)
-@rights_blueprint.parse_collection_parameters(sort='name')
+@rights_blueprint.parse_collection_parameters(sort='name', view='list')
 def get_rights(params: CollectionParameters):
     right_manager = RightManager(right_tree)
     body = request.method == 'HEAD'
 
     try:
-        iteration_result: IterationResult[BaseRight] = right_manager.iterate(
-            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
-        rights = [BaseRight.to_dict(type) for type in iteration_result.results]
-        api_response = GetMultiResponse(rights, total=iteration_result.total, params=params,
-                                        url=request.url, model='Right', body=body)
+        if params.optional['view'] == 'tree':
+            api_response = GetMultiResponse(right_manager.tree_to_json(right_tree), total=len(right_tree),
+                                            params=params, url=request.url, model='Right-Tree', body=body)
+            return api_response.make_response(pagination=False)
+        else:
+            iteration_result: IterationResult[BaseRight] = right_manager.iterate(
+                filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+            rights = [BaseRight.to_dict(type) for type in iteration_result.results]
+            api_response = GetMultiResponse(rights, total=iteration_result.total, params=params,
+                                            url=request.url, model='Right', body=body)
+            return api_response.make_response()
     except FrameworkIterationError as err:
         return abort(400, err.message)
     except ManagerGetError as err:
         return abort(404, err.message)
+
+
+@rights_blueprint.route('/<string:name>', methods=['GET', 'HEAD'])
+@rights_blueprint.protect(auth=False, right='None')
+def get_right(name: str):
+
+    right_manager: RightManager = RightManager(right_tree)
+    body = True if not request.method != 'HEAD' else False
+
+    try:
+        right = right_manager.get(name)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    api_response = GetSingleResponse(BaseRight.to_dict(right), url=request.url,
+                                     model='Right', body=body)
     return api_response.make_response()

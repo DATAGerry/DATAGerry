@@ -17,6 +17,7 @@ from typing import List
 
 from .account_manager import AccountManager
 from ..models.right import BaseRight
+from ...framework.managers import ManagerGetError
 from ...framework.managers.error.framework_errors import FrameworkIterationError
 from ...framework.results import IterationResult
 
@@ -46,12 +47,32 @@ class RightManager(AccountManager):
                 rights.append(right)
         return rights
 
+    @staticmethod
+    def tree_to_json(right_tree) -> list:
+        """
+        Converts to right tree to json
+        """
+        raw_tree = []
+        for node in right_tree:
+            if isinstance(node, tuple) or isinstance(node, list):
+                raw_tree.append(RightManager.tree_to_json(node))
+            else:
+                raw_tree.append(BaseRight.to_dict(node))
+        return raw_tree
+
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult[
-                BaseRight]:
+        BaseRight]:
         try:
             sorted_rights = sorted(self.rights, key=lambda right: right[sort])
-            spliced_rights = [sorted_rights[i:i+limit] for i in range(0, len(sorted_rights), limit)][int(skip/limit)]
+            spliced_rights = [sorted_rights[i:i + limit] for i in range(0, len(sorted_rights), limit)][
+                int(skip / limit)]
         except (AttributeError, ValueError, IndexError) as err:
             raise FrameworkIterationError(err)
         result: IterationResult[BaseRight] = IterationResult(spliced_rights, total=len(self.rights))
         return result
+
+    def get(self, name: str) -> BaseRight:
+        try:
+            return next(right for right in self.rights if right.name == name)
+        except Exception as err:
+            raise ManagerGetError(err)
