@@ -50,12 +50,13 @@ export class RefFieldEditComponent extends ConfigEdit implements OnInit {
     }
   }
 
-  public onChange(type: any) {
-    if (type === undefined) {
+  public onChange() {
+    const {ref_types} = this.data;
+    if (ref_types && ref_types.length === 0) {
       this.objectList = [];
       this.data.value = '';
     } else {
-      this.objectService.getObjectsByType(type.public_id).subscribe((res: RenderResult[]) => {
+      this.objectService.getObjectsByType(ref_types).subscribe((res: RenderResult[]) => {
         this.objectList = res;
       });
     }

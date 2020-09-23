@@ -23,14 +23,12 @@ import {
   ApiCallService,
   ApiService,
   httpFileOptions,
-  HttpInterceptorHandler
 } from '../../services/api-call.service';
 import { HttpBackend, HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { ValidatorService } from '../../services/validator.service';
 import { FileMetadata } from '../model/metadata';
 import { FormControl } from '@angular/forms';
-import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
-import {FileElement} from "../model/file-element";
+import { FileElement } from '../model/file-element';
 
 export const checkFolderExistsValidator = (fileService: FileService, metadata: any, time: number = 500) => {
   return (control: FormControl) => {
@@ -77,8 +75,8 @@ export class FileService<T = any> implements ApiService {
    * Get all files as a list
    */
   public getAllFilesList(params: any): Observable<T[]> {
-    httpObserveOptions[PARAMETER] = {metadata : JSON.stringify(params)};
-    return this.api.callGet<T[]>(this.servicePrefix + '/', this.http, httpObserveOptions).pipe(
+    httpObserveOptions[PARAMETER] = { metadata: JSON.stringify(params) };
+    return this.api.callGet<T[]>(this.servicePrefix + '/', httpObserveOptions).pipe(
       map((apiResponse: HttpResponse<T[]>) => {
         if (apiResponse.status === 204) {
           return [];
@@ -128,7 +126,7 @@ export class FileService<T = any> implements ApiService {
   public getFileByName(filename: string, metadata) {
     const formData = new FormData();
     formData.append('metadata', JSON.stringify(metadata));
-    return this.api.callPostRoute(this.servicePrefix + '/download/' + filename, formData, httpOptions);
+    return this.api.callPost(this.servicePrefix + '/download/' + filename, formData, httpFileOptions);
   }
 
   /**
@@ -155,7 +153,7 @@ export class FileService<T = any> implements ApiService {
    * @param params metadata raw instance
    */
   public deleteFile(fileID: number, params): Observable<number> {
-    httpFileOptions[PARAMETER] = {metadata : JSON.stringify(params)};
+    httpFileOptions[PARAMETER] = { metadata: JSON.stringify(params) };
     return this.api.callDelete<number>(this.servicePrefix + '/' + fileID, httpFileOptions).pipe(
       map((apiResponse: HttpResponse<number>) => {
         return apiResponse.body;
@@ -169,9 +167,8 @@ export class FileService<T = any> implements ApiService {
    *  @param metadata raw instance
    */
   public checkFolderExists(folderName: string, metadata: FileMetadata) {
-    httpObserveOptions[PARAMETER] = {metadata : JSON.stringify(metadata)};
-    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ folderName }`, specialClient, httpObserveOptions);
+    httpObserveOptions[PARAMETER] = { metadata: JSON.stringify(metadata) };
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ folderName }`, httpObserveOptions);
   }
 
 }

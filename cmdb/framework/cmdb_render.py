@@ -32,7 +32,7 @@ import logging
 from datetime import datetime
 
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.dao.type import TypeDAO, TypeExternalLink, TypeSection
+from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeSection
 from cmdb.framework.special.dt_html_parser import DtHtmlParser
 from cmdb.user_management.user_manager import User, UserManager
 
@@ -68,11 +68,11 @@ class CmdbRender:
     AUTHOR_ANONYMOUS_NAME = 'unknown'
 
     def __init__(self, object_instance: CmdbObject,
-                 type_instance: TypeDAO,
+                 type_instance: TypeModel,
                  render_user: User, user_list: List[User] = None,
                  object_manager: CmdbObjectManager = None, dt_render=False):
         self.object_instance: CmdbObject = object_instance
-        self.type_instance: TypeDAO = type_instance
+        self.type_instance: TypeModel = type_instance
         self.user_list: List[User] = user_list
         self.render_user: User = render_user
         self.object_manager = object_manager
@@ -110,21 +110,21 @@ class CmdbRender:
             self._object_instance = object_instance
 
     @property
-    def type_instance(self) -> TypeDAO:
+    def type_instance(self) -> TypeModel:
         """
-        Object of the class TypeDAO that has already been instantiated.
+        Object of the class TypeModel that has already been instantiated.
         The data should come from the database and already be validated.
         This already happens when the object is instantiated.
         """
         return self._type_instance
 
     @type_instance.setter
-    def type_instance(self, type_instance: TypeDAO):
+    def type_instance(self, type_instance: TypeModel):
         """
         Property setter for type_instance. The render only checks whether the passed object
         belongs to the correct class, not whether it is valid.
         """
-        if not isinstance(type_instance, TypeDAO):
+        if not isinstance(type_instance, TypeModel):
             raise TypeInstanceError()
         self._type_instance = type_instance
 
@@ -333,7 +333,7 @@ class RenderError(CMDBError):
 
 class TypeInstanceError(CMDBError):
     """
-    Error class raised when the passed object is not an instance of TypeDAO.
+    Error class raised when the passed object is not an instance of TypeModel.
     """
 
     def __init__(self):

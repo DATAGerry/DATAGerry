@@ -177,8 +177,13 @@ class GetMultiResponse(BaseAPIResponse):
         self.count: int = len(self.results)
         self.total: int = total
         self.parameters = params
+
+        if params.limit == 0:
+            total_pages = 1
+        else:
+            total_pages = ceil(total / params.limit)
         self.pager: APIPager = APIPager(page=params.page, page_size=params.limit,
-                                        total_pages=ceil(total / params.limit))
+                                        total_pages=total_pages)
         self.pagination: APIPagination = APIPagination.create(url, self.pager.page, self.pager.total_pages)
         super(GetMultiResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model,
                                                body=body)

@@ -21,7 +21,7 @@ import { ApiCallService, ApiService, httpObservePostOptions } from '../services/
 import { ValidatorService } from '../services/validator.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import { HttpParams } from '@angular/common/http';
 import { SearchResultList } from './models/search-result';
 
 export const COOCKIENAME = 'onlyActiveObjCookie';
@@ -35,13 +35,13 @@ export class SearchService<T = SearchResultList> implements ApiService {
 
   public servicePrefix: string = 'search';
 
-  public constructor(private api: ApiCallService, private http: HttpClient) {
+  public constructor(private api: ApiCallService) {
   }
 
   public getEstimateValueResults(regex: string): Observable<number> {
     regex = ValidatorService.validateRegex(regex).trim();
-    httpObservePostOptions[PARAMS] = {searchValue: regex};
-    return this.api.callGet<number>(this.servicePrefix + '/quick/count/', this.http, httpObservePostOptions).pipe(
+    httpObservePostOptions[PARAMS] = { searchValue: regex };
+    return this.api.callGet<number>(this.servicePrefix + '/quick/count/', httpObservePostOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })

@@ -15,328 +15,185 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import json
+from datetime import datetime
 
-from flask import abort, request, jsonify, current_app
+from flask import abort, request, current_app
 
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.search.query.query_builder import QueryBuilder
-from cmdb.user_management import User
-from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
-from cmdb.interface.blueprint import RootBlueprint
-from cmdb.framework.cmdb_errors import TypeNotFoundError, TypeInsertError, ObjectDeleteError, ObjectManagerGetError, \
-    ObjectManagerInitError
-from cmdb.framework.dao.type import TypeDAO
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+from cmdb.framework.models.type import TypeModel
+from cmdb.framework.managers import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
+from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
+from cmdb.framework.results.iteration import IterationResult
+from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.framework.utils import PublicID
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
+    DeleteSingleResponse
 
 LOGGER = logging.getLogger(__name__)
-type_blueprint = RootBlueprint('type_blueprint', __name__, url_prefix='/type')
-
-with current_app.app_context():
-    object_manager: CmdbObjectManager = current_app.object_manager
+types_blueprint = APIBlueprint('types', __name__)
 
 
-@type_blueprint.route('/', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.view')
-def get_types(request_user: User):
-    """Get all types as a list"""
-    try:
-        type_list = object_manager.get_all_types()
-    except (ObjectManagerInitError, ObjectManagerGetError) as err:
-        return abort(500, err.message)
-    if len(type_list) == 0:
-        return make_response([], 204)
-    return make_response([TypeDAO.to_json(type) for type in type_list])
+@types_blueprint.route('/', methods=['GET', 'HEAD'])
+@types_blueprint.protect(auth=True, right='base.framework.type.view')
+@types_blueprint.parse_collection_parameters()
+def get_types(params: CollectionParameters):
+    """
+    HTTP `GET`/`HEAD` route for getting a iterable collection of resources.
 
+    Args:
+        params (CollectionParameters): Passed parameters over the http query string
 
-@type_blueprint.route('/find/<path:regex>/', defaults={'regex_options': 'imsx'}, methods=['GET'])
-@type_blueprint.route('/find/<path:regex>', defaults={'regex_options': 'imsx'}, methods=['GET'])
-@type_blueprint.route('/find/<path:regex>/<path:regex_options>/', methods=['GET'])
-@type_blueprint.route('/find/<path:regex>/<path:regex_options>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.view')
-def find_types_by_name(regex: str, regex_options: str, request_user: User):
-    query_builder = QueryBuilder()
+    Returns:
+        GetMultiResponse: Which includes a IterationResult of the TypeModel.
 
-    if not regex or (regex == '') or regex is None or len(regex) == 0:
-        return abort(400, 'No valid selection parameter was passed!')
+    Example:
+        You can pass any parameter based on the CollectionParameters.
+        Optional parameters are passed over the function declaration.
 
-    if any(ro not in 'imsx' for ro in regex_options):
-        return abort(400, 'No valid regex options!')
+    Raises:
+        FrameworkIterationError: If the collection could not be iterated.
+        ManagerGetError: If the collection could not be found.
 
-    query_name = query_builder.regex_('name', f'{regex}', regex_options)
-    query_label = query_builder.regex_('label', f'{regex}', regex_options)
-    query = query_builder.or_([query_name, query_label])
+    """
+    type_manager = TypeManager(database_manager=current_app.database_manager)
+    body = request.method == 'HEAD'
 
     try:
-        type_list = object_manager.get_types_by(**query)
-    except ObjectManagerInitError as err:
-        return abort(500, err.message)
-    except ObjectManagerGetError as err:
+        iteration_result: IterationResult[TypeModel] = type_manager.iterate(
+            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+        types = [TypeModel.to_json(type) for type in iteration_result.results]
+        api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
+                                        url=request.url, model=TypeModel.MODEL, body=body)
+    except FrameworkIterationError as err:
+        return abort(400, err.message)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    return api_response.make_response()
+
+
+@types_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
+@types_blueprint.protect(auth=True, right='base.framework.type.view')
+def get_type(public_id: int):
+    """
+    HTTP `GET`/`HEAD` route for a single type resource.
+
+    Args:
+        public_id (int): Public ID of the type.
+
+    Raises:
+        ManagerGetError: When the selected type does not exists.
+
+    Returns:
+        GetSingleResponse: Which includes the json data of a TypeModel.
+    """
+    type_manager = TypeManager(database_manager=current_app.database_manager)
+    body = request.method == 'HEAD'
+
+    try:
+        type_ = type_manager.get(public_id)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    api_response = GetSingleResponse(TypeModel.to_json(type_), url=request.url,
+                                     model=TypeModel.MODEL, body=body)
+    return api_response.make_response()
+
+
+@types_blueprint.route('/', methods=['POST'])
+@types_blueprint.protect(auth=True, right='base.framework.type.add')
+@types_blueprint.validate(TypeModel.SCHEMA)
+def insert_type(data: dict):
+    """
+    HTTP `POST` route for insert a single type resource.
+
+    Args:
+        data (TypeModel.SCHEMA): Insert data of a new type.
+
+    Raises:
+        ManagerGetError: If the inserted resource could not be found after inserting.
+        ManagerInsertError: If something went wrong during insertion.
+
+    Returns:
+        InsertSingleResponse: Insert response with the new type and its public_id.
+    """
+    type_manager = TypeManager(database_manager=current_app.database_manager)
+    data.setdefault('creation_time', datetime.utcnow())
+    try:
+        result_id: PublicID = type_manager.insert(data)
+        raw_doc = type_manager.get(public_id=result_id)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    except ManagerInsertError as err:
+        return abort(400, err.message)
+    api_response = InsertSingleResponse(result_id, raw=TypeModel.to_json(raw_doc), url=request.url,
+                                        model=TypeModel.MODEL)
+    return api_response.make_response(prefix='types')
+
+
+@types_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@types_blueprint.protect(auth=True, right='base.framework.type.edit')
+@types_blueprint.validate(TypeModel.SCHEMA)
+def update_type(public_id: int, data: dict):
+    """
+    HTTP `PUT`/`PATCH` route for update a single type resource.
+
+    Args:
+        public_id (int): Public ID of the updatable type
+        data (TypeModel.SCHEMA): New type data to update
+
+    Raises:
+        ManagerGetError: When the type with the `public_id` was not found.
+        ManagerUpdateError: When something went wrong during the update.
+
+    Returns:
+        UpdateSingleResponse: With update result of the new updated type.
+    """
+    type_manager = TypeManager(database_manager=current_app.database_manager)
+    try:
+        type_ = TypeModel.from_data(data=data)
+
+        type_manager.update(public_id=PublicID(public_id), type=TypeModel.to_json(type_))
+        api_response = UpdateSingleResponse(result=data, url=request.url, model=TypeModel.MODEL)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    except ManagerUpdateError as err:
         return abort(400, err.message)
 
-    if len(type_list) == 0:
-        return make_response([], 204)
-    return make_response([TypeDAO.to_json(type) for type in type_list])
+    return api_response.make_response()
 
 
-@type_blueprint.route('/<int:public_id>/', methods=['GET'])
-@type_blueprint.route('/<int:public_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.view')
-def get_type(public_id: int, request_user: User):
+@types_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@types_blueprint.protect(auth=True, right='base.framework.type.delete')
+def delete_type(public_id: int):
+    """
+    HTTP `DELETE` route for delete a single type resource.
+
+    Args:
+        public_id (int): Public ID of the deletable type
+
+    Raises:
+        ManagerGetError: When the type with the `public_id` was not found.
+        ManagerDeleteError: When something went wrong during the deletion.
+
+    Notes:
+        Deleting the type will also delete all objects in this type!
+
+    Returns:
+        DeleteSingleResponse: Delete result with the deleted type as data.
+    """
+    type_manager = TypeManager(database_manager=current_app.database_manager)
+    from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+    deprecated_object_manager = CmdbObjectManager(database_manager=current_app.database_manager)
+
     try:
-        type_instance = object_manager.get_type(public_id)
-    except ObjectManagerGetError as err:
+        objects_ids = [object_.get_public_id() for object_ in deprecated_object_manager.get_objects_by_type(public_id)]
+        deprecated_object_manager.delete_many_objects({'type_id': public_id}, objects_ids, None)
+        deleted_type = type_manager.delete(public_id=PublicID(public_id))
+        api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
+    except ManagerGetError as err:
         return abort(404, err.message)
-    return make_response(TypeDAO.to_json(type_instance))
-
-
-@type_blueprint.route('/<string:name>/', methods=['GET'])
-@type_blueprint.route('/<string:name>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.view')
-def get_type_by_name(name: str, request_user: User):
-    try:
-        type_instance = object_manager.get_type_by(name=name)
-    except ObjectManagerGetError as err:
-        return abort(404, err.message)
-    return make_response(TypeDAO.from_data(type_instance))
-
-
-@type_blueprint.route('/', methods=['POST'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.add')
-def add_type(request_user: User):
-    from bson import json_util
-    from datetime import datetime
-    add_data_dump = json.dumps(request.json)
-    try:
-        new_type_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
-        new_type_data['public_id'] = object_manager.get_new_id(TypeDAO.COLLECTION)
-        new_type_data['creation_time'] = datetime.utcnow()
-    except TypeError as e:
-        LOGGER.warning(e)
-        return abort(400)
-    try:
-        type_instance = TypeDAO.from_data(new_type_data)
-    except CMDBError as e:
-        LOGGER.debug(e)
-        return abort(400)
-    try:
-        ack = object_manager.insert_type(TypeDAO.to_json(type_instance))
-    except TypeInsertError:
-        return abort(500)
-
-    resp = make_response(ack)
-    return resp
-
-
-@type_blueprint.route('/', methods=['PUT'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.edit')
-def update_type(request_user: User):
-    from bson import json_util
-    add_data_dump = json.dumps(request.json)
-    try:
-        new_type_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
-    except TypeError as e:
-        LOGGER.warning(e)
-        abort(400)
-    try:
-        update_type_instance = TypeDAO.from_data(new_type_data)
-    except CMDBError:
-        return abort(400)
-    try:
-        old_fields = object_manager.get_type(update_type_instance.get_public_id()).get_fields()
-        new_fields = update_type_instance.get_fields()
-        if [item for item in old_fields if item not in new_fields]:
-            update_type_instance.clean_db = False
-        if [item for item in new_fields if item not in old_fields]:
-            update_type_instance.clean_db = False
-    except CMDBError:
-        return abort(500)
-    try:
-        object_manager.update_type(update_type_instance)
-    except CMDBError:
-        return abort(500)
-
-    resp = make_response(update_type_instance)
-    return resp
-
-
-@type_blueprint.route('/<int:public_id>/', methods=['DELETE'])
-@type_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.delete')
-def delete_type(public_id: int, request_user: User):
-    try:
-        # delete all objects by typeID
-        obj_ids = []
-        objs_by_type = object_manager.get_objects_by_type(public_id)
-        for objID in objs_by_type:
-            obj_ids.append(objID.get_public_id())
-        object_manager.delete_many_objects({'type_id': public_id}, obj_ids, request_user)
-
-        ack = object_manager.delete_type(public_id=public_id)
-    except User as e:
-        return abort(400, f'Type with Public ID: {public_id} was not found!: {e}')
-    return make_response(ack)
-
-
-@type_blueprint.route('/delete/<string:public_ids>/', methods=['GET'])
-@type_blueprint.route('/delete/<string:public_ids>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.delete')
-def delete_many_types(public_ids, request_user: User):
-    try:
-        ids = []
-        operator_in = {'$in': []}
-        filter_public_ids = {'public_id': {}}
-
-        for v in public_ids.split(","):
-            try:
-                ids.append(int(v))
-            except (ValueError, TypeError):
-                return abort(400)
-
-        operator_in.update({'$in': ids})
-        filter_public_ids.update({'public_id': operator_in})
-
-        ack = object_manager.delete_many_types(filter_public_ids, ids)
-        return make_response(ack.raw_result)
-    except TypeNotFoundError as e:
-        return jsonify(message='Delete Error', error=e.message)
-    except ObjectDeleteError as e:
-        return jsonify(message='Delete Error', error=e.message)
-    except CMDBError:
-        return abort(500)
-
-
-@type_blueprint.route('/count/', methods=['GET'])
-@type_blueprint.route('/count', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.view')
-def count_types(request_user: User):
-    try:
-        count = object_manager.count_types()
-        resp = make_response(count)
-    except CMDBError:
-        return abort(400)
-    return resp
-
-
-@type_blueprint.route('/category/<int:public_id>/', methods=['GET'])
-@type_blueprint.route('/category/<int:public_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.view')
-def get_types_by_category(public_id, request_user: User):
-    try:
-        category = object_manager.get_category(public_id=public_id)
-    except ObjectManagerGetError as err:
-        return abort(404, err.message)
-    if category.get_number_of_types() == 0:
-        return make_response([], 204)
-
-    type_ids = category.get_types()
-    try:
-        type_list = object_manager.get_types_by(public_id={'$in': type_ids})
-    except ObjectManagerGetError as err:
-        return abort(404, err.message)
-    return make_response([TypeDAO.to_json(type) for type in type_list])
-
-
-@type_blueprint.route('/uncategorized/', methods=['GET'])
-@type_blueprint.route('/uncategorized', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.view')
-def get_uncategorized_types(request_user: User):
-    categories = object_manager.get_categories()
-    types = object_manager.get_all_types()
-
-    categorized_types = []
-    for category in categories:
-        categorized_types += category.types
-
-    uncategorized_types = [TypeDAO.to_json(type_) for type_ in types if type_.get_public_id() not in categorized_types]
-
-    return make_response(uncategorized_types)
-
-
-@type_blueprint.route('/cleanup/remove/<int:public_id>/', methods=['GET'])
-@type_blueprint.route('/cleanup/remove/<int:public_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.clean')
-def cleanup_removed_fields(public_id, request_user: User):
-    # REMOVE fields from CmdbObject
-    try:
-        update_type_instance = object_manager.get_type(public_id)
-        type_fields = update_type_instance.get_fields()
-        objects_by_type = object_manager.get_objects_by_type(public_id)
-
-        for obj in objects_by_type:
-            incorrect = []
-            correct = []
-            obj_fields = obj.get_all_fields()
-            for t_field in type_fields:
-                name = t_field["name"]
-                for field in obj_fields:
-                    if name == field["name"]:
-                        correct.append(field["name"])
-                    else:
-                        incorrect.append(field["name"])
-            removed_type_fields = [item for item in incorrect if not item in correct]
-            for field in removed_type_fields:
-                object_manager.remove_object_fields(filter_query={'public_id': obj.public_id},
-                                                    update={'$pull': {'fields': {"name": field}}})
-
-    except Exception as error:
-        return abort(500)
-
-    return make_response(update_type_instance)
-
-
-@type_blueprint.route('/cleanup/update/<int:public_id>/', methods=['GET'])
-@type_blueprint.route('/cleanup/update/<int:public_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.clean')
-def cleanup_updated_push_fields(public_id, request_user: User):
-    # Update/Push fields to CmdbObject
-    try:
-        update_type_instance = object_manager.get_type(public_id)
-        type_fields = update_type_instance.get_fields()
-        objects_by_type = object_manager.get_objects_by_type(public_id)
-
-        for obj in objects_by_type:
-            for t_field in type_fields:
-                name = t_field["name"]
-                value = None
-                if [item for item in obj.get_all_fields() if item["name"] == name]:
-                    continue
-                if "value" in t_field:
-                    value = t_field["value"]
-                object_manager.update_object_fields(filter={'public_id': obj.public_id},
-                                                    update={
-                                                        '$addToSet': {'fields': {"name": name, "value": value}}})
-    except CMDBError:
-        return abort(500)
-
-    return make_response(update_type_instance)
+    except ManagerDeleteError as err:
+        return abort(400, err.message)
+    except Exception as err:
+        return abort(400, str(err))
+    return api_response.make_response()

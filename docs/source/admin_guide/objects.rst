@@ -109,6 +109,45 @@ By default, only summary fields of an object are shown in the table, with the ye
 can be faded in.
 
 
+Bulk change of Objects
+---------------------------
+The bulk change is a function in DATAGERRY with which several objects can be changed in one step
+on the basis of change templates. With this change, the selected objects adopt the field values of the change template.
+
+
+**Start**
+
+Simply select all objects you want to change and click on the yellow button for mass changes above the list.
+
+.. image:: img/objects_bulk_change_list.png
+    :width: 600
+
+
+**Template**
+
+A change template is generated based on the assigned object type. The following change template is identical
+to the creation of a regular object. Store all contents that you want to
+transfer to the objects later and save your entries.
+
+.. image:: img/objects_bulk_change_active.png
+    :width: 600
+
+
+**Preview**:
+
+In the preview, all changes made are listed and can be adjusted again if necessary.
+
+.. image:: img/objects_bulk_change_preview.png
+    :width: 600
+
+
+**Result**:
+
+After a preview, the selected objects will be changed.
+
+.. image:: img/objects_bulk_change_list.png
+    :width: 600
+
 
 Active und Inactive Objects
 ---------------------------

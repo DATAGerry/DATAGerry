@@ -52,7 +52,10 @@ class CollectionParameters(ApiParameters):
         self.sort: str = sort or Parameter('public_id')
         self.order: int = int(order or SortOrder.ASCENDING.value)
         self.page: int = int((page or 1) or page < 1)
-        self.skip: int = (self.page - 1) * self.limit
+        if self.limit == 0:
+            self.skip = 0
+        else:
+            self.skip: int = (self.page - 1) * self.limit
         self.filter: Union[List[dict], dict] = filter or {}
         super(CollectionParameters, self).__init__(query_string=query_string, **kwargs)
 

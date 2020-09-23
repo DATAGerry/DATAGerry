@@ -19,7 +19,7 @@
 DATAGERRY is a flexible asset management tool and
 open-source configurable management database
 """
-import logging
+import logging.config
 import signal
 from time import sleep
 from argparse import ArgumentParser, Namespace
@@ -130,9 +130,6 @@ def build_arg_parser() -> Namespace:
     _parser.add_argument('--keys', action='store_true', default=False, dest='keys',
                          help="init keys")
 
-    _parser.add_argument('--test', action='store_true', default=False, dest='test_data',
-                         help="generate and insert test data")
-
     _parser.add_argument('-d', '--debug', action='store_true', default=False, dest='debug',
                          help="enable debug mode: DO NOT USE ON PRODUCTIVE SYSTEMS")
 
@@ -158,7 +155,7 @@ def main(args):
     _init_config_reader(args.config_file)
     from cmdb.data_storage.database_connection import DatabaseConnectionError
 
-    # create / check connection database manager
+    # create / check connection database managers
     dbm = None
     try:
         dbm = _check_database()
@@ -224,30 +221,6 @@ def main(args):
         if setup_status == SetupRoutine.SetupStatus.FINISHED:
             exit(0)
         else:
-            exit(1)
-
-    if args.test_data:
-        _activate_debug()
-        from cmdb.utils.data_factory import DataFactory
-
-        ssc = SystemConfigReader()
-        database_options = ssc.get_all_values_from_section('Database')
-        dbm = DatabaseManagerMongo(
-                **database_options
-        )
-        db_name = dbm.get_database_name()
-        LOGGER.warning(f'Inserting test-data into: {db_name}')
-        try:
-            factory = DataFactory(database_manager=dbm)
-            ack = factory.insert_data()
-            LOGGER.warning("Test-data was successfully added".format(dbm.get_database_name()))
-            if len(ack) > 0:
-                LOGGER.critical("Error while inserting test-data: {} - dropping database".format(ack))
-                dbm.drop(db_name)  # cleanup database
-        except (Exception, CMDBError) as e:
-            import traceback
-            traceback.print_tb(e.__traceback__)
-            dbm.drop(db_name)  # cleanup database
             exit(1)
 
     if args.start:

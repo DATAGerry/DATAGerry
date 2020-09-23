@@ -24,7 +24,7 @@ from cmdb.user_management.user import User
 from cmdb.user_management.user_group import UserGroup
 from cmdb.user_management.user_right import BaseRight
 from cmdb.utils.error import CMDBError
-from cmdb.utils.security import SecurityManager
+from cmdb.security.security import SecurityManager
 
 LOGGER = logging.getLogger(__name__)
 

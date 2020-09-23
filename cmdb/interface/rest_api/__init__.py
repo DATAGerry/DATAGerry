@@ -26,7 +26,7 @@ from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManager
 from cmdb.media_library.media_file_manager import MediaFileManagement
 from cmdb.user_management import UserManager
-from cmdb.utils.security import SecurityManager
+from cmdb.security.security import SecurityManager
 
 try:
     from cmdb.utils.error import CMDBError
@@ -56,7 +56,7 @@ def create_rest_api(event_queue):
 
     cache = Cache(config=cache_config)
 
-    # Create manager
+    # Create managers
     from cmdb.data_storage.database_manager import DatabaseManagerMongo
     app_database = DatabaseManagerMongo(
         **system_config_reader.get_all_values_from_section('Database')
@@ -108,7 +108,7 @@ def create_rest_api(event_queue):
 
     # Import App Extensions
     from flask_cors import CORS
-    CORS(app)
+    CORS(app, expose_headers=['X-API-Version', 'X-Total-Count'])
     import cmdb
     cache.init_app(app)
     cache.clear()
@@ -139,7 +139,7 @@ def register_converters(app):
 def register_blueprints(app):
     from cmdb.interface.rest_api.connection import connection_routes
     from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint
-    from cmdb.interface.rest_api.framework_routes.type_routes import type_blueprint
+    from cmdb.interface.rest_api.framework_routes.type_routes import types_blueprint
     from cmdb.interface.rest_api.auth_routes import auth_blueprint
     from cmdb.interface.rest_api.framework_routes.category_routes import categories_blueprint
     from cmdb.interface.rest_api.user_management_routes.user_routes import user_blueprint
@@ -148,8 +148,6 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.search_routes import search_blueprint
     from cmdb.interface.rest_api.exporter_routes.file_routes import file_blueprint
     from cmdb.interface.rest_api.exporter_routes.export_type_routes import type_export_blueprint
-    from cmdb.interface.rest_api.framework_routes.status_routes import status_blueprint
-    from cmdb.interface.rest_api.framework_routes.collection_routes import collection_blueprint
     from cmdb.interface.rest_api.log_routes import log_blueprint
     from cmdb.interface.rest_api.setting_routes import settings_blueprint
     from cmdb.interface.rest_api.import_routes import importer_blueprint
@@ -162,7 +160,7 @@ def register_blueprints(app):
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(object_blueprint)
-    app.register_multi_blueprint(type_blueprint, multi_prefix=['/type', '/types'])
+    app.register_multi_blueprint(types_blueprint, multi_prefix=['/type', '/types'])
     app.register_blueprint(connection_routes)
     app.register_multi_blueprint(categories_blueprint, multi_prefix=['/category', '/categories'])
     app.register_blueprint(user_blueprint)
@@ -171,9 +169,6 @@ def register_blueprints(app):
     app.register_blueprint(search_blueprint)
     app.register_blueprint(file_blueprint)
     app.register_blueprint(type_export_blueprint)
-
-    app.register_blueprint(status_blueprint)
-    app.register_blueprint(collection_blueprint)
     app.register_blueprint(log_blueprint)
     app.register_blueprint(settings_blueprint)
     app.register_blueprint(importer_blueprint)

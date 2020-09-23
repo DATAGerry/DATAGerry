@@ -25,6 +25,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { CmdbCategory } from '../../models/cmdb-category';
 import { CmdbMode } from '../../modes.enum';
 import { SidebarService } from '../../../layout/services/sidebar.service';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
 
 @Component({
   selector: 'cmdb-category-edit',
@@ -62,8 +63,8 @@ export class CategoryEditComponent implements OnInit, OnDestroy {
       this.assignedTypes = types;
     });
 
-    this.typeUnAssignedSubscription = this.typeService.getUncategorizedTypes().subscribe((types: CmdbType[]) => {
-      this.unAssignedTypes = types;
+    this.typeUnAssignedSubscription = this.typeService.getUncategorizedTypes().subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
+      this.unAssignedTypes = apiResponse.results;
     });
   }
 

@@ -85,15 +85,15 @@ export class ExportdJobService<T = ExportdJob> implements ApiService {
 
   // CRUD calls
   public postTask(taskInstance: ExportdJob): Observable<any> {
-    return this.api.callPostRoute<ExportdJob>(this.servicePrefix + '/', taskInstance);
+    return this.api.callPost<ExportdJob>(this.servicePrefix + '/', taskInstance);
   }
 
   public putTask( taskInstance: ExportdJob): Observable<any> {
-    return this.api.callPutRoute(this.servicePrefix + '/', taskInstance);
+    return this.api.callPut(this.servicePrefix + '/', taskInstance);
   }
 
   public deleteTask(publicID: number) {
-    return this.api.callDeleteRoute<number>(this.servicePrefix + '/' + publicID);
+    return this.api.callDelete<number>(this.servicePrefix + '/' + publicID);
   }
 
   public run_task(publicID: number) {
@@ -109,7 +109,6 @@ export class ExportdJobService<T = ExportdJob> implements ApiService {
 
   // Validation functions
   public checkJobExists(typeName: string) {
-    const specialClient = new HttpClient(new HttpInterceptorHandler(this.backend, new BasicAuthInterceptor()));
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`, specialClient);
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`);
   }
 }

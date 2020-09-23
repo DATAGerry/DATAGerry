@@ -34,7 +34,7 @@ system_config_reader = SystemConfigReader()
 
 
 def create_docs_server(event_queue):
-    # Create manager
+    # Create managers
     from cmdb.data_storage.database_manager import DatabaseManagerMongo
     app_database = DatabaseManagerMongo(
         **system_config_reader.get_all_values_from_section('Database')

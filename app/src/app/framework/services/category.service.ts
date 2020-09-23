@@ -71,7 +71,7 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
     observe: resp
   };
 
-  constructor(private api: ApiCallService, private client: HttpClient) {
+  constructor(private api: ApiCallService) {
 
   }
 
@@ -89,7 +89,7 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
       params,
       observe: resp
     };
-    return this.api.callGet<T[]>(this.servicePrefix + '/', this.client, httpObserveOptions).pipe(
+    return this.api.callGet<T[]>(this.servicePrefix + '/', httpObserveOptions).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
@@ -130,7 +130,7 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    */
   public getCategoryByName(category: string): Observable<T | null> {
     const params = encodeURIComponent(`{"name": "${ category }"}`);
-    return this.api.callGet<T>(this.servicePrefix + `/?filter=` + params, this.client).pipe(
+    return this.api.callGet<T>(this.servicePrefix + `/?filter=` + params).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         if (apiResponse.body.count === 0) {
           return null;
@@ -175,7 +175,7 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
       params: new HttpParams().append('view', 'tree'),
       observe: resp
     };
-    return this.api.callGet<CmdbCategoryTree>(`${ this.servicePrefix }/`, this.client, httpObserveOptions).pipe(
+    return this.api.callGet<CmdbCategoryTree>(`${ this.servicePrefix }/`, httpObserveOptions).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<CmdbCategoryNode>>) => {
         if (apiResponse.status === 204) {
           return [];

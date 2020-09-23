@@ -17,13 +17,8 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService } from '../services/api-call.service';
+import { ApiCallService, httpFileOptions } from '../services/api-call.service';
 import { map } from 'rxjs/operators';
-
-const httpOptions = {
-  observe: 'response',
-  responseType: 'blob'
-};
 
 @Injectable({
   providedIn: 'root'
@@ -44,20 +39,18 @@ export class FileService {
   }
 
   public callExportRoute(route: string, exportType: string) {
-    return this.api.callPostRoute<any>(route + '/' + exportType,
-      null, httpOptions);
+    return this.api.callPost<any>(route + '/' + exportType, httpFileOptions);
   }
 
   public getObjectFileByType(typeID: number, exportType: string) {
-    return this.api.callPostRoute(this.servicePrefix + '/object/type/' + typeID + '/' + exportType,
-      null, httpOptions);
+    return this.api.callPost(this.servicePrefix + '/object/type/' + typeID + '/' + exportType, null, httpFileOptions);
   }
 
   public getTypeFile() {
-    return this.api.callPostRoute<any>('export/type/', null, httpOptions);
+    return this.api.callPost<any>('export/type/', null, httpFileOptions);
   }
 
   public callExportTypeRoute(route: string) {
-    return this.api.callPostRoute<any>(route , null, httpOptions);
+    return this.api.callPost<any>(route , null, httpFileOptions);
   }
 }

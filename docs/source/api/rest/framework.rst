@@ -1,8 +1,312 @@
 Framework
 =========
 
-Category
---------
+Types
+-----
+
+.. http:get:: /rest/types/
+
+       HTTP GET/HEAD rest route. HEAD will be the same result except their will be no body.
+
+       **Example request**:
+
+       .. sourcecode:: http
+
+          GET /rest/types/ HTTP/1.1
+          Host: datagerry.com
+          Accept: application/json
+
+       **Example response**:
+
+       .. sourcecode:: http
+
+          HTTP/1.1 200 OK
+          Content-Type: application/json
+          Content-Length: 3311
+          X-Total-Count: 1
+          X-API-Version: 1.0
+
+          {
+              "results": [
+                {
+                  "public_id": 1,
+                  "name": "example",
+                  "active": true,
+                  "author_id": 1,
+                  "creation_time": "",
+                  "label": "Example",
+                  "version": "1.0.0",
+                  "description": "",
+                  "render_meta": {
+                    "icon": "",
+                    "sections": [
+                      {
+                        "type": "section",
+                        "name": "example",
+                        "label": "Example",
+                        "fields": [
+                          "f"
+                        ]
+                      }
+                    ],
+                    "externals": [
+                      {
+                        "name": "example",
+                        "href": "https://example.org",
+                        "label": "Example",
+                        "icon": "fas fa-external-link-alt",
+                        "fields": []
+                      }
+                    ],
+                    "summary": {
+                      "fields": [
+                        "f"
+                      ]
+                    }
+                  },
+                  "fields": [
+                    {
+                      "type": "text",
+                      "name": "f",
+                      "label": "F"
+                    }
+                  ],
+                  "clean_db": true
+                }
+              ],
+              "count": 1,
+              "total": 1,
+              "parameters": {
+                "limit": 10,
+                "sort": "public_id",
+                "order": 1,
+                "page": 1,
+                "filter": {},
+                "optional": {}
+              },
+              "pager": {
+                "page": 1,
+                "page_size": 10,
+                "total_pages": 1
+              },
+              "pagination": {
+                "current": "http://datagerry.com/rest/types/",
+                "first": "http://datagerry.com/rest/types/?page=1",
+                "prev": "http://datagerry.com/rest/types/?page=1",
+                "next": "http://datagerry.com/rest/types/?page=1",
+                "last": "http://datagerry.com/rest/types/?page=1"
+              },
+              "response_type": "GET",
+              "model": "Type",
+              "time": "1970-01-01T00:00:00"
+            }
+
+       :query sort: the sort field name. default is public_id
+       :query order: the sort order value for ascending or descending. default is 1 for ascending
+       :query page: the current view page. default is 1
+       :query limit: max number of results. default is 10
+       :query filter: a mongodb query filter. default is {} which means everything
+
+       :reqheader Accept: application/json
+       :reqheader Authorization: jwtoken to authenticate
+       :resheader Content-Type: application/json
+       :statuscode 200: Everything is fine.
+       :statuscode 400: The request or the parameters are wrong formatted.
+       :statuscode 404: No collection or resources found.
+
+.. http:get:: /types/(int:public_id)
+
+        HTTP GET/HEAD rest route for a single resource by its ID.
+
+        **Example request**
+
+        .. sourcecode:: http
+
+            GET /rest/types/1 HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        **Example response**
+
+        .. sourcecode:: http
+
+            HTTP/1.1 200 OK
+            Content-Type: application/json
+            Content-Length: 588
+            X-API-Version: 1.0
+
+            {
+              "result": {
+                  "public_id": 1,
+                  "name": "example",
+                  "active": true,
+                  "author_id": 1,
+                  "creation_time": "",
+                  "label": "Example",
+                  "version": "1.0.0",
+                  "description": "",
+                  "render_meta": {
+                    "icon": "",
+                    "sections": [
+                      {
+                        "type": "section",
+                        "name": "example",
+                        "label": "Example",
+                        "fields": [
+                          "f"
+                        ]
+                      }
+                    ],
+                    "externals": [
+                      {
+                        "name": "example",
+                        "href": "https://example.org",
+                        "label": "Example",
+                        "icon": "fas fa-external-link-alt",
+                        "fields": []
+                      }
+                    ],
+                    "summary": {
+                      "fields": [
+                        "f"
+                      ]
+                    }
+                  },
+                  "fields": [
+                    {
+                      "type": "text",
+                      "name": "f",
+                      "label": "F"
+                    }
+                  ],
+                  "clean_db": true
+                },
+                "response_type": "GET",
+                "model": "Type",
+                "time": "1970-01-01T00:00:00"
+            }
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: jwtoken to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 200: Everything is fine.
+        :statuscode 404: No resource found.
+
+.. http:post:: /types/
+
+        HTTP Post route for inserting a new type.
+
+        **Example request**
+
+        .. sourcecode:: http
+
+            POST /rest/types/ HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        **Example response**
+
+        .. sourcecode:: http
+
+            HTTP/1.1 200 OK
+            Content-Type: application/json
+            Content-Length: 588
+            Location: http://datagerry.com/rest/types/1
+            X-API-Version: 1.0
+
+            {
+              "result_id": 1,
+              "raw": {},
+              "response_type": "INSERT",
+              "model": "Type",
+              "time": "1970-01-01T00:00:00"
+            }
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: jwtoken to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 200: Everything is fine.
+        :statuscode 400: Resource could not be inserted.
+        :statuscode 404: No resource found.
+
+.. http:put:: /types/(int:public_id)
+
+        HTTP `PUT`/`PATCH` route for updating a existing type.
+
+        **Example request**
+
+        .. sourcecode:: http
+
+            PUT /rest/types/1 HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+            {
+            }
+
+        **Example response**
+
+        .. sourcecode:: http
+
+            HTTP/1.1 202 ACCEPTED
+            Content-Type: application/json
+            Content-Length: 170
+            Location: http://datagerry.com/rest/categories/1
+            X-API-Version: 1.0
+
+            {
+              "result": {
+              },
+              "response_type": "UPDATE",
+              "model": "Type",
+              "time": "1970-01-01T00:00:00"
+            }
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: jwtoken to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 202: Everything is fine.
+        :statuscode 400: Resource could not be updated.
+        :statuscode 404: No resource found.
+
+.. http:delete:: /type/(int:public_id)
+
+        HTTP `DELETE` route for deleting a existing type.
+
+        **Example request**
+
+        .. sourcecode:: http
+
+            DELETE /rest/types/1 HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        **Example response**
+
+        .. sourcecode:: http
+
+            HTTP/1.1 202 ACCEPTED
+            Content-Type: application/json
+            Content-Length: 170
+            X-API-Version: 1.0
+
+            {
+              "deleted_entry": {
+              },
+              "response_type": "DELETE",
+              "model": "Type",
+              "time": "1970-01-01T00:00:00"
+            }
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: jwtoken to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 202: Everything is fine.
+        :statuscode 400: Resource could not be deleted.
+        :statuscode 404: No resource found.
+
+Categories
+----------
 
 .. http:get:: /rest/categories/
 
@@ -58,15 +362,15 @@ Category
                 "total_pages": 1
               },
               "pagination": {
-                "current": "http://localhost:4000/rest/categories/",
-                "first": "http://localhost:4000/rest/categories/?page=1",
-                "prev": "http://localhost:4000/rest/categories/?page=1",
-                "next": "http://localhost:4000/rest/categories/?page=1",
-                "last": "http://localhost:4000/rest/categories/?page=1"
+                "current": "http://datagerry.com/rest/categories/",
+                "first": "http://datagerry.com/rest/categories/?page=1",
+                "prev": "http://datagerry.com0/rest/categories/?page=1",
+                "next": "http://datagerry.com/rest/categories/?page=1",
+                "last": "http://datagerry.com/rest/categories/?page=1"
               },
               "response_type": "GET",
               "model": "Category",
-              "time": "2020-08-20T10:13:15.350747"
+              "time": "1970-01-01T00:00:00"
             }
 
        :query sort: the sort field name. default is public_id
@@ -83,7 +387,7 @@ Category
        :statuscode 400: The request or the parameters are wrong formatted.
        :statuscode 404: No collection or resources found.
 
-.. http:get:: /category/(int:public_id)
+.. http:get:: /categories/(int:public_id)
 
         The category with the public_id.
 
@@ -118,7 +422,7 @@ Category
               },
               "response_type": "GET",
               "model": "Category",
-              "time": "2020-08-20T09:21:10.235525"
+              "time": "1970-01-01T00:00:00"
             }
 
         :reqheader Accept: application/json
@@ -127,7 +431,7 @@ Category
         :statuscode 200: Everything is fine.
         :statuscode 404: No resource found.
 
-.. http:post:: /category/
+.. http:post:: /categories/
 
         HTTP Post route for inserting a new category.
 
@@ -157,7 +461,7 @@ Category
             HTTP/1.1 200 OK
             Content-Type: application/json
             Content-Length: 588
-            Location: http://localhost:4000/rest/categories/1
+            Location: http://datagerry.com/rest/categories/1
             X-API-Version: 1.0
 
             {
@@ -175,7 +479,7 @@ Category
               },
               "response_type": "INSERT",
               "model": "Category",
-              "time": "2020-08-20T11:14:42.704920"
+              "time": "1970-01-01T00:00:00"
             }
 
         :reqheader Accept: application/json
@@ -185,7 +489,7 @@ Category
         :statuscode 400: Resource could not be inserted.
         :statuscode 404: No resource found.
 
-.. http:put:: /category/(int:public_id)
+.. http:put:: /categories/(int:public_id)
 
         HTTP `PUT`/`PATCH` route for updating a existing category.
 
@@ -216,7 +520,7 @@ Category
             HTTP/1.1 202 ACCEPTED
             Content-Type: application/json
             Content-Length: 170
-            Location: http://localhost:4000/rest/categories/1
+            Location: http://datagerry.com/rest/categories/1
             X-API-Version: 1.0
 
             {
@@ -233,7 +537,7 @@ Category
               },
               "response_type": "UPDATE",
               "model": "Category",
-              "time": "2020-08-20T11:37:07.499137"
+              "time": "1970-01-01T00:00:00"
             }
 
         :reqheader Accept: application/json
@@ -243,7 +547,7 @@ Category
         :statuscode 400: Resource could not be updated.
         :statuscode 404: No resource found.
 
-.. http:delete:: /category/(int:public_id)
+.. http:delete:: /categories/(int:public_id)
 
         HTTP `DELETE` route for deleting a existing category.
 
@@ -280,7 +584,7 @@ Category
               },
               "response_type": "DELETE",
               "model": "Category",
-              "time": "2020-08-20T11:45:50.809706"
+              "time": "1970-01-01T00:00:00"
             }
 
         :reqheader Accept: application/json

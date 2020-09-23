@@ -1,0 +1,18 @@
+version: 2
+updates:
+
+  - package-ecosystem: "npm"
+    directory: "/app/"
+    schedule:
+      interval: "weekly"
+    target-branch: "development"
+    assignees:
+      - "markheumueller"
+
+  - package-ecosystem: "pip"
+    directory: "/cmdb/"
+    schedule:
+      interval: "weekly"
+    target-branch: "development"
+    assignees:
+      - "markheumueller"

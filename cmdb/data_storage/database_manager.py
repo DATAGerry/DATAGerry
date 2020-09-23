@@ -35,7 +35,7 @@ LOGGER = logging.getLogger(__name__)
 
 class DatabaseManager(Generic[CONNECTOR]):
     """
-    Default database manager with no implementation
+    Default database managers with no implementation
 
     """
 
