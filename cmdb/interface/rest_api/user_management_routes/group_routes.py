@@ -20,122 +20,105 @@ import json
 from bson import json_util
 from flask import request, current_app
 
-from cmdb.interface.route_utils import make_response, abort, login_required, insert_request_user, \
-    right_required
-from cmdb.interface.blueprint import RootBlueprint
-from cmdb.user_management import UserModel
+from cmdb.framework.managers import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
+from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
+from cmdb.framework.results import IterationResult
+from cmdb.framework.utils import PublicID
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
+    DeleteSingleResponse
+from cmdb.interface.route_utils import abort
+from cmdb.interface.blueprint import APIBlueprint
+from cmdb.user_management.managers.group_manager import GroupManager
+from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.user_management.models.group import UserGroupModel
-from cmdb.user_management.user_manager import UserManager, UserManagerInsertError, UserManagerGetError, \
-    UserManagerUpdateError, UserManagerDeleteError
+from cmdb.user_management.rights import __all__ as rights
 
-with current_app.app_context():
-    user_manager: UserManager = current_app.user_manager
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
-
-LOGGER = logging.getLogger(__name__)
-group_blueprint = RootBlueprint('group_rest', __name__, url_prefix='/group')
+groups_blueprint = APIBlueprint('groups', __name__)
 
 
-@group_blueprint.route('/', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.user-management.group.view')
-def get_all_groups(request_user: UserModel):
-    try:
-        group_list = user_manager.get_groups()
-    except UserManagerGetError as err:
-        LOGGER.error(err)
-        return abort(404)
-    if len(group_list) < 1:
-        return make_response(group_list, 204)
-    return make_response(group_list)
-
-
-@group_blueprint.route('/<int:public_id>/', methods=['GET'])
-@group_blueprint.route('/<int:public_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.user-management.group.view', {'group_id': 'public_id'})
-def get_group(public_id: int, request_user: UserModel):
-    try:
-        group_instance = user_manager.get_group(public_id)
-    except UserManagerGetError as err:
-        LOGGER.error(err)
-        return abort(404)
-    return make_response(group_instance)
-
-
-@group_blueprint.route('/<string:group_name>/', methods=['GET'])
-@group_blueprint.route('/<string:group_name>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.user-management.group.view')
-def get_group_by_name(group_name: str, request_user: UserModel):
-    try:
-        group = user_manager.get_group_by(name=group_name)
-    except UserManagerGetError:
-        return abort(404)
-    return make_response(group)
-
-
-@group_blueprint.route('/', methods=['POST'])
-@login_required
-@insert_request_user
-@right_required('base.user-management.group.add')
-def add_group(request_user: UserModel):
-    http_post_request_data = json.dumps(request.json)
-    new_group_data = json.loads(http_post_request_data, object_hook=json_util.object_hook)
-    new_group_data['public_id'] = user_manager.get_new_id(UserGroupModel.COLLECTION)
+@groups_blueprint.route('/', methods=['GET', 'HEAD'])
+@groups_blueprint.protect(auth=False, right='base.user-management.group.*')
+@groups_blueprint.parse_collection_parameters()
+def get_groups(params: CollectionParameters):
+    group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
+                                               right_manager=RightManager(rights))
+    body = request.method == 'HEAD'
 
     try:
-        new_group = UserGroupModel(**new_group_data)
-    except (CMDBError, Exception) as err:
-        LOGGER.error(err.message)
-        return abort(400)
+        iteration_result: IterationResult[UserGroupModel] = group_manager.iterate(
+            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+        groups = [UserGroupModel.to_dict(group) for group in iteration_result.results]
+        api_response = GetMultiResponse(groups, total=iteration_result.total, params=params,
+                                        url=request.url, model=UserGroupModel.MODEL, body=body)
+    except FrameworkIterationError as err:
+        return abort(400, err.message)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    return api_response.make_response()
+
+
+@groups_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
+@groups_blueprint.protect(auth=False, right='base.user-management.group.view')
+def get_group(public_id: int):
+    group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
+                                               right_manager=RightManager(rights))
+    body = True if not request.method != 'HEAD' else False
+
     try:
-        insert_ack = user_manager.insert_group(new_group)
-    except UserManagerInsertError as err:
-        LOGGER.error(err)
-        return abort(400)
+        group = group_manager.get(public_id)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    api_response = GetSingleResponse(UserGroupModel.to_dict(group), url=request.url, model=UserGroupModel.MODEL,
+                                     body=body)
+    return api_response.make_response()
 
-    return make_response(insert_ack)
 
-
-@group_blueprint.route('/<int:public_id>/', methods=['PUT'])
-@group_blueprint.route('/<int:public_id>', methods=['PUT'])
-@login_required
-@insert_request_user
-@right_required('base.user-management.group.edit')
-def edit_group(public_id: int, request_user: UserModel):
-    updated_group_params = json.dumps(request.json)
+@groups_blueprint.route('/', methods=['POST'])
+@groups_blueprint.protect(auth=False, right='base.user-management.group.add')
+@groups_blueprint.validate(UserGroupModel.SCHEMA)
+def insert_group(data: dict):
+    group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
+                                               right_manager=RightManager(rights))
     try:
-        response = user_manager.update_group(public_id,
-                                             json.loads(updated_group_params, object_hook=json_util.object_hook))
-    except UserManagerUpdateError as umue:
-        LOGGER.error(umue)
-        return abort(400)
-    return make_response(response.acknowledged)
+        result_id: PublicID = group_manager.insert(data)
+        raw_doc = group_manager.get(public_id=result_id)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    except ManagerInsertError as err:
+        return abort(400, err.message)
+    api_response = InsertSingleResponse(result_id, raw=UserGroupModel.to_dict(raw_doc), url=request.url,
+                                        model=UserGroupModel.MODEL)
+    return api_response.make_response(prefix='groups')
 
 
-@group_blueprint.route('/<int:public_id>/', methods=['DELETE'])
-@group_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@login_required
-@insert_request_user
-@right_required('base.user-management.group.delete')
-def delete_group(public_id: int, request_user: UserModel):
-    action = request.args.get('action')
-    options = None
-    if request.args.get('options'):
-        options = json.loads(request.args.get('options'))
-    if action is None:
-        return abort(400)
+@groups_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@groups_blueprint.protect(auth=False, right='base.user-management.group.edit')
+@groups_blueprint.validate(UserGroupModel.SCHEMA)
+def update_group(public_id: int, data: dict):
+    group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
+                                               right_manager=RightManager(rights))
     try:
-        ack = user_manager.delete_group(public_id, action, options=options)
-    except UserManagerDeleteError as err:
-        LOGGER.error(err)
-        return abort(500)
-    return make_response(ack)
+        group = UserGroupModel.from_data(data=data)
+        group_manager.update(public_id=PublicID(public_id), group=group)
+        api_response = UpdateSingleResponse(result=data, url=request.url, model=UserGroupModel.MODEL)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    except ManagerUpdateError as err:
+        return abort(400, err.message)
+    return api_response.make_response()
+
+
+@groups_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@groups_blueprint.protect(auth=False, right='base.user-management.group.delete')
+def delete_category(public_id: int):
+    group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
+                                               right_manager=RightManager(rights))
+    try:
+        deleted_group = group_manager.delete(public_id=PublicID(public_id))
+        api_response = DeleteSingleResponse(raw=UserGroupModel.to_dict(deleted_group), model=UserGroupModel.MODEL)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    except ManagerDeleteError as err:
+        return abort(404, err.message)
+    return api_response.make_response()

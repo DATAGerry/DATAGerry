@@ -41,7 +41,7 @@ def get_users(params: CollectionParameters):
     try:
         iteration_result: IterationResult[UserModel] = user_manager.iterate(
             filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
-        users = [UserModel.to_json(user) for user in iteration_result.results]
+        users = [UserModel.to_dict(user) for user in iteration_result.results]
         api_response = GetMultiResponse(users, total=iteration_result.total, params=params,
                                         url=request.url, model=UserModel.MODEL, body=body)
     except FrameworkIterationError as err:
@@ -61,6 +61,6 @@ def get_user(public_id: int):
         user: UserModel = user_manager.get(public_id)
     except ManagerGetError as err:
         return abort(404, err.message)
-    api_response = GetSingleResponse(UserModel.to_json(user), url=request.url,
+    api_response = GetSingleResponse(UserModel.to_dict(user), url=request.url,
                                      model=UserModel.MODEL, body=body)
     return api_response.make_response()
