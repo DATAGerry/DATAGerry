@@ -28,7 +28,7 @@ from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
-from cmdb.user_management.user_manager import UserManager
+from cmdb.user_management.managers.user_manager import UserManager
 
 
 LOGGER = logging.getLogger(__name__)
@@ -147,9 +147,9 @@ class ExportdThread(Thread):
             self.job.last_execute_date = datetime.utcnow()
 
             # get current user
-            cur_user = self.user_manager.get_user(self.user_id)
+            cur_user = self.user_manager.get(self.user_id)
 
-            self.exportd_job_manager.update_job(self.job, self.user_manager.get_user(self.user_id), event_start=False)
+            self.exportd_job_manager.update_job(self.job, self.user_manager.get(self.user_id), event_start=False)
             # execute Exportd job
             job = cmdb.exportd.exporter_base.ExportdManagerBase(self.job)
             job.execute(self.event, cur_user.get_public_id(), cur_user.get_display_name())
@@ -173,7 +173,7 @@ class ExportdThread(Thread):
         finally:
             # update job for UI
             self.job.state = ExecuteState.SUCCESSFUL.name if not self.exception_handling else ExecuteState.FAILED.name
-            self.exportd_job_manager.update_job(self.job, self.user_manager.get_user(self.user_id), event_start=False)
+            self.exportd_job_manager.update_job(self.job, self.user_manager.get(self.user_id), event_start=False)
 
 
 

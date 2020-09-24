@@ -118,33 +118,37 @@ class SetupRoutine:
 
         self.__check_database()
 
-        from cmdb.user_management.user_manager import UserManager
+        from cmdb.user_management.managers.user_manager import UserManager, UserModel
         from cmdb.security.security import SecurityManager
         scm = SecurityManager(self.setup_database_manager)
         usm = UserManager(self.setup_database_manager)
 
         try:
-            admin_user = usm.get_user(1)
+            admin_user: UserModel = usm.get(1)
             LOGGER.warning('KEY ROUTINE: Admin user detected')
             LOGGER.info(f'KEY ROUTINE: Enter new password for user: {admin_user.user_name}')
             admin_pass = str(input('New admin password: '))
             new_password = scm.generate_hmac(admin_pass)
             admin_user.password = new_password
-            usm.update_user(admin_user.get_public_id(), admin_user.__dict__)
+            usm.update(admin_user.get_public_id(), admin_user)
             LOGGER.info(f'KEY ROUTINE: Password was updated for user: {admin_user.user_name}')
         except Exception as ex:
             LOGGER.info(f'KEY ROUTINE: Password was updated for user failed: {ex}')
         LOGGER.info('KEY ROUTINE: FINISHED')
 
     def __create_user_management(self):
-        from cmdb.user_management.user_manager import UserManager, UserModel
+        from cmdb.user_management.models.user import UserModel
+
+        from cmdb.user_management.managers.user_manager import UserManager
+        from cmdb.user_management.managers.group_manager import GroupManager
         from cmdb.user_management import __FIXED_GROUPS__
         from cmdb.security.security import SecurityManager
         scm = SecurityManager(self.setup_database_manager)
-        usm = UserManager(self.setup_database_manager)
+        group_manager = GroupManager(self.setup_database_manager)
+        user_manager = UserManager(self.setup_database_manager)
 
         for group in __FIXED_GROUPS__:
-            usm.insert_group(group)
+            group_manager.insert(group)
 
         # setting the initial user to admin/admin as default
         admin_name = 'admin'
@@ -158,7 +162,7 @@ class SetupRoutine:
             group_id=__FIXED_GROUPS__[0].get_public_id(),
             registration_time=datetime.datetime.utcnow()
         )
-        usm.insert_user(admin_user)
+        user_manager.insert(admin_user)
         return True
 
     def __check_database(self):

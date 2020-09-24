@@ -18,13 +18,13 @@ import logging
 from datetime import datetime
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.framework.managers import ManagerGetError, ManagerInsertError
 from cmdb.security.auth.auth_errors import AuthenticationError
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
 from cmdb.security.auth.provider_config_form import AuthProviderConfigForm, AuthProviderConfigFormEntry, \
     AuthProviderConfigFormSection
-from cmdb.user_management import UserModel, UserManager
-from cmdb.user_management.user_manager import UserManagerGetError, UserManagerInsertError
+from cmdb.user_management.managers.user_manager import UserModel, UserManager
 from cmdb.utils.system_config import SystemConfigReader
 
 LOGGER = logging.getLogger(__name__)
@@ -146,30 +146,30 @@ class LdapAuthenticationProvider(AuthenticationProvider):
 
         # Check if user exists
         try:
-            user_instance: UserModel = __user_manager.get_user_by_name(user_name=user_name)
-        except UserManagerGetError as umge:
+            user_instance: UserModel = __user_manager.get_by({'user_name': user_name})
+        except ManagerGetError as umge:
             LOGGER.warning(f'[LdapAuthenticationProvider] UserModel exists on LDAP but not in database: {umge}')
-            LOGGER.info(f'[LdapAuthenticationProvider] Try creating user: {user_name}')
+            LOGGER.debug(f'[LdapAuthenticationProvider] Try creating user: {user_name}')
             try:
                 new_user_data = dict()
-                new_user_data['public_id'] = __user_manager.get_new_id(UserModel.COLLECTION)
                 new_user_data['user_name'] = user_name
+                new_user_data['active'] = True
                 new_user_data['group_id'] = self.config.default_group
                 new_user_data['registration_time'] = datetime.utcnow()
                 new_user_data['authenticator'] = LdapAuthenticationProvider.get_name()
-                new_user = UserModel(**new_user_data)
+
             except Exception as e:
                 LOGGER.debug(f'[LdapAuthenticationProvider] {e}')
                 raise AuthenticationError(LdapAuthenticationProvider.get_name(), e)
             LOGGER.debug(f'[LdapAuthenticationProvider] New user was init')
             try:
-                user_id = __user_manager.insert_user(new_user)
-            except UserManagerInsertError as umie:
+                user_id = __user_manager.insert(new_user_data)
+            except ManagerInsertError as umie:
                 LOGGER.debug(f'[LdapAuthenticationProvider] {umie}')
                 raise AuthenticationError(LdapAuthenticationProvider.get_name(), umie)
             try:
-                user_instance: UserModel = __user_manager.get_user(public_id=user_id)
-            except UserManagerGetError as umge:
+                user_instance: UserModel = __user_manager.get(public_id=user_id)
+            except ManagerGetError as umge:
                 LOGGER.debug(f'[LdapAuthenticationProvider] {umge}')
                 raise AuthenticationError(LdapAuthenticationProvider.get_name(), umge)
         return user_instance

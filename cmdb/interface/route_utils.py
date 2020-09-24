@@ -24,8 +24,11 @@ from werkzeug.http import wsgi_to_bytes
 from cmdb.framework.managers import ManagerGetError
 from cmdb.security.auth import AuthModule
 from cmdb.security.token.generator import TokenGenerator
-from cmdb.user_management import UserModel
+from cmdb.user_management.rights import __all__ as rights
+from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
+from cmdb.user_management.managers.group_manager import GroupManager
+from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.wraps import LOGGER
 
@@ -90,7 +93,8 @@ def auth_is_valid() -> bool:
 def user_has_right(required_right: str) -> bool:
     from flask import request, current_app
     with current_app.app_context():
-        user_manager = UserManager(current_app.user_manager)
+        user_manager = UserManager(current_app.database_manager)
+        group_manager = GroupManager(current_app.database_manager, RightManager(rights))
 
     token = parse_authorization_header(request.headers['Authorization'])
     try:
@@ -100,7 +104,8 @@ def user_has_right(required_right: str) -> bool:
     try:
         user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
         user = user_manager.get(user_id)
-        return user_manager.group_has_right(user.group, required_right)
+        group = group_manager.get(user.group_id)
+        return group.has_right(required_right)
     except ManagerGetError:
         return False
 
@@ -115,7 +120,7 @@ def insert_request_user(func):
     def get_request_user(*args, **kwargs):
         from flask import request, current_app
         with current_app.app_context():
-            user_manager = UserManager(current_app.user_manager)
+            user_manager = UserManager(current_app.database_manager)
 
         token = parse_authorization_header(request.headers['Authorization'])
         try:
@@ -141,6 +146,7 @@ def right_required(required_right: str, excepted: dict = None):
 
     with current_app.app_context():
         user_manager: UserManager = current_app.user_manager
+        group_manager = GroupManager(current_app.database_manager, RightManager(rights))
 
     def _page_right(func):
         @functools.wraps(func)
@@ -170,7 +176,8 @@ def right_required(required_right: str, excepted: dict = None):
                         return func(*args, **kwargs)
 
             try:
-                has_right = user_manager.group_has_right(current_user.group_id, required_right)
+                group = group_manager.get(current_user.group_id)
+                has_right = group.has_right(required_right)
             except ManagerGetError:
                 return abort(404, 'Group or right not exists')
             if not has_right:

@@ -17,6 +17,7 @@
 import logging
 from typing import List, ClassVar, Union
 
+from cmdb.framework.managers import ManagerGetError
 from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, AuthenticationProviderNotActivated, \
     AuthenticationError
 from cmdb.security.auth.auth_providers import AuthenticationProvider
@@ -24,8 +25,7 @@ from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.providers.external_providers import LdapAuthenticationProvider
 from cmdb.security.auth.providers.internal_providers import LocalAuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
-from cmdb.user_management import UserManager, UserModel
-from cmdb.user_management.user_manager import UserManagerGetError
+from cmdb.user_management.managers.user_manager import UserManager, UserModel
 from cmdb.utils.system_reader import SystemSettingsReader
 
 LOGGER = logging.getLogger(__name__)
@@ -153,7 +153,7 @@ class AuthModule:
         user_name = user_name.lower()
         user_instance = None
         try:
-            founded_user = user_manager.get_user_by_name(user_name=user_name)
+            founded_user = user_manager.get_by({'user_name': user_name})
             provider_class_name = founded_user.authenticator
             LOGGER.debug(f'[AUTH] Founded user: {founded_user} with provider: {provider_class_name}')
             if not self.provider_exists(provider_class_name):
@@ -174,7 +174,7 @@ class AuthModule:
             except AuthenticationError as ae:
                 LOGGER.error(f'[LOGIN] UserModel could not login: {ae}')
 
-        except UserManagerGetError as umge:
+        except ManagerGetError as umge:
             LOGGER.error(f'[AUTH] {user_name} not in database: {umge}')
             LOGGER.info(f'[AUTH] Check for other providers - request_user: {user_name}')
             # get installed providers

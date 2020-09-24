@@ -97,11 +97,10 @@ class UserGroupModel(CmdbDAO):
             raise RightNotFoundError(self.name, name)
 
     def has_right(self, right_name) -> bool:
-        try:
-            self.get_right(right_name)
-        except RightNotFoundError:
-            return False
-        return True
+        right_status = self.get_right(right_name)
+        if not right_status:
+            right_status = self.has_extended_right(right_name=right_name)
+        return right_status
 
     def has_extended_right(self, right_name: str) -> bool:
         parent_right_name: str = right_name.rsplit(".", 1)[0]

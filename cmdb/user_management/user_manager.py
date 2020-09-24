@@ -39,14 +39,6 @@ class UserManager(CmdbManagerBase):
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
 
-    def get_user(self, public_id: int) -> UserModel:
-        """Get user by public id"""
-        try:
-            result = UserModel(**self._get(collection=UserModel.COLLECTION, public_id=public_id))
-        except (CMDBError, Exception) as err:
-            raise UserManagerGetError(err)
-        return result
-
     def get_users(self) -> List[UserModel]:
         """Get all users"""
         user_list = []
@@ -80,15 +72,6 @@ class UserManager(CmdbManagerBase):
     def get_user_by_name(self, user_name) -> UserModel:
         """Get a user by his user_name"""
         return self.get_user_by(user_name=user_name)
-
-    def insert_user(self, user: UserModel) -> int:
-        """
-        TODO: Refactor for dict use
-        """
-        try:
-            return self.dbm.insert(collection=UserModel.COLLECTION, data=user.__dict__)
-        except (CMDBError, Exception):
-            raise UserManagerInsertError(f'Could not insert {user.user_name}')
 
     def update_user(self, public_id, update_params: dict):
         try:

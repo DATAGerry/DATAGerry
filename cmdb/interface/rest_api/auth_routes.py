@@ -27,7 +27,7 @@ from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError,
     AuthenticationProviderNotActivated
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import UserModel
-from cmdb.user_management.user_manager import UserManager
+from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 
@@ -40,7 +40,7 @@ auth_blueprint = RootBlueprint('auth_rest', __name__, url_prefix='/auth')
 LOGGER = logging.getLogger(__name__)
 
 with current_app.app_context():
-    user_manager: UserManager = current_app.user_manager
+    user_manager: UserManager = UserManager(current_app.database_manager)
     system_settings_reader: SystemSettingsReader = SystemSettingsReader(current_app.database_manager)
     system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(current_app.database_manager)
 
@@ -136,8 +136,6 @@ def post_login():
     finally:
         # If login success generate user instance with token
         if user_instance:
-            user_instance.last_login_time = datetime.utcnow()
-            user_manager.update_user(user_instance.public_id, user_instance.__dict__)
             tg = TokenGenerator()
             token = tg.generate_token(payload={'user': {
                 'public_id': user_instance.get_public_id()

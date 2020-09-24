@@ -28,7 +28,7 @@ from ...framework.utils import PublicID
 
 class GroupManager(AccountManager):
 
-    def __init__(self, database_manager: DatabaseManagerMongo, right_manager: RightManager = None):
+    def __init__(self, database_manager: DatabaseManagerMongo = None, right_manager: RightManager = None):
         self.right_manager: RightManager = right_manager
         super(GroupManager, self).__init__(UserGroupModel.COLLECTION, database_manager=database_manager)
 

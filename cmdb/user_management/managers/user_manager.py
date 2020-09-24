@@ -76,7 +76,7 @@ class UserManager(AccountManager):
         raw_user = super(UserManager, self).get_by(query=query)
         return UserModel.from_data(raw_user)
 
-    def insert(self, user: dict) -> PublicID:
+    def insert(self, user: Union[UserModel, dict]) -> PublicID:
         """
         Insert a single user into the system.
 
@@ -89,6 +89,8 @@ class UserManager(AccountManager):
         Returns:
             int: The Public ID of the new inserted user
         """
+        if isinstance(user, UserModel):
+            user = UserModel.to_dict(user)
         return super(UserManager, self).insert(resource=user)
 
     def update(self, public_id: Union[PublicID, int], user: Union[UserModel, dict]):
