@@ -16,10 +16,10 @@
 from typing import Union, List
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
-from cmdb.framework.cmdb_dao import CmdbDAO
-from cmdb.framework.managers import ManagerBase, ManagerGetError, ManagerDeleteError
+from cmdb.manager.errors import ManagerGetError, ManagerDeleteError
+from cmdb.manager import ManagerBase
 from cmdb.framework.managers.error.framework_errors import FrameworkGetError, FrameworkNotFoundError, \
-    FrameworkIterationError, FrameworkQueryEmptyError, FrameworkDeleteError, FrameworkUpdateError
+    FrameworkIterationError, FrameworkDeleteError, FrameworkUpdateError
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.utils import PublicID, Collection
 from cmdb.search import Query, Pipeline

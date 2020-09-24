@@ -20,7 +20,7 @@ from datetime import datetime
 from flask import abort, current_app, request
 
 from cmdb.framework.models.category import CategoryModel, CategoryTree
-from cmdb.framework.managers import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerUpdateError
+from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerUpdateError
 from cmdb.framework.managers.category_manager import CategoryManager
 from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
 from cmdb.framework.results.iteration import IterationResult

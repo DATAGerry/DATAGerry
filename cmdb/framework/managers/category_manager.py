@@ -19,7 +19,6 @@ from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework import CategoryModel
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.models.category import CategoryTree
-from cmdb.framework.managers import ManagerGetError
 from cmdb.framework.managers.error.framework_errors import FrameworkDeleteError
 from cmdb.framework.managers.framework_manager import FrameworkManager
 from cmdb.framework.results.iteration import IterationResult

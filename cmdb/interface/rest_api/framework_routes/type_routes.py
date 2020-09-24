@@ -20,7 +20,7 @@ from datetime import datetime
 from flask import abort, request, current_app
 
 from cmdb.framework.models.type import TypeModel
-from cmdb.framework.managers import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
+from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
 from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.managers.type_manager import TypeManager
