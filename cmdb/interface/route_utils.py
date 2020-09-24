@@ -21,26 +21,24 @@ from functools import wraps
 from werkzeug._compat import to_unicode
 from werkzeug.http import wsgi_to_bytes
 
+from cmdb.framework.managers import ManagerGetError
 from cmdb.security.auth import AuthModule
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import UserModel
-from cmdb.user_management.user_manager import UserManagerGetError, UserManager
+from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.wraps import LOGGER
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
 
 from flask import request, abort, current_app
 
 from cmdb.security.token.validator import TokenValidator, ValidationError
+from cmdb.utils.wraps import deprecated
 from cmdb.utils import json_encoding
 
 DEFAULT_MIME_TYPE = 'application/json'
 
 
+@deprecated
 def make_response(instance, status_code=200, indent=2):
     """
     make json http response with indent settings and auto encoding
@@ -60,6 +58,7 @@ def make_response(instance, status_code=200, indent=2):
     return resp
 
 
+@deprecated
 def login_required(f):
     """wraps function for routes which requires an authentication
     """
@@ -77,6 +76,7 @@ def login_required(f):
     return decorated
 
 
+@deprecated
 def auth_is_valid() -> bool:
     try:
         parse_authorization_header(request.headers['Authorization'])
@@ -86,10 +86,11 @@ def auth_is_valid() -> bool:
         return False
 
 
+@deprecated
 def user_has_right(required_right: str) -> bool:
     from flask import request, current_app
     with current_app.app_context():
-        user_manager = current_app.user_manager
+        user_manager = UserManager(current_app.user_manager)
 
     token = parse_authorization_header(request.headers['Authorization'])
     try:
@@ -98,12 +99,13 @@ def user_has_right(required_right: str) -> bool:
         return abort(401)
     try:
         user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
-        user = user_manager.get_user(user_id)
+        user = user_manager.get(user_id)
         return user_manager.group_has_right(user.group, required_right)
-    except UserManagerGetError:
+    except ManagerGetError:
         return False
 
 
+@deprecated
 def insert_request_user(func):
     """helper function which auto injects the user from the token request
     requires: login_required
@@ -113,7 +115,7 @@ def insert_request_user(func):
     def get_request_user(*args, **kwargs):
         from flask import request, current_app
         with current_app.app_context():
-            user_manager = current_app.user_manager
+            user_manager = UserManager(current_app.user_manager)
 
         token = parse_authorization_header(request.headers['Authorization'])
         try:
@@ -124,13 +126,14 @@ def insert_request_user(func):
             user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
         except ValueError:
             return abort(401)
-        user = user_manager.get_user(user_id)
+        user = user_manager.get(user_id)
         kwargs.update({'request_user': user})
         return func(*args, **kwargs)
 
     return get_request_user
 
 
+@deprecated
 def right_required(required_right: str, excepted: dict = None):
     """wraps function for routes which requires a special user right
     requires: insert_request_user
@@ -168,7 +171,7 @@ def right_required(required_right: str, excepted: dict = None):
 
             try:
                 has_right = user_manager.group_has_right(current_user.group_id, required_right)
-            except UserManagerGetError:
+            except ManagerGetError:
                 return abort(404, 'Group or right not exists')
             if not has_right:
                 return abort(403, 'Request user does not have the right for this action')
