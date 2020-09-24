@@ -20,6 +20,8 @@ from cmdb.framework import TypeModel
 from cmdb.framework.managers.framework_manager import FrameworkManager
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.utils import PublicID
+from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError, ManagerDeleteError
+from cmdb.search import Query
 
 
 class TypeManager(FrameworkManager):
@@ -47,14 +49,17 @@ class TypeManager(FrameworkManager):
             skip: number of elements to skip first
             sort: sort field
             order: sort order
-            *args:
-            **kwargs:
 
         Returns:
             IterationResult: Instance of IterationResult with generic TypeModel.
         """
-        iteration_result: IterationResult[TypeModel] = super(TypeManager, self).iterate(
-            filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+
+        try:
+            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            aggregation_result = next(self._aggregate(self.collection, query))
+        except ManagerGetError as err:
+            raise ManagerIterationError(err=err)
+        iteration_result: IterationResult[TypeModel] = IterationResult.from_aggregation(aggregation_result)
         iteration_result.convert_to(TypeModel)
         return iteration_result
 
@@ -68,8 +73,10 @@ class TypeManager(FrameworkManager):
         Returns:
             TypeModel: Instance of TypeModel with data.
         """
-        result = super(TypeManager, self).get(public_id=public_id)
-        return TypeModel.from_data(result)
+        cursor_result = self._get(self.collection, filter={'public_id': public_id}, limit=1)
+        for resource_result in cursor_result.limit(-1):
+            return TypeModel.from_data(resource_result)
+        raise ManagerGetError(f'Type with ID: {public_id} not found!')
 
     def insert(self, type: dict) -> PublicID:
         """
@@ -84,14 +91,14 @@ class TypeManager(FrameworkManager):
         Returns:
             int: The Public ID of the new inserted type
         """
-        return super(TypeManager, self).insert(resource=type)
+        return self._insert(self.collection, resource=type)
 
     def update(self, public_id: Union[PublicID, int], type: Union[TypeModel, dict]):
         """
         Update a existing type in the system.
         Args:
             public_id (int): PublicID of the type in the system.
-            type:
+            type: New type data
 
         Notes:
             If a TypeModel instance was passed as type argument, \
@@ -99,7 +106,10 @@ class TypeManager(FrameworkManager):
         """
         if isinstance(type, TypeModel):
             type = TypeModel.to_json(type)
-        return super(TypeManager, self).update(public_id=public_id, resource=type)
+        update_result = self._update(self.collection, filter={'public_id': public_id}, resource=type)
+        if update_result.matched_count != 1:
+            raise ManagerUpdateError(f'Something happened during the update!')
+        return update_result
 
     def delete(self, public_id: Union[PublicID, int]) -> TypeModel:
         """
@@ -111,6 +121,8 @@ class TypeManager(FrameworkManager):
         Returns:
             TypeModel: The deleted type as its model.
         """
-        type: TypeModel = self.get(public_id=public_id)
-        super(TypeManager, self).delete(public_id=public_id)
-        return type
+        raw_type: TypeModel = self.get(public_id=public_id)
+        delete_result = self._delete(self.collection, public_id=public_id)
+        if delete_result.deleted_count == 0:
+            raise ManagerDeleteError(err='No type matched this public id')
+        return raw_type

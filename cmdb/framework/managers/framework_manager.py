@@ -16,10 +16,10 @@
 from typing import Union, List
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
-from cmdb.framework.cmdb_dao import CmdbDAO
-from cmdb.framework.managers import ManagerBase, ManagerGetError, ManagerDeleteError
+from cmdb.manager.errors import ManagerGetError, ManagerDeleteError
+from cmdb.manager import ManagerBase
 from cmdb.framework.managers.error.framework_errors import FrameworkGetError, FrameworkNotFoundError, \
-    FrameworkIterationError, FrameworkQueryEmptyError, FrameworkDeleteError, FrameworkUpdateError
+    FrameworkIterationError, FrameworkDeleteError, FrameworkUpdateError
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.utils import PublicID, Collection
 from cmdb.search import Query, Pipeline
@@ -46,7 +46,6 @@ class FrameworkQueryBuilder(Builder):
             Union[Query, Pipeline]:
         """
         Converts the parameters from the call to a mongodb aggregation pipeline
-
         Args:
             filter: dict or list of dict query/queries which the elements have to match.
             limit: max number of documents to return.
@@ -84,10 +83,9 @@ class FrameworkQueryBuilder(Builder):
 class FrameworkManager(ManagerBase):
     """Framework managers implementation for all framework based CRUD operations."""
 
-    def __init__(self, collection: Collection, database_manager: DatabaseManagerMongo = None):
+    def __init__(self, collection: Collection, database_manager: DatabaseManagerMongo):
         """
         Set the collection name and the database connection.
-
         Args:
             collection: Name of the database collection
             database_manager: Active database managers instance
@@ -97,100 +95,16 @@ class FrameworkManager(ManagerBase):
         super(FrameworkManager, self).__init__(database_manager)
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult:
-        """
-        Get multi elements from a collection by passed parameters.
-
-        Notes:
-            If you want to get all elements in a collection, just pass a empty dict as filter.
-
-        Args:
-            filter: match requirements of field values
-            limit: max number of elements to return
-            skip: number of elements to skip first
-            sort: sort field
-            order: sort order
-            *args:
-            **kwargs:
-
-        Returns:
-            IterationResult
-
-        Raises:
-            FrameworkIterationError - if something happens during the database aggregation.
-        """
-        try:
-            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-            aggregation_result = next(super(FrameworkManager, self)._aggregate(self.collection, query))
-        except ManagerGetError as err:
-            raise FrameworkIterationError(err=err)
-        return IterationResult.from_aggregation(aggregation_result)
+        raise NotImplementedError
 
     def get(self, public_id: PublicID) -> dict:
-        """
-        Get a single framework resource by its id.
-
-        Args:
-            public_id: ID of the element inside the database.
-
-        Returns:
-            Raw result of the element.
-
-        Raises:
-            - FrameworkGetError if something breaks with loading the resource from the database.
-            - FrameworkNotFoundError if the PublicID is not in the selected database collection.
-        """
-        try:
-            cursor_result = super(FrameworkManager, self)._get(self.collection, filter={'public_id': public_id},
-                                                               limit=1)
-        except ManagerGetError as err:
-            raise FrameworkGetError(err)
-        for resource_result in cursor_result.limit(-1):
-            return resource_result
-        else:
-            raise FrameworkNotFoundError(
-                f'A resource with the PublicID {public_id} was not found inside {self.collection}')
+        raise NotImplementedError
 
     def insert(self, resource: dict) -> PublicID:
-        """
-        Insert a new framework resource by raw data.
-
-        Args:
-            resource(dict): Raw resource information.
-
-        Returns:
-            PublicID: public_id of the new inserted resource.
-        """
-        return super(FrameworkManager, self)._insert(self.collection, resource)
+        raise NotImplementedError
 
     def update(self, public_id: PublicID, resource: dict):
-        """
-        Update a existing framework resource by its id.
-
-        Args:
-            public_id(PublicID): public_id of the resource which will be updated.
-            resource(dict): New resource data.
-
-        Raises:
-            - FrameworkUpdateError: If something went wrong during update.
-        """
-        update_result = super(FrameworkManager, self)._update(self.collection, filter={'public_id': public_id},
-                                                              data=resource, upsert=False)
-        if update_result.matched_count != 1:
-            raise FrameworkUpdateError(f'Something happened during the update!')
-        return update_result
+        raise NotImplementedError
 
     def delete(self, public_id: PublicID):
-        """
-        Delete a existing resource by its id.
-
-        Args:
-            public_id(PublicID): The public_id of the resource which will be deleted.
-
-        Raises:
-            - FrameworkDeleteError: If something went wrong during delete.
-        """
-        try:
-            delete_result = super(FrameworkManager, self)._delete(self.collection, public_id=public_id)
-        except ManagerDeleteError as err:
-            raise FrameworkDeleteError(err=err)
-        return delete_result
+        raise NotImplementedError

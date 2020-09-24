@@ -26,8 +26,8 @@ class ManagerGetError(CMDBError):
         self.message = f'Error while GET operation - E: {err}'
 
 
-class ManagerIterationError(ManagerGetError):
-    """Manager exception for get operations"""
+class ManagerIterationError(CMDBError):
+    """Manager exception for iteration operations"""
 
     def __init__(self, err=None):
         self.message = f'Error while ITERATE operation - E: {err}'
