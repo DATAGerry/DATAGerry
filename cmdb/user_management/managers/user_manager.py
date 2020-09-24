@@ -20,6 +20,7 @@ from cmdb.user_management.models.user import UserModel
 from .account_manager import AccountManager
 from ...framework.results import IterationResult
 from ...framework.utils import PublicID
+from ...search import Query
 
 
 class UserManager(AccountManager):
@@ -61,6 +62,19 @@ class UserManager(AccountManager):
         """
         result = super(UserManager, self).get(public_id=public_id)
         return UserModel.from_data(result)
+
+    def get_by(self, query: Query) -> UserModel:
+        """
+        Get a single user by a query.
+
+        Args:
+            query (Query): Query filter of user parameters.
+
+        Returns:
+            UserModel: Instance of UserModel with matching data.
+        """
+        raw_user = super(UserManager, self).get_by(query=query)
+        return UserModel.from_data(raw_user)
 
     def insert(self, user: dict) -> PublicID:
         """

@@ -16,6 +16,7 @@
 from typing import Union
 
 from cmdb.framework.managers import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
+from cmdb.framework.managers.error.manager_errors import ManagerIterationError
 
 
 class FrameworkGetError(ManagerGetError):
@@ -62,7 +63,7 @@ class FrameworkQueryEmptyError(FrameworkGetError):
         super(FrameworkQueryEmptyError, self).__init__()
 
 
-class FrameworkIterationError(FrameworkGetError):
+class FrameworkIterationError(ManagerIterationError):
     """Framework error if the iteration over the collection throws an error"""
 
     def __init__(self, err: Union[Exception, str] = None):
