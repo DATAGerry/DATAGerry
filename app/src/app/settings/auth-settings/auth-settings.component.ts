@@ -146,7 +146,7 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
     if (this.authProviderFormGroup.valid) {
       this.spinner.show();
       this.configFormSaveSubscriptions = this.authSettingsService.postSettings(this.authProviderFormGroup.value).subscribe((resp: any) => {
-        this.toast.show('Authentication config was updated!');
+        this.toast.success('Authentication config was updated!');
       }).add(() => {
         this.spinner.hide();
       });

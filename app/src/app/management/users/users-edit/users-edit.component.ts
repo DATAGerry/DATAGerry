@@ -160,7 +160,7 @@ export class UsersEditComponent implements OnInit, OnDestroy {
     if (this.editForm.valid) {
       const data = this.editForm.getRawValue();
       this.userService.putUser(this.userID, data).subscribe(addResp => {
-        this.toastService.show(`User with ID: ${ this.userID } was updated!`);
+        this.toastService.success(`User with ID: ${ this.userID } was updated!`);
       }, (error) => {
         this.toastService.error(error.error.description);
       }, () => {
