@@ -20,8 +20,8 @@ from datetime import datetime
 from flask import abort, request, current_app
 
 from cmdb.framework.models.type import TypeModel
-from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
-from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
+from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, \
+    ManagerIterationError
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.utils import PublicID
@@ -65,7 +65,7 @@ def get_types(params: CollectionParameters):
         types = [TypeModel.to_json(type) for type in iteration_result.results]
         api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
                                         url=request.url, model=TypeModel.MODEL, body=body)
-    except FrameworkIterationError as err:
+    except ManagerIterationError as err:
         return abort(400, err.message)
     except ManagerGetError as err:
         return abort(404, err.message)

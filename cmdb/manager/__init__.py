@@ -19,7 +19,7 @@ from typing import Any
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.utils import Collection, PublicID
 
-from .errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
+from .errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, ManagerIterationError
 
 
 class ManagerBase:
@@ -55,7 +55,7 @@ class ManagerBase:
         try:
             return self._database_manager.aggregate(collection, *args, **kwargs)
         except Exception as err:
-            raise ManagerGetError(err)
+            raise ManagerIterationError(err)
 
     def _get(self, collection: Collection, filter=None, *args, **kwargs):
         """
@@ -74,28 +74,28 @@ class ManagerBase:
         except Exception as err:
             raise ManagerGetError(err)
 
-    def _insert(self, collection: Collection, data: Any):
+    def _insert(self, collection: Collection, resource: Any):
         """
         Calls mongodb insert operation
         Args:
             collection: Name of the collection
-            data: Insert data (normally a dict)
+            resource: Insert data (normally a dict)
 
         Returns:
             - An instance of :class:`~pymongo.results.InsertOneResult`.
         """
         try:
-            return self._database_manager.insert(collection, data=data)
+            return self._database_manager.insert(collection, data=resource)
         except Exception as err:
             raise ManagerInsertError(err)
 
-    def _update(self, collection: Collection, filter, data, *args, **kwargs):
+    def _update(self, collection: Collection, filter, resource, *args, **kwargs):
         """
         Calls a mongodb update operation
         Args:
             collection: Name of the collection
             filter: Match dictionary
-            data: Update data (normally a dict)
+            resource: Update data (normally a dict)
             *args:
             **kwargs:
 
@@ -103,7 +103,7 @@ class ManagerBase:
             - An instance of :class:`~pymongo.results.UpdateResult`.
         """
         try:
-            return self._database_manager.update(collection, filter=filter, data=data, *args, **kwargs)
+            return self._database_manager.update(collection, filter=filter, data=resource, *args, **kwargs)
         except Exception as err:
             raise ManagerUpdateError(err)
 
@@ -112,7 +112,7 @@ class ManagerBase:
         Calls a mongodb delete operation
         Args:
             collection: Name of the collection
-            public_id: Public ID of Document
+            public_id: Public ID of resource
 
         Returns:
             - An instance of :class:`~pymongo.results.DeleteResult`.
