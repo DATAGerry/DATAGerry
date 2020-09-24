@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
 from flask import abort, request, current_app
 
 from cmdb.framework.managers import ManagerGetError
@@ -25,8 +24,6 @@ from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse, GetSingleResponse
 from cmdb.user_management import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
-
-LOGGER = logging.getLogger(__name__)
 
 users_blueprint = APIBlueprint('users', __name__)
 

@@ -133,7 +133,12 @@ class AccountManager(ManagerBase):
         Returns:
             Raw result of the element.
         """
-        return self.get_by({'public_id': public_id})
+        cursor_result = super(AccountManager, self)._get(self.collection, filter={'public_id': public_id}, limit=1)
+        for resource_result in cursor_result.limit(-1):
+            return resource_result
+        else:
+            raise ManagerGetError(
+                f'A resource with the ID {public_id} was not found inside {self.collection}')
 
     def get_by(self, query: Query):
         """
