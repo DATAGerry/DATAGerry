@@ -64,7 +64,7 @@ class CmdbDAO:
         Args:
             **kwargs: list of parameters
         """
-        self.public_id: int = public_id
+        self.public_id: int = int(public_id)
         for key in kwargs:
             setattr(self, key, kwargs[key])
 
