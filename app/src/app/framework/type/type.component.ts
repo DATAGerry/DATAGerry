@@ -56,11 +56,17 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
   public types: Array<CmdbType>;
   public typesAPIResponse: APIGetMultiResponse<CmdbType>;
 
+  /**
+   * Selection parameters
+   */
   public selected: Array<number> = [];
   public all: boolean = false;
-
   public remove: boolean = false;
   public update: boolean = false;
+
+  /**
+   * Export modal
+   */
   private modalRef: NgbModalRef;
 
   constructor(private typeService: TypeService, private router: Router, private fileService: FileService,
@@ -68,45 +74,81 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.types = [];
   }
 
+  /**
+   * Starts the component and init the table
+   */
   public ngOnInit(): void {
     this.dtOptions = {
       ordering: true,
       columnDefs: [
         {
           orderable: true,
+          searchable: true,
+          targets: [1, 2, 3, 4]
+        },
+        {
           name: 'active',
           targets: [1]
         },
         {
-          orderable: true,
           name: 'public_id',
           targets: [2]
         },
         {
-          orderable: true,
           name: 'name',
           targets: [3]
         },
         {
-          orderable: true,
           name: 'creation_time',
-          targets: [4]
+          targets: [4],
+          orderable: true
         },
         {
           orderable: false,
-          targets: [1, 5, 6]
+          searchable: false,
+          targets: [0, 5, 6]
         }
       ],
+      language: {
+        search: '',
+        searchPlaceholder: 'Filter...'
+      },
       order: [[2, 'desc']],
       dom:
         '<"row" <"col-sm-2" l><"col" f> >' +
         '<"row" <"col-sm-12"tr>>' +
         '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
-      searching: false,
+      searching: true,
       serverSide: true,
       processing: true,
       ajax: (params: any, callback) => {
+        let filter;
+        if (params.search.value !== '') {
+          const searchableColumns = params.columns.filter(column => {
+            return column.searchable === true;
+          });
+
+          const columnQueries = [];
+          for (const column of searchableColumns) {
+            const regex = {
+              $regexMatch: {
+                input: { $toString: `$${ column.name }` },
+                regex: params.search.value,
+                options: 'ismx'
+              }
+            };
+            columnQueries.push(regex);
+          }
+          const query = [
+            { $addFields: { match: { $or: columnQueries } } },
+            { $match: { match: true } },
+            { $project: { match: 0 } }
+          ];
+          filter = JSON.stringify(query);
+        }
+
         const apiParameters: CollectionParameters = {
+          filter,
           page: Math.ceil(params.start / params.length) + 1,
           limit: params.length,
           sort: params.columns[params.order[0].column].name,
@@ -128,10 +170,16 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
     };
   }
 
+  /**
+   * Trigger the table render after init the data
+   */
   public ngAfterViewInit(): void {
     this.dtTrigger.next();
   }
 
+  /**
+   * Destroy subscriptions after clsoe
+   */
   public ngOnDestroy(): void {
     this.dtTrigger.unsubscribe();
     if (this.modalRef) {
@@ -141,11 +189,18 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.unSubscribe.complete();
   }
 
+  /**
+   * Open the clean modal
+   * @param typeInstance - Instance of the type which will be cleaned
+   */
   public callCleanUpModal(typeInstance: CmdbType): void {
     this.modalRef = this.modalService.open(CleanupModalComponent);
     this.modalRef.componentInstance.typeInstance = typeInstance;
   }
 
+  /**
+   * Call the export routes with the selected types
+   */
   public exportingFiles() {
     if (this.selected.length === 0 || this.selected.length === this.types.length) {
       this.fileService.getTypeFile()
@@ -156,11 +211,20 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Download the selected export file
+   *
+   * @param data Data which will be exported
+   * @param exportType File extension
+   */
   public downLoadFile(data: any, exportType: any) {
     const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
     this.fileSaverService.save(data.body, timestamp + '.' + exportType);
   }
 
+  /**
+   * Select all types in the table
+   */
   public selectAll() {
     if (this.all) {
       this.selected = [];
@@ -174,9 +238,14 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Toggle a specific selection in the table.
+   * Disables the `all` selection in the headline.
+   *
+   * @param publicID ID of the row/type
+   */
   public toggleSelection(publicID: number) {
     const idx = this.selected.indexOf(publicID);
-    console.log(idx);
     if (idx === -1) {
       this.selected.push(publicID);
     } else {
@@ -185,6 +254,9 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Quickhack to open the selection box.
+   */
   public showAlert(): void {
     $('#infobox').show();
   }
