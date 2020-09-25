@@ -73,8 +73,28 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
       ordering: true,
       columnDefs: [
         {
+          orderable: true,
+          name: 'active',
+          targets: [1]
+        },
+        {
+          orderable: true,
+          name: 'public_id',
+          targets: [2]
+        },
+        {
+          orderable: true,
+          name: 'name',
+          targets: [3]
+        },
+        {
+          orderable: true,
+          name: 'creation_time',
+          targets: [4]
+        },
+        {
           orderable: false,
-          targets: [0, 1, 5, 6]
+          targets: [1, 5, 6]
         }
       ],
       order: [[2, 'desc']],
