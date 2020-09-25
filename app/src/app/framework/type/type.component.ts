@@ -84,7 +84,7 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
         {
           orderable: true,
           searchable: true,
-          targets: [1, 2, 3, 4]
+          targets: [1, 2, 3]
         },
         {
           name: 'active',
@@ -101,7 +101,8 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
         {
           name: 'creation_time',
           targets: [4],
-          orderable: true
+          orderable: true,
+          searchable: false
         },
         {
           orderable: false,
