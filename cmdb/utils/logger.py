@@ -123,13 +123,13 @@ def get_logging_conf():
             "gunicorn.error": {
                 "level": "INFO",
                 "handlers": ["file_web_error"],
-                "propagate": True,
+                "propagate": False,
                 "qualname": "gunicorn.error"
             },
             "gunicorn.access": {
                 "level": "INFO",
                 "handlers": ["file_web_access"],
-                "propagate": True,
+                "propagate": False,
                 "qualname": "gunicorn.access"
             }
         }

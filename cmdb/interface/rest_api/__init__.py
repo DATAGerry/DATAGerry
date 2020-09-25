@@ -97,13 +97,13 @@ def create_rest_api(event_queue):
 
     import cmdb
     if cmdb.__MODE__ == 'DEBUG':
-        app.config.from_object(app_config['rest_development'])
-        LOGGER.info('RestAPI starting with config mode {}'.format(app.config.get("ENV")))
-    elif cmdb.__MODE__ == 'TESTING':
-        app.config.from_object(app_config['testing'])
+        config = app_config['development']
+        config.APPLICATION_ROOT = '/rest/'
+        app.config.from_object(config)
     else:
-        app.config.from_object(app_config['rest'])
-        LOGGER.info('RestAPI starting with config mode {}'.format(app.config.get("ENV")))
+        config = app_config['production']
+        config.APPLICATION_ROOT = '/rest/'
+        app.config.from_object(config)
 
     with app.app_context():
         register_converters(app)
