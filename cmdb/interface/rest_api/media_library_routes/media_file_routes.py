@@ -56,10 +56,11 @@ def get_file_list(params: CollectionParameters):
         list of media_files
     """
     try:
+        sort = json.loads(params.sort).items()
         param = json.loads(params.optional['metadata'])
         metadata = generate_metadata_filter('metadata', params=param)
-        query = {'limit': params.limit, 'skip': params.skip}
-        output = media_file_manager.get_all_media_files(metadata, **query)
+        query = {'limit': params.limit, 'skip': params.skip, 'sort': list(sort)}
+        output = media_file_manager.get_many(metadata, **query)
         api_response = GetMultiResponse(output.result, total=output.total, params=params, url=request.url)
     except MediaFileManagerGetError as err:
         return abort(404, err.message)
@@ -89,18 +90,19 @@ def add_new_file(request_user: User):
     try:
         file = get_file_in_request('file')
         filter_metadata = generate_metadata_filter('metadata', request)
+        filter_metadata.update({'filename': file.filename})
 
         # Check if file exists
-        is_exist_file = media_file_manager.exist_media_file(file.filename, filter_metadata)
+        is_exist_file = media_file_manager.exist_file(filter_metadata)
         if is_exist_file:
-            grid_fs_file = media_file_manager.get_media_file(file.filename, filter_metadata)
-            media_file_manager.delete_media_file(grid_fs_file._file['public_id'])
+            exist = media_file_manager.get_file(filter_metadata)
+            media_file_manager.delete_file(exist['public_id'])
 
         metadata = get_element_from_data_request('metadata', request)
         metadata['author_id'] = request_user.public_id
         metadata['mime_type'] = file.mimetype
 
-        result = media_file_manager.insert_media_file(data=file, metadata=metadata)
+        result = media_file_manager.insert_file(data=file, metadata=metadata)
     except (MediaFileManagerInsertError, MediaFileManagerGetError):
         return abort(500)
 
@@ -118,12 +120,12 @@ def update_file(request_user: User):
         new_file_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
 
         # Check if file exists
-        data = media_file_manager.get_media_file_by_public_id(new_file_data['public_id'])._file
+        data = media_file_manager.get_file(metadata={'public_id': new_file_data['public_id']})
         data['public_id'] = new_file_data['public_id']
         data['filename'] = new_file_data['filename']
         data['metadata'] = new_file_data['metadata']
         data['metadata']['author_id'] = new_file_data['metadata']['author_id'] = request_user.get_public_id()
-        media_file_manager.updata_media_file(data)
+        media_file_manager.updata_file(data)
     except MediaFileManagerUpdateError:
         return abort(500)
 
@@ -131,17 +133,17 @@ def update_file(request_user: User):
     return resp
 
 
-@media_file_blueprint.route('/<string:name>/', methods=['GET'])
-@media_file_blueprint.route('/<string:name>', methods=['GET'])
+@media_file_blueprint.route('/<string:filename>/', methods=['GET'])
+@media_file_blueprint.route('/<string:filename>', methods=['GET'])
 @media_file_blueprint.protect(auth=True, right='base.framework.object.view')
-def get_file(name: str):
+def get_file(filename: str):
     """ Validation: Check folder name for uniqueness
 
         For Example
 
         Create a unique media file element:
          - Folders in the same directory are unique.
-         - The same Folder-Name can exist in different directories
+         - The Folder-Name can exist in different directories
 
         Create subfolders:
          - Selected folder is considered as parent
@@ -149,14 +151,15 @@ def get_file(name: str):
         This also applies for files
 
         Args:
-            name: name must be unique
+            filename: name must be unique
 
         Returns: MediaFile
 
         """
     try:
         filter_metadata = generate_metadata_filter('metadata', request)
-        result = media_file_manager.get_media_file(name, filter_metadata)._file
+        filter_metadata.update({'filename': filename})
+        result = media_file_manager.get_file(metadata=filter_metadata)
     except MediaFileManagerGetError as err:
         return abort(404, err.message)
     return make_response(result)
@@ -167,12 +170,13 @@ def get_file(name: str):
 def download_file(filename: str):
     try:
         filter_metadata = generate_metadata_filter('metadata', request)
-        grid_fs_file = media_file_manager.get_media_file(filename, filter_metadata).read()
+        filter_metadata.update({'filename': filename})
+        result = media_file_manager.get_file(metadata=filter_metadata, blob=True)
     except MediaFileManagerInsertError:
         return abort(500)
 
     return Response(
-        grid_fs_file,
+        result,
         mimetype="application/octet-stream",
         headers={
             "Content-Disposition":
@@ -185,10 +189,10 @@ def download_file(filename: str):
 @media_file_blueprint.protect(auth=True, right='base.framework.object.edit')
 def delete_file(public_id: int):
     try:
-        deleted = media_file_manager.get_media_file_by_public_id(public_id)
+        deleted = media_file_manager.get_file(metadata={'public_id': public_id})
         for _id in recursive_delete_filter(public_id, media_file_manager):
-            media_file_manager.delete_media_file(_id)
+            media_file_manager.delete_file(_id)
     except MediaFileManagerDeleteError:
         return abort(500)
 
-    return make_response(deleted._file)
+    return make_response(deleted)

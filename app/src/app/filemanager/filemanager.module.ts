@@ -28,7 +28,7 @@ import { ContextmenuComponent } from './components/contextmenu/contextmenu.compo
 import { FileViewListComponent } from './components/file-view-list/file-view-list.component';
 import { NewFolderDialogComponent } from './modal/new-folder-dialog/new-folder-dialog.component';
 import { RenameDialogComponent } from './modal/rename-dialog/rename-dialog.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { FolderPathViewerComponent } from './components/folder-path-viewer/folder-path-viewer.component';
 import { MoveDialogComponent } from './modal/move-dialog/move-dialog.component';
 import { NgSelectModule } from '@ng-select/ng-select';
@@ -54,7 +54,8 @@ import { NgSelectModule } from '@ng-select/ng-select';
     LayoutModule,
     FilemanagerRoutingModule,
     ReactiveFormsModule,
-    NgSelectModule
+    NgSelectModule,
+    FormsModule
   ],
   providers: [
     TypeService,

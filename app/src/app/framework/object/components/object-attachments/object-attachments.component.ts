@@ -23,6 +23,8 @@ import { FileMetadata } from '../../../../filemanager/model/metadata';
 import { ActivatedRoute } from '@angular/router';
 import { NgbModal, NgbModalConfig, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { AddAttachmentsModalComponent } from '../../../../layout/helpers/modals/add-attachments-modal/add-attachments-modal.component';
+import { APIGetMultiResponse } from '../../../../services/models/api-response';
+import { FileElement } from '../../../../filemanager/model/file-element';
 
 @Component({
   selector: 'cmdb-object-attachments',
@@ -46,7 +48,7 @@ export class ObjectAttachmentsComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.fileService.getAllFilesList(this.metadata).subscribe((resp: any) => {
+    this.fileService.getAllFilesList(this.metadata).subscribe((resp: APIGetMultiResponse<FileElement>) => {
       this.attachmentsTotal = resp.total;
     });
   }

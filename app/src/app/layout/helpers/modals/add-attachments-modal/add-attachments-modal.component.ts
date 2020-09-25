@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, HostListener, Input, OnInit} from '@angular/core';
+import { Component, HostListener, Input, OnInit } from '@angular/core';
 import { FileMetadata } from '../../../../filemanager/model/metadata';
 import { FileElement } from '../../../../filemanager/model/file-element';
 import { FileService } from '../../../../filemanager/service/file.service';
@@ -24,8 +24,9 @@ import { FileSaverService } from 'ngx-filesaver';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../../toast/toast.service';
 import { GeneralModalComponent } from '../general-modal/general-modal.component';
-import {CollectionParameters} from "../../../../services/models/api-parameter";
-import {InfiniteScrollService} from "../../../services/infinite-scroll.service";
+import { CollectionParameters } from '../../../../services/models/api-parameter';
+import { InfiniteScrollService } from '../../../services/infinite-scroll.service';
+import { APIGetMultiResponse } from '../../../../services/models/api-response';
 
 @Component({
   selector: 'cmdb-add-attachments-modal',
@@ -56,21 +57,32 @@ export class AddAttachmentsModalComponent implements OnInit {
 
   @HostListener('scroll', ['$event']) onScrollHost(e: Event): void {
     if (this.scrollService.bottomReached(e, this.tag) && this.page <= this.lastPage) {
-      this.getFiles(this.scrollService.getCollectionParameters(this.tag));
+      this.getFiles(this.scrollService.getCollectionParameters(this.tag), true);
     }
   }
   public ngOnInit(): void {
-    this.fileService.getAllFilesList(this.metadata).subscribe((data: any) => {
+    this.fileService.getAllFilesList(this.metadata).subscribe((data: APIGetMultiResponse<FileElement>) => {
       this.attachments.push(...data.results);
       this.recordsTotal = data.total;
       this.updatePagination(data);
     });
   }
 
-  public getFiles(apiParameters?: CollectionParameters): void {
+  /**
+   * Get all attachments as a list
+   * As you scroll, new records are added to the attachments.
+   * Without the scrolling parameter the attachments are reinitialized
+   * @param apiParameters Instance of {@link CollectionParameters}
+   * @param onScroll Control if it is a new file upload
+   */
+  public getFiles(apiParameters?: CollectionParameters, onScroll: boolean = false): void {
     this.fileService.getAllFilesList(this.metadata, apiParameters ? apiParameters : this.defaultApiParameter)
-      .subscribe((data: any) => {
-        this.attachments.push(...data.results);
+      .subscribe((data: APIGetMultiResponse<FileElement>) => {
+        if (onScroll) {
+          this.attachments.push(...data.results);
+        } else {
+          this.attachments = data.results;
+        }
         this.recordsTotal = data.total;
         this.inProcess = false;
         this.updatePagination(data);
@@ -96,7 +108,7 @@ export class AddAttachmentsModalComponent implements OnInit {
           if (this.attachments.find(el => el.name === file.name)) {
             const promiseModal = this.replaceFileModal(file.name).then(result => {
               if (result) {
-                this.attachments = this.attachments.filter(el => el.name !== file.name);
+                this.attachments.push(...this.attachments.filter(el => el.name !== file.name));
                 return true;
               } else {return false; }
             });
@@ -111,7 +123,6 @@ export class AddAttachmentsModalComponent implements OnInit {
 
   /**
    * Check if the upload file is larger than 50 M/Bytes.
-   *
    * @param file: File to be uploaded
    * @return boolean: false if larger than 50 M/Bytes, else true
    */
@@ -129,12 +140,14 @@ export class AddAttachmentsModalComponent implements OnInit {
     this.inProcess = true;
     this.attachments.push(file);
     this.fileService.postFile(file, this.metadata).subscribe(() => {
-      this.getFiles();
+      this.getFiles(this.defaultApiParameter);
     }, (err) => console.log(err));
   }
 
   public deleteFile(publicID: number) {
-    this.fileService.deleteFile(publicID, {}).subscribe(() => this.getFiles());
+    this.fileService.deleteFile(publicID, {}).subscribe(() =>
+      this.getFiles(this.defaultApiParameter)
+    );
   }
 
   private replaceFileModal(filename: string) {

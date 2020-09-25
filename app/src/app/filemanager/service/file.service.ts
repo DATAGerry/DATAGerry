@@ -29,6 +29,7 @@ import { ValidatorService } from '../../services/validator.service';
 import { FileMetadata } from '../model/metadata';
 import { FormControl } from '@angular/forms';
 import { FileElement } from '../model/file-element';
+import { APIGetMultiResponse } from '../../services/models/api-response';
 
 export const checkFolderExistsValidator = (fileService: FileService, metadata: any, time: number = 500) => {
   return (control: FormControl) => {
@@ -60,23 +61,22 @@ export class FileService<T = any> implements ApiService {
   }
 
   /**
-   * Get all files as a list
+   * Get all files as a list from database (GridFS)
+   * @param metadata part of (GridFS) instance
+   * @param options HttpParams
    */
-  public getAllFilesList(metadata: FileMetadata, ...options): Observable<T[]> {
-
+  public getAllFilesList(metadata: FileMetadata, ...options): Observable<APIGetMultiResponse<T>> {
     let params: HttpParams = new HttpParams();
     for (const option of options) {
       for (const key of Object.keys(option)) {
         params = params.append(key, option[key]);
       }
     }
+    params = params.append('sort', JSON.stringify({filename: -1}));
     params = params.append('metadata', JSON.stringify(metadata));
     httpObserveOptions[PARAMETER] = params;
-    return this.api.callGet<T[]>(this.servicePrefix + '/', httpObserveOptions).pipe(
-      map((apiResponse: HttpResponse<T[]>) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
+    return this.api.callGet<Array<T>>(this.servicePrefix + '/', httpObserveOptions).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
     );
@@ -85,7 +85,7 @@ export class FileService<T = any> implements ApiService {
   /**
    * Add a new file into the database (GridFS)
    * @param file raw instance
-   * @param metadata raw instance
+   * @param metadata part of (GridFS) instance
    */
   public postFile(file: File, metadata: FileMetadata): Observable<T> {
     const formData = new FormData();
@@ -104,7 +104,7 @@ export class FileService<T = any> implements ApiService {
 
   /**
    * Update file into the database (GridFS)
-   * @param file raw instance
+   * @param file part of (GridFS) instance
    */
   public putFile(file: FileElement): Observable<T> {
     return this.api.callPut<number>(this.servicePrefix + '/', JSON.stringify(file)).pipe(
@@ -118,7 +118,7 @@ export class FileService<T = any> implements ApiService {
   /**
    * Download a file by name
    * @param filename name of the file
-   * @param metadata raw instance
+   * @param metadata part of (GridFS) instance
    */
   public downloadFile(filename: string, metadata) {
     const formData = new FormData();
@@ -147,10 +147,10 @@ export class FileService<T = any> implements ApiService {
   /**
    * Delete a existing files
    * @param fileID the file id
-   * @param params metadata raw instance
+   * @param metadata part of (GridFS) instance
    */
-  public deleteFile(fileID: number, params): Observable<any> {
-    httpFileOptions[PARAMETER] = {metadata : JSON.stringify(params)};
+  public deleteFile(fileID: number, metadata): Observable<any> {
+    httpFileOptions[PARAMETER] = {metadata : JSON.stringify(metadata)};
     return this.api.callDelete<any>(this.servicePrefix + '/' + fileID, httpFileOptions).pipe(
       map((apiResponse: HttpResponse<any>) => {
         return apiResponse.body;
@@ -161,7 +161,7 @@ export class FileService<T = any> implements ApiService {
   /**
    * Validation: Check folder name for uniqueness
    *  @param filename must be unique
-   *  @param metadata raw instance
+   *  @param metadata part of (GridFS) instance
    */
   public getFileElement(filename: string, metadata: FileMetadata) {
     httpObserveOptions[PARAMETER] = {metadata : JSON.stringify(metadata)};

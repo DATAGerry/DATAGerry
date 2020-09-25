@@ -36,13 +36,13 @@ export class InfiniteScrollService {
   /**
    * Controls if end was reached
    *
-   * @param e : event which takes place in the DOM.
-   * @param unique : name of scrollable container
+   * @param event event which takes place in the DOM.
+   * @param unique name of scrollable container
    */
-  public bottomReached(e: Event, unique: string): boolean {
-    this.scrollTop = (e.target as Element).scrollTop;
-    this.clientHeight = (e.target as Element).clientHeight;
-    this.scrollHeight = (e.target as Element).scrollHeight;
+  public bottomReached(event: Event, unique: string): boolean {
+    this.scrollTop = (event.target as Element).scrollTop;
+    this.clientHeight = (event.target as Element).clientHeight;
+    this.scrollHeight = (event.target as Element).scrollHeight;
 
     return this.scrollUp(unique) && Math.round((this.scrollTop + this.clientHeight) - this.scrollHeight) === 0;
   }
@@ -51,9 +51,9 @@ export class InfiniteScrollService {
   /**
    * Controls if end was reached
    *
-   * @param page : current page
-   * @param limit : fetch limit
-   * @param unique : name of scrollable container
+   * @param page current page
+   * @param limit fetch limit
+   * @param unique name of scrollable container
    */
   public setCollectionParameters(page: number, limit: number, unique?: string): void {
     const apiParams: CollectionParameters = {page, limit, optional: {lastScroll: this.scrollTop}};
@@ -64,8 +64,8 @@ export class InfiniteScrollService {
   /**
    * Controls if end was reached
    *
-   * @param unique : name of scrollable container
-   * @return CollectionParameters : Api Parameters
+   * @param unique name of scrollable container
+   * @return boolean CollectionParameters Api Parameters
    */
   public getCollectionParameters(unique: string): CollectionParameters {
     return this.apiCollection.get(unique);
@@ -74,8 +74,8 @@ export class InfiniteScrollService {
   /**
    * Detecting scroll direction
    *
-   * @param unique : name of scrollable container
-   * @return boolean: true when scrolling down otherwise false
+   * @param unique name of scrollable container
+   * @return true when scrolling down otherwise false
    */
   private scrollUp(unique: string): boolean {
     return this.scrollTop > (this.apiCollection.get(unique).optional as any).lastScroll;

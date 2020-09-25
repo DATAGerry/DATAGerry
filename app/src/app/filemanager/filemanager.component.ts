@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, HostListener, OnDestroy, OnInit} from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { FileService } from './service/file.service';
 import { NgbModal, NgbModalConfig, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { NewFolderDialogComponent } from './modal/new-folder-dialog/new-folder-dialog.component';
@@ -29,6 +29,7 @@ import { RenameDialogComponent } from './modal/rename-dialog/rename-dialog.compo
 import { MoveDialogComponent } from './modal/move-dialog/move-dialog.component';
 import { InfiniteScrollService } from '../layout/services/infinite-scroll.service';
 import { CollectionParameters } from '../services/models/api-parameter';
+import { APIGetMultiResponse } from '../services/models/api-response';
 
 @Component({
   selector: 'cmdb-filemanager',
@@ -75,10 +76,17 @@ export class FilemanagerComponent implements OnInit, OnDestroy {
     this.loadFileTree();
   }
 
+  /**
+   * Get all attachments as a list
+   * As you scroll, new records are added to the attachments.
+   * Without the scrolling parameter the attachments are reinitialized
+   * @param apiParameters Instance of {@link CollectionParameters}
+   * @param onScroll Control if it is a new file upload
+   */
   public loadFiles(apiParameters?: CollectionParameters, onScroll: boolean = false): void {
     const metadata = this.generateMetadata();
     this.fileService.getAllFilesList(metadata, apiParameters ? apiParameters : this.apiParameter)
-      .subscribe((data: any) => {
+      .subscribe((data: APIGetMultiResponse<FileElement>) => {
         if (onScroll) {
           this.fileElements.push(...data.results);
         } else {
@@ -90,7 +98,7 @@ export class FilemanagerComponent implements OnInit, OnDestroy {
 
   public loadFileTree() {
     this.fileService.getAllFilesList(new FileMetadata({folder: true}))
-      .subscribe((data: any) => {
+      .subscribe((data: APIGetMultiResponse<FileElement>) => {
         this.fileTree = data.results;
       });
   }
@@ -120,7 +128,8 @@ export class FilemanagerComponent implements OnInit, OnDestroy {
   }
 
   private reorderFolderTree(item: FileElement) {
-    this.fileService.getAllFilesList(new FileMetadata({folder: true})).subscribe((data: any) => {
+    this.fileService.getAllFilesList(new FileMetadata({folder: true}))
+      .subscribe((data: APIGetMultiResponse<FileElement>) => {
       for (const el of data.results) {
         if (el.public_id === item.metadata.parent) {
           el.hasSubFolders = true;
@@ -138,7 +147,7 @@ export class FilemanagerComponent implements OnInit, OnDestroy {
     this.modalRef = this.modalService.open(AddAttachmentsModalComponent);
     this.modalRef.componentInstance.metadata = metadata;
     this.modalRef.result.then(() => {
-      this.fileService.getAllFilesList(metadata).subscribe((data: any) => {
+      this.fileService.getAllFilesList(metadata).subscribe((data: APIGetMultiResponse<FileElement>) => {
         this.fileElements = data.results;
       });
     });

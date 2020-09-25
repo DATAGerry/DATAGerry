@@ -21,8 +21,8 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FileMetadata } from '../../model/metadata';
 import { FileService } from '../../service/file.service';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastService } from '../../../layout/toast/toast.service';
 import { FileElement } from '../../model/file-element';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
 
 @Component({
   selector: 'cmdb-move-dialog',
@@ -40,9 +40,11 @@ export class MoveDialogComponent implements OnInit {
     this.basicForm = new FormGroup({
       folder: new FormControl(null, Validators.required)
     });
-    this.fileService.getAllFilesList(new FileMetadata({folder: true})).subscribe( (data: any) => {
-      this.destinationFolder = data.results;
-      this.destinationFolder.push(new FileElement({name: '/', public_id: null, metadata: { parent: null } }));
+
+    this.fileService.getAllFilesList(new FileMetadata({folder: true}))
+      .subscribe( (data: APIGetMultiResponse<FileElement>) => {
+        this.destinationFolder = data.results;
+        this.destinationFolder.push(new FileElement({name: '/', public_id: null, metadata: { parent: null } }));
     });
   }
 }

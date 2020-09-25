@@ -42,7 +42,7 @@
             </div>
           </div>
         </div>
-        <div class="col-12 p-0 pre-scrollable" (scroll)="onScrollHost($event)">
+        <div id="file-view-list" class="col-12 p-0" (scroll)="onScrollHost($event)">
           <cmdb-file-view-list [fileElements]="fileElements"></cmdb-file-view-list>
         </div>
       </div>

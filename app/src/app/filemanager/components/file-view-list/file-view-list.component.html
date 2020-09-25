@@ -1,18 +1,18 @@
-<table class="table framework-table table-striped table-bordered">
+<table class="table framework-table table-hover table-striped table-bordered mb-0 ">
   <thead>
   <tr>
-    <th scope="col">Name</th>
+    <th scope="col" class="active _desc">Filename</th>
     <th scope="col">Size</th>
     <th scope="col">Type</th>
-    <th scope="col">Modifier</th>
-    <th scope="col" class="text-center">Action</th>
+    <th scope="col">Author</th>
+    <th class="text-center">Action</th>
   </tr>
   </thead>
   <tbody>
   <tr *ngFor="let item of fileElements">
     <td>{{item.name}}</td>
     <td>{{item.size | fileSize}}</td>
-    <td>{{item.metadata?.folder ? "Folder" : item.metadata?.mime_type}}</td>
+    <td>{{item.metadata?.mime_type}}</td>
     <td>{{item.metadata?.author_id}}</td>
     <td>
       <div class="text-center">

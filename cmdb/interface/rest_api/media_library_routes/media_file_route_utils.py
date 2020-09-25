@@ -61,8 +61,8 @@ def recursive_delete_filter(public_id, media_file_manager, _ids=None) -> []:
     if not _ids:
         _ids = []
 
-    root = media_file_manager.get_media_file_by_public_id(public_id)
-    output = media_file_manager.get_all_media_files({'metadata.parent': root.public_id})
+    root = media_file_manager.get_many(metadata={'public_id': public_id}).result[0]
+    output = media_file_manager.get_many(metadata={'metadata.parent': root.public_id})
     _ids.append(root.public_id)
 
     for item in output.result:

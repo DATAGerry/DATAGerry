@@ -25,6 +25,7 @@ import { RenameDialogComponent} from '../../modal/rename-dialog/rename-dialog.co
 import { FileMetadata } from '../../model/metadata';
 import { NgbModal, NgbModalConfig } from '@ng-bootstrap/ng-bootstrap';
 import { MoveDialogComponent } from '../../modal/move-dialog/move-dialog.component';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
 
 @Component({
   selector: 'cmdb-file-view-list',
@@ -85,8 +86,8 @@ export class FileViewListComponent {
 
   public deleteFile(value: FileElement) {
     const metadata = new FileMetadata({parent: value.metadata.parent, folder: false });
-    this.fileService.deleteFile(value.public_id, {}).subscribe((resp: FileElement) => {
-      this.fileService.getAllFilesList(metadata).subscribe((data: any) => {
+    this.fileService.deleteFile(value.public_id, {}).subscribe(() => {
+      this.fileService.getAllFilesList(metadata).subscribe((data: APIGetMultiResponse<FileElement>) => {
         this.fileElements = data.results;
       });
     });
@@ -94,8 +95,8 @@ export class FileViewListComponent {
 
   private postFileChanges(curr: any, metadata: any): void {
     this.fileService.putFile(curr).subscribe(() => {
-      this.fileService.getAllFilesList(metadata).subscribe((data: any) => {
-        this.fileElements = data.result;
+      this.fileService.getAllFilesList(metadata).subscribe((data: APIGetMultiResponse<FileElement>) => {
+        this.fileElements = data.results;
       });
     });
   }
