@@ -83,6 +83,7 @@ class HTTPServer(BaseApplication):
         if 'workers' not in self.options:
             self.options['workers'] = HTTPServer.number_of_workers()
         self.options['worker_class'] = 'sync'
+        self.options['disable_existing_loggers'] = False
         self.options['logconfig_dict'] = get_logging_conf()
         self.options['timeout'] = 120
         self.options['daemon'] = True

@@ -22,10 +22,8 @@ import { BehaviorSubject } from 'rxjs';
 import { FileService } from '../../service/file.service';
 import { FileSaverService } from 'ngx-filesaver';
 import { RenameDialogComponent} from '../../modal/rename-dialog/rename-dialog.component';
-import { FileMetadata } from '../../model/metadata';
 import { NgbModal, NgbModalConfig } from '@ng-bootstrap/ng-bootstrap';
 import { MoveDialogComponent } from '../../modal/move-dialog/move-dialog.component';
-import { APIGetMultiResponse } from '../../../services/models/api-response';
 import { CollectionParameters } from '../../../services/models/api-parameter';
 import { InfiniteScrollService } from '../../../layout/services/infinite-scroll.service';
 
@@ -144,7 +142,7 @@ export class FileViewListComponent {
   }
 
   public deleteFile(value: FileElement) {
-    this.fileService.deleteFile(value.public_id, {}).subscribe(tes => {
+    this.fileService.deleteFile(value.public_id, {}).subscribe(() => {
       this.loadFolderFiles();
     });
   }

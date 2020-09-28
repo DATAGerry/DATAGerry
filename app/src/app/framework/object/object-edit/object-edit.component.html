@@ -5,7 +5,7 @@
     </div>
     <div class="col-sm-2 text-right">
       <div class="btn-group p-1" role="group">
-        <button type="submit" class="btn btn-outline-success mr-2"
+        <button id ="myBtn" type="submit" class="btn btn-outline-success mr-2"
                 (click)="editObject()"
                 [disabled]="!renderForm.dirty">Save</button>
         <button class="btn btn-outline-danger"
@@ -15,6 +15,7 @@
     </div>
   </div>
 </div>
+
 <hr/>
 <div id="object-edit" class="card">
   <div class="card-body">

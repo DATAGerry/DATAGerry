@@ -79,7 +79,7 @@ export class GroupsAddComponent implements OnInit, OnDestroy {
     const rawData = this.addForm.getRawValue();
     if (this.addForm.valid) {
       this.groupService.postGroup(rawData).subscribe(insertAck => {
-          this.toast.show(`Group was added with ID: ${ insertAck }`);
+          this.toast.success(`Group was added with ID: ${ insertAck }`);
         },
         (error) => {
           console.error(error);

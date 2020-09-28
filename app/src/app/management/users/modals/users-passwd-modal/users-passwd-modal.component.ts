@@ -53,7 +53,7 @@ export class UsersPasswdModalComponent {
     if (this.passwdForm.valid) {
       const changePasswd = this.userService.changeUserPassword(this.user.public_id, this.passwdForm.get('password').value).subscribe(
         () => {
-          this.toast.show(`Password for user with ID: ${ this.user.public_id } was changed`);
+          this.toast.success(`Password for user with ID: ${ this.user.public_id } was changed`);
         },
         (error => {
           console.error(error);
