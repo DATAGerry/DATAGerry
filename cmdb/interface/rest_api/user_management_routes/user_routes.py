@@ -16,7 +16,7 @@
 
 from flask import abort, request, current_app
 
-from cmdb.framework.managers import ManagerGetError
+from cmdb.manager.errors import ManagerGetError
 from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
@@ -61,3 +61,4 @@ def get_user(public_id: int):
     api_response = GetSingleResponse(UserModel.to_dict(user), url=request.url,
                                      model=UserModel.MODEL, body=body)
     return api_response.make_response()
+

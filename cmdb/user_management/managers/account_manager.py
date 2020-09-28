@@ -16,10 +16,9 @@
 from typing import Union, List
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
-from cmdb.framework.managers import ManagerBase, ManagerGetError
-from cmdb.framework.managers.error.manager_errors import ManagerIterationError, ManagerUpdateError
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import Collection, PublicID
+from cmdb.manager import ManagerBase
 from cmdb.search import Pipeline, Query
 from cmdb.search.query.builder import Builder
 
@@ -95,105 +94,16 @@ class AccountManager(ManagerBase):
         super(AccountManager, self).__init__(database_manager)
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult:
-        """
-        Get multi elements from a collection by passed parameters.
-
-        Notes:
-            If you want to get all elements in a collection, just pass a empty dict as filter.
-
-        Args:
-            filter: match requirements of field values
-            limit: max number of elements to return
-            skip: number of elements to skip first
-            sort: sort field
-            order: sort order
-            *args:
-            **kwargs:
-
-        Returns:
-            IterationResult
-
-        Raises:
-            ManagerIterationError - if something happens during the database aggregation.
-        """
-        try:
-            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-            aggregation_result = next(super(AccountManager, self)._aggregate(self.collection, query))
-        except ManagerGetError as err:
-            raise ManagerIterationError(err=err)
-        return IterationResult.from_aggregation(aggregation_result)
+        raise NotImplementedError
 
     def get(self, public_id: PublicID) -> dict:
-        """
-        Get a single user management resource by its id.
-
-        Args:
-            public_id: ID of the element inside the database.
-
-        Returns:
-            Raw result of the element.
-        """
-        cursor_result = super(AccountManager, self)._get(self.collection, filter={'public_id': public_id}, limit=1)
-        for resource_result in cursor_result.limit(-1):
-            return resource_result
-        else:
-            raise ManagerGetError(
-                f'A resource with the ID {public_id} was not found inside {self.collection}')
-
-    def get_by(self, query: Query):
-        """
-        Get a single user management resource by a query.
-
-        Args:
-            query (Query): Dict query of the element
-
-        Returns:
-            Raw result of the element.
-
-        Raises:
-            - ManagerGetError if the PublicID is not in the selected database collection.
-        """
-        cursor_result = super(AccountManager, self)._get(self.collection, filter=query, limit=1)
-        for resource_result in cursor_result.limit(-1):
-            return resource_result
-        else:
-            raise ManagerGetError(
-                f'A resource with the Query {query} was not found inside {self.collection}')
+        raise NotImplementedError
 
     def insert(self, resource: dict) -> PublicID:
-        """
-        Insert a new user management resource by raw data.
-
-        Args:
-            resource(dict): Raw resource information.
-
-        Returns:
-            PublicID: public_id of the new inserted resource.
-        """
-        return super(AccountManager, self)._insert(self.collection, resource)
+        raise NotImplementedError
 
     def update(self, public_id: PublicID, resource: dict):
-        """
-        Update a existing user management resource by its id.
-
-        Args:
-            public_id(PublicID): public_id of the resource which will be updated.
-            resource(dict): New resource data.
-
-        Raises:
-            - ManagerUpdateError: If something went wrong during update.
-        """
-        update_result = super(AccountManager, self)._update(self.collection, filter={'public_id': public_id},
-                                                            data=resource, upsert=False)
-        if update_result.matched_count != 1:
-            raise ManagerUpdateError(f'Something happened during the update!')
-        return update_result
+        raise NotImplementedError
 
     def delete(self, public_id: PublicID):
-        """
-        Delete a existing resource by its id.
-
-        Args:
-            public_id(PublicID): The public_id of the resource which will be deleted.
-        """
-        return super(AccountManager, self)._delete(self.collection, public_id=public_id)
+        raise NotImplementedError

@@ -18,8 +18,10 @@ from typing import Union
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.user_management.models.user import UserModel
 from .account_manager import AccountManager
+from .. import UserGroupModel
 from ...framework.results import IterationResult
 from ...framework.utils import PublicID
+from ...manager import ManagerGetError, ManagerIterationError, ManagerDeleteError
 from ...search import Query
 
 
@@ -45,8 +47,12 @@ class UserManager(AccountManager):
         Returns:
             IterationResult: Instance of IterationResult with generic UserModel.
         """
-        iteration_result: IterationResult[UserModel] = super(UserManager, self).iterate(
-            filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+        try:
+            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            aggregation_result = next(self._aggregate(self.collection, query))
+        except ManagerGetError as err:
+            raise ManagerIterationError(err=err)
+        iteration_result: IterationResult[UserModel] = IterationResult.from_aggregation(aggregation_result)
         iteration_result.convert_to(UserModel)
         return iteration_result
 
@@ -60,8 +66,10 @@ class UserManager(AccountManager):
         Returns:
             UserModel: Instance of UserModel with data.
         """
-        result = super(UserManager, self).get(public_id=public_id)
-        return UserModel.from_data(result)
+        result = self._get(self.collection, filter={'public_id': public_id}, limit=1)
+        for resource_result in result.limit(-1):
+            return UserModel.from_data(resource_result)
+        raise ManagerGetError(f'User with ID: {public_id} not found!')
 
     def get_by(self, query: Query) -> UserModel:
         """
@@ -73,8 +81,10 @@ class UserManager(AccountManager):
         Returns:
             UserModel: Instance of UserModel with matching data.
         """
-        raw_user = super(UserManager, self).get_by(query=query)
-        return UserModel.from_data(raw_user)
+        result = self._get(self.collection, filter=query, limit=1)
+        for resource_result in result.limit(-1):
+            return UserModel.from_data(resource_result)
+        raise ManagerGetError(f'User with the query: {query} not found!')
 
     def insert(self, user: Union[UserModel, dict]) -> PublicID:
         """
@@ -91,7 +101,7 @@ class UserManager(AccountManager):
         """
         if isinstance(user, UserModel):
             user = UserModel.to_dict(user)
-        return super(UserManager, self).insert(resource=user)
+        return self._insert(self.collection, resource=user)
 
     def update(self, public_id: Union[PublicID, int], user: Union[UserModel, dict]):
         """
@@ -107,7 +117,7 @@ class UserManager(AccountManager):
         """
         if isinstance(user, UserModel):
             user = UserModel.to_dict(user)
-        return super(UserManager, self).update(public_id=public_id, resource=user)
+        return self._update(public_id=public_id, filter={'public_id': public_id}, resource=user)
 
     def delete(self, public_id: Union[PublicID, int]) -> UserModel:
         """
@@ -116,9 +126,18 @@ class UserManager(AccountManager):
         Args:
             public_id (int): PublicID of the user in the system.
 
+        Raises:
+            ManagerDeleteError: If you try to delete the admin \
+                                or something happened during the database operation.
+
         Returns:
             UserModel: The deleted user as its model.
         """
+        if public_id in [1]:
+            raise ManagerDeleteError(f'You cant delete the admin user')
         user: UserModel = self.get(public_id=public_id)
-        super(UserManager, self).delete(public_id=public_id)
+        delete_result = self._delete(self.collection, public_id=public_id)
+
+        if delete_result.deleted_count == 0:
+            raise ManagerDeleteError(err='No user matched this public id')
         return user

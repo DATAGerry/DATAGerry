@@ -19,11 +19,11 @@ from typing import Union, List
 from .account_manager import AccountManager
 from .right_manager import RightManager
 from .. import UserGroupModel
-from ..models.right import BaseRight
 from ...data_storage.database_manager import DatabaseManagerMongo
-from ...framework.managers import ManagerDeleteError
 from ...framework.results import IterationResult
 from ...framework.utils import PublicID
+from ...manager import ManagerDeleteError, ManagerGetError, ManagerIterationError, ManagerUpdateError
+from ...search import Query
 
 
 class GroupManager(AccountManager):
@@ -38,21 +38,23 @@ class GroupManager(AccountManager):
         Iterate over a collection of group resources.
 
         Args:
-            filter: match requirements of field values
+             filter: match requirements of field values
             limit: max number of elements to return
             skip: number of elements to skip first
             sort: sort field
             order: sort order
-            *args:
-            **kwargs:
 
         Returns:
-            IterationResult: Instance of IterationResult with generic UserModel.
+            IterationResult: Instance of IterationResult with generic CategoryModel.
         """
-        iteration_result: IterationResult[UserGroupModel] = super(GroupManager, self).iterate(
-            filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-        iteration_result.results = [UserGroupModel.from_data(result, self.right_manager.rights) for result in
-                                    iteration_result.results]
+
+        try:
+            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            aggregation_result = next(self._aggregate(self.collection, query))
+        except ManagerGetError as err:
+            raise ManagerIterationError(err=err)
+        iteration_result: IterationResult[UserGroupModel] = IterationResult.from_aggregation(aggregation_result)
+        iteration_result.convert_to(UserGroupModel)
         return iteration_result
 
     def get(self, public_id: Union[PublicID, int]) -> UserGroupModel:
@@ -63,12 +65,14 @@ class GroupManager(AccountManager):
             public_id (int): ID of the group.
 
         Returns:
-            UserModel: Instance of UserGroupModel with data.
+            UserGroupModel: Instance of UserGroupModel with data.
         """
-        result = super(GroupManager, self).get(public_id=public_id)
-        return UserGroupModel.from_data(result, self.right_manager.rights)
+        cursor_result = self._get(self.collection, filter={'public_id': public_id}, limit=1)
+        for resource_result in cursor_result.limit(-1):
+            return UserGroupModel.from_data(resource_result)
+        raise ManagerGetError(f'Group with ID: {public_id} not found!')
 
-    def insert(self, group: dict) -> PublicID:
+    def insert(self, group: Union[UserGroupModel, dict]) -> PublicID:
         """
         Insert a single group into the system.
 
@@ -79,11 +83,13 @@ class GroupManager(AccountManager):
             If no public id was given, the database manager will auto insert the next available ID.
 
         Returns:
-            int: The Public ID of the new inserted group
+            int: The Public ID of the new inserted UserGroupModel
         """
-        return super(GroupManager, self).insert(resource=group)
+        if isinstance(group, UserGroupModel):
+            group = UserGroupModel.to_dict(group)
+        return self._insert(self.collection, resource=group)
 
-    def update(self, public_id: Union[PublicID, int], group: UserGroupModel):
+    def update(self, public_id: Union[PublicID, int], group: Union[UserGroupModel, dict]):
         """
         Update a existing group in the system.
 
@@ -91,8 +97,16 @@ class GroupManager(AccountManager):
             public_id (int): PublicID of the user in the system.
             group (UserGroupModel): Instance of UserGroupModel
 
+        Notes:
+            If a CategoryModel instance was passed as type argument, \
+            it will be auto converted via the model `to_json` method.
         """
-        return super(GroupManager, self).update(public_id=public_id, resource=UserGroupModel.to_data(group))
+        if isinstance(group, UserGroupModel):
+            group = UserGroupModel.to_data(group)
+        update_result = self._update(self.collection, filter={'public_id': public_id}, resource=group)
+        if update_result.matched_count != 1:
+            raise ManagerUpdateError(f'Something happened during the update!')
+        return update_result
 
     def delete(self, public_id: Union[PublicID, int]) -> UserGroupModel:
         """
@@ -102,7 +116,8 @@ class GroupManager(AccountManager):
             public_id (int): PublicID of the group in the system.
 
         Raises:
-            ManagerDeleteError: If you try to delete the admin or user group
+            ManagerDeleteError: If you try to delete the admin or user group \
+                                or something happened during the database operation.
 
         Returns:
             UserGroupModel: The deleted group as its model.
@@ -110,5 +125,8 @@ class GroupManager(AccountManager):
         if public_id in [1, 2]:
             raise ManagerDeleteError(f'Group with ID: {public_id} can not be deleted!')
         group: UserGroupModel = self.get(public_id=public_id)
-        super(GroupManager, self).delete(public_id=public_id)
+        delete_result = self._delete(self.collection, public_id=public_id)
+
+        if delete_result.deleted_count == 0:
+            raise ManagerDeleteError(err='No group matched this public id')
         return group
