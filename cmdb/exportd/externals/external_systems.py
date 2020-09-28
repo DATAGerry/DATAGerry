@@ -231,7 +231,8 @@ class ExternalSystemOpenNMS(ExternalSystem):
             snmp_ip = str(self._export_vars.get("ip", ExportVariable("ip", "127.0.0.1")).get_value(cmdb_object, template_data))
             snmp_community = str(self._export_vars.get("snmp_community", ExportVariable("snmp_community", "public")).get_value(cmdb_object, template_data))
             snmp_version = str(self._export_vars.get("snmp_version", ExportVariable("snmp_version", "v2c")).get_value(cmdb_object, template_data))
-            self.__onms_update_snmpconf_v12(snmp_ip, snmp_community, snmp_version)
+            if self.__check_ip(snmp_ip):
+                self.__onms_update_snmpconf_v12(snmp_ip, snmp_community, snmp_version)
 
         # update error counter
         self.__obj_successful.append(cmdb_object.object_information['object_id'])
