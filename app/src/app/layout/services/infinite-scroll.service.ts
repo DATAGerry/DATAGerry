@@ -53,10 +53,12 @@ export class InfiniteScrollService {
    *
    * @param page current page
    * @param limit fetch limit
+   * @param sort by name
+   * @param order desc or acs
    * @param unique name of scrollable container
    */
-  public setCollectionParameters(page: number, limit: number, unique?: string): void {
-    const apiParams: CollectionParameters = {page, limit, optional: {lastScroll: this.scrollTop}};
+  public setCollectionParameters(page: number, limit: number, sort?: string, order?: number, unique?: string): void {
+    const apiParams: CollectionParameters = { page, limit, sort, order, optional: {lastScroll: this.scrollTop} };
     this.apiCollection.set(unique, apiParams);
   }
 

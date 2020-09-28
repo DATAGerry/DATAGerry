@@ -72,7 +72,6 @@ export class FileService<T = any> implements ApiService {
         params = params.append(key, option[key]);
       }
     }
-    params = params.append('sort', JSON.stringify({filename: -1}));
     params = params.append('metadata', JSON.stringify(metadata));
     httpObserveOptions[PARAMETER] = params;
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', httpObserveOptions).pipe(

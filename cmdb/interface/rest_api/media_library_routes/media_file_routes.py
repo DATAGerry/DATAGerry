@@ -56,10 +56,10 @@ def get_file_list(params: CollectionParameters):
         list of media_files
     """
     try:
-        sort = json.loads(params.sort).items()
         param = json.loads(params.optional['metadata'])
         metadata = generate_metadata_filter('metadata', params=param)
-        query = {'limit': params.limit, 'skip': params.skip, 'sort': list(sort)}
+        query = {'limit': params.limit, 'skip': params.skip, 'sort': [(params.sort, params.order)]}
+        print([(params.sort, params.order)])
         output = media_file_manager.get_many(metadata, **query)
         api_response = GetMultiResponse(output.result, total=output.total, params=params, url=request.url)
     except MediaFileManagerGetError as err:

@@ -1,11 +1,11 @@
 <table class="table framework-table table-hover table-striped table-bordered mb-0 ">
   <thead>
-  <tr>
+  <tr tableSortEvent (valueChanged)="loadFolderFiles($event)">
     <th scope="col" class="active _desc">Filename</th>
-    <th scope="col">Size</th>
-    <th scope="col">Type</th>
-    <th scope="col">Author</th>
-    <th class="text-center">Action</th>
+    <th scope="col" class="_desc">Size</th>
+    <th scope="col" class="_desc">Type</th>
+    <th scope="col" class="_desc">Author</th>
+    <th class="text-center _desc">Action</th>
   </tr>
   </thead>
   <tbody>

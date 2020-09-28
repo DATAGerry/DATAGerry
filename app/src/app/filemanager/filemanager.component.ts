@@ -54,7 +54,7 @@ export class FilemanagerComponent implements OnInit, OnDestroy {
   /**
    * Metadata for filtering Files from Database
    */
-  private readonly apiParameter: CollectionParameters = {page: 1, limit: 100, order: 1};
+  private apiParameter: CollectionParameters = {page: 1, limit: 100, sort: 'filename', order: -1};
   private metadata: FileMetadata = new FileMetadata({folder: false});
   private modalRef: NgbModalRef;
 
@@ -85,14 +85,15 @@ export class FilemanagerComponent implements OnInit, OnDestroy {
    */
   public loadFiles(apiParameters?: CollectionParameters, onScroll: boolean = false): void {
     const metadata = this.generateMetadata();
-    this.fileService.getAllFilesList(metadata, apiParameters ? apiParameters : this.apiParameter)
+    apiParameters = apiParameters ? apiParameters : this.apiParameter;
+    this.fileService.getAllFilesList(metadata, apiParameters)
       .subscribe((data: APIGetMultiResponse<FileElement>) => {
         if (onScroll) {
           this.fileElements.push(...data.results);
         } else {
           this.fileElements =  data.results;
         }
-        this.updatePagination(data);
+        this.updatePagination(data, apiParameters.sort, apiParameters.order);
       });
   }
 
@@ -103,10 +104,11 @@ export class FilemanagerComponent implements OnInit, OnDestroy {
       });
   }
 
-  private updatePagination(data) {
+  private updatePagination(data, sort: string = 'filename', order: number = -1) {
     this.page = data.pager.page + 1;
     this.lastPage = data.pager.total_pages;
-    this.scrollService.setCollectionParameters(this.page, 100, this.tag);
+    this.scrollService.setCollectionParameters(this.page, 100, sort, order, this.tag);
+    // this.apiParameter = this.scrollService.getCollectionParameters(this.tag);
   }
 
   private generateMetadata(folder: boolean = false): FileMetadata {
@@ -214,8 +216,8 @@ export class FilemanagerComponent implements OnInit, OnDestroy {
 
   public mockups() {
     let i = 0;
-    while (i < 300) {
-      const folder = new File(['folder'], `mockup${i}.json`, {
+    while (i < 250) {
+      const folder = new File(['folder'], `${i}_mockup.json`, {
         type: 'application/json',
       });
       const metadata: FileMetadata = new FileMetadata( {

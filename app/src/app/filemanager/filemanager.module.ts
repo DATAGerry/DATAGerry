@@ -25,10 +25,10 @@ import { TypeService } from '../framework/services/type.service';
 import { ObjectService } from '../framework/services/object.service';
 import { FolderTreeComponent } from './components/folder-tree/folder-tree.component';
 import { ContextmenuComponent } from './components/contextmenu/contextmenu.component';
-import { FileViewListComponent } from './components/file-view-list/file-view-list.component';
+import { FileViewListComponent, TableEventDirective} from './components/file-view-list/file-view-list.component';
 import { NewFolderDialogComponent } from './modal/new-folder-dialog/new-folder-dialog.component';
 import { RenameDialogComponent } from './modal/rename-dialog/rename-dialog.component';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FolderPathViewerComponent } from './components/folder-path-viewer/folder-path-viewer.component';
 import { MoveDialogComponent } from './modal/move-dialog/move-dialog.component';
 import { NgSelectModule } from '@ng-select/ng-select';
@@ -47,7 +47,8 @@ import { NgSelectModule } from '@ng-select/ng-select';
     RenameDialogComponent,
     ContextmenuComponent,
     FolderPathViewerComponent,
-    MoveDialogComponent
+    MoveDialogComponent,
+    TableEventDirective
   ],
   imports: [
     CommonModule,
