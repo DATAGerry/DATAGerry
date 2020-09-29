@@ -39,8 +39,6 @@ export class FileService {
   }
 
   public callExportRoute(objectIDs: string, exportType: string, zipping: boolean = false) {
-    console.log(objectIDs);
-    console.log(exportType);
     (httpFileOptions.params as any).ids = objectIDs;
     (httpFileOptions.params as any).classname = exportType;
     (httpFileOptions.params as any).zip = false;

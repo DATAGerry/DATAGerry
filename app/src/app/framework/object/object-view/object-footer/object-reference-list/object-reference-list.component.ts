@@ -85,19 +85,27 @@ export class ObjectReferenceListComponent implements OnDestroy {
 
   }
 
+  /**
+   * Exports the referenceList as zip
+   *
+   * @param exportType the filetype to be zipped
+   */
   public exportingFiles(exportType: any) {
     if (this.referenceList.length !== 0) {
       const objectIDs: number[] = [];
       for (const el of this.referenceList) {
         objectIDs.push(el.object_information.object_id);
       }
-      console.log(exportType);
       this.fileService.callExportRoute(objectIDs.toString(), exportType.id, true)
-        .subscribe(res => this.downLoadFile(res, exportType));
+        .subscribe(res => this.downLoadFile(res));
     }
   }
 
-  public downLoadFile(data: any, exportType: any) {
+  /**
+   * Downloads file
+   * @param data the file data to be downloaded
+   */
+  public downLoadFile(data: any) {
     const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
     this.fileSaverService.save(data.body, timestamp + '.' + 'zip');
   }
