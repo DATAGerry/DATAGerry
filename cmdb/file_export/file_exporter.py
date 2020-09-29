@@ -49,6 +49,10 @@ class FileExporter:
             public_id: public id which implements the object / type
             **kwargs: additional data
         """
+        self.zip_class = False
+        if kwargs.get("file_type"):
+            self.zip_class = kwargs.get("file_type")
+
         self.object_type = object_type
         self.export_type = export_type
         self.public_id = public_id
@@ -95,7 +99,7 @@ class FileExporter:
 
     def get_object_by_id(self):
         try:
-            query = self._build_query({'public_id': self.public_id}, q_operator='$or')
+            query = self._build_query({'public_id': self.public_id})
             return object_manager.get_objects_by(sort="public_id", **query)
         except ObjectNotFoundError as e:
             return abort(400, e)
@@ -112,27 +116,30 @@ class FileExporter:
 
     def get_type_by_id(self):
         try:
-            query = self._build_query({'public_id': self.public_id}, q_operator='$or')
+            query = self._build_query({'public_id': self.public_id})
             return object_manager.get_types_by(sort="public_id", **query)
         except TypeNotFoundError as e:
             return abort(400, e)
         except CMDBError:
             return abort(404)
 
-    #
-    # Advanced methods
-    #
-
-    def _build_query(self, args, q_operator='$and'):
+    @staticmethod
+    def _build_query(parameters, operator='$or') -> dict:
+        """
+        Create a MongoDB query
+        :param parameters: dictionary of properties
+        :param operator: kind of linking of query properties
+        :return: dict
+        """
         query_list = []
         try:
-            for key, value in args.items():
+            for key, value in parameters.items():
                 for v in value.split(","):
                     try:
                         query_list.append({key: int(v)})
                     except (ValueError, TypeError):
                         return abort(400)
-            return {q_operator: query_list}
+            return {operator: query_list}
         except CMDBError as e:
             abort(400, e)
 
@@ -144,8 +151,12 @@ class FileExporter:
         import time
 
         timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
+        if self.zip_class:
+            export = self.export_type.export(self.get_object_list(), self.zip_class)
+        else:
+            export = self.export_type.export(self.get_object_list())
         return Response(
-            self.export_type.export(self.get_object_list()),
+            export,
             mimetype="text/" + self.export_type.__class__.FILE_EXTENSION,
             headers={
                 "Content-Disposition":

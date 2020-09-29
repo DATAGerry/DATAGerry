@@ -281,7 +281,7 @@ export class TableComponent implements OnInit, OnDestroy {
       }
     }
     if (publicIds.length > 0) {
-      this.fileService.callExportRoute('/file/object/' + publicIds.toString(), exportType.id)
+      this.fileService.callExportRoute(publicIds.toString(), exportType.id)
         .subscribe(res => this.downLoadFile(res, exportType));
     }
   }

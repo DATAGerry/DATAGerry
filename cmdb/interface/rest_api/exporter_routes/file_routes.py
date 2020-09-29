@@ -14,9 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
+import logging, json
 
-from flask import abort, jsonify
+from flask import abort, jsonify, request
 from cmdb.framework.cmdb_errors import TypeNotFoundError
 from cmdb.file_export.file_exporter import FileExporter
 from cmdb.interface.route_utils import make_response, login_required
@@ -52,13 +52,23 @@ def get_filetypes():
     return make_response(filetype_list)
 
 
-@file_blueprint.route('/object/<string:public_ids>/<string:export_class>', methods=['GET'])
+@file_blueprint.route('/object/', methods=['GET'])
 @login_required
-def export_file(public_ids, export_class):
+def export_file():
     try:
-        export_type_class = load_class('cmdb.file_export.export_types.' + export_class)
+        object_ids = request.args.get('ids', [])
+        classname = request.args.get('classname', '')
+        zipping = request.args.get('zip')
+
+        export_type_class = load_class('cmdb.file_export.export_types.' + classname)
+        if zipping:
+            export_type_class = load_class('cmdb.file_export.export_types.' + 'ZipExportType')
+
         export_type = export_type_class()
-        file_export = FileExporter('object', export_type, public_ids)
+        file_export = FileExporter('object', export_type, object_ids)
+        if zipping:
+            file_export = FileExporter('object', export_type, object_ids, file_type=classname)
+
     except TypeNotFoundError as e:
         return abort(400, e.message)
     except ModuleNotFoundError as e:

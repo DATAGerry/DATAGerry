@@ -13,18 +13,19 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import csv
+import io
+import json
+import re
+import tempfile
+import xml.dom.minidom
+import xml.etree.ElementTree as ET
+import zipfile
+import openpyxl
+
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.utils import json_encoding
-import csv
-import io
-import openpyxl
-import tempfile
-import json
-import re
-import xml.etree.ElementTree as ET
-import xml.dom.minidom
-
 from cmdb.utils.system_config import SystemConfigReader
 
 object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
@@ -45,6 +46,65 @@ class ExportType:
 
     def export(self, object_list):
         pass
+
+
+class ZipExportType(ExportType):
+    FILE_EXTENSION = "zip"
+    LABEL = "ZIP"
+    MULTITYPE_SUPPORT = True
+    ICON = "file-archive"
+    DESCRIPTION = "Export Zipped Files"
+    ACTIVE = True
+
+    def __init__(self):
+        pass
+
+    def export(self, object_list, type):
+        # check what export type is requested and intitializes a new zip file in memory
+        export_type = self.get_export_type(type)
+        zipped_file = io.BytesIO()
+
+        # Build .zip file
+        with zipfile.ZipFile(zipped_file, "a", zipfile.ZIP_DEFLATED, False) as f:
+
+            # Enters loop until the object list is empty
+            while len(object_list) > 0:
+
+                # Set what type the loop filters to and makes an empty list
+                type_id = object_list[len(object_list) - 1].type_id
+                type_list = []
+
+                # Filters object list to the current type_id and inserts it into type_list
+                # When an object is inserted into type_list it gets deleted from object_list
+                for i in range(len(object_list) - 1, -1, -1):
+                    if object_list[i].type_id == type_id:
+                        type_list.append(object_list[i])
+                        del object_list[i]
+
+                # Runs the requested export function and returns the output in the export variable
+                export = export_type.export(type_list)
+
+                # check if export output is a string, bytes or a file and inserts it into the zip file
+                if isinstance(export, str) or isinstance(export, bytes):
+                    f.writestr(("type-" + str(type_id) + "." + export_type.FILE_EXTENSION).format(i), export)
+                else:
+                    f.writestr(("type-" + str(type_id) + "." + export_type.FILE_EXTENSION).format(i), export.getvalue())
+
+        # returns zipped file
+        zipped_file.seek(0)
+        return zipped_file
+
+    def get_export_type(self, export_type: ExportType):
+        if export_type == "JsonExportType":
+            return JsonExportType()
+        elif export_type == "CsvExportType":
+            return CsvExportType()
+        elif export_type == "XlsxExportType":
+            return XlsxExportType()
+        elif export_type == "XmlExportType":
+            return XmlExportType()
+        else:
+            return JsonExportType()
 
 
 class CsvExportType(ExportType):
