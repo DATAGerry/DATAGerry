@@ -34,7 +34,7 @@ class UserModel(CmdbDAO):
         'public_id': {
             'type': 'integer'
         },
-        'name': {
+        'user_name': {
             'type': 'string',
             'required': True,
         },
