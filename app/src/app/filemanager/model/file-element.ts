@@ -27,6 +27,7 @@ export class FileElement implements CmdbDao {
   public name: string;
   public metadata: any;
   public size: number;
+  public upload_date: any;
   public inProcess: boolean = false;
   public children: any[] = [];
   public hasSubFolders: boolean = false;

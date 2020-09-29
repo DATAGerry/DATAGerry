@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, HostListener, Input, OnInit } from '@angular/core';
+import { Component, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
 import { FileMetadata } from '../../../../filemanager/model/metadata';
 import { FileElement } from '../../../../filemanager/model/file-element';
 import { FileService } from '../../../../filemanager/service/file.service';
@@ -27,13 +27,20 @@ import { GeneralModalComponent } from '../general-modal/general-modal.component'
 import { CollectionParameters } from '../../../../services/models/api-parameter';
 import { InfiniteScrollService } from '../../../services/infinite-scroll.service';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
+import { takeUntil} from 'rxjs/operators';
+import { ReplaySubject } from 'rxjs';
 
 @Component({
   selector: 'cmdb-add-attachments-modal',
   templateUrl: './add-attachments-modal.component.html',
   styleUrls: ['./add-attachments-modal.component.scss']
 })
-export class AddAttachmentsModalComponent implements OnInit {
+export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
+
+  /**
+   * Global unsubscriber for http calls to the rest backend.
+   */
+  private unSubscribe: ReplaySubject<void> = new ReplaySubject();
 
   @Input() metadata: FileMetadata = new FileMetadata();
   public inProcess: boolean = false;
@@ -54,12 +61,16 @@ export class AddAttachmentsModalComponent implements OnInit {
               private modalService: NgbModal, public activeModal: NgbActiveModal, private toast: ToastService,
               private scrollService: InfiniteScrollService) { }
 
-
-  @HostListener('scroll', ['$event']) onScrollHost(e: Event): void {
-    if (this.scrollService.bottomReached(e, this.tag) && this.page <= this.lastPage) {
+  /**
+   * Checks whether further data should be loaded
+   * @param event trigger on scroll
+   */
+  @HostListener('scroll', ['$event']) onScrollHost(event: Event): void {
+    if (this.scrollService.bottomReached(event, this.tag) && this.page <= this.lastPage) {
       this.getFiles(this.scrollService.getCollectionParameters(this.tag), true);
     }
   }
+
   public ngOnInit(): void {
     this.fileService.getAllFilesList(this.metadata).subscribe((data: APIGetMultiResponse<FileElement>) => {
       this.attachments.push(...data.results);
@@ -89,36 +100,65 @@ export class AddAttachmentsModalComponent implements OnInit {
       });
   }
 
+  /**
+   * Update pagination properties for infinite scrolling.
+   * Current page values are retrieved from the response {@link APIGetMultiResponse}
+   * @param data response {@link APIGetMultiResponse} from backend
+   */
   private updatePagination(data): void {
     this.page = data.pager.page + 1;
     this.lastPage = data.pager.total_pages;
-    this.scrollService.setCollectionParameters(this.page, 100, this.tag);
+    this.scrollService.setCollectionParameters(this.page, 100, 'filename', 1, this.tag);
   }
 
+  /**
+   * Download selected file
+   * @param filename current filename
+   */
   public downloadFile(filename: string) {
     this.fileService.downloadFile(filename, this.metadata).subscribe((data: any) => {
       this.fileSaverService.save(data.body, filename);
     });
   }
 
+  /**
+   * Upload selected file from File Browser
+   * @param files selected file
+   */
   public uploadFile(files: FileList) {
     if (files.length > 0) {
       Array.from(files).forEach((file: any) => {
         if (this.checkFileSizeAllow(file)) {
-          if (this.attachments.find(el => el.name === file.name)) {
-            const promiseModal = this.replaceFileModal(file.name).then(result => {
-              if (result) {
-                this.attachments.push(...this.attachments.filter(el => el.name !== file.name));
-                return true;
-              } else {return false; }
-            });
-            promiseModal.then(value => {
-              if (value) {this.postFile(file); }
-            });
-          } else { this.postFile(file); }
+          this.checkFileExist(file.name).then(exist => {
+            if (exist) {
+              const promiseModal = this.replaceFileModal(file.name).then(result => {
+                if (result) {
+                  this.attachments.push(...this.attachments.filter(el => el.name !== file.name));
+                  return true;
+                } else {return false; }
+              });
+              promiseModal.then(value => {
+                if (value) {this.postFile(file); }
+              });
+            } else { this.postFile(file); }
+          });
         }
       });
     }
+  }
+
+  /**
+   * Checks if the file already exists in the database
+   * @param value filename
+   */
+  private checkFileExist(value) {
+    return new Promise((resolve) => {
+      this.fileService.getFileElement(value, this.metadata).pipe(
+        takeUntil(this.unSubscribe)).subscribe(
+        () => resolve(true),
+        err => resolve(false)
+      );
+    });
   }
 
   /**
@@ -138,7 +178,7 @@ export class AddAttachmentsModalComponent implements OnInit {
   private postFile(file: any) {
     file.inProcess = true;
     this.inProcess = true;
-    this.attachments.push(file);
+    this.attachments = [file].concat(this.attachments);
     this.fileService.postFile(file, this.metadata).subscribe(() => {
       this.getFiles(this.defaultApiParameter);
     }, (err) => console.log(err));
@@ -160,6 +200,11 @@ export class AddAttachmentsModalComponent implements OnInit {
     modalComponent.componentInstance.buttonDeny = 'Cancel';
     modalComponent.componentInstance.buttonAccept = 'Replace';
     return modalComponent.result;
+  }
+
+  public ngOnDestroy(): void {
+    this.unSubscribe.next();
+    this.unSubscribe.complete();
   }
 
 }

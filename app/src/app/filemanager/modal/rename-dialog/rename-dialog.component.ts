@@ -22,7 +22,6 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FileMetadata } from '../../model/metadata';
 import { checkFolderExistsValidator, FileService } from '../../service/file.service';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastService } from '../../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-rename-dialog',

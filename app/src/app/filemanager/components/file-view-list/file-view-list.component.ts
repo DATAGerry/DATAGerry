@@ -31,6 +31,7 @@ enum SortType {
   TYPE = 'metadata.mime_type',
   SIZE = 'length',
   AUTHOR = 'metadata.author_id',
+  DATE = 'uploadDate',
   FILENAME = 'filename'
 }
 
