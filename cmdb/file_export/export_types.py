@@ -94,7 +94,7 @@ class ZipExportType(ExportType):
         zipped_file.seek(0)
         return zipped_file
 
-    def get_export_type(self, export_type: ExportType):
+    def get_export_type(self, export_type):
         if export_type == "JsonExportType":
             return JsonExportType()
         elif export_type == "CsvExportType":
