@@ -76,7 +76,7 @@ export class UsersListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.spinner.show();
     this.currentUser = this.authService.currentUserValue;
     const dataSubscriptionArray: any[] = [
-      this.userService.getUserList(), this.groupService.getGroupList()
+      this.userService.getUsers(), this.groupService.getGroupList()
     ];
     this.dataSubscription = forkJoin(dataSubscriptionArray).subscribe(
       ([users, groups]) => {

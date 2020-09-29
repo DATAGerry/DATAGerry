@@ -91,7 +91,7 @@ export class BuilderComponent implements OnInit, OnDestroy{
     this.groupService.getGroupList().subscribe((gList: Group[]) => {
       this.groupList = gList;
     });
-    this.userService.getUserList().subscribe((uList: User[]) => {
+    this.userService.getUsers().subscribe((uList: User[]) => {
       this.userList = uList;
     });
   }

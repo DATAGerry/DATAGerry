@@ -17,7 +17,6 @@
 */
 
 export class User {
-  /* tslint:disable */
   readonly public_id: number;
   public user_name: string;
   public first_name?: string;
@@ -27,14 +26,7 @@ export class User {
   public token?: string;
   public token_expire?: number;
   public token_issued_at?: number;
-  public registration_time: {
-    $date: string;
-  };
-  public last_login_time: {
-    $date: string;
-  };
+  public registration_time: string;
   public authenticator: string;
   public group_id: number;
-
-  /* tslint:enable */
 }
