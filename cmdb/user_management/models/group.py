@@ -86,7 +86,7 @@ class UserGroupModel(CmdbDAO):
             'public_id': instance.public_id,
             'name': instance.name,
             'label': instance.label,
-            'rights': [right.name for right in instance.rights]
+            'rights': [BaseRight.to_dict(right) for right in instance.rights]
         }
 
     def set_rights(self, rights: list):

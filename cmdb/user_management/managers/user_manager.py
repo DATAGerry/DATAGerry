@@ -100,7 +100,7 @@ class UserManager(AccountManager):
             int: The Public ID of the new inserted user
         """
         if isinstance(user, UserModel):
-            user = UserModel.to_dict(user)
+            user = UserModel.to_data(user)
         return self._insert(self.collection, resource=user)
 
     def update(self, public_id: Union[PublicID, int], user: Union[UserModel, dict]):
@@ -116,7 +116,7 @@ class UserManager(AccountManager):
             it will be auto converted via the model `to_json` method.
         """
         if isinstance(user, UserModel):
-            user = UserModel.to_dict(user)
+            user = UserModel.to_data(user)
         return self._update(public_id=public_id, filter={'public_id': public_id}, resource=user)
 
     def delete(self, public_id: Union[PublicID, int]) -> UserModel:
