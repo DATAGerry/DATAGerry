@@ -72,6 +72,7 @@ class ZipExportType(ExportType):
 
                 # Set what type the loop filters to and makes an empty list
                 type_id = object_list[len(object_list) - 1].type_id
+                type_name = object_manager.get_type(type_id).get_name()
                 type_list = []
 
                 # Filters object list to the current type_id and inserts it into type_list
@@ -86,9 +87,9 @@ class ZipExportType(ExportType):
 
                 # check if export output is a string, bytes or a file and inserts it into the zip file
                 if isinstance(export, str) or isinstance(export, bytes):
-                    f.writestr(("type-" + str(type_id) + "." + export_type.FILE_EXTENSION).format(i), export)
+                    f.writestr((type_name + "_ID_" + str(type_id) + "." + export_type.FILE_EXTENSION).format(i), export)
                 else:
-                    f.writestr(("type-" + str(type_id) + "." + export_type.FILE_EXTENSION).format(i), export.getvalue())
+                    f.writestr((type_name + "_ID_" + str(type_id) + "." + export_type.FILE_EXTENSION).format(i), export.getvalue())
 
         # returns zipped file
         zipped_file.seek(0)
