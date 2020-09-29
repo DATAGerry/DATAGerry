@@ -17,12 +17,13 @@
 from flask import abort, request, current_app
 
 from cmdb.framework.utils import PublicID
-from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError
+from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
 from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse
+from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
+    DeleteSingleResponse
 from cmdb.user_management import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
 
@@ -82,7 +83,7 @@ def insert_user(data: dict):
 
 
 @users_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
-@users_blueprint.protect(auth=False, right='base.user-management.group.edit')
+@users_blueprint.protect(auth=False, right='base.user-management.user.edit')
 @users_blueprint.validate(UserModel.SCHEMA)
 def update_user(public_id: int, data: dict):
     user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
@@ -98,13 +99,12 @@ def update_user(public_id: int, data: dict):
 
 
 @users_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@users_blueprint.protect(auth=False, right='base.user-management.group.delete')
+@users_blueprint.protect(auth=False, right='base.user-management.user.delete')
 def delete_user(public_id: int):
-    group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
-                                               right_manager=RightManager(rights))
+    user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
     try:
-        deleted_group = group_manager.delete(public_id=PublicID(public_id))
-        api_response = DeleteSingleResponse(raw=UserGroupModel.to_dict(deleted_group), model=UserGroupModel.MODEL)
+        deleted_group = user_manager.delete(public_id=PublicID(public_id))
+        api_response = DeleteSingleResponse(raw=UserModel.to_dict(deleted_group), model=UserModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerDeleteError as err:
