@@ -13,14 +13,17 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from enum import Enum
+from enum import IntEnum
 
 from cmdb.utils.error import CMDBError
 
 GLOBAL_RIGHT_IDENTIFIER = '*'
 
 
-class Levels(Enum):
+class Levels(IntEnum):
+    """
+    Class wrapper for different security levels
+    """
     CRITICAL = 100
     DANGER = 80
     SECURE = 50

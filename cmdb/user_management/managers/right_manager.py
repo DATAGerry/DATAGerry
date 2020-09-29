@@ -17,9 +17,9 @@ from typing import List
 
 from .account_manager import AccountManager
 from ..models.right import BaseRight
-from ...framework.managers import ManagerGetError
-from ...framework.managers.error.framework_errors import FrameworkIterationError
 from ...framework.results import IterationResult
+from ...framework.utils import PublicID
+from ...manager import ManagerIterationError, ManagerGetError
 
 
 class RightManager(AccountManager):
@@ -67,12 +67,30 @@ class RightManager(AccountManager):
             spliced_rights = [sorted_rights[i:i + limit] for i in range(0, len(sorted_rights), limit)][
                 int(skip / limit)]
         except (AttributeError, ValueError, IndexError) as err:
-            raise FrameworkIterationError(err)
+            raise ManagerIterationError(err)
         result: IterationResult[BaseRight] = IterationResult(spliced_rights, total=len(self.rights))
         return result
 
     def get(self, name: str) -> BaseRight:
+        """
+        Get a right by its name.
+
+        Args:
+            name: Name of the right.
+
+        Returns:
+            BaseRight: Right instance
+        """
         try:
             return next(right for right in self.rights if right.name == name)
         except Exception as err:
             raise ManagerGetError(err)
+
+    def insert(self, resource: dict) -> PublicID:
+        raise NotImplementedError
+
+    def update(self, public_id: PublicID, resource: dict):
+        raise NotImplementedError
+
+    def delete(self, public_id: PublicID):
+        raise NotImplementedError

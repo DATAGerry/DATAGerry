@@ -17,7 +17,7 @@
 import logging
 from typing import List, ClassVar, Union
 
-from cmdb.framework.managers import ManagerGetError
+from cmdb.manager.errors import ManagerGetError
 from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, AuthenticationProviderNotActivated, \
     AuthenticationError
 from cmdb.security.auth.auth_providers import AuthenticationProvider
