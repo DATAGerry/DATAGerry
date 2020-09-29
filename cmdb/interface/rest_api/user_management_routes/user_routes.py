@@ -16,12 +16,13 @@
 
 from flask import abort, request, current_app
 
-from cmdb.manager.errors import ManagerGetError
+from cmdb.framework.utils import PublicID
+from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError
 from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.response import GetMultiResponse, GetSingleResponse
+from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse
 from cmdb.user_management import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
 
@@ -62,3 +63,50 @@ def get_user(public_id: int):
                                      model=UserModel.MODEL, body=body)
     return api_response.make_response()
 
+
+@users_blueprint.route('/', methods=['POST'])
+@users_blueprint.protect(auth=False, right='base.user-management.user.add')
+@users_blueprint.validate(UserModel.SCHEMA)
+def insert_user(data: dict):
+    user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
+    try:
+        result_id: PublicID = user_manager.insert(data)
+        raw_doc = user_manager.get(public_id=result_id)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    except ManagerInsertError as err:
+        return abort(400, err.message)
+    api_response = InsertSingleResponse(result_id, raw=UserModel.to_dict(raw_doc), url=request.url,
+                                        model=UserModel.MODEL)
+    return api_response.make_response(prefix='users')
+
+
+@users_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@users_blueprint.protect(auth=False, right='base.user-management.group.edit')
+@users_blueprint.validate(UserModel.SCHEMA)
+def update_user(public_id: int, data: dict):
+    user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
+    try:
+        user = UserModel.from_data(data=data)
+        user_manager.update(public_id=PublicID(public_id), user=user)
+        api_response = UpdateSingleResponse(result=data, url=request.url, model=UserModel.MODEL)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    except ManagerUpdateError as err:
+        return abort(400, err.message)
+    return api_response.make_response()
+
+
+@users_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@users_blueprint.protect(auth=False, right='base.user-management.group.delete')
+def delete_user(public_id: int):
+    group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
+                                               right_manager=RightManager(rights))
+    try:
+        deleted_group = group_manager.delete(public_id=PublicID(public_id))
+        api_response = DeleteSingleResponse(raw=UserGroupModel.to_dict(deleted_group), model=UserGroupModel.MODEL)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    except ManagerDeleteError as err:
+        return abort(404, err.message)
+    return api_response.make_response()
