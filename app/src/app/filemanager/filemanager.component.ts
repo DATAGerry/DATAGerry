@@ -30,6 +30,8 @@ import { MoveDialogComponent } from './modal/move-dialog/move-dialog.component';
 import { InfiniteScrollService } from '../layout/services/infinite-scroll.service';
 import { CollectionParameters } from '../services/models/api-parameter';
 import { APIGetMultiResponse } from '../services/models/api-response';
+import { ToastService } from '../layout/toast/toast.service';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-filemanager',
@@ -39,10 +41,17 @@ import { APIGetMultiResponse } from '../services/models/api-response';
 export class FilemanagerComponent implements OnInit, OnDestroy {
 
   constructor(private fileService: FileService, private modalService: NgbModal, private config: NgbModalConfig,
-              private scrollService: InfiniteScrollService) {
+              private scrollService: InfiniteScrollService, private toast: ToastService) {
     config.backdrop = 'static';
     config.keyboard = false;
   }
+
+  /**
+   * FormController
+   */
+  public searchForm: FormGroup = new FormGroup({
+    search: new FormControl('', Validators.required)
+  });
 
   /**
    * Data sharing between components
@@ -72,6 +81,13 @@ export class FilemanagerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.searchForm.valueChanges.subscribe(value => {
+      if (value !== '') {
+        const SEARCH = 'searchTerm';
+        this.apiParameter[SEARCH] = value.search;
+        this.loadFiles(this.apiParameter);
+      }
+    });
     this.loadFiles(this.apiParameter);
     this.loadFileTree();
   }
@@ -108,7 +124,6 @@ export class FilemanagerComponent implements OnInit, OnDestroy {
     this.page = data.pager.page + 1;
     this.lastPage = data.pager.total_pages;
     this.scrollService.setCollectionParameters(this.page, 100, sort, order, this.tag);
-    // this.apiParameter = this.scrollService.getCollectionParameters(this.tag);
   }
 
   private generateMetadata(folder: boolean = false): FileMetadata {
@@ -160,11 +175,7 @@ export class FilemanagerComponent implements OnInit, OnDestroy {
     this.modalRef.componentInstance.selectedFileFolder = this.selectedFolderElement;
     this.modalRef.result.then((result) => {
       if (result) {
-        const fileElement = this.selectedFolderElement.getValue();
-        fileElement.filename = result.filename;
-        this.fileService.putFile(fileElement).subscribe((resp: FileElement) => {
-          this.reorderFolderTree(resp);
-        });
+        this.postFileChanges(result, 'renamed');
       }
     });
   }
@@ -173,12 +184,7 @@ export class FilemanagerComponent implements OnInit, OnDestroy {
     this.modalRef = this.modalService.open(MoveDialogComponent);
     this.modalRef.result.then((result) => {
       if (result) {
-        const fileElement = this.selectedFolderElement.getValue();
-        fileElement.filename = fileElement.name;
-        fileElement.metadata.parent = result.parent;
-        this.fileService.putFile(fileElement).subscribe((resp: FileElement) => {
-          this.reorderFolderTree(resp);
-        });
+        this.postFileChanges(result, 'moved');
       }
     });
   }
@@ -214,24 +220,19 @@ export class FilemanagerComponent implements OnInit, OnDestroy {
     }
   }
 
-  public mockups() {
-    let i = 0;
-    while (i < 250) {
-      const folder = new File(['folder'], `${i}_mockup.json`, {
-        type: 'application/json',
-      });
-      const metadata: FileMetadata = new FileMetadata( {
-          reference : 3242,
-          reference_type : 'object',
-          mime_type : 'application/json',
-          folder: false,
-          parent : null
-        }
-      );
-      this.fileService.postFile( folder, metadata).subscribe((resp: FileElement) => {
-        console.log(resp.public_id);
-      });
-      i++;
-    }
+  /**
+   * Post changes and reorder Folder-Tree
+   * @param changes file changes
+   * @param action renamed or created
+   */
+  private postFileChanges(changes: any, action: string) {
+    const fileElement = this.selectedFolderElement.getValue();
+    const fileType = fileElement.metadata.folder ? 'Folder' : 'File';
+    fileElement.filename = changes.filename !== undefined ? changes.filename : fileElement.name;
+    fileElement.metadata.parent = changes.parent !== undefined ? changes.parent : fileElement.metadata.parent;
+    this.fileService.putFile(fileElement).subscribe((resp: FileElement) => {
+      this.reorderFolderTree(resp);
+      this.toast.info(`${fileType} was successfully ${action}: ${fileElement.filename}`);
+    });
   }
 }

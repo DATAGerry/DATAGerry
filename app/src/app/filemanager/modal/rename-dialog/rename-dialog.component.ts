@@ -55,8 +55,9 @@ export class RenameDialogComponent implements OnInit {
   constructor(private fileService: FileService, public activeModal: NgbActiveModal) {}
 
   public ngOnInit(): void {
+    const placeholder: string = this.selectedFileElement.getValue() ? this.selectedFileElement.getValue().name : '';
     this.basicForm = new FormGroup({
-      name: new FormControl('', Validators.required)
+      name: new FormControl(placeholder, Validators.required)
     });
     this.basicForm.get('name').setAsyncValidators(checkFolderExistsValidator(this.fileService,
       RenameDialogComponent.generateMetaData(this.selectedFileFolder)));

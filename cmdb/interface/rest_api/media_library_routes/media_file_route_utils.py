@@ -20,6 +20,8 @@ import logging
 from flask import request, abort
 from werkzeug.datastructures import FileStorage
 from werkzeug.wrappers import Request
+from cmdb.search.query.builder import Builder
+from cmdb.interface.api_parameters import CollectionParameters
 
 LOGGER = logging.getLogger(__name__)
 
@@ -48,13 +50,34 @@ def generate_metadata_filter(element, _request=None, params=None):
             if _request.args.get(element):
                 data = json.loads(_request.args.get(element))
             if not data:
-                data = json.loads(_request.form.to_dict()[element])
+                data = get_element_from_data_request(element, _request)
         for key, value in data.items():
             filter_metadata.update({"metadata.%s" % key: value})
     except (IndexError, KeyError, TypeError, Exception) as ex:
         LOGGER.error(f'Metadata was not provided - Exception: {ex}')
         return abort(400)
     return filter_metadata
+
+
+def generate_metadata(params: CollectionParameters):
+
+    builder = Builder()
+    search = params.optional.get('searchTerm')
+    param = json.loads(params.optional['metadata'])
+
+    if search:
+        _ = [
+            builder.regex_('filename', search)
+            , builder.regex_('metadata.reference_type', search)
+            , builder.regex_('metadata.mime_type', search)
+        ]
+        if search.isdigit():
+            _.append({'public_id': int(search)})
+            _.append({'metadata.reference': int(search)})
+            _.append({'metadata.parent': int(search)})
+
+        return builder.and_([{'metadata.folder': False}, builder.or_(_)])
+    return generate_metadata_filter('metadata', params=param)
 
 
 def recursive_delete_filter(public_id, media_file_manager, _ids=None) -> []:

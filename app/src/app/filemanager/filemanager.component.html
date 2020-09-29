@@ -30,17 +30,18 @@
       <div class="row">
         <div class="col-12 p-2 d-flex justify-content-between align-items-center">
           <span class="col-9">
-            <cmdb-folder-path-viewer [selectedFileFolder]="selectedFolderElement"
-                                     [folderTree]="fileTree"></cmdb-folder-path-viewer>
+            <ng-container *ngIf="searchForm.get('search').value;then showPath; else defaultPhatView"></ng-container>
+            <ng-template #showPath>
+              <i class="fas fa-caret-right"></i>
+            </ng-template>
+            <ng-template #defaultPhatView>
+              <cmdb-folder-path-viewer [selectedFileFolder]="selectedFolderElement"
+                                       [folderTree]="fileTree"></cmdb-folder-path-viewer>
+            </ng-template>
           </span>
-          <div class="input-group input-group-sm">
-            <input type="text" class="form-control" placeholder="Search Collection">
-            <div class="input-group-append">
-              <button class="btn btn-sm" type="button">
-                <i class="fas fa-search"></i>
-              </button>
-            </div>
-          </div>
+          <form [formGroup]="searchForm">
+            <input type="text" formControlName="search" class="form-control form-control-sm" placeholder="Filter File">
+          </form>
         </div>
         <div id="file-view-list" class="col-12 p-0" (scroll)="onScrollHost($event)">
           <cmdb-file-view-list [fileElements]="fileElements"
@@ -50,5 +51,3 @@
     </div>
   </div>
 </div>
-
-<button (click)="mockups()">mockups</button>

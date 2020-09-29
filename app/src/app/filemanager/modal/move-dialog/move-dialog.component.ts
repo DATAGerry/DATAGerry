@@ -16,13 +16,14 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FileMetadata } from '../../model/metadata';
 import { FileService } from '../../service/file.service';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { FileElement } from '../../model/file-element';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
+import {BehaviorSubject} from "rxjs";
 
 @Component({
   selector: 'cmdb-move-dialog',
@@ -36,6 +37,19 @@ export class MoveDialogComponent implements OnInit {
 
   constructor(private fileService: FileService, public activeModal: NgbActiveModal) {}
 
+  groupByFn = (item) => item.metadata.parent ? item.metadata.parent : 0;
+
+  groupValueFn = (_: string, children: any[]) => (
+    {
+      parentName: this.findParentName(children[0].metadata.parent),
+      total: children.length,
+      public_id: children[0].metadata.parent
+    })
+
+  private findParentName(publicID: number) {
+    return publicID === null ? 'Without Parent' : this.destinationFolder.filter(x => x.public_id === publicID)[0].name;
+  }
+
   public ngOnInit(): void {
     this.basicForm = new FormGroup({
       folder: new FormControl(null, Validators.required)
@@ -44,7 +58,6 @@ export class MoveDialogComponent implements OnInit {
     this.fileService.getAllFilesList(new FileMetadata({folder: true}))
       .subscribe( (data: APIGetMultiResponse<FileElement>) => {
         this.destinationFolder = data.results;
-        this.destinationFolder.push(new FileElement({name: '/', public_id: null, metadata: { parent: null } }));
     });
   }
 }

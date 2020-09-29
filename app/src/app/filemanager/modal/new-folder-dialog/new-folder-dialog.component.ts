@@ -43,8 +43,8 @@ export class NewFolderDialogComponent implements OnInit {
   get selectedFileFolder(): BehaviorSubject<any> {
     return this.selectedFileElement;
   }
-  public basicForm: FormGroup;
 
+  public basicForm: FormGroup;
 
   static generateMetaData(parent: BehaviorSubject<any> ): FileMetadata {
     return new FileMetadata(
@@ -72,7 +72,7 @@ export class NewFolderDialogComponent implements OnInit {
     });
     this.fileService.postFile( folder, NewFolderDialogComponent.generateMetaData(this.selectedFileElement))
       .subscribe((resp: any) => {
-        this.toast.showToast(`Folder was successfully created: ${this.name.value}`);
+        this.toast.info(`Folder was successfully created: ${this.name.value}`);
         this.activeModal.close({data: resp});
       });
   }

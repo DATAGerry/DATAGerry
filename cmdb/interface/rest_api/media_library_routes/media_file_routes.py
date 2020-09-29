@@ -18,19 +18,19 @@ import logging
 import json
 from bson import json_util
 
-from flask import abort, request, current_app, Response, jsonify
+from flask import abort, request, current_app, Response
 from cmdb.media_library.media_file_manager import MediaFileManagerGetError, \
     MediaFileManagerDeleteError, MediaFileManagerUpdateError, MediaFileManagerInsertError
+
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
 from cmdb.user_management import User
 from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import get_element_from_data_request, \
-    get_file_in_request, generate_metadata_filter, recursive_delete_filter
+    get_file_in_request, generate_metadata_filter, recursive_delete_filter, generate_metadata
 
 
 from cmdb.interface.response import GetMultiResponse, InsertSingleResponse
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
-
 
 with current_app.app_context():
     media_file_manager = current_app.media_file_manager
@@ -56,11 +56,9 @@ def get_file_list(params: CollectionParameters):
         list of media_files
     """
     try:
-        param = json.loads(params.optional['metadata'])
-        metadata = generate_metadata_filter('metadata', params=param)
-        query = {'limit': params.limit, 'skip': params.skip, 'sort': [(params.sort, params.order)]}
-        print([(params.sort, params.order)])
-        output = media_file_manager.get_many(metadata, **query)
+        metadata = generate_metadata(params=params)
+        response_query = {'limit': params.limit, 'skip': params.skip, 'sort': [(params.sort, params.order)]}
+        output = media_file_manager.get_many(metadata, **response_query)
         api_response = GetMultiResponse(output.result, total=output.total, params=params, url=request.url)
     except MediaFileManagerGetError as err:
         return abort(404, err.message)
