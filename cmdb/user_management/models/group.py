@@ -36,7 +36,8 @@ class UserGroupModel(CmdbDAO):
 
     SCHEMA: dict = {
         'public_id': {
-            'type': 'integer'
+            'type': 'integer',
+            'required': False
         },
         'name': {
             'type': 'string',
@@ -45,6 +46,10 @@ class UserGroupModel(CmdbDAO):
         'label': {
             'type': 'string',
             'required': False,
+        },
+        'rights': {
+            'type': 'list',
+            'default': []
         }
     }
 
