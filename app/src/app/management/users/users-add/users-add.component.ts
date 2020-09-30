@@ -79,7 +79,7 @@ export class UsersAddComponent implements OnInit, OnDestroy {
         this.authProviders.push(provider.class_name);
       }
     });
-    this.groupListSubscription = this.groupService.getGroupList().subscribe((groupList: Group[]) => {
+    this.groupListSubscription = this.groupService.getGroups().subscribe((groupList: Group[]) => {
       this.groupList = groupList;
     });
   }

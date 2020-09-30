@@ -88,7 +88,7 @@ export class BuilderComponent implements OnInit, OnDestroy{
   public builderFormGroup: FormGroup;
 
   public constructor(private userService: UserService, private groupService: GroupService, private modalService: NgbModal) {
-    this.groupService.getGroupList().subscribe((gList: Group[]) => {
+    this.groupService.getGroups().subscribe((gList: Group[]) => {
       this.groupList = gList;
     });
     this.userService.getUsers().subscribe((uList: User[]) => {

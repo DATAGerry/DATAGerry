@@ -85,7 +85,7 @@ export class UsersEditComponent implements OnInit, OnDestroy {
         this.authProviders.push(provider.class_name);
       }
     });
-    this.groupService.getGroupList().subscribe((groupList: Group[]) => {
+    this.groupService.getGroups().subscribe((groupList: Group[]) => {
       this.groupList = groupList;
     });
 

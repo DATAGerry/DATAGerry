@@ -47,7 +47,7 @@ export class GroupsListComponent implements OnInit, OnDestroy {
       }
     };
 
-    this.groupService.getGroupList().subscribe((groupList: Group[]) => {
+    this.groupService.getGroups().subscribe((groupList: Group[]) => {
         this.groupList = groupList;
       },
       (error) => {
@@ -57,7 +57,7 @@ export class GroupsListComponent implements OnInit, OnDestroy {
       }
     );
 
-    this.rightService.getRightList().subscribe((rightList: Right[]) => {
+    this.rightService.getRights().subscribe((rightList: Right[]) => {
       this.rightList = rightList;
     });
   }

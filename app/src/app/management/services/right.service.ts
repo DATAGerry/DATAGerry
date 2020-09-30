@@ -17,11 +17,13 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService } from '../../services/api-call.service';
-import { Group } from '../models/group';
+import { ApiCallService, ApiService, httpObserveOptions } from '../../services/api-call.service';
 import { Right } from '../models/right';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { HttpParams, HttpResponse } from '@angular/common/http';
+import { APIGetMultiResponse, APIGetSingleResponse } from '../../services/models/api-response';
+import { CollectionParameters } from '../../services/models/api-parameter';
 
 @Injectable({
   providedIn: 'root'
@@ -33,27 +35,23 @@ export class RightService<T = Right> implements ApiService {
   constructor(private api: ApiCallService) {
   }
 
-  public getRightList(): Observable<T[]> {
-    return this.api.callGet<T[]>(`${this.servicePrefix}/`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
+  public getRights(params: CollectionParameters = { filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1 }
+  ): Observable<Array<T>> {
+    const options = httpObserveOptions;
+    let httpParams: HttpParams = new HttpParams();
+    if (params.filter !== undefined) {
+      httpParams = httpParams.set('filter', params.filter);
+    }
+    httpParams = httpParams.set('limit', params.limit.toString());
+    httpParams = httpParams.set('sort', params.sort);
+    httpParams = httpParams.set('order', params.order.toString());
+    httpParams = httpParams.set('page', params.page.toString());
+    options.params = httpParams;
+    return this.api.callGet<T>(`${ this.servicePrefix }/`, options).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return apiResponse.body.results as Array<T>;
       })
     );
   }
-
-  public getRightLevels() {
-    return this.api.callGet<T[]>(`${this.servicePrefix}/levels`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
-  }
-
 
 }

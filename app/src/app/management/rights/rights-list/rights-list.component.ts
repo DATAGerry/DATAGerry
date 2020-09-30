@@ -60,18 +60,15 @@ export class RightsListComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.rightListSubscription = this.rightService.getRightList().subscribe((rightList: Right[]) => {
+    this.rightListSubscription = this.rightService.getRights().subscribe((rightList: Right[]) => {
         this.rightList = rightList;
         this.dtTrigger.next();
       });
-    this.securityRightLevelsSubscription = this.rightService.getRightLevels().subscribe((levels: any[]) => {
-      this.securityRightLevels = levels;
-    });
+
   }
 
   public ngOnDestroy(): void {
     this.rightListSubscription.unsubscribe();
-    this.securityRightLevelsSubscription.unsubscribe();
     this.dtTrigger.unsubscribe();
     this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
       dtInstance.destroy();

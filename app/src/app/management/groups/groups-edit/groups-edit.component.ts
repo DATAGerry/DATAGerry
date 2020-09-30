@@ -67,7 +67,7 @@ export class GroupsEditComponent implements OnInit, OnDestroy {
         });
       }
     );
-    this.rightServiceSubscription = this.rightService.getRightList().subscribe((rightList: Right[]) => {
+    this.rightServiceSubscription = this.rightService.getRights().subscribe((rightList: Right[]) => {
       this.rightList = rightList;
     });
   }

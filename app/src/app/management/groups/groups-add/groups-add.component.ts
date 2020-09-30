@@ -17,7 +17,7 @@
 */
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { checkGroupExistsValidator, GroupService } from '../../services/group.service';
+import { checkGroupNameExistsValidator, GroupService } from '../../services/group.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { RightService } from '../../services/right.service';
 import { Right } from '../../models/right';
@@ -41,14 +41,14 @@ export class GroupsAddComponent implements OnInit, OnDestroy {
   constructor(private groupService: GroupService, private rightService: RightService,
               private toast: ToastService, private router: Router) {
     this.addForm = new FormGroup({
-      name: new FormControl('', [Validators.required], [checkGroupExistsValidator(this.groupService)]),
+      name: new FormControl('', [Validators.required], [checkGroupNameExistsValidator(this.groupService)]),
       label: new FormControl('', [Validators.required]),
       rights: new FormControl([], Validators.minLength(1))
     });
   }
 
   public ngOnInit(): void {
-    this.rightServiceSubscription = this.rightService.getRightList().subscribe((rightList: Right[]) => {
+    this.rightServiceSubscription = this.rightService.getRights().subscribe((rightList: Right[]) => {
       this.rightList = rightList;
     });
   }

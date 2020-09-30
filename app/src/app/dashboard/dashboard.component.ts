@@ -121,7 +121,7 @@ export class DashboardComponent implements OnInit {
 
   private generateGroupChar() {
     let values;
-    this.groupService.getGroupList().subscribe((data: Group[]) => {
+    this.groupService.getGroups().subscribe((data: Group[]) => {
         values = data;
       }, (error) => {
       },

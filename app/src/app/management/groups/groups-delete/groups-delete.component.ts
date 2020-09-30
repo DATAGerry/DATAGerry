@@ -66,7 +66,7 @@ export class GroupsDeleteComponent implements OnInit, OnDestroy {
         });
       }
     );
-    this.groupListSubscription = this.groupService.getGroupList().subscribe((groupList: Group[]) => {
+    this.groupListSubscription = this.groupService.getGroups().subscribe((groupList: Group[]) => {
       this.groupList = groupList;
       this.deleteForm.get('deleteGroupOption').setValue(2);
     });
