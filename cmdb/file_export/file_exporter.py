@@ -94,11 +94,12 @@ class FileExporter:
     def set_response(self, value):
         self.response = value
 
-    #
-    #   Get values from the database
-    #
-
     def get_object_by_id(self):
+        """
+
+        Get values from the database
+
+        """
         try:
             query = self._build_query({'public_id': self.public_id})
             return object_manager.get_objects_by(sort="public_id", **query)

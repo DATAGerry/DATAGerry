@@ -60,6 +60,15 @@ class ZipExportType(ExportType):
     ACTIVE = True
 
     def export(self, object_list, *args):
+
+        """
+        Export a zip file, containing the object list sorted by type in several files.
+
+        :param object_list: List of objects to be exported
+        :param args: the filetype with which the objects are stored
+        :return: zip file containing object files separated by types
+        """
+
         # check what export type is requested and intitializes a new zip file in memory
         export_type = load_class("cmdb.file_export.export_types." + args[0])()
         zipped_file = io.BytesIO()
@@ -107,6 +116,14 @@ class CsvExportType(ExportType):
 
     def export(self, object_list, *args):
 
+        """
+        Exports object_list as .csv file
+
+        :param object_list: The objects to be exported
+        :param args:
+        :return: Csv file containing the object_list
+        """
+
         header = ['public_id', 'active']
         rows = []
         row = {}
@@ -153,6 +170,14 @@ class JsonExportType(ExportType):
 
     def export(self, object_list, *args):
 
+        """
+        Exports object_list as .json file
+
+        :param object_list: The objects to be exported
+        :param args:
+        :return: Json file containing the object_list
+        """
+
         s_keys = ['public_id', 'active', 'type_id', 'fields']
         filter_dict = []
 
@@ -180,6 +205,15 @@ class XlsxExportType(ExportType):
     ACTIVE = True
 
     def export(self, object_list, *args):
+
+        """
+        Exports object_list as .xlsx file
+
+        :param object_list: The objects to be exported
+        :param args:
+        :return: Xlsx file containing the object_list
+        """
+
         workbook = self.create_xls_object(object_list)
 
         # save workbook
@@ -265,6 +299,14 @@ class XmlExportType(ExportType):
     ACTIVE = True
 
     def export(self, object_list, *args):
+
+        """
+        Exports object_list as .xml file
+
+        :param object_list: The objects to be exported
+        :param args:
+        :return: Xml file containing the object_list
+        """
 
         # object list
         cmdb_object_list = ET.Element('objects')
