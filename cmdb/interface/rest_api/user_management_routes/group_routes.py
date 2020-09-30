@@ -40,14 +40,12 @@ groups_blueprint = APIBlueprint('groups', __name__)
 def get_groups(params: CollectionParameters):
     group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
                                                right_manager=RightManager(rights))
-    body = request.method == 'HEAD'
-
     try:
         iteration_result: IterationResult[UserGroupModel] = group_manager.iterate(
             filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
         groups = [UserGroupModel.to_dict(group) for group in iteration_result.results]
         api_response = GetMultiResponse(groups, total=iteration_result.total, params=params,
-                                        url=request.url, model=UserGroupModel.MODEL, body=body)
+                                        url=request.url, model=UserGroupModel.MODEL, body=request.method == 'HEAD')
     except FrameworkIterationError as err:
         return abort(400, err.message)
     except ManagerGetError as err:
@@ -60,14 +58,12 @@ def get_groups(params: CollectionParameters):
 def get_group(public_id: int):
     group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
                                                right_manager=RightManager(rights))
-    body = True if not request.method != 'HEAD' else False
-
     try:
         group = group_manager.get(public_id)
     except ManagerGetError as err:
         return abort(404, err.message)
     api_response = GetSingleResponse(UserGroupModel.to_dict(group), url=request.url, model=UserGroupModel.MODEL,
-                                     body=body)
+                                     body=request.method == 'HEAD')
     return api_response.make_response()
 
 

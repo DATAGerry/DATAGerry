@@ -74,6 +74,15 @@ class APIBlueprint(Blueprint):
 
     @classmethod
     def parse_parameters(cls, parameters_class: Type[ApiParameters], **optional):
+        """
+        Parse generic parameters from http to a class
+        Args:
+            parameters_class: Wrapper class of the ApiParameters
+            **optional: Dynamic route parameters
+
+        Returns:
+            ApiParameters: Wrapper class
+        """
         def _parse(f):
             @wraps(f)
             def _decorate(*args, **kwargs):
