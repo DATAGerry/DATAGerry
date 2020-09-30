@@ -16,12 +16,13 @@
 import logging
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.manager import ManagerGetError
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.auth_errors import AuthenticationError
 from cmdb.security.auth.provider_config import AuthProviderConfig
 from cmdb.security.auth.provider_config_form import AuthProviderConfigForm, AuthProviderConfigFormEntry
 from cmdb.user_management import UserModel
-from cmdb.user_management.user_manager import UserManager, UserManagerGetError
+from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.security.security import SecurityManager
 from cmdb.utils.system_config import SystemConfigReader
 
@@ -55,8 +56,8 @@ class LocalAuthenticationProvider(AuthenticationProvider):
         __user_manager = UserManager(__dbm)
         LOGGER.info(f'[LocalAuthenticationProvider] Try login for user {user_name}')
         try:
-            user: UserModel = __user_manager.get_user_by_name(user_name=user_name)
-        except UserManagerGetError as umge:
+            user: UserModel = __user_manager.get_by({'user_name': user_name})
+        except ManagerGetError as umge:
             raise AuthenticationError(LocalAuthenticationProvider.get_name(), umge.message)
         login_pass = __scm.generate_hmac(password)
         if login_pass == user.password:

@@ -100,24 +100,23 @@ class UserGroupModel(CmdbDAO):
 
     def get_right(self, name) -> str:
         try:
-            return self.rights[self.rights.index(name)]
-        except (IndexError, TypeError, ValueError):
+            return next(right for right in self.rights if right.name == name)
+        except Exception:
             raise RightNotFoundError(self.name, name)
 
     def has_right(self, right_name) -> bool:
-        right_status = self.get_right(right_name)
-        if not right_status:
-            right_status = self.has_extended_right(right_name=right_name)
-        return right_status
+        try:
+            self.get_right(right_name)
+        except RightNotFoundError:
+            return False
+        return True
 
     def has_extended_right(self, right_name: str) -> bool:
         parent_right_name: str = right_name.rsplit(".", 1)[0]
         if self.has_right(f'{parent_right_name}.{GLOBAL_RIGHT_IDENTIFIER}'):
             return True
         if parent_right_name == 'base':
-            if self.has_right(f'{parent_right_name}.{GLOBAL_RIGHT_IDENTIFIER}'):
-                return True
-            return False
+            return self.has_right(f'{parent_right_name}.{GLOBAL_RIGHT_IDENTIFIER}')
         return self.has_extended_right(right_name=parent_right_name)
 
 

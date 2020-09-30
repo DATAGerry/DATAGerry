@@ -89,8 +89,8 @@ def auth_is_valid() -> bool:
         return False
 
 
-@deprecated
 def user_has_right(required_right: str) -> bool:
+    """Check if a user has a specific right"""
     from flask import request, current_app
     with current_app.app_context():
         user_manager = UserManager(current_app.database_manager)
@@ -105,7 +105,10 @@ def user_has_right(required_right: str) -> bool:
         user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
         user = user_manager.get(user_id)
         group = group_manager.get(user.group_id)
-        return group.has_right(required_right)
+        right_status = group.has_right(right_name=required_right)
+        if not right_status:
+            right_status = group.has_extended_right(right_name=required_right)
+        return right_status
     except ManagerGetError:
         return False
 
@@ -218,7 +221,7 @@ def parse_authorization_header(header):
                 username = to_unicode(username, "utf-8")
                 password = to_unicode(password, "utf-8")
 
-                user_manager: UserManager = current_app.user_manager
+                user_manager: UserManager = UserManager(current_app.database_manager)
                 auth_module = AuthModule(SystemSettingsReader(current_app.database_manager))
 
                 try:
