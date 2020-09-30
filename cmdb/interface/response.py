@@ -169,7 +169,7 @@ class GetMultiResponse(BaseAPIResponse):
             params: HTTP query parameters.
             url: Requested url.
             model: Data-Model of the results.
-            body_less: If http response should not have a body.
+            body: If http response should not have a body.
 
         """
         self.results: List[dict] = results
@@ -220,7 +220,7 @@ class GetMultiResponse(BaseAPIResponse):
         extra = {}
         if pagination:
             extra = {
-                'parameters': self.parameters.to_dict(),
+                'parameters': CollectionParameters.to_dict(self.parameters),
                 'pager': self.pager.to_dict(),
                 'pagination': self.pagination.to_dict()
             }

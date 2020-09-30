@@ -13,19 +13,17 @@ class SortOrder(Enum):
 class ApiParameters:
     """Rest API Parameter superclass"""
 
-    def __init__(self, query_string: Parameter = None, **kwargs):
+    def __init__(self, query_string: Parameter = None, **optional):
         self.query_string: Parameter = query_string or Parameter('')
-        self.optional = kwargs
+        self.optional = optional
 
     @classmethod
-    def from_http(cls, *args, **kwargs) -> "ApiParameters":
+    def from_http(cls, query_string: str, **optional) -> "ApiParameters":
         raise NotImplementedError
 
-    def to_dict(self) -> dict:
-        """Get the object as a dict"""
-        return {
-            'optional': self.optional
-        }
+    @classmethod
+    def to_dict(cls, *args, **kwargs) -> dict:
+        raise NotImplementedError
 
     def __repr__(self):
         return f'Parameters: Query({self.query_string}) | Optional({self.optional})'
@@ -60,31 +58,30 @@ class CollectionParameters(ApiParameters):
         super(CollectionParameters, self).__init__(query_string=query_string, **kwargs)
 
     @classmethod
-    def from_http(cls, query_string: str, **parameters) -> "CollectionParameters":
+    def from_http(cls, query_string: str, **optional) -> "CollectionParameters":
         """
         Create a collection parameter instance from a http query string
 
         Args:
             query_string: raw query string
-            **parameters: list of optional http parameters
+            **optional: list of optional http parameters
 
         Returns:
             CollectionParameters instance
         """
         from json import loads
-        if 'filter' in parameters:
-            parameters['filter'] = loads(parameters['filter'])
-        return cls(Parameter(query_string), **parameters)
+        if 'filter' in optional:
+            optional['filter'] = loads(optional['filter'])
+        return cls(Parameter(query_string), **optional)
 
-    def to_dict(self) -> dict:
+    @classmethod
+    def to_dict(cls, parameters: "CollectionParameters") -> dict:
         """Get the object as a dict"""
         return {
-            **{
-                'limit': self.limit,
-                'sort': self.sort,
-                'order': self.order,
-                'page': self.page,
-                'filter': self.filter,
-            },
-            **super(CollectionParameters, self).to_dict()
+            'limit': parameters.limit,
+            'sort': parameters.sort,
+            'order': parameters.order,
+            'page': parameters.page,
+            'filter': parameters.filter,
+            'optional': parameters.optional
         }

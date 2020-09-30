@@ -16,6 +16,7 @@
 
 from flask import request, current_app
 
+from cmdb.interface.rest_api.user_management_routes.group_parameters import GroupDeletionParameters
 from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
 from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
 from cmdb.framework.results import IterationResult
@@ -107,7 +108,8 @@ def update_group(public_id: int, data: dict):
 
 @groups_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @groups_blueprint.protect(auth=False, right='base.user-management.group.delete')
-def delete_category(public_id: int):
+@groups_blueprint.parse_parameters(GroupDeletionParameters)
+def delete_category(public_id: int, params: GroupDeletionParameters):
     group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
                                                right_manager=RightManager(rights))
     try:

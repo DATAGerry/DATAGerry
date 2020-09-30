@@ -15,11 +15,12 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from functools import wraps
+from typing import Type
 
 from cerberus import Validator
 from flask import Blueprint, abort, request
 
-from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.api_parameters import CollectionParameters, ApiParameters
 from cmdb.interface.route_utils import auth_is_valid, user_has_right
 
 
@@ -72,10 +73,30 @@ class APIBlueprint(Blueprint):
         return _validate
 
     @classmethod
+    def parse_parameters(cls, parameters_class: Type[ApiParameters], **optional):
+        def _parse(f):
+            @wraps(f)
+            def _decorate(*args, **kwargs):
+                try:
+                    params = parameters_class.from_http(
+                        str(request.query_string, 'utf-8'), **{**optional, **request.args.to_dict()}
+                    )
+                except Exception as e:
+                    return abort(400, str(e))
+                return f(params=params, *args, **kwargs)
+
+            return _decorate
+
+        return _parse
+
+    @classmethod
     def parse_collection_parameters(cls, **optional):
         """
         Wrapper function for the flask routes.
         Auto parses the collection based parameters to the route.
+
+        TODO:
+            Move to global method like up.
 
         Args:
             **optional: dict of optional collection parameters for given route function.
