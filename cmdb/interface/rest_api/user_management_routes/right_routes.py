@@ -34,6 +34,22 @@ rights_blueprint = APIBlueprint('rights', __name__)
 @rights_blueprint.protect(auth=False, right=None)
 @rights_blueprint.parse_collection_parameters(sort='name', view='list')
 def get_rights(params: CollectionParameters):
+    """
+    HTTP `GET`/`HEAD` route for getting a iterable collection of resources.
+
+    Args:
+        params (CollectionParameters): Passed parameters over the http query string
+
+    Returns:
+        GetMultiResponse: Which includes a IterationResult of the BaseRight.
+
+    Notes:
+        Calling the route over HTTP HEAD method will result in an empty body.
+
+    Raises:
+        ManagerIterationError: If the collection could not be iterated.
+        ManagerGetError: If the collection/resources could not be found.
+    """
     right_manager = RightManager(right_tree)
     body = request.method == 'HEAD'
 
@@ -47,7 +63,7 @@ def get_rights(params: CollectionParameters):
                 filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
             rights = [BaseRight.to_dict(type) for type in iteration_result.results]
             api_response = GetMultiResponse(rights, total=iteration_result.total, params=params,
-                                            url=request.url, model='Right', body=body)
+                                            url=request.url, model='Right', body=request.method == 'HEAD')
             return api_response.make_response()
     except ManagerIterationError as err:
         return abort(400, err.message)
@@ -58,35 +74,71 @@ def get_rights(params: CollectionParameters):
 @rights_blueprint.route('/<string:name>', methods=['GET', 'HEAD'])
 @rights_blueprint.protect(auth=False, right='None')
 def get_right(name: str):
+    """
+    HTTP `GET`/`HEAD` route for a single right resource.
+
+    Args:
+        name (str): Name of the right.
+
+    Raises:
+        ManagerGetError: When the selected right does not exists.
+
+    Notes:
+        Calling the route over HTTP HEAD method will result in an empty body.
+
+    Returns:
+        GetSingleResponse: Which includes the json data of a BaseRight.
+    """
     right_manager: RightManager = RightManager(right_tree)
-    body = True if not request.method != 'HEAD' else False
 
     try:
         right = right_manager.get(name)
     except ManagerGetError as err:
         return abort(404, err.message)
-    api_response = GetSingleResponse(BaseRight.to_dict(right), url=request.url,
-                                     model='Right', body=body)
+    api_response = GetSingleResponse(BaseRight.to_dict(right), url=request.url, model='Right',
+                                     body=request.method == 'HEAD')
     return api_response.make_response()
 
 
 @rights_blueprint.route('/levels', methods=['GET', 'HEAD'])
 @rights_blueprint.protect(auth=False, right='None')
 def get_levels():
-    body = True if not request.method != 'HEAD' else False
+    """
+    HTTP `GET`/`HEAD` route for a static collection of levels.
 
-    api_response = GetSingleResponse(_nameToLevel, url=request.url,
-                                     model='Security-Level', body=body)
+    Returns:
+        GetSingleResponse: Which includes a levels as enum.
+
+    Notes:
+        Calling the route over HTTP HEAD method will result in an empty body.
+    """
+
+    api_response = GetSingleResponse(_nameToLevel, url=request.url, model='Security-Level',
+                                     body=request.method == 'HEAD')
     return api_response.make_response()
 
 
 @rights_blueprint.route('/levels/<string:name>', methods=['GET', 'HEAD'])
 @rights_blueprint.protect(auth=False, right='None')
 def get_level(name: str):
-    body = True if not request.method != 'HEAD' else False
+    """
+    HTTP `GET`/`HEAD` route for a single level resource.
+
+    Args:
+        name (str): Name of the level.
+
+    Raises:
+        ManagerGetError: When the selected level does not exists.
+
+    Notes:
+        Calling the route over HTTP HEAD method will result in an empty body.
+
+    Returns:
+        GetSingleResponse: Which includes the json data of the level enum.
+    """
     level = _nameToLevel.get(name)
     if not level:
         raise ManagerGetError(f'No level with the name: {name}')
 
-    api_response = GetSingleResponse(level, url=request.url, model='Security-Level', body=body)
+    api_response = GetSingleResponse(level, url=request.url, model='Security-Level', body=request.method == 'HEAD')
     return api_response.make_response()
