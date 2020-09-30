@@ -31,18 +31,17 @@ users_blueprint = APIBlueprint('users', __name__)
 
 
 @users_blueprint.route('/', methods=['GET', 'HEAD'])
-@users_blueprint.protect(auth=False, right='base.user-management.user.*')
+@users_blueprint.protect(auth=True, right='base.user-management.user.*')
 @users_blueprint.parse_collection_parameters()
 def get_users(params: CollectionParameters):
     user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
-    body = request.method == 'HEAD'
 
     try:
         iteration_result: IterationResult[UserModel] = user_manager.iterate(
             filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
         users = [UserModel.to_dict(user) for user in iteration_result.results]
         api_response = GetMultiResponse(users, total=iteration_result.total, params=params,
-                                        url=request.url, model=UserModel.MODEL, body=body)
+                                        url=request.url, model=UserModel.MODEL, body=request.method == 'HEAD')
     except FrameworkIterationError as err:
         return abort(400, err.message)
     except ManagerGetError as err:
@@ -51,46 +50,45 @@ def get_users(params: CollectionParameters):
 
 
 @users_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
-@users_blueprint.protect(auth=False, right='base.user-management.user.view')
+@users_blueprint.protect(auth=True, right='base.user-management.user.view')
 def get_user(public_id: int):
     user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
-    body = request.method == 'HEAD'
 
     try:
         user: UserModel = user_manager.get(public_id)
     except ManagerGetError as err:
         return abort(404, err.message)
     api_response = GetSingleResponse(UserModel.to_dict(user), url=request.url,
-                                     model=UserModel.MODEL, body=body)
+                                     model=UserModel.MODEL, body=request.method == 'HEAD')
     return api_response.make_response()
 
 
 @users_blueprint.route('/', methods=['POST'])
-@users_blueprint.protect(auth=False, right='base.user-management.user.add')
+@users_blueprint.protect(auth=True, right='base.user-management.user.add')
 @users_blueprint.validate(UserModel.SCHEMA)
 def insert_user(data: dict):
     user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
     try:
         result_id: PublicID = user_manager.insert(data)
-        raw_doc = user_manager.get(public_id=result_id)
+        user = user_manager.get(public_id=result_id)
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerInsertError as err:
         return abort(400, err.message)
-    api_response = InsertSingleResponse(result_id, raw=UserModel.to_dict(raw_doc), url=request.url,
+    api_response = InsertSingleResponse(result_id, raw=UserModel.to_dict(user), url=request.url,
                                         model=UserModel.MODEL)
     return api_response.make_response(prefix='users')
 
 
 @users_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
-@users_blueprint.protect(auth=False, right='base.user-management.user.edit')
+@users_blueprint.protect(auth=True, right='base.user-management.user.edit')
 @users_blueprint.validate(UserModel.SCHEMA)
 def update_user(public_id: int, data: dict):
     user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
     try:
         user = UserModel.from_data(data=data)
         user_manager.update(public_id=PublicID(public_id), user=user)
-        api_response = UpdateSingleResponse(result=data, url=request.url, model=UserModel.MODEL)
+        api_response = UpdateSingleResponse(result=UserModel.to_dict(user), url=request.url, model=UserModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerUpdateError as err:
@@ -99,7 +97,7 @@ def update_user(public_id: int, data: dict):
 
 
 @users_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@users_blueprint.protect(auth=False, right='base.user-management.user.delete')
+@users_blueprint.protect(auth=True, right='base.user-management.user.delete')
 def delete_user(public_id: int):
     user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
     try:

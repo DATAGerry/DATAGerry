@@ -38,7 +38,7 @@ groups_blueprint = APIBlueprint('groups', __name__)
 
 
 @groups_blueprint.route('/', methods=['GET', 'HEAD'])
-@groups_blueprint.protect(auth=False, right='base.user-management.group.*')
+@groups_blueprint.protect(auth=True, right='base.user-management.group.*')
 @groups_blueprint.parse_collection_parameters()
 def get_groups(params: CollectionParameters):
     group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
@@ -57,7 +57,7 @@ def get_groups(params: CollectionParameters):
 
 
 @groups_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
-@groups_blueprint.protect(auth=False, right='base.user-management.group.view')
+@groups_blueprint.protect(auth=True, right='base.user-management.group.view')
 def get_group(public_id: int):
     group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
                                                right_manager=RightManager(rights))
@@ -65,31 +65,31 @@ def get_group(public_id: int):
         group = group_manager.get(public_id)
     except ManagerGetError as err:
         return abort(404, err.message)
-    api_response = GetSingleResponse(UserGroupModel.to_dict(group), url=request.url, model=UserGroupModel.MODEL,
-                                     body=request.method == 'HEAD')
+    api_response = GetSingleResponse(UserGroupModel.to_dict(group), url=request.url,
+                                     model=UserGroupModel.MODEL, body=request.method == 'HEAD')
     return api_response.make_response()
 
 
 @groups_blueprint.route('/', methods=['POST'])
-@groups_blueprint.protect(auth=False, right='base.user-management.group.add')
+@groups_blueprint.protect(auth=True, right='base.user-management.group.add')
 @groups_blueprint.validate(UserGroupModel.SCHEMA)
 def insert_group(data: dict):
     group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
                                                right_manager=RightManager(rights))
     try:
         result_id: PublicID = group_manager.insert(data)
-        raw_doc = group_manager.get(public_id=result_id)
+        group = group_manager.get(public_id=result_id)
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerInsertError as err:
         return abort(400, err.message)
-    api_response = InsertSingleResponse(result_id, raw=UserGroupModel.to_dict(raw_doc), url=request.url,
+    api_response = InsertSingleResponse(result_id, raw=UserGroupModel.to_dict(group), url=request.url,
                                         model=UserGroupModel.MODEL)
     return api_response.make_response(prefix='groups')
 
 
 @groups_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
-@groups_blueprint.protect(auth=False, right='base.user-management.group.edit')
+@groups_blueprint.protect(auth=True, right='base.user-management.group.edit')
 @groups_blueprint.validate(UserGroupModel.SCHEMA)
 def update_group(public_id: int, data: dict):
     group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
@@ -97,7 +97,7 @@ def update_group(public_id: int, data: dict):
     try:
         group = UserGroupModel.from_data(data=data)
         group_manager.update(public_id=PublicID(public_id), group=group)
-        api_response = UpdateSingleResponse(result=data, url=request.url, model=UserGroupModel.MODEL)
+        api_response = UpdateSingleResponse(result=UserGroupModel.to_dict(group), url=request.url, model=UserGroupModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerUpdateError as err:
@@ -106,7 +106,7 @@ def update_group(public_id: int, data: dict):
 
 
 @groups_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@groups_blueprint.protect(auth=False, right='base.user-management.group.delete')
+@groups_blueprint.protect(auth=True, right='base.user-management.group.delete')
 @groups_blueprint.parse_parameters(GroupDeletionParameters)
 def delete_group(public_id: int, params: GroupDeletionParameters):
     group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
