@@ -424,7 +424,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       this.fileService.getObjectFileByType(this.objects.data[0].type_information.type_id, exportType.id)
         .subscribe(res => this.downLoadFile(res, exportType));
     } else {
-      this.fileService.callExportRoute('/file/object/' + this.selectedObjects.toString(), exportType.id)
+      this.fileService.callExportRoute(this.selectedObjects.toString(), exportType.id)
         .subscribe(res => this.downLoadFile(res, exportType));
     }
   }
