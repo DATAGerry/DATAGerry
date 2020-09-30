@@ -22,6 +22,7 @@ import xml.dom.minidom
 import xml.etree.ElementTree as ET
 import zipfile
 import openpyxl
+from cmdb.utils.helpers import load_class
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
@@ -61,7 +62,7 @@ class ZipExportType(ExportType):
 
     def export(self, object_list, type):
         # check what export type is requested and intitializes a new zip file in memory
-        export_type = self.get_export_type(type)
+        export_type = load_class("cmdb.file_export.export_types." + type)()
         zipped_file = io.BytesIO()
 
         # Build .zip file
@@ -94,18 +95,6 @@ class ZipExportType(ExportType):
         # returns zipped file
         zipped_file.seek(0)
         return zipped_file
-
-    def get_export_type(self, export_type):
-        if export_type == "JsonExportType":
-            return JsonExportType()
-        elif export_type == "CsvExportType":
-            return CsvExportType()
-        elif export_type == "XlsxExportType":
-            return XlsxExportType()
-        elif export_type == "XmlExportType":
-            return XmlExportType()
-        else:
-            return JsonExportType()
 
 
 class CsvExportType(ExportType):
