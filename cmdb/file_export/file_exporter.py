@@ -35,31 +35,32 @@ object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
 
 class FileExporter:
 
-    @staticmethod
-    def get_filetypes():
-        filetypes = ["CsvExportType", "JsonExportType", "XlsxExportType", "XmlExportType"]
-        return filetypes
-
-    def __init__(self, object_type, export_type: ExportType, public_id: str, **kwargs):
+    def __init__(self, object_type, export_type: ExportType, public_id: str, *args):
         """init of FileExporter
 
         Args:
             object_type: type of object e.g. CmdbObject or CmdbObject by TypeModel ID
             export_type: the ExportType object
             public_id: public id which implements the object / type
-            **kwargs: additional data
+            *args: additional data
         """
-        self.zip_class = False
-        if kwargs.get("file_type"):
-            self.zip_class = kwargs.get("file_type")
-
         self.object_type = object_type
         self.export_type = export_type
         self.public_id = public_id
+        self.zip_class = False if len(args) == 0 else args[0]
 
         # object_list: list of objects e.g CmdbObject or TypeModel
         self.object_list = []
         self.response = None
+
+    @staticmethod
+    def get_type_list():
+        """
+        Get list of supported ExportTypes
+        Returns: list of ExportType
+
+        """
+        return ["CsvExportType", "JsonExportType", "XlsxExportType", "XmlExportType"]
 
     def get_object_type(self):
         """
@@ -108,7 +109,7 @@ class FileExporter:
 
     def get_all_objects_by_type_id(self):
         try:
-            return object_manager.get_objects_by_type(self.public_id)
+            return object_manager.get_objects_by_type(int(self.public_id))
         except ObjectNotFoundError as e:
             return abort(400, e)
         except CMDBError:

@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import csv
 import io
 import json
@@ -45,11 +46,12 @@ class ExportType:
     def __init__(self):
         pass
 
-    def export(self, object_list):
+    def export(self, object_list, *args):
         pass
 
 
 class ZipExportType(ExportType):
+
     FILE_EXTENSION = "zip"
     LABEL = "ZIP"
     MULTITYPE_SUPPORT = True
@@ -57,12 +59,9 @@ class ZipExportType(ExportType):
     DESCRIPTION = "Export Zipped Files"
     ACTIVE = True
 
-    def __init__(self):
-        pass
-
-    def export(self, object_list, type):
+    def export(self, object_list, *args):
         # check what export type is requested and intitializes a new zip file in memory
-        export_type = load_class("cmdb.file_export.export_types." + type)()
+        export_type = load_class("cmdb.file_export.export_types." + args[0])()
         zipped_file = io.BytesIO()
 
         # Build .zip file
@@ -98,6 +97,7 @@ class ZipExportType(ExportType):
 
 
 class CsvExportType(ExportType):
+
     FILE_EXTENSION = "csv"
     LABEL = "CSV"
     MULTITYPE_SUPPORT = False
@@ -105,10 +105,8 @@ class CsvExportType(ExportType):
     DESCRIPTION = "Export as CSV (only of the same type)"
     ACTIVE = True
 
-    def __init__(self):
-        pass
+    def export(self, object_list, *args):
 
-    def export(self, object_list):
         header = ['public_id', 'active']
         rows = []
         row = {}
@@ -134,6 +132,7 @@ class CsvExportType(ExportType):
         return self.csv_writer(header, rows)
 
     def csv_writer(self, header, rows, dialect=csv.excel):
+
         csv_file = io.StringIO()
         writer = csv.DictWriter(csv_file, fieldnames=header, dialect=dialect)
         writer.writeheader()
@@ -144,6 +143,7 @@ class CsvExportType(ExportType):
 
 
 class JsonExportType(ExportType):
+
     FILE_EXTENSION = "json"
     LABEL = "JSON"
     MULTITYPE_SUPPORT = True
@@ -151,7 +151,8 @@ class JsonExportType(ExportType):
     DESCRIPTION = "Export as JSON"
     ACTIVE = True
 
-    def export(self, object_list):
+    def export(self, object_list, *args):
+
         s_keys = ['public_id', 'active', 'type_id', 'fields']
         filter_dict = []
 
@@ -170,6 +171,7 @@ class JsonExportType(ExportType):
 
 
 class XlsxExportType(ExportType):
+
     FILE_EXTENSION = "xlsx"
     LABEL = "XLSX"
     MULTITYPE_SUPPORT = True
@@ -177,7 +179,7 @@ class XlsxExportType(ExportType):
     DESCRIPTION = "Export as XLS"
     ACTIVE = True
 
-    def export(self, object_list):
+    def export(self, object_list, *args):
         workbook = self.create_xls_object(object_list)
 
         # save workbook
@@ -187,6 +189,7 @@ class XlsxExportType(ExportType):
             return tmp.read()
 
     def create_xls_object(self, object_list):
+
         # create workbook
         workbook = openpyxl.Workbook()
 
@@ -253,6 +256,7 @@ class XlsxExportType(ExportType):
 
 
 class XmlExportType(ExportType):
+
     FILE_EXTENSION = "xml"
     LABEL = "XML"
     MULTITYPE_SUPPORT = True
@@ -260,14 +264,15 @@ class XmlExportType(ExportType):
     DESCRIPTION = "Export as XML"
     ACTIVE = True
 
-    def export(self, object_list):
-        return self.parse_to_xml(json.loads(json.dumps(object_list, default=json_encoding.default, indent=2)))
+    def export(self, object_list, *args):
 
-    def parse_to_xml(self, json_obj):
         # object list
         cmdb_object_list = ET.Element('objects')
 
-        # objects
+        # parse objects to JSON
+        json_obj = json.loads(json.dumps(object_list, default=json_encoding.default, indent=2))
+
+        # parse objects to XML
         for obj in json_obj:
             # object
             cmdb_object = ET.SubElement(cmdb_object_list, 'object')
