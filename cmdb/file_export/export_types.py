@@ -64,9 +64,12 @@ class ZipExportType(ExportType):
         """
         Export a zip file, containing the object list sorted by type in several files.
 
-        :param object_list: List of objects to be exported
-        :param args: the filetype with which the objects are stored
-        :return: zip file containing object files separated by types
+        Args:
+            object_list: List of objects to be exported
+            args: the filetype with which the objects are stored
+
+        Returns:
+            zip file containing object files separated by types
         """
 
         # check what export type is requested and intitializes a new zip file in memory
@@ -116,12 +119,14 @@ class CsvExportType(ExportType):
 
     def export(self, object_list, *args):
 
-        """
-        Exports object_list as .csv file
+        """ Exports object_list as .csv file
 
-        :param object_list: The objects to be exported
-        :param args:
-        :return: Csv file containing the object_list
+        Args:
+            object_list: The objects to be exported
+            args:
+
+        Returns:
+            Csv file containing the object_list
         """
 
         header = ['public_id', 'active']
@@ -170,12 +175,14 @@ class JsonExportType(ExportType):
 
     def export(self, object_list, *args):
 
-        """
-        Exports object_list as .json file
+        """Exports object_list as .json file
 
-        :param object_list: The objects to be exported
-        :param args:
-        :return: Json file containing the object_list
+        Args:
+            object_list: The objects to be exported
+            args:
+
+        Returns:
+            Json file containing the object_list
         """
 
         s_keys = ['public_id', 'active', 'type_id', 'fields']
@@ -206,12 +213,14 @@ class XlsxExportType(ExportType):
 
     def export(self, object_list, *args):
 
-        """
-        Exports object_list as .xlsx file
+        """Exports object_list as .xlsx file
 
-        :param object_list: The objects to be exported
-        :param args:
-        :return: Xlsx file containing the object_list
+        Args:
+            object_list: The objects to be exported
+            args:
+
+        Returns:
+            Xlsx file containing the object_list
         """
 
         workbook = self.create_xls_object(object_list)
@@ -300,12 +309,14 @@ class XmlExportType(ExportType):
 
     def export(self, object_list, *args):
 
-        """
-        Exports object_list as .xml file
+        """Exports object_list as .xml file
 
-        :param object_list: The objects to be exported
-        :param args:
-        :return: Xml file containing the object_list
+        Args:
+            object_list: The objects to be exported
+            args:
+
+        Returns:
+            Xml file containing the object_list
         """
 
         # object list

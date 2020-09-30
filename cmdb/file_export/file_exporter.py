@@ -55,9 +55,10 @@ class FileExporter:
 
     @staticmethod
     def get_type_list():
-        """
-        Get list of supported ExportTypes
-        Returns: list of ExportType
+        """Get list of supported ExportTypes
+
+        Returns:
+            list of ExportType
 
         """
         return ["CsvExportType", "JsonExportType", "XlsxExportType", "XmlExportType"]
@@ -65,7 +66,8 @@ class FileExporter:
     def get_object_type(self):
         """
 
-        Returns: type of object e.g. CmdbObject, TypeModel or CmdbObject by TypeModel ID (object, type, object/type)
+        Returns:
+            type of object e.g. CmdbObject, TypeModel or CmdbObject by TypeModel ID (object, type, object/type)
 
         """
         return self.object_type
@@ -73,7 +75,8 @@ class FileExporter:
     def get_object_list(self):
         """
 
-        Returns: list of objects e.g CmdbObject or TypeModel
+        Returns:
+            list of objects e.g CmdbObject or TypeModel
 
         """
         file_type = self.get_object_type()
@@ -86,7 +89,8 @@ class FileExporter:
     def get_response(self):
         """
 
-        Returns: Response element
+        Returns:
+            Response element
 
         """
         return self.response
@@ -95,10 +99,10 @@ class FileExporter:
         self.response = value
 
     def get_object_by_id(self):
-        """
+        """ Get values from the database
 
-        Get values from the database
-
+            Returns:
+                Object
         """
         try:
             query = self._build_query({'public_id': self.public_id})
@@ -127,11 +131,14 @@ class FileExporter:
 
     @staticmethod
     def _build_query(parameters, operator='$or') -> dict:
-        """
-        Create a MongoDB query
-        :param parameters: dictionary of properties
-        :param operator: kind of linking of query properties
-        :return: dict
+        """ Create a MongoDB query
+
+        Args:
+            parameters: dictionary of properties
+            operator: kind of linking of query properties
+
+        Returns:
+            dict
         """
         query_list = []
         try:
