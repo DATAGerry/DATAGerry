@@ -13,19 +13,27 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+from enum import Enum
+
 from cmdb.framework.utils import PublicID
 from cmdb.interface.api_parameters import ApiParameters, Parameter
 
 
+class GroupDeleteMode(Enum):
+    NONE = None
+    MOVE = 'move'
+    DELETE = 'DELETE'
+
+
 class GroupDeletionParameters(ApiParameters):
 
-    def __init__(self, query_string: Parameter, action: str, group_id: PublicID = None, **kwargs):
+    def __init__(self, query_string: Parameter, action: GroupDeleteMode = None, group_id: PublicID = None, **kwargs):
         """
         Constructor of the GroupDeletionParameters.
 
         Args:
             query_string (str): The raw http query string. Can be used when the parsed parameters are not enough.
-            action (str): The action which is to perform on delete a group.
+            action (GroupDeleteMode): The action which is to perform on delete a group.
             group_id (int): The public id of another group which the users have to move.
             **kwargs: optional parameters
         """

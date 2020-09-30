@@ -13,10 +13,11 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+from typing import List
 
 from flask import request, current_app
 
-from cmdb.interface.rest_api.user_management_routes.group_parameters import GroupDeletionParameters
+from cmdb.interface.rest_api.user_management_routes.group_parameters import GroupDeletionParameters, GroupDeleteMode
 from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
 from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
 from cmdb.framework.results import IterationResult
@@ -26,8 +27,10 @@ from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertS
     DeleteSingleResponse
 from cmdb.interface.route_utils import abort
 from cmdb.interface.blueprint import APIBlueprint
+from cmdb.user_management import UserModel
 from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.right_manager import RightManager
+from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.rights import __all__ as rights
 
@@ -108,6 +111,33 @@ def update_group(public_id: int, data: dict):
 def delete_group(public_id: int, params: GroupDeletionParameters):
     group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
                                                right_manager=RightManager(rights))
+    user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
+
+    # Check of action is set
+    if params.action:
+        users_in_group: List[UserModel] = user_manager.get_many({'group_id': public_id})
+        if len(users_in_group) > 0:
+            if params.action == GroupDeleteMode.MOVE.value:
+                if params.group_id:
+                    try:
+                        group_manager.get(params.group_id)
+                    except ManagerGetError:
+                        return abort(404, f'Group for users move does not exist: GroupID: {params.group_id}')
+
+                    for user in users_in_group:
+                        user.group_id = params.group_id
+                        try:
+                            user_manager.update(user.public_id, user)
+                        except ManagerUpdateError as err:
+                            return abort(400, f'Could not move user: {user.public_id} to group: {params.group_id} | Error: {err.message}')
+
+            if params.action == GroupDeleteMode.DELETE.value:
+                for user in users_in_group:
+                    try:
+                        user_manager.delete(user.public_id)
+                    except ManagerDeleteError as err:
+                        return abort(400, f'Could not delete user: {user.public_id} | Error: {err.message}')
+
     try:
         deleted_group = group_manager.delete(public_id=PublicID(public_id))
         api_response = DeleteSingleResponse(raw=UserGroupModel.to_dict(deleted_group), model=UserGroupModel.MODEL)

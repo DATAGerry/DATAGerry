@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from typing import Union
+from typing import Union, List
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.user_management.models.user import UserModel
@@ -85,6 +85,20 @@ class UserManager(AccountManager):
         for resource_result in result.limit(-1):
             return UserModel.from_data(resource_result)
         raise ManagerGetError(f'User with the query: {query} not found!')
+
+    def get_many(self, query: Query = None) -> List[UserModel]:
+        """
+        Get a collection of users by a query. Passing no query means all users.
+
+        Args:
+            query (Query): A database query for filtering.
+
+        Returns:
+            List[UserModel]: A list of all users which matches the query.
+        """
+        query = query or {}
+        results = self._get(self.collection, filter=query)
+        return [UserModel.from_data(user) for user in results]
 
     def insert(self, user: Union[UserModel, dict]) -> PublicID:
         """
