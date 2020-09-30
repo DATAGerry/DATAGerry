@@ -63,7 +63,10 @@ class UserGroupModel(CmdbDAO):
 
     @classmethod
     def from_data(cls, data: dict, rights: List[BaseRight] = None) -> "UserGroupModel":
-        rights = [right for right in rights if right.name in data.get('rights', [])]
+        if rights:
+            rights = [right for right in rights if right.name in data.get('rights', [])]
+        else:
+            rights = []
         return cls(
             public_id=data.get('public_id'),
             name=data.get('name'),

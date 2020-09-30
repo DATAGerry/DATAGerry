@@ -54,7 +54,7 @@ class GroupManager(AccountManager):
         except ManagerGetError as err:
             raise ManagerIterationError(err=err)
         iteration_result: IterationResult[UserGroupModel] = IterationResult.from_aggregation(aggregation_result)
-        iteration_result.convert_to(UserGroupModel)
+        iteration_result.results = [UserGroupModel.from_data(result, rights=self.right_manager.rights) for result in iteration_result.results]
         return iteration_result
 
     def get(self, public_id: Union[PublicID, int]) -> UserGroupModel:
@@ -69,7 +69,7 @@ class GroupManager(AccountManager):
         """
         cursor_result = self._get(self.collection, filter={'public_id': public_id}, limit=1)
         for resource_result in cursor_result.limit(-1):
-            return UserGroupModel.from_data(resource_result)
+            return UserGroupModel.from_data(resource_result, rights=self.right_manager.rights)
         raise ManagerGetError(f'Group with ID: {public_id} not found!')
 
     def insert(self, group: Union[UserGroupModel, dict]) -> PublicID:
