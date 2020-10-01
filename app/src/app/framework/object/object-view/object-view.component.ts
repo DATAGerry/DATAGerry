@@ -42,16 +42,6 @@ export class ObjectViewComponent implements OnInit, OnDestroy{
       this.ngOnInit();
     });
 
-    // tslint:disable-next-line:only-arrow-functions
-    this.router.routeReuseStrategy.shouldReuseRoute = function() {
-      return false;
-    };
-
-    this.previousLoadSubscription = this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        this.router.navigated = false;
-      }
-    });
   }
 
   public ngOnInit(): void {

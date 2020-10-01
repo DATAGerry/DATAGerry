@@ -77,10 +77,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
-    // tslint:disable-next-line:only-arrow-functions
-    this.router.routeReuseStrategy.shouldReuseRoute = function() {
-      return false;
-    };
+
   }
 
   ngOnInit() {

@@ -30,9 +30,11 @@ export class NavigationComponent implements OnInit, OnDestroy {
   public readonly title: string = 'DATAGERRY';
 
   constructor(private renderer: Renderer2, public authService: AuthService, private router: Router) {
+    console.log('Navi CON');
   }
 
   public ngOnInit(): void {
+    console.log('Navi INIT');
     this.renderer.addClass(document.body, 'header-fixed');
     this.dropdownSubmenu();
   }

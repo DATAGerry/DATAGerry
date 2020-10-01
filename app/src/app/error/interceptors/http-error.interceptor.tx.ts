@@ -20,10 +20,8 @@ import { Injectable } from '@angular/core';
 import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { ErrorMessageService } from '../services/error-message.service';
 import { AuthService } from '../../auth/services/auth.service';
 import { Router } from '@angular/router';
-import { BackendHttpError } from '../models/custom.error';
 
 @Injectable()
 export class HttpErrorInterceptor implements HttpInterceptor {
@@ -55,7 +53,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     this.FORBIDDEN
   ];
 
-  constructor(private router: Router, private errorService: ErrorMessageService, private authService: AuthService) {
+  constructor(private router: Router, private authService: AuthService) {
   }
 
   public intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -63,7 +61,6 @@ export class HttpErrorInterceptor implements HttpInterceptor {
       const statusCode = error.status;
 
       if (this.INFO_ERRORS.indexOf(statusCode) !== -1) {
-        // this.errorService.add(error.error as BackendHttpError);
       } else if (this.REDIRECT_ERRORS.indexOf(statusCode) !== -1) {
         if (statusCode === this.CONNECTION_REFUSED || statusCode === this.INTERNAL_SERVER_ERROR) {
           this.router.navigate(['/connect/']);

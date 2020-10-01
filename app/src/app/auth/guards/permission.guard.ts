@@ -13,17 +13,13 @@ export class PermissionGuard implements CanActivate, CanActivateChild {
   public canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot)
     : Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     const right: string = next.data.right as string;
-    const permission: boolean = this.hasRequiredPermission(right);
-    console.log(`Active root route: ${next.url} - right: ${right}- permission: ${permission}`);
-    return permission;
+    return this.hasRequiredPermission(right);
   }
 
   public canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot)
     : Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
     const right: string = childRoute.data.right as string;
-    const permission: boolean = this.hasRequiredPermission(right);
-    console.log(`Active child route: ${childRoute.url} - right: ${right}- permission: ${permission}`);
-    return permission;
+    return this.hasRequiredPermission(right);
   }
 
   public hasRequiredPermission(right: string): boolean {
