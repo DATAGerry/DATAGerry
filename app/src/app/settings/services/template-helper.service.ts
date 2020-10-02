@@ -41,11 +41,11 @@ export class TemplateHelperService {
             let subdata;
 
             if (isNaN(field.ref_types)) {
-              await this.getObjectTemplateHelperData(field.ref_types, changedPrefix, iteration).then(data => {
+              await this.getObjectTemplateHelperData(field.ref_types, changedPrefix, iteration - 1).then(data => {
                 subdata = data;
               });
             } else if (field.ref_types.length === 1) {
-              await this.getObjectTemplateHelperData(field.ref_types[0], changedPrefix, iteration).then(data => {
+              await this.getObjectTemplateHelperData(field.ref_types[0], changedPrefix, iteration - 1).then(data => {
                 subdata = data;
               });
             }
