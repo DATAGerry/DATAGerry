@@ -47,10 +47,6 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    console.log(this.authenticationService.currentUserValue);
-    if (this.authenticationService.currentUserValue) {
-      this.router.navigate(['/']);
-    }
     this.render.addClass(document.body, 'embedded');
     this.loginForm = new FormGroup({
       username: new FormControl('', [Validators.required]),

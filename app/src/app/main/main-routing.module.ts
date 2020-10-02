@@ -18,7 +18,6 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { AuthGuard } from '../auth/guards/auth.guard';
 
 
 const routes: Routes = [
@@ -32,7 +31,6 @@ const routes: Routes = [
   },
   {
     path: 'error',
-    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Error'
     },
@@ -40,7 +38,6 @@ const routes: Routes = [
   },
   {
     path: 'search',
-    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Search'
     },
@@ -48,7 +45,6 @@ const routes: Routes = [
   },
   {
     path: 'framework',
-    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Framework'
     },
@@ -56,7 +52,6 @@ const routes: Routes = [
   },
   {
     path: 'import',
-    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Import'
     },
@@ -64,7 +59,6 @@ const routes: Routes = [
   },
   {
     path: 'export',
-    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Export'
     },
@@ -72,7 +66,6 @@ const routes: Routes = [
   },
   {
     path: 'management',
-    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'User-Management'
     },
@@ -80,7 +73,6 @@ const routes: Routes = [
   },
   {
     path: 'settings',
-    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Settings'
     },
@@ -88,7 +80,6 @@ const routes: Routes = [
   },
   {
     path: 'info',
-    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Info'
     },
@@ -96,7 +87,6 @@ const routes: Routes = [
   },
   {
     path: 'filemanager',
-    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Filemanager'
     },
@@ -104,7 +94,6 @@ const routes: Routes = [
   },
   {
     path: 'debug',
-    canActivate: [AuthGuard],
     data: {
       breadcrumb: 'Debug'
     },

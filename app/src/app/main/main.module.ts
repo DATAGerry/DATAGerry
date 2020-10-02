@@ -20,7 +20,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { MainRoutingModule } from './main-routing.module';
-import { AuthModule } from '../auth/auth.module';
 import { FileSaverModule } from 'ngx-filesaver';
 import { LayoutModule } from '../layout/layout.module';
 import { ToastModule } from '../layout/toast/toast.module';
@@ -31,11 +30,10 @@ import { ToastModule } from '../layout/toast/toast.module';
   ],
   imports: [
     CommonModule,
-    AuthModule,
+    MainRoutingModule,
     LayoutModule,
     FileSaverModule,
-    ToastModule,
-    MainRoutingModule
+    ToastModule
   ]
 })
 export class MainModule {
