@@ -24,7 +24,8 @@ import { LoginComponent } from './login.component';
 const routes: Routes = [
   {
     path: 'login',
-    component: LoginComponent
+    component: LoginComponent,
+    outlet: 'embedded'
   }
 ];
 
