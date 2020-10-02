@@ -19,26 +19,34 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
 import { LoginComponent } from './auth/login.component';
-
 const routes: Routes = [
   {
+    path: '',
+    loadChildren: () => import('./main/main.module').then(m => m.MainModule)
+  },
+  {
     path: 'connect',
+    data: {
+      view: 'embedded'
+    },
     loadChildren: () => import('./connect/connect.module').then(m => m.ConnectModule)
   },
   {
     path: 'auth',
-    outlet: 'embedded',
+    data: {
+      view: 'embedded'
+    },
     component: LoginComponent
   },
   {
-    path: '',
-    loadChildren: () => import('./main/main.module').then(m => m.MainModule)
+    path: '**',
+    redirectTo: 'error/404'
   }
 ];
 
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { enableTracing: false })],
+  imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules, enableTracing: false })],
   exports: [RouterModule]
 })
 export class AppRoutingModule {

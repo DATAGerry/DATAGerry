@@ -23,7 +23,6 @@ import { DashboardComponent } from './dashboard.component';
 const routes: Routes = [
   {
     path: '',
-    pathMatch: 'full',
     component: DashboardComponent
   },
 ];

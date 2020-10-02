@@ -18,7 +18,11 @@
 
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { AuthService } from './auth/services/auth.service';
-import { ActivationStart, Router, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, ActivationStart, Event, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { NavigationComponent } from './layout/structure/navigation/navigation.component';
+
+declare type AppView = 'full' | 'embedded';
+
 
 @Component({
   selector: 'cmdb-root',
@@ -27,21 +31,26 @@ import { ActivationStart, Router, RouterOutlet } from '@angular/router';
 })
 export class AppComponent implements OnInit {
 
-  @ViewChild(RouterOutlet, { static: false }) outlet: RouterOutlet;
+  public readonly defaultView: AppView = 'full';
+  public view: AppView;
 
-  public currentUserToken;
-
-  constructor(private router: Router, private authService: AuthService) {
+  constructor(private router: Router, private route: ActivatedRoute) {
+    this.view = this.defaultView;
   }
 
   public ngOnInit(): void {
-
-    this.currentUserToken = this.authService.currentUserTokenValue;
-    this.router.events.subscribe(e => {
-
-      if (e instanceof ActivationStart) {
-        this.outlet.deactivate();
+    this.router.events.subscribe((e: Event) => {
+      if (e instanceof NavigationEnd) {
+        this.route.url.subscribe(() => {
+          console.log(this.route.snapshot.firstChild.data);
+          if (this.route.snapshot.firstChild.data.view) {
+            this.view = this.route.snapshot.firstChild.data.view;
+          } else {
+            this.view = this.defaultView;
+          }
+        });
       }
     });
   }
+
 }

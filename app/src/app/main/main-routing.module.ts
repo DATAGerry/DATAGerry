@@ -18,16 +18,17 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { DashboardComponent } from '../dashboard/dashboard.component';
 
 
 const routes: Routes = [
   {
     path: '',
-    pathMatch: 'full',
     data: {
       breadcrumb: 'Dashboard'
     },
-    loadChildren: () => import('../dashboard/dashboard.module').then(m => m.DashboardModule)
+    component: DashboardComponent
+    // loadChildren: () => import('../dashboard/dashboard.module').then(m => m.DashboardModule)
   },
   {
     path: 'error',

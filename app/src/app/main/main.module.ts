@@ -23,14 +23,16 @@ import { MainRoutingModule } from './main-routing.module';
 import { FileSaverModule } from 'ngx-filesaver';
 import { LayoutModule } from '../layout/layout.module';
 import { ToastModule } from '../layout/toast/toast.module';
+import { DashboardModule } from '../dashboard/dashboard.module';
 
 
 @NgModule({
-  declarations: [
-  ],
+  declarations: [],
+  exports: [],
   imports: [
     CommonModule,
     MainRoutingModule,
+    DashboardModule,
     LayoutModule,
     FileSaverModule,
     ToastModule

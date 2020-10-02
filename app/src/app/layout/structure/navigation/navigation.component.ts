@@ -43,7 +43,7 @@ export class NavigationComponent implements OnInit, OnDestroy {
 
   public logout(): void {
     this.authService.logout();
-    this.router.navigate(['auth']);
+    this.router.navigate(['/auth']);
   }
 
   private dropdownSubmenu() {

@@ -63,10 +63,10 @@ export class HttpErrorInterceptor implements HttpInterceptor {
       if (this.INFO_ERRORS.indexOf(statusCode) !== -1) {
       } else if (this.REDIRECT_ERRORS.indexOf(statusCode) !== -1) {
         if (statusCode === this.CONNECTION_REFUSED || statusCode === this.INTERNAL_SERVER_ERROR) {
-          //this.router.navigate([{ outlets: { embedded : ['/connect']}}]);
+          this.router.navigate(['/connect']);
         } else if (statusCode === this.UNAUTHORIZED) {
           this.authService.logout();
-          //this.router.navigate([{ outlets: { embedded : ['/auth']}}]);
+          this.router.navigate(['/auth']);
         } else {
           this.router.navigate(['/error/', statusCode]);
         }

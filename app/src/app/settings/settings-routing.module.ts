@@ -24,21 +24,12 @@ import { PermissionGuard } from '../auth/guards/permission.guard';
 const routes: Routes = [
   {
     path: '',
-    pathMatch: 'full',
     canActivate: [PermissionGuard],
     data: {
       breadcrumb: 'Overview',
       right: 'base.system.view'
     },
     component: SettingsComponent
-  },
-  {
-    path: 'auth',
-    canActivateChild: [PermissionGuard],
-    data: {
-      breadcrumb: 'Authentication'
-    },
-    loadChildren: () => import('./auth-settings/auth-settings.module').then(m => m.AuthSettingsModule)
   },
   {
     path: 'system',
@@ -68,7 +59,14 @@ const routes: Routes = [
       breadcrumb: 'DocAPI'
     },
     loadChildren: () => import('./docapi-settings/docapi-settings.module').then(m => m.DocapiSettingsModule)
-  }
+  },{
+    path: 'auth',
+    canActivateChild: [PermissionGuard],
+    data: {
+      breadcrumb: 'Authentication'
+    },
+    loadChildren: () => import('./auth-settings/auth-settings.module').then(m => m.AuthSettingsModule)
+  },
 ];
 
 @NgModule({

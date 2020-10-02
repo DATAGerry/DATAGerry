@@ -30,6 +30,7 @@ import { HttpErrorInterceptor } from './error/interceptors/http-error.intercepto
 import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MainModule } from './main/main.module';
+import { AuthModule } from './auth/auth.module';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { MainModule } from './main/main.module';
     BrowserAnimationsModule,
     HttpClientModule,
     MainModule,
+    AuthModule,
     LayoutModule,
     ToastModule,
     AppRoutingModule
