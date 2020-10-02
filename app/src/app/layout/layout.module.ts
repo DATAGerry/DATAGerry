@@ -66,29 +66,6 @@ import { RenderModule } from '../framework/render/render.module';
 import { ObjectPreviewModalComponent } from '../framework/object/modals/object-preview-modal/object-preview-modal.component';
 import { InfoBoxComponent } from './components/info-box/info-box.component';
 
-export const LAYOUT_COMPONENT_ROUTES: Routes = [
-  {
-    path: '',
-    component: NavigationComponent,
-    outlet: 'navigation'
-  },
-  {
-    path: '',
-    component: SidebarComponent,
-    outlet: 'sidebar'
-  },
-  {
-    path: '',
-    component: BreadcrumbComponent,
-    outlet: 'breadcrumb'
-  },
-  {
-    path: '',
-    component: FooterComponent,
-    outlet: 'footer'
-  }
-];
-
 @NgModule({
   declarations: [
     LowercaseDirective,

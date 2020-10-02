@@ -24,6 +24,7 @@ const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
+    outlet: 'embedded',
     component: ConnectComponent
   }
 ];

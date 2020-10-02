@@ -28,7 +28,6 @@ import { DatePipe } from '@angular/common';
 import { ToastModule } from './layout/toast/toast.module';
 import { HttpErrorInterceptor } from './error/interceptors/http-error.interceptor.tx';
 import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
-import { AuthModule } from './auth/auth.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MainModule } from './main/main.module';
 

@@ -17,8 +17,7 @@
 */
 
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { MainComponent } from './main/main.component';
+import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
 
 const routes: Routes = [
   {
@@ -27,21 +26,20 @@ const routes: Routes = [
   },
   {
     path: 'auth',
+    outlet: 'embedded',
     loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
   },
-  {
-    path: '',
-    component: MainComponent,
-    loadChildren: () => import('./main/main.module').then(m => m.MainModule)
-  },
-  {
-    path: '**',
-    redirectTo: '/error/404'
-  }
+
 ];
 
+
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules }), RouterModule.forChild([
+    {
+      path: '',
+      loadChildren: () => import('./main/main.module').then(m => m.MainModule)
+    }
+  ])],
   exports: [RouterModule]
 })
 export class AppRoutingModule {
