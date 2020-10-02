@@ -16,12 +16,32 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { AuthService } from './auth/services/auth.service';
+import { ActivationStart, Router, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'cmdb-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+
+  @ViewChild(RouterOutlet, { static: false }) outlet: RouterOutlet;
+
+  public currentUserToken;
+
+  constructor(private router: Router, private authService: AuthService) {
+  }
+
+  public ngOnInit(): void {
+
+    this.currentUserToken = this.authService.currentUserTokenValue;
+    this.router.events.subscribe(e => {
+
+      if (e instanceof ActivationStart) {
+        this.outlet.deactivate();
+      }
+    });
+  }
 }
