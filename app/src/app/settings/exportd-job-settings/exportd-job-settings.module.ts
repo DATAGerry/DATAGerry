@@ -41,7 +41,7 @@ import {
 } from './exportd-job-settings-builder/exportd-job-destinations-step/exportd-job-destinations-step.component';
 import {
   ExportdJobVariablesStepComponent,
-  FilterPipe
+  FilterPipe, HostDirective
 } from './exportd-job-settings-builder/exportd-job-variables-step/exportd-job-variables-step.component';
 import {
   ExportdJobSchedulingStepComponent
@@ -73,6 +73,7 @@ import { AuthModule } from '../../auth/auth.module';
     ExportdJobLogsComponent,
     DeleteLogJobModalComponent,
     FilterPipe,
+    HostDirective,
     ExportdJobSettingsCopyComponent],
   imports: [
     CommonModule,

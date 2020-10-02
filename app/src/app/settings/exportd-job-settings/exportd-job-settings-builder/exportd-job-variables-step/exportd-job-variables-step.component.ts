@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnInit, Pipe, PipeTransform} from '@angular/core';
+import {Component, Directive, Input, OnInit, Pipe, PipeTransform, HostListener} from '@angular/core';
 import { CmdbMode } from '../../../../framework/modes.enum';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbType } from '../../../../framework/models/cmdb-type';
@@ -24,6 +24,17 @@ import { TypeService } from '../../../../framework/services/type.service';
 import { ExportdJobDestinationsStepComponent } from '../exportd-job-destinations-step/exportd-job-destinations-step.component';
 import { ExternalSystemService } from '../../../services/external_system.service';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
+import {TemplateHelperService} from '../../../services/template-helper.service';
+
+@Directive(
+  {
+    selector: '[cmdbTest]'
+  })
+export class HostDirective {
+  @HostListener('mouseover', ['$event']) onClick(event: Event) {
+    console.log(event);
+  }
+}
 
 @Pipe({
   name: 'filterUnique',
@@ -71,7 +82,7 @@ export class ExportdJobVariablesStepComponent implements OnInit {
 
         // Create templates
         i = 0;
-        while ( i < forArray.controls.length) {
+        while (i < forArray.controls.length) {
           for (const item of data.variables[i].templates) {
             const control = forArray.controls[i].get('templates') as FormArray;
             control.push(this.createTemplate());
@@ -91,10 +102,13 @@ export class ExportdJobVariablesStepComponent implements OnInit {
   public variableForm: FormGroup;
   public variableHelper: any[];
   public dragVariableName: string = '';
+  public templateHelperData: any = {};
   readonly VARIABLES = 'variables';
 
+
   constructor(private formBuilder: FormBuilder, private typeService: TypeService,
-              private externalService: ExternalSystemService) {}
+              private externalService: ExternalSystemService, private templateHelperService: TemplateHelperService) {
+  }
 
   @Input() set destinationStep(value: ExportdJobDestinationsStepComponent) {
     this.destinationForm = value;
@@ -148,6 +162,9 @@ export class ExportdJobVariablesStepComponent implements OnInit {
   public delTemplate(index, event): void {
     const control = this.getVariableAsFormArray().at(event).get('templates') as FormArray;
     control.removeAt(index);
+    if (this.templateHelperData[index]) {
+      delete this.templateHelperData[index];
+    }
   }
 
   public getVariableHelp(value: string) {
@@ -164,5 +181,56 @@ export class ExportdJobVariablesStepComponent implements OnInit {
 
   public onDndStart(name: string) {
     this.dragVariableName = name;
+  }
+
+  public getCmdbDataMenuItems(editor) {
+    const items = [];
+    items.push({
+      type: 'nestedmenuitem',
+      text: 'Object Template Data',
+      icon: 'code-sample',
+      getSubmenuItems: () => {
+        return this.getObjectDataMenuItems(editor);
+      }
+    });
+    return items;
+  }
+
+  public getObjectDataMenuItems(editor, templateHelperData = this.templateHelperData) {
+    const items = [];
+    for (const item of templateHelperData) {
+      if (item.subdata) {
+        items.push({
+          type: 'nestedmenuitem',
+          text: item.label,
+          icon: 'chevron-right',
+          getSubmenuItems: () => {
+            return this.getObjectDataMenuItems(editor, item.subdata);
+          }
+        });
+      } else {
+        let icon = 'sourcecode';
+        if (item.label === 'Public ID') {
+          icon = 'character-count';
+        }
+        items.push({
+          type: 'menuitem',
+          text: item.label,
+          icon,
+          onAction() {
+            editor.insertContent(item.templatedata);
+          }
+        });
+      }
+    }
+  }
+
+  public onOptionSelected(index, value) {
+    console.log(index + ' ' + value);
+    this.templateHelperService.getObjectTemplateHelperData(value).then(helperData => {
+      this.templateHelperData[index] = helperData;
+      console.log(helperData);
+    });
+    console.log(this.templateHelperData[index]);
   }
 }

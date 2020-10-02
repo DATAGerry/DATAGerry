@@ -18,7 +18,6 @@
           </div>
 
           <ng-container *ngFor="let variable of variableForm['controls'].variables['controls']; let s=index">
-
             <div class="space-bottom card" [dndDraggable]="{name: variable.get('name').value, oldIndex: s}"
                  dndEffectAllowed="move"
                  (dndStart)="onDndStart(variable.get('name').value)"
@@ -60,13 +59,25 @@
 
                   <div class="form-group">
                     <label for="variableDefault{{s}}">Default Value <span class="required">*</span></label>
-                    <input id="variableDefault{{s}}" class="form-control"
-                           [ngClass]="{ 'is-valid': variable.get('default').valid
+                      <div class="input-group">
+                        <input id="variableDefault{{s}}" class="form-control"
+                               [ngClass]="{ 'is-valid': variable.get('default').valid
                          && (variable.get('default').dirty || variable.get('default').touched),
                          'is-invalid': variable.get('default').invalid
                          && (variable.get('default').dirty || variable.get('default').touched)}"
-                           formControlName="default"
-                           required>
+                               formControlName="default"
+                               required>
+                        <span class="input-group-btn">
+                      <button class="btn btn-primary dropdown-toggle" type="button">Template Variables</button>
+                            <div class="dropdown-menu">
+                              <a class="dropdown-item" href="#">Action</a>
+                              <a class="dropdown-item" href="#">Another action</a>
+                              <a class="dropdown-item" href="#">Something else here</a>
+                              <div class="dropdown-divider"></div>
+                              <a class="dropdown-item" href="#">Separated link</a>
+                            </div>
+                    </span>
+                      </div>
                   </div>
 
                   <ng-container formArrayName="templates">
@@ -89,6 +100,7 @@
                                    && (templ.get('type').dirty
                                    || templ.get('type').touched), 'is-invalid': templ.get('type').invalid
                                    && (templ.get('type').dirty || templ.get('type').touched)}"
+                                  (ngModelChange)="onOptionSelected(iy, $event)"
                                   required>
                             <option *ngFor="let order of typeList; let i = index" [value]="order.public_id">
                               {{order.label}} #{{order.public_id}}
@@ -96,12 +108,37 @@
                           </select>
                         </td>
                         <td>
+                          <div class="input-group">
                           <input type="text" class="form-control" formControlName="template"
                                  [ngClass]="{ 'is-valid': templ.get('template').valid
                                    && (templ.get('template').dirty
                                    || templ.get('template').touched), 'is-invalid': templ.get('template').invalid
                                    && (templ.get('template').dirty || templ.get('template').touched)}"
                                  required>
+
+                            <span class="input-group-btn">
+                              <div class="btn-group">
+                                <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" type="button">Template variables</button>
+                                    <ng-template #recursiveList let-templateHelperData>
+                                      <ul class="dropdown-menu">
+                                        <div *ngFor="let item of templateHelperData">
+                                          <div *ngIf="item.subdata?.length > 0; else button">
+                                            <li class="btn dropdown-submenu">
+                                              <a href="#" class="dropdown-toggle" cmdbTest></a>{{item.label}}
+                                              <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item.subdata }"></ng-container>
+                                            </li>
+                                          </div>
+                                          <ng-template #button>
+                                            <li class="btn">{{item.label}}</li>
+                                          </ng-template>
+                                        </div>
+                                      </ul>
+                                    </ng-template>
+                                   <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: templateHelperData[iy] }"></ng-container>
+                                 </div>
+                          </span>
+                            <button class="dropdown-toggle" data-toggle="dropdown">Menu 1 <b class="caret"></b></button>
+                          </div>
                         </td>
                         <td>
                           <button type="button" class="btn btn-outline-primary" (click)="delTemplate(iy,s)">
