@@ -17,7 +17,7 @@
 */
 
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { CmdbMode } from '../../modes.enum';
 import { RenderResult } from '../../models/cmdb-render';
@@ -41,6 +41,10 @@ export class ObjectViewComponent implements OnInit, OnDestroy{
       this.objectID = params.publicID;
       this.ngOnInit();
     });
+
+    this.router.routeReuseStrategy.shouldReuseRoute = (future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot) => {
+      return false;
+    };
 
   }
 
