@@ -20,26 +20,16 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { SettingsComponent } from './settings.component';
 import { PermissionGuard } from '../auth/guards/permission.guard';
-import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
 
 const routes: Routes = [
   {
     path: '',
-    pathMatch: 'full',
     canActivate: [PermissionGuard],
     data: {
       breadcrumb: 'Overview',
       right: 'base.system.view'
     },
     component: SettingsComponent
-  },
-  {
-    path: 'auth',
-    canActivateChild: [PermissionGuard],
-    data: {
-      breadcrumb: 'Authentication'
-    },
-    loadChildren: () => import('./auth-settings/auth-settings.module').then(m => m.AuthSettingsModule)
   },
   {
     path: 'system',
@@ -69,11 +59,18 @@ const routes: Routes = [
       breadcrumb: 'DocAPI'
     },
     loadChildren: () => import('./docapi-settings/docapi-settings.module').then(m => m.DocapiSettingsModule)
-  }
+  },{
+    path: 'auth',
+    canActivateChild: [PermissionGuard],
+    data: {
+      breadcrumb: 'Authentication'
+    },
+    loadChildren: () => import('./auth-settings/auth-settings.module').then(m => m.AuthSettingsModule)
+  },
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
+  imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
 export class SettingsRoutingModule { }

@@ -19,13 +19,8 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { ImportComponent } from './import.component';
-import { NavigationComponent } from '../layout/structure/navigation/navigation.component';
-import { SidebarComponent } from '../layout/structure/sidebar/sidebar.component';
-import { BreadcrumbComponent } from '../layout/structure/breadcrumb/breadcrumb.component';
 import { ImportObjectsComponent } from './import-objects/import-objects.component';
-import { FooterComponent } from '../layout/structure/footer/footer.component';
 import { ImportTypesComponent } from './import-types/import-types.component';
-import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
 import { PermissionGuard } from '../auth/guards/permission.guard';
 
 const routes: Routes = [
@@ -59,7 +54,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
+  imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
 export class ImportRoutingModule {
