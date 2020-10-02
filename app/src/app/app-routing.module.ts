@@ -26,7 +26,6 @@ const routes: Routes = [
   },
   {
     path: 'auth',
-    outlet: 'embedded',
     loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
   },
 

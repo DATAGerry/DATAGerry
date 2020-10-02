@@ -1,4 +1,4 @@
-<div id="app-wrapper">
+<div id="app-wrapper" *ngIf="!embedded.isActivated">
   <cmdb-navigation></cmdb-navigation>
   <cmdb-sidebar></cmdb-sidebar>
   <main id="main">
@@ -6,10 +6,11 @@
     <div id="content">
       <div class="container-fluid">
         <router-outlet></router-outlet>
+
       </div>
     </div>
     <cmdb-footer></cmdb-footer>
     <cmdb-toast-container></cmdb-toast-container>
   </main>
-  <router-outlet name="embedded"></router-outlet>
 </div>
+<router-outlet name="embedded" #embedded="outlet"></router-outlet>
