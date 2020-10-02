@@ -21,7 +21,6 @@ import { filter } from 'rxjs/operators';
 import { BreadcrumbItem } from './breadcrumb.model';
 import { BreadcrumbService } from './breadcrumb.service';
 import { ActivatedRoute, NavigationEnd, PRIMARY_OUTLET, Router } from '@angular/router';
-import {SidebarService} from "../../services/sidebar.service";
 
 export const COOCKIENAME = 'onlyActiveObjCookie';
 
@@ -41,8 +40,7 @@ export class BreadcrumbComponent implements OnInit {
 
   public isChecked: boolean;
 
-  public constructor(public breadcrumbService: BreadcrumbService, private activatedRoute: ActivatedRoute,
-                     private router: Router, private sidebarService: SidebarService) {
+  public constructor(public breadcrumbService: BreadcrumbService, private activatedRoute: ActivatedRoute, private router: Router) {
 
   }
 
@@ -58,7 +56,7 @@ export class BreadcrumbComponent implements OnInit {
 
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd
-      )).subscribe(event => {
+      )).subscribe(() => {
       this.breadcrumbService.store(this.getBreadcrumbs(this.activatedRoute.root));
     });
     this.isChecked = this.readCookies(COOCKIENAME) === 'true';
@@ -98,8 +96,7 @@ export class BreadcrumbComponent implements OnInit {
 
   public checkState(event: any) {
     this.writeCookies(COOCKIENAME, event.currentTarget.checked.toString());
-    this.router.navigateByUrl(this.router.url, { skipLocationChange: false });
-    this.sidebarService.reload();
+    window.location.reload();
   }
 
   readCookies(name: string) {

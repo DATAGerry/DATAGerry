@@ -48,7 +48,6 @@ import { ChartsComponent } from './components/charts/charts.component';
 import { ToastModule } from './toast/toast.module';
 import { AuthModule } from '../auth/auth.module';
 import { NgxSpinnerComponent, NgxSpinnerModule } from 'ngx-spinner';
-import { LoadingScreenComponent } from './structure/loading-screen/loading-screen.component';
 import { SearchBarModule } from '../search/search-bar/search-bar.module';
 import { IntroComponent } from './intro/intro.component';
 import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-step-intro.component';
@@ -64,36 +63,8 @@ import { TypeFilterPipe } from './pipes/typeFilter.pipe';
 import { AddAttachmentsModalComponent } from './helpers/modals/add-attachments-modal/add-attachments-modal.component';
 import { GeneralModalComponent } from './helpers/modals/general-modal/general-modal.component';
 import { RenderModule } from '../framework/render/render.module';
-import { ObjectPreviewModalComponent} from '../framework/object/modals/object-preview-modal/object-preview-modal.component';
+import { ObjectPreviewModalComponent } from '../framework/object/modals/object-preview-modal/object-preview-modal.component';
 import { InfoBoxComponent } from './components/info-box/info-box.component';
-
-export const LAYOUT_COMPONENT_ROUTES: Routes = [
-  {
-    path: '',
-    component: NavigationComponent,
-    outlet: 'navigation'
-  },
-  {
-    path: '',
-    component: SidebarComponent,
-    outlet: 'sidebar'
-  },
-  {
-    path: '',
-    component: BreadcrumbComponent,
-    outlet: 'breadcrumb'
-  },
-  {
-    path: '',
-    component: LoadingScreenComponent,
-    outlet: 'loading-screen'
-  },
-  {
-    path: '',
-    component: FooterComponent,
-    outlet: 'footer'
-  }
-];
 
 @NgModule({
   declarations: [
@@ -113,7 +84,6 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     UserImageComponent,
     UserDisplayComponent,
     ChartsComponent,
-    LoadingScreenComponent,
     StepByStepIntroComponent,
     JwPaginationComponent,
     NameDirective,

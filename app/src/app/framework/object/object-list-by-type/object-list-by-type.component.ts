@@ -32,7 +32,7 @@ import { Subject } from 'rxjs';
 import { ObjectService } from '../../services/object.service';
 import { RenderResult } from '../../models/cmdb-render';
 import { DatePipe } from '@angular/common';
-import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { FileService } from '../../../export/export.service';
 import { FileSaverService } from 'ngx-filesaver';
 import { DataTableFilter, DataTablesResult } from '../../models/cmdb-datatable';
@@ -58,7 +58,6 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   public objects: DataTablesResult;
 
   private modalRef: NgbModalRef;
-  private readonly previousLoadSubscription: any;
 
   // Header
   public pageTitle: string = 'List';
@@ -78,16 +77,10 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
-    // tslint:disable-next-line:only-arrow-functions
-    this.router.routeReuseStrategy.shouldReuseRoute = function() {
+
+    this.router.routeReuseStrategy.shouldReuseRoute = (future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot) => {
       return false;
     };
-
-    this.previousLoadSubscription = this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        this.router.navigated = false;
-      }
-    });
   }
 
   ngOnInit() {
@@ -127,7 +120,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
             that.selectedObjects.length = 0;
             that.objects = resp;
             // Render columns afterwards
-            this.rerender(this.dtOptions);
+            this.rerender(this.dtOptions).then();
 
             callback({
               data: that.objects.data,
@@ -140,7 +133,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
             that.selectedObjects.length = 0;
             that.objects = resp;
             // Render columns afterwards
-            this.rerender(this.dtOptions);
+            this.rerender(this.dtOptions).then();
 
             callback({
               data: that.objects.data,
@@ -175,8 +168,8 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       },
       rowCallback: (row: Node, data: RenderResult) => {
         const self = this;
-        $('td:first-child', row).unbind('click');
-        $('td:first-child', row).bind('click', () => {
+        $('td:first-child', row).off('click');
+        $('td:first-child', row).on('click', () => {
           self.updateDisplay(data.object_information.object_id.toString());
         });
         return row;
@@ -244,10 +237,6 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
 
     if (this.modalRef) {
       this.modalRef.close();
-    }
-
-    if (this.previousLoadSubscription) {
-      this.previousLoadSubscription.unsubscribe();
     }
   }
 
@@ -346,7 +335,6 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
 
   private buildAdvancedDtOptions() {
     const summaries = this.objects.data[0].summaries;
-    const that = this;
     if (summaries != null) {
       const visTargets: any[] = [0, 1, 2, -3, -2, -1];
       for (const summary of summaries) {
@@ -397,7 +385,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
 
     modalComponent.result.then((result) => {
       if (result) {
-        this.objectService.deleteObject(publicID).subscribe(data => {
+        this.objectService.deleteObject(publicID).subscribe(() => {
           this.ajaxReload();
         });
       }
@@ -422,7 +410,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       modalComponent.result.then((result) => {
         if (result) {
           if (this.selectedObjects.length > 0) {
-            this.objectService.deleteManyObjects(this.selectedObjects.toString()).subscribe(data => {
+            this.objectService.deleteManyObjects(this.selectedObjects.toString()).subscribe(() => {
               this.ajaxReload();
             });
           }
@@ -436,7 +424,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       this.fileService.getObjectFileByType(this.objects.data[0].type_information.type_id, exportType.id)
         .subscribe(res => this.downLoadFile(res, exportType));
     } else {
-      this.fileService.callExportRoute('/file/object/' + this.selectedObjects.toString(), exportType.id)
+      this.fileService.callExportRoute(this.selectedObjects.toString(), exportType.id)
         .subscribe(res => this.downLoadFile(res, exportType));
     }
   }

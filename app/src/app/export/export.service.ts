@@ -38,8 +38,12 @@ export class FileService {
     );
   }
 
-  public callExportRoute(route: string, exportType: string) {
-    return this.api.callGet<any>(route + '/' + exportType, httpFileOptions);
+  public callExportRoute(objectIDs: string, exportType: string, zipping: boolean = false) {
+    (httpFileOptions.params as any).ids = objectIDs;
+    (httpFileOptions.params as any).classname = exportType;
+    (httpFileOptions.params as any).zip = false;
+
+    return this.api.callGet<any>(this.servicePrefix + '/object/', httpFileOptions);
   }
 
   public getObjectFileByType(typeID: number, exportType: string) {

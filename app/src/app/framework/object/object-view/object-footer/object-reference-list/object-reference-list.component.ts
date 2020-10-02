@@ -16,11 +16,14 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, ViewChild } from '@angular/core';
+import { Component, Input, OnDestroy, Renderer2, ViewChild} from '@angular/core';
 import { Subject } from 'rxjs';
 import { RenderResult } from '../../../../models/cmdb-render';
 import { ObjectService } from '../../../../services/object.service';
 import { DataTableDirective } from 'angular-datatables';
+import { FileService } from '../../../../../export/export.service';
+import {DatePipe} from '@angular/common';
+import {FileSaverService} from 'ngx-filesaver';
 
 @Component({
   selector: 'cmdb-object-reference-list',
@@ -37,6 +40,7 @@ export class ObjectReferenceListComponent implements OnDestroy {
   public dtTrigger: Subject<any> = new Subject();
 
   public referenceList: RenderResult[] = [];
+  public formatList: any[] = [];
 
   @Input()
   set publicID(publicID: number) {
@@ -50,7 +54,11 @@ export class ObjectReferenceListComponent implements OnDestroy {
     return this.id;
   }
 
-  public constructor(private objectService: ObjectService) {
+  public constructor(private objectService: ObjectService, private datePipe: DatePipe,
+                     private fileSaverService: FileSaverService, private fileService: FileService) {
+    this.fileService.callFileFormatRoute().subscribe(data => {
+      this.formatList = data;
+    });
   }
 
   private loadObjectReferences() {
@@ -75,6 +83,31 @@ export class ObjectReferenceListComponent implements OnDestroy {
       });
     }
 
+  }
+
+  /**
+   * Exports the referenceList as zip
+   *
+   * @param exportType the filetype to be zipped
+   */
+  public exportingFiles(exportType: any) {
+    if (this.referenceList.length !== 0) {
+      const objectIDs: number[] = [];
+      for (const el of this.referenceList) {
+        objectIDs.push(el.object_information.object_id);
+      }
+      this.fileService.callExportRoute(objectIDs.toString(), exportType.id, true)
+        .subscribe(res => this.downLoadFile(res));
+    }
+  }
+
+  /**
+   * Downloads file
+   * @param data the file data to be downloaded
+   */
+  public downLoadFile(data: any) {
+    const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
+    this.fileSaverService.save(data.body, timestamp + '.' + 'zip');
   }
 
   public ngOnDestroy(): void {

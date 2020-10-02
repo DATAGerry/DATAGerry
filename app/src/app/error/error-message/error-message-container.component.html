@@ -1,7 +1,0 @@
-<cmdb-error-message *ngFor="let errorMessage of errorMessages" [class]="errorMessage.classname"
-                    [error]="errorMessage" (hideOut)="onHide(errorMessage)">
-  <strong *ngIf="!!errorMessage?.message"><p class="text-center">{{errorMessage?.message}}</p>
-    <hr/>
-  </strong>
-  {{errorMessage?.description}}
-</cmdb-error-message>

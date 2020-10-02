@@ -21,7 +21,6 @@ import { Routes, RouterModule } from '@angular/router';
 import { AboutComponent } from './components/about/about.component';
 import { ContactComponent } from './components/contact/contact.component';
 import { TeamComponent } from './components/team/team.component';
-import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
 import { LicenseComponent } from './components/license/license.component';
 import { PermissionGuard } from '../auth/guards/permission.guard';
 import { InfoComponent } from './info.component';
@@ -68,7 +67,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
+  imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
 export class InfoRoutingModule { }

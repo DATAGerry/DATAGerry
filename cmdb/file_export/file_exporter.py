@@ -35,32 +35,39 @@ object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
 
 class FileExporter:
 
-    @staticmethod
-    def get_filetypes():
-        filetypes = ["CsvExportType", "JsonExportType", "XlsxExportType", "XmlExportType"]
-        return filetypes
-
-    def __init__(self, object_type, export_type: ExportType, public_id: str, **kwargs):
+    def __init__(self, object_type, export_type: ExportType, public_id: str, *args):
         """init of FileExporter
 
         Args:
             object_type: type of object e.g. CmdbObject or CmdbObject by TypeModel ID
             export_type: the ExportType object
             public_id: public id which implements the object / type
-            **kwargs: additional data
+            *args: additional data
         """
         self.object_type = object_type
         self.export_type = export_type
         self.public_id = public_id
+        self.zip_class = False if len(args) == 0 else args[0]
 
         # object_list: list of objects e.g CmdbObject or TypeModel
         self.object_list = []
         self.response = None
 
+    @staticmethod
+    def get_type_list():
+        """Get list of supported ExportTypes
+
+        Returns:
+            list of ExportType
+
+        """
+        return ["CsvExportType", "JsonExportType", "XlsxExportType", "XmlExportType"]
+
     def get_object_type(self):
         """
 
-        Returns: type of object e.g. CmdbObject, TypeModel or CmdbObject by TypeModel ID (object, type, object/type)
+        Returns:
+            type of object e.g. CmdbObject, TypeModel or CmdbObject by TypeModel ID (object, type, object/type)
 
         """
         return self.object_type
@@ -68,7 +75,8 @@ class FileExporter:
     def get_object_list(self):
         """
 
-        Returns: list of objects e.g CmdbObject or TypeModel
+        Returns:
+            list of objects e.g CmdbObject or TypeModel
 
         """
         file_type = self.get_object_type()
@@ -81,7 +89,8 @@ class FileExporter:
     def get_response(self):
         """
 
-        Returns: Response element
+        Returns:
+            Response element
 
         """
         return self.response
@@ -89,13 +98,14 @@ class FileExporter:
     def set_response(self, value):
         self.response = value
 
-    #
-    #   Get values from the database
-    #
-
     def get_object_by_id(self):
+        """ Get values from the database
+
+            Returns:
+                Object
+        """
         try:
-            query = self._build_query({'public_id': self.public_id}, q_operator='$or')
+            query = self._build_query({'public_id': self.public_id})
             return object_manager.get_objects_by(sort="public_id", **query)
         except ObjectNotFoundError as e:
             return abort(400, e)
@@ -104,7 +114,7 @@ class FileExporter:
 
     def get_all_objects_by_type_id(self):
         try:
-            return object_manager.get_objects_by_type(self.public_id)
+            return object_manager.get_objects_by_type(int(self.public_id))
         except ObjectNotFoundError as e:
             return abort(400, e)
         except CMDBError:
@@ -112,27 +122,33 @@ class FileExporter:
 
     def get_type_by_id(self):
         try:
-            query = self._build_query({'public_id': self.public_id}, q_operator='$or')
+            query = self._build_query({'public_id': self.public_id})
             return object_manager.get_types_by(sort="public_id", **query)
         except TypeNotFoundError as e:
             return abort(400, e)
         except CMDBError:
             return abort(404)
 
-    #
-    # Advanced methods
-    #
+    @staticmethod
+    def _build_query(parameters, operator='$or') -> dict:
+        """ Create a MongoDB query
 
-    def _build_query(self, args, q_operator='$and'):
+        Args:
+            parameters: dictionary of properties
+            operator: kind of linking of query properties
+
+        Returns:
+            dict
+        """
         query_list = []
         try:
-            for key, value in args.items():
+            for key, value in parameters.items():
                 for v in value.split(","):
                     try:
                         query_list.append({key: int(v)})
                     except (ValueError, TypeError):
                         return abort(400)
-            return {q_operator: query_list}
+            return {operator: query_list}
         except CMDBError as e:
             abort(400, e)
 
@@ -144,8 +160,12 @@ class FileExporter:
         import time
 
         timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
+        if self.zip_class:
+            export = self.export_type.export(self.get_object_list(), self.zip_class)
+        else:
+            export = self.export_type.export(self.get_object_list())
         return Response(
-            self.export_type.export(self.get_object_list()),
+            export,
             mimetype="text/" + self.export_type.__class__.FILE_EXTENSION,
             headers={
                 "Content-Disposition":

@@ -20,11 +20,7 @@ import cmdb
 from cmdb.interface.cmdb_app import BaseCmdbApp
 from cmdb.interface.config import app_config
 from cmdb.interface.docs.doc_routes import doc_pages
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+from cmdb.utils.error import CMDBError
 
 LOGGER = logging.getLogger(__name__)
 
@@ -43,13 +39,13 @@ def create_docs_server(event_queue):
     app = BaseCmdbApp(__name__, app_database)
 
     if cmdb.__MODE__ == 'DEBUG':
-        app.config.from_object(app_config['rest_development'])
-        LOGGER.info('Docs starting with config mode {}'.format(app.config.get("ENV")))
-    elif cmdb.__MODE__ == 'TESTING':
-        app.config.from_object(app_config['testing'])
+        config = app_config['development']
+        config.APPLICATION_ROOT = '/docs/'
+        app.config.from_object(config)
     else:
-        app.config.from_object(app_config['rest'])
-        LOGGER.info('Docs starting with config mode {}'.format(app.config.get("ENV")))
+        config = app_config['production']
+        config.APPLICATION_ROOT = '/docs/'
+        app.config.from_object(config)
 
     app.register_blueprint(doc_pages, url_prefix="/")
 
