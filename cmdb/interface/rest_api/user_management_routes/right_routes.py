@@ -17,6 +17,7 @@
 
 from flask import request, abort
 
+from cmdb.framework.utils import Model
 from cmdb.manager.errors import ManagerGetError, ManagerIterationError
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
@@ -63,7 +64,7 @@ def get_rights(params: CollectionParameters):
                 filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
             rights = [BaseRight.to_dict(type) for type in iteration_result.results]
             api_response = GetMultiResponse(rights, total=iteration_result.total, params=params,
-                                            url=request.url, model='Right', body=request.method == 'HEAD')
+                                            url=request.url, model=Model('Right'), body=request.method == 'HEAD')
             return api_response.make_response()
     except ManagerIterationError as err:
         return abort(400, err.message)
@@ -95,7 +96,7 @@ def get_right(name: str):
         right = right_manager.get(name)
     except ManagerGetError as err:
         return abort(404, err.message)
-    api_response = GetSingleResponse(BaseRight.to_dict(right), url=request.url, model='Right',
+    api_response = GetSingleResponse(BaseRight.to_dict(right), url=request.url, model=Model('Right'),
                                      body=request.method == 'HEAD')
     return api_response.make_response()
 
@@ -113,32 +114,6 @@ def get_levels():
         Calling the route over HTTP HEAD method will result in an empty body.
     """
 
-    api_response = GetSingleResponse(_nameToLevel, url=request.url, model='Security-Level',
+    api_response = GetSingleResponse(_nameToLevel, url=request.url, model=Model('Security-Level'),
                                      body=request.method == 'HEAD')
-    return api_response.make_response()
-
-
-@rights_blueprint.route('/levels/<string:name>', methods=['GET', 'HEAD'])
-@rights_blueprint.protect(auth=False, right='None')
-def get_level(name: str):
-    """
-    HTTP `GET`/`HEAD` route for a single level resource.
-
-    Args:
-        name (str): Name of the level.
-
-    Raises:
-        ManagerGetError: When the selected level does not exists.
-
-    Notes:
-        Calling the route over HTTP HEAD method will result in an empty body.
-
-    Returns:
-        GetSingleResponse: Which includes the json data of the level enum.
-    """
-    level = _nameToLevel.get(name)
-    if not level:
-        raise ManagerGetError(f'No level with the name: {name}')
-
-    api_response = GetSingleResponse(level, url=request.url, model='Security-Level', body=request.method == 'HEAD')
     return api_response.make_response()
