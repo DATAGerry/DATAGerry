@@ -44,7 +44,7 @@ class UserManager(CmdbManagerBase):
         user_list = []
         for founded_user in self._get_many(collection=UserModel.COLLECTION):
             try:
-                user_list.append(UserModel(**founded_user))
+                user_list.append(UserModel.from_data(founded_user))
             except CMDBError:
                 continue
         return user_list
@@ -55,7 +55,7 @@ class UserManager(CmdbManagerBase):
         users_in_database = self._get_many(collection=UserModel.COLLECTION, sort=sort, **requirements)
         for user in users_in_database:
             try:
-                user_ = UserModel(**user)
+                user_ = UserModel.from_data(user)
             except CMDBError as err:
                 LOGGER.error(f'[UserManager] Error while inserting database user into return list: {err}')
                 continue
@@ -65,7 +65,7 @@ class UserManager(CmdbManagerBase):
     def get_user_by(self, **requirements) -> UserModel:
         """Get user by requirement"""
         try:
-            return UserModel(**self._get_by(collection=UserModel.COLLECTION, **requirements))
+            return UserModel.from_data(self._get_by(collection=UserModel.COLLECTION, **requirements))
         except NoDocumentFound:
             raise UserManagerGetError(f'UserModel not found')
 

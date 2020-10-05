@@ -19,11 +19,10 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
 import { LoginComponent } from './auth/login.component';
+import { AuthGuard } from './auth/guards/auth.guard';
+
 const routes: Routes = [
-  {
-    path: '',
-    loadChildren: () => import('./main/main.module').then(m => m.MainModule)
-  },
+
   {
     path: 'connect',
     data: {
@@ -37,6 +36,11 @@ const routes: Routes = [
       view: 'embedded'
     },
     component: LoginComponent
+  },
+  {
+    path: '',
+    canActivate: [AuthGuard],
+    loadChildren: () => import('./main/main.module').then(m => m.MainModule)
   },
   {
     path: '**',

@@ -24,6 +24,7 @@ from werkzeug.http import wsgi_to_bytes
 from cmdb.manager.errors import ManagerGetError
 from cmdb.security.auth import AuthModule
 from cmdb.security.token.generator import TokenGenerator
+from cmdb.user_management import UserGroupModel
 from cmdb.user_management.rights import __all__ as rights
 from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
@@ -148,7 +149,6 @@ def right_required(required_right: str, excepted: dict = None):
     """
 
     with current_app.app_context():
-        user_manager: UserManager = current_app.user_manager
         group_manager = GroupManager(current_app.database_manager, RightManager(rights))
 
     def _page_right(func):
@@ -158,32 +158,12 @@ def right_required(required_right: str, excepted: dict = None):
                 current_user: UserModel = kwargs['request_user']
             except KeyError:
                 return abort(400, 'No request user was provided')
-
-            if excepted:
-                for exe_key, exe_value in excepted.items():
-
-                    LOGGER.debug(f'Excepted parameter: {exe_key} | {exe_value}')
-                    # Check if parameter exits
-                    try:
-                        route_parameter = kwargs[exe_value]
-                        LOGGER.debug(f'Parameter exits {route_parameter}')
-                    except KeyError:
-                        continue
-                    # Check if user attr exists
-                    if not hasattr(current_user, exe_key):
-                        continue
-
-                    # Check if parameter test passed
-                    if current_user.__dict__.get(exe_key) == route_parameter:
-                        LOGGER.debug(f'Exception parameter passed test at {exe_key} | {exe_value}!')
-                        return func(*args, **kwargs)
-
             try:
-                group = group_manager.get(current_user.group_id)
+                group: UserGroupModel = group_manager.get(current_user.group_id)
                 has_right = group.has_right(required_right)
             except ManagerGetError:
                 return abort(404, 'Group or right not exists')
-            if not has_right:
+            if not has_right and not group.has_extended_right(required_right):
                 return abort(403, 'Request user does not have the right for this action')
             return func(*args, **kwargs)
 
