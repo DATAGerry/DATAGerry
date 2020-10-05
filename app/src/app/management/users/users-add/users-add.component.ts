@@ -27,6 +27,7 @@ import { ToastService } from '../../../layout/toast/toast.service';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { map, delay } from 'rxjs/operators';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
 
 
 @Component({
@@ -79,8 +80,8 @@ export class UsersAddComponent implements OnInit, OnDestroy {
         this.authProviders.push(provider.class_name);
       }
     });
-    this.groupListSubscription = this.groupService.getGroups().subscribe((groupList: Group[]) => {
-      this.groupList = groupList;
+    this.groupListSubscription = this.groupService.getGroups().subscribe((apiGroupResponse: APIGetMultiResponse<Group>) => {
+      this.groupList = apiGroupResponse.results as Array<Group>;
     });
   }
 

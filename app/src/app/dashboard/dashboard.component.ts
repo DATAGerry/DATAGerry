@@ -27,6 +27,7 @@ import { GroupService } from '../management/services/group.service';
 import { Group } from '../management/models/group';
 import { UserService } from '../management/services/user.service';
 import { User } from '../management/models/user';
+import { APIGetMultiResponse } from '../services/models/api-response';
 
 @Component({
   selector: 'cmdb-dashboard',
@@ -121,8 +122,8 @@ export class DashboardComponent implements OnInit {
 
   private generateGroupChar() {
     let values;
-    this.groupService.getGroups().subscribe((data: Group[]) => {
-        values = data;
+    this.groupService.getGroups().subscribe((data: APIGetMultiResponse<Group>) => {
+        values = data.results;
       }, (error) => {
       },
       () => {

@@ -26,6 +26,7 @@ import { ToastService } from '../../../layout/toast/toast.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { User } from '../../models/user';
 import { Observable, Subscription } from 'rxjs';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
 
 
 @Component({
@@ -85,8 +86,8 @@ export class UsersEditComponent implements OnInit, OnDestroy {
         this.authProviders.push(provider.class_name);
       }
     });
-    this.groupService.getGroups().subscribe((groupList: Group[]) => {
-      this.groupList = groupList;
+    this.groupService.getGroups().subscribe((apiGroupResponse: APIGetMultiResponse<Group>) => {
+      this.groupList = apiGroupResponse.results as Array<Group>;
     });
 
   }

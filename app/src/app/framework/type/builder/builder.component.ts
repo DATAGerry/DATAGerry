@@ -37,6 +37,7 @@ import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import {PreviewModalComponent} from './modals/preview-modal/preview-modal.component';
 import {DiagnosticModalComponent} from './modals/diagnostic-modal/diagnostic-modal.component';
 import { DateControl } from './controls/date-time/date.control';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
 
 declare var $: any;
 
@@ -88,11 +89,11 @@ export class BuilderComponent implements OnInit, OnDestroy{
   public builderFormGroup: FormGroup;
 
   public constructor(private userService: UserService, private groupService: GroupService, private modalService: NgbModal) {
-    this.groupService.getGroups().subscribe((gList: Group[]) => {
-      this.groupList = gList;
+    this.groupService.getGroups().subscribe((apiGroupResponse: APIGetMultiResponse<Group>) => {
+      this.groupList = apiGroupResponse.results as Array<Group>;
     });
-    this.userService.getUsers().subscribe((uList: User[]) => {
-      this.userList = uList;
+    this.userService.getUsers().subscribe((apiUserResponse: APIGetMultiResponse<User>) => {
+      this.userList = apiUserResponse.results as Array<User>;
     });
   }
 

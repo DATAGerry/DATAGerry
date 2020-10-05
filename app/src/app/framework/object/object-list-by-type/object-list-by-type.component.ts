@@ -39,8 +39,8 @@ import { DataTableFilter, DataTablesResult } from '../../models/cmdb-datatable';
 import { TypeService } from '../../services/type.service';
 import { CmdbType } from '../../models/cmdb-type';
 import { PermissionService } from '../../../auth/services/permission.service';
-import {ObjectPreviewModalComponent} from '../modals/object-preview-modal/object-preview-modal.component';
-import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import { ObjectPreviewModalComponent } from '../modals/object-preview-modal/object-preview-modal.component';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'cmdb-object-list-by-type',
@@ -50,8 +50,8 @@ import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 })
 export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestroy {
 
-  @ViewChild('dtTableElement', {static: false}) dtTableElement: ElementRef;
-  @ViewChild(DataTableDirective, {static: false})
+  @ViewChild('dtTableElement', { static: false }) dtTableElement: ElementRef;
+  @ViewChild(DataTableDirective, { static: false })
   public dtElement: DataTableDirective;
   public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();
@@ -98,7 +98,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     const that = this;
     this.dtOptions = {
       pagingType: 'full_numbers',
-      order: [[ 2, 'asc' ]],
+      order: [[2, 'asc']],
       dom:
         '<"row" <"col-sm-3" l> <"col-sm-3" B > <"col" f> >' +
         '<"row" <"col-sm-12"tr>>' +
@@ -157,12 +157,12 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
             collectionLayout: 'dropdown-menu overflow-auto',
             text: '<i class="fas fa-cog"></i>',
 
-            postfixButtons: [ {
+            postfixButtons: [{
               extend: 'colvisRestore',
               text: 'Restore',
               tag: 'button',
               className: 'btn btn-secondary btn-sm btn-block mt-2 mb-2',
-            } ]
+            }]
           }
         ]
       },
@@ -175,13 +175,15 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
         return row;
       },
       select: {
-        style:    'multi',
+        style: 'multi',
         selector: 'td:first-child'
       },
       columns: [
-        { data: null, defaultContent: '',
+        {
+          data: null, defaultContent: '',
           title: '<input type="checkbox" class="select-all-objects" name="select-all-objects">',
-          className: 'select-checkbox text-center', sortable: false, orderable: false },
+          className: 'select-checkbox text-center', sortable: false, orderable: false
+        },
         {
           data: 'object_information.active', title: 'Active', name: 'active',
           render(data) {
@@ -191,7 +193,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
             return '<span class="badge badge-danger"> D </span>';
           }
         },
-        {data: 'object_information.object_id', title: 'ID', name: 'public_id'}
+        { data: 'object_information.object_id', title: 'ID', name: 'public_id' }
       ]
     };
   }
@@ -264,7 +266,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
         }
       });
     } catch (error) {
-      console.log(`DT Rerender Exception: ${error}`);
+      console.log(`DT Rerender Exception: ${ error }`);
     }
     return Promise.resolve(null);
   }
@@ -273,14 +275,16 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     const that = this;
     for (let i = 0; i < this.objects.data[0].fields.length; i++) {
       newSettings.columns.push(
-        { data: 'fields.' + i + '.value',
+        {
+          data: 'fields.' + i + '.value',
           title: that.objects.data[0].fields[i].label,
           name: that.objects.data[0].fields[i].name,
         });
     }
     newSettings.columns.push(
-      {data: 'object_information.author_name', title: 'Author', name: 'author_id'},
-      {data: 'object_information.creation_time', title: 'Creation Time', name: 'creation_time',
+      { data: 'object_information.author_name', title: 'Author', name: 'author_id' },
+      {
+        data: 'object_information.creation_time', title: 'Creation Time', name: 'creation_time',
         render(data) {
           return that.datePipe.transform(data.$date, 'dd/MM/yyyy - HH:mm:ss');
         }
@@ -291,7 +295,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
         className: 'td-button-actions text-center',
         orderable: false,
         render(data) {
-          const rights: string[] = that.permissionService.currentUserRights;
+          const rights: string[] = that.permissionService.currentUserRights.map(right => right.name);
           const baseRights = rights.includes('base.*')
             || rights.includes('base.system.*')
             || rights.includes('base.framework.*')
@@ -329,7 +333,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     newSettings.columnDefs = [
       { className: 'text-center', width: '20px', targets: 0, orderable: false },
       { className: 'text-center', width: '5%', targets: [1, 2] },
-      { className: 'text-center', width: '8%', targets: [-1, -2, -3, 3 ]},
+      { className: 'text-center', width: '8%', targets: [-1, -2, -3, 3] },
     ];
   }
 
@@ -341,9 +345,9 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
         visTargets.push(this.objects.data[0].fields.findIndex(i => i.name === summary.name) + 3);
       }
       this.dtOptions.columnDefs = [
-        {orderable: false, targets: 'nosort'},
-        {visible: true, targets: visTargets},
-        {visible: false, targets: '_all'}
+        { orderable: false, targets: 'nosort' },
+        { visible: true, targets: visTargets },
+        { visible: false, targets: '_all' }
       ];
     }
   }
@@ -391,6 +395,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       }
     });
   }
+
   private previewObject(publicID: number) {
     this.objectService.getObject(publicID).subscribe(resp => {
       this.modalRef = this.modalService.open(ObjectPreviewModalComponent, { size: 'lg' });

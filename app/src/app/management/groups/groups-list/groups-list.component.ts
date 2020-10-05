@@ -22,6 +22,7 @@ import { Group } from '../../models/group';
 import { Subject } from 'rxjs';
 import { Right } from '../../models/right';
 import { RightService } from '../../services/right.service';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
 
 @Component({
   selector: 'cmdb-groups-list',
@@ -47,8 +48,8 @@ export class GroupsListComponent implements OnInit, OnDestroy {
       }
     };
 
-    this.groupService.getGroups().subscribe((groupList: Group[]) => {
-        this.groupList = groupList;
+    this.groupService.getGroups().subscribe((apiResponse: APIGetMultiResponse<Group>) => {
+        this.groupList = apiResponse.results as Array<Group>;
       },
       (error) => {
         console.error(error);

@@ -23,6 +23,7 @@ import { GroupService } from '../../services/group.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
 
 @Component({
   selector: 'cmdb-groups-delete',
@@ -66,8 +67,8 @@ export class GroupsDeleteComponent implements OnInit, OnDestroy {
         });
       }
     );
-    this.groupListSubscription = this.groupService.getGroups().subscribe((groupList: Group[]) => {
-      this.groupList = groupList;
+    this.groupListSubscription = this.groupService.getGroups().subscribe((apiGroupResponse: APIGetMultiResponse<Group>) => {
+      this.groupList = apiGroupResponse.results as Array<Group>;
       this.deleteForm.get('deleteGroupOption').setValue(2);
     });
   }
