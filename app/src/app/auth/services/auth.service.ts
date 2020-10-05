@@ -30,6 +30,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SpecialService } from '../../framework/services/special.service';
 import { Router } from '@angular/router';
 import { LoginResponse } from '../models/responses';
+import { Token } from '../models/token';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -51,8 +52,8 @@ export class AuthService<T = any> implements ApiService {
   // User storage
   private currentUserSubject: BehaviorSubject<User>;
   public currentUser: Observable<User>;
-  private currentUserTokenSubject: BehaviorSubject<string>;
-  public currentUserToken: Observable<string>;
+  private currentUserTokenSubject: BehaviorSubject<Token>;
+  public currentUserToken: Observable<Token>;
 
   // First Step Intro
   private startIntroModal: any = undefined;
@@ -66,7 +67,7 @@ export class AuthService<T = any> implements ApiService {
       JSON.parse(localStorage.getItem('current-user')));
     this.currentUser = this.currentUserSubject.asObservable();
 
-    this.currentUserTokenSubject = new BehaviorSubject<string>(
+    this.currentUserTokenSubject = new BehaviorSubject<Token>(
       JSON.parse(localStorage.getItem('access-token')));
     this.currentUserToken = this.currentUserTokenSubject.asObservable();
   }
@@ -75,7 +76,7 @@ export class AuthService<T = any> implements ApiService {
     return this.currentUserSubject.value;
   }
 
-  public get currentUserTokenValue(): string {
+  public get currentUserTokenValue(): Token {
     return this.currentUserTokenSubject.value;
   }
 
@@ -96,10 +97,15 @@ export class AuthService<T = any> implements ApiService {
     return this.http.post<LoginResponse>(
       `${ this.connectionService.currentConnection }/${ this.restPrefix }/${ this.servicePrefix }/login`, data, httpOptions)
       .pipe(map((response: LoginResponse) => {
+        const token: Token = {
+          token: response.token,
+          issued: response.token_issued_at,
+          expire: response.token_expire
+        };
         localStorage.setItem('current-user', JSON.stringify(response.user));
-        localStorage.setItem('access-token', JSON.stringify(response.token));
+        localStorage.setItem('access-token', JSON.stringify(token));
         this.currentUserSubject.next(response.user);
-        this.currentUserTokenSubject.next(response.token);
+        this.currentUserTokenSubject.next(token);
         this.showIntro();
         return response;
       }));

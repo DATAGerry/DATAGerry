@@ -50,7 +50,7 @@ export class FooterComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.userTokenExpire = this.authService.currentUserValue.token_expire;
+    this.userTokenExpire = this.authService.currentUserTokenValue.expire;
     this.timeout = FooterComponent.convertToDate(this.calcRestTime(this.userTokenExpire));
     this.interval();
   }
