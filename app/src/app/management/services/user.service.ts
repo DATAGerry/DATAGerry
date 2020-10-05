@@ -29,12 +29,17 @@ import { Observable, timer } from 'rxjs';
 import { HttpBackend, HttpParams, HttpResponse } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
 import { CollectionParameters } from '../../services/models/api-parameter';
-import { APIGetMultiResponse, APIGetSingleResponse } from '../../services/models/api-response';
+import {
+  APIGetMultiResponse,
+  APIGetSingleResponse,
+  APIInsertSingleResponse,
+  APIUpdateSingleResponse
+} from '../../services/models/api-response';
 
-export const checkUserExistsValidator = (userService: UserService, time: number = 500) => {
+export const userExistsValidator = (userService: UserService, time: number = 500) => {
   return (control: FormControl) => {
     return timer(time).pipe(switchMap(() => {
-      return userService.checkUserExists(control.value).pipe(
+      return userService.getUserByName(control.value).pipe(
         map(() => {
           return { userExists: true };
         }),
@@ -58,6 +63,9 @@ export class UserService<T = User> implements ApiService {
   constructor(private api: ApiCallService, private backend: HttpBackend, private authService: AuthService) {
   }
 
+  /**
+   * Get the current login user.
+   */
   public getCurrentUser(): User {
     return this.authService.currentUserValue;
   }
@@ -102,39 +110,82 @@ export class UserService<T = User> implements ApiService {
     );
   }
 
+  /**
+   * Get the number of all users.
+   */
+  public countUsers(): Observable<number> {
+    return this.api.callHead<T>(`${ this.servicePrefix }/`).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return +apiResponse.headers.get('X-Total-Count');
+      })
+    );
+  }
+
+  /**
+   * Get user by the user_name.
+   * @param name: Username of the user.
+   */
+  public getUserByName(name: string): Observable<T> {
+    const options = httpObserveOptions;
+    const filter = { user_name: name };
+    let params: HttpParams = new HttpParams();
+    params = params.set('filter', JSON.stringify(filter));
+    options.params = params;
+    return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        if (apiResponse.body.count === 0) {
+          return null;
+        }
+        return apiResponse.body.results[0] as T;
+      })
+    );
+  }
+
   public changeUserPassword(userID: number, newPassword: string) {
     return this.api.callPut<boolean>(this.servicePrefix + '/' + userID + '/passwd', { password: newPassword });
   }
 
-
-
-  public getUserByGroup(publicID: number): Observable<T[]> {
-    return this.api.callGet<T>(`${ this.servicePrefix }/group/${ publicID }`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
+  /**
+   * Get all users in a group.
+   * @param groupID: PublicID of the user group.
+   */
+  public getUsersByGroup(groupID: number): Observable<Array<T>> {
+    return this.api.callGet<Array<T>>(`${ this.servicePrefix }/?filter={"group_id": ${ groupID }}`).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return apiResponse.body.results as Array<T>;
       })
     );
   }
 
-  public postUser(data: User) {
-    return this.api.callPost<User>(`${ this.servicePrefix }/`, data).pipe(
-      map((apiResponse: HttpResponse<any>) => {
-        return apiResponse.body;
+  /**
+   * Insert a new user.
+   * @param user: Data of the user.
+   */
+  public postUser(user: T): Observable<T> {
+    return this.api.callPost<User>(`${ this.servicePrefix }/`, user).pipe(
+      map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => {
+        return apiResponse.body.raw as T;
       })
     );
   }
 
-  public putUser(publicID: number, data: T): Observable<T> {
-    return this.api.callPut<T>(`${ this.servicePrefix }/${ publicID }/`, data).pipe(
-      map((apiResponse) => {
-        return apiResponse.body;
+  /**
+   * Update a existing user.
+   * @param publicID: The PublicID of the selected user.
+   * @param user: User instance of the selected user.
+   */
+  public putUser(publicID: number, user: T): Observable<T> {
+    return this.api.callPut<T>(`${ this.servicePrefix }/${ publicID }/`, user).pipe(
+      map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
+        return apiResponse.body.result as T;
       })
     );
   }
 
+  /**
+   * Delete a existing user.
+   * @param publicID: The PublicID of the selected user.
+   */
   public deleteUser(publicID: number): Observable<boolean> {
     return this.api.callDelete<boolean>(`${ this.servicePrefix }/${ publicID }/`).pipe(
       map((apiResponse) => {
@@ -143,19 +194,4 @@ export class UserService<T = User> implements ApiService {
     );
   }
 
-  // Special functions
-  public countUsers(): Observable<T[]> {
-    return this.api.callGet<T>(`${ this.servicePrefix }/count/`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
-  }
-
-  public checkUserExists(userName: string) {
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ userName }`);
-  }
 }

@@ -27,6 +27,7 @@ export class BasicAuthInterceptor implements HttpInterceptor {
   public intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const currentUser = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('current-user'))).value;
     const currentUserToken = new BehaviorSubject<string>(JSON.parse(localStorage.getItem('access-token'))).value;
+    console.log(currentUser);
     if (currentUser && currentUserToken) {
       request = request.clone({
         setHeaders: {

@@ -128,7 +128,7 @@ export class DashboardComponent implements OnInit {
       },
       () => {
         for (let i = 0; i < values.length; i++) {
-          this.userService.getUserByGroup(values[i].public_id).subscribe((users: User[]) => {
+          this.userService.getUsersByGroup(values[i].public_id).subscribe((users: User[]) => {
             this.labelsGroup.push(values[i].label);
             this.colorsGroup.push(this.getRandomColor());
             this.itemsGroup.push(users.length);

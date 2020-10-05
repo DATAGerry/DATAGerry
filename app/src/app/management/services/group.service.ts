@@ -28,7 +28,12 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import { HttpParams, HttpResponse } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
 import { CollectionParameters } from '../../services/models/api-parameter';
-import { APIGetMultiResponse, APIGetSingleResponse, APIInsertSingleResponse } from '../../services/models/api-response';
+import {
+  APIGetMultiResponse,
+  APIGetSingleResponse,
+  APIInsertSingleResponse,
+  APIUpdateSingleResponse
+} from '../../services/models/api-response';
 
 export const checkGroupNameExistsValidator = (groupService: GroupService, time: number = 500) => {
   return (control: FormControl) => {
@@ -97,6 +102,10 @@ export class GroupService<T = Group> implements ApiService {
     );
   }
 
+  /**
+   * Get a group by its name.
+   * @param name: Name property of the selected group.
+   */
   public getGroupByName(name: string): Observable<T> {
     const options = httpObserveOptions;
     const filter = { name };
@@ -132,8 +141,8 @@ export class GroupService<T = Group> implements ApiService {
    */
   public putGroup(publicID: number, group: T): Observable<T> {
     return this.api.callPut<T>(`${ this.servicePrefix }/${ publicID }/`, group).pipe(
-      map((apiResponse) => {
-        return apiResponse.body;
+      map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
+        return apiResponse.body.result as T;
       })
     );
   }

@@ -19,7 +19,7 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../../auth/services/auth.service';
-import { checkUserExistsValidator, UserService } from '../../services/user.service';
+import { userExistsValidator, UserService } from '../../services/user.service';
 import { User } from '../../models/user';
 import { Group } from '../../models/group';
 import { GroupService } from '../../services/group.service';
@@ -51,7 +51,7 @@ export class UsersAddComponent implements OnInit, OnDestroy {
   constructor(private authService: AuthService, private userService: UserService, private groupService: GroupService,
               private toastService: ToastService, private router: Router) {
     this.addForm = new FormGroup({
-      user_name: new FormControl('', [Validators.required], [checkUserExistsValidator(this.userService)]),
+      user_name: new FormControl('', [Validators.required], [userExistsValidator(this.userService)]),
       email: new FormControl('', [Validators.required, Validators.email]),
       password: new FormControl('', [Validators.required]),
       first_name: new FormControl(null),

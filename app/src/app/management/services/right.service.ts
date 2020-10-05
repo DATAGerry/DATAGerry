@@ -35,6 +35,10 @@ export class RightService<T = Right> implements ApiService {
   constructor(private api: ApiCallService) {
   }
 
+  /**
+   * Iterate over the right collection
+   * @param params Instance of CollectionParameters
+   */
   public getRights(params: CollectionParameters = { filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1 }
   ): Observable<Array<T>> {
     const options = httpObserveOptions;
@@ -54,4 +58,26 @@ export class RightService<T = Right> implements ApiService {
     );
   }
 
+  /**
+   * Get a right by its name.
+   * @param name: Name of the right.
+   */
+  public getRight(name: string): Observable<T> {
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ name }/`).pipe(
+      map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => {
+        return apiResponse.body.result as T;
+      })
+    );
+  }
+
+  /**
+   * Get security levels.
+   */
+  public getLevels(): Observable<any> {
+    return this.api.callGet<T>(`${ this.servicePrefix }/levels/`).pipe(
+      map((apiResponse: HttpResponse<APIGetSingleResponse<any>>) => {
+        return apiResponse.body.result;
+      })
+    );
+  }
 }
