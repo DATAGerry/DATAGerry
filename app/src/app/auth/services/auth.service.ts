@@ -29,6 +29,7 @@ import { StepByStepIntroComponent } from '../../layout/intro/step-by-step-intro/
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SpecialService } from '../../framework/services/special.service';
 import { Router } from '@angular/router';
+import { LoginResponse } from '../models/responses';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -92,15 +93,15 @@ export class AuthService<T = any> implements ApiService {
       user_name: username,
       password
     };
-    return this.http.post<User>(
+    return this.http.post<LoginResponse>(
       `${ this.connectionService.currentConnection }/${ this.restPrefix }/${ this.servicePrefix }/login`, data, httpOptions)
-      .pipe(map(user => {
-        localStorage.setItem('current-user', JSON.stringify(user));
-        localStorage.setItem('access-token', JSON.stringify(user.token));
-        this.currentUserSubject.next(user);
-        this.currentUserTokenSubject.next(user.token);
+      .pipe(map((response: LoginResponse) => {
+        localStorage.setItem('current-user', JSON.stringify(response.user));
+        localStorage.setItem('access-token', JSON.stringify(response.token));
+        this.currentUserSubject.next(response.user);
+        this.currentUserTokenSubject.next(response.token);
         this.showIntro();
-        return user;
+        return response;
       }));
   }
 

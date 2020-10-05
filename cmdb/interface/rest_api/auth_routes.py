@@ -25,6 +25,7 @@ from cmdb.interface.blueprint import RootBlueprint
 from cmdb.security.auth import AuthModule, AuthSettingsDAO
 from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, \
     AuthenticationProviderNotActivated
+from cmdb.security.auth.response import LoginResponse
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
@@ -137,13 +138,16 @@ def post_login():
         # If login success generate user instance with token
         if user_instance:
             tg = TokenGenerator()
-            token = tg.generate_token(payload={'user': {
+            token: bytes = tg.generate_token(payload={'user': {
                 'public_id': user_instance.get_public_id()
             }})
-            user_instance.token = token
-            user_instance.token_issued_at = int(datetime.now().timestamp())
-            user_instance.token_expire = int(tg.get_expire_time().timestamp())
-            return make_response(user_instance)
+            token_issued_at = int(datetime.now().timestamp())
+            token_expire = int(tg.get_expire_time().timestamp())
+
+            login_response = LoginResponse(user_instance, token, token_issued_at, token_expire)
+
+            return login_response.make_response()
+
         # Login not success
         else:
             return abort(401, 'Could not login')
