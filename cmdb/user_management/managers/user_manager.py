@@ -21,7 +21,7 @@ from .account_manager import AccountManager
 from .. import UserGroupModel
 from ...framework.results import IterationResult
 from ...framework.utils import PublicID
-from ...manager import ManagerGetError, ManagerIterationError, ManagerDeleteError
+from ...manager import ManagerGetError, ManagerIterationError, ManagerDeleteError, ManagerUpdateError
 from ...search import Query
 
 
@@ -127,11 +127,15 @@ class UserManager(AccountManager):
 
         Notes:
             If a UserModel instance was passed as user argument, \
-            it will be auto converted via the model `to_json` method.
+            it will be auto converted via the model `to_dict` method.
         """
         if isinstance(user, UserModel):
-            user = UserModel.to_data(user)
-        return self._update(public_id=public_id, filter={'public_id': public_id}, resource=user)
+            user = UserModel.to_dict(user)
+        update_result = self._update(collection=self.collection, filter={'public_id': public_id}, resource=user)
+
+        if update_result.matched_count != 1:
+            raise ManagerUpdateError(f'Something happened during the update!')
+        return update_result
 
     def delete(self, public_id: Union[PublicID, int]) -> UserModel:
         """

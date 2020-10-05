@@ -99,10 +99,10 @@ class GroupManager(AccountManager):
 
         Notes:
             If a CategoryModel instance was passed as type argument, \
-            it will be auto converted via the model `to_json` method.
+            it will be auto converted via the model `to_dict` method.
         """
         if isinstance(group, UserGroupModel):
-            group = UserGroupModel.to_data(group)
+            group = UserGroupModel.to_dict(group)
         update_result = self._update(self.collection, filter={'public_id': public_id}, resource=group)
         if update_result.matched_count != 1:
             raise ManagerUpdateError(f'Something happened during the update!')
