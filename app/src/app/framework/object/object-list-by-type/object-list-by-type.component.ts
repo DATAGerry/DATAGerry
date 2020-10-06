@@ -32,7 +32,7 @@ import { Subject } from 'rxjs';
 import { ObjectService } from '../../services/object.service';
 import { RenderResult } from '../../models/cmdb-render';
 import { DatePipe } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot, Router } from '@angular/router';
 import { FileService } from '../../../export/export.service';
 import { FileSaverService } from 'ngx-filesaver';
 import { DataTableFilter, DataTablesResult } from '../../models/cmdb-datatable';
@@ -77,8 +77,8 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
-    // tslint:disable-next-line:only-arrow-functions
-    this.router.routeReuseStrategy.shouldReuseRoute = function() {
+
+    this.router.routeReuseStrategy.shouldReuseRoute = (future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot) => {
       return false;
     };
   }

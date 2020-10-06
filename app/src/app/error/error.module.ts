@@ -22,7 +22,6 @@ import { CommonModule } from '@angular/common';
 import { ErrorRoutingModule } from './error-routing.module';
 import { ErrorComponent } from './error.component';
 import { LayoutModule } from '../layout/layout.module';
-import { ErrorMessageService } from './services/error-message.service';
 import { ErrorForbiddenComponent } from './components/error-forbidden/error-forbidden.component';
 import { DefaultErrorComponent } from './toasts/default-error/default-error.component';
 import { ErrorNotFoundComponent } from './components/error-not-found/error-not-found.component';
@@ -38,9 +37,6 @@ import { ErrorNotFoundComponent } from './components/error-not-found/error-not-f
   exports: [
     DefaultErrorComponent,
     ErrorNotFoundComponent,
-  ],
-  providers: [
-    ErrorMessageService
   ]
 })
 export class ErrorModule {

@@ -25,13 +25,12 @@ import { LayoutModule } from './layout/layout.module';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { PreviousRouteService } from './services/previous-route.service';
 import { DatePipe } from '@angular/common';
-import { FileSaverModule } from 'ngx-filesaver';
 import { ToastModule } from './layout/toast/toast.module';
 import { HttpErrorInterceptor } from './error/interceptors/http-error.interceptor.tx';
 import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MainModule } from './main/main.module';
 import { AuthModule } from './auth/auth.module';
-import { ErrorMessageModule } from './error/error-message/error-message.module';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -41,10 +40,9 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    LayoutModule,
+    MainModule,
     AuthModule,
-    ErrorMessageModule,
-    FileSaverModule,
+    LayoutModule,
     ToastModule,
     AppRoutingModule
   ],

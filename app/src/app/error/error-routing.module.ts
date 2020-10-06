@@ -19,7 +19,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { ErrorComponent } from './error.component';
-import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
 
 const routes: Routes = [
   {
@@ -40,7 +39,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
+  imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
 export class ErrorRoutingModule {
