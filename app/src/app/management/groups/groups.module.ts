@@ -21,12 +21,9 @@ import { CommonModule } from '@angular/common';
 
 import { GroupsRoutingModule } from './groups-routing.module';
 import { DataTablesModule } from 'angular-datatables';
-import { GroupsAddComponent } from './groups-add/groups-add.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { GroupsDeleteComponent } from './groups-delete/groups-delete.component';
 import { LayoutModule } from '../../layout/layout.module';
-import { GroupSelectPipe } from './groups-delete/group-select.pipe';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { AuthModule } from '../../auth/auth.module';
 import { GroupsComponent } from './groups.component';
@@ -37,9 +34,6 @@ import { GroupTableComponent } from './components/group-table/group-table.compon
 
 @NgModule({
   declarations: [
-    GroupsAddComponent,
-    GroupsDeleteComponent,
-    GroupSelectPipe,
     GroupsComponent,
     GroupFormComponent,
     GroupAddComponent,

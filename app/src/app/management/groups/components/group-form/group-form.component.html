@@ -35,11 +35,10 @@
   <div class="form-group row">
     <label class="col-sm-2 col-form-label">Rights: <span class="required">*</span></label>
     <div class="col-sm-10">
-      <ng-select class="form-control" [multiple]="true" bindLabel="name" bindValue="name"
+      <ng-select class="form-control" [virtualScroll]="true" [multiple]="true" bindLabel="name" bindValue="name" [items]="rights"
                  [ngClass]="{ 'is-valid': rightsControl.valid && (rightsControl.dirty || rightsControl.touched),
-                 'is-invalid': rightsControl.invalid && (rightsControl.dirty || rightsControl.touched)}"
-
-                 formControlName="rights">
+                 'is-invalid': rightsControl.invalid && (rightsControl.dirty || rightsControl.touched)}" [loading]="false"
+                 formControlName="rights" (scrollToEnd)="onScrollToEnd()">
       </ng-select>
     </div>
   </div>

@@ -25,6 +25,7 @@ import { groupNameExistsValidator, GroupService } from '../../../services/group.
 import { RightService } from '../../../services/right.service';
 import { Right } from '../../../models/right';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
+import { CollectionParameters } from '../../../../services/models/api-parameter';
 
 @Component({
   selector: 'cmdb-group-form',
@@ -55,6 +56,8 @@ export class GroupFormComponent implements OnInit, OnDestroy {
    * Current right list
    */
   public rights: Array<Right> = [];
+  private currentRightPage: number = 1;
+  private totalRightPage: number = -1;
 
   constructor(private groupService: GroupService, private rightService: RightService) {
     this.subscriber = new Subject<void>();
@@ -76,10 +79,31 @@ export class GroupFormComponent implements OnInit, OnDestroy {
     this.form.statusChanges.pipe(takeUntil(this.subscriber)).subscribe(status => {
       this.validation.emit(status);
     });
-    this.rightService.getRights().pipe(takeUntil(this.subscriber))
-      .subscribe((apiResponse: APIGetMultiResponse<Right>) => {
+    this.loadRights(this.currentRightPage);
+  }
 
-    });
+  public onScrollToEnd() {
+    this.loadRights(this.currentRightPage + 1);
+  }
+
+  private loadRights(page: number): void {
+    if (page !== this.totalRightPage) {
+      this.rightService.getRights({
+        filter: undefined,
+        limit: 10,
+        sort: 'name',
+        order: 1,
+        page
+      }).pipe(takeUntil(this.subscriber))
+        .subscribe((apiResponse: APIGetMultiResponse<Right>) => {
+          this.currentRightPage = +apiResponse.pager.page;
+          console.log(this.currentRightPage);
+          this.totalRightPage = +apiResponse.pager.total_pages;
+          console.log(this.totalRightPage);
+          this.rights.push(...apiResponse.results as Array<Right>);
+          console.log(this.rights);
+        });
+    }
   }
 
   /**
@@ -109,7 +133,7 @@ export class GroupFormComponent implements OnInit, OnDestroy {
    */
   public onSubmit(): void {
     const formGroup: Group = this.form.getRawValue() as Group;
-    this.group = {...this.group, ...formGroup};
+    this.group = { ...this.group, ...formGroup };
     return this.submit.emit(formGroup);
   }
 
