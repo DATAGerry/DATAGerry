@@ -60,8 +60,8 @@ export class RightsListComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.rightListSubscription = this.rightService.getRights().subscribe((rightList: Right[]) => {
-        this.rightList = rightList;
+    this.rightListSubscription = this.rightService.getRights().subscribe((rightList) => {
+        this.rightList = rightList.results;
         this.dtTrigger.next();
       });
 

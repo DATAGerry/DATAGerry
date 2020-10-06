@@ -42,8 +42,6 @@ import { far } from '@fortawesome/free-regular-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
 import { IconPickerModule } from 'ngx-icon-picker';
 import { IconPickerComponent } from './helpers/icon-picker/icon-picker.component';
-import { UserImageComponent } from './components/user-image/user-image.component';
-import { UserDisplayComponent } from './components/user-display/user-display.component';
 import { ChartsComponent } from './components/charts/charts.component';
 import { ToastModule } from './toast/toast.module';
 import { AuthModule } from '../auth/auth.module';
@@ -81,8 +79,6 @@ import { InfoBoxComponent } from './components/info-box/info-box.component';
     TypeLabelComponent,
     FooterComponent,
     IconPickerComponent,
-    UserImageComponent,
-    UserDisplayComponent,
     ChartsComponent,
     StepByStepIntroComponent,
     JwPaginationComponent,
@@ -109,8 +105,6 @@ import { InfoBoxComponent } from './components/info-box/info-box.component';
     TableComponent,
     TypeLabelComponent,
     IconPickerComponent,
-    UserImageComponent,
-    UserDisplayComponent,
     ChartsComponent,
     JwPaginationComponent,
     SidebarComponent,

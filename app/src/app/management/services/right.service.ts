@@ -30,7 +30,7 @@ import { CollectionParameters } from '../../services/models/api-parameter';
 })
 export class RightService<T = Right> implements ApiService {
 
-  public readonly servicePrefix: string = 'right';
+  public readonly servicePrefix: string = 'rights';
 
   constructor(private api: ApiCallService) {
   }
@@ -39,8 +39,8 @@ export class RightService<T = Right> implements ApiService {
    * Iterate over the right collection
    * @param params Instance of CollectionParameters
    */
-  public getRights(params: CollectionParameters = { filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1 }
-  ): Observable<Array<T>> {
+  public getRights(params: CollectionParameters = { filter: undefined, limit: 10, sort: 'name', order: 1, page: 1 }
+  ): Observable<APIGetMultiResponse<T>> {
     const options = httpObserveOptions;
     let httpParams: HttpParams = new HttpParams();
     if (params.filter !== undefined) {
@@ -53,7 +53,7 @@ export class RightService<T = Right> implements ApiService {
     options.params = httpParams;
     return this.api.callGet<T>(`${ this.servicePrefix }/`, options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
-        return apiResponse.body.results as Array<T>;
+        return apiResponse.body;
       })
     );
   }
