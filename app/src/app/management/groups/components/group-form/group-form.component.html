@@ -1,0 +1,46 @@
+<div id="group-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="form-group row">
+    <label for="group-form-name" class="col-sm-2 col-form-label">Name: <span class="required">*</span></label>
+    <div class="col-sm-10">
+      <input name-guideline type="text" formControlName="name" class="form-control" placeholder="Name"
+             id="group-form-name" [ngClass]="{ 'is-valid': name.valid && (name.dirty || name.touched),
+                 'is-invalid': name.invalid && (name.dirty || name.touched)}" lowercase>
+      <div *ngIf="name.invalid && (name.dirty || name.touched)"
+           class="invalid-feedback">
+        <div class="float-right" *ngIf="name.errors.required">
+          Name is required
+        </div>
+        <div class="float-right" *ngIf="name.errors.groupNameExists">
+          Group with this name already exists
+        </div>
+        <div class="clearfix"></div>
+      </div>
+    </div>
+  </div>
+  <div class="form-group row">
+    <label for="group-form-label" class="col-sm-2 col-form-label">Label: </label>
+    <div class="col-sm-10">
+      <input type="text" formControlName="label" class="form-control" placeholder="Label" id="group-form-label"
+             [ngClass]="{ 'is-valid': label.valid && (label.dirty || label.touched),
+                 'is-invalid': label.invalid && (label.dirty || label.touched)}">
+      <div *ngIf="label.invalid && (label.dirty || label.touched)"
+           class="invalid-feedback">
+        <div class="float-right" *ngIf="label.errors.required">
+          Label is required
+        </div>
+        <div class="clearfix"></div>
+      </div>
+    </div>
+  </div>
+  <div class="form-group row">
+    <label class="col-sm-2 col-form-label">Rights: <span class="required">*</span></label>
+    <div class="col-sm-10">
+      <ng-select class="form-control" [multiple]="true" bindLabel="name" bindValue="name"
+                 [ngClass]="{ 'is-valid': rightsControl.valid && (rightsControl.dirty || rightsControl.touched),
+                 'is-invalid': rightsControl.invalid && (rightsControl.dirty || rightsControl.touched)}"
+
+                 formControlName="rights">
+      </ng-select>
+    </div>
+  </div>
+</div>

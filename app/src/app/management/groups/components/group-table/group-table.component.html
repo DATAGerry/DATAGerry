@@ -1,0 +1,27 @@
+<table datatable [dtOptions]="tableOptions" class="table table-striped table-hover">
+  <thead>
+  <tr>
+    <th scope="col">Public ID</th>
+    <th scope="col">Name</th>
+    <th scope="col">Label</th>
+    <th scope="col" *permissionLink="'base.user-management.group.*'">Action</th>
+  </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let group of groups">
+      <td>{{group.public_id}}</td>
+      <td>{{group.name}}</td>
+      <td>{{group?.label}}</td>
+      <td>
+        <a *permissionLink="'base.user-management.group.edit'" class="text-dark"
+           [routerLink]="['/management/groups/edit/', group.public_id]">
+          <fa-icon [icon]="['far', 'edit']"></fa-icon>
+        </a>
+        <a *permissionLink="'base.user-management.group.delete'" class="text-dark ml-2"
+           [routerLink]="['/management/groups/delete/', group.public_id]">
+          <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
+        </a>
+      </td>
+    </tr>
+  </tbody>
+</table>
