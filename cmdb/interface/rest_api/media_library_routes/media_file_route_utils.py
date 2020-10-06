@@ -74,6 +74,7 @@ def generate_metadata(params: CollectionParameters):
         if search.isdigit():
             _.append({'public_id': int(search)})
             _.append({'metadata.reference': int(search)})
+            _.append(builder.in_('metadata.reference', [int(search)]))
             _.append({'metadata.parent': int(search)})
 
         return builder.and_([{'metadata.folder': False}, builder.or_(_)])

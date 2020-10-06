@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, HostListener, Input, OnDestroy, OnInit} from '@angular/core';
+import { Component, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
 import { FileService } from './service/file.service';
 import { NgbModal, NgbModalConfig, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { NewFolderDialogComponent } from './modal/new-folder-dialog/new-folder-dialog.component';
@@ -32,7 +32,7 @@ import { AddAttachmentsModalComponent } from '../../helpers/modals/add-attachmen
 import { RenameDialogComponent } from './modal/rename-dialog/rename-dialog.component';
 import { MoveDialogComponent } from './modal/move-dialog/move-dialog.component';
 import { GeneralModalComponent } from '../../helpers/modals/general-modal/general-modal.component';
-import {MetadataInfoComponent} from "./modal/metadata-info/metadata-info.component";
+import { MetadataInfoComponent } from './modal/metadata-info/metadata-info.component';
 
 @Component({
   selector: 'cmdb-fileexplorer',
@@ -61,7 +61,7 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
     return this.defaultMetadata;
   }
 
-  private fileSeletedElements: SelectedFileArray;
+  private fileSeletedElements: SelectedFileArray = {files: [], totalSize: 0};
   @Input()
   public set selectedFileElements(value: SelectedFileArray) {
     this.fileSeletedElements = value;
@@ -143,7 +143,6 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
         this.recordsTotal = data.total;
         this.updatePagination(data, apiParameters.sort, apiParameters.order);
       });
-    this.selectedFileElements = new SelectedFileArray();
   }
 
   public loadFileTree() {
@@ -162,7 +161,7 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
   private generateMetadata(folder: boolean = false): FileMetadata {
     const value = this.selectedFolderElement.getValue();
     const {public_id} = value ? value : {public_id: null};
-    return Object.assign({}, this.localMetadata, new FileMetadata({ parent: public_id, folder }));
+    return new FileMetadata({ parent: public_id, folder });
   }
 
   public addFolder() {

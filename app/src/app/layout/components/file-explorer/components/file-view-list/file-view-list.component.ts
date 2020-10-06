@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FileElement, SelectedFileArray } from '../../model/file-element';
 import { BehaviorSubject } from 'rxjs';
 import { FileService } from '../../service/file.service';
@@ -25,7 +25,6 @@ import { RenameDialogComponent} from '../../modal/rename-dialog/rename-dialog.co
 import { NgbModal, NgbModalConfig } from '@ng-bootstrap/ng-bootstrap';
 import { MoveDialogComponent } from '../../modal/move-dialog/move-dialog.component';
 import { CollectionParameters } from '../../../../../services/models/api-parameter';
-import {UserService} from "../../../../../management/services/user.service";
 
 
 @Component({
@@ -33,7 +32,7 @@ import {UserService} from "../../../../../management/services/user.service";
   templateUrl: './file-view-list.component.html',
   styleUrls: ['./file-view-list.component.scss']
 })
-export class FileViewListComponent {
+export class FileViewListComponent implements OnChanges {
 
   @Output() loadFileElementEvent = new EventEmitter<any>();
 
@@ -75,9 +74,13 @@ export class FileViewListComponent {
   }
 
   constructor(public fileService: FileService, private fileSaverService: FileSaverService,
-              private modalService: NgbModal, private config: NgbModalConfig, private userService: UserService) {
+              private modalService: NgbModal, private config: NgbModalConfig) {
     config.backdrop = 'static';
     config.keyboard = false;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    this.listView = false;
   }
 
   public onSelect(value: FileElement, event?: Event): void {

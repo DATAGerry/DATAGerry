@@ -20,7 +20,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FileMetadata } from '../../../components/file-explorer/model/metadata';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
-import { FileElement } from '../../../components/file-explorer/model/file-element';
+import { FileElement, SelectedFileArray } from '../../../components/file-explorer/model/file-element';
 import { FileService } from '../../../components/file-explorer/service/file.service';
 import { ToastService } from '../../../toast/toast.service';
 
@@ -32,7 +32,7 @@ import { ToastService } from '../../../toast/toast.service';
 export class FilemanagerModalComponent implements OnInit {
 
   @Input() localMetadata: FileMetadata = new FileMetadata();
-  public selectedFileElements: FileElement[] = [];
+  public selectedFileElements: SelectedFileArray = {files: [], totalSize: 0};
   public recordsTotal: number = 0;
 
   constructor(public activeModal: NgbActiveModal, private fileService: FileService, private toast: ToastService) {}
@@ -45,7 +45,7 @@ export class FilemanagerModalComponent implements OnInit {
 
   public postFileOnDone() {
     const {reference, reference_type} = this.localMetadata;
-    this.selectedFileElements.forEach(fileElement => {
+    this.selectedFileElements.files.forEach(fileElement => {
       fileElement.metadata.reference = reference;
       fileElement.metadata.reference_type = reference_type;
       this.fileService.putFile(fileElement).subscribe((resp) => {
