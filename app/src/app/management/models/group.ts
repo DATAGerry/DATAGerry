@@ -24,6 +24,6 @@ export class Group implements CmdbDao {
   public readonly public_id: number;
   public name: string;
   public label: string;
-  public rights: Array<Right>;
+  public rights: Array<Right | any>;
 
 }

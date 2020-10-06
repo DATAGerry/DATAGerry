@@ -35,7 +35,7 @@ import {
   APIUpdateSingleResponse
 } from '../../services/models/api-response';
 
-export const checkGroupNameExistsValidator = (groupService: GroupService, time: number = 500) => {
+export const groupNameExistsValidator = (groupService: GroupService, time: number = 500) => {
   return (control: FormControl) => {
     return timer(time).pipe(switchMap(() => {
       return groupService.getGroupByName(control.value).pipe(
@@ -61,7 +61,7 @@ export const checkGroupNameExistsValidator = (groupService: GroupService, time: 
 })
 export class GroupService<T = Group> implements ApiService {
 
-  public servicePrefix: string = 'group';
+  public servicePrefix: string = 'groups';
 
   constructor(private api: ApiCallService) {
   }
@@ -112,7 +112,7 @@ export class GroupService<T = Group> implements ApiService {
     let params: HttpParams = new HttpParams();
     params = params.set('filter', JSON.stringify(filter));
     options.params = params;
-    return this.api.callGet<Array<T>>(`${ this.servicePrefix }`, options).pipe(
+    return this.api.callGet<Array<T>>(`${ this.servicePrefix }/`, options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         if (apiResponse.body.count === 0) {
           return null;

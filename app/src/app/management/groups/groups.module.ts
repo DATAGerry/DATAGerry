@@ -20,20 +20,32 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { GroupsRoutingModule } from './groups-routing.module';
-import { GroupsListComponent } from './groups-list/groups-list.component';
 import { DataTablesModule } from 'angular-datatables';
 import { GroupsAddComponent } from './groups-add/groups-add.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { GroupsEditComponent } from './groups-edit/groups-edit.component';
 import { GroupsDeleteComponent } from './groups-delete/groups-delete.component';
 import { LayoutModule } from '../../layout/layout.module';
 import { GroupSelectPipe } from './groups-delete/group-select.pipe';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { AuthModule } from '../../auth/auth.module';
+import { GroupsComponent } from './groups.component';
+import { GroupFormComponent } from './components/group-form/group-form.component';
+import { GroupAddComponent } from './group-add/group-add.component';
+import { GroupEditComponent } from './group-edit/group-edit.component';
+import { GroupTableComponent } from './components/group-table/group-table.component';
 
 @NgModule({
-  declarations: [GroupsListComponent, GroupsAddComponent, GroupsEditComponent, GroupsDeleteComponent, GroupSelectPipe],
+  declarations: [
+    GroupsAddComponent,
+    GroupsDeleteComponent,
+    GroupSelectPipe,
+    GroupsComponent,
+    GroupFormComponent,
+    GroupAddComponent,
+    GroupEditComponent,
+    GroupTableComponent
+  ],
   imports: [
     CommonModule,
     GroupsRoutingModule,
