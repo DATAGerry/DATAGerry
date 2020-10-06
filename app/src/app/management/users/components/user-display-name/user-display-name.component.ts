@@ -13,24 +13,27 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Pipe, PipeTransform } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { User } from '../../../models/user';
 
-@Pipe({
-  name: 'groupSelect',
-  pure: true
+@Component({
+  selector: 'cmdb-user-display-name',
+  templateUrl: './user-display-name.component.html',
+  styleUrls: ['./user-display-name.component.scss']
 })
-export class GroupSelectPipe implements PipeTransform {
+export class UserDisplayNameComponent {
 
-  public transform(items: any[], publicID: number): any {
-    if (items === undefined) {
-      return [];
+  @Input() public user: User;
+
+  public displayName(): string {
+    if (this.user.first_name && this.user.last_name) {
+      return `${ this.user.first_name } ${ this.user.last_name }`;
+    } else {
+      return this.user.user_name;
     }
-    return items.filter(item => {
-      return item.public_id !== +publicID;
-    });
   }
 
 }

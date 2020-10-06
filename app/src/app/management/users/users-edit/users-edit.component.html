@@ -90,7 +90,7 @@
 
     <div class="col-3">
       <div id="picture-upload" class="text-center">
-        <cmdb-user-image [imageURL]="preview"></cmdb-user-image>
+        <cmdb-user-image></cmdb-user-image>
         <div class="custom-file mt-2">
           <input type="file" (change)="previewImage($event)"
                  class="custom-file-input" [ngClass]="{ 'is-valid': image.valid && (image.dirty || image.touched),

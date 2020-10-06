@@ -18,11 +18,11 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { UsersListComponent } from './users-list/users-list.component';
 import { UsersAddComponent } from './users-add/users-add.component';
 import { UserViewComponent } from './user-view/user-view.component';
 import { UsersEditComponent } from './users-edit/users-edit.component';
 import { UsersDeleteComponent } from './users-delete/users-delete.component';
+import { UsersComponent } from './users.component';
 
 const routes: Routes = [
   {
@@ -32,7 +32,7 @@ const routes: Routes = [
       breadcrumb: 'List',
       right: 'base.user-management.user.view'
     },
-    component: UsersListComponent
+    component: UsersComponent
   },
   {
     path: 'view/:publicID',

@@ -58,7 +58,7 @@ export const userExistsValidator = (userService: UserService, time: number = 500
 })
 export class UserService<T = User> implements ApiService {
 
-  public readonly servicePrefix: string = 'user';
+  public readonly servicePrefix: string = 'users';
 
   constructor(private api: ApiCallService, private backend: HttpBackend, private authService: AuthService) {
   }

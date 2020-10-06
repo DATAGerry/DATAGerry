@@ -16,39 +16,41 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { User } from '../../models/user';
-import { UserService } from '../../services/user.service';
-import { GroupService } from '../../services/group.service';
-import { Group } from '../../models/group';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { User } from '../models/user';
+import { APIGetMultiResponse } from '../../services/models/api-response';
+import { UserService } from '../services/user.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'cmdb-user-view',
-  templateUrl: './user-view.component.html',
-  styleUrls: ['./user-view.component.scss']
+  selector: 'cmdb-users',
+  templateUrl: './users.component.html',
+  styleUrls: ['./users.component.scss']
 })
-export class UserViewComponent implements OnInit, OnDestroy {
+export class UsersComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private unSubscriber: Subject<void>;
+  public dtTrigger: Subject<void> = new Subject();
 
-  public userID: number;
-  public user: User;
-  public group: Group;
+  public users: Array<User>;
+  private apiUsersResponse: APIGetMultiResponse<User>;
 
-  constructor(private route: ActivatedRoute, public userService: UserService, public groupService: GroupService) {
+  constructor(private userService: UserService) {
     this.unSubscriber = new Subject<void>();
-    this.route.params.subscribe((id) => this.userID = id.publicID);
+    this.dtTrigger = new Subject<void>();
   }
 
   public ngOnInit(): void {
-    this.userService.getUser(this.userID).pipe(takeUntil(this.unSubscriber)).subscribe((user: User) => {
-      this.user = user;
-      this.groupService.getGroup(this.user.group_id).pipe(takeUntil(this.unSubscriber))
-        .subscribe((group: Group) => this.group = group);
-    });
+    this.userService.getUsers().pipe(takeUntil(this.unSubscriber))
+      .subscribe((apiUsersResponse: APIGetMultiResponse<User>) => {
+        this.apiUsersResponse = apiUsersResponse;
+        this.users = this.apiUsersResponse.results as Array<User>;
+      });
+  }
+
+  public ngAfterViewInit(): void {
+    this.dtTrigger.next();
   }
 
   public ngOnDestroy(): void {

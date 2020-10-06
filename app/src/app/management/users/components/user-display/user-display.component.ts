@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { User } from '../../../management/models/user';
+import { User } from '../../../models/user';
 
 @Component({
   selector: 'cmdb-user-display',
