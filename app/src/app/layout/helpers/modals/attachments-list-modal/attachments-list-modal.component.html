@@ -15,12 +15,10 @@
   </div>
   <div class="modal-body">
     <div id="uploadFileForm">
-      <div appDragDrop id="uploadFileContainer" *permissionLink="['base.framework.object.edit']"
-           class="card-body jumbotron text-center align-items-center text-center"
-           (click)="fileInput.click()" (fileDropped)="uploadFile($event)">
-        <fa-icon class="attachment-fa-icon" icon="cloud-upload-alt"></fa-icon>
-        <h6 class="attachment-subtitle">Drop files here or click to upload.</h6>
-        <input id="fileUpload" hidden type="file" #fileInput (change)="uploadFile($event.target.files)">
+      <div class="p-2">
+        <button type="button" class="btn btn-primary btn-lg btn-block" (click)="addAttachments()">
+          <i class="fas fa-plus"></i> Add new Attachments
+        </button>
       </div>
       <div class="pre-scrollable" (scroll)="onScrollHost($event)">
         <div class="container-fluid border p-2 mb-2 w-auto"

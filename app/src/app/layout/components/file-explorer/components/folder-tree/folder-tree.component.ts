@@ -42,11 +42,11 @@ export class FolderTreeComponent implements OnInit, OnChanges {
   }
 
   @Input()
-  set selectedFileFolder( value: BehaviorSubject<any>) {
+  set selectedFileFolder( value: BehaviorSubject<FileElement>) {
     this.selectedFileElement = value;
   }
 
-  get selectedFileFolder(): BehaviorSubject<any> {
+  get selectedFileFolder(): BehaviorSubject<FileElement> {
     return this.selectedFileElement;
   }
 

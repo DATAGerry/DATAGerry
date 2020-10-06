@@ -1,0 +1,88 @@
+<div class="modal-content">
+  <div class="modal-header">
+    <h4 class="modal-title">
+      <i class="fas fa-info-circle"></i> Metadata Info
+    </h4>
+    <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss(true)">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="row no-gutters">
+      <div class="col-md-3 text-center">
+        <i class="display-4" [ngClass]="fileElement.filename | fileExtension"></i>
+      </div>
+      <div class="col-md-9">
+        <form>
+          <fieldset>
+            <legend>Basic</legend>
+            <div class="form-group row">
+              <label for="colForFilename" class="col-sm-3 col-form-label col-form-label-sm">Filename</label>
+              <div class="col-sm-9">
+                <input type="text" [value]="fileElement.filename" [disabled]="true"
+                       class="form-control form-control-sm" id="colForFilename" placeholder="col-form-label-sm">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="colForType" class="col-sm-3 col-form-label col-form-label-sm">Type</label>
+              <div class="col-sm-9">
+                <input type="text" [value]="fileElement?.metadata.mime_type" [disabled]="true"
+                       class="form-control form-control-sm" id="colForType" placeholder="col-form-label-sm">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="colForSize" class="col-sm-3 col-form-label col-form-label-sm">Size</label>
+              <div class="col-sm-9">
+                <input type="text" [value]="fileElement?.size | fileSize" [disabled]="true"
+                       class="form-control form-control-sm" id="colForSize" placeholder="col-form-label-sm">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="colForFilename" class="col-sm-3 col-form-label col-form-label-sm">Path</label>
+              <div class="col-sm-9">
+                <cmdb-folder-path-viewer
+                  [selectedFileFolder]="selectedFileFolder"
+                  [folderTree]="folderTree"></cmdb-folder-path-viewer>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Metadata</legend>
+            <div class="form-group row">
+              <label for="colForReference" class="col-sm-3 col-form-label col-form-label-sm">Reference</label>
+              <div class="col-sm-9 input-group input-group-sm">
+                <input type="text" class="form-control form-control-sm" id="colForReference"
+                       [disabled]="true"
+                       [value]="cmdbObject ? cmdbObject.summary_line : cmdbType ? cmdbType.label : ''">
+                <div class="input-group-append">
+                  <span class="input-group-text" id="calRefLink" [hidden]="!refId">
+                    <a [routerLink]="navigationLink" target="_blank"><fa-icon icon="arrow-right"></fa-icon></a>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="colForModifier" class="col-sm-3 col-form-label col-form-label-sm">Modifier</label>
+              <div class="col-sm-9">
+                <input type="text" class="form-control form-control-sm" id="colForModifier" placeholder="col-form-label-sm"
+                       [value]="username" [disabled]="true">
+              </div>
+            </div>
+            <div class="form-group row">
+              <label for="colForDate" class="col-sm-3 col-form-label col-form-label-sm">Modify</label>
+              <div class="col-sm-9">
+                <input type="text" class="form-control form-control-sm" id="colForDate" placeholder="col-form-label-sm"
+                       [value]="fileElement.upload_date.$date | date: 'dd/MM/yyyy - HH:mm:ss'" [disabled]="true">
+              </div>
+            </div>
+          </fieldset>
+
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-primary" (click)="activeModal.close(true)">Close</button>
+  </div>
+</div>

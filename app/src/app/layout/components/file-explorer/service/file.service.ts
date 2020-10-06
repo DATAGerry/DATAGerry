@@ -19,17 +19,13 @@
 import { Injectable } from '@angular/core';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import {
-  ApiCallService,
-  ApiService,
-  httpFileOptions, httpObserveOptions,
-} from '../../services/api-call.service';
 import { HttpParams, HttpResponse} from '@angular/common/http';
-import { ValidatorService } from '../../services/validator.service';
 import { FileMetadata } from '../model/metadata';
 import { FormControl } from '@angular/forms';
 import { FileElement } from '../model/file-element';
-import { APIGetMultiResponse } from '../../services/models/api-response';
+import { APIGetMultiResponse } from '../../../../services/models/api-response';
+import { ApiCallService, ApiService, httpFileOptions, httpObserveOptions} from '../../../../services/api-call.service';
+import { ValidatorService } from '../../../../services/validator.service';
 
 export const checkFolderExistsValidator = (fileService: FileService, metadata: any, time: number = 500) => {
   return (control: FormControl) => {
@@ -175,7 +171,7 @@ export class FileService<T = any> implements ApiService {
    */
   public pathBuilder(publicID: number, path: string[], tree: FileElement[]) {
     const temp = tree.find(f => f.public_id === publicID);
-    const checker = temp ? temp.name : '';
+    const checker = temp ? temp.filename : '';
     path.push(checker);
     if (temp && temp.metadata && temp.metadata.parent) {
       return this.pathBuilder(temp.metadata.parent, path, tree);

@@ -1,3 +1,5 @@
+@import "~src/scss/variables";
+
 .framework-table {
   th[scope=col]::after {
     font-family: "Font Awesome 5 Free", sans-serif;
@@ -26,4 +28,16 @@
     opacity: 1!important;
   }
 
+  .thumbnail {
+    word-break: break-all;
+  }
+}
+
+#file-view-tile {
+  .active {
+    border: 1px solid $cmdb-primary;
+  }
+  .thumbnail {
+    word-break: break-all;
+  }
 }

@@ -1,0 +1,48 @@
+<ng-template [ngIf]="listView" [ngIfElse]="tileView">
+  <table class="table framework-table table-hover table-striped table-bordered mb-0 ">
+    <thead>
+    <tr tableSortEvent (valueChanged)="loadFolderFiles($event)">
+      <th><input type="checkbox" (click)="removeSelects()"
+                 [checked]="selectedFiles.files.length > 0"
+                 [disabled]="selectedFiles.files.length == 0"></th>
+      <th scope="col" class="w-75 active _desc">Filename</th>
+      <th scope="col" class="_desc">Size</th>
+      <th scope="col" class="_desc">Date</th>
+      <th scope="col" class="w-25 _desc">Type</th>
+      <th class="text-center">Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let item of fileElements">
+      <td>
+        <input type="checkbox" class="selected-file" (click)="onSelect(item)">
+      </td>
+      <td>{{item.filename}}</td>
+      <td>{{item.size | fileSize}}</td>
+      <td>{{item.upload_date.$date | date: "dd/MM/yyyy - HH:mm:ss"}}</td>
+      <td><p class="thumbnail">{{item.metadata?.mime_type}}</p></td>
+      <td>
+        <div class="text-center">
+          <i class="fas fa-download mr-1" title="dowload" (click)="downloadFile(item)"></i>
+          <i class="far fa-edit mr-1" title="rename" (click)="renameFile(item)"></i>
+          <i class="fas fa-expand-arrows-alt mr-1" title="move to" (click)="moveFile(item)"></i>
+          <i class="far fa-trash-alt" title="delete" (click)="deleteFile(item)"></i>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</ng-template>
+
+<ng-template #tileView>
+  <div id="file-view-tile" class="container">
+    <div class="row">
+      <div class="col-md-2 col-sm-3 col-xs-4 p-2" *ngFor="let item of fileElements" (click)="onSelect(item, $event)">
+        <div style="pointer-events: none;">
+          <div class="tile display-4 text-center"><i [className]="item.filename | fileExtension"></i></div>
+          <div class="thumbnail text-center">{{item.filename}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>

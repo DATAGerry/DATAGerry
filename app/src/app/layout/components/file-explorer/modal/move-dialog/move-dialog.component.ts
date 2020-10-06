@@ -16,14 +16,13 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { FileMetadata } from '../../model/metadata';
 import { FileService } from '../../service/file.service';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { FileElement } from '../../model/file-element';
-import { APIGetMultiResponse } from '../../../services/models/api-response';
-import {BehaviorSubject} from "rxjs";
+import { APIGetMultiResponse } from '../../../../../services/models/api-response';
 
 @Component({
   selector: 'cmdb-move-dialog',
@@ -47,7 +46,7 @@ export class MoveDialogComponent implements OnInit {
     })
 
   private findParentName(publicID: number) {
-    return publicID === null ? 'Without Parent' : this.destinationFolder.filter(x => x.public_id === publicID)[0].name;
+    return publicID === null ? 'Without Parent' : this.destinationFolder.filter(x => x.public_id === publicID)[0].filename;
   }
 
   public ngOnInit(): void {

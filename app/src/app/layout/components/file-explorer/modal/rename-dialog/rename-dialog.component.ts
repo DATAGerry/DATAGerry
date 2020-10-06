@@ -54,7 +54,7 @@ export class RenameDialogComponent implements OnInit {
   constructor(private fileService: FileService, public activeModal: NgbActiveModal) {}
 
   public ngOnInit(): void {
-    const placeholder: string = this.selectedFileElement.getValue() ? this.selectedFileElement.getValue().name : '';
+    const placeholder: string = this.selectedFileElement.getValue() ? this.selectedFileElement.getValue().filename : '';
     this.basicForm = new FormGroup({
       name: new FormControl(placeholder, Validators.required)
     });

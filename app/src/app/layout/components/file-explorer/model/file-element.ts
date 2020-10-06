@@ -16,7 +16,9 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { CmdbDao } from '../../framework/models/cmdb-dao';
+
+import { CmdbDao } from '../../../../framework/models/cmdb-dao';
+import { FileMetadata } from './metadata';
 
 export class FileElement implements CmdbDao {
 
@@ -24,8 +26,8 @@ export class FileElement implements CmdbDao {
   // tslint:disable:variable-name
   public readonly public_id: number;
   public readonly gridOutId: number;
-  public name: string;
-  public metadata: any;
+  public filename: string;
+  public metadata: FileMetadata;
   public size: number;
   public upload_date: any;
   public inProcess: boolean = false;
@@ -36,4 +38,9 @@ export class FileElement implements CmdbDao {
   public constructor(init?: Partial<FileElement>) {
     Object.assign(this, init);
   }
+}
+
+export class SelectedFileArray implements Object {
+  files: FileElement[] = [];
+  totalSize: number = 0;
 }

@@ -22,9 +22,8 @@ import { FileMetadata } from '../../model/metadata';
 import { checkFolderExistsValidator, FileService } from '../../service/file.service';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ToastService } from '../../../layout/toast/toast.service';
 import { BehaviorSubject } from 'rxjs';
-import { FileElement } from '../../model/file-element';
+import { ToastService } from '../../../../toast/toast.service';
 
 @Component({
   selector: 'cmdb-new-folder-dialog',

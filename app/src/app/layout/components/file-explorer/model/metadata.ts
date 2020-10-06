@@ -16,7 +16,8 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { CmdbDao } from '../../framework/models/cmdb-dao';
+
+import {CmdbDao} from '../../../../framework/models/cmdb-dao';
 
 export class FileMetadata implements CmdbDao {
 

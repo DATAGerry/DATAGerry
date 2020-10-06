@@ -7,8 +7,8 @@
            (dblclick)="dropTree($event, item)"
            (click)="loadFolderFiles(item)"
            (contextmenu)="loadContextMenu()">
-        <span class="mr-auto">{{item.name}}</span>
-        <span class="context-line" [style.display]="item.name === '' ? 'none' : 'block'">
+        <span class="mr-auto">{{item.filename}}</span>
+        <span class="context-line" [style.display]="item.filename === '' ? 'none' : 'block'">
           <i class="far fa-file" (click)="createFolder()"></i>
           <i class="far fa-edit" (click)="renameFolder()"></i>
           <i class="fas fa-expand-arrows-alt" (click)="moveFolder()"></i>

@@ -19,48 +19,21 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LayoutModule } from '../layout/layout.module';
-import { FilemanagerComponent } from './filemanager.component';
+import { FileexplorerModule } from '../layout/components/file-explorer/fileexplorer.module';
 import { FilemanagerRoutingModule } from './filemanager-routing.module';
-import { TypeService } from '../framework/services/type.service';
-import { ObjectService } from '../framework/services/object.service';
-import { FolderTreeComponent } from './components/folder-tree/folder-tree.component';
-import { ContextmenuComponent } from './components/contextmenu/contextmenu.component';
-import { FileViewListComponent, TableEventDirective} from './components/file-view-list/file-view-list.component';
-import { NewFolderDialogComponent } from './modal/new-folder-dialog/new-folder-dialog.component';
-import { RenameDialogComponent } from './modal/rename-dialog/rename-dialog.component';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FolderPathViewerComponent } from './components/folder-path-viewer/folder-path-viewer.component';
-import { MoveDialogComponent } from './modal/move-dialog/move-dialog.component';
-import { NgSelectModule } from '@ng-select/ng-select';
+import { FilemanagerComponent } from './filemanager.component';
 
 @NgModule({
-  entryComponents: [
-    NewFolderDialogComponent,
-    RenameDialogComponent,
-    MoveDialogComponent
-  ],
-  declarations: [
-    FilemanagerComponent,
-    FolderTreeComponent,
-    FileViewListComponent,
-    NewFolderDialogComponent,
-    RenameDialogComponent,
-    ContextmenuComponent,
-    FolderPathViewerComponent,
-    MoveDialogComponent,
-    TableEventDirective
-  ],
+    entryComponents: [
+    ],
+    declarations: [
+      FilemanagerComponent
+    ],
   imports: [
     CommonModule,
     LayoutModule,
     FilemanagerRoutingModule,
-    ReactiveFormsModule,
-    NgSelectModule,
-    FormsModule
-  ],
-  providers: [
-    TypeService,
-    ObjectService
+    FileexplorerModule
   ]
 })
 export class FilemanagerModule { }

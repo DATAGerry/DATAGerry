@@ -18,13 +18,13 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FileSaverService } from 'ngx-filesaver';
-import { FileService } from '../../../../filemanager/service/file.service';
-import { FileMetadata } from '../../../../filemanager/model/metadata';
 import { ActivatedRoute } from '@angular/router';
 import { NgbModal, NgbModalConfig, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { AddAttachmentsModalComponent } from '../../../../layout/helpers/modals/add-attachments-modal/add-attachments-modal.component';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
-import { FileElement } from '../../../../filemanager/model/file-element';
+import { FileMetadata } from '../../../../layout/components/file-explorer/model/metadata';
+import { FileService } from '../../../../layout/components/file-explorer/service/file.service';
+import { FileElement } from '../../../../layout/components/file-explorer/model/file-element';
+import { AttachmentsListModalComponent } from '../../../../layout/helpers/modals/attachments-list-modal/attachments-list-modal.component';
 
 @Component({
   selector: 'cmdb-object-attachments',
@@ -33,6 +33,7 @@ import { FileElement } from '../../../../filemanager/model/file-element';
 })
 export class ObjectAttachmentsComponent implements OnInit, OnDestroy {
 
+  public attachments: FileElement[] = [];
   public attachmentsTotal: number = 0;
   private metadata: FileMetadata = new FileMetadata();
   private modalRef: NgbModalRef;
@@ -49,6 +50,7 @@ export class ObjectAttachmentsComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.fileService.getAllFilesList(this.metadata).subscribe((resp: APIGetMultiResponse<FileElement>) => {
+      this.attachments = resp.results;
       this.attachmentsTotal = resp.total;
     });
   }
@@ -59,8 +61,8 @@ export class ObjectAttachmentsComponent implements OnInit, OnDestroy {
     }
   }
 
-  public addAttachments() {
-    this.modalRef = this.modalService.open(AddAttachmentsModalComponent);
+  public showAttachments() {
+    this.modalRef = this.modalService.open(AttachmentsListModalComponent);
     this.modalRef.componentInstance.metadata = this.metadata;
     this.modalRef.result.then((result) => {
       this.attachmentsTotal = result.total;

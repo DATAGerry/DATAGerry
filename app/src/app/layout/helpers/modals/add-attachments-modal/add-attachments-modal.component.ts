@@ -17,9 +17,6 @@
 */
 
 import { Component, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
-import { FileMetadata } from '../../../../filemanager/model/metadata';
-import { FileElement } from '../../../../filemanager/model/file-element';
-import { FileService } from '../../../../filemanager/service/file.service';
 import { FileSaverService } from 'ngx-filesaver';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../../toast/toast.service';
@@ -29,6 +26,9 @@ import { InfiniteScrollService } from '../../../services/infinite-scroll.service
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
 import { takeUntil} from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
+import { FileMetadata } from '../../../components/file-explorer/model/metadata';
+import { FileElement } from '../../../components/file-explorer/model/file-element';
+import { FileService } from '../../../components/file-explorer/service/file.service';
 
 @Component({
   selector: 'cmdb-add-attachments-modal',
@@ -133,7 +133,7 @@ export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
             if (exist) {
               const promiseModal = this.replaceFileModal(file.name).then(result => {
                 if (result) {
-                  this.attachments.push(...this.attachments.filter(el => el.name !== file.name));
+                  this.attachments.push(...this.attachments.filter(el => el.filename !== file.name));
                   return true;
                 } else {return false; }
               });
@@ -156,7 +156,7 @@ export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
       this.fileService.getFileElement(value, this.metadata).pipe(
         takeUntil(this.unSubscribe)).subscribe(
         () => resolve(true),
-        err => resolve(false)
+        () => resolve(false)
       );
     });
   }
@@ -175,6 +175,10 @@ export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
     return true;
   }
 
+  /**
+   * Update selected file
+   * @param file current file for update
+   */
   private postFile(file: any) {
     file.inProcess = true;
     this.inProcess = true;
@@ -184,6 +188,10 @@ export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
     }, (err) => console.log(err));
   }
 
+  /**
+   * Delete selected file
+   * @param publicID from current filename
+   */
   public deleteFile(publicID: number) {
     this.fileService.deleteFile(publicID, {}).subscribe(() =>
       this.getFiles(this.defaultApiParameter)
