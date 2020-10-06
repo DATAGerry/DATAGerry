@@ -56,6 +56,7 @@ class TypeManager(FrameworkManager):
 
         try:
             query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            print(query)
             aggregation_result = next(self._aggregate(self.collection, query))
         except ManagerGetError as err:
             raise ManagerIterationError(err=err)

@@ -7,7 +7,7 @@
   </aw-wizard-step>
   <aw-wizard-step stepId="2" stepTitle="Sources">
     <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
-    <cmdb-task-sources-step [preData]="taskInstance" [mode]="mode"></cmdb-task-sources-step>
+    <cmdb-task-sources-step [preData]="taskInstance" [selectedTypes]="sourcesStep" [mode]="mode"></cmdb-task-sources-step>
     <button class="btn btn-primary prev" type="button" awPreviousStep>Go to previous step</button>
     <button class="btn btn-primary next" type="button"
             [disabled]="!sourcesStep.sourcesForm.valid" awNextStep>Go to next step
@@ -23,7 +23,7 @@
   </aw-wizard-step>
   <aw-wizard-step stepId="4" stepTitle="Variables">
     <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
-    <cmdb-task-variables-step [preData]="taskInstance" [destinationStep]="destinationStep" [mode]="mode"></cmdb-task-variables-step>
+    <cmdb-task-variables-step [preData]="taskInstance" [sources]="sourcesStep.sourcesForm.get('sources').value" [destinationStep]="destinationStep" [mode]="mode"></cmdb-task-variables-step>
     <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
     <button class="btn btn-primary next" type="button"
             [disabled]="!variablesStep.variableForm.valid" awNextStep>Go to next step</button>

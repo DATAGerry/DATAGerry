@@ -13,16 +13,16 @@
 }
 
 .dropdown-submenu>.dropdown-menu {
-  //list-style: none;
-  //padding: 0;
-  //margin:0 [B]61px[/B] 0 0;
-  //top: 0;
   left: 100%;
-  margin-top: -6px;
-  margin-left: -1px;
-  -webkit-border-radius: 0 6px 6px 6px;
-  -moz-border-radius: 0 6px 6px;
-  border-radius: 0 6px 6px 6px;
+  margin-left: -50px;
+  margin-top: -5px;
+  -webkit-border-radius: 6px 6px 6px 6px;
+  -moz-border-radius: 6px 6px 6px;
+  border-radius: 6px 6px 6px 6px;
+}
+
+.dropdown-submenu>.dropdown-menu-left {
+  left: 0 !important;
 }
 
 .dropdown-submenu:hover>.dropdown-menu {
