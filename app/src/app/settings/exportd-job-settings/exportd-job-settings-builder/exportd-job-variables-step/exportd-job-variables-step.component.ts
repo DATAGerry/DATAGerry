@@ -16,14 +16,14 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Directive, Input, OnInit, Pipe, PipeTransform, HostListener} from '@angular/core';
+import {Component, Input, OnInit, Pipe, PipeTransform} from '@angular/core';
 import { CmdbMode } from '../../../../framework/modes.enum';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbType } from '../../../../framework/models/cmdb-type';
 import { TypeService } from '../../../../framework/services/type.service';
 import { ExportdJobDestinationsStepComponent } from '../exportd-job-destinations-step/exportd-job-destinations-step.component';
 import { ExternalSystemService } from '../../../services/external_system.service';
-import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
+import { DndDropEvent } from 'ngx-drag-drop';
 import { TemplateHelperService } from '../../../services/template-helper.service';
 
 
@@ -35,7 +35,7 @@ export class FilterPipe implements PipeTransform {
 
   transform(value: any, args?: any): any {
     const newArr = [];
-    value.forEach((item, index) => {
+    value.forEach((item) => {
       if (newArr.findIndex(i => i.className === item.className) === -1) {
         newArr.push(item);
       }
