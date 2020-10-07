@@ -56,7 +56,6 @@
                       </a>
                     </div>
                   </div>
-
                   <div class="form-group">
                     <label for="variableDefault{{s}}">Default Value <span class="required">*</span></label>
                       <div class="input-group">
@@ -70,32 +69,33 @@
                         <span class="input-group-btn">
                           <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" type="button" (click)="filterTypes()">Template Variables</button>
                             <ul class="dropdown-menu">
-                              <div *ngFor="let type of typesInSources">
-                                <li class="btn dropdown-submenu" (mouseenter)="determineDropDownDirection()">
+                              <li *ngFor="let type of typesInSources">
+                                <div class="btn dropdown-submenu" (mouseenter)="determineDropDownDirection()">
                                   <span class="dropdown-toggle pr-5"  data-toggle="dropdown" aria-haspopup="true"><i class="fas fa-crop-alt"></i>  {{type.label}}</span>
                                   <ng-container *ngTemplateOutlet="List; context:{ $implicit: defaultTemplateData[type.public_id] }"></ng-container>
-                                </li>
-                              </div>
-                              <ng-template #List let-templateHelperData>
-                                <ul class="dropdown-menu">
-                                  <div *ngFor="let item of templateHelperData; let i = index">
-                                    <div *ngIf="item.subdata?.length > 0; else button">
-                                      <li class="btn dropdown-submenu">
-                                        <span class="dropdown-toggle pr-5" (mouseenter)="determineDropDownDirection()" data-toggle="dropdown" aria-haspopup="true"><i class="fas fa-angle-right"></i>  {{item.label}}</span>
-                                        <ng-container *ngTemplateOutlet="List; context:{ $implicit: item.subdata }"></ng-container>
+                                </div>
+                                <ng-template #List let-templateHelperData>
+                                  <ul class="dropdown-menu">
+                                    <ng-container *ngFor="let item of templateHelperData; let i = index">
+                                      <li>
+                                        <ng-template [ngIf]="item.subdata?.length > 0" [ngIfElse]='button'>
+                                          <div class="btn dropdown-submenu">
+                                            <span class="dropdown-toggle pr-5" (mouseenter)="determineDropDownDirection()" data-toggle="dropdown" aria-haspopup="true"><i class="fas fa-angle-right"></i>  {{item.label}}</span>
+                                            <ng-container *ngTemplateOutlet="List; context:{ $implicit: item.subdata }"></ng-container>
+                                          </div>
+                                        </ng-template>
+                                        <ng-template #button>
+                                          <div class="btn" (click)="setDefaultValue(s, item.templatedata, variable)"><i class="{{isID(i)}}"></i>  {{item.label}}</div>
+                                        </ng-template>
                                       </li>
-                                    </div>
-                                    <ng-template #button>
-                                      <li class="btn" (click)="setDefaultValue(s, item.templatedata, variable)"><i class="{{isID(i)}}"></i>  {{item.label}}</li>
-                                    </ng-template>
-                                  </div>
-                                </ul>
-                              </ng-template>
+                                    </ng-container>
+                                  </ul>
+                                </ng-template>
+                              </li>
                             </ul>
-                    </span>
+                        </span>
                       </div>
                   </div>
-
                   <ng-container formArrayName="templates">
                     <label>Templates</label>
                     <table class="table table-bordered">
@@ -136,17 +136,17 @@
                                 <button class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" type="button">Template variables</button>
                                     <ng-template #recursiveList let-templateHelperData>
                                       <ul class="dropdown-menu">
-                                        <div *ngFor="let item of templateHelperData; let i = index">
+                                        <li *ngFor="let item of templateHelperData; let i = index">
                                           <div *ngIf="item.subdata?.length > 0; else button" (mouseenter)="determineDropDownDirection()">
-                                            <li class="btn dropdown-submenu">
+                                            <div class="btn dropdown-submenu">
                                               <span class="dropdown-toggle pr-5" data-toggle="dropdown" aria-haspopup="true"><i class="fas fa-angle-right"></i>  {{item.label}}</span>
                                               <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item.subdata }"></ng-container>
-                                            </li>
+                                            </div>
                                           </div>
                                           <ng-template #button>
-                                            <li class="btn" (click)="setTemplateValue(s, iy, item.templatedata, templ)"><i class="{{isID(i)}}"></i>  {{item.label}}</li>
+                                            <div class="btn" (click)="setTemplateValue(s, iy, item.templatedata, templ)"><i class="{{isID(i)}}"></i>  {{item.label}}</div>
                                           </ng-template>
-                                        </div>
+                                        </li>
                                       </ul>
                                     </ng-template>
                                    <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: getTemplateHelperData(s, iy) }"></ng-container>
@@ -168,7 +168,6 @@
             </div>
           </ng-container>
         </section>
-
       </ng-container>
     </form>
   </div>

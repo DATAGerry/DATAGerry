@@ -258,7 +258,7 @@ export class ExportdJobVariablesStepComponent implements OnInit {
     determine();
   }
 
-  private filterTypes() {
+  public filterTypes() {
     // gets all type IDs from the data received form sources
     const typeArray = [];
     this.sources.forEach( source => {
@@ -278,7 +278,7 @@ export class ExportdJobVariablesStepComponent implements OnInit {
     });
   }
 
-  private isID(field) {
+  public isID(field) {
     // used to determine wether the field calling it is the first in the list where the Public ID is located
     if (field === 0) {
       return 'fas fa-list-ol';
