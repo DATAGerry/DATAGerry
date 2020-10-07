@@ -168,8 +168,8 @@ export class ExportdJobVariablesStepComponent implements OnInit {
   public delTemplate(index, event): void {
     const control = this.getVariableAsFormArray().at(event).get('templates') as FormArray;
     control.removeAt(index);
-    if (this.templateHelperData[index]) {
-      delete this.templateHelperData[index];
+    if (this.templateHelperData[event][index]) {
+      delete this.templateHelperData[event][index];
     }
   }
 
