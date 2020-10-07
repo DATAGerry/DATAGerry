@@ -50,10 +50,16 @@ media_file_blueprint = APIBlueprint('media_file_blueprint', __name__, url_prefix
 @media_file_blueprint.parse_collection_parameters()
 def get_file_list(params: CollectionParameters):
     """
-    get all objects in database
+    Get all objects in database
+
+    Args:
+        params (CollectionParameters): Passed parameters over the http query string + optional `view` parameter.
+
+    Raises:
+        MediaFileManagerGetError: If the files could not be found.
 
     Returns:
-        list of media_files
+        list of files
     """
     try:
         metadata = generate_metadata(params=params)
@@ -74,14 +80,28 @@ def add_new_file(request_user: User):
         Any existing value that matches filename and the metadata is deleted. Before saving a value.
         GridFS document under the specified key is deleted.
 
+        For Example:
+            Create a unique media file element:
+             - Folders in the same directory are unique.
+             - The Folder-Name can exist in different directories
+
+            Create subfolders:
+             - Selected folder is considered as parent
+
+            This also applies for files
+
         File:
             File is stored under 'request.files["file"]'
 
         Metadata:
             Metadata are stored under 'request.form["Metadata"]'
 
+        Raises:
+            MediaFileManagerGetError: If the file could not be found.
+            MediaFileManagerInsertError: If something went wrong during insert.
+
         Args:
-            request_user (User): the instance of the started user
+            request_user (User): the instance of the started user (last modifier)
         Returns:
             New MediaFile.
         """
@@ -113,6 +133,22 @@ def add_new_file(request_user: User):
 @insert_request_user
 @right_required('base.framework.object.edit')
 def update_file(request_user: User):
+    """ This method updates a file to the specified section in the document.
+        Any existing value that matches the file name and metadata is taken into account.
+
+        Changes:
+            Is stored under 'request.json'
+
+        Raises:
+            MediaFileManagerUpdateError: If something went wrong during update.
+
+        Args:
+            Args:
+            request_user (User): the instance of the started user (last modifier)
+
+        Returns: MediaFile as JSON
+
+            """
     try:
         add_data_dump = json.dumps(request.json)
         new_file_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
@@ -135,23 +171,16 @@ def update_file(request_user: User):
 @media_file_blueprint.route('/<string:filename>', methods=['GET'])
 @media_file_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_file(filename: str):
-    """ Validation: Check folder name for uniqueness
+    """ This method fetch a file to the specified section of the document.
+        Any existing value that matches the file name and metadata will be considered.
 
-        For Example
-
-        Create a unique media file element:
-         - Folders in the same directory are unique.
-         - The Folder-Name can exist in different directories
-
-        Create subfolders:
-         - Selected folder is considered as parent
-
-        This also applies for files
+        Raises:
+            MediaFileManagerGetError: If the file could not be found.
 
         Args:
             filename: name must be unique
 
-        Returns: MediaFile
+        Returns: MediaFile as JSON
 
         """
     try:
@@ -166,11 +195,23 @@ def get_file(filename: str):
 @media_file_blueprint.route('/download/<path:filename>', methods=['POST'])
 @media_file_blueprint.protect(auth=True, right='base.framework.object.view')
 def download_file(filename: str):
+    """ This method download a file to the specified section of the document.
+        Any existing value that matches the file name and metadata will be considered.
+
+        Raises:
+            MediaFileManagerGetError: If the file could not be found.
+
+        Args:
+            filename (str): name must be unique
+
+        Returns: File
+
+        """
     try:
         filter_metadata = generate_metadata_filter('metadata', request)
         filter_metadata.update({'filename': filename})
         result = media_file_manager.get_file(metadata=filter_metadata, blob=True)
-    except MediaFileManagerInsertError:
+    except MediaFileManagerGetError:
         return abort(500)
 
     return Response(
@@ -186,6 +227,19 @@ def download_file(filename: str):
 @media_file_blueprint.route('<int:public_id>', methods=['DELETE'])
 @media_file_blueprint.protect(auth=True, right='base.framework.object.edit')
 def delete_file(public_id: int):
+    """ This method deletes a file in the specified section of the document for storing workflow data.
+        Any existing value that matches the file name and metadata is deleted. Before saving a value.
+        GridFS document under the specified key is deleted.
+
+    Raises:
+        MediaFileManagerDeleteError: When something went wrong during the deletion.
+
+    Args:
+        public_id (int): Public ID of the File
+
+    Returns:
+         Delete result with the deleted File as JSON.
+    """
     try:
         deleted = media_file_manager.get_file(metadata={'public_id': public_id})
         for _id in recursive_delete_filter(public_id, media_file_manager):
