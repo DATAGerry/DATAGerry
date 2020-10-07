@@ -45,8 +45,11 @@ export class FilemanagerModalComponent implements OnInit {
 
   public postFileOnDone() {
     const {reference, reference_type} = this.localMetadata;
+    const newReference = typeof reference === 'number' ? [reference] : reference;
     this.selectedFileElements.files.forEach(fileElement => {
-      fileElement.metadata.reference = reference;
+      const tempReference = fileElement.metadata.reference;
+      fileElement.metadata.reference = typeof tempReference === 'number' ?
+        [tempReference].concat(newReference) : tempReference.concat(newReference);
       fileElement.metadata.reference_type = reference_type;
       this.fileService.putFile(fileElement).subscribe((resp) => {
         this.toast.info(`File(s) was successfully added: ${resp.filename}`);

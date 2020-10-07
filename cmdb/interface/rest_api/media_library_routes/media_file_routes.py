@@ -14,10 +14,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+
 import logging
 import json
-from bson import json_util
 
+from bson import json_util
 from flask import abort, request, current_app, Response
 from cmdb.media_library.media_file_manager import MediaFileManagerGetError, \
     MediaFileManagerDeleteError, MediaFileManagerUpdateError, MediaFileManagerInsertError
@@ -25,7 +26,7 @@ from cmdb.media_library.media_file_manager import MediaFileManagerGetError, \
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
 from cmdb.user_management import User
 from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import get_element_from_data_request, \
-    get_file_in_request, generate_metadata_filter, recursive_delete_filter, generate_metadata
+    get_file_in_request, generate_metadata_filter, recursive_delete_filter, generate_collection_parameters
 
 
 from cmdb.interface.response import GetMultiResponse, InsertSingleResponse
@@ -62,7 +63,7 @@ def get_file_list(params: CollectionParameters):
         list of files
     """
     try:
-        metadata = generate_metadata(params=params)
+        metadata = generate_collection_parameters(params=params)
         response_query = {'limit': params.limit, 'skip': params.skip, 'sort': [(params.sort, params.order)]}
         output = media_file_manager.get_many(metadata, **response_query)
         api_response = GetMultiResponse(output.result, total=output.total, params=params, url=request.url)
@@ -91,7 +92,7 @@ def add_new_file(request_user: User):
             This also applies for files
 
         File:
-            File is stored under 'request.files["file"]'
+            File is stored under 'request.files.get('files')'
 
         Metadata:
             Metadata are stored under 'request.form["Metadata"]'
@@ -109,14 +110,19 @@ def add_new_file(request_user: User):
         file = get_file_in_request('file')
         filter_metadata = generate_metadata_filter('metadata', request)
         filter_metadata.update({'filename': file.filename})
+        metadata = get_element_from_data_request('metadata', request)
 
         # Check if file exists
         is_exist_file = media_file_manager.exist_file(filter_metadata)
+        exist = None
         if is_exist_file:
             exist = media_file_manager.get_file(filter_metadata)
             media_file_manager.delete_file(exist['public_id'])
 
-        metadata = get_element_from_data_request('metadata', request)
+        # If file exist overwrite the references from previous file
+        if exist:
+            metadata['reference'] = exist['metadata']['reference']
+            metadata['reference_type'] = exist['metadata']['reference_type']
         metadata['author_id'] = request_user.public_id
         metadata['mime_type'] = file.mimetype
 
@@ -159,6 +165,7 @@ def update_file(request_user: User):
         data['filename'] = new_file_data['filename']
         data['metadata'] = new_file_data['metadata']
         data['metadata']['author_id'] = new_file_data['metadata']['author_id'] = request_user.get_public_id()
+
         media_file_manager.updata_file(data)
     except MediaFileManagerUpdateError:
         return abort(500)

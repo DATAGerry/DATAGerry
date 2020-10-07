@@ -52,14 +52,21 @@ def generate_metadata_filter(element, _request=None, params=None):
             if not data:
                 data = get_element_from_data_request(element, _request)
         for key, value in data.items():
-            filter_metadata.update({"metadata.%s" % key: value})
+            if 'reference' == key and value:
+                if isinstance(value, list):
+                    filter_metadata.update({"metadata.%s" % key: {'$in': value}})
+                else:
+                    filter_metadata.update({"metadata.%s" % key: {'$in': [int(value)]}})
+            else:
+                filter_metadata.update({"metadata.%s" % key: value})
+
     except (IndexError, KeyError, TypeError, Exception) as ex:
         LOGGER.error(f'Metadata was not provided - Exception: {ex}')
         return abort(400)
     return filter_metadata
 
 
-def generate_metadata(params: CollectionParameters):
+def generate_collection_parameters(params: CollectionParameters):
 
     builder = Builder()
     search = params.optional.get('searchTerm')

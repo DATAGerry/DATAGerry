@@ -130,11 +130,20 @@ export class AttachmentsListModalComponent implements OnInit {
 
   /**
    * Delete selected file
-   * @param publicID from current filename
+   * @param fileElement current selected file
    */
-  public deleteFile(publicID: number) {
-    this.fileService.deleteFile(publicID, {}).subscribe(() =>
-      this.getFiles(this.defaultApiParameter)
-    );
+  public deleteFile(fileElement: FileElement) {
+    const {reference, reference_type} = this.metadata;
+    const newReference = typeof reference === 'number' ? [reference] : reference;
+    const tempReference = fileElement.metadata.reference;
+    fileElement.metadata.reference = typeof tempReference === 'number' ?
+      [tempReference].concat(newReference) : tempReference.concat(newReference);
+    fileElement.metadata.reference_type = reference_type;
+    fileElement.metadata.reference = fileElement.metadata.reference.filter(x => x !== reference);
+
+    this.fileService.putFile(fileElement).subscribe((resp) => {
+      this.getFiles(this.defaultApiParameter);
+      this.toast.info(`File was successfully solved: ${resp.filename}`);
+    });
   }
 }
