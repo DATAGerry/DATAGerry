@@ -135,7 +135,7 @@ export class AttachmentsListModalComponent implements OnInit {
   public deleteFile(fileElement: FileElement) {
     const {reference, reference_type} = this.metadata;
     const newReference = typeof reference === 'number' ? [reference] : reference;
-    const tempReference = fileElement.metadata.reference;
+    const tempReference = fileElement.metadata.reference ? fileElement.metadata.reference : [];
     fileElement.metadata.reference = typeof tempReference === 'number' ?
       [tempReference].concat(newReference) : tempReference.concat(newReference);
     fileElement.metadata.reference_type = reference_type;

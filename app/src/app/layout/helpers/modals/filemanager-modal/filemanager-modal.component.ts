@@ -47,7 +47,7 @@ export class FilemanagerModalComponent implements OnInit {
     const {reference, reference_type} = this.localMetadata;
     const newReference = typeof reference === 'number' ? [reference] : reference;
     this.selectedFileElements.files.forEach(fileElement => {
-      const tempReference = fileElement.metadata.reference;
+      const tempReference = fileElement.metadata.reference ? fileElement.metadata.reference : [];
       fileElement.metadata.reference = typeof tempReference === 'number' ?
         [tempReference].concat(newReference) : tempReference.concat(newReference);
       fileElement.metadata.reference_type = reference_type;
