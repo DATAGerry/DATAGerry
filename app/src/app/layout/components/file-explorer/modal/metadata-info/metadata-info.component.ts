@@ -6,7 +6,7 @@ import { ObjectService } from '../../../../../framework/services/object.service'
 import { CmdbType } from '../../../../../framework/models/cmdb-type';
 import { TypeService } from '../../../../../framework/services/type.service';
 import { RenderResult } from '../../../../../framework/models/cmdb-render';
-import {UserService} from "../../../../../management/services/user.service";
+import { UserService } from '../../../../../management/services/user.service';
 
 @Component({
   selector: 'cmdb-metadata-info',

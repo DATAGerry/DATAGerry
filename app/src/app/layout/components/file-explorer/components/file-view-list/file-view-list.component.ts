@@ -80,7 +80,9 @@ export class FileViewListComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    this.listView = false;
+    if (!changes.hasOwnProperty('listView')) {
+      this.listView = true;
+    }
   }
 
   public onSelect(value: FileElement, event?: Event): void {
