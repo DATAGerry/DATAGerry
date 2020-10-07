@@ -77,7 +77,6 @@ export class ExportdJobVariablesStepComponent implements OnInit {
           data.variables[i].templates.forEach((item, index) => {
             const control = forArray.controls[i].get('templates') as FormArray;
             control.push(this.createTemplate());
-            console.log(item.type + ':' + index);
             this.onOptionSelected(i, index, item.type);
           });
           i++;
