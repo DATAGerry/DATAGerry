@@ -71,8 +71,8 @@
                           <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown" type="button" (click)="filterTypes()">Template Variables</button>
                             <ul class="dropdown-menu">
                               <div *ngFor="let type of typesInSources">
-                                <li class="btn dropdown-submenu">
-                                  <span class="dropdown-toggle pr-5" (mouseenter)="determineDropDownDirection()" data-toggle="dropdown" aria-haspopup="true"><i class="fas fa-crop-alt"></i>  {{type.label}}</span>
+                                <li class="btn dropdown-submenu" (mouseenter)="determineDropDownDirection()">
+                                  <span class="dropdown-toggle pr-5"  data-toggle="dropdown" aria-haspopup="true"><i class="fas fa-crop-alt"></i>  {{type.label}}</span>
                                   <ng-container *ngTemplateOutlet="List; context:{ $implicit: defaultTemplateData[type.public_id] }"></ng-container>
                                 </li>
                               </div>
