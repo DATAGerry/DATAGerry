@@ -116,7 +116,7 @@
                                    && (templ.get('type').dirty
                                    || templ.get('type').touched), 'is-invalid': templ.get('type').invalid
                                    && (templ.get('type').dirty || templ.get('type').touched)}"
-                                  (ngModelChange)="onOptionSelected(iy, $event)"
+                                  (ngModelChange)="onOptionSelected(s, iy, $event)"
                                   required>
                             <option *ngFor="let order of typeList; let i = index" [value]="order.public_id">
                               {{order.label}} #{{order.public_id}}
@@ -125,7 +125,7 @@
                         </td>
                         <td>
                           <div class="input-group">
-                          <input id="input-{{iy}}" type="text" class="form-control" formControlName="template"
+                          <input id="input{{s}}{{iy}}" type="text" class="form-control" formControlName="template"
                                  [ngClass]="{ 'is-valid': templ.get('template').valid
                                    && (templ.get('template').dirty
                                    || templ.get('template').touched), 'is-invalid': templ.get('template').invalid
@@ -144,12 +144,12 @@
                                             </li>
                                           </div>
                                           <ng-template #button>
-                                            <li class="btn" (click)="setTemplateValue(iy, item.templatedata, templ)"><i class="{{isID(i)}}"></i>  {{item.label}}</li>
+                                            <li class="btn" (click)="setTemplateValue(s, iy, item.templatedata, templ)"><i class="{{isID(i)}}"></i>  {{item.label}}</li>
                                           </ng-template>
                                         </div>
                                       </ul>
                                     </ng-template>
-                                   <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: templateHelperData[iy] }"></ng-container>
+                                   <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: getTemplateHelperData(s, iy) }"></ng-container>
                             </span>
                           </div>
                         </td>

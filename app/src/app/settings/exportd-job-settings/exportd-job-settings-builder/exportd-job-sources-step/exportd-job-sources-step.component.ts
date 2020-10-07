@@ -32,7 +32,6 @@ import { Subscription } from 'rxjs';
 export class ExportdJobSourcesStepComponent implements OnInit, OnDestroy {
 
   private typeSubscription: Subscription;
-  @Input() selectedTypes: any [] = [];
 
   @Input()
   set preData(data: any) {
@@ -45,7 +44,6 @@ export class ExportdJobSourcesStepComponent implements OnInit, OnDestroy {
         this.sourcesForm.removeControl('sources');
         const forArray: FormArray = this.formBuilder.array([]);
         for (const source of data.sources) {
-          this.selectedTypes.push(source.type_id);
           forArray.push(this.formBuilder.group({
             type_id: new FormControl('', Validators.required),
             condition: this.formBuilder.array([])

@@ -74,10 +74,12 @@ export class ExportdJobVariablesStepComponent implements OnInit {
         // Create templates
         i = 0;
         while (i < forArray.controls.length) {
-          for (const item of data.variables[i].templates) {
+          data.variables[i].templates.forEach((item, index) => {
             const control = forArray.controls[i].get('templates') as FormArray;
             control.push(this.createTemplate());
-          }
+            console.log(item.type + ':' + index);
+            this.onOptionSelected(i, index, item.type);
+          });
           i++;
         }
 
@@ -188,16 +190,25 @@ export class ExportdJobVariablesStepComponent implements OnInit {
     this.dragVariableName = name;
   }
 
-  public onOptionSelected(index, value) {
+  public onOptionSelected(superindex, index, value) {
     // gets template helper data of the given object and inserts it at the specified index of this.templatehelperdata
     this.templateHelperService.getObjectTemplateHelperData(value).then(helperData => {
-      this.templateHelperData[index] = helperData;
+      this.templateHelperData[superindex][index] = helperData;
     });
   }
 
-  public setTemplateValue(index, value, variable) {
+  public getTemplateHelperData(superindex, index) {
+    // used to determine whether the an array exists in the superindex and returns it or an empty array
+    // built due to frontend breaking if the html tries to get it directly
+    if (!this.templateHelperData[superindex]) {
+      this.templateHelperData[superindex] = [];
+    }
+    return this.templateHelperData[superindex][index];
+  }
+
+  public setTemplateValue(superindex, index, value, variable) {
     // sets the text of the specified input field and validates the field in the form
-    (document.getElementById('input-' + index) as HTMLInputElement).value = value;
+    (document.getElementById('input' + superindex + index) as HTMLInputElement).value = value;
     variable.patchValue({
       template: value
     });
