@@ -31,41 +31,41 @@ import { takeUntil } from 'rxjs/operators';
 })
 export class GroupsComponent implements OnInit, OnDestroy {
 
+  /**
+   * Subscriber replay for auto unsubscribe.
+   */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
+  /**
+   * List of current loaded groups.
+   */
   public groups: Array<Group> = [];
+
+  /**
+   * Backend http call response for user groups.
+   */
   private groupAPIResponse: APIGetMultiResponse<Group>;
+
+  /**
+   * Generic table options.
+   */
   public tableOptions: any;
 
   constructor(private groupService: GroupService) {
   }
 
+  /**
+   * Init function for group component.
+   * Loading the default table options and auto load first set of groups.
+   */
   public ngOnInit(): void {
     this.tableOptions = {
       columnDefs: [
-        {
-          orderable: true,
-          searchable: true,
-          targets: [0, 1, 2]
-        },
-        {
-          name: 'public_id',
-          targets: [0]
-        },
-        {
-          name: 'name',
-          targets: [1]
-        },
-        {
-          name: 'label',
-          targets: [2]
-        },
-        {
-          name: 'action',
-          targets: [3],
-          orderable: false,
-          searchable: false
-        }
+        { orderable: true, searchable: true, targets: [0, 1, 2] },
+        { name: 'public_id', targets: [0] },
+        { name: 'name', targets: [1] },
+        { name: 'label', targets: [2] },
+        { name: 'action', targets: [3], orderable: false, searchable: false }
       ],
       ordering: true,
       searching: true,
@@ -121,6 +121,9 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   }
 
+  /**
+   * On destroying the group component, auto unsubscribe the api subscriptions.
+   */
   public ngOnDestroy(): void {
     this.subscriber.next();
     this.subscriber.complete();

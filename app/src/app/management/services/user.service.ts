@@ -84,7 +84,8 @@ export class UserService<T = User> implements ApiService {
     const options = httpObserveOptions;
     let httpParams: HttpParams = new HttpParams();
     if (params.filter !== undefined) {
-      httpParams = httpParams.set('filter', params.filter);
+      const filter = JSON.stringify(params.filter);
+      httpParams = httpParams.set('filter', filter);
     }
     httpParams = httpParams.set('limit', params.limit.toString());
     httpParams = httpParams.set('sort', params.sort);
@@ -113,9 +114,16 @@ export class UserService<T = User> implements ApiService {
   /**
    * Get the number of all users.
    */
-  public countUsers(): Observable<number> {
-    return this.api.callHead<T>(`${ this.servicePrefix }/`).pipe(
+  public countUsers(filter?: any): Observable<number> {
+    const options = httpObserveOptions;
+    if (filter !== undefined) {
+      let httpParams: HttpParams = new HttpParams();
+      httpParams = httpParams.set('filter', JSON.stringify(filter));
+      options.params = httpParams;
+    }
+    return this.api.callHead<T>(`${ this.servicePrefix }/`, options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        console.log(+apiResponse.headers.get('X-Total-Count'));
         return +apiResponse.headers.get('X-Total-Count');
       })
     );

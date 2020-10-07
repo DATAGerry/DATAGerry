@@ -1,3 +1,8 @@
-<cmdb-group-form [group]="group"></cmdb-group-form>
-<hr />
-{{group | json}}
+<div id="group-edit-headline" class="d-flex justify-content-between">
+  <h1>Edit group: {{group?.label}}
+  </h1>
+  <button class="btn btn-sm btn-outline-secondary" [routerLink]="['/', 'management', 'groups']">Back</button>
+</div>
+
+<hr/>
+<cmdb-group-form [group]="group" (submit)="submit($event)"></cmdb-group-form>

@@ -16,11 +16,12 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { GroupService } from '../../services/group.service';
 import { Subject } from 'rxjs';
 import { Group } from '../../models/group';
 import { ActivatedRoute, Data } from '@angular/router';
+import { GroupFormComponent } from '../components/group-form/group-form.component';
 
 @Component({
   selector: 'cmdb-group-edit',
@@ -29,22 +30,25 @@ import { ActivatedRoute, Data } from '@angular/router';
 })
 export class GroupEditComponent implements OnInit, OnDestroy {
 
+  @ViewChild(GroupFormComponent, {static: true}) private groupForm: GroupFormComponent;
   private unSubscriber: Subject<void> = new Subject<void>();
 
   public group: Group;
 
   constructor(private route: ActivatedRoute, private groupService: GroupService) {
-    const data: Data = route.snapshot.data;
-    console.log(data);
   }
 
   public ngOnInit(): void {
     this.group = this.route.snapshot.data.group as Group;
+    this.groupForm.nameControl.clearAsyncValidators();
   }
 
   public ngOnDestroy(): void {
     this.unSubscriber.next();
     this.unSubscriber.complete();
+  }
+
+  public submit(group: Group): void {
   }
 
 }

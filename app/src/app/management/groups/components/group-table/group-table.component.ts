@@ -27,6 +27,7 @@ import { Group } from '../../../models/group';
 })
 export class GroupTableComponent implements OnInit {
 
+
   @Input() public groups: Array<Group> = [];
 
   /**
@@ -35,9 +36,11 @@ export class GroupTableComponent implements OnInit {
   @Input() public tableOptions: any = {};
   @ViewChild(DataTableDirective, { static: false }) dtElement: DataTableDirective;
 
-  constructor() { }
+  constructor() {
+  }
 
   public ngOnInit(): void {
   }
+
 
 }

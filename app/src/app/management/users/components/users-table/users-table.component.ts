@@ -19,8 +19,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { User } from '../../../models/user';
 import { GroupService } from '../../../services/group.service';
-import { Observable } from 'rxjs';
-import { Group } from '../../../models/group';
+
 
 @Component({
   selector: 'cmdb-users-table',
@@ -31,6 +30,10 @@ export class UsersTableComponent implements OnInit {
 
   @Input() public users: Array<User>;
 
+  /**
+   * Datatable
+   */
+  @Input() public tableOptions: any = {};
 
   constructor(private groupService: GroupService) {
   }

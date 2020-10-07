@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { Group } from '../../../models/group';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -32,7 +32,7 @@ import { CollectionParameters } from '../../../../services/models/api-parameter'
   templateUrl: './group-form.component.html',
   styleUrls: ['./group-form.component.scss']
 })
-export class GroupFormComponent implements OnInit, OnDestroy {
+export class GroupFormComponent implements OnInit, OnChanges, OnDestroy {
 
   private subscriber: Subject<void>;
   public form: FormGroup;
@@ -41,6 +41,12 @@ export class GroupFormComponent implements OnInit, OnDestroy {
    * Passable group data if there are pre data.
    */
   @Input() public group: Group;
+
+
+  /**
+   * Are rights loading.
+   */
+  public rightLoading: boolean = false;
 
   /**
    * Validation status event emitter.
@@ -55,7 +61,8 @@ export class GroupFormComponent implements OnInit, OnDestroy {
   /**
    * Current right list
    */
-  public rights: Array<Right> = [];
+  public loadedRights: Array<Right> = [];
+  public totalItems: number = 0;
   private currentRightPage: number = 1;
   private totalRightPage: number = -1;
 
@@ -82,11 +89,37 @@ export class GroupFormComponent implements OnInit, OnDestroy {
     this.loadRights(this.currentRightPage);
   }
 
+  /**
+   * OnChange call for group form component.
+   * Patches passed group data into the form.
+   *
+   * @param changes SimpleChanges of all input changes.
+   */
+  public ngOnChanges(changes: SimpleChanges): void {
+    if (changes.group && changes.group.currentValue !== changes.group.previousValue) {
+      const groupRights: Array<Right> = this.group.rights;
+      this.group.rights = [];
+      for (const r of groupRights) {
+        this.group.rights.push(r.name);
+      }
+      this.form.patchValue(this.group);
+      this.form.markAllAsTouched();
+    }
+  }
+
+  /**
+   * Load next rights if scroll-end was reached.
+   */
   public onScrollToEnd() {
     this.loadRights(this.currentRightPage + 1);
   }
 
+  /**
+   * Loading the rights.
+   * @param page current page number.
+   */
   private loadRights(page: number): void {
+    this.rightLoading = true;
     if (page !== this.totalRightPage) {
       this.rightService.getRights({
         filter: undefined,
@@ -96,12 +129,11 @@ export class GroupFormComponent implements OnInit, OnDestroy {
         page
       }).pipe(takeUntil(this.subscriber))
         .subscribe((apiResponse: APIGetMultiResponse<Right>) => {
+          this.totalItems = +apiResponse.total;
           this.currentRightPage = +apiResponse.pager.page;
-          console.log(this.currentRightPage);
           this.totalRightPage = +apiResponse.pager.total_pages;
-          console.log(this.totalRightPage);
-          this.rights.push(...apiResponse.results as Array<Right>);
-          console.log(this.rights);
+          this.loadedRights.push(...apiResponse.results as Array<Right>);
+          this.rightLoading = false;
         });
     }
   }
@@ -109,14 +141,14 @@ export class GroupFormComponent implements OnInit, OnDestroy {
   /**
    * Get the form control for name.
    */
-  public get name(): FormControl {
+  public get nameControl(): FormControl {
     return this.form.get('name') as FormControl;
   }
 
   /**
    * Get the form control for label.
    */
-  public get label(): FormControl {
+  public get labelControl(): FormControl {
     return this.form.get('label') as FormControl;
   }
 
