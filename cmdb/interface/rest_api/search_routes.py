@@ -87,15 +87,16 @@ def search_framework(request_user: User):
     except Exception as err:
         LOGGER.error(f'[Search Framework]: {err}')
         return abort(400, err)
-
     try:
         builder = PipelineBuilder()
         search_parameters = SearchParam.from_request(search_params)
+
         query: Pipeline = builder.build(search_parameters, object_manager, only_active)
 
         searcher = SearcherFramework(manager=object_manager)
-        result = searcher.aggregate(pipeline=query, request_user=request_user, limit=limit, skip=skip)
-        LOGGER.debug(result.__dict__)
+        result = searcher.aggregate(pipeline=query, request_user=request_user, limit=limit, skip=skip,
+                                    resolve=resolve_object_references)
+
     except Exception as err:
         LOGGER.error(f'[Search Framework Rest]: {err}')
         return make_response([], 204)

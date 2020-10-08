@@ -23,7 +23,7 @@ from cmdb.framework.cmdb_render import RenderResult, RenderList
 from cmdb.search import Search
 from cmdb.search.query import Query, Pipeline
 from cmdb.search.query.pipe_builder import PipelineBuilder
-from cmdb.search.search_result import SearchResult
+from cmdb.search.search_result import SearchResult, SearchReferenceResults
 from cmdb.user_management import User
 
 LOGGER = logging.getLogger(__name__)
@@ -53,12 +53,39 @@ class SearcherFramework(Search[CmdbObjectManager]):
         plb = PipelineBuilder(pipeline)
 
         # define search output
-        stages: dict = {
-            'metadata': [PipelineBuilder.count_('total')],
-            'data': [
-                PipelineBuilder.skip_(skip),
-                PipelineBuilder.limit_(limit)
-            ],
+        stages: dict = {}
+        stages.update({'metadata': [PipelineBuilder.count_('total')]})
+        stages.update({'data': [
+            PipelineBuilder.skip_(skip),
+            PipelineBuilder.limit_(limit)
+        ]})
+
+        if kwargs.get('resolve', False):
+            references_stage: dict = {
+                'references': [
+                    PipelineBuilder.lookup_sub_(
+                        'framework.objects',
+                        {'ref_id': '$public_id'},
+                        [{'$match': {'$expr': {'$in': ['$$ref_id', '$fields.value']}}}],
+                        'ref_data'),
+                    PipelineBuilder.unwind_(path='$ref_data'),
+                    PipelineBuilder.project_(specification={
+                        '_id': 0,
+                        'public_id': 1,
+                        'ref_data': 1
+                    }),
+                    {'$group': {
+                        '_id': '$$ROOT.public_id',
+                        'objects': {'$push': '$ref_data'},
+                        'total': {
+                            '$sum': 1
+                        }
+                    }}
+                ]
+            }
+            stages.update(references_stage)
+
+        group_stage: dict = {
             'group': [
                 PipelineBuilder.lookup_(TypeModel.COLLECTION, 'type_id', 'public_id', 'lookup_data'),
                 PipelineBuilder.unwind_('$lookup_data'),
@@ -75,6 +102,8 @@ class SearcherFramework(Search[CmdbObjectManager]):
                 PipelineBuilder.sort_("total", -1)
             ]
         }
+        stages.update(group_stage)
+
         plb.add_pipe(PipelineBuilder.facet_(stages))
 
         raw_search_result = self.manager.aggregate(collection=CmdbObject.COLLECTION, pipeline=plb.pipeline)
@@ -91,8 +120,22 @@ class SearcherFramework(Search[CmdbObjectManager]):
             pre_rendered_result_list = [CmdbObject(**raw_result) for raw_result in raw_search_result_list_entry['data']]
             rendered_result_list = RenderList(pre_rendered_result_list, request_user,
                                               object_manager=self.manager).render_result_list()
+
             total_results = raw_search_result_list_entry['metadata'][0].get('total', 0)
             group_result_list = raw_search_result_list[0]['group']
+            rendered_reference_list = []
+            if kwargs.get('resolve', False):
+                raw_reference_results = raw_search_result_list[0]['references']
+                reference_results: List[SearchReferenceResults] = []
+
+                for reference_group in raw_reference_results:
+                    reference_group_objects = [CmdbObject(**raw_result) for raw_result in
+                                               reference_group.get('objects', [])]
+                    rendered_reference_list = RenderList(reference_group_objects, request_user,
+                                                         object_manager=self.manager).render_result_list()
+                    reference_results.append(
+                        SearchReferenceResults(reference_group.get('_id'), rendered_reference_list))
+                rendered_reference_list = reference_results
         else:
             rendered_result_list = []
             group_result_list = []
@@ -102,6 +145,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
             results=rendered_result_list,
             total_results=total_results,
             groups=group_result_list,
+            references=rendered_reference_list,
             alive=raw_search_result.alive,
             matches_regex=matches_regex,
             limit=limit,
