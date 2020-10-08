@@ -20,11 +20,12 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SearchService } from './search.service';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import { SearchResultList } from './models/search-result';
 import { HttpParams } from '@angular/common/http';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { JwPaginationComponent } from 'jw-angular-pagination';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   templateUrl: './search.component.html',
@@ -32,51 +33,112 @@ import { JwPaginationComponent } from 'jw-angular-pagination';
 })
 export class SearchComponent implements OnInit, OnDestroy {
 
+  /**
+   * Get the form control of the input field.
+   */
+  public get input(): AbstractControl {
+    return this.searchInputForm.get('input');
+  }
+
+  /**
+   * Default page size
+   */
+  private readonly defaultLimit: number = 10;
+
+  /**
+   * Results skipped for pagination.
+   * Will be something like: skip = limit * (page-1).
+   */
+  private skip: number = 0;
+
+  /**
+   * Used page size.
+   * Max number of displayed results.
+   */
+  public limit: number = this.defaultLimit;
+
+  /**
+   * Current page number.
+   */
+  public currentPage: number = 1;
+
+  /**
+   * Max number of size for pagination truncate.
+   */
+  public maxNumberOfSites: number[];
+
+
+  @ViewChild('paginationComponent', { static: false }) pagination: JwPaginationComponent;
+  private initSearch: boolean = true;
+  private initFilter: boolean = true;
+
+  /**
+   * Search form input group.
+   */
+  public searchInputForm: FormGroup;
+
+  /**
+   * List of search results.
+   */
+  public searchResultList: SearchResultList;
+  public filterResultList: any[];
+
+  /**
+   * Query parameters.
+   */
+  public queryParameters: any = [];
+
+  /**
+   * Resolve flag.
+   */
+  public resolve: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
+  /**
+   * Component un-subscriber.
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  /**
+   * Constructor of SearchComponent
+   *
+   * @param route Current activated route.
+   * @param spinner Spinner service.
+   * @param searchService API Search service.
+   */
   constructor(private route: ActivatedRoute, private spinner: NgxSpinnerService, private searchService: SearchService) {
-    this.queryParameterSubscription = new Subscription();
     this.searchInputForm = new FormGroup({
       input: new FormControl('', Validators.required)
     });
   }
 
-  public get input(): AbstractControl {
-    return this.searchInputForm.get('input');
-  }
-
-  // Pagination
-  private readonly defaultLimit: number = 10;
-  private skip: number = 0;
-  public limit: number = this.defaultLimit;
-  public currentPage: number = 1;
-  public maxNumberOfSites: number[];
-  @ViewChild('paginationComponent', { static: false }) pagination: JwPaginationComponent;
-  private initSearch: boolean = true;
-  private initFilter: boolean = true;
-
-  // Form
-  public searchInputForm: FormGroup;
-  // Results
-  public searchResultList: SearchResultList;
-  public filterResultList: any[];
-  // Parameters
-  public queryParameters: any = [];
-  // Subscription
-  private queryParameterSubscription: Subscription;
-
   public ngOnInit(): void {
-    this.queryParameterSubscription = this.route.queryParamMap.subscribe(params => {
+
+    this.route.queryParamMap.pipe(takeUntil(this.subscriber)).subscribe(params => {
       this.queryParameters = params.get('query');
+      if (params.has('resolve')) {
+        this.resolve = JSON.parse(params.get('resolve'));
+      }
       this.initSearch = true;
       this.initFilter = true;
       this.onSearch();
     });
+
+    this.resolve.asObservable().pipe(takeUntil(this.subscriber)).subscribe((change: boolean) => {
+      this.onSearch();
+    });
   }
 
+  /**
+   * Triggers the actual search api call.
+   */
   public onSearch(): void {
     this.spinner.show();
     let params = new HttpParams();
     params = params.set('limit', this.limit.toString());
     params = params.set('skip', this.skip.toString());
+    if (this.resolve.value) {
+      params = params.set('resolve', this.resolve.value.toString());
+    }
     this.searchService.postSearch(this.queryParameters, params).subscribe((results: SearchResultList) => {
       this.searchResultList = results;
       this.filterResultList = this.initFilter ? results.groups : this.filterResultList;
@@ -89,6 +151,10 @@ export class SearchComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Pagination page was changed.
+   * @param event: Data from the change event.
+   */
   public onChangePage(event): void {
     if (this.currentPage !== this.pagination.pager.currentPage) {
       this.currentPage = this.pagination.pager.currentPage;
@@ -101,11 +167,12 @@ export class SearchComponent implements OnInit, OnDestroy {
   public reSearch(value: any) {
     this.queryParameters = JSON.stringify(value.query);
     this.initSearch = true;
-    this.initFilter = value.rebuild ;
+    this.initFilter = value.rebuild;
     this.onSearch();
   }
 
   public ngOnDestroy(): void {
-    this.queryParameterSubscription.unsubscribe();
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 }

@@ -1,7 +1,8 @@
-
+{{resolve.value}}
 <cmdb-search-result-bar [queryParameters]="queryParameters"
                         [searchResultList]="searchResultList"
                         [filterResultList]="filterResultList"
+                        [resolve]="resolve"
                         (refreshSearch)="reSearch($event)"></cmdb-search-result-bar>
 
 <hr/>

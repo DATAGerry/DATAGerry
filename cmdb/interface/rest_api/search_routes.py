@@ -74,6 +74,7 @@ def search_framework(request_user: User):
         skip = request.args.get('skip', Search.DEFAULT_SKIP, int)
         only_active = _fetch_only_active_objs()
         search_params: dict = request.args.get('query') or '{}'
+        resolve_object_references: bool = request.args.get('resolve', False)
     except ValueError as err:
         return abort(400, err)
     try:
