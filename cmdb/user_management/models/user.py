@@ -51,6 +51,10 @@ class UserModel(CmdbDAO):
             'type': 'string',
             'default': DEFAULT_GROUP,
             'required': False
+        },
+        'password': {
+            'type': 'string',
+            'required': True
         }
     }
 

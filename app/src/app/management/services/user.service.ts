@@ -40,8 +40,12 @@ export const userExistsValidator = (userService: UserService, time: number = 500
   return (control: FormControl) => {
     return timer(time).pipe(switchMap(() => {
       return userService.getUserByName(control.value).pipe(
-        map(() => {
-          return { userExists: true };
+        map((response) => {
+          if (response === null) {
+            return null;
+          } else {
+            return { userExists: true };
+          }
         }),
         catchError(() => {
           return new Promise(resolve => {
@@ -123,7 +127,6 @@ export class UserService<T = User> implements ApiService {
     }
     return this.api.callHead<T>(`${ this.servicePrefix }/`, options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
-        console.log(+apiResponse.headers.get('X-Total-Count'));
         return +apiResponse.headers.get('X-Total-Count');
       })
     );
@@ -141,6 +144,7 @@ export class UserService<T = User> implements ApiService {
     options.params = params;
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        console.log(apiResponse);
         if (apiResponse.body.count === 0) {
           return null;
         }
