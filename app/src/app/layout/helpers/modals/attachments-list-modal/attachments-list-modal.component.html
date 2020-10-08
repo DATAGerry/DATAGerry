@@ -15,23 +15,23 @@
   </div>
   <div class="modal-body">
     <div id="uploadFileForm">
-      <div class="p-2">
+      <div class="container-fluid mb-2">
         <button type="button" class="btn btn-primary btn-lg btn-block" (click)="addAttachments()">
           <i class="fas fa-plus"></i> Add new Attachments
         </button>
       </div>
-      <div class="pre-scrollable" (scroll)="onScrollHost($event)">
-        <div class="container-fluid border p-2 mb-2 w-auto"
+      <div class="pre-scrollable-x-hidden" (scroll)="onScrollHost($event)">
+        <div class="container-fluid border mb-2 w-auto"
              *ngFor="let attachment of attachments">
           <div class="row align-items-center flex-nowrap">
-            <div class="col-auto">
+            <div class="col-2">
               <i [className]="attachment.filename | fileExtension"></i>
             </div>
             <div class="col-9 px-0">
-              <a (click)="downloadFile(attachment.filename)">{{attachment.filename}}</a>
+              <a (click)="downloadFile(attachment.filename)" class="text-break">{{attachment.filename}}</a>
               <p class="mb-0 text-muted">{{attachment.size | fileSize}}</p>
             </div>
-            <div class="col-auto px-0" [hidden]="attachment.inProcess"
+            <div class="col-2 px-0" [hidden]="attachment.inProcess"
                  *permissionLink="['base.framework.object.edit']">
               <!-- Button -->
               <a (click)="deleteFile(attachment)" class="btn btn-link btn-sm align-items-end">
