@@ -21,6 +21,8 @@ import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/r
 import { Group } from '../models/group';
 import { Observable } from 'rxjs';
 import { GroupService } from '../services/group.service';
+import { APIGetMultiResponse } from '../../services/models/api-response';
+import { CollectionParameters } from '../../services/models/api-parameter';
 
 /**
  * Resolver for a single group
@@ -36,5 +38,25 @@ export class GroupResolver implements Resolve<Group> {
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Group> | Promise<Group> | Group {
     const groupID: number = +route.paramMap.get('publicID');
     return this.groupService.getGroup(groupID);
+  }
+}
+
+/**
+ * Resolver for all groups
+ */
+@Injectable({
+  providedIn: 'root'
+})
+export class GroupsResolver implements Resolve<APIGetMultiResponse<Group>> {
+
+  constructor(private groupService: GroupService) {
+  }
+
+  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
+    Observable<APIGetMultiResponse<Group>> | Promise<APIGetMultiResponse<Group>> | APIGetMultiResponse<Group> {
+    const params: CollectionParameters = {
+      filter: undefined, limit: 0, sort: 'public_id', order: 1, page: 1
+    };
+    return this.groupService.getGroups(params);
   }
 }

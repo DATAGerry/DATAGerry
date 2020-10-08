@@ -24,6 +24,7 @@ from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
     DeleteSingleResponse
+from cmdb.security.security import SecurityManager
 from cmdb.user_management import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
 
@@ -112,7 +113,9 @@ def insert_user(data: dict):
         InsertSingleResponse: Insert response with the new user and its public_id.
     """
     user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
+    security_manager: SecurityManager = SecurityManager(database_manager=current_app.database_manager)
     try:
+        data['password'] = security_manager.generate_hmac(data['password'])
         result_id: PublicID = user_manager.insert(data)
         user = user_manager.get(public_id=result_id)
     except ManagerGetError as err:

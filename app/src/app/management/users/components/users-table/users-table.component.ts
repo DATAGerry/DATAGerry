@@ -35,7 +35,7 @@ export class UsersTableComponent implements OnInit {
    */
   @Input() public tableOptions: any = {};
 
-  constructor(private groupService: GroupService) {
+  constructor(public groupService: GroupService) {
   }
 
   public ngOnInit(): void {

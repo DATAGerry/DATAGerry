@@ -19,6 +19,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { RightsListComponent } from './rights-list/rights-list.component';
+import { RightsResolver } from '../resolvers/rights-resolver.service';
 
 const routes: Routes = [
   {
@@ -26,6 +27,9 @@ const routes: Routes = [
     pathMatch: 'full',
     data: {
       breadcrumb: 'List'
+    },
+    resolve: {
+      rights: RightsResolver
     },
     component: RightsListComponent
   }

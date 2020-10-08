@@ -35,6 +35,9 @@ import { UserDisplayNameComponent } from './components/user-display-name/user-di
 import { UserImageComponent } from './components/user-image/user-image.component';
 import { UserDisplayComponent } from './components/user-display/user-display.component';
 import { UsersTableComponent } from './components/users-table/users-table.component';
+import { AuthModule } from '../../auth/auth.module';
+import { UserFormComponent } from './components/user-form/user-form.component';
+import { UserAddComponent } from './user-add/user-add.component';
 
 @NgModule({
   entryComponents: [
@@ -51,21 +54,24 @@ import { UsersTableComponent } from './components/users-table/users-table.compon
     UserHeadlineComponent,
     UserDisplayNameComponent,
     UserDisplayComponent,
-    UsersTableComponent
+    UsersTableComponent,
+    UserFormComponent,
+    UserAddComponent
   ],
   exports: [
     UserImageComponent,
     UserDisplayComponent
   ],
-  imports: [
-    CommonModule,
-    UsersRoutingModule,
-    DataTablesModule,
-    PasswordStrengthMeterModule,
-    ReactiveFormsModule,
-    LayoutModule,
-    FontAwesomeModule,
-  ]
+    imports: [
+        CommonModule,
+        UsersRoutingModule,
+        DataTablesModule,
+        PasswordStrengthMeterModule,
+        ReactiveFormsModule,
+        LayoutModule,
+        FontAwesomeModule,
+        AuthModule,
+    ]
 })
 export class UsersModule {
 }

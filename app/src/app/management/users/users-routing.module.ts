@@ -23,6 +23,7 @@ import { UserViewComponent } from './user-view/user-view.component';
 import { UsersEditComponent } from './users-edit/users-edit.component';
 import { UsersDeleteComponent } from './users-delete/users-delete.component';
 import { UsersComponent } from './users.component';
+import { UserAddComponent } from './user-add/user-add.component';
 
 const routes: Routes = [
   {
@@ -48,7 +49,7 @@ const routes: Routes = [
       breadcrumb: 'Add',
       right: 'base.user-management.user.add'
     },
-    component: UsersAddComponent
+    component: UserAddComponent
   },
   {
     path: 'edit/:publicID',

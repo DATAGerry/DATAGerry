@@ -1,7 +1,15 @@
-<div id="user-list-header">
+<div id="user-list-header" class="d-flex justify-content-between">
   <h1>Users</h1>
-  <hr />
+  <div class="header-buttons">
+    <button *permissionLink="'base.user-management.user.add'"
+            routerLink="/management/users/add/" type="button" class="btn btn-success">
+      <i class="fas fa-plus-circle"></i>
+    </button>
+  </div>
 </div>
-<div id="user-list">
-  <cmdb-users-table [users]="users"></cmdb-users-table>
+<hr />
+<div id="user-list" class="row">
+  <div class="col-md-12">
+    <cmdb-users-table [tableOptions]="tableOptions" [users]="users"></cmdb-users-table>
+  </div>
 </div>
