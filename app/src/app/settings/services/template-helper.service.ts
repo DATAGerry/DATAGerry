@@ -48,6 +48,17 @@ export class TemplateHelperService {
               await this.getObjectTemplateHelperData(field.ref_types[0], changedPrefix, iteration - 1).then(data => {
                 subdata = data;
               });
+            } else {
+              subdata = [];
+              console.log(cmdbTypeObj);
+              await field.ref_types.forEach((type) => {
+                this.getObjectTemplateHelperData(type , changedPrefix, iteration - 1).then( data => {
+                  subdata.push(({
+                    label: 'ref_type ' + type,
+                    subdata: data
+                  }));
+                });
+              });
             }
 
             templateHelperData.push(({
@@ -65,7 +76,6 @@ export class TemplateHelperService {
       (error) => {
         console.error(error);
       });
-
     return templateHelperData;
   }
 }
