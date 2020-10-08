@@ -36,16 +36,14 @@ export class LoginComponent implements OnInit, OnDestroy {
   public loginForm: FormGroup;
   public submitted = false;
 
-  private loginSubscription: Subscription;
+  private loginSubscription: Subscription = new Subscription();
 
   constructor(
-    private route: ActivatedRoute,
     private router: Router,
     private authenticationService: AuthService,
     private permissionService: PermissionService,
     private render: Renderer2
   ) {
-    this.loginSubscription = new Subscription();
   }
 
   public ngOnInit(): void {
@@ -80,7 +78,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.render.removeClass(document.getElementById('login-button'), 'button-progress');
         this.render.addClass(document.getElementById('login-logo'), 'shake');
         this.loginForm.reset();
-        await this.delay(1000);
+        await this.delay(500);
         this.render.removeClass(document.getElementById('login-logo'), 'shake');
       }
     );

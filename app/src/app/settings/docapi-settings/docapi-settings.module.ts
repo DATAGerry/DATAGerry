@@ -71,8 +71,8 @@ import {
     DataTablesModule,
     NgSelectModule,
     LayoutModule,
-    AuthModule,
-    DocapiSettingsRoutingModule
+    DocapiSettingsRoutingModule,
+    AuthModule
   ]
 })
 export class DocapiSettingsModule {
