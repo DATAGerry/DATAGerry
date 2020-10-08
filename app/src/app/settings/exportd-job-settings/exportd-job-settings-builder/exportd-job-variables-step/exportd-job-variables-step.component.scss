@@ -8,8 +8,18 @@
   margin-bottom: 15px;
 }
 
+.scrollable-menu {
+  height: auto;
+  max-height: 440px;
+  overflow-x: hidden;
+}
+
+.scrollable-menu>.dropdown-submenu {
+  overflow-x: visible;
+}
+
 .dropdown-submenu {
-  position: relative;
+  position: relative ;
 }
 
 .dropdown-submenu>.dropdown-menu {

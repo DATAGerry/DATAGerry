@@ -207,18 +207,24 @@ export class ExportdJobVariablesStepComponent implements OnInit {
 
   public setTemplateValue(superindex, index, value, variable) {
     // sets the text of the specified input field and validates the field in the form
-    (document.getElementById('input' + superindex + index) as HTMLInputElement).value = value;
+    const element = (document.getElementById('input' + superindex + index) as HTMLInputElement);
+    element.value = element.value + value;
     variable.patchValue({
-      template: value
+      template: element.value
     });
   }
 
   public setDefaultValue(index, value, variable) {
     // sets the text of the specified input field and validates the field in the form
-    (document.getElementById('variableDefault' + index) as HTMLInputElement).value = value;
+    const element = (document.getElementById('variableDefault' + index) as HTMLInputElement);
+    element.value = element.value + value;
     variable.patchValue({
-      default: value
+      default: element.value
     });
+  }
+
+  public getIcon(item) {
+    console.log(item);
   }
 
   public determineDropDownDirection() {
@@ -237,7 +243,8 @@ export class ExportdJobVariablesStepComponent implements OnInit {
         $(this).removeClass('dropdown-menu-right').removeClass('dropdown-menu-left');
 
         // Determine whether bottom of menu will be below window at current scroll position
-        if ($(this).offset().top + $(this).outerHeight() > $(window).innerHeight() + $(window).scrollTop() + 10) {
+        if ($(this).offset().top + $(this).outerHeight() > $(window).innerHeight() + $(window).scrollTop() + 10 &&
+          ($(this).offset().top - $(this).outerHeight()) > 0) {
           $(this).parent().addClass('dropup');
         }
 
