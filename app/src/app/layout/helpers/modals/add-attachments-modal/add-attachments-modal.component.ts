@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FileSaverService } from 'ngx-filesaver';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../../toast/toast.service';
@@ -47,13 +47,6 @@ export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
   public attachments: FileElement[] = [];
   public recordsTotal: number = 0;
   private dataMaxSize: number = 1024 * 1024 * 50;
-
-  /**
-   * Detecting scroll direction
-   */
-  private page: number = 0;
-  private lastPage: number;
-  private readonly tag: string = 'attachmentsScroll';
   private readonly defaultApiParameter: CollectionParameters = {page: 1, limit: 100, order: 1};
 
 
@@ -61,21 +54,10 @@ export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
               private modalService: NgbModal, public activeModal: NgbActiveModal, private toast: ToastService,
               private scrollService: InfiniteScrollService) { }
 
-  /**
-   * Checks whether further data should be loaded
-   * @param event trigger on scroll
-   */
-  @HostListener('scroll', ['$event']) onScrollHost(event: Event): void {
-    if (this.scrollService.bottomReached(event, this.tag) && this.page <= this.lastPage) {
-      this.getFiles(this.scrollService.getCollectionParameters(this.tag), true);
-    }
-  }
-
   public ngOnInit(): void {
     this.fileService.getAllFilesList(this.metadata).subscribe((data: APIGetMultiResponse<FileElement>) => {
       this.attachments.push(...data.results);
       this.recordsTotal = data.total;
-      this.updatePagination(data);
     });
   }
 
@@ -96,29 +78,7 @@ export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
         }
         this.recordsTotal = data.total;
         this.inProcess = false;
-        this.updatePagination(data);
       });
-  }
-
-  /**
-   * Update pagination properties for infinite scrolling.
-   * Current page values are retrieved from the response {@link APIGetMultiResponse}
-   * @param data response {@link APIGetMultiResponse} from backend
-   */
-  private updatePagination(data): void {
-    this.page = data.pager.page + 1;
-    this.lastPage = data.pager.total_pages;
-    this.scrollService.setCollectionParameters(this.page, 100, 'filename', 1, this.tag);
-  }
-
-  /**
-   * Download selected file
-   * @param filename current filename
-   */
-  public downloadFile(filename: string) {
-    this.fileService.downloadFile(filename, this.metadata).subscribe((data: any) => {
-      this.fileSaverService.save(data.body, filename);
-    });
   }
 
   /**
@@ -186,16 +146,6 @@ export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
     this.fileService.postFile(file, this.metadata).subscribe(() => {
       this.getFiles(this.defaultApiParameter);
     }, (err) => console.log(err));
-  }
-
-  /**
-   * Delete selected file
-   * @param publicID from current filename
-   */
-  public deleteFile(publicID: number) {
-    this.fileService.deleteFile(publicID, {}).subscribe(() =>
-      this.getFiles(this.defaultApiParameter)
-    );
   }
 
   private replaceFileModal(filename: string) {
