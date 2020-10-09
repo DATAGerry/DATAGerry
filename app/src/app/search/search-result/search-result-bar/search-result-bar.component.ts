@@ -1,6 +1,16 @@
-import {Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges
+} from '@angular/core';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { SearchResultList } from '../../models/search-result';
+import { BehaviorSubject } from 'rxjs';
 
 export interface ReSearchParameters {
   rebuild: boolean;
@@ -20,20 +30,28 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
   @Input() searchResultList: SearchResultList;
   @Input() filterResultList: any[];
 
+  /**
+   * Flag from resolve object references.
+   */
+  @Input() public resolve: BehaviorSubject<boolean>;
+
   // Filterers results
   public preSelectedFilterList: any[] = [];
   private rollbackQueryParameters: string = '';
 
-  constructor(private toast: ToastService) {}
-
-  ngOnInit(): void {
-    this.rollbackQueryParameters = this.queryParameters;
-    this.addPreSelectedFilterItem(this.queryParameters);
+  constructor(private toast: ToastService) {
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
+  public ngOnInit(): void {
+    this.rollbackQueryParameters = this.queryParameters;
+    this.addPreSelectedFilterItem(this.queryParameters);
+
+  }
+
+  public ngOnChanges(changes: SimpleChanges): void {
     this.preSelectedFilterList = [];
     this.addPreSelectedFilterItem(this.queryParameters);
+
   }
 
   @HostListener('window:scroll')
@@ -52,7 +70,7 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
   private addPreSelectedFilterItem(value: string): void {
     JSON.parse(value).filter(f => {
       if (f.hasOwnProperty('settings')) {
-        this.preSelectedFilterList = [ ...this.preSelectedFilterList,
+        this.preSelectedFilterList = [...this.preSelectedFilterList,
           {
             total: 0,
             searchText: f.searchLabel,
@@ -65,16 +83,23 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
     });
   }
 
+  /**
+   * Toggles the references flag when the checkbox was changed.
+   */
+  public onResolveChange(change): void {
+    this.resolve.next(change.target.checked);
+  }
+
   public rollbackQueryParametersIfNeeded(): void {
     this.reSearch(JSON.parse(this.rollbackQueryParameters), true);
   }
 
   private reSearch(value: any[], refreshFilter: boolean = false) {
     if (this.preSelectedFilterList.length === 0) {
-      this.refreshSearch.emit({rebuild: true, query: JSON.parse(this.rollbackQueryParameters)});
+      this.refreshSearch.emit({ rebuild: true, query: JSON.parse(this.rollbackQueryParameters) });
       this.addPreSelectedFilterItem(this.rollbackQueryParameters);
     } else {
-      this.refreshSearch.emit({rebuild: refreshFilter, query: value});
+      this.refreshSearch.emit({ rebuild: refreshFilter, query: value });
     }
   }
 
@@ -93,13 +118,15 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
     });
 
     queryJson = queryJson.concat(
-      { searchText: value.searchLabel,
+      {
+        searchText: value.searchLabel,
         searchForm: 'type',
         searchLabel: value.searchLabel,
         settings: value.settings
       });
     queryJson = queryJson.filter(f => !f.hasOwnProperty('disjunction')).concat({
-      searchText: 'or', searchForm: 'disjunction', searchLabel: 'or', disjunction: true} );
+      searchText: 'or', searchForm: 'disjunction', searchLabel: 'or', disjunction: true
+    });
     this.reSearch(queryJson);
   }
 
@@ -113,7 +140,10 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
     const parsedUrl = new URL(window.location.href);
     const baseUrl = parsedUrl.origin;
     const selBox = document.createElement('textarea');
-    selBox.value = `${baseUrl}/search?query=${this.queryParameters}`;
+    selBox.value = `${ baseUrl }/search?query=${ this.queryParameters }`;
+    if (this.resolve.value) {
+      selBox.value = selBox.value + `&resolve=${ this.resolve.value }`;
+    }
     this.generateDataForClipboard(selBox);
   }
 

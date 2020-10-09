@@ -38,13 +38,13 @@ class SearchResultMap(Generic[R]):
 class SearchResult(Generic[R]):
     """Generic search result base"""
 
-    def __init__(self, results: List[R], total_results: int, groups: List[R], alive: bool, limit: int, skip: int,
-                 matches_regex: List[str] = None):
+    def __init__(self, results: List[R], total_results: int, groups: list, alive: bool, limit: int, skip: int, matches_regex: List[str] = None):
         """
         Constructor for search result
         Args:
             results: List of generic search results
             total_results: total number of results
+            groups: Type groups of objects
             alive: flag if spliced search result has more data in database
             limit: max number of results to return
             skip: start of index value for the search
