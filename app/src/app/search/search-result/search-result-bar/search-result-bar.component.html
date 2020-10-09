@@ -16,7 +16,8 @@
         <div class="name">
           <strong class="text-uppercase">Resolve</strong>
           <div class="custom-control custom-checkbox">
-            <input (change)="onResolveChange($event)" type="checkbox" class="custom-control-input" id="search-result-bar-follow-objects-button">
+            <input (change)="onResolveChange($event)" type="checkbox" class="custom-control-input"
+                   id="search-result-bar-follow-objects-button" [checked]="resolve.value">
             <label for="search-result-bar-follow-objects-button" class="custom-control-label">
               References
             </label>

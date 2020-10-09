@@ -1,4 +1,13 @@
-import { Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges
+} from '@angular/core';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { SearchResultList } from '../../models/search-result';
 import { BehaviorSubject } from 'rxjs';
@@ -36,11 +45,13 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
   public ngOnInit(): void {
     this.rollbackQueryParameters = this.queryParameters;
     this.addPreSelectedFilterItem(this.queryParameters);
+
   }
 
   public ngOnChanges(changes: SimpleChanges): void {
     this.preSelectedFilterList = [];
     this.addPreSelectedFilterItem(this.queryParameters);
+
   }
 
   @HostListener('window:scroll')
@@ -130,6 +141,9 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
     const baseUrl = parsedUrl.origin;
     const selBox = document.createElement('textarea');
     selBox.value = `${ baseUrl }/search?query=${ this.queryParameters }`;
+    if (this.resolve.value) {
+      selBox.value = selBox.value + `&resolve=${ this.resolve.value }`;
+    }
     this.generateDataForClipboard(selBox);
   }
 

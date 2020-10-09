@@ -102,10 +102,9 @@ export class SearchComponent implements OnInit, OnDestroy {
    * Constructor of SearchComponent
    *
    * @param route Current activated route.
-   * @param spinner Spinner service.
    * @param searchService API Search service.
    */
-  constructor(private route: ActivatedRoute, private spinner: NgxSpinnerService, private searchService: SearchService) {
+  constructor(private route: ActivatedRoute, private searchService: SearchService) {
     this.searchInputForm = new FormGroup({
       input: new FormControl('', Validators.required)
     });
@@ -116,7 +115,7 @@ export class SearchComponent implements OnInit, OnDestroy {
     this.route.queryParamMap.pipe(takeUntil(this.subscriber)).subscribe(params => {
       this.queryParameters = params.get('query');
       if (params.has('resolve')) {
-        this.resolve = JSON.parse(params.get('resolve'));
+        this.resolve.next(JSON.parse(params.get('resolve')));
       }
       this.initSearch = true;
       this.initFilter = true;
@@ -132,7 +131,6 @@ export class SearchComponent implements OnInit, OnDestroy {
    * Triggers the actual search api call.
    */
   public onSearch(): void {
-    this.spinner.show();
     let params = new HttpParams();
     params = params.set('limit', this.limit.toString());
     params = params.set('skip', this.skip.toString());
@@ -147,7 +145,6 @@ export class SearchComponent implements OnInit, OnDestroy {
         this.initSearch = false;
         this.initFilter = false;
       }
-      this.spinner.hide();
     });
   }
 
