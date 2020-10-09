@@ -55,93 +55,33 @@ class SearcherFramework(Search[CmdbObjectManager]):
         stages: dict = {}
 
         if kwargs.get('resolve', False):
-            plb.add_pipe({
-                "$lookup": {
-                    "from": "framework.objects",
-                    "let": {
-                        "ref_id": "$public_id"
-                    },
-                    "pipeline": [
-                        {
-                            "$match": {
-                                "$expr": {
-                                    "$in": [
-                                        "$$ref_id",
-                                        "$fields.value"
-                                    ]
-                                }
-                            }
-                        }
-                    ],
-                    "as": "refs"
-                }
-            })
-            plb.add_pipe({
-                "$facet": {
-                    "root": [
-                        {
-                            "$replaceRoot": {
-                                "newRoot": {
-                                    "$mergeObjects": [
-                                        "$$ROOT"
-                                    ]
-                                }
-                            }
-                        }
-                    ],
-                    "references": [
-                        {
-                            "$lookup": {
-                                "from": "framework.objects",
-                                "let": {
-                                    "ref_id": "$public_id"
-                                },
-                                "pipeline": [
-                                    {
-                                        "$match": {
-                                            "$expr": {
-                                                "$in": [
-                                                    "$$ref_id",
-                                                    "$fields.value"
-                                                ]
-                                            }
-                                        }
-                                    }
-                                ],
-                                "as": "refs"
-                            }
-                        },
-                        {
-                            "$unwind": "$refs"
-                        },
-                        {
-                            "$replaceRoot": {
-                                "newRoot": "$refs"
-                            }
-                        }
-                    ]
-                }
-            })
-            plb.add_pipe({
-                "$project": {
-                    "complete": {
-                        "$concatArrays": [
-                            "$root",
-                            "$references"
+            plb.add_pipe(
+                plb.lookup_sub_(
+                    from_='framework.objects',
+                    let_={'ref_id': '$public_id'},
+                    pipeline_=[plb.match_({'$expr': {
+                        '$in': [
+                            '$$ref_id',
+                            '$fields.value'
                         ]
-                    }
-                }
-            })
-            plb.add_pipe({
-                "$unwind": {
-                    "path": "$complete"
-                }
-            })
-            plb.add_pipe({
-                "$replaceRoot": {
-                    "newRoot": "$complete"
-                }
-            })
+                    }})],
+                    as_='refs'
+                ))
+            plb.add_pipe(
+                plb.facet_({
+                    'root': [{'$replaceRoot': {'newRoot': {'$mergeObjects': ['$$ROOT']}}}],
+                    'references': [
+                        {'$lookup': {'from': 'framework.objects', 'let': {'ref_id': '$public_id'},
+                                     'pipeline': [{'$match': {'$expr': {'$in': ['$$ref_id', '$fields.value']}}}],
+                                     'as': 'refs'}},
+                        {'$unwind': '$refs'},
+                        {'$replaceRoot': {'newRoot': '$refs'}}
+                    ]
+                })
+            )
+            plb.add_pipe(plb.project_(specification={'complete': {'$concatArrays': ['$root', '$references']}}))
+            plb.add_pipe(plb.unwind_(path='$complete'))
+            plb.add_pipe({'$replaceRoot': {'newRoot': '$complete'}})
 
         stages.update({'metadata': [PipelineBuilder.count_('total')]})
         stages.update({'data': [
@@ -153,8 +93,8 @@ class SearcherFramework(Search[CmdbObjectManager]):
             'group': [
                 PipelineBuilder.lookup_(TypeModel.COLLECTION, 'type_id', 'public_id', 'lookup_data'),
                 PipelineBuilder.unwind_('$lookup_data'),
-                PipelineBuilder.project_({'_id': 0, 'type_id': 1, 'label': "$lookup_data.label"}),
-                PipelineBuilder.group_("$$ROOT.type_id", {'types': {'$first': "$$ROOT"}, 'total': {'$sum': 1}}),
+                PipelineBuilder.project_({'_id': 0, 'type_id': 1, 'label': '$lookup_data.label'}),
+                PipelineBuilder.group_('$$ROOT.type_id', {'types': {'$first': '$$ROOT'}, 'total': {'$sum': 1}}),
                 PipelineBuilder.project_(
                     {'_id': 0,
                      'searchText': '$types.label',
@@ -163,7 +103,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
                      'settings': {'types': ['$types.type_id']},
                      'total': 1
                      }),
-                PipelineBuilder.sort_("total", -1)
+                PipelineBuilder.sort_('total', -1)
             ]
         }
         stages.update(group_stage)
@@ -171,6 +111,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
 
         raw_search_result = self.manager.aggregate(collection=CmdbObject.COLLECTION, pipeline=plb.pipeline)
         raw_search_result_list = list(raw_search_result)
+
         try:
             matches_regex = plb.get_regex_pipes_values()
         except Exception as err:
@@ -202,6 +143,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
             skip=skip
         )
         return search_result
+
 
     def search(self, query: Query, request_user: User = None, limit: int = Search.DEFAULT_LIMIT,
                skip: int = Search.DEFAULT_SKIP) -> SearchResult[RenderResult]:
