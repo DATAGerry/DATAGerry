@@ -53,6 +53,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
 
         # define search output
         stages: dict = {}
+        active = kwargs.get('active', True)
 
         if kwargs.get('resolve', False):
             plb.add_pipe(
@@ -67,12 +68,19 @@ class SearcherFramework(Search[CmdbObjectManager]):
                     }})],
                     as_='refs'
                 ))
+            if active:
+                active_pipe = [
+                    {'$match': {'active': {"$eq": True}}},
+                    {'$match': {'$expr': {'$in': ['$$ref_id', '$fields.value']}}}
+                ]
+            else:
+                active_pipe = [{'$match': {'$expr': {'$in': ['$$ref_id', '$fields.value']}}}]
             plb.add_pipe(
                 plb.facet_({
                     'root': [{'$replaceRoot': {'newRoot': {'$mergeObjects': ['$$ROOT']}}}],
                     'references': [
                         {'$lookup': {'from': 'framework.objects', 'let': {'ref_id': '$public_id'},
-                                     'pipeline': [{'$match': {'$expr': {'$in': ['$$ref_id', '$fields.value']}}}],
+                                     'pipeline': active_pipe,
                                      'as': 'refs'}},
                         {'$unwind': '$refs'},
                         {'$replaceRoot': {'newRoot': '$refs'}}
@@ -143,7 +151,6 @@ class SearcherFramework(Search[CmdbObjectManager]):
             skip=skip
         )
         return search_result
-
 
     def search(self, query: Query, request_user: User = None, limit: int = Search.DEFAULT_LIMIT,
                skip: int = Search.DEFAULT_SKIP) -> SearchResult[RenderResult]:

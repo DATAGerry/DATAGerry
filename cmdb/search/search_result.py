@@ -14,12 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import logging
-from typing import TypeVar, Generic, List, Union
+from typing import TypeVar, Generic, List
 
 from bson import Regex
-
-from cmdb.framework import CmdbObject
-from cmdb.framework.cmdb_render import RenderResult
 
 LOGGER = logging.getLogger(__name__)
 R: TypeVar = TypeVar('R')

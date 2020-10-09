@@ -95,7 +95,7 @@ def search_framework(request_user: User):
 
         searcher = SearcherFramework(manager=object_manager)
         result = searcher.aggregate(pipeline=query, request_user=request_user, limit=limit, skip=skip,
-                                    resolve=resolve_object_references)
+                                    resolve=resolve_object_references, active=only_active)
 
     except Exception as err:
         LOGGER.error(f'[Search Framework Rest]: {err}')
