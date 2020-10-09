@@ -91,7 +91,33 @@ class SearcherFramework(Search[CmdbObjectManager]):
                     ],
                     "references": [
                         {
+                            "$lookup": {
+                                "from": "framework.objects",
+                                "let": {
+                                    "ref_id": "$public_id"
+                                },
+                                "pipeline": [
+                                    {
+                                        "$match": {
+                                            "$expr": {
+                                                "$in": [
+                                                    "$$ref_id",
+                                                    "$fields.value"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                ],
+                                "as": "refs"
+                            }
+                        },
+                        {
                             "$unwind": "$refs"
+                        },
+                        {
+                            "$replaceRoot": {
+                                "newRoot": "$refs"
+                            }
                         }
                     ]
                 }
@@ -141,10 +167,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
             ]
         }
         stages.update(group_stage)
-
         plb.add_pipe(PipelineBuilder.facet_(stages))
-        import json
-        print(json.dumps(plb.pipeline))
 
         raw_search_result = self.manager.aggregate(collection=CmdbObject.COLLECTION, pipeline=plb.pipeline)
         raw_search_result_list = list(raw_search_result)
