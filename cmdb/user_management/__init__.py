@@ -20,6 +20,7 @@ In addition, the rights management, group administration and access rights are d
 """
 from typing import List
 
+from cmdb.user_management.models.settings import UserSettingModel
 from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.models.right import BaseRight
 
@@ -34,6 +35,7 @@ right_manager = RightManager(rights)
 
 __COLLECTIONS__: List = [
     UserModel,
+    UserSettingModel,
     UserGroupModel
 ]
 

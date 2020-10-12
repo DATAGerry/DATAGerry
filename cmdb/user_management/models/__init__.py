@@ -13,11 +13,3 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-from .user import UserModel
-from .group import UserGroupModel
-
-__all__ = [
-    UserModel,
-    UserGroupModel
-]

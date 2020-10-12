@@ -395,16 +395,20 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
     def search(self, collection: str, *args, **kwargs):
         return self.connector.get_collection(collection).find(*args, **kwargs)
 
-    def insert(self, collection: str, data: dict) -> int:
+    def insert(self, collection: str, data: dict, skip_public: bool = False) -> int:
         """adds document to database
 
         Args:
             collection (str): name of database collection
             data (str): insert data
+            skip_public (bool): Skip the public id creation and counter increment
 
         Returns:
             int: new public id of the document
         """
+        if skip_public:
+            return self.connector.get_collection(collection).insert_one(data)
+
         if 'public_id' not in data:
             data['public_id'] = self.get_highest_id(collection=collection) + 1
         self.connector.get_collection(collection).insert_one(data)
