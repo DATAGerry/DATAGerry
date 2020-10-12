@@ -16,7 +16,17 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnInit, Pipe, PipeTransform} from '@angular/core';
+import {
+  Component,
+  Directive,
+  ElementRef,
+  HostListener,
+  Input,
+  OnInit,
+  Pipe,
+  PipeTransform,
+  Renderer2
+} from '@angular/core';
 import { CmdbMode } from '../../../../framework/modes.enum';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbType } from '../../../../framework/models/cmdb-type';
@@ -26,6 +36,49 @@ import { ExternalSystemService } from '../../../services/external_system.service
 import { DndDropEvent } from 'ngx-drag-drop';
 import { TemplateHelperService } from '../../../services/template-helper.service';
 
+
+@Directive({
+  // tslint:disable-next-line:directive-selector
+  selector: '[dropdowndirection]'
+})
+export class DropDownDirectionDirective {
+
+
+  constructor(private el: ElementRef, private renderer: Renderer2) {}
+
+  @HostListener('mouseenter', ['$event.target'])
+  determineDirection(target): void {
+    for (const child of target.children) {
+      if (child.className.includes('dropdown-menu')) {
+        this.renderer.setStyle(child, 'visibility', 'hidden');
+        this.renderer.setStyle(child, 'display', 'block');
+
+        this.renderer.removeClass(child, 'dropdown-menu-left');
+        this.renderer.removeClass(child, 'dropdown-menu-right');
+        this.renderer.removeClass(child.parentNode, 'dropup');
+
+        console.log(child.outerHeight + ':' + $(child).outerHeight());
+        console.log(child.offsetTop + ':' + $(child).offset().top);
+        if (($(child).offset().top + $(child).outerHeight() > window.innerHeight + window.scrollY + 10)
+          && ($(child).offset().top - $(child).outerHeight()) > 0) {
+          this.renderer.addClass(child.parentNode, 'dropup');
+        }
+
+        console.log(child.offsetLeft + ':' + $(child).offset().left);
+        if ($(child).offset().left + $(child).outerWidth() > window.innerWidth + window.scrollX) {
+          this.renderer.addClass(child, 'dropdown-menu-left');
+        } else {
+          this.renderer.addClass(child, 'dropdown-menu-right');
+        }
+
+        this.renderer.removeStyle(child, 'visibility');
+        this.renderer.removeStyle(child, 'display');
+      }
+
+    }
+  }
+
+}
 
 @Pipe({
   name: 'filterUnique',
@@ -110,7 +163,8 @@ export class ExportdJobVariablesStepComponent implements OnInit {
   }
 
   constructor(private formBuilder: FormBuilder, private typeService: TypeService,
-              private externalService: ExternalSystemService, private templateHelperService: TemplateHelperService) {
+              private externalService: ExternalSystemService, private templateHelperService: TemplateHelperService,
+              private renderer: Renderer2, private el: ElementRef) {
   }
   @Input() set destinationStep(value: ExportdJobDestinationsStepComponent) {
     this.destinationForm = value;
@@ -221,48 +275,6 @@ export class ExportdJobVariablesStepComponent implements OnInit {
     variable.patchValue({
       default: element.value
     });
-  }
-
-  public getIcon(item) {
-    console.log(item);
-  }
-
-  public determineDropDownDirection() {
-    // determines what direction the dropdowns will be facing
-    function determine() {
-      $('.dropdown-menu').each(function() {
-
-        // Invisibly expand the dropdown menu so its true height can be calculated
-        $(this).css({
-          visibility: 'hidden',
-          display: 'block'
-        });
-
-        // Necessary to remove class each time so we don't unwantedly use dropup's offset top
-        $(this).parent().removeClass('dropup');
-        $(this).removeClass('dropdown-menu-right').removeClass('dropdown-menu-left');
-
-        // Determine whether bottom of menu will be below window at current scroll position
-        if ($(this).offset().top + $(this).outerHeight() > $(window).innerHeight() + $(window).scrollTop() + 10 &&
-          ($(this).offset().top - $(this).outerHeight()) > 0) {
-          $(this).parent().addClass('dropup');
-        }
-
-        // Determine whether the right of menu will be outside of window at current scroll position
-        if ($(this).offset().left + $(this).outerWidth() > $(window).innerWidth() + $(window).scrollLeft()) {
-          $(this).addClass('dropdown-menu-left');
-        } else {
-          $(this).addClass('dropdown-menu-right');
-        }
-
-        // Return dropdown menu to fully hidden state
-        $(this).css( {
-        visibility: '', display: ''
-        });
-      });
-    }
-
-    determine();
   }
 
   public filterTypes() {

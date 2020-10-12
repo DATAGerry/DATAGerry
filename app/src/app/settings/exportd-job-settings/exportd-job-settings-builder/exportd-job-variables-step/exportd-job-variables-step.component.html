@@ -69,23 +69,23 @@
                         <div class="input-group-btn">
                           <span class="input-group-text dropdown-toggle" data-toggle="dropdown"
                                 (click)="filterTypes()"
-                                (mouseenter)="determineDropDownDirection()"
+                                dropdowndirection
                                 [ngbTooltip]="'Template variable'">
                             <fa-icon icon="code"></fa-icon>
                           </span>
                             <ul class="dropdown-menu">
                               <li *ngFor="let type of typesInSources">
-                                <div class="btn dropdown-submenu" (mouseenter)="determineDropDownDirection()">
+                                <div class="btn dropdown-submenu" dropdowndirection>
                                   <span class="dropdown-toggle pr-5"  data-toggle="dropdown" aria-haspopup="true"><i class="{{type.render_meta.icon}}"></i>  {{type.label}}</span>
                                   <ng-container *ngTemplateOutlet="List; context:{ $implicit: defaultTemplateData[type.public_id] }"></ng-container>
                                 </div>
-                                <ng-template #List let-templateHelperData>
+                                <ng-template #List let-templateHelperData dropdowndirection>
                                   <ul class="dropdown-menu scrollable-menu">
                                     <ng-container *ngFor="let item of templateHelperData; let i = index">
                                       <li>
                                         <ng-template [ngIf]="item.subdata?.length > 0" [ngIfElse]='button'>
-                                          <div class="btn dropdown-submenu">
-                                              <span class="dropdown-toggle pr-5" (mouseenter)="determineDropDownDirection()" data-toggle="dropdown" aria-haspopup="true"><i class="fas fa-angle-right"></i>  {{item.label}}</span>
+                                          <div class="btn dropdown-submenu" dropdowndirection>
+                                              <span class="dropdown-toggle pr-5" data-toggle="dropdown" aria-haspopup="true"><i class="fas fa-angle-right"></i>  {{item.label}}</span>
                                               <ng-container *ngTemplateOutlet="List; context:{ $implicit: item.subdata }"></ng-container>
                                           </div>
                                         </ng-template>
@@ -140,15 +140,15 @@
                             <span class="input-group-btn">
                               <span class="input-group-text dropdown-toggle" data-toggle="dropdown" type="button"
                                                               (click)="filterTypes()"
-                                                              (mouseenter)="determineDropDownDirection()"
-                                                              [ngbTooltip]="'Template variable'">
+                                                              [ngbTooltip]="'Template variable'"
+                                                              dropdowndirection>
                                 <fa-icon icon="code" placement="right"></fa-icon>
                               </span>
                                     <ng-template #recursiveList let-templateHelperData>
                                       <ul class="dropdown-menu">
                                         <li *ngFor="let item of templateHelperData; let i = index">
-                                          <div *ngIf="item.subdata?.length > 0; else button" (mouseenter)="determineDropDownDirection()">
-                                            <div class="btn dropdown-submenu">
+                                          <div *ngIf="item.subdata?.length > 0; else button">
+                                            <div class="btn dropdown-submenu" dropdowndirection>
                                               <span class="dropdown-toggle pr-5" data-toggle="dropdown" aria-haspopup="true"><i class="fas fa-angle-right"></i>  {{item.label}}</span>
                                               <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item.subdata }"></ng-container>
                                             </div>
