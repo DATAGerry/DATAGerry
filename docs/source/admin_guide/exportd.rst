@@ -359,7 +359,7 @@ request. Please see the following section for an example JSON structure:
 
 ExternalSystemMySQLDB
 ---------------------
-This exporter synchronizes DATAGERRY objects to one or multiple database tables in a MySQL/MariaDB database table. The
+This exporter synchronizes DATAGERRY objects to one or multiple database tables in a MySQL/MariaDB database. The
 synchronization is done within one database transaction. At first, the content of the configured tables will be deleted.
 After that, the new data will be inserted. If anything goes wrong (e.g. a table does not exist, there is an error in SQL
 syntax, etc.), a rollback will be done.
