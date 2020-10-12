@@ -17,8 +17,7 @@
 from datetime import datetime
 from enum import Enum
 from json import dumps
-from typing import List, Any
-from pymongo import IndexModel
+from typing import Any
 
 from cmdb.data_storage.database_utils import default
 from cmdb.framework import CmdbDAO
@@ -108,6 +107,29 @@ class UserSettingModel(CmdbDAO):
     COLLECTION: Collection = 'management.users.settings'
     MODEL: Model = 'UserSetting'
 
+    SCHEMA: dict = {
+        'public_id': {
+            'type': 'integer',
+            'required': False
+        },
+        'user_id': {
+            'type': 'integer',
+            'required': True
+        },
+        'setting': {
+            'type': 'dict',
+            'required': False
+        },
+        'active': {
+            'type': 'boolean',
+            'required': True
+        },
+        'setting_type': {
+            'type': 'datetime',
+            'required': True
+        }
+    }
+
     __slots__ = 'public_id', 'user_id', 'setting', 'active', 'setting_type', 'setting_time'
 
     def __init__(self, public_id: int, user_id: int, setting: UserSettingEntry, active: bool,
@@ -128,7 +150,7 @@ class UserSettingModel(CmdbDAO):
         self.active: bool = active
         self.setting_type: UserSettingType = setting_type
         self.setting_time: datetime = setting_time
-        super(UserSettingModel, self).__init__(public_id=public_id)
+        super().__init__(public_id=public_id)
 
     @classmethod
     def from_data(cls, data: dict, *args, **kwargs) -> "UserSettingModel":
