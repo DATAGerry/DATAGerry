@@ -37,6 +37,7 @@ pyinstaller==4.0
 pyinstaller-hooks-contrib==2020.8
 pylint==2.6.0
 pymongo==3.11.0
+PyMySQL==0.10.1
 pyparsing==2.4.7
 PyPDF2==1.26.0
 pytz==2020.1
