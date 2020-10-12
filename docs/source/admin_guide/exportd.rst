@@ -106,6 +106,7 @@ Currently the follwowing ExternalSystems are supported:
     "ExternalSystemExcuteScript", "Executes a script on the DATAGERRY machine"
     "ExternalSystemGenericPullJson", "Provides a JSON structure that can be pulled via the DATAGERRY REST API"
     "ExternalSystemGenericRestCall", "Sends a HTTP POST to an userdefined URL"
+    "ExternalSystemMySQLDB", "Syncs CMDB objects to one or multiple MySQL/MariaDB database tables"
     "ExternalSystemOpenNMS", "Add nodes to the monitoring system OpenNMS with the OpenNMS REST API"
 
 
@@ -354,6 +355,44 @@ request. Please see the following section for an example JSON structure:
                 }
         }
     ]
+
+
+ExternalSystemMySQLDB
+---------------------
+This exporter synchronizes DATAGERRY objects to one or multiple database tables in a MySQL/MariaDB database table. The
+synchronization is done within one database transaction. At first, the content of the configured tables will be deleted.
+After that, the new data will be inserted. If anything goes wrong (e.g. a table does not exist, there is an error in SQL
+syntax, etc.), a rollback will be done.
+
+The exporter class has the following parameters:
+
+.. csv-table::
+    :header: "parameter", "required", "description"
+    :align: left
+
+    "dbserver", "True", "Hostname or IP of the database server"
+    "database", "True", "database name"
+    "username", "True", "username for database connection"
+    "password", "True", "password for database connection"
+
+
+The following export variables can be defined:
+
+.. csv-table::
+    :header: "name", "required", "description"
+    :align: left
+
+    "table\_<name>", "True", "adding CMDB data to database table with name <name>. As value, comma seperated field values (in SQL INSERT syntax) should be defined"
+
+
+The exporter can synchronize objects to one or multiple database tables. Please see an example of the export variable syntax below::
+
+    #variable name: table_users
+    #variable value: "{{id}}", "{{fields['username']}}", NULL, NULL
+
+    #variable name: table_groups
+    #variable value: "{{id}}", "{{fields['username']}}"
+
 
 
 ExternalSystemOpenNMS
