@@ -18,9 +18,9 @@ from datetime import datetime
 from enum import Enum
 from json import dumps
 from typing import Any
+from pymongo import IndexModel
 
 from cmdb.data_storage.database_utils import default
-from cmdb.framework import CmdbDAO
 from cmdb.framework.utils import Collection, Model
 
 
@@ -35,70 +35,66 @@ class UserSettingType(Enum):
     SERVER = 'SERVER'
 
 
-class UserSettingEntry:
+class UserSettingPayload:
     """
-    Represents a single entry in the user settings.
+    Payload wrapper user settings.
     """
     __slots__ = 'name', 'setting'
 
-    def __init__(self, name: str, setting: Any):
+    def __init__(self, setting: Any):
         """
-        Constructor of `UserSettingEntry`.
+        Constructor of `UserSettingPayload`.
 
         Args:
-            name (str): Name/Identifier of the setting.
             setting (Any): Settings option/body/payload.
         """
-        self.name: str = name
         self.setting: Any = setting
 
     @classmethod
-    def from_data(cls, data: dict) -> "UserSettingEntry":
+    def from_data(cls, data: dict) -> "UserSettingPayload":
         """
         Create a `UserSettingEntry` instance from database.
 
         Args:
-            data (dict): Database user settings entry values.
+            data (dict): Database user settings values.
 
         Returns:
-            UserSettingEntry: Instance of `UserSettingEntry`.
+            UserSettingPayload: Instance of `UserSettingEntry`.
         """
         return cls(
-            name=data.get('name'),
             setting=data.get('setting', None)
         )
 
     @classmethod
-    def to_data(cls, instance: "UserSettingEntry") -> str:
+    def to_data(cls, instance: "UserSettingPayload") -> str:
         """
         Get the setting to database format.
 
         Args:
-            instance (UserSettingEntry): Instance of `UserSettingEntry`.
+            instance (UserSettingPayload): Instance of `UserSettingPayload`.
 
         Returns:
-            str: JSON dump data of `UserSettingEntry`.
+            str: JSON dump data of `UserSettingPayload`.
         """
-        return dumps(UserSettingEntry.to_dict(instance), default=default)
+        return dumps(UserSettingPayload.to_dict(instance), default=default)
 
     @classmethod
-    def to_dict(cls, instance: "UserSettingEntry") -> dict:
+    def to_dict(cls, instance: "UserSettingPayload") -> dict:
         """
         Get the dictionary values of `UserSettingEntry`
 
         Args:
-            instance (UserSettingEntry): Instance of `UserSettingEntry`.
+            instance (UserSettingPayload): Instance of `UserSettingEntry`.
 
         Returns:
             dict: Return the `UserSettingEntry` as dict.
         """
         return {
-            'name': instance.name,
             'setting': instance.setting
         }
 
 
-class UserSettingModel(CmdbDAO):
+class UserSettingModel:
     """
     User settings model. Holds all stored user-settings for a specific user.
     Every user has exact one model document in the database collection.
@@ -106,11 +102,16 @@ class UserSettingModel(CmdbDAO):
 
     COLLECTION: Collection = 'management.users.settings'
     MODEL: Model = 'UserSetting'
+    INDEX_KEYS = [
+        {'keys': [('identifier', 1), ('user_id', 1)],
+         'name': 'identifier-user',
+         'unique': True}
+    ]
 
     SCHEMA: dict = {
-        'public_id': {
-            'type': 'integer',
-            'required': False
+        'identifier': {
+            'type': 'string',
+            'required': True
         },
         'user_id': {
             'type': 'integer',
@@ -130,27 +131,31 @@ class UserSettingModel(CmdbDAO):
         }
     }
 
-    __slots__ = 'public_id', 'user_id', 'setting', 'active', 'setting_type', 'setting_time'
+    __slots__ = 'identifier', 'user_id', 'setting', 'active', 'setting_type', 'setting_time'
 
-    def __init__(self, public_id: int, user_id: int, setting: UserSettingEntry, active: bool,
+    def __init__(self, identifier: str, user_id: int, setting: UserSettingPayload, active: bool,
                  setting_type: UserSettingType, setting_time: datetime):
         """
         Constructor of `UserSettingModel`.
 
         Args:
-            public_id: (int): PublicID of the setting
+            identifier: (str): Identifier or Name of the setting
             user_id (int): PublicID of the user
-            setting (UserSettingEntry): User setting
+            setting (UserSettingPayload): User setting
             active (bool): Activate/Deactivate flag.
             setting_type (UserSettingType): Type of the setting scope.
             setting_time: Datetime of the setting creation.
         """
+        self.identifier: str = identifier
         self.user_id: int = user_id
-        self.setting: UserSettingEntry = setting
+        self.setting: UserSettingPayload = setting
         self.active: bool = active
         self.setting_type: UserSettingType = setting_type
         self.setting_time: datetime = setting_time
-        super().__init__(public_id=public_id)
+
+    @classmethod
+    def get_index_keys(cls):
+        return [IndexModel(**index) for index in cls.INDEX_KEYS]
 
     @classmethod
     def from_data(cls, data: dict, *args, **kwargs) -> "UserSettingModel":
@@ -164,9 +169,9 @@ class UserSettingModel(CmdbDAO):
             UserSettingModel: Instance of `UserSettingsModel`.
         """
         return cls(
-            public_id=int(data.get('public_id')),
+            identifier=data.get('identifier'),
             user_id=int(data.get('user_id')),
-            setting=UserSettingEntry.from_data(data=data.get('settings', None)),
+            setting=UserSettingPayload.from_data(data=data.get('settings', None)),
             active=data.get('active'),
             setting_type=UserSettingType(data.get('setting_type')),
             setting_time=data.get('setting_time')
@@ -198,9 +203,9 @@ class UserSettingModel(CmdbDAO):
             dict: Return the `UserSettingsModel` as dict.
         """
         return {
-            'public_id': instance.public_id,
+            'identifier': instance.identifier,
             'user_id': instance.user_id,
-            'settings': UserSettingEntry.to_data(instance.setting),
+            'setting': UserSettingPayload.to_data(instance.setting),
             'active': instance.active,
             'setting_type': instance.setting_type,
             'setting_time': instance.setting_time

@@ -125,7 +125,7 @@ class GroupManager(AccountManager):
         if public_id in [1, 2]:
             raise ManagerDeleteError(f'Group with ID: {public_id} can not be deleted!')
         group: UserGroupModel = self.get(public_id=public_id)
-        delete_result = self._delete(self.collection, public_id=public_id)
+        delete_result = self._delete(self.collection, filter={'public_id': public_id})
 
         if delete_result.deleted_count == 0:
             raise ManagerDeleteError(err='No group matched this public id')

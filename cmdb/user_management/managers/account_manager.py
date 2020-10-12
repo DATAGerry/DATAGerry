@@ -96,14 +96,14 @@ class AccountManager(ManagerBase):
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult:
         raise NotImplementedError
 
-    def get(self, public_id: PublicID) -> dict:
+    def get(self, *args, **kwargs) -> dict:
         raise NotImplementedError
 
-    def insert(self, resource: dict) -> PublicID:
+    def insert(self, resource: dict, *args, **kwargs) -> PublicID:
         raise NotImplementedError
 
-    def update(self, public_id: PublicID, resource: dict):
+    def update(self, resource: dict, *args, **kwargs):
         raise NotImplementedError
 
-    def delete(self, public_id: PublicID):
+    def delete(self, *args, **kwargs):
         raise NotImplementedError

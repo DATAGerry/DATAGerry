@@ -358,3 +358,40 @@ class DeleteSingleResponse(BaseAPIResponse):
         return {**{
             'deleted_entry': self.raw
         }, **super(DeleteSingleResponse, self).export()}
+
+
+class GetListResponse(BaseAPIResponse):
+    """
+    API Response for a simple list without iteration.
+    """
+    __slots__ = 'results'
+
+    def __init__(self, results: List[dict], url: str = None, model: Model = None, body: bool = None):
+        self.results: List[dict] = results
+        super(GetListResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model, body=body)
+
+    def make_response(self, *args, **kwargs) -> BaseResponse:
+        """
+        Make a valid http response.
+
+        Args:
+            *args:
+            **kwargs:
+
+        Returns:
+            Instance of BaseResponse with a HTTP 200 status code.
+        """
+        if self.body:
+            response = make_api_response(self.export(*args, **kwargs))
+        else:
+            response = make_api_response(None)
+        response.headers['X-Total-Count'] = len(self.results)
+        return response
+
+    def export(self, text: str = 'json') -> dict:
+        """
+        Get the list response
+        """
+        return {**{
+            'results': self.results
+        }, **super(GetListResponse, self).export()}

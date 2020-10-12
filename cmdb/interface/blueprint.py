@@ -28,7 +28,6 @@ class APIBlueprint(Blueprint):
     """Wrapper class for Blueprints with nested elements"""
 
     def __init__(self, *args, **kwargs):
-        self.nested_blueprints = []
         super(APIBlueprint, self).__init__(*args, **kwargs)
 
     @staticmethod
@@ -125,14 +124,6 @@ class APIBlueprint(Blueprint):
             return _decorate
 
         return _parse
-
-    def register_nested_blueprint(self, nested_blueprint):
-        """Add a 'sub' blueprint to root element
-        Args:
-            nested_blueprint (NestedBlueprint): Blueprint for sub routes
-        """
-        self.nested_blueprints.append(nested_blueprint)
-
 
 class RootBlueprint(Blueprint):
     """Wrapper class for Blueprints with nested elements"""

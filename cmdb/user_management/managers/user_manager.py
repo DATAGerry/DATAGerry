@@ -154,7 +154,7 @@ class UserManager(AccountManager):
         if public_id in [1]:
             raise ManagerDeleteError(f'You cant delete the admin user')
         user: UserModel = self.get(public_id=public_id)
-        delete_result = self._delete(self.collection, public_id=public_id)
+        delete_result = self._delete(self.collection, filter={'public_id': public_id})
 
         if delete_result.deleted_count == 0:
             raise ManagerDeleteError(err='No user matched this public id')

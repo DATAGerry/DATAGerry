@@ -483,22 +483,21 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         formatted_data = {'$set': data}
         return self.connector.get_collection(collection).update_one(formatted_id, formatted_data)
 
-    def delete(self, collection: str, public_id: int) -> DeleteResult:
+    def delete(self, collection: str, filter: dict, *args, **kwargs) -> DeleteResult:
         """delete document inside database
 
         Args:
             collection (str): name of database collection
-            public_id (int): public id of document
+            filter (dict): filter query
 
         Returns:
             acknowledged
 
         """
 
-        formatted_public_id = {'public_id': public_id}
-        result = self.connector.get_collection(collection).delete_one(formatted_public_id)
+        result = self.connector.get_collection(collection).delete_one(filter)
         if result.deleted_count != 1:
-            raise DocumentCouldNotBeDeleted(collection, public_id)
+            raise DocumentCouldNotBeDeleted(collection, filter)
         return result
 
     def delete_many(self, collection: str, **requirements: dict) -> DeleteResult:

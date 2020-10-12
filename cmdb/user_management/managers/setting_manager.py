@@ -18,8 +18,7 @@ from typing import Union, List
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
-from cmdb.manager import ManagerGetError, ManagerIterationError
-from cmdb.search import Query
+from cmdb.manager import ManagerGetError, ManagerDeleteError
 from cmdb.user_management.models.settings import UserSettingModel, UserSettingType
 from cmdb.user_management.managers.account_manager import AccountManager
 
@@ -40,44 +39,26 @@ class UserSettingsManager(AccountManager):
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
             -> IterationResult[UserSettingModel]:
+        raise NotImplementedError(
+            'Because only a restricted number of settings per user is possible, \
+             a limitation and iteration of the query is not necessary.')
+
+    def get_user_setting(self, user_id: int, identifier: str) -> UserSettingModel:
         """
-        Iterate over a collection of settings resources.
+        Get a single setting from a user by the identifier.
 
         Args:
-            filter: match requirements of field values
-            limit: max number of elements to return
-            skip: number of elements to skip first
-            sort: sort field
-            order: sort order
-
-        Returns:
-            IterationResult: Instance of IterationResult with generic UserSettingModel.
-        """
-
-        try:
-            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-            aggregation_result = next(self._aggregate(self.collection, query))
-        except ManagerGetError as err:
-            raise ManagerIterationError(err=err)
-        iteration_result: IterationResult[UserSettingModel] = IterationResult.from_aggregation(aggregation_result)
-        iteration_result.convert_to(UserSettingModel)
-        return iteration_result
-
-    def get(self, public_id: PublicID) -> UserSettingModel:
-        """
-        Get a single setting by its id.
-
-        Args:
-            public_id (int): ID of the setting.
+            user_id (int): PublicID of the user.
+            identifier (str): Name of the setting.
 
         Returns:
             UserSettingModel: Instance of UserSettingModel with data.
         """
 
-        result = self._get(self.collection, filter={'public_id': public_id}, limit=1)
+        result = self._get(self.collection, filter={'user_id': user_id, 'identifier': identifier}, limit=1)
         for resource_result in result.limit(-1):
             return UserSettingModel.from_data(resource_result)
-        raise ManagerGetError(f'No setting with the id: {public_id} was found!')
+        raise ManagerGetError(f'No setting with the name: {identifier} was found!')
 
     def get_user_settings(self, user_id: PublicID, setting_type: UserSettingType = None) -> List[UserSettingModel]:
         """
@@ -96,53 +77,47 @@ class UserSettingsManager(AccountManager):
         user_settings = self._get(self.collection, filter=query)
         return [UserSettingModel.from_data(setting) for setting in user_settings]
 
-    def insert(self, setting: Union[dict, UserSettingModel]):
+    def insert(self, setting: Union[dict, UserSettingModel], *args, **kwargs):
         """
         Insert a single setting into the database.
 
         Args:
             setting (Union[dict, UserSettingModel]): Raw data of the setting.
-
-        Notes:
-            - If no public id was given, the database manager will auto insert the next available ID.
-            - If a UserSettingModel instance was passed as type argument, \
-              it will be auto converted via the model `to_data` method.
-
-        Returns:
-            int: The Public ID of the new inserted UserSettingModel
         """
-
         if isinstance(setting, UserSettingModel):
             setting = UserSettingModel.to_data(setting)
-        return self._insert(self.collection, resource=setting)
+        return self._insert(self.collection, resource=setting, skip_public=True)
 
-    def update(self, public_id: PublicID, setting: Union[dict, UserSettingModel]):
+    def update(self, setting: Union[dict, UserSettingModel], *args, **kwargs):
         """
         Update a existing setting in the database.
 
         Args:
-            public_id (int): PublicID of the setting in the database.
-            setting (Union[dict, UserSettingModel]): Instance of UserSettingModel or dict
+            setting (Union[dict, UserSettingModel]): Settings data.
 
         Notes:
-            If a UserSettingModel instance was passed as type argument, \
+            If a `UserSettingModel` was passed as type argument, \
             it will be auto converted via the model `to_data` method.
         """
-
         if isinstance(setting, UserSettingModel):
             setting = UserSettingModel.to_data(setting)
-        return self._update(collection=self.collection, filter={'public_id': public_id}, resource=setting)
+        return self._update(self.collection, filter={'identifier': setting.get('identifier'),
+                                                     'user_id': setting.get('user_id')}, resource=setting)
 
-    def delete(self, public_id: PublicID):
+    def delete(self, user_id: PublicID, identifier: str, *args, **kwargs):
         """
-        Delete a existing setting by its PublicID.
+        Delete a existing setting by the tuple of user_id and identifier.
 
         Args:
-            public_id (int): PublicID of the setting.
+            user_id (int): PublicID of the user in the database.
+            identifier (str): Name/Identifier of the setting.
 
         Returns:
             UserSettingModel: The deleted setting as its model.
         """
-        setting: UserSettingModel = self.get(public_id=public_id)
-        self._delete(self.collection, public_id=public_id)
+        setting: UserSettingModel = self.get_user_setting(user_id=user_id, identifier=identifier)
+        delete_result = self._delete(self.collection, filter={'user_id': user_id, 'identifier': identifier})
+
+        if delete_result.deleted_count == 0:
+            raise ManagerDeleteError(err='No user matched this public id')
         return setting
