@@ -41,6 +41,10 @@ import { CmdbType } from '../../models/cmdb-type';
 import { PermissionService } from '../../../auth/services/permission.service';
 import { ObjectPreviewModalComponent } from '../modals/object-preview-modal/object-preview-modal.component';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { UserSetting } from '../../../management/user-settings/models/user-setting';
+import { UserSettingsDbService } from '../../../management/user-settings/services/user-settings-db.service';
+import { AuthService } from '../../../auth/services/auth.service';
+import { stringify } from '@angular/compiler/src/util';
 
 @Component({
   selector: 'cmdb-object-list-by-type',
@@ -70,33 +74,55 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   // Select properties
   public selectedObjects: string[] = [];
 
+  /**
+   * User settings for this route.
+   */
+  public tableUserSettings: Array<UserSetting> = [];
+
+  /**
+   * Current type from the route resolve.
+   */
+  public type: CmdbType;
+
   constructor(private objectService: ObjectService, private typeService: TypeService, private datePipe: DatePipe,
               private fileSaverService: FileSaverService, private fileService: FileService,
               private router: Router, private route: ActivatedRoute, private renderer: Renderer2,
-              private permissionService: PermissionService, private modalService: NgbModal) {
-    this.fileService.callFileFormatRoute().subscribe(data => {
-      this.formatList = data;
-    });
+              private permissionService: PermissionService, private modalService: NgbModal,
+              private userSettingsDB: UserSettingsDbService, private authService: AuthService) {
 
     this.router.routeReuseStrategy.shouldReuseRoute = (future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot) => {
       return false;
     };
+    this.type = this.route.snapshot.data.type as CmdbType;
+    this.tableUserSettings = this.route.snapshot.data.userSettings as Array<UserSetting>;
   }
 
-  ngOnInit() {
+  public ngOnInit() {
+    this.fileService.callFileFormatRoute().subscribe(data => {
+      this.formatList = data;
+    });
+
     this.route.params.subscribe((params) => {
-      this.typeID = params.typeID;
-      this.typeService.getType(this.typeID).subscribe((tInstance: CmdbType) => {
-        this.faIcon = tInstance.render_meta.icon;
-        this.pageTitle = tInstance.label + ' list';
-      });
+      this.typeID = this.type.public_id;
+      this.faIcon = this.type.render_meta.icon;
+      this.pageTitle = this.type.label + ' list';
       this.dtOptionbuilder(this.typeID);
     });
   }
 
   private dtOptionbuilder(typeID: number) {
-    const that = this;
     this.dtOptions = {
+      stateSave: true,
+      stateSaveCallback: (settings, data) => {
+        const set: UserSetting = Object.assign(new UserSetting(), {
+          identifier: this.router.url,
+          user_id: this.authService.currentUserValue.public_id,
+          setting: data,
+          setting_type: 'APPLICATION',
+          setting_time: new Date(Date.now()).toISOString()
+        });
+        this.userSettingsDB.addSetting(set);
+      },
       pagingType: 'full_numbers',
       pageLength: 25,
       lengthMenu: [10, 25, 50, 100, 250, 500],
@@ -118,29 +144,29 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
         if (filter.search !== null
           && filter.search !== ''
           && filter.search !== undefined) {
-          that.objectService.getObjectsByFilter(typeID, filter).subscribe((resp: any) => {
-            that.selectedObjects.length = 0;
-            that.objects = resp;
+          this.objectService.getObjectsByFilter(typeID, filter).subscribe((resp: any) => {
+            this.selectedObjects.length = 0;
+            this.objects = resp;
             // Render columns afterwards
             this.rerender(this.dtOptions).then();
 
             callback({
-              data: that.objects.data,
-              recordsTotal: that.objects.recordsTotal,
-              recordsFiltered: that.objects.recordsFiltered,
+              data: this.objects.data,
+              recordsTotal: this.objects.recordsTotal,
+              recordsFiltered: this.objects.recordsFiltered,
             });
           });
         } else {
-          that.objectService.getObjects(typeID, filter).subscribe((resp: any) => {
-            that.selectedObjects.length = 0;
-            that.objects = resp;
+          this.objectService.getObjects(typeID, filter).subscribe((resp: any) => {
+            this.selectedObjects.length = 0;
+            this.objects = resp;
             // Render columns afterwards
             this.rerender(this.dtOptions).then();
 
             callback({
-              data: that.objects.data,
-              recordsTotal: that.objects.recordsTotal,
-              recordsFiltered: that.objects.recordsFiltered,
+              data: this.objects.data,
+              recordsTotal: this.objects.recordsTotal,
+              recordsFiltered: this.objects.recordsFiltered,
             });
           });
         }
@@ -215,7 +241,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     }
   }
 
-  ngAfterViewInit(): void {
+  public ngAfterViewInit(): void {
     this.renderer.listen('document', 'click', (event) => {
       const actionClassList = (event.target as Element).classList;
       if (actionClassList.contains('select-all-objects')) {
@@ -236,7 +262,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     });
   }
 
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.dtTrigger.unsubscribe();
 
     if (this.modalRef) {

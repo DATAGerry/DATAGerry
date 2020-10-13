@@ -15,7 +15,8 @@
           [disabled]="selectedObjects.length<=0"
           class="btn btn-secondary btn-sm mr-1"
           [routerLink]="['/framework/object/change/', { typeID: typeID , ids: selectedObjects}]">
-    <i class="fas fa-tasks"></i> Bulk Change <span class="badge badge-primary badge-pill">{{selectedObjects.length}}</span>
+    <i class="fas fa-tasks"></i> Bulk Change <span
+    class="badge badge-primary badge-pill">{{selectedObjects.length}}</span>
   </button>
 
   <button type="button"
@@ -26,6 +27,15 @@
   </button>
 
   <span class="card-group float-right">
+      <div class="btn-group ml-2" *ngIf="tableUserSettings.length > 0">
+        <button type="button" id="tableSettingButton" class="btn btn-warning btn-sm dropdown-toggle"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <fa-icon icon="file-export"></fa-icon> Settings
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left" aria-labelledby="exportButton">
+
+        </ul>
+      </div>
       <div class="btn-group" *permissionLink="'base.export.object.*'">
         <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -36,7 +46,8 @@
               [className]="item.active && objects?.recordsTotal > 0 ? 'dropdown-item' : 'dropdown-item disabled'"
               (click)="exportingFiles(item)"
               [ngbTooltip]="item.helperText">
-            <fa-icon icon="{{item.icon}}"></fa-icon> {{item.label}}
+            <fa-icon icon="{{item.icon}}"></fa-icon>
+            {{item.label}}
             <span *ngIf="selectedObjects.length == 0">( all )</span>
             <span *ngIf="selectedObjects.length > 0"> ( {{selectedObjects.length}} )</span>
           </li>
