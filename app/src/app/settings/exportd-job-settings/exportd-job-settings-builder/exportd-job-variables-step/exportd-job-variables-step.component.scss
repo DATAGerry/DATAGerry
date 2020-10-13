@@ -8,22 +8,24 @@
   margin-bottom: 15px;
 }
 
-.scrollable-menu {
-  height: auto;
-  max-height: 440px;
-  overflow-x: hidden;
-}
-
-.scrollable-menu>.dropdown-submenu {
-  overflow-x: visible;
-}
+//.scrollable-menu {
+//  height: auto;
+//  max-height: 440px;
+//  overflow-x: hidden;
+//}
+//
+//.scrollable-menu>.dropdown-submenu {
+//  overflow-x: visible;
+//}
 
 .dropdown-submenu {
   position: relative ;
+  width: fit-content;
 }
 
 .dropdown-submenu>.dropdown-menu {
   left: 100%;
+  width: fit-content;
   margin-left: -50px;
   margin-top: -5px;
   -webkit-border-radius: 6px 6px 6px 6px;

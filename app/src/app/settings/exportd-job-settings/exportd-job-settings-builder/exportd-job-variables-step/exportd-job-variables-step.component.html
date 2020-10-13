@@ -66,8 +66,8 @@
                          && (variable.get('default').dirty || variable.get('default').touched)}"
                                formControlName="default"
                                required>
-                        <div class="input-group-btn">
-                          <span class="input-group-text dropdown-toggle" data-toggle="dropdown"
+                        <div class="input-group-btn" dropdowndirection>
+                          <span class="input-group-text dropdown-toggle" data-toggle="dropdown" type="button"
                                 (click)="filterTypes()"
                                 dropdowndirection
                                 [ngbTooltip]="'Template variable'">
@@ -137,24 +137,26 @@
                                    && (templ.get('template').dirty || templ.get('template').touched)}"
                                  required>
 
-                            <span class="input-group-btn">
-                              <span class="input-group-text dropdown-toggle" data-toggle="dropdown" type="button"
-                                                              (click)="filterTypes()"
+                            <span class="input-group-btn" dropdowndirection>
+                              <span class="input-group-text dropdown-toggle" data-toggle="dropdown" data-display="static" type="button"
                                                               [ngbTooltip]="'Template variable'"
                                                               dropdowndirection>
                                 <fa-icon icon="code" placement="right"></fa-icon>
                               </span>
-                                    <ng-template #recursiveList let-templateHelperData>
+                                    <ng-template #recursiveList let-templateHelperData dropdowndirection>
                                       <ul class="dropdown-menu">
                                         <li *ngFor="let item of templateHelperData; let i = index">
                                           <div *ngIf="item.subdata?.length > 0; else button">
                                             <div class="btn dropdown-submenu" dropdowndirection>
-                                              <span class="dropdown-toggle pr-5" data-toggle="dropdown" aria-haspopup="true"><i class="fas fa-angle-right"></i>  {{item.label}}</span>
-                                              <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item.subdata }"></ng-container>
+                                              <span class="dropdown-toggle pr-5" data-toggle="dropdown" aria-haspopup="true">
+                                                <i class="fas fa-angle-right"></i>  {{item.label}}</span>
+                                              <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item.subdata }">
+                                              </ng-container>
                                             </div>
                                           </div>
                                           <ng-template #button>
-                                            <div class="btn" (click)="setTemplateValue(s, iy, item.templatedata, templ)"><i class="{{isID(i)}}"></i>  {{item.label}}</div>
+                                            <div class="btn" (click)="setTemplateValue(s, iy, item.templatedata, templ)">
+                                              <i class="{{isID(i)}}"></i>  {{item.label}}</div>
                                           </ng-template>
                                         </li>
                                       </ul>
