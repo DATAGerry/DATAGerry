@@ -17,7 +17,6 @@
 */
 
 import { Injectable } from '@angular/core';
-import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { ApiCallService, ApiService } from '../../../services/api-call.service';
 import { UserSetting } from '../models/user-setting';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -25,26 +24,46 @@ import { User } from '../../models/user';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpResponse } from '@angular/common/http';
-import { APIGetListResponse } from '../../../services/models/api-response';
+import {
+  APIDeleteSingleResponse,
+  APIGetListResponse, APIGetSingleResponse,
+  APIInsertSingleResponse,
+  APIUpdateSingleResponse
+} from '../../../services/models/api-response';
 
+/**
+ * Service class for API user settings.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class UserSettingsService<T = UserSetting> implements ApiService {
 
+  /**
+   * Default REST URL Prefix.
+   */
   public servicePrefix: string;
-  private readonly storeName: string = 'UserSettings';
+
+  /**
+   * The current login user.
+   */
   private currentUser: User;
 
-  constructor(private api: ApiCallService, private authService: AuthService, private dbService: NgxIndexedDBService<T>) {
+  /**
+   * Constructor of `UserSettingsService`.
+   * Generates the servicePrefix as `users/{USER_ID}/settings`.
+   *
+   * @param api: ApiCallService
+   * @param authService: AuthService
+   */
+  constructor(private api: ApiCallService, private authService: AuthService) {
     this.currentUser = this.authService.currentUserValue;
     this.servicePrefix = `users/${ this.currentUser.public_id }/settings`;
   }
 
-  public cleanUserSettings(): Observable<boolean> {
-    return this.dbService.clear(this.storeName);
-  }
-
+  /**
+   * Get all settings from the logged user.
+   */
   public getUserSettings(): Observable<Array<T>> {
     return this.api.callGet<T>(`${ this.servicePrefix }/`).pipe(
       map((apiResponse: HttpResponse<APIGetListResponse<T>>) => {
@@ -53,15 +72,53 @@ export class UserSettingsService<T = UserSetting> implements ApiService {
     );
   }
 
-  public addUserSetting(setting: T): Observable<number> {
-    return this.dbService.add(this.storeName, setting);
+  /**
+   * Get a specific setting from the logged user.
+   * @param identifier of the setting.
+   */
+  public getUserSetting(identifier: string): Observable<T> {
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ identifier }/`).pipe(
+      map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => {
+        return apiResponse.body.result as T;
+      })
+    );
   }
 
-  public updateUserSetting(setting: T): Observable<Array<T>> {
-    return this.dbService.update(this.storeName, setting);
+  /**
+   * Add a new setting for the logged in user.
+   * @param setting data.
+   */
+  public addUserSetting(setting: T): Observable<T> {
+    return this.api.callPost<T>(`${ this.servicePrefix }/`, setting).pipe(
+      map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => {
+        return apiResponse.body.raw as T;
+      })
+    );
   }
 
-  public deleteUserSetting(key: number): Observable<Array<T>> {
-    return this.dbService.delete(this.storeName, key);
+  /**
+   * Update a existing user setting by its identifier.
+   * @param identifier of the setting.
+   * @param setting data.
+   */
+  public updateUserSetting(identifier: string, setting: T): Observable<T> {
+    return this.api.callPut<T>(`${ this.servicePrefix }/${ identifier }/`, setting).pipe(
+      map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
+        return apiResponse.body.result as T;
+      })
+    );
   }
+
+  /**
+   * Delete a specific user setting by its identifier.
+   * @param identifier of the setting.
+   */
+  public deleteUserSetting(identifier: string): Observable<T> {
+    return this.api.callDelete<T>(`${ this.servicePrefix }/${ identifier }/`).pipe(
+      map((apiResponse: HttpResponse<APIDeleteSingleResponse<T>>) => {
+        return apiResponse.body.deleted_entry as T;
+      })
+    );
+  }
+
 }

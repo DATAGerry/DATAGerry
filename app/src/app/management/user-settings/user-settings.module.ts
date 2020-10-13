@@ -22,11 +22,11 @@ import { DBConfig } from 'ngx-indexed-db';
 import { userSettingsSchema } from './models/user-setting';
 
 export const userSettingsDBConfig: DBConfig = {
-  name: 'ApplicationSettings',
+  name: 'DATAGERRY',
   version: 1,
   objectStoresMeta: [{
     store: 'UserSettings',
-    storeConfig: { keyPath: 'identifier', autoIncrement: false },
+    storeConfig: { keyPath: 'id', autoIncrement: true },
     storeSchema: userSettingsSchema
   }]
 };
@@ -39,4 +39,5 @@ export const userSettingsDBConfig: DBConfig = {
   ]
 })
 export class UserSettingsModule {
+
 }
