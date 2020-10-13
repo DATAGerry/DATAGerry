@@ -59,6 +59,7 @@ import { ObjectBulkChangePreviewComponent } from './object-bulk-change/object-bu
 import { ArchwizardModule } from 'angular-archwizard';
 import { ObjectDocsComponent } from './components/object-docs/object-docs.component';
 import { ObjectAttachmentsComponent } from './components/object-attachments/object-attachments.component';
+import { UsersModule } from '../../management/users/users.module';
 
 @NgModule({
   entryComponents: [
@@ -97,22 +98,23 @@ import { ObjectAttachmentsComponent } from './components/object-attachments/obje
   ],
   exports: [
   ],
-  imports: [
-    CommonModule,
-    ObjectRoutingModule,
-    DataTablesModule,
-    AuthModule,
-    LayoutModule,
-    QRCodeModule,
-    NgxSpinnerModule,
-    FormsModule,
-    ReactiveFormsModule,
-    NgSelectModule,
-    NgbTooltipModule,
-    FontAwesomeModule,
-    ArchwizardModule,
-    RenderModule
-  ]
+    imports: [
+        CommonModule,
+        ObjectRoutingModule,
+        DataTablesModule,
+        AuthModule,
+        LayoutModule,
+        QRCodeModule,
+        NgxSpinnerModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgSelectModule,
+        NgbTooltipModule,
+        FontAwesomeModule,
+        ArchwizardModule,
+        RenderModule,
+        UsersModule
+    ]
 })
 export class ObjectModule {
 }
