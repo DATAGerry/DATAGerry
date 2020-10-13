@@ -57,16 +57,12 @@ export class DropDownDirectionDirective {
         this.renderer.removeClass(child, 'dropdown-menu-right');
         this.renderer.removeClass(child.parentNode, 'dropup');
 
-        console.log(child.outerHeight + ':' + $(child).outerHeight());
-        console.log(child.offsetTop + ':' + $(child).offset().top);
         if (($(child).offset().top + $(child).outerHeight() > window.innerHeight + window.scrollY + 10)
           && ($(child).offset().top - $(child).outerHeight()) > 90) {
           this.renderer.addClass(child.parentNode, 'dropup');
         }
 
-        console.log(child.offsetLeft + ':' + $(child).offset().left);
-        if ($(child).offset().left + $(child).outerWidth()> window.innerWidth + window.scrollX) {
-          console.log("yes");
+        if ($(child).offset().left + $(child).outerWidth() + 200 > window.innerWidth + window.scrollX) {
           this.renderer.addClass(child, 'dropdown-menu-left');
         } else {
           this.renderer.addClass(child, 'dropdown-menu-right');
