@@ -98,6 +98,8 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     const that = this;
     this.dtOptions = {
       pagingType: 'full_numbers',
+      pageLength: 25,
+      lengthMenu: [10, 25, 50, 100, 250, 500],
       order: [[2, 'asc']],
       dom:
         '<"row" <"col-sm-3" l> <"col-sm-3" B > <"col" f> >' +
