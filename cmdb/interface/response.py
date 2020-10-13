@@ -238,18 +238,19 @@ class InsertSingleResponse(BaseAPIResponse):
     """
     __slots__ = 'result_id', 'raw'
 
-    def __init__(self, result_id: PublicID, raw: dict, url: str = None, model: Model = None):
+    def __init__(self, raw: dict, result_id: [PublicID, str] = None, url: str = None, model: Model = None):
         """
         Constructor of InsertSingleResponse.
 
         Args:
-            result_id: The new public id of the inserted resource.
+            result_id: The new public id or a identifier of the inserted resource.
             raw: The raw document
             url: The request url.
             model: Data model of the inserted resource.
         """
-        self.result_id: PublicID = result_id
+
         self.raw: dict = raw
+        self.result_id: PublicID = result_id
         super(InsertSingleResponse, self).__init__(operation_type=OperationType.INSERT, url=url, model=model)
 
     def make_response(self, prefix: str = '', *args, **kwargs) -> BaseResponse:

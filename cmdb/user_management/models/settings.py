@@ -62,7 +62,7 @@ class UserSettingPayload:
             UserSettingPayload: Instance of `UserSettingEntry`.
         """
         return cls(
-            setting=data.get('setting', None)
+            setting=data
         )
 
     @classmethod
@@ -89,9 +89,7 @@ class UserSettingPayload:
         Returns:
             dict: Return the `UserSettingEntry` as dict.
         """
-        return {
-            'setting': instance.setting
-        }
+        return instance.setting
 
 
 class UserSettingModel:
@@ -121,20 +119,22 @@ class UserSettingModel:
             'type': 'dict',
             'required': False
         },
-        'active': {
-            'type': 'boolean',
+        'setting_type': {
+            'type': 'string',
             'required': True
         },
-        'setting_type': {
+        'setting_time': {
             'type': 'datetime',
-            'required': True
+            'default': datetime.now(),
+            # 'coerce': lambda s: datetime.strptime(s, 'YYYY-MM-DD HH:MM:SS.mmmmmm'),
+            'required': False
         }
     }
 
-    __slots__ = 'identifier', 'user_id', 'setting', 'active', 'setting_type', 'setting_time'
+    __slots__ = 'identifier', 'user_id', 'setting', 'setting_type', 'setting_time'
 
-    def __init__(self, identifier: str, user_id: int, setting: UserSettingPayload, active: bool,
-                 setting_type: UserSettingType, setting_time: datetime):
+    def __init__(self, identifier: str, user_id: int, setting: UserSettingPayload, setting_type: UserSettingType,
+                 setting_time: datetime = None):
         """
         Constructor of `UserSettingModel`.
 
@@ -142,14 +142,12 @@ class UserSettingModel:
             identifier: (str): Identifier or Name of the setting
             user_id (int): PublicID of the user
             setting (UserSettingPayload): User setting
-            active (bool): Activate/Deactivate flag.
             setting_type (UserSettingType): Type of the setting scope.
             setting_time: Datetime of the setting creation.
         """
         self.identifier: str = identifier
         self.user_id: int = user_id
         self.setting: UserSettingPayload = setting
-        self.active: bool = active
         self.setting_type: UserSettingType = setting_type
         self.setting_time: datetime = setting_time
 
@@ -172,9 +170,8 @@ class UserSettingModel:
             identifier=data.get('identifier'),
             user_id=int(data.get('user_id')),
             setting=UserSettingPayload.from_data(data=data.get('settings', None)),
-            active=data.get('active'),
             setting_type=UserSettingType(data.get('setting_type')),
-            setting_time=data.get('setting_time')
+            setting_time=data.get('setting_time', None)
         )
 
     @classmethod
@@ -205,8 +202,7 @@ class UserSettingModel:
         return {
             'identifier': instance.identifier,
             'user_id': instance.user_id,
-            'setting': UserSettingPayload.to_data(instance.setting),
-            'active': instance.active,
-            'setting_type': instance.setting_type,
-            'setting_time': instance.setting_time
+            'setting': UserSettingPayload.to_dict(instance.setting),
+            'setting_type': instance.setting_type.value,
+            'setting_time': instance.setting_time.isoformat()
         }

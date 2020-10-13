@@ -88,12 +88,14 @@ class UserSettingsManager(AccountManager):
             setting = UserSettingModel.to_data(setting)
         return self._insert(self.collection, resource=setting, skip_public=True)
 
-    def update(self, setting: Union[dict, UserSettingModel], *args, **kwargs):
+    def update(self, user_id: int, identifier: str, setting: Union[dict, UserSettingModel], *args, **kwargs):
         """
         Update a existing setting in the database.
 
         Args:
             setting (Union[dict, UserSettingModel]): Settings data.
+            user_id (int): User of this setting.
+            identifier (str): Identifier of the setting.
 
         Notes:
             If a `UserSettingModel` was passed as type argument, \
@@ -101,8 +103,8 @@ class UserSettingsManager(AccountManager):
         """
         if isinstance(setting, UserSettingModel):
             setting = UserSettingModel.to_data(setting)
-        return self._update(self.collection, filter={'identifier': setting.get('identifier'),
-                                                     'user_id': setting.get('user_id')}, resource=setting)
+        return self._update(self.collection, filter={'identifier': identifier,
+                                                     'user_id': user_id}, resource=setting)
 
     def delete(self, user_id: PublicID, identifier: str, *args, **kwargs):
         """

@@ -128,7 +128,7 @@ def insert_group(data: dict):
         return abort(404, err.message)
     except ManagerInsertError as err:
         return abort(400, err.message)
-    api_response = InsertSingleResponse(result_id, raw=UserGroupModel.to_dict(group), url=request.url,
+    api_response = InsertSingleResponse(result_id=result_id, raw=UserGroupModel.to_dict(group), url=request.url,
                                         model=UserGroupModel.MODEL)
     return api_response.make_response(prefix='groups')
 

@@ -122,7 +122,7 @@ def insert_user(data: dict):
         return abort(404, err.message)
     except ManagerInsertError as err:
         return abort(400, err.message)
-    api_response = InsertSingleResponse(result_id, raw=UserModel.to_dict(user), url=request.url,
+    api_response = InsertSingleResponse(result_id=result_id, raw=UserModel.to_dict(user), url=request.url,
                                         model=UserModel.MODEL)
     return api_response.make_response(prefix='users')
 
