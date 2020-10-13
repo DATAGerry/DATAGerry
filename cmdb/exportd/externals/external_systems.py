@@ -20,6 +20,7 @@ import requests
 import json
 import re
 import os
+import pymysql
 import subprocess
 from cmdb.exportd.exporter_base import ExternalSystem, ExportVariable
 from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
@@ -810,3 +811,77 @@ class ExternalSystemGenericPullJson(ExternalSystem):
         json_data = json.dumps(self.__rows)
         header = ExportdHeader(json_data)
         return header
+
+
+class ExternalSystemMySQLDB(ExternalSystem):
+
+    parameters = [
+        {"name": "dbserver", "required": True, "description": "database server", "default": "localhost"},
+        {"name": "database", "required": True, "description": "database name", "default": "db"},
+        {"name": "username", "required": False, "description": "username for database server", "default": "user"},
+        {"name": "password", "required": False, "description": "password for database server", "default": "password"}
+    ]
+
+    variables = [
+        {
+            "name": "table_<name>",
+            "required": True,
+            "description": "Sync data with database table <name>."
+        }
+    ]
+
+    def __init__(self, destination_parms, export_vars):
+        super(ExternalSystemMySQLDB, self).__init__(destination_parms, export_vars)
+
+
+        # get table names for sync
+        self.__tables = []
+        self.__table_data = {}
+        for export_var in self._export_vars:
+            if export_var.startswith("table_"):
+                table_name = export_var.replace("table_", "", 1)
+                self.__tables.append(table_name)
+                self.__table_data[table_name] = []
+
+    def prepare_export(self):
+        pass
+
+    def add_object(self, cmdb_object, template_data):
+        # add data for insert statement
+        for table in self.__tables:
+            varname = "table_" + table
+            self.__table_data[table].append(str(self._export_vars.get(varname, ExportVariable(varname, "")).get_value(cmdb_object, template_data)))
+
+    def finish_export(self):
+        # connect to database
+        db_connection = pymysql.connect(host=self._destination_parms.get("dbserver"),
+                                        user=self._destination_parms.get("username"),
+                                        password=self._destination_parms.get("password"),
+                                        db=self._destination_parms.get("database"),
+                                        cursorclass=pymysql.cursors.DictCursor,
+                                        autocommit=False)
+
+        # handle all database changes within one transaction
+        # if something goes wrong, a rollback will be done
+        try:
+            # beginn transaction
+            db_connection.begin()
+
+            # remove all data from existing tables
+            for table in self.__tables:
+                with db_connection.cursor() as cursor:
+                    sql = "DELETE FROM {}".format(table)
+                    cursor.execute(sql)
+
+            # insert new data in all tables
+            for table in self.__tables:
+                for data in self.__table_data[table]:
+                    with db_connection.cursor() as cursor:
+                        sql = "INSERT INTO {} VALUES({})".format(table, data)
+                        cursor.execute(sql)
+
+            # close transaction
+            db_connection.commit()
+
+        finally:
+            db_connection.close()
