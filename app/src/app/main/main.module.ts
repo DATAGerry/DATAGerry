@@ -24,6 +24,10 @@ import { FileSaverModule } from 'ngx-filesaver';
 import { LayoutModule } from '../layout/layout.module';
 import { ToastModule } from '../layout/toast/toast.module';
 import { DashboardModule } from '../dashboard/dashboard.module';
+import { UserSettingsService } from '../management/user-settings/services/user-settings.service';
+import { NgxIndexedDBModule } from 'ngx-indexed-db';
+import { userSettingsDBConfig } from '../management/user-settings/user-settings.module';
+import { UserSetting } from '../management/user-settings/models/user-setting';
 
 
 @NgModule({
@@ -31,6 +35,7 @@ import { DashboardModule } from '../dashboard/dashboard.module';
   exports: [],
   imports: [
     CommonModule,
+    NgxIndexedDBModule.forRoot(userSettingsDBConfig),
     MainRoutingModule,
     DashboardModule,
     LayoutModule,
@@ -39,4 +44,19 @@ import { DashboardModule } from '../dashboard/dashboard.module';
   ]
 })
 export class MainModule {
+  public constructor(private userSettingsService: UserSettingsService) {
+    const cleanUP = this.userSettingsService.cleanUserSettings().subscribe((success: boolean) => {
+        console.log(`Cleaned user settings: ${ success }`);
+      }, error => {
+        console.error(`Error while cleaning user settings ${ error }`);
+      },
+      () => {
+        cleanUP.unsubscribe();
+      });
+    this.userSettingsService.getUserSettings().subscribe((settings: Array<UserSetting>) => {
+      for (const setting of settings) {
+        this.userSettingsService.addUserSetting(setting);
+      }
+    });
+  }
 }
