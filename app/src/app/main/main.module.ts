@@ -26,6 +26,9 @@ import { DashboardModule } from '../dashboard/dashboard.module';
 import { NgxIndexedDBModule } from 'ngx-indexed-db';
 import { userSettingsDBConfig } from '../management/user-settings/user-settings.module';
 import { UserSettingsService } from '../management/user-settings/services/user-settings.service';
+import { UserSetting } from '../management/user-settings/models/user-setting';
+import { Subscription } from 'rxjs';
+import { UserSettingsDBService } from '../management/user-settings/services/user-settings-db.service';
 
 
 @NgModule({
@@ -43,7 +46,13 @@ import { UserSettingsService } from '../management/user-settings/services/user-s
 })
 export class MainModule {
 
-  constructor(private userSettingsService: UserSettingsService) {
-    // TODO: Load user settings
+  constructor(private userSettingsService: UserSettingsService, private dbService: UserSettingsDBService) {
+    const userSettingsSubscription: Subscription = this.userSettingsService.getUserSettings()
+      .subscribe(
+        (userSettings: Array<UserSetting>) => {
+          this.dbService.syncSettings(userSettings).then( () => console.log('User setting loaded!'));
+        },
+        error => console.error(`Error while loading user settings: ${error}`),
+        () => userSettingsSubscription.unsubscribe());
   }
 }

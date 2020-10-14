@@ -102,7 +102,7 @@ export class UserSettingsService<T = UserSetting> implements ApiService {
    * @param setting data.
    */
   public updateUserSetting(identifier: string, setting: T): Observable<T> {
-    return this.api.callPut<T>(`${ this.servicePrefix }/${ identifier }/`, setting).pipe(
+    return this.api.callPut<T>(`${ this.servicePrefix }/${ identifier }`, setting).pipe(
       map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
         return apiResponse.body.result as T;
       })
@@ -114,7 +114,7 @@ export class UserSettingsService<T = UserSetting> implements ApiService {
    * @param identifier of the setting.
    */
   public deleteUserSetting(identifier: string): Observable<T> {
-    return this.api.callDelete<T>(`${ this.servicePrefix }/${ identifier }/`).pipe(
+    return this.api.callDelete<T>(`${ this.servicePrefix }/${ identifier }`).pipe(
       map((apiResponse: HttpResponse<APIDeleteSingleResponse<T>>) => {
         return apiResponse.body.deleted_entry as T;
       })
