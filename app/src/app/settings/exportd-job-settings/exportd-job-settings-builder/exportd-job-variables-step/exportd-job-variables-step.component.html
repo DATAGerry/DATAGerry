@@ -91,7 +91,7 @@
                                           </div>
                                         </ng-template>
                                         <ng-template #button>
-                                          <span class="btn btn-react dropdown-entry" (click)="setDefaultValue(s, item.templatedata, variable)" type="button">
+                                          <span class="btn btn-react dropdown-entry" (click)="setDefaultValue(s, item.templatedata, variable)">
                                             <i class="{{isID(i)}}"></i>&nbsp;&nbsp;{{item.label}}</span>
                                         </ng-template>
                                       </li>
@@ -140,10 +140,10 @@
                                  required>
 
                             <span class="input-group-btn" dropdowndirection>
-                              <span class="input-group-text dropdown-toggle" data-toggle="dropdown" data-display="static" type="button"
+                              <span class="input-group-text dropdown-toggle" data-toggle="dropdown" data-display="static"
                                                               [ngbTooltip]="'Template variable'"
                                                               dropdowndirection>
-                                <fa-icon icon="code" placement="right"></fa-icon>
+                                <fa-icon icon="code"></fa-icon>
                               </span>
                                     <ng-template #recursiveList let-templateHelperData dropdowndirection>
                                       <ul class="dropdown-menu">
@@ -157,7 +157,7 @@
                                             </div>
                                           </div>
                                           <ng-template #button>
-                                            <span class="btn btn-react dropdown-entry" (click)="setTemplateValue(s, iy, item.templatedata, templ)" type="button">
+                                            <span class="btn btn-react dropdown-entry" (click)="setTemplateValue(s, iy, item.templatedata, templ)">
                                               <i class="{{isID(i)}}"></i>&nbsp;&nbsp;{{item.label}}</span>
                                           </ng-template>
                                         </li>
