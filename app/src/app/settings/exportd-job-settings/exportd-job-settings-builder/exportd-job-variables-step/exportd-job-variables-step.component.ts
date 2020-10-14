@@ -46,28 +46,38 @@ export class DropDownDirectionDirective {
 
   constructor(private el: ElementRef, private renderer: Renderer2) {}
 
+  // listens to the mouseenter event on the element this directive is called
   @HostListener('mouseenter', ['$event.target'])
   determineDirection(target): void {
     for (const child of target.children) {
+
+      // checks if the child is a dropdow menu
       if (child.className.includes('dropdown-menu')) {
+
+        // displays the dropdown menu in a hidden state to determine how it would be positioned
         this.renderer.setStyle(child, 'visibility', 'hidden');
         this.renderer.setStyle(child, 'display', 'block');
 
+        // removes all classes to prevent wrong data to be compared
         this.renderer.removeClass(child, 'dropdown-menu-left');
         this.renderer.removeClass(child, 'dropdown-menu-right');
         this.renderer.removeClass(child.parentNode, 'dropup');
 
+        // if the menu will be displayed under the window border it will be turned into a dropup
+        // except if it would be displayed above the upper window border
         if (($(child).offset().top + $(child).outerHeight() > window.innerHeight + window.scrollY + 10)
           && ($(child).offset().top - $(child).outerHeight()) > 90) {
           this.renderer.addClass(child.parentNode, 'dropup');
         }
 
+        // Determines if the menu would display outside of the right border and adjust its position
         if ($(child).offset().left + $(child).outerWidth() + 200 > window.innerWidth + window.scrollX) {
           this.renderer.addClass(child, 'dropdown-menu-left');
         } else {
           this.renderer.addClass(child, 'dropdown-menu-right');
         }
 
+        // Returns the menu to its original state
         this.renderer.removeStyle(child, 'visibility');
         this.renderer.removeStyle(child, 'display');
       }
@@ -160,8 +170,7 @@ export class ExportdJobVariablesStepComponent implements OnInit {
   }
 
   constructor(private formBuilder: FormBuilder, private typeService: TypeService,
-              private externalService: ExternalSystemService, private templateHelperService: TemplateHelperService,
-              private renderer: Renderer2, private el: ElementRef) {
+              private externalService: ExternalSystemService, private templateHelperService: TemplateHelperService) {
   }
   @Input() set destinationStep(value: ExportdJobDestinationsStepComponent) {
     this.destinationForm = value;
