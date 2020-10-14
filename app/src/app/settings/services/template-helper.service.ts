@@ -40,7 +40,7 @@ export class TemplateHelperService {
             const changedPrefix = (prefix ? prefix + '[\'fields\'][\'' + field.name + '\']' : '[\'' + field.name + '\']');
             let subdata;
 
-            if (isNaN(field.ref_types) && !Array.isArray(field.ref_types)) {
+            if (!isNaN(field.ref_types) && !Array.isArray(field.ref_types)) {
               await this.getObjectTemplateHelperData(field.ref_types, changedPrefix, iteration - 1).then(data => {
                 subdata = data;
               });
