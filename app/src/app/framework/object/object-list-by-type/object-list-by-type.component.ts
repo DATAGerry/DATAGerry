@@ -49,7 +49,6 @@ import {
   ObjectTableUserPayload,
   ObjectTableUserSettingConfig
 } from '../../../management/user-settings/models/settings/object-table-user-setting';
-import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-object-list-by-type',
@@ -97,7 +96,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   /**
    * Selector if the config is new.
    */
-  public newTableConfig: BehaviorSubject<ObjectTableUserSettingConfig>;
+  public newTableSettingConfig: BehaviorSubject<ObjectTableUserSettingConfig>;
 
   /**
    * Current type from the route resolve.
@@ -106,7 +105,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
 
   constructor(private objectService: ObjectService, private typeService: TypeService, private datePipe: DatePipe,
               private fileSaverService: FileSaverService, private fileService: FileService,
-              private router: Router, private route: ActivatedRoute, private renderer: Renderer2,
+              private router: Router, private route: ActivatedRoute, private renderer2: Renderer2,
               private permissionService: PermissionService, private modalService: NgbModal,
               private userSettingsDB: UserSettingsDBService, private authService: AuthService) {
 
@@ -118,19 +117,13 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       this.formatList = data;
     });
     this.currentTableConfig = new BehaviorSubject<ObjectTableUserSettingConfig>(undefined);
-    this.newTableConfig = new BehaviorSubject<ObjectTableUserSettingConfig>(undefined);
+    this.newTableSettingConfig = new BehaviorSubject<ObjectTableUserSettingConfig>(undefined);
 
     this.type = this.route.snapshot.data.type as CmdbType;
     this.tableUserSetting = this.route.snapshot.data.userSetting as UserSetting<ObjectTableUserPayload>;
-    console.log(this.tableUserSetting);
   }
 
   public ngOnInit() {
-
-    this.currentTableConfig.asObservable().pipe(takeUntil(this.subscriber))
-      .subscribe((settingConf: ObjectTableUserSettingConfig) => {
-        // console.log(settingConf);
-      });
 
     this.route.params.subscribe((params) => {
       this.typeID = this.type.public_id;
@@ -150,8 +143,19 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
           active: true
         } as ObjectTableUserSettingConfig;
 
-        this.currentTableConfig.next(currentStateConfig);
-        this.newTableConfig.next(currentStateConfig);
+        this.newTableSettingConfig.next(currentStateConfig);
+      },
+      stateLoadCallback: (settings, callback) => {
+        try {
+          for (const config of this.tableUserSetting.payload.configs) {
+            if (config.active) {
+              return config.data;
+            }
+          }
+        } catch (e) {
+          return callback(null);
+        }
+
       },
       pagingType: 'full_numbers',
       pageLength: 25,
@@ -272,7 +276,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   }
 
   public ngAfterViewInit(): void {
-    this.renderer.listen('document', 'click', (event) => {
+    this.renderer2.listen('document', 'click', (event) => {
       const actionClassList = (event.target as Element).classList;
       if (actionClassList.contains('select-all-objects')) {
         const dataTable: any = $('#dt-object-list').DataTable();
@@ -503,7 +507,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
    * Save the current table settings into the indexedDB.
    */
   public saveSetting(): void {
-    const newTableData = this.newTableConfig.value;
+    const newTableData = this.newTableSettingConfig.value;
     if (this.tableUserSetting) {
       for (const config of this.tableUserSetting.payload.configs) {
         config.active = false;
@@ -522,11 +526,22 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       this.userSettingsDB.addSetting(userSetting);
       this.tableUserSetting = userSetting;
     }
-    this.newTableConfig.next(undefined);
+    this.newTableSettingConfig.next(undefined);
   }
 
-  public selectSetting(userSetting: UserSetting): void {
-    // TODO: Update active flag
+  /**
+   * Toggle between multiple setting states.
+   * @param selected ObjectTableUserSettingConfig
+   */
+  public selectSetting(selected: ObjectTableUserSettingConfig) {
+    for (const config of this.tableUserSetting.payload.configs) {
+      config.active = config === selected;
+    }
+    this.userSettingsDB.updateSetting(this.tableUserSetting);
+    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+      dtInstance.destroy();
+      this.displayTable(this.dtTableElement);
+    });
   }
 
 }
