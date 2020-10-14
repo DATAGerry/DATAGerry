@@ -40,6 +40,7 @@ import {
   ExportdJobDestinationsStepComponent
 } from './exportd-job-settings-builder/exportd-job-destinations-step/exportd-job-destinations-step.component';
 import {
+  DropDownDirectionDirective,
   ExportdJobVariablesStepComponent,
   FilterPipe
 } from './exportd-job-settings-builder/exportd-job-variables-step/exportd-job-variables-step.component';
@@ -73,7 +74,8 @@ import { AuthModule } from '../../auth/auth.module';
     ExportdJobLogsComponent,
     DeleteLogJobModalComponent,
     FilterPipe,
-    ExportdJobSettingsCopyComponent],
+    ExportdJobSettingsCopyComponent,
+    DropDownDirectionDirective],
   imports: [
     CommonModule,
     LayoutModule,

@@ -50,7 +50,6 @@ export class TemplateHelperService {
               });
             } else {
               subdata = [];
-              console.log(cmdbTypeObj);
               await field.ref_types.forEach((type) => {
                 this.getObjectTemplateHelperData(type , changedPrefix, iteration - 1).then( data => {
                   subdata.push(({
