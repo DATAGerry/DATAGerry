@@ -155,7 +155,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
         } catch (e) {
           return callback(null);
         }
-
+        return callback(null);
       },
       pagingType: 'full_numbers',
       pageLength: 25,
@@ -533,9 +533,24 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
    * Toggle between multiple setting states.
    * @param selected ObjectTableUserSettingConfig
    */
-  public selectSetting(selected: ObjectTableUserSettingConfig) {
+  public selectSetting(selected: ObjectTableUserSettingConfig): void {
     for (const config of this.tableUserSetting.payload.configs) {
       config.active = config === selected;
+    }
+    this.userSettingsDB.updateSetting(this.tableUserSetting);
+    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+      dtInstance.destroy();
+      this.displayTable(this.dtTableElement);
+    });
+  }
+
+  /**
+   * Set all settings activation status to false.
+   * Same as reset default setting.
+   */
+  public resetSetting(): void {
+    for (const config of this.tableUserSetting.payload.configs) {
+      config.active = false;
     }
     this.userSettingsDB.updateSetting(this.tableUserSetting);
     this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {

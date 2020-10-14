@@ -50,7 +50,7 @@ export class MainModule {
     const userSettingsSubscription: Subscription = this.userSettingsService.getUserSettings()
       .subscribe(
         (userSettings: Array<UserSetting>) => {
-          this.dbService.syncSettings(userSettings).then( () => console.log('User setting loaded!'));
+          this.dbService.syncSettings(userSettings).then();
         },
         error => console.error(`Error while loading user settings: ${error}`),
         () => userSettingsSubscription.unsubscribe());

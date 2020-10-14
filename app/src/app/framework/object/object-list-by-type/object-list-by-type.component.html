@@ -41,8 +41,9 @@
         <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
           <li class="dropdown-item" *ngFor="let tableSetting of tableUserSetting.payload?.configs.reverse()" [ngClass]="tableSetting.active ? 'active': ''"
           (click)="selectSetting(tableSetting)">
-            {{tableSetting.data.time | date: 'dd/MM/yyyy - HH:mm:ss'}}
+            <span></span> {{tableSetting.data.time | date: 'dd/MM/yyyy - HH:mm:ss'}}
           </li>
+          <li class="dropdown-item bg-warning" (click)="resetSetting()">RESET</li>
         </ul>
       </div>
       <div class="btn-group" *permissionLink="'base.export.object.*'">
