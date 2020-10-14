@@ -20,7 +20,6 @@
   left: 100%;
   margin-left: -50px;
   padding: 5px;
-  width: inherit;
 }
 
 .dropup>.dropdown-menu {
@@ -52,10 +51,6 @@
 
 .dropdown-submenu>.dropdown-menu-right {
   left: 210px !important;
-}
-
-.dropdown-submenu:hover>a:after {
-  border-left-color: #fff;
 }
 
 .dropdown-entry {
