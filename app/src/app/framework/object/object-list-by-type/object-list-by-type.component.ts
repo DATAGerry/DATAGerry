@@ -89,11 +89,6 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   public tableUserSetting: UserSetting<ObjectTableUserPayload>;
 
   /**
-   * The current table configuration.
-   */
-  public currentTableConfig: BehaviorSubject<ObjectTableUserSettingConfig>;
-
-  /**
    * Selector if the config is new.
    */
   public newTableSettingConfig: BehaviorSubject<ObjectTableUserSettingConfig>;
@@ -116,7 +111,6 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
-    this.currentTableConfig = new BehaviorSubject<ObjectTableUserSettingConfig>(undefined);
     this.newTableSettingConfig = new BehaviorSubject<ObjectTableUserSettingConfig>(undefined);
 
     this.type = this.route.snapshot.data.type as CmdbType;
@@ -553,6 +547,18 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       config.active = false;
     }
     this.userSettingsDB.updateSetting(this.tableUserSetting);
+    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+      dtInstance.destroy();
+      this.displayTable(this.dtTableElement);
+    });
+  }
+
+  /**
+   * Clear the complete tableSetting
+   */
+  public clearSetting(): void {
+    this.userSettingsDB.deleteSetting(this.tableUserSetting.identifier);
+    this.tableUserSetting = undefined;
     this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
       dtInstance.destroy();
       this.displayTable(this.dtTableElement);

@@ -39,11 +39,13 @@
           <i class="fas fa-border-none"></i> Settings
         </button>
         <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
-          <li class="dropdown-item" *ngFor="let tableSetting of tableUserSetting.payload?.configs.reverse()" [ngClass]="tableSetting.active ? 'active': ''"
+          <li class="dropdown-item pointer" *ngFor="let tableSetting of tableUserSetting.payload?.configs.reverse()" [ngClass]="tableSetting.active ? 'active': ''"
           (click)="selectSetting(tableSetting)">
             <span></span> {{tableSetting.data.time | date: 'dd/MM/yyyy - HH:mm:ss'}}
           </li>
-          <li class="dropdown-item bg-warning" (click)="resetSetting()">RESET</li>
+          <div class="dropdown-divider"></div>
+          <li class="dropdown-item bg-warning pointer" (click)="resetSetting()">RESET</li>
+          <li class="dropdown-item bg-danger pointer" (click)="clearSetting()">CLEAR</li>
         </ul>
       </div>
       <div class="btn-group" *permissionLink="'base.export.object.*'">
