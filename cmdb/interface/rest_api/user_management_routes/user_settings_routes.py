@@ -29,6 +29,21 @@ user_settings_blueprint = APIBlueprint('user_settings', __name__)
 
 @user_settings_blueprint.route('/', methods=['GET', 'HEAD'])
 def get_user_settings(user_id: int):
+    """
+    HTTP `GET`/`HEAD` route for getting a complete collection of resources.
+
+    Args:
+        user_id (int): PublicID of the current user.
+
+    Returns:
+        GetListResponse: Which includes all of the `UserSettingModel`.
+
+    Notes:
+        Calling the route over HTTP HEAD method will result in an empty body.
+
+    Raises:
+        ManagerGetError: If the collection/resources could not be found.
+    """
     settings_manager = UserSettingsManager(database_manager=current_app.database_manager)
     try:
         settings: List[UserSettingModel] = settings_manager.get_user_settings(user_id=user_id)
@@ -42,6 +57,22 @@ def get_user_settings(user_id: int):
 
 @user_settings_blueprint.route('/<string:identifier>', methods=['GET', 'HEAD'])
 def get_user_setting(user_id: int, identifier: str):
+    """
+    HTTP `GET`/`HEAD` route for a single user setting resource.
+
+    Args:
+        user_id (int): Public ID of the user.
+        identifier (str): Identifier/Name of the user setting.
+
+    Raises:
+        ManagerGetError: When the selected user setting does not exists.
+
+    Notes:
+        Calling the route over HTTP HEAD method will result in an empty body.
+
+    Returns:
+        GetSingleResponse: Which includes the json data of a UserSettingModel.
+    """
     settings_manager = UserSettingsManager(database_manager=current_app.database_manager)
     try:
         setting: UserSettingModel = settings_manager.get_user_setting(user_id, identifier)
@@ -55,6 +86,20 @@ def get_user_setting(user_id: int, identifier: str):
 @user_settings_blueprint.route('/', methods=['POST'])
 @user_settings_blueprint.validate(UserSettingModel.SCHEMA)
 def insert_setting(user_id: int, data: dict):
+    """
+    HTTP `POST` route for insert a single user setting resource.
+
+    Args:
+        user_id (int): Public ID of the user.
+        data (UserModel.SCHEMA): Insert data of a new user.
+
+    Raises:
+        ManagerGetError: If the inserted user could not be found after inserting.
+        ManagerInsertError: If something went wrong during insertion.
+
+    Returns:
+        InsertSingleResponse: Insert response with the new user and its identifier.
+    """
     settings_manager: UserSettingsManager = UserSettingsManager(database_manager=current_app.database_manager)
     try:
         settings_manager.insert(data)
@@ -72,6 +117,21 @@ def insert_setting(user_id: int, data: dict):
 @user_settings_blueprint.route('/<string:identifier>', methods=['PUT', 'PATCH'])
 @user_settings_blueprint.validate(UserSettingModel.SCHEMA)
 def update_setting(user_id: int, identifier: str, data: dict):
+    """
+    HTTP `PUT`/`PATCH` route for update a single user setting resource.
+
+    Args:
+        user_id (int): Public ID of the user.
+        identifier (str): Identifier/Name of the user setting.
+        data (UserModel.SCHEMA): New setting data to update.
+
+    Raises:
+        ManagerGetError: When the setting with the `identifier` was not found.
+        ManagerUpdateError: When something went wrong during the update.
+
+    Returns:
+        UpdateSingleResponse: With update result of the new updated user setting.
+    """
     settings_manager: UserSettingsManager = UserSettingsManager(database_manager=current_app.database_manager)
     try:
         setting = UserSettingModel.from_data(data=data)
@@ -87,6 +147,20 @@ def update_setting(user_id: int, identifier: str, data: dict):
 
 @user_settings_blueprint.route('/<string:identifier>', methods=['DELETE'])
 def delete_setting(user_id: int, identifier: str):
+    """
+    HTTP `DELETE` route for delete a single user setting resource.
+
+    Args:
+        user_id (int): Public ID of the user.
+        identifier (str): Identifier/Name of the user setting.
+
+    Raises:
+        ManagerGetError: When the setting with the `identifier` was not found.
+        ManagerDeleteError: When something went wrong during the deletion.
+
+    Returns:
+        DeleteSingleResponse: Delete result with the deleted setting as data.
+    """
     settings_manager: UserSettingsManager = UserSettingsManager(database_manager=current_app.database_manager)
     try:
         deleted_setting = settings_manager.delete(user_id=user_id, identifier=identifier)

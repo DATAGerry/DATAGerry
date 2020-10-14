@@ -807,3 +807,228 @@ Rights
         :reqheader Authorization: jwtoken to authenticate
         :resheader Content-Type: application/json
         :statuscode 200: Everything is fine.
+
+
+Settings
+--------
+
+.. http:get:: /users/(int:user_id)/settings/
+
+        HTTP `GET/HEAD` rest route. HEAD will be the same result except their will be no body.
+
+        **Example request**:
+
+        .. sourcecode:: http
+
+            GET /rest/users/1/settings/ HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        **Example response**:
+
+        .. sourcecode:: http
+
+            HTTP/1.1 200 OK
+            Content-Type: application/json
+            Content-Length: 1000
+            X-Total-Count: 1
+            X-API-Version: 1.0
+
+            {
+              "results": [
+                {
+                  "identifier": "test",
+                  "user_id": 1,
+                  "payload": {},
+                  "setting_type": "GLOBAL"
+                }
+              ],
+              "response_type": "GET",
+              "model": "UserSetting",
+              "time": "2020-01-01 00:00:00.000000"
+            }
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: jwtoken to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 200: Everything is fine.
+        :statuscode 400: The request or the parameters are wrong formatted.
+        :statuscode 404: No collection or resources found.
+
+.. http:get:: /users/(int:public_id)/settings/(str:identifier)
+
+        HTTP `GET/HEAD` rest route for a single resource by the UserID and the setting identifier.
+
+        **Example request**
+
+        .. sourcecode:: http
+
+            GET /rest/users/1/settings/test HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        **Example response**
+
+        .. sourcecode:: http
+
+            HTTP/1.1 200 OK
+            Content-Type: application/json
+            Content-Length: 100
+            X-API-Version: 1.0
+
+            {
+              "results": [
+                {
+                  "identifier": "test",
+                  "user_id": 1,
+                  "payload": {},
+                  "setting_type": "GLOBAL"
+                }
+              ],
+              "response_type": "GET",
+              "model": "UserSetting",
+              "time": "2020-01-01 00:00:00.000000"
+            }
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: jwtoken to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 200: Everything is fine.
+        :statuscode 404: No resource found.
+
+.. http:post:: /users/(int:public_id)/settings/
+
+        HTTP `POST` route for inserting a new setting.
+
+        **Example request**
+
+        .. sourcecode:: http
+
+            POST /rest/users/1/settings/ HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+            {
+                "identifier" : "test",
+                "user_id" : 1,
+                "payload" : {},
+                "setting_type" : "GLOBAL"
+            }
+
+        **Example response**
+
+        .. sourcecode:: http
+
+            HTTP/1.1 201 CREATED
+            Content-Type: application/json
+            Content-Length: 100
+            Location: http://datagerry.com/rest/users/1/settings/test
+            X-API-Version: 1.0
+
+            {
+              "result_id": "test",
+              "raw": {
+                "identifier": "test",
+                "user_id": 1,
+                "payload": {},
+                "setting_type": "GLOBAL"
+              },
+              "response_type": "INSERT",
+              "model": "UserSetting",
+              "time": "2020-01-01 00:00:00.000000"
+            }
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: jwtoken to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 201: Resource was created.
+        :statuscode 400: Resource could not be inserted.
+        :statuscode 404: No resource found.
+
+.. http:put:: /users/(int:public_id)/settings/(str:identifier)
+
+        HTTP `PUT`/`PATCH` route for updating a setting.
+
+        **Example request**
+
+        .. sourcecode:: http
+
+            PUT /rest/users/1/settings/test HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+            {
+                "identifier" : "test",
+                "user_id" : 1,
+                "payload" : {},
+                "setting_type" : "GLOBAL"
+            }
+
+        **Example response**
+
+        .. sourcecode:: http
+
+            HTTP/1.1 202 ACCEPTED
+            Content-Type: application/json
+            Content-Length: 100
+            Location: http://datagerry.com/rest/users/1/settings/test
+            X-API-Version: 1.0
+
+            {
+                "result": {
+                    "identifier": "test",
+                    "user_id": 1,
+                    "payload": {},
+                    "setting_type": "GLOBAL"
+                },
+                "response_type": "UPDATE",
+                "model": "UserSetting",
+                "time": "2020-01-01 00:00:00.000000"
+            }
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: jwtoken to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 202: Everything is fine.
+        :statuscode 400: Resource could not be updated.
+        :statuscode 404: No resource found.
+
+.. http:delete:: /users/(int:public_id)/settings/(str:identifier)
+
+        HTTP `DELETE` route for deleting a existing setting.
+
+        **Example request**
+
+        .. sourcecode:: http
+
+            DELETE /rest/users/1/settings/test HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        **Example response**
+
+        .. sourcecode:: http
+
+            HTTP/1.1 202 ACCEPTED
+            Content-Type: application/json
+            Content-Length: 100
+            X-API-Version: 1.0
+
+            {
+                "deleted_entry": {
+                    "identifier": "test",
+                    "user_id": 1,
+                    "payload": {},
+                    "setting_type": "APPLICATION"
+                },
+                "response_type": "DELETE",
+                "model": "UserSetting",
+                "time": "2020-01-01 00:00:00.000000"
+            }
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: jwtoken to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 202: Everything is fine.
+        :statuscode 400: Resource could not be deleted.
+        :statuscode 404: No resource found.
