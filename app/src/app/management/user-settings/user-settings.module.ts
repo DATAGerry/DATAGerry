@@ -20,7 +20,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DBConfig } from 'ngx-indexed-db';
 import { userSettingsSchema } from './models/user-setting';
-import { UserSettingsDbService } from './services/user-settings-db.service';
+import { UserSettingsDBService } from './services/user-settings-db.service';
 
 export const userSettingsDBConfig: DBConfig = {
   name: 'DATAGERRY',
@@ -39,7 +39,7 @@ export const userSettingsDBConfig: DBConfig = {
     CommonModule
   ],
   providers: [
-    UserSettingsDbService
+    UserSettingsDBService
   ]
 })
 export class UserSettingsModule {

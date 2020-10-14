@@ -42,7 +42,7 @@ import { PermissionService } from '../../../auth/services/permission.service';
 import { ObjectPreviewModalComponent } from '../modals/object-preview-modal/object-preview-modal.component';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { UserSetting } from '../../../management/user-settings/models/user-setting';
-import { UserSettingsDbService } from '../../../management/user-settings/services/user-settings-db.service';
+import { UserSettingsDBService } from '../../../management/user-settings/services/user-settings-db.service';
 import { AuthService } from '../../../auth/services/auth.service';
 
 import {
@@ -87,7 +87,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   /**
    * User settings for this route.
    */
-  public tableUserSetting: UserSetting;
+  public tableUserSetting: UserSetting<ObjectTableUserPayload>;
 
   /**
    * The current table configuration.
@@ -108,7 +108,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
               private fileSaverService: FileSaverService, private fileService: FileService,
               private router: Router, private route: ActivatedRoute, private renderer: Renderer2,
               private permissionService: PermissionService, private modalService: NgbModal,
-              private userSettingsDB: UserSettingsDbService, private authService: AuthService) {
+              private userSettingsDB: UserSettingsDBService, private authService: AuthService) {
 
     this.router.routeReuseStrategy.shouldReuseRoute = (future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot) => {
       return false;
@@ -121,7 +121,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     this.newTableConfig = new BehaviorSubject<ObjectTableUserSettingConfig>(undefined);
 
     this.type = this.route.snapshot.data.type as CmdbType;
-    this.tableUserSetting = this.route.snapshot.data.userSetting as UserSetting;
+    this.tableUserSetting = this.route.snapshot.data.userSetting as UserSetting<ObjectTableUserPayload>;
     console.log(this.tableUserSetting);
   }
 
@@ -147,8 +147,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
 
         const currentStateConfig = {
           data,
-          active: true,
-          date: new Date(Date.now()).toISOString()
+          active: true
         } as ObjectTableUserSettingConfig;
 
         this.currentTableConfig.next(currentStateConfig);
@@ -505,17 +504,29 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
    */
   public saveSetting(): void {
     const newTableData = this.newTableConfig.value;
-    const tablePayload = new ObjectTableUserPayload([newTableData]);
+    if (this.tableUserSetting) {
+      for (const config of this.tableUserSetting.payload.configs) {
+        config.active = false;
+      }
+      this.tableUserSetting.payload.configs.push(newTableData);
+      this.userSettingsDB.updateSetting(this.tableUserSetting);
+    } else {
+      const tablePayload = new ObjectTableUserPayload([newTableData]);
 
-    const userSetting: UserSetting = Object.assign(new UserSetting(), {
-      identifier: this.router.url,
-      user_id: this.authService.currentUserValue.public_id,
-      payload: tablePayload,
-      setting_type: 'APPLICATION',
-      setting_time: new Date(Date.now()).toISOString()
-    });
-    this.userSettingsDB.addSetting(userSetting);
+      const userSetting: UserSetting<ObjectTableUserPayload> = Object.assign(new UserSetting(), {
+        identifier: this.router.url.toString().substring(1).split('/').join('-'),
+        user_id: this.authService.currentUserValue.public_id,
+        payload: tablePayload,
+        setting_type: 'APPLICATION'
+      });
+      this.userSettingsDB.addSetting(userSetting);
+      this.tableUserSetting = userSetting;
+    }
     this.newTableConfig.next(undefined);
+  }
+
+  public selectSetting(userSetting: UserSetting): void {
+    // TODO: Update active flag
   }
 
 }

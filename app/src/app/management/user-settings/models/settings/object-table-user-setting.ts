@@ -37,5 +37,4 @@ export interface ObjectTableUserSettingConfig {
   hash?: string;
   data: any;
   active: boolean;
-  date: string;
 }

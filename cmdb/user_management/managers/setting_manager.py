@@ -102,7 +102,7 @@ class UserSettingsManager(AccountManager):
             it will be auto converted via the model `to_data` method.
         """
         if isinstance(setting, UserSettingModel):
-            setting = UserSettingModel.to_data(setting)
+            setting = UserSettingModel.to_dict(setting)
         return self._update(self.collection, filter={'identifier': identifier,
                                                      'user_id': user_id}, resource=setting)
 

@@ -17,30 +17,101 @@
 */
 
 
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { UserSettingsService } from './user-settings.service';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { UserSetting } from '../models/user-setting';
-import { Observable } from 'rxjs';
+import { Observable, ReplaySubject, Subject } from 'rxjs';
+import { ToastService } from '../../../layout/toast/toast.service';
+import { takeUntil } from 'rxjs/operators';
+import { User } from '../../models/user';
 
 @Injectable({
   providedIn: 'root'
 })
-export class UserSettingsDbService<T = UserSetting> {
+export class UserSettingsDBService<T = UserSetting> implements OnDestroy {
 
+  /**
+   * Name of the store settings of the indexedDB `DATAGERRY`.
+   */
   private readonly storeName: string = 'UserSettings';
 
-  constructor(private dbService: NgxIndexedDBService<any>, private userSettingsService: UserSettingsService) {
+  /**
+   * Subscriber subject. When active auto set to backend db.
+   */
+  private updater: ReplaySubject<void>;
 
+  /**
+   * Holder subject when new settings are in the database.
+   */
+  private newSettings: Subject<UserSetting>;
+
+  constructor(private dbService: NgxIndexedDBService<UserSetting>, private userSettingsService: UserSettingsService,
+              private toastService: ToastService) {
+    this.updater = new ReplaySubject<void>();
+    this.newSettings = new Subject<UserSetting>();
+    this.newSettings.asObservable().pipe(takeUntil(this.updater)).subscribe(
+
+    );
   }
 
-  public getSetting(key: string): Observable<T> {
+  /**
+   * Syncs the indexedDB settings with database.
+   * @param settings List of UserSettings from the database.
+   */
+  public async syncSettings(settings: Array<UserSetting>) {
+    this.dbService.clear(this.storeName);
+
+    for (const setting of settings) {
+      await this.dbService.add(this.storeName, setting);
+    }
+  }
+
+  /**
+   * Get a setting by it ident.
+   * @param key Identifier of the setting.
+   */
+  public getSetting(key: string): Observable<UserSetting> {
     return this.dbService.getByKey(this.storeName, key);
   }
 
-  public addSetting(setting: UserSetting) {
+  /**
+   * Add a setting to the database.
+   * @param setting UserSetting data.
+   */
+  public addSetting(setting: UserSetting): void {
     this.dbService.add(this.storeName, setting).subscribe(key => {
-      console.log(key);
+      this.userSettingsService.addUserSetting(setting).subscribe();
+      this.toastService.success('Setting was saved!');
     });
+  }
+
+  /**
+   * Update a existing user setting.
+   * @param setting UserSetting data.
+   */
+  public updateSetting(setting: UserSetting): void {
+    this.dbService.update(this.storeName, setting).subscribe(key => {
+      this.userSettingsService.updateUserSetting(setting.identifier, setting).subscribe();
+      this.toastService.success('Setting was updated!');
+    });
+  }
+
+  /**
+   * Delete a existing user setting.
+   * @param identifier User key.
+   */
+  public deleteSetting(identifier: string): void {
+    this.dbService.delete(this.storeName, identifier).subscribe(a => {
+      this.toastService.success('Setting was deleted!');
+    });
+  }
+
+  /**
+   * Auto unsubscribe when service is destroyed.
+   */
+  public ngOnDestroy(): void {
+    this.updater.next();
+    this.updater.complete();
   }
 }

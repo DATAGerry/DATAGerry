@@ -46,7 +46,7 @@ class UserSettingPayload:
         Constructor of `UserSettingPayload`.
 
         Args:
-            setting (Any): Settings option/body/payload.
+            payload (Any): Settings option/body/payload.
         """
         self.payload: Any = payload
 
@@ -122,19 +122,12 @@ class UserSettingModel:
         'setting_type': {
             'type': 'string',
             'required': True
-        },
-        'setting_time': {
-            'type': 'datetime',
-            'default': datetime.now(),
-            # 'coerce': lambda s: datetime.strptime(s, 'YYYY-MM-DD HH:MM:SS.mmmmmm'),
-            'required': False
         }
     }
 
-    __slots__ = 'identifier', 'user_id', 'payload', 'setting_type', 'setting_time'
+    __slots__ = 'identifier', 'user_id', 'payload', 'setting_type'
 
-    def __init__(self, identifier: str, user_id: int, payload: UserSettingPayload, setting_type: UserSettingType,
-                 setting_time: datetime = None):
+    def __init__(self, identifier: str, user_id: int, payload: UserSettingPayload, setting_type: UserSettingType):
         """
         Constructor of `UserSettingModel`.
 
@@ -143,13 +136,11 @@ class UserSettingModel:
             user_id (int): PublicID of the user
             payload (UserSettingPayload): Setting payload
             setting_type (UserSettingType): Type of the setting scope.
-            setting_time: Datetime of the setting creation.
         """
         self.identifier: str = identifier
         self.user_id: int = user_id
         self.payload: UserSettingPayload = payload
         self.setting_type: UserSettingType = setting_type
-        self.setting_time: datetime = setting_time
 
     @classmethod
     def get_index_keys(cls):
@@ -170,8 +161,7 @@ class UserSettingModel:
             identifier=data.get('identifier'),
             user_id=int(data.get('user_id')),
             payload=UserSettingPayload.from_data(data=data.get('payload', None)),
-            setting_type=UserSettingType(data.get('setting_type')),
-            setting_time=data.get('setting_time', None)
+            setting_type=UserSettingType(data.get('setting_type'))
         )
 
     @classmethod
@@ -203,6 +193,5 @@ class UserSettingModel:
             'identifier': instance.identifier,
             'user_id': instance.user_id,
             'payload': UserSettingPayload.to_dict(instance.payload),
-            'setting_type': instance.setting_type.value,
-            'setting_time': instance.setting_time.isoformat()
+            'setting_type': instance.setting_type.value
         }

@@ -20,7 +20,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
 import { UserSetting } from '../models/user-setting';
 import { Observable } from 'rxjs';
-import { UserSettingsDbService } from '../services/user-settings-db.service';
+import { UserSettingsDBService } from '../services/user-settings-db.service';
 import { catchError, map } from 'rxjs/operators';
 import { HttpResponse } from '@angular/common/http';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
@@ -33,7 +33,7 @@ import { APIGetMultiResponse } from '../../../services/models/api-response';
 })
 export class UserSettingsResolver implements Resolve<UserSetting | unknown> {
 
-  constructor(private userSettingsDB: UserSettingsDbService<UserSetting>) {
+  constructor(private userSettingsDB: UserSettingsDBService<UserSetting>) {
   }
 
   /**
@@ -43,13 +43,13 @@ export class UserSettingsResolver implements Resolve<UserSetting | unknown> {
    */
   public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
     Observable<UserSetting | unknown> | Promise<UserSetting | unknown> | UserSetting | unknown {
-    const currentURL = state.url;
-    return this.userSettingsDB.getSetting(currentURL).pipe(
+    const ident = state.url.toString().substring(1).split('/').join('-');
+    return this.userSettingsDB.getSetting(ident).pipe(
       map((setting: UserSetting) => {
         return setting;
       }),
       catchError((error) => {
-        console.error(`No user setting for the route: ${currentURL} | Error: ${error}`);
+        console.error(`No user setting for the route: ${ident} | Error: ${error}`);
         return undefined;
       })
     );
