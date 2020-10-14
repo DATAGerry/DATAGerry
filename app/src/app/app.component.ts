@@ -42,7 +42,6 @@ export class AppComponent implements OnInit {
     this.router.events.subscribe((e: Event) => {
       if (e instanceof NavigationEnd) {
         this.route.url.subscribe(() => {
-          console.log(this.route.snapshot.firstChild.data);
           if (this.route.snapshot.firstChild.data.view) {
             this.view = this.route.snapshot.firstChild.data.view;
           } else {
