@@ -43,7 +43,6 @@ import { userSettingsDBConfig } from './management/user-settings/user-settings.m
     BrowserAnimationsModule,
     HttpClientModule,
     MainModule,
-    NgxIndexedDBModule.forRoot(userSettingsDBConfig),
     AuthModule,
     LayoutModule,
     ToastModule,

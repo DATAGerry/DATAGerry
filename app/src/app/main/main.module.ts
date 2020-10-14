@@ -23,6 +23,9 @@ import { FileSaverModule } from 'ngx-filesaver';
 import { LayoutModule } from '../layout/layout.module';
 import { ToastModule } from '../layout/toast/toast.module';
 import { DashboardModule } from '../dashboard/dashboard.module';
+import { NgxIndexedDBModule } from 'ngx-indexed-db';
+import { userSettingsDBConfig } from '../management/user-settings/user-settings.module';
+import { UserSettingsService } from '../management/user-settings/services/user-settings.service';
 
 
 @NgModule({
@@ -30,6 +33,7 @@ import { DashboardModule } from '../dashboard/dashboard.module';
   exports: [],
   imports: [
     CommonModule,
+    NgxIndexedDBModule.forRoot(userSettingsDBConfig),
     MainRoutingModule,
     DashboardModule,
     LayoutModule,
@@ -37,4 +41,9 @@ import { DashboardModule } from '../dashboard/dashboard.module';
     ToastModule
   ]
 })
-export class MainModule {}
+export class MainModule {
+
+  constructor(private userSettingsService: UserSettingsService) {
+    // TODO: Load user settings
+  }
+}

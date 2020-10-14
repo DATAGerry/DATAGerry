@@ -27,13 +27,20 @@
   </button>
 
   <span class="card-group float-right">
-      <div class="btn-group ml-2" *ngIf="tableUserSettings.length > 0">
-        <button type="button" id="tableSettingButton" class="btn btn-warning btn-sm dropdown-toggle"
-                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          <fa-icon icon="file-export"></fa-icon> Settings
+      <div class="btn-group mr-2" *ngIf="newTableConfig.value">
+        <button type="button" id="saveTableSettingButton" class="btn btn-outline-success btn-sm" (click)="saveSetting()">
+          <i class="fas fa-save"></i> Save
         </button>
-        <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left" aria-labelledby="exportButton">
-
+      </div>
+      <div class="btn-group mr-2" *ngIf="tableUserSetting">
+        <button type="button" id="tableSettingButton" class="btn btn-warning btn-sm dropdown-toggle"
+                data-toggle="dropdown">
+          <i class="fas fa-border-none"></i> Settings
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
+          <li class="dropdown-item" *ngFor="let tableSetting of tableUserSetting.payload?.configs">
+            {{tableSetting.date | date: 'dd/MM/yyyy - HH:mm:ss'}}
+          </li>
         </ul>
       </div>
       <div class="btn-group" *permissionLink="'base.export.object.*'">

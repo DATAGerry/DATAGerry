@@ -87,7 +87,7 @@ const routes: Routes = [
     },
     resolve: {
       type: TypeResolver,
-      userSettings: UserSettingsResolver
+      userSetting: UserSettingsResolver
     },
     component: ObjectListByTypeComponent,
   },

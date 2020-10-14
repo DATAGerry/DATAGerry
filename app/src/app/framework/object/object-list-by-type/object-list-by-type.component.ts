@@ -28,7 +28,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { ObjectService } from '../../services/object.service';
 import { RenderResult } from '../../models/cmdb-render';
 import { DatePipe } from '@angular/common';
@@ -44,7 +44,12 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { UserSetting } from '../../../management/user-settings/models/user-setting';
 import { UserSettingsDbService } from '../../../management/user-settings/services/user-settings-db.service';
 import { AuthService } from '../../../auth/services/auth.service';
-import { stringify } from '@angular/compiler/src/util';
+
+import {
+  ObjectTableUserPayload,
+  ObjectTableUserSettingConfig
+} from '../../../management/user-settings/models/settings/object-table-user-setting';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-object-list-by-type',
@@ -75,9 +80,24 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   public selectedObjects: string[] = [];
 
   /**
+   * Component wide un-subscriber.
+   */
+  private subscriber: Subject<void> = new Subject<void>();
+
+  /**
    * User settings for this route.
    */
-  public tableUserSettings: Array<UserSetting> = [];
+  public tableUserSetting: UserSetting;
+
+  /**
+   * The current table configuration.
+   */
+  public currentTableConfig: BehaviorSubject<ObjectTableUserSettingConfig>;
+
+  /**
+   * Selector if the config is new.
+   */
+  public newTableConfig: BehaviorSubject<ObjectTableUserSettingConfig>;
 
   /**
    * Current type from the route resolve.
@@ -93,14 +113,24 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     this.router.routeReuseStrategy.shouldReuseRoute = (future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot) => {
       return false;
     };
-    this.type = this.route.snapshot.data.type as CmdbType;
-    this.tableUserSettings = this.route.snapshot.data.userSettings as Array<UserSetting>;
-  }
 
-  public ngOnInit() {
     this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
+    this.currentTableConfig = new BehaviorSubject<ObjectTableUserSettingConfig>(undefined);
+    this.newTableConfig = new BehaviorSubject<ObjectTableUserSettingConfig>(undefined);
+
+    this.type = this.route.snapshot.data.type as CmdbType;
+    this.tableUserSetting = this.route.snapshot.data.userSetting as UserSetting;
+    console.log(this.tableUserSetting);
+  }
+
+  public ngOnInit() {
+
+    this.currentTableConfig.asObservable().pipe(takeUntil(this.subscriber))
+      .subscribe((settingConf: ObjectTableUserSettingConfig) => {
+        // console.log(settingConf);
+      });
 
     this.route.params.subscribe((params) => {
       this.typeID = this.type.public_id;
@@ -114,14 +144,15 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     this.dtOptions = {
       stateSave: true,
       stateSaveCallback: (settings, data) => {
-        const set: UserSetting = Object.assign(new UserSetting(), {
-          identifier: this.router.url,
-          user_id: this.authService.currentUserValue.public_id,
-          setting: data,
-          setting_type: 'APPLICATION',
-          setting_time: new Date(Date.now()).toISOString()
-        });
-        this.userSettingsDB.addSetting(set);
+
+        const currentStateConfig = {
+          data,
+          active: true,
+          date: new Date(Date.now()).toISOString()
+        } as ObjectTableUserSettingConfig;
+
+        this.currentTableConfig.next(currentStateConfig);
+        this.newTableConfig.next(currentStateConfig);
       },
       pagingType: 'full_numbers',
       pageLength: 25,
@@ -264,6 +295,8 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
 
   public ngOnDestroy(): void {
     this.dtTrigger.unsubscribe();
+    this.subscriber.next();
+    this.subscriber.complete();
 
     if (this.modalRef) {
       this.modalRef.close();
@@ -465,6 +498,24 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   public downLoadFile(data: any, exportType: any) {
     const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
     this.fileSaverService.save(data.body, timestamp + '.' + exportType.label);
+  }
+
+  /**
+   * Save the current table settings into the indexedDB.
+   */
+  public saveSetting(): void {
+    const newTableData = this.newTableConfig.value;
+    const tablePayload = new ObjectTableUserPayload([newTableData]);
+
+    const userSetting: UserSetting = Object.assign(new UserSetting(), {
+      identifier: this.router.url,
+      user_id: this.authService.currentUserValue.public_id,
+      payload: tablePayload,
+      setting_type: 'APPLICATION',
+      setting_time: new Date(Date.now()).toISOString()
+    });
+    this.userSettingsDB.addSetting(userSetting);
+    this.newTableConfig.next(undefined);
   }
 
 }
