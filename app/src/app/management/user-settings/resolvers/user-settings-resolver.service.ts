@@ -21,6 +21,9 @@ import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/r
 import { UserSetting } from '../models/user-setting';
 import { Observable } from 'rxjs';
 import { UserSettingsDbService } from '../services/user-settings-db.service';
+import { catchError, map } from 'rxjs/operators';
+import { HttpResponse } from '@angular/common/http';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
 
 /**
  * Resolver for the current user settings of a URL.
@@ -28,9 +31,9 @@ import { UserSettingsDbService } from '../services/user-settings-db.service';
 @Injectable({
   providedIn: 'root'
 })
-export class UserSettingsResolver implements Resolve<Array<UserSetting>> {
+export class UserSettingsResolver implements Resolve<UserSetting | unknown> {
 
-  constructor(private userSettingsDB: UserSettingsDbService) {
+  constructor(private userSettingsDB: UserSettingsDbService<UserSetting>) {
   }
 
   /**
@@ -39,8 +42,16 @@ export class UserSettingsResolver implements Resolve<Array<UserSetting>> {
    * @param state RouterStateSnapshot
    */
   public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
-    Observable<Array<UserSetting>> | Promise<Array<UserSetting>> | Array<UserSetting> {
+    Observable<UserSetting | unknown> | Promise<UserSetting | unknown> | UserSetting | unknown {
     const currentURL = state.url;
-    return [];
+    return this.userSettingsDB.getSetting(currentURL).pipe(
+      map((setting: UserSetting) => {
+        return setting;
+      }),
+      catchError((error) => {
+        console.error(`No user setting for the route: ${currentURL} | Error: ${error}`);
+        return undefined;
+      })
+    );
   }
 }

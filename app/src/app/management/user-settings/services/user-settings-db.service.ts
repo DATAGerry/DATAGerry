@@ -21,6 +21,7 @@ import { Injectable } from '@angular/core';
 import { UserSettingsService } from './user-settings.service';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { UserSetting } from '../models/user-setting';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -33,18 +34,12 @@ export class UserSettingsDbService<T = UserSetting> {
 
   }
 
-  public getSetting(key: string) {
+  public getSetting(key: string): Observable<T> {
     return this.dbService.getByKey(this.storeName, key);
   }
 
   public addSetting(setting: UserSetting) {
-    this.dbService.add(this.storeName, {
-      identifier: setting.identifier,
-      user_id: setting.user_id,
-      setting: setting.setting,
-      setting_type: setting.setting_type,
-      setting_time: setting.setting_time
-    }).subscribe(key => {
+    this.dbService.add(this.storeName, setting).subscribe(key => {
       console.log(key);
     });
   }

@@ -21,15 +21,23 @@ import { ObjectStoreSchema } from 'ngx-indexed-db/lib/ngx-indexed-db.meta';
 export const userSettingsSchema: ObjectStoreSchema[] = [
   { name: 'identifier', keypath: 'identifier', options: { unique: true } },
   { name: 'user_id', keypath: 'user_id', options: { unique: false } },
-  { name: 'setting', keypath: 'setting', options: { unique: false } },
+  { name: 'payload', keypath: 'payload', options: { unique: false } },
   { name: 'setting_type', keypath: 'setting_type', options: { unique: false } },
   { name: 'setting_time', keypath: 'setting_time', options: { unique: false } }
 ];
 
+/**
+ * Basic user setting class. Wrapper class for all CRUD functions with the API.
+ */
 export class UserSetting {
   identifier: string;
   user_id: number;
-  setting: any;
+  payload: UserSettingPayload;
   setting_type: string;
   setting_time: any;
+}
+
+// tslint:disable-next-line:no-empty-interface
+export interface UserSettingPayload {
+
 }

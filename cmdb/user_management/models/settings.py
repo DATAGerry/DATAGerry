@@ -39,16 +39,16 @@ class UserSettingPayload:
     """
     Payload wrapper user settings.
     """
-    __slots__ = 'name', 'setting'
+    __slots__ = 'name', 'payload'
 
-    def __init__(self, setting: Any):
+    def __init__(self, payload: Any):
         """
         Constructor of `UserSettingPayload`.
 
         Args:
             setting (Any): Settings option/body/payload.
         """
-        self.setting: Any = setting
+        self.payload: Any = payload
 
     @classmethod
     def from_data(cls, data: dict) -> "UserSettingPayload":
@@ -62,7 +62,7 @@ class UserSettingPayload:
             UserSettingPayload: Instance of `UserSettingEntry`.
         """
         return cls(
-            setting=data
+            payload=data
         )
 
     @classmethod
@@ -89,7 +89,7 @@ class UserSettingPayload:
         Returns:
             dict: Return the `UserSettingEntry` as dict.
         """
-        return instance.setting
+        return instance.payload
 
 
 class UserSettingModel:
@@ -115,7 +115,7 @@ class UserSettingModel:
             'type': 'integer',
             'required': True
         },
-        'setting': {
+        'payload': {
             'type': 'dict',
             'required': False
         },
@@ -131,9 +131,9 @@ class UserSettingModel:
         }
     }
 
-    __slots__ = 'identifier', 'user_id', 'setting', 'setting_type', 'setting_time'
+    __slots__ = 'identifier', 'user_id', 'payload', 'setting_type', 'setting_time'
 
-    def __init__(self, identifier: str, user_id: int, setting: UserSettingPayload, setting_type: UserSettingType,
+    def __init__(self, identifier: str, user_id: int, payload: UserSettingPayload, setting_type: UserSettingType,
                  setting_time: datetime = None):
         """
         Constructor of `UserSettingModel`.
@@ -141,13 +141,13 @@ class UserSettingModel:
         Args:
             identifier: (str): Identifier or Name of the setting
             user_id (int): PublicID of the user
-            setting (UserSettingPayload): User setting
+            payload (UserSettingPayload): Setting payload
             setting_type (UserSettingType): Type of the setting scope.
             setting_time: Datetime of the setting creation.
         """
         self.identifier: str = identifier
         self.user_id: int = user_id
-        self.setting: UserSettingPayload = setting
+        self.payload: UserSettingPayload = payload
         self.setting_type: UserSettingType = setting_type
         self.setting_time: datetime = setting_time
 
@@ -169,7 +169,7 @@ class UserSettingModel:
         return cls(
             identifier=data.get('identifier'),
             user_id=int(data.get('user_id')),
-            setting=UserSettingPayload.from_data(data=data.get('settings', None)),
+            payload=UserSettingPayload.from_data(data=data.get('payload', None)),
             setting_type=UserSettingType(data.get('setting_type')),
             setting_time=data.get('setting_time', None)
         )
@@ -202,7 +202,7 @@ class UserSettingModel:
         return {
             'identifier': instance.identifier,
             'user_id': instance.user_id,
-            'setting': UserSettingPayload.to_dict(instance.setting),
+            'payload': UserSettingPayload.to_dict(instance.payload),
             'setting_type': instance.setting_type.value,
             'setting_time': instance.setting_time.isoformat()
         }

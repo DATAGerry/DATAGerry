@@ -16,32 +16,26 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { DBConfig } from 'ngx-indexed-db';
-import { userSettingsSchema } from './models/user-setting';
-import { UserSettingsDbService } from './services/user-settings-db.service';
+import { UserSettingPayload } from '../user-setting';
 
-export const userSettingsDBConfig: DBConfig = {
-  name: 'DATAGERRY',
-  version: 1,
-  objectStoresMeta: [{
-    store: 'UserSettings',
-    storeConfig: { keyPath: 'identifier', autoIncrement: false },
-    storeSchema: userSettingsSchema
-  }]
-};
+/**
+ * Represents a generic user setting for a specific config.
+ * Will normally include into a `UserSetting` as payload.
+ */
+export class ObjectTableUserPayload implements UserSettingPayload {
+  public configs: Array<ObjectTableUserSettingConfig>;
 
+  public constructor(configs: Array<ObjectTableUserSettingConfig>) {
+    this.configs = configs;
+  }
+}
 
-@NgModule({
-  declarations: [],
-  imports: [
-    CommonModule
-  ],
-  providers: [
-    UserSettingsDbService
-  ]
-})
-export class UserSettingsModule {
-
+/**
+ * Wrapper interface for a single table config inside the `ObjectTableUserSetting`.
+ */
+export interface ObjectTableUserSettingConfig {
+  hash?: string;
+  data: any;
+  active: boolean;
+  date: string;
 }
