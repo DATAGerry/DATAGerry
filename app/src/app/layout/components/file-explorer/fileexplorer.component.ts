@@ -95,19 +95,33 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
   /**
    * Metadata for filtering Files from Database
    */
-  private apiParameter: CollectionParameters = {page: 1, limit: 100, sort: 'filename', order: -1};
+  private apiViewListParameter: CollectionParameters = {page: 1, limit: 100, sort: 'filename', order: -1};
+  private apiTreeListParameter: CollectionParameters = {page: 1, limit: 100, sort: 'filename', order: -1};
   private modalRef: NgbModalRef;
 
   /**
-   * Detecting scroll direction
+   * Detecting scroll direction for file list
    */
   private page: number;
   private lastPage: number;
-  private readonly tag: string = 'viewScroll';
+  private readonly viewListScroll: string = 'viewFilesScroll';
 
-  @HostListener('scroll', ['$event']) onScrollHost(e: Event): void {
-    if (this.scrollService.bottomReached(e, this.tag) && this.page <= this.lastPage) {
-      this.loadFiles(this.scrollService.getCollectionParameters(this.tag), true);
+  /**
+   * Detecting scroll direction for tree list
+   */
+  private pageTree: number;
+  private lastPageTree: number;
+  private readonly treeListScroll: string = 'treeFolderScroll';
+
+  @HostListener('scroll', ['$event']) onScrollListViewHost(e: Event): void {
+    if (this.scrollService.bottomReached(e, this.viewListScroll) && this.page <= this.lastPage) {
+      this.loadFiles(this.scrollService.getCollectionParameters(this.viewListScroll), true);
+    }
+  }
+
+  @HostListener('scroll', ['$event']) onScrollTreeListHost(e: Event): void {
+    if (this.scrollService.bottomReached(e, this.treeListScroll) && this.pageTree <= this.lastPageTree) {
+      this.loadFileTree(this.scrollService.getCollectionParameters(this.treeListScroll), true);
     }
   }
 
@@ -115,12 +129,12 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
     this.searchForm.valueChanges.subscribe(value => {
       if (value !== '') {
         const SEARCH = 'searchTerm';
-        this.apiParameter[SEARCH] = value.search;
-        this.loadFiles(this.apiParameter);
+        this.apiViewListParameter[SEARCH] = value.search;
+        this.loadFiles(this.apiViewListParameter);
       }
     });
-    this.loadFiles(this.apiParameter);
-    this.loadFileTree();
+    this.loadFiles(this.apiViewListParameter);
+    this.loadFileTree(this.apiTreeListParameter);
   }
 
   /**
@@ -132,7 +146,7 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
    */
   public loadFiles(apiParameters?: CollectionParameters, onScroll: boolean = false): void {
     const metadata = this.generateMetadata();
-    apiParameters = apiParameters ? apiParameters : this.apiParameter;
+    apiParameters = apiParameters ? apiParameters : this.apiViewListParameter;
     this.fileService.getAllFilesList(metadata, apiParameters)
       .subscribe((data: APIGetMultiResponse<FileElement>) => {
         if (onScroll) {
@@ -141,21 +155,26 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
           this.fileElements =  data.results;
         }
         this.recordsTotal = data.total;
-        this.updatePagination(data, apiParameters.sort, apiParameters.order);
+        this.updatePagination(data, apiParameters.sort, apiParameters.order, this.viewListScroll);
       });
   }
 
-  public loadFileTree() {
-    this.fileService.getAllFilesList(new FileMetadata({folder: true}))
+  public loadFileTree(apiParameters?: CollectionParameters, onScroll: boolean = false) {
+    this.fileService.getAllFilesList(new FileMetadata({folder: true}), apiParameters)
       .subscribe((data: APIGetMultiResponse<FileElement>) => {
-        this.fileTree = data.results;
+        if (onScroll) {
+          this.fileTree.push(...data.results);
+        } else {
+          this.fileTree = data.results;
+        }
+        this.updatePagination(data, apiParameters.sort, apiParameters.order, this.treeListScroll);
       });
   }
 
-  private updatePagination(data, sort: string = 'filename', order: number = -1) {
+  private updatePagination(data, sort: string = 'filename', order: number = -1, identifier: string) {
     this.page = data.pager.page + 1;
     this.lastPage = data.pager.total_pages;
-    this.scrollService.setCollectionParameters(this.page, 100, sort, order, this.tag);
+    this.scrollService.setCollectionParameters(this.page, 100, sort, order, identifier);
   }
 
   private generateMetadata(folder: boolean = false): FileMetadata {
@@ -181,8 +200,8 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
     this.modalRef.result.then(() => {});
   }
 
-  private reorderFolderTree(item: FileElement) {
-    this.fileService.getAllFilesList(new FileMetadata({folder: true}))
+  private reorderFolderTree(item: FileElement, apiParameter= {page: 1, limit: 100, sort: 'filename', order: -1}) {
+    this.fileService.getAllFilesList(new FileMetadata({folder: true}), apiParameter)
       .subscribe((data: APIGetMultiResponse<FileElement>) => {
       for (const el of data.results) {
         if (el.public_id === item.metadata.parent) {
@@ -201,7 +220,7 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
     this.modalRef = this.modalService.open(AddAttachmentsModalComponent);
     this.modalRef.componentInstance.metadata = metadata;
     this.modalRef.result.then(() => {
-      this.loadFiles(this.apiParameter);
+      this.loadFiles(this.apiViewListParameter);
     });
   }
 
@@ -227,7 +246,7 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
             this.toast.info(`File was successfully moved: ${fileElement.filename}`);
           });
         }
-        this.loadFiles(this.apiParameter);
+        this.loadFiles(this.apiViewListParameter);
       }
     });
   }
@@ -243,7 +262,7 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
   public deleteFiles(value: FileElement[]) {
     for (const file of value) {
       this.fileService.deleteFile(file.public_id, {}).subscribe(() => {
-        this.loadFiles(this.apiParameter);
+        this.loadFiles(this.apiViewListParameter);
       });
     }
   }
