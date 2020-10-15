@@ -21,7 +21,7 @@ from cmdb.interface.api_parameters import ApiParameters, Parameter
 
 class GroupDeleteMode(Enum):
     NONE = None
-    MOVE = 'move'
+    MOVE = 'MOVE'
     DELETE = 'DELETE'
 
 
