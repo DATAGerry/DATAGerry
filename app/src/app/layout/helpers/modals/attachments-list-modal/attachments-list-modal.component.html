@@ -16,7 +16,8 @@
   <div class="modal-body">
     <div id="uploadFileForm">
       <div class="container-fluid mb-2">
-        <button type="button" class="btn btn-primary btn-lg btn-block" (click)="addAttachments()">
+        <button *permissionLink="'base.framework.object.edit'"
+                type="button" class="btn btn-primary btn-lg btn-block" (click)="addAttachments()">
           <i class="fas fa-plus"></i> Add new Attachments
         </button>
       </div>
