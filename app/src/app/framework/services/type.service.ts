@@ -108,7 +108,11 @@ export class TypeService<T = CmdbType> implements ApiService {
    * Get the complete type list
    */
   public getTypeList(): Observable<Array<T>> {
-    return this.api.callGet<Array<T>>(this.servicePrefix + '/?limit=0').pipe(
+    const options = httpObserveOptions;
+    let params = new HttpParams();
+    params = params.set('limit', '0');
+    options.params = params;
+    return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
       })
