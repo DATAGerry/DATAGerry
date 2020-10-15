@@ -44,7 +44,7 @@ class APIBlueprint(Blueprint):
                 # Dont need right validation if no auth
                 if auth and right:
                     if not user_has_right(right):
-                        return abort(401)
+                        return abort(403, f'User has not the required right {right}')
                 return f(*args, **kwargs)
 
             return _decorate
