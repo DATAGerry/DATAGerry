@@ -118,7 +118,7 @@ export class UserSettingsService<T = UserSetting> implements ApiService {
   public deleteUserSetting(identifier: string): Observable<T> {
     return this.api.callDelete<T>(`${ this.servicePrefix }/${ identifier }`).pipe(
       map((apiResponse: HttpResponse<APIDeleteSingleResponse<T>>) => {
-        return apiResponse.body.deleted_entry as T;
+        return apiResponse.body.raw as T;
       })
     );
   }

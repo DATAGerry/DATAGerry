@@ -12,7 +12,7 @@
     <td>{{group.public_id}}</td>
     <td>{{group.name}}</td>
     <td>{{group?.label}}</td>
-    <td>
+    <td *permissionLink="'base.user-management.group.*'">
       <a *permissionLink="'base.user-management.group.edit'" class="text-dark"
          [routerLink]="['/management/groups/edit/', group.public_id]">
         <fa-icon [icon]="['far', 'edit']"></fa-icon>

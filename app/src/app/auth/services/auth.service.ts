@@ -81,10 +81,10 @@ export class AuthService<T = any> implements ApiService {
   }
 
 
-  public getAuthProviders(): Observable<T> {
-    return this.api.callGet<T>(`${ this.servicePrefix }/providers`).pipe(
+  public getAuthProviders(): Observable<Array<T>> {
+    return this.api.callGet<Array<T>>(`${ this.servicePrefix }/providers`).pipe(
       map((apiResponse) => {
-        return apiResponse.body;
+        return apiResponse.body as Array<T>;
       })
     );
   }

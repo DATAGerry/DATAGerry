@@ -100,6 +100,10 @@ export class ApiCallService {
     return this.http.put<T>(this.apiURL + route, data, httpPutOptions).pipe(catchError(ApiCallService.handleError));
   }
 
+  public callPatch<T>(route: string, data, httpPatchOptions: any = httpObserveOptions): Observable<any> {
+    return this.http.patch<T>(this.apiURL + route, data, httpPatchOptions).pipe(catchError(ApiCallService.handleError));
+  }
+
   public callDelete<T>(route: string, httpDeleteOptions: any = httpObserveOptions): Observable<any> {
     return this.http.delete<T>(this.apiURL + route, httpDeleteOptions).pipe(catchError(ApiCallService.handleError));
   }

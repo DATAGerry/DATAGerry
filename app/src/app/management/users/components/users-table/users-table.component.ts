@@ -16,9 +16,12 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy } from '@angular/core';
 import { User } from '../../../models/user';
 import { GroupService } from '../../../services/group.service';
+import { Group } from '../../../models/group';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { UsersPasswdModalComponent } from '../../modals/users-passwd-modal/users-passwd-modal.component';
 
 
 @Component({
@@ -26,19 +29,42 @@ import { GroupService } from '../../../services/group.service';
   templateUrl: './users-table.component.html',
   styleUrls: ['./users-table.component.scss']
 })
-export class UsersTableComponent implements OnInit {
+export class UsersTableComponent implements OnDestroy{
 
-  @Input() public users: Array<User>;
+  /**
+   * Password modal
+   */
+  private modalRef: NgbModalRef;
+
+  /**
+   * User list
+   */
+  @Input() public users: Array<User> = [];
+
+  /**
+   * Group list
+   */
+  @Input() public groups: Array<Group> = [];
 
   /**
    * Datatable
    */
   @Input() public tableOptions: any = {};
 
-  constructor(public groupService: GroupService) {
+  constructor(public groupService: GroupService, private modalService: NgbModal) {
   }
 
-  public ngOnInit(): void {
+  public findGroup(groupID: number): Group {
+    return this.groups.find(g => g.public_id === groupID);
+  }
+
+  public openPasswordModal(user: User) {
+    this.modalRef = this.modalService.open(UsersPasswdModalComponent, { size: 'lg' });
+    this.modalRef.componentInstance.user = user;
+  }
+
+  public ngOnDestroy(): void {
+    this.modalRef.close();
   }
 
 }

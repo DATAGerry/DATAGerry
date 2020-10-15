@@ -184,7 +184,7 @@ export class TypeService<T = CmdbType> implements ApiService {
   public deleteType(publicID: number): Observable<T> {
     return this.api.callDelete<number>(this.servicePrefix + '/' + publicID).pipe(
       map((apiResponse: HttpResponse<APIDeleteSingleResponse<T>>) => {
-        return apiResponse.body.deleted_entry as T;
+        return apiResponse.body.raw as T;
       })
     );
   }

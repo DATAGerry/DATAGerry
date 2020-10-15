@@ -40,21 +40,22 @@ class UserModel(CmdbDAO):
         },
         'active': {
             'type': 'boolean',
-            'default': 2,
+            'default': True,
             'required': False
         },
         'group_id': {
             'type': 'integer',
+            'default': DEFAULT_GROUP,
             'required': True
         },
         'authenticator': {
             'type': 'string',
-            'default': DEFAULT_GROUP,
+            'default': DEFAULT_AUTHENTICATOR,
             'required': False
         },
         'password': {
             'type': 'string',
-            'required': True
+            'required': False
         }
     }
 

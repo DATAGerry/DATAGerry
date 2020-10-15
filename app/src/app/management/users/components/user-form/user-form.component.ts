@@ -16,19 +16,20 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { User } from '../../../models/user';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Group } from '../../../models/group';
 import { takeUntil } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
+import { Right } from '../../../models/right';
 
 @Component({
   selector: 'cmdb-user-form',
   templateUrl: './user-form.component.html',
   styleUrls: ['./user-form.component.scss']
 })
-export class UserFormComponent implements OnInit {
+export class UserFormComponent implements OnInit, OnChanges, OnDestroy {
 
   /**
    * Component un-subscriber.
@@ -73,7 +74,7 @@ export class UserFormComponent implements OnInit {
       first_name: new FormControl(null),
       last_name: new FormControl(null),
       authenticator: new FormControl('LocalAuthenticationProvider', Validators.required),
-      group_id: new FormControl(null, Validators.required),
+      group_id: new FormControl(2, Validators.required),
       image: new FormControl(null)
     });
   }
@@ -117,6 +118,27 @@ export class UserFormComponent implements OnInit {
     if (this.form.valid) {
       this.submit.emit(this.form.getRawValue() as User);
     }
+  }
+
+  /**
+   * OnChange call for user form component.
+   * Patches passed user data into the form.
+   *
+   * @param changes SimpleChanges of all input changes.
+   */
+  public ngOnChanges(changes: SimpleChanges): void {
+    if (changes.user && changes.user.currentValue !== changes.user.previousValue) {
+      this.form.patchValue(this.user);
+      this.form.markAllAsTouched();
+    }
+  }
+
+  /**
+   * Auto un-subscribe by component destroy.
+   */
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
 }

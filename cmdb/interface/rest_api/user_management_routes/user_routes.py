@@ -182,3 +182,35 @@ def delete_user(public_id: int):
     except ManagerDeleteError as err:
         return abort(404, err.message)
     return api_response.make_response()
+
+
+@users_blueprint.route('/<int:public_id>/password', methods=['PATCH'])
+@users_blueprint.protect(auth=True, right='base.user-management.user.edit')
+def change_user_password(public_id: int):
+    """
+    HTTP `PATCH` route for updating a single user password.
+
+    Args:
+        public_id (int): Public ID of the user.
+
+    Raises:
+        ManagerGetError: When the user with the `public_id` was not found.
+        ManagerUpdateError: When something went wrong during the updated.
+
+    Returns:
+        UpdateSingleResponse: User with new password
+    """
+    user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
+    security_manager: SecurityManager = SecurityManager(database_manager=current_app.database_manager)
+    try:
+        user = user_manager.get(public_id=public_id)
+        password = security_manager.generate_hmac(request.json.get('password'))
+        user.password = password
+        user_manager.update(public_id=PublicID(public_id), user=user)
+        api_response = UpdateSingleResponse(result=UserModel.to_dict(user), url=request.url, model=UserModel.MODEL)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    except ManagerUpdateError as err:
+        return abort(400, err.message)
+
+    return api_response.make_response()

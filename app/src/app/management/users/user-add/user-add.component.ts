@@ -27,13 +27,14 @@ import { APIGetMultiResponse, APIInsertSingleResponse } from '../../../services/
 import { AuthService } from '../../../auth/services/auth.service';
 import { User } from '../../models/user';
 import { ToastService } from '../../../layout/toast/toast.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'cmdb-user-add',
   templateUrl: './user-add.component.html',
   styleUrls: ['./user-add.component.scss']
 })
-export class UserAddComponent implements OnInit, AfterViewInit, OnDestroy {
+export class UserAddComponent implements AfterViewInit, OnDestroy {
 
   /**
    * UserFormComponent for static inserting of parameters.
@@ -55,19 +56,12 @@ export class UserAddComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   public providers: Array<any> = [];
 
-  constructor(private userService: UserService, private authService: AuthService, private groupService: GroupService,
-              private toastService: ToastService) {
+  constructor(private route: ActivatedRoute, private router: Router,
+              private userService: UserService, private toastService: ToastService) {
+    this.groups = this.route.snapshot.data.groups as Array<Group>;
+    this.providers = this.route.snapshot.data.providers as Array<any>;
   }
 
-  public ngOnInit(): void {
-    this.groupService.getGroups().pipe(takeUntil(this.subscriber))
-      .subscribe((apiResponse: APIGetMultiResponse<Group>) => {
-        this.groups = apiResponse.results as Array<Group>;
-      });
-    this.authService.getAuthProviders().subscribe((providers: any[]) => {
-      this.providers = providers;
-    });
-  }
 
   public ngAfterViewInit(): void {
     this.userFormComponent.usernameControl.setAsyncValidators(userExistsValidator(this.userService));
@@ -80,7 +74,8 @@ export class UserAddComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public save(user: User): void {
     this.userService.postUser(user).pipe(takeUntil(this.subscriber)).subscribe((apiUser: User) => {
-      console.log(apiUser);
+      this.toastService.success(`User ${apiUser.user_name} was added`);
+      this.router.navigate(['/', 'management', 'users']);
     });
   }
 

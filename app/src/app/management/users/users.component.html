@@ -3,13 +3,13 @@
   <div class="header-buttons">
     <button *permissionLink="'base.user-management.user.add'"
             routerLink="/management/users/add/" type="button" class="btn btn-success">
-      <i class="fas fa-plus-circle"></i>
+      Add
     </button>
   </div>
 </div>
 <hr />
 <div id="user-list" class="row">
   <div class="col-md-12">
-    <cmdb-users-table [tableOptions]="tableOptions" [users]="users"></cmdb-users-table>
+    <cmdb-users-table [tableOptions]="tableOptions" [users]="users" [groups]="groups"></cmdb-users-table>
   </div>
 </div>

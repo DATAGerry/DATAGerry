@@ -357,7 +357,7 @@ class DeleteSingleResponse(BaseAPIResponse):
         Get the delete instance as dict.
         """
         return {**{
-            'deleted_entry': self.raw
+            'raw': self.raw
         }, **super(DeleteSingleResponse, self).export()}
 
 

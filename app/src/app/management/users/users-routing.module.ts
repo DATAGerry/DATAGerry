@@ -13,17 +13,19 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { UsersAddComponent } from './users-add/users-add.component';
 import { UserViewComponent } from './user-view/user-view.component';
-import { UsersEditComponent } from './users-edit/users-edit.component';
-import { UsersDeleteComponent } from './users-delete/users-delete.component';
 import { UsersComponent } from './users.component';
 import { UserAddComponent } from './user-add/user-add.component';
+import { GroupsResolver } from '../resolvers/group-resolver.service';
+import { UserEditComponent } from './user-edit/user-edit.component';
+import { ProviderResolver } from '../../auth/resolvers/provider-resolver.service';
+import { UserResolver } from '../resolvers/user-resolver.service';
+import { UserDeleteComponent } from './user-delete/user-delete.component';
 
 const routes: Routes = [
   {
@@ -32,6 +34,9 @@ const routes: Routes = [
     data: {
       breadcrumb: 'List',
       right: 'base.user-management.user.view'
+    },
+    resolve: {
+      groups: GroupsResolver
     },
     component: UsersComponent
   },
@@ -49,6 +54,10 @@ const routes: Routes = [
       breadcrumb: 'Add',
       right: 'base.user-management.user.add'
     },
+    resolve: {
+      groups: GroupsResolver,
+      providers: ProviderResolver
+    },
     component: UserAddComponent
   },
   {
@@ -57,7 +66,12 @@ const routes: Routes = [
       breadcrumb: 'Edit',
       right: 'base.user-management.user.edit'
     },
-    component: UsersEditComponent
+    resolve: {
+      user: UserResolver,
+      groups: GroupsResolver,
+      providers: ProviderResolver
+    },
+    component: UserEditComponent
   },
   {
     path: 'delete/:publicID',
@@ -65,7 +79,10 @@ const routes: Routes = [
       breadcrumb: 'Delete',
       right: 'base.user-management.user.delete'
     },
-    component: UsersDeleteComponent
+    resolve: {
+      user: UserResolver
+    },
+    component: UserDeleteComponent
   }
 ];
 

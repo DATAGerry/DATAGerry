@@ -23,6 +23,7 @@ export class User {
   public last_name?: string;
   public email: string;
   public image?: string;
+  public password?: string;
   public token?: string;
   public token_expire?: number;
   public token_issued_at?: number;

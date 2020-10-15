@@ -50,7 +50,7 @@ export class APIUpdateSingleResponse<T = CmdbDao> extends APIResponse {
 }
 
 export class APIDeleteSingleResponse<T = CmdbDao> extends APIResponse {
-  deleted_entry: T;
+  raw: T;
 }
 
 export class APIGetListResponse<T = CmdbDao> extends APIResponse {

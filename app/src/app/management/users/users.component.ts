@@ -24,6 +24,7 @@ import { ReplaySubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import { Group } from '../models/group';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'cmdb-users',
@@ -47,7 +48,13 @@ export class UsersComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   private apiUsersResponse: APIGetMultiResponse<User>;
 
-  constructor(private userService: UserService) {
+  /**
+   * List of current loaded groups.
+   */
+  public groups: Array<Group> = [];
+
+  constructor(private route: ActivatedRoute, private userService: UserService) {
+    this.groups = this.route.snapshot.data.groups as Array<Group>;
   }
 
   public ngOnInit(): void {
