@@ -92,6 +92,11 @@ export class GroupFormComponent implements OnInit, OnChanges, OnDestroy {
    */
   public ngOnChanges(changes: SimpleChanges): void {
     if (changes.group && changes.group.currentValue !== changes.group.previousValue) {
+      const groupRights: Array<Right> = this.group.rights;
+      this.group.rights = [];
+      for (const r of groupRights) {
+        this.group.rights.push(r.name);
+      }
       this.form.patchValue(this.group);
       this.form.markAllAsTouched();
     }

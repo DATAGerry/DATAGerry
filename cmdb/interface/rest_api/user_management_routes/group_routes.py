@@ -39,7 +39,7 @@ groups_blueprint = APIBlueprint('groups', __name__)
 
 
 @groups_blueprint.route('/', methods=['GET', 'HEAD'])
-@groups_blueprint.protect(auth=True, right='base.user-management.group.*')
+@groups_blueprint.protect(auth=True, right='base.user-management.group.view')
 @groups_blueprint.parse_collection_parameters()
 def get_groups(params: CollectionParameters):
     """
@@ -95,6 +95,7 @@ def get_group(public_id: int):
                                                right_manager=RightManager(rights))
     try:
         group = group_manager.get(public_id)
+        print(group.to_dict(group))
     except ManagerGetError as err:
         return abort(404, err.message)
     api_response = GetSingleResponse(UserGroupModel.to_dict(group), url=request.url,

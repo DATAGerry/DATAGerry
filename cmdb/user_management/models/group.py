@@ -49,6 +49,7 @@ class UserGroupModel(CmdbDAO):
         },
         'rights': {
             'type': 'list',
+            'required': False,
             'default': []
         }
     }
@@ -63,8 +64,9 @@ class UserGroupModel(CmdbDAO):
 
     @classmethod
     def from_data(cls, data: dict, rights: List[BaseRight] = None) -> "UserGroupModel":
+
         if rights:
-            rights = [right for right in rights if right.name in data.get('rights', [])]
+            rights = [right for right in rights if right['name'] in data.get('rights', [])]
         else:
             rights = []
         return cls(
@@ -76,7 +78,12 @@ class UserGroupModel(CmdbDAO):
 
     @classmethod
     def to_data(cls, instance: "UserGroupModel"):
-        return dumps(UserGroupModel.to_dict(instance), default=default)
+        return dumps({
+            'public_id': instance.public_id,
+            'name': instance.name,
+            'label': instance.label,
+            'rights': [BaseRight.to_dict(right) for right in instance.rights]
+        }, default=default)
 
     @classmethod
     def to_dict(cls, instance: "UserGroupModel") -> dict:
@@ -85,7 +92,7 @@ class UserGroupModel(CmdbDAO):
             'public_id': instance.public_id,
             'name': instance.name,
             'label': instance.label,
-            'rights': [right.name for right in instance.rights]
+            'rights': [BaseRight.to_dict(right) for right in instance.rights]
         }
 
     def set_rights(self, rights: list):

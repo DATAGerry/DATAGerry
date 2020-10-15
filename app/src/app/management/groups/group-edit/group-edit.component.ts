@@ -60,7 +60,6 @@ export class GroupEditComponent implements OnInit, OnDestroy {
   public edit(group: Group): void {
     const editGroup = Object.assign(this.group, group);
     if (this.valid) {
-      console.log(editGroup);
       this.groupService.putGroup(this.group.public_id, editGroup).pipe(takeUntil(this.subscriber)).subscribe((g: Group) => {
           this.toastService.success(`Group ${g.label} was updated!`);
           this.router.navigate(['/', 'management', 'groups']);

@@ -32,7 +32,7 @@ users_blueprint = APIBlueprint('users', __name__)
 
 
 @users_blueprint.route('/', methods=['GET', 'HEAD'])
-@users_blueprint.protect(auth=True, right='base.user-management.user.*')
+@users_blueprint.protect(auth=True, right='base.user-management.user.view')
 @users_blueprint.parse_collection_parameters()
 def get_users(params: CollectionParameters):
     """
