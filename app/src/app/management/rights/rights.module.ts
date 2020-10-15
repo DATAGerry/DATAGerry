@@ -20,7 +20,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { RightsRoutingModule } from './rights-routing.module';
-import { RightsListComponent } from './rights-list/rights-list.component';
 import { DataTablesModule } from 'angular-datatables';
 import { RightLevelColorDirective } from './right-level-color.directive';
 import { RightsComponent } from './rights.component';
@@ -31,6 +30,6 @@ import { RightsComponent } from './rights.component';
     RightsRoutingModule,
     DataTablesModule
   ],
-  declarations: [RightsListComponent, RightLevelColorDirective, RightsComponent]
+  declarations: [ RightLevelColorDirective, RightsComponent]
 })
 export class RightsModule { }

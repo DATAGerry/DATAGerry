@@ -64,8 +64,11 @@ class RightManager(AccountManager):
         BaseRight]:
         try:
             sorted_rights = sorted(self.rights, key=lambda right: right[sort])
-            spliced_rights = [sorted_rights[i:i + limit] for i in range(0, len(sorted_rights), limit)][
-                int(skip / limit)]
+            if limit > 0:
+                spliced_rights = [sorted_rights[i:i + limit] for i in range(0, len(sorted_rights), limit)][
+                    int(skip / limit)]
+            else:
+                spliced_rights = sorted_rights
         except (AttributeError, ValueError, IndexError) as err:
             raise ManagerIterationError(err)
         result: IterationResult[BaseRight] = IterationResult(spliced_rights, total=len(self.rights))
