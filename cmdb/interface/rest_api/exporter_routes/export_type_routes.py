@@ -43,7 +43,7 @@ type_export_blueprint = RootBlueprint('type_export_rest', __name__, url_prefix='
 # @login_required
 def export_type():
     try:
-        type_list = object_manager.get_all_types()
+        type_list = [TypeModel.to_json(type) for type in object_manager.get_all_types()]
         resp = json.dumps(type_list, default=json_encoding.default, indent=2)
     except TypeNotFoundError as e:
         return abort(400, e.message)
