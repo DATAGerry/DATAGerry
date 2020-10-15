@@ -154,7 +154,7 @@ def update_group(public_id: int, data: dict):
     group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
                                                right_manager=RightManager(rights))
     try:
-        group = UserGroupModel.from_data(data=data)
+        group = UserGroupModel.from_data(data=data, rights=RightManager(rights).rights)
         group_manager.update(public_id=PublicID(public_id), group=group)
         api_response = UpdateSingleResponse(result=UserGroupModel.to_dict(group), url=request.url,
                                             model=UserGroupModel.MODEL)

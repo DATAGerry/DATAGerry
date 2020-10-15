@@ -103,6 +103,7 @@ class GroupManager(AccountManager):
         """
         if isinstance(group, UserGroupModel):
             group = UserGroupModel.to_dict(group)
+
         update_result = self._update(self.collection, filter={'public_id': public_id}, resource=group)
         if update_result.matched_count != 1:
             raise ManagerUpdateError(f'Something happened during the update!')
