@@ -255,6 +255,7 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
       if (result) {
         this.fileService.deleteFile(value.public_id, metadata).subscribe(() => {
             this.reorderFolderTree(value);
+            this.selectedFolderElement = new BehaviorSubject<any>(null);
           }
         );
       }
