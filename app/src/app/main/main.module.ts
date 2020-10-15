@@ -47,12 +47,15 @@ import { UserSettingsDBService } from '../management/user-settings/services/user
 export class MainModule {
 
   constructor(private userSettingsService: UserSettingsService, private dbService: UserSettingsDBService) {
-    const userSettingsSubscription: Subscription = this.userSettingsService.getUserSettings()
-      .subscribe(
-        (userSettings: Array<UserSetting>) => {
-          this.dbService.syncSettings(userSettings).then();
-        },
-        error => console.error(`Error while loading user settings: ${error}`),
-        () => userSettingsSubscription.unsubscribe());
+    try {
+      const userSettingsSubscription: Subscription = this.userSettingsService.getUserSettings()
+        .subscribe(
+          (userSettings: Array<UserSetting>) => {
+            this.dbService.syncSettings(userSettings).then();
+          },
+          error => console.error(`Error while loading user settings: ${ error }`),
+          () => userSettingsSubscription.unsubscribe());
+    } catch (e) {
+    }
   }
 }

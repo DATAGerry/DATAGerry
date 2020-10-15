@@ -58,7 +58,9 @@ export class UserSettingsService<T = UserSetting> implements ApiService {
    */
   constructor(private api: ApiCallService, private authService: AuthService) {
     this.currentUser = this.authService.currentUserValue;
-    this.servicePrefix = `users/${ this.currentUser.public_id }/settings`;
+    if (this.currentUser) {
+      this.servicePrefix = `users/${ this.currentUser.public_id }/settings`;
+    }
   }
 
   /**
