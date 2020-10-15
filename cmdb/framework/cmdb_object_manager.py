@@ -324,7 +324,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerGetError(err=err)
         try:
-            return [TypeModel.from_data(type) for type in raw_types]
+            return [TypeModel.to_json(TypeModel.from_data(type)) for type in raw_types]
         except Exception as err:
             raise ObjectManagerInitError(err=err)
 
