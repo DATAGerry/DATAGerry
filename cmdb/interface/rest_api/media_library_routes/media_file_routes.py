@@ -26,7 +26,8 @@ from cmdb.media_library.media_file_manager import MediaFileManagerGetError, \
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
 from cmdb.user_management import User
 from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import get_element_from_data_request, \
-    get_file_in_request, generate_metadata_filter, recursive_delete_filter, generate_collection_parameters
+    get_file_in_request, generate_metadata_filter, recursive_delete_filter, generate_collection_parameters, \
+    create_attachment_name
 
 
 from cmdb.interface.response import GetMultiResponse, InsertSingleResponse
@@ -86,7 +87,7 @@ def add_new_file(request_user: User):
              - Folders in the same directory are unique.
              - The Folder-Name can exist in different directories
 
-            Create subfolders:
+            Create sub-folders:
              - Selected folder is considered as parent
 
             This also applies for files
@@ -141,6 +142,18 @@ def add_new_file(request_user: User):
 def update_file(request_user: User):
     """ This method updates a file to the specified section in the document.
         Any existing value that matches the file name and metadata is taken into account.
+        Furthermore, it is checked whether the current file name already exists in the directory.
+        If this is the case, 'copy_(index)_' is appended as prefix. The method is executed recursively.
+
+        Note:
+            Create a unique media file element:
+             - Folders in the same directory are unique.
+             - The folder name can exist in different directories
+
+            Create sub-folders:
+             - Selected folder is considered as parent folder
+
+            This also applies to files
 
         Changes:
             Is stored under 'request.json'
@@ -159,12 +172,16 @@ def update_file(request_user: User):
         add_data_dump = json.dumps(request.json)
         new_file_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
 
-        # Check if file exists
         data = media_file_manager.get_file(metadata={'public_id': new_file_data['public_id']})
         data['public_id'] = new_file_data['public_id']
         data['filename'] = new_file_data['filename']
         data['metadata'] = new_file_data['metadata']
         data['metadata']['author_id'] = new_file_data['metadata']['author_id'] = request_user.get_public_id()
+
+        # # Check if file / folder exist in folder
+        checker = {'filename': new_file_data['filename'], 'metadata.parent': new_file_data['metadata']['parent']}
+        copied_name = create_attachment_name(new_file_data['filename'], 0, checker, media_file_manager)
+        data['filename'] = copied_name
 
         media_file_manager.updata_file(data)
     except MediaFileManagerUpdateError:

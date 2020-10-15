@@ -88,7 +88,43 @@ def generate_collection_parameters(params: CollectionParameters):
     return generate_metadata_filter('metadata', params=param)
 
 
+def create_attachment_name(name, index, metadata, media_file_manager):
+    """ This method checks whether the current file name already exists in the directory.
+        If this is the case, 'copy_(index)_' is appended as a prefix. method is executed recursively.
+
+        Args:
+            name (str): filename of the File
+            index (int): counter
+            metadata (dict): Metadata for filtering Files from Database
+            media_file_manager (MediaFileManagement): Manager
+        Returns:
+         New Filename with 'copy_(index)_' - prefix.
+    """
+    try:
+        if media_file_manager.exist_file(metadata):
+            index += 1  # increment index by 1
+            name = name.replace('copy_({})_'.format(index-1), '')
+            name = 'copy_({})_{}'.format(index, name)
+            metadata['filename'] = name
+            return create_attachment_name(name, index, metadata, media_file_manager)
+        else:
+            return name
+    except Exception as err:
+        raise Exception(err)
+
+
 def recursive_delete_filter(public_id, media_file_manager, _ids=None) -> []:
+    """ This method deletes a file in the specified section of the document for storing workflow data.
+        Any existing value that matches the file name and metadata is deleted. Before saving a value.
+        GridFS document under the specified key is deleted.
+
+        Args:
+            public_id (int): Public ID of the File
+            media_file_manager (MediaFileManagement): Manager
+            _ids (list(int): List of IDs of the Files
+        Returns:
+         List of deleted public_id.
+    """
     if not _ids:
         _ids = []
 
