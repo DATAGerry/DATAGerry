@@ -18,10 +18,13 @@
 
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { GroupService } from '../../services/group.service';
-import { Subject } from 'rxjs';
+import { ReplaySubject, Subject } from 'rxjs';
 import { Group } from '../../models/group';
-import { ActivatedRoute, Data } from '@angular/router';
+import { ActivatedRoute, Data, Router } from '@angular/router';
 import { GroupFormComponent } from '../components/group-form/group-form.component';
+import { Right } from '../../models/right';
+import { takeUntil } from 'rxjs/operators';
+import { ToastService } from '../../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-group-edit',
@@ -30,25 +33,40 @@ import { GroupFormComponent } from '../components/group-form/group-form.componen
 })
 export class GroupEditComponent implements OnInit, OnDestroy {
 
-  @ViewChild(GroupFormComponent, {static: true}) private groupForm: GroupFormComponent;
-  private unSubscriber: Subject<void> = new Subject<void>();
+  @ViewChild(GroupFormComponent, { static: true }) private groupForm: GroupFormComponent;
 
+  public rights: Array<Right> = [];
+  public valid: boolean = false;
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
   public group: Group;
 
-  constructor(private route: ActivatedRoute, private groupService: GroupService) {
+  constructor(private route: ActivatedRoute, private router: Router, private groupService: GroupService,
+              private toastService: ToastService) {
+    this.rights = this.route.snapshot.data.rights as Array<Right>;
+    this.group = this.route.snapshot.data.group as Group;
   }
 
   public ngOnInit(): void {
     this.group = this.route.snapshot.data.group as Group;
     this.groupForm.nameControl.clearAsyncValidators();
+    this.groupForm.nameControl.disable();
   }
 
   public ngOnDestroy(): void {
-    this.unSubscriber.next();
-    this.unSubscriber.complete();
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
-  public submit(group: Group): void {
+  public edit(group: Group): void {
+    const editGroup = Object.assign(this.group, group);
+    if (this.valid) {
+      console.log(editGroup);
+      this.groupService.putGroup(this.group.public_id, editGroup).pipe(takeUntil(this.subscriber)).subscribe((g: Group) => {
+          this.toastService.success(`Group ${g.label} was updated!`);
+          this.router.navigate(['/', 'management', 'groups']);
+        }
+      );
+    }
   }
 
 }

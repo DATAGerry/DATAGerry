@@ -23,6 +23,7 @@ import { Observable } from 'rxjs';
 import { GroupService } from '../services/group.service';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
+import { map } from 'rxjs/operators';
 
 /**
  * Resolver for a single group
@@ -35,7 +36,7 @@ export class GroupResolver implements Resolve<Group> {
   constructor(private groupService: GroupService) {
   }
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Group> | Promise<Group> | Group {
+  public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Group> | Promise<Group> | Group {
     const groupID: number = +route.paramMap.get('publicID');
     return this.groupService.getGroup(groupID);
   }
@@ -47,16 +48,18 @@ export class GroupResolver implements Resolve<Group> {
 @Injectable({
   providedIn: 'root'
 })
-export class GroupsResolver implements Resolve<APIGetMultiResponse<Group>> {
+export class GroupsResolver implements Resolve<Array<Group>> {
 
   constructor(private groupService: GroupService) {
   }
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
-    Observable<APIGetMultiResponse<Group>> | Promise<APIGetMultiResponse<Group>> | APIGetMultiResponse<Group> {
+  public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
+    Observable<Array<Group>> | Promise<Array<Group>> | Array<Group> {
     const params: CollectionParameters = {
       filter: undefined, limit: 0, sort: 'public_id', order: 1, page: 1
     };
-    return this.groupService.getGroups(params);
+    return this.groupService.getGroups(params).pipe(map((response: APIGetMultiResponse<Group>) => {
+      return response.results as Array<Group>;
+    }));
   }
 }

@@ -20,12 +20,12 @@ import { Injectable } from '@angular/core';
 import {
   ApiCallService,
   ApiService,
-  httpObserveOptions
+  resp
 } from '../../services/api-call.service';
 import { Group } from '../models/group';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { FormControl } from '@angular/forms';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import {
@@ -63,6 +63,14 @@ export class GroupService<T = Group> implements ApiService {
 
   public servicePrefix: string = 'groups';
 
+  public readonly post = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    }),
+    params: {},
+    observe: resp
+  };
+
   constructor(private api: ApiCallService) {
   }
 
@@ -73,7 +81,7 @@ export class GroupService<T = Group> implements ApiService {
   public getGroups(params: CollectionParameters = {
     filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1
   }): Observable<APIGetMultiResponse<T>> {
-    const options = httpObserveOptions;
+    const options = this.post;
     let httpParams: HttpParams = new HttpParams();
     if (params.filter !== undefined) {
       httpParams = httpParams.set('filter', params.filter);
@@ -107,7 +115,7 @@ export class GroupService<T = Group> implements ApiService {
    * @param name: Name property of the selected group.
    */
   public getGroupByName(name: string): Observable<T> {
-    const options = httpObserveOptions;
+    const options = this.post;
     const filter = { name };
     let params: HttpParams = new HttpParams();
     params = params.set('filter', JSON.stringify(filter));
@@ -127,7 +135,9 @@ export class GroupService<T = Group> implements ApiService {
    * @param group: Data of the group.
    */
   public postGroup(group: T): Observable<T> {
-    return this.api.callPost<T>(`${ this.servicePrefix }/`, group).pipe(
+    const options = this.post;
+    options.params = new HttpParams();
+    return this.api.callPost<T>(`${ this.servicePrefix }/`, group, options).pipe(
       map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => {
         return apiResponse.body.raw as T;
       })
@@ -140,21 +150,26 @@ export class GroupService<T = Group> implements ApiService {
    * @param group Data of the new group.
    */
   public putGroup(publicID: number, group: T): Observable<T> {
-    return this.api.callPut<T>(`${ this.servicePrefix }/${ publicID }/`, group).pipe(
+    const options = this.post;
+    options.params = new HttpParams();
+    return this.api.callPut<T>(`${ this.servicePrefix }/${ publicID }`, group, options).pipe(
       map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
         return apiResponse.body.result as T;
       })
     );
   }
 
-  public deleteGroup(publicID: number, action: string = null, options: any = {}): Observable<T> {
-    const groupDeleteOptions: any = httpObserveOptions;
+  public deleteGroup(publicID: number, action: string = null, groupID?: number): Observable<T> {
+    const groupDeleteOptions: any = this.post;
     let params = new HttpParams();
     params = params.append('action', action);
-    params = params.append('options', JSON.stringify(options));
+    if (groupID) {
+      params = params.append('group_id', JSON.stringify(groupID));
+    }
+
     groupDeleteOptions.params = params;
 
-    return this.api.callDelete<T>(`${ this.servicePrefix }/${ publicID }/`, groupDeleteOptions).pipe(
+    return this.api.callDelete<T>(`${ this.servicePrefix }/${ publicID }`, groupDeleteOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })

@@ -92,15 +92,15 @@ export class ApiCallService {
     return this.http.get<T>(this.apiURL + route, httpGetOptions).pipe(catchError(ApiCallService.handleError));
   }
 
-  public callPost<T>(route: string, data, httpPostOptions = httpObserveOptions): Observable<any> {
+  public callPost<T>(route: string, data, httpPostOptions: any = httpObserveOptions): Observable<any> {
     return this.http.post<T>(this.apiURL + route, data, httpPostOptions).pipe(catchError(ApiCallService.handleError));
   }
 
-  public callPut<T>(route: string, data, httpPutOptions = httpObserveOptions): Observable<any> {
+  public callPut<T>(route: string, data, httpPutOptions: any = httpObserveOptions): Observable<any> {
     return this.http.put<T>(this.apiURL + route, data, httpPutOptions).pipe(catchError(ApiCallService.handleError));
   }
 
-  public callDelete<T>(route: string, httpDeleteOptions = httpObserveOptions): Observable<any> {
+  public callDelete<T>(route: string, httpDeleteOptions: any = httpObserveOptions): Observable<any> {
     return this.http.delete<T>(this.apiURL + route, httpDeleteOptions).pipe(catchError(ApiCallService.handleError));
   }
 

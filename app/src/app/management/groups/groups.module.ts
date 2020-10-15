@@ -31,6 +31,8 @@ import { GroupFormComponent } from './components/group-form/group-form.component
 import { GroupAddComponent } from './group-add/group-add.component';
 import { GroupEditComponent } from './group-edit/group-edit.component';
 import { GroupTableComponent } from './components/group-table/group-table.component';
+import { GroupDeleteComponent } from './group-delete/group-delete.component';
+import { GroupSelectPipe } from './pipes/group-select.pipe';
 
 @NgModule({
   declarations: [
@@ -38,7 +40,9 @@ import { GroupTableComponent } from './components/group-table/group-table.compon
     GroupFormComponent,
     GroupAddComponent,
     GroupEditComponent,
-    GroupTableComponent
+    GroupTableComponent,
+    GroupDeleteComponent,
+    GroupSelectPipe
   ],
   imports: [
     CommonModule,

@@ -16,19 +16,51 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { GroupService } from '../../services/group.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Right } from '../../models/right';
+import { Group } from '../../models/group';
+import { takeUntil } from 'rxjs/operators';
+import { ReplaySubject } from 'rxjs';
+import { ToastService } from '../../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-group-add',
   templateUrl: './group-add.component.html',
   styleUrls: ['./group-add.component.scss']
 })
-export class GroupAddComponent implements OnInit {
+export class GroupAddComponent implements OnDestroy {
 
-  constructor(private groupService: GroupService) { }
+  public rights: Array<Right> = [];
+  public valid: boolean = false;
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  ngOnInit() {
+  constructor(private route: ActivatedRoute, private router: Router, private toastService: ToastService,
+              private groupService: GroupService) {
+    this.rights = this.route.snapshot.data.rights as Array<Right>;
+  }
+
+  /**
+   * Call group api call.
+   * @param group data
+   */
+  public save(group: Group) {
+    if (this.valid) {
+      this.groupService.postGroup(group).pipe(takeUntil(this.subscriber)).subscribe((g: Group) => {
+          this.toastService.success(`Group ${g.label} was added!`);
+          this.router.navigate(['/', 'management', 'groups']);
+        }
+      );
+    }
+  }
+
+  /**
+   * Auto unsubscribe on component destroy.
+   */
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
 }

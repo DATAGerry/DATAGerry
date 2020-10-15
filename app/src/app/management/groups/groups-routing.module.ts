@@ -21,7 +21,9 @@ import { Routes, RouterModule } from '@angular/router';
 import { GroupsComponent } from './groups.component';
 import { GroupAddComponent } from './group-add/group-add.component';
 import { GroupEditComponent } from './group-edit/group-edit.component';
-import { GroupResolver } from '../resolvers/group-resolver.service';
+import { GroupResolver, GroupsResolver } from '../resolvers/group-resolver.service';
+import { RightsResolver } from '../resolvers/rights-resolver.service';
+import { GroupDeleteComponent } from './group-delete/group-delete.component';
 
 const routes: Routes = [
   {
@@ -39,6 +41,9 @@ const routes: Routes = [
       breadcrumb: 'Add',
       right: 'base.user-management.group.add'
     },
+    resolve: {
+      rights: RightsResolver
+    },
     component: GroupAddComponent
   },
   {
@@ -48,7 +53,8 @@ const routes: Routes = [
       right: 'base.user-management.group.edit'
     },
     resolve: {
-      group: GroupResolver
+      group: GroupResolver,
+      rights: RightsResolver
     },
     component: GroupEditComponent
   },
@@ -58,7 +64,11 @@ const routes: Routes = [
       breadcrumb: 'Delete',
       right: 'base.user-management.group.delete'
     },
-    component: GroupEditComponent
+    resolve: {
+      group: GroupResolver,
+      groups: GroupsResolver
+    },
+    component: GroupDeleteComponent
   }
 ];
 

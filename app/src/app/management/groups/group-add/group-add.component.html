@@ -1,5 +1,5 @@
 <div id="group-add-header">
   <h1>Add group</h1>
-  <hr />
 </div>
-<cmdb-group-form></cmdb-group-form>
+<hr />
+<cmdb-group-form [rights]="rights" (submit)="save($event)" (validation)="valid = $event"></cmdb-group-form>

@@ -1,8 +1,6 @@
-<div id="group-edit-headline" class="d-flex justify-content-between">
+<div id="group-edit-headline">
   <h1>Edit group: {{group?.label}}
   </h1>
-  <button class="btn btn-sm btn-outline-secondary" [routerLink]="['/', 'management', 'groups']">Back</button>
 </div>
-
 <hr/>
-<cmdb-group-form [group]="group" (submit)="submit($event)"></cmdb-group-form>
+<cmdb-group-form [group]="group" [rights]="rights" (submit)="edit($event)" (validation)="valid = $event"></cmdb-group-form>

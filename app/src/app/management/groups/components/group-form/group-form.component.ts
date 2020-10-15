@@ -42,6 +42,10 @@ export class GroupFormComponent implements OnInit, OnChanges, OnDestroy {
    */
   @Input() public group: Group;
 
+  /**
+   * List of complete rights.
+   */
+  @Input() public rights: Array<Right> = [];
 
   /**
    * Are rights loading.
@@ -58,15 +62,7 @@ export class GroupFormComponent implements OnInit, OnChanges, OnDestroy {
    */
   @Output() public submit: EventEmitter<Group>;
 
-  /**
-   * Current right list
-   */
-  public loadedRights: Array<Right> = [];
-  public totalItems: number = 0;
-  private currentRightPage: number = 1;
-  private totalRightPage: number = -1;
-
-  constructor(private groupService: GroupService, private rightService: RightService) {
+  constructor(private groupService: GroupService) {
     this.subscriber = new Subject<void>();
     this.validation = new EventEmitter<boolean>();
     this.submit = new EventEmitter<Group>();
@@ -86,7 +82,6 @@ export class GroupFormComponent implements OnInit, OnChanges, OnDestroy {
     this.form.statusChanges.pipe(takeUntil(this.subscriber)).subscribe(status => {
       this.validation.emit(status);
     });
-    this.loadRights(this.currentRightPage);
   }
 
   /**
@@ -104,37 +99,6 @@ export class GroupFormComponent implements OnInit, OnChanges, OnDestroy {
       }
       this.form.patchValue(this.group);
       this.form.markAllAsTouched();
-    }
-  }
-
-  /**
-   * Load next rights if scroll-end was reached.
-   */
-  public onScrollToEnd() {
-    this.loadRights(this.currentRightPage + 1);
-  }
-
-  /**
-   * Loading the rights.
-   * @param page current page number.
-   */
-  private loadRights(page: number): void {
-    this.rightLoading = true;
-    if (page !== this.totalRightPage) {
-      this.rightService.getRights({
-        filter: undefined,
-        limit: 10,
-        sort: 'name',
-        order: 1,
-        page
-      }).pipe(takeUntil(this.subscriber))
-        .subscribe((apiResponse: APIGetMultiResponse<Right>) => {
-          this.totalItems = +apiResponse.total;
-          this.currentRightPage = +apiResponse.pager.page;
-          this.totalRightPage = +apiResponse.pager.total_pages;
-          this.loadedRights.push(...apiResponse.results as Array<Right>);
-          this.rightLoading = false;
-        });
     }
   }
 
@@ -164,6 +128,7 @@ export class GroupFormComponent implements OnInit, OnChanges, OnDestroy {
    * Triggers the submit event emitter.
    */
   public onSubmit(): void {
+    this.form.markAllAsTouched();
     const formGroup: Group = this.form.getRawValue() as Group;
     this.group = { ...this.group, ...formGroup };
     return this.submit.emit(formGroup);
@@ -176,6 +141,15 @@ export class GroupFormComponent implements OnInit, OnChanges, OnDestroy {
   public ngOnDestroy(): void {
     this.subscriber.next();
     this.subscriber.complete();
+  }
+
+  /**
+   * Group function for rights dropdown
+   * @param item Right
+   */
+  public groupByFn(item) {
+    const baseData = item.name.split('.');
+    return `${ baseData[0] }.${ baseData[1] }.*`;
   }
 
 }
