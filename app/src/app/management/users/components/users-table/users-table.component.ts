@@ -29,7 +29,7 @@ import { UsersPasswdModalComponent } from '../../modals/users-passwd-modal/users
   templateUrl: './users-table.component.html',
   styleUrls: ['./users-table.component.scss']
 })
-export class UsersTableComponent implements OnDestroy{
+export class UsersTableComponent implements OnDestroy {
 
   /**
    * Password modal
@@ -64,7 +64,9 @@ export class UsersTableComponent implements OnDestroy{
   }
 
   public ngOnDestroy(): void {
-    this.modalRef.close();
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
   }
 
 }

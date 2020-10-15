@@ -122,5 +122,6 @@
   <div class="d-flex flex-row-reverse">
     <button type="submit" class="btn btn-success" [disabled]="form.invalid">Save</button>
     <button type="reset" class="btn btn-secondary">Reset</button>
+    <button [routerLink]="['/', 'management', 'users']" type="button" class="btn ml-2 btn-outline-danger">Cancel</button>
   </div>
 </form>
