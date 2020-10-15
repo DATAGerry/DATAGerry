@@ -46,8 +46,7 @@ export class UserSettingsDBService<T = UserSetting> implements OnDestroy {
    */
   private newSettings: Subject<UserSetting>;
 
-  constructor(private dbService: NgxIndexedDBService<UserSetting>, private userSettingsService: UserSettingsService,
-              private toastService: ToastService) {
+  constructor(private dbService: NgxIndexedDBService<UserSetting>, private userSettingsService: UserSettingsService) {
     this.updater = new ReplaySubject<void>();
     this.newSettings = new Subject<UserSetting>();
     this.newSettings.asObservable().pipe(takeUntil(this.updater)).subscribe(
@@ -82,7 +81,6 @@ export class UserSettingsDBService<T = UserSetting> implements OnDestroy {
   public addSetting(setting: UserSetting): void {
     this.dbService.add(this.storeName, setting).subscribe(key => {
       this.userSettingsService.addUserSetting(setting).subscribe();
-      this.toastService.success('Setting was saved!');
     });
   }
 
@@ -93,7 +91,6 @@ export class UserSettingsDBService<T = UserSetting> implements OnDestroy {
   public updateSetting(setting: UserSetting): void {
     this.dbService.update(this.storeName, setting).subscribe(key => {
       this.userSettingsService.updateUserSetting(setting.identifier, setting).subscribe();
-      this.toastService.success('Setting was updated!');
     });
   }
 
@@ -102,8 +99,8 @@ export class UserSettingsDBService<T = UserSetting> implements OnDestroy {
    * @param identifier User key.
    */
   public deleteSetting(identifier: string): void {
-    this.dbService.delete(this.storeName, identifier).subscribe(a => {
-      this.toastService.success('Setting was deleted!');
+    this.dbService.delete(this.storeName, identifier).subscribe(key => {
+      this.userSettingsService.deleteUserSetting(identifier).subscribe();
     });
   }
 

@@ -36,5 +36,6 @@ export class ObjectTableUserPayload implements UserSettingPayload {
 export interface ObjectTableUserSettingConfig {
   hash?: string;
   data: any;
+  label: string;
   active: boolean;
 }

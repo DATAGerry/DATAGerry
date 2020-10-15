@@ -94,7 +94,7 @@ import { UsersModule } from '../../management/users/users.module';
     ObjectBulkChangeEditorComponent,
     ObjectBulkChangePreviewComponent,
     ObjectDocsComponent,
-    ObjectAttachmentsComponent,
+    ObjectAttachmentsComponent
   ],
   exports: [
   ],
