@@ -48,13 +48,40 @@ class UserModel(CmdbDAO):
             'default': DEFAULT_GROUP,
             'required': True
         },
+        'registration_time': {
+            'type': 'string',
+            'nullable': True,
+            'required': False
+        },
         'authenticator': {
             'type': 'string',
+            'nullable': True,
             'default': DEFAULT_AUTHENTICATOR,
             'required': False
         },
         'password': {
             'type': 'string',
+            'nullable': True,
+            'required': False
+        },
+        'first_name': {
+            'type': 'string',
+            'nullable': True,
+            'required': False
+        },
+        'last_name': {
+            'type': 'string',
+            'nullable': True,
+            'required': False
+        },
+        'email': {
+            'type': 'string',
+            'nullable': True,
+            'required': False
+        },
+        'image': {
+            'type': 'string',
+            'nullable': True,
             'required': False
         }
     }
