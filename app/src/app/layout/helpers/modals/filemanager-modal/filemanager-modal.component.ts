@@ -51,7 +51,7 @@ export class FilemanagerModalComponent implements OnInit {
       fileElement.metadata.reference = typeof tempReference === 'number' ?
         [tempReference].concat(newReference) : tempReference.concat(newReference);
       fileElement.metadata.reference_type = reference_type;
-      this.fileService.putFile(fileElement).subscribe((resp) => {
+      this.fileService.putFile(fileElement, true).subscribe((resp) => {
         this.toast.info(`File(s) was successfully added: ${resp.filename}`);
       });
     });

@@ -23,6 +23,7 @@ import { FileService } from '../../service/file.service';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { FileElement } from '../../model/file-element';
 import { APIGetMultiResponse } from '../../../../../services/models/api-response';
+import {CollectionParameters} from "../../../../../services/models/api-parameter";
 
 @Component({
   selector: 'cmdb-move-dialog',
@@ -33,6 +34,7 @@ export class MoveDialogComponent implements OnInit {
 
   public basicForm: FormGroup;
   public destinationFolder: FileElement[] = [];
+  private readonly defaultApiParameter: CollectionParameters = {page: 1, limit: 100, order: 1};
 
   constructor(private fileService: FileService, public activeModal: NgbActiveModal) {}
 
@@ -54,7 +56,7 @@ export class MoveDialogComponent implements OnInit {
       folder: new FormControl(null, Validators.required)
     });
 
-    this.fileService.getAllFilesList(new FileMetadata({folder: true}))
+    this.fileService.getAllFilesList(new FileMetadata({folder: true}), this.defaultApiParameter)
       .subscribe( (data: APIGetMultiResponse<FileElement>) => {
         this.destinationFolder = data.results;
     });

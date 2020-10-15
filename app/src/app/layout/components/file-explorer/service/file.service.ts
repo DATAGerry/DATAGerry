@@ -100,8 +100,12 @@ export class FileService<T = any> implements ApiService {
   /**
    * Update file into the database (GridFS)
    * @param file part of (GridFS) instance
+   * @param hasReference set only reference to CmdbObject
    */
-  public putFile(file: FileElement): Observable<T> {
+  public putFile(file: FileElement, hasReference: boolean  = false): Observable<T> {
+    let params: HttpParams = new HttpParams();
+    params = params.append('attachment', JSON.stringify({reference: hasReference}));
+    httpObserveOptions[PARAMETER] = params;
     return this.api.callPut<number>(this.servicePrefix + '/', JSON.stringify(file)).pipe(
       map((apiResponse: HttpResponse<T>) => {
         return apiResponse.body;

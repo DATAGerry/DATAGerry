@@ -144,6 +144,7 @@ def update_file(request_user: User):
         Any existing value that matches the file name and metadata is taken into account.
         Furthermore, it is checked whether the current file name already exists in the directory.
         If this is the case, 'copy_(index)_' is appended as prefix. The method is executed recursively.
+        Exception, if the parameter 'attachment' is passed with the value '{reference':true}', the name is not checked.
 
         Note:
             Create a unique media file element:
@@ -171,6 +172,7 @@ def update_file(request_user: User):
     try:
         add_data_dump = json.dumps(request.json)
         new_file_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
+        reference_attachment = json.loads(request.args.get('attachment'))
 
         data = media_file_manager.get_file(metadata={'public_id': new_file_data['public_id']})
         data['public_id'] = new_file_data['public_id']
@@ -178,10 +180,11 @@ def update_file(request_user: User):
         data['metadata'] = new_file_data['metadata']
         data['metadata']['author_id'] = new_file_data['metadata']['author_id'] = request_user.get_public_id()
 
-        # # Check if file / folder exist in folder
-        checker = {'filename': new_file_data['filename'], 'metadata.parent': new_file_data['metadata']['parent']}
-        copied_name = create_attachment_name(new_file_data['filename'], 0, checker, media_file_manager)
-        data['filename'] = copied_name
+        # Check if file / folder exist in folder
+        if not reference_attachment['reference']:
+            checker = {'filename': new_file_data['filename'], 'metadata.parent': new_file_data['metadata']['parent']}
+            copied_name = create_attachment_name(new_file_data['filename'], 0, checker, media_file_manager)
+            data['filename'] = copied_name
 
         media_file_manager.updata_file(data)
     except MediaFileManagerUpdateError:
