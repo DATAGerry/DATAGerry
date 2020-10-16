@@ -610,109 +610,50 @@ Rights
 
         **Example response**:
 
-        {
-           "results":[
-              {
-                 "level":0,
-                 "name":"base.*",
-                 "label":"base.*",
-                 "description":"Base application right",
-                 "is_master":true
-              },
-              {
-                 "level":50,
-                 "name":"base.docapi.*",
-                 "label":"docapi.*",
-                 "description":"Manage DocAPI",
-                 "is_master":true
-              },
-              {
-                 "level":50,
-                 "name":"base.docapi.template.*",
-                 "label":"template.*",
-                 "description":"Manage DocAPI templates",
-                 "is_master":true
-              },
-              {
-                 "level":50,
-                 "name":"base.docapi.template.add",
-                 "label":"template.add",
-                 "description":"Add template",
-                 "is_master":false
-              },
-              {
-                 "level":50,
-                 "name":"base.docapi.template.delete",
-                 "label":"template.delete",
-                 "description":"Delete template",
-                 "is_master":false
-              },
-              {
-                 "level":50,
-                 "name":"base.docapi.template.edit",
-                 "label":"template.edit",
-                 "description":"Edit template",
-                 "is_master":false
-              },
-              {
-                 "level":50,
-                 "name":"base.docapi.template.view",
-                 "label":"template.view",
-                 "description":"View template",
-                 "is_master":false
-              },
-              {
-                 "level":50,
-                 "name":"base.export.*",
-                 "label":"export.*",
-                 "description":"Manage exports",
-                 "is_master":true
-              },
-              {
-                 "level":50,
-                 "name":"base.export.object.*",
-                 "label":"object.*",
-                 "description":"Manage object exports",
-                 "is_master":true
-              },
-              {
-                 "level":50,
-                 "name":"base.export.type.*",
-                 "label":"type.*",
-                 "description":"Manage type exports",
-                 "is_master":true
-              }
-           ],
-           "count":10,
-           "total":62,
-           "parameters":{
-              "limit":10,
-              "sort":"name",
-              "order":1,
-              "page":1,
-              "filter":{
+        .. sourcecode:: http
 
-              },
-              "optional":{
-                 "view":"list"
-              }
-           },
-           "pager":{
-              "page":1,
-              "page_size":10,
-              "total_pages":7
-           },
-           "pagination":{
-              "current":"http://datagerry.com/rest/rights/",
-              "first":"http://datagerry.com/rest/rights/?page=1",
-              "prev":"http://datagerry.com/rest/rights/?page=1",
-              "next":"http://datagerry.com/rest/rights/?page=2",
-              "last":"http://datagerry.com/rest/rights/?page=7"
-           },
-           "response_type":"GET",
-           "model":"Right",
-           "time":"2020-01-01 00:00:00.000000"
-        }
+            HTTP/1.1 202 ACCEPTED
+            Content-Type: application/json
+            Content-Length: 100
+            X-API-Version: 1.0
+
+            {
+                "results": [{
+                     "level": 0,
+                     "name": "base.*",
+                     "label": "base.*",
+                     "description": "Base application right",
+                     "is_master": true
+                }],
+
+                "count": 1,
+                "total": 62,
+                "parameters": {
+                    "limit": 1,
+                    "sort": "name",
+                    "order": 1,
+                    "page": 1,
+                    "filter": {},
+                    "optional": {
+                        "view": "list"
+                    }
+               },
+               "pager":{
+                    "page": 1,
+                    "page_size": 1,
+                    "total_pages": 62
+               },
+               "pagination": {
+                    "current": "http://datagerry.com/rest/rights/",
+                    "first": "http://datagerry.com/rest/rights/?page=1",
+                    "prev": "http://datagerry.com/rest/rights/?page=1",
+                    "next": "http://datagerry.com/rest/rights/?page=2",
+                    "last": "http://datagerry.com/rest/rights/?page=62"
+               },
+               "response_type": "GET",
+               "model": "Right",
+               "time": "2020-01-01 00:00:00.000000"
+            }
 
         :query sort: the sort field name. default is `name`.
         :query order: the sort order value for ascending or descending. default is 1 for ascending
