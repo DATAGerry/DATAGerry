@@ -219,7 +219,7 @@ def get_file(filename: str):
     return make_response(result)
 
 
-@media_file_blueprint.route('/download/<path:filename>', methods=['POST'])
+@media_file_blueprint.route('/download/<path:filename>', methods=['GET'])
 @media_file_blueprint.protect(auth=True, right='base.framework.object.view')
 def download_file(filename: str):
     """ This method download a file to the specified section of the document.

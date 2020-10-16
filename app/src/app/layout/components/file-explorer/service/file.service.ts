@@ -19,12 +19,18 @@
 import { Injectable } from '@angular/core';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { HttpParams, HttpResponse} from '@angular/common/http';
+import {HttpHeaders, HttpParams, HttpResponse} from '@angular/common/http';
 import { FileMetadata } from '../model/metadata';
 import { FormControl } from '@angular/forms';
 import { FileElement } from '../model/file-element';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
-import { ApiCallService, ApiService, httpFileOptions, httpObserveOptions} from '../../../../services/api-call.service';
+import {
+  ApiCallService,
+  ApiService,
+  httpFileOptions,
+  httpObserveOptions,
+  resp
+} from '../../../../services/api-call.service';
 import { ValidatorService } from '../../../../services/validator.service';
 
 export const checkFolderExistsValidator = (fileService: FileService, metadata: any, time: number = 500) => {
@@ -45,6 +51,7 @@ export const checkFolderExistsValidator = (fileService: FileService, metadata: a
 };
 
 export const PARAMETER = 'params';
+export const RESPONSETYPE = 'responseType';
 
 @Injectable({
   providedIn: 'root'
@@ -120,9 +127,18 @@ export class FileService<T = any> implements ApiService {
    * @param metadata part of (GridFS) instance
    */
   public downloadFile(filename: string, metadata) {
-    const formData = new FormData();
-    formData.append('metadata', JSON.stringify(metadata));
-    return this.api.callPost(this.servicePrefix + '/download/' + filename, formData, httpFileOptions);
+    let params: HttpParams = new HttpParams();
+    params = params.append('metadata', JSON.stringify(metadata));
+    const observeOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      }),
+      params: {},
+      observe: resp
+    };
+    observeOptions[PARAMETER] = params;
+    observeOptions[RESPONSETYPE] = 'blob';
+    return this.api.callGet(this.servicePrefix + '/download/' + filename, observeOptions);
   }
 
   /**
