@@ -21,6 +21,21 @@ import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/r
 import { User } from '../models/user';
 import { Observable } from 'rxjs';
 import { UserService } from '../services/user.service';
+import { AuthService } from '../../auth/services/auth.service';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class OwnUserResolver implements Resolve<User> {
+
+  constructor(private authService: AuthService, private userService: UserService) {
+  }
+
+  public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<User> | Promise<User> | User {
+    const userID: number = +this.authService.currentUserValue.public_id;
+    return this.userService.getUser(userID);
+  }
+}
 
 @Injectable({
   providedIn: 'root'

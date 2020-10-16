@@ -66,6 +66,10 @@ export class UserFormComponent implements OnInit, OnChanges, OnDestroy {
    */
   @Output() public validation: EventEmitter<boolean> = new EventEmitter<boolean>();
 
+  @Input() cancel: boolean = true;
+
+  public preview: any = undefined;
+
   constructor() {
     this.form = new FormGroup({
       user_name: new FormControl('', [Validators.required]),
@@ -113,10 +117,25 @@ export class UserFormComponent implements OnInit, OnChanges, OnDestroy {
     return this.form.get('group_id') as FormControl;
   }
 
+  public get imageControl() {
+    return this.form.get('image') as FormControl;
+  }
+
+  public previewImage(event) {
+    if (event.target.files && event.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (eve: ProgressEvent) => {
+        this.preview = (eve.target as FileReader).result;
+        this.imageControl.setValue(this.preview);
+      };
+      reader.readAsDataURL(event.target.files[0]);
+    }
+  }
+
   public onSubmit(): void {
     this.form.markAllAsTouched();
     if (this.form.valid) {
-      this.submit.emit(this.form.getRawValue() as User);
+      this.submit.emit(this.form.value as User);
     }
   }
 
@@ -129,6 +148,7 @@ export class UserFormComponent implements OnInit, OnChanges, OnDestroy {
   public ngOnChanges(changes: SimpleChanges): void {
     if (changes.user && changes.user.currentValue !== changes.user.previousValue) {
       this.form.patchValue(this.user);
+      this.preview = this.user.image;
       this.form.markAllAsTouched();
     }
   }

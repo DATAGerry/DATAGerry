@@ -1,10 +1,38 @@
-<div id="user-page">
-  <div class="row">
-    <div id="user-page-image" class="col-md-3">
-      <cmdb-user-image [user]="user"></cmdb-user-image>
-    </div>
-    <div id="user-page-headline" class="col-md-9">
-      <cmdb-user-headline [user]="user" [group]="group"></cmdb-user-headline>
+<div class="row">
+  <div class="col-12">
+    <nav>
+      <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <a class="nav-item nav-link active" id="profile-tab" data-toggle="tab" href="#nav-profile"
+           role="tab">Profile</a>
+        <a class="nav-item nav-link" id="meta-tab" data-toggle="tab" href="#nav-meta" role="tab">Meta</a>
+        <a class="nav-item nav-link" id="group-tab" data-toggle="tab" href="#nav-group" role="tab">Group</a>
+        <a class="nav-item nav-link bg-primary text-white pointer" id="pass-change-tab" (click)="openPasswordModal()"
+           >Change Password?</a>
+      </div>
+    </nav>
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="nav-profile" role="tabpanel">
+        <div id="user-view-form" class="mt-3">
+          <cmdb-user-form [user]="user" [cancel]="false" (submit)="save($event)"></cmdb-user-form>
+        </div>
+      </div>
+      <div class="tab-pane fade" id="nav-meta" role="tabpanel">
+        <dl class="mt-3 row">
+          <dt class="col-3">Public ID:</dt>
+          <dd class="col-9">{{user?.public_id}}</dd>
+          <dt class="col-3">Registration Time:</dt>
+          <dd class="col-9">{{user?.registration_time | date:"dd/MM/yyyy - HH:mm:ss"}}</dd>
+          <dt class="col-3">Authenticator</dt>
+          <dd class="col-9">{{user?.authenticator}}</dd>
+        </dl>
+      </div>
+      <div class="tab-pane fade" id="nav-group" role="tabpanel">
+        <dl class="mt-3 row">
+          <dt class="col-sm-3">Group:</dt>
+          <dd class="col-sm-9">{{group?.label}}</dd>
+        </dl>
+      </div>
     </div>
   </div>
+
 </div>

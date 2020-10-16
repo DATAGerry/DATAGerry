@@ -95,7 +95,6 @@ def get_group(public_id: int):
                                                right_manager=RightManager(rights))
     try:
         group = group_manager.get(public_id)
-        print(group.to_dict(group))
     except ManagerGetError as err:
         return abort(404, err.message)
     api_response = GetSingleResponse(UserGroupModel.to_dict(group), url=request.url,
@@ -198,13 +197,8 @@ def delete_group(public_id: int, params: GroupDeletionParameters):
         if len(users_in_group) > 0:
             if params.action == GroupDeleteMode.MOVE.value:
                 if params.group_id:
-                    try:
-                        group_manager.get(params.group_id)
-                    except ManagerGetError:
-                        return abort(404, f'Group for users move does not exist: GroupID: {params.group_id}')
-
                     for user in users_in_group:
-                        user.group_id = params.group_id
+                        user.group_id = int(params.group_id)
                         try:
                             user_manager.update(user.public_id, user)
                         except ManagerUpdateError as err:

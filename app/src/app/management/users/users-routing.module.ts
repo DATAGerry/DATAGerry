@@ -21,10 +21,10 @@ import { Routes, RouterModule } from '@angular/router';
 import { UserViewComponent } from './user-view/user-view.component';
 import { UsersComponent } from './users.component';
 import { UserAddComponent } from './user-add/user-add.component';
-import { GroupsResolver } from '../resolvers/group-resolver.service';
+import { GroupsResolver, OwnGroupResolver } from '../resolvers/group-resolver.service';
 import { UserEditComponent } from './user-edit/user-edit.component';
 import { ProviderResolver } from '../../auth/resolvers/provider-resolver.service';
-import { UserResolver } from '../resolvers/user-resolver.service';
+import { OwnUserResolver, UserResolver } from '../resolvers/user-resolver.service';
 import { UserDeleteComponent } from './user-delete/user-delete.component';
 
 const routes: Routes = [
@@ -41,10 +41,14 @@ const routes: Routes = [
     component: UsersComponent
   },
   {
-    path: 'view/:publicID',
+    path: 'view',
     data: {
       breadcrumb: 'View',
-      right: 'base.user-management.user.view'
+      right: 'base.user-management.user.view',
+    },
+    resolve: {
+      user: OwnUserResolver,
+      group: OwnGroupResolver
     },
     component: UserViewComponent
   },

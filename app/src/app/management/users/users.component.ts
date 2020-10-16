@@ -64,7 +64,7 @@ export class UsersComponent implements OnInit, AfterViewInit, OnDestroy {
         { orderable: true, searchable: true, targets: [0, 1, 3] },
         { name: 'public_id', targets: [0] },
         { name: 'user_name', targets: [1] },
-        { name: 'display', targets: [2], searchable: false },
+        { name: 'display', targets: [2], orderable: false, searchable: false },
         { name: 'email', targets: [3] },
         { name: 'registration_time', targets: [4],  orderable: false, searchable: false },
         { name: 'group_id', targets: [5],  orderable: false, searchable: false },

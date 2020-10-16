@@ -24,6 +24,23 @@ import { GroupService } from '../services/group.service';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import { map } from 'rxjs/operators';
+import { User } from '../models/user';
+import { AuthService } from '../../auth/services/auth.service';
+import { UserService } from '../services/user.service';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class OwnGroupResolver implements Resolve<Group> {
+
+  constructor(private authService: AuthService, private groupService: GroupService) {
+  }
+
+  public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Group> | Promise<Group> | Group {
+    const groupID: number = +this.authService.currentUserValue.group_id;
+    return this.groupService.getGroup(groupID);
+  }
+}
 
 /**
  * Resolver for a single group

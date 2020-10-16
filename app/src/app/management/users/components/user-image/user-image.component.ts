@@ -27,5 +27,5 @@ import { User } from '../../../models/user';
 export class UserImageComponent {
   public defaultURL = '/assets/img/avatar.png';
   @Input() public maxWidth: string = '200';
-  @Input() public user: User;
+  @Input() public image: string;
 }

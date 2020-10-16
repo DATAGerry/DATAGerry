@@ -77,6 +77,7 @@ export class UserEditComponent implements OnInit, OnDestroy {
   public save(user: User): void {
     const editUser = Object.assign(this.user, user);
     this.userService.putUser(this.user.public_id, editUser).pipe(takeUntil(this.subscriber)).subscribe((apiUser: User) => {
+
       this.toastService.success(`User ${apiUser.user_name} was updated`);
       this.router.navigate(['/', 'management', 'users']);
     });
