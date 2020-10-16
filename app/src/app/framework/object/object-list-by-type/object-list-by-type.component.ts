@@ -568,49 +568,6 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   }
 
   /**
-   * Save the current table settings into the indexedDB.
-   */
-  public saveSetting(label?: string): void {
-    console.log(label);
-    /*
-    const newTableData = this.newTableSettingConfig.value;
-    if (newTableData) {
-
-      newTableData.label = label;
-      if (this.tableUserSetting) {
-        const configs = this.tableUserSetting.payload.configs;
-        for (const config of configs) {
-          config.active = false;
-        }
-        this.settingForm.reset();
-        try {
-          const possibleConf = configs.find(c => c.label && c.label === label);
-          if (possibleConf) {
-            const confId = configs.indexOf(possibleConf);
-            configs.splice(confId, 1);
-          }
-        } catch {
-        }
-
-        this.tableUserSetting.payload.configs.push(newTableData);
-        this.userSettingsDB.updateSetting(this.tableUserSetting);
-      } else {
-        this.settingForm.reset();
-        const tablePayload = new ObjectTableUserPayload([newTableData]);
-        const userSetting: UserSetting<ObjectTableUserPayload> = Object.assign(new UserSetting(), {
-          identifier: this.router.url.toString().substring(1).split('/').join('-'),
-          user_id: this.authService.currentUserValue.public_id,
-          payload: tablePayload,
-          setting_type: 'APPLICATION'
-        });
-        this.userSettingsDB.addSetting(userSetting);
-        this.tableUserSetting = userSetting;
-      }
-
-    }*/
-  }
-
-  /**
    * Toggle between multiple setting states.
    * @param selected ObjectTableUserSettingConfig
    */
