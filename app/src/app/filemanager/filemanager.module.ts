@@ -17,38 +17,23 @@
 */
 
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
-import { LoginComponent } from './auth/login.component';
-
-const routes: Routes = [
-  {
-    path: '',
-    loadChildren: () => import('./main/main.module').then(m => m.MainModule)
-  },
-  {
-    path: 'connect',
-    data: {
-      view: 'embedded'
-    },
-    loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule)
-  },
-  {
-    path: 'auth',
-    data: {
-      view: 'embedded'
-    },
-    component: LoginComponent
-  },
-  {
-    path: '**',
-    redirectTo: 'error/404'
-  }
-];
-
+import { CommonModule } from '@angular/common';
+import { LayoutModule } from '../layout/layout.module';
+import { FileexplorerModule } from '../layout/components/file-explorer/fileexplorer.module';
+import { FilemanagerRoutingModule } from './filemanager-routing.module';
+import { FilemanagerComponent } from './filemanager.component';
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules, enableTracing: false })],
-  exports: [RouterModule]
+    entryComponents: [
+    ],
+    declarations: [
+      FilemanagerComponent
+    ],
+  imports: [
+    CommonModule,
+    LayoutModule,
+    FilemanagerRoutingModule,
+    FileexplorerModule
+  ]
 })
-export class AppRoutingModule {
-}
+export class FilemanagerModule { }

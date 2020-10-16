@@ -91,7 +91,7 @@ const routes: Routes = [
     data: {
       breadcrumb: 'Filemanager'
     },
-    loadChildren: () => import('../file-manager/file-manager.module').then(m => m.FileManagerModule)
+    loadChildren: () => import('../filemanager/filemanager.module').then(m => m.FilemanagerModule)
   },
   {
     path: 'debug',
