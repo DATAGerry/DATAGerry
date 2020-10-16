@@ -154,16 +154,12 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     this.dtOptions = {
       stateSave: true,
       stateSaveCallback: (settings, data) => {
-        if (!this.stateSelected) {
-          this.newTableSettingConfig = {
-            data,
-            label: 'Latest',
-            active: true,
-          } as ObjectTableUserSettingConfig;
-          this.saveConfig('Latest');
-        }else{
-          this.stateSelected = false;
-        }
+
+        this.newTableSettingConfig = {
+          data,
+          active: true,
+        } as ObjectTableUserSettingConfig;
+
 
       },
       stateLoadCallback: (settings, callback) => {
@@ -531,7 +527,13 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
    */
   public saveConfig(label?: string): void {
     const tableData = this.newTableSettingConfig;
-    tableData.label = label;
+    if (!label) {
+      tableData.label = this.settingLabel.value;
+      console.log(tableData);
+    } else {
+
+      tableData.label = label;
+    }
     if (tableData) {
       if (this.tableUserSetting) {
         const configs = this.tableUserSetting.payload.configs;
