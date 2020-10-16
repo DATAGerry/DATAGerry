@@ -24,6 +24,7 @@ from cmdb.manager import ManagerGetError
 from cmdb.interface.api_parameters import CollectionParameters, ApiParameters
 from cmdb.interface.route_utils import auth_is_valid, user_has_right, parse_authorization_header
 from cmdb.security.token.validator import TokenValidator, ValidationError
+from cmdb.user_management import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
 
 
@@ -58,18 +59,19 @@ class APIBlueprint(Blueprint):
                                 return abort(401)
                             try:
                                 user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
-                                user = user_manager.get(user_id)
+                                user_dict: dict = UserModel.to_dict(user_manager.get(user_id))
 
                                 if excepted:
                                     for exe_key, exe_value in excepted.items():
                                         try:
                                             route_parameter = kwargs[exe_value]
                                         except KeyError:
-                                            continue
-                                        if not hasattr(user, exe_key):
-                                            continue
+                                            return abort(403, f'User has not the required right {right}')
 
-                                        if user.__slots__.get(exe_key) == route_parameter:
+                                        if exe_key not in user_dict.keys():
+                                            return abort(403, f'User has not the required right {right}')
+
+                                        if user_dict[exe_key] == route_parameter:
                                             return f(*args, **kwargs)
                             except ManagerGetError:
                                 return abort(404)
