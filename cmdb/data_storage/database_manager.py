@@ -401,6 +401,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         Returns:
             int: new public id of the document
         """
+        data = data.__class__.to_json(data)
         if 'public_id' not in data:
             data['public_id'] = self.get_highest_id(collection=collection) + 1
         self.connector.get_collection(collection).insert_one(data)
