@@ -67,7 +67,7 @@ def get_users(params: CollectionParameters):
 
 
 @users_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
-@users_blueprint.protect(auth=True, right='base.user-management.user.view')
+@users_blueprint.protect(auth=True, right='base.user-management.user.view', excepted={'public_id': 'public_id'})
 def get_user(public_id: int):
     """
     HTTP `GET`/`HEAD` route for a single user resource.
@@ -128,7 +128,7 @@ def insert_user(data: dict):
 
 
 @users_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
-@users_blueprint.protect(auth=True, right='base.user-management.user.edit')
+@users_blueprint.protect(auth=True, right='base.user-management.user.edit', excepted={'public_id': 'public_id'})
 @users_blueprint.validate(UserModel.SCHEMA)
 def update_user(public_id: int, data: dict):
     """
@@ -185,7 +185,7 @@ def delete_user(public_id: int):
 
 
 @users_blueprint.route('/<int:public_id>/password', methods=['PATCH'])
-@users_blueprint.protect(auth=True, right='base.user-management.user.edit')
+@users_blueprint.protect(auth=True, right='base.user-management.user.edit', excepted={'public_id': 'public_id'})
 def change_user_password(public_id: int):
     """
     HTTP `PATCH` route for updating a single user password.

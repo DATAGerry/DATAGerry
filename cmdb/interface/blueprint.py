@@ -18,10 +18,13 @@ from functools import wraps
 from typing import Type
 
 from cerberus import Validator
-from flask import Blueprint, abort, request
+from flask import Blueprint, abort, request, current_app
 
+from cmdb.manager import ManagerGetError
 from cmdb.interface.api_parameters import CollectionParameters, ApiParameters
-from cmdb.interface.route_utils import auth_is_valid, user_has_right
+from cmdb.interface.route_utils import auth_is_valid, user_has_right, parse_authorization_header
+from cmdb.security.token.validator import TokenValidator, ValidationError
+from cmdb.user_management.managers.user_manager import UserManager
 
 
 class APIBlueprint(Blueprint):
@@ -31,20 +34,47 @@ class APIBlueprint(Blueprint):
         super(APIBlueprint, self).__init__(*args, **kwargs)
 
     @staticmethod
-    def protect(auth: bool = True, right: str = None):
+    def protect(auth: bool = True, right: str = None, excepted: dict = None):
         """Active auth and right protection for flask routes"""
 
         def _protect(f):
             @wraps(f)
             def _decorate(*args, **kwargs):
+
                 if auth:
                     if not auth_is_valid():
                         return abort(401)
 
-                # Dont need right validation if no auth
                 if auth and right:
                     if not user_has_right(right):
+                        if excepted:
+                            with current_app.app_context():
+                                user_manager = UserManager(current_app.database_manager)
+
+                            token = parse_authorization_header(request.headers['Authorization'])
+                            try:
+                                decrypted_token = TokenValidator().decode_token(token)
+                            except ValidationError as err:
+                                return abort(401)
+                            try:
+                                user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
+                                user = user_manager.get(user_id)
+
+                                if excepted:
+                                    for exe_key, exe_value in excepted.items():
+                                        try:
+                                            route_parameter = kwargs[exe_value]
+                                        except KeyError:
+                                            continue
+                                        if not hasattr(user, exe_key):
+                                            continue
+
+                                        if user.__slots__.get(exe_key) == route_parameter:
+                                            return f(*args, **kwargs)
+                            except ManagerGetError:
+                                return abort(404)
                         return abort(403, f'User has not the required right {right}')
+
                 return f(*args, **kwargs)
 
             return _decorate
@@ -82,6 +112,7 @@ class APIBlueprint(Blueprint):
         Returns:
             ApiParameters: Wrapper class
         """
+
         def _parse(f):
             @wraps(f)
             def _decorate(*args, **kwargs):
@@ -124,6 +155,7 @@ class APIBlueprint(Blueprint):
             return _decorate
 
         return _parse
+
 
 class RootBlueprint(Blueprint):
     """Wrapper class for Blueprints with nested elements"""
