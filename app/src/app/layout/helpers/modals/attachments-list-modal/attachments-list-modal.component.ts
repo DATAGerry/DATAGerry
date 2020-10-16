@@ -141,7 +141,7 @@ export class AttachmentsListModalComponent implements OnInit {
     fileElement.metadata.reference_type = reference_type;
     fileElement.metadata.reference = fileElement.metadata.reference.filter(x => x !== reference);
 
-    this.fileService.putFile(fileElement).subscribe((resp) => {
+    this.fileService.putFile(fileElement, true).subscribe((resp) => {
       this.getFiles(this.defaultApiParameter);
       this.toast.info(`File was successfully solved: ${resp.filename}`);
     });
