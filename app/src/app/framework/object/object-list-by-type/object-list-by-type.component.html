@@ -32,40 +32,32 @@
                 data-toggle="dropdown">
           <i class="fas fa-border-none"></i> Settings
         </button>
-        <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
-          <li class="dropdown-item pointer" *ngFor="let tableSetting of tableUserSetting?.payload?.configs"
-              [ngClass]="tableSetting.active ? 'active': ''" (click)="selectConfig(tableSetting)">
-            <span (click)="deleteConfig(tableSetting)" class="mr-1"><i class="fas fa-times"></i></span>
-            {{tableSetting?.label}}
-          </li>
-          <div class="dropdown-divider" *ngIf="tableUserSetting?.payload?.configs.length > 0"></div>
-          <form [formGroup]="settingForm" class="px-4 py-2">
-            <div class="form-group">
+        <ul class="steting-dropdown dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
+          <!-- Save config -->
+           <form [formGroup]="settingForm" class="form-inline px-2">
+             <div class="input-group mb-2">
               <input type="text" formControlName="label" class="form-control form-control-sm"
                      [ngClass]="{ 'is-valid': settingLabel.valid && (settingLabel.dirty || settingLabel.touched),
                  'is-invalid': settingLabel.invalid && (settingLabel.dirty || settingLabel.touched)}">
-                  <div *ngIf="settingLabel.invalid && (settingLabel.dirty || settingLabel.touched)"
-                       class="invalid-feedback">
-                    <div class="float-right" *ngIf="settingLabel.errors.required">
-                      Label is required
-                    </div>
-                    <div class="clearfix"></div>
-                  </div>
-            </div>
+               <div class="input-group-append">
+                  <div class="input-group-text">
+                    <i class="fas fa-save" (click)="saveConfig(settingLabel.value)"></i></div>
+                </div>
+              </div>
           </form>
-          <li class="dropdown-item bg-success text-white pointer" (click)="saveSetting(settingLabel.value)"
-              [ngClass]="(settingForm.invalid)  ? 'disabled': ''">
-            <i class="fas fa-save"></i> SAVE
+          <!-- Set default -->
+          <li class="dropdown-item pointer setting-item" (click)="default()" [ngClass]="currentTableSettingsConfig ? '': 'active'">
+              Default
           </li>
-          <ng-container *ngIf="tableUserSetting">
-          <div class="dropdown-divider"></div>
-          <li class="dropdown-item bg-warning text-white pointer" (click)="resetConfig()">
-            <i class="fas fa-history"></i> RESET
+          <!-- List config -->
+          <li class="dropdown-item pointer setting-item" *ngFor="let tableConfig of tableUserSetting?.payload?.configs"
+              (click)="selectConfig(tableConfig)"
+              [ngClass]="tableConfig.active ? 'active': ''">
+              {{tableConfig?.label}}
+              <i class="far fa-trash-alt setting-item-icon" (click)="deleteConfig(tableConfig)"></i>
+            <div class="clearfix"></div>
           </li>
-          <li class="dropdown-item bg-danger text-white pointer" (click)="clearSetting()">
-            <i class="fas fa-times"></i> CLEAR
-          </li>
-          </ng-container>
+
         </ul>
       </div>
       <div class="btn-group" *permissionLink="'base.export.object.*'">

@@ -93,7 +93,11 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   /**
    * Selector if the config is new.
    */
-  public newTableSettingConfig: BehaviorSubject<ObjectTableUserSettingConfig>;
+  public newTableSettingConfig: ObjectTableUserSettingConfig;
+
+  public currentTableSettingsConfig: ObjectTableUserSettingConfig;
+
+  public stateSelected: boolean = false;
 
   /**
    * FormGroup for settings label
@@ -118,7 +122,6 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
-    this.newTableSettingConfig = new BehaviorSubject<ObjectTableUserSettingConfig>(undefined);
 
     this.type = this.route.snapshot.data.type as CmdbType;
     this.tableUserSetting = this.route.snapshot.data.userSetting as UserSetting<ObjectTableUserPayload>;
@@ -137,33 +140,38 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       this.dtOptionbuilder(this.typeID);
     });
     // AUTO save
-    this.newTableSettingConfig.asObservable().pipe(takeUntil(this.subscriber)).subscribe((config) => {
+    /*this.newTableSettingConfig.asObservable().pipe(takeUntil(this.subscriber)).subscribe((config) => {
       if (config && !this.tableUserSetting.payload.configs.find(c => c === config && c.label !== config.label)) {
         if (!this.tableUserSetting || !this.tableUserSetting.payload.configs.find(c => c === config && c.label !== 'LATEST')) {
           this.saveSetting('LATEST');
         }
       }
 
-    });
+    });*/
   }
 
   private dtOptionbuilder(typeID: number) {
     this.dtOptions = {
       stateSave: true,
       stateSaveCallback: (settings, data) => {
+        if (!this.stateSelected) {
+          this.newTableSettingConfig = {
+            data,
+            label: 'Latest',
+            active: true,
+          } as ObjectTableUserSettingConfig;
+          this.saveConfig('Latest');
+        }else{
+          this.stateSelected = false;
+        }
 
-        const currentStateConfig = {
-          data,
-          label: '',
-          active: true,
-        } as ObjectTableUserSettingConfig;
-
-        this.newTableSettingConfig.next(currentStateConfig);
       },
       stateLoadCallback: (settings, callback) => {
         try {
           for (const config of this.tableUserSetting.payload.configs) {
             if (config.active) {
+              this.currentTableSettingsConfig = config.data;
+              this.stateSelected = true;
               return config.data;
             }
           }
@@ -519,10 +527,52 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   }
 
   /**
+   * Save Config
+   */
+  public saveConfig(label?: string): void {
+    const tableData = this.newTableSettingConfig;
+    tableData.label = label;
+    if (tableData) {
+      if (this.tableUserSetting) {
+        const configs = this.tableUserSetting.payload.configs;
+        for (const config of configs) {
+          config.active = false;
+        }
+        this.settingForm.reset();
+        try {
+          const possibleConf = configs.find(c => c.label && c.label === label);
+          if (possibleConf) {
+            const confId = configs.indexOf(possibleConf);
+            configs.splice(confId, 1);
+          }
+        } catch {
+        }
+
+        this.tableUserSetting.payload.configs.push(tableData);
+        this.userSettingsDB.updateSetting(this.tableUserSetting);
+      } else {
+        this.settingForm.reset();
+        const tablePayload = new ObjectTableUserPayload([tableData]);
+        const userSetting: UserSetting<ObjectTableUserPayload> = Object.assign(new UserSetting(), {
+          identifier: this.router.url.toString().substring(1).split('/').join('-'),
+          user_id: this.authService.currentUserValue.public_id,
+          payload: tablePayload,
+          setting_type: 'APPLICATION'
+        });
+        this.userSettingsDB.addSetting(userSetting);
+        this.tableUserSetting = userSetting;
+      }
+      this.currentTableSettingsConfig = tableData;
+      this.newTableSettingConfig = undefined;
+    }
+  }
+
+  /**
    * Save the current table settings into the indexedDB.
    */
-  public saveSetting(label: string): void {
-
+  public saveSetting(label?: string): void {
+    console.log(label);
+    /*
     const newTableData = this.newTableSettingConfig.value;
     if (newTableData) {
 
@@ -557,7 +607,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
         this.tableUserSetting = userSetting;
       }
 
-    }
+    }*/
   }
 
   /**
@@ -569,6 +619,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       config.active = config === selected;
     }
     this.userSettingsDB.updateSetting(this.tableUserSetting);
+    this.currentTableSettingsConfig = selected;
     this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
       dtInstance.destroy();
       this.displayTable(this.dtTableElement);
@@ -579,17 +630,18 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
    * Set all settings activation status to false.
    * Same as reset default setting.
    */
-  public resetConfig(): void {
+  public default(): void {
     if (this.tableUserSetting) {
       for (const config of this.tableUserSetting.payload.configs) {
         config.active = false;
       }
       this.userSettingsDB.updateSetting(this.tableUserSetting);
-      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-        dtInstance.destroy();
-        this.displayTable(this.dtTableElement);
-      });
     }
+    this.currentTableSettingsConfig = undefined;
+    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+      dtInstance.destroy();
+      this.displayTable(this.dtTableElement);
+    });
   }
 
   /**
@@ -604,17 +656,6 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     this.userSettingsDB.updateSetting(this.tableUserSetting);
   }
 
-  /**
-   * Clear the complete tableSetting.
-   */
-  public clearSetting(): void {
-    this.userSettingsDB.deleteSetting(this.tableUserSetting.identifier);
-    this.tableUserSetting = undefined;
-    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-      dtInstance.destroy();
-      this.displayTable(this.dtTableElement);
-    });
-  }
 
   /**
    * Get the label control of the settings.
