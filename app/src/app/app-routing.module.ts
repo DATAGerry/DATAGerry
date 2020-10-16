@@ -30,7 +30,7 @@ const routes: Routes = [
     data: {
       view: 'embedded'
     },
-    loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule)
+    loadChildren: () => import('./connect/connect.module').then(m => m.ConnectModule)
   },
   {
     path: 'auth',
