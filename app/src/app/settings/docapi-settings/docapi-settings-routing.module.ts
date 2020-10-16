@@ -25,6 +25,7 @@ import { DocapiSettingsEditComponent } from './docapi-settings-edit/docapi-setti
 const routes: Routes = [
   {
     path: '',
+    pathMatch: 'full',
     data: {
       breadcrumb: 'List'
     },

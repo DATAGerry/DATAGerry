@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import logging
-from typing import List
 
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
@@ -53,17 +52,57 @@ class SearcherFramework(Search[CmdbObjectManager]):
         plb = PipelineBuilder(pipeline)
 
         # define search output
-        stages: dict = {
-            'metadata': [PipelineBuilder.count_('total')],
-            'data': [
-                PipelineBuilder.skip_(skip),
-                PipelineBuilder.limit_(limit)
-            ],
+        stages: dict = {}
+        active = kwargs.get('active', True)
+
+        if kwargs.get('resolve', False):
+            plb.add_pipe(
+                plb.lookup_sub_(
+                    from_='framework.objects',
+                    let_={'ref_id': '$public_id'},
+                    pipeline_=[plb.match_({'$expr': {
+                        '$in': [
+                            '$$ref_id',
+                            '$fields.value'
+                        ]
+                    }})],
+                    as_='refs'
+                ))
+            if active:
+                active_pipe = [
+                    {'$match': {'active': {"$eq": True}}},
+                    {'$match': {'$expr': {'$in': ['$$ref_id', '$fields.value']}}}
+                ]
+            else:
+                active_pipe = [{'$match': {'$expr': {'$in': ['$$ref_id', '$fields.value']}}}]
+            plb.add_pipe(
+                plb.facet_({
+                    'root': [{'$replaceRoot': {'newRoot': {'$mergeObjects': ['$$ROOT']}}}],
+                    'references': [
+                        {'$lookup': {'from': 'framework.objects', 'let': {'ref_id': '$public_id'},
+                                     'pipeline': active_pipe,
+                                     'as': 'refs'}},
+                        {'$unwind': '$refs'},
+                        {'$replaceRoot': {'newRoot': '$refs'}}
+                    ]
+                })
+            )
+            plb.add_pipe(plb.project_(specification={'complete': {'$concatArrays': ['$root', '$references']}}))
+            plb.add_pipe(plb.unwind_(path='$complete'))
+            plb.add_pipe({'$replaceRoot': {'newRoot': '$complete'}})
+
+        stages.update({'metadata': [PipelineBuilder.count_('total')]})
+        stages.update({'data': [
+            PipelineBuilder.skip_(skip),
+            PipelineBuilder.limit_(limit)
+        ]})
+
+        group_stage: dict = {
             'group': [
                 PipelineBuilder.lookup_(TypeModel.COLLECTION, 'type_id', 'public_id', 'lookup_data'),
                 PipelineBuilder.unwind_('$lookup_data'),
-                PipelineBuilder.project_({'_id': 0, 'type_id': 1, 'label': "$lookup_data.label"}),
-                PipelineBuilder.group_("$$ROOT.type_id", {'types': {'$first': "$$ROOT"}, 'total': {'$sum': 1}}),
+                PipelineBuilder.project_({'_id': 0, 'type_id': 1, 'label': '$lookup_data.label'}),
+                PipelineBuilder.group_('$$ROOT.type_id', {'types': {'$first': '$$ROOT'}, 'total': {'$sum': 1}}),
                 PipelineBuilder.project_(
                     {'_id': 0,
                      'searchText': '$types.label',
@@ -72,13 +111,15 @@ class SearcherFramework(Search[CmdbObjectManager]):
                      'settings': {'types': ['$types.type_id']},
                      'total': 1
                      }),
-                PipelineBuilder.sort_("total", -1)
+                PipelineBuilder.sort_('total', -1)
             ]
         }
+        stages.update(group_stage)
         plb.add_pipe(PipelineBuilder.facet_(stages))
 
         raw_search_result = self.manager.aggregate(collection=CmdbObject.COLLECTION, pipeline=plb.pipeline)
         raw_search_result_list = list(raw_search_result)
+
         try:
             matches_regex = plb.get_regex_pipes_values()
         except Exception as err:
@@ -91,8 +132,10 @@ class SearcherFramework(Search[CmdbObjectManager]):
             pre_rendered_result_list = [CmdbObject(**raw_result) for raw_result in raw_search_result_list_entry['data']]
             rendered_result_list = RenderList(pre_rendered_result_list, request_user,
                                               object_manager=self.manager).render_result_list()
+
             total_results = raw_search_result_list_entry['metadata'][0].get('total', 0)
             group_result_list = raw_search_result_list[0]['group']
+
         else:
             rendered_result_list = []
             group_result_list = []

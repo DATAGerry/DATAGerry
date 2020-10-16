@@ -22,12 +22,14 @@ services:
 
   db:
     image: mongo:4.2-bionic
+    restart: unless-stopped
     volumes:
       - mongodb-data:/data/db
       - mongodb-config:/data/configdb
     
   broker:
     image: rabbitmq:3.8
+    restart: unless-stopped
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
 

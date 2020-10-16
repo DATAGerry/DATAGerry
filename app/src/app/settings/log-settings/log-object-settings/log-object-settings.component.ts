@@ -117,7 +117,7 @@ export class LogObjectSettingsComponent implements OnInit {
     deleteModalRef.componentInstance.publicID = publicID;
     deleteModalRef.result.then(result => {
         this.logService.deleteLog(result).subscribe(ack => {
-            this.toastService.show('Log was deleted!');
+            this.toastService.success('Log was deleted!');
           }, (error) => {
             console.error(error);
           },

@@ -1,10 +1,77 @@
-.toast{
-  max-width: 600px;
+
+
+.toast-container {
+  overflow: visible;
+  opacity: 1;
+  background: white;
+  pointer-events: all;
+  border: 0 solid;
+  border-left: 5px solid;
+  min-width: 350px;
+  max-width: 400px;
+  word-break: break-word;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  pointer-events: all;
+  border-radius: 5px;
 }
-:host {
+
+.fixed {
   position: fixed;
+  pointer-events: none;
+  margin: 1em;
+}
+
+.left {
+  left: 0;
+}
+
+.top {
   top: 0;
+}
+
+.bottom {
+  bottom: 0;
+}
+
+.right {
   right: 0;
-  margin: 0.5em;
-  z-index: 1200;
+}
+
+.center {
+  height: fit-content;
+  width: fit-content;
+  right: 45%;
+  left: 45%;
+  top: 45%;
+  bottom: 45%;
+}
+
+.icon-center {
+  position: absolute;
+  left: 5%;
+  top: 30%;
+}
+
+.meter {
+  height: 5px;
+  position: relative;
+  background: lightgray;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+}
+
+.progress {
+  background-color: gray;
+}
+
+
+@-webkit-keyframes progressBar {
+  0% { width: 0; }
+  100% { width: 100%; }
 }

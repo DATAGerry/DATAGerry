@@ -105,7 +105,11 @@ export class ObjectService<T = RenderResult> implements ApiService {
 
   // CRUD calls
   public postObject(objectInstance: CmdbObject): Observable<any> {
-    return this.api.callPost<CmdbObject>(this.servicePrefix + '/', objectInstance);
+    return this.api.callPost<CmdbObject>(this.servicePrefix + '/', objectInstance).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
   }
 
   public putObject(publicID: number, objectInstance: CmdbObject, options?): Observable<any> {

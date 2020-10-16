@@ -16,10 +16,10 @@
 from typing import Union, List
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
-from cmdb.framework.cmdb_dao import CmdbDAO
-from cmdb.framework.managers import ManagerBase, ManagerGetError, ManagerDeleteError
+from cmdb.manager.errors import ManagerGetError, ManagerDeleteError
+from cmdb.manager import ManagerBase
 from cmdb.framework.managers.error.framework_errors import FrameworkGetError, FrameworkNotFoundError, \
-    FrameworkIterationError, FrameworkQueryEmptyError, FrameworkDeleteError, FrameworkUpdateError
+    FrameworkIterationError, FrameworkDeleteError, FrameworkUpdateError
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.utils import PublicID, Collection
 from cmdb.search import Query, Pipeline
@@ -95,78 +95,16 @@ class FrameworkManager(ManagerBase):
         super(FrameworkManager, self).__init__(database_manager)
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult:
-        """
-        Get multi elements from a collection by passed parameters.
-
-        Notes:
-            If you want to get all elements in a collection, just pass a empty dict as filter.
-
-        Args:
-            filter: match requirements of field values
-            limit: max number of elements to return
-            skip: number of elements to skip first
-            sort: sort field
-            order: sort order
-            *args:
-            **kwargs:
-
-        Returns:
-            IterationResult
-
-        Raises:
-            FrameworkIterationError - if something happens during the database aggregation.
-        """
-        try:
-            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-            aggregation_result = next(super(FrameworkManager, self)._aggregate(self.collection, query))
-        except ManagerGetError as err:
-            raise FrameworkIterationError(err=err)
-        return IterationResult.from_aggregation(aggregation_result)
-
-    def get_many(self, *args, **kwarg) -> List[dict]:
-        try:
-            cursor_result = super(FrameworkManager, self)._get(self.collection, *args, **kwarg)
-        except ManagerGetError as err:
-            raise FrameworkGetError(err)
-        return list(cursor_result)
+        raise NotImplementedError
 
     def get(self, public_id: PublicID) -> dict:
-        """
-        Get a single framework resource by its id.
-        Args:
-            public_id: ID of the element inside the database.
-
-        Returns:
-            Raw result of the element.
-
-        Raises:
-            - FrameworkGetError if something breaks with loading the resource from the database.
-            - FrameworkNotFoundError if the PublicID is not in the selected database collection.
-        """
-        try:
-            cursor_result = super(FrameworkManager, self)._get(self.collection, filter={'public_id': public_id},
-                                                               limit=1)
-        except ManagerGetError as err:
-            raise FrameworkGetError(err)
-        for resource_result in cursor_result.limit(-1):
-            return resource_result
-        else:
-            raise FrameworkNotFoundError(
-                f'A resource with the PublicID {public_id} was not found inside {self.collection}')
+        raise NotImplementedError
 
     def insert(self, resource: dict) -> PublicID:
-        return super(FrameworkManager, self)._insert(self.collection, resource)
+        raise NotImplementedError
 
     def update(self, public_id: PublicID, resource: dict):
-        update_result = super(FrameworkManager, self)._update(self.collection, filter={'public_id': public_id},
-                                                              data=resource, upsert=False)
-        if update_result.matched_count != 1:
-            raise FrameworkUpdateError(f'Something happened during the update!')
-        return update_result
+        raise NotImplementedError
 
     def delete(self, public_id: PublicID):
-        try:
-            delete_result = super(FrameworkManager, self)._delete(self.collection, public_id=public_id)
-        except ManagerDeleteError as err:
-            raise FrameworkDeleteError(err=err)
-        return delete_result
+        raise NotImplementedError

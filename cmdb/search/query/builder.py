@@ -159,6 +159,18 @@ class Builder:
         return {'$lookup': {'from': _from, 'localField': _local, 'foreignField': _foreign, 'as': _as}}
 
     @classmethod
+    def lookup_sub_(cls, from_: str, let_: dict, pipeline_: list, as_: str) -> dict:
+        """ Performs uncorrelated subqueries between two collections as well as allow other join conditions besides a
+            single equality match, the $lookup stage has the following syntax.
+            Args:
+                from_:      Specifies the collection in the same database to perform the join with.
+                let_:       Optional. Specifies variables to use in the pipeline field stages.
+                pipeline_:  The pipeline determines the resulting documents from the joined collection.
+                as_:        Specifies the name of the new array field to add to the input documents.
+            """
+        return {'$lookup': {'from': from_, 'let': let_, 'pipeline': pipeline_, 'as': as_}}
+
+    @classmethod
     def unwind_(cls, path: str):
         """Duplicates each document in the pipeline, once per array element."""
         return {'$unwind': path}

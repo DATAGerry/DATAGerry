@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 from typing import Union
 
-from cmdb.framework.managers import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
+from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
 
 
 class FrameworkGetError(ManagerGetError):

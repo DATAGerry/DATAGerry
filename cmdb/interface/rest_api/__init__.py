@@ -41,21 +41,6 @@ def create_rest_api(event_queue):
     from cmdb.utils.system_config import SystemConfigReader
     system_config_reader = SystemConfigReader()
 
-    try:
-        cache_config = {
-            'DEBUG': True,
-            'CACHE_TYPE': system_config_reader.get_value('name', 'Cache'),
-            'CACHE_REDIS_HOST': system_config_reader.get_value('host', 'Cache'),
-            'CACHE_REDIS_PORT': system_config_reader.get_value('port', 'Cache'),
-            'CACHE_REDIS_PASSWORD': system_config_reader.get_value('password', 'Cache'),
-        }
-    except (ImportError, CMDBError) as e:
-        LOGGER.debug(e.message)
-        cache_config = {'CACHE_TYPE': 'simple'}
-    from flask_caching import Cache
-
-    cache = Cache(config=cache_config)
-
     # Create managers
     from cmdb.data_storage.database_manager import DatabaseManagerMongo
     app_database = DatabaseManagerMongo(
@@ -109,19 +94,16 @@ def create_rest_api(event_queue):
     # Import App Extensions
     from flask_cors import CORS
     CORS(app, expose_headers=['X-API-Version', 'X-Total-Count'])
-    import cmdb
-    cache.init_app(app)
-    cache.clear()
-    app.cache = cache
 
+    import cmdb
     if cmdb.__MODE__ == 'DEBUG':
-        app.config.from_object(app_config['rest_development'])
-        LOGGER.info('RestAPI starting with config mode {}'.format(app.config.get("ENV")))
-    elif cmdb.__MODE__ == 'TESTING':
-        app.config.from_object(app_config['testing'])
+        config = app_config['development']
+        config.APPLICATION_ROOT = '/rest/'
+        app.config.from_object(config)
     else:
-        app.config.from_object(app_config['rest'])
-        LOGGER.info('RestAPI starting with config mode {}'.format(app.config.get("ENV")))
+        config = app_config['production']
+        config.APPLICATION_ROOT = '/rest/'
+        app.config.from_object(config)
 
     with app.app_context():
         register_converters(app)

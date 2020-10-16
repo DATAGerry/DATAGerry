@@ -70,7 +70,7 @@ export class UsersDeleteComponent implements OnInit, OnDestroy {
   public onDelete(): void {
     this.userDeleteObserver = this.userService.deleteUser(this.userID);
     this.userDeleteSubscription = this.userDeleteObserver.subscribe((ack: boolean) => {
-        this.toast.show('User was deleted');
+        this.toast.success('User was deleted');
       },
       (error) => {
         this.toast.error(error.error.description);

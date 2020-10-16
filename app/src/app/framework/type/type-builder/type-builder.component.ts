@@ -29,6 +29,8 @@ import { Router } from '@angular/router';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { CmdbCategory } from '../../models/cmdb-category';
 import { SidebarService } from '../../../layout/services/sidebar.service';
+import { HttpHeaders } from '@angular/common/http';
+import { resp } from '../../../services/api-call.service';
 
 @Component({
   selector: 'cmdb-type-builder',
@@ -38,6 +40,13 @@ import { SidebarService } from '../../../layout/services/sidebar.service';
 export class TypeBuilderComponent implements OnInit {
 
 
+  private readonly httpObserveOptions = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    }),
+    params: {},
+    observe: resp
+  };
   @Input() public typeInstance?: CmdbType;
   @Input() public mode: number = CmdbMode.Create;
   public modes = CmdbMode;
@@ -121,7 +130,7 @@ export class TypeBuilderComponent implements OnInit {
           console.error(error);
         });
     } else if (this.mode === CmdbMode.Edit) {
-
+      this.typeInstance.creation_time = this.typeInstance.creation_time.$date;
       this.typeService.putType(this.typeInstance).subscribe((updateResp: CmdbType) => {
           if (this.basicStep.originalCategoryID !== this.selectedCategoryID) {
             this.categoryService.getCategory(this.basicStep.originalCategoryID).subscribe((category: CmdbCategory) => {
@@ -141,7 +150,7 @@ export class TypeBuilderComponent implements OnInit {
             });
           }
           this.sidebarService.reload();
-          this.toast.show(`Type was successfully edit: TypeID: ${ updateResp.public_id }`);
+          this.toast.success(`Type was successfully edited: TypeID: ${ updateResp.public_id }`);
           this.router.navigate(['/framework/type/'], { queryParams: { typeEditSuccess: updateResp.public_id } });
         },
         (error) => {
