@@ -19,20 +19,16 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { DashboardComponent } from './dashboard.component';
-import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
-import { AuthGuard } from '../auth/guards/auth.guard';
 
 const routes: Routes = [
   {
     path: '',
-    pathMatch: 'full',
-    canActivate: [AuthGuard],
     component: DashboardComponent
   },
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
+  imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
 export class DashboardRoutingModule {

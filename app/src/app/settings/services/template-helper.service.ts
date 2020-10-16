@@ -40,13 +40,23 @@ export class TemplateHelperService {
             const changedPrefix = (prefix ? prefix + '[\'fields\'][\'' + field.name + '\']' : '[\'' + field.name + '\']');
             let subdata;
 
-            if (isNaN(field.ref_types)) {
-              await this.getObjectTemplateHelperData(field.ref_types, changedPrefix, iteration).then(data => {
+            if (!isNaN(field.ref_types) && !Array.isArray(field.ref_types)) {
+              await this.getObjectTemplateHelperData(field.ref_types, changedPrefix, iteration - 1).then(data => {
                 subdata = data;
               });
             } else if (field.ref_types.length === 1) {
-              await this.getObjectTemplateHelperData(field.ref_types[0], changedPrefix, iteration).then(data => {
+              await this.getObjectTemplateHelperData(field.ref_types[0], changedPrefix, iteration - 1).then(data => {
                 subdata = data;
+              });
+            } else {
+              subdata = [];
+              await field.ref_types.forEach((type) => {
+                this.getObjectTemplateHelperData(type , changedPrefix, iteration - 1).then( data => {
+                  subdata.push(({
+                    label: 'ref_type ' + type,
+                    subdata: data
+                  }));
+                });
               });
             }
 
@@ -65,7 +75,6 @@ export class TemplateHelperService {
       (error) => {
         console.error(error);
       });
-
     return templateHelperData;
   }
 }

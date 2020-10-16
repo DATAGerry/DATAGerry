@@ -19,14 +19,10 @@
 import { Injectable } from '@angular/core';
 import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { AuthService } from '../services/auth.service';
 import { User } from '../../management/models/user';
 
 @Injectable()
 export class BasicAuthInterceptor implements HttpInterceptor {
-
-  constructor() {
-  }
 
   public intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const currentUser = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('current-user'))).value;

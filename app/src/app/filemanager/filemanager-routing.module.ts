@@ -18,7 +18,6 @@
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { LAYOUT_COMPONENT_ROUTES } from '../layout/layout.module';
 import { FilemanagerComponent } from './filemanager.component';
 
 const routes: Routes = [
@@ -41,7 +40,7 @@ const routes: Routes = [
 
 @NgModule({
   declarations: [],
-  imports: [RouterModule.forChild(routes), RouterModule.forChild(LAYOUT_COMPONENT_ROUTES)],
+  imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
 export class FilemanagerRoutingModule { }

@@ -13,18 +13,21 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+import csv
+import io
+import json
+import re
+import tempfile
+import xml.dom.minidom
+import xml.etree.ElementTree as ET
+import zipfile
+import openpyxl
+from cmdb.utils.helpers import load_class
+
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.utils import json_encoding
-import csv
-import io
-import openpyxl
-import tempfile
-import json
-import re
-import xml.etree.ElementTree as ET
-import xml.dom.minidom
-
 from cmdb.utils.system_config import SystemConfigReader
 
 object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
@@ -43,11 +46,70 @@ class ExportType:
     def __init__(self):
         pass
 
-    def export(self, object_list):
+    def export(self, object_list, *args):
         pass
 
 
+class ZipExportType(ExportType):
+
+    FILE_EXTENSION = "zip"
+    LABEL = "ZIP"
+    MULTITYPE_SUPPORT = True
+    ICON = "file-archive"
+    DESCRIPTION = "Export Zipped Files"
+    ACTIVE = True
+
+    def export(self, object_list, *args):
+
+        """
+        Export a zip file, containing the object list sorted by type in several files.
+
+        Args:
+            object_list: List of objects to be exported
+            args: the filetype with which the objects are stored
+
+        Returns:
+            zip file containing object files separated by types
+        """
+
+        # check what export type is requested and intitializes a new zip file in memory
+        export_type = load_class("cmdb.file_export.export_types." + args[0])()
+        zipped_file = io.BytesIO()
+
+        # Build .zip file
+        with zipfile.ZipFile(zipped_file, "a", zipfile.ZIP_DEFLATED, False) as f:
+
+            # Enters loop until the object list is empty
+            while len(object_list) > 0:
+
+                # Set what type the loop filters to and makes an empty list
+                type_id = object_list[len(object_list) - 1].type_id
+                type_name = object_manager.get_type(type_id).get_name()
+                type_list = []
+
+                # Filters object list to the current type_id and inserts it into type_list
+                # When an object is inserted into type_list it gets deleted from object_list
+                for i in range(len(object_list) - 1, -1, -1):
+                    if object_list[i].type_id == type_id:
+                        type_list.append(object_list[i])
+                        del object_list[i]
+
+                # Runs the requested export function and returns the output in the export variable
+                export = export_type.export(type_list)
+
+                # check if export output is a string, bytes or a file and inserts it into the zip file
+                if isinstance(export, str) or isinstance(export, bytes):
+                    f.writestr((type_name + "_ID_" + str(type_id) + "." + export_type.FILE_EXTENSION).format(i), export)
+                else:
+                    f.writestr((type_name + "_ID_" + str(type_id) + "." + export_type.FILE_EXTENSION).format(i), export.getvalue())
+
+        # returns zipped file
+        zipped_file.seek(0)
+        return zipped_file
+
+
 class CsvExportType(ExportType):
+
     FILE_EXTENSION = "csv"
     LABEL = "CSV"
     MULTITYPE_SUPPORT = False
@@ -55,10 +117,18 @@ class CsvExportType(ExportType):
     DESCRIPTION = "Export as CSV (only of the same type)"
     ACTIVE = True
 
-    def __init__(self):
-        pass
+    def export(self, object_list, *args):
 
-    def export(self, object_list):
+        """ Exports object_list as .csv file
+
+        Args:
+            object_list: The objects to be exported
+            args:
+
+        Returns:
+            Csv file containing the object_list
+        """
+
         header = ['public_id', 'active']
         rows = []
         row = {}
@@ -84,6 +154,7 @@ class CsvExportType(ExportType):
         return self.csv_writer(header, rows)
 
     def csv_writer(self, header, rows, dialect=csv.excel):
+
         csv_file = io.StringIO()
         writer = csv.DictWriter(csv_file, fieldnames=header, dialect=dialect)
         writer.writeheader()
@@ -94,6 +165,7 @@ class CsvExportType(ExportType):
 
 
 class JsonExportType(ExportType):
+
     FILE_EXTENSION = "json"
     LABEL = "JSON"
     MULTITYPE_SUPPORT = True
@@ -101,7 +173,18 @@ class JsonExportType(ExportType):
     DESCRIPTION = "Export as JSON"
     ACTIVE = True
 
-    def export(self, object_list):
+    def export(self, object_list, *args):
+
+        """Exports object_list as .json file
+
+        Args:
+            object_list: The objects to be exported
+            args:
+
+        Returns:
+            Json file containing the object_list
+        """
+
         s_keys = ['public_id', 'active', 'type_id', 'fields']
         filter_dict = []
 
@@ -120,6 +203,7 @@ class JsonExportType(ExportType):
 
 
 class XlsxExportType(ExportType):
+
     FILE_EXTENSION = "xlsx"
     LABEL = "XLSX"
     MULTITYPE_SUPPORT = True
@@ -127,7 +211,18 @@ class XlsxExportType(ExportType):
     DESCRIPTION = "Export as XLS"
     ACTIVE = True
 
-    def export(self, object_list):
+    def export(self, object_list, *args):
+
+        """Exports object_list as .xlsx file
+
+        Args:
+            object_list: The objects to be exported
+            args:
+
+        Returns:
+            Xlsx file containing the object_list
+        """
+
         workbook = self.create_xls_object(object_list)
 
         # save workbook
@@ -137,6 +232,7 @@ class XlsxExportType(ExportType):
             return tmp.read()
 
     def create_xls_object(self, object_list):
+
         # create workbook
         workbook = openpyxl.Workbook()
 
@@ -203,6 +299,7 @@ class XlsxExportType(ExportType):
 
 
 class XmlExportType(ExportType):
+
     FILE_EXTENSION = "xml"
     LABEL = "XML"
     MULTITYPE_SUPPORT = True
@@ -210,14 +307,25 @@ class XmlExportType(ExportType):
     DESCRIPTION = "Export as XML"
     ACTIVE = True
 
-    def export(self, object_list):
-        return self.parse_to_xml(json.loads(json.dumps(object_list, default=json_encoding.default, indent=2)))
+    def export(self, object_list, *args):
 
-    def parse_to_xml(self, json_obj):
+        """Exports object_list as .xml file
+
+        Args:
+            object_list: The objects to be exported
+            args:
+
+        Returns:
+            Xml file containing the object_list
+        """
+
         # object list
         cmdb_object_list = ET.Element('objects')
 
-        # objects
+        # parse objects to JSON
+        json_obj = json.loads(json.dumps(object_list, default=json_encoding.default, indent=2))
+
+        # parse objects to XML
         for obj in json_obj:
             # object
             cmdb_object = ET.SubElement(cmdb_object_list, 'object')

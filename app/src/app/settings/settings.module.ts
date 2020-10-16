@@ -31,8 +31,7 @@ import { AuthModule } from '../auth/auth.module';
   imports: [
     CommonModule,
     LayoutModule,
-    SettingsRoutingModule,
-    AuthModule
+    SettingsRoutingModule
   ]
 })
 export class SettingsModule {

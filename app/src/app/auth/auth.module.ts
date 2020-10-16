@@ -21,7 +21,6 @@ import { CommonModule } from '@angular/common';
 import { LoginComponent } from './login.component';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { AuthRoutingModule } from './auth-routing.module';
 import { InlineSVGModule } from 'ng-inline-svg';
 import { PermissionLinkDirective } from './directives/permission-link.directive';
 import { PermissionGuard } from './guards/permission.guard';
@@ -35,7 +34,6 @@ import { PermissionGuard } from './guards/permission.guard';
     CommonModule,
     FormsModule,
     RouterModule,
-    AuthRoutingModule,
     ReactiveFormsModule,
     InlineSVGModule,
   ],

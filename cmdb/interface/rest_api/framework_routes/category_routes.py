@@ -20,9 +20,9 @@ from datetime import datetime
 from flask import abort, current_app, request
 
 from cmdb.framework.models.category import CategoryModel, CategoryTree
-from cmdb.framework.managers import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerUpdateError
+from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerUpdateError, \
+    ManagerIterationError
 from cmdb.framework.managers.category_manager import CategoryManager
-from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.interface.api_parameters import CollectionParameters
@@ -73,7 +73,7 @@ def get_categories(params: CollectionParameters):
             category_list = [CategoryModel.to_json(category) for category in iteration_result.results]
             api_response = GetMultiResponse(category_list, total=iteration_result.total, params=params,
                                             url=request.url, model=CategoryModel.MODEL, body=body)
-    except FrameworkIterationError as err:
+    except ManagerIterationError as err:
         return abort(400, err.message)
     except ManagerGetError as err:
         return abort(404, err.message)

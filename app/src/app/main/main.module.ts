@@ -17,21 +17,26 @@
 */
 
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { LoginComponent } from './login.component';
+import { CommonModule } from '@angular/common';
 
-
-const routes: Routes = [
-  {
-    path: 'login',
-    component: LoginComponent
-  }
-];
+import { MainRoutingModule } from './main-routing.module';
+import { FileSaverModule } from 'ngx-filesaver';
+import { LayoutModule } from '../layout/layout.module';
+import { ToastModule } from '../layout/toast/toast.module';
+import { DashboardModule } from '../dashboard/dashboard.module';
 
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  declarations: [],
+  exports: [],
+  imports: [
+    CommonModule,
+    MainRoutingModule,
+    DashboardModule,
+    LayoutModule,
+    FileSaverModule,
+    ToastModule
+  ]
 })
-export class AuthRoutingModule {
+export class MainModule {
 }

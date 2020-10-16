@@ -37,7 +37,6 @@ import { UserImageComponent } from './components/user-image/user-image.component
 import { UserDisplayComponent } from './components/user-display/user-display.component';
 import { ChartsComponent } from './components/charts/charts.component';
 import { NgxSpinnerComponent, NgxSpinnerModule } from 'ngx-spinner';
-import { LoadingScreenComponent } from './structure/loading-screen/loading-screen.component';
 import { IntroComponent } from './intro/intro.component';
 import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-step-intro.component';
 import { JwPaginationComponent } from 'jw-angular-pagination';
@@ -92,35 +91,6 @@ import { NameGuidePipe } from './pipes/name-guide.pipe';
 import { FileExtensionPipe } from './pipes/file-extension.pipe';
 import { CategoryTreeFilterPipe } from './pipes/categoryTreeFilter.pipe';
 import { TypeFilterPipe } from './pipes/typeFilter.pipe';
-import {ObjectModule} from "../framework/object/object.module";
-
-export const LAYOUT_COMPONENT_ROUTES: Routes = [
-  {
-    path: '',
-    component: NavigationComponent,
-    outlet: 'navigation'
-  },
-  {
-    path: '',
-    component: SidebarComponent,
-    outlet: 'sidebar'
-  },
-  {
-    path: '',
-    component: BreadcrumbComponent,
-    outlet: 'breadcrumb'
-  },
-  {
-    path: '',
-    component: LoadingScreenComponent,
-    outlet: 'loading-screen'
-  },
-  {
-    path: '',
-    component: FooterComponent,
-    outlet: 'footer'
-  }
-];
 
 @NgModule({
   declarations: [
@@ -140,7 +110,6 @@ export const LAYOUT_COMPONENT_ROUTES: Routes = [
     UserImageComponent,
     UserDisplayComponent,
     ChartsComponent,
-    LoadingScreenComponent,
     StepByStepIntroComponent,
     JwPaginationComponent,
     NameDirective,

@@ -14,9 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
+import logging, json
 
-from flask import abort, jsonify
+from flask import abort, jsonify, request
 from cmdb.framework.cmdb_errors import TypeNotFoundError
 from cmdb.file_export.file_exporter import FileExporter
 from cmdb.interface.route_utils import make_response, login_required
@@ -34,31 +34,40 @@ file_blueprint = RootBlueprint('file_rest', __name__, url_prefix='/file')
 
 @file_blueprint.route('/', methods=['GET'])
 @login_required
-def get_filetypes():
-    filetypes = FileExporter.get_filetypes()
-    filetype_list = []
-    for filetype in filetypes:
-        filetype_class = load_class('cmdb.file_export.export_types.' + filetype)
-        filetype_properties = {
-                'id': filetype,
-                'label': filetype_class.LABEL,
-                'icon': filetype_class.ICON,
-                'multiTypeSupport': filetype_class.MULTITYPE_SUPPORT,
-                'helperText': filetype_class.DESCRIPTION,
-                'active': filetype_class.ACTIVE
+def get_export_file_types():
+    _types = FileExporter.get_type_list()
+    _list = []
+
+    for type_element in _types:
+        type_element_class = load_class('cmdb.file_export.export_types.' + type_element)
+        type_element_properties = {
+                'id': type_element,
+                'label': type_element_class.LABEL,
+                'icon': type_element_class.ICON,
+                'multiTypeSupport': type_element_class.MULTITYPE_SUPPORT,
+                'helperText': type_element_class.DESCRIPTION,
+                'active': type_element_class.ACTIVE
         }
-        filetype_list.append(filetype_properties)
+        _list.append(type_element_properties)
 
-    return make_response(filetype_list)
+    return make_response(_list)
 
 
-@file_blueprint.route('/object/<string:public_ids>/<string:export_class>', methods=['GET'])
+@file_blueprint.route('/object/', methods=['GET'])
 @login_required
-def export_file(public_ids, export_class):
+def export_file():
     try:
-        export_type_class = load_class('cmdb.file_export.export_types.' + export_class)
-        export_type = export_type_class()
-        file_export = FileExporter('object', export_type, public_ids)
+        _object_ids = request.args.get('ids', [])
+        _class = request.args.get('classname', '')
+        _zipping = request.args.get('zip')
+
+        if _zipping:
+            export_type_class = load_class('cmdb.file_export.export_types.' + 'ZipExportType')()
+            file_export = FileExporter('object', export_type_class, _object_ids, _class)
+        else:
+            export_type_class = load_class('cmdb.file_export.export_types.' + _class)()
+            file_export = FileExporter('object', export_type_class, _object_ids)
+
     except TypeNotFoundError as e:
         return abort(400, e.message)
     except ModuleNotFoundError as e:

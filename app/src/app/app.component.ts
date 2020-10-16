@@ -16,12 +16,40 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { AuthService } from './auth/services/auth.service';
+import { ActivatedRoute, ActivationStart, Event, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { NavigationComponent } from './layout/structure/navigation/navigation.component';
+
+declare type AppView = 'full' | 'embedded';
+
 
 @Component({
   selector: 'cmdb-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+
+  public readonly defaultView: AppView = 'full';
+  public view: AppView;
+
+  constructor(private router: Router, private route: ActivatedRoute) {
+    this.view = this.defaultView;
+  }
+
+  public ngOnInit(): void {
+    this.router.events.subscribe((e: Event) => {
+      if (e instanceof NavigationEnd) {
+        this.route.url.subscribe(() => {
+          if (this.route.snapshot.firstChild.data.view) {
+            this.view = this.route.snapshot.firstChild.data.view;
+          } else {
+            this.view = this.defaultView;
+          }
+        });
+      }
+    });
+  }
+
 }

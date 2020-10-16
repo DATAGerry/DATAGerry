@@ -87,7 +87,7 @@
           <div class="dropdown-menu dropdown-menu-right">
             <div class="dropdown-header" *permissionLink="['base.docapi.template.view']">DocAPI</div>
             <a class="dropdown-item" *permissionLink="['base.docapi.template.view']"
-              routerLink="/settings/docapi">
+              [routerLink]="['/settings/docapi']">
               <fa-icon icon="file-pdf"></fa-icon>
               Document Templates</a>
           </div>

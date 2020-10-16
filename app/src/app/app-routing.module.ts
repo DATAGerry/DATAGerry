@@ -16,116 +16,38 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule, isDevMode } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { AuthGuard } from './auth/guards/auth.guard';
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
+import { LoginComponent } from './auth/login.component';
 
 const routes: Routes = [
   {
     path: '',
-    pathMatch: 'full',
-    canActivateChild: [AuthGuard],
-    data: {
-      breadcrumb: 'Dashboard'
-    },
-    loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
+    loadChildren: () => import('./main/main.module').then(m => m.MainModule)
   },
   {
     path: 'connect',
-    loadChildren: () => import('./connect/connect.module').then(m => m.ConnectModule)
-  },
-  {
-    path: 'auth',
-    loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
-  },
-  {
-    path: 'error',
-    canActivate: [AuthGuard],
     data: {
-      breadcrumb: 'Error'
-    },
-    loadChildren: () => import('./error/error.module').then(m => m.ErrorModule)
-  },
-  {
-    path: 'search',
-    canActivate: [AuthGuard],
-    data: {
-      breadcrumb: 'Search'
-    },
-    loadChildren: () => import('./search/search.module').then(m => m.SearchModule)
-  },
-  {
-    path: 'framework',
-    canActivate: [AuthGuard],
-    data: {
-      breadcrumb: 'Framework'
-    },
-    loadChildren: () => import('./framework/framework.module').then(m => m.FrameworkModule)
-  },
-  {
-    path: 'import',
-    canActivate: [AuthGuard],
-    data: {
-      breadcrumb: 'Import'
-    },
-    loadChildren: () => import('./import/import.module').then(m => m.ImportModule)
-  },
-  {
-    path: 'export',
-    canActivate: [AuthGuard],
-    data: {
-      breadcrumb: 'Export'
-    },
-    loadChildren: () => import('./export/export.module').then(m => m.ExportModule)
-  },
-  {
-    path: 'management',
-    canActivate: [AuthGuard],
-    data: {
-      breadcrumb: 'User-Management'
-    },
-    loadChildren: () => import('./management/management.module').then(m => m.ManagementModule),
-  },
-  {
-    path: 'settings',
-    canActivate: [AuthGuard],
-    data: {
-      breadcrumb: 'Settings'
+      view: 'embedded'
     },
     loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule)
   },
   {
-    path: 'info',
-    canActivate: [AuthGuard],
+    path: 'auth',
     data: {
-      breadcrumb: 'Info'
+      view: 'embedded'
     },
-    loadChildren: () => import('./info/info.module').then(m => m.InfoModule)
-  },
-  {
-    path: 'filemanager',
-    canActivate: [AuthGuard],
-    data: {
-      breadcrumb: 'Filemanager'
-    },
-    loadChildren: () => import('./filemanager/filemanager.module').then(m => m.FilemanagerModule)
-  },
-  {
-    path: 'debug',
-    canActivate: [AuthGuard],
-    data: {
-      breadcrumb: 'Debug'
-    },
-    loadChildren: () => import('./debug/debug.module').then(m => m.DebugModule)
+    component: LoginComponent
   },
   {
     path: '**',
-    redirectTo: '/error/404'
+    redirectTo: 'error/404'
   }
 ];
 
+
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules, enableTracing: false })],
   exports: [RouterModule]
 })
 export class AppRoutingModule {

@@ -17,11 +17,20 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService, httpFileOptions, resp } from '../services/api-call.service';
+import { ApiCallService, ApiService } from '../services/api-call.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { HttpHeaders, HttpParams } from '@angular/common/http';
-import { ImporterConfig, ImporterFile } from './import-objects/import-object.models';
+import { HttpHeaders } from '@angular/common/http';
+import { ImporterConfig } from './import-objects/import-object.models';
+
+declare type HttpObserve = 'body' | 'events' | 'response';
+export const resp: HttpObserve = 'response';
+
+export const httpImportFileOptions = {
+  headers: new HttpHeaders({}),
+  params: {},
+  observe: resp
+};
 
 @Injectable({
   providedIn: 'root'
@@ -41,7 +50,7 @@ export class ImportService implements ApiService {
     formData.append('file_format', fileFormat);
     formData.append('parser_config', JSON.stringify(parserConfig));
     formData.append('importer_config', JSON.stringify(importerConfig));
-    return this.api.callPost<any>(`${ this.servicePrefix }/${ this.objectPrefix }/`, formData, httpFileOptions).pipe(
+    return this.api.callPost<any>(`${ this.servicePrefix }/${ this.objectPrefix }/`, formData, httpImportFileOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -53,8 +62,9 @@ export class ImportService implements ApiService {
     formData.append('file', file, file.name);
     formData.append('file_format', fileFormat);
     formData.append('parser_config', JSON.stringify(parserConfig));
-    return this.api.callPost<any>(`${ this.servicePrefix }/${ this.objectPrefix }/parse/`, formData, httpFileOptions).pipe(
+    return this.api.callPost<any>(`${ this.servicePrefix }/${ this.objectPrefix }/parse/`, formData, httpImportFileOptions).pipe(
       map((apiResponse) => {
+        console.log(apiResponse);
         return apiResponse.body;
       })
     );
@@ -94,7 +104,7 @@ export class ImportService implements ApiService {
   }
 
   public postUpdateTypeParser(formData: FormData): Observable<any> {
-    return this.api.callPost<any>(`${ this.servicePrefix }/${ this.typePrefix }/update/`, formData, httpFileOptions).pipe(
+    return this.api.callPost<any>(`${ this.servicePrefix }/${ this.typePrefix }/update/`, formData, httpImportFileOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -102,7 +112,7 @@ export class ImportService implements ApiService {
   }
 
   public postCreateTypeParser(formData: FormData): Observable<any> {
-    return this.api.callPost<any>(`${ this.servicePrefix }/${ this.typePrefix }/create/`, formData, httpFileOptions).pipe(
+    return this.api.callPost<any>(`${ this.servicePrefix }/${ this.typePrefix }/create/`, formData, httpImportFileOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
