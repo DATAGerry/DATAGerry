@@ -96,13 +96,7 @@ class GroupManager(AccountManager):
         Args:
             public_id (int): PublicID of the user in the system.
             group (UserGroupModel): Instance of UserGroupModel
-
-        Notes:
-            If a CategoryModel instance was passed as type argument, \
-            it will be auto converted via the model `to_dict` method.
         """
-        if isinstance(group, UserGroupModel):
-            group = UserGroupModel.to_dict(group)
 
         update_result = self._update(self.collection, filter={'public_id': public_id}, resource=group)
         if update_result.matched_count != 1:

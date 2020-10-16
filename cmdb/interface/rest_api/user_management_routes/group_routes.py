@@ -155,8 +155,10 @@ def update_group(public_id: int, data: dict):
                                                right_manager=RightManager(rights))
     try:
         group = UserGroupModel.from_data(data=data, rights=RightManager(rights).rights)
-        group_manager.update(public_id=PublicID(public_id), group=group)
-        api_response = UpdateSingleResponse(result=UserGroupModel.to_dict(group), url=request.url,
+        group_dict = UserGroupModel.to_dict(group)
+        group_dict['rights'] = [right.get('name') for right in group_dict.get('rights', [])]
+        group_manager.update(public_id=PublicID(public_id), group=group_dict)
+        api_response = UpdateSingleResponse(result=group_dict, url=request.url,
                                             model=UserGroupModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err.message)
