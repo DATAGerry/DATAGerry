@@ -48,7 +48,7 @@ class MediaFile(MediaFileManagementBase):
             variables: has a name and gets its value out of fields of the objects
             **kwargs: optional params
         """
-        self.name = filename
+        self.filename = filename
         self.chunk_size = chunkSize
         self.upload_date = uploadDate
         self.metadata = metadata
@@ -76,16 +76,16 @@ class MediaFile(MediaFileManagementBase):
             raise NoPublicIDError()
         return self.public_id
 
-    def get_name(self) -> str:
+    def get_filename(self) -> str:
         """
         Get the name of file
         Returns:
             str: display filename
         """
-        if self.name is None:
+        if self.filename is None:
             return ""
         else:
-            return self.name
+            return self.filename
 
     def get_chunk_size(self) -> bytes:
         """

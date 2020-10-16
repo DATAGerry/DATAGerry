@@ -95,8 +95,9 @@ import { ObjectAttachmentsComponent } from './components/object-attachments/obje
     ObjectDocsComponent,
     ObjectAttachmentsComponent,
   ],
-  exports: [
-  ],
+    exports: [
+        ObjectViewRenderComponent
+    ],
   imports: [
     CommonModule,
     ObjectRoutingModule,

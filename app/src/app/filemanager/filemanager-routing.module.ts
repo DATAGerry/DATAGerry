@@ -17,38 +17,30 @@
 */
 
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
-import { LoginComponent } from './auth/login.component';
+import { Routes, RouterModule } from '@angular/router';
+import { FilemanagerComponent } from './filemanager.component';
 
 const routes: Routes = [
   {
     path: '',
-    loadChildren: () => import('./main/main.module').then(m => m.MainModule)
-  },
-  {
-    path: 'connect',
+    pathMatch: 'full',
     data: {
-      view: 'embedded'
+      breadcrumb: 'Explorer'
     },
-    loadChildren: () => import('./settings/settings.module').then(m => m.SettingsModule)
+    component: FilemanagerComponent
   },
   {
-    path: 'auth',
+    path: 'explorer',
     data: {
-      view: 'embedded'
+      breadcrumb: 'Explorer'
     },
-    component: LoginComponent
-  },
-  {
-    path: '**',
-    redirectTo: 'error/404'
+    component: FilemanagerComponent
   }
 ];
 
-
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules, enableTracing: false })],
+  declarations: [],
+  imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class AppRoutingModule {
-}
+export class FilemanagerRoutingModule { }

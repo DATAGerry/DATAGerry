@@ -20,6 +20,8 @@ import logging
 from flask import request, abort
 from werkzeug.datastructures import FileStorage
 from werkzeug.wrappers import Request
+from cmdb.search.query.builder import Builder
+from cmdb.interface.api_parameters import CollectionParameters
 
 LOGGER = logging.getLogger(__name__)
 
@@ -40,32 +42,97 @@ def get_element_from_data_request(element, _request: Request) -> (dict, None):
         return None
 
 
-def generate_metadata_filter(element, _request):
+def generate_metadata_filter(element, _request=None, params=None):
     filter_metadata = {}
     try:
-        if _request.args.get(element):
-            data = json.loads(_request.args.get(element))
-        else:
-            data = json.loads(_request.form.to_dict()[element])
-
+        data = params
+        if _request:
+            if _request.args.get(element):
+                data = json.loads(_request.args.get(element))
+            if not data:
+                data = get_element_from_data_request(element, _request)
         for key, value in data.items():
-            filter_metadata.update({"metadata.%s" % key: value})
+            if 'reference' == key and value:
+                if isinstance(value, list):
+                    filter_metadata.update({"metadata.%s" % key: {'$in': value}})
+                else:
+                    filter_metadata.update({"metadata.%s" % key: {'$in': [int(value)]}})
+            else:
+                filter_metadata.update({"metadata.%s" % key: value})
+
     except (IndexError, KeyError, TypeError, Exception) as ex:
         LOGGER.error(f'Metadata was not provided - Exception: {ex}')
         return abort(400)
     return filter_metadata
 
 
-def recursive_delete_filter(public_id, media_file_manager, _ids=None) -> []:
+def generate_collection_parameters(params: CollectionParameters):
 
+    builder = Builder()
+    search = params.optional.get('searchTerm')
+    param = json.loads(params.optional['metadata'])
+
+    if search:
+        _ = [
+            builder.regex_('filename', search)
+            , builder.regex_('metadata.reference_type', search)
+            , builder.regex_('metadata.mime_type', search)
+        ]
+        if search.isdigit():
+            _.append({'public_id': int(search)})
+            _.append({'metadata.reference': int(search)})
+            _.append(builder.in_('metadata.reference', [int(search)]))
+            _.append({'metadata.parent': int(search)})
+
+        return builder.and_([{'metadata.folder': False}, builder.or_(_)])
+    return generate_metadata_filter('metadata', params=param)
+
+
+def create_attachment_name(name, index, metadata, media_file_manager):
+    """ This method checks whether the current file name already exists in the directory.
+        If this is the case, 'copy_(index)_' is appended as a prefix. method is executed recursively.
+
+        Args:
+            name (str): filename of the File
+            index (int): counter
+            metadata (dict): Metadata for filtering Files from Database
+            media_file_manager (MediaFileManagement): Manager
+        Returns:
+         New Filename with 'copy_(index)_' - prefix.
+    """
+    try:
+        if media_file_manager.exist_file(metadata):
+            index += 1  # increment index by 1
+            name = name.replace('copy_({})_'.format(index-1), '')
+            name = 'copy_({})_{}'.format(index, name)
+            metadata['filename'] = name
+            return create_attachment_name(name, index, metadata, media_file_manager)
+        else:
+            return name
+    except Exception as err:
+        raise Exception(err)
+
+
+def recursive_delete_filter(public_id, media_file_manager, _ids=None) -> []:
+    """ This method deletes a file in the specified section of the document for storing workflow data.
+        Any existing value that matches the file name and metadata is deleted. Before saving a value.
+        GridFS document under the specified key is deleted.
+
+        Args:
+            public_id (int): Public ID of the File
+            media_file_manager (MediaFileManagement): Manager
+            _ids (list(int): List of IDs of the Files
+        Returns:
+         List of deleted public_id.
+    """
     if not _ids:
         _ids = []
 
-    root = media_file_manager.get_media_file_by_public_id(public_id)
-    all_files = media_file_manager.get_all_media_files({'metadata.parent': root.public_id})
+    root = media_file_manager.get_many(metadata={'public_id': public_id}).result[0]
+    output = media_file_manager.get_many(metadata={'metadata.parent': root.public_id})
     _ids.append(root.public_id)
 
-    for item in all_files:
+    for item in output.result:
         recursive_delete_filter(item.public_id, media_file_manager, _ids)
 
     return _ids

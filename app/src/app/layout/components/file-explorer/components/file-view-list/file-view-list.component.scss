@@ -1,0 +1,43 @@
+@import "~src/scss/variables";
+
+.framework-table {
+  th[scope=col]::after {
+    font-family: "Font Awesome 5 Free", sans-serif;
+    content: '\f063';
+    right: 1rem;
+  }
+
+  th[scope=col]::before {
+    font-family: "Font Awesome 5 Free", sans-serif;
+    font-weight: bold;
+    content: '\f062';
+    right: 0.5rem;
+  }
+
+  th[scope=col]::before,
+  th[scope=col]::after{
+    position: absolute;
+    font-size: 7px;
+    bottom: 1.9em;
+    display: block;
+    opacity: 0.3;
+  }
+
+  th[scope=col]._asc.active::before,
+  th[scope=col]._desc.active::after{
+    opacity: 1!important;
+  }
+
+  .thumbnail {
+    word-break: break-all;
+  }
+}
+
+#file-view-tile {
+  .active {
+    border: 1px solid $cmdb-primary;
+  }
+  .thumbnail {
+    word-break: break-all;
+  }
+}

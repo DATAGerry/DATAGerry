@@ -16,72 +16,113 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { FileMetadata } from '../../../../file-manager/model/metadata';
-import { FileElement } from '../../../../file-manager/model/file-element';
-import { FileService } from '../../../../file-manager/service/file.service';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FileSaverService } from 'ngx-filesaver';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../../toast/toast.service';
 import { GeneralModalComponent } from '../general-modal/general-modal.component';
+import { CollectionParameters } from '../../../../services/models/api-parameter';
+import { InfiniteScrollService } from '../../../services/infinite-scroll.service';
+import { APIGetMultiResponse } from '../../../../services/models/api-response';
+import { takeUntil} from 'rxjs/operators';
+import { ReplaySubject } from 'rxjs';
+import { FileMetadata } from '../../../components/file-explorer/model/metadata';
+import { FileElement } from '../../../components/file-explorer/model/file-element';
+import { FileService } from '../../../components/file-explorer/service/file.service';
 
 @Component({
   selector: 'cmdb-add-attachments-modal',
   templateUrl: './add-attachments-modal.component.html',
   styleUrls: ['./add-attachments-modal.component.scss']
 })
-export class AddAttachmentsModalComponent implements OnInit {
+export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
+
+  /**
+   * Global unsubscriber for http calls to the rest backend.
+   */
+  private unSubscribe: ReplaySubject<void> = new ReplaySubject();
 
   @Input() metadata: FileMetadata = new FileMetadata();
   public inProcess: boolean = false;
   public attachments: FileElement[] = [];
+  public recordsTotal: number = 0;
   private dataMaxSize: number = 1024 * 1024 * 50;
+  private readonly defaultApiParameter: CollectionParameters = {page: 1, limit: 100, order: 1};
+
 
   constructor(private fileService: FileService, private fileSaverService: FileSaverService,
-              private modalService: NgbModal, public activeModal: NgbActiveModal, private toast: ToastService) { }
+              private modalService: NgbModal, public activeModal: NgbActiveModal, private toast: ToastService,
+              private scrollService: InfiniteScrollService) { }
 
   public ngOnInit(): void {
-    this.fileService.getAllFilesList(this.metadata).subscribe((resp: FileElement[]) => {
-      this.attachments = resp;
+    this.fileService.getAllFilesList(this.metadata).subscribe((data: APIGetMultiResponse<FileElement>) => {
+      this.attachments.push(...data.results);
+      this.recordsTotal = data.total;
     });
   }
 
-  public getFiles() {
-    this.fileService.getAllFilesList(this.metadata).subscribe((resp: FileElement[]) => {
-      this.attachments = resp;
-      this.inProcess = false;
-    });
+  /**
+   * Get all attachments as a list
+   * As you scroll, new records are added to the attachments.
+   * Without the scrolling parameter the attachments are reinitialized
+   * @param apiParameters Instance of {@link CollectionParameters}
+   * @param onScroll Control if it is a new file upload
+   */
+  public getFiles(apiParameters?: CollectionParameters, onScroll: boolean = false): void {
+    this.fileService.getAllFilesList(this.metadata, apiParameters ? apiParameters : this.defaultApiParameter)
+      .subscribe((data: APIGetMultiResponse<FileElement>) => {
+        if (onScroll) {
+          this.attachments.push(...data.results);
+        } else {
+          this.attachments = data.results;
+        }
+        this.recordsTotal = data.total;
+        this.inProcess = false;
+      });
   }
 
-  public downloadFile(filename: string) {
-    this.fileService.getFileByName(filename, this.metadata).subscribe((data: any) => {
-      this.fileSaverService.save(data.body, filename);
-    });
-  }
-
+  /**
+   * Upload selected file from File Browser
+   * @param files selected file
+   */
   public uploadFile(files: FileList) {
     if (files.length > 0) {
       Array.from(files).forEach((file: any) => {
         if (this.checkFileSizeAllow(file)) {
-          if (this.attachments.find(el => el.name === file.name)) {
-            const promiseModal = this.replaceFileModal(file.name).then(result => {
-              if (result) {
-                this.attachments = this.attachments.filter(el => el.name !== file.name);
-                return true;
-              } else {return false; }
-            });
-            promiseModal.then(value => {
-              if (value) {  this.postFile(file); }
-            });
-          } else { this.postFile(file); }
+          this.checkFileExist(file.name).then(exist => {
+            if (exist) {
+              const promiseModal = this.replaceFileModal(file.name).then(result => {
+                if (result) {
+                  this.attachments.push(...this.attachments.filter(el => el.filename !== file.name));
+                  return true;
+                } else {return false; }
+              });
+              promiseModal.then(value => {
+                if (value) {this.postFile(file); }
+              });
+            } else { this.postFile(file); }
+          });
         }
       });
     }
   }
 
   /**
+   * Checks if the file already exists in the database
+   * @param value filename
+   */
+  private checkFileExist(value) {
+    return new Promise((resolve) => {
+      this.fileService.getFileElement(value, this.metadata).pipe(
+        takeUntil(this.unSubscribe)).subscribe(
+        () => resolve(true),
+        () => resolve(false)
+      );
+    });
+  }
+
+  /**
    * Check if the upload file is larger than 50 M/Bytes.
-   *
    * @param file: File to be uploaded
    * @return boolean: false if larger than 50 M/Bytes, else true
    */
@@ -94,17 +135,17 @@ export class AddAttachmentsModalComponent implements OnInit {
     return true;
   }
 
+  /**
+   * Update selected file
+   * @param file current file for update
+   */
   private postFile(file: any) {
     file.inProcess = true;
     this.inProcess = true;
-    this.attachments.push(file);
+    this.attachments = [file].concat(this.attachments);
     this.fileService.postFile(file, this.metadata).subscribe(() => {
-      this.getFiles();
+      this.getFiles(this.defaultApiParameter);
     }, (err) => console.log(err));
-  }
-
-  public deleteFile(publicID: number) {
-    this.fileService.deleteFile(publicID, {}).subscribe(() => this.getFiles());
   }
 
   private replaceFileModal(filename: string) {
@@ -117,6 +158,11 @@ export class AddAttachmentsModalComponent implements OnInit {
     modalComponent.componentInstance.buttonDeny = 'Cancel';
     modalComponent.componentInstance.buttonAccept = 'Replace';
     return modalComponent.result;
+  }
+
+  public ngOnDestroy(): void {
+    this.unSubscribe.next();
+    this.unSubscribe.complete();
   }
 
 }

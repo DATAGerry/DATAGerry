@@ -16,22 +16,24 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FileSaverService } from 'ngx-filesaver';
-import { FileService } from '../../../../file-manager/service/file.service';
-import { FileMetadata } from '../../../../file-manager/model/metadata';
 import { ActivatedRoute } from '@angular/router';
-import {NgbModal, NgbModalConfig, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
-import { FileElement } from '../../../../file-manager/model/file-element';
-import { AddAttachmentsModalComponent } from '../../../../layout/helpers/modals/add-attachments-modal/add-attachments-modal.component';
+import { NgbModal, NgbModalConfig, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { APIGetMultiResponse } from '../../../../services/models/api-response';
+import { FileMetadata } from '../../../../layout/components/file-explorer/model/metadata';
+import { FileService } from '../../../../layout/components/file-explorer/service/file.service';
+import { FileElement } from '../../../../layout/components/file-explorer/model/file-element';
+import { AttachmentsListModalComponent } from '../../../../layout/helpers/modals/attachments-list-modal/attachments-list-modal.component';
 
 @Component({
   selector: 'cmdb-object-attachments',
   templateUrl: './object-attachments.component.html',
   styleUrls: ['./object-attachments.component.scss']
 })
-export class ObjectAttachmentsComponent implements OnInit, OnDestroy{
+export class ObjectAttachmentsComponent implements OnInit, OnDestroy {
 
+  public attachments: FileElement[] = [];
   public attachmentsTotal: number = 0;
   private metadata: FileMetadata = new FileMetadata();
   private modalRef: NgbModalRef;
@@ -47,18 +49,20 @@ export class ObjectAttachmentsComponent implements OnInit, OnDestroy{
   }
 
   public ngOnInit(): void {
-    this.fileService.getAllFilesList(this.metadata).subscribe((resp: FileElement[]) => {
-      this.attachmentsTotal = resp.length;
+    this.fileService.getAllFilesList(this.metadata).subscribe((resp: APIGetMultiResponse<FileElement>) => {
+      this.attachments = resp.results;
+      this.attachmentsTotal = resp.total;
     });
   }
+
   public ngOnDestroy(): void {
     if (this.modalRef) {
       this.modalRef.close();
     }
   }
 
-  public addAttachments() {
-    this.modalRef = this.modalService.open(AddAttachmentsModalComponent);
+  public showAttachments() {
+    this.modalRef = this.modalService.open(AttachmentsListModalComponent);
     this.modalRef.componentInstance.metadata = this.metadata;
     this.modalRef.result.then((result) => {
       this.attachmentsTotal = result.total;
