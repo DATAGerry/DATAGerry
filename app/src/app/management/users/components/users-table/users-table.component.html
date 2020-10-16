@@ -3,7 +3,8 @@
   <tr>
     <th>Public ID</th>
     <th>Username</th>
-    <th>Display</th>
+    <th>Firstname</th>
+    <th>Lastname</th>
     <th>Email</th>
     <th>Registration</th>
     <th>Group</th>
@@ -14,9 +15,8 @@
   <tr *ngFor="let user of users">
     <td>{{user.public_id}}</td>
     <td>{{user.user_name}}</td>
-    <td>
-      <cmdb-user-display-name [user]="user"></cmdb-user-display-name>
-    </td>
+    <td>{{user.first_name}}</td>
+    <td>{{user.last_name}}</td>
     <td>{{user?.email}}</td>
     <td>{{user?.registration_time | date: "dd/MM/yyyy - HH:mm:ss"}}</td>
     <td>{{findGroup(user.group_id).label}}</td>

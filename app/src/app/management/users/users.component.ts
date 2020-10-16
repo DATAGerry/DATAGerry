@@ -61,14 +61,15 @@ export class UsersComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.tableOptions = {
       columnDefs: [
-        { orderable: true, searchable: true, targets: [0, 1, 3] },
+        { orderable: true, searchable: true, targets: [0, 1, 2, 3, 4] },
         { name: 'public_id', targets: [0] },
         { name: 'user_name', targets: [1] },
-        { name: 'display', targets: [2], orderable: false, searchable: false },
-        { name: 'email', targets: [3] },
-        { name: 'registration_time', targets: [4],  orderable: false, searchable: false },
-        { name: 'group_id', targets: [5],  orderable: false, searchable: false },
-        { name: 'action', targets: [6], orderable: false, searchable: false }
+        { name: 'first_name', targets: [2] },
+        { name: 'last_name', targets: [3] },
+        { name: 'email', targets: [4] },
+        { name: 'registration_time', targets: [5],  orderable: false, searchable: false },
+        { name: 'group_id', targets: [6],  orderable: false, searchable: false },
+        { name: 'action', targets: [7], orderable: false, searchable: false }
       ],
       ordering: true,
       searching: true,
