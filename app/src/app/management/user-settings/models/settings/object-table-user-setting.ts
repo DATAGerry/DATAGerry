@@ -23,10 +23,10 @@ import { UserSettingPayload } from '../user-setting';
  * Will normally include into a `UserSetting` as payload.
  */
 export class ObjectTableUserPayload implements UserSettingPayload {
-  public configs: Array<ObjectTableUserSettingConfig>;
+  public tableConfigs: Array<ObjectTableUserSettingConfig>;
 
   public constructor(configs: Array<ObjectTableUserSettingConfig>) {
-    this.configs = configs;
+    this.tableConfigs = configs;
   }
 }
 

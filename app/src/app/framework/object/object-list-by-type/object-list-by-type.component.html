@@ -34,27 +34,26 @@
         </button>
         <ul class="steting-dropdown dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
           <!-- Save config -->
-           <form [formGroup]="settingForm" class="form-inline px-2">
-             <div class="input-group mb-2">
-              <input type="text" formControlName="label" class="form-control form-control-sm"
+           <form [formGroup]="settingForm" class="px-2 mb-2 d-flex">
+              <input type="text" formControlName="label" class="form-control form-control-sm mr-auto p-2"
                      [ngClass]="{ 'is-valid': settingLabel.valid && (settingLabel.dirty || settingLabel.touched),
-                 'is-invalid': settingLabel.invalid && (settingLabel.dirty || settingLabel.touched)}">
-               <div class="input-group-append">
-                  <div class="input-group-text">
-                    <i class="fas fa-save" (click)="saveConfig()"></i></div>
-                </div>
-              </div>
+                 'is-invalid': settingLabel.invalid && (settingLabel.dirty || settingLabel.touched)}"/>
+                    <button [disabled]="settingForm.invalid" class="btn btn-success btn-sm"
+                            (click)="saveConfig(settingLabel.value)">
+                      <i class="fas fa-save"></i>
+                    </button>
           </form>
           <!-- Set default -->
-          <li class="dropdown-item pointer setting-item" (click)="default()" [ngClass]="currentTableSettingsConfig ? '': 'active'">
+          <li class="dropdown-item pointer setting-item" (click)="default()"
+              [ngClass]="currentTableSettingsConfig ? '': 'active'">
               Default
           </li>
           <!-- List config -->
-          <li class="dropdown-item pointer setting-item" *ngFor="let tableConfig of tableUserSetting?.payload?.configs"
-              (click)="selectConfig(tableConfig)"
-              [ngClass]="tableConfig.active ? 'active': ''">
+          <li class="dropdown-item pointer setting-item"
+              *ngFor="let tableConfig of tableUserSetting?.payload?.tableConfigs"
+              (click)="selectConfig(tableConfig)">
               {{tableConfig?.label}}
-              <i class="far fa-trash-alt setting-item-icon" (click)="deleteConfig(tableConfig)"></i>
+            <i class="far fa-trash-alt setting-item-icon" (click)="deleteConfig(tableConfig)"></i>
             <div class="clearfix"></div>
           </li>
 

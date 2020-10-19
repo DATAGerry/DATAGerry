@@ -93,7 +93,6 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   /**
    * Selector if the config is new.
    */
-  public newTableSettingConfig: ObjectTableUserSettingConfig;
 
   public currentTableSettingsConfig: ObjectTableUserSettingConfig;
 
@@ -125,6 +124,14 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
 
     this.type = this.route.snapshot.data.type as CmdbType;
     this.tableUserSetting = this.route.snapshot.data.userSetting as UserSetting<ObjectTableUserPayload>;
+    if (!this.tableUserSetting) {
+      this.tableUserSetting = new UserSetting<ObjectTableUserPayload>(
+        this.router.url.toString().substring(1).split('/').join('-'),
+        this.authService.currentUserValue.public_id,
+        new ObjectTableUserPayload([])
+      );
+      this.userSettingsDB.addSetting(this.tableUserSetting);
+    }
     this.settingForm = new FormGroup({
       label: new FormControl('', Validators.required)
     });
@@ -139,35 +146,25 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       this.pageTitle = this.type.label + ' list';
       this.dtOptionbuilder(this.typeID);
     });
-    // AUTO save
-    /*this.newTableSettingConfig.asObservable().pipe(takeUntil(this.subscriber)).subscribe((config) => {
-      if (config && !this.tableUserSetting.payload.configs.find(c => c === config && c.label !== config.label)) {
-        if (!this.tableUserSetting || !this.tableUserSetting.payload.configs.find(c => c === config && c.label !== 'LATEST')) {
-          this.saveSetting('LATEST');
-        }
-      }
-
-    });*/
   }
 
   private dtOptionbuilder(typeID: number) {
     this.dtOptions = {
       stateSave: true,
       stateSaveCallback: (settings, data) => {
-
-        this.newTableSettingConfig = {
+        console.log('Save');
+        this.currentTableSettingsConfig = {
           data,
           active: true,
         } as ObjectTableUserSettingConfig;
-
-
+        this.saveConfig();
       },
       stateLoadCallback: (settings, callback) => {
+        console.log('Load');
         try {
-          for (const config of this.tableUserSetting.payload.configs) {
+          for (const config of this.tableUserSetting.payload.tableConfigs) {
             if (config.active) {
               this.currentTableSettingsConfig = config.data;
-              this.stateSelected = true;
               return config.data;
             }
           }
@@ -525,56 +522,29 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   /**
    * Save Config
    */
-  public saveConfig(label?: string): void {
-    const tableData = this.newTableSettingConfig;
-    if (!label) {
-      tableData.label = this.settingLabel.value;
-      console.log(tableData);
+  public saveConfig(label: string = ''): void {
+    this.tableUserSetting.payload.tableConfigs.forEach(c => {
+      c.active = false;
+    });
+
+    this.currentTableSettingsConfig.label = label;
+    const configIDX = this.tableUserSetting.payload.tableConfigs.findIndex(c => c.label && c.label === label);
+    if (configIDX > -1) {
+      this.tableUserSetting.payload.tableConfigs[configIDX] = this.currentTableSettingsConfig;
     } else {
-
-      tableData.label = label;
+      this.tableUserSetting.payload.tableConfigs.push(this.currentTableSettingsConfig);
     }
-    if (tableData) {
-      if (this.tableUserSetting) {
-        const configs = this.tableUserSetting.payload.configs;
-        for (const config of configs) {
-          config.active = false;
-        }
-        this.settingForm.reset();
-        try {
-          const possibleConf = configs.find(c => c.label && c.label === label);
-          if (possibleConf) {
-            const confId = configs.indexOf(possibleConf);
-            configs.splice(confId, 1);
-          }
-        } catch {
-        }
 
-        this.tableUserSetting.payload.configs.push(tableData);
-        this.userSettingsDB.updateSetting(this.tableUserSetting);
-      } else {
-        this.settingForm.reset();
-        const tablePayload = new ObjectTableUserPayload([tableData]);
-        const userSetting: UserSetting<ObjectTableUserPayload> = Object.assign(new UserSetting(), {
-          identifier: this.router.url.toString().substring(1).split('/').join('-'),
-          user_id: this.authService.currentUserValue.public_id,
-          payload: tablePayload,
-          setting_type: 'APPLICATION'
-        });
-        this.userSettingsDB.addSetting(userSetting);
-        this.tableUserSetting = userSetting;
-      }
-      this.currentTableSettingsConfig = tableData;
-      this.newTableSettingConfig = undefined;
-    }
+    this.userSettingsDB.updateSetting(this.tableUserSetting);
   }
+
 
   /**
    * Toggle between multiple setting states.
    * @param selected ObjectTableUserSettingConfig
    */
   public selectConfig(selected: ObjectTableUserSettingConfig): void {
-    for (const config of this.tableUserSetting.payload.configs) {
+    for (const config of this.tableUserSetting.payload.tableConfigs) {
       config.active = config === selected;
     }
     this.userSettingsDB.updateSetting(this.tableUserSetting);
@@ -591,7 +561,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
    */
   public default(): void {
     if (this.tableUserSetting) {
-      for (const config of this.tableUserSetting.payload.configs) {
+      for (const config of this.tableUserSetting.payload.tableConfigs) {
         config.active = false;
       }
       this.userSettingsDB.updateSetting(this.tableUserSetting);
@@ -608,9 +578,9 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
    * @param selected The form setting
    */
   public deleteConfig(selected: ObjectTableUserSettingConfig): void {
-    const index = this.tableUserSetting.payload.configs.indexOf(selected, 0);
+    const index = this.tableUserSetting.payload.tableConfigs.indexOf(selected, 0);
     if (index > -1) {
-      this.tableUserSetting.payload.configs.splice(index, 1);
+      this.tableUserSetting.payload.tableConfigs.splice(index, 1);
     }
     this.userSettingsDB.updateSetting(this.tableUserSetting);
   }

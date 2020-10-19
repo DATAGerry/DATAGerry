@@ -33,6 +33,13 @@ export class UserSetting<P = UserSettingPayload> {
   user_id: number;
   payload: P;
   setting_type: string;
+
+  constructor(identifier: string, user_id: number, payload: P) {
+    this.identifier = identifier;
+    this.user_id = user_id;
+    this.payload = payload;
+    this.setting_type = 'APPLICATION';
+  }
 }
 
 // tslint:disable-next-line:no-empty-interface
