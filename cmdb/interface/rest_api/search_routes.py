@@ -73,6 +73,7 @@ def search_framework(request_user: UserModel):
         skip = request.args.get('skip', Search.DEFAULT_SKIP, int)
         only_active = _fetch_only_active_objs()
         search_params: dict = request.args.get('query') or '{}'
+        resolve_object_references: bool = request.args.get('resolve', False)
     except ValueError as err:
         return abort(400, err)
     try:
@@ -85,15 +86,16 @@ def search_framework(request_user: UserModel):
     except Exception as err:
         LOGGER.error(f'[Search Framework]: {err}')
         return abort(400, err)
-
     try:
         builder = PipelineBuilder()
         search_parameters = SearchParam.from_request(search_params)
+
         query: Pipeline = builder.build(search_parameters, object_manager, only_active)
 
         searcher = SearcherFramework(manager=object_manager)
-        result = searcher.aggregate(pipeline=query, request_user=request_user, limit=limit, skip=skip)
-        LOGGER.debug(result.__dict__)
+        result = searcher.aggregate(pipeline=query, request_user=request_user, limit=limit, skip=skip,
+                                    resolve=resolve_object_references, active=only_active)
+
     except Exception as err:
         LOGGER.error(f'[Search Framework Rest]: {err}')
         return make_response([], 204)

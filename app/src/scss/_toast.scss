@@ -8,6 +8,10 @@
   border: 0 solid;
   border-left: 5px solid;
   min-width: 350px;
+  max-width: 400px;
+  word-break: break-word;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
   pointer-events: all;
   border-radius: 5px;
 }

@@ -16,14 +16,76 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnInit, Pipe, PipeTransform} from '@angular/core';
+import {
+  Component,
+  Directive,
+  ElementRef,
+  HostListener,
+  Input,
+  OnInit,
+  Pipe,
+  PipeTransform,
+  Renderer2
+} from '@angular/core';
 import { CmdbMode } from '../../../../framework/modes.enum';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbType } from '../../../../framework/models/cmdb-type';
 import { TypeService } from '../../../../framework/services/type.service';
 import { ExportdJobDestinationsStepComponent } from '../exportd-job-destinations-step/exportd-job-destinations-step.component';
 import { ExternalSystemService } from '../../../services/external_system.service';
-import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
+import { DndDropEvent } from 'ngx-drag-drop';
+import { TemplateHelperService } from '../../../services/template-helper.service';
+
+
+@Directive({
+  // tslint:disable-next-line:directive-selector
+  selector: '[dropdowndirection]'
+})
+export class DropDownDirectionDirective {
+
+
+  constructor(private el: ElementRef, private renderer: Renderer2) {}
+
+  // listens to the mouseenter event on the element this directive is called
+  @HostListener('mouseenter', ['$event.target'])
+  determineDirection(target): void {
+    for (const child of target.children) {
+
+      // checks if the child is a dropdow menu
+      if (child.className.includes('dropdown-menu')) {
+
+        // displays the dropdown menu in a hidden state to determine how it would be positioned
+        this.renderer.setStyle(child, 'visibility', 'hidden');
+        this.renderer.setStyle(child, 'display', 'block');
+
+        // removes all classes to prevent wrong data to be compared
+        this.renderer.removeClass(child, 'dropdown-menu-left');
+        this.renderer.removeClass(child, 'dropdown-menu-right');
+        this.renderer.removeClass(child.parentNode, 'dropup');
+
+        // if the menu will be displayed under the window border it will be turned into a dropup
+        // except if it would be displayed above the upper window border
+        if (($(child).offset().top + $(child).outerHeight() > window.innerHeight + window.scrollY + 10)
+          && ($(child).offset().top - $(child).outerHeight()) > 90) {
+          this.renderer.addClass(child.parentNode, 'dropup');
+        }
+
+        // Determines if the menu would display outside of the right border and adjust its position
+        if ($(child).offset().left + $(child).outerWidth() + 200 > window.innerWidth + window.scrollX) {
+          this.renderer.addClass(child, 'dropdown-menu-left');
+        } else {
+          this.renderer.addClass(child, 'dropdown-menu-right');
+        }
+
+        // Returns the menu to its original state
+        this.renderer.removeStyle(child, 'visibility');
+        this.renderer.removeStyle(child, 'display');
+      }
+
+    }
+  }
+
+}
 
 @Pipe({
   name: 'filterUnique',
@@ -33,7 +95,7 @@ export class FilterPipe implements PipeTransform {
 
   transform(value: any, args?: any): any {
     const newArr = [];
-    value.forEach((item, index) => {
+    value.forEach((item) => {
       if (newArr.findIndex(i => i.className === item.className) === -1) {
         newArr.push(item);
       }
@@ -48,7 +110,7 @@ export class FilterPipe implements PipeTransform {
   styleUrls: ['./exportd-job-variables-step.component.scss']
 })
 export class ExportdJobVariablesStepComponent implements OnInit {
-
+  index = 1;
   @Input()
   set preData(data: any) {
     if (data !== undefined) {
@@ -71,11 +133,12 @@ export class ExportdJobVariablesStepComponent implements OnInit {
 
         // Create templates
         i = 0;
-        while ( i < forArray.controls.length) {
-          for (const item of data.variables[i].templates) {
+        while (i < forArray.controls.length) {
+          data.variables[i].templates.forEach((item, index) => {
             const control = forArray.controls[i].get('templates') as FormArray;
             control.push(this.createTemplate());
-          }
+            this.onOptionSelected(i, index, item.type);
+          });
           i++;
         }
 
@@ -91,11 +154,24 @@ export class ExportdJobVariablesStepComponent implements OnInit {
   public variableForm: FormGroup;
   public variableHelper: any[];
   public dragVariableName: string = '';
+  public templateHelperData: any = {};
+  public defaultTemplateData: any = {};
   readonly VARIABLES = 'variables';
+  public typesInSources: any[] = [];
+
+  private sourceTypes: any[];
+  // receives data from the sources step
+  @Input() set sources(value: any[]) {
+    this.sourceTypes = value;
+  }
+
+  get sources(): any[] {
+    return this.sourceTypes;
+  }
 
   constructor(private formBuilder: FormBuilder, private typeService: TypeService,
-              private externalService: ExternalSystemService) {}
-
+              private externalService: ExternalSystemService, private templateHelperService: TemplateHelperService) {
+  }
   @Input() set destinationStep(value: ExportdJobDestinationsStepComponent) {
     this.destinationForm = value;
   }
@@ -108,7 +184,10 @@ export class ExportdJobVariablesStepComponent implements OnInit {
     this.variableForm = this.formBuilder.group({
       variables: this.formBuilder.array([this.createVariable()])
     });
-    this.typeService.getTypeList().subscribe((value: CmdbType[]) => this.typeList = value);
+
+    this.typeService.getTypeList().subscribe(resp => {
+      this.typeList = resp;
+    });
   }
 
   private createVariable(): FormGroup {
@@ -118,6 +197,7 @@ export class ExportdJobVariablesStepComponent implements OnInit {
       templates: this.formBuilder.array([this.createTemplate()])
     });
   }
+
 
   private createTemplate(): FormGroup {
     return this.formBuilder.group({
@@ -148,6 +228,9 @@ export class ExportdJobVariablesStepComponent implements OnInit {
   public delTemplate(index, event): void {
     const control = this.getVariableAsFormArray().at(event).get('templates') as FormArray;
     control.removeAt(index);
+    if (this.templateHelperData[event][index]) {
+      delete this.templateHelperData[event][index];
+    }
   }
 
   public getVariableHelp(value: string) {
@@ -165,4 +248,68 @@ export class ExportdJobVariablesStepComponent implements OnInit {
   public onDndStart(name: string) {
     this.dragVariableName = name;
   }
+
+  public onOptionSelected(superindex, index, value) {
+    // gets template helper data of the given object and inserts it at the specified index of this.templatehelperdata
+    this.templateHelperService.getObjectTemplateHelperData(value).then(helperData => {
+      this.templateHelperData[superindex][index] = helperData;
+    });
+  }
+
+  public getTemplateHelperData(superindex, index) {
+    // used to determine whether the an array exists in the superindex and returns it or an empty array
+    // built due to frontend breaking if the html tries to get it directly
+    if (!this.templateHelperData[superindex]) {
+      this.templateHelperData[superindex] = [];
+    }
+    return this.templateHelperData[superindex][index];
+  }
+
+  public setTemplateValue(superindex, index, value, variable) {
+    // sets the text of the specified input field and validates the field in the form
+    const element = (document.getElementById('input' + superindex + index) as HTMLInputElement);
+    element.value = element.value + value;
+    variable.patchValue({
+      template: element.value
+    });
+  }
+
+  public setDefaultValue(index, value, variable) {
+    // sets the text of the specified input field and validates the field in the form
+    const element = (document.getElementById('variableDefault' + index) as HTMLInputElement);
+    element.value = element.value + value;
+    variable.patchValue({
+      default: element.value
+    });
+  }
+
+  public filterTypes() {
+    // gets all type IDs from the data received form sources
+    const typeArray = [];
+    this.sources.forEach( source => {
+      if (!typeArray.includes(source.type_id)) {
+        typeArray.push(source.type_id);
+      }
+    });
+    // filters all duplicates and gets the respective template helper data of the given types
+    this.typesInSources = [];
+    this.typeList.forEach( item => {
+      if (typeArray.includes(item.public_id) && !this.typesInSources.includes(item)) {
+        this.typesInSources.push(item);
+        this.templateHelperService.getObjectTemplateHelperData(item.public_id).then(helperData => {
+          this.defaultTemplateData[item.public_id] = helperData;
+        });
+      }
+    });
+  }
+
+  public isID(field) {
+    // used to determine wether the field calling it is the first in the list where the Public ID is located
+    if (field === 0) {
+      return 'fas fa-list-ol';
+    } else {
+      return 'fas fa-code';
+    }
+  }
+
 }

@@ -14,16 +14,27 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
 
+import logging
+import json
+
+from bson import json_util
 from flask import abort, request, current_app, Response
-from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError
+from cmdb.media_library.media_file_manager import MediaFileManagerGetError, \
+    MediaFileManagerDeleteError, MediaFileManagerUpdateError, MediaFileManagerInsertError
+
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import UserModel
-from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import get_element_from_data_request, \
-    get_file_in_request, generate_metadata_filter, recursive_delete_filter
 
+from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import get_element_from_data_request, \
+    get_file_in_request, generate_metadata_filter, recursive_delete_filter, generate_collection_parameters, \
+    create_attachment_name
+
+
+from cmdb.interface.response import GetMultiResponse, InsertSingleResponse
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.blueprint import APIBlueprint
 
 with current_app.app_context():
     media_file_manager = current_app.media_file_manager
@@ -35,31 +46,33 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-media_file_blueprint = RootBlueprint('media_file_blueprint', __name__, url_prefix='/media_file')
-
-# DEFAULT ROUTES
+media_file_blueprint = APIBlueprint('media_file_blueprint', __name__, url_prefix='/media_file')
 
 
-@media_file_blueprint.route('/', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_file_list(request_user: UserModel):
+@media_file_blueprint.route('/', methods=['GET', 'HEAD'])
+@media_file_blueprint.protect(auth=True, right='base.framework.object.view')
+@media_file_blueprint.parse_collection_parameters()
+def get_file_list(params: CollectionParameters):
     """
-    get all objects in database
+    Get all objects in database
+
+    Args:
+        params (CollectionParameters): Passed parameters over the http query string + optional `view` parameter.
+
+    Raises:
+        MediaFileManagerGetError: If the files could not be found.
 
     Returns:
-        list of media_files
+        list of files
     """
     try:
-        media_file_list = media_file_manager.get_all_media_files(generate_metadata_filter('metadata', request))
-    except ObjectManagerGetError as err:
-        LOGGER.error(err.message)
-        return abort(404)
-    if len(media_file_list) < 1:
-        return make_response(media_file_list, 204)
-
-    return make_response(media_file_list)
+        metadata = generate_collection_parameters(params=params)
+        response_query = {'limit': params.limit, 'skip': params.skip, 'sort': [(params.sort, params.order)]}
+        output = media_file_manager.get_many(metadata, **response_query)
+        api_response = GetMultiResponse(output.result, total=output.total, params=params, url=request.url)
+    except MediaFileManagerGetError as err:
+        return abort(404, err.message)
+    return api_response.make_response()
 
 
 @media_file_blueprint.route('/', methods=['POST'])
@@ -71,36 +84,58 @@ def add_new_file(request_user: UserModel):
         Any existing value that matches filename and the metadata is deleted. Before saving a value.
         GridFS document under the specified key is deleted.
 
+        For Example:
+            Create a unique media file element:
+             - Folders in the same directory are unique.
+             - The Folder-Name can exist in different directories
+
+            Create sub-folders:
+             - Selected folder is considered as parent
+
+            This also applies for files
+
         File:
-            File is stored under 'request.files["file"]'
+            File is stored under 'request.files.get('files')'
 
         Metadata:
             Metadata are stored under 'request.form["Metadata"]'
 
+        Raises:
+            MediaFileManagerGetError: If the file could not be found.
+            MediaFileManagerInsertError: If something went wrong during insert.
+
         Args:
-            request_user (UserModel): the instance of the started user
+          request_user (UserModel): the instance of the started user
+
         Returns:
-            int: ObjectId of GridFS File.
+            New MediaFile.
         """
     try:
         file = get_file_in_request('file')
         filter_metadata = generate_metadata_filter('metadata', request)
+        filter_metadata.update({'filename': file.filename})
+        metadata = get_element_from_data_request('metadata', request)
 
         # Check if file exists
-        is_exist_file = media_file_manager.exist_media_file(file.filename, filter_metadata)
+        is_exist_file = media_file_manager.exist_file(filter_metadata)
+        exist = None
         if is_exist_file:
-            grid_fs_file = media_file_manager.get_media_file(file.filename, filter_metadata)
-            media_file_manager.delete_media_file(grid_fs_file._file['public_id'])
+            exist = media_file_manager.get_file(filter_metadata)
+            media_file_manager.delete_file(exist['public_id'])
 
-        metadata = get_element_from_data_request('metadata', request)
+        # If file exist overwrite the references from previous file
+        if exist:
+            metadata['reference'] = exist['metadata']['reference']
+            metadata['reference_type'] = exist['metadata']['reference_type']
         metadata['author_id'] = request_user.public_id
         metadata['mime_type'] = file.mimetype
-        ack = media_file_manager.insert_media_file(data=file, metadata=metadata)
-    except ObjectInsertError:
+
+        result = media_file_manager.insert_file(data=file, metadata=metadata)
+    except (MediaFileManagerInsertError, MediaFileManagerGetError):
         return abort(500)
 
-    resp = make_response(ack)
-    return resp
+    api_response = InsertSingleResponse(result['public_id'], raw=result, url=request.url)
+    return api_response.make_response(prefix='library')
 
 
 @media_file_blueprint.route('/', methods=['PUT'])
@@ -108,70 +143,109 @@ def add_new_file(request_user: UserModel):
 @insert_request_user
 @right_required('base.framework.object.edit')
 def update_file(request_user: UserModel):
+    """ This method updates a file to the specified section in the document.
+        Any existing value that matches the file name and metadata is taken into account.
+        Furthermore, it is checked whether the current file name already exists in the directory.
+        If this is the case, 'copy_(index)_' is appended as prefix. The method is executed recursively.
+        Exception, if the parameter 'attachment' is passed with the value '{reference':true}', the name is not checked.
+
+        Note:
+            Create a unique media file element:
+             - Folders in the same directory are unique.
+             - The folder name can exist in different directories
+
+            Create sub-folders:
+             - Selected folder is considered as parent folder
+
+            This also applies to files
+
+        Changes:
+            Is stored under 'request.json'
+
+        Raises:
+            MediaFileManagerUpdateError: If something went wrong during update.
+
+        Args:
+            Args:
+            request_user (User): the instance of the started user (last modifier)
+
+        Returns: MediaFile as JSON
+
+        """
     try:
-
-        import json
-        from bson import json_util
         add_data_dump = json.dumps(request.json)
-
         new_file_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
+        reference_attachment = json.loads(request.args.get('attachment'))
 
-        # Check if file exists
-        curr_file = media_file_manager.get_media_file_by_public_id(new_file_data['public_id'])._file
-        curr_file['public_id'] = new_file_data['public_id']
-        curr_file['filename'] = new_file_data['filename']
-        curr_file['metadata'] = new_file_data['metadata']
-        curr_file['metadata']['author_id'] = new_file_data['metadata']['author_id'] = request_user.get_public_id()
+        data = media_file_manager.get_file(metadata={'public_id': new_file_data['public_id']})
+        data['public_id'] = new_file_data['public_id']
+        data['filename'] = new_file_data['filename']
+        data['metadata'] = new_file_data['metadata']
+        data['metadata']['author_id'] = new_file_data['metadata']['author_id'] = request_user.get_public_id()
 
-        ack = media_file_manager.updata_media_file(curr_file)
-    except ObjectInsertError:
+        # Check if file / folder exist in folder
+        if not reference_attachment['reference']:
+            checker = {'filename': new_file_data['filename'], 'metadata.parent': new_file_data['metadata']['parent']}
+            copied_name = create_attachment_name(new_file_data['filename'], 0, checker, media_file_manager)
+            data['filename'] = copied_name
+
+        media_file_manager.updata_file(data)
+    except MediaFileManagerUpdateError:
         return abort(500)
 
-    resp = make_response(ack)
+    resp = make_response(data)
     return resp
 
 
-@media_file_blueprint.route('/<string:name>/', methods=['GET'])
-@media_file_blueprint.route('/<string:name>', methods=['GET'])
-@login_required
-def get_file_by_name(name: str):
-    """ Validation: Check folder name for uniqueness
-        Create a unique directory:
-         - Folders in the same directory are unique.
-         - The same Folder-Name can exist in different directories
+@media_file_blueprint.route('/<string:filename>/', methods=['GET'])
+@media_file_blueprint.route('/<string:filename>', methods=['GET'])
+@media_file_blueprint.protect(auth=True, right='base.framework.object.view')
+def get_file(filename: str):
+    """ This method fetch a file to the specified section of the document.
+        Any existing value that matches the file name and metadata will be considered.
 
-        Create subfolders:
-         - Selected folder is considered as parent
-
-        This also applies for files
+        Raises:
+            MediaFileManagerGetError: If the file could not be found.
 
         Args:
-            name: folderName must be unique
+            filename: name must be unique
 
-        Returns: True if exist else False
+        Returns: MediaFile as JSON
 
         """
     try:
         filter_metadata = generate_metadata_filter('metadata', request)
-        media_file = media_file_manager.exist_media_file(name, filter_metadata)
-    except ObjectManagerGetError as err:
+        filter_metadata.update({'filename': filename})
+        result = media_file_manager.get_file(metadata=filter_metadata)
+    except MediaFileManagerGetError as err:
         return abort(404, err.message)
-    return make_response(media_file)
+    return make_response(result)
+  
 
+@media_file_blueprint.route('/download/<path:filename>', methods=['GET'])
+@media_file_blueprint.protect(auth=True, right='base.framework.object.view')
+def download_file(filename: str):
+    """ This method download a file to the specified section of the document.
+        Any existing value that matches the file name and metadata will be considered.
 
-@media_file_blueprint.route('/download/<path:filename>', methods=['POST'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def download_media_file(request_user: UserModel, filename: str):
+        Raises:
+            MediaFileManagerGetError: If the file could not be found.
+
+        Args:
+            filename (str): name must be unique
+
+        Returns: File
+
+        """
     try:
         filter_metadata = generate_metadata_filter('metadata', request)
-        grid_fs_file = media_file_manager.get_media_file(filename, filter_metadata).read()
-    except ObjectInsertError:
+        filter_metadata.update({'filename': filename})
+        result = media_file_manager.get_file(metadata=filter_metadata, blob=True)
+    except MediaFileManagerGetError:
         return abort(500)
 
     return Response(
-        grid_fs_file,
+        result,
         mimetype="application/octet-stream",
         headers={
             "Content-Disposition":
@@ -181,14 +255,26 @@ def download_media_file(request_user: UserModel, filename: str):
 
 
 @media_file_blueprint.route('<int:public_id>', methods=['DELETE'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.edit')
-def delete_file(request_user: UserModel, public_id: int):
+@media_file_blueprint.protect(auth=True, right='base.framework.object.edit')
+def delete_file(public_id: int):
+    """ This method deletes a file in the specified section of the document for storing workflow data.
+        Any existing value that matches the file name and metadata is deleted. Before saving a value.
+        GridFS document under the specified key is deleted.
+
+    Raises:
+        MediaFileManagerDeleteError: When something went wrong during the deletion.
+
+    Args:
+        public_id (int): Public ID of the File
+
+    Returns:
+         Delete result with the deleted File as JSON.
+    """
     try:
+        deleted = media_file_manager.get_file(metadata={'public_id': public_id})
         for _id in recursive_delete_filter(public_id, media_file_manager):
-            media_file_manager.delete_media_file(_id)
-    except ObjectDeleteError:
+            media_file_manager.delete_file(_id)
+    except MediaFileManagerDeleteError:
         return abort(500)
 
-    return make_response(True)
+    return make_response(deleted)

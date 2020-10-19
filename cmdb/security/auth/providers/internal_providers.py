@@ -33,8 +33,8 @@ class LocalAuthenticationProviderConfig(AuthProviderConfig):
     PROVIDER_CONFIG_FORM = AuthProviderConfigForm(
         entries=[
             AuthProviderConfigFormEntry(name='active', type='checkbox',
-                                        default=AuthProviderConfig.DEFAULT_CONFIG_VALUES.get('active'),
-                                        disabled=True)
+                                        default=AuthProviderConfig.DEFAULT_CONFIG_VALUES.get('active'), disabled=True,
+                                        helperText='The deactivation of the local provider will be ignored!')
         ]
     )
 

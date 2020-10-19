@@ -1,0 +1,123 @@
+@import "~src/scss/variables";
+
+.fileExplorer {
+  /* Remove default bullets */
+  #folder-tree-view {
+    * {margin: 0; padding: 0; list-style: none;}
+    ul li {
+      margin-left: 15px;
+      position: relative;
+      padding-left: 5px;
+    }
+    ul li::before {
+      top: 5px;
+      bottom: -12px;
+      left: -10px;
+    }
+    ul li:only-child::before {
+      display: list-item;
+      top: 5px;
+      bottom: 7px;
+      height: 7px;
+      left: -10px;
+    }
+    ul li::after {
+      left: -10px;
+      width: 10px!important;
+      height: 1px;
+    }
+
+    body > ul > li:first-child::before, ul li::after {top: 12px;}
+    ul li:not(:first-child):last-child::before {display: none;}
+    ul li::before, ul li::after, ul li:only-child::before {
+      content: " ";
+      position: absolute;
+      width: 1px;
+      background-color: #000;
+    }
+  }
+
+  /* Remove margins and padding from the parent ul */
+  #folder-tree-view {
+    margin: 0;
+    padding: 0;
+    white-space:nowrap;
+
+    /* Style the caret/folder */
+    .caret {
+      cursor: pointer;
+      user-select: none; /* Prevent text selection */
+
+      /* Create the caret/folder with a unicode, and style it */
+      &::before {
+        font-family: "Font Awesome 5 Free", sans-serif;
+        font-weight: 900;
+        content: "\f07b";
+        color: $black;
+        display: inline-block;
+        margin-right: 6px;
+      }
+
+      /* The caret/folder icon when clicked on */
+      &.caret-with-subs::before {
+        content: "\f65e";
+      }
+
+      /* The caret/folder icon when clicked on */
+      &.caret-down::before {
+        content: "\f07c";
+      }
+    }
+
+    /* The caret/folder hover */
+    .caret:hover, .caret-down:hover {
+      background: $gray-400;
+
+      .context-line {
+        visibility: visible;
+      }
+    }
+
+    /* The nested list */
+    .nested {
+      display: block;
+    }
+
+
+    /* The folder is selected */
+    .selected {
+      color: $cmdb-primary;
+      font-weight: bold;
+    }
+
+
+    .context-line {
+      visibility: hidden;
+      z-index: 999;
+      color: $cmdb-primary;
+      i {
+        margin-right: 0.25em!important;
+
+        &:hover {
+          font-weight: 900;
+          color: darken($cmdb-primary, 20%);;
+        }
+      }
+    }
+  }
+
+
+  /* Fixed Head for file-view-list */
+  #file-view-list {
+    overflow-y: auto; height: 390px;
+    table  {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th {
+      background: white;
+      box-shadow: inset 1px 1px $table-border-color, 0 1px $table-border-color;
+    }
+    thead th { position: sticky; top: -1px; }
+  }
+}

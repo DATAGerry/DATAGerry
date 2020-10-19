@@ -2,7 +2,7 @@
 * DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
-* This program is free software: you can redistribute it and/or modify
+* This program is free software: you can redistribute it and/or modifyhttps://nethinks.atlassian.net/browse/NET-412
 * it under the terms of the GNU Affero General Public License as
 * published by the Free Software Foundation, either version 3 of the
 * License, or (at your option) any later version.
@@ -96,8 +96,6 @@ import { UsersModule } from '../../management/users/users.module';
     ObjectDocsComponent,
     ObjectAttachmentsComponent
   ],
-  exports: [
-  ],
     imports: [
         CommonModule,
         ObjectRoutingModule,
@@ -114,6 +112,9 @@ import { UsersModule } from '../../management/users/users.module';
         ArchwizardModule,
         RenderModule,
         UsersModule
+    ],
+    exports: [
+        ObjectViewRenderComponent
     ]
 })
 export class ObjectModule {

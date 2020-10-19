@@ -165,7 +165,7 @@ class AuthModule:
 
             provider_config_instance = provider_config_class(**provider_config_settings)
             provider_instance = provider(config=provider_config_instance)
-            if not provider_config_instance.is_active():
+            if not provider_instance.is_active():
                 raise AuthenticationProviderNotActivated(f'Provider {provider_class_name} is deactivated')
             if provider_instance.EXTERNAL_PROVIDER and not self.settings.enable_external:
                 raise AuthenticationProviderNotActivated(f'External providers are deactivated')
