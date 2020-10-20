@@ -23,7 +23,7 @@ import { CmdbCategory } from '../../models/cmdb-category';
 import { CmdbType } from '../../models/cmdb-type';
 import { CategoryService, checkCategoryExistsValidator } from '../../services/category.service';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
-import {TypeService} from "../../services/type.service";
+import { TypeService } from "../../services/type.service";
 
 @Component({
   selector: 'cmdb-category-form',
