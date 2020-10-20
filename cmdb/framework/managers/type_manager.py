@@ -13,12 +13,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from typing import Union
+from typing import Union, List
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework import TypeModel
 from cmdb.framework.managers.framework_manager import FrameworkManager
 from cmdb.framework.results.iteration import IterationResult
+from cmdb.framework.results.list import ListResult
 from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError, ManagerDeleteError
 from cmdb.search import Query
@@ -62,6 +63,19 @@ class TypeManager(FrameworkManager):
         iteration_result: IterationResult[TypeModel] = IterationResult.from_aggregation(aggregation_result)
         iteration_result.convert_to(TypeModel)
         return iteration_result
+
+    def find(self, filter: dict, *args, **kwargs) -> ListResult[TypeModel]:
+        """
+        Get a list of types by a filter query.
+        Args:
+            filter: Filter for matched querys
+
+        Returns:
+            ListResult
+        """
+        results = self._get(self.collection, filter=filter)
+        types: List[TypeModel] = [TypeModel.from_data(result) for result in results]
+        return ListResult(types)
 
     def get(self, public_id: Union[PublicID, int]) -> TypeModel:
         """

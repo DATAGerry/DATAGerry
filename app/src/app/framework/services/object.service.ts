@@ -17,16 +17,18 @@
 */
 
 import { Injectable } from '@angular/core';
-import {ApiCallService, ApiService, httpObserveOptions, resp} from '../../services/api-call.service';
+import { ApiCallService, ApiService, httpObserveOptions, resp } from '../../services/api-call.service';
 import { ValidatorService } from '../../services/validator.service';
 import { CmdbObject } from '../models/cmdb-object';
 import { Observable } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { map } from 'rxjs/operators';
 import { RenderResult } from '../models/cmdb-render';
-import { HttpClient, HttpHeaders} from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { DataTableFilter, DataTablesResult } from '../models/cmdb-datatable';
 import { GeneralModalComponent } from '../../layout/helpers/modals/general-modal/general-modal.component';
+import { CmdbType } from '../models/cmdb-type';
+import { APIGetSingleResponse } from '../../services/models/api-response';
 
 export const httpObjectObserveOptions = {
   headers: new HttpHeaders({
@@ -59,7 +61,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
     httpObjectObserveOptions[PARAMETER].direction = filter.direction;
     httpObjectObserveOptions[FILTER] = filter;
     if (typeID != null) {
-      return this.api.callGet<T[]>(`${this.servicePrefix}/dt/type/${typeID}`, httpObjectObserveOptions).pipe(
+      return this.api.callGet<T[]>(`${ this.servicePrefix }/dt/type/${ typeID }`, httpObjectObserveOptions).pipe(
         map((apiResponse) => {
           if (apiResponse.status === 204) {
             return [];
@@ -69,7 +71,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
       );
     }
 
-    return this.api.callGet<T[]>(`${this.servicePrefix}/`, httpObjectObserveOptions).pipe(
+    return this.api.callGet<T[]>(`${ this.servicePrefix }/`, httpObjectObserveOptions).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -78,7 +80,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
 
   public getObjectsByType(typeID: number): Observable<T[]> {
     httpObjectObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    return this.api.callGet<T[]>(`${this.servicePrefix}/type/${typeID}`, httpObjectObserveOptions).pipe(
+    return this.api.callGet<T[]>(`${ this.servicePrefix }/type/${ typeID }`, httpObjectObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -90,13 +92,13 @@ export class ObjectService<T = RenderResult> implements ApiService {
 
   public getObject<R>(publicID: number, native: boolean = false): Observable<R> {
     if (native === true) {
-      return this.api.callGet<CmdbObject[]>(`${this.servicePrefix}/${publicID}/native/`).pipe(
+      return this.api.callGet<CmdbObject[]>(`${ this.servicePrefix }/${ publicID }/native/`).pipe(
         map((apiResponse) => {
           return apiResponse.body;
         })
       );
     }
-    return this.api.callGet<R[]>(`${this.servicePrefix}/${publicID}/`).pipe(
+    return this.api.callGet<R[]>(`${ this.servicePrefix }/${ publicID }/`).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -114,19 +116,19 @@ export class ObjectService<T = RenderResult> implements ApiService {
 
   public putObject(publicID: number, objectInstance: CmdbObject,
                    httpOptions = httpObserveOptions): Observable<any> {
-    return this.api.callPut<CmdbObject>(`${this.servicePrefix}/${publicID}/`, objectInstance, httpOptions);
+    return this.api.callPut<CmdbObject>(`${ this.servicePrefix }/${ publicID }/`, objectInstance, httpOptions);
   }
 
   public changeState(publicID: number, status: boolean) {
-    return this.api.callPut<boolean>(`${this.servicePrefix}/${publicID}/state/`, status).pipe(
+    return this.api.callPut<boolean>(`${ this.servicePrefix }/${ publicID }/state/`, status).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
     );
   }
 
-  public  deleteManyObjects(publicID: any) {
-    return this.api.callDeleteManyRoute(`${this.servicePrefix}/delete/${publicID}`).pipe(
+  public deleteManyObjects(publicID: any) {
+    return this.api.callDeleteManyRoute(`${ this.servicePrefix }/delete/${ publicID }`).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -137,7 +139,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
   }
 
   public deleteObject(publicID: any): Observable<any> {
-    return this.api.callDelete(`${this.servicePrefix}/${publicID}`);
+    return this.api.callDelete(`${ this.servicePrefix }/${ publicID }`);
   }
 
   // Count calls
@@ -168,7 +170,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
 
   public countObjects() {
     httpObjectObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    return this.api.callGet<number>(`${this.servicePrefix}/count/`, httpObjectObserveOptions).pipe(
+    return this.api.callGet<number>(`${ this.servicePrefix }/count/`, httpObjectObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -181,7 +183,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
   // Custom calls
   public getObjectReferences(publicID: number) {
     httpObjectObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/reference/${publicID}`, httpObjectObserveOptions).pipe(
+    return this.api.callGet<RenderResult[]>(`${ this.servicePrefix }/reference/${ publicID }`, httpObjectObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -192,7 +194,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
   }
 
   public getObjectsByUser(publicID: number) {
-    return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/user/${publicID}`).pipe(
+    return this.api.callGet<RenderResult[]>(`${ this.servicePrefix }/user/${ publicID }`).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -203,7 +205,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
   }
 
   public getNewObjectsSince(timestamp: number) {
-    return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/user/new/${timestamp}`).pipe(
+    return this.api.callGet<RenderResult[]>(`${ this.servicePrefix }/user/new/${ timestamp }`).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -214,7 +216,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
   }
 
   public getChangedObjectsSince(timestamp: number) {
-    return this.api.callGet<RenderResult[]>(`${this.servicePrefix}/user/changed/${timestamp}`).pipe(
+    return this.api.callGet<RenderResult[]>(`${ this.servicePrefix }/user/changed/${ timestamp }`).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -233,7 +235,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
     httpObjectObserveOptions[PARAMETER].search = ValidatorService.validateRegex(filter.search).trim();
     httpObjectObserveOptions[PARAMETER].dtRender = filter.dtRender;
     httpObjectObserveOptions[PARAMETER].idList = filter.idList;
-    return this.api.callGet<DataTablesResult[]>(`${this.servicePrefix}/dt/filter/type/${typeID}`,
+    return this.api.callGet<DataTablesResult[]>(`${ this.servicePrefix }/dt/filter/type/${ typeID }`,
       httpObjectObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
@@ -244,23 +246,17 @@ export class ObjectService<T = RenderResult> implements ApiService {
     );
   }
 
-  public cleanupRemovedFields(publicID: number): Observable<any> {
-    return this.api.callGet(this.servicePrefix + '/cleanup/remove/' + publicID).pipe(
+  public async getUncleanObjects(typeID: number): Promise<boolean> {
+    return this.api.callHead<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`).pipe(
       map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
+        return +apiResponse.headers.get('X-Total-Count') > 0;
       })
-    );
+    ).toPromise();
   }
 
-  public cleanupInsertedFields(publicID: number): Observable<any> {
-    return this.api.callGet(this.servicePrefix + '/cleanup/update/' + publicID).pipe(
+  public cleanObjects(typeID: number): Observable<any> {
+    return this.api.callPatch(`${ this.servicePrefix }/clean/${ typeID }`, null).pipe(
       map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
         return apiResponse.body;
       })
     );

@@ -16,48 +16,40 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { CmdbType } from '../../../../models/cmdb-type';
-import { TypeService } from '../../../../services/type.service';
-import { UserService } from '../../../../../management/services/user.service';
-import { ObjectService } from '../../../../services/object.service';
+import { CmdbType } from '../../../models/cmdb-type';
+import { TypeService } from '../../../services/type.service';
+import { ObjectService } from '../../../services/object.service';
+import { UserService } from '../../../../management/services/user.service';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-cleanup-modal',
   templateUrl: './cleanup-modal.component.html',
   styleUrls: ['./cleanup-modal.component.scss']
 })
-export class CleanupModalComponent implements OnInit {
+export class CleanupModalComponent implements OnInit, OnDestroy {
 
   @Input() typeInstance: CmdbType = null;
   public remove: boolean = false;
-  public update: boolean = false;
+
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   constructor(private typeService: TypeService, private objectService: ObjectService,
               public userService: UserService, public activeModal: NgbActiveModal) {
   }
 
-  ngOnInit() {
-    if (this.typeInstance.clean_db === false) {
-      this.objectService.cleanupRemovedFields(this.typeInstance.public_id).subscribe(() => {
-          this.remove = true;
-        }, error => {
-          console.log(error);
-        },
-        () => {
-          this.objectService.cleanupInsertedFields(this.typeInstance.public_id).subscribe(() => {
-              this.update = true;
-            }, error => console.log(error),
-            () => {
-              if (this.remove && this.update) {
-                this.typeInstance.clean_db = true;
-                this.typeService.putType(this.typeInstance).subscribe(() => {
-                  console.log('ok');
-                });
-              }
-            });
-        });
-    }
+  public ngOnInit(): void {
+    this.objectService.cleanObjects(this.typeInstance.public_id).pipe(takeUntil(this.subscriber))
+      .subscribe(() => {
+      this.remove = true;
+    });
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 }

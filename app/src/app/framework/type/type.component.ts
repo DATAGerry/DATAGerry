@@ -20,16 +20,17 @@ import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular
 import { TypeService } from '../services/type.service';
 import { DataTableDirective } from 'angular-datatables';
 import { takeUntil } from 'rxjs/operators';
-import { ReplaySubject, Subject } from 'rxjs';
+import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CmdbType } from '../models/cmdb-type';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
 import { FileSaverService } from 'ngx-filesaver';
-import { CleanupModalComponent } from './builder/modals/cleanup-modal/cleanup-modal.component';
 import { DatePipe } from '@angular/common';
 import { FileService } from '../../export/export.service';
+import { CleanupModalComponent } from './modals/cleanup-modal/cleanup-modal.component';
+import { ObjectService } from '../services/object.service';
 
 @Component({
   selector: 'cmdb-type',
@@ -69,7 +70,7 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   private modalRef: NgbModalRef;
 
-  constructor(private typeService: TypeService, private router: Router, private fileService: FileService,
+  constructor(private typeService: TypeService, private router: Router, private fileService: FileService, private objectService: ObjectService,
               private fileSaverService: FileSaverService, private modalService: NgbModal, private datePipe: DatePipe) {
     this.types = [];
   }
@@ -210,6 +211,10 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
       this.fileService.callExportTypeRoute('/export/type/' + this.selected.toString())
         .subscribe(res => this.downLoadFile(res, 'json'));
     }
+  }
+
+  public async getCleanStatus(typeID: number): Promise<boolean> {
+    return this.objectService.getUncleanObjects(typeID);
   }
 
   /**

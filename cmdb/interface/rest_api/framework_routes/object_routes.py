@@ -17,6 +17,8 @@
 import copy
 import json
 import logging
+from typing import List
+
 import pytz
 
 from datetime import datetime
@@ -25,14 +27,18 @@ from bson import json_util
 from flask import abort, jsonify, request, current_app
 
 from cmdb.data_storage.database_utils import object_hook, default
-from cmdb.framework import CmdbObject
+from cmdb.framework import CmdbObject, TypeModel
 from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError, \
     ObjectManagerUpdateError
 from cmdb.framework.cmdb_log import LogAction, CmdbObjectLog
 from cmdb.framework.cmdb_log_manager import LogManagerInsertError
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
+from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.interface.response import UpdateMultiResponse, GetListResponse
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
 from cmdb.interface.blueprint import RootBlueprint
+from cmdb.manager import ManagerUpdateError, ManagerGetError
 from cmdb.user_management import UserModel
 
 with current_app.app_context():
@@ -889,17 +895,71 @@ def get_latest(request_user: UserModel):
     return make_response(rendered_list)
 
 
-@object_blueprint.route('/cleanup/remove/<int:public_id>/', methods=['GET'])
-@object_blueprint.route('/cleanup/remove/<int:public_id>', methods=['GET'])
+@object_blueprint.route('/clean/<int:public_id>/', methods=['GET', 'HEAD'])
+@object_blueprint.route('/clean/<int:public_id>', methods=['GET', 'HEAD'])
 @login_required
 @insert_request_user
 @right_required('base.framework.type.clean')
-def cleanup_removed_fields(public_id, request_user: UserModel):
-    # REMOVE fields from CmdbObject
+def get_unstructured_objects(public_id: int, request_user: UserModel):
+    """
+    HTTP `GET`/`HEAD` route for a multi resources which are not formatted according the type structure.
+
+    Args:
+        public_id (int): Public ID of the type.
+
+    Raises:
+        ManagerGetError: When the selected type does not exists or the objects could not be loaded.
+
+    Returns:
+        GetListResponse: Which includes the json data of multiple objects.
+    """
+    type_manager = TypeManager(database_manager=current_app.database_manager)
+    object_manager = CmdbObjectManager(database_manager=current_app.database_manager)
+
     try:
-        update_type_instance = object_manager.get_type(public_id)
-        type_fields = update_type_instance.get_fields()
-        objects_by_type = object_manager.get_objects_by_type(public_id)
+        type: TypeModel = type_manager.get(public_id=public_id)
+        objects: List[CmdbObject] = object_manager.get_objects_by(type_id=public_id)
+    except ManagerGetError as err:
+        return abort(400, err.message)
+
+    unstructured_objects: List[CmdbObject] = []
+    for object_ in objects:
+        for field in type.fields:
+            if not object_.has_field(field.get('name')):
+                unstructured_objects.append(object_)
+                break
+
+    api_response = GetListResponse([un_object.__dict__ for un_object in unstructured_objects], url=request.url,
+                                   model='Object', body=request.method == 'HEAD')
+    return api_response.make_response()
+
+
+@object_blueprint.route('/clean/<int:public_id>/', methods=['PUT', 'PATCH'])
+@object_blueprint.route('/clean/<int:public_id>', methods=['PUT', 'PATCH'])
+@login_required
+@insert_request_user
+@right_required('base.framework.type.clean')
+def update_unstructured_objects(public_id: int, request_user: UserModel):
+    """
+    HTTP `PUT`/`PATCH` route for a multi resources which will be formatted based on the TypeModel
+
+    Args:
+        public_id (int): Public ID of the type.
+
+    Raises:
+        ManagerGetError: When the type with the `public_id` was not found.
+        ManagerUpdateError: When something went wrong during the update.
+
+    Returns:
+        UpdateMultiResponse: Which includes the json data of multiple updated objects.
+    """
+    type_manager = TypeManager(database_manager=current_app.database_manager)
+    object_manager = CmdbObjectManager(database_manager=current_app.database_manager)
+
+    try:
+        update_type_instance = type_manager.get(public_id)
+        type_fields = update_type_instance.fields
+        objects_by_type = object_manager.get_objects_by_type(type_id=public_id)
 
         for obj in objects_by_type:
             incorrect = []
@@ -917,24 +977,7 @@ def cleanup_removed_fields(public_id, request_user: UserModel):
                 object_manager.remove_object_fields(filter_query={'public_id': obj.public_id},
                                                     update={'$pull': {'fields': {"name": field}}})
 
-    except Exception as error:
-        return abort(500)
-
-    return make_response(update_type_instance)
-
-
-@object_blueprint.route('/cleanup/update/<int:public_id>/', methods=['GET'])
-@object_blueprint.route('/cleanup/update/<int:public_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.clean')
-def cleanup_updated_push_fields(public_id, request_user: UserModel):
-    # Update/Push fields to CmdbObject
-    try:
-        update_type_instance = object_manager.get_type(public_id)
-        type_fields = update_type_instance.get_fields()
-        objects_by_type = object_manager.get_objects_by_type(public_id)
-
+        objects_by_type = object_manager.get_objects_by_type(type_id=public_id)
         for obj in objects_by_type:
             for t_field in type_fields:
                 name = t_field["name"]
@@ -946,10 +989,13 @@ def cleanup_updated_push_fields(public_id, request_user: UserModel):
                 object_manager.update_object_fields(filter={'public_id': obj.public_id},
                                                     update={
                                                         '$addToSet': {'fields': {"name": name, "value": value}}})
-    except CMDBError:
-        return abort(500)
 
-    return make_response(update_type_instance)
+    except ManagerUpdateError as err:
+        return abort(400, err.message)
+
+    api_response = UpdateMultiResponse([], url=request.url, model='Object')
+
+    return api_response.make_response()
 
 
 def _build_query(args, q_operator='$and'):

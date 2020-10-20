@@ -39,9 +39,10 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { AuthModule } from '../../auth/auth.module';
 import { TypeComponent } from './type.component';
+import { CleanupModalComponent } from './modals/cleanup-modal/cleanup-modal.component';
 
 @NgModule({
-  entryComponents: [TypeDeleteConfirmModalComponent],
+  entryComponents: [TypeDeleteConfirmModalComponent, CleanupModalComponent],
   declarations: [
     TypeAddComponent,
     TypeBasicStepComponent,
@@ -53,6 +54,7 @@ import { TypeComponent } from './type.component';
     TypeDeleteComponent,
     TypeDeleteConfirmModalComponent,
     TypeComponent,
+    CleanupModalComponent
   ],
   imports: [
     CommonModule,

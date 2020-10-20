@@ -320,6 +320,48 @@ class UpdateSingleResponse(BaseAPIResponse):
         }, **super(UpdateSingleResponse, self).export(*args, **kwargs)}
 
 
+class UpdateMultiResponse(BaseAPIResponse):
+    """
+    API Response for update call of a multiple resources.
+    """
+
+    __slots__ = 'results'
+
+    def __init__(self, results: List[dict], url: str = None, model: Model = None):
+        """
+        Constructor of UpdateSingleResponse.
+
+        Args:
+            results: Updated resources.
+            url: Requested url.
+            model: Data model of updated resource.
+        """
+        self.results: List[dict] = results
+        super(UpdateMultiResponse, self).__init__(operation_type=OperationType.UPDATE, url=url, model=model)
+
+    def make_response(self, *args, **kwargs) -> BaseResponse:
+        """
+        Make a valid http response.
+
+        Args:
+            *args:
+            **kwargs:
+
+        Returns:
+            Instance of BaseResponse with http status code 202
+        """
+        response = make_api_response(self.export(), 202)
+        return response
+
+    def export(self, text: str = 'json', *args, **kwargs) -> dict:
+        """
+        Get the update instance as dict.
+        """
+        return {**{
+            'results': self.results
+        }, **super(UpdateMultiResponse, self).export(*args, **kwargs)}
+
+
 class DeleteSingleResponse(BaseAPIResponse):
     """
     API Response for delete call of a single resource.
