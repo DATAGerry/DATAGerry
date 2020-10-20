@@ -19,12 +19,14 @@ import logging
 from datetime import datetime
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo, DatabaseGridFS
-from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
-    ManagerDeleteError
-from cmdb.utils.error import CMDBError
+from gridfs.grid_file import GridOutCursor, GridOut
 
 from cmdb.media_library.media_file import MediaFile
 from cmdb.media_library.media_file import FileMetadata
+
+from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
+    ManagerDeleteError
+from cmdb.utils.error import CMDBError
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,40 +41,33 @@ class MediaFileManagement(CmdbManagerBase):
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
 
-    def get_media_file(self, file_name: str, filter_metadata):
+    def get_file(self, metadata: dict, blob: bool = False) -> GridOut:
         try:
-            result = self.fs.get_last_version(filename=file_name, **filter_metadata)
+            result = self.fs.get_last_version(**metadata)
         except (MediaFileManagerGetError, Exception) as err:
             LOGGER.error(err)
-            raise err
-        return result
+            raise MediaFileManagerGetError(err=err)
+        return result.read() if blob else result._file
 
-    def get_media_file_by_public_id(self, public_id: int, filter_metadata=None):
+    def get_many(self, metadata, **params: dict):
         try:
-            filter_metadata = {'public_id': public_id}
-            result = self.fs.get_last_version(**filter_metadata)
-        except (MediaFileManagerGetError, Exception) as err:
-            LOGGER.error(err)
-            raise err
-        return result
+            results = []
+            records_total = self.fs.find(filter=metadata).count()
+            iterator: GridOutCursor = self.fs.find(filter=metadata, **params)
+            for grid in iterator:
+                results.append(MediaFile(**grid._file))
+        except (CMDBError, MediaFileManagerGetError) as err:
+            raise MediaFileManagerGetError(err)
+        return GridFsResponse(results, records_total)
 
-    def get_all_media_files(self, filter_metadata):
-        media_file_list = []
-        for grid_out in self.fs.find(filter=filter_metadata):
-            try:
-                media_file_list.append(MediaFile(**grid_out._file))
-            except CMDBError:
-                continue
-        return media_file_list
-
-    def insert_media_file(self, data, metadata) -> str:
+    def insert_file(self, data, metadata):
         """
         Insert new MediaFile Object
         Args:
             data: init media_file
             metadata: a set of data that describes and gives information about other data.
         Returns:
-            Filename of the new MediaFile in database
+            New MediaFile in database
         """
         try:
             with self.fs.new_file(filename=data.filename) as media_file:
@@ -81,24 +76,18 @@ class MediaFileManagement(CmdbManagerBase):
                 media_file.metadata = FileMetadata(**metadata).__dict__
         except CMDBError as e:
             raise MediaFileManagerInsertError(e)
-        return media_file._id
 
-    def updata_media_file(self, data):
-        # if isinstance(data, dict):
-        #     update_object = MediaFile(**data)
-        # elif isinstance(data, MediaFile):
-        #     update_object = data
-        # else:
-        #     raise FileNotFoundError('Wrong Media file init format - expecting FileMedia or dict')
-        data['uploadDate'] = datetime.utcnow()
-        ack = self._update(
-            collection='media.libary.files',
-            public_id=data['public_id'],
-            data=data
-        )
-        return ack.acknowledged
+        return media_file._file
 
-    def delete_media_file(self, public_id) -> bool:
+    def updata_file(self, data):
+        try:
+            data['uploadDate'] = datetime.utcnow()
+            self._update(collection='media.libary.files', public_id=data['public_id'], data=data)
+        except Exception as err:
+            raise MediaFileManagerUpdateError(err)
+        return data
+
+    def delete_file(self, public_id) -> bool:
         """
         Delete MediaFile Object
         Args:
@@ -109,20 +98,28 @@ class MediaFileManagement(CmdbManagerBase):
         try:
             file_id = self.fs.get_last_version(**{'public_id': public_id})._id
             self.fs.delete(file_id)
-            return True
         except Exception:
             raise MediaFileManagerDeleteError(f'Could not delete file with ID: {file_id}')
 
-    def exist_media_file(self, file_name: str, filter_metadata) -> bool:
+        return True
+
+    def exist_file(self, filter_metadata) -> bool:
         """
         Check is MediaFile Object exist
         Args:
-            file_name(str): init media_file
             filter_metadata: Metadata as filter
         Returns:
             bool: If exist return true else false
         """
-        return self.fs.exists(filename=file_name, **filter_metadata)
+        return self.fs.exists(**filter_metadata)
+
+
+class GridFsResponse:
+
+    def __init__(self, result, total: int = None):
+        self.result = result
+        self.count = len(result)
+        self.total = total or 0
 
 
 class MediaFileManagerGetError(ManagerGetError):
