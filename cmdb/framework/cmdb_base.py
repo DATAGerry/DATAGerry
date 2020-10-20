@@ -207,7 +207,7 @@ class CmdbManagerBase(ABC):
         """
         return self.dbm.delete(
             collection=collection,
-            public_id=public_id
+            filter={'public_id': public_id}
         ).acknowledged
 
     def _delete_many(self, collection: str, filter_query: dict):

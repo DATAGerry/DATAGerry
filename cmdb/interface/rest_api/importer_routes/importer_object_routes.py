@@ -34,7 +34,7 @@ from cmdb.interface.route_utils import make_response, insert_request_user, login
 from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.interface.rest_api.importer_routes.importer_route_utils import get_file_in_request, \
     get_element_from_data_request, generate_parsed_output
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 
 LOGGER = logging.getLogger(__name__)
 
@@ -101,7 +101,7 @@ def get_default_parser_config(parser_type: str):
 @login_required
 @insert_request_user
 @right_required('base.import.object.*')
-def parse_objects(request_user: User):
+def parse_objects(request_user: UserModel):
     # Check if file exists
     request_file: FileStorage = get_file_in_request('file', request.files)
     # Load parser config
@@ -119,7 +119,7 @@ def parse_objects(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.import.object.*')
-def import_objects(request_user: User):
+def import_objects(request_user: UserModel):
     # Check if file exists
     if not request.files:
         return abort(400, 'No import file was provided')

@@ -40,16 +40,16 @@ class ImproveObject:
         # improve properties
         for property_entry in self.property_entries:
             self.value = self.entry.get(property_entry.get_value())
-            if property_entry.get_name() == "active":
+            if property_entry.get_display_name() == "active":
                 self.entry.update({property_entry.get_value(): self.improve_boolean()})
 
         # improve fields
         for entry_field in self.field_entries:
             for item in self.possible_fields:
                 self.value = self.entry.get(entry_field.get_value())
-                if item['type'] == 'date' and item["name"] == entry_field.get_name():
+                if item['type'] == 'date' and item["name"] == entry_field.get_display_name():
                     self.entry.update({entry_field.get_value(): self.improve_date()})
-                if item['type'] == 'ref' and item["name"] == entry_field.get_name():
+                if item['type'] == 'ref' and item["name"] == entry_field.get_display_name():
                     self.improve_ref()
         return self.entry
 

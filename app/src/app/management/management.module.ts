@@ -26,6 +26,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { GroupService } from './services/group.service';
 import { ManagementComponent } from './management.component';
 import { AuthModule } from '../auth/auth.module';
+import { UserSettingsModule } from './user-settings/user-settings.module';
 
 @NgModule({
   declarations: [ManagementComponent],
@@ -34,7 +35,8 @@ import { AuthModule } from '../auth/auth.module';
     ManagementRoutingModule,
     LayoutModule,
     ReactiveFormsModule,
-    AuthModule
+    AuthModule,
+    UserSettingsModule
   ],
   providers: [
     UserService,

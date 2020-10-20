@@ -24,7 +24,9 @@ from cmdb.media_library.media_file_manager import MediaFileManagerGetError, \
     MediaFileManagerDeleteError, MediaFileManagerUpdateError, MediaFileManagerInsertError
 
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
-from cmdb.user_management import User
+from cmdb.interface.blueprint import RootBlueprint
+from cmdb.user_management import UserModel
+
 from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import get_element_from_data_request, \
     get_file_in_request, generate_metadata_filter, recursive_delete_filter, generate_collection_parameters, \
     create_attachment_name
@@ -77,7 +79,7 @@ def get_file_list(params: CollectionParameters):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.edit')
-def add_new_file(request_user: User):
+def add_new_file(request_user: UserModel):
     """ This method saves a file to the specified section of the document for storing workflow data.
         Any existing value that matches filename and the metadata is deleted. Before saving a value.
         GridFS document under the specified key is deleted.
@@ -103,7 +105,8 @@ def add_new_file(request_user: User):
             MediaFileManagerInsertError: If something went wrong during insert.
 
         Args:
-            request_user (User): the instance of the started user (last modifier)
+          request_user (UserModel): the instance of the started user
+
         Returns:
             New MediaFile.
         """
@@ -139,7 +142,7 @@ def add_new_file(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.edit')
-def update_file(request_user: User):
+def update_file(request_user: UserModel):
     """ This method updates a file to the specified section in the document.
         Any existing value that matches the file name and metadata is taken into account.
         Furthermore, it is checked whether the current file name already exists in the directory.
@@ -168,7 +171,7 @@ def update_file(request_user: User):
 
         Returns: MediaFile as JSON
 
-            """
+        """
     try:
         add_data_dump = json.dumps(request.json)
         new_file_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
@@ -217,7 +220,7 @@ def get_file(filename: str):
     except MediaFileManagerGetError as err:
         return abort(404, err.message)
     return make_response(result)
-
+  
 
 @media_file_blueprint.route('/download/<path:filename>', methods=['GET'])
 @media_file_blueprint.protect(auth=True, right='base.framework.object.view')

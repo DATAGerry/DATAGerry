@@ -17,14 +17,13 @@
 */
 
 import { CmdbDao } from '../../framework/models/cmdb-dao';
+import { Right } from './right';
 
 export class Group implements CmdbDao {
-  /* tslint:disable */
+
   public readonly public_id: number;
   public name: string;
   public label: string;
-  public rights: any[];
-  public deletable: boolean;
+  public rights: Array<Right | any>;
 
-  /* tslint:enable */
 }

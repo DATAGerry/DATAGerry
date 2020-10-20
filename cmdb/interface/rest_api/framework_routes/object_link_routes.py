@@ -25,7 +25,7 @@ from cmdb.interface.rest_api.framework_routes.object_routes import object_bluepr
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, \
     right_required
 from cmdb.interface.blueprint import NestedBlueprint
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 
 with current_app.app_context():
     object_manager: CmdbObjectManager = current_app.object_manager
@@ -44,7 +44,7 @@ link_rest = NestedBlueprint(object_blueprint, url_prefix='/link')
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_link(public_id: int, request_user: User):
+def get_link(public_id: int, request_user: UserModel):
     try:
         return object_manager.get_link(public_id=public_id)
     except ObjectManagerGetError as err:
@@ -69,7 +69,7 @@ def get_partner_links(public_id: int):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.add')
-def add_link(request_user: User):
+def add_link(request_user: UserModel):
     try:
         new_link_params = {**request.json}
     except TypeError:
@@ -86,7 +86,7 @@ def add_link(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.delete')
-def remove_link(public_id: int, request_user: User):
+def remove_link(public_id: int, request_user: UserModel):
     try:
         ack = object_manager.delete_link(public_id)
     except ObjectManagerDeleteError as err:

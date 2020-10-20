@@ -23,14 +23,21 @@ import { ComponentsFields, RenderField } from '../components.fields';
   templateUrl: './password.component.html',
   styleUrls: ['./text.component.scss']
 })
-export class PasswordComponent extends RenderField {
+export class PasswordComponent extends RenderField implements OnInit {
 
-  @ViewChild('passWordInput', {static: false}) public passWordToggle: ElementRef;
+  @ViewChild('passWordInput', { static: false }) public passWordToggle: ElementRef;
+
+  public displayType: string = 'text';
 
   public constructor() {
     super();
   }
 
+  public ngOnInit(): void {
+    if (this.data.hasOwnProperty('force_hidden') && this.data.force_hidden) {
+      this.displayType = 'password';
+    }
+  }
 
   public toggleInput() {
     if (this.passWordToggle.nativeElement.type === 'password') {
@@ -44,5 +51,6 @@ export class PasswordComponent extends RenderField {
     this.passWordToggle.nativeElement.value = Math.random().toString(36).slice(-8);
     this.controller.setValue(this.passWordToggle.nativeElement.value);
   }
+
 
 }

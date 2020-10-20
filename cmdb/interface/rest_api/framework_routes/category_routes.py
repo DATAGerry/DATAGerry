@@ -133,7 +133,7 @@ def insert_category(data: dict):
         return abort(404, err.message)
     except ManagerInsertError as err:
         return abort(400, err.message)
-    api_response = InsertSingleResponse(result_id, raw=CategoryModel.to_json(raw_doc), url=request.url,
+    api_response = InsertSingleResponse(result_id=result_id, raw=CategoryModel.to_json(raw_doc), url=request.url,
                                         model=CategoryModel.MODEL)
     return api_response.make_response(prefix='categories')
 

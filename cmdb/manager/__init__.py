@@ -74,30 +74,26 @@ class ManagerBase:
         except Exception as err:
             raise ManagerGetError(err)
 
-    def _insert(self, collection: Collection, resource: Any):
+    def _insert(self, collection: Collection, resource: Any, skip_public: bool = False):
         """
         Calls mongodb insert operation
         Args:
-            collection: Name of the collection
-            resource: Insert data (normally a dict)
-
-        Returns:
-            - An instance of :class:`~pymongo.results.InsertOneResult`.
+            collection (Collection): Name of the collection
+            resource (Any): Insert data (normally a dict)
+            skip_public (bool): Skip the public id creation and counter increment.
         """
         try:
-            return self._database_manager.insert(collection, data=resource)
+            return self._database_manager.insert(collection, data=resource, skip_public=skip_public)
         except Exception as err:
             raise ManagerInsertError(err)
 
-    def _update(self, collection: Collection, filter, resource, *args, **kwargs):
+    def _update(self, collection: Collection, filter: dict, resource: Any, *args, **kwargs):
         """
         Calls a mongodb update operation
         Args:
-            collection: Name of the collection
-            filter: Match dictionary
+            collection (Collection): Name of the collection
+            filter (dict): Match dictionary
             resource: Update data (normally a dict)
-            *args:
-            **kwargs:
 
         Returns:
             - An instance of :class:`~pymongo.results.UpdateResult`.
@@ -107,17 +103,14 @@ class ManagerBase:
         except Exception as err:
             raise ManagerUpdateError(err)
 
-    def _delete(self, collection: Collection, public_id: PublicID):
+    def _delete(self, collection: Collection, filter: dict, *args, **kwargs):
         """
         Calls a mongodb delete operation
         Args:
             collection: Name of the collection
-            public_id: Public ID of resource
-
-        Returns:
-            - An instance of :class:`~pymongo.results.DeleteResult`.
+            filter: Matching resource dict.
         """
         try:
-            return self._database_manager.delete(collection, public_id=public_id)
+            return self._database_manager.delete(collection, filter=filter, *args, **kwargs)
         except Exception as err:
             raise ManagerDeleteError(err)

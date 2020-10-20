@@ -28,7 +28,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { ObjectService } from '../../services/object.service';
 import { RenderResult } from '../../models/cmdb-render';
 import { DatePipe } from '@angular/common';
@@ -39,8 +39,18 @@ import { DataTableFilter, DataTablesResult } from '../../models/cmdb-datatable';
 import { TypeService } from '../../services/type.service';
 import { CmdbType } from '../../models/cmdb-type';
 import { PermissionService } from '../../../auth/services/permission.service';
-import {ObjectPreviewModalComponent} from '../modals/object-preview-modal/object-preview-modal.component';
-import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import { ObjectPreviewModalComponent } from '../modals/object-preview-modal/object-preview-modal.component';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { UserSetting } from '../../../management/user-settings/models/user-setting';
+import { UserSettingsDBService } from '../../../management/user-settings/services/user-settings-db.service';
+import { AuthService } from '../../../auth/services/auth.service';
+
+import {
+  ObjectTableUserPayload,
+  ObjectTableUserSettingConfig
+} from '../../../management/user-settings/models/settings/object-table-user-setting';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-object-list-by-type',
@@ -50,8 +60,8 @@ import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 })
 export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestroy {
 
-  @ViewChild('dtTableElement', {static: false}) dtTableElement: ElementRef;
-  @ViewChild(DataTableDirective, {static: false})
+  @ViewChild('dtTableElement', { static: false }) dtTableElement: ElementRef;
+  @ViewChild(DataTableDirective, { static: false })
   public dtElement: DataTableDirective;
   public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();
@@ -70,35 +80,103 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   // Select properties
   public selectedObjects: string[] = [];
 
+  /**
+   * Component wide un-subscriber.
+   */
+  private subscriber: Subject<void> = new Subject<void>();
+
+  /**
+   * User settings for this route.
+   */
+  public tableUserSetting: UserSetting<ObjectTableUserPayload>;
+
+  /**
+   * Selector if the config is new.
+   */
+
+  public currentTableSettingsConfig: ObjectTableUserSettingConfig;
+
+  public stateSelected: boolean = false;
+
+  /**
+   * FormGroup for settings label
+   */
+  public settingForm: FormGroup;
+
+  /**
+   * Current type from the route resolve.
+   */
+  public type: CmdbType;
+
   constructor(private objectService: ObjectService, private typeService: TypeService, private datePipe: DatePipe,
               private fileSaverService: FileSaverService, private fileService: FileService,
-              private router: Router, private route: ActivatedRoute, private renderer: Renderer2,
-              private permissionService: PermissionService, private modalService: NgbModal) {
-    this.fileService.callFileFormatRoute().subscribe(data => {
-      this.formatList = data;
-    });
+              private router: Router, private route: ActivatedRoute, private renderer2: Renderer2,
+              private permissionService: PermissionService, private modalService: NgbModal,
+              private userSettingsDB: UserSettingsDBService, private authService: AuthService) {
 
     this.router.routeReuseStrategy.shouldReuseRoute = (future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot) => {
       return false;
     };
+
+    this.fileService.callFileFormatRoute().subscribe(data => {
+      this.formatList = data;
+    });
+
+    this.type = this.route.snapshot.data.type as CmdbType;
+    this.tableUserSetting = this.route.snapshot.data.userSetting as UserSetting<ObjectTableUserPayload>;
+    if (!this.tableUserSetting) {
+      this.tableUserSetting = new UserSetting<ObjectTableUserPayload>(
+        this.router.url.toString().substring(1).split('/').join('-'),
+        this.authService.currentUserValue.public_id,
+        new ObjectTableUserPayload([])
+      );
+      this.userSettingsDB.addSetting(this.tableUserSetting);
+    }
+    this.settingForm = new FormGroup({
+      label: new FormControl('', Validators.required)
+    });
+
   }
 
-  ngOnInit() {
+  public ngOnInit() {
+
     this.route.params.subscribe((params) => {
-      this.typeID = params.typeID;
-      this.typeService.getType(this.typeID).subscribe((tInstance: CmdbType) => {
-        this.faIcon = tInstance.render_meta.icon;
-        this.pageTitle = tInstance.label + ' list';
-      });
+      this.typeID = this.type.public_id;
+      this.faIcon = this.type.render_meta.icon;
+      this.pageTitle = this.type.label + ' list';
       this.dtOptionbuilder(this.typeID);
     });
   }
 
   private dtOptionbuilder(typeID: number) {
-    const that = this;
     this.dtOptions = {
+      stateSave: true,
+      stateSaveCallback: (settings, data) => {
+        console.log('Save');
+        this.currentTableSettingsConfig = {
+          data,
+          active: true,
+        } as ObjectTableUserSettingConfig;
+        this.saveConfig();
+      },
+      stateLoadCallback: (settings, callback) => {
+        console.log('Load');
+        try {
+          for (const config of this.tableUserSetting.payload.tableConfigs) {
+            if (config.active) {
+              this.currentTableSettingsConfig = config.data;
+              return config.data;
+            }
+          }
+        } catch (e) {
+          return callback(null);
+        }
+        return callback(null);
+      },
       pagingType: 'full_numbers',
-      order: [[ 2, 'asc' ]],
+      pageLength: 25,
+      lengthMenu: [10, 25, 50, 100, 250, 500],
+      order: [[2, 'asc']],
       dom:
         '<"row" <"col-sm-3" l> <"col-sm-3" B > <"col" f> >' +
         '<"row" <"col-sm-12"tr>>' +
@@ -116,29 +194,29 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
         if (filter.search !== null
           && filter.search !== ''
           && filter.search !== undefined) {
-          that.objectService.getObjectsByFilter(typeID, filter).subscribe((resp: any) => {
-            that.selectedObjects.length = 0;
-            that.objects = resp;
+          this.objectService.getObjectsByFilter(typeID, filter).subscribe((resp: any) => {
+            this.selectedObjects.length = 0;
+            this.objects = resp;
             // Render columns afterwards
             this.rerender(this.dtOptions).then();
 
             callback({
-              data: that.objects.data,
-              recordsTotal: that.objects.recordsTotal,
-              recordsFiltered: that.objects.recordsFiltered,
+              data: this.objects.data,
+              recordsTotal: this.objects.recordsTotal,
+              recordsFiltered: this.objects.recordsFiltered,
             });
           });
         } else {
-          that.objectService.getObjects(typeID, filter).subscribe((resp: any) => {
-            that.selectedObjects.length = 0;
-            that.objects = resp;
+          this.objectService.getObjects(typeID, filter).subscribe((resp: any) => {
+            this.selectedObjects.length = 0;
+            this.objects = resp;
             // Render columns afterwards
             this.rerender(this.dtOptions).then();
 
             callback({
-              data: that.objects.data,
-              recordsTotal: that.objects.recordsTotal,
-              recordsFiltered: that.objects.recordsFiltered,
+              data: this.objects.data,
+              recordsTotal: this.objects.recordsTotal,
+              recordsFiltered: this.objects.recordsFiltered,
             });
           });
         }
@@ -157,12 +235,12 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
             collectionLayout: 'dropdown-menu overflow-auto',
             text: '<i class="fas fa-cog"></i>',
 
-            postfixButtons: [ {
+            postfixButtons: [{
               extend: 'colvisRestore',
               text: 'Restore',
               tag: 'button',
               className: 'btn btn-secondary btn-sm btn-block mt-2 mb-2',
-            } ]
+            }]
           }
         ]
       },
@@ -175,13 +253,15 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
         return row;
       },
       select: {
-        style:    'multi',
+        style: 'multi',
         selector: 'td:first-child'
       },
       columns: [
-        { data: null, defaultContent: '',
+        {
+          data: null, defaultContent: '',
           title: '<input type="checkbox" class="select-all-objects" name="select-all-objects">',
-          className: 'select-checkbox text-center', sortable: false, orderable: false },
+          className: 'select-checkbox text-center', sortable: false, orderable: false
+        },
         {
           data: 'object_information.active', title: 'Active', name: 'active',
           render(data) {
@@ -191,7 +271,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
             return '<span class="badge badge-danger"> D </span>';
           }
         },
-        {data: 'object_information.object_id', title: 'ID', name: 'public_id'}
+        { data: 'object_information.object_id', title: 'ID', name: 'public_id' }
       ]
     };
   }
@@ -211,8 +291,8 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     }
   }
 
-  ngAfterViewInit(): void {
-    this.renderer.listen('document', 'click', (event) => {
+  public ngAfterViewInit(): void {
+    this.renderer2.listen('document', 'click', (event) => {
       const actionClassList = (event.target as Element).classList;
       if (actionClassList.contains('select-all-objects')) {
         const dataTable: any = $('#dt-object-list').DataTable();
@@ -232,8 +312,10 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     });
   }
 
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.dtTrigger.unsubscribe();
+    this.subscriber.next();
+    this.subscriber.complete();
 
     if (this.modalRef) {
       this.modalRef.close();
@@ -264,7 +346,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
         }
       });
     } catch (error) {
-      console.log(`DT Rerender Exception: ${error}`);
+      console.log(`DT Rerender Exception: ${ error }`);
     }
     return Promise.resolve(null);
   }
@@ -273,14 +355,16 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     const that = this;
     for (let i = 0; i < this.objects.data[0].fields.length; i++) {
       newSettings.columns.push(
-        { data: 'fields.' + i + '.value',
+        {
+          data: 'fields.' + i + '.value',
           title: that.objects.data[0].fields[i].label,
           name: that.objects.data[0].fields[i].name,
         });
     }
     newSettings.columns.push(
-      {data: 'object_information.author_name', title: 'Author', name: 'author_id'},
-      {data: 'object_information.creation_time', title: 'Creation Time', name: 'creation_time',
+      { data: 'object_information.author_name', title: 'Author', name: 'author_id' },
+      {
+        data: 'object_information.creation_time', title: 'Creation Time', name: 'creation_time',
         render(data) {
           return that.datePipe.transform(data.$date, 'dd/MM/yyyy - HH:mm:ss');
         }
@@ -291,7 +375,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
         className: 'td-button-actions text-center',
         orderable: false,
         render(data) {
-          const rights: string[] = that.permissionService.currentUserRights;
+          const rights: string[] = that.permissionService.currentUserRights.map(right => right.name);
           const baseRights = rights.includes('base.*')
             || rights.includes('base.system.*')
             || rights.includes('base.framework.*')
@@ -329,7 +413,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     newSettings.columnDefs = [
       { className: 'text-center', width: '20px', targets: 0, orderable: false },
       { className: 'text-center', width: '5%', targets: [1, 2] },
-      { className: 'text-center', width: '8%', targets: [-1, -2, -3, 3 ]},
+      { className: 'text-center', width: '8%', targets: [-1, -2, -3, 3] },
     ];
   }
 
@@ -341,9 +425,9 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
         visTargets.push(this.objects.data[0].fields.findIndex(i => i.name === summary.name) + 3);
       }
       this.dtOptions.columnDefs = [
-        {orderable: false, targets: 'nosort'},
-        {visible: true, targets: visTargets},
-        {visible: false, targets: '_all'}
+        { orderable: false, targets: 'nosort' },
+        { visible: true, targets: visTargets },
+        { visible: false, targets: '_all' }
       ];
     }
   }
@@ -391,6 +475,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       }
     });
   }
+
   private previewObject(publicID: number) {
     this.objectService.getObject(publicID).subscribe(resp => {
       this.modalRef = this.modalService.open(ObjectPreviewModalComponent, { size: 'lg' });
@@ -432,6 +517,80 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   public downLoadFile(data: any, exportType: any) {
     const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
     this.fileSaverService.save(data.body, timestamp + '.' + exportType.label);
+  }
+
+  /**
+   * Save Config
+   */
+  public saveConfig(label: string = ''): void {
+    this.tableUserSetting.payload.tableConfigs.forEach(c => {
+      c.active = false;
+    });
+
+    this.currentTableSettingsConfig.label = label;
+    const configIDX = this.tableUserSetting.payload.tableConfigs.findIndex(c => c.label && c.label === label);
+    if (configIDX > -1) {
+      this.tableUserSetting.payload.tableConfigs[configIDX] = this.currentTableSettingsConfig;
+    } else {
+      this.tableUserSetting.payload.tableConfigs.push(this.currentTableSettingsConfig);
+    }
+
+    this.userSettingsDB.updateSetting(this.tableUserSetting);
+  }
+
+
+  /**
+   * Toggle between multiple setting states.
+   * @param selected ObjectTableUserSettingConfig
+   */
+  public selectConfig(selected: ObjectTableUserSettingConfig): void {
+    for (const config of this.tableUserSetting.payload.tableConfigs) {
+      config.active = config === selected;
+    }
+    this.userSettingsDB.updateSetting(this.tableUserSetting);
+    this.currentTableSettingsConfig = selected;
+    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+      dtInstance.destroy();
+      this.displayTable(this.dtTableElement);
+    });
+  }
+
+  /**
+   * Set all settings activation status to false.
+   * Same as reset default setting.
+   */
+  public default(): void {
+    if (this.tableUserSetting) {
+      for (const config of this.tableUserSetting.payload.tableConfigs) {
+        config.active = false;
+      }
+      this.userSettingsDB.updateSetting(this.tableUserSetting);
+    }
+    this.currentTableSettingsConfig = undefined;
+    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+      dtInstance.destroy();
+      this.displayTable(this.dtTableElement);
+    });
+  }
+
+  /**
+   * Delete a config from the setting.
+   * @param selected The form setting
+   */
+  public deleteConfig(selected: ObjectTableUserSettingConfig): void {
+    const index = this.tableUserSetting.payload.tableConfigs.indexOf(selected, 0);
+    if (index > -1) {
+      this.tableUserSetting.payload.tableConfigs.splice(index, 1);
+    }
+    this.userSettingsDB.updateSetting(this.tableUserSetting);
+  }
+
+
+  /**
+   * Get the label control of the settings.
+   */
+  public get settingLabel(): FormControl {
+    return this.settingForm.get('label') as FormControl;
   }
 
 }
