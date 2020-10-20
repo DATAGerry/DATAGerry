@@ -76,8 +76,9 @@ export class FileService<T = any> implements ApiService {
       }
     }
     params = params.append('metadata', JSON.stringify(metadata));
-    httpObserveOptions[PARAMETER] = params;
-    return this.api.callGet<Array<T>>(this.servicePrefix + '/', httpObserveOptions).pipe(
+    const httpOptions = httpObserveOptions;
+    httpOptions[PARAMETER] = params;
+    return this.api.callGet<Array<T>>(this.servicePrefix + '/', httpOptions).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
@@ -93,8 +94,9 @@ export class FileService<T = any> implements ApiService {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('metadata', JSON.stringify(metadata));
-    httpFileOptions.responseType = 'json';
-    return this.api.callPost<any>(`${ this.servicePrefix }/`, formData, httpFileOptions).pipe(
+    const httpOptions = httpFileOptions;
+    httpOptions[RESPONSETYPE] = 'json';
+    return this.api.callPost<any>(`${ this.servicePrefix }/`, formData, httpOptions).pipe(
       map((apiResponse: HttpResponse<any>) => {
         if (apiResponse.status === 204) {
           return [];
@@ -112,8 +114,9 @@ export class FileService<T = any> implements ApiService {
   public putFile(file: FileElement, hasReference: boolean  = false): Observable<T> {
     let params: HttpParams = new HttpParams();
     params = params.append('attachment', JSON.stringify({reference: hasReference}));
-    httpObserveOptions[PARAMETER] = params;
-    return this.api.callPut<number>(this.servicePrefix + '/', JSON.stringify(file)).pipe(
+    const httpOptions = httpObserveOptions;
+    httpOptions[PARAMETER] = params;
+    return this.api.callPut<number>(this.servicePrefix + '/', JSON.stringify(file), httpOptions).pipe(
       map((apiResponse: HttpResponse<T>) => {
         return apiResponse.body;
       })

@@ -55,7 +55,7 @@ class MediaFileManagement(CmdbManagerBase):
             records_total = self.fs.find(filter=metadata).count()
             iterator: GridOutCursor = self.fs.find(filter=metadata, **params)
             for grid in iterator:
-                results.append(MediaFile(**grid._file))
+                results.append(MediaFile.to_json(MediaFile(**grid._file)))
         except (CMDBError, MediaFileManagerGetError) as err:
             raise MediaFileManagerGetError(err)
         return GridFsResponse(results, records_total)

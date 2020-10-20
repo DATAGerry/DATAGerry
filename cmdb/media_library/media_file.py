@@ -128,6 +128,17 @@ class MediaFile(MediaFileManagementBase):
         """
         return self.size
 
+    @classmethod
+    def to_json(cls, instance) -> dict:
+        """Convert a type instance to json conform data"""
+        return {
+            'public_id': instance.get_public_id(),
+            'filename': instance.get_filename(),
+            'size': instance.get_size(),
+            'upload_date': instance.get_upload_date(),
+            'metadata': instance.get_metadata()
+        }
+
 
 class NoPublicIDError(CMDBError):
     """
