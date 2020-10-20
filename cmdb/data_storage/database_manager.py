@@ -240,6 +240,10 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
                 return False
         return True
 
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Auto disconnect the database connection when the Manager get destroyed."""
+        self.connector.disconnect()
+
     def _import(self, collection: str, data_list: list):
         try:
             self.delete_collection(collection)
@@ -391,16 +395,19 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
     def search(self, collection: str, *args, **kwargs):
         return self.connector.get_collection(collection).find(*args, **kwargs)
 
-    def insert(self, collection: str, data: dict) -> int:
+    def insert(self, collection: str, data: dict, skip_public: bool = False) -> int:
         """adds document to database
 
         Args:
             collection (str): name of database collection
             data (dict): insert data
+            skip_public (bool): Skip the public id creation and counter increment
 
         Returns:
             int: new public id of the document
         """
+        if skip_public:
+            return self.connector.get_collection(collection).insert_one(data)
 
         if 'public_id' not in data:
             data['public_id'] = self.get_highest_id(collection=collection) + 1
@@ -476,22 +483,21 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         formatted_data = {'$set': data}
         return self.connector.get_collection(collection).update_one(formatted_id, formatted_data)
 
-    def delete(self, collection: str, public_id: int) -> DeleteResult:
+    def delete(self, collection: str, filter: dict, *args, **kwargs) -> DeleteResult:
         """delete document inside database
 
         Args:
             collection (str): name of database collection
-            public_id (int): public id of document
+            filter (dict): filter query
 
         Returns:
             acknowledged
 
         """
 
-        formatted_public_id = {'public_id': public_id}
-        result = self.connector.get_collection(collection).delete_one(formatted_public_id)
+        result = self.connector.get_collection(collection).delete_one(filter)
         if result.deleted_count != 1:
-            raise DocumentCouldNotBeDeleted(collection, public_id)
+            raise DocumentCouldNotBeDeleted(collection, filter)
         return result
 
     def delete_many(self, collection: str, **requirements: dict) -> DeleteResult:

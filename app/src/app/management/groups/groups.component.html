@@ -1,0 +1,13 @@
+<div id="group-list-header" class="d-flex justify-content-between">
+  <h1>Groups</h1>
+  <div class="header-buttons">
+    <button *permissionLink="'base.user-management.group.add'"
+            routerLink="/management/groups/add/" type="button" class="btn btn-success">
+      Add
+    </button>
+  </div>
+</div>
+<hr/>
+<div id="group-list">
+  <cmdb-group-table [groups]="groups" [tableOptions]="tableOptions"></cmdb-group-table>
+</div>

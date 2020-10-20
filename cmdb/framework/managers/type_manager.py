@@ -124,7 +124,7 @@ class TypeManager(FrameworkManager):
             TypeModel: The deleted type as its model.
         """
         raw_type: TypeModel = self.get(public_id=public_id)
-        delete_result = self._delete(self.collection, public_id=public_id)
+        delete_result = self._delete(self.collection, filter={'public_id': public_id})
         if delete_result.deleted_count == 0:
             raise ManagerDeleteError(err='No type matched this public id')
         return raw_type

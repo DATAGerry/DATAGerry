@@ -15,11 +15,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from cmdb.user_management.rights.import_rights import ImportRight, ImportObjectRight, ImportTypeRight
-from cmdb.user_management.user_right import GLOBAL_RIGHT_IDENTIFIER, BaseRight
+from cmdb.user_management.models.right import GLOBAL_RIGHT_IDENTIFIER, BaseRight, Levels
 from cmdb.user_management.rights.system_rights import SystemRight
 from cmdb.user_management.rights.user_management_rights import UserManagementRight, UserRight, GroupRight
 from cmdb.user_management.rights.framework_rights import FrameworkRight, ObjectRight, TypeRight, CategoryRight, \
-    LogRight, CollectionRight
+    LogRight
 from cmdb.user_management.rights.export_rights import ExportRight, ExportObjectRight, ExportTypeRight
 from cmdb.user_management.rights.exportd_rights import ExportdRight, ExportdJobRight, ExportdLogRight
 from cmdb.user_management.rights.docapi_rights import DocapiRight, DocapiTemplateRight
@@ -41,20 +41,20 @@ FRAMEWORK_RIGHTS = (
         (
             ObjectRight('view', description='View objects'),
             ObjectRight('add', description='Add objects'),
-            ObjectRight('edit', BaseRight.PROTECTED, description='Edit objects'),
-            ObjectRight('delete', BaseRight.SECURE, description='Delete objects'),
-            ObjectRight('activation', BaseRight.SECURE, description='Activate/Deactivate objects')
+            ObjectRight('edit', Levels.PROTECTED, description='Edit objects'),
+            ObjectRight('delete', Levels.SECURE, description='Delete objects'),
+            ObjectRight('activation', Levels.SECURE, description='Activate/Deactivate objects')
         )
     ),
     (
         TypeRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage types from framework'),
         (
-            TypeRight('view', BaseRight.PROTECTED, description='View types'),
-            TypeRight('add', BaseRight.PROTECTED, description='Add types'),
-            TypeRight('edit', BaseRight.SECURE, description='Edit types'),
-            TypeRight('delete', BaseRight.SECURE, description='Delete types'),
-            TypeRight('activation', BaseRight.SECURE, description='Activate/Deactivate types'),
-            TypeRight('clean', BaseRight.SECURE, description='Clean type fields')
+            TypeRight('view', Levels.PROTECTED, description='View types'),
+            TypeRight('add', Levels.PROTECTED, description='Add types'),
+            TypeRight('edit', Levels.SECURE, description='Edit types'),
+            TypeRight('delete', Levels.SECURE, description='Delete types'),
+            TypeRight('activation', Levels.SECURE, description='Activate/Deactivate types'),
+            TypeRight('clean', Levels.SECURE, description='Clean type fields')
         )
     ),
     (
@@ -62,25 +62,16 @@ FRAMEWORK_RIGHTS = (
         (
             CategoryRight('view', description='View category'),
             CategoryRight('add', description='Add category'),
-            CategoryRight('edit', BaseRight.PROTECTED, description='Edit category'),
-            CategoryRight('delete', BaseRight.SECURE, description='Delete category')
-        )
-    ),
-    (
-        CollectionRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage collections'),
-        (
-            CollectionRight('view', BaseRight.PERMISSION, description='View collections'),
-            CollectionRight('add', BaseRight.PERMISSION, description='View collections'),
-            CollectionRight('edit', BaseRight.PERMISSION, description='View collections'),
-            CollectionRight('delete', BaseRight.PROTECTED, description='View collections'),
+            CategoryRight('edit', Levels.PROTECTED, description='Edit category'),
+            CategoryRight('delete', Levels.SECURE, description='Delete category')
         )
     ),
     (
         LogRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage framework logs'),
         (
             LogRight('view', description='View logs'),
-            LogRight('reload', BaseRight.SECURE, description='Reload logs'),
-            LogRight('delete', BaseRight.DANGER, description='Delete logs')
+            LogRight('reload', Levels.SECURE, description='Reload logs'),
+            LogRight('delete', Levels.DANGER, description='Delete logs')
         )
     )
 )
@@ -106,21 +97,21 @@ IMPORT_RIGHTS = (
 )
 
 USER_MANAGEMENT_RIGHTS = (
-    UserManagementRight(GLOBAL_RIGHT_IDENTIFIER, description='User management'),
+    UserManagementRight(GLOBAL_RIGHT_IDENTIFIER, description='UserModel management'),
     (
         UserRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage users'),
         (
             UserRight('view', description='View user'),
             UserRight('add', description='Add user'),
-            UserRight('edit', BaseRight.SECURE, description='Edit user'),
-            UserRight('delete', BaseRight.SECURE, description='Delete user')
+            UserRight('edit', Levels.SECURE, description='Edit user'),
+            UserRight('delete', Levels.SECURE, description='Delete user')
         ),
         GroupRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage groups'),
         (
             GroupRight('view', description='View group'),
-            GroupRight('add', BaseRight.DANGER, description='Add group'),
-            GroupRight('edit', BaseRight.DANGER, description='Edit group'),
-            GroupRight('delete', BaseRight.SECURE, description='Delete group')
+            GroupRight('add', Levels.DANGER, description='Add group'),
+            GroupRight('edit', Levels.DANGER, description='Edit group'),
+            GroupRight('delete', Levels.SECURE, description='Delete group')
         )
     )
 )
@@ -132,17 +123,17 @@ EXPORTD_RIGHTS = (
         (
             ExportdJobRight('view', description='View job'),
             ExportdJobRight('add', description='Add job'),
-            ExportdJobRight('edit', BaseRight.SECURE, description='Edit job'),
-            ExportdJobRight('delete', BaseRight.SECURE, description='Delete job'),
-            ExportdJobRight('run', BaseRight.SECURE, description='Run job manual')
+            ExportdJobRight('edit', Levels.SECURE, description='Edit job'),
+            ExportdJobRight('delete', Levels.SECURE, description='Delete job'),
+            ExportdJobRight('run', Levels.SECURE, description='Run job manual')
         ),
     ),
     (
         ExportdLogRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage exportd logs'),
         (
             ExportdLogRight('view', description='View exportd logs'),
-            ExportdLogRight('reload', BaseRight.SECURE, description='Reload exportd logs'),
-            ExportdLogRight('delete', BaseRight.DANGER, description='Delete exportd logs')
+            ExportdLogRight('reload', Levels.SECURE, description='Reload exportd logs'),
+            ExportdLogRight('delete', Levels.DANGER, description='Delete exportd logs')
         )
     )
 )
@@ -154,14 +145,14 @@ DOCAPI_RIGHTS = (
         (
             DocapiTemplateRight('view', description='View template'),
             DocapiTemplateRight('add', description='Add template'),
-            DocapiTemplateRight('edit', BaseRight.SECURE, description='Edit template'),
-            DocapiTemplateRight('delete', BaseRight.SECURE, description='Delete template'),
+            DocapiTemplateRight('edit', Levels.SECURE, description='Edit template'),
+            DocapiTemplateRight('delete', Levels.SECURE, description='Delete template'),
         ),
     )
 )
 __all__ = (
     BaseRight(
-        BaseRight.NOTSET, GLOBAL_RIGHT_IDENTIFIER, description='Base application right'
+        Levels.NOTSET, GLOBAL_RIGHT_IDENTIFIER, description='Base application right'
     ),
     SYSTEM_RIGHTS,
     FRAMEWORK_RIGHTS,

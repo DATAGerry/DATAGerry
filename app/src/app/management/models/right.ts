@@ -17,9 +17,8 @@
 */
 
 export class Right {
-  public _MASTER: boolean;
-  // tslint:disable-next-line:variable-name
-  public _level: number;
+  public level: number;
+  public is_master: boolean;
   public name: string;
   public label: string;
   public description: string;

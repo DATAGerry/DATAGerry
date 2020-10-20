@@ -4,6 +4,8 @@ import { User } from '../../../models/user';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { UserService } from '../../../services/user.service';
 import { ToastService } from '../../../../layout/toast/toast.service';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   templateUrl: './users-passwd-modal.component.html',
@@ -13,6 +15,7 @@ export class UsersPasswdModalComponent {
 
   @ViewChild('passWordInput', { static: false }) public passWordToggle: ElementRef;
 
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
   // Data
   // tslint:disable-next-line:variable-name
   private _user: User;
@@ -51,17 +54,11 @@ export class UsersPasswdModalComponent {
 
   public changePasswd() {
     if (this.passwdForm.valid) {
-      const changePasswd = this.userService.changeUserPassword(this.user.public_id, this.passwdForm.get('password').value).subscribe(
-        () => {
+      const changePasswd = this.userService.changeUserPassword(
+        this.user.public_id, this.passwdForm.get('password').value).pipe(takeUntil(this.subscriber)).subscribe(
+        (user: User) => {
           this.toast.success(`Password for user with ID: ${ this.user.public_id } was changed`);
-        },
-        (error => {
-          console.error(error);
           this.activeModal.close();
-        }),
-        () => {
-          this.activeModal.close();
-          changePasswd.unsubscribe();
         }
       );
     }

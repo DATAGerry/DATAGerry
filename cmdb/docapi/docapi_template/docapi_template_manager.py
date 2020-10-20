@@ -22,7 +22,7 @@ from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.utils.error import CMDBError
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
 
 LOGGER = logging.getLogger(__name__)
@@ -104,7 +104,7 @@ class DocapiTemplateManager(CmdbManagerBase):
             raise DocapiTemplateManagerInsertError(e)
         return ack
 
-    def update_template(self, data: (dict, DocapiTemplate), request_user: User) -> str:
+    def update_template(self, data: (dict, DocapiTemplate), request_user: UserModel) -> str:
         """
         Update new DocapiTemplat Object
         Args:
@@ -132,7 +132,7 @@ class DocapiTemplateManager(CmdbManagerBase):
             self._event_queue.put(event)
         return ack.acknowledged
 
-    def delete_template(self, public_id: int, request_user: User) -> bool:
+    def delete_template(self, public_id: int, request_user: UserModel) -> bool:
         try:
             ack = self._delete(collection=DocapiTemplate.COLLECTION, public_id=public_id)
             if self._event_queue:
