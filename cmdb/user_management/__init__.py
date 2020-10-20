@@ -20,32 +20,40 @@ In addition, the rights management, group administration and access rights are d
 """
 from typing import List
 
-from cmdb.user_management.user import User
+from cmdb.user_management.models.settings import UserSettingModel
+from cmdb.user_management.models.user import UserModel
+from cmdb.user_management.models.right import BaseRight
 
-from cmdb.user_management.user_base import UserManagementBase
-from cmdb.user_management.user_group import UserGroup
+from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.user_manager import UserManager
+from cmdb.user_management.managers.right_manager import RightManager
+from cmdb.user_management.rights import __all__ as rights
 
-__COLLECTIONS__: List[object] = [
-    User,
-    UserGroup
+# TODO: Refactor to use with dependency injection
+
+right_manager = RightManager(rights)
+
+__COLLECTIONS__: List = [
+    UserModel,
+    UserSettingModel,
+    UserGroupModel
 ]
 
-__ADMIN_GROUP_RIGHTS__: List[str] = [
-    'base.*'
+__ADMIN_GROUP_RIGHTS__: List[BaseRight] = [
+    right_manager.get('base.*')
 ]
 
-__USER_GROUP_RIGHTS__: List[str] = [
-    'base.framework.object.*',
-    'base.framework.type.view',
-    'base.framework.category.view',
-    'base.framework.log.view',
-    'base.user-management.user.view',
-    'base.user-management.group.view',
-    'base.docapi.template.view'
+__USER_GROUP_RIGHTS__: List[BaseRight] = [
+    right_manager.get('base.framework.object.*'),
+    right_manager.get('base.framework.type.view'),
+    right_manager.get('base.framework.category.view'),
+    right_manager.get('base.framework.log.view'),
+    right_manager.get('base.user-management.user.view'),
+    right_manager.get('base.user-management.group.view'),
+    right_manager.get('base.docapi.template.view')
 ]
 
-__FIXED_GROUPS__: List[UserGroup] = [
-    UserGroup(public_id=1, name='admin', label='Administrator', rights=__ADMIN_GROUP_RIGHTS__, deletable=False),
-    UserGroup(public_id=2, name='user', label='User', rights=__USER_GROUP_RIGHTS__, deletable=False)
+__FIXED_GROUPS__: List[UserGroupModel] = [
+    UserGroupModel(public_id=1, name='admin', label='Administrator', rights=__ADMIN_GROUP_RIGHTS__),
+    UserGroupModel(public_id=2, name='user', label='UserModel', rights=__USER_GROUP_RIGHTS__)
 ]

@@ -20,17 +20,18 @@ import { Injectable } from '@angular/core';
 import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { User } from '../../management/models/user';
+import { Token } from '../models/token';
 
 @Injectable()
 export class BasicAuthInterceptor implements HttpInterceptor {
 
   public intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const currentUser = new BehaviorSubject<User>(JSON.parse(localStorage.getItem('current-user'))).value;
-    const currentUserToken = new BehaviorSubject<string>(JSON.parse(localStorage.getItem('access-token'))).value;
+    const currentUserToken = new BehaviorSubject<Token>(JSON.parse(localStorage.getItem('access-token'))).value;
     if (currentUser && currentUserToken) {
       request = request.clone({
         setHeaders: {
-          Authorization: `Bearer ${ currentUserToken }`,
+          Authorization: `Bearer ${ currentUserToken.token }`,
           'Cache-Control': 'no-cache',
           Pragma: 'no-cache'
         }

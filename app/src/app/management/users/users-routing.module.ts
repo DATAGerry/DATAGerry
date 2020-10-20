@@ -13,16 +13,19 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { UsersListComponent } from './users-list/users-list.component';
-import { UsersAddComponent } from './users-add/users-add.component';
 import { UserViewComponent } from './user-view/user-view.component';
-import { UsersEditComponent } from './users-edit/users-edit.component';
-import { UsersDeleteComponent } from './users-delete/users-delete.component';
+import { UsersComponent } from './users.component';
+import { UserAddComponent } from './user-add/user-add.component';
+import { GroupsResolver, OwnGroupResolver } from '../resolvers/group-resolver.service';
+import { UserEditComponent } from './user-edit/user-edit.component';
+import { ProviderResolver } from '../../auth/resolvers/provider-resolver.service';
+import { OwnUserResolver, UserResolver } from '../resolvers/user-resolver.service';
+import { UserDeleteComponent } from './user-delete/user-delete.component';
 
 const routes: Routes = [
   {
@@ -32,13 +35,20 @@ const routes: Routes = [
       breadcrumb: 'List',
       right: 'base.user-management.user.view'
     },
-    component: UsersListComponent
+    resolve: {
+      groups: GroupsResolver
+    },
+    component: UsersComponent
   },
   {
-    path: 'view/:publicID',
+    path: 'view',
     data: {
       breadcrumb: 'View',
-      right: 'base.user-management.user.view'
+      right: 'base.user-management.user.view',
+    },
+    resolve: {
+      user: OwnUserResolver,
+      group: OwnGroupResolver
     },
     component: UserViewComponent
   },
@@ -48,7 +58,11 @@ const routes: Routes = [
       breadcrumb: 'Add',
       right: 'base.user-management.user.add'
     },
-    component: UsersAddComponent
+    resolve: {
+      groups: GroupsResolver,
+      providers: ProviderResolver
+    },
+    component: UserAddComponent
   },
   {
     path: 'edit/:publicID',
@@ -56,7 +70,12 @@ const routes: Routes = [
       breadcrumb: 'Edit',
       right: 'base.user-management.user.edit'
     },
-    component: UsersEditComponent
+    resolve: {
+      user: UserResolver,
+      groups: GroupsResolver,
+      providers: ProviderResolver
+    },
+    component: UserEditComponent
   },
   {
     path: 'delete/:publicID',
@@ -64,7 +83,10 @@ const routes: Routes = [
       breadcrumb: 'Delete',
       right: 'base.user-management.user.delete'
     },
-    component: UsersDeleteComponent
+    resolve: {
+      user: UserResolver
+    },
+    component: UserDeleteComponent
   }
 ];
 

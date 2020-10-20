@@ -1,0 +1,40 @@
+<table id="user-table" datatable [dtOptions]="tableOptions" class="table table-striped table-hover">
+  <thead>
+  <tr>
+    <th>Public ID</th>
+    <th>Username</th>
+    <th>Firstname</th>
+    <th>Lastname</th>
+    <th>Email</th>
+    <th>Registration</th>
+    <th>Group</th>
+    <th scope="col" *permissionLink="'base.user-management.user.*'">Action</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let user of users">
+    <td>{{user.public_id}}</td>
+    <td>{{user.user_name}}</td>
+    <td>{{user.first_name}}</td>
+    <td>{{user.last_name}}</td>
+    <td>{{user?.email}}</td>
+    <td>{{user?.registration_time | date: "dd/MM/yyyy - HH:mm:ss"}}</td>
+    <td>{{findGroup(user.group_id).label}}</td>
+    <td *permissionLink="'base.user-management.user.*'">
+      <a *permissionLink="'base.user-management.user.edit'" class="text-dark"
+         [routerLink]="['/management/users/edit/', user.public_id]">
+        <fa-icon [icon]="['far', 'edit']"></fa-icon>
+      </a>
+      <a class="text-dark ml-2 pointer" (click)="openPasswordModal(user)" *permissionLink="'base.user-management.user.edit'" >
+        <fa-icon [icon]="['fas', 'key']"></fa-icon>
+      </a>
+      <ng-container *ngIf="[1].indexOf(user.public_id) == -1">
+        <a *permissionLink="'base.user-management.user.delete'" class="text-dark ml-2"
+           [routerLink]="['/management/users/delete/', user.public_id]">
+          <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
+        </a>
+      </ng-container>
+    </td>
+  </tr>
+  </tbody>
+</table>

@@ -31,6 +31,8 @@ import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MainModule } from './main/main.module';
 import { AuthModule } from './auth/auth.module';
+import { NgxIndexedDBModule } from 'ngx-indexed-db';
+import { userSettingsDBConfig } from './management/user-settings/user-settings.module';
 
 @NgModule({
   declarations: [

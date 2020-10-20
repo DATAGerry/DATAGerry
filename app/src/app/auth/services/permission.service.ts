@@ -29,16 +29,16 @@ import { first, map } from 'rxjs/operators';
 export class PermissionService {
 
   // Right storage
-  private currentUserRightListSubject: BehaviorSubject<string[]>;
-  public currentUserRightList: Observable<string[]>;
+  private currentUserRightListSubject: BehaviorSubject<Right[]>;
+  public currentUserRightList: Observable<Right[]>;
 
   constructor(private groupService: GroupService) {
-    this.currentUserRightListSubject = new BehaviorSubject<string[]>(
+    this.currentUserRightListSubject = new BehaviorSubject<Right[]>(
       JSON.parse(localStorage.getItem('current-user-rights')));
     this.currentUserRightList = this.currentUserRightListSubject.asObservable();
   }
 
-  public get currentUserRights(): string[] {
+  public get currentUserRights(): Right[] {
     if (this.currentUserRightListSubject.value == null) {
       return [];
     }
@@ -61,7 +61,7 @@ export class PermissionService {
   }
 
   public hasRight(rightName: string): boolean {
-    return !!this.currentUserRights.find(right => right === rightName);
+    return !!this.currentUserRights.find(right => right.name === rightName);
   }
 
   public hasExtendedRight(rightName: string): boolean {

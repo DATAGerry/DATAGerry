@@ -1,0 +1,7 @@
+<div id="user-add-header">
+  <h1>Add user:</h1>
+</div>
+<hr />
+<div id="user-add-form">
+  <cmdb-user-form [providers]="providers" [groups]="groups" (submit)="save($event)"></cmdb-user-form>
+</div>

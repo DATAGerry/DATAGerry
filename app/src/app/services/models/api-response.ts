@@ -40,15 +40,19 @@ export class APIGetMultiResponse<T = CmdbDao> extends APIResponse {
   pagination?: APIPagination;
 }
 
-export class APIInsertSingleResponse<T = CmdbDao> extends APIResponse{
-  result_id: number;
+export class APIInsertSingleResponse<T = CmdbDao> extends APIResponse {
+  result_id?: number | string;
   raw: T;
 }
 
-export class APIUpdateSingleResponse<T = CmdbDao> extends APIResponse{
+export class APIUpdateSingleResponse<T = CmdbDao> extends APIResponse {
   result: T;
 }
 
-export class APIDeleteSingleResponse<T = CmdbDao> extends APIResponse{
-  deleted_entry: T;
+export class APIDeleteSingleResponse<T = CmdbDao> extends APIResponse {
+  raw: T;
+}
+
+export class APIGetListResponse<T = CmdbDao> extends APIResponse {
+  results: Array<T>;
 }

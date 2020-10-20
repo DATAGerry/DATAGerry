@@ -30,7 +30,7 @@ from cmdb.importer.importer_response import ImporterObjectResponse
 from cmdb.importer.mapper import Mapping, MapEntry
 from cmdb.importer.parser_object import JsonObjectParserResponse, CsvObjectParserResponse, ExcelObjectParserResponse
 from cmdb.importer.improve_object import ImproveObject
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 
 LOGGER = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
     """Object importer for JSON"""
 
     def __init__(self, file=None, config: JsonObjectImporterConfig = None,
-                 parser: JsonObjectParser = None, object_manager: CmdbObjectManager = None, request_user: User = None):
+                 parser: JsonObjectParser = None, object_manager: CmdbObjectManager = None, request_user: UserModel = None):
         super(JsonObjectImporter, self).__init__(file=file, file_type=self.FILE_TYPE, config=config, parser=parser,
                                                  object_manager=object_manager, request_user=request_user)
 
@@ -126,7 +126,7 @@ class CsvObjectImporterConfig(ObjectImporterConfig, CSVContent):
 class CsvObjectImporter(ObjectImporter, CSVContent):
 
     def __init__(self, file=None, config: CsvObjectImporterConfig = None,
-                 parser: JsonObjectParser = None, object_manager: CmdbObjectManager = None, request_user: User = None):
+                 parser: JsonObjectParser = None, object_manager: CmdbObjectManager = None, request_user: UserModel = None):
         super(CsvObjectImporter, self).__init__(file=file, file_type=self.FILE_TYPE, config=config, parser=parser,
                                                 object_manager=object_manager, request_user=request_user)
 
@@ -227,7 +227,7 @@ class ExcelObjectImporterConfig(ObjectImporterConfig, XLSXContent):
 class ExcelObjectImporter(ObjectImporter, XLSXContent):
 
     def __init__(self, file=None, config: ExcelObjectImporterConfig = None,
-                 parser: JsonObjectParser = None, object_manager: CmdbObjectManager = None, request_user: User = None):
+                 parser: JsonObjectParser = None, object_manager: CmdbObjectManager = None, request_user: UserModel = None):
         super(ExcelObjectImporter, self).__init__(file=file, file_type=self.FILE_TYPE, config=config, parser=parser,
                                                   object_manager=object_manager, request_user=request_user)
 

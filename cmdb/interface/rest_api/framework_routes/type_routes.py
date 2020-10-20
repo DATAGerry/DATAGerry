@@ -125,7 +125,7 @@ def insert_type(data: dict):
         return abort(404, err.message)
     except ManagerInsertError as err:
         return abort(400, err.message)
-    api_response = InsertSingleResponse(result_id, raw=TypeModel.to_json(raw_doc), url=request.url,
+    api_response = InsertSingleResponse(result_id=result_id, raw=TypeModel.to_json(raw_doc), url=request.url,
                                         model=TypeModel.MODEL)
     return api_response.make_response(prefix='types')
 

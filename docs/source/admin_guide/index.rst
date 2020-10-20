@@ -14,5 +14,5 @@ Admin Guide
     objects
     exportd
     docapi
-    usermanagement
+    user-management
     authentication

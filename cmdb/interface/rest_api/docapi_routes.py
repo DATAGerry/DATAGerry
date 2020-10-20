@@ -26,7 +26,7 @@ from cmdb.docapi.docapi_base import DocApiManager
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate, DocapiTemplateType
 from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManagerGetError, \
     DocapiTemplateManagerInsertError, DocapiTemplateManagerUpdateError, DocapiTemplateManagerDeleteError
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 
 with current_app.app_context():
     docapi_tpl_manager = current_app.docapi_tpl_manager
@@ -47,7 +47,7 @@ docapi_blueprint = RootBlueprint('docapi', __name__, url_prefix='/docapi')
 @login_required
 @insert_request_user
 @right_required('base.docapi.template.view')
-def get_template_list(request_user: User):
+def get_template_list(request_user: UserModel):
     """
     get all objects in database
     Returns:
@@ -69,7 +69,7 @@ def get_template_list(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.docapi.template.view')
-def get_template_list_filtered(searchfilter: str, request_user: User):
+def get_template_list_filtered(searchfilter: str, request_user: UserModel):
     try:
         filterdict = json.loads(searchfilter)
         tpl = docapi_tpl_manager.get_templates_by(**filterdict)
@@ -83,7 +83,7 @@ def get_template_list_filtered(searchfilter: str, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.docapi.template.view')
-def get_template(public_id, request_user: User):
+def get_template(public_id, request_user: UserModel):
     """
         get template in database
         Returns:
@@ -103,7 +103,7 @@ def get_template(public_id, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.docapi.template.view')
-def get_template_by_name(name: str, request_user: User):
+def get_template_by_name(name: str, request_user: UserModel):
     try:
         tpl = docapi_tpl_manager.get_template_by_name(name=name)
     except DocapiTemplateManagerGetError as err:
@@ -116,7 +116,7 @@ def get_template_by_name(name: str, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.docapi.template.add')
-def add_template(request_user: User):
+def add_template(request_user: UserModel):
     from bson import json_util
     add_data_dump = json.dumps(request.json)
     try:
@@ -145,7 +145,7 @@ def add_template(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.docapi.template.edit')
-def update_template(request_user: User):
+def update_template(request_user: UserModel):
     from bson import json_util
     add_data_dump = json.dumps(request.json)
     new_tpl_data = None
@@ -171,7 +171,7 @@ def update_template(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.docapi.template.delete')
-def delete_template(public_id: int, request_user: User):
+def delete_template(public_id: int, request_user: UserModel):
     try:
         ack = docapi_tpl_manager.delete_template(public_id=public_id, request_user=request_user)
     except DocapiTemplateManagerDeleteError:
@@ -187,7 +187,7 @@ def delete_template(public_id: int, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def render_object_template(public_id: int, object_id: int, request_user: User):
+def render_object_template(public_id: int, object_id: int, request_user: UserModel):
     docapi_manager = DocApiManager(docapi_tpl_manager, object_manager)
     output = docapi_manager.render_object_template(public_id, object_id)
 

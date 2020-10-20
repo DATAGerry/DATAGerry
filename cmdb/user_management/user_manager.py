@@ -20,9 +20,9 @@ from typing import List
 from cmdb.data_storage.database_manager import NoDocumentFound, DatabaseManagerMongo
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
-from cmdb.user_management.user import User
-from cmdb.user_management.user_group import UserGroup
-from cmdb.user_management.user_right import BaseRight
+from cmdb.user_management.models.user import UserModel
+from cmdb.user_management.models.group import UserGroupModel
+from cmdb.user_management.models.right import BaseRight
 from cmdb.utils.error import CMDBError
 from cmdb.security.security import SecurityManager
 
@@ -36,145 +36,118 @@ class UserManager(CmdbManagerBase):
         self.rights = self._load_rights()
         super(UserManager, self).__init__(database_manager)
 
-    def search(self):
-        pass
-
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
 
-    def count_user(self) -> int:
-        """Get number of users"""
-        return self._count(collection=User.COLLECTION)
-
-    def get_user(self, public_id: int) -> User:
-        """Get user by public id"""
-        try:
-            result = User(**self._get(collection=User.COLLECTION, public_id=public_id))
-        except (CMDBError, Exception) as err:
-            raise UserManagerGetError(err)
-        return result
-
-    def get_users(self) -> List[User]:
+    def get_users(self) -> List[UserModel]:
         """Get all users"""
         user_list = []
-        for founded_user in self._get_many(collection=User.COLLECTION):
+        for founded_user in self._get_many(collection=UserModel.COLLECTION):
             try:
-                user_list.append(User(**founded_user))
+                user_list.append(UserModel.from_data(founded_user))
             except CMDBError:
                 continue
         return user_list
 
-    def get_users_by(self, sort='public_id', **requirements) -> List[User]:
+    def get_users_by(self, sort='public_id', **requirements) -> List[UserModel]:
         """Get a list of users by requirement"""
         user_list = []
-        users_in_database = self._get_many(collection=User.COLLECTION, sort=sort, **requirements)
+        users_in_database = self._get_many(collection=UserModel.COLLECTION, sort=sort, **requirements)
         for user in users_in_database:
             try:
-                user_ = User(**user)
+                user_ = UserModel.from_data(user)
             except CMDBError as err:
                 LOGGER.error(f'[UserManager] Error while inserting database user into return list: {err}')
                 continue
             user_list.append(user_)
         return user_list
 
-    def get_user_by(self, **requirements) -> User:
+    def get_user_by(self, **requirements) -> UserModel:
         """Get user by requirement"""
         try:
-            return User(**self._get_by(collection=User.COLLECTION, **requirements))
+            return UserModel.from_data(self._get_by(collection=UserModel.COLLECTION, **requirements))
         except NoDocumentFound:
-            raise UserManagerGetError(f'User not found')
+            raise UserManagerGetError(f'UserModel not found')
 
-    def get_user_by_name(self, user_name) -> User:
+    def get_user_by_name(self, user_name) -> UserModel:
         """Get a user by his user_name"""
         return self.get_user_by(user_name=user_name)
 
-    def insert_user(self, user: User) -> int:
-        """
-        TODO: Refactor for dict use
-        """
-        try:
-            return self.dbm.insert(collection=User.COLLECTION, data=user.to_database())
-        except (CMDBError, Exception):
-            raise UserManagerInsertError(f'Could not insert {user.get_username()}')
-
     def update_user(self, public_id, update_params: dict):
         try:
-            return self._update(collection=User.COLLECTION, public_id=public_id, data=update_params)
+            return self._update(collection=UserModel.COLLECTION, public_id=public_id, data=update_params)
         except (CMDBError, Exception):
             raise UserManagerUpdateError(f'Could not update user with ID: {public_id}')
 
     def update_users_by(self, query: dict, update: dict):
         try:
-            return self._update_many(collection=User.COLLECTION, query=query, update=update)
+            return self._update_many(collection=UserModel.COLLECTION, query=query, update=update)
         except Exception as err:
             raise UserManagerUpdateError(err)
 
     def delete_user(self, public_id: int) -> bool:
         try:
-            return self._delete(collection=User.COLLECTION, public_id=public_id)
+            return self._delete(collection=UserModel.COLLECTION, public_id=public_id)
         except Exception:
             raise UserManagerDeleteError(f'Could not delete user with ID: {public_id}')
 
     def delete_users_by(self, query: dict):
         try:
-            return self._delete_many(collection=User.COLLECTION, filter_query=query).acknowledged
+            return self._delete_many(collection=UserModel.COLLECTION, filter_query=query).acknowledged
         except Exception as err:
             raise UserManagerDeleteError(err)
 
     def get_groups(self) -> list:
         group_list = []
-        for founded_group in self._get_many(collection=UserGroup.COLLECTION):
+        for founded_group in self._get_many(collection=UserGroupModel.COLLECTION):
             try:
-                group_list.append(UserGroup(**founded_group))
+                group_list.append(UserGroupModel(**founded_group))
             except CMDBError:
                 LOGGER.debug("Error while group parser: {}".format(founded_group))
                 continue
         return group_list
 
-    def get_group(self, public_id: int) -> UserGroup:
+    def get_group(self, public_id: int) -> UserGroupModel:
         try:
-            founded_group = self._get(collection=UserGroup.COLLECTION, public_id=public_id)
-            return UserGroup(**founded_group)
+            founded_group = self._get(collection=UserGroupModel.COLLECTION, public_id=public_id)
+            return UserGroupModel(**founded_group)
         except NoDocumentFound as e:
             raise UserManagerGetError(e)
 
-    def get_group_by(self, **requirements) -> UserGroup:
+    def get_group_by(self, **requirements) -> UserGroupModel:
         try:
-            return UserGroup(**self._get_by(collection=UserGroup.COLLECTION, **requirements))
+            return UserGroupModel(**self._get_by(collection=UserGroupModel.COLLECTION, **requirements))
         except NoDocumentFound:
             raise UserManagerGetError(f'Group not found')
 
     def update_group(self, public_id, update_params: dict) -> bool:
         try:
-            ack = self._update(collection=UserGroup.COLLECTION, public_id=public_id,
-                                  data=update_params)
+            ack = self._update(collection=UserGroupModel.COLLECTION, public_id=public_id,
+                               data=update_params)
         except (CMDBError, Exception) as e:
             LOGGER.error(e)
             raise UserManagerUpdateError(e)
         return ack
 
-    def insert_group(self, insert_group: UserGroup) -> int:
+    def insert_group(self, insert_group: UserGroupModel) -> int:
         try:
-            return self.dbm.insert(collection=UserGroup.COLLECTION, data=insert_group.to_database())
+            return self.dbm.insert(collection=UserGroupModel.COLLECTION, data=insert_group.__dict__)
         except Exception:
-            raise UserManagerInsertError(insert_group.get_name())
+            raise UserManagerInsertError(insert_group.name)
 
     def delete_group(self, public_id, user_action: str = None, options: dict = None) -> bool:
         try:
-            delete_group: UserGroup = self.get_group(public_id)
+            delete_group: UserGroupModel = self.get_group(public_id)
         except UserManagerGetError:
             raise UserManagerDeleteError(f'Could not find group with ID: {public_id}')
 
-        if not delete_group.is_deletable():
-            raise UserManagerDeleteError(f'Group {delete_group.get_label()} is not deletable!')
-
         try:
-            ack = self.dbm.delete(collection=UserGroup.COLLECTION, public_id=public_id).acknowledged
+            ack = self.dbm.delete(collection=UserGroupModel.COLLECTION, public_id=public_id).acknowledged
         except Exception:
             raise UserManagerDeleteError(f'Could not delete group')
 
         # Cleanup user
-        users_in_group: [User] = self.get_users_by(**{'group_id': delete_group.get_public_id()})
+        users_in_group: [UserModel] = self.get_users_by(**{'group_id': delete_group.get_public_id()})
         if len(users_in_group) > 0:
             if user_action == 'move':
                 if not options.get('group_id'):
@@ -191,16 +164,11 @@ class UserManager(CmdbManagerBase):
         selected_levels = []
         for right in self.rights:
             if right.get_level() <= min_level:
-                selected_levels.append(right.get_name())
+                selected_levels.append(right.get_display_name())
         return selected_levels
 
     def get_all_rights(self):
         return self.rights
-
-    @staticmethod
-    def get_right_tree():
-        from cmdb.user_management.rights import __all__
-        return __all__
 
     def _load_rights(self):
         from cmdb.user_management.rights import __all__
@@ -214,10 +182,6 @@ class UserManager(CmdbManagerBase):
             else:
                 rights.append(right)
         return rights
-
-    @staticmethod
-    def get_security_levels():
-        return BaseRight.get_levels()
 
     def get_right_by_name(self, name) -> BaseRight:
         try:

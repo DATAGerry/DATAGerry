@@ -1,0 +1,6 @@
+<div id="group-edit-headline">
+  <h1>Edit group: {{group?.label}}
+  </h1>
+</div>
+<hr/>
+<cmdb-group-form [group]="group" [rights]="rights" (submit)="edit($event)" (validation)="valid = $event"></cmdb-group-form>
