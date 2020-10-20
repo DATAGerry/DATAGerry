@@ -28,13 +28,4 @@ export class SystemService<T = any> implements ApiService  {
     );
   }
 
-  public reloadConfigFile(): Observable<T> {
-    return this.api.callPost<T>(`${this.servicePrefix}/config/`, true).pipe(
-      map((apiResponse) => {
-        return apiResponse.body;
-      })
-    );
-  }
-
-
 }
