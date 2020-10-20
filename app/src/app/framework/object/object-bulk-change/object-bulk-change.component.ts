@@ -23,10 +23,10 @@ import { ObjectBulkChangeEditorComponent } from './object-bulk-change-editor/obj
 import { ObjectBulkChangePreviewComponent } from './object-bulk-change-preview/object-bulk-change-preview.component';
 import { CmdbObject } from '../../models/cmdb-object';
 import { FormGroup } from '@angular/forms';
-import { ObjectService } from '../../services/object.service';
+import { ObjectService} from '../../services/object.service';
 import { TypeService } from '../../services/type.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpHeaders } from '@angular/common/http';
+import { httpObserveOptions } from '../../../services/api-call.service';
 
 @Component({
   selector: 'cmdb-object-bulk-change',
@@ -72,12 +72,9 @@ export class ObjectBulkChangeComponent {
 
   public saveObject() {
     if (this.renderForm.get('changedFields').value.size > 0 ) {
-      const httpOptions = {
-        headers: new HttpHeaders({
-          'Content-Type': 'application/json'
-        }),
-        params: {objectIDs: this.objectIDs},
-      };
+      const httpOptions = Object.assign({}, httpObserveOptions);
+      httpOptions.params = {objectIDs: this.objectIDs};
+
       const patchValue = [];
       const newObjectInstance = new CmdbObject();
       newObjectInstance.active = this.activeState;

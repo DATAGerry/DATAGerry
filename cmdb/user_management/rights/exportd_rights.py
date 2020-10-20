@@ -15,29 +15,29 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from cmdb.user_management.user_right import BaseRight
+from cmdb.user_management.models.right import BaseRight, Levels
 
 
 class ExportdRight(BaseRight):
-    MIN_LEVEL = BaseRight.PROTECTED
+    MIN_LEVEL = Levels.PROTECTED
     PREFIX = '{}.{}'.format(BaseRight.PREFIX, 'exportd')
 
-    def __init__(self, name: str, level: int = 50, description: str = None):
+    def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
         super(ExportdRight, self).__init__(level, name, description=description)
 
 
 class ExportdJobRight(ExportdRight):
-    MIN_LEVEL = BaseRight.PROTECTED
+    MIN_LEVEL = Levels.PROTECTED
     PREFIX = '{}.{}'.format(ExportdRight.PREFIX, 'job')
 
-    def __init__(self, name: str, level: int = 50, description: str = None):
+    def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
         super(ExportdJobRight, self).__init__(name, level, description=description)
 
 
 class ExportdLogRight(ExportdRight):
-    MIN_LEVEL = BaseRight.PROTECTED
-    MAX_LEVEL = BaseRight.DANGER
+    MIN_LEVEL = Levels.PROTECTED
+    MAX_LEVEL = Levels.DANGER
     PREFIX = '{}.{}'.format(ExportdRight.PREFIX, 'log')
 
-    def __init__(self, name: str, level: int = BaseRight.PROTECTED, description: str = None):
+    def __init__(self, name: str, level: Levels = Levels.PROTECTED, description: str = None):
         super(ExportdLogRight, self).__init__(name, level, description=description)

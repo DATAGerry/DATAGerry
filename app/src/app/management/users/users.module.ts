@@ -19,39 +19,57 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UsersRoutingModule } from './users-routing.module';
-import { UsersListComponent } from './users-list/users-list.component';
 import { DataTablesModule } from 'angular-datatables';
-import { UsersAddComponent } from './users-add/users-add.component';
 import { PasswordStrengthMeterModule } from '../../layout/password-strength-meter/password-strength-meter.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { UserViewComponent } from './user-view/user-view.component';
 import { LayoutModule } from '../../layout/layout.module';
-import { UsersEditComponent } from './users-edit/users-edit.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { UsersDeleteComponent } from './users-delete/users-delete.component';
 import { UsersPasswdModalComponent } from './modals/users-passwd-modal/users-passwd-modal.component';
+import { UsersComponent } from './users.component';
+import { UserHeadlineComponent } from './components/user-headline/user-headline.component';
+import { UserDisplayNameComponent } from './components/user-display-name/user-display-name.component';
+import { UserImageComponent } from './components/user-image/user-image.component';
+import { UserDisplayComponent } from './components/user-display/user-display.component';
+import { UsersTableComponent } from './components/users-table/users-table.component';
+import { AuthModule } from '../../auth/auth.module';
+import { UserFormComponent } from './components/user-form/user-form.component';
+import { UserAddComponent } from './user-add/user-add.component';
+import { UserEditComponent } from './user-edit/user-edit.component';
+import { UserDeleteComponent } from './user-delete/user-delete.component';
 
 @NgModule({
   entryComponents: [
     UsersPasswdModalComponent
   ],
   declarations: [
-    UsersListComponent,
     UserViewComponent,
-    UsersAddComponent,
-    UsersEditComponent,
-    UsersDeleteComponent,
-    UsersPasswdModalComponent
+    UsersPasswdModalComponent,
+    UsersComponent,
+    UserImageComponent,
+    UserHeadlineComponent,
+    UserDisplayNameComponent,
+    UserDisplayComponent,
+    UsersTableComponent,
+    UserFormComponent,
+    UserAddComponent,
+    UserEditComponent,
+    UserDeleteComponent
   ],
-  imports: [
-    CommonModule,
-    UsersRoutingModule,
-    DataTablesModule,
-    PasswordStrengthMeterModule,
-    ReactiveFormsModule,
-    LayoutModule,
-    FontAwesomeModule,
-  ]
+  exports: [
+    UserImageComponent,
+    UserDisplayComponent
+  ],
+    imports: [
+        CommonModule,
+        UsersRoutingModule,
+        DataTablesModule,
+        PasswordStrengthMeterModule,
+        ReactiveFormsModule,
+        LayoutModule,
+        FontAwesomeModule,
+        AuthModule,
+    ]
 })
 export class UsersModule {
 }

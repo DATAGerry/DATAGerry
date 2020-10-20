@@ -17,43 +17,67 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService } from '../../services/api-call.service';
-import { Group } from '../models/group';
+import { ApiCallService, ApiService, httpObserveOptions } from '../../services/api-call.service';
 import { Right } from '../models/right';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { HttpParams, HttpResponse } from '@angular/common/http';
+import { APIGetMultiResponse, APIGetSingleResponse } from '../../services/models/api-response';
+import { CollectionParameters } from '../../services/models/api-parameter';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RightService<T = Right> implements ApiService {
 
-  public readonly servicePrefix: string = 'right';
+  public readonly servicePrefix: string = 'rights';
 
   constructor(private api: ApiCallService) {
   }
 
-  public getRightList(): Observable<T[]> {
-    return this.api.callGet<T[]>(`${this.servicePrefix}/`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
+  /**
+   * Iterate over the right collection
+   * @param params Instance of CollectionParameters
+   */
+  public getRights(params: CollectionParameters = { filter: undefined, limit: 10, sort: 'name', order: 1, page: 1 }
+  ): Observable<APIGetMultiResponse<T>> {
+    const options = httpObserveOptions;
+    let httpParams: HttpParams = new HttpParams();
+    if (params.filter !== undefined) {
+      httpParams = httpParams.set('filter', params.filter);
+    }
+    httpParams = httpParams.set('limit', params.limit.toString());
+    httpParams = httpParams.set('sort', params.sort);
+    httpParams = httpParams.set('order', params.order.toString());
+    httpParams = httpParams.set('page', params.page.toString());
+    options.params = httpParams;
+    return this.api.callGet<T>(`${ this.servicePrefix }/`, options).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
     );
   }
 
-  public getRightLevels() {
-    return this.api.callGet<T[]>(`${this.servicePrefix}/levels`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
+  /**
+   * Get a right by its name.
+   * @param name: Name of the right.
+   */
+  public getRight(name: string): Observable<T> {
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ name }/`).pipe(
+      map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => {
+        return apiResponse.body.result as T;
       })
     );
   }
 
-
+  /**
+   * Get security levels.
+   */
+  public getLevels(): Observable<any> {
+    return this.api.callGet<T>(`${ this.servicePrefix }/levels/`).pipe(
+      map((apiResponse: HttpResponse<APIGetSingleResponse<any>>) => {
+        return apiResponse.body.result;
+      })
+    );
+  }
 }

@@ -16,60 +16,67 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { User } from '../../models/user';
 import { UserService } from '../../services/user.service';
 import { GroupService } from '../../services/group.service';
 import { Group } from '../../models/group';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { ReplaySubject, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { FormGroup } from '@angular/forms';
+import { UserFormComponent } from '../components/user-form/user-form.component';
 import { ToastService } from '../../../layout/toast/toast.service';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { UsersPasswdModalComponent } from '../modals/users-passwd-modal/users-passwd-modal.component';
 
 @Component({
   selector: 'cmdb-user-view',
   templateUrl: './user-view.component.html',
   styleUrls: ['./user-view.component.scss']
 })
-export class UserViewComponent implements OnInit {
+export class UserViewComponent implements OnInit, OnDestroy {
+
+  @ViewChild(UserFormComponent, { static: true }) userFormComponent: UserFormComponent;
+  private modalRef: NgbModalRef;
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   public userID: number;
-  public userInstance: User;
-  public userGroup: Group;
-  public profileForm: FormGroup;
-  public passwordChangeForm: FormGroup;
+  public user: User;
+  public group: Group;
 
-  constructor(private route: ActivatedRoute, private userService: UserService,
-              private groupService: GroupService, private toastService: ToastService) {
-    this.route.params.subscribe((id) => this.userID = id.publicID);
-    this.profileForm = new FormGroup({});
-    this.passwordChangeForm = new FormGroup({
-      password: new FormControl('', Validators.required)
+  constructor(private route: ActivatedRoute, public userService: UserService, public groupService: GroupService,
+              private toastService: ToastService, private modalService: NgbModal) {
+    this.user = this.route.snapshot.data.user as User;
+    this.group = this.route.snapshot.data.group as Group;
+  }
+
+  public save(user: User): void {
+    const editUser = Object.assign(this.user, user);
+    this.userService.putUser(this.user.public_id, editUser).pipe(takeUntil(this.subscriber)).subscribe((apiUser: User) => {
+      this.toastService.success('Your profile was updated!');
     });
   }
+
 
   public ngOnInit(): void {
-    this.userService.getUser(this.userID).subscribe((user: User) => {
-        this.userInstance = user;
-      },
-      (error) => {
-
-      },
-      () => {
-        this.groupService.getGroup(this.userInstance.group_id).subscribe((groupResp: Group) => {
-          this.userGroup = groupResp;
-        });
-      });
+    this.userFormComponent.usernameControl.disable();
+    this.userFormComponent.form.removeControl('password');
+    this.userFormComponent.form.removeControl('authenticator');
+    this.userFormComponent.form.removeControl('group_id');
   }
 
-  public onPasswordChange(): void {
-    const newPassword = this.passwordChangeForm.get('password').value;
-    this.userService.changeUserPassword(this.userInstance.public_id, newPassword).subscribe(res => {
-      if (res) {
-        this.toastService.info('Password changed!');
-        this.passwordChangeForm.reset();
-      }
+  public ngOnDestroy(): void {
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
+    this.subscriber.next();
+    this.subscriber.complete();
+  }
 
-    });
+  public openPasswordModal() {
+    this.modalRef = this.modalService.open(UsersPasswdModalComponent, { size: 'lg' });
+    this.modalRef.componentInstance.user = this.user;
   }
 
 }

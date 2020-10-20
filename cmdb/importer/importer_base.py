@@ -28,7 +28,7 @@ from cmdb.importer.importer_response import BaseImporterResponse, ImporterObject
     ImportSuccessMessage
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.importer.parser_response import ObjectParserResponse
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 
 LOGGER = logging.getLogger(__name__)
 
@@ -73,7 +73,7 @@ class ObjectImporter(BaseImporter):
     """Superclass for object importers"""
 
     def __init__(self, file, file_type, config: ObjectImporterConfig = None,
-                 parser: BaseObjectParser = None, object_manager: CmdbObjectManager = None, request_user: User = None):
+                 parser: BaseObjectParser = None, object_manager: CmdbObjectManager = None, request_user: UserModel = None):
         """
         Basic importer super class for object imports
         Normally should be started by start_import

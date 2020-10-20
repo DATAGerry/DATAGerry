@@ -24,7 +24,7 @@ from cmdb.interface.rest_api.setting_routes import settings_blueprint
 from cmdb.interface.route_utils import make_response, login_required, right_required, \
     insert_request_user
 from cmdb.interface.blueprint import NestedBlueprint
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.utils.system_reader import SystemSettingsReader
 
@@ -44,7 +44,7 @@ with current_app.app_context():
 @login_required
 @insert_request_user
 @right_required('base.system.view')
-def get_datagerry_information(request_user: User):
+def get_datagerry_information(request_user: UserModel):
     from cmdb import __title__, __version__, __runtime__
 
     try:
@@ -68,7 +68,8 @@ def get_datagerry_information(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.system.view')
-def get_config_information(request_user: User):
+def get_config_information(request_user: UserModel):
+
     ssc = SystemConfigReader()
     config_dict = {
         'path': ssc.config_file,
@@ -92,7 +93,7 @@ def get_config_information(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.system.view')
-def get_system_information(request_user: User):
+def get_system_information(request_user: UserModel):
     system_infos = {
         'platform': sys.platform,
         'python_interpreter': {

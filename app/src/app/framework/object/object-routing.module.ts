@@ -25,6 +25,8 @@ import { ObjectCopyComponent } from './object-copy/object-copy.component';
 import { ObjectLogComponent } from './object-log/object-log.component';
 import { ObjectListByTypeComponent } from './object-list-by-type/object-list-by-type.component';
 import { ObjectBulkChangeComponent } from './object-bulk-change/object-bulk-change.component';
+import { UserSettingsResolver } from '../../management/user-settings/resolvers/user-settings-resolver.service';
+import { TypeResolver } from '../resolvers/type-resolver.service';
 
 
 const routes: Routes = [
@@ -82,6 +84,10 @@ const routes: Routes = [
     data: {
       breadcrumb: 'Object Type List',
       right: 'base.framework.object.view'
+    },
+    resolve: {
+      type: TypeResolver,
+      userSetting: UserSettingsResolver
     },
     component: ObjectListByTypeComponent,
   },

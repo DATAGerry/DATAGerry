@@ -33,8 +33,6 @@ import { BreadcrumbService } from './structure/breadcrumb/breadcrumb.service';
 import { NavigationComponent } from './structure/navigation/navigation.component';
 import { BreadcrumbComponent } from './structure/breadcrumb/breadcrumb.component';
 import { IconPickerComponent } from './helpers/icon-picker/icon-picker.component';
-import { UserImageComponent } from './components/user-image/user-image.component';
-import { UserDisplayComponent } from './components/user-display/user-display.component';
 import { ChartsComponent } from './components/charts/charts.component';
 import { NgxSpinnerComponent, NgxSpinnerModule } from 'ngx-spinner';
 import { IntroComponent } from './intro/intro.component';
@@ -107,8 +105,6 @@ import { TypeFilterPipe } from './pipes/typeFilter.pipe';
     TypeLabelComponent,
     FooterComponent,
     IconPickerComponent,
-    UserImageComponent,
-    UserDisplayComponent,
     ChartsComponent,
     StepByStepIntroComponent,
     JwPaginationComponent,
@@ -149,8 +145,6 @@ import { TypeFilterPipe } from './pipes/typeFilter.pipe';
     TableComponent,
     TypeLabelComponent,
     IconPickerComponent,
-    UserImageComponent,
-    UserDisplayComponent,
     ChartsComponent,
     JwPaginationComponent,
     SidebarComponent,

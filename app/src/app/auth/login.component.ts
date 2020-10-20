@@ -25,6 +25,7 @@ import { forkJoin, Subscription } from 'rxjs';
 import { User } from '../management/models/user';
 import { PermissionService } from './services/permission.service';
 import { Group } from '../management/models/group';
+import { LoginResponse } from './models/responses';
 
 @Component({
   selector: 'cmdb-login',
@@ -69,8 +70,8 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this.loginSubscription = this.authenticationService.login(
       this.loginForm.controls.username.value, this.loginForm.controls.password.value).pipe(first()).subscribe(
-      (user: User) => {
-        this.permissionService.storeUserRights(user.group_id).pipe(first()).subscribe((group: Group) => {
+      (response: LoginResponse) => {
+        this.permissionService.storeUserRights(response.user.group_id).pipe(first()).subscribe((group: Group) => {
           this.router.navigate(['/']);
         });
       },

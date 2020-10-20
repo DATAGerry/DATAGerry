@@ -15,33 +15,68 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from functools import wraps
+from typing import Type
 
 from cerberus import Validator
-from flask import Blueprint, abort, request
+from flask import Blueprint, abort, request, current_app
 
-from cmdb.interface.api_parameters import CollectionParameters
-from cmdb.interface.route_utils import auth_is_valid, user_has_right
+from cmdb.manager import ManagerGetError
+from cmdb.interface.api_parameters import CollectionParameters, ApiParameters
+from cmdb.interface.route_utils import auth_is_valid, user_has_right, parse_authorization_header
+from cmdb.security.token.validator import TokenValidator, ValidationError
+from cmdb.user_management import UserModel
+from cmdb.user_management.managers.user_manager import UserManager
 
 
 class APIBlueprint(Blueprint):
     """Wrapper class for Blueprints with nested elements"""
 
     def __init__(self, *args, **kwargs):
-        self.nested_blueprints = []
         super(APIBlueprint, self).__init__(*args, **kwargs)
 
     @staticmethod
-    def protect(auth: bool = True, right: str = None):
+    def protect(auth: bool = True, right: str = None, excepted: dict = None):
         """Active auth and right protection for flask routes"""
 
         def _protect(f):
             @wraps(f)
             def _decorate(*args, **kwargs):
-                if auth and not auth_is_valid():
-                    return abort(401)
 
-                if right and not user_has_right(right):
-                    return abort(401)
+                if auth:
+                    if not auth_is_valid():
+                        return abort(401)
+
+                if auth and right:
+                    if not user_has_right(right):
+                        if excepted:
+                            with current_app.app_context():
+                                user_manager = UserManager(current_app.database_manager)
+
+                            token = parse_authorization_header(request.headers['Authorization'])
+                            try:
+                                decrypted_token = TokenValidator().decode_token(token)
+                            except ValidationError as err:
+                                return abort(401)
+                            try:
+                                user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
+                                user_dict: dict = UserModel.to_dict(user_manager.get(user_id))
+
+                                if excepted:
+                                    for exe_key, exe_value in excepted.items():
+                                        try:
+                                            route_parameter = kwargs[exe_value]
+                                        except KeyError:
+                                            return abort(403, f'User has not the required right {right}')
+
+                                        if exe_key not in user_dict.keys():
+                                            return abort(403, f'User has not the required right {right}')
+
+                                        if user_dict[exe_key] == route_parameter:
+                                            return f(*args, **kwargs)
+                            except ManagerGetError:
+                                return abort(404)
+                        return abort(403, f'User has not the required right {right}')
+
                 return f(*args, **kwargs)
 
             return _decorate
@@ -69,10 +104,40 @@ class APIBlueprint(Blueprint):
         return _validate
 
     @classmethod
+    def parse_parameters(cls, parameters_class: Type[ApiParameters], **optional):
+        """
+        Parse generic parameters from http to a class
+        Args:
+            parameters_class: Wrapper class of the ApiParameters
+            **optional: Dynamic route parameters
+
+        Returns:
+            ApiParameters: Wrapper class
+        """
+
+        def _parse(f):
+            @wraps(f)
+            def _decorate(*args, **kwargs):
+                try:
+                    params = parameters_class.from_http(
+                        str(request.query_string, 'utf-8'), **{**optional, **request.args.to_dict()}
+                    )
+                except Exception as e:
+                    return abort(400, str(e))
+                return f(params=params, *args, **kwargs)
+
+            return _decorate
+
+        return _parse
+
+    @classmethod
     def parse_collection_parameters(cls, **optional):
         """
         Wrapper function for the flask routes.
         Auto parses the collection based parameters to the route.
+
+        TODO:
+            Move to global method like up.
 
         Args:
             **optional: dict of optional collection parameters for given route function.
@@ -92,13 +157,6 @@ class APIBlueprint(Blueprint):
             return _decorate
 
         return _parse
-
-    def register_nested_blueprint(self, nested_blueprint):
-        """Add a 'sub' blueprint to root element
-        Args:
-            nested_blueprint (NestedBlueprint): Blueprint for sub routes
-        """
-        self.nested_blueprints.append(nested_blueprint)
 
 
 class RootBlueprint(Blueprint):

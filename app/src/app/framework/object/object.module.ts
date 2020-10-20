@@ -2,7 +2,7 @@
 * DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
-* This program is free software: you can redistribute it and/or modify
+* This program is free software: you can redistribute it and/or modifyhttps://nethinks.atlassian.net/browse/NET-412
 * it under the terms of the GNU Affero General Public License as
 * published by the Free Software Foundation, either version 3 of the
 * License, or (at your option) any later version.
@@ -59,6 +59,7 @@ import { ObjectBulkChangePreviewComponent } from './object-bulk-change/object-bu
 import { ArchwizardModule } from 'angular-archwizard';
 import { ObjectDocsComponent } from './components/object-docs/object-docs.component';
 import { ObjectAttachmentsComponent } from './components/object-attachments/object-attachments.component';
+import { UsersModule } from '../../management/users/users.module';
 
 @NgModule({
   entryComponents: [
@@ -93,27 +94,28 @@ import { ObjectAttachmentsComponent } from './components/object-attachments/obje
     ObjectBulkChangeEditorComponent,
     ObjectBulkChangePreviewComponent,
     ObjectDocsComponent,
-    ObjectAttachmentsComponent,
+    ObjectAttachmentsComponent
   ],
+    imports: [
+        CommonModule,
+        ObjectRoutingModule,
+        DataTablesModule,
+        AuthModule,
+        LayoutModule,
+        QRCodeModule,
+        NgxSpinnerModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgSelectModule,
+        NgbTooltipModule,
+        FontAwesomeModule,
+        ArchwizardModule,
+        RenderModule,
+        UsersModule
+    ],
     exports: [
         ObjectViewRenderComponent
-    ],
-  imports: [
-    CommonModule,
-    ObjectRoutingModule,
-    DataTablesModule,
-    AuthModule,
-    LayoutModule,
-    QRCodeModule,
-    NgxSpinnerModule,
-    FormsModule,
-    ReactiveFormsModule,
-    NgSelectModule,
-    NgbTooltipModule,
-    FontAwesomeModule,
-    ArchwizardModule,
-    RenderModule
-  ]
+    ]
 })
 export class ObjectModule {
 }

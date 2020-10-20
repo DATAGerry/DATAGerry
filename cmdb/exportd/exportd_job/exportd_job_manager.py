@@ -25,7 +25,7 @@ from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerIn
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.utils.error import CMDBError
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 
 LOGGER = logging.getLogger(__name__)
 
@@ -119,7 +119,7 @@ class ExportdJobManagement(CmdbManagerBase):
             raise ExportdJobManagerInsertError(e)
         return ack
 
-    def update_job(self, data: (dict, ExportdJob), request_user: User, event_start=True) -> str:
+    def update_job(self, data: (dict, ExportdJob), request_user: UserModel, event_start=True) -> str:
         """
         Update new ExportdJob Object
         Args:
@@ -148,7 +148,7 @@ class ExportdJobManagement(CmdbManagerBase):
             self._event_queue.put(event)
         return ack.acknowledged
 
-    def delete_job(self, public_id: int, request_user: User) -> bool:
+    def delete_job(self, public_id: int, request_user: UserModel) -> bool:
         try:
             ack = self._delete(collection=ExportdJob.COLLECTION, public_id=public_id)
             if self._event_queue:
@@ -159,7 +159,7 @@ class ExportdJobManagement(CmdbManagerBase):
         except Exception:
             raise ExportdJobManagerDeleteError(f'Could not delete job with ID: {public_id}')
 
-    def run_job_manual(self, public_id: int, request_user: User) -> bool:
+    def run_job_manual(self, public_id: int, request_user: UserModel) -> bool:
         if self._event_queue:
             event = Event("cmdb.exportd.run_manual", {"id": public_id,
                                                       "user_id": request_user.get_public_id()})

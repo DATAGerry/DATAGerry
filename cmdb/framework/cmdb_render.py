@@ -34,7 +34,7 @@ from datetime import datetime
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeSection
 from cmdb.framework.special.dt_html_parser import DtHtmlParser
-from cmdb.user_management.user_manager import User, UserManager
+from cmdb.user_management.user_manager import UserModel, UserManager
 
 LOGGER = logging.getLogger(__name__)
 
@@ -69,23 +69,23 @@ class CmdbRender:
 
     def __init__(self, object_instance: CmdbObject,
                  type_instance: TypeModel,
-                 render_user: User, user_list: List[User] = None,
+                 render_user: UserModel, user_list: List[UserModel] = None,
                  object_manager: CmdbObjectManager = None, dt_render=False):
         self.object_instance: CmdbObject = object_instance
         self.type_instance: TypeModel = type_instance
-        self.user_list: List[User] = user_list
-        self.render_user: User = render_user
+        self.user_list: List[UserModel] = user_list
+        self.render_user: UserModel = render_user
         self.object_manager = object_manager
         self.dt_render = dt_render
 
     def _render_username_by_id(self, user_id: int) -> str:
-        user: User = None
+        user: UserModel = None
         try:
             user = next(_ for _ in self.user_list if _.public_id == user_id)
         except Exception:
             user = None
         if user:
-            return user.get_name()
+            return user.get_display_name()
         else:
             return CmdbRender.AUTHOR_ANONYMOUS_NAME
 
@@ -293,7 +293,7 @@ class CmdbRender:
 
 class RenderList:
 
-    def __init__(self, object_list: List[CmdbObject], request_user: User, dt_render=False,
+    def __init__(self, object_list: List[CmdbObject], request_user: UserModel, dt_render=False,
                  object_manager: CmdbObjectManager = None):
         self.object_list: List[CmdbObject] = object_list
         self.request_user = request_user
@@ -307,7 +307,7 @@ class RenderList:
 
     @timing('RenderList')
     def render_result_list(self) -> List[RenderResult]:
-        complete_user_list: List[User] = self.user_manager.get_users()
+        complete_user_list: List[UserModel] = self.user_manager.get_users()
 
         preparation_objects: List[RenderResult] = []
         for passed_object in self.object_list:

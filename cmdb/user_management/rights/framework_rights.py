@@ -14,57 +14,48 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from cmdb.user_management.user_right import BaseRight
+from cmdb.user_management.models.right import BaseRight, Levels
 
 
 class FrameworkRight(BaseRight):
-    MIN_LEVEL = BaseRight.PERMISSION
+    MIN_LEVEL = Levels.PERMISSION
     PREFIX = '{}.{}'.format(BaseRight.PREFIX, 'framework')
 
-    def __init__(self, name: str, level: int = MIN_LEVEL, description: str = None):
+    def __init__(self, name: str, level: Levels = MIN_LEVEL, description: str = None):
         super(FrameworkRight, self).__init__(level, name, description=description)
 
 
 class ObjectRight(FrameworkRight):
-    MIN_LEVEL = BaseRight.PERMISSION
-    MAX_LEVEL = BaseRight.SECURE
+    MIN_LEVEL = Levels.PERMISSION
+    MAX_LEVEL = Levels.SECURE
     PREFIX = '{}.{}'.format(FrameworkRight.PREFIX, 'object')
 
-    def __init__(self, name: str, level: int = MIN_LEVEL, description: str = None):
+    def __init__(self, name: str, level: Levels = MIN_LEVEL, description: str = None):
         super(ObjectRight, self).__init__(name, level, description=description)
 
 
 class TypeRight(FrameworkRight):
-    MIN_LEVEL = BaseRight.PROTECTED
-    MAX_LEVEL = BaseRight.CRITICAL
+    MIN_LEVEL = Levels.PROTECTED
+    MAX_LEVEL = Levels.CRITICAL
     PREFIX = '{}.{}'.format(FrameworkRight.PREFIX, 'type')
 
-    def __init__(self, name: str, level: int = 50, description: str = None):
+    def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
         super(TypeRight, self).__init__(name, level, description=description)
 
 
 class CategoryRight(FrameworkRight):
-    MIN_LEVEL = BaseRight.PROTECTED
-    MAX_LEVEL = BaseRight.SECURE
+    MIN_LEVEL = Levels.PROTECTED
+    MAX_LEVEL = Levels.SECURE
     PREFIX = '{}.{}'.format(FrameworkRight.PREFIX, 'category')
 
-    def __init__(self, name: str, level: int = BaseRight.PROTECTED, description: str = None):
+    def __init__(self, name: str, level: Levels = Levels.PROTECTED, description: str = None):
         super(CategoryRight, self).__init__(name, level, description=description)
 
 
-class CollectionRight(FrameworkRight):
-    MIN_LEVEL = BaseRight.PERMISSION
-    MAX_LEVEL = BaseRight.SECURE
-    PREFIX = '{}.{}'.format(FrameworkRight.PREFIX, 'collection')
-
-    def __init__(self, name: str, level: int = BaseRight.PROTECTED, description: str = None):
-        super(CollectionRight, self).__init__(name, level, description=description)
-
-
 class LogRight(FrameworkRight):
-    MIN_LEVEL = BaseRight.PROTECTED
-    MAX_LEVEL = BaseRight.DANGER
+    MIN_LEVEL = Levels.PROTECTED
+    MAX_LEVEL = Levels.DANGER
     PREFIX = '{}.{}'.format(FrameworkRight.PREFIX, 'log')
 
-    def __init__(self, name: str, level: int = BaseRight.PROTECTED, description: str = None):
+    def __init__(self, name: str, level: Levels = Levels.PROTECTED, description: str = None):
         super(LogRight, self).__init__(name, level, description=description)
