@@ -91,6 +91,8 @@ class TypeManager(FrameworkManager):
         Returns:
             int: The Public ID of the new inserted type
         """
+        if isinstance(type, TypeModel):
+            type = TypeModel.to_json(type)
         return self._insert(self.collection, resource=type)
 
     def update(self, public_id: Union[PublicID, int], type: Union[TypeModel, dict]):
