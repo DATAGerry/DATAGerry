@@ -69,7 +69,7 @@ class LdapAuthenticationProviderConfig(AuthProviderConfig):
             AuthProviderConfigFormSection(name='connection_config', entries=[
                 AuthProviderConfigFormEntry(name='user', type='text',
                                             default=DEFAULT_CONFIG_VALUES.get('connection_config').get('user')),
-                AuthProviderConfigFormEntry(name='password', type='text',
+                AuthProviderConfigFormEntry(name='password', type='password', force_hidden=True,
                                             default=DEFAULT_CONFIG_VALUES.get('connection_config').get('password')),
                 AuthProviderConfigFormEntry(name='version', type='number',
                                             default=DEFAULT_CONFIG_VALUES.get('connection_config').get('version'))
