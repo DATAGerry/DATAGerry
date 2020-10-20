@@ -55,6 +55,7 @@ export class CsvMappingComponent extends TypeMappingBaseComponent implements OnI
 
 
   public ngOnInit(): void {
+    console.log("hello")
     for (let i = 0; i < this.parsedData.entry_length; i++) {
       this.currentMapping.push({});
     }
