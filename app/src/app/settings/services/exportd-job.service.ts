@@ -109,6 +109,6 @@ export class ExportdJobService<T = ExportdJob> implements ApiService {
 
   // Validation functions
   public checkJobExists(typeName: string) {
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ typeName }`);
+    return this.api.callGet<T>(`${ this.servicePrefix }/name/${ typeName }`);
   }
 }

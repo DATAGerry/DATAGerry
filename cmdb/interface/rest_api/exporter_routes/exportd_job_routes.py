@@ -85,8 +85,8 @@ def get_exportd_job(public_id, request_user: User):
     return resp
 
 
-@exportd_job_blueprint.route('/<string:name>/', methods=['GET'])
-@exportd_job_blueprint.route('/<string:name>', methods=['GET'])
+@exportd_job_blueprint.route('/name/<string:name>/', methods=['GET'])
+@exportd_job_blueprint.route('/name/<string:name>', methods=['GET'])
 @login_required
 @insert_request_user
 @right_required('base.exportd.job.view')

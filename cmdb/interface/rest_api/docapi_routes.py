@@ -98,8 +98,8 @@ def get_template(public_id, request_user: User):
     return resp
 
 
-@docapi_blueprint.route('/template/<string:name>/', methods=['GET'])
-@docapi_blueprint.route('/template/<string:name>', methods=['GET'])
+@docapi_blueprint.route('/template/name/<string:name>/', methods=['GET'])
+@docapi_blueprint.route('/template/name/<string:name>', methods=['GET'])
 @login_required
 @insert_request_user
 @right_required('base.docapi.template.view')
