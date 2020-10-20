@@ -23,6 +23,7 @@ import { CmdbCategory } from '../../models/cmdb-category';
 import { CmdbType } from '../../models/cmdb-type';
 import { CategoryService, checkCategoryExistsValidator } from '../../services/category.service';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
+import {TypeService} from "../../services/type.service";
 
 @Component({
   selector: 'cmdb-category-form',
@@ -83,7 +84,7 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Category form constructor - Inits the category form
    */
-  public constructor(private categoryService: CategoryService) {
+  public constructor(private categoryService: CategoryService, private typeService: TypeService) {
     this.categoryForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl(''),
@@ -126,11 +127,9 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
     if (changes.assignedTypes !== undefined && changes.assignedTypes.currentValue !== undefined && (
       changes.assignedTypes.previousValue !== changes.assignedTypes.currentValue
     )) {
-      const buffer: CmdbType[] = [];
-      for (const type of this.$category.types) {
-        buffer.push(this.findAssignedTypeByIndex(type));
-      }
-      this.assignedTypes = buffer;
+      this.typeService.getTypeListByCategory(this.$category.public_id).subscribe(data => {
+        this.assignedTypes = data;
+      });
     }
   }
 
