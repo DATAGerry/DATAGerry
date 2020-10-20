@@ -67,11 +67,4 @@ export class PropertiesComponent implements OnInit, OnDestroy {
     this.dtTrigger.unsubscribe();
   }
 
-  public reload() {
-    this.systemService.reloadConfigFile().subscribe(res => {
-      this.toast.info(`Config file was reloaded!`);
-    });
-
-  }
-
 }
