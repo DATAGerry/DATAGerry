@@ -76,7 +76,9 @@ export class SidebarService {
    */
   public async updateTypeCounter(typeID) {
     const sidebarType = this.sideBarType.filter(type => type.type.public_id === typeID).pop();
-    sidebarType.objectCounter = await this.getObjectCount(sidebarType.type.public_id);
+    await this.getObjectCount(sidebarType.type.public_id).then( count => {
+      sidebarType.objectCounter = count;
+    });
   }
 
   /**
