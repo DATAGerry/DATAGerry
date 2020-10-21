@@ -39,18 +39,11 @@ export class SidebarTypeComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit() {
-    // this.objectCountSubscription = this.objectService.countObjectsByType(this.type.public_id).subscribe((count: number) => {
-    //   this.objectCounter = count;
-    // });
     this.sidebarService.initializeCounter(this);
   }
 
-  public setCount(num) {
-    this.objectCounter = num;
-  }
-
   public ngOnDestroy(): void {
-    this.objectCountSubscription.unsubscribe();
+    this.sidebarService.deleteCounter(this);
   }
 
 }

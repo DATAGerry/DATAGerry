@@ -473,7 +473,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       if (result) {
         this.objectService.deleteObject(publicID).subscribe(() => {
           this.ajaxReload();
-          this.sidebarService.updateTypeCounter()
+          this.sidebarService.updateTypeCounter(this.typeID);
         });
       }
     });
@@ -500,6 +500,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
           if (this.selectedObjects.length > 0) {
             this.objectService.deleteManyObjects(this.selectedObjects.toString()).subscribe(() => {
               this.ajaxReload();
+              this.sidebarService.updateTypeCounter(this.typeID);
             });
           }
         }

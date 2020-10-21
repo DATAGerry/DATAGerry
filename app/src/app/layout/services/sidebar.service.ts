@@ -57,46 +57,26 @@ export class SidebarService {
     });
   }
 
-  private async updateObjectCount(typeID, tree?: CmdbCategoryTree) {
-    let categoryTree = [];
-    if (tree && tree.length === 0) {
-      categoryTree = tree;
-    } else {
-      categoryTree = this.categoryTreeObserver.getValue();
-    }
-    if (categoryTree.length !== 0) {
-      return new Promise((resolve) => {
-        Array.from(categoryTree).forEach((c: any) => {
-          for (const t of c.types) {
-            if (typeID === t.public_id) {
-              this.objectService.countObjectsByType(typeID).subscribe((data: number) => {
-                resolve(data);
-              });
-            }
-          }
-        });
-      });
-    } else {
-      return new Promise((resolve) => {
+  private async getObjectCount(typeID) {
+    return new Promise((resolve) => {
         this.objectService.countObjectsByType(typeID).subscribe((data: number) => {
           resolve(data);
         });
     });
-    }
   }
 
   public async updateTypeCounter(typeID) {
-    const sidebarType = this.sideBarType.filter(type => type.type.public_id === typeID).pop()
-    console.log(sidebarType);
-
-    const num = await this.updateObjectCount(sidebarType.type.public_id);
-    sidebarType.objectCounter = num;
+    const sidebarType = this.sideBarType.filter(type => type.type.public_id === typeID).pop();
+    sidebarType.objectCounter = await this.getObjectCount(sidebarType.type.public_id);
   }
 
-  public async initializeCounter(sidebarType: SidebarTypeComponent) {
+  public initializeCounter(sidebarType: SidebarTypeComponent) {
     this.sideBarType.push(sidebarType);
-    const num = await this.updateObjectCount(sidebarType.type.public_id);
-    console.log(num + ":" + sidebarType.type.public_id)
-    sidebarType.setCount(num);
+    this.updateTypeCounter(sidebarType.type.public_id);
   }
+
+  public deleteCounter(sidebarType: SidebarTypeComponent) {
+    this.sideBarType = this.sideBarType.filter( type => type !== sidebarType);
+  }
+
 }

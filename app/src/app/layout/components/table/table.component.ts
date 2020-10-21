@@ -34,6 +34,7 @@ import { FileService } from '../../../export/export.service';
 import { ObjectService } from '../../../framework/services/object.service';
 import { DataTableFilter } from '../../../framework/models/cmdb-datatable';
 import { GeneralModalComponent } from '../../helpers/modals/general-modal/general-modal.component';
+import {SidebarService} from '../../services/sidebar.service';
 
 @Component({
   selector: 'cmdb-table',
@@ -67,7 +68,7 @@ export class TableComponent implements OnInit, OnDestroy {
   constructor(private userService: UserService, private apiCallService: ApiCallService,
               private objService: ObjectService, private fileService: FileService, private router: Router,
               private modalService: NgbModal, private fileSaverService: FileSaverService,
-              private datePipe: DatePipe) {
+              private datePipe: DatePipe, private sidebarService: SidebarService) {
     this.add = {
       // add new
       text: '<i class="fas fa-plus"></i> Add',
@@ -265,6 +266,7 @@ export class TableComponent implements OnInit, OnDestroy {
               this.dtTrigger.next();
             });
           });
+          this.sidebarService.updateTypeCounter(value.type_information.type_id);
         }
       }, (reason) => {
         // ToDO:

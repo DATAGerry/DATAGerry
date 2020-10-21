@@ -27,6 +27,7 @@ import { UserService } from '../../../management/services/user.service';
 import { RenderResult } from '../../models/cmdb-render';
 import { CmdbType } from '../../models/cmdb-type';
 import { TypeService } from '../../services/type.service';
+import {SidebarService} from "../../../layout/services/sidebar.service";
 
 @Component({
   selector: 'cmdb-object-copy',
@@ -42,7 +43,8 @@ export class ObjectCopyComponent implements OnInit {
   public renderForm: FormGroup;
 
   constructor(private api: ApiCallService, private objectService: ObjectService, private typeService: TypeService,
-              private route: ActivatedRoute, private router: Router, private userService: UserService) {
+              private route: ActivatedRoute, private router: Router, private userService: UserService,
+              private sidebarService: SidebarService) {
     this.route.params.subscribe((params) => {
       this.objectID = params.publicID;
     });
@@ -98,6 +100,7 @@ export class ObjectCopyComponent implements OnInit {
         }, () => {
           console.log(ack);
           this.router.navigate(['/framework/object/view/' + ack]);
+          this.sidebarService.updateTypeCounter(this.renderResult.type_information.type_id);
         });
     }
   }
