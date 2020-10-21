@@ -19,6 +19,9 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { CmdbCategoryTree } from '../../framework/models/cmdb-category';
 import { CategoryService } from '../../framework/services/category.service';
+import {ObjectService} from '../../framework/services/object.service';
+import {TypeService} from '../../framework/services/type.service';
+import {SidebarTypeComponent} from '../structure/sidebar/sidebar-type.component';
 
 @Injectable({
   providedIn: 'root'
@@ -29,8 +32,10 @@ export class SidebarService {
    * Basic tree observer.
    */
   private categoryTreeObserver = new BehaviorSubject<CmdbCategoryTree>(new CmdbCategoryTree());
+  private sideBarType: SidebarTypeComponent[] = [];
 
-  constructor(private categoryService: CategoryService) {
+  constructor(private categoryService: CategoryService, private objectService: ObjectService, private typeService: TypeService) {
+
     this.categoryService.getCategoryTree().subscribe((tree: CmdbCategoryTree)  => {
       this.categoryTreeObserver.next(tree);
     });
@@ -50,5 +55,48 @@ export class SidebarService {
     this.categoryService.getCategoryTree().subscribe((tree: CmdbCategoryTree)  => {
       this.categoryTreeObserver.next(tree);
     });
+  }
+
+  private async updateObjectCount(typeID, tree?: CmdbCategoryTree) {
+    let categoryTree = [];
+    if (tree && tree.length === 0) {
+      categoryTree = tree;
+    } else {
+      categoryTree = this.categoryTreeObserver.getValue();
+    }
+    if (categoryTree.length !== 0) {
+      return new Promise((resolve) => {
+        Array.from(categoryTree).forEach((c: any) => {
+          for (const t of c.types) {
+            if (typeID === t.public_id) {
+              this.objectService.countObjectsByType(typeID).subscribe((data: number) => {
+                resolve(data);
+              });
+            }
+          }
+        });
+      });
+    } else {
+      return new Promise((resolve) => {
+        this.objectService.countObjectsByType(typeID).subscribe((data: number) => {
+          resolve(data);
+        });
+    });
+    }
+  }
+
+  public async updateTypeCounter(typeID) {
+    const sidebarType = this.sideBarType.filter(type => type.type.public_id === typeID).pop()
+    console.log(sidebarType);
+
+    const num = await this.updateObjectCount(sidebarType.type.public_id);
+    sidebarType.objectCounter = num;
+  }
+
+  public async initializeCounter(sidebarType: SidebarTypeComponent) {
+    this.sideBarType.push(sidebarType);
+    const num = await this.updateObjectCount(sidebarType.type.public_id);
+    console.log(num + ":" + sidebarType.type.public_id)
+    sidebarType.setCount(num);
   }
 }
