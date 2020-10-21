@@ -78,16 +78,15 @@ class UserGroupModel(CmdbDAO):
 
     @classmethod
     def to_data(cls, instance: "UserGroupModel"):
-        return dumps({
+        return {
             'public_id': instance.public_id,
             'name': instance.name,
             'label': instance.label,
-            'rights': [BaseRight.to_dict(right) for right in instance.rights]
-        }, default=default)
+            'rights': [right.name for right in instance.rights]
+        }
 
     @classmethod
     def to_dict(cls, instance: "UserGroupModel") -> dict:
-
         return {
             'public_id': instance.public_id,
             'name': instance.name,

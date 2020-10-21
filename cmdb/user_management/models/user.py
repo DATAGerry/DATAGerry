@@ -138,8 +138,8 @@ class UserModel(CmdbDAO):
         )
 
     @classmethod
-    def to_data(cls, instance: "UserModel") -> str:
-        return dumps(cls.to_dict(instance), default=default)
+    def to_data(cls, instance: "UserModel") -> dict:
+        return cls.to_dict(instance)
 
     @classmethod
     def to_dict(cls, instance: "UserModel") -> dict:
