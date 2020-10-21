@@ -88,21 +88,6 @@ def get_config_information(request_user: UserModel):
     return make_response(config_dict)
 
 
-@system_blueprint.route('/config/', methods=['POST'])
-@system_blueprint.route('/config', methods=['POST'])
-@login_required
-@insert_request_user
-@right_required('base.system.reload')
-def reload_config_reader(request_user: UserModel):
-    ssc = SystemConfigReader()
-    ssc.setup()
-    LOGGER.warning('Reload config file!')
-    status = ssc.status()
-    if status:
-        current_app.cache.clear()
-    return make_response(status)
-
-
 @system_blueprint.route('/information/', methods=['GET'])
 @system_blueprint.route('/information', methods=['GET'])
 @login_required

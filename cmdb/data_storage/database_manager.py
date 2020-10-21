@@ -400,7 +400,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
 
         Args:
             collection (str): name of database collection
-            data (str): insert data
+            data (dict): insert data
             skip_public (bool): Skip the public id creation and counter increment
 
         Returns:
