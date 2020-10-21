@@ -921,13 +921,12 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
         objects: List[CmdbObject] = object_manager.get_objects_by(type_id=public_id)
     except ManagerGetError as err:
         return abort(400, err.message)
-
+    type_fields = sorted([field.get('name') for field in type.fields])
     unstructured_objects: List[CmdbObject] = []
     for object_ in objects:
-        for field in type.fields:
-            if not object_.has_field(field.get('name')):
-                unstructured_objects.append(object_)
-                break
+        object_fields = [field.get('name') for field in object_.fields]
+        if sorted(object_fields) != type_fields:
+            unstructured_objects.append(object_)
 
     api_response = GetListResponse([un_object.__dict__ for un_object in unstructured_objects], url=request.url,
                                    model='Object', body=request.method == 'HEAD')
