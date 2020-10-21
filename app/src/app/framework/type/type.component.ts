@@ -106,8 +106,7 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
         },
         {
           orderable: false,
-          searchable: false,
-          targets: [0, 5, 6]
+          searchable: false
         }
       ],
       language: {
