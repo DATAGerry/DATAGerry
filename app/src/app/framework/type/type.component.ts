@@ -20,7 +20,7 @@ import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular
 import { TypeService } from '../services/type.service';
 import { DataTableDirective } from 'angular-datatables';
 import { takeUntil } from 'rxjs/operators';
-import { Observable, ReplaySubject, Subject } from 'rxjs';
+import { ReplaySubject, Subject } from 'rxjs';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CmdbType } from '../models/cmdb-type';
 import { CollectionParameters } from '../../services/models/api-parameter';
@@ -29,7 +29,6 @@ import { Router } from '@angular/router';
 import { FileSaverService } from 'ngx-filesaver';
 import { DatePipe } from '@angular/common';
 import { FileService } from '../../export/export.service';
-import { CleanupModalComponent } from './modals/cleanup-modal/cleanup-modal.component';
 import { ObjectService } from '../services/object.service';
 
 @Component({
@@ -65,13 +64,8 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
   public remove: boolean = false;
   public update: boolean = false;
 
-  /**
-   * Export modal
-   */
-  private modalRef: NgbModalRef;
-
-  constructor(private typeService: TypeService, private router: Router, private fileService: FileService, private objectService: ObjectService,
-              private fileSaverService: FileSaverService, private modalService: NgbModal, private datePipe: DatePipe) {
+  constructor(private typeService: TypeService, private router: Router, private fileService: FileService,
+              private fileSaverService: FileSaverService, private datePipe: DatePipe) {
     this.types = [];
   }
 
@@ -184,20 +178,9 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   public ngOnDestroy(): void {
     this.dtTrigger.unsubscribe();
-    if (this.modalRef) {
-      this.modalRef.close();
-    }
+
     this.unSubscribe.next();
     this.unSubscribe.complete();
-  }
-
-  /**
-   * Open the clean modal
-   * @param typeInstance - Instance of the type which will be cleaned
-   */
-  public callCleanUpModal(typeInstance: CmdbType): void {
-    this.modalRef = this.modalService.open(CleanupModalComponent);
-    this.modalRef.componentInstance.typeInstance = typeInstance;
   }
 
   /**
@@ -211,10 +194,6 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
       this.fileService.callExportTypeRoute('/export/type/' + this.selected.toString())
         .subscribe(res => this.downLoadFile(res, 'json'));
     }
-  }
-
-  public async getCleanStatus(typeID: number): Promise<boolean> {
-    return this.objectService.getUncleanObjects(typeID);
   }
 
   /**

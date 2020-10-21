@@ -82,10 +82,7 @@ In DATAGERRY objects are stored. An object can be for example a router, server, 
         </a>
       </td>
       <td *permissionLink="['base.framework.type.clean']">
-        {{getCleanStatus(typeInstance.public_id)}}
-        <fieldset>
-          Test
-        </fieldset>
+        <cmdb-clean-button [type]="typeInstance"></cmdb-clean-button>
       </td>
     </tr>
     </tbody>

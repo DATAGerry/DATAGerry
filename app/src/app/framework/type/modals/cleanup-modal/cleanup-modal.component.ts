@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { CmdbType } from '../../../models/cmdb-type';
 import { TypeService } from '../../../services/type.service';
@@ -30,22 +30,49 @@ import { takeUntil } from 'rxjs/operators';
   templateUrl: './cleanup-modal.component.html',
   styleUrls: ['./cleanup-modal.component.scss']
 })
-export class CleanupModalComponent implements OnInit, OnDestroy {
+export class CleanupModalComponent implements AfterViewInit, OnDestroy {
 
-  @Input() typeInstance: CmdbType = null;
-  public remove: boolean = false;
-
+  /**
+   * Component un-subscriber.
+   */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  /**
+   * Type instance of the cleanable objects.
+   */
+  @Input() public type: CmdbType;
+
+  /**
+   * Number of uncleaned objects.
+   */
+  public numberOfObjects: number = 0;
+
+  /**
+   * In current cleaning operation
+   */
+  public cleaning: boolean = false;
 
   constructor(private typeService: TypeService, private objectService: ObjectService,
               public userService: UserService, public activeModal: NgbActiveModal) {
   }
 
-  public ngOnInit(): void {
-    this.objectService.cleanObjects(this.typeInstance.public_id).pipe(takeUntil(this.subscriber))
+  public ngAfterViewInit(): void {
+    this.objectService.countUncleanObjects(this.type.public_id).pipe(takeUntil(this.subscriber))
+      .subscribe((count: number) => {
+        this.numberOfObjects = count;
+      });
+  }
+
+  /**
+   * Triggers the api clean call.
+   */
+  public clean(): void {
+    this.cleaning = true;
+    this.objectService.cleanObjects(this.type.public_id).pipe(takeUntil(this.subscriber))
       .subscribe(() => {
-      this.remove = true;
-    });
+        this.cleaning = false;
+        this.activeModal.close('Clean');
+      });
   }
 
   public ngOnDestroy(): void {

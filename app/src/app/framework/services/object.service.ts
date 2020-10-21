@@ -28,7 +28,7 @@ import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { DataTableFilter, DataTablesResult } from '../models/cmdb-datatable';
 import { GeneralModalComponent } from '../../layout/helpers/modals/general-modal/general-modal.component';
 import { CmdbType } from '../models/cmdb-type';
-import { APIGetSingleResponse } from '../../services/models/api-response';
+import { APIGetListResponse, APIGetSingleResponse } from '../../services/models/api-response';
 
 export const httpObjectObserveOptions = {
   headers: new HttpHeaders({
@@ -246,12 +246,28 @@ export class ObjectService<T = RenderResult> implements ApiService {
     );
   }
 
-  public async getUncleanObjects(typeID: number): Promise<boolean> {
+  public countUncleanObjects(typeID: number): Observable<number> {
+    return this.api.callHead<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`).pipe(
+      map((apiResponse: HttpResponse<APIGetListResponse<CmdbObject>>) => {
+        return +apiResponse.headers.get('X-Total-Count');
+      })
+    );
+  }
+
+  public getUncleanObjects(typeID: number): Observable<Array<CmdbObject>> {
+    return this.api.callGet<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`).pipe(
+      map((apiResponse: HttpResponse<APIGetListResponse<CmdbObject>>) => {
+        return apiResponse.body.results as Array<CmdbObject>;
+      })
+    );
+  }
+
+  public getObjectCleanStatus(typeID: number): Observable<boolean> {
     return this.api.callHead<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`).pipe(
       map((apiResponse) => {
-        return +apiResponse.headers.get('X-Total-Count') > 0;
+        return +apiResponse.headers.get('X-Total-Count') === 0;
       })
-    ).toPromise();
+    );
   }
 
   public cleanObjects(typeID: number): Observable<any> {

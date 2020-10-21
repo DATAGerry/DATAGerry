@@ -40,6 +40,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { AuthModule } from '../../auth/auth.module';
 import { TypeComponent } from './type.component';
 import { CleanupModalComponent } from './modals/cleanup-modal/cleanup-modal.component';
+import { CleanButtonComponent } from './components/clean-button/clean-button.component';
 
 @NgModule({
   entryComponents: [TypeDeleteConfirmModalComponent, CleanupModalComponent],
@@ -54,7 +55,8 @@ import { CleanupModalComponent } from './modals/cleanup-modal/cleanup-modal.comp
     TypeDeleteComponent,
     TypeDeleteConfirmModalComponent,
     TypeComponent,
-    CleanupModalComponent
+    CleanupModalComponent,
+    CleanButtonComponent
   ],
   imports: [
     CommonModule,
