@@ -57,6 +57,11 @@ export class SidebarService {
     });
   }
 
+  /**
+   * gets the object count of the given type
+   *
+   * @param typeID: the type id of the type of which the objects are counted
+   */
   private async getObjectCount(typeID) {
     return new Promise((resolve) => {
         this.objectService.countObjectsByType(typeID).subscribe((data: number) => {
@@ -65,16 +70,31 @@ export class SidebarService {
     });
   }
 
+  /**
+   * updates the objectCounter of the affected sidebar-type component
+   *
+   * @param typeID the type id with to the sidebar-typ component will be filtered
+   */
   public async updateTypeCounter(typeID) {
     const sidebarType = this.sideBarType.filter(type => type.type.public_id === typeID).pop();
     sidebarType.objectCounter = await this.getObjectCount(sidebarType.type.public_id);
   }
 
+  /**
+   * inserts the sidebar-type component into an array and updates its counter
+   *
+   * @param sidebarType the sidebar-type component which will be inserted
+   */
   public initializeCounter(sidebarType: SidebarTypeComponent) {
     this.sideBarType.push(sidebarType);
     this.updateTypeCounter(sidebarType.type.public_id);
   }
 
+  /**
+   * deletes the given sidebar-type component from the array
+   *
+   * @param sidebarType the sidebar-type component to be deleted
+   */
   public deleteCounter(sidebarType: SidebarTypeComponent) {
     this.sideBarType = this.sideBarType.filter( type => type !== sidebarType);
   }
