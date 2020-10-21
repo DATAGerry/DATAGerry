@@ -16,9 +16,8 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnDestroy, OnInit, Pipe, PipeTransform} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import { CmdbType } from '../../../framework/models/cmdb-type';
-import { TypeService } from '../../../framework/services/type.service';
 import { Subscription } from 'rxjs';
 import { ObjectService } from '../../../framework/services/object.service';
 import {SidebarService} from '../../services/sidebar.service';
@@ -42,7 +41,7 @@ export class SidebarTypeComponent implements OnInit, OnDestroy {
     this.sidebarService.initializeCounter(this);
   }
 
-  public ngOnDestroy(): void {
+  public ngOnDestroy() {
     this.sidebarService.deleteCounter(this);
   }
 

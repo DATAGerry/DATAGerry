@@ -28,7 +28,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { ObjectService } from '../../services/object.service';
 import { RenderResult } from '../../models/cmdb-render';
 import { DatePipe } from '@angular/common';
@@ -50,8 +50,7 @@ import {
   ObjectTableUserSettingConfig
 } from '../../../management/user-settings/models/settings/object-table-user-setting';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { takeUntil } from 'rxjs/operators';
-import {SidebarService} from "../../../layout/services/sidebar.service";
+import {SidebarService} from '../../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-object-list-by-type',

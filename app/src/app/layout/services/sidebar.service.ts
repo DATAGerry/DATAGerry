@@ -20,7 +20,6 @@ import { BehaviorSubject } from 'rxjs';
 import { CmdbCategoryTree } from '../../framework/models/cmdb-category';
 import { CategoryService } from '../../framework/services/category.service';
 import {ObjectService} from '../../framework/services/object.service';
-import {TypeService} from '../../framework/services/type.service';
 import {SidebarTypeComponent} from '../structure/sidebar/sidebar-type.component';
 
 @Injectable({
@@ -34,7 +33,7 @@ export class SidebarService {
   private categoryTreeObserver = new BehaviorSubject<CmdbCategoryTree>(new CmdbCategoryTree());
   private sideBarType: SidebarTypeComponent[] = [];
 
-  constructor(private categoryService: CategoryService, private objectService: ObjectService, private typeService: TypeService) {
+  constructor(private categoryService: CategoryService, private objectService: ObjectService) {
 
     this.categoryService.getCategoryTree().subscribe((tree: CmdbCategoryTree)  => {
       this.categoryTreeObserver.next(tree);
