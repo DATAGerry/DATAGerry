@@ -2,10 +2,9 @@ import {Component, Input, OnDestroy} from '@angular/core';
 import { ObjectService } from '../../../services/object.service';
 import { Router } from '@angular/router';
 import { ApiCallService } from '../../../../services/api-call.service';
-import { CmdbObject } from '../../../models/cmdb-object';
-import { CmdbType } from '../../../models/cmdb-type';
 import { RenderResult } from '../../../models/cmdb-render';
 import {NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import {SidebarService} from '../../../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-object-actions',
@@ -16,7 +15,8 @@ export class ObjectActionsComponent implements OnDestroy {
 
   @Input() renderResult: RenderResult;
 
-  constructor(private api: ApiCallService, private objectService: ObjectService,  private router: Router) {
+  constructor(private api: ApiCallService, private objectService: ObjectService,  private router: Router,
+              private sidebarService: SidebarService) {
 
   }
   private modalRef: NgbModalRef;
@@ -34,6 +34,7 @@ export class ObjectActionsComponent implements OnDestroy {
           if (res) {
             this.router.navigate(['/']);
           }
+          this.sidebarService.updateTypeCounter(this.renderResult.type_information.type_id);
         });
       }
     });

@@ -28,7 +28,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { ObjectService } from '../../services/object.service';
 import { RenderResult } from '../../models/cmdb-render';
 import { DatePipe } from '@angular/common';
@@ -50,7 +50,7 @@ import {
   ObjectTableUserSettingConfig
 } from '../../../management/user-settings/models/settings/object-table-user-setting';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { takeUntil } from 'rxjs/operators';
+import { SidebarService } from '../../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-object-list-by-type',
@@ -112,7 +112,8 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
               private fileSaverService: FileSaverService, private fileService: FileService,
               private router: Router, private route: ActivatedRoute, private renderer2: Renderer2,
               private permissionService: PermissionService, private modalService: NgbModal,
-              private userSettingsDB: UserSettingsDBService, private authService: AuthService) {
+              private userSettingsDB: UserSettingsDBService, private authService: AuthService,
+              private sidebarService: SidebarService) {
 
     this.router.routeReuseStrategy.shouldReuseRoute = (future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot) => {
       return false;
@@ -471,6 +472,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
       if (result) {
         this.objectService.deleteObject(publicID).subscribe(() => {
           this.ajaxReload();
+          this.sidebarService.updateTypeCounter(this.typeID);
         });
       }
     });
@@ -497,6 +499,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
           if (this.selectedObjects.length > 0) {
             this.objectService.deleteManyObjects(this.selectedObjects.toString()).subscribe(() => {
               this.ajaxReload();
+              this.sidebarService.updateTypeCounter(this.typeID);
             });
           }
         }
