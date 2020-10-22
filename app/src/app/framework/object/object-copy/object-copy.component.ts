@@ -27,7 +27,7 @@ import { UserService } from '../../../management/services/user.service';
 import { RenderResult } from '../../models/cmdb-render';
 import { CmdbType } from '../../models/cmdb-type';
 import { TypeService } from '../../services/type.service';
-import {SidebarService} from "../../../layout/services/sidebar.service";
+import { SidebarService } from '../../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-object-copy',

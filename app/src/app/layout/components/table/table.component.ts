@@ -34,7 +34,7 @@ import { FileService } from '../../../export/export.service';
 import { ObjectService } from '../../../framework/services/object.service';
 import { DataTableFilter } from '../../../framework/models/cmdb-datatable';
 import { GeneralModalComponent } from '../../helpers/modals/general-modal/general-modal.component';
-import {SidebarService} from '../../services/sidebar.service';
+import { SidebarService } from '../../services/sidebar.service';
 
 @Component({
   selector: 'cmdb-table',

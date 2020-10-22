@@ -50,7 +50,7 @@ import {
   ObjectTableUserSettingConfig
 } from '../../../management/user-settings/models/settings/object-table-user-setting';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import {SidebarService} from '../../../layout/services/sidebar.service';
+import { SidebarService } from '../../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-object-list-by-type',

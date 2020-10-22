@@ -2,11 +2,9 @@ import {Component, Input, OnDestroy} from '@angular/core';
 import { ObjectService } from '../../../services/object.service';
 import { Router } from '@angular/router';
 import { ApiCallService } from '../../../../services/api-call.service';
-import { CmdbObject } from '../../../models/cmdb-object';
-import { CmdbType } from '../../../models/cmdb-type';
 import { RenderResult } from '../../../models/cmdb-render';
 import {NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
-import {SidebarService} from "../../../../layout/services/sidebar.service";
+import {SidebarService} from '../../../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-object-actions',

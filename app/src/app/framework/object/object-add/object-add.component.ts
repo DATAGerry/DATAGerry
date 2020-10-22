@@ -29,7 +29,7 @@ import { ObjectService } from '../../services/object.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryService } from '../../services/category.service';
 import { CmdbCategory } from '../../models/cmdb-category';
-import {SidebarService} from "../../../layout/services/sidebar.service";
+import { SidebarService } from '../../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-object-add',
