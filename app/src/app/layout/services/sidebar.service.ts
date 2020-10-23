@@ -61,7 +61,7 @@ export class SidebarService {
    *
    * @param typeID: the type id of the type of which the objects are counted
    */
-  private async getObjectCount(typeID) {
+  private async getObjectCount(typeID): Promise<number> {
     return new Promise((resolve) => {
         this.objectService.countObjectsByType(typeID).subscribe((data: number) => {
           resolve(data);
