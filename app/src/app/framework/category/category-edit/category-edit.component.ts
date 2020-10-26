@@ -50,7 +50,7 @@ export class CategoryEditComponent implements OnInit, OnDestroy {
   constructor(private categoryService: CategoryService, private typeService: TypeService,
               private router: Router, private route: ActivatedRoute, private sidebarService: SidebarService) {
     this.route.params.subscribe((params: Params) => {
-      this.publicID = params.publicID;
+      this.publicID = Number(params.publicID);
     });
   }
 
