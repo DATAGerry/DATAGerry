@@ -130,6 +130,10 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
 
           const columnQueries = [];
           for (const column of searchableColumns) {
+            // Must be filtered for empty values. '$' i not a valid FieldPath in MongoDB
+            if (column.name === '') {
+              continue;
+            }
             const regex = {
               $regexMatch: {
                 input: { $toString: `$${ column.name }` },
