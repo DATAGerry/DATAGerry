@@ -60,6 +60,8 @@ import { ArchwizardModule } from 'angular-archwizard';
 import { ObjectDocsComponent } from './components/object-docs/object-docs.component';
 import { ObjectAttachmentsComponent } from './components/object-attachments/object-attachments.component';
 import { UsersModule } from '../../management/users/users.module';
+import { ObjectsByTypeComponent } from './objects-by-type/objects-by-type.component';
+import { TableModule } from '../../layout/table/table.module';
 
 @NgModule({
   entryComponents: [
@@ -94,25 +96,27 @@ import { UsersModule } from '../../management/users/users.module';
     ObjectBulkChangeEditorComponent,
     ObjectBulkChangePreviewComponent,
     ObjectDocsComponent,
-    ObjectAttachmentsComponent
+    ObjectAttachmentsComponent,
+    ObjectsByTypeComponent
   ],
-    imports: [
-        CommonModule,
-        ObjectRoutingModule,
-        DataTablesModule,
-        AuthModule,
-        LayoutModule,
-        QRCodeModule,
-        NgxSpinnerModule,
-        FormsModule,
-        ReactiveFormsModule,
-        NgSelectModule,
-        NgbTooltipModule,
-        FontAwesomeModule,
-        ArchwizardModule,
-        RenderModule,
-        UsersModule
-    ],
+  imports: [
+    CommonModule,
+    ObjectRoutingModule,
+    DataTablesModule,
+    AuthModule,
+    LayoutModule,
+    QRCodeModule,
+    NgxSpinnerModule,
+    FormsModule,
+    ReactiveFormsModule,
+    NgSelectModule,
+    NgbTooltipModule,
+    FontAwesomeModule,
+    ArchwizardModule,
+    RenderModule,
+    UsersModule,
+    TableModule
+  ],
     exports: [
         ObjectViewRenderComponent
     ]

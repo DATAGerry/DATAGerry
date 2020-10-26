@@ -1,0 +1,8 @@
+<thead>
+<tr>
+  <ng-container *ngFor="let column of columns; let h = index">
+    <th scope="col" *ngIf="!column.hidden">{{column?.name}}</th>
+  </ng-container>
+</tr>
+</thead>
+

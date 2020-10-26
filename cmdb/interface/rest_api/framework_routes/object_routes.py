@@ -14,13 +14,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import copy
 import json
 import logging
 import pytz
 
 from datetime import datetime
-from bson import json_util
 
 from flask import abort, jsonify, request, current_app
 
@@ -31,8 +29,13 @@ from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, Obj
 from cmdb.framework.cmdb_log import LogAction, CmdbObjectLog
 from cmdb.framework.cmdb_log_manager import LogManagerInsertError
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
+from cmdb.framework.results import IterationResult
+from cmdb.framework.utils import Model
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.response import GetMultiResponse
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
-from cmdb.interface.blueprint import RootBlueprint
+from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
+from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.user_management import UserModel
 
 with current_app.app_context():
@@ -46,48 +49,36 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
+
+objects_blueprint = APIBlueprint('objects', __name__)
 object_blueprint = RootBlueprint('object_blueprint', __name__, url_prefix='/object')
+
 with current_app.app_context():
     from cmdb.interface.rest_api.framework_routes.object_link_routes import link_rest
 
     object_blueprint.register_nested_blueprint(link_rest)
 
 
-# DEFAULT ROUTES
+@objects_blueprint.route('/', methods=['GET', 'HEAD'])
+@objects_blueprint.protect(auth=True, right='base.framework.type.view')
+@objects_blueprint.parse_collection_parameters()
+def get_objects(params: CollectionParameters):
+    from cmdb.framework.managers.object_manager import ObjectManager
+    manager = ObjectManager(database_manager=current_app.database_manager)
 
-@object_blueprint.route('/', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_object_list(request_user: UserModel):
-    """
-    get all objects in database
-    Args:
-        request_user: auto inserted user who made the request.
-    Returns:
-        list of rendered objects
-    """
     try:
-        filter_state = {'sort': 'public_id'}
-        if _fetch_only_active_objs():
-            filter_state['active'] = {"$eq": True}
+        iteration_result: IterationResult[CmdbObject] = manager.iterate(
+            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
 
-        object_list = object_manager.get_objects_by(**filter_state)
+        rendered_list = RenderList(iteration_result.results, None).render_result_list(raw=True)
 
-        if request.args.get('start') is not None:
-            start = int(request.args.get('start'))
-            length = int(request.args.get('length'))
-            object_list = object_list[start:start + length]
-
-    except ObjectManagerGetError as err:
-        LOGGER.error(err.message)
-        return abort(404)
-    if len(object_list) < 1:
-        return make_response(object_list, 204)
-
-    rendered_list = RenderList(object_list, request_user).render_result_list()
-
-    return make_response(rendered_list)
+        api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
+                                        url=request.url, model=Model('RenderResults'), body=request.method == 'HEAD')
+    except ManagerIterationError as err:
+        return abort(400, err.message)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    return api_response.make_response()
 
 
 @object_blueprint.route('/native', methods=['GET'])
@@ -101,124 +92,6 @@ def get_native_object_list(request_user: UserModel):
         return abort(404)
     resp = make_response(object_list)
     return resp
-
-
-@object_blueprint.route('/dt/type/<int:type_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_dt_objects_by_type(type_id, request_user: UserModel):
-    """Return all objects by type_id"""
-    try:
-        table_config = request.args
-        filter_state = {'type_id': type_id}
-
-        if _fetch_only_active_objs():
-            filter_state['active'] = {"$eq": True}
-
-        start_at = int(table_config.get('start'))
-        site_length = int(table_config.get('length'))
-        order_column = table_config.get('order') if table_config.get('order') else 'type_id'
-        order_direction = 1 if table_config.get('direction') == 'asc' else -1
-
-        if order_column in ['active', 'public_id', 'type_id', 'author_id', 'creation_time']:
-            object_list = object_manager.get_objects_by(sort=order_column, direction=order_direction, **filter_state)
-        else:
-            object_list = object_manager.sort_objects_by_field_value(value=order_column, order=order_direction,
-                                                                     match=filter_state)
-        totals = len(object_list)
-        object_list = object_list[start_at:start_at + site_length]
-
-    except CMDBError:
-        return abort(400)
-
-    rendered_list = RenderList(object_list, request_user, dt_render=True).render_result_list()
-
-    table_response = {
-        'data': rendered_list,
-        'recordsTotal': totals,
-        'recordsFiltered': totals
-    }
-    return make_response(table_response)
-
-
-@object_blueprint.route('/dt/filter/type/<int:type_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_dt_filter_objects_by_type(type_id, request_user: UserModel):
-    """Return all objects by type_id"""
-    try:
-        table_config = request.args
-
-        filter_ids = table_config.getlist('idList')
-        start_at = int(table_config.get('start', 0, int))
-        site_length = int(table_config.get('length', 10, int))
-        search_for = table_config.get('search', '', str)
-        order_column = table_config.get('order', 'type_id', str)
-        order_direction = 1 if table_config.get('direction') == 'asc' else -1
-        dt_render = False if table_config.get('dtRender') == 'false' else True
-
-        # Prepare search term
-        if search_for in ['true', 'True']:
-            search_for = True
-        elif search_for in ['false', 'False']:
-            search_for = False
-        elif search_for.isdigit():
-            search_for = int(search_for)
-
-        # Filter Objects by IDS
-        filter_arg = []
-        if filter_ids:
-            filter_arg.append({'public_id': {'$in': list(map(int, filter_ids))}})
-
-        # Search default values
-        filter_arg.append({'type_id': type_id})
-        if _fetch_only_active_objs():
-            filter_arg.append({'active': {"$eq": True}})
-
-        # Search search term over entire object
-        or_conditions = []
-        if not isinstance(search_for, bool):
-            search_term = {'$regex': str(search_for), '$options': 'i'}
-        else:
-            search_term = search_for
-
-        or_conditions.append({'fields': {'$elemMatch': {'value': search_term}}})
-        # ToDo: Find - convert string to date
-        # or_conditions.append({'creation_time': {'$toDate': str(search_for)}})
-
-        if isinstance(search_for, int) and not isinstance(search_for, bool):
-            if order_column in ['public_id', 'author_id']:
-                or_conditions.append({'$where': "this.public_id.toString().includes(%s)" % search_for})
-                or_conditions.append({'$where': "this.author_id.toString().includes(%s)" % search_for})
-            else:
-                or_conditions.append({'public_id': search_for})
-                or_conditions.append({'author_id': search_for})
-
-        # Linking queries
-        filter_arg.append({'$or': or_conditions})
-        filter_state = {'$and': filter_arg}
-
-        if order_column in ['active', 'public_id', 'type_id', 'author_id', 'creation_time']:
-            object_list = object_manager.get_objects_by(sort=order_column, direction=order_direction, **filter_state)
-        else:
-            object_list = object_manager.sort_objects_by_field_value(value=order_column, order=order_direction,
-                                                                     match=filter_state)
-        totals = len(object_list)
-        object_list = object_list[start_at:start_at + site_length]
-
-    except CMDBError:
-        return abort(400)
-
-    rendered_list = RenderList(object_list, request_user, dt_render=dt_render).render_result_list()
-
-    table_response = {
-        'data': rendered_list,
-        'recordsTotal': totals,
-        'recordsFiltered': totals
-    }
-    return make_response(table_response)
 
 
 @object_blueprint.route('/type/<int:public_id>', methods=['GET'])

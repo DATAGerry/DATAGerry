@@ -27,6 +27,7 @@ import { ObjectListByTypeComponent } from './object-list-by-type/object-list-by-
 import { ObjectBulkChangeComponent } from './object-bulk-change/object-bulk-change.component';
 import { UserSettingsResolver } from '../../management/user-settings/resolvers/user-settings-resolver.service';
 import { TypeResolver } from '../resolvers/type-resolver.service';
+import { ObjectsByTypeComponent } from './objects-by-type/objects-by-type.component';
 
 
 const routes: Routes = [
@@ -89,7 +90,7 @@ const routes: Routes = [
       type: TypeResolver,
       userSetting: UserSettingsResolver
     },
-    component: ObjectListByTypeComponent,
+    component: ObjectsByTypeComponent,
   },
   {
     path: 'view/:publicID',

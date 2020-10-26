@@ -1,0 +1,35 @@
+<div #container class="table-container">
+  <table-header>
+
+  </table-header>
+  <table #table class="table table-striped table-hover">
+    <thead table-head [columns]="columns">
+
+    </thead>
+    <tbody table-body>
+
+    </tbody>
+  </table>
+  <!--
+  <div class="table-footer">
+    <nav class="table-pagination" *ngIf="paginationEnabled">
+      <ul class="pagination pagination-sm" *ngIf="pager.pages && pager.pages.length">
+        <li [ngClass]="{disabled:currentPage === 1}" class="page-item disabled">
+          <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+        </li>
+        <li [ngClass]="{disabled:currentPage === 1}" class="page-item previous-item">
+          <a (click)="setPage(currentPage - 1)" class="page-link">Previous</a>
+        </li>
+        <li *ngFor="let page of pager.pages" [ngClass]="{active:currentPage === page}" class="page-item number-item">
+          <a (click)="setPage(page)" class="page-link">{{page}}</a>
+        </li>
+        <li [ngClass]="{disabled:currentPage === totalPages}" class="page-item next-item">
+          <a (click)="setPage(currentPage + 1)" class="page-link">Next</a>
+        </li>
+        <li [ngClass]="{disabled:currentPage === totalPages}" class="page-item last-item">
+          <a (click)="setPage(totalPages)" class="page-link">Last</a>
+        </li>
+      </ul>
+    </nav>
+  </div>-->
+</div>

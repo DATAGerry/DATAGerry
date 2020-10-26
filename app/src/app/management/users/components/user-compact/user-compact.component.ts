@@ -13,25 +13,18 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { TableColumnAction } from '../../../models/table-columns-action';
+import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'cmdb-action-delete',
-  templateUrl: './action-delete.component.html',
-  styleUrls: ['./action-delete.component.scss']
+  selector: 'cmdb-user-compact',
+  templateUrl: './user-compact.component.html',
+  styleUrls: ['./user-compact.component.scss']
 })
-export class ActionDeleteComponent {
+export class UserCompactComponent {
 
-  @Input() data: TableColumnAction[];
-  @Input() publicID: string = '';
-  @Output() deleteValue = new EventEmitter();
+  @Input() public userName: string = '';
 
-  delete(route: string) {
-    this.deleteValue.emit(route);
-  }
 }

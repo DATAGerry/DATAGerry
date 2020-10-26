@@ -71,6 +71,19 @@ class CmdbObject(CmdbDAO):
         return {**{'old': [i for i in self.fields if i not in other.fields]},
                 **{'new': [j for j in other.fields if j not in self.fields]}}
 
+    @classmethod
+    def from_data(cls, data: dict, *args, **kwargs) -> "CmdbObject":
+        return cls(
+            type_id=data.get('type_id'),
+            version=data.get('version'),
+            creation_time=data.get('creation_time'),
+            author_id=data.get('author_id'),
+            last_edit_time=data.get('last_edit_time', None),
+            active=data.get('active'),
+            fields=data.get('fields', []),
+            public_id=data.get('public_id')
+        )
+
     def get_type_id(self) -> int:
         """get input_type if of this object
 

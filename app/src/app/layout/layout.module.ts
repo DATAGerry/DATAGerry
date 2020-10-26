@@ -39,7 +39,6 @@ import { IntroComponent } from './intro/intro.component';
 import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-step-intro.component';
 import { JwPaginationComponent } from 'jw-angular-pagination';
 import { SidebarTypeComponent } from './structure/sidebar/sidebar-type.component';
-import { TableComponent } from './components/table/table.component';
 import { TypeLabelComponent } from './helpers/type-label/type-label.component';
 import { FooterComponent } from './structure/footer/footer.component';
 import { SidebarComponent } from './structure/sidebar/sidebar.component';
@@ -73,7 +72,6 @@ import { AuthModule } from '../auth/auth.module';
 import { IconPickerModule } from 'ngx-icon-picker';
 import { DataTablesModule } from 'angular-datatables';
 import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { TableModule } from './components/table/table.module';
 import { RenderModule } from '../framework/render/render.module';
 import { FileexplorerModule } from './components/file-explorer/fileexplorer.module';
 
@@ -89,6 +87,7 @@ import { NameGuidePipe } from './pipes/name-guide.pipe';
 import { FileExtensionPipe } from './pipes/file-extension.pipe';
 import { CategoryTreeFilterPipe } from './pipes/categoryTreeFilter.pipe';
 import { TypeFilterPipe } from './pipes/typeFilter.pipe';
+import { TableModule } from './table/table.module';
 
 @NgModule({
   declarations: [
@@ -99,7 +98,6 @@ import { TypeFilterPipe } from './pipes/typeFilter.pipe';
     SidebarCategoryComponent,
     ContentHeaderComponent,
     ActiveBadgeComponent,
-    TableComponent,
     GeneralModalComponent,
     IntroComponent,
     TypeLabelComponent,
@@ -142,7 +140,6 @@ import { TypeFilterPipe } from './pipes/typeFilter.pipe';
     FooterComponent,
     ContentHeaderComponent,
     ActiveBadgeComponent,
-    TableComponent,
     TypeLabelComponent,
     IconPickerComponent,
     ChartsComponent,

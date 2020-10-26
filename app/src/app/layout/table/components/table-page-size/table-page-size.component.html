@@ -1,0 +1,6 @@
+<form class="form-inline">
+  <label class="mr-1">Show:</label>
+  <select class="custom-select custom-select-sm">
+    <option [value]="l.value" *ngFor="let l of pageLengthList">{{l.label}}</option>
+  </select>
+</form>

@@ -208,7 +208,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
             });
           });
         } else {
-          this.objectService.getObjects(typeID, filter).subscribe((resp: any) => {
+          this.objectService.getObjects().subscribe((resp: any) => {
             this.selectedObjects.length = 0;
             this.objects = resp;
             // Render columns afterwards

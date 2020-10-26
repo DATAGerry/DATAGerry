@@ -13,26 +13,41 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { TemplateRef } from '@angular/core';
 
-import {Component, Input, OnInit} from '@angular/core';
-import {TableColumnAction} from '../../../models/table-columns-action';
+export class Pagination {
 
-@Component({
-  selector: 'cmdb-action-copy',
-  templateUrl: './action-copy.component.html',
-  styleUrls: ['./action-copy.component.scss']
-})
-export class ActionCopyComponent implements OnInit {
+}
 
-  @Input() data: TableColumnAction[];
-  @Input() publicID: string = '';
 
-  constructor() { }
+/**
+ * Interface for Sort/Order combination.
+ */
+export interface Sort {
+  name: string;
+  order: number;
+}
 
-  ngOnInit() {
-  }
+/**
+ * Interface for a table header.
+ */
+export interface Column {
+  display: any;
+  data: any;
+  name: string;
+  hidden: boolean;
+  fixed: boolean;
+  sortable: boolean;
 
+  render(item?: any, column?: Column, index?: number, container?: TemplateRef<any>);
+}
+
+export class TableConfig<T> {
+  pageLength: number = 10;
+  currentPage: number = 1;
+  items: Array<T> = [];
+  totalItems: number = this.items.length;
 }

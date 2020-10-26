@@ -37,6 +37,7 @@ import { UserFormComponent } from './components/user-form/user-form.component';
 import { UserAddComponent } from './user-add/user-add.component';
 import { UserEditComponent } from './user-edit/user-edit.component';
 import { UserDeleteComponent } from './user-delete/user-delete.component';
+import { UserCompactComponent } from './components/user-compact/user-compact.component';
 
 @NgModule({
   entryComponents: [
@@ -54,7 +55,8 @@ import { UserDeleteComponent } from './user-delete/user-delete.component';
     UserFormComponent,
     UserAddComponent,
     UserEditComponent,
-    UserDeleteComponent
+    UserDeleteComponent,
+    UserCompactComponent
   ],
   exports: [
     UserImageComponent,
