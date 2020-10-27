@@ -102,6 +102,12 @@ class CmdbObject(CmdbDAO):
 
         return self.fields
 
+    def has_field(self, name) -> bool:
+        field = next(iter([x for x in self.fields if x.get('name') == name]), None)
+        if field is None:
+            return False
+        return True
+
     def set_new_value(self, field, value):
         self.fields.append({
             'name': field,
