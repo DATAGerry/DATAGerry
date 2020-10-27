@@ -80,8 +80,8 @@ export class CategoryAddComponent implements OnInit, OnDestroy {
    */
   public onSave(category: CmdbCategory): void {
     if (this.formValid) {
-      this.categorySubmitSubscription = this.categoryService.postCategory(category).subscribe(response => {
-        this.sidebarService.reload();
+      this.categorySubmitSubscription = this.categoryService.postCategory(category).subscribe(() => {
+        this.sidebarService.loadCategoryTree();
         this.router.navigate(['/', 'framework', 'category']);
       });
     }

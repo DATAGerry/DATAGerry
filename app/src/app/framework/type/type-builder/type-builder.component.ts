@@ -29,8 +29,6 @@ import { Router } from '@angular/router';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { CmdbCategory } from '../../models/cmdb-category';
 import { SidebarService } from '../../../layout/services/sidebar.service';
-import { HttpHeaders } from '@angular/common/http';
-import { resp } from '../../../services/api-call.service';
 
 @Component({
   selector: 'cmdb-type-builder',
@@ -39,14 +37,6 @@ import { resp } from '../../../services/api-call.service';
 })
 export class TypeBuilderComponent implements OnInit {
 
-
-  private readonly httpObserveOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json'
-    }),
-    params: {},
-    observe: resp
-  };
   @Input() public typeInstance?: CmdbType;
   @Input() public mode: number = CmdbMode.Create;
   public modes = CmdbMode;
@@ -116,12 +106,12 @@ export class TypeBuilderComponent implements OnInit {
             this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
               category.types.push(newTypeID);
               this.categoryService.updateCategory(category).subscribe(() => {
-                this.sidebarService.reload();
+                this.sidebarService.loadCategoryTree();
                 this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
               });
             });
           } else {
-            this.sidebarService.reload();
+            this.sidebarService.loadCategoryTree();
             this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
           }
 
@@ -149,7 +139,7 @@ export class TypeBuilderComponent implements OnInit {
               });
             });
           }
-          this.sidebarService.reload();
+          this.sidebarService.loadCategoryTree();
           this.toast.success(`Type was successfully edited: TypeID: ${ updateResp.public_id }`);
           this.router.navigate(['/framework/type/'], { queryParams: { typeEditSuccess: updateResp.public_id } });
         },
