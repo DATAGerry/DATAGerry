@@ -18,7 +18,7 @@
 
 import { Injectable } from '@angular/core';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { ApiCallService, ApiService, resp } from '../../services/api-call.service';
+import {ApiCallService, ApiService, httpObserveOptions, resp} from '../../services/api-call.service';
 import { ValidatorService } from '../../services/validator.service';
 import { CmdbCategory, CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb-category';
 import { FormControl } from '@angular/forms';
@@ -100,7 +100,11 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * Get all categories as a list
    */
   public getCategoryList(): Observable<T[]> {
-    return this.api.callGet<T[]>(this.servicePrefix + '/?limit=1000').pipe(
+    const options = httpObserveOptions;
+    let params = new HttpParams();
+    params = params.set('limit', '1000');
+    options.params = params;
+    return this.api.callGet<T[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         if (apiResponse.status === 204) {
           return [];
