@@ -148,7 +148,7 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
     const metadata = this.generateMetadata();
     apiParameters = apiParameters ? apiParameters : this.apiViewListParameter;
     this.fileService.getAllFilesList(metadata, apiParameters)
-      .subscribe((data: APIGetMultiResponse<FileElement>) => {
+      .subscribe((data: APIGetMultiResponse<any>) => {
         if (onScroll) {
           this.fileElements.push(...data.results);
         } else {
@@ -161,7 +161,7 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
 
   public loadFileTree(apiParameters?: CollectionParameters, onScroll: boolean = false) {
     this.fileService.getAllFilesList(new FileMetadata({folder: true}), apiParameters)
-      .subscribe((data: APIGetMultiResponse<FileElement>) => {
+      .subscribe((data: APIGetMultiResponse<any>) => {
         if (onScroll) {
           this.fileTree.push(...data.results);
         } else {
@@ -202,7 +202,7 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
 
   private reorderFolderTree(item: FileElement, apiParameter= {page: 1, limit: 100, sort: 'filename', order: -1}) {
     this.fileService.getAllFilesList(new FileMetadata({folder: true}), apiParameter)
-      .subscribe((data: APIGetMultiResponse<FileElement>) => {
+      .subscribe((data: APIGetMultiResponse<any>) => {
       for (const el of data.results) {
         if (el.public_id === item.metadata.parent) {
           el.hasSubFolders = true;

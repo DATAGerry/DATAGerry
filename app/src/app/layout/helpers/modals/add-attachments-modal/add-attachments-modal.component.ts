@@ -22,7 +22,6 @@ import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../../toast/toast.service';
 import { GeneralModalComponent } from '../general-modal/general-modal.component';
 import { CollectionParameters } from '../../../../services/models/api-parameter';
-import { InfiniteScrollService } from '../../../services/infinite-scroll.service';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
 import { takeUntil} from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
@@ -51,8 +50,7 @@ export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
 
 
   constructor(private fileService: FileService, private fileSaverService: FileSaverService,
-              private modalService: NgbModal, public activeModal: NgbActiveModal, private toast: ToastService,
-              private scrollService: InfiniteScrollService) { }
+              private modalService: NgbModal, public activeModal: NgbActiveModal, private toast: ToastService) { }
 
   public ngOnInit(): void {
     this.fileService.getAllFilesList(this.metadata).subscribe((data: APIGetMultiResponse<FileElement>) => {

@@ -55,7 +55,6 @@ class FileMetadata:
     def to_json(cls, instance) -> dict:
         """Convert a type instance to json conform data"""
         return {
-            'public_id': instance.get_public_id(),
             'reference': instance.get_ref_to(),
             'reference_type': instance.get_ref_to_type(),
             'mime_type': instance.get_mime_type(),
