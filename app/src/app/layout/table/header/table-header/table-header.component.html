@@ -1,17 +1,16 @@
-<div class="table-header d-flex bd-highlight mb-3">
-  <div class="mr-auto p-2 bd-highlight" *ngIf="pageSizeEnabled">
-    <!--<form class="form-inline">
-      <label class="mr-1">Show:</label>
-      <select class="custom-select custom-select-sm">
-        <option [value]="l.value" *ngFor="let l of pageLengthList">{{l.label}}</option>
-      </select>
-    </form>-->
+<div class="table-header d-flex mb-3">
+  <div class="mr-auto" *ngIf="pageSizeEnabled">
+    <table-page-size [pageSize]="pageSize" [pageSizeList]="pageSizeList"
+                     (pageSizeChange)="pageSizeChange.emit($event)">
+
+    </table-page-size>
   </div>
-  <div class="p-2 bd-highlight">
+  <div class="p-2">
 
   </div>
-  <div class="p-2 bd-highlight" *ngIf="searchEnabled">
-    <table-search [searchDebounceTime]="searchDebounceTime" (searchChange)="searchChange.emit($event)">
+  <div class="p-2" *ngIf="searchEnabled">
+    <table-search [debounceTime]="debounceTime"
+                  (searchChange)="searchChange.emit($event)">
     </table-search>
   </div>
 </div>

@@ -1,0 +1,13 @@
+<div class="table-footer d-flex">
+  <div class="mr-auto" *ngIf="paginationEnabled">
+    <table-pagination
+      [currentPage]="currentPage"
+      [totalItems]="totalItems"
+      [pageSize]="pageSize"
+      [maxPages]="maxPages"
+      (pageChange)="pageChange.emit($event)"
+    >
+
+    </table-pagination>
+  </div>
+</div>

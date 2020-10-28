@@ -16,28 +16,15 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { TemplateRef } from '@angular/core';
+import { Directive, Input } from '@angular/core';
+import { Column } from '../models';
 
+@Directive({
+  // tslint:disable-next-line:directive-selector
+  selector: 'thead[table-head]'
+})
+export class TableHeadDirective {
 
-/**
- * Interface for Sort/Order combination.
- */
-export interface Sort {
-  name: string;
-  order: number;
-}
+  constructor() { }
 
-/**
- * Interface for a table header.
- */
-export interface Column {
-  display: any;
-  data: any;
-  name: string;
-  hidden: boolean;
-  fixed: boolean;
-  sortable: boolean;
-  template: TemplateRef<any>;
-
-  render(item?: any, column?: Column, index?: number);
 }

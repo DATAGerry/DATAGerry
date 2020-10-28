@@ -19,17 +19,11 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
-
-// FontAwesome Libraries
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { far } from '@fortawesome/free-regular-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
-
-// Import Services
 import { BreadcrumbService } from './structure/breadcrumb/breadcrumb.service';
-
-// Import Components
 import { NavigationComponent } from './structure/navigation/navigation.component';
 import { BreadcrumbComponent } from './structure/breadcrumb/breadcrumb.component';
 import { IconPickerComponent } from './helpers/icon-picker/icon-picker.component';
@@ -62,8 +56,6 @@ import { FolderPathViewerComponent } from './components/file-explorer/components
 import { MoveDialogComponent } from './components/file-explorer/modal/move-dialog/move-dialog.component';
 import { MetadataInfoComponent } from './components/file-explorer/modal/metadata-info/metadata-info.component';
 import { AttachmentsListModalComponent } from './helpers/modals/attachments-list-modal/attachments-list-modal.component';
-
-// Import Modules
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { SearchBarModule } from '../search/search-bar/search-bar.module';
@@ -74,14 +66,10 @@ import { DataTablesModule } from 'angular-datatables';
 import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { RenderModule } from '../framework/render/render.module';
 import { FileexplorerModule } from './components/file-explorer/fileexplorer.module';
-
-// Import Directives
 import { FileDragDropDirective } from './directives/fileDragDrop.directive';
 import { NameDirective } from './directives/name.directive';
 import { LowercaseDirective } from './directives/lowercase.directive';
 import { TableSortEventDirective } from './components/file-explorer/directives/tabletSortEvent.directive';
-
-// Import Pipes
 import { FileSizePipe } from './pipes/file-size.pipe';
 import { NameGuidePipe } from './pipes/name-guide.pipe';
 import { FileExtensionPipe } from './pipes/file-extension.pipe';

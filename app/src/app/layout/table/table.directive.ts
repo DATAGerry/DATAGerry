@@ -16,28 +16,17 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { TemplateRef } from '@angular/core';
+import { Directive, HostBinding } from '@angular/core';
 
+@Directive({
+  // tslint:disable-next-line:directive-selector
+  selector: 'table[layout-table]'
+})
+export class TableDirective {
 
-/**
- * Interface for Sort/Order combination.
- */
-export interface Sort {
-  name: string;
-  order: number;
-}
+  @HostBinding('class.table-striped') striped: boolean = true;
+  @HostBinding('class.table-hover') hover: boolean = true;
 
-/**
- * Interface for a table header.
- */
-export interface Column {
-  display: any;
-  data: any;
-  name: string;
-  hidden: boolean;
-  fixed: boolean;
-  sortable: boolean;
-  template: TemplateRef<any>;
+  constructor() { }
 
-  render(item?: any, column?: Column, index?: number);
 }

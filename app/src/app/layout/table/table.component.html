@@ -1,35 +1,37 @@
-<div #container class="table-container">
-  <table-header>
+<div #container class="dg-table table-container">
+  <table-header (pageSizeChange)="pageSizeChange.emit($event)" (searchChange)="searchChange.emit($event)">
 
   </table-header>
-  <table #table class="table table-striped table-hover">
-    <thead table-head [columns]="columns">
-
+  <table #table layout-table class="table">
+    <thead table-head>
+    <tr class="table-head" [ngClass]="sortAble ? 'sortable': ''">
+      <th *ngIf="selection" [ngStyle]="{'width': '3rem'}">
+        <div class="form-check">
+          <input class="form-check-input position-static" type="checkbox" value="all" />
+        </div>
+      </th>
+      <th *ngFor="let column of columns" table-column-head [column]="column"></th>
+    </tr>
     </thead>
     <tbody table-body>
-
+    <tr table-row *ngFor="let item of items; let rowIndex= index" [item]="item">
+      <td *ngIf="selection" [ngStyle]="{'width': '3rem'}">
+        <div class="form-check">
+          <input class="form-check-input position-static" type="checkbox" [value]="item" />
+        </div>
+      </td>
+      <td *ngFor="let column of columns">
+        <ng-container *ngIf="column.template"
+                      [ngTemplateOutlet]="column.template"
+                      [ngTemplateOutletContext]="{ $implicit: item,rowIndex: rowIndex,column: column}">
+        </ng-container>
+      </td>
+    </tr>
     </tbody>
+    <tfoot table-foot>
+    </tfoot>
   </table>
-  <!--
-  <div class="table-footer">
-    <nav class="table-pagination" *ngIf="paginationEnabled">
-      <ul class="pagination pagination-sm" *ngIf="pager.pages && pager.pages.length">
-        <li [ngClass]="{disabled:currentPage === 1}" class="page-item disabled">
-          <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-        </li>
-        <li [ngClass]="{disabled:currentPage === 1}" class="page-item previous-item">
-          <a (click)="setPage(currentPage - 1)" class="page-link">Previous</a>
-        </li>
-        <li *ngFor="let page of pager.pages" [ngClass]="{active:currentPage === page}" class="page-item number-item">
-          <a (click)="setPage(page)" class="page-link">{{page}}</a>
-        </li>
-        <li [ngClass]="{disabled:currentPage === totalPages}" class="page-item next-item">
-          <a (click)="setPage(currentPage + 1)" class="page-link">Next</a>
-        </li>
-        <li [ngClass]="{disabled:currentPage === totalPages}" class="page-item last-item">
-          <a (click)="setPage(totalPages)" class="page-link">Last</a>
-        </li>
-      </ul>
-    </nav>
-  </div>-->
+  <table-footer [pageSize]="10" [totalItems]="totalItems" (pageChange)="pageChange.emit($event)">
+
+  </table-footer>
 </div>

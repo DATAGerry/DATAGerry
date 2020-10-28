@@ -16,28 +16,24 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { PageLengthEntry } from '../../components/table-page-size/table-page-size.component';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 @Component({
   // tslint:disable-next-line:component-selector
-  selector: 'table-header',
-  templateUrl: './table-header.component.html',
-  styleUrls: ['./table-header.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Default,
+  selector: 'table-footer',
+  templateUrl: './table-footer.component.html',
+  styleUrls: ['./table-footer.component.scss']
 })
-export class TableHeaderComponent implements OnInit {
+export class TableFooterComponent implements OnInit {
 
-  @Input() public pageSizeEnabled: boolean = true;
-  @Input() public searchEnabled: boolean = true;
+  @Input() public paginationEnabled: boolean = true;
 
-  @Input() public debounceTime: number;
-
+  @Input() public currentPage: number;
+  @Input() public totalItems: number;
   @Input() public pageSize: number;
-  @Input() public pageSizeList: Array<PageLengthEntry>;
+  @Input() public maxPages: number;
 
-  @Output() public searchChange: EventEmitter<string> = new EventEmitter<string>();
-  @Output() public pageSizeChange: EventEmitter<number> = new EventEmitter<number>();
+  @Output() public pageChange: EventEmitter<number> = new EventEmitter<number>();
 
   constructor() { }
 

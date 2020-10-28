@@ -1,5 +1,8 @@
 <h1><i class="{{type.render_meta.icon}}"></i> {{type.label}}</h1>
 <hr />
-<cmdb-table>
+<ng-template #activeTemplate>
+  Test
+</ng-template>
+<cmdb-table [selection]="selection" [items]="results" [totalItems]="totalResults" [columns]="columns">
 
 </cmdb-table>

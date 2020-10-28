@@ -22,7 +22,7 @@ import {
   OnDestroy,
   OnInit, TemplateRef, ViewChild,
 } from '@angular/core';
-import { ReplaySubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 import { CmdbType } from '../../models/cmdb-type';
 import { ActivatedRoute, Data, Router } from '@angular/router';
 import { takeUntil } from 'rxjs/operators';
@@ -40,18 +40,21 @@ import { UserCompactComponent } from '../../../management/users/components/user-
   templateUrl: './objects-by-type.component.html',
   styleUrls: ['./objects-by-type.component.scss']
 })
-export class ObjectsByTypeComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   /**
    * Table component.
    */
   @ViewChild(TableComponent, { static: false }) objectsTableComponent: TableComponent<RenderResult>;
 
+  @ViewChild('activeTemplate', { static: true }) activeTemplateRef: TemplateRef<any>;
+
   /**
    * Component un-subscriber.
    */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
+  public selection: boolean = true;
 
   /**
    * Current render results
@@ -66,17 +69,12 @@ export class ObjectsByTypeComponent implements OnInit, AfterViewInit, OnDestroy 
   /**
    * Current type from the route resolve.
    */
-  public type: CmdbType;
+  private typeSubject: BehaviorSubject<CmdbType> = new BehaviorSubject<CmdbType>(undefined);
 
   /**
    * Preset list of columns.
    */
   public readonly defaultPreColumns: Array<Column> = [
-    {
-      name: 'Active',
-      data: 'active',
-      sortable: true
-    },
     {
       name: 'Public ID',
       data: 'object_information.object_id',
@@ -110,27 +108,36 @@ export class ObjectsByTypeComponent implements OnInit, AfterViewInit, OnDestroy 
   public ngOnInit() {
     // Subscribe to route changes
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
-      this.type = data.type as CmdbType;
+      this.typeSubject.next(data.type as CmdbType);
+    });
+    this.typeSubject.asObservable().pipe(takeUntil(this.subscriber)).subscribe((type: CmdbType) => {
+      const params: CollectionParameters = {
+        filter: { type_id: this.type.public_id }, limit: 10,
+        sort: 'public_id', order: 1, page: 1
+      };
+      this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
+        .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
+          this.results = apiResponse.body.results as Array<RenderResult>;
+          this.totalResults = apiResponse.body.total;
+        });
     });
     const typeColumns: Array<Column> = [] as Array<Column>;
-    this.columns = [...this.defaultPreColumns, ...typeColumns, ...this.defaultAppendColumns];
-  }
-
-  public ngAfterViewInit(): void {
-    const params: CollectionParameters = {
-      filter: { type_id: this.type.public_id }, limit: 10,
-      sort: 'public_id', order: 1, page: 1
-    };
-    this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
-      .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
-        this.results = apiResponse.body.results as Array<RenderResult>;
-        this.totalResults = apiResponse.body.total;
-      });
+    this.columns = [
+      ...[{
+        name: 'Active',
+        data: 'active',
+        sortable: true,
+        template: this.activeTemplateRef
+      }] as Array<Column>, ...this.defaultPreColumns, ...typeColumns, ...this.defaultAppendColumns];
   }
 
   public ngOnDestroy(): void {
     this.subscriber.next();
     this.subscriber.complete();
+  }
+
+  public get type(): CmdbType {
+    return this.typeSubject.getValue() as CmdbType;
   }
 
 

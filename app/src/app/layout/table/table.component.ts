@@ -19,24 +19,19 @@
 
 import {
   ChangeDetectionStrategy,
-  Component, ComponentFactoryResolver,
+  Component, ComponentFactoryResolver, ContentChild,
   ElementRef,
   EventEmitter, Injector,
   Input,
   OnDestroy,
   OnInit,
-  Output,
+  Output, TemplateRef,
   ViewChild,
   ViewEncapsulation
 } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
-import { Column, PageLengthEntry, Sort, TableConfig } from './models';
-import { FormControl, FormGroup } from '@angular/forms';
-import { debounceTime, takeUntil } from 'rxjs/operators';
-
-export function calculateTotalPages(totalItems: number, pageLength: number): number {
-  return Math.ceil(totalItems / pageLength);
-}
+import { Column, Sort } from './models';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-table',
@@ -47,51 +42,41 @@ export function calculateTotalPages(totalItems: number, pageLength: number): num
 })
 export class TableComponent<T> implements OnInit, OnDestroy {
 
-  @Input() public tableConfig: TableConfig<T> = new TableConfig<T>();
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   @Input() public columns: Array<Column> = [];
-  @Input() public items: Array<T> = this.tableConfig.items;
-  @Input() public totalItems: number = this.items.length;
-  @Input() public pageLength: number = this.tableConfig.pageLength;
-  @Input() public currentPage: number = this.tableConfig.currentPage;
+  @Input() public items: Array<T> = [];
+  @Input() public totalItems: number = 0;
 
-  @Input() public pageLengthList: Array<PageLengthEntry> =
-    [
-      { label: '10', value: 10 },
-      { label: '25', value: 10 },
-      { label: '50', value: 10 },
-      { label: '100', value: 10 },
-      { label: '200', value: 10 },
-      { label: '500', value: 10 },
-      { label: 'All', value: 0 }
-    ];
-  @Input() public totalPages: number = calculateTotalPages(this.totalItems, this.pageLength);
-  @Input() public maxPages: number = 5;
+  @Input() public selection: boolean = false;
+
+  // SORT
+  @Input() public sortAble: boolean = true;
 
   @Input() public pageLengthEnabled: boolean = true;
   @Input() public searchEnabled: boolean = true;
   @Input() public paginationEnabled: boolean = true;
 
-  @Input() public columnToggle: boolean = false;
-  @Input() public searchDebounceTime: number = 500;
-
-  @Input() public emptyItemMessage: string = 'Table list is empty!';
-
-  @Output() public configChange: EventEmitter<void> = new EventEmitter<void>();
-
   @Output() public sortChange: EventEmitter<Sort> = new EventEmitter<Sort>();
-  @Output() public pageLengthChange: EventEmitter<number> = new EventEmitter<number>();
+  @Output() public pageSizeChange: EventEmitter<number> = new EventEmitter<number>();
   @Output() public pageChange: EventEmitter<number> = new EventEmitter<number>();
   @Output() public searchChange: EventEmitter<string> = new EventEmitter<string>();
 
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  constructor(public factory: ComponentFactoryResolver, public injector: Injector) {
+  constructor() {
 
   }
 
   public ngOnInit(): void {
-
+    this.pageSizeChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((size: number) => {
+      console.log(`[TableEvent] Page size changed to: ${size}`);
+    });
+    this.pageChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((page: number) => {
+      console.log(`[TableEvent] Page changed to: ${page}`);
+    });
+    this.searchChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((search: string) => {
+      console.log(`[TableEvent] Search input: ${search}`);
+    });
   }
 
   public ngOnDestroy(): void {
@@ -99,64 +84,5 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     this.subscriber.complete();
   }
 
-  public emitPageLengthChange(value: number): void {
-    this.pageLengthChange.emit(value);
-  }
-
-  public setPage(page: number): void {
-    if (page < 1) {
-      this.currentPage = 1;
-    } else if (page > this.totalPages) {
-      this.currentPage = this.totalPages;
-    }
-    this.emitPageChange(this.currentPage);
-  }
-
-  public emitPageChange(page: number): void {
-    this.pageChange.emit(page);
-  }
-
-  public get toggleColumns(): Array<Column> {
-    return this.columns.filter(c => c.fixed !== true);
-  }
-
-  /**
-   * Resolve object path
-   */
-  public resolve(path, obj = this, separator = '.') {
-    const properties = Array.isArray(path) ? path : path.split(separator);
-    return properties.reduce((prev, curr) => prev && prev[curr], obj);
-  }
-
-  public get pager(): any {
-    let startPage: number;
-    let endPage: number;
-    if (this.totalPages <= this.maxPages) {
-      startPage = 1;
-      endPage = this.totalPages;
-    } else {
-      const maxPagesBeforeCurrentPage = Math.floor(this.maxPages / 2);
-      const maxPagesAfterCurrentPage = Math.ceil(this.maxPages / 2) - 1;
-      if (this.currentPage <= maxPagesBeforeCurrentPage) {
-        startPage = 1;
-        endPage = this.maxPages;
-      } else if (this.currentPage + maxPagesAfterCurrentPage >= this.totalPages) {
-        startPage = this.totalPages - this.maxPages + 1;
-        endPage = this.totalPages;
-      } else {
-        startPage = this.currentPage - maxPagesBeforeCurrentPage;
-        endPage = this.currentPage + maxPagesAfterCurrentPage;
-      }
-    }
-
-    const startIndex = (this.currentPage - 1) * this.pageLength;
-    const endIndex = Math.min(startIndex + this.pageLength - 1, this.totalItems - 1);
-
-    // create an array of pages to ng-repeat in the pager control
-    const pages = Array.from(Array((endPage + 1) - startPage).keys()).map(i => startPage + i);
-    return {
-      pages
-    };
-  }
 
 }
