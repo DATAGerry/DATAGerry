@@ -5,10 +5,10 @@
 
     </table-page-size>
   </div>
-  <div class="p-2">
+  <div>
 
   </div>
-  <div class="p-2" *ngIf="searchEnabled">
+  <div *ngIf="searchEnabled">
     <table-search [debounceTime]="debounceTime"
                   (searchChange)="searchChange.emit($event)">
     </table-search>

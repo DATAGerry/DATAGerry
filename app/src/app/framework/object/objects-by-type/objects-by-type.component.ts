@@ -54,7 +54,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public selection: boolean = true;
+  public selection: boolean = false;
 
   /**
    * Current render results

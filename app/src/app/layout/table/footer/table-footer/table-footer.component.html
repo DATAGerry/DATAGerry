@@ -1,5 +1,8 @@
 <div class="table-footer d-flex">
-  <div class="mr-auto" *ngIf="paginationEnabled">
+  <div class="mr-auto">
+    <table-info [show]="show" [total]="totalItems" *ngIf="infoEnabled"></table-info>
+  </div>
+  <div *ngIf="paginationEnabled">
     <table-pagination
       [currentPage]="currentPage"
       [totalItems]="totalItems"

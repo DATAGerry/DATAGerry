@@ -31,13 +31,14 @@ import { TableDirective } from './table.directive';
 import { TableBodyDirective } from './body/table-body.directive';
 import { TableRowDirective } from './body/table-row.directive';
 import { TableColumnHeadComponent } from './header/table-column-head/table-column-head.component';
+import { TableInfoComponent } from './components/table-info/table-info.component';
 
 
 @NgModule({
   declarations: [
     TableComponent, TableSearchComponent, TableHeaderComponent, TablePageSizeComponent,
     TablePaginationComponent, TableFooterComponent, TableFootDirective, TableHeadDirective, TableDirective,
-    TableBodyDirective, TableRowDirective, TableColumnHeadComponent],
+    TableBodyDirective, TableRowDirective, TableColumnHeadComponent, TableInfoComponent],
   exports: [
     TableComponent
   ],

@@ -7,7 +7,7 @@
     <tr class="table-head" [ngClass]="sortAble ? 'sortable': ''">
       <th *ngIf="selection" [ngStyle]="{'width': '3rem'}">
         <div class="form-check">
-          <input class="form-check-input position-static" type="checkbox" value="all" />
+          <input class="form-check-input position-static" type="checkbox" value="all"/>
         </div>
       </th>
       <th *ngFor="let column of columns" table-column-head [column]="column"></th>
@@ -17,7 +17,8 @@
     <tr table-row *ngFor="let item of items; let rowIndex= index" [item]="item">
       <td *ngIf="selection" [ngStyle]="{'width': '3rem'}">
         <div class="form-check">
-          <input class="form-check-input position-static" type="checkbox" [value]="item" />
+          <input class="form-check-input position-static" type="checkbox" [value]="item"
+                 (change)="toggleRowSelection(item, $event)"/>
         </div>
       </td>
       <td *ngFor="let column of columns">
@@ -31,7 +32,13 @@
     <tfoot table-foot>
     </tfoot>
   </table>
-  <table-footer [pageSize]="10" [totalItems]="totalItems" (pageChange)="pageChange.emit($event)">
+  <table-footer
+    [paginationEnabled]="paginationEnabled"
+    [infoEnabled]="infoEnabled"
+    [items]="items"
+    [pageSize]="10"
+    [totalItems]="totalItems"
+    (pageChange)="pageChange.emit($event)">
 
   </table-footer>
 </div>
