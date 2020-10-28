@@ -192,6 +192,137 @@
             </a>
           </div>
         </li>
+        <li class="nav-item dropdown mr-2">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+          aria-expanded="false">
+            <i class="far fa-smile"></i>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right feedback-form">
+            <div class="dropdown-header">Feedback Form</div>
+            <div>
+              <form>
+                <div class="form-group" id="feedback-form">
+                  <div class="container">
+                    <div class="row">
+                      <div class="col-4">
+                        <label for="usability">Usability</label>
+                      </div>
+                      <div class="col-8">
+                        <div class="slidercontainer">
+                          <input type="range" min="1" max="5" value="3" step="1" class="slider" id="usability" list="steplist">
+                          <div class="ticks">
+                            <span class="tick">1</span>
+                            <span class="tick">2</span>
+                            <span class="tick">3</span>
+                            <span class="tick">4</span>
+                            <span class="tick">5</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-4">
+                        <label for="functions">Functions</label>
+                      </div>
+                      <div class="col-8">
+                        <div class="slidercontainer">
+                          <input type="range" min="1" max="5" value="3" step="1" class="slider" id="functions" list="steplist">
+                          <div class="ticks">
+                            <span class="tick">1</span>
+                            <span class="tick">2</span>
+                            <span class="tick">3</span>
+                            <span class="tick">4</span>
+                            <span class="tick">5</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-4">
+                        <label for="design">Design</label>
+                      </div>
+                      <div class="col-8">
+                        <div class="slidercontainer">
+                          <input type="range" min="1" max="5" value="3" step="1" class="slider" id="design" list="steplist">
+                          <div class="ticks">
+                            <span class="tick">1</span>
+                            <span class="tick">2</span>
+                            <span class="tick">3</span>
+                            <span class="tick">4</span>
+                            <span class="tick">5</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-4">
+                        <label for="performance">Performance</label>
+                      </div>
+                      <div class="col-8">
+                        <div class="slidercontainer">
+                          <input type="range" min="1" max="5" value="3" step="1" class="slider" id="performance" list="steplist">
+                          <div class="ticks">
+                            <span class="tick">1</span>
+                            <span class="tick">2</span>
+                            <span class="tick">3</span>
+                            <span class="tick">4</span>
+                            <span class="tick">5</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-4">
+                        <label for="overall-experience">Overall Experience</label>
+                      </div>
+                      <div class="col-8">
+                        <div class="slidercontainer">
+                          <input type="range" min="1" max="5" value="3" step="1" class="slider" id="overall-experience" list="steplist">
+                          <div class="ticks">
+                            <span class="tick">1</span>
+                            <span class="tick">2</span>
+                            <span class="tick">3</span>
+                            <span class="tick">4</span>
+                            <span class="tick">5</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <datalist id="steplist">
+                      <option>1</option>
+                      <option>2</option>
+                      <option>3</option>
+                      <option>4</option>
+                      <option>5</option>
+                    </datalist>
+                    <div class="row">
+                      <div class="col-4">
+                        <label for="comment">Comment</label>
+                      </div>
+                      <div class="col-8">
+                        <textarea id="comment"></textarea>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-4">
+                        <label for="email">E-Mail</label>
+                      </div>
+                      <div class="col-8">
+                        <input type="text" id="email">
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-auto" id="form-qr">
+                        <cmdb-form-qr></cmdb-form-qr>
+                      </div>
+                    </div>
+                  </div>
+                  <input class="btn-primary" type="submit" id="submit">
+                </div>
+              </form>
+            </div>
+          </div>
+        </li>
       </ul>
     </div>
   </div>
