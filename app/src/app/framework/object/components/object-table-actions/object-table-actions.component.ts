@@ -16,26 +16,18 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Component, OnInit } from '@angular/core';
 
-/**
- * Interface for Sort/Order combination.
- */
-export interface Sort {
-  name: string;
-  order: number;
-}
+@Component({
+  selector: 'cmdb-object-table-actions',
+  templateUrl: './object-table-actions.component.html',
+  styleUrls: ['./object-table-actions.component.scss']
+})
+export class ObjectTableActionsComponent implements OnInit {
 
-/**
- * Interface for a table header.
- */
-export interface Column {
-  display: any;
-  data: any;
-  name: string;
-  hidden: boolean;
-  fixed: boolean;
-  sortable: boolean;
-  template: any;
+  constructor() { }
 
-  render(item?: any, column?: Column, index?: number);
+  ngOnInit() {
+  }
+
 }

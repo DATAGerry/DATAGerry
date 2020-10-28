@@ -29,16 +29,17 @@ import { TableFootDirective } from './footer/table-foot.directive';
 import { TableHeadDirective } from './header/table-head.directive';
 import { TableDirective } from './table.directive';
 import { TableBodyDirective } from './body/table-body.directive';
-import { TableRowDirective } from './body/table-row.directive';
 import { TableColumnHeadComponent } from './header/table-column-head/table-column-head.component';
 import { TableInfoComponent } from './components/table-info/table-info.component';
+import { TableCellComponent } from './body/table-cell/table-cell.component';
+import { TableRowDirective } from './body/table-row.directive';
 
 
 @NgModule({
   declarations: [
     TableComponent, TableSearchComponent, TableHeaderComponent, TablePageSizeComponent,
     TablePaginationComponent, TableFooterComponent, TableFootDirective, TableHeadDirective, TableDirective,
-    TableBodyDirective, TableRowDirective, TableColumnHeadComponent, TableInfoComponent],
+    TableBodyDirective, TableColumnHeadComponent, TableInfoComponent, TableCellComponent, TableRowDirective],
   exports: [
     TableComponent
   ],

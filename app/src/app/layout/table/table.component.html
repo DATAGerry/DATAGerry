@@ -1,5 +1,7 @@
 <div #container class="dg-table table-container">
-  <table-header (pageSizeChange)="pageSizeChange.emit($event)" (searchChange)="searchChange.emit($event)">
+  <table-header
+    (pageSizeChange)="pageSizeChange.emit($event)"
+    (searchChange)="searchChange.emit($event)">
 
   </table-header>
   <table #table layout-table class="table">
@@ -14,19 +16,14 @@
     </tr>
     </thead>
     <tbody table-body>
-    <tr table-row *ngFor="let item of items; let rowIndex= index" [item]="item">
-      <td *ngIf="selection" [ngStyle]="{'width': '3rem'}">
+    <tr table-row *ngFor="let item of items; let rowIndex= index" [item]="item" [rowIndex]="rowIndex">
+      <!--<td *ngIf="selection" [ngStyle]="{'width': '3rem'}">
         <div class="form-check">
           <input class="form-check-input position-static" type="checkbox" [value]="item"
                  (change)="toggleRowSelection(item, $event)"/>
         </div>
-      </td>
-      <td *ngFor="let column of columns">
-        <ng-container *ngIf="column.template"
-                      [ngTemplateOutlet]="column.template"
-                      [ngTemplateOutletContext]="{ $implicit: item,rowIndex: rowIndex,column: column}">
-        </ng-container>
-      </td>
+      </td>-->
+      <td table-cell *ngFor="let column of columns" [column]="column" [item]="item"></td>
     </tr>
     </tbody>
     <tfoot table-foot>

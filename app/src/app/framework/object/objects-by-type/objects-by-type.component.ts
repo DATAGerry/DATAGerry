@@ -34,6 +34,8 @@ import { CollectionParameters } from '../../../services/models/api-parameter';
 import { HttpResponse } from '@angular/common/http';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
 import { UserCompactComponent } from '../../../management/users/components/user-compact/user-compact.component';
+import { ActiveBadgeComponent } from '../../../layout/helpers/active-badge/active-badge.component';
+import { ObjectTableActionsComponent } from '../components/object-table-actions/object-table-actions.component';
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -46,8 +48,6 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * Table component.
    */
   @ViewChild(TableComponent, { static: false }) objectsTableComponent: TableComponent<RenderResult>;
-
-  @ViewChild('activeTemplate', { static: true }) activeTemplateRef: TemplateRef<any>;
 
   /**
    * Component un-subscriber.
@@ -88,14 +88,6 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       data: 'object_information.author_id',
       display: 'object_information.author_name',
       sortable: true,
-    },
-    {
-      name: 'Actions',
-      sortable: false,
-      fixed: true,
-      render(item?: any, column?: Column, index?: number) {
-        return 'Test';
-      }
     }
   ] as Array<Column>;
 
@@ -127,8 +119,19 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         name: 'Active',
         data: 'active',
         sortable: true,
-        template: this.activeTemplateRef
-      }] as Array<Column>, ...this.defaultPreColumns, ...typeColumns, ...this.defaultAppendColumns];
+        template: ActiveBadgeComponent
+      }] as Array<Column>,
+      ...this.defaultPreColumns,
+      ...typeColumns,
+      ... [
+        {
+          name: 'Actions',
+          sortable: false,
+          fixed: true,
+          template: ObjectTableActionsComponent
+        }
+      ] as Array<Column>
+      ];
   }
 
   public ngOnDestroy(): void {

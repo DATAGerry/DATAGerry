@@ -17,15 +17,16 @@
 */
 
 import { Directive, Input } from '@angular/core';
+import { Column } from '../models';
 
 @Directive({
   // tslint:disable-next-line:directive-selector
-  selector: '[table-row]'
+  selector: 'tr[table-row]'
 })
-export class TableRowDirective {
+export class TableRowDirective<T> {
 
-  @Input() public item: any;
-
-  constructor() { }
+  @Input() public item: T;
+  @Input() public rowIndex: number;
+  @Input() public columns: Array<Column>;
 
 }

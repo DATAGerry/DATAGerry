@@ -2,7 +2,7 @@
 * DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2019 NETHINKS GmbH
 *
-* This program is free software: you can redistribute it and/or modifyhttps://nethinks.atlassian.net/browse/NET-412
+* This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
 * published by the Free Software Foundation, either version 3 of the
 * License, or (at your option) any later version.
@@ -62,6 +62,7 @@ import { ObjectAttachmentsComponent } from './components/object-attachments/obje
 import { UsersModule } from '../../management/users/users.module';
 import { ObjectsByTypeComponent } from './objects-by-type/objects-by-type.component';
 import { TableModule } from '../../layout/table/table.module';
+import { ObjectTableActionsComponent } from './components/object-table-actions/object-table-actions.component';
 
 @NgModule({
   entryComponents: [
@@ -97,7 +98,8 @@ import { TableModule } from '../../layout/table/table.module';
     ObjectBulkChangePreviewComponent,
     ObjectDocsComponent,
     ObjectAttachmentsComponent,
-    ObjectsByTypeComponent
+    ObjectsByTypeComponent,
+    ObjectTableActionsComponent
   ],
   imports: [
     CommonModule,
