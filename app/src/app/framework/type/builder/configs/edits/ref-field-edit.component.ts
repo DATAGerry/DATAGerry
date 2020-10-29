@@ -48,6 +48,12 @@ export class RefFieldEditComponent extends ConfigEdit implements OnInit {
         this.objectList = res;
       });
     }
+
+    if (this.data.ref_types) {
+      if (!Array.isArray(this.data.ref_types)) {
+        this.data.ref_types = [this.data.ref_types];
+      }
+    }
   }
 
   public onChange() {
