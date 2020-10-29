@@ -19,7 +19,9 @@
         <button class="btn btn-link" type="button">
           <i class="fas fa-angle-double-right"></i>
         </button>
-        <i>Text</i>: {{inputControl.value}} - <i>({{possibleTextResults}})</i>
+        <i>Text</i>: {{inputControl.value}} -
+        <i>({{possibleTextResults.active}}
+          <i *ngIf="possibleTextResults.inactive > 0"> + {{possibleTextResults.inactive}} inactive</i>)</i>
       </span>
     </li>
     <li #tabID tabindex="3" *ngIf="isExistingPublicID" (keyup.arrowUp)="arrowUp(tabID.tabIndex)" (keyup.arrowDown)="arrowDown(tabID.tabIndex)"
@@ -72,7 +74,7 @@
         >{{possibleCategory?.label}}</li>
       </ul>
     </li>
-    <li class="alert alert-info alert-dismissible fade show mb-0" role="alert">
+    <li class="alert alert-info alert-dismissible fade show mb-0">
       <strong><fa-icon icon="info-circle" class="text-primary"></fa-icon></strong>
       Enter your search terms, after each search term use
       <span class="badge badge-warning w-auto">TAB</span>

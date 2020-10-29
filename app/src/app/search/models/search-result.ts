@@ -32,3 +32,14 @@ export class SearchResultList {
   // tslint:disable-next-line:variable-name
   public groups?: any[];
 }
+
+
+export class NumberSearchResults implements Object {
+  public active: number = 0;
+  public inactive: number = 0;
+  public total: number = 0;
+
+  public constructor(init?: Partial<NumberSearchResults>) {
+    Object.assign(this, init);
+  }
+}

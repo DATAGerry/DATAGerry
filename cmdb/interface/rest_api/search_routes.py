@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import json
 import logging
 
@@ -20,13 +21,13 @@ from flask import current_app, request, abort
 
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required
-from cmdb.interface.blueprint import RootBlueprint
 from cmdb.search import Search
 from cmdb.search.params import SearchParam
 from cmdb.search.query import Pipeline
 from cmdb.search.query.pipe_builder import PipelineBuilder
 from cmdb.search.searchers import SearcherFramework
 from cmdb.user_management.models.user import UserModel
+from cmdb.interface.blueprint import APIBlueprint
 
 try:
     from cmdb.utils.error import CMDBError
@@ -37,21 +38,41 @@ with current_app.app_context():
     object_manager: CmdbObjectManager = current_app.object_manager
 
 LOGGER = logging.getLogger(__name__)
-search_blueprint = RootBlueprint('search_rest', __name__, url_prefix='/search')
+search_blueprint = APIBlueprint('search_rest', __name__, url_prefix='/search')
 
 
 @search_blueprint.route('/quick/count', methods=['GET'])
 @search_blueprint.route('/quick/count/', methods=['GET'])
-@login_required
-@insert_request_user
-def quick_search_result_counter(request_user: UserModel):
+@search_blueprint.protect(auth=True)
+def quick_search_result_counter():
     regex = request.args.get('searchValue', Search.DEFAULT_REGEX, str)
+
     plb = PipelineBuilder()
     regex = plb.regex_('fields.value', f'{regex}', 'ims')
-    pipe_match = plb.match_(regex)
+    pipe_and = plb.and_([regex, {'active': {"$eq": True}} if _fetch_only_active_objs() else {}])
+    pipe_match = plb.match_(pipe_and)
     plb.add_pipe(pipe_match)
-    pipe_count = plb.count_('count')
-    plb.add_pipe(pipe_count)
+    plb.add_pipe({'$group': {"_id": {'active': '$active'},  'count': {'$sum': 1}}})
+    plb.add_pipe({'$group': {'_id': 0,
+                             'levels': {'$push': {'_id': '$_id.active', 'count': '$count'}},
+                             'total': {'$sum': '$count'}}
+                  })
+    plb.add_pipe({'$unwind': '$levels'})
+    plb.add_pipe({'$sort': {"levels._id": -1}})
+    plb.add_pipe({'$group': {'_id': 0, 'levels': {'$push': {'count': "$levels.count"}}, "total": {'$avg': '$total'}}})
+    plb.add_pipe({
+        '$project': {
+            'total': "$total",
+            'active': {'$arrayElemAt': ["$levels", 0]},
+            'inactive': {'$arrayElemAt': ["$levels", 1]}
+        }})
+    plb.add_pipe({
+        '$project': {
+            '_id': 0,
+            'active': {'$cond': [{'$ifNull': ["$active", False]}, '$active.count', 0]},
+            'inactive': {'$cond': [{'$ifNull': ['$inactive', False]}, '$inactive.count', 0]},
+            'total': '$total'
+        }})
     pipeline = plb.pipeline
     try:
         result = list(object_manager.aggregate(collection='framework.objects', pipeline=pipeline))
@@ -59,9 +80,9 @@ def quick_search_result_counter(request_user: UserModel):
         LOGGER.error(f'[Search count]: {err}')
         return abort(400)
     if len(result) > 0:
-        return make_response(result[0]['count'])
+        return make_response(result[0])
     else:
-        return make_response(0)
+        return make_response({'active': 0, 'inactive': 0, 'total': 0})
 
 
 @search_blueprint.route('/', methods=['GET', 'POST'])
