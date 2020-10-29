@@ -34,10 +34,7 @@ export class SidebarService {
   private sideBarType: SidebarTypeComponent[] = [];
 
   constructor(private categoryService: CategoryService, private objectService: ObjectService) {
-
-    this.categoryService.getCategoryTree().subscribe((tree: CmdbCategoryTree)  => {
-      this.categoryTreeObserver.next(tree);
-    });
+    this.loadCategoryTree();
   }
 
   /**
@@ -48,9 +45,9 @@ export class SidebarService {
   }
 
   /**
-   * Reload the category tree.
+   * Load Category Tree {@link CmdbCategoryTree}.
    */
-  public reload() {
+  public loadCategoryTree() {
     this.categoryService.getCategoryTree().subscribe((tree: CmdbCategoryTree)  => {
       this.categoryTreeObserver.next(tree);
     });
