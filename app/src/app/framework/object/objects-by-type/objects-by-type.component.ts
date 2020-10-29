@@ -28,7 +28,7 @@ import { ActivatedRoute, Data, Router } from '@angular/router';
 import { takeUntil } from 'rxjs/operators';
 import { RenderResult } from '../../models/cmdb-render';
 import { TableComponent } from '../../../layout/table/table.component';
-import { Column } from '../../../layout/table/models';
+import { Column, Sort, SortDirection } from '../../../layout/table/table.types';
 import { ObjectService } from '../../services/object.service';
 import { CollectionParameters } from '../../../services/models/api-parameter';
 import { HttpResponse } from '@angular/common/http';
@@ -49,12 +49,13 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    */
   @ViewChild(TableComponent, { static: false }) objectsTableComponent: TableComponent<RenderResult>;
 
+  @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
+  @ViewChild('fieldTemplate', { static: true }) fieldTemplate: TemplateRef<any>;
+
   /**
    * Component un-subscriber.
    */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
-
-  public selection: boolean = false;
 
   /**
    * Current render results
@@ -71,76 +72,107 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    */
   private typeSubject: BehaviorSubject<CmdbType> = new BehaviorSubject<CmdbType>(undefined);
 
-  /**
-   * Preset list of columns.
-   */
-  public readonly defaultPreColumns: Array<Column> = [
-    {
-      name: 'Public ID',
-      data: 'object_information.object_id',
-      sortable: true
-    }
-  ] as Array<Column>;
+  public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
 
-  public readonly defaultAppendColumns: Array<Column> = [
-    {
-      name: 'Author',
-      data: 'object_information.author_id',
-      display: 'object_information.author_name',
-      sortable: true,
-    }
-  ] as Array<Column>;
+  public get type(): CmdbType {
+    return this.typeSubject.getValue() as CmdbType;
+  }
 
   public columns: Array<Column>;
 
+  public page: number = 1;
+  public limit: number = 10;
 
   constructor(private router: Router, private route: ActivatedRoute, private objectService: ObjectService) {
-  }
-
-  public ngOnInit() {
-    // Subscribe to route changes
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
       this.typeSubject.next(data.type as CmdbType);
     });
-    this.typeSubject.asObservable().pipe(takeUntil(this.subscriber)).subscribe((type: CmdbType) => {
-      const params: CollectionParameters = {
-        filter: { type_id: this.type.public_id }, limit: 10,
-        sort: 'public_id', order: 1, page: 1
-      };
-      this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
-        .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
-          this.results = apiResponse.body.results as Array<RenderResult>;
-          this.totalResults = apiResponse.body.total;
-        });
-    });
-    const typeColumns: Array<Column> = [] as Array<Column>;
-    this.columns = [
-      ...[{
-        name: 'Active',
-        data: 'active',
-        sortable: true,
-        template: ActiveBadgeComponent
-      }] as Array<Column>,
-      ...this.defaultPreColumns,
-      ...typeColumns,
-      ... [
-        {
-          name: 'Actions',
-          sortable: false,
-          fixed: true,
-          template: ObjectTableActionsComponent
-        }
-      ] as Array<Column>
-      ];
   }
+
+  public ngOnInit(): void {
+    this.typeSubject.asObservable().pipe(takeUntil(this.subscriber)).subscribe((type: CmdbType) => {
+      this.setColumns(type);
+      this.getObjects();
+    });
+  }
+
+  private setColumns(type: CmdbType): void {
+
+    const fields = type.fields || [];
+    const summaryFields = type.render_meta.summary.fields || [];
+
+    const columns = [
+      {
+        display: 'Active',
+        name: 'active',
+        data: 'active',
+        sortable: false,
+        searchable: false,
+        template: this.activeTemplate
+      },
+      {
+        display: 'Public ID',
+        name: 'public_id',
+        data: 'object_information.object_id',
+        searchable: false,
+        sortable: true
+      },
+
+    ] as Array<Column>;
+    for (const field of fields) {
+      columns.push({
+        display: field.label || field.name,
+        name: field.name,
+        data: field.name,
+        sortable: true,
+        searchable: true,
+        hidden: !summaryFields.includes(field.name),
+        template: this.fieldTemplate
+      } as Column);
+    }
+
+    columns.push({
+      display: 'Actions',
+      name: 'actions',
+      sortable: false,
+      searchable: false,
+      fixed: true,
+    } as Column);
+
+    this.columns = columns;
+  }
+
+  public getObjects() {
+    const params: CollectionParameters = {
+      filter: { type_id: this.type.public_id }, limit: this.limit,
+      sort: this.sort.name, order: this.sort.order, page: this.page
+    };
+    this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
+      .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
+        this.results = apiResponse.body.results as Array<RenderResult>;
+        this.totalResults = apiResponse.body.total;
+      });
+  }
+
 
   public ngOnDestroy(): void {
     this.subscriber.next();
     this.subscriber.complete();
   }
 
-  public get type(): CmdbType {
-    return this.typeSubject.getValue() as CmdbType;
+  public onPageChange(page: number) {
+    this.page = page;
+    this.getObjects();
+  }
+
+  public onPageSizeChange(limit: number): void {
+    this.limit = limit;
+    this.getObjects();
+  }
+
+  public onSortChange(sort: Sort): void {
+    this.sort = sort;
+    this.getObjects();
   }
 
 

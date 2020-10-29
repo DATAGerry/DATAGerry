@@ -16,16 +16,22 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Directive, HostBinding, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { Column } from '../../table.types';
 
-@Directive({
-  // tslint:disable-next-line:directive-selector
-  selector: 'thead[table-head]'
+@Component({
+  // tslint:disable-next-line:component-selector
+  selector: 'table-column-toggle',
+  templateUrl: './table-column-toggle.component.html',
+  styleUrls: ['./table-column-toggle.component.scss']
 })
-export class TableHeadDirective {
+export class TableColumnToggleComponent implements OnInit {
 
-  @HostBinding('class.sortable') @Input() sortable: boolean = false;
+  @Input() columns: Array<Column> = [];
 
   constructor() { }
+
+  ngOnInit() {
+  }
 
 }

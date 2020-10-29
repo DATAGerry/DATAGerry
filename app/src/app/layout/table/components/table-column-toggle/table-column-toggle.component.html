@@ -1,0 +1,10 @@
+<div class="btn-group">
+  <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
+    <i class="fas fa-table"></i> Columns
+  </button>
+  <ul class="dropdown-menu" *ngIf="columns.length > 0">
+    <li class="dropdown-item" *ngFor="let column of columns" [ngClass]="{'active': !column.hidden}">
+      {{column.name}}
+    </li>
+  </ul>
+</div>

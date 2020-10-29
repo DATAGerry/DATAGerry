@@ -1,6 +1,17 @@
 <h1><i class="{{type.render_meta.icon}}"></i> {{type.label}}</h1>
-<hr />
+<hr/>
 
-<cmdb-table [selection]="selection" [items]="results" [totalItems]="totalResults" [columns]="columns">
+<ng-template #activeTemplate let-item="item" let-column="column">
+  <cmdb-active-badge [activeStatus]="item.object_information.active"></cmdb-active-badge>
+</ng-template>
+
+<ng-template #fieldTemplate let-item="item" let-column="column">
+
+</ng-template>
+
+<cmdb-table [items]="results" [totalItems]="totalResults" [columns]="columns" [sort]="sort" [toggleable]="true"
+            [selectEnabled]="true"
+            (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
+            (sortChange)="onSortChange($event)">
 
 </cmdb-table>

@@ -1,29 +1,36 @@
 <div #container class="dg-table table-container">
   <table-header
+    [toggleable]="toggleable" [columns]="columns"
     (pageSizeChange)="pageSizeChange.emit($event)"
     (searchChange)="searchChange.emit($event)">
 
   </table-header>
   <table #table layout-table class="table">
-    <thead table-head>
-    <tr class="table-head" [ngClass]="sortAble ? 'sortable': ''">
-      <th *ngIf="selection" [ngStyle]="{'width': '3rem'}">
+    <thead table-head [sortable]="sortable">
+    <tr class="table-head">
+      <th *ngIf="selectEnabled" [ngStyle]="{'width': '3rem'}">
         <div class="form-check">
           <input class="form-check-input position-static" type="checkbox" value="all"/>
         </div>
       </th>
-      <th *ngFor="let column of columns" table-column-head [column]="column"></th>
+      <th table-column-head *ngFor="let column of columns" [column]="column" [selected]="column.name === sort.name"
+          (sortChange)="onSortChange($event)"></th>
     </tr>
     </thead>
     <tbody table-body>
     <tr table-row *ngFor="let item of items; let rowIndex= index" [item]="item" [rowIndex]="rowIndex">
-      <!--<td *ngIf="selection" [ngStyle]="{'width': '3rem'}">
+      <td *ngIf="selectEnabled" [ngStyle]="{'width': '3rem'}">
         <div class="form-check">
           <input class="form-check-input position-static" type="checkbox" [value]="item"
                  (change)="toggleRowSelection(item, $event)"/>
         </div>
-      </td>-->
+      </td>
       <td table-cell *ngFor="let column of columns" [column]="column" [item]="item"></td>
+    </tr>
+    <tr *ngIf="items.length === 0">
+      <td class="text-center" [colSpan]="columns.length">
+        No data to display!
+      </td>
     </tr>
     </tbody>
     <tfoot table-foot>

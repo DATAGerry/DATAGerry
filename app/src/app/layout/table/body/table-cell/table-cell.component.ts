@@ -17,13 +17,13 @@
 */
 import {
   Component,
-  ComponentFactoryResolver,
+  ComponentFactoryResolver, HostBinding,
   Input,
   OnInit,
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import { Column } from '../../models';
+import { Column } from '../../table.types';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -33,23 +33,27 @@ import { Column } from '../../models';
 })
 export class TableCellComponent<T> implements OnInit {
 
-  @ViewChild('container', { static: true }) containerRef: ViewContainerRef;
+  @HostBinding('class.hidden') private hidden: boolean = false;
+
+  @Input() rowIndex: number;
 
   public data: any;
   public item: T;
+
 
   public column: Column;
 
   @Input('column')
   public set Column(col: Column) {
     this.column = col;
+    this.hidden = this.column.hidden;
   }
 
   @Input('item')
   public set Item(item: T) {
     this.item = item;
-    if (this.column.display || this.column.data) {
-      this.data = TableCellComponent.resolve(this.column.display || this.column.data, this.item);
+    if (this.column.data) {
+      this.data = TableCellComponent.resolve(this.column.data, this.item);
     }
   }
 
@@ -71,11 +75,4 @@ export class TableCellComponent<T> implements OnInit {
 
   }
 
-  public insertComponent(component: any) {
-    const componentFactory = this.resolver.resolveComponentFactory(component);
-    this.containerRef.clear();
-    const componentRef = this.containerRef.createComponent(componentFactory);
-
-
-  }
 }

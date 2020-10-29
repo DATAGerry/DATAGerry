@@ -16,8 +16,17 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ChangeDetectionStrategy, Component, HostListener, Input, OnInit, ViewEncapsulation } from '@angular/core';
-import { Column } from '../../models';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter, HostBinding,
+  HostListener,
+  Input,
+  OnInit,
+  Output,
+  ViewEncapsulation
+} from '@angular/core';
+import { Column, Sort, SortDirection } from '../../table.types';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -29,14 +38,56 @@ import { Column } from '../../models';
 })
 export class TableColumnHeadComponent implements OnInit {
 
-  @Input() public column: Column;
-  @Input() sortSelected: boolean = false;
-  @Input() sortDirection: number = 1;
+  @HostBinding('class.sortable') private sortable: boolean = false;
+  @HostBinding('class.hidden') private hidden: boolean = false;
+
+  public column: Column;
+
+  @Input('column')
+  public set Column(c: Column) {
+    this.column = c;
+    this.hidden = this.column.hidden;
+    this.sortable = this.column.sortable || false;
+  }
+
+  @Input() order: SortDirection = SortDirection.NONE;
+
+  public selected: boolean = false;
+
+  @Input('selected')
+  public set Selected(value: boolean) {
+    this.onSelectedChange(value);
+  }
+
+  public onSelectedChange(value: boolean) {
+    this.selected = value;
+    if (!this.selected) {
+      this.order = SortDirection.NONE;
+    } else {
+      this.order = this.reverseOrder(this.order);
+    }
+  }
+
+  @Output() private sortChange: EventEmitter<Sort> = new EventEmitter<Sort>();
 
   @HostListener('click', ['$event'])
   public onClick(e) {
-    if (this.column && this.column.sortable) {
-      this.sortSelected = true;
+    if (this.column && this.column.sortable && this.sortable) {
+      this.onSelectedChange(true);
+      const sort = {
+        name: this.column.name,
+        order: this.order
+      } as Sort;
+      this.sortChange.emit(sort);
+    }
+  }
+
+
+  public reverseOrder(direction: SortDirection): SortDirection {
+    if (direction === SortDirection.DESCENDING) {
+      return SortDirection.ASCENDING;
+    } else {
+      return SortDirection.DESCENDING;
     }
   }
 

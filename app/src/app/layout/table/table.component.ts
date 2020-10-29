@@ -19,18 +19,16 @@
 
 import {
   ChangeDetectionStrategy,
-  Component, ComponentFactoryResolver, ContentChild,
-  ElementRef,
-  EventEmitter, Injector,
+  Component,
+  EventEmitter,
   Input,
   OnDestroy,
   OnInit,
-  Output, TemplateRef,
-  ViewChild,
+  Output,
   ViewEncapsulation
 } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
-import { Column, Sort } from './models';
+import { Column, Sort, SortDirection } from './table.types';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
@@ -42,39 +40,87 @@ import { takeUntil } from 'rxjs/operators';
 })
 export class TableComponent<T> implements OnInit, OnDestroy {
 
+  /**
+   * Component un subscriber.
+   * @private
+   */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  @Input() public columns: Array<Column> = [];
+  @Input() loading: boolean = true;
+
+  public hiddenColumns: Array<Column> = [];
+  public columns: Array<Column> = [];
+
+  @Input('columns')
+  public set Columns(columns: Array<Column>) {
+    this.columns = columns;
+    this.hiddenColumns = this.columns.filter(c => !c.hidden);
+  }
+
   @Input() public items: Array<T> = [];
   @Input() public totalItems: number = 0;
 
   /**
    * Is row selected enabled.
    */
-  @Input() public selection: boolean = false;
+  @Input() public selectEnabled: boolean = false;
 
   /**
-   * Selected rows.
+   * Selected items.
    */
-  @Input() public selected: Array<T> = [];
+  @Input() public selectedItems: Array<T> = [];
 
-  // SORT
-  @Input() public sortAble: boolean = true;
+  /**
+   * Event emitter when selected items changed.
+   */
+  @Output()  public selectedChange: EventEmitter<Array<T>> = new EventEmitter<Array<T>>();
+
 
   @Input() public infoEnabled: boolean = true;
   @Input() public pageLengthEnabled: boolean = true;
   @Input() public searchEnabled: boolean = true;
   @Input() public paginationEnabled: boolean = true;
 
-  @Output() public sortChange: EventEmitter<Sort> = new EventEmitter<Sort>();
+
   @Output() public pageSizeChange: EventEmitter<number> = new EventEmitter<number>();
   @Output() public pageChange: EventEmitter<number> = new EventEmitter<number>();
   @Output() public searchChange: EventEmitter<string> = new EventEmitter<string>();
-  @Output() public selectionChange: EventEmitter<Array<T>> = new EventEmitter<Array<T>>();
 
 
-  constructor() {
+  @Input() public toggleable: boolean = false;
 
+
+  /**
+   * Sorting enabled.
+   */
+  @Input() public sortable: boolean = true;
+
+  /**
+   * Sort change emitter.
+   */
+  @Output() public sortChange: EventEmitter<Sort> = new EventEmitter<Sort>();
+
+  /**
+   * Table sort value.
+   */
+  public sort: Sort = { name: null, order: SortDirection.NONE };
+
+  /**
+   * Sort input setter.
+   * @param value
+   */
+  @Input('sort')
+  public set Sort(value: Sort) {
+    this.sort = value;
+  }
+
+  /**
+   * Function when on sort changed emitter.
+   * @param sort
+   */
+  public onSortChange(sort: Sort): void {
+    this.sort = sort;
+    this.sortChange.emit(sort);
   }
 
   public ngOnInit(): void {
@@ -87,10 +133,15 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     this.searchChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((search: string) => {
       console.log(`[TableEvent] Search input changed to: ${ search }`);
     });
-    this.selectionChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((selected: Array<T>) => {
+    this.selectedChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((selected: Array<T>) => {
       console.log(`[TableEvent] Selected rows changed to: ${ selected }`);
     });
+    this.sortChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((sort: Sort) => {
+      console.log(`[TableEvent] Sort changed to:`);
+      console.log(sort);
+    });
   }
+
 
   /**
    * Select a row
@@ -98,14 +149,14 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   public toggleRowSelection(item: T, event: any): void {
     const checked = event.currentTarget.checked;
     if (checked) {
-      this.selected.push(item);
+      this.selectedItems.push(item);
     } else {
-      const idx = this.selected.indexOf(item);
+      const idx = this.selectedItems.indexOf(item);
       if (idx !== -1) {
-        this.selected.splice(idx, 1);
+        this.selectedItems.splice(idx, 1);
       }
     }
-    this.selectionChange.emit(this.selected);
+    this.selectedChange.emit(this.selectedItems);
   }
 
   public ngOnDestroy(): void {

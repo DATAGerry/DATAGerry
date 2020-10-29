@@ -1,5 +1,37 @@
 .dg-table {
+  .table {
+    thead {
+      &.sortable {
+        .table-head {
+          > th {
+            user-select: none;
 
+            &.hidden {
+              display: none;
+            }
+
+            &.sortable {
+              cursor: pointer;
+
+              &:hover {
+                background: $gray-200;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    tbody {
+      > tr {
+        > td {
+          &.hidden {
+            display: none;
+          }
+        }
+      }
+    }
+  }
 }
 
 

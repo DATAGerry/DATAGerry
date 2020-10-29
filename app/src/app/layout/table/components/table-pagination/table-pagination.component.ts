@@ -18,15 +18,55 @@
 
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 
+/**
+ * Pager interface.
+ */
 export interface Pager {
+  /**
+   * Total number of items.
+   */
   totalItems: number;
+
+  /**
+   * Current displayed page number.
+   */
   currentPage: number;
+
+  /**
+   * Number of items displayed on the page.
+   */
   pageSize: number;
+
+  /**
+   * Total number of pages.
+   * Should be equal to round totalItems / pageSize.
+   */
   totalPages: number;
+
+  /**
+   * First page in pagination.
+   */
   startPage: number;
+
+  /**
+   * Last page in pagination.
+   */
   endPage: number;
+
+  /**
+   * Index of first page in pagination.
+   */
   startIndex: number;
+
+  /**
+   * Index last page in pagination.
+   */
   endIndex: number;
+
+  /**
+   * Array of numbered pages for iteration.
+   * Used in ngFor.
+   */
   pages: Array<number>;
 }
 
@@ -38,7 +78,15 @@ export interface Pager {
 })
 export class TablePaginationComponent implements OnInit, OnChanges {
 
+  /**
+   * Default starting page for this component.
+   * @private
+   */
   private readonly initPage: number = 1;
+
+  /**
+   * The current displayed page number.
+   */
   public currentPage: number = this.initPage;
 
   @Input('currentPage')
@@ -46,6 +94,9 @@ export class TablePaginationComponent implements OnInit, OnChanges {
     this.currentPage = page || this.initPage;
   }
 
+  /**
+   * Total number of items.
+   */
   public totalItems: number = 0;
 
   @Input('totalItems')
@@ -53,6 +104,9 @@ export class TablePaginationComponent implements OnInit, OnChanges {
     this.totalItems = total || 0;
   }
 
+  /**
+   * Max number of items in a page list.
+   */
   public pageSize: number = 10;
 
   @Input('pageSize')
@@ -60,6 +114,9 @@ export class TablePaginationComponent implements OnInit, OnChanges {
     this.pageSize = size || 10;
   }
 
+  /**
+   * Max number of pages displayed in the pagination.
+   */
   public maxPages: number = 5;
 
   @Input('maxPages')
@@ -67,8 +124,14 @@ export class TablePaginationComponent implements OnInit, OnChanges {
     this.maxPages = max || 5;
   }
 
+  /**
+   * Pagination pager instance.
+   */
   public pager: Pager;
 
+  /**
+   * Event Emitter when the page was changed.
+   */
   @Output() public pageChange: EventEmitter<number> = new EventEmitter<number>();
 
   public ngOnInit(): void {
@@ -84,13 +147,18 @@ export class TablePaginationComponent implements OnInit, OnChanges {
       this.currentPage = 1;
     } else if (page > this.pager.totalPages) {
       this.currentPage = this.pager.totalPages;
-    } else{
+    } else {
       this.currentPage = page;
     }
     this.pager = this.paginate(this.currentPage);
     this.pageChange.emit(this.currentPage);
   }
 
+  /**
+   * Generates a `Pager` object from a given page number.
+   * @param currentPage - The current displayed page number.
+   *                      Default is 1.
+   */
   public paginate(currentPage: number = 1): Pager {
 
     const pageSize = this.pageSize;

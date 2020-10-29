@@ -16,26 +16,76 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { TemplateRef } from '@angular/core';
+
+/**
+ * Order of sorting.
+ */
+export enum SortDirection {
+  NONE = 0,
+  ASCENDING = 1,
+  DESCENDING = -1
+}
+
 
 /**
  * Interface for Sort/Order combination.
  */
 export interface Sort {
   name: string;
-  order: number;
+  order: SortDirection;
 }
 
 /**
  * Interface for a table header.
  */
 export interface Column {
-  display: any;
-  data: any;
-  name: string;
-  hidden: boolean;
-  fixed: boolean;
-  sortable: boolean;
-  template: any;
 
+  /**
+   * Displayed name
+   */
+  display?: any;
+
+  /**
+   * Data value
+   */
+  data: any;
+
+  /**
+   * Identifier
+   */
+  name: string;
+
+  /**
+   * Field is hidden
+   */
+  hidden: boolean;
+
+  /**
+   * Field cant be toggled
+   */
+  fixed: boolean;
+
+  /**
+   * Sortable
+   */
+  sortable: boolean;
+
+  /**
+   * Searchable
+   */
+  searchable: boolean;
+
+  /**
+   * Got row template
+   */
+  template: TemplateRef<any>;
+
+  /**
+   * Data parser
+   * @param item
+   * @param column
+   * @param index
+   */
   render(item?: any, column?: Column, index?: number);
 }

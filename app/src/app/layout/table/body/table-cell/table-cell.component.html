@@ -1,7 +1,7 @@
-<ng-template #container></ng-template>
-
-<!--<ng-container *ngIf="column.template"
+<ng-container *ngIf="column.template"
               [ngTemplateOutlet]="column.template"
-              [ngTemplateOutletContext]="{ $implicit: item,rowIndex: rowIndex,column: column}">
-</ng-container>-->
-{{data}}
+              [ngTemplateOutletContext]="{ $implicit: item,item: item,column: column}">
+</ng-container>
+<ng-container *ngIf="data && !column.template">
+  {{data}}
+</ng-container>

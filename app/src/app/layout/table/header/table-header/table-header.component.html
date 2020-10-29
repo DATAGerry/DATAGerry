@@ -5,10 +5,10 @@
 
     </table-page-size>
   </div>
-  <div>
-
+  <div class="table-toggle" *ngIf="toggleable">
+    <table-column-toggle [columns]="columns"></table-column-toggle>
   </div>
-  <div *ngIf="searchEnabled">
+  <div class="table-search ml-2" *ngIf="searchEnabled">
     <table-search [debounceTime]="debounceTime"
                   (searchChange)="searchChange.emit($event)">
     </table-search>

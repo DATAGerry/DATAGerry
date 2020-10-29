@@ -18,6 +18,7 @@
 
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { PageLengthEntry } from '../../components/table-page-size/table-page-size.component';
+import { Column } from '../../table.types';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -27,6 +28,9 @@ import { PageLengthEntry } from '../../components/table-page-size/table-page-siz
   changeDetection: ChangeDetectionStrategy.Default,
 })
 export class TableHeaderComponent implements OnInit {
+
+  @Input() public columns: Array<Column>;
+  @Input() public toggleable: boolean = false;
 
   @Input() public pageSizeEnabled: boolean = true;
   @Input() public searchEnabled: boolean = true;
