@@ -1,0 +1,124 @@
+<form>
+  <div class="form-group" id="feedback-form">
+    <div class="container no-padding">
+      <div class="row m-0">
+        <div class="container col-6 p-3 bg-light border-right border-info">
+          <div class="row">
+            <div class="col-12">
+              <label for="happiness">Happiness</label>
+              <div class="slidercontainer">
+                <input type="range" min="1" max="5" value="3" step="1" class="slider" id="happiness" list="steplist">
+                <div class="ticks">
+                  <span class="tick">--</span>
+                  <span class="tick">-</span>
+                  <span class="tick">0</span>
+                  <span class="tick">+</span>
+                  <span class="tick">++</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <label for="usability">Usability</label>
+              <div class="slidercontainer">
+                <input type="range" min="1" max="5" value="3" step="1" class="slider" id="usability" list="steplist">
+                <div class="ticks">
+                  <span class="tick">--</span>
+                  <span class="tick">-</span>
+                  <span class="tick">0</span>
+                  <span class="tick">+</span>
+                  <span class="tick">++</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <label for="functionality">Functionality</label>
+              <div class="slidercontainer">
+                <input type="range" min="1" max="5" value="3" step="1" class="slider" id="functionality" list="steplist">
+                <div class="ticks">
+                  <span class="tick">--</span>
+                  <span class="tick">-</span>
+                  <span class="tick">0</span>
+                  <span class="tick">+</span>
+                  <span class="tick">++</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <label for="performance">Performance</label>
+              <div class="slidercontainer">
+                <input type="range" min="1" max="5" value="3" step="1" class="slider" id="performance" list="steplist">
+                <div class="ticks">
+                  <span class="tick">--</span>
+                  <span class="tick">-</span>
+                  <span class="tick">0</span>
+                  <span class="tick">+</span>
+                  <span class="tick">++</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <label for="stability">Stability</label>
+              <div class="slidercontainer">
+                <input type="range" min="1" max="5" value="3" step="1" class="slider" id="stability" list="steplist">
+                <div class="ticks">
+                  <span class="tick">--</span>
+                  <span class="tick">-</span>
+                  <span class="tick">0</span>
+                  <span class="tick">+</span>
+                  <span class="tick">++</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <datalist id="steplist">
+            <option>--</option>
+            <option>-</option>
+            <option>0</option>
+            <option>+</option>
+            <option>++</option>
+          </datalist>
+          <div class="row">
+            <div class="col-12">
+              <label for="version-dg">Version</label>
+              <input id='version-dg' type="text" class="form-control" [value]="systemInfo?.version" readonly/>
+            </div>
+          </div>
+        </div>
+        <div class="container col-6">
+          <div class="row">
+            <div class="col-7 padding-top">
+              <p class="michael">Hi!</p>
+              <p class="michael">My name is Michael Batz, I'm the Product Owner of DATEGERRY and it would be my pleasure to
+                discuss the product vision with every DATAGERRY user</p>
+            </div>
+            <div class="col-5 d-flex">
+              <img src="assets/img/michael.png" width="117" height="145" class="my-auto mr-0 ml-auto d-block">
+            </div>
+          </div>
+          <div class="row padding-top">
+            <div class="col-12">
+              <label for="email">E-Mail</label>
+              <input type="text" id="email">
+            </div>
+          </div>
+          <div class="row padding-top">
+            <div class="col-12 d-flex" id="form-qr">
+              <div class="mx-auto my-auto text-center">
+                <cmdb-qrcode [urlContent]="'I am useless. Why did you scan me? Anyway have a good day! =D'"></cmdb-qrcode>
+                <small class="form-text text-muted">Submit by Scanning QR</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
