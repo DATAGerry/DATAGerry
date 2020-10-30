@@ -93,3 +93,10 @@
 #version {
   width: fit-content;
 }
+
+@media (max-width: 1200px) {
+  #feedback-form {
+    min-width: 400px;
+    max-width: 500px;
+  }
+}
