@@ -37,7 +37,6 @@ export class FeedbackFormComponent implements OnInit, OnDestroy {
   }
 
   generateQRCode() {
-    console.log(this.feedbackForm);
     let url = 'https://datagerry.com/feedback-v1/';
     url = url + this.feedbackForm.get('happiness').value.toString() + '/';
     url = url + this.feedbackForm.get('usability').value.toString() + '/';
