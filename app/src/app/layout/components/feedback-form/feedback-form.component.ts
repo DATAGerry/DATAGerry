@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {SystemService} from "../../../settings/system/system.service";
+import { SystemService } from '../../../settings/system/system.service';
 
 @Component({
   selector: 'cmdb-feedback-form',
@@ -8,7 +8,7 @@ import {SystemService} from "../../../settings/system/system.service";
 })
 export class FeedbackFormComponent implements OnInit {
 
-  public systemInfo: any[] = [];
+  public systemInfo: any;
 
   constructor(private systemService: SystemService) { }
 
