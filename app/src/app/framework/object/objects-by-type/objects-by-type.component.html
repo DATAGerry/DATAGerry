@@ -6,7 +6,8 @@
 </ng-template>
 
 <ng-template #fieldTemplate let-item="item" let-column="column">
-
+  <cmdb-render-element [mode]="mode" [data]="getFieldByName(item, column.name)" [parentFormGroup]="renderForm"
+                       [value]="getFieldValue(item, column.name)"></cmdb-render-element>
 </ng-template>
 
 <cmdb-table [items]="results" [totalItems]="totalResults" [columns]="columns" [sort]="sort" [toggleable]="true"

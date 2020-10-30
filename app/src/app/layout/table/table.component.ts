@@ -21,7 +21,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
-  Input,
+  Input, isDevMode,
   OnDestroy,
   OnInit,
   Output,
@@ -73,7 +73,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   /**
    * Event emitter when selected items changed.
    */
-  @Output()  public selectedChange: EventEmitter<Array<T>> = new EventEmitter<Array<T>>();
+  @Output() public selectedChange: EventEmitter<Array<T>> = new EventEmitter<Array<T>>();
 
 
   @Input() public infoEnabled: boolean = true;
@@ -124,22 +124,26 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.pageSizeChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((size: number) => {
-      console.log(`[TableEvent] Page size changed to: ${ size }`);
-    });
-    this.pageChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((page: number) => {
-      console.log(`[TableEvent] Page changed to: ${ page }`);
-    });
-    this.searchChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((search: string) => {
-      console.log(`[TableEvent] Search input changed to: ${ search }`);
-    });
-    this.selectedChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((selected: Array<T>) => {
-      console.log(`[TableEvent] Selected rows changed to: ${ selected }`);
-    });
-    this.sortChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((sort: Sort) => {
-      console.log(`[TableEvent] Sort changed to:`);
-      console.log(sort);
-    });
+    if (isDevMode()) {
+      this.pageSizeChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((size: number) => {
+        console.log(`[TableEvent] Page size changed to: ${ size }`);
+      });
+      this.pageChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((page: number) => {
+        console.log(`[TableEvent] Page changed to: ${ page }`);
+      });
+      this.searchChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((search: string) => {
+        console.log(`[TableEvent] Search input changed to: ${ search }`);
+      });
+      this.selectedChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((selected: Array<T>) => {
+        console.log(`[TableEvent] Selected rows changed to`);
+        console.log(selected);
+      });
+      this.sortChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((sort: Sort) => {
+        console.log(`[TableEvent] Sort changed to:`);
+        console.log(sort);
+      });
+    }
+
   }
 
 
@@ -155,6 +159,16 @@ export class TableComponent<T> implements OnInit, OnDestroy {
       if (idx !== -1) {
         this.selectedItems.splice(idx, 1);
       }
+    }
+    this.selectedChange.emit(this.selectedItems);
+  }
+
+  public toggleAllRowSelections(event: any): void {
+    const checked = event.currentTarget.checked;
+    if (checked) {
+      this.selectedItems = [...this.items];
+    } else {
+      this.selectedItems = [];
     }
     this.selectedChange.emit(this.selectedItems);
   }

@@ -36,6 +36,8 @@ import { APIGetMultiResponse } from '../../../services/models/api-response';
 import { UserCompactComponent } from '../../../management/users/components/user-compact/user-compact.component';
 import { ActiveBadgeComponent } from '../../../layout/helpers/active-badge/active-badge.component';
 import { ObjectTableActionsComponent } from '../components/object-table-actions/object-table-actions.component';
+import { FormGroup } from '@angular/forms';
+import { CmdbMode } from '../../modes.enum';
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -71,6 +73,9 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * Current type from the route resolve.
    */
   private typeSubject: BehaviorSubject<CmdbType> = new BehaviorSubject<CmdbType>(undefined);
+
+  public mode: CmdbMode = CmdbMode.Simple;
+  public renderForm: FormGroup;
 
   public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
 
@@ -142,7 +147,21 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.columns = columns;
   }
 
+  public getFieldByName(item: RenderResult, name: string) {
+    return item.fields.find(field => field.name === name);
+  }
+
+  public getFieldValue(item: RenderResult, name: string) {
+    const value = item.fields.find(field => field.name === name).value;
+    if (value) {
+      return value;
+    } else {
+      return {};
+    }
+  }
+
   public getObjects() {
+
     const params: CollectionParameters = {
       filter: { type_id: this.type.public_id }, limit: this.limit,
       sort: this.sort.name, order: this.sort.order, page: this.page
