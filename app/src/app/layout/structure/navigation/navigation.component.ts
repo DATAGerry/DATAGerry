@@ -19,6 +19,7 @@
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Router } from '@angular/router';
+import {SystemService} from "../../../settings/system/system.service";
 
 @Component({
   selector: 'cmdb-navigation',
@@ -28,13 +29,17 @@ import { Router } from '@angular/router';
 export class NavigationComponent implements OnInit, OnDestroy {
 
   public readonly title: string = 'DATAGERRY';
+  public systemInfo: any[] = [];
 
-  constructor(private renderer: Renderer2, public authService: AuthService, private router: Router) {
+  constructor(private renderer: Renderer2, public authService: AuthService, private router: Router, private systemService: SystemService) {
   }
 
   public ngOnInit(): void {
     this.renderer.addClass(document.body, 'header-fixed');
     this.dropdownSubmenu();
+    this.systemService.getDatagerryInformation().subscribe((infos: any[]) => {
+      this.systemInfo = infos;
+    });
   }
 
   public ngOnDestroy(): void {

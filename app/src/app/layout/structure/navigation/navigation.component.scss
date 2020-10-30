@@ -112,9 +112,18 @@ $navbar-dropdown-header-background: theme-color('primary');
 
 }
 
-.feedback-form {
+#feedback-form {
   width: fit-content;
-  min-width: 300px;
+  min-width: 800px;
+  margin: 0 !important;
+}
+
+.no-padding {
+  padding: 0 !important;
+}
+
+.margin-top {
+  margin-top: 25px !important;
 }
 
 
@@ -157,12 +166,8 @@ $navbar-dropdown-header-background: theme-color('primary');
   margin: 5px 0;
 }
 
-#comment {
-  max-width: 165px;
-}
-
-#email{
-  max-width: 165px;
+#email {
+  width: 100%;
 }
 
 .col-3>label {
@@ -178,24 +183,12 @@ $navbar-dropdown-header-background: theme-color('primary');
   justify-content: space-between;
 }
 
-
-
-$qr-borders: (
-  all: (size: 2px, style: solid, color: theme-color('secondary'))
-) !default;
-
-
-#form-qr{
-  svg{
-    width: 100%;
-  }
-  padding: 15px;
-  border: $card-border-width solid $card-border-color;
-  margin-bottom: 15px;
-}
-
 #submit {
   margin: 0 10px;
+}
+
+#version {
+  width: fit-content;
 }
 
 @media(max-width: 991px) {

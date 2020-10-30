@@ -89,6 +89,8 @@ import { NameGuidePipe } from './pipes/name-guide.pipe';
 import { FileExtensionPipe } from './pipes/file-extension.pipe';
 import { CategoryTreeFilterPipe } from './pipes/categoryTreeFilter.pipe';
 import { TypeFilterPipe } from './pipes/typeFilter.pipe';
+import { QRCodeModule } from 'angularx-qrcode';
+import { QrcodeComponent } from './helpers/qrcode/qrcode.component';
 
 @NgModule({
   declarations: [
@@ -131,7 +133,8 @@ import { TypeFilterPipe } from './pipes/typeFilter.pipe';
     FolderPathViewerComponent,
     MoveDialogComponent,
     TableSortEventDirective,
-    AttachmentsListModalComponent
+    AttachmentsListModalComponent,
+    QrcodeComponent
   ],
   exports: [
     FileExplorerComponent,
@@ -155,7 +158,8 @@ import { TypeFilterPipe } from './pipes/typeFilter.pipe';
     CategoryTreeFilterPipe,
     TypeFilterPipe,
     FileExtensionPipe,
-    InfoBoxComponent
+    InfoBoxComponent,
+    QrcodeComponent
   ],
   imports: [
     CommonModule,
@@ -173,7 +177,8 @@ import { TypeFilterPipe } from './pipes/typeFilter.pipe';
     ToastModule,
     AuthModule,
     RenderModule,
-    FileexplorerModule
+    FileexplorerModule,
+    QRCodeModule
   ],
   providers: [
     BreadcrumbService,
