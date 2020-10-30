@@ -90,7 +90,8 @@ import { FileExtensionPipe } from './pipes/file-extension.pipe';
 import { CategoryTreeFilterPipe } from './pipes/categoryTreeFilter.pipe';
 import { TypeFilterPipe } from './pipes/typeFilter.pipe';
 import { QRCodeModule } from 'angularx-qrcode';
-import { QrcodeComponent } from './helpers/qrcode/qrcode.component';
+import { QrCodeComponent } from './helpers/qrcode/qr-code.component';
+import { FeedbackFormComponent } from './components/feedback-form/feedback-form.component';
 
 @NgModule({
   declarations: [
@@ -134,7 +135,8 @@ import { QrcodeComponent } from './helpers/qrcode/qrcode.component';
     MoveDialogComponent,
     TableSortEventDirective,
     AttachmentsListModalComponent,
-    QrcodeComponent
+    QrCodeComponent,
+    FeedbackFormComponent
   ],
   exports: [
     FileExplorerComponent,
@@ -159,7 +161,7 @@ import { QrcodeComponent } from './helpers/qrcode/qrcode.component';
     TypeFilterPipe,
     FileExtensionPipe,
     InfoBoxComponent,
-    QrcodeComponent
+    QrCodeComponent
   ],
   imports: [
     CommonModule,

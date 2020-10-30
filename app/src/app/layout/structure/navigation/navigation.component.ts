@@ -19,7 +19,7 @@
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Router } from '@angular/router';
-import {SystemService} from "../../../settings/system/system.service";
+import {SystemService} from '../../../settings/system/system.service';
 
 @Component({
   selector: 'cmdb-navigation',
@@ -29,17 +29,13 @@ import {SystemService} from "../../../settings/system/system.service";
 export class NavigationComponent implements OnInit, OnDestroy {
 
   public readonly title: string = 'DATAGERRY';
-  public systemInfo: any[] = [];
 
-  constructor(private renderer: Renderer2, public authService: AuthService, private router: Router, private systemService: SystemService) {
+  constructor(private renderer: Renderer2, public authService: AuthService, private router: Router) {
   }
 
   public ngOnInit(): void {
     this.renderer.addClass(document.body, 'header-fixed');
     this.dropdownSubmenu();
-    this.systemService.getDatagerryInformation().subscribe((infos: any[]) => {
-      this.systemInfo = infos;
-    });
   }
 
   public ngOnDestroy(): void {
@@ -69,5 +65,9 @@ export class NavigationComponent implements OnInit, OnDestroy {
   public visibilitySidebar() {
     const sidebar = document.getElementById('sidebar').classList;
     sidebar.length === 0 ? sidebar.add('set-sidebar-visible') : sidebar.remove('set-sidebar-visible');
+  }
+
+  public generateQR() {
+
   }
 }
