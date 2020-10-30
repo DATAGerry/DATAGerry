@@ -2,8 +2,8 @@
   <table-header
     [toggleable]="toggleable" [columns]="columns"
     (pageSizeChange)="pageSizeChange.emit($event)"
-    (searchChange)="searchChange.emit($event)">
-
+    (searchChange)="searchChange.emit($event)"
+    (columnVisibilityChange)="onColumnVisibilityChange($event)">
   </table-header>
   <table #table layout-table class="table">
     <thead table-head [sortable]="sortable">
@@ -16,7 +16,7 @@
         </div>
       </th>
       <th table-column-head *ngFor="let column of columns" [column]="column" [selected]="column.name === sort.name"
-          (sortChange)="onSortChange($event)"></th>
+          (sortChange)="onSortChange($event)" [ngClass]="columnClasses"></th>
     </tr>
     </thead>
     <tbody table-body>
@@ -27,10 +27,10 @@
                  [checked]="selectedItems.includes(item)" (change)="toggleRowSelection(item, $event)"/>
         </div>
       </td>
-      <td table-cell *ngFor="let column of columns" [column]="column" [item]="item"></td>
+      <td table-cell *ngFor="let column of columns" [column]="column" [item]="item" [ngClass]="rowClasses"></td>
     </tr>
     <tr *ngIf="items.length === 0">
-      <td class="text-center" [colSpan]="columns.length">
+      <td class="text-center" [colSpan]="(columns.length) + (selectEnabled ? 1: 0)">
         No data to display!
       </td>
     </tr>
@@ -41,6 +41,8 @@
   <table-footer
     [paginationEnabled]="paginationEnabled"
     [infoEnabled]="infoEnabled"
+    [selectEnabled]="selectEnabled"
+    [selected]="selectedItems.length"
     [items]="items"
     [pageSize]="10"
     [totalItems]="totalItems"

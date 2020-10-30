@@ -38,6 +38,8 @@ import { Column, Sort, SortDirection } from '../../table.types';
 })
 export class TableColumnHeadComponent implements OnInit {
 
+  // noinspection JSMismatchedCollectionQueryUpdate
+  @HostBinding('class') private cssClasses: Array<string>;
   @HostBinding('class.sortable') private sortable: boolean = false;
   @HostBinding('class.hidden') private hidden: boolean = false;
 
@@ -48,6 +50,7 @@ export class TableColumnHeadComponent implements OnInit {
     this.column = c;
     this.hidden = this.column.hidden;
     this.sortable = this.column.sortable || false;
+    this.cssClasses = this.column.cssClasses || [];
   }
 
   @Input() order: SortDirection = SortDirection.NONE;
@@ -75,7 +78,7 @@ export class TableColumnHeadComponent implements OnInit {
     if (this.column && this.column.sortable && this.sortable) {
       this.onSelectedChange(true);
       const sort = {
-        name: this.column.name,
+        name: this.column.data,
         order: this.order
       } as Sort;
       this.sortChange.emit(sort);

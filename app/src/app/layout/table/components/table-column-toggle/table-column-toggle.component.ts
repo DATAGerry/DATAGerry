@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Column } from '../../table.types';
 
 @Component({
@@ -25,13 +25,15 @@ import { Column } from '../../table.types';
   templateUrl: './table-column-toggle.component.html',
   styleUrls: ['./table-column-toggle.component.scss']
 })
-export class TableColumnToggleComponent implements OnInit {
+export class TableColumnToggleComponent {
 
-  @Input() columns: Array<Column> = [];
+  @Input() public columns: Array<Column> = [];
+  @Output() public columnVisibilityChange: EventEmitter<Column> = new EventEmitter<Column>();
 
-  constructor() { }
-
-  ngOnInit() {
+  public toggleColumn(c: Column): Column {
+    c.hidden = !c.hidden;
+    this.columnVisibilityChange.emit(c);
+    return c;
   }
 
 }

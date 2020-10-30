@@ -30,6 +30,9 @@ export class TableFooterComponent implements OnInit, OnChanges {
   @Input() public paginationEnabled: boolean = true;
   @Input() public infoEnabled: boolean = true;
 
+  @Input() public selectEnabled: boolean = false;
+  @Input() public selected: number = 0;
+
   @Input() public currentPage: number;
   @Input() public totalItems: number;
   @Input() public pageSize: number;

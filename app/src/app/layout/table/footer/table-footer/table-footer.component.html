@@ -1,6 +1,7 @@
 <div class="table-footer d-flex">
   <div class="mr-auto">
-    <table-info [show]="show" [total]="totalItems" *ngIf="infoEnabled"></table-info>
+    <table-info [show]="show" [total]="totalItems" *ngIf="infoEnabled"
+    [selectEnabled]="selectEnabled" [selected]="selected"></table-info>
   </div>
   <div *ngIf="paginationEnabled">
     <table-pagination
@@ -8,8 +9,7 @@
       [totalItems]="totalItems"
       [pageSize]="pageSize"
       [maxPages]="maxPages"
-      (pageChange)="pageChange.emit($event)"
-    >
+      (pageChange)="pageChange.emit($event)">
 
     </table-pagination>
   </div>

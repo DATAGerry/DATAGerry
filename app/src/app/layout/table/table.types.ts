@@ -82,6 +82,12 @@ export interface Column {
   template: TemplateRef<any>;
 
   /**
+   * List of extra css classes for
+   * head and cells in this column.
+   */
+  cssClasses: Array<string>;
+
+  /**
    * Data parser
    * @param item
    * @param column

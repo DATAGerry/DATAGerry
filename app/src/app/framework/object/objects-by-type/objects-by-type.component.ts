@@ -53,6 +53,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
   @ViewChild('fieldTemplate', { static: true }) fieldTemplate: TemplateRef<any>;
+  @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
 
   /**
    * Component un-subscriber.
@@ -113,7 +114,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         data: 'active',
         sortable: false,
         searchable: false,
-        template: this.activeTemplate
+        template: this.activeTemplate,
+        cssClasses: ['text-center']
       },
       {
         display: 'Public ID',
@@ -124,11 +126,11 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       },
 
     ] as Array<Column>;
+
     for (const field of fields) {
       columns.push({
         display: field.label || field.name,
         name: field.name,
-        data: field.name,
         sortable: true,
         searchable: true,
         hidden: !summaryFields.includes(field.name),
@@ -142,6 +144,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       sortable: false,
       searchable: false,
       fixed: true,
+      template: this.actionTemplate,
+      cssClasses: ['text-center']
     } as Column);
 
     this.columns = columns;
@@ -161,7 +165,6 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   }
 
   public getObjects() {
-
     const params: CollectionParameters = {
       filter: { type_id: this.type.public_id }, limit: this.limit,
       sort: this.sort.name, order: this.sort.order, page: this.page

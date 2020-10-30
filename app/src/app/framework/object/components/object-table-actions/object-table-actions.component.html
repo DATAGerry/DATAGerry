@@ -1,12 +1,11 @@
-<a [routerLink]="['/']">
-  <i class="far fa-eye"></i>
-</a>
-<a [routerLink]="['/']">
-  <i class="far fa-clone"></i>
-</a>
-<a [routerLink]="['/']">
-  <i class="far fa-edit"></i>
-</a>
-<a [routerLink]="['/']">
-  <i class="far fa-trash-alt"></i>
-</a>
+<ng-container *ngIf="renderResult">
+  <a [routerLink]="['/', 'framework', 'object', 'view', renderResult.object_information.object_id]">
+    <i class="far fa-eye"></i>
+  </a>
+  <a [routerLink]="['/', 'framework', 'object', 'copy', renderResult.object_information.object_id]">
+    <i class="far fa-clone"></i>
+  </a>
+  <a [routerLink]="['/', 'framework', 'object', 'edit', renderResult.object_information.object_id]">
+    <i class="far fa-edit"></i>
+  </a>
+</ng-container>

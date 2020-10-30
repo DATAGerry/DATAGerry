@@ -31,15 +31,23 @@ import { Column } from '../../table.types';
   templateUrl: './table-cell.component.html',
   styleUrls: ['./table-cell.component.scss']
 })
-export class TableCellComponent<T> implements OnInit {
+export class TableCellComponent<T> {
 
+  // noinspection JSMismatchedCollectionQueryUpdate
+  @HostBinding('class') private cssClasses: Array<string>;
+
+  /**
+   * When column is hidden, add css class hidden to cell.
+   * @private
+   */
   @HostBinding('class.hidden') private hidden: boolean = false;
 
+  /**
+   * Row index which this cell is in.
+   */
   @Input() rowIndex: number;
 
   public data: any;
-  public item: T;
-
 
   public column: Column;
 
@@ -47,13 +55,21 @@ export class TableCellComponent<T> implements OnInit {
   public set Column(col: Column) {
     this.column = col;
     this.hidden = this.column.hidden;
+    this.cssClasses = this.column.cssClasses || [];
   }
+
+  public item: T;
 
   @Input('item')
   public set Item(item: T) {
     this.item = item;
     if (this.column.data) {
-      this.data = TableCellComponent.resolve(this.column.data, this.item);
+      if (this.column.render) {
+        this.data = this.column.render(this.item, this.column, this.rowIndex);
+      } else {
+        this.data = TableCellComponent.resolve(this.column.data, this.item);
+      }
+
     }
   }
 
@@ -68,11 +84,5 @@ export class TableCellComponent<T> implements OnInit {
     return properties.reduce((prev, curr) => prev && prev[curr], obj);
   }
 
-  constructor(private resolver: ComponentFactoryResolver) {
-  }
-
-  public ngOnInit(): void {
-
-  }
 
 }

@@ -10,6 +10,10 @@
                        [value]="getFieldValue(item, column.name)"></cmdb-render-element>
 </ng-template>
 
+<ng-template #actionTemplate let-item="item" let-column="column">
+  <cmdb-object-table-actions [renderResult]="item"></cmdb-object-table-actions>
+</ng-template>
+
 <cmdb-table [items]="results" [totalItems]="totalResults" [columns]="columns" [sort]="sort" [toggleable]="true"
             [selectEnabled]="true"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"

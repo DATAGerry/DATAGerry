@@ -3,7 +3,8 @@
     <i class="fas fa-table"></i> Columns
   </button>
   <ul class="dropdown-menu" *ngIf="columns.length > 0">
-    <li class="dropdown-item" *ngFor="let column of columns" [ngClass]="{'active': !column.hidden}">
+    <li class="dropdown-item" *ngFor="let column of columns" [ngClass]="{'active': !column.hidden}"
+        (click)="toggleColumn(column)">
       {{column.name}}
     </li>
   </ul>

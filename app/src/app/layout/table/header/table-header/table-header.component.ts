@@ -31,6 +31,7 @@ export class TableHeaderComponent implements OnInit {
 
   @Input() public columns: Array<Column>;
   @Input() public toggleable: boolean = false;
+  @Output() public columnVisibilityChange: EventEmitter<Column> = new EventEmitter<Column>();
 
   @Input() public pageSizeEnabled: boolean = true;
   @Input() public searchEnabled: boolean = true;
@@ -42,6 +43,7 @@ export class TableHeaderComponent implements OnInit {
 
   @Output() public searchChange: EventEmitter<string> = new EventEmitter<string>();
   @Output() public pageSizeChange: EventEmitter<number> = new EventEmitter<number>();
+
 
   constructor() { }
 

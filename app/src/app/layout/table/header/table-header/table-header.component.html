@@ -6,7 +6,9 @@
     </table-page-size>
   </div>
   <div class="table-toggle" *ngIf="toggleable">
-    <table-column-toggle [columns]="columns"></table-column-toggle>
+    <table-column-toggle [columns]="columns"
+                         (columnVisibilityChange)="columnVisibilityChange.emit($event)">
+    </table-column-toggle>
   </div>
   <div class="table-search ml-2" *ngIf="searchEnabled">
     <table-search [debounceTime]="debounceTime"

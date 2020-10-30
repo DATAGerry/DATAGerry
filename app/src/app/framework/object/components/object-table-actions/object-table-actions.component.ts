@@ -16,7 +16,8 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { RenderResult } from '../../../models/cmdb-render';
 
 @Component({
   selector: 'cmdb-object-table-actions',
@@ -25,7 +26,10 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ObjectTableActionsComponent implements OnInit {
 
-  constructor() { }
+  @Input() public renderResult: RenderResult;
+
+  constructor() {
+  }
 
   ngOnInit() {
   }

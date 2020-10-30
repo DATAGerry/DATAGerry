@@ -48,13 +48,11 @@ export class TableComponent<T> implements OnInit, OnDestroy {
 
   @Input() loading: boolean = true;
 
-  public hiddenColumns: Array<Column> = [];
   public columns: Array<Column> = [];
 
   @Input('columns')
   public set Columns(columns: Array<Column>) {
     this.columns = columns;
-    this.hiddenColumns = this.columns.filter(c => !c.hidden);
   }
 
   @Input() public items: Array<T> = [];
@@ -89,6 +87,15 @@ export class TableComponent<T> implements OnInit, OnDestroy {
 
   @Input() public toggleable: boolean = false;
 
+  /**
+   * Dynamic list of css classes for column heads.
+   */
+  @Input() public columnClasses: Array<string> = [];
+
+  /**
+   * Dynamic list of css classes for rows.
+   */
+  @Input() public rowClasses: Array<string> = [];
 
   /**
    * Sorting enabled.
@@ -171,6 +178,13 @@ export class TableComponent<T> implements OnInit, OnDestroy {
       this.selectedItems = [];
     }
     this.selectedChange.emit(this.selectedItems);
+  }
+
+  public onColumnVisibilityChange(column: Column) {
+    const col = this.columns.find(c => c.name === column.name);
+    const colIndex = this.columns.indexOf(col);
+    console.log(colIndex);
+    this.columns[colIndex].hidden = column.hidden;
   }
 
   public ngOnDestroy(): void {

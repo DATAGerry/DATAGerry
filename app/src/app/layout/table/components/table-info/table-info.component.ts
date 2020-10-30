@@ -26,7 +26,7 @@ import { Component, Input } from '@angular/core';
 })
 export class TableInfoComponent {
 
-  @Input() public selection: boolean = false;
+  @Input() public selectEnabled: boolean = false;
   @Input() public selected: number = 0;
   @Input() public show: number;
   @Input() public total: number;
