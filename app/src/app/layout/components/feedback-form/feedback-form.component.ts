@@ -44,7 +44,7 @@ export class FeedbackFormComponent implements OnInit, OnDestroy {
     url = url + this.feedbackForm.get('performance').value.toString() + '/';
     url = url + this.feedbackForm.get('stability').value.toString() + '/';
     url = url + this.feedbackForm.get('version').value.toString() + '/';
-    url = url + this.feedbackForm.get('email').value.toString() + '/';
+    url = url + this.feedbackForm.get('email').value.toString();
     this.feedbackUrl = url;
   }
 
