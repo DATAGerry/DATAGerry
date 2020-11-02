@@ -46,7 +46,11 @@ export class TableComponent<T> implements OnInit, OnDestroy {
    */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  @Input() loading: boolean = true;
+  @Input() public emptyMessage: string = 'No data to display!';
+
+
+  @Input() public loadingEnabled: boolean = true;
+  @Input() public loading: boolean = false;
 
   public columns: Array<Column> = [];
 

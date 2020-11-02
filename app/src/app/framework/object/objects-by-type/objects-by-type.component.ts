@@ -17,12 +17,11 @@
 */
 
 import {
-  AfterViewInit,
-  Component, ComponentFactoryResolver, ElementRef, Injector,
+  Component,
   OnDestroy,
   OnInit, TemplateRef, ViewChild,
 } from '@angular/core';
-import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { CmdbType } from '../../models/cmdb-type';
 import { ActivatedRoute, Data, Router } from '@angular/router';
 import { takeUntil } from 'rxjs/operators';
@@ -33,9 +32,6 @@ import { ObjectService } from '../../services/object.service';
 import { CollectionParameters } from '../../../services/models/api-parameter';
 import { HttpResponse } from '@angular/common/http';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
-import { UserCompactComponent } from '../../../management/users/components/user-compact/user-compact.component';
-import { ActiveBadgeComponent } from '../../../layout/helpers/active-badge/active-badge.component';
-import { ObjectTableActionsComponent } from '../components/object-table-actions/object-table-actions.component';
 import { FormGroup } from '@angular/forms';
 import { CmdbMode } from '../../modes.enum';
 
@@ -53,6 +49,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
   @ViewChild('fieldTemplate', { static: true }) fieldTemplate: TemplateRef<any>;
+  @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
   @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
 
   /**
@@ -74,6 +71,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * Current type from the route resolve.
    */
   private typeSubject: BehaviorSubject<CmdbType> = new BehaviorSubject<CmdbType>(undefined);
+
+  public loading: boolean = false;
 
   public mode: CmdbMode = CmdbMode.Simple;
   public renderForm: FormGroup;
@@ -112,22 +111,22 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         display: 'Active',
         name: 'active',
         data: 'active',
-        sortable: false,
         searchable: false,
+        sortable: true,
         template: this.activeTemplate,
-        cssClasses: ['text-center']
+        cssClasses: ['text-center'],
+        style: { width: '6rem' }
       },
       {
         display: 'Public ID',
         name: 'public_id',
-        data: 'object_information.object_id',
+        data: 'public_id',
         searchable: false,
         sortable: true
-      },
-
+      }
     ] as Array<Column>;
 
-    for (const field of fields) {
+    /*for (const field of fields) {
       columns.push({
         display: field.label || field.name,
         name: field.name,
@@ -136,7 +135,16 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         hidden: !summaryFields.includes(field.name),
         template: this.fieldTemplate
       } as Column);
-    }
+    }*/
+
+    columns.push({
+      display: 'Author',
+      name: 'author_id',
+      data: 'author_id',
+      sortable: true,
+      searchable: false,
+      template: this.userTemplate
+    } as unknown as Column);
 
     columns.push({
       display: 'Actions',
@@ -145,8 +153,9 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       searchable: false,
       fixed: true,
       template: this.actionTemplate,
-      cssClasses: ['text-center']
-    } as Column);
+      cssClasses: ['text-center'],
+      style: { width: '6em' }
+    } as unknown as Column);
 
     this.columns = columns;
   }
@@ -165,6 +174,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   }
 
   public getObjects() {
+    this.loading = true;
     const params: CollectionParameters = {
       filter: { type_id: this.type.public_id }, limit: this.limit,
       sort: this.sort.name, order: this.sort.order, page: this.page
@@ -173,6 +183,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
         this.results = apiResponse.body.results as Array<RenderResult>;
         this.totalResults = apiResponse.body.total;
+        this.loading = false;
       });
   }
 

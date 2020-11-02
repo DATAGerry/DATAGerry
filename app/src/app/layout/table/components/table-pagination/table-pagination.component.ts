@@ -196,17 +196,7 @@ export class TablePaginationComponent implements OnInit, OnChanges {
     const endIndex = Math.min(startIndex + pageSize - 1, totalItems - 1);
     const pages = Array.from(Array((endPage + 1) - startPage).keys()).map(i => startPage + i);
 
-    return {
-      totalItems,
-      currentPage,
-      pageSize,
-      totalPages,
-      startPage,
-      endPage,
-      startIndex,
-      endIndex,
-      pages
-    } as Pager;
+    return { totalItems, currentPage, pageSize, totalPages, startPage, endPage, startIndex, endIndex, pages } as Pager;
   }
 
 }

@@ -60,7 +60,8 @@ import { UserCompactComponent } from './components/user-compact/user-compact.com
   ],
   exports: [
     UserImageComponent,
-    UserDisplayComponent
+    UserDisplayComponent,
+    UserCompactComponent
   ],
     imports: [
         CommonModule,

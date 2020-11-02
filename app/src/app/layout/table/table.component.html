@@ -1,4 +1,5 @@
 <div #container class="dg-table table-container">
+  <table-loading *ngIf="loadingEnabled" [loading]="loading"></table-loading>
   <table-header
     [toggleable]="toggleable" [columns]="columns"
     (pageSizeChange)="pageSizeChange.emit($event)"
@@ -16,7 +17,7 @@
         </div>
       </th>
       <th table-column-head *ngFor="let column of columns" [column]="column" [selected]="column.name === sort.name"
-          (sortChange)="onSortChange($event)" [ngClass]="columnClasses"></th>
+          (sortChange)="onSortChange($event)" [ngClass]="columnClasses" [ngStyle]="column.style"></th>
     </tr>
     </thead>
     <tbody table-body>
@@ -27,11 +28,12 @@
                  [checked]="selectedItems.includes(item)" (change)="toggleRowSelection(item, $event)"/>
         </div>
       </td>
-      <td table-cell *ngFor="let column of columns" [column]="column" [item]="item" [ngClass]="rowClasses"></td>
+      <td table-cell *ngFor="let column of columns" [column]="column" [item]="item"
+          [ngClass]="rowClasses" [ngStyle]="column.style"></td>
     </tr>
     <tr *ngIf="items.length === 0">
       <td class="text-center" [colSpan]="(columns.length) + (selectEnabled ? 1: 0)">
-        No data to display!
+        {{emptyMessage}}
       </td>
     </tr>
     </tbody>

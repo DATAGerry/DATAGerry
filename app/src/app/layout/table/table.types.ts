@@ -88,6 +88,12 @@ export interface Column {
   cssClasses: Array<string>;
 
   /**
+   * List of direct styles for
+   * head and cells in this column.
+   */
+  style: { [klass: string]: any };
+
+  /**
    * Data parser
    * @param item
    * @param column

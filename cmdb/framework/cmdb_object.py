@@ -18,6 +18,7 @@ import logging
 
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.cmdb_errors import FieldNotFoundError
+from cmdb.framework.utils import Collection, Model
 
 try:
     from cmdb.utils.error import CMDBError
@@ -31,7 +32,8 @@ class CmdbObject(CmdbDAO):
     """The CMDB object is the basic data wrapper for storing and holding the pure objects within the CMDB.
     """
 
-    COLLECTION = 'framework.objects'
+    COLLECTION: Collection = 'framework.objects'
+    MODEL: Model = 'Object'
     REQUIRED_INIT_KEYS = [
         'type_id',
         'creation_time',

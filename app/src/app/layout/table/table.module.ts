@@ -34,13 +34,14 @@ import { TableInfoComponent } from './components/table-info/table-info.component
 import { TableCellComponent } from './body/table-cell/table-cell.component';
 import { TableRowDirective } from './body/table-row.directive';
 import { TableColumnToggleComponent } from './components/table-column-toggle/table-column-toggle.component';
+import { TableLoadingComponent } from './components/table-loading/table-loading.component';
 
 
 @NgModule({
     declarations: [
         TableComponent, TableSearchComponent, TableHeaderComponent, TablePageSizeComponent,
         TablePaginationComponent, TableFooterComponent, TableFootDirective, TableHeadDirective, TableDirective,
-        TableBodyDirective, TableColumnHeadComponent, TableInfoComponent, TableCellComponent, TableRowDirective, TableColumnToggleComponent],
+        TableBodyDirective, TableColumnHeadComponent, TableInfoComponent, TableCellComponent, TableRowDirective, TableColumnToggleComponent, TableLoadingComponent],
   exports: [
     TableComponent
   ],

@@ -16,6 +16,8 @@
 
 import json
 import logging
+from typing import List
+
 import pytz
 
 from datetime import datetime
@@ -63,7 +65,6 @@ with current_app.app_context():
 @objects_blueprint.protect(auth=True, right='base.framework.type.view')
 @objects_blueprint.parse_collection_parameters()
 def get_objects(params: CollectionParameters):
-    print(params)
     from cmdb.framework.managers.object_manager import ObjectManager
     manager = ObjectManager(database_manager=current_app.database_manager)
 
@@ -71,10 +72,10 @@ def get_objects(params: CollectionParameters):
         iteration_result: IterationResult[CmdbObject] = manager.iterate(
             filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
 
-        rendered_list = RenderList(iteration_result.results, None).render_result_list(raw=True)
+        object_list: List[dict] = [object_.__dict__ for object_ in iteration_result.results]
 
-        api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
-                                        url=request.url, model=Model('RenderResults'), body=request.method == 'HEAD')
+        api_response = GetMultiResponse(object_list, total=iteration_result.total, params=params,
+                                        url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
     except ManagerIterationError as err:
         return abort(400, err.message)
     except ManagerGetError as err:

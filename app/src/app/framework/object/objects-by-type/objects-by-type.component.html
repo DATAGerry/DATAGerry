@@ -2,20 +2,24 @@
 <hr/>
 
 <ng-template #activeTemplate let-item="item" let-column="column">
-  <cmdb-active-badge [activeStatus]="item.object_information.active"></cmdb-active-badge>
+  <cmdb-active-badge [activeStatus]="item?.active"></cmdb-active-badge>
 </ng-template>
 
 <ng-template #fieldTemplate let-item="item" let-column="column">
-  <cmdb-render-element [mode]="mode" [data]="getFieldByName(item, column.name)" [parentFormGroup]="renderForm"
-                       [value]="getFieldValue(item, column.name)"></cmdb-render-element>
+  <!--<cmdb-render-element [mode]="mode" [data]="getFieldByName(item, column.name)" [parentFormGroup]="renderForm"
+                       [value]="getFieldValue(item, column.name)"></cmdb-render-element>-->
+</ng-template>
+
+<ng-template #userTemplate let-item="item" let-column="column">
+  <cmdb-user-compact [userID]="item.author_id"></cmdb-user-compact>
 </ng-template>
 
 <ng-template #actionTemplate let-item="item" let-column="column">
-  <cmdb-object-table-actions [renderResult]="item"></cmdb-object-table-actions>
+  <cmdb-object-table-actions [object]="item"></cmdb-object-table-actions>
 </ng-template>
 
 <cmdb-table [items]="results" [totalItems]="totalResults" [columns]="columns" [sort]="sort" [toggleable]="true"
-            [selectEnabled]="true"
+            [selectEnabled]="true" [loading]="loading"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
             (sortChange)="onSortChange($event)">
 

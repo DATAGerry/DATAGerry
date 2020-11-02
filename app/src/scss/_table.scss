@@ -1,14 +1,21 @@
 .dg-table {
   .table {
     thead {
+      .table-head {
+        > th {
+          user-select: none;
+          vertical-align: middle;
+
+          &.hidden {
+            display: none;
+          }
+
+        }
+      }
+
       &.sortable {
         .table-head {
           > th {
-            user-select: none;
-
-            &.hidden {
-              display: none;
-            }
 
             &.sortable {
               cursor: pointer;
@@ -30,6 +37,16 @@
           }
         }
       }
+    }
+  }
+
+  .table-pagination {
+    ul, li {
+      user-select: none;
+    }
+
+    a {
+      cursor: pointer;
     }
   }
 }

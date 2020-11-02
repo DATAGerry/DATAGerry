@@ -1,11 +1,11 @@
-<ng-container *ngIf="renderResult">
-  <a [routerLink]="['/', 'framework', 'object', 'view', renderResult.object_information.object_id]">
+<ng-container *ngIf="object">
+  <a [routerLink]="['/', 'framework', 'object', 'view', object.public_id]">
     <i class="far fa-eye"></i>
   </a>
-  <a [routerLink]="['/', 'framework', 'object', 'copy', renderResult.object_information.object_id]">
+  <a [routerLink]="['/', 'framework', 'object', 'copy', object.public_id]">
     <i class="far fa-clone"></i>
   </a>
-  <a [routerLink]="['/', 'framework', 'object', 'edit', renderResult.object_information.object_id]">
+  <a [routerLink]="['/', 'framework', 'object', 'edit', object.public_id]">
     <i class="far fa-edit"></i>
   </a>
 </ng-container>

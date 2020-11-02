@@ -16,22 +16,19 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { CmdbObject } from '../../../models/cmdb-object';
+import { ChangeDetectionStrategy, Component, Input, ViewEncapsulation } from '@angular/core';
 
 @Component({
-  selector: 'cmdb-object-table-actions',
-  templateUrl: './object-table-actions.component.html',
-  styleUrls: ['./object-table-actions.component.scss']
+  // tslint:disable-next-line:component-selector
+  selector: 'table-loading',
+  templateUrl: './table-loading.component.html',
+  styleUrls: ['./table-loading.component.scss'],
+  encapsulation: ViewEncapsulation.Emulated,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ObjectTableActionsComponent implements OnInit {
+export class TableLoadingComponent {
 
-  @Input() public object: CmdbObject;
+  @Input() public loading: boolean = false;
 
-  constructor() {
-  }
-
-  ngOnInit() {
-  }
 
 }
