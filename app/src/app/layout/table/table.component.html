@@ -46,6 +46,7 @@
     [selectEnabled]="selectEnabled"
     [selected]="selectedItems.length"
     [items]="items"
+    [currentPage]="page"
     [pageSize]="10"
     [totalItems]="totalItems"
     (pageChange)="pageChange.emit($event)">

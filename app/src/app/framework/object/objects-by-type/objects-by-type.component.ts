@@ -17,7 +17,7 @@
 */
 
 import {
-  Component,
+  Component, Input,
   OnDestroy,
   OnInit, TemplateRef, ViewChild,
 } from '@angular/core';
@@ -34,6 +34,9 @@ import { HttpResponse } from '@angular/common/http';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
 import { FormGroup } from '@angular/forms';
 import { CmdbMode } from '../../modes.enum';
+import { FileService } from '../../../export/export.service';
+import { CmdbObject } from '../../models/cmdb-object';
+import { FileSaverService } from 'ngx-filesaver';
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -60,7 +63,12 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   /**
    * Current render results
    */
-  public results: Array<RenderResult> = [];
+  public results: Array<CmdbObject> = [];
+
+  /**
+   * Selected objects
+   */
+  public selectedObjects: Array<number> = [];
 
   /**
    * Total number of results
@@ -85,20 +93,35 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   public columns: Array<Column>;
 
-  public page: number = 1;
-  public limit: number = 10;
+  private readonly initPage: number = 1;
+  public page: number = this.initPage;
 
-  constructor(private router: Router, private route: ActivatedRoute, private objectService: ObjectService) {
+  private readonly initLimit: number = 10;
+  public limit: number = this.initLimit;
+
+  public formatList: any[] = [];
+
+  constructor(private router: Router, private route: ActivatedRoute, private objectService: ObjectService,
+              private fileService: FileService, private fileSaverService: FileSaverService) {
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
       this.typeSubject.next(data.type as CmdbType);
+    });
+    this.fileService.callFileFormatRoute().subscribe(data => {
+      this.formatList = data;
     });
   }
 
   public ngOnInit(): void {
     this.typeSubject.asObservable().pipe(takeUntil(this.subscriber)).subscribe((type: CmdbType) => {
+      this.resetTable();
       this.setColumns(type);
       this.getObjects();
     });
+  }
+
+  public resetTable() {
+    this.page = this.initPage;
+    this.limit = this.initLimit;
   }
 
   private setColumns(type: CmdbType): void {
@@ -126,7 +149,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       }
     ] as Array<Column>;
 
-    /*for (const field of fields) {
+    for (const field of fields) {
       columns.push({
         display: field.label || field.name,
         name: field.name,
@@ -135,7 +158,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         hidden: !summaryFields.includes(field.name),
         template: this.fieldTemplate
       } as Column);
-    }*/
+    }
 
     columns.push({
       display: 'Author',
@@ -144,7 +167,19 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       sortable: true,
       searchable: false,
       template: this.userTemplate
-    } as unknown as Column);
+    } as Column);
+
+    columns.push({
+      display: 'Creation Time',
+      name: 'creation_time',
+      data: 'creation_time',
+      sortable: true,
+      searchable: false,
+      render(data: any, item?: any, column?: Column, index?: number) {
+        const date = new Date(data);
+        return `${ date.getDay() }/${ date.getMonth() }/${ date.getFullYear() } - ${ date.getHours() }:${ date.getMinutes() }:${ date.getSeconds() }`;
+      }
+    } as Column);
 
     columns.push({
       display: 'Actions',
@@ -180,8 +215,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       sort: this.sort.name, order: this.sort.order, page: this.page
     };
     this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
-      .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
-        this.results = apiResponse.body.results as Array<RenderResult>;
+      .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<CmdbObject>>) => {
+        this.results = apiResponse.body.results as Array<CmdbObject>;
         this.totalResults = apiResponse.body.total;
         this.loading = false;
       });
@@ -206,6 +241,19 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   public onSortChange(sort: Sort): void {
     this.sort = sort;
     this.getObjects();
+  }
+
+  public onSelectedChange(selectedItems: Array<CmdbObject>): void {
+    this.selectedObjects = selectedItems.map(m => m.public_id);
+  }
+
+
+  public exportingFiles(exportType: any) {
+    this.fileService.callExportRoute(this.selectedObjects.toString(), exportType.id)
+      .subscribe(res => {
+        this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
+      });
+
   }
 
 

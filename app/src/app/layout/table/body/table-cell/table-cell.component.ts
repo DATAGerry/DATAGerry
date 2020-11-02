@@ -64,10 +64,11 @@ export class TableCellComponent<T> {
   public set Item(item: T) {
     this.item = item;
     if (this.column.data) {
+      const cellData = TableCellComponent.resolve(this.column.data, this.item);
       if (this.column.render) {
-        this.data = this.column.render(this.item, this.column, this.rowIndex);
+        this.data = this.column.render(cellData, this.item, this.column, this.rowIndex);
       } else {
-        this.data = TableCellComponent.resolve(this.column.data, this.item);
+        this.data = cellData;
       }
 
     }

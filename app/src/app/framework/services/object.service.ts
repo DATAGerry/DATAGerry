@@ -63,7 +63,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
 
   public getObjects(
     params: CollectionParameters = { filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1
-  }): Observable<HttpResponse<APIGetMultiResponse<T>>> {
+  }): Observable<HttpResponse<APIGetMultiResponse<CmdbObject>>> {
     const options = this.options;
     let httpParams: HttpParams = new HttpParams();
     if (params.filter !== undefined) {
@@ -76,7 +76,7 @@ export class ObjectService<T = RenderResult> implements ApiService {
     httpParams = httpParams.set('page', params.page.toString());
     options.params = httpParams;
     return this.api.callGet<Array<T>>(this.newServicePrefix + '/', options).pipe(
-      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+      map((apiResponse: HttpResponse<APIGetMultiResponse<CmdbObject>>) => {
         return apiResponse;
       })
     );

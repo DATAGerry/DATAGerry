@@ -46,20 +46,44 @@ export class TableComponent<T> implements OnInit, OnDestroy {
    */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
+  /**
+   * Message which will be shown if no data are in the table.
+   */
   @Input() public emptyMessage: string = 'No data to display!';
 
-
-  @Input() public loadingEnabled: boolean = true;
+  /**
+   * Is the table data currently in loading.
+   */
   @Input() public loading: boolean = false;
 
+  /**
+   * Should the loading spinner be loaded.
+   */
+  @Input() public loadingEnabled: boolean = true;
+
+  /**
+   * Columns
+   */
   public columns: Array<Column> = [];
 
+  /**
+   * Column setter.
+   *
+   * @param columns
+   */
   @Input('columns')
   public set Columns(columns: Array<Column>) {
     this.columns = columns;
   }
 
+  /**
+   * Items or data which will be inserted into the tbody.
+   */
   @Input() public items: Array<T> = [];
+
+  /**
+   * Total number of items which exists for this table.
+   */
   @Input() public totalItems: number = 0;
 
   /**
@@ -77,6 +101,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
    */
   @Output() public selectedChange: EventEmitter<Array<T>> = new EventEmitter<Array<T>>();
 
+  @Input() public page: number = 1;
 
   @Input() public infoEnabled: boolean = true;
   @Input() public pageLengthEnabled: boolean = true;

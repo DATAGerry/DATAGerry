@@ -3,9 +3,15 @@
     <i class="fas fa-table"></i> Columns
   </button>
   <ul class="dropdown-menu" *ngIf="columns.length > 0">
-    <li class="dropdown-item" *ngFor="let column of columns" [ngClass]="{'active': !column.hidden}"
-        (click)="toggleColumn(column)">
-      {{column.name}}
+    <li class="dropdown-item" *ngFor="let column of columns"
+        [ngClass]="{'active': !column.hidden, 'disabled': column.fixed}" (click)="toggleColumn(column)">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
+        <label class="form-check-label" for="defaultCheck1">
+          {{column.display ? column.display : column.name}}
+        </label>
+      </div>
+
     </li>
   </ul>
 </div>

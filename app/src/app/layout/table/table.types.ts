@@ -59,45 +59,46 @@ export interface Column {
   /**
    * Field is hidden
    */
-  hidden: boolean;
+  hidden?: boolean;
 
   /**
    * Field cant be toggled
    */
-  fixed: boolean;
+  fixed?: boolean;
 
   /**
    * Sortable
    */
-  sortable: boolean;
+  sortable?: boolean;
 
   /**
    * Searchable
    */
-  searchable: boolean;
+  searchable?: boolean;
 
   /**
    * Got row template
    */
-  template: TemplateRef<any>;
+  template?: TemplateRef<any>;
 
   /**
    * List of extra css classes for
    * head and cells in this column.
    */
-  cssClasses: Array<string>;
+  cssClasses?: Array<string>;
 
   /**
    * List of direct styles for
    * head and cells in this column.
    */
-  style: { [klass: string]: any };
+  style?: { [klass: string]: any };
 
   /**
    * Data parser
+   * @param data
    * @param item
    * @param column
    * @param index
    */
-  render(item?: any, column?: Column, index?: number);
+  render(data: any, item: any, column?: Column, index?: number);
 }
