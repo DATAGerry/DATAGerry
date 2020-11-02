@@ -77,19 +77,14 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
         }
         map_properties = mapping.get('properties')
 
-        # Improve insert object
-        improve_object = ImproveObject(entry, map_properties, entry.get('fields'), possible_fields)
-        entry = improve_object.improve_entry()
-
         for prop in map_properties:
             working_object = self._map_element(prop, entry, working_object)
-
 
         for entry_field in entry.get('fields'):
             field_exists = next((item for item in possible_fields if item["name"] == entry_field['name']), None)
             if field_exists:
-                improve_object.value = entry_field['value']
-                entry_field['value'] = improve_object.improve_date()
+                entry_field['value'] = ImproveObject.improve_boolean(entry_field['value'])
+                entry_field['value'] = ImproveObject.improve_date(entry_field['value'])
                 working_object.get('fields').append(entry_field)
         return working_object
 
