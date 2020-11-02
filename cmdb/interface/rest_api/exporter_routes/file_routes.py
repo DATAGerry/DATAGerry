@@ -59,7 +59,7 @@ def export_file():
     try:
         _object_ids = request.args.get('ids', [])
         _class = request.args.get('classname', '')
-        _zipping = request.args.get('zip')
+        _zipping = request.args.get('zip', False) in ['true', 'True']
 
         if _zipping:
             export_type_class = load_class('cmdb.file_export.export_types.' + 'ZipExportType')()
