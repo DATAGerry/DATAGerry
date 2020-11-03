@@ -205,7 +205,7 @@ def import_objects(request_user: UserModel):
                 'object_id': message.public_id,
                 'user_id': request_user.get_public_id(),
                 'user_name': request_user.get_display_name(),
-                'comment': 'Object was created',
+                'comment': 'Object was imported',
                 'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
                 'version': current_object.version
             }
