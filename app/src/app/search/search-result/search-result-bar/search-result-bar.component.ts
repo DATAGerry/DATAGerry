@@ -51,7 +51,6 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
   public ngOnChanges(changes: SimpleChanges): void {
     this.preSelectedFilterList = [];
     this.addPreSelectedFilterItem(this.queryParameters);
-
   }
 
   @HostListener('window:scroll')

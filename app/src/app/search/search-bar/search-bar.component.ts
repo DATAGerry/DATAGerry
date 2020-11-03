@@ -66,6 +66,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   // Dropdown
   public possibleTextResults: NumberSearchResults = new NumberSearchResults();
+  public possibleRegexResults: NumberSearchResults = new NumberSearchResults();
   public isExistingPublicID: boolean = false;
   public possibleTypes: CmdbType[] = [];
   public possibleCategories: CmdbCategory[] = [];
@@ -73,6 +74,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   // Subscriptions
   private routeChangeSubscription: Subscription;
   private textRegexSubscription: Subscription;
+  private regexRegexSubscription: Subscription;
   private isExistingPublicIDSubscription: Subscription;
   private typeRegexSubscription: Subscription;
   private inputControlSubscription: Subscription;
@@ -83,6 +85,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.searchBarForm = new FormGroup({
       inputControl: new FormControl('')
     });
+    this.regexRegexSubscription = new Subscription();
     this.textRegexSubscription = new Subscription();
     this.isExistingPublicIDSubscription = new Subscription();
     this.typeRegexSubscription = new Subscription();
@@ -100,12 +103,17 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-
     this.inputControl.valueChanges.pipe(debounceTime(300)).subscribe((changes: string) => {
       if (changes.trim() !== '') {
         this.textRegexSubscription = this.searchService.getEstimateValueResults(changes).subscribe((counter: NumberSearchResults) => {
           this.possibleTextResults = counter;
         });
+        if (ValidatorService.getRegex().test(changes)) {
+          this.regexRegexSubscription = this.searchService.getEstimateValueResults(ValidatorService.replaceTextWithRegex(changes))
+            .subscribe((counter: NumberSearchResults) => {
+            this.possibleRegexResults = counter;
+          });
+        }
         if (!isNaN(+changes)) {
           this.isExistingPublicIDSubscription = this.objectService.getObject(+changes).subscribe(() => {
               this.isExistingPublicID = true;
@@ -122,6 +130,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         });
       } else {
         this.possibleTextResults = new NumberSearchResults();
+        this.possibleRegexResults = new NumberSearchResults();
         this.possibleTypes = [];
         this.possibleCategories = [];
       }
@@ -140,6 +149,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     switch (searchForm) {
       case 'text':
         tag.searchText = ValidatorService.validateRegex(searchTerm).trim();
+        break;
+      case 'regex':
+        tag.searchText = searchTerm.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
         break;
       case 'type':
         const typeIDs: number[] = [];
@@ -257,6 +269,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   public ngOnDestroy(): void {
     // ToDo: provisionally commented out. To be used later.
     // this.routeChangeSubscription.unsubscribe();
+    this.regexRegexSubscription.unsubscribe();
     this.textRegexSubscription.unsubscribe();
     this.typeRegexSubscription.unsubscribe();
     this.inputControlSubscription.unsubscribe();

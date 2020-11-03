@@ -105,7 +105,7 @@ class PipelineBuilder(Builder):
             self.add_pipe(self.match_({'active': {"$eq": True}}))
 
         # text builds
-        text_params = [_ for _ in params if _.search_form == 'text']
+        text_params = [_ for _ in params if _.search_form == 'text' or _.search_form == 'regex']
         for param in text_params:
             regex = self.regex_('fields.value', param.search_text, 'ims')
             self.add_pipe(self.match_(regex))
