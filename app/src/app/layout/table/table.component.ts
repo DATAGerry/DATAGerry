@@ -30,6 +30,7 @@ import {
 import { ReplaySubject } from 'rxjs';
 import { Column, Sort, SortDirection } from './table.types';
 import { takeUntil } from 'rxjs/operators';
+import { PageLengthEntry } from './components/table-page-size/table-page-size.component';
 
 @Component({
   selector: 'cmdb-table',
@@ -108,11 +109,15 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Input() public searchEnabled: boolean = true;
   @Input() public paginationEnabled: boolean = true;
 
-
-  @Output() public pageSizeChange: EventEmitter<number> = new EventEmitter<number>();
   @Output() public pageChange: EventEmitter<number> = new EventEmitter<number>();
   @Output() public searchChange: EventEmitter<string> = new EventEmitter<string>();
 
+  @Input() public debounceTime: number;
+
+  @Input() public pageSizeEnabled: boolean = true;
+  @Input() public pageSize: number;
+  @Input() public pageSizeList: Array<PageLengthEntry>;
+  @Output() public pageSizeChange: EventEmitter<number> = new EventEmitter<number>();
 
   @Input() public toggleable: boolean = false;
 

@@ -1,11 +1,22 @@
 <div #container class="dg-table table-container">
   <table-loading *ngIf="loadingEnabled" [loading]="loading"></table-loading>
-  <table-header
-    [toggleable]="toggleable" [columns]="columns"
-    (pageSizeChange)="pageSizeChange.emit($event)"
-    (searchChange)="searchChange.emit($event)"
-    (columnVisibilityChange)="onColumnVisibilityChange($event)">
-  </table-header>
+  <div class="table-header d-flex mb-3">
+    <div class="mr-auto" *ngIf="pageSizeEnabled">
+      <table-page-size [pageSize]="pageSize" [pageSizeList]="pageSizeList"
+                       (pageSizeChange)="pageSizeChange.emit($event)">
+
+      </table-page-size>
+    </div>
+    <div class="table-toggle" *ngIf="toggleable">
+      <table-column-toggle [columns]="columns"
+                           (columnVisibilityChange)="onColumnVisibilityChange($event)">
+      </table-column-toggle>
+    </div>
+    <div class="table-search ml-2" *ngIf="searchEnabled">
+      <table-search [debounceTime]="debounceTime" (searchChange)="searchChange.emit($event)">
+      </table-search>
+    </div>
+  </div>
   <table #table layout-table class="table">
     <thead table-head [sortable]="sortable">
     <tr class="table-head">

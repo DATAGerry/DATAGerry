@@ -21,7 +21,6 @@ import { CommonModule } from '@angular/common';
 import { TableComponent } from './table.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TableSearchComponent } from './components/table-search/table-search.component';
-import { TableHeaderComponent } from './header/table-header/table-header.component';
 import { TablePageSizeComponent } from './components/table-page-size/table-page-size.component';
 import { TablePaginationComponent } from './components/table-pagination/table-pagination.component';
 import { TableFooterComponent } from './footer/table-footer/table-footer.component';
@@ -38,10 +37,11 @@ import { TableLoadingComponent } from './components/table-loading/table-loading.
 
 
 @NgModule({
-    declarations: [
-        TableComponent, TableSearchComponent, TableHeaderComponent, TablePageSizeComponent,
-        TablePaginationComponent, TableFooterComponent, TableFootDirective, TableHeadDirective, TableDirective,
-        TableBodyDirective, TableColumnHeadComponent, TableInfoComponent, TableCellComponent, TableRowDirective, TableColumnToggleComponent, TableLoadingComponent],
+  declarations: [
+    TableComponent, TableSearchComponent, TablePageSizeComponent,
+    TablePaginationComponent, TableFooterComponent, TableFootDirective, TableHeadDirective, TableDirective,
+    TableBodyDirective, TableColumnHeadComponent, TableInfoComponent, TableCellComponent,
+    TableRowDirective, TableColumnToggleComponent, TableLoadingComponent],
   exports: [
     TableComponent
   ],
