@@ -22,7 +22,7 @@
     <tr class="table-head">
       <th *ngIf="selectEnabled" [ngStyle]="{'width': '3rem'}">
         <div class="form-check">
-          <input class="form-check-input position-static" type="checkbox" value="all"
+          <input class="form-check-input position-static" type="checkbox" value="all" title="select-all-rows"
                  [checked]="items.length === selectedItems.length && items.length > 0"
                  (change)="toggleAllRowSelections($event)"/>
         </div>
@@ -37,7 +37,8 @@
       <td *ngIf="selectEnabled" [ngStyle]="{'width': '3rem'}">
         <div class="form-check">
           <input class="form-check-input position-static" type="checkbox" [value]="item"
-                 [checked]="selectedItems.includes(item)" (change)="toggleRowSelection(item, $event)"/>
+                 title="" [checked]="selectedItems.includes(item)"
+                 (change)="toggleRowSelection(item, $event)"/>
         </div>
       </td>
       <td table-cell *ngFor="let column of columns" [column]="column" [item]="item"
