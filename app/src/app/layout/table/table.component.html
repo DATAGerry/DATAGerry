@@ -51,16 +51,15 @@
     <tfoot table-foot>
     </tfoot>
   </table>
-  <table-footer
-    [paginationEnabled]="paginationEnabled"
-    [infoEnabled]="infoEnabled"
-    [selectEnabled]="selectEnabled"
-    [selected]="selectedItems.length"
-    [items]="items"
-    [currentPage]="page"
-    [pageSize]="10"
-    [totalItems]="totalItems"
-    (pageChange)="pageChange.emit($event)">
-
-  </table-footer>
+  <div class="table-footer d-flex">
+    <div class="mr-auto">
+      <table-info [show]="items.length" [total]="totalItems" *ngIf="infoEnabled"
+                  [selectEnabled]="selectEnabled" [selected]="selectedItems.length"></table-info>
+    </div>
+    <div *ngIf="paginationEnabled">
+      <table-pagination [currentPage]="page" [totalItems]="totalItems" [pageSize]="pageSize"
+        (pageChange)="pageChange.emit($event)">
+      </table-pagination>
+    </div>
+  </div>
 </div>

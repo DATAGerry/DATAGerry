@@ -23,12 +23,11 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TableSearchComponent } from './components/table-search/table-search.component';
 import { TablePageSizeComponent } from './components/table-page-size/table-page-size.component';
 import { TablePaginationComponent } from './components/table-pagination/table-pagination.component';
-import { TableFooterComponent } from './footer/table-footer/table-footer.component';
-import { TableFootDirective } from './footer/table-foot.directive';
-import { TableHeadDirective } from './header/table-head.directive';
+import { TableFootDirective } from './foot/table-foot.directive';
+import { TableHeadDirective } from './head/table-head.directive';
 import { TableDirective } from './table.directive';
 import { TableBodyDirective } from './body/table-body.directive';
-import { TableColumnHeadComponent } from './header/table-column-head/table-column-head.component';
+import { TableColumnHeadComponent } from './head/table-column-head/table-column-head.component';
 import { TableInfoComponent } from './components/table-info/table-info.component';
 import { TableCellComponent } from './body/table-cell/table-cell.component';
 import { TableRowDirective } from './body/table-row.directive';
@@ -39,7 +38,7 @@ import { TableLoadingComponent } from './components/table-loading/table-loading.
 @NgModule({
   declarations: [
     TableComponent, TableSearchComponent, TablePageSizeComponent,
-    TablePaginationComponent, TableFooterComponent, TableFootDirective, TableHeadDirective, TableDirective,
+    TablePaginationComponent, TableFootDirective, TableHeadDirective, TableDirective,
     TableBodyDirective, TableColumnHeadComponent, TableInfoComponent, TableCellComponent,
     TableRowDirective, TableColumnToggleComponent, TableLoadingComponent],
   exports: [
