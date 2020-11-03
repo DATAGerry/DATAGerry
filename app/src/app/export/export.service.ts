@@ -47,7 +47,7 @@ export class FileService {
     params = params.set('zip', JSON.stringify(zipping));
     options.params = params;
 
-    return this.api.callGet<any>(this.servicePrefix + '/object/', httpFileOptions);
+    return this.api.callGet<any>(this.servicePrefix + '/object/', options);
   }
 
   public getObjectFileByType(typeID: number, exportType: string) {
