@@ -90,6 +90,7 @@ export class RenderElementComponent extends RenderField implements OnInit {
         break;
       }
       case CmdbMode.Simple: {
+        this.data.value = this.value;
         this.component = simpleComponents[this.data.type];
         const factory = this.resolver.resolveComponentFactory(this.component);
         this.componentRef = this.containerSimple.createComponent(factory);

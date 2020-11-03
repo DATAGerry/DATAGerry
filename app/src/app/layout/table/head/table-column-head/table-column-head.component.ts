@@ -109,7 +109,7 @@ export class TableColumnHeadComponent {
     if (this.column && this.column.sortable && this.sortable) {
       this.onSelectedChange(true);
       const sort = {
-        name: this.column.data,
+        name: this.column.name,
         order: this.order
       } as Sort;
       this.sortChange.emit(sort);

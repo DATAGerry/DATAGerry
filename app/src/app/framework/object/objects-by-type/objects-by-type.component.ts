@@ -50,7 +50,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    */
   @ViewChild(TableComponent, { static: false }) objectsTableComponent: TableComponent<RenderResult>;
 
-  @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
+  @ViewChild('activeTemplate', { static: true  }) activeTemplate: TemplateRef<any>;
   @ViewChild('fieldTemplate', { static: true }) fieldTemplate: TemplateRef<any>;
   @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
   @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
@@ -151,7 +151,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
     for (const field of fields) {
       columns.push({
-        display: field.label || field.name,
+        display: field.label,
         name: field.name,
         sortable: true,
         searchable: true,
@@ -209,11 +209,11 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.columns = columns;
   }
 
-  public getFieldByName(item: RenderResult, name: string) {
-    return item.fields.find(field => field.name === name);
+  public getFieldByName(name: string) {
+    return this.type.fields.find(field => field.name === name);
   }
 
-  public getFieldValue(item: RenderResult, name: string) {
+  public getFieldValue(item: CmdbObject, name: string) {
     const value = item.fields.find(field => field.name === name).value;
     if (value) {
       return value;

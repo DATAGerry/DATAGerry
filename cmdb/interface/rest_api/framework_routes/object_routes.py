@@ -62,38 +62,32 @@ with current_app.app_context():
 
 
 @objects_blueprint.route('/', methods=['GET', 'HEAD'])
-@objects_blueprint.protect(auth=True, right='base.framework.type.view')
-@objects_blueprint.parse_collection_parameters()
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
+@objects_blueprint.parse_collection_parameters(view='native')
 def get_objects(params: CollectionParameters):
     from cmdb.framework.managers.object_manager import ObjectManager
     manager = ObjectManager(database_manager=current_app.database_manager)
-
+    view = params.optional.get('view', 'native')
     try:
         iteration_result: IterationResult[CmdbObject] = manager.iterate(
             filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
 
-        object_list: List[dict] = [object_.__dict__ for object_ in iteration_result.results]
+        if view == 'native':
+            object_list: List[dict] = [object_.__dict__ for object_ in iteration_result.results]
+            api_response = GetMultiResponse(object_list, total=iteration_result.total, params=params,
+                                            url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
+        elif view == 'render':
+            rendered_list = RenderList(iteration_result.results, None).render_result_list(raw=True)
+            api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
+                                            url=request.url, model=Model('RendeResult'), body=request.method == 'HEAD')
+        else:
+            return abort(401, 'No possible view parameter')
 
-        api_response = GetMultiResponse(object_list, total=iteration_result.total, params=params,
-                                        url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
     except ManagerIterationError as err:
         return abort(400, err.message)
     except ManagerGetError as err:
         return abort(404, err.message)
     return api_response.make_response()
-
-
-@object_blueprint.route('/native', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_native_object_list(request_user: UserModel):
-    try:
-        object_list = object_manager.get_all_objects()
-    except CMDBError:
-        return abort(404)
-    resp = make_response(object_list)
-    return resp
 
 
 @object_blueprint.route('/type/<int:public_id>', methods=['GET'])
