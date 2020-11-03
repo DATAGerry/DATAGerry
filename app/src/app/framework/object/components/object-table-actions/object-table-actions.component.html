@@ -1,4 +1,4 @@
-<ng-container *ngIf="object">
+<div class="d-flex justify-content-between" *ngIf="object">
   <a [routerLink]="['/', 'framework', 'object', 'view', object.public_id]">
     <i class="far fa-eye"></i>
   </a>
@@ -8,4 +8,10 @@
   <a [routerLink]="['/', 'framework', 'object', 'edit', object.public_id]">
     <i class="far fa-edit"></i>
   </a>
-</ng-container>
+  <a class="pointer">
+    <i class="far fa-file-powerpoint"></i>
+  </a>
+  <a class="pointer">
+    <i class="far fa-trash-alt"></i>
+  </a>
+</div>

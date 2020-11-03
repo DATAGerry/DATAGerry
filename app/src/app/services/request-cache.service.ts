@@ -60,7 +60,7 @@ export class RequestCacheService {
    * @param req
    * @param response
    */
-  put(req: HttpRequest<any>, response: HttpResponse<any>): void {
+  public put(req: HttpRequest<any>, response: HttpResponse<any>): void {
     const url = req.urlWithParams;
     const entry = { url, response, lastRead: Date.now() };
     this.cache.set(url, entry);

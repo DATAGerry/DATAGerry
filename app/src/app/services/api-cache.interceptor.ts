@@ -22,12 +22,21 @@ import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { RequestCacheService } from './request-cache.service';
 
-
+/**
+ * HTTP interceptor which quick caches previous api calls.
+ */
 @Injectable()
 export class APICachingInterceptor implements HttpInterceptor {
   constructor(private cache: RequestCacheService) {
   }
 
+  /**
+   * Intercepts the http client.
+   * Only assigned to cacheable calls `HEAD` and `GET`
+   *
+   * @param req the HttpRequest
+   * @param next the HttpHandler
+   */
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     if (!isCacheable(req)) {
       return next.handle(req);
@@ -36,6 +45,12 @@ export class APICachingInterceptor implements HttpInterceptor {
     return cachedResponse ? of(cachedResponse) : this.sendRequest(req, next, this.cache);
   }
 
+  /**
+   * Save the request into the cache and resend it to the intercepted http call.
+   * @param req the HttpRequest
+   * @param next the HttpHandler
+   * @param cache the RequestCacheService
+   */
   sendRequest(
     req: HttpRequest<any>,
     next: HttpHandler,

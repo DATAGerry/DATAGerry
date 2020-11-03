@@ -27,10 +27,11 @@ import { User } from '../../../models/user';
 export class UserDisplayComponent {
 
   @Input() user: User;
+  @Input() maxWidth: string = '40';
 
   public get name() {
     if ((this.user.first_name !== null) && (this.user.last_name !== null)) {
-      return `${this.user.first_name} ${this.user.last_name}`;
+      return `${ this.user.first_name } ${ this.user.last_name }`;
     }
     return this.user.user_name;
   }

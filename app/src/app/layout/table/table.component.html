@@ -31,8 +31,9 @@
           (sortChange)="onSortChange($event)" [ngClass]="columnClasses" [ngStyle]="column.style"></th>
     </tr>
     </thead>
-    <tbody table-body>
-    <tr table-row *ngFor="let item of items; let rowIndex= index" [item]="item" [rowIndex]="rowIndex">
+    <tbody table-body [bodyClasses]="bodyClasses">
+    <tr table-row *ngFor="let item of items; let rowIndex= index" [item]="item" [rowIndex]="rowIndex"
+        [ngClass]="rowClasses">
       <td *ngIf="selectEnabled" [ngStyle]="{'width': '3rem'}">
         <div class="form-check">
           <input class="form-check-input position-static" type="checkbox" [value]="item"
@@ -40,7 +41,7 @@
         </div>
       </td>
       <td table-cell *ngFor="let column of columns" [column]="column" [item]="item"
-          [ngClass]="rowClasses" [ngStyle]="column.style"></td>
+          [ngStyle]="column.style"></td>
     </tr>
     <tr *ngIf="items.length === 0">
       <td class="text-center" [colSpan]="(columns.length) + (selectEnabled ? 1: 0)">
@@ -58,7 +59,7 @@
     </div>
     <div *ngIf="paginationEnabled">
       <table-pagination [currentPage]="page" [totalItems]="totalItems" [pageSize]="pageSize"
-        (pageChange)="pageChange.emit($event)">
+                        (pageChange)="pageChange.emit($event)">
       </table-pagination>
     </div>
   </div>

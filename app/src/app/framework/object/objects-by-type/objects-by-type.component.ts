@@ -135,7 +135,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         name: 'active',
         data: 'active',
         searchable: false,
-        sortable: true,
+        sortable: false,
         template: this.activeTemplate,
         cssClasses: ['text-center'],
         style: { width: '6rem' }
@@ -176,6 +176,20 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       sortable: true,
       searchable: false,
       render(data: any, item?: any, column?: Column, index?: number) {
+        const date = new Date(data);
+        return `${ date.getDay() }/${ date.getMonth() }/${ date.getFullYear() } - ${ date.getHours() }:${ date.getMinutes() }:${ date.getSeconds() }`;
+      }
+    } as Column);
+    columns.push({
+      display: 'Modification Time',
+      name: 'last_edit_time',
+      data: 'last_edit_time',
+      sortable: true,
+      searchable: false,
+      render(data: any, item?: any, column?: Column, index?: number) {
+        if (!data) {
+          return 'No modifications so far.';
+        }
         const date = new Date(data);
         return `${ date.getDay() }/${ date.getMonth() }/${ date.getFullYear() } - ${ date.getHours() }:${ date.getMinutes() }:${ date.getSeconds() }`;
       }

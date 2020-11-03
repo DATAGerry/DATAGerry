@@ -19,12 +19,12 @@
 
 import {
   ChangeDetectionStrategy,
-  Component,
+  Component, ElementRef,
   EventEmitter,
   Input, isDevMode,
   OnDestroy,
   OnInit,
-  Output,
+  Output, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
@@ -40,6 +40,16 @@ import { PageLengthEntry } from './components/table-page-size/table-page-size.co
   changeDetection: ChangeDetectionStrategy.Default,
 })
 export class TableComponent<T> implements OnInit, OnDestroy {
+
+  /**
+   * `ViewChild` for accessing the complete table container.
+   */
+  @ViewChild('container', { static: true }) public containerRef: ElementRef;
+
+  /**
+   * `ViewChild` for accessing the table html element.
+   */
+  @ViewChild('table', { static: true }) public tableRef: ElementRef;
 
   /**
    * Component un subscriber.
@@ -120,6 +130,11 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Output() public pageSizeChange: EventEmitter<number> = new EventEmitter<number>();
 
   @Input() public toggleable: boolean = false;
+
+  /**
+   * Dynamic list of css classes for the table body.
+   */
+  @Input() public bodyClasses: Array<string> = [];
 
   /**
    * Dynamic list of css classes for column heads.

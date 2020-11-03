@@ -16,14 +16,15 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Directive } from '@angular/core';
+import { Directive, HostBinding, Input } from '@angular/core';
 
 @Directive({
   // tslint:disable-next-line:directive-selector
   selector: 'tbody[table-body]'
 })
 export class TableBodyDirective {
-
-  constructor() { }
-
+  /**
+   * Binding a list of css classes to the tbody tag.
+   */
+  @HostBinding('class') @Input() public bodyClasses: Array<string> = [];
 }
