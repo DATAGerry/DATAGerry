@@ -96,7 +96,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   private readonly initPage: number = 1;
   public page: number = this.initPage;
 
-  private readonly initLimit: number = 10;
+  private readonly initLimit: number = 25;
   public limit: number = this.initLimit;
 
   public formatList: any[] = [];

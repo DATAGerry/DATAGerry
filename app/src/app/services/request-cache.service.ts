@@ -27,7 +27,7 @@ export class RequestCacheService {
   /**
    * Max time the cache entry is valid in ms.
    */
-  public readonly maxAge = 3000; // MS
+  public readonly maxAge = 5000; // MS
 
   /**
    * Cache entry holder.

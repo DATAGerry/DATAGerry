@@ -43,7 +43,7 @@
 </div>
 <hr/>
 <cmdb-table [items]="results" [totalItems]="totalResults" [columns]="columns" [sort]="sort" [toggleable]="true"
-            [page]="page" [rowClasses]="['align-middle']"
+            [currentPage]="page" [rowClasses]="['align-middle']" [pageSize]="limit"
             [selectEnabled]="true" [loading]="loading" [emptyMessage]="'There are no objects for this type yet!'"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
             (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)">

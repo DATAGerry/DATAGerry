@@ -58,7 +58,7 @@
                   [selectEnabled]="selectEnabled" [selected]="selectedItems.length"></table-info>
     </div>
     <div *ngIf="paginationEnabled">
-      <table-pagination [currentPage]="page" [totalItems]="totalItems" [pageSize]="pageSize"
+      <table-pagination [currentPage]="currentPage" [totalItems]="totalItems" [pageSize]="pageSize"
                         (pageChange)="pageChange.emit($event)">
       </table-pagination>
     </div>

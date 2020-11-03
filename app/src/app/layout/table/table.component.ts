@@ -63,6 +63,11 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Input() public emptyMessage: string = 'No data to display!';
 
   /**
+   * Component wide debounce time.
+   */
+  @Input() public debounceTime: number = 500;
+
+  /**
    * Is the table data currently in loading.
    */
   @Input() public loading: boolean = false;
@@ -112,23 +117,59 @@ export class TableComponent<T> implements OnInit, OnDestroy {
    */
   @Output() public selectedChange: EventEmitter<Array<T>> = new EventEmitter<Array<T>>();
 
-  @Input() public page: number = 1;
+  /**
+   * Current displayed page number.
+   */
+  @Input() public currentPage: number = 1;
 
-  @Input() public infoEnabled: boolean = true;
-  @Input() public pageLengthEnabled: boolean = true;
-  @Input() public searchEnabled: boolean = true;
+  /**
+   * Pagination enabled.
+   */
   @Input() public paginationEnabled: boolean = true;
 
+  /**
+   * Event Emitter when the current page was changed.
+   */
   @Output() public pageChange: EventEmitter<number> = new EventEmitter<number>();
-  @Output() public searchChange: EventEmitter<string> = new EventEmitter<string>();
 
-  @Input() public debounceTime: number;
-
+  /**
+   * Is a switching of the page size possible.
+   */
   @Input() public pageSizeEnabled: boolean = true;
-  @Input() public pageSize: number;
+
+  /**
+   * Current page size.
+   */
+  @Input() public pageSize: number = 10;
+
+  /**
+   * Possible page size list.
+   */
   @Input() public pageSizeList: Array<PageLengthEntry>;
+
+  /**
+   * Event Emitter when the page size changed.
+   */
   @Output() public pageSizeChange: EventEmitter<number> = new EventEmitter<number>();
 
+  /**
+   * Search input enabled.
+   */
+  @Input() public searchEnabled: boolean = true;
+
+  /**
+   * Event Emitter for search input change.
+   */
+  @Output() public searchChange: EventEmitter<string> = new EventEmitter<string>();
+
+  /**
+   * Info display enabled.
+   */
+  @Input() public infoEnabled: boolean = true;
+
+  /**
+   * Are columns toggleable.
+   */
   @Input() public toggleable: boolean = false;
 
   /**
@@ -202,10 +243,6 @@ export class TableComponent<T> implements OnInit, OnDestroy {
 
   }
 
-
-  /**
-   * Select a row
-   */
   public toggleRowSelection(item: T, event: any): void {
     const checked = event.currentTarget.checked;
     if (checked) {
@@ -232,7 +269,6 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   public onColumnVisibilityChange(column: Column) {
     const col = this.columns.find(c => c.name === column.name);
     const colIndex = this.columns.indexOf(col);
-    console.log(colIndex);
     this.columns[colIndex].hidden = column.hidden;
   }
 
