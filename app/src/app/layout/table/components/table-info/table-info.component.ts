@@ -26,9 +26,24 @@ import { Component, Input } from '@angular/core';
 })
 export class TableInfoComponent {
 
+  /**
+   * Select row enabled.
+   */
   @Input() public selectEnabled: boolean = false;
+
+  /**
+   * Number of selected elements
+   */
   @Input() public selected: number = 0;
-  @Input() public show: number;
-  @Input() public total: number;
+
+  /**
+   * Number of displayed items on this page.
+   */
+  @Input() public show: number = 0;
+
+  /**
+   * Number of all items for this table.
+   */
+  @Input() public total: number = 0;
 
 }

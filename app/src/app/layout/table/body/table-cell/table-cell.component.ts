@@ -38,9 +38,8 @@ export class TableCellComponent<T> {
 
   /**
    * When column is hidden, add css class hidden to cell.
-   * @private
    */
-  @HostBinding('class.hidden') private hidden: boolean = false;
+  @HostBinding('class.hidden') @Input() public hidden: boolean = false;
 
   /**
    * Row index which this cell is in.

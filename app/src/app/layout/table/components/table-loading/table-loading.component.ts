@@ -28,7 +28,9 @@ import { ChangeDetectionStrategy, Component, Input, ViewEncapsulation } from '@a
 })
 export class TableLoadingComponent {
 
+  /**
+   * Is table currently loading.
+   */
   @Input() public loading: boolean = false;
-
 
 }

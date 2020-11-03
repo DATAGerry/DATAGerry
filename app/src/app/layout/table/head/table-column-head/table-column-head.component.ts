@@ -36,15 +36,23 @@ import { Column, Sort, SortDirection } from '../../table.types';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated
 })
-export class TableColumnHeadComponent implements OnInit {
+export class TableColumnHeadComponent {
 
   // noinspection JSMismatchedCollectionQueryUpdate
   @HostBinding('class') private cssClasses: Array<string>;
   @HostBinding('class.sortable') private sortable: boolean = false;
-  @HostBinding('class.hidden') private hidden: boolean = false;
+  @HostBinding('class.hidden') @Input() public hidden: boolean = false;
 
+  /**
+   * Column of this head element.
+   */
   public column: Column;
 
+  /**
+   * Column setter. Also sets the `hidden`, `sortable` and `cssClasses`
+   * property from the Column element.
+   * @param c Column
+   */
   @Input('column')
   public set Column(c: Column) {
     this.column = c;
@@ -53,26 +61,49 @@ export class TableColumnHeadComponent implements OnInit {
     this.cssClasses = this.column.cssClasses || [];
   }
 
-  @Input() order: SortDirection = SortDirection.NONE;
+  /**
+   * Sort order of this element.
+   */
+  @Input() public order: SortDirection = SortDirection.NONE;
 
-  public selected: boolean = false;
+  /**
+   * Event Emitter when the sort order and selection was changed.
+   */
+  @Output() public sortChange: EventEmitter<Sort> = new EventEmitter<Sort>();
 
-  @Input('selected')
-  public set Selected(value: boolean) {
+  /**
+   * Is this the selected sort column.
+   */
+  public sortActivated: boolean = false;
+
+  /**
+   * Sort Activation setter.
+   * @param value
+   */
+  @Input('sortActivated')
+  public set SortActivated(value: boolean) {
     this.onSelectedChange(value);
   }
 
+  /**
+   * Change the activation status.
+   * @param value
+   */
   public onSelectedChange(value: boolean) {
-    this.selected = value;
-    if (!this.selected) {
+    this.sortActivated = value;
+    if (!this.sortActivated) {
       this.order = SortDirection.NONE;
     } else {
       this.order = this.reverseOrder(this.order);
     }
   }
 
-  @Output() private sortChange: EventEmitter<Sort> = new EventEmitter<Sort>();
-
+  /**
+   * Auto select this column for sort when clicked.
+   * Reverse the order on reclick.
+   *
+   * @param e
+   */
   @HostListener('click', ['$event'])
   public onClick(e) {
     if (this.column && this.column.sortable && this.sortable) {
@@ -86,19 +117,16 @@ export class TableColumnHeadComponent implements OnInit {
   }
 
 
+  /**
+   * Swap the sort order on call.
+   * @param direction
+   */
   public reverseOrder(direction: SortDirection): SortDirection {
     if (direction === SortDirection.DESCENDING) {
       return SortDirection.ASCENDING;
     } else {
       return SortDirection.DESCENDING;
     }
-  }
-
-
-  constructor() {
-  }
-
-  ngOnInit() {
   }
 
 }

@@ -8,7 +8,7 @@
       </table-page-size>
     </div>
     <div class="table-toggle" *ngIf="toggleable">
-      <table-column-toggle [columns]="columns"
+      <table-column-toggle [columns]="columns" (columnsReset)="onColumnsReset()"
                            (columnVisibilityChange)="onColumnVisibilityChange($event)">
       </table-column-toggle>
     </div>
@@ -27,8 +27,9 @@
                  (change)="toggleAllRowSelections($event)"/>
         </div>
       </th>
-      <th table-column-head *ngFor="let column of columns" [column]="column" [selected]="column.name === sort.name"
-          (sortChange)="onSortChange($event)" [ngClass]="columnClasses" [ngStyle]="column.style"></th>
+      <th table-column-head *ngFor="let column of columns" [column]="column" [sortActivated]="column.name === sort.name"
+          (sortChange)="onSortChange($event)" [ngClass]="columnClasses" [ngStyle]="column.style"
+          [hidden]="column.hidden"></th>
     </tr>
     </thead>
     <tbody table-body [bodyClasses]="bodyClasses">
@@ -41,7 +42,7 @@
                  (change)="toggleRowSelection(item, $event)"/>
         </div>
       </td>
-      <td table-cell *ngFor="let column of columns" [column]="column" [item]="item"
+      <td table-cell *ngFor="let column of columns" [column]="column" [item]="item" [hidden]="column.hidden"
           [ngStyle]="column.style"></td>
     </tr>
     <tr *ngIf="items.length === 0">

@@ -2,16 +2,18 @@
   <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
     <i class="fas fa-table"></i> Columns
   </button>
-  <ul class="dropdown-menu" *ngIf="columns.length > 0">
-    <li class="dropdown-item" *ngFor="let column of columns"
-        [ngClass]="{'active': !column.hidden, 'disabled': column.fixed}" (click)="toggleColumn(column)">
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" value="" id="defaultCheck1">
-        <label class="form-check-label" for="defaultCheck1">
-          {{column.display ? column.display : column.name}}
-        </label>
-      </div>
+  <div class="dropdown-menu" *ngIf="columns.length > 0">
+      <span *ngFor="let column of columns" [ngClass]="{'disabled': column.fixed}">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" [checked]="!column.hidden"
+                 title="toggle-{{column.name}}" (change)="toggleColumn(column)">
+          <label class="form-check-label">
+            {{column.display ? column.display : column.name}}
+          </label>
+        </div>
+      </span>
+    <hr/>
+    <span (click)="columnsReset.emit()">Reset</span>
 
-    </li>
-  </ul>
+  </div>
 </div>

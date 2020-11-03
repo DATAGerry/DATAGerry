@@ -83,6 +83,12 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   public columns: Array<Column> = [];
 
   /**
+   * Column holder for reset.
+   * @private
+   */
+  private initialColumns: Array<Column> = [];
+
+  /**
    * Column setter.
    *
    * @param columns
@@ -90,6 +96,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Input('columns')
   public set Columns(columns: Array<Column>) {
     this.columns = columns;
+    this.initialColumns = this.columns;
   }
 
   /**
@@ -270,6 +277,14 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     const col = this.columns.find(c => c.name === column.name);
     const colIndex = this.columns.indexOf(col);
     this.columns[colIndex].hidden = column.hidden;
+  }
+
+
+  /**
+   * Reset the columns to the initial set.
+   */
+  public onColumnsReset(): void {
+    this.columns = this.initialColumns;
   }
 
   public ngOnDestroy(): void {

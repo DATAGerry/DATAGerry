@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Column } from '../../table.types';
 
 @Component({
@@ -27,9 +27,25 @@ import { Column } from '../../table.types';
 })
 export class TableColumnToggleComponent {
 
+  /**
+   * Column definitions from the table.
+   */
   @Input() public columns: Array<Column> = [];
+
+  /**
+   * Visibility change emitter.
+   */
   @Output() public columnVisibilityChange: EventEmitter<Column> = new EventEmitter<Column>();
 
+  /**
+   * Visibility change emitter.
+   */
+  @Output() public columnsReset: EventEmitter<void> = new EventEmitter<void>();
+
+  /**
+   * Toggle the hidden property of a column.
+   * @param c
+   */
   public toggleColumn(c: Column): Column {
     c.hidden = !c.hidden;
     this.columnVisibilityChange.emit(c);
