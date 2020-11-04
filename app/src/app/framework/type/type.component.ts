@@ -27,9 +27,9 @@ import { CollectionParameters } from '../../services/models/api-parameter';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { Router } from '@angular/router';
 import { FileSaverService } from 'ngx-filesaver';
-import { CleanupModalComponent } from './builder/modals/cleanup-modal/cleanup-modal.component';
 import { DatePipe } from '@angular/common';
 import { FileService } from '../../export/export.service';
+import { ObjectService } from '../services/object.service';
 
 @Component({
   selector: 'cmdb-type',
@@ -64,13 +64,8 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
   public remove: boolean = false;
   public update: boolean = false;
 
-  /**
-   * Export modal
-   */
-  private modalRef: NgbModalRef;
-
   constructor(private typeService: TypeService, private router: Router, private fileService: FileService,
-              private fileSaverService: FileSaverService, private modalService: NgbModal, private datePipe: DatePipe) {
+              private fileSaverService: FileSaverService, private datePipe: DatePipe) {
     this.types = [];
   }
 
@@ -130,6 +125,10 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
 
           const columnQueries = [];
           for (const column of searchableColumns) {
+            // Must be filtered for empty values. '$' i not a valid FieldPath in MongoDB
+            if (column.name === '') {
+              continue;
+            }
             const regex = {
               $regexMatch: {
                 input: { $toString: `$${ column.name }` },
@@ -182,20 +181,9 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   public ngOnDestroy(): void {
     this.dtTrigger.unsubscribe();
-    if (this.modalRef) {
-      this.modalRef.close();
-    }
+
     this.unSubscribe.next();
     this.unSubscribe.complete();
-  }
-
-  /**
-   * Open the clean modal
-   * @param typeInstance - Instance of the type which will be cleaned
-   */
-  public callCleanUpModal(typeInstance: CmdbType): void {
-    this.modalRef = this.modalService.open(CleanupModalComponent);
-    this.modalRef.componentInstance.typeInstance = typeInstance;
   }
 
   /**

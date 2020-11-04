@@ -24,7 +24,6 @@ from cmdb.media_library.media_file_manager import MediaFileManagerGetError, \
     MediaFileManagerDeleteError, MediaFileManagerUpdateError, MediaFileManagerInsertError
 
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
-from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import UserModel
 
 from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import get_element_from_data_request, \
@@ -134,7 +133,7 @@ def add_new_file(request_user: UserModel):
     except (MediaFileManagerInsertError, MediaFileManagerGetError):
         return abort(500)
 
-    api_response = InsertSingleResponse(result['public_id'], raw=result, url=request.url)
+    api_response = InsertSingleResponse(raw=result, result_id=result['public_id'], url=request.url)
     return api_response.make_response(prefix='library')
 
 

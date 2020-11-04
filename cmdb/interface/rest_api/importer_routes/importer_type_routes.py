@@ -80,10 +80,7 @@ def update_type():
         try:
             old_fields = object_manager.get_type(update_type_instance.get_public_id()).get_fields()
             new_fields = update_type_instance.get_fields()
-            if [item for item in old_fields if item not in new_fields]:
-                update_type_instance.clean_db = False
-            if [item for item in new_fields if item not in old_fields]:
-                update_type_instance.clean_db = False
+
         except Exception as ex:
             error_collection.update({"public_id": add_data_dump['public_id'], "message": ex.message})
         try:

@@ -17,8 +17,9 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, httpFileOptions } from '../services/api-call.service';
+import { ApiCallService, httpFileOptions} from '../services/api-call.service';
 import { map } from 'rxjs/operators';
+import { HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -39,11 +40,14 @@ export class FileService {
   }
 
   public callExportRoute(objectIDs: string, exportType: string, zipping: boolean = false) {
-    (httpFileOptions.params as any).ids = objectIDs;
-    (httpFileOptions.params as any).classname = exportType;
-    (httpFileOptions.params as any).zip = false;
+    const options = httpFileOptions;
+    let params = new HttpParams();
+    params = params.set('ids', objectIDs);
+    params = params.set('classname', exportType);
+    params = params.set('zip', JSON.stringify(zipping));
+    options.params = params;
 
-    return this.api.callGet<any>(this.servicePrefix + '/object/', httpFileOptions);
+    return this.api.callGet<any>(this.servicePrefix + '/object/', options);
   }
 
   public getObjectFileByType(typeID: number, exportType: string) {

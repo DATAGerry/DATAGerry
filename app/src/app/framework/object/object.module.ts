@@ -25,7 +25,6 @@ import { DataTablesModule } from 'angular-datatables';
 import { LayoutModule } from '../../layout/layout.module';
 import { ObjectHeaderComponent } from './components/object-header/object-header.component';
 import { ObjectQrComponent } from './components/object-qr/object-qr.component';
-import { QRCodeModule } from 'angularx-qrcode';
 import { ObjectSummaryComponent } from './components/object-summary/object-summary.component';
 import { ObjectExternalsComponent } from './components/object-externals/object-externals.component';
 import { NgxSpinnerModule } from 'ngx-spinner';
@@ -63,6 +62,7 @@ import { UsersModule } from '../../management/users/users.module';
 import { ObjectsByTypeComponent } from './objects-by-type/objects-by-type.component';
 import { TableModule } from '../../layout/table/table.module';
 import { ObjectTableActionsComponent } from './components/object-table-actions/object-table-actions.component';
+import { QRCodeModule } from 'angularx-qrcode';
 
 @NgModule({
   entryComponents: [
@@ -119,9 +119,9 @@ import { ObjectTableActionsComponent } from './components/object-table-actions/o
     UsersModule,
     TableModule
   ],
-    exports: [
-        ObjectViewRenderComponent
-    ]
+  exports: [
+    ObjectViewRenderComponent
+  ]
 })
 export class ObjectModule {
 }

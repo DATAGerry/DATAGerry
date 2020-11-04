@@ -31,15 +31,15 @@ import { TypeService } from '../../framework/services/type.service';
 import { CmdbType } from '../../framework/models/cmdb-type';
 import { Subscription } from 'rxjs';
 import { SearchBarTagComponent } from './search-bar-tag/search-bar-tag.component';
-import { ActivatedRoute, NavigationEnd, Route, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { FormControl, FormGroup } from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
 import { CategoryService } from '../../framework/services/category.service';
 import { CmdbCategory } from '../../framework/models/cmdb-category';
 import { SearchService } from '../search.service';
 import { ObjectService } from '../../framework/services/object.service';
-
 import * as $ from 'jquery';
+import { NumberSearchResults } from '../models/search-result';
 
 @Component({
   selector: 'cmdb-search-bar',
@@ -65,7 +65,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   public searchBarForm: FormGroup;
 
   // Dropdown
-  public possibleTextResults: number = 0;
+  public possibleTextResults: NumberSearchResults = new NumberSearchResults();
   public isExistingPublicID: boolean = false;
   public possibleTypes: CmdbType[] = [];
   public possibleCategories: CmdbCategory[] = [];
@@ -103,14 +103,14 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
     this.inputControl.valueChanges.pipe(debounceTime(300)).subscribe((changes: string) => {
       if (changes.trim() !== '') {
-        this.textRegexSubscription = this.searchService.getEstimateValueResults(changes).subscribe((counter: number) => {
+        this.textRegexSubscription = this.searchService.getEstimateValueResults(changes).subscribe((counter: NumberSearchResults) => {
           this.possibleTextResults = counter;
         });
         if (!isNaN(+changes)) {
           this.isExistingPublicIDSubscription = this.objectService.getObject(+changes).subscribe(() => {
               this.isExistingPublicID = true;
             },
-            (error) => {
+            () => {
               this.isExistingPublicID = false;
             });
         }
@@ -121,7 +121,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
           this.possibleCategories = categoryList;
         });
       } else {
-        this.possibleTextResults = 0;
+        this.possibleTextResults = new NumberSearchResults();
         this.possibleTypes = [];
         this.possibleCategories = [];
       }
@@ -211,7 +211,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   public openDropdown(currentIDx: number) {
-    $('[tabindex=' + (currentIDx) + ']').find('[data-toggle="collapse"]').first().click();
+    $('[tabindex=' + (currentIDx) + ']').find('[data-toggle="collapse"]').first().trigger('click');
   }
 
 
@@ -250,7 +250,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.currentFocus = tabIdx;
     }
     setTimeout(() => { // this will make the execution after the above boolean has changed
-      $('[tabindex=' + this.currentFocus + ']').focus();
+      $('[tabindex=' + this.currentFocus + ']').trigger('focus');
     }, 0);
   }
 

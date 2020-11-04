@@ -130,7 +130,7 @@ class LdapAuthenticationProvider(AuthenticationProvider):
         search_result = self.__ldap_connection.search(self.config.search['basedn'], ldap_search_filter)
         LOGGER.debug(f'[LdapAuthenticationProvider] Search result: {search_result}')
 
-        if not search_result:
+        if not search_result or len(self.__ldap_connection.entries) == 0:
             raise AuthenticationError(LdapAuthenticationProvider.get_name(), 'No matching entry')
 
         for entry in self.__ldap_connection.entries:

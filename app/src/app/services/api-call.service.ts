@@ -26,14 +26,8 @@ import {
   HttpInterceptor, HttpParams, HttpRequest
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { ConnectionService } from '../connect/connection.service';
-
-const httpOptions = {
-  headers: new HttpHeaders({
-    'Content-Type': 'application/json'
-  })
-};
 
 declare type HttpObserve = 'body' | 'events' | 'response';
 export const resp: HttpObserve = 'response';
@@ -119,7 +113,6 @@ export class ApiCallService {
     const result = new RegExp('(?:^|; )' + encodeURIComponent(name) + '=([^;]*)').exec(document.cookie);
     return result ? result[1] : 'true';
   }
-
 }
 
 export interface ApiService {
@@ -132,5 +125,30 @@ export class HttpInterceptorHandler implements HttpHandler {
 
   handle(req: HttpRequest<any>): Observable<HttpEvent<any>> {
     return this.interceptor.intercept(req, this.next);
+  }
+}
+
+export class HttpProtocolHelper {
+
+  /**
+   * Creates a copy of the passing HTTP-Protocol with the desired http parameters
+   * @param httpProtocol HTTP protocol
+   * @param filter Evaluation which data should be fetched. (A generic query filter based)
+   * @param limit The max number of resources returned (pageSize).
+   * @param sort The query element which is used as the sort id (nested resources are possible via (.) dot).
+   * @param order The order sequence in which `way` the sort should be returned.
+   * @param page The current page. N number of elements will be skip based on (limit * page)
+   */
+  static createHttpProtocolOptions(httpProtocol, filter?: any, limit?: number, sort?: string, order?: number,
+                                   page?: number) {
+    const options = Object.assign(this, httpProtocol);
+    let httpParams: HttpParams = new HttpParams();
+    httpParams = httpParams.set('filter', filter === undefined ? {} : filter);
+    httpParams = httpParams.set('limit', limit === undefined ? '0' : limit.toString());
+    httpParams = httpParams.set('sort', sort === undefined ? 'public_id' : sort);
+    httpParams = httpParams.set('order', order === undefined ? '1' : order.toString());
+    httpParams = httpParams.set('page', page === undefined ? '1' : page.toString());
+    options.params = httpParams;
+    return options;
   }
 }

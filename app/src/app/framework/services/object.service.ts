@@ -28,7 +28,8 @@ import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/comm
 import { DataTableFilter, DataTablesResult } from '../models/cmdb-datatable';
 import { GeneralModalComponent } from '../../layout/helpers/modals/general-modal/general-modal.component';
 import { CollectionParameters } from '../../services/models/api-parameter';
-import { APIGetMultiResponse } from '../../services/models/api-response';
+import { APIGetListResponse, APIGetMultiResponse } from '../../services/models/api-response';
+import { CmdbType } from '../models/cmdb-type';
 
 export const httpObjectObserveOptions = {
   headers: new HttpHeaders({
@@ -75,6 +76,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
 
     httpParams = httpParams.set('view', view);
     options.params = httpParams;
+
     return this.api.callGet<Array<T>>(this.newServicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse;
@@ -250,23 +252,33 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     );
   }
 
-  public cleanupRemovedFields(publicID: number): Observable<any> {
-    return this.api.callGet(this.servicePrefix + '/cleanup/remove/' + publicID).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
+  public countUncleanObjects(typeID: number): Observable<number> {
+    return this.api.callHead<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`).pipe(
+      map((apiResponse: HttpResponse<APIGetListResponse<CmdbObject>>) => {
+        return +apiResponse.headers.get('X-Total-Count');
       })
     );
   }
 
-  public cleanupInsertedFields(publicID: number): Observable<any> {
-    return this.api.callGet(this.servicePrefix + '/cleanup/update/' + publicID).pipe(
+  public getUncleanObjects(typeID: number): Observable<Array<CmdbObject>> {
+    return this.api.callGet<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`).pipe(
+      map((apiResponse: HttpResponse<APIGetListResponse<CmdbObject>>) => {
+        return apiResponse.body.results as Array<CmdbObject>;
+      })
+    );
+  }
+
+  public getObjectCleanStatus(typeID: number): Observable<boolean> {
+    return this.api.callHead<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`).pipe(
       map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
+        return +apiResponse.headers.get('X-Total-Count') === 0;
+      })
+    );
+  }
+
+  public cleanObjects(typeID: number): Observable<any> {
+    return this.api.callPatch(`${ this.servicePrefix }/clean/${ typeID }`, null).pipe(
+      map((apiResponse) => {
         return apiResponse.body;
       })
     );
