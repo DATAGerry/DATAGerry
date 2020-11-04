@@ -50,18 +50,18 @@
 
 </cmdb-table>
 
-<ng-template #activeTemplate let-item="item" let-column="column">
-  <cmdb-active-badge [activeStatus]="item?.active"></cmdb-active-badge>
+<ng-template #activeTemplate let-data="data">
+  <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
 </ng-template>
 
-<ng-template #fieldTemplate let-item="item" let-column="column">
- {{item | json}}
+<ng-template #fieldTemplate let-data="data">
+  <cmdb-render-element [mode]="mode" [data]="data.field" [value]="data.value"></cmdb-render-element>
 </ng-template>
 
-<ng-template #userTemplate let-item="item" let-column="column">
-  <cmdb-user-compact [userID]="item.author_id"></cmdb-user-compact>
+<ng-template #userTemplate let-data="data">
+  <cmdb-user-compact [userID]="data"></cmdb-user-compact>
 </ng-template>
 
-<ng-template #actionTemplate let-item="item" let-column="column">
-  <cmdb-object-table-actions [object]="item"></cmdb-object-table-actions>
+<ng-template #actionTemplate let-item="item">
+  <cmdb-object-table-actions [publicID]="item.object_information.object_id"></cmdb-object-table-actions>
 </ng-template>

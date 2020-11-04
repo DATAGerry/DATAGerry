@@ -16,22 +16,15 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { CmdbObject } from '../../../models/cmdb-object';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'cmdb-object-table-actions',
   templateUrl: './object-table-actions.component.html',
   styleUrls: ['./object-table-actions.component.scss']
 })
-export class ObjectTableActionsComponent implements OnInit {
+export class ObjectTableActionsComponent {
 
-  @Input() public object: CmdbObject;
-
-  constructor() {
-  }
-
-  ngOnInit() {
-  }
+  @Input() public publicID: number;
 
 }

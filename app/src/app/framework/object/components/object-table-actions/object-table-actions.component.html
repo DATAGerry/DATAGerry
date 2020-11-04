@@ -1,11 +1,11 @@
-<div class="d-flex justify-content-between" *ngIf="object">
-  <a [routerLink]="['/', 'framework', 'object', 'view', object.public_id]">
+<div class="d-flex justify-content-between" *ngIf="publicID">
+  <a [routerLink]="['/', 'framework', 'object', 'view', publicID]">
     <i class="far fa-eye"></i>
   </a>
-  <a [routerLink]="['/', 'framework', 'object', 'copy', object.public_id]">
+  <a [routerLink]="['/', 'framework', 'object', 'copy', publicID]">
     <i class="far fa-clone"></i>
   </a>
-  <a [routerLink]="['/', 'framework', 'object', 'edit', object.public_id]">
+  <a [routerLink]="['/', 'framework', 'object', 'edit', publicID]">
     <i class="far fa-edit"></i>
   </a>
   <a class="pointer">

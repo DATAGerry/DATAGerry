@@ -50,7 +50,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    */
   @ViewChild(TableComponent, { static: false }) objectsTableComponent: TableComponent<RenderResult>;
 
-  @ViewChild('activeTemplate', { static: true  }) activeTemplate: TemplateRef<any>;
+  @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
   @ViewChild('fieldTemplate', { static: true }) fieldTemplate: TemplateRef<any>;
   @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
   @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
@@ -133,7 +133,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       {
         display: 'Active',
         name: 'active',
-        data: 'active',
+        data: 'object_information.active',
         searchable: false,
         sortable: false,
         template: this.activeTemplate,
@@ -143,7 +143,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       {
         display: 'Public ID',
         name: 'public_id',
-        data: 'public_id',
+        data: 'object_information.object_id',
         searchable: false,
         sortable: true
       }
@@ -153,9 +153,17 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       columns.push({
         display: field.label,
         name: field.name,
+        data: field.name,
         sortable: true,
         searchable: true,
         hidden: !summaryFields.includes(field.name),
+        render(data: RenderResult, item: RenderResult, column: Column, index?: number) {
+          const renderedField = item.fields.find(f => f.name === column.name);
+          return {
+            field: renderedField,
+            value: renderedField.value
+          };
+        },
         template: this.fieldTemplate
       } as Column);
     }
@@ -163,7 +171,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     columns.push({
       display: 'Author',
       name: 'author_id',
-      data: 'author_id',
+      data: 'object_information.author_id',
       sortable: true,
       searchable: false,
       template: this.userTemplate
@@ -172,7 +180,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     columns.push({
       display: 'Creation Time',
       name: 'creation_time',
-      data: 'creation_time',
+      data: 'object_information.creation_time',
       sortable: true,
       searchable: false,
       render(data: any, item?: any, column?: Column, index?: number) {
@@ -183,7 +191,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     columns.push({
       display: 'Modification Time',
       name: 'last_edit_time',
-      data: 'last_edit_time',
+      data: 'object_information.last_edit_time',
       sortable: true,
       searchable: false,
       render(data: any, item?: any, column?: Column, index?: number) {
@@ -257,8 +265,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.getObjects();
   }
 
-  public onSelectedChange(selectedItems: Array<CmdbObject>): void {
-    this.selectedObjects = selectedItems.map(m => m.public_id);
+  public onSelectedChange(selectedItems: Array<RenderResult>): void {
+    this.selectedObjects = selectedItems.map(m => m.object_information.object_id);
   }
 
 
