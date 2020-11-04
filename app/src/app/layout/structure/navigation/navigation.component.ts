@@ -66,8 +66,4 @@ export class NavigationComponent implements OnInit, OnDestroy {
     const sidebar = document.getElementById('sidebar').classList;
     sidebar.length === 0 ? sidebar.add('set-sidebar-visible') : sidebar.remove('set-sidebar-visible');
   }
-
-  public generateQR() {
-
-  }
 }

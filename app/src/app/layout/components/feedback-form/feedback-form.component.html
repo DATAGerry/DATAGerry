@@ -1,6 +1,6 @@
 <form [formGroup]="feedbackForm">
   <div class="form-group" id="feedback-form">
-    <div class="container no-padding">
+    <div class="container p-0">
       <div class="row m-0">
         <div class="container col-lg-auto col-xl-6 p-3 bg-light border-right border-info">
           <div class="row">
@@ -99,7 +99,7 @@
         </div>
         <div class="container col-lg-auto col-xl-6">
           <div class="row">
-            <div class="col-7 padding-top">
+            <div class="col-7 head-space">
               <p class="michael">Hi!</p>
               <p class="michael">My name is Michael Batz, I'm the Product Owner of DATEGERRY and it would be my pleasure to
                 discuss the product vision with every DATAGERRY user</p>
@@ -108,13 +108,13 @@
               <img src="assets/img/michael.png" width="117" height="145" class="my-auto mr-0 ml-auto d-block">
             </div>
           </div>
-          <div class="row padding-top">
+          <div class="row head-space">
             <div class="col-12">
               <label for="email">E-Mail</label>
               <input formControlName="email" type="email" id="email">
             </div>
           </div>
-          <div class="row padding-top">
+          <div class="row head-space">
             <div class="col-12 d-flex" id="form-qr">
               <div class="mx-auto my-auto text-center">
                 <cmdb-qrcode [urlContent]="feedbackUrl"></cmdb-qrcode>
