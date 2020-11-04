@@ -1,5 +1,4 @@
 @import '~src/scss/variables';
-
 /**
  * Navbar
  */
@@ -101,6 +100,7 @@ $navbar-dropdown-header-background: theme-color('primary');
   }
 
 }
+
 
 @media(max-width: 991px) {
   #navbar-cmdb {

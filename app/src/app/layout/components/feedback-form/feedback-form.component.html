@@ -1,0 +1,129 @@
+<form [formGroup]="feedbackForm">
+  <div class="form-group" id="feedback-form">
+    <div class="container p-0">
+      <div class="row m-0">
+        <div class="container col-lg-auto col-xl-6 p-3 bg-light border-right border-info">
+          <div class="row">
+            <div class="col-12">
+              <label for="happiness">Happiness</label>
+              <div class="slidercontainer">
+                <input formControlName="happiness" type="range" min="-2" max="2" value="0" step="1"
+                 class="slider" id="happiness" list="steplist">
+                <div class="ticks">
+                  <span class="tick">--</span>
+                  <span class="tick">-</span>
+                  <span class="tick">0</span>
+                  <span class="tick">+</span>
+                  <span class="tick">++</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <label for="usability">Usability</label>
+              <div class="slidercontainer">
+                <input formControlName="usability" type="range" min="-2" max="2" value="0" step="1"
+                       class="slider" id="usability" list="steplist">
+                <div class="ticks">
+                  <span class="tick">--</span>
+                  <span class="tick">-</span>
+                  <span class="tick">0</span>
+                  <span class="tick">+</span>
+                  <span class="tick">++</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <label for="functionality">Functionality</label>
+              <div class="slidercontainer">
+                <input formControlName="functionality" type="range" min="-2" max="2" value="0" step="1"
+                       class="slider" id="functionality" list="steplist">
+                <div class="ticks">
+                  <span class="tick">--</span>
+                  <span class="tick">-</span>
+                  <span class="tick">0</span>
+                  <span class="tick">+</span>
+                  <span class="tick">++</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <label for="performance">Performance</label>
+              <div class="slidercontainer">
+                <input formControlName="performance" type="range" min="-2" max="2" value="0" step="1"
+                       class="slider" id="performance" list="steplist">
+                <div class="ticks">
+                  <span class="tick">--</span>
+                  <span class="tick">-</span>
+                  <span class="tick">0</span>
+                  <span class="tick">+</span>
+                  <span class="tick">++</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <label for="stability">Stability</label>
+              <div class="slidercontainer">
+                <input formControlName="stability" type="range" min="-2" max="2" value="0" step="1"
+                       class="slider" id="stability" list="steplist">
+                <div class="ticks">
+                  <span class="tick">--</span>
+                  <span class="tick">-</span>
+                  <span class="tick">0</span>
+                  <span class="tick">+</span>
+                  <span class="tick">++</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <datalist id="steplist">
+            <option>-2</option>
+            <option>-1</option>
+            <option>0</option>
+            <option>1</option>
+            <option>2</option>
+          </datalist>
+          <div class="row">
+            <div class="col-12">
+              <label for="version-dg">Version</label>
+              <input id='version-dg' type="text" class="form-control" [value]="feedbackForm.get('version').value" readonly/>
+            </div>
+          </div>
+        </div>
+        <div class="container col-lg-auto col-xl-6">
+          <div class="row">
+            <div class="col-7 head-space">
+              <p class="michael">Hi!</p>
+              <p class="michael">My name is Michael Batz, I'm the Product Owner of DATEGERRY and it would be my pleasure to
+                discuss the product vision with every DATAGERRY user</p>
+            </div>
+            <div class="col-5 d-flex">
+              <img src="assets/img/michael.png" width="117" height="145" class="my-auto mr-0 ml-auto d-block">
+            </div>
+          </div>
+          <div class="row head-space">
+            <div class="col-12">
+              <label for="email">E-Mail</label>
+              <input formControlName="email" type="email" id="email">
+            </div>
+          </div>
+          <div class="row head-space">
+            <div class="col-12 d-flex" id="form-qr">
+              <div class="mx-auto my-auto text-center">
+                <cmdb-qrcode [urlContent]="feedbackUrl"></cmdb-qrcode>
+                <small class="form-text text-muted">Submit by Scanning QR</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

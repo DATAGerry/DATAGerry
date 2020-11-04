@@ -25,7 +25,6 @@ import { DataTablesModule } from 'angular-datatables';
 import { LayoutModule } from '../../layout/layout.module';
 import { ObjectHeaderComponent } from './components/object-header/object-header.component';
 import { ObjectQrComponent } from './components/object-qr/object-qr.component';
-import { QRCodeModule } from 'angularx-qrcode';
 import { ObjectSummaryComponent } from './components/object-summary/object-summary.component';
 import { ObjectExternalsComponent } from './components/object-externals/object-externals.component';
 import { NgxSpinnerModule } from 'ngx-spinner';
@@ -96,23 +95,22 @@ import { UsersModule } from '../../management/users/users.module';
     ObjectDocsComponent,
     ObjectAttachmentsComponent
   ],
-    imports: [
-        CommonModule,
-        ObjectRoutingModule,
-        DataTablesModule,
-        AuthModule,
-        LayoutModule,
-        QRCodeModule,
-        NgxSpinnerModule,
-        FormsModule,
-        ReactiveFormsModule,
-        NgSelectModule,
-        NgbTooltipModule,
-        FontAwesomeModule,
-        ArchwizardModule,
-        RenderModule,
-        UsersModule
-    ],
+  imports: [
+    CommonModule,
+    ObjectRoutingModule,
+    DataTablesModule,
+    AuthModule,
+    LayoutModule,
+    NgxSpinnerModule,
+    FormsModule,
+    ReactiveFormsModule,
+    NgSelectModule,
+    NgbTooltipModule,
+    FontAwesomeModule,
+    ArchwizardModule,
+    RenderModule,
+    UsersModule
+  ],
     exports: [
         ObjectViewRenderComponent
     ]

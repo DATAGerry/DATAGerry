@@ -19,6 +19,7 @@
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Router } from '@angular/router';
+import {SystemService} from '../../../settings/system/system.service';
 
 @Component({
   selector: 'cmdb-navigation',

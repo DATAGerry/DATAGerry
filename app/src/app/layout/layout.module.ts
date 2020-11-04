@@ -89,6 +89,9 @@ import { NameGuidePipe } from './pipes/name-guide.pipe';
 import { FileExtensionPipe } from './pipes/file-extension.pipe';
 import { CategoryTreeFilterPipe } from './pipes/categoryTreeFilter.pipe';
 import { TypeFilterPipe } from './pipes/typeFilter.pipe';
+import { QRCodeModule } from 'angularx-qrcode';
+import { QrCodeComponent } from './helpers/qrcode/qr-code.component';
+import { FeedbackFormComponent } from './components/feedback-form/feedback-form.component';
 
 @NgModule({
   declarations: [
@@ -131,7 +134,9 @@ import { TypeFilterPipe } from './pipes/typeFilter.pipe';
     FolderPathViewerComponent,
     MoveDialogComponent,
     TableSortEventDirective,
-    AttachmentsListModalComponent
+    AttachmentsListModalComponent,
+    QrCodeComponent,
+    FeedbackFormComponent
   ],
   exports: [
     FileExplorerComponent,
@@ -155,7 +160,8 @@ import { TypeFilterPipe } from './pipes/typeFilter.pipe';
     CategoryTreeFilterPipe,
     TypeFilterPipe,
     FileExtensionPipe,
-    InfoBoxComponent
+    InfoBoxComponent,
+    QrCodeComponent
   ],
   imports: [
     CommonModule,
@@ -174,6 +180,7 @@ import { TypeFilterPipe } from './pipes/typeFilter.pipe';
     AuthModule,
     RenderModule,
     FileexplorerModule,
+    QRCodeModule
   ],
   providers: [
     BreadcrumbService,

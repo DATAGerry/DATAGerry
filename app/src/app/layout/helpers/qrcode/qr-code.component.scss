@@ -1,0 +1,5 @@
+@import "~src/scss/variables";
+
+$qr-borders: (
+  all: (size: 2px, style: solid, color: theme-color('secondary'))
+) !default;
