@@ -38,6 +38,7 @@ import { FileService } from '../../../export/export.service';
 import { CmdbObject } from '../../models/cmdb-object';
 import { FileSaverService } from 'ngx-filesaver';
 import { ToastService } from '../../../layout/toast/toast.service';
+import { SidebarService } from '../../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -103,7 +104,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   public formatList: any[] = [];
 
   constructor(private router: Router, private route: ActivatedRoute, private objectService: ObjectService,
-              private fileService: FileService, private fileSaverService: FileSaverService, private toastService: ToastService) {
+              private fileService: FileService, private fileSaverService: FileSaverService, private toastService: ToastService,
+              private sidebarService: SidebarService) {
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
       this.typeSubject.next(data.type as CmdbType);
     });
@@ -262,21 +264,54 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
 
   public exportingFiles(exportType: any) {
-    this.fileService.callExportRoute(this.selectedObjects.toString(), exportType.id)
-      .subscribe(res => {
-        this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
-      });
+    if (this.selectedObjects.length === 0) {
+      this.fileService.getObjectFileByType(this.type.public_id, exportType.id)
+        .subscribe(res => {
+          this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
+        });
+    } else {
+      this.fileService.callExportRoute(this.selectedObjects.toString(), exportType.id)
+        .subscribe(res => {
+          this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
+        });
+
+    }
 
   }
 
   public onObjectDelete(publicID: number) {
     this.objectService.deleteObject(publicID).pipe(takeUntil(this.subscriber)).subscribe(response => {
         this.toastService.success(`Object ${ publicID } was deleted successfully`);
+        this.sidebarService.updateTypeCounter(this.type.public_id);
         this.getObjects();
       },
       (error) => {
         this.toastService.error(`Error while deleting object ${ publicID } | Error: ${ error }`);
       });
+  }
+
+  public onManyObjectDeletes() {
+    if (this.selectedObjects.length > 0) {
+      const modalComponent = this.objectService.openModalComponent(
+        'Delete selected Objects',
+        'Are you sure, you want to delete all selected objects?',
+        'Cancel',
+        'Delete');
+
+      modalComponent.result.then((result) => {
+        if (result) {
+          if (this.selectedObjects.length > 0) {
+            this.objectService.deleteManyObjects(this.selectedObjects.toString())
+              .pipe(takeUntil(this.subscriber)).subscribe(() => {
+              this.toastService.success(`Deleted ${ this.selectedObjects.length } objects successfully`);
+              this.sidebarService.updateTypeCounter(this.type.public_id);
+              this.selectedObjects = [];
+              this.getObjects();
+            });
+          }
+        }
+      });
+    }
   }
 
 }
