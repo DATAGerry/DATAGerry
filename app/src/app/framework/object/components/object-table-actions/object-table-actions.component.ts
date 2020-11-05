@@ -16,15 +16,76 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import { RenderResult } from '../../../models/cmdb-render';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { ObjectPreviewModalComponent } from '../../modals/object-preview-modal/object-preview-modal.component';
+import { ObjectDeleteModalComponent } from '../../modals/object-delete-modal/object-delete-modal.component';
+import { ObjectService } from '../../../services/object.service';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { ToastService } from '../../../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-object-table-actions',
   templateUrl: './object-table-actions.component.html',
   styleUrls: ['./object-table-actions.component.scss']
 })
-export class ObjectTableActionsComponent {
+export class ObjectTableActionsComponent implements OnDestroy {
 
+  /**
+   * Component wide unsubscriber-
+   * @private
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  /**
+   * Public id of the object.
+   */
   @Input() public publicID: number;
+
+  /**
+   * Rendered object
+   */
+  @Input() public result: RenderResult;
+
+  /**
+   * Emitter when element was deleted.
+   */
+  @Output() public deleteEmitter: EventEmitter<number> = new EventEmitter<number>();
+
+  private modalRef: NgbModalRef;
+
+  constructor(private modalService: NgbModal) {
+  }
+
+  /**
+   * Open the preview modal.
+   */
+  public openPreviewModal(): void {
+    this.modalRef = this.modalService.open(ObjectPreviewModalComponent, { size: 'lg' });
+    this.modalRef.componentInstance.renderResult = this.result;
+  }
+
+  /**
+   * Open the delete modal.
+   */
+  public openDeleteModal(): void {
+    this.modalRef = this.modalService.open(ObjectDeleteModalComponent, { size: 'lg' });
+    this.modalRef.componentInstance.publicID = this.result.object_information.object_id;
+    this.modalRef.result.then((response: any) => {
+      if (!isNaN(+response)) {
+        this.deleteEmitter.emit(+response);
+      }
+    });
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
+  }
 
 }

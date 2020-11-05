@@ -145,7 +145,11 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   public deleteObject(publicID: any): Observable<any> {
-    return this.api.callDelete(`${ this.servicePrefix }/${ publicID }`);
+    return this.api.callDelete(`${ this.servicePrefix }/${ publicID }`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
   }
 
   // Count calls

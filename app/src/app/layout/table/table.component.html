@@ -61,7 +61,7 @@
     </div>
     <div *ngIf="paginationEnabled">
       <table-pagination [currentPage]="currentPage" [totalItems]="totalItems" [pageSize]="pageSize"
-                        (pageChange)="pageChange.emit($event)">
+                        (pageChange)="onPageChange($event)">
       </table-pagination>
     </div>
   </div>

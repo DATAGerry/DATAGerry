@@ -287,6 +287,11 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     this.columns = this.initialColumns;
   }
 
+  public onPageChange(page: number) {
+    this.selectedItems = [];
+    this.pageChange.emit(page);
+  }
+
   public ngOnDestroy(): void {
     this.subscriber.next();
     this.subscriber.complete();

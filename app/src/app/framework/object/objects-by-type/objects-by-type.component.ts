@@ -37,6 +37,7 @@ import { CmdbMode } from '../../modes.enum';
 import { FileService } from '../../../export/export.service';
 import { CmdbObject } from '../../models/cmdb-object';
 import { FileSaverService } from 'ngx-filesaver';
+import { ToastService } from '../../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -63,7 +64,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   /**
    * Current render results
    */
-  public results: Array<CmdbObject> = [];
+  public results: Array<RenderResult> = [];
 
   /**
    * Selected objects
@@ -102,7 +103,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   public formatList: any[] = [];
 
   constructor(private router: Router, private route: ActivatedRoute, private objectService: ObjectService,
-              private fileService: FileService, private fileSaverService: FileSaverService) {
+              private fileService: FileService, private fileSaverService: FileSaverService, private toastService: ToastService) {
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
       this.typeSubject.next(data.type as CmdbType);
     });
@@ -159,6 +160,9 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         hidden: !summaryFields.includes(field.name),
         render(data: RenderResult, item: RenderResult, column: Column, index?: number) {
           const renderedField = item.fields.find(f => f.name === column.name);
+          if (!renderedField) {
+            return {};
+          }
           return {
             field: renderedField,
             value: renderedField.value
@@ -217,19 +221,6 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.columns = columns;
   }
 
-  public getFieldByName(name: string) {
-    return this.type.fields.find(field => field.name === name);
-  }
-
-  public getFieldValue(item: CmdbObject, name: string) {
-    const value = item.fields.find(field => field.name === name).value;
-    if (value) {
-      return value;
-    } else {
-      return {};
-    }
-  }
-
   public getObjects() {
     this.loading = true;
     const params: CollectionParameters = {
@@ -237,8 +228,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       sort: this.sort.name, order: this.sort.order, page: this.page
     };
     this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
-      .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<CmdbObject>>) => {
-        this.results = apiResponse.body.results as Array<CmdbObject>;
+      .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
+        this.results = apiResponse.body.results as Array<RenderResult>;
         this.totalResults = apiResponse.body.total;
         this.loading = false;
       });
@@ -278,5 +269,14 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   }
 
+  public onObjectDelete(publicID: number) {
+    this.objectService.deleteObject(publicID).pipe(takeUntil(this.subscriber)).subscribe(response => {
+        this.toastService.success(`Object ${ publicID } was deleted successfully`);
+        this.getObjects();
+      },
+      (error) => {
+        this.toastService.error(`Error while deleting object ${ publicID } | Error: ${ error }`);
+      });
+  }
 
 }

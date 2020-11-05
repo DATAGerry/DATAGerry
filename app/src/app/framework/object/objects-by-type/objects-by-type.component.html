@@ -63,5 +63,6 @@
 </ng-template>
 
 <ng-template #actionTemplate let-item="item">
-  <cmdb-object-table-actions [publicID]="item.object_information.object_id"></cmdb-object-table-actions>
+  <cmdb-object-table-actions [publicID]="item.object_information.object_id" [result]="item"
+  (deleteEmitter)="onObjectDelete($event)"></cmdb-object-table-actions>
 </ng-template>

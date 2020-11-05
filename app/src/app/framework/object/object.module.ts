@@ -63,10 +63,12 @@ import { ObjectsByTypeComponent } from './objects-by-type/objects-by-type.compon
 import { TableModule } from '../../layout/table/table.module';
 import { ObjectTableActionsComponent } from './components/object-table-actions/object-table-actions.component';
 import { QRCodeModule } from 'angularx-qrcode';
+import { ObjectDeleteModalComponent } from './modals/object-delete-modal/object-delete-modal.component';
 
 @NgModule({
   entryComponents: [
     ObjectLinkAddModalComponent,
+    ObjectDeleteModalComponent,
     ObjectLinkDeleteModalComponent,
   ],
   declarations: [
@@ -99,7 +101,8 @@ import { QRCodeModule } from 'angularx-qrcode';
     ObjectDocsComponent,
     ObjectAttachmentsComponent,
     ObjectsByTypeComponent,
-    ObjectTableActionsComponent
+    ObjectTableActionsComponent,
+    ObjectDeleteModalComponent
   ],
   imports: [
     CommonModule,
