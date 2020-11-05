@@ -18,7 +18,7 @@
 
 import { Injectable } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
-import {ApiCallService, ApiService, httpObserveOptions, HttpProtocolHelper} from '../../services/api-call.service';
+import { ApiCallService, ApiService, httpObserveOptions, HttpProtocolHelper } from '../../services/api-call.service';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
@@ -31,6 +31,7 @@ import {
   APIUpdateSingleResponse
 } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
+import { ValidatorService } from '../../services/validator.service';
 
 
 export const checkTypeExistsValidator = (typeService: TypeService, time: number = 500) => {
@@ -144,8 +145,9 @@ export class TypeService<T = CmdbType> implements ApiService {
    * @param name Name/Label of the type
    */
   public getTypesByNameOrLabel(name: string): Observable<Array<T>> {
+    const regex = ValidatorService.validateRegex(name).trim();
     const filter = {
-      $or: [{ name: { $regex: name, $options: 'ismx' } }, { label: { $regex: name, $options: 'ismx' } }]
+      $or: [{ name: { $regex: regex, $options: 'ismx' } }, { label: { $regex: regex, $options: 'ismx' } }]
     };
     const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(filter), 0);
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(

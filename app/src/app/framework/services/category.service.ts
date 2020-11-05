@@ -18,12 +18,17 @@
 
 import { Injectable } from '@angular/core';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import {ApiCallService, ApiService, httpObserveOptions, resp} from '../../services/api-call.service';
+import {
+  ApiCallService,
+  ApiService,
+  httpObserveOptions,
+  HttpProtocolHelper,
+} from '../../services/api-call.service';
 import { ValidatorService } from '../../services/validator.service';
 import { CmdbCategory, CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb-category';
 import { FormControl } from '@angular/forms';
 import { Observable, timer } from 'rxjs';
-import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpParams, HttpResponse } from '@angular/common/http';
 import {
   APIDeleteSingleResponse,
   APIGetMultiResponse,
@@ -63,33 +68,20 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    */
   public servicePrefix: string = 'categories';
 
-  private httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json'
-    }),
-    params: new HttpParams(),
-    observe: resp
-  };
-
   constructor(private api: ApiCallService) {
 
   }
 
   public getCategoryIteration(...options): Observable<APIGetMultiResponse<T>> {
+    const httpProtocol = httpObserveOptions;
     let params: HttpParams = new HttpParams();
     for (const option of options) {
       for (const key of Object.keys(option)) {
         params = params.append(key, option[key]);
       }
     }
-    const httpObserveOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      }),
-      params,
-      observe: resp
-    };
-    return this.api.callGet<T[]>(this.servicePrefix + '/', httpObserveOptions).pipe(
+    httpProtocol.params = params;
+    return this.api.callGet<T[]>(this.servicePrefix + '/', httpProtocol).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
@@ -153,9 +145,11 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    */
   public getCategoriesByName(regex: string): Observable<T[]> {
     regex = ValidatorService.validateRegex(regex).trim();
-    const filter = encodeURIComponent(`{"$or": [{"name": {"$regex": "${ regex }", "$options": "ismx"}}, {"label": {"$regex": "${ regex }", "$options": "ismx"}}]}`);
-
-    return this.api.callGet<T[]>(this.servicePrefix + '/?filter=' + filter).pipe(
+    const filter = {
+      $or: [{ name: { $regex: regex, $options: 'ismx' } }, { label: { $regex: regex, $options: 'ismx' } }]
+    };
+    const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(filter), 0);
+    return this.api.callGet<T[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         if (apiResponse.body.count === 0) {
           return null;
@@ -172,14 +166,10 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * nested structure and type instances
    */
   public getCategoryTree(): Observable<CmdbCategoryTree> {
-    const httpObserveOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      }),
-      params: new HttpParams().append('view', 'tree'),
-      observe: resp
-    };
-    return this.api.callGet<CmdbCategoryTree>(`${ this.servicePrefix }/`, httpObserveOptions).pipe(
+    const httpProtocol = httpObserveOptions;
+    httpProtocol.params = new HttpParams().append('view', 'tree');
+
+    return this.api.callGet<CmdbCategoryTree>(`${ this.servicePrefix }/`, httpProtocol).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<CmdbCategoryNode>>) => {
         if (apiResponse.status === 204) {
           return [];
