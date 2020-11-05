@@ -96,7 +96,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Input('columns')
   public set Columns(columns: Array<Column>) {
     this.columns = columns;
-    this.initialColumns = this.columns;
+    this.initialColumns = Object.assign([], []);
   }
 
   /**
@@ -284,7 +284,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
    * Reset the columns to the initial set.
    */
   public onColumnsReset(): void {
-    this.columns = this.initialColumns;
+    this.columns = Object.assign([], this.initialColumns);
   }
 
   public onPageChange(page: number) {

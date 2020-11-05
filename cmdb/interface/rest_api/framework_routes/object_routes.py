@@ -68,6 +68,8 @@ def get_objects(params: CollectionParameters):
     from cmdb.framework.managers.object_manager import ObjectManager
     manager = ObjectManager(database_manager=current_app.database_manager)
     view = params.optional.get('view', 'native')
+    if _fetch_only_active_objs():
+        params.filter.append({'$match': {'active': {"$eq": True}}})
     try:
         iteration_result: IterationResult[CmdbObject] = manager.iterate(
             filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)

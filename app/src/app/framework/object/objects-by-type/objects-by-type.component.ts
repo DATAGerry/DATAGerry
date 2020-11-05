@@ -89,6 +89,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
 
+  public filter: string;
+
   public get type(): CmdbType {
     return this.typeSubject.getValue() as CmdbType;
   }
@@ -118,13 +120,15 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.typeSubject.asObservable().pipe(takeUntil(this.subscriber)).subscribe((type: CmdbType) => {
       this.resetTable();
       this.setColumns(type);
-      this.getObjects();
+      this.loadObjects();
     });
   }
 
   public resetTable() {
     this.page = this.initPage;
     this.limit = this.initLimit;
+    this.filter = undefined;
+    this.selectedObjects = [];
   }
 
   private setColumns(type: CmdbType): void {
@@ -147,7 +151,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         display: 'Public ID',
         name: 'public_id',
         data: 'object_information.object_id',
-        searchable: false,
+        searchable: true,
         sortable: true
       }
     ] as Array<Column>;
@@ -155,13 +159,13 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     for (const field of fields) {
       columns.push({
         display: field.label,
-        name: field.name,
+        name: `fields.${ field.name }`,
         data: field.name,
         sortable: true,
-        searchable: true,
+        searchable: false,
         hidden: !summaryFields.includes(field.name),
         render(data: RenderResult, item: RenderResult, column: Column, index?: number) {
-          const renderedField = item.fields.find(f => f.name === column.name);
+          const renderedField = item.fields.find(f => f.name === column.data);
           if (!renderedField) {
             return {};
           }
@@ -223,10 +227,39 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.columns = columns;
   }
 
-  public getObjects() {
+  public loadObjects() {
     this.loading = true;
+    const query = [];
+    query.push({
+      $match: {
+        type_id: this.type.public_id
+      }
+    });
+    if (this.filter) {
+      const columnMatchStage = { $match: { $or: [] } };
+      const columnMatchList = [];
+      const searchableColumns = this.columns.filter(c => c.searchable);
+
+      // Searchable Columns
+      for (const column of this.columns.filter(c => c.searchable)) {
+        const regex = {
+          $regexMatch: {
+            input: { $toString: `$${ column.name }` },
+            regex: this.filter,
+            options: 'ismx'
+          }
+        };
+        query.push(regex);
+      }
+      //columnQueries.push({ $filter: { input: '$fields', as: 'fields', cond: {$eq: ['$$fields.value', this.filter]}} });
+      // query.push({ $addFields: { match: { $or: columnQueries } } });
+
+      //query.push({ $match: { match: true } });
+      //query.push({ $project: { match: 0 } });
+      console.log(query);
+    }
     const params: CollectionParameters = {
-      filter: { type_id: this.type.public_id }, limit: this.limit,
+      filter: query, limit: this.limit,
       sort: this.sort.name, order: this.sort.order, page: this.page
     };
     this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
@@ -245,17 +278,26 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   public onPageChange(page: number) {
     this.page = page;
-    this.getObjects();
+    this.loadObjects();
   }
 
   public onPageSizeChange(limit: number): void {
     this.limit = limit;
-    this.getObjects();
+    this.loadObjects();
   }
 
   public onSortChange(sort: Sort): void {
     this.sort = sort;
-    this.getObjects();
+    this.loadObjects();
+  }
+
+  public onSearchChange(search: any): void {
+    if (search) {
+      this.filter = search;
+    } else {
+      this.filter = undefined;
+    }
+    this.loadObjects();
   }
 
   public onSelectedChange(selectedItems: Array<RenderResult>): void {
@@ -283,7 +325,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.objectService.deleteObject(publicID).pipe(takeUntil(this.subscriber)).subscribe(response => {
         this.toastService.success(`Object ${ publicID } was deleted successfully`);
         this.sidebarService.updateTypeCounter(this.type.public_id);
-        this.getObjects();
+        this.loadObjects();
       },
       (error) => {
         this.toastService.error(`Error while deleting object ${ publicID } | Error: ${ error }`);
@@ -306,7 +348,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
               this.toastService.success(`Deleted ${ this.selectedObjects.length } objects successfully`);
               this.sidebarService.updateTypeCounter(this.type.public_id);
               this.selectedObjects = [];
-              this.getObjects();
+              this.loadObjects();
             });
           }
         }

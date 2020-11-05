@@ -5,7 +5,7 @@
   <div class="dropdown-menu" *ngIf="columns.length > 0">
       <span *ngFor="let column of columns" [ngClass]="{'disabled': column.fixed}">
         <div class="form-check">
-          <input class="form-check-input" type="checkbox" [checked]="!column.hidden"
+          <input class="form-check-input" type="checkbox" [checked]="!column.hidden" [disabled]="column.fixed"
                  title="toggle-{{column.name}}" (change)="toggleColumn(column)">
           <label class="form-check-label">
             {{column.display ? column.display : column.name}}
@@ -14,6 +14,5 @@
       </span>
     <hr/>
     <span (click)="columnsReset.emit()">Reset</span>
-
   </div>
 </div>

@@ -75,6 +75,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     httpParams = httpParams.set('page', params.page.toString());
 
     httpParams = httpParams.set('view', view);
+    httpParams = httpParams.set('onlyActiveObjCookie', this.api.readCookies(COOCKIENAME));
     options.params = httpParams;
 
     return this.api.callGet<Array<T>>(this.newServicePrefix + '/', options).pipe(
