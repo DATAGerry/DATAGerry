@@ -21,6 +21,16 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class ValidatorService {
 
+  private static readonly regex = new RegExp('[.*+\\-?^${}()|[\\]\\\\]');
+
+  public static getRegex() {
+    return this.regex;
+  }
+
+  public static replaceTextWithRegex(value: string) {
+    return value.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
+  }
+
   public static validateRegex(input: string) {
     let regexObj;
     // check, if RegExp is valid JavaScript
