@@ -245,8 +245,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       const searchableColumns = this.columns.filter(c => c.searchable);
       // Searchable Columns
       for (const column of searchableColumns) {
-        const regex: any = {
-        };
+        const regex: any = {};
         regex[column.name] = {
           $regex: String(this.filter),
           $options: 'ismx'
@@ -254,6 +253,20 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         or.push(regex);
       }
 
+      // Nasty public id quick hack
+      query.push({
+        $addFields: {
+          public_id: { $toString: '$public_id' }
+        }
+      });
+      or.push({public_id: {
+        $elemMatch: {
+          value: {
+            $regex: String(this.filter),
+              $options: 'ismx'
+          }
+        }
+      }});
       // Search Fields
       or.push({
         fields: {
@@ -265,7 +278,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
           }
         }
       });
-      query.push({$match: { $or: or }});
+      query.push({ $match: { $or: or } });
     }
 
     const params: CollectionParameters = {
