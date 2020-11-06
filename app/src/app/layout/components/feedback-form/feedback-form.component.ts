@@ -12,7 +12,7 @@ export class FeedbackFormComponent implements OnInit, OnDestroy {
 
   public feedbackForm: FormGroup;
   public formListener: Subscription;
-  public feedbackUrl: string;
+  public feedbackUrl: string = 'https://datagerry.com/feedback-v1/0/0/0/0/0/unknown/';
 
   constructor(private systemService: SystemService) {
     this.feedbackForm = new FormGroup({
@@ -38,13 +38,13 @@ export class FeedbackFormComponent implements OnInit, OnDestroy {
 
   generateQRCode() {
     let url = 'https://datagerry.com/feedback-v1/';
-    url = url + this.feedbackForm.get('happiness').value.toString() + '/';
-    url = url + this.feedbackForm.get('usability').value.toString() + '/';
-    url = url + this.feedbackForm.get('functionality').value.toString() + '/';
-    url = url + this.feedbackForm.get('performance').value.toString() + '/';
-    url = url + this.feedbackForm.get('stability').value.toString() + '/';
-    url = url + this.feedbackForm.get('version').value.toString() + '/';
-    url = url + this.feedbackForm.get('email').value.toString();
+    url = url + this.feedbackForm.get('happiness').value.toString() + '/'
+      + this.feedbackForm.get('usability').value.toString() + '/'
+      + this.feedbackForm.get('functionality').value.toString() + '/'
+      + this.feedbackForm.get('performance').value.toString() + '/'
+      + this.feedbackForm.get('stability').value.toString() + '/'
+      + this.feedbackForm.get('version').value.toString() + '/'
+      + this.feedbackForm.get('email').value.toString();
     this.feedbackUrl = url;
   }
 

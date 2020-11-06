@@ -189,11 +189,6 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
     this.types.removeAt(index);
   }
 
-  public clickReset() {
-    this.unAssignedTypes = this.unAssignedTypes.concat(this.assignedTypes);
-    this.assignedTypes = [];
-  }
-
   public onDragged(item: CmdbType, list: any[], effect: DropEffect, control: boolean = false) {
     if (effect === 'move') {
       const index = list.indexOf(item);

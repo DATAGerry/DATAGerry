@@ -112,7 +112,8 @@
       </div>
       <div class="card-footer">
         <div class="btn-group float-right" role="group">
-          <button type="reset" class="btn btn-outline-warning mr-2" (click)="clickReset()">Reset</button>
+          <button class="btn btn-outline-danger mr-2"
+                  routerLink="/framework/category">Cancel</button>
           <button type="submit" class="btn btn-success" [disabled]="categoryForm.invalid">Save</button>
         </div>
         <div class="clearfix"></div>

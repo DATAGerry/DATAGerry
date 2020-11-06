@@ -95,7 +95,7 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
             idx_ident = map_ident.get(prop)
             if idx_ident:
                 value = entry.get(idx_ident)
-                if value:
+                if value is not None:
                     working.update({prop: value})
         return working
 
