@@ -1,31 +1,35 @@
 <div class="btn-group mr-2">
-  <button type="button"class="btn btn-warning btn-sm dropdown-toggle"
+  <button type="button" class="btn btn-warning btn-sm dropdown-toggle"
           data-toggle="dropdown">
     <i class="fas fa-border-none"></i> Configs
   </button>
-  <ul class="steting-dropdown dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
-    <!-- Save config -->
-    <form [formGroup]="form" class="px-2 mb-2 d-flex">
-      <input type="text" formControlName="label" class="form-control form-control-sm mr-auto p-2"
-             [ngClass]="{ 'is-valid': labelControl.valid && (labelControl.dirty || labelControl.touched),
-                 'is-invalid': labelControl.invalid && (labelControl.dirty || labelControl.touched)}"/>
-      <button [disabled]="form.invalid" class="btn btn-success btn-sm"
-              (click)="saveConfig(labelControl.value)">
-        <i class="fas fa-save"></i>
-      </button>
-    </form>
-    <!-- Set default -->
-    <li class="dropdown-item pointer config-item" (click)="resetConfig()">
-      Default
-    </li>
-    <!-- List config -->
-    <li class="dropdown-item pointer config-item"
-        *ngFor="let tableConfig of tableConfigs"
-        (click)="selectConfig(tableConfig)">
-      {{tableConfig?.label}}
-      <i class="far fa-trash-alt config-item-icon" (click)="deleteConfig(tableConfig)"></i>
-      <div class="clearfix"></div>
-    </li>
-
-  </ul>
+  <form [formGroup]="form">
+    <div class="steting-dropdown dropdown-menu dropdown-menu-right dropdown-menu-lg-left text-center">
+      <!-- Save config -->
+      <span class="input-group p-2">
+        <input type="text" formControlName="label" class="form-control form-control-sm mr-auto p-2"
+               [ngClass]="{ 'is-valid': labelControl.valid && (labelControl.dirty || labelControl.touched),
+             'is-invalid': labelControl.invalid && (labelControl.dirty || labelControl.touched)}"/>
+        <span class="input-group-append">
+          <button [disabled]="form.invalid" class="btn btn-success btn-sm"
+                  (click)="saveConfig(labelControl.value)">
+          <i class="fas fa-save"></i>
+        </button>
+        </span>
+      </span>
+      <div class="dropdown-divider"></div>
+      <!-- Set default -->
+      <span class="dropdown-item pointer config-item" (click)="resetConfig()">
+        <i class="fas fa-redo"></i>  Default
+      </span>
+      <!-- List config -->
+      <span class="dropdown-item pointer config-item"
+          *ngFor="let tableConfig of tableConfigs"
+          (click)="selectConfig(tableConfig)">
+        {{tableConfig?.label}}
+        <i class="far fa-trash-alt config-item-icon" (click)="deleteConfig(tableConfig)"></i>
+        <span class="clearfix"></span>
+      </span>
+    </div>
+  </form>
 </div>
