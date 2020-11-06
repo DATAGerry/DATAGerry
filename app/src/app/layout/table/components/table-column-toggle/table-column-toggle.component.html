@@ -3,16 +3,20 @@
     <i class="fas fa-table"></i> Columns
   </button>
   <div class="dropdown-menu" *ngIf="columns.length > 0">
-      <span *ngFor="let column of columns" [ngClass]="{'disabled': column.fixed}">
-        <div class="form-check">
+    <button *ngFor="let column of columns" type="button" class="dropdown-item"
+            [ngClass]="{'disabled': column.fixed}"
+            (click)="toggleColumn(column, $event)">
+        <span class="form-check">
           <input class="form-check-input" type="checkbox" [checked]="!column.hidden" [disabled]="column.fixed"
-                 title="toggle-{{column.name}}" (change)="toggleColumn(column)">
+                 title="toggle-{{column.name}}">
           <label class="form-check-label">
             {{column.display ? column.display : column.name}}
           </label>
-        </div>
-      </span>
-    <hr/>
-    <span (click)="columnsReset.emit()">Reset</span>
+        </span>
+    </button>
+    <div class="dropdown-divider"></div>
+    <button type="button" class="dropdown-item btn text-center" (click)="columnsReset.emit()">
+      <i class="fas fa-redo"></i> Reset
+    </button>
   </div>
 </div>

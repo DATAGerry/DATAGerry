@@ -44,9 +44,12 @@ export class TableColumnToggleComponent {
 
   /**
    * Toggle the hidden property of a column.
+   * The Event interface prevents further propagation of the current event in the capturing and bubbling phases.
    * @param c
+   * @param event
    */
-  public toggleColumn(c: Column): Column {
+  public toggleColumn(c: Column, event: Event): Column {
+    event.stopPropagation();
     c.hidden = !c.hidden;
     this.columnVisibilityChange.emit(c);
     return c;

@@ -27,7 +27,7 @@ import {
   Output, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
-import { zip, Observable, ReplaySubject, merge } from 'rxjs';
+import { Observable, ReplaySubject, merge } from 'rxjs';
 import { Column, Sort, SortDirection, TableConfig, TableConfigUserSetting } from './table.types';
 import { PageLengthEntry } from './components/table-page-size/table-page-size.component';
 import { takeUntil } from 'rxjs/operators';
