@@ -21,10 +21,7 @@ import { RenderResult } from '../../../models/cmdb-render';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectPreviewModalComponent } from '../../modals/object-preview-modal/object-preview-modal.component';
 import { ObjectDeleteModalComponent } from '../../modals/object-delete-modal/object-delete-modal.component';
-import { ObjectService } from '../../../services/object.service';
 import { ReplaySubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { ToastService } from '../../../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-object-table-actions',
@@ -34,7 +31,7 @@ import { ToastService } from '../../../../layout/toast/toast.service';
 export class ObjectTableActionsComponent implements OnDestroy {
 
   /**
-   * Component wide unsubscriber-
+   * Component wide un-subscriber
    * @private
    */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();

@@ -51,7 +51,6 @@ import { ObjectLogUserComponent } from './object-view/object-footer/object-log-l
 import { ObjectLinkAddModalComponent } from './modals/object-link-add-modal/object-link-add-modal.component';
 import { ObjectLinkDeleteModalComponent } from './modals/object-link-delete-modal/object-link-delete-modal.component';
 import { AuthModule } from '../../auth/auth.module';
-import { ObjectListByTypeComponent } from './object-list-by-type/object-list-by-type.component';
 import { ObjectBulkChangeComponent } from './object-bulk-change/object-bulk-change.component';
 import { ObjectBulkChangeEditorComponent } from './object-bulk-change/object-bulk-change-editor/object-bulk-change-editor.component';
 import { ObjectBulkChangePreviewComponent } from './object-bulk-change/object-bulk-change-preview/object-bulk-change-preview.component';
@@ -64,12 +63,14 @@ import { TableModule } from '../../layout/table/table.module';
 import { ObjectTableActionsComponent } from './components/object-table-actions/object-table-actions.component';
 import { QRCodeModule } from 'angularx-qrcode';
 import { ObjectDeleteModalComponent } from './modals/object-delete-modal/object-delete-modal.component';
+import { ObjectsDeleteModalComponent } from './modals/objects-delete-modal/objects-delete-modal.component';
 
 @NgModule({
   entryComponents: [
     ObjectLinkAddModalComponent,
     ObjectDeleteModalComponent,
     ObjectLinkDeleteModalComponent,
+    ObjectsDeleteModalComponent
   ],
   declarations: [
     ObjectViewComponent,
@@ -93,7 +94,6 @@ import { ObjectDeleteModalComponent } from './modals/object-delete-modal/object-
     ObjectLogUserComponent,
     ObjectLinkAddModalComponent,
     ObjectLinkDeleteModalComponent,
-    ObjectListByTypeComponent,
     ObjectBulkChangeComponent,
     ObjectBulkChangePreviewComponent,
     ObjectBulkChangeEditorComponent,
@@ -102,7 +102,8 @@ import { ObjectDeleteModalComponent } from './modals/object-delete-modal/object-
     ObjectAttachmentsComponent,
     ObjectsByTypeComponent,
     ObjectTableActionsComponent,
-    ObjectDeleteModalComponent
+    ObjectDeleteModalComponent,
+    ObjectsDeleteModalComponent
   ],
   imports: [
     CommonModule,

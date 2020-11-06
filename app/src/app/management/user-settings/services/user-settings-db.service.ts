@@ -39,7 +39,7 @@ export class UserSettingsDBService<T = UserSetting> implements OnDestroy {
   /**
    * Subscriber subject. When active auto set to backend db.
    */
-  private updater: ReplaySubject<void>;
+  private updater: ReplaySubject<void> = new ReplaySubject<void>();
 
   /**
    * Holder subject when new settings are in the database.
@@ -47,7 +47,6 @@ export class UserSettingsDBService<T = UserSetting> implements OnDestroy {
   private newSettings: Subject<UserSetting>;
 
   constructor(private dbService: NgxIndexedDBService<UserSetting>, private userSettingsService: UserSettingsService) {
-    this.updater = new ReplaySubject<void>();
     this.newSettings = new Subject<UserSetting>();
     this.newSettings.asObservable().pipe(takeUntil(this.updater)).subscribe(
 
@@ -90,17 +89,17 @@ export class UserSettingsDBService<T = UserSetting> implements OnDestroy {
    */
   public updateSetting(setting: UserSetting): void {
     this.dbService.update(this.storeName, setting).subscribe(key => {
-      this.userSettingsService.updateUserSetting(setting.identifier, setting).subscribe();
+      this.userSettingsService.updateUserSetting(setting.id, setting).subscribe();
     });
   }
 
   /**
    * Delete a existing user setting.
-   * @param identifier User key.
+   * @param id User key.
    */
-  public deleteSetting(identifier: string): void {
-    this.dbService.delete(this.storeName, identifier).subscribe(key => {
-      this.userSettingsService.deleteUserSetting(identifier).subscribe();
+  public deleteSetting(id: string): void {
+    this.dbService.delete(this.storeName, id).subscribe(key => {
+      this.userSettingsService.deleteUserSetting(id).subscribe();
     });
   }
 

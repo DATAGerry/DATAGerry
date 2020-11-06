@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TableConfigUserSetting } from '../../table.types';
 
@@ -28,7 +28,11 @@ import { TableConfigUserSetting } from '../../table.types';
 })
 export class TableConfigSwitchComponent implements OnInit {
 
-  @Input() public tableConfigs: Array<TableConfigUserSetting>;
+  @Input() public tableConfigs: Array<TableConfigUserSetting> = [];
+  @Output() public configSelect: EventEmitter<TableConfigUserSetting> = new EventEmitter<TableConfigUserSetting>();
+  @Output() public configSave: EventEmitter<TableConfigUserSetting> = new EventEmitter<TableConfigUserSetting>();
+  @Output() public configDelete: EventEmitter<TableConfigUserSetting> = new EventEmitter<TableConfigUserSetting>();
+  @Output() public configReset: EventEmitter<void> = new EventEmitter<void>();
 
   public form: FormGroup;
 
@@ -38,7 +42,7 @@ export class TableConfigSwitchComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
   }
 
   /**
@@ -49,19 +53,29 @@ export class TableConfigSwitchComponent implements OnInit {
   }
 
   public selectConfig(config: TableConfigUserSetting) {
-
+    for (const conf of this.tableConfigs) {
+      conf.active = conf === config;
+    }
+    this.configSelect.emit(config);
   }
 
   public resetConfig() {
-
+    this.configReset.emit();
   }
 
   public saveConfig(label?: string) {
-
+    for (const conf of this.tableConfigs) {
+      conf.active = false;
+    }
+    this.configSave.emit();
   }
 
   public deleteConfig(config: TableConfigUserSetting) {
-
+    const index = this.tableConfigs.indexOf(config, 0);
+    if (index > -1) {
+      this.tableConfigs.splice(index, 1);
+    }
+    this.configDelete.emit(config);
   }
 
 }

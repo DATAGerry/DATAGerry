@@ -28,7 +28,7 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import { zip, Observable, ReplaySubject, merge } from 'rxjs';
-import { Column, Sort, SortDirection, TableConfig } from './table.types';
+import { Column, Sort, SortDirection, TableConfig, TableConfigUserSetting } from './table.types';
 import { PageLengthEntry } from './components/table-page-size/table-page-size.component';
 import { takeUntil } from 'rxjs/operators';
 
@@ -215,6 +215,11 @@ export class TableComponent<T> implements OnInit, OnDestroy {
    * Event emitter when any config was changed.
    */
   @Input() public configEnabled: boolean = true;
+
+  /**
+   * List of possible table configs.
+   */
+  @Input() public tableConfigs: Array<TableConfigUserSetting> = [];
 
   /**
    * Event emitter when any config was changed.

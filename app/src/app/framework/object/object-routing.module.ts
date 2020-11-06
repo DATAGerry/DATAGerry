@@ -23,7 +23,6 @@ import { ObjectAddComponent } from './object-add/object-add.component';
 import { ObjectEditComponent } from './object-edit/object-edit.component';
 import { ObjectCopyComponent } from './object-copy/object-copy.component';
 import { ObjectLogComponent } from './object-log/object-log.component';
-import { ObjectListByTypeComponent } from './object-list-by-type/object-list-by-type.component';
 import { ObjectBulkChangeComponent } from './object-bulk-change/object-bulk-change.component';
 import { UserSettingsResolver } from '../../management/user-settings/resolvers/user-settings-resolver.service';
 import { TypeResolver } from '../resolvers/type-resolver.service';

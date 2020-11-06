@@ -8,7 +8,7 @@
       </table-page-size>
     </div>
     <div class="table-config-switch mr-1 ml-1 border-right" *ngIf="configEnabled">
-      <table-config-switch></table-config-switch>
+      <table-config-switch [tableConfigs]="tableConfigs"></table-config-switch>
     </div>
     <div class="table-toggle mr-1 ml-1 border-right" *ngIf="toggleable">
       <table-column-toggle [columns]="columns" (columnsReset)="onColumnsReset()"
