@@ -58,7 +58,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   /**
-   * Add dynamic table id
+   * html table id
    */
   @Input() public id: string = `table-${ Math.random().toString(36).substring(10) }`;
 
@@ -303,6 +303,11 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     );
   }
 
+  /**
+   * Toggle the selection of a single row.
+   * @param item presented item in this row
+   * @param event checkbox change event
+   */
   public toggleRowSelection(item: T, event: any): void {
     const checked = event.currentTarget.checked;
     if (checked) {
@@ -316,6 +321,10 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     this.selectedChange.emit(this.selectedItems);
   }
 
+  /**
+   * Toggle the selection of all displayed elements.
+   * @param event global checkbox change event
+   */
   public toggleAllRowSelections(event: any): void {
     const checked = event.currentTarget.checked;
     if (checked) {
@@ -326,6 +335,10 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     this.selectedChange.emit(this.selectedItems);
   }
 
+  /**
+   * On hidden status change of a column.
+   * @param column with changed hidden status.
+   */
   public onColumnVisibilityChange(column: Column) {
     const col = this.columns.find(c => c.name === column.name);
     const colIndex = this.columns.indexOf(col);
@@ -341,6 +354,10 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     this.columns = Object.assign([], this.initialColumns);
   }
 
+  /**
+   * Page change.
+   * @param page new page number
+   */
   public onPageChange(page: number) {
     this.selectedItems = [];
     this.page = page;

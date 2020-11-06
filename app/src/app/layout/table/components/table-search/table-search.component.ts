@@ -74,6 +74,11 @@ export class TableSearchComponent implements OnInit, OnDestroy {
     });
   }
 
+  public static maskRegex(value: string): string {
+    return value.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
+  }
+
+
   /**
    * OnInit of `TableSearchComponent`.
    * Auto subscribes to search input control values changes.
@@ -81,7 +86,10 @@ export class TableSearchComponent implements OnInit, OnDestroy {
    */
   public ngOnInit(): void {
     this.search.valueChanges.pipe(takeUntil(this.subscriber)).pipe(debounceTime(this.debounceTime))
-      .subscribe(change => this.searchChange.emit(change));
+      .subscribe(change => {
+        const validatedChange = TableSearchComponent.maskRegex(change);
+        this.searchChange.emit(validatedChange);
+      });
   }
 
   /**
