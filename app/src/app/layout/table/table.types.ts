@@ -17,6 +17,7 @@
 */
 
 import { TemplateRef } from '@angular/core';
+import { UserSettingPayload } from '../../management/user-settings/models/user-setting';
 
 /**
  * Order of sorting.
@@ -101,4 +102,37 @@ export interface Column {
    * @param index
    */
   render(data: any, item: any, column?: Column, index?: number);
+}
+
+export interface TableConfig {
+  columns: Array<Column>;
+  currentPage: number;
+  pageSize: number;
+  sort: Sort;
+}
+
+/**
+ * Wrapper interface for a single table config inside the `ObjectTableUserSetting`.
+ */
+export interface TableConfigUserSetting {
+  hash?: string;
+  data: TableConfig;
+  label: string;
+  active: boolean;
+}
+
+/**
+ * Represents a generic user setting for a specific config.
+ * Will normally include into a `UserSetting` as payload.
+ */
+export class TableConfigPayload implements UserSettingPayload {
+  public id: string;
+  public tableConfigs: Array<TableConfigUserSetting>;
+
+  public constructor(id: string, configs: Array<TableConfigUserSetting>) {
+    this.id = id;
+    this.tableConfigs = configs;
+  }
+
+
 }

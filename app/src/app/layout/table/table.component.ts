@@ -27,10 +27,10 @@ import {
   Output, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
-import { ReplaySubject } from 'rxjs';
-import { Column, Sort, SortDirection } from './table.types';
-import { takeUntil } from 'rxjs/operators';
+import { zip, Observable, ReplaySubject, merge } from 'rxjs';
+import { Column, Sort, SortDirection, TableConfig } from './table.types';
 import { PageLengthEntry } from './components/table-page-size/table-page-size.component';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-table',
@@ -56,6 +56,11 @@ export class TableComponent<T> implements OnInit, OnDestroy {
    * @private
    */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  /**
+   * Add dynamic table id
+   */
+  @Input() public id: string = `table-${ Math.random().toString(36).substring(10) }`;
 
   /**
    * Message which will be shown if no data are in the table.
@@ -97,6 +102,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   public set Columns(columns: Array<Column>) {
     this.columns = columns;
     this.initialColumns = Object.assign([], []);
+    this.items = [];
   }
 
   /**
@@ -125,9 +131,20 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Output() public selectedChange: EventEmitter<Array<T>> = new EventEmitter<Array<T>>();
 
   /**
+   * Initial page site
+   */
+  public initPage: number = 1;
+
+  @Input('initPage')
+  public set Page(page: number) {
+    this.initPage = page;
+    this.page = page;
+  }
+
+  /**
    * Current displayed page number.
    */
-  @Input() public currentPage: number = 1;
+  public page: number = 1;
 
   /**
    * Pagination enabled.
@@ -195,6 +212,21 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Input() public rowClasses: Array<string> = [];
 
   /**
+   * Event emitter when any config was changed.
+   */
+  @Input() public configEnabled: boolean = true;
+
+  /**
+   * Event emitter when any config was changed.
+   */
+  @Output() public configChange: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
+
+  /**
+   * Visibility change emitter.
+   */
+  @Output() public columnVisibilityChange: EventEmitter<Column> = new EventEmitter<Column>();
+
+  /**
    * Sorting enabled.
    */
   @Input() public sortable: boolean = true;
@@ -228,6 +260,9 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
+    this.configChangeObservable.pipe(takeUntil(this.subscriber)).subscribe(() => {
+      console.log(`[TableEvent] Config changed`);
+    });
     if (isDevMode()) {
       this.pageSizeChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((size: number) => {
         console.log(`[TableEvent] Page size changed to: ${ size }`);
@@ -248,6 +283,19 @@ export class TableComponent<T> implements OnInit, OnDestroy {
       });
     }
 
+  }
+
+  /**
+   * Get any kind of table config change as observable.
+   * @private
+   */
+  private get configChangeObservable(): Observable<any> {
+    return merge(
+      this.pageChange.asObservable(),
+      this.columnVisibilityChange.asObservable(),
+      this.sortChange.asObservable(),
+      this.pageSizeChange.asObservable()
+    );
   }
 
   public toggleRowSelection(item: T, event: any): void {
@@ -277,6 +325,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     const col = this.columns.find(c => c.name === column.name);
     const colIndex = this.columns.indexOf(col);
     this.columns[colIndex].hidden = column.hidden;
+    this.columnVisibilityChange.emit(column);
   }
 
 
@@ -289,6 +338,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
 
   public onPageChange(page: number) {
     this.selectedItems = [];
+    this.page = page;
     this.pageChange.emit(page);
   }
 

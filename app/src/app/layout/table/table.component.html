@@ -1,4 +1,4 @@
-<div #container class="dg-table table-container">
+<div [attr.id]="id" #container class="dg-table table-container">
   <table-loading *ngIf="loadingEnabled" [loading]="loading"></table-loading>
   <div class="table-header d-flex mb-3">
     <div class="mr-auto" *ngIf="pageSizeEnabled">
@@ -7,12 +7,15 @@
 
       </table-page-size>
     </div>
-    <div class="table-toggle" *ngIf="toggleable">
+    <div class="table-config-switch mr-1 ml-1 border-right" *ngIf="configEnabled">
+      <table-config-switch></table-config-switch>
+    </div>
+    <div class="table-toggle mr-1 ml-1 border-right" *ngIf="toggleable">
       <table-column-toggle [columns]="columns" (columnsReset)="onColumnsReset()"
                            (columnVisibilityChange)="onColumnVisibilityChange($event)">
       </table-column-toggle>
     </div>
-    <div class="table-search ml-2" *ngIf="searchEnabled">
+    <div class="table-search ml-1" *ngIf="searchEnabled">
       <table-search [debounceTime]="debounceTime" (searchChange)="searchChange.emit($event)">
       </table-search>
     </div>
@@ -60,7 +63,7 @@
                   [selectEnabled]="selectEnabled" [selected]="selectedItems.length"></table-info>
     </div>
     <div *ngIf="paginationEnabled">
-      <table-pagination [currentPage]="currentPage" [totalItems]="totalItems" [pageSize]="pageSize"
+      <table-pagination [currentPage]="initPage" [totalItems]="totalItems" [pageSize]="pageSize"
                         (pageChange)="onPageChange($event)">
       </table-pagination>
     </div>

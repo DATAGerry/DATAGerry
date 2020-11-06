@@ -97,7 +97,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   public columns: Array<Column>;
 
-  private readonly initPage: number = 1;
+  public readonly initPage: number = 1;
   public page: number = this.initPage;
 
   private readonly initLimit: number = 25;

@@ -45,12 +45,9 @@ import { UserSetting } from '../../../management/user-settings/models/user-setti
 import { UserSettingsDBService } from '../../../management/user-settings/services/user-settings-db.service';
 import { AuthService } from '../../../auth/services/auth.service';
 
-import {
-  ObjectTableUserPayload,
-  ObjectTableUserSettingConfig
-} from '../../../management/user-settings/models/settings/object-table-user-setting';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { SidebarService } from '../../../layout/services/sidebar.service';
+import { TableConfigPayload, TableConfigUserSetting } from '../../../layout/table/table.types';
 
 @Component({
   selector: 'cmdb-object-list-by-type',
@@ -88,13 +85,13 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
   /**
    * User settings for this route.
    */
-  public tableUserSetting: UserSetting<ObjectTableUserPayload>;
+  public tableUserSetting: UserSetting<TableConfigPayload>;
 
   /**
    * Selector if the config is new.
    */
 
-  public currentTableSettingsConfig: ObjectTableUserSettingConfig;
+  public currentTableSettingsConfig: TableConfigUserSetting;
 
   public stateSelected: boolean = false;
 
@@ -124,12 +121,12 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
     });
 
     this.type = this.route.snapshot.data.type as CmdbType;
-    this.tableUserSetting = this.route.snapshot.data.userSetting as UserSetting<ObjectTableUserPayload>;
+    this.tableUserSetting = this.route.snapshot.data.userSetting as UserSetting<TableConfigPayload>;
     if (!this.tableUserSetting) {
-      this.tableUserSetting = new UserSetting<ObjectTableUserPayload>(
+      this.tableUserSetting = new UserSetting<TableConfigPayload>(
         this.router.url.toString().substring(1).split('/').join('-'),
         this.authService.currentUserValue.public_id,
-        new ObjectTableUserPayload([])
+        new TableConfigPayload([])
       );
       this.userSettingsDB.addSetting(this.tableUserSetting);
     }
@@ -157,7 +154,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
         this.currentTableSettingsConfig = {
           data,
           active: true,
-        } as ObjectTableUserSettingConfig;
+        } as TableConfigUserSetting;
         this.saveConfig();
       },
       stateLoadCallback: (settings, callback) => {
@@ -546,7 +543,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
    * Toggle between multiple setting states.
    * @param selected ObjectTableUserSettingConfig
    */
-  public selectConfig(selected: ObjectTableUserSettingConfig): void {
+  public selectConfig(selected: TableConfigUserSetting): void {
     for (const config of this.tableUserSetting.payload.tableConfigs) {
       config.active = config === selected;
     }
@@ -580,7 +577,7 @@ export class ObjectListByTypeComponent implements AfterViewInit, OnInit, OnDestr
    * Delete a config from the setting.
    * @param selected The form setting
    */
-  public deleteConfig(selected: ObjectTableUserSettingConfig): void {
+  public deleteConfig(selected: TableConfigUserSetting): void {
     const index = this.tableUserSetting.payload.tableConfigs.indexOf(selected, 0);
     if (index > -1) {
       this.tableUserSetting.payload.tableConfigs.splice(index, 1);

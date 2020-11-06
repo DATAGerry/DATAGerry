@@ -44,7 +44,7 @@
 </div>
 <hr/>
 <cmdb-table [items]="results" [totalItems]="totalResults" [columns]="columns" [sort]="sort" [toggleable]="true"
-            [currentPage]="page" [rowClasses]="['align-middle']" [pageSize]="limit"
+            [initPage]="initPage" [rowClasses]="['align-middle']" [pageSize]="limit" [id]="'table-objects-type'"
             [selectEnabled]="true" [loading]="loading" [emptyMessage]="'There are no objects for this type yet!'"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
             (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)"
