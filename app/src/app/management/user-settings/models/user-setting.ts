@@ -19,7 +19,7 @@
 import { ObjectStoreSchema } from 'ngx-indexed-db/lib/ngx-indexed-db.meta';
 
 export const userSettingsSchema: ObjectStoreSchema[] = [
-  { name: 'url', keypath: 'url', options: { unique: true } },
+  { name: 'id', keypath: 'id', options: { unique: true } },
   { name: 'user_id', keypath: 'user_id', options: { unique: false } },
   { name: 'payloads', keypath: 'payloads', options: { unique: false } },
   { name: 'setting_type', keypath: 'setting_type', options: { unique: false } }
@@ -29,13 +29,13 @@ export const userSettingsSchema: ObjectStoreSchema[] = [
  * Basic user setting class. Wrapper class for all CRUD functions with the API.
  */
 export class UserSetting<P = UserSettingPayload> {
-  url: string;
+  id: string;
   user_id: number;
   payloads: Array<P>;
   setting_type: string;
 
-  constructor(url: string, user_id: number, payloads: Array<P>) {
-    this.url = url;
+  constructor(id: string, user_id: number, payloads: Array<P>) {
+    this.id = id;
     this.user_id = user_id;
     this.payloads = payloads;
     this.setting_type = 'APPLICATION';
