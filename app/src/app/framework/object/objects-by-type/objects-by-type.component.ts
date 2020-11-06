@@ -241,27 +241,32 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       }
     });
     if (this.filter) {
-      const columnMatchStage = { $match: { $or: [] } };
-      const columnMatchList = [];
+
+      const or = [];
       const searchableColumns = this.columns.filter(c => c.searchable);
-
       // Searchable Columns
-      for (const column of this.columns.filter(c => c.searchable)) {
-        const regex = {
-          $regexMatch: {
-            input: { $toString: `$${ column.name }` },
-            regex: this.filter,
-            options: 'ismx'
-          }
+      for (const column of searchableColumns) {
+        const regex: any = {
         };
-        query.push(regex);
+        regex[column.name] = {
+          $regex: String(this.filter),
+          $options: 'ismx'
+        };
+        or.push(regex);
       }
-      //columnQueries.push({ $filter: { input: '$fields', as: 'fields', cond: {$eq: ['$$fields.value', this.filter]}} });
-      // query.push({ $addFields: { match: { $or: columnQueries } } });
 
-      //query.push({ $match: { match: true } });
-      //query.push({ $project: { match: 0 } });
-      console.log(query);
+      // Search Fields
+      or.push({
+        fields: {
+          $elemMatch: {
+            value: {
+              $regex: String(this.filter),
+              $options: 'ismx'
+            }
+          }
+        }
+      });
+      query.push({$match: { $or: or }});
     }
     const params: CollectionParameters = {
       filter: query, limit: this.limit,
