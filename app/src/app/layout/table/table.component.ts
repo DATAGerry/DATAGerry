@@ -224,7 +224,12 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   /**
    * Event emitter when any config was changed.
    */
-  @Output() public configChange: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
+  @Output() public configChange: EventEmitter<TableConfigUserSetting> = new EventEmitter<TableConfigUserSetting>();
+
+  /**
+   * Current user table config.
+   */
+  @Input() public userTableConfig: TableConfigUserSetting;
 
   /**
    * Visibility change emitter.
@@ -266,7 +271,18 @@ export class TableComponent<T> implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.configChangeObservable.pipe(takeUntil(this.subscriber)).subscribe(() => {
-      console.log(`[TableEvent] Config changed`);
+      const tableConfig: TableConfig = {
+        columns: this.columns,
+        page: this.page,
+        pageSize: this.pageSize,
+        sort: this.sort
+      } as TableConfig;
+      this.userTableConfig = {
+        label: '',
+        data: tableConfig,
+        active: true
+      } as TableConfigUserSetting;
+      this.configChange.emit(this.userTableConfig);
     });
     if (isDevMode()) {
       this.pageSizeChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((size: number) => {
@@ -362,6 +378,10 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     this.selectedItems = [];
     this.page = page;
     this.pageChange.emit(page);
+  }
+
+  public onConfigSave(config: TableConfigUserSetting) {
+    console.log(config);
   }
 
   public ngOnDestroy(): void {

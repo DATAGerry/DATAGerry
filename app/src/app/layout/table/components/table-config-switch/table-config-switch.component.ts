@@ -29,6 +29,8 @@ import { TableConfigUserSetting } from '../../table.types';
 export class TableConfigSwitchComponent implements OnInit {
 
   @Input() public tableConfigs: Array<TableConfigUserSetting> = [];
+  @Input() public currentConfig: TableConfigUserSetting;
+
   @Output() public configSelect: EventEmitter<TableConfigUserSetting> = new EventEmitter<TableConfigUserSetting>();
   @Output() public configSave: EventEmitter<TableConfigUserSetting> = new EventEmitter<TableConfigUserSetting>();
   @Output() public configDelete: EventEmitter<TableConfigUserSetting> = new EventEmitter<TableConfigUserSetting>();
@@ -64,10 +66,10 @@ export class TableConfigSwitchComponent implements OnInit {
   }
 
   public saveConfig(label?: string) {
-    for (const conf of this.tableConfigs) {
-      conf.active = false;
-    }
-    this.configSave.emit();
+    const saveTableConfig: TableConfigUserSetting = Object.assign({}, this.currentConfig) as TableConfigUserSetting;
+    saveTableConfig.label = label;
+    this.configSave.emit(saveTableConfig);
+    this.labelControl.setValue('');
   }
 
   public deleteConfig(config: TableConfigUserSetting) {

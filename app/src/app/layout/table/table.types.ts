@@ -106,7 +106,7 @@ export interface Column {
 
 export interface TableConfig {
   columns: Array<Column>;
-  currentPage: number;
+  page: number;
   pageSize: number;
   sort: Sort;
 }
