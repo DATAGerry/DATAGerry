@@ -20,8 +20,8 @@
           <i class="fas fa-angle-double-right"></i>
         </button>
         <i>Text</i>: {{inputControl.value}} -
-        <i>({{possibleRegexResults.active}}<i *ngIf="possibleRegexResults.inactive > 0"> +
-          {{possibleRegexResults.inactive}} inactive</i>)</i>
+        <i>({{possibleTextResults.active}}<i *ngIf="possibleTextResults.inactive > 0"> +
+          {{possibleTextResults.inactive}} inactive</i>)</i>
       </span>
     </li>
     <li #tabText tabindex="3" *ngIf="possibleRegexResults.total > 0" (keyup.arrowUp)="setFocusOnElement(2)" (keyup.arrowDown)="arrowDown(tabText.tabIndex)" (keyup.enter)="addTag('regex')" (click)="addTag('regex')">
@@ -30,8 +30,8 @@
           <i class="fas fa-angle-double-right"></i>
         </button>
         <i>Regex</i>: {{inputControl.value}} -
-        <i>({{possibleTextResults.active}}<i *ngIf="possibleTextResults.inactive > 0"> +
-          {{possibleTextResults.inactive}} inactive</i>)</i>
+        <i>({{possibleRegexResults.active}}<i *ngIf="possibleRegexResults.inactive > 0"> +
+          {{possibleRegexResults.inactive}} inactive</i>)</i>
       </span>
     </li>
     <li #tabID tabindex="4" *ngIf="isExistingPublicID" (keyup.arrowUp)="arrowUp(tabID.tabIndex)" (keyup.arrowDown)="arrowDown(tabID.tabIndex)"

@@ -95,17 +95,17 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.inputControl.valueChanges.pipe(debounceTime(300)).subscribe((changes: string) => {
       if (changes.trim() !== '') {
-        this.searchService.getEstimateValueResults(changes).pipe(takeUntil(this.unsubscribe$))
-          .subscribe((counter: NumberSearchResults) => {
-            this.possibleTextResults = counter;
-        });
         if (ValidatorService.getRegex().test(changes)) {
-          this.searchService.getEstimateValueResults(ValidatorService.replaceTextWithRegex(changes))
-            .pipe(takeUntil(this.unsubscribe$))
+          this.searchService.getEstimateValueResults(changes).pipe(takeUntil(this.unsubscribe$))
             .subscribe((counter: NumberSearchResults) => {
               this.possibleRegexResults = counter;
           });
         }
+        this.searchService.getEstimateValueResults(ValidatorService.replaceTextWithRegex(changes))
+          .pipe(takeUntil(this.unsubscribe$))
+          .subscribe((counter: NumberSearchResults) => {
+            this.possibleTextResults = counter;
+        });
         if (!isNaN(+changes) && Number.isInteger(+changes)) {
           this.objectService.getObject(+changes).pipe(takeUntil(this.unsubscribe$))
             .subscribe(() => {
