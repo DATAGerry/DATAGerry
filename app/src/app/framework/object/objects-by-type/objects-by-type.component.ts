@@ -241,7 +241,6 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       }
     });
     if (this.filter) {
-
       const or = [];
       const searchableColumns = this.columns.filter(c => c.searchable);
       // Searchable Columns
@@ -268,6 +267,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       });
       query.push({$match: { $or: or }});
     }
+
     const params: CollectionParameters = {
       filter: query, limit: this.limit,
       sort: this.sort.name, order: this.sort.order, page: this.page
