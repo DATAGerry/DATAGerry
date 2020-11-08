@@ -26,8 +26,8 @@ export const userSettingsDBConfig: DBConfig = {
   name: 'DATAGERRY',
   version: 1,
   objectStoresMeta: [{
-    store: 'UserSettings',
-    storeConfig: { keyPath: 'identifier', autoIncrement: false },
+    store: 'user-settings',
+    storeConfig: { keyPath: 'resource', autoIncrement: false },
     storeSchema: userSettingsSchema
   }]
 };

@@ -18,7 +18,7 @@
 
 import { Injectable } from '@angular/core';
 import { ApiCallService, ApiService } from '../../../services/api-call.service';
-import { UserSetting } from '../models/user-setting';
+import { UserSetting, UserSettingPayload } from '../models/user-setting';
 import { AuthService } from '../../../auth/services/auth.service';
 import { User } from '../../models/user';
 import { Observable } from 'rxjs';
@@ -30,6 +30,7 @@ import {
   APIInsertSingleResponse,
   APIUpdateSingleResponse
 } from '../../../services/models/api-response';
+import { Router } from '@angular/router';
 
 /**
  * Service class for API user settings.
@@ -37,7 +38,7 @@ import {
 @Injectable({
   providedIn: 'root'
 })
-export class UserSettingsService<T = UserSetting> implements ApiService {
+export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implements ApiService {
 
   /**
    * Default REST URL Prefix.
@@ -47,7 +48,7 @@ export class UserSettingsService<T = UserSetting> implements ApiService {
   /**
    * The current login user.
    */
-  private currentUser: User;
+  public readonly currentUser: User;
 
   /**
    * Constructor of `UserSettingsService`.

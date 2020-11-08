@@ -27,7 +27,7 @@ import { ActivatedRoute, Data, Router } from '@angular/router';
 import { takeUntil } from 'rxjs/operators';
 import { RenderResult } from '../../models/cmdb-render';
 import { TableComponent } from '../../../layout/table/table.component';
-import { Column, Sort, SortDirection } from '../../../layout/table/table.types';
+import { Column, Sort, SortDirection, TableConfig } from '../../../layout/table/table.types';
 import { ObjectService } from '../../services/object.service';
 import { CollectionParameters } from '../../../services/models/api-parameter';
 import { HttpResponse } from '@angular/common/http';
@@ -86,6 +86,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   private typeSubject: BehaviorSubject<CmdbType> = new BehaviorSubject<CmdbType>(undefined);
 
   public loading: boolean = false;
+
+  public tableConfig: TableConfig;
 
   public mode: CmdbMode = CmdbMode.Simple;
   public renderForm: FormGroup;
@@ -259,14 +261,16 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
           public_id: { $toString: '$public_id' }
         }
       });
-      or.push({public_id: {
-        $elemMatch: {
-          value: {
-            $regex: String(this.filter),
+      or.push({
+        public_id: {
+          $elemMatch: {
+            value: {
+              $regex: String(this.filter),
               $options: 'ismx'
+            }
           }
         }
-      }});
+      });
       // Search Fields
       or.push({
         fields: {
@@ -325,6 +329,14 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   public onSelectedChange(selectedItems: Array<RenderResult>): void {
     this.selectedObjects = selectedItems.map(m => m.object_information.object_id);
+  }
+
+  public onConfigChange(config: TableConfig): void {
+    this.tableConfig = config;
+  }
+
+  public onConfigSave(config: TableConfig): void {
+    console.log(config);
   }
 
 

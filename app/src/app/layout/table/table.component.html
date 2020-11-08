@@ -8,7 +8,10 @@
       </table-page-size>
     </div>
     <div class="table-config-switch mr-1 ml-1 border-right" *ngIf="configEnabled">
-      <table-config-switch [tableConfigs]="tableConfigs" (configSave)="onConfigSave($event)"></table-config-switch>
+      <table-config-switch [tableConfigs]="tableConfigs" [tableConfig]="tableConfig"
+                           (configSave)="onConfigSave($event)" (configSelect)="configSelect.emit($event)"
+                           (configDelete)="configDelete.emit($event)" (configReset)="configReset.emit()">
+      </table-config-switch>
     </div>
     <div class="table-toggle mr-1 ml-1 border-right" *ngIf="toggleable">
       <table-column-toggle [columns]="columns" (columnsReset)="onColumnsReset()"
@@ -16,8 +19,7 @@
       </table-column-toggle>
     </div>
     <div class="table-search ml-1" *ngIf="searchEnabled">
-      <table-search [debounceTime]="debounceTime" (searchChange)="searchChange.emit($event)">
-      </table-search>
+      <table-search [debounceTime]="debounceTime" (searchChange)="searchChange.emit($event)"></table-search>
     </div>
   </div>
   <table #table layout-table class="table">

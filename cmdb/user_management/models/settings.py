@@ -101,13 +101,13 @@ class UserSettingModel:
     COLLECTION: Collection = 'management.users.settings'
     MODEL: Model = 'UserSetting'
     INDEX_KEYS = [
-        {'keys': [('id', 1), ('user_id', 1)],
-         'name': 'id-user',
+        {'keys': [('resource', 1), ('user_id', 1)],
+         'name': 'resource-user',
          'unique': True}
     ]
 
     SCHEMA: dict = {
-        'id': {
+        'resource': {
             'type': 'string',
             'required': True
         },
@@ -125,19 +125,19 @@ class UserSettingModel:
         }
     }
 
-    __slots__ = 'id', 'user_id', 'payloads', 'setting_type'
+    __slots__ = 'resource', 'user_id', 'payloads', 'setting_type'
 
-    def __init__(self, id: str, user_id: int, payloads: List[UserSettingPayload], setting_type: UserSettingType):
+    def __init__(self, resource: str, user_id: int, payloads: List[UserSettingPayload], setting_type: UserSettingType):
         """
         Constructor of `UserSettingModel`.
 
         Args:
-            id: (str): Identifier or Name of the setting
+            resource: (str): Identifier or Name of the setting
             user_id (int): PublicID of the user
             payloads (list): Setting payloads
             setting_type (UserSettingType): Type of the setting scope.
         """
-        self.id: str = id
+        self.resource: str = resource
         self.user_id: int = user_id
         self.payloads: List[UserSettingPayload] = payloads
         self.setting_type: UserSettingType = setting_type
@@ -159,7 +159,7 @@ class UserSettingModel:
         """
         payloads = [UserSettingPayload.from_data(payload) for payload in data.get('payloads', [])]
         return cls(
-            id=data.get('id'),
+            resource=data.get('resource'),
             user_id=int(data.get('user_id')),
             payloads=payloads,
             setting_type=UserSettingType(data.get('setting_type'))
@@ -191,7 +191,7 @@ class UserSettingModel:
             dict: Return the `UserSettingsModel` as dict.
         """
         return {
-            'id': instance.id,
+            'resource': instance.resource,
             'user_id': instance.user_id,
             'payloads': [UserSettingPayload.to_dict(payload) for payload in instance.payloads],
             'setting_type': instance.setting_type.value

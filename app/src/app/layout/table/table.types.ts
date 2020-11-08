@@ -104,7 +104,11 @@ export interface Column {
   render(data: any, item: any, column?: Column, index?: number);
 }
 
-export interface TableConfig {
+/**
+ * Table config interface.
+ * Used as a `set` of default data for a table.
+ */
+export interface TableConfigData {
   columns: Array<Column>;
   page: number;
   pageSize: number;
@@ -112,26 +116,27 @@ export interface TableConfig {
 }
 
 /**
- * Wrapper interface for a single table config inside the `ObjectTableUserSetting`.
+ * A table config.
+ * Binds the `TableConfigData` to a label/name.
  */
-export interface TableConfigUserSetting {
-  hash?: string;
-  data: TableConfig;
-  label: string;
-  active: boolean;
+export interface TableConfig {
+  data: TableConfigData;
+  name?: string;
 }
 
+
 /**
- * Represents a generic user setting for a specific config.
- * Will normally include into a `UserSetting` as payload.
+ * Table config payload for saving table config data into the user settings.
  */
 export class TableConfigPayload implements UserSettingPayload {
   public id: string;
-  public tableConfigs: Array<TableConfigUserSetting>;
+  public tableConfigs: Array<TableConfig>;
+  public currentTableConfig?: TableConfig;
 
-  public constructor(id: string, configs: Array<TableConfigUserSetting>) {
+  public constructor(id: string, configs: Array<TableConfig>, currentTableConfig?: TableConfig) {
     this.id = id;
     this.tableConfigs = configs;
+    this.currentTableConfig = currentTableConfig;
   }
 
 

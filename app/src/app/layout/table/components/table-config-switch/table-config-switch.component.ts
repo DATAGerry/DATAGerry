@@ -18,7 +18,7 @@
 
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { TableConfigUserSetting } from '../../table.types';
+import { TableConfig } from '../../table.types';
 
 @Component({
   // tslint:disable-next-line:component-selector
@@ -28,19 +28,20 @@ import { TableConfigUserSetting } from '../../table.types';
 })
 export class TableConfigSwitchComponent implements OnInit {
 
-  @Input() public tableConfigs: Array<TableConfigUserSetting> = [];
-  @Input() public currentConfig: TableConfigUserSetting;
+  @Input() public tableConfigs: Array<TableConfig> = [];
 
-  @Output() public configSelect: EventEmitter<TableConfigUserSetting> = new EventEmitter<TableConfigUserSetting>();
-  @Output() public configSave: EventEmitter<TableConfigUserSetting> = new EventEmitter<TableConfigUserSetting>();
-  @Output() public configDelete: EventEmitter<TableConfigUserSetting> = new EventEmitter<TableConfigUserSetting>();
+  @Input() public tableConfig: TableConfig;
+
+  @Output() public configSelect: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
+  @Output() public configSave: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
+  @Output() public configDelete: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
   @Output() public configReset: EventEmitter<void> = new EventEmitter<void>();
 
   public form: FormGroup;
 
   constructor() {
     this.form = new FormGroup({
-      label: new FormControl('', Validators.required)
+      name: new FormControl('', Validators.required)
     });
   }
 
@@ -48,16 +49,13 @@ export class TableConfigSwitchComponent implements OnInit {
   }
 
   /**
-   * Get the label control of the settings.
+   * Get the control of the settings.
    */
-  public get labelControl(): FormControl {
-    return this.form.get('label') as FormControl;
+  public get nameControl(): FormControl {
+    return this.form.get('name') as FormControl;
   }
 
-  public selectConfig(config: TableConfigUserSetting) {
-    for (const conf of this.tableConfigs) {
-      conf.active = conf === config;
-    }
+  public selectConfig(config: TableConfig) {
     this.configSelect.emit(config);
   }
 
@@ -65,14 +63,14 @@ export class TableConfigSwitchComponent implements OnInit {
     this.configReset.emit();
   }
 
-  public saveConfig(label?: string) {
-    const saveTableConfig: TableConfigUserSetting = Object.assign({}, this.currentConfig) as TableConfigUserSetting;
-    saveTableConfig.label = label;
+  public saveConfig(name?: string) {
+    const saveTableConfig: TableConfig = Object.assign({}, this.tableConfig) as TableConfig;
+    saveTableConfig.name = name;
     this.configSave.emit(saveTableConfig);
-    this.labelControl.setValue('');
+    this.nameControl.setValue('');
   }
 
-  public deleteConfig(config: TableConfigUserSetting) {
+  public deleteConfig(config: TableConfig) {
     const index = this.tableConfigs.indexOf(config, 0);
     if (index > -1) {
       this.tableConfigs.splice(index, 1);

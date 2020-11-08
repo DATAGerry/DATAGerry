@@ -28,9 +28,11 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import { Observable, ReplaySubject, merge } from 'rxjs';
-import { Column, Sort, SortDirection, TableConfig, TableConfigUserSetting } from './table.types';
+import { Column, Sort, SortDirection, TableConfigData, TableConfig } from './table.types';
 import { PageLengthEntry } from './components/table-page-size/table-page-size.component';
 import { takeUntil } from 'rxjs/operators';
+import { UserSettingsDBService } from '../../management/user-settings/services/user-settings-db.service';
+import { TableService } from './table.service';
 
 @Component({
   selector: 'cmdb-table',
@@ -101,7 +103,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Input('columns')
   public set Columns(columns: Array<Column>) {
     this.columns = columns;
-    this.initialColumns = Object.assign([], []);
+    this.initialColumns = Object.assign([], columns);
     this.items = [];
   }
 
@@ -212,26 +214,6 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Input() public rowClasses: Array<string> = [];
 
   /**
-   * Event emitter when any config was changed.
-   */
-  @Input() public configEnabled: boolean = true;
-
-  /**
-   * List of possible table configs.
-   */
-  @Input() public tableConfigs: Array<TableConfigUserSetting> = [];
-
-  /**
-   * Event emitter when any config was changed.
-   */
-  @Output() public configChange: EventEmitter<TableConfigUserSetting> = new EventEmitter<TableConfigUserSetting>();
-
-  /**
-   * Current user table config.
-   */
-  @Input() public userTableConfig: TableConfigUserSetting;
-
-  /**
    * Visibility change emitter.
    */
   @Output() public columnVisibilityChange: EventEmitter<Column> = new EventEmitter<Column>();
@@ -261,28 +243,59 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   }
 
   /**
-   * Function when on sort changed emitter.
-   * @param sort
+   * Event emitter when any config was changed.
    */
-  public onSortChange(sort: Sort): void {
-    this.sort = sort;
-    this.sortChange.emit(sort);
+  @Input() public configEnabled: boolean = true;
+
+  /**
+   * List of possible table configs.
+   */
+  @Input() public tableConfigs: Array<TableConfig> = [];
+
+  /**
+   * Current user table config.
+   */
+  @Input() public tableConfig: TableConfig = {
+    data: {
+      columns: [],
+      page: this.initPage,
+      pageSize: this.pageSize,
+      sort: this.sort,
+    } as TableConfigData,
+    active: true
+  } as TableConfig;
+
+  /**
+   * Event emitter when any config was changed.
+   */
+  @Output() public configChange: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
+
+  /**
+   * Config save emit.
+   */
+  @Output() public configSelect: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
+  @Output() public configSave: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
+  @Output() public configDelete: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
+  @Output() public configReset: EventEmitter<void> = new EventEmitter<void>();
+
+  public constructor(private tableService: TableService) {
+
   }
 
   public ngOnInit(): void {
     this.configChangeObservable.pipe(takeUntil(this.subscriber)).subscribe(() => {
-      const tableConfig: TableConfig = {
-        columns: this.columns,
-        page: this.page,
-        pageSize: this.pageSize,
-        sort: this.sort
-      } as TableConfig;
-      this.userTableConfig = {
-        label: '',
-        data: tableConfig,
+      this.tableConfig = {
+        data: {
+          columns: this.columns,
+          page: this.page,
+          pageSize: this.pageSize,
+          sort: this.sort
+        } as TableConfigData,
         active: true
-      } as TableConfigUserSetting;
-      this.configChange.emit(this.userTableConfig);
+      } as TableConfig;
+      if (this.configEnabled) {
+        this.configChange.emit(this.tableConfig);
+      }
     });
     if (isDevMode()) {
       this.pageSizeChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((size: number) => {
@@ -371,17 +384,27 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   }
 
   /**
+   * Function when on sort changed emitter.
+   * @param sort
+   */
+  public onSortChange(sort: Sort): void {
+    this.sort = sort;
+    this.sortChange.emit(sort);
+  }
+
+  /**
    * Page change.
    * @param page new page number
    */
-  public onPageChange(page: number) {
+  public onPageChange(page: number): void {
     this.selectedItems = [];
     this.page = page;
     this.pageChange.emit(page);
   }
 
-  public onConfigSave(config: TableConfigUserSetting) {
-    console.log(config);
+  public async onConfigSave(config: TableConfig) {
+    this.configSave.emit(config);
+    await this.tableService.addTableConfig(this.id, config);
   }
 
   public ngOnDestroy(): void {
