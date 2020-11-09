@@ -65,15 +65,16 @@ export class TableService<C = TableState> implements OnDestroy {
   }
 
   /**
-   * Get a single state from a user setting by its name.
+   * Get a the current table state
    * @param url
    * @param id
-   * @param name
    */
-  public getTableState(url: string, id: string, name: string): Observable<TableState> {
-    return this.getTableStates(url, id).pipe(map((states: Array<TableState>) => {
-      return states.find(state => state.name === name);
-    }));
+  public getTableState(url: string, id: string): Observable<TableState> {
+    return this.indexDB.getSetting(url).pipe(
+      map((setting: UserSetting<TableStatePayload>) => {
+        return setting.payloads.find(payload => payload.id === id).currentState;
+      })
+    );
   }
 
   /**
@@ -89,6 +90,21 @@ export class TableService<C = TableState> implements OnDestroy {
       this.indexDB.updateSetting(setting);
     });
   }
+
+  /**
+   * Set the current table state
+   * @param url
+   * @param id
+   * @param state
+   */
+  public setCurrentTableState(url: string, id: string, state: TableState) {
+    const resource: string = convertResourceURL(url);
+    this.indexDB.getSetting(resource).subscribe((setting: UserSetting<TableStatePayload>) => {
+      setting.payloads.find(payload => payload.id === id).currentState = state;
+      this.indexDB.updateSetting(setting);
+    });
+  }
+
 
   /**
    * Remove a table state from the payload.

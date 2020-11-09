@@ -151,9 +151,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Input('page')
   public set Page(page: number) {
     this.page = page;
-    this.pageChange.emit(page);
   }
-
 
   /**
    * Pagination enabled.
@@ -282,6 +280,17 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
+    this.configChangeObservable.pipe(takeUntil(this.subscriber)).subscribe(() => {
+      this.tableState = {
+        name,
+        page: this.page,
+        pageSize: this.pageSize,
+        sort: this.sort,
+        visibleColumns: this.columns.filter(c => !c.hidden).map(c => c.name)
+      } as TableState;
+      this.tableService.setCurrentTableState(this.router.url, this.id, this.tableState);
+      this.stateChange.emit(this.tableState);
+    });
     if (isDevMode()) {
       this.pageSizeChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((size: number) => {
         console.log(`[TableEvent] Page size changed to: ${ size }`);
@@ -406,18 +415,13 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     this.stateSave.emit(tableState);
   }
 
-  public assignStateSelect(state: TableState): void {
-    this.tableState = state;
-    this.Page = this.tableState.page;
-    this.sort = this.tableState.sort;
-    this.pageSize = this.tableState.pageSize;
-    for (const col of this.columns) {
-      col.hidden = !this.tableState.visibleColumns.includes(col.name);
-    }
-  }
-
+  /**
+   * When state was selected
+   * @param state
+   */
   public onStateSelect(state: TableState): void {
-    this.assignStateSelect(state);
+    this.tableState = state;
+    this.tableService.setCurrentTableState(this.router.url, this.id, state);
     this.stateSelect.emit(state);
   }
 
