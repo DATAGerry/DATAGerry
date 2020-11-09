@@ -170,7 +170,6 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.typeSubject.asObservable().pipe(takeUntil(this.subscriber)).subscribe((type: CmdbType) => {
-      console.log(type);
       this.reload(type);
     });
   }

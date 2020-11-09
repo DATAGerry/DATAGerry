@@ -288,8 +288,10 @@ export class TableComponent<T> implements OnInit, OnDestroy {
         sort: this.sort,
         visibleColumns: this.columns.filter(c => !c.hidden).map(c => c.name)
       } as TableState;
-      this.tableService.setCurrentTableState(this.router.url, this.id, this.tableState);
-      this.stateChange.emit(this.tableState);
+      if (this.stateEnabled) {
+        this.tableService.setCurrentTableState(this.router.url, this.id, this.tableState);
+        this.stateChange.emit(this.tableState);
+      }
     });
     if (isDevMode()) {
       this.pageSizeChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((size: number) => {
