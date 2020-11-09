@@ -43,7 +43,6 @@ with current_app.app_context():
 @system_blueprint.route('/', methods=['GET'])
 @login_required
 @insert_request_user
-@right_required('base.system.view')
 def get_datagerry_information(request_user: UserModel):
     from cmdb import __title__, __version__, __runtime__
 
