@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import copy
 import json
 import logging
 from typing import List
@@ -22,7 +21,6 @@ from typing import List
 import pytz
 
 from datetime import datetime
-from bson import json_util
 
 from flask import abort, jsonify, request, current_app
 
@@ -35,10 +33,13 @@ from cmdb.framework.cmdb_log_manager import LogManagerInsertError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
 from cmdb.framework.managers.type_manager import TypeManager
-from cmdb.interface.response import UpdateMultiResponse, GetListResponse
+from cmdb.framework.results import IterationResult
+from cmdb.framework.utils import Model
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.response import GetMultiResponse, GetListResponse, UpdateMultiResponse
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
-from cmdb.interface.blueprint import RootBlueprint
-from cmdb.manager import ManagerUpdateError, ManagerGetError
+from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
+from cmdb.manager import ManagerIterationError, ManagerGetError, ManagerUpdateError
 from cmdb.user_management import UserModel
 
 with current_app.app_context():
@@ -52,60 +53,73 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
+
+objects_blueprint = APIBlueprint('objects', __name__)
 object_blueprint = RootBlueprint('object_blueprint', __name__, url_prefix='/object')
+
 with current_app.app_context():
     from cmdb.interface.rest_api.framework_routes.object_link_routes import link_rest
 
     object_blueprint.register_nested_blueprint(link_rest)
 
 
-# DEFAULT ROUTES
+@objects_blueprint.route('/', methods=['GET', 'HEAD'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
+@objects_blueprint.parse_collection_parameters(view='native')
+def get_objects(params: CollectionParameters):
+    from cmdb.framework.managers.object_manager import ObjectManager
+    manager = ObjectManager(database_manager=current_app.database_manager)
+    view = params.optional.get('view', 'native')
+    if _fetch_only_active_objs():
+        params.filter.append({'$match': {'active': {"$eq": True}}})
 
-@object_blueprint.route('/', methods=['GET'])
+    try:
+        iteration_result: IterationResult[CmdbObject] = manager.iterate(
+            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+
+        if view == 'native':
+            object_list: List[dict] = [object_.__dict__ for object_ in iteration_result.results]
+            api_response = GetMultiResponse(object_list, total=iteration_result.total, params=params,
+                                            url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
+        elif view == 'render':
+            rendered_list = RenderList(iteration_result.results, None).render_result_list(raw=True)
+            api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
+                                            url=request.url, model=Model('RendeResult'), body=request.method == 'HEAD')
+        else:
+            return abort(401, 'No possible view parameter')
+
+    except ManagerIterationError as err:
+        return abort(400, err.message)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    return api_response.make_response()
+
+
+@object_blueprint.route('/type/<int:public_id>', methods=['GET'])
 @login_required
 @insert_request_user
 @right_required('base.framework.object.view')
-def get_object_list(request_user: UserModel):
-    """
-    get all objects in database
-    Args:
-        request_user: auto inserted user who made the request.
-    Returns:
-        list of rendered objects
-    """
+def get_objects_by_type(public_id, request_user: UserModel):
+    """Return all objects by type_id"""
     try:
-        filter_state = {'sort': 'public_id'}
+        filter_state = {'type_id': public_id}
         if _fetch_only_active_objs():
             filter_state['active'] = {"$eq": True}
 
-        object_list = object_manager.get_objects_by(**filter_state)
+        object_list = object_manager.get_objects_by(sort="type_id", **filter_state)
+    except CMDBError:
+        return abort(400)
 
-        if request.args.get('start') is not None:
-            start = int(request.args.get('start'))
-            length = int(request.args.get('length'))
-            object_list = object_list[start:start + length]
+    if request.args.get('start') is not None:
+        start = int(request.args.get('start'))
+        length = int(request.args.get('length'))
+        object_list = object_list[start:start + length]
 
-    except ObjectManagerGetError as err:
-        LOGGER.error(err.message)
-        return abort(404)
     if len(object_list) < 1:
         return make_response(object_list, 204)
 
     rendered_list = RenderList(object_list, request_user).render_result_list()
-
-    return make_response(rendered_list)
-
-
-@object_blueprint.route('/native', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_native_object_list(request_user: UserModel):
-    try:
-        object_list = object_manager.get_all_objects()
-    except CMDBError:
-        return abort(404)
-    resp = make_response(object_list)
+    resp = make_response(rendered_list)
     return resp
 
 
@@ -225,34 +239,6 @@ def get_dt_filter_objects_by_type(type_id, request_user: UserModel):
         'recordsFiltered': totals
     }
     return make_response(table_response)
-
-
-@object_blueprint.route('/type/<int:public_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_objects_by_type(public_id, request_user: UserModel):
-    """Return all objects by type_id"""
-    try:
-        filter_state = {'type_id': public_id}
-        if _fetch_only_active_objs():
-            filter_state['active'] = {"$eq": True}
-
-        object_list = object_manager.get_objects_by(sort="type_id", **filter_state)
-    except CMDBError:
-        return abort(400)
-
-    if request.args.get('start') is not None:
-        start = int(request.args.get('start'))
-        length = int(request.args.get('length'))
-        object_list = object_list[start:start + length]
-
-    if len(object_list) < 1:
-        return make_response(object_list, 204)
-
-    rendered_list = RenderList(object_list, request_user).render_result_list()
-    resp = make_response(rendered_list)
-    return resp
 
 
 @object_blueprint.route('/type/<string:type_ids>', methods=['GET'])
@@ -903,13 +889,10 @@ def get_latest(request_user: UserModel):
 def get_unstructured_objects(public_id: int, request_user: UserModel):
     """
     HTTP `GET`/`HEAD` route for a multi resources which are not formatted according the type structure.
-
     Args:
         public_id (int): Public ID of the type.
-
     Raises:
         ManagerGetError: When the selected type does not exists or the objects could not be loaded.
-
     Returns:
         GetListResponse: Which includes the json data of multiple objects.
     """
@@ -941,14 +924,11 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
 def update_unstructured_objects(public_id: int, request_user: UserModel):
     """
     HTTP `PUT`/`PATCH` route for a multi resources which will be formatted based on the TypeModel
-
     Args:
         public_id (int): Public ID of the type.
-
     Raises:
         ManagerGetError: When the type with the `public_id` was not found.
         ManagerUpdateError: When something went wrong during the update.
-
     Returns:
         UpdateMultiResponse: Which includes the json data of multiple updated objects.
     """

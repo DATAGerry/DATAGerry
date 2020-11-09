@@ -43,22 +43,22 @@ class UserSettingsManager(AccountManager):
             'Because only a restricted number of settings per user is possible, \
              a limitation and iteration of the query is not necessary.')
 
-    def get_user_setting(self, user_id: int, identifier: str) -> UserSettingModel:
+    def get_user_setting(self, user_id: int, resource: str) -> UserSettingModel:
         """
         Get a single setting from a user by the identifier.
 
         Args:
             user_id (int): PublicID of the user.
-            identifier (str): Name of the setting.
+            resource (str): Name of the setting.
 
         Returns:
             UserSettingModel: Instance of UserSettingModel with data.
         """
 
-        result = self._get(self.collection, filter={'user_id': user_id, 'identifier': identifier}, limit=1)
+        result = self._get(self.collection, filter={'user_id': user_id, 'resource': resource}, limit=1)
         for resource_result in result.limit(-1):
             return UserSettingModel.from_data(resource_result)
-        raise ManagerGetError(f'No setting with the name: {identifier} was found!')
+        raise ManagerGetError(f'No setting with the name: {resource} was found!')
 
     def get_user_settings(self, user_id: PublicID, setting_type: UserSettingType = None) -> List[UserSettingModel]:
         """
@@ -88,14 +88,14 @@ class UserSettingsManager(AccountManager):
             setting = UserSettingModel.to_data(setting)
         return self._insert(self.collection, resource=setting, skip_public=True)
 
-    def update(self, user_id: int, identifier: str, setting: Union[dict, UserSettingModel], *args, **kwargs):
+    def update(self, user_id: int, resource: str, setting: Union[dict, UserSettingModel], *args, **kwargs):
         """
         Update a existing setting in the database.
 
         Args:
             setting (Union[dict, UserSettingModel]): Settings data.
             user_id (int): User of this setting.
-            identifier (str): Identifier of the setting.
+            resource (str): Identifier of the setting.
 
         Notes:
             If a `UserSettingModel` was passed as type argument, \
@@ -103,22 +103,22 @@ class UserSettingsManager(AccountManager):
         """
         if isinstance(setting, UserSettingModel):
             setting = UserSettingModel.to_dict(setting)
-        return self._update(self.collection, filter={'identifier': identifier,
+        return self._update(self.collection, filter={'resource': resource,
                                                      'user_id': user_id}, resource=setting)
 
-    def delete(self, user_id: PublicID, identifier: str, *args, **kwargs):
+    def delete(self, user_id: PublicID, resource: str, *args, **kwargs):
         """
         Delete a existing setting by the tuple of user_id and identifier.
 
         Args:
             user_id (int): PublicID of the user in the database.
-            identifier (str): Name/Identifier of the setting.
+            resource (str): Name/Identifier of the setting.
 
         Returns:
             UserSettingModel: The deleted setting as its model.
         """
-        setting: UserSettingModel = self.get_user_setting(user_id=user_id, identifier=identifier)
-        delete_result = self._delete(self.collection, filter={'user_id': user_id, 'identifier': identifier})
+        setting: UserSettingModel = self.get_user_setting(user_id=user_id, resource=resource)
+        delete_result = self._delete(self.collection, filter={'user_id': user_id, 'resource': resource})
 
         if delete_result.deleted_count == 0:
             raise ManagerDeleteError(err='No user matched this public id')

@@ -18,18 +18,12 @@
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Routes } from '@angular/router';
-
-// FontAwesome Libraries
+import { RouterModule } from '@angular/router';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { far } from '@fortawesome/free-regular-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
-
-// Import Services
 import { BreadcrumbService } from './structure/breadcrumb/breadcrumb.service';
-
-// Import Components
 import { NavigationComponent } from './structure/navigation/navigation.component';
 import { BreadcrumbComponent } from './structure/breadcrumb/breadcrumb.component';
 import { IconPickerComponent } from './helpers/icon-picker/icon-picker.component';
@@ -39,7 +33,6 @@ import { IntroComponent } from './intro/intro.component';
 import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-step-intro.component';
 import { JwPaginationComponent } from 'jw-angular-pagination';
 import { SidebarTypeComponent } from './structure/sidebar/sidebar-type.component';
-import { TableComponent } from './components/table/table.component';
 import { TypeLabelComponent } from './helpers/type-label/type-label.component';
 import { FooterComponent } from './structure/footer/footer.component';
 import { SidebarComponent } from './structure/sidebar/sidebar.component';
@@ -63,8 +56,6 @@ import { FolderPathViewerComponent } from './components/file-explorer/components
 import { MoveDialogComponent } from './components/file-explorer/modal/move-dialog/move-dialog.component';
 import { MetadataInfoComponent } from './components/file-explorer/modal/metadata-info/metadata-info.component';
 import { AttachmentsListModalComponent } from './helpers/modals/attachments-list-modal/attachments-list-modal.component';
-
-// Import Modules
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { SearchBarModule } from '../search/search-bar/search-bar.module';
@@ -73,22 +64,18 @@ import { AuthModule } from '../auth/auth.module';
 import { IconPickerModule } from 'ngx-icon-picker';
 import { DataTablesModule } from 'angular-datatables';
 import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { TableModule } from './components/table/table.module';
 import { RenderModule } from '../framework/render/render.module';
 import { FileexplorerModule } from './components/file-explorer/fileexplorer.module';
-
-// Import Directives
 import { FileDragDropDirective } from './directives/fileDragDrop.directive';
 import { NameDirective } from './directives/name.directive';
 import { LowercaseDirective } from './directives/lowercase.directive';
 import { TableSortEventDirective } from './components/file-explorer/directives/tabletSortEvent.directive';
-
-// Import Pipes
 import { FileSizePipe } from './pipes/file-size.pipe';
 import { NameGuidePipe } from './pipes/name-guide.pipe';
 import { FileExtensionPipe } from './pipes/file-extension.pipe';
 import { CategoryTreeFilterPipe } from './pipes/categoryTreeFilter.pipe';
 import { TypeFilterPipe } from './pipes/typeFilter.pipe';
+import { TableModule } from './table/table.module';
 import { QRCodeModule } from 'angularx-qrcode';
 import { QrCodeComponent } from './helpers/qrcode/qr-code.component';
 import { FeedbackFormComponent } from './components/feedback-form/feedback-form.component';
@@ -102,7 +89,6 @@ import { FeedbackFormComponent } from './components/feedback-form/feedback-form.
     SidebarCategoryComponent,
     ContentHeaderComponent,
     ActiveBadgeComponent,
-    TableComponent,
     GeneralModalComponent,
     IntroComponent,
     TypeLabelComponent,
@@ -147,7 +133,6 @@ import { FeedbackFormComponent } from './components/feedback-form/feedback-form.
     FooterComponent,
     ContentHeaderComponent,
     ActiveBadgeComponent,
-    TableComponent,
     TypeLabelComponent,
     IconPickerComponent,
     ChartsComponent,

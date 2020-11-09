@@ -17,7 +17,7 @@
 """
 Object/Type render
 """
-from typing import List
+from typing import List, Union
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
@@ -305,7 +305,7 @@ class RenderList:
         self.user_manager = UserManager(database_manager=database_manager)
 
     @timing('RenderList')
-    def render_result_list(self) -> List[RenderResult]:
+    def render_result_list(self, raw: bool = False) -> List[Union[RenderResult, dict]]:
         complete_user_list: List[UserModel] = self.user_manager.get_users()
 
         preparation_objects: List[RenderResult] = []
@@ -315,7 +315,10 @@ class RenderList:
                 object_instance=passed_object,
                 render_user=self.request_user, user_list=complete_user_list,
                 object_manager=self.object_manager, dt_render=self.dt_render)
-            current_render_result = tmp_render.result()
+            if raw:
+                current_render_result = tmp_render.result().__dict__
+            else:
+                current_render_result = tmp_render.result()
             preparation_objects.append(current_render_result)
         return preparation_objects
 

@@ -1,0 +1,22 @@
+<div class="d-flex justify-content-between" *ngIf="publicID">
+  <a *permissionLink="'base.framework.object.view'" [routerLink]="['/', 'framework', 'object', 'view', publicID]"
+    title="View object">
+    <i class="far fa-eye"></i>
+  </a>
+  <a *permissionLink="'base.framework.object.add'" [routerLink]="['/', 'framework', 'object', 'copy', publicID]"
+    title="Copy object">
+    <i class="far fa-clone"></i>
+  </a>
+  <a *permissionLink="'base.framework.object.edit'" [routerLink]="['/', 'framework', 'object', 'edit', publicID]"
+    title="Edit object">
+    <i class="far fa-edit"></i>
+  </a>
+  <a *permissionLink="'base.framework.object.view'" class="pointer" (click)="openPreviewModal()"
+    title="Preview object">
+    <i class="far fa-file-powerpoint"></i>
+  </a>
+  <a *permissionLink="'base.framework.object.delete'" class="pointer" (click)="openDeleteModal()"
+    title="Delete object">
+    <i class="far fa-trash-alt"></i>
+  </a>
+</div>

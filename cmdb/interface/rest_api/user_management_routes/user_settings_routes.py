@@ -55,14 +55,14 @@ def get_user_settings(user_id: int):
     return api_response.make_response()
 
 
-@user_settings_blueprint.route('/<string:identifier>', methods=['GET', 'HEAD'])
-def get_user_setting(user_id: int, identifier: str):
+@user_settings_blueprint.route('/<string:resource>', methods=['GET', 'HEAD'])
+def get_user_setting(user_id: int, resource: str):
     """
     HTTP `GET`/`HEAD` route for a single user setting resource.
 
     Args:
         user_id (int): Public ID of the user.
-        identifier (str): Identifier/Name of the user setting.
+        resource (str): Identifier/Name of the user setting.
 
     Raises:
         ManagerGetError: When the selected user setting does not exists.
@@ -75,7 +75,7 @@ def get_user_setting(user_id: int, identifier: str):
     """
     settings_manager = UserSettingsManager(database_manager=current_app.database_manager)
     try:
-        setting: UserSettingModel = settings_manager.get_user_setting(user_id, identifier)
+        setting: UserSettingModel = settings_manager.get_user_setting(user_id, resource)
         api_response = GetSingleResponse(UserSettingModel.to_dict(setting), url=request.url,
                                          model=UserSettingModel.MODEL, body=request.method == 'HEAD')
     except ManagerGetError as err:
@@ -104,25 +104,25 @@ def insert_setting(user_id: int, data: dict):
     try:
         settings_manager.insert(data)
         setting: UserSettingModel = settings_manager.get_user_setting(user_id=user_id,
-                                                                      identifier=data.get('identifier'))
+                                                                      resource=data.get('identifier'))
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerInsertError as err:
         return abort(400, err.message)
-    api_response = InsertSingleResponse(raw=UserSettingModel.to_dict(setting), result_id=setting.identifier,
+    api_response = InsertSingleResponse(raw=UserSettingModel.to_dict(setting), result_id=setting.resource,
                                         url=request.url, model=UserSettingModel.MODEL)
-    return api_response.make_response(prefix=f'users/{user_id}/settings/{setting.identifier}')
+    return api_response.make_response(prefix=f'users/{user_id}/settings/{setting.resource}')
 
 
-@user_settings_blueprint.route('/<string:identifier>', methods=['PUT', 'PATCH'])
+@user_settings_blueprint.route('/<string:resource>', methods=['PUT', 'PATCH'])
 @user_settings_blueprint.validate(UserSettingModel.SCHEMA)
-def update_setting(user_id: int, identifier: str, data: dict):
+def update_setting(user_id: int, resource: str, data: dict):
     """
     HTTP `PUT`/`PATCH` route for update a single user setting resource.
 
     Args:
         user_id (int): Public ID of the user.
-        identifier (str): Identifier/Name of the user setting.
+        resource (str): Identifier/Name of the user setting.
         data (UserModel.SCHEMA): New setting data to update.
 
     Raises:
@@ -135,7 +135,7 @@ def update_setting(user_id: int, identifier: str, data: dict):
     settings_manager: UserSettingsManager = UserSettingsManager(database_manager=current_app.database_manager)
     try:
         setting = UserSettingModel.from_data(data=data)
-        settings_manager.update(user_id=user_id, identifier=identifier, setting=setting)
+        settings_manager.update(user_id=user_id, resource=resource, setting=setting)
         api_response = UpdateSingleResponse(result=data, url=request.url, model=UserSettingModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err.message)
@@ -145,14 +145,14 @@ def update_setting(user_id: int, identifier: str, data: dict):
     return api_response.make_response()
 
 
-@user_settings_blueprint.route('/<string:identifier>', methods=['DELETE'])
-def delete_setting(user_id: int, identifier: str):
+@user_settings_blueprint.route('/<string:resource>', methods=['DELETE'])
+def delete_setting(user_id: int, resource: str):
     """
     HTTP `DELETE` route for delete a single user setting resource.
 
     Args:
         user_id (int): Public ID of the user.
-        identifier (str): Identifier/Name of the user setting.
+        resource (str): Identifier/Name of the user setting.
 
     Raises:
         ManagerGetError: When the setting with the `identifier` was not found.
@@ -163,7 +163,7 @@ def delete_setting(user_id: int, identifier: str):
     """
     settings_manager: UserSettingsManager = UserSettingsManager(database_manager=current_app.database_manager)
     try:
-        deleted_setting = settings_manager.delete(user_id=user_id, identifier=identifier)
+        deleted_setting = settings_manager.delete(user_id=user_id, resource=resource)
         api_response = DeleteSingleResponse(raw=UserSettingModel.to_dict(deleted_setting), model=UserSettingModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err.message)

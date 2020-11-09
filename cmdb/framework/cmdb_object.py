@@ -18,6 +18,7 @@ import logging
 
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.cmdb_errors import FieldNotFoundError
+from cmdb.framework.utils import Collection, Model
 
 try:
     from cmdb.utils.error import CMDBError
@@ -31,7 +32,8 @@ class CmdbObject(CmdbDAO):
     """The CMDB object is the basic data wrapper for storing and holding the pure objects within the CMDB.
     """
 
-    COLLECTION = 'framework.objects'
+    COLLECTION: Collection = 'framework.objects'
+    MODEL: Model = 'Object'
     REQUIRED_INIT_KEYS = [
         'type_id',
         'creation_time',
@@ -70,6 +72,19 @@ class CmdbObject(CmdbDAO):
             raise TypeError("Not the same class")
         return {**{'old': [i for i in self.fields if i not in other.fields]},
                 **{'new': [j for j in other.fields if j not in self.fields]}}
+
+    @classmethod
+    def from_data(cls, data: dict, *args, **kwargs) -> "CmdbObject":
+        return cls(
+            type_id=data.get('type_id'),
+            version=data.get('version'),
+            creation_time=data.get('creation_time'),
+            author_id=data.get('author_id'),
+            last_edit_time=data.get('last_edit_time', None),
+            active=data.get('active'),
+            fields=data.get('fields', []),
+            public_id=data.get('public_id')
+        )
 
     def get_type_id(self) -> int:
         """get input_type if of this object

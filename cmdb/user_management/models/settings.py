@@ -17,7 +17,7 @@
 from datetime import datetime
 from enum import Enum
 from json import dumps
-from typing import Any
+from typing import Any, List
 from pymongo import IndexModel
 
 from cmdb.data_storage.database_utils import default
@@ -101,13 +101,13 @@ class UserSettingModel:
     COLLECTION: Collection = 'management.users.settings'
     MODEL: Model = 'UserSetting'
     INDEX_KEYS = [
-        {'keys': [('identifier', 1), ('user_id', 1)],
-         'name': 'identifier-user',
+        {'keys': [('resource', 1), ('user_id', 1)],
+         'name': 'resource-user',
          'unique': True}
     ]
 
     SCHEMA: dict = {
-        'identifier': {
+        'resource': {
             'type': 'string',
             'required': True
         },
@@ -115,8 +115,8 @@ class UserSettingModel:
             'type': 'integer',
             'required': True
         },
-        'payload': {
-            'type': 'dict',
+        'payloads': {
+            'type': 'list',
             'required': False
         },
         'setting_type': {
@@ -125,21 +125,21 @@ class UserSettingModel:
         }
     }
 
-    __slots__ = 'identifier', 'user_id', 'payload', 'setting_type'
+    __slots__ = 'resource', 'user_id', 'payloads', 'setting_type'
 
-    def __init__(self, identifier: str, user_id: int, payload: UserSettingPayload, setting_type: UserSettingType):
+    def __init__(self, resource: str, user_id: int, payloads: List[UserSettingPayload], setting_type: UserSettingType):
         """
         Constructor of `UserSettingModel`.
 
         Args:
-            identifier: (str): Identifier or Name of the setting
+            resource: (str): Identifier or Name of the setting
             user_id (int): PublicID of the user
-            payload (UserSettingPayload): Setting payload
+            payloads (list): Setting payloads
             setting_type (UserSettingType): Type of the setting scope.
         """
-        self.identifier: str = identifier
+        self.resource: str = resource
         self.user_id: int = user_id
-        self.payload: UserSettingPayload = payload
+        self.payloads: List[UserSettingPayload] = payloads
         self.setting_type: UserSettingType = setting_type
 
     @classmethod
@@ -157,10 +157,11 @@ class UserSettingModel:
         Returns:
             UserSettingModel: Instance of `UserSettingsModel`.
         """
+        payloads = [UserSettingPayload.from_data(payload) for payload in data.get('payloads', [])]
         return cls(
-            identifier=data.get('identifier'),
+            resource=data.get('resource'),
             user_id=int(data.get('user_id')),
-            payload=UserSettingPayload.from_data(data=data.get('payload', None)),
+            payloads=payloads,
             setting_type=UserSettingType(data.get('setting_type'))
         )
 
@@ -190,8 +191,8 @@ class UserSettingModel:
             dict: Return the `UserSettingsModel` as dict.
         """
         return {
-            'identifier': instance.identifier,
+            'resource': instance.resource,
             'user_id': instance.user_id,
-            'payload': UserSettingPayload.to_dict(instance.payload),
+            'payloads': [UserSettingPayload.to_dict(payload) for payload in instance.payloads],
             'setting_type': instance.setting_type.value
         }

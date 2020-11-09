@@ -24,11 +24,12 @@ import { Observable } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { map } from 'rxjs/operators';
 import { RenderResult } from '../models/cmdb-render';
-import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { DataTableFilter, DataTablesResult } from '../models/cmdb-datatable';
 import { GeneralModalComponent } from '../../layout/helpers/modals/general-modal/general-modal.component';
+import { CollectionParameters } from '../../services/models/api-parameter';
+import { APIGetListResponse, APIGetMultiResponse } from '../../services/models/api-response';
 import { CmdbType } from '../models/cmdb-type';
-import { APIGetListResponse, APIGetSingleResponse } from '../../services/models/api-response';
 
 export const httpObjectObserveOptions = {
   headers: new HttpHeaders({
@@ -38,42 +39,48 @@ export const httpObjectObserveOptions = {
 };
 
 export const PARAMETER = 'params';
-export const FILTER = 'filter';
 export const COOCKIENAME = 'onlyActiveObjCookie';
 
 @Injectable({
   providedIn: 'root'
 })
 
-export class ObjectService<T = RenderResult> implements ApiService {
+export class ObjectService<T = CmdbObject | RenderResult> implements ApiService {
 
   public servicePrefix: string = 'object';
+  public newServicePrefix: string = 'objects';
+
+  public readonly options = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    }),
+    params: {},
+    observe: resp
+  };
 
   constructor(private api: ApiCallService, private http: HttpClient, private modalService: NgbModal) {
   }
 
-  // Find calls
-  public getObjects(typeID: number, filter: DataTableFilter): Observable<T[]> {
-    httpObjectObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    httpObjectObserveOptions[PARAMETER].start = filter.start;
-    httpObjectObserveOptions[PARAMETER].length = filter.length;
-    httpObjectObserveOptions[PARAMETER].order = filter.orderBy;
-    httpObjectObserveOptions[PARAMETER].direction = filter.direction;
-    httpObjectObserveOptions[FILTER] = filter;
-    if (typeID != null) {
-      return this.api.callGet<T[]>(`${ this.servicePrefix }/dt/type/${ typeID }`, httpObjectObserveOptions).pipe(
-        map((apiResponse) => {
-          if (apiResponse.status === 204) {
-            return [];
-          }
-          return apiResponse.body;
-        })
-      );
+  public getObjects(params: CollectionParameters = { filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1 }, view: string = 'render'):
+    Observable<HttpResponse<APIGetMultiResponse<T>>> {
+    const options = this.options;
+    let httpParams: HttpParams = new HttpParams();
+    if (params.filter !== undefined) {
+      const filter = JSON.stringify(params.filter);
+      httpParams = httpParams.set('filter', filter);
     }
+    httpParams = httpParams.set('limit', params.limit.toString());
+    httpParams = httpParams.set('sort', params.sort);
+    httpParams = httpParams.set('order', params.order.toString());
+    httpParams = httpParams.set('page', params.page.toString());
 
-    return this.api.callGet<T[]>(`${ this.servicePrefix }/`, httpObjectObserveOptions).pipe(
-      map((apiResponse) => {
-        return apiResponse.body;
+    httpParams = httpParams.set('view', view);
+    httpParams = httpParams.set('onlyActiveObjCookie', this.api.readCookies(COOCKIENAME));
+    options.params = httpParams;
+
+    return this.api.callGet<Array<T>>(this.newServicePrefix + '/', options).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return apiResponse;
       })
     );
   }
@@ -139,7 +146,11 @@ export class ObjectService<T = RenderResult> implements ApiService {
   }
 
   public deleteObject(publicID: any): Observable<any> {
-    return this.api.callDelete(`${ this.servicePrefix }/${ publicID }`);
+    return this.api.callDelete(`${ this.servicePrefix }/${ publicID }`).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
   }
 
   // Count calls

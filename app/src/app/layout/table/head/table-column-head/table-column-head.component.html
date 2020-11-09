@@ -1,0 +1,7 @@
+{{column.display ? column.display : column.name}}
+<ng-container *ngIf="column.sortable">
+  <i class="fas fa-sort" *ngIf="order === 0"></i>
+  <i class="fas fa-sort-amount-up" *ngIf="order === 1"></i>
+  <i class="fas fa-sort-amount-down" *ngIf="order === -1"></i>
+</ng-container>
+
