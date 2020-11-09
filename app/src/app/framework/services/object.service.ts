@@ -61,7 +61,9 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   constructor(private api: ApiCallService, private http: HttpClient, private modalService: NgbModal) {
   }
 
-  public getObjects(params: CollectionParameters = { filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1 }, view: string = 'render'):
+  public getObjects(
+    params: CollectionParameters = { filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1 },
+    view: string = 'render'):
     Observable<HttpResponse<APIGetMultiResponse<T>>> {
     const options = this.options;
     let httpParams: HttpParams = new HttpParams();
