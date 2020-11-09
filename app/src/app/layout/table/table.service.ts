@@ -90,9 +90,22 @@ export class TableService<C = TableState> implements OnDestroy {
     });
   }
 
-  public removeTableState(url: string, id: string, state?) {
+  /**
+   * Remove a table state from the payload.
+   * @param url
+   * @param id
+   * @param state
+   */
+  public removeTableState(url: string, id: string, state: TableState) {
     const resource: string = convertResourceURL(url);
-
+    this.indexDB.getSetting(resource).subscribe((setting: UserSetting<TableStatePayload>) => {
+      const states = setting.payloads.find(payload => payload.id === id).tableStates;
+      const stateIdx = states.findIndex(s => s.name === state.name);
+      if (stateIdx > -1) {
+        states.splice(stateIdx, 1);
+        this.indexDB.updateSetting(setting);
+      }
+    });
   }
 
   public ngOnDestroy(): void {

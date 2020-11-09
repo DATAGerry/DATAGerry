@@ -138,7 +138,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   public initPage: number = 1;
 
   @Input('initPage')
-  public set Page(page: number) {
+  public set InitPage(page: number) {
     this.initPage = page;
     this.page = page;
   }
@@ -146,7 +146,14 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   /**
    * Current displayed page number.
    */
-  public page: number = 1;
+  public page: number = this.initPage;
+
+  @Input('page')
+  public set Page(page: number) {
+    this.page = page;
+    this.pageChange.emit(page);
+  }
+
 
   /**
    * Pagination enabled.
@@ -385,15 +392,42 @@ export class TableComponent<T> implements OnInit, OnDestroy {
    * @param name
    */
   public onStateSave(name: string): void {
+    const columns = this.columns.filter(c => !c.hidden).map(c => c.name);
     const tableState = {
       name,
-      page: this.page
+      page: this.page,
+      pageSize: this.pageSize,
+      sort: this.sort,
+      visibleColumns: columns
     } as TableState;
+    this.tableState = tableState;
+    this.tableStates.push(tableState);
     this.tableService.addTableState(this.router.url, this.id, tableState);
+    this.stateSave.emit(tableState);
   }
 
-  public onStateDelete(name: string): void {
-    this.tableService.removeTableState(this.router.url, this.id, name);
+  public assignStateSelect(state: TableState): void {
+    this.tableState = state;
+    this.Page = this.tableState.page;
+    this.sort = this.tableState.sort;
+    this.pageSize = this.tableState.pageSize;
+    for (const col of this.columns) {
+      col.hidden = !this.tableState.visibleColumns.includes(col.name);
+    }
+  }
+
+  public onStateSelect(state: TableState): void {
+    this.assignStateSelect(state);
+    this.stateSelect.emit(state);
+  }
+
+  /**
+   * Delete a state from the setting.
+   * @param state
+   */
+  public onStateDelete(state: TableState): void {
+    this.tableService.removeTableState(this.router.url, this.id, state);
+    this.stateDelete.emit(state);
   }
 
   public ngOnDestroy(): void {

@@ -1,10 +1,19 @@
+@import "~src/scss/variables";
+
 .config-item {
   font-size: 0.875rem;
+
+  > i {
+    &:hover {
+      color: theme-color("primary");
+    }
+  }
 }
 
 .config-dropdown {
   min-width: 250px;
-  .form-inline, .input-group{
+
+  .form-inline, .input-group {
     width: 100%;
   }
 }

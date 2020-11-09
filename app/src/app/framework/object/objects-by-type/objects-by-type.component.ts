@@ -133,9 +133,11 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         this.tableStates = userSettingPayloads.tableStates;
         this.tableState = userSettingPayloads.currentState;
       } else {
+        this.tableStates = [];
+        this.tableState = undefined;
         const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
         const resource: string = convertResourceURL(this.router.url.toString());
-        const userSetting = userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload])
+        const userSetting = userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
         this.indexDB.addSetting(userSetting);
       }
 

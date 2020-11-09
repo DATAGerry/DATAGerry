@@ -26,7 +26,7 @@ import { TableState } from '../../table.types';
   templateUrl: './table-state.component.html',
   styleUrls: ['./table-state.component.scss']
 })
-export class TableStateComponent implements OnInit {
+export class TableStateComponent {
 
   /**
    * Current possible table states
@@ -38,20 +38,35 @@ export class TableStateComponent implements OnInit {
    */
   @Input() public currentState: TableState;
 
+  /**
+   * State selection event emitter.
+   */
   @Output() public stateSelect: EventEmitter<TableState> = new EventEmitter<TableState>();
+
+  /**
+   * State save event emitter.
+   */
   @Output() public stateSave: EventEmitter<string> = new EventEmitter<string>();
+
+  /**
+   * State delete event emitter.
+   */
   @Output() public stateDelete: EventEmitter<TableState> = new EventEmitter<TableState>();
+
+  /**
+   * State reset event emitter.
+   */
   @Output() public stateReset: EventEmitter<void> = new EventEmitter<void>();
 
+  /**
+   * Name form validation
+   */
   public form: FormGroup;
 
   constructor() {
     this.form = new FormGroup({
       name: new FormControl('', Validators.required)
     });
-  }
-
-  public ngOnInit(): void {
   }
 
   /**
@@ -61,25 +76,44 @@ export class TableStateComponent implements OnInit {
     return this.form.get('name') as FormControl;
   }
 
+  /**
+   * On state selection change.
+   * @param state
+   */
   public selectState(state: TableState) {
     this.stateSelect.emit(state);
   }
 
+  /**
+   * Reset to a existing state.
+   */
   public resetState() {
     this.stateReset.emit();
   }
 
-  public saveState(name?: string) {
+  /**
+   * Save new state
+   * @param name
+   * @param event
+   */
+  public saveState(name: string, event: Event) {
+    event.stopPropagation();
     this.stateSave.emit(name);
     this.nameControl.setValue('');
   }
 
-  public deleteState(config: TableState) {
-    const index = this.tableStates.indexOf(config, 0);
+  /**
+   * Delete a existing state.
+   * @param state
+   * @param event
+   */
+  public deleteState(state: TableState, event: Event) {
+    event.stopPropagation();
+    const index = this.tableStates.indexOf(state, 0);
     if (index > -1) {
       this.tableStates.splice(index, 1);
     }
-    this.stateDelete.emit(config);
+    this.stateDelete.emit(state);
   }
 
 }

@@ -110,9 +110,7 @@ export interface Column {
  */
 export interface TableState {
   name?: string;
-  timestamp?: string;
-  filter?: string;
-  visible_columns?: Array<string>;
+  visibleColumns?: Array<string>;
   page?: number;
   pageSize?: number;
   sort?: Sort;

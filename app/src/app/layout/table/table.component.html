@@ -9,8 +9,8 @@
     </div>
     <div class="table-config-switch mr-1 ml-1 border-right" *ngIf="stateEnabled">
       <table-state [tableStates]="tableStates" [currentState]="tableState"
-                   (stateSave)="onStateSave($event)" (stateSelect)="stateSelect.emit($event)"
-                   (stateDelete)="stateDelete.emit($event)" (stateReset)="stateReset.emit()">
+                   (stateSave)="onStateSave($event)" (stateSelect)="onStateSelect($event)"
+                   (stateDelete)="onStateDelete($event)" (stateReset)="stateReset.emit()">
       </table-state>
     </div>
     <div class="table-toggle mr-1 ml-1 border-right" *ngIf="toggleable">
@@ -65,7 +65,7 @@
                   [selectEnabled]="selectEnabled" [selected]="selectedItems.length"></table-info>
     </div>
     <div *ngIf="paginationEnabled">
-      <table-pagination [currentPage]="initPage" [totalItems]="totalItems" [pageSize]="pageSize"
+      <table-pagination [currentPage]="page" [totalItems]="totalItems" [pageSize]="pageSize"
                         (pageChange)="onPageChange($event)">
       </table-pagination>
     </div>
