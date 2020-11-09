@@ -29,12 +29,20 @@ import { convertResourceURL } from '../../management/user-settings/services/user
 })
 export class TableService<C = TableConfig> implements OnDestroy {
 
+  /**
+   * Component un-subscriber.
+   * @private
+   */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   constructor(private indexDB: UserSettingsDBService<UserSetting, TableConfigPayload>) {
-
   }
 
+  /**
+   * Get the table payload from a user setting.
+   * @param url
+   * @param id
+   */
   public getTableConfigPayload(url: string, id: string): Observable<TableConfigPayload> {
     return this.indexDB.getSetting(url).pipe(
       map((setting: UserSetting<TableConfigPayload>) => {
@@ -43,6 +51,11 @@ export class TableService<C = TableConfig> implements OnDestroy {
     );
   }
 
+  /**
+   * Get all configs from a user setting.
+   * @param url
+   * @param id
+   */
   public getTableConfigs(url: string, id: string): Observable<Array<TableConfig>> {
     return this.indexDB.getSetting(url).pipe(
       map((setting: UserSetting<TableConfigPayload>) => {
@@ -51,40 +64,32 @@ export class TableService<C = TableConfig> implements OnDestroy {
     );
   }
 
+  /**
+   * Get a single config from a user setting by its name.
+   * @param url
+   * @param id
+   * @param name
+   */
   public getTableConfig(url: string, id: string, name: string): Observable<TableConfig> {
     return this.getTableConfigs(url, id).pipe(map((configs: Array<TableConfig>) => {
       return configs.find(config => config.name === name);
     }));
   }
 
+  /**
+   * Add a table config to a user setting.
+   * @param url
+   * @param id
+   * @param config
+   */
   public addTableConfig(url: string, id: string, config: TableConfig) {
     const resource: string = convertResourceURL(url);
     this.indexDB.getSetting(resource).subscribe((setting: UserSetting<TableConfigPayload>) => {
-      config.data = this.simpleStringify(config.data);
       setting.payloads.find(payload => payload.id === id).tableConfigs.push(config);
       this.indexDB.updateSetting(setting);
     });
 
   }
-
-  // TODO FIX JSON ENCODING PROBLEM FOR FUNCTIONS
-  public simpleStringify(object) {
-    const simpleObject = {};
-    for (const prop in object) {
-      if (!object.hasOwnProperty(prop)) {
-        continue;
-      }
-      if (typeof (object[prop]) === 'object') {
-        continue;
-      }
-      if (typeof (object[prop]) === 'function') {
-        continue;
-      }
-      simpleObject[prop] = object[prop];
-    }
-    return JSON.stringify(simpleObject); // returns cleaned up JSON
-  }
-
 
   public ngOnDestroy(): void {
     this.subscriber.next();

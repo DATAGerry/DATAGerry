@@ -46,6 +46,7 @@
 <cmdb-table [items]="results" [totalItems]="totalResults" [columns]="columns" [sort]="sort" [toggleable]="true"
             [initPage]="initPage" [rowClasses]="['align-middle']" [pageSize]="limit" [id]="id" [tableConfigs]="tableConfigs"
             [selectEnabled]="true" [loading]="loading" [emptyMessage]="'There are no objects for this type yet!'"
+            [configEnabled]="false"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
             (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)"
             (searchChange)="onSearchChange($event)" (configChange)="onConfigChange($event)">

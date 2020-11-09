@@ -245,7 +245,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   /**
    * Event emitter when any config was changed.
    */
-  @Input() public configEnabled: boolean = true;
+  @Input() public configEnabled: boolean = false;
 
   /**
    * List of possible table configs.
@@ -400,10 +400,21 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     this.pageChange.emit(page);
   }
 
+  /**
+   * Save table config over `TableService`.
+   * Reduce the columns to `name` and `hidden`.
+   * @param config
+   */
   public async onConfigSave(config: TableConfig) {
-    console.log(config);
-    this.configSave.emit(config);
-    await this.tableService.addTableConfig(this.router.url, this.id, config);
+    const configData = {} as TableConfigData;
+
+    const saveConfig = {
+      name: config.name,
+      data: configData
+    } as TableConfig;
+    console.log(saveConfig);
+    // this.configSave.emit(config);
+    // await this.tableService.addTableConfig(this.router.url, this.id, config);
   }
 
   public ngOnDestroy(): void {

@@ -120,12 +120,11 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
               private fileService: FileService, private fileSaverService: FileSaverService, private toastService: ToastService,
               private sidebarService: SidebarService, private modalService: NgbModal) {
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
-      console.log(data);
-      const userSettingPayloads = (data.userSetting as UserSetting<TableConfigPayload>).payloads
-        .find(payloads => payloads.id === this.id);
+      // const userSettingPayloads = (data.userSetting as UserSetting<TableConfigPayload>).payloads
+      // .find(payloads => payloads.id === this.id);
 
-      this.tableConfigs = userSettingPayloads.tableConfigs;
-      this.tableConfig = userSettingPayloads.currentTableConfig;
+      // this.tableConfigs = userSettingPayloads.tableConfigs;
+      // this.tableConfig = userSettingPayloads.currentTableConfig;
       this.typeSubject.next(data.type as CmdbType);
     });
     this.fileService.callFileFormatRoute().subscribe(data => {

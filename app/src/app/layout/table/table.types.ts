@@ -120,7 +120,7 @@ export interface TableConfigData {
  * Binds the `TableConfigData` to a label/name.
  */
 export interface TableConfig {
-  data: TableConfigData | string;
+  data: TableConfigData;
   name?: string;
 }
 
