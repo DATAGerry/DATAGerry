@@ -31,8 +31,8 @@ import { Observable, ReplaySubject, merge } from 'rxjs';
 import { Column, Sort, SortDirection, TableConfigData, TableConfig } from './table.types';
 import { PageLengthEntry } from './components/table-page-size/table-page-size.component';
 import { takeUntil } from 'rxjs/operators';
-import { UserSettingsDBService } from '../../management/user-settings/services/user-settings-db.service';
 import { TableService } from './table.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'cmdb-table',
@@ -261,8 +261,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
       page: this.initPage,
       pageSize: this.pageSize,
       sort: this.sort,
-    } as TableConfigData,
-    active: true
+    } as TableConfigData
   } as TableConfig;
 
   /**
@@ -278,7 +277,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Output() public configDelete: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
   @Output() public configReset: EventEmitter<void> = new EventEmitter<void>();
 
-  public constructor(private tableService: TableService) {
+  public constructor(private tableService: TableService, private router: Router) {
 
   }
 
@@ -290,8 +289,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
           page: this.page,
           pageSize: this.pageSize,
           sort: this.sort
-        } as TableConfigData,
-        active: true
+        } as TableConfigData
       } as TableConfig;
       if (this.configEnabled) {
         this.configChange.emit(this.tableConfig);
@@ -403,8 +401,9 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   }
 
   public async onConfigSave(config: TableConfig) {
+    console.log(config);
     this.configSave.emit(config);
-    await this.tableService.addTableConfig(this.id, config);
+    await this.tableService.addTableConfig(this.router.url, this.id, config);
   }
 
   public ngOnDestroy(): void {

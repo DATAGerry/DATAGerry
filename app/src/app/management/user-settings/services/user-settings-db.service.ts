@@ -23,8 +23,6 @@ import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { UserSetting, UserSettingPayload } from '../models/user-setting';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { AuthService } from '../../../auth/services/auth.service';
-import { Router } from '@angular/router';
 import { User } from '../../models/user';
 
 @Injectable({
@@ -53,8 +51,7 @@ export class UserSettingsDBService<T = UserSetting, P = UserSettingPayload> impl
   private newSettings: Subject<UserSetting> = new Subject<UserSetting>();
 
   constructor(private dbService: NgxIndexedDBService<UserSetting<P>>,
-              private userSettingsService: UserSettingsService<UserSetting<P>>,
-              private router: Router) {
+              private userSettingsService: UserSettingsService<UserSetting<P>>) {
     this.newSettings.asObservable().pipe(takeUntil(this.subscriber)).subscribe();
     this.currentUser = this.userSettingsService.currentUser;
   }
@@ -69,19 +66,6 @@ export class UserSettingsDBService<T = UserSetting, P = UserSettingPayload> impl
     for (const setting of settings) {
       await this.dbService.add(this.storeName, setting);
     }
-  }
-
-  public get currentResourceURL(): string {
-    return this.router.url.toString().substring(1).split('/').join('-');
-  }
-
-  /**
-   * Create a user setting.
-   * @param payloads
-   */
-  public createUserSetting<PAYLOAD>(payloads: Array<PAYLOAD>): UserSetting<PAYLOAD> {
-    const resource = this.router.url.toString().substring(1).split('/').join('-');
-    return new UserSetting<PAYLOAD>(resource, this.currentUser.public_id, payloads);
   }
 
   /**

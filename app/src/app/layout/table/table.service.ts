@@ -16,17 +16,20 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { UserSettingsDBService } from '../../management/user-settings/services/user-settings-db.service';
 import { TableConfig, TableConfigPayload } from './table.types';
-import { Observable } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 import { UserSetting } from '../../management/user-settings/models/user-setting';
 import { map } from 'rxjs/operators';
+import { convertResourceURL } from '../../management/user-settings/services/user-settings.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class TableService<C = TableConfig> {
+export class TableService<C = TableConfig> implements OnDestroy {
+
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   constructor(private indexDB: UserSettingsDBService<UserSetting, TableConfigPayload>) {
 
@@ -54,11 +57,38 @@ export class TableService<C = TableConfig> {
     }));
   }
 
-  public async addTableConfig(id: string, config: TableConfig): Promise<void> {
-    const resource: string = this.indexDB.currentResourceURL;
-    console.log(resource);
-    const sett = await this.indexDB.getSetting(resource);
+  public addTableConfig(url: string, id: string, config: TableConfig) {
+    const resource: string = convertResourceURL(url);
+    this.indexDB.getSetting(resource).subscribe((setting: UserSetting<TableConfigPayload>) => {
+      config.data = this.simpleStringify(config.data);
+      setting.payloads.find(payload => payload.id === id).tableConfigs.push(config);
+      this.indexDB.updateSetting(setting);
+    });
 
+  }
+
+  // TODO FIX JSON ENCODING PROBLEM FOR FUNCTIONS
+  public simpleStringify(object) {
+    const simpleObject = {};
+    for (const prop in object) {
+      if (!object.hasOwnProperty(prop)) {
+        continue;
+      }
+      if (typeof (object[prop]) === 'object') {
+        continue;
+      }
+      if (typeof (object[prop]) === 'function') {
+        continue;
+      }
+      simpleObject[prop] = object[prop];
+    }
+    return JSON.stringify(simpleObject); // returns cleaned up JSON
+  }
+
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
 }

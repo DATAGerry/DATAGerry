@@ -27,7 +27,7 @@ import { ActivatedRoute, Data, Router } from '@angular/router';
 import { takeUntil } from 'rxjs/operators';
 import { RenderResult } from '../../models/cmdb-render';
 import { TableComponent } from '../../../layout/table/table.component';
-import { Column, Sort, SortDirection, TableConfig } from '../../../layout/table/table.types';
+import { Column, Sort, SortDirection, TableConfig, TableConfigPayload } from '../../../layout/table/table.types';
 import { ObjectService } from '../../services/object.service';
 import { CollectionParameters } from '../../../services/models/api-parameter';
 import { HttpResponse } from '@angular/common/http';
@@ -42,6 +42,7 @@ import { SidebarService } from '../../../layout/services/sidebar.service';
 import { ObjectDeleteModalComponent } from '../modals/object-delete-modal/object-delete-modal.component';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectsDeleteModalComponent } from '../modals/objects-delete-modal/objects-delete-modal.component';
+import { UserSetting } from '../../../management/user-settings/models/user-setting';
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -49,6 +50,8 @@ import { ObjectsDeleteModalComponent } from '../modals/objects-delete-modal/obje
   styleUrls: ['./objects-by-type.component.scss']
 })
 export class ObjectsByTypeComponent implements OnInit, OnDestroy {
+
+  public readonly id: string = 'table-objects-type';
 
   /**
    * Table component.
@@ -88,6 +91,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   public loading: boolean = false;
 
   public tableConfig: TableConfig;
+  public tableConfigs: Array<TableConfig> = [];
 
   public mode: CmdbMode = CmdbMode.Simple;
   public renderForm: FormGroup;
@@ -116,6 +120,12 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
               private fileService: FileService, private fileSaverService: FileSaverService, private toastService: ToastService,
               private sidebarService: SidebarService, private modalService: NgbModal) {
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
+      console.log(data);
+      const userSettingPayloads = (data.userSetting as UserSetting<TableConfigPayload>).payloads
+        .find(payloads => payloads.id === this.id);
+
+      this.tableConfigs = userSettingPayloads.tableConfigs;
+      this.tableConfig = userSettingPayloads.currentTableConfig;
       this.typeSubject.next(data.type as CmdbType);
     });
     this.fileService.callFileFormatRoute().subscribe(data => {
@@ -334,11 +344,6 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   public onConfigChange(config: TableConfig): void {
     this.tableConfig = config;
   }
-
-  public onConfigSave(config: TableConfig): void {
-    console.log(config);
-  }
-
 
   public exportingFiles(exportType: any) {
     if (this.selectedObjects.length === 0) {

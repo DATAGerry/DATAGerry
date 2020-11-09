@@ -18,17 +18,18 @@
         </span>
       </span>
       <div class="dropdown-divider"></div>
-      <!-- Set default -->
-      <span class="dropdown-item pointer config-item" (click)="resetConfig()">
-        <i class="fas fa-redo"></i>  Default
-      </span>
       <!-- List config -->
       <span class="dropdown-item pointer config-item"
           *ngFor="let tableConfig of tableConfigs"
           (click)="selectConfig(tableConfig)">
-        {{tableConfig?.name}}
+        Test
         <i class="far fa-trash-alt config-item-icon" (click)="deleteConfig(tableConfig)"></i>
         <span class="clearfix"></span>
+      </span>
+      <div class="dropdown-divider"></div>
+      <!-- Set default -->
+      <span class="dropdown-item pointer config-item" (click)="resetConfig()">
+        <i class="fas fa-redo"></i>  Default
       </span>
     </div>
   </form>

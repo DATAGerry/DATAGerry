@@ -17,20 +17,23 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService } from '../../../services/api-call.service';
+import { ApiCallService, ApiService, resp } from '../../../services/api-call.service';
 import { UserSetting, UserSettingPayload } from '../models/user-setting';
 import { AuthService } from '../../../auth/services/auth.service';
 import { User } from '../../models/user';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { HttpResponse } from '@angular/common/http';
+import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import {
   APIDeleteSingleResponse,
   APIGetListResponse, APIGetSingleResponse,
   APIInsertSingleResponse,
   APIUpdateSingleResponse
 } from '../../../services/models/api-response';
-import { Router } from '@angular/router';
+
+export function convertResourceURL(url: string): string {
+  return url.substring(1).split('/').join('-');
+}
 
 /**
  * Service class for API user settings.
@@ -50,6 +53,14 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
    */
   public readonly currentUser: User;
 
+  public readonly options = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    }),
+    params: {},
+    observe: resp
+  };
+
   /**
    * Constructor of `UserSettingsService`.
    * Generates the servicePrefix as `users/{USER_ID}/settings`.
@@ -65,10 +76,21 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
   }
 
   /**
+   * Create a user setting.
+   * @param resource
+   * @param payloads
+   */
+  public createUserSetting<PAYLOAD>(resource: string, payloads: Array<PAYLOAD>): UserSetting<PAYLOAD> {
+    return new UserSetting<PAYLOAD>(resource, this.currentUser.public_id, payloads);
+  }
+
+  /**
    * Get all settings from the logged user.
    */
   public getUserSettings(): Observable<Array<T>> {
-    return this.api.callGet<T>(`${ this.servicePrefix }/`).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callGet<T>(`${ this.servicePrefix }/`, options).pipe(
       map((apiResponse: HttpResponse<APIGetListResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
       })
@@ -80,7 +102,9 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
    * @param identifier of the setting.
    */
   public getUserSetting(identifier: string): Observable<T> {
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ identifier }/`).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ identifier }/`, options).pipe(
       map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => {
         return apiResponse.body.result as T;
       })
@@ -92,7 +116,9 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
    * @param setting data.
    */
   public addUserSetting(setting: T): Observable<T> {
-    return this.api.callPost<T>(`${ this.servicePrefix }/`, setting).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callPost<T>(`${ this.servicePrefix }/`, setting, options).pipe(
       map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => {
         return apiResponse.body.raw as T;
       })
@@ -105,7 +131,9 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
    * @param setting data.
    */
   public updateUserSetting(identifier: string, setting: T): Observable<T> {
-    return this.api.callPut<T>(`${ this.servicePrefix }/${ identifier }`, setting).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callPut<T>(`${ this.servicePrefix }/${ identifier }`, setting, options).pipe(
       map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
         return apiResponse.body.result as T;
       })
@@ -117,7 +145,9 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
    * @param identifier of the setting.
    */
   public deleteUserSetting(identifier: string): Observable<T> {
-    return this.api.callDelete<T>(`${ this.servicePrefix }/${ identifier }`).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callDelete<T>(`${ this.servicePrefix }/${ identifier }`, options).pipe(
       map((apiResponse: HttpResponse<APIDeleteSingleResponse<T>>) => {
         return apiResponse.body.raw as T;
       })
