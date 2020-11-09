@@ -103,8 +103,11 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Input('columns')
   public set Columns(columns: Array<Column>) {
     this.columns = columns;
-    this.initialColumns = Object.assign([], columns);
-    this.items = [];
+    const temp = [];
+    for (const col of columns) {
+      temp.push(Object.assign({}, col));
+    }
+    this.initialColumns = temp;
   }
 
   /**
@@ -378,7 +381,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
    * Reset the columns to the initial set.
    */
   public onColumnsReset(): void {
-    this.columns = Object.assign([], this.initialColumns);
+    this.Columns = this.initialColumns;
   }
 
   /**
