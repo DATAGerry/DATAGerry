@@ -33,7 +33,7 @@ import { TableCellComponent } from './body/table-cell/table-cell.component';
 import { TableRowDirective } from './body/table-row.directive';
 import { TableColumnToggleComponent } from './components/table-column-toggle/table-column-toggle.component';
 import { TableLoadingComponent } from './components/table-loading/table-loading.component';
-import { TableConfigSwitchComponent } from './components/table-config-switch/table-config-switch.component';
+import { TableStateComponent } from './components/table-states/table-state.component';
 
 
 @NgModule({
@@ -41,7 +41,7 @@ import { TableConfigSwitchComponent } from './components/table-config-switch/tab
     TableComponent, TableSearchComponent, TablePageSizeComponent,
     TablePaginationComponent, TableFootDirective, TableHeadDirective, TableDirective,
     TableBodyDirective, TableColumnHeadComponent, TableInfoComponent, TableCellComponent,
-    TableRowDirective, TableColumnToggleComponent, TableLoadingComponent, TableConfigSwitchComponent],
+    TableRowDirective, TableColumnToggleComponent, TableLoadingComponent, TableStateComponent],
   exports: [
     TableComponent
   ],

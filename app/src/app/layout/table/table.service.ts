@@ -18,7 +18,7 @@
 
 import { Injectable, OnDestroy } from '@angular/core';
 import { UserSettingsDBService } from '../../management/user-settings/services/user-settings-db.service';
-import { TableConfig, TableConfigPayload } from './table.types';
+import { TableState, TableStatePayload } from './table.types';
 import { Observable, ReplaySubject } from 'rxjs';
 import { UserSetting } from '../../management/user-settings/models/user-setting';
 import { map } from 'rxjs/operators';
@@ -27,7 +27,7 @@ import { convertResourceURL } from '../../management/user-settings/services/user
 @Injectable({
   providedIn: 'root'
 })
-export class TableService<C = TableConfig> implements OnDestroy {
+export class TableService<C = TableState> implements OnDestroy {
 
   /**
    * Component un-subscriber.
@@ -35,59 +35,63 @@ export class TableService<C = TableConfig> implements OnDestroy {
    */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  constructor(private indexDB: UserSettingsDBService<UserSetting, TableConfigPayload>) {
+  constructor(private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
   }
 
   /**
-   * Get the table payload from a user setting.
+   * Get the table state payload from a user setting.
    * @param url
    * @param id
    */
-  public getTableConfigPayload(url: string, id: string): Observable<TableConfigPayload> {
+  public getTableStatePayload(url: string, id: string): Observable<TableStatePayload> {
     return this.indexDB.getSetting(url).pipe(
-      map((setting: UserSetting<TableConfigPayload>) => {
+      map((setting: UserSetting<TableStatePayload>) => {
         return setting.payloads.find(payload => payload.id === id);
       })
     );
   }
 
   /**
-   * Get all configs from a user setting.
+   * Get all states from a user setting.
    * @param url
    * @param id
    */
-  public getTableConfigs(url: string, id: string): Observable<Array<TableConfig>> {
+  public getTableStates(url: string, id: string): Observable<Array<TableState>> {
     return this.indexDB.getSetting(url).pipe(
-      map((setting: UserSetting<TableConfigPayload>) => {
-        return setting.payloads.find(payload => payload.id === id).tableConfigs;
+      map((setting: UserSetting<TableStatePayload>) => {
+        return setting.payloads.find(payload => payload.id === id).tableStates;
       })
     );
   }
 
   /**
-   * Get a single config from a user setting by its name.
+   * Get a single state from a user setting by its name.
    * @param url
    * @param id
    * @param name
    */
-  public getTableConfig(url: string, id: string, name: string): Observable<TableConfig> {
-    return this.getTableConfigs(url, id).pipe(map((configs: Array<TableConfig>) => {
-      return configs.find(config => config.name === name);
+  public getTableState(url: string, id: string, name: string): Observable<TableState> {
+    return this.getTableStates(url, id).pipe(map((states: Array<TableState>) => {
+      return states.find(state => state.name === name);
     }));
   }
 
   /**
-   * Add a table config to a user setting.
+   * Add a table state to a user setting.
    * @param url
    * @param id
-   * @param config
+   * @param state
    */
-  public addTableConfig(url: string, id: string, config: TableConfig) {
+  public addTableState(url: string, id: string, state: TableState) {
     const resource: string = convertResourceURL(url);
-    this.indexDB.getSetting(resource).subscribe((setting: UserSetting<TableConfigPayload>) => {
-      setting.payloads.find(payload => payload.id === id).tableConfigs.push(config);
+    this.indexDB.getSetting(resource).subscribe((setting: UserSetting<TableStatePayload>) => {
+      setting.payloads.find(payload => payload.id === id).tableStates.push(state);
       this.indexDB.updateSetting(setting);
     });
+  }
+
+  public removeTableState(url: string, id: string, state?) {
+    const resource: string = convertResourceURL(url);
 
   }
 

@@ -5,30 +5,30 @@
   </button>
   <form [formGroup]="form">
     <div class="steting-dropdown dropdown-menu dropdown-menu-right dropdown-menu-lg-left text-center">
-      <!-- Save config -->
+      <!-- Save state -->
       <span class="input-group p-2">
         <input type="text" formControlName="name" class="form-control form-control-sm mr-auto p-2"
                [ngClass]="{ 'is-valid': nameControl.valid && (nameControl.dirty || nameControl.touched),
              'is-invalid': nameControl.invalid && (nameControl.dirty || nameControl.touched)}"/>
         <span class="input-group-append">
           <button [disabled]="form.invalid" class="btn btn-success btn-sm"
-                  (click)="saveConfig(nameControl.value)">
+                  (click)="saveState(nameControl.value)">
           <i class="fas fa-save"></i>
         </button>
         </span>
       </span>
       <div class="dropdown-divider"></div>
-      <!-- List config -->
+      <!-- List state -->
       <span class="dropdown-item pointer config-item"
-          *ngFor="let tableConfig of tableConfigs"
-          (click)="selectConfig(tableConfig)">
+          *ngFor="let tableConfig of tableStates"
+          (click)="selectState(tableConfig)">
         Test
-        <i class="far fa-trash-alt config-item-icon" (click)="deleteConfig(tableConfig)"></i>
+        <i class="far fa-trash-alt config-item-icon" (click)="deleteState(tableConfig)"></i>
         <span class="clearfix"></span>
       </span>
       <div class="dropdown-divider"></div>
       <!-- Set default -->
-      <span class="dropdown-item pointer config-item" (click)="resetConfig()">
+      <span class="dropdown-item pointer config-item" (click)="resetState()">
         <i class="fas fa-redo"></i>  Default
       </span>
     </div>

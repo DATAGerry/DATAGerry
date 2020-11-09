@@ -28,7 +28,7 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import { Observable, ReplaySubject, merge } from 'rxjs';
-import { Column, Sort, SortDirection, TableConfigData, TableConfig } from './table.types';
+import { Column, Sort, SortDirection, TableState } from './table.types';
 import { PageLengthEntry } from './components/table-page-size/table-page-size.component';
 import { takeUntil } from 'rxjs/operators';
 import { TableService } from './table.service';
@@ -245,56 +245,36 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   /**
    * Event emitter when any config was changed.
    */
-  @Input() public configEnabled: boolean = false;
+  @Input() public stateEnabled: boolean = false;
 
   /**
    * List of possible table configs.
    */
-  @Input() public tableConfigs: Array<TableConfig> = [];
+  @Input() public tableStates: Array<TableState> = [];
 
   /**
    * Current user table config.
    */
-  @Input() public tableConfig: TableConfig = {
-    data: {
-      columns: [],
-      page: this.initPage,
-      pageSize: this.pageSize,
-      sort: this.sort,
-    } as TableConfigData
-  } as TableConfig;
+  @Input() public tableState: TableState;
 
   /**
    * Event emitter when any config was changed.
    */
-  @Output() public configChange: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
+  @Output() public stateChange: EventEmitter<TableState> = new EventEmitter<TableState>();
 
   /**
    * Config save emit.
    */
-  @Output() public configSelect: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
-  @Output() public configSave: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
-  @Output() public configDelete: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
-  @Output() public configReset: EventEmitter<void> = new EventEmitter<void>();
+  @Output() public stateSelect: EventEmitter<TableState> = new EventEmitter<TableState>();
+  @Output() public stateSave: EventEmitter<TableState> = new EventEmitter<TableState>();
+  @Output() public stateDelete: EventEmitter<TableState> = new EventEmitter<TableState>();
+  @Output() public stateReset: EventEmitter<void> = new EventEmitter<void>();
 
   public constructor(private tableService: TableService, private router: Router) {
 
   }
 
   public ngOnInit(): void {
-    this.configChangeObservable.pipe(takeUntil(this.subscriber)).subscribe(() => {
-      this.tableConfig = {
-        data: {
-          columns: this.columns,
-          page: this.page,
-          pageSize: this.pageSize,
-          sort: this.sort
-        } as TableConfigData
-      } as TableConfig;
-      if (this.configEnabled) {
-        this.configChange.emit(this.tableConfig);
-      }
-    });
     if (isDevMode()) {
       this.pageSizeChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((size: number) => {
         console.log(`[TableEvent] Page size changed to: ${ size }`);
@@ -401,20 +381,19 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   }
 
   /**
-   * Save table config over `TableService`.
-   * Reduce the columns to `name` and `hidden`.
-   * @param config
+   * Save table state over `TableService`.
+   * @param name
    */
-  public async onConfigSave(config: TableConfig) {
-    const configData = {} as TableConfigData;
+  public onStateSave(name: string): void {
+    const tableState = {
+      name,
+      page: this.page
+    } as TableState;
+    this.tableService.addTableState(this.router.url, this.id, tableState);
+  }
 
-    const saveConfig = {
-      name: config.name,
-      data: configData
-    } as TableConfig;
-    console.log(saveConfig);
-    // this.configSave.emit(config);
-    // await this.tableService.addTableConfig(this.router.url, this.id, config);
+  public onStateDelete(name: string): void {
+    this.tableService.removeTableState(this.router.url, this.id, name);
   }
 
   public ngOnDestroy(): void {

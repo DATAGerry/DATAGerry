@@ -44,12 +44,13 @@
 </div>
 <hr/>
 <cmdb-table [items]="results" [totalItems]="totalResults" [columns]="columns" [sort]="sort" [toggleable]="true"
-            [initPage]="initPage" [rowClasses]="['align-middle']" [pageSize]="limit" [id]="id" [tableConfigs]="tableConfigs"
+            [initPage]="initPage" [rowClasses]="['align-middle']" [pageSize]="limit" [id]="id"
+            [tableStates]="tableStates"
             [selectEnabled]="true" [loading]="loading" [emptyMessage]="'There are no objects for this type yet!'"
-            [configEnabled]="false"
+            [stateEnabled]="true"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
             (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)"
-            (searchChange)="onSearchChange($event)" (configChange)="onConfigChange($event)">
+            (searchChange)="onSearchChange($event)" (stateChange)="onConfigChange($event)">
 
 </cmdb-table>
 

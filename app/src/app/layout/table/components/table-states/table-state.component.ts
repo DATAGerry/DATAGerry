@@ -18,24 +18,30 @@
 
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { TableConfig } from '../../table.types';
+import { TableState } from '../../table.types';
 
 @Component({
   // tslint:disable-next-line:component-selector
-  selector: 'table-config-switch',
-  templateUrl: './table-config-switch.component.html',
-  styleUrls: ['./table-config-switch.component.scss']
+  selector: 'table-state',
+  templateUrl: './table-state.component.html',
+  styleUrls: ['./table-state.component.scss']
 })
-export class TableConfigSwitchComponent implements OnInit {
+export class TableStateComponent implements OnInit {
 
-  @Input() public tableConfigs: Array<TableConfig> = [];
+  /**
+   * Current possible table states
+   */
+  @Input() public tableStates: Array<TableState> = [];
 
-  @Input() public tableConfig: TableConfig;
+  /**
+   * Current selected state.
+   */
+  @Input() public currentState: TableState;
 
-  @Output() public configSelect: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
-  @Output() public configSave: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
-  @Output() public configDelete: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
-  @Output() public configReset: EventEmitter<void> = new EventEmitter<void>();
+  @Output() public stateSelect: EventEmitter<TableState> = new EventEmitter<TableState>();
+  @Output() public stateSave: EventEmitter<string> = new EventEmitter<string>();
+  @Output() public stateDelete: EventEmitter<TableState> = new EventEmitter<TableState>();
+  @Output() public stateReset: EventEmitter<void> = new EventEmitter<void>();
 
   public form: FormGroup;
 
@@ -55,27 +61,25 @@ export class TableConfigSwitchComponent implements OnInit {
     return this.form.get('name') as FormControl;
   }
 
-  public selectConfig(config: TableConfig) {
-    this.configSelect.emit(config);
+  public selectState(state: TableState) {
+    this.stateSelect.emit(state);
   }
 
-  public resetConfig() {
-    this.configReset.emit();
+  public resetState() {
+    this.stateReset.emit();
   }
 
-  public saveConfig(name?: string) {
-    const saveTableConfig: TableConfig = Object.assign({}, this.tableConfig) as TableConfig;
-    saveTableConfig.name = name;
-    this.configSave.emit(saveTableConfig);
+  public saveState(name?: string) {
+    this.stateSave.emit(name);
     this.nameControl.setValue('');
   }
 
-  public deleteConfig(config: TableConfig) {
-    const index = this.tableConfigs.indexOf(config, 0);
+  public deleteState(config: TableState) {
+    const index = this.tableStates.indexOf(config, 0);
     if (index > -1) {
-      this.tableConfigs.splice(index, 1);
+      this.tableStates.splice(index, 1);
     }
-    this.configDelete.emit(config);
+    this.stateDelete.emit(config);
   }
 
 }

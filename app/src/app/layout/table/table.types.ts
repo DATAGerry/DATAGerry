@@ -104,39 +104,33 @@ export interface Column {
   render(data: any, item: any, column?: Column, index?: number);
 }
 
-/**
- * Table config interface.
- * Used as a `set` of default data for a table.
- */
-export interface TableConfigData {
-  columns: Array<Column>;
-  page: number;
-  pageSize: number;
-  sort: Sort;
-}
 
 /**
- * A table config.
- * Binds the `TableConfigData` to a label/name.
+ * A table state.
  */
-export interface TableConfig {
-  data: TableConfigData;
+export interface TableState {
   name?: string;
+  timestamp?: string;
+  filter?: string;
+  visible_columns?: Array<string>;
+  page?: number;
+  pageSize?: number;
+  sort?: Sort;
 }
 
 
 /**
- * Table config payload for saving table config data into the user settings.
+ * Table state payload for saving table state data into the user settings.
  */
-export class TableConfigPayload implements UserSettingPayload {
+export class TableStatePayload implements UserSettingPayload {
   public id: string;
-  public tableConfigs: Array<TableConfig>;
-  public currentTableConfig?: TableConfig;
+  public tableStates: Array<TableState>;
+  public currentState?: TableState;
 
-  public constructor(id: string, configs: Array<TableConfig>, currentTableConfig?: TableConfig) {
+  public constructor(id: string, states: Array<TableState>, currentState?: TableState) {
     this.id = id;
-    this.tableConfigs = configs;
-    this.currentTableConfig = currentTableConfig;
+    this.tableStates = states;
+    this.currentState = currentState;
   }
 
 

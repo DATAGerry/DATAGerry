@@ -7,11 +7,11 @@
 
       </table-page-size>
     </div>
-    <div class="table-config-switch mr-1 ml-1 border-right" *ngIf="configEnabled">
-      <table-config-switch [tableConfigs]="tableConfigs" [tableConfig]="tableConfig"
-                           (configSave)="onConfigSave($event)" (configSelect)="configSelect.emit($event)"
-                           (configDelete)="configDelete.emit($event)" (configReset)="configReset.emit()">
-      </table-config-switch>
+    <div class="table-config-switch mr-1 ml-1 border-right" *ngIf="stateEnabled">
+      <table-state [tableStates]="tableStates" [currentState]="tableState"
+                   (stateSave)="onStateSave($event)" (stateSelect)="stateSelect.emit($event)"
+                   (stateDelete)="stateDelete.emit($event)" (stateReset)="stateReset.emit()">
+      </table-state>
     </div>
     <div class="table-toggle mr-1 ml-1 border-right" *ngIf="toggleable">
       <table-column-toggle [columns]="columns" (columnsReset)="onColumnsReset()"

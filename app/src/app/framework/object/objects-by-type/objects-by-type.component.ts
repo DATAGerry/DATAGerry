@@ -27,7 +27,7 @@ import { ActivatedRoute, Data, Router } from '@angular/router';
 import { takeUntil } from 'rxjs/operators';
 import { RenderResult } from '../../models/cmdb-render';
 import { TableComponent } from '../../../layout/table/table.component';
-import { Column, Sort, SortDirection, TableConfig, TableConfigPayload } from '../../../layout/table/table.types';
+import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../../layout/table/table.types';
 import { ObjectService } from '../../services/object.service';
 import { CollectionParameters } from '../../../services/models/api-parameter';
 import { HttpResponse } from '@angular/common/http';
@@ -43,6 +43,11 @@ import { ObjectDeleteModalComponent } from '../modals/object-delete-modal/object
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectsDeleteModalComponent } from '../modals/objects-delete-modal/objects-delete-modal.component';
 import { UserSetting } from '../../../management/user-settings/models/user-setting';
+import { UserSettingsDBService } from '../../../management/user-settings/services/user-settings-db.service';
+import {
+  convertResourceURL,
+  UserSettingsService
+} from '../../../management/user-settings/services/user-settings.service';
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -90,8 +95,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   public loading: boolean = false;
 
-  public tableConfig: TableConfig;
-  public tableConfigs: Array<TableConfig> = [];
+  public tableState: TableState;
+  public tableStates: Array<TableState> = [];
 
   public mode: CmdbMode = CmdbMode.Simple;
   public renderForm: FormGroup;
@@ -117,14 +122,23 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   private deleteManyModalRef: NgbModalRef;
 
   constructor(private router: Router, private route: ActivatedRoute, private objectService: ObjectService,
-              private fileService: FileService, private fileSaverService: FileSaverService, private toastService: ToastService,
-              private sidebarService: SidebarService, private modalService: NgbModal) {
+              private fileService: FileService, private fileSaverService: FileSaverService,
+              private toastService: ToastService, private sidebarService: SidebarService,
+              private modalService: NgbModal, private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>,
+              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>) {
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
-      // const userSettingPayloads = (data.userSetting as UserSetting<TableConfigPayload>).payloads
-      // .find(payloads => payloads.id === this.id);
+      if (data.userSetting) {
+        const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
+          .find(payloads => payloads.id === this.id);
+        this.tableStates = userSettingPayloads.tableStates;
+        this.tableState = userSettingPayloads.currentState;
+      } else {
+        const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
+        const resource: string = convertResourceURL(this.router.url.toString());
+        const userSetting = userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload])
+        this.indexDB.addSetting(userSetting);
+      }
 
-      // this.tableConfigs = userSettingPayloads.tableConfigs;
-      // this.tableConfig = userSettingPayloads.currentTableConfig;
       this.typeSubject.next(data.type as CmdbType);
     });
     this.fileService.callFileFormatRoute().subscribe(data => {
@@ -340,8 +354,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.selectedObjects = selectedItems.map(m => m.object_information.object_id);
   }
 
-  public onConfigChange(config: TableConfig): void {
-    this.tableConfig = config;
+  public onConfigChange(config: TableState): void {
+    this.tableState = config;
   }
 
   public exportingFiles(exportType: any) {
