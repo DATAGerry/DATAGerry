@@ -4,13 +4,12 @@
     <div class="mr-auto" *ngIf="pageSizeEnabled">
       <table-page-size [pageSize]="pageSize" [pageSizeList]="pageSizeList"
                        (pageSizeChange)="pageSizeChange.emit($event)">
-
       </table-page-size>
     </div>
     <div class="table-config-switch mr-1 ml-1 border-right" *ngIf="stateEnabled">
       <table-state [tableStates]="tableStates" [currentState]="tableState"
                    (stateSave)="onStateSave($event)" (stateSelect)="onStateSelect($event)"
-                   (stateDelete)="onStateDelete($event)" (stateReset)="stateReset.emit()">
+                   (stateDelete)="onStateDelete($event)" (stateReset)="onStateReset()">
       </table-state>
     </div>
     <div class="table-toggle mr-1 ml-1 border-right" *ngIf="toggleable">

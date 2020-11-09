@@ -436,6 +436,14 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     this.stateDelete.emit(state);
   }
 
+  /**
+   * Emit current state reset.
+   */
+  public onStateReset(): void {
+    this.tableService.setCurrentTableState(this.router.url, this.id, undefined);
+    this.stateReset.emit();
+  }
+
   public ngOnDestroy(): void {
     this.subscriber.next();
     this.subscriber.complete();

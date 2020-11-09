@@ -47,7 +47,7 @@
             [page]="page" [rowClasses]="['align-middle']" [pageSize]="limit" [id]="id"
             [tableStates]="tableStates" [selectEnabled]="true" [loading]="loading" [tableState]="tableState"
             [emptyMessage]="'There are no objects for this type yet!'" [stateEnabled]="true"
-            (stateSelect)="onStateSelect($event)"
+            (stateSelect)="onStateSelect($event)" (stateReset)="onStateReset()"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
             (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)"
             (searchChange)="onSearchChange($event)">

@@ -419,6 +419,11 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.selectedObjects = selectedItems.map(m => m.object_information.object_id);
   }
 
+  /**
+   * Select a state.
+   *
+   * @param state
+   */
   public onStateSelect(state: TableState): void {
     this.tableStateSubject.next(state);
     this.page = this.tableState.page;
@@ -428,6 +433,11 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       col.hidden = !this.tableState.visibleColumns.includes(col.name);
     }
     this.loadObjects();
+  }
+
+  public onStateReset(): void {
+    this.tableStateSubject.next(undefined);
+    this.reload(this.type);
   }
 
   public exportingFiles(exportType: any) {
