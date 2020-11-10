@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ApiCallService } from '../services/api-call.service';
 import { TypeService } from '../framework/services/type.service';
 import { CmdbType } from '../framework/models/cmdb-type';
@@ -28,6 +28,10 @@ import { Group } from '../management/models/group';
 import { UserService } from '../management/services/user.service';
 import { User } from '../management/models/user';
 import { APIGetMultiResponse } from '../services/models/api-response';
+import { SpecialService } from '../framework/services/special.service';
+import { RenderResult } from '../framework/models/cmdb-render';
+import { Column } from '../layout/table/table.types';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'cmdb-dashboard',
@@ -35,6 +39,11 @@ import { APIGetMultiResponse } from '../services/models/api-response';
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
+
+  @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
+  @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
+  @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
+
 
   public objectCount: number;
   public typeCount: number;
@@ -58,12 +67,103 @@ export class DashboardComponent implements OnInit {
   public itemsGroup: number [] = [];
   public colorsGroup: any [] = [];
 
+  public newestObjects: Array<RenderResult>;
+  public newestTableColumns: Array<Column>;
+  public newestObjectsCount: number;
+
+  public latestObjects: Array<RenderResult>;
+  public latestTableColumns: Array<Column>;
+  public latestObjectsCount: number;
+
   constructor(private api: ApiCallService, private typeService: TypeService,
               private objectService: ObjectService, private categoryService: CategoryService,
-              private userService: UserService, private groupService: GroupService) {
+              private userService: UserService, private groupService: GroupService,
+              private specialService: SpecialService<RenderResult>) {
   }
 
   public ngOnInit(): void {
+
+    const activeColumn = {
+      display: 'Active',
+      name: 'active',
+      data: 'object_information.active',
+      searchable: false,
+      sortable: false,
+      template: this.activeTemplate,
+      cssClasses: ['text-center'],
+      style: { width: '6rem' }
+    } as unknown as Column;
+
+    const publicColumn = {
+      display: 'Public ID',
+      name: 'public_id',
+      data: 'object_information.object_id',
+      cssClasses: ['text-center'],
+      style: { width: '6rem' },
+      searchable: false,
+      sortable: false
+    } as unknown as Column;
+
+    const typeColumn = {
+      display: 'Type',
+      name: 'type',
+      data: 'type_information.type_label',
+      cssClasses: ['text-center'],
+      searchable: false,
+      sortable: false
+    } as unknown as Column;
+
+    const authorColumn = {
+      display: 'Author',
+      name: 'author_id',
+      data: 'object_information.author_id',
+      sortable: false,
+      searchable: false,
+      cssClasses: ['text-center'],
+      template: this.userTemplate
+    } as Column;
+
+    const creationColumn = {
+      display: 'Creation Time',
+      name: 'creation_time',
+      data: 'object_information.creation_time',
+      sortable: false,
+      searchable: false,
+      cssClasses: ['text-center'],
+      render(data: any, item?: any, column?: Column, index?: number) {
+        const date = new Date(data.$date);
+        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - HH:mm:ss').toString();
+      }
+    } as Column;
+
+    const lastModColumn = {
+      display: 'Modification Time',
+      name: 'last_edit_time',
+      data: 'object_information.last_edit_time',
+      sortable: false,
+      searchable: false,
+      cssClasses: ['text-center'],
+      render(data: any, item?: any, column?: Column, index?: number) {
+        if (!data) {
+          return 'No modifications so far.';
+        }
+        const date = new Date(data.$date);
+        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - HH:mm:ss').toString();
+      }
+    } as Column;
+
+    const actionColumn = {
+      display: 'Actions',
+      name: 'actions',
+      sortable: false,
+      searchable: false,
+      fixed: true,
+      template: this.actionTemplate,
+      cssClasses: ['text-center'],
+      style: { width: '6em' }
+    } as unknown as Column;
+    this.newestTableColumns = [activeColumn, publicColumn, typeColumn, authorColumn, creationColumn, actionColumn];
+    this.latestTableColumns = [activeColumn, publicColumn, typeColumn, authorColumn, lastModColumn, actionColumn];
 
     this.objectService.countObjects().subscribe((totals) => {
       this.objectCount = totals;
@@ -75,6 +175,16 @@ export class DashboardComponent implements OnInit {
 
     this.userService.countUsers().subscribe((totals: any) => {
       this.userCount = totals;
+    });
+
+    this.specialService.getNewestObjects().subscribe((results: Array<RenderResult>) => {
+      this.newestObjects = results;
+      this.newestObjectsCount = results.length;
+    });
+
+    this.specialService.getLatestObjects().subscribe((results: Array<RenderResult>) => {
+      this.latestObjects = results;
+      this.latestObjectsCount = results.length;
     });
 
     this.generateObjectChar();
