@@ -24,9 +24,9 @@ import { ObjectEditComponent } from './object-edit/object-edit.component';
 import { ObjectCopyComponent } from './object-copy/object-copy.component';
 import { ObjectLogComponent } from './object-log/object-log.component';
 import { ObjectBulkChangeComponent } from './object-bulk-change/object-bulk-change.component';
-import { UserSettingsResolver } from '../../management/user-settings/resolvers/user-settings-resolver.service';
 import { TypeResolver } from '../resolvers/type-resolver.service';
 import { ObjectsByTypeComponent } from './objects-by-type/objects-by-type.component';
+import { ObjectViewResolver } from '../resolvers/object-view-resolver.service';
 
 
 const routes: Routes = [
@@ -97,13 +97,8 @@ const routes: Routes = [
       breadcrumb: 'View',
       right: 'base.framework.object.view'
     },
-    component: ObjectViewComponent
-  },
-  {
-    path: 'type/view/:publicID',
-    data: {
-      breadcrumb: 'Type View',
-      right: 'base.framework.object.view'
+    resolve: {
+      object: ObjectViewResolver,
     },
     component: ObjectViewComponent
   },
