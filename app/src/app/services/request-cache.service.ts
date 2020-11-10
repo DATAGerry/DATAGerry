@@ -48,8 +48,6 @@ export class RequestCacheService {
     }
 
     const isExpired = cached.lastRead < (Date.now() - this.maxAge);
-    const expired = isExpired ? 'expired ' : '';
-    console.log(`Found ${ expired } cached response for "${ url }".`);
     return isExpired ? undefined : cached.response;
   }
 
