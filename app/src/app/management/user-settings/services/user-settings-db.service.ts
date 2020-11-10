@@ -69,6 +69,13 @@ export class UserSettingsDBService<T = UserSetting, P = UserSettingPayload> impl
   }
 
   /**
+   * Clear the settings database.
+   */
+  public clear(): void {
+    this.dbService.clear(this.storeName);
+  }
+
+  /**
    * Get a setting by it ident.
    * @param resource Identifier of the setting.
    */
