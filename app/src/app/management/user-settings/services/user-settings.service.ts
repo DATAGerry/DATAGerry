@@ -52,6 +52,7 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
    * The current login user.
    */
   public readonly currentUser: User;
+  public currentUserObservable: Observable<User>;
 
   public readonly options = {
     headers: new HttpHeaders({
@@ -70,6 +71,7 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
    */
   constructor(private api: ApiCallService, private authService: AuthService) {
     this.currentUser = this.authService.currentUserValue;
+    this.currentUserObservable = this.authService.currentUser;
     if (this.currentUser) {
       this.servicePrefix = `users/${ this.currentUser.public_id }/settings`;
     }
