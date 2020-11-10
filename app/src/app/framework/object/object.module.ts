@@ -124,7 +124,8 @@ import { ObjectsDeleteModalComponent } from './modals/objects-delete-modal/objec
     TableModule
   ],
   exports: [
-    ObjectViewRenderComponent
+    ObjectViewRenderComponent,
+    ObjectTableActionsComponent
   ]
 })
 export class ObjectModule {

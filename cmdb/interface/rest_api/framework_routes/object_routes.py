@@ -849,7 +849,7 @@ def get_newest(request_user: UserModel):
         list of rendered objects
     """
     newest_objects_list = object_manager.get_objects_by(sort='creation_time',
-                                                        limit=25,
+                                                        limit=10,
                                                         active={"$eq": True},
                                                         creation_time={'$ne': None})
     rendered_list = RenderList(newest_objects_list, request_user).render_result_list()
@@ -872,7 +872,7 @@ def get_latest(request_user: UserModel):
         list of rendered objects
     """
     last_objects_list = object_manager.get_objects_by(sort='last_edit_time',
-                                                      limit=25,
+                                                      limit=10,
                                                       active={"$eq": True},
                                                       last_edit_time={'$ne': None})
     rendered_list = RenderList(last_objects_list, request_user).render_result_list()
