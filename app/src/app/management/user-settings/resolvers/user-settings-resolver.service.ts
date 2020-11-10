@@ -44,7 +44,6 @@ export class UserSettingsResolver implements Resolve<UserSetting | unknown> {
   public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
     Observable<UserSetting | unknown> | Promise<UserSetting | unknown> | UserSetting | unknown {
     const ident = state.url.toString().substring(1).split('/').join('-');
-    console.log(ident);
     return this.userSettingsDB.getSetting(ident).pipe(
       map((setting: UserSetting) => {
         return setting;

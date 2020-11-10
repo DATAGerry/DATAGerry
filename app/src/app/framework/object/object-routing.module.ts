@@ -27,6 +27,7 @@ import { ObjectBulkChangeComponent } from './object-bulk-change/object-bulk-chan
 import { TypeResolver } from '../resolvers/type-resolver.service';
 import { ObjectsByTypeComponent } from './objects-by-type/objects-by-type.component';
 import { ObjectViewResolver } from '../resolvers/object-view-resolver.service';
+import { UserSettingsResolver } from '../../management/user-settings/resolvers/user-settings-resolver.service';
 
 
 const routes: Routes = [
@@ -87,7 +88,7 @@ const routes: Routes = [
     },
     resolve: {
       type: TypeResolver,
-      // userSetting: UserSettingsResolver
+      userSetting: UserSettingsResolver
     },
     component: ObjectsByTypeComponent,
   },

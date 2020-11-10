@@ -16,19 +16,22 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit, TemplateRef, ViewChild,
+} from '@angular/core';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { CmdbType } from '../../models/cmdb-type';
 import { ActivatedRoute, Data, Router } from '@angular/router';
 import { takeUntil } from 'rxjs/operators';
 import { RenderResult } from '../../models/cmdb-render';
 import { TableComponent } from '../../../layout/table/table.component';
-import { Column, Sort, SortDirection, TableConfig } from '../../../layout/table/table.types';
+import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../../layout/table/table.types';
 import { ObjectService } from '../../services/object.service';
 import { CollectionParameters } from '../../../services/models/api-parameter';
 import { HttpResponse } from '@angular/common/http';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
-import { FormGroup } from '@angular/forms';
 import { CmdbMode } from '../../modes.enum';
 import { FileService } from '../../../export/export.service';
 import { FileSaverService } from 'ngx-filesaver';
@@ -36,6 +39,13 @@ import { ToastService } from '../../../layout/toast/toast.service';
 import { SidebarService } from '../../../layout/services/sidebar.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectsDeleteModalComponent } from '../modals/objects-delete-modal/objects-delete-modal.component';
+import { UserSetting } from '../../../management/user-settings/models/user-setting';
+import { UserSettingsDBService } from '../../../management/user-settings/services/user-settings-db.service';
+import {
+  convertResourceURL,
+  UserSettingsService
+} from '../../../management/user-settings/services/user-settings.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -44,6 +54,10 @@ import { ObjectsDeleteModalComponent } from '../modals/objects-delete-modal/obje
 })
 export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
+  /**
+   * HTML ID of the table.
+   * Used for user settings and table-states
+   */
   public readonly id: string = 'table-objects-type';
 
   /**
@@ -81,21 +95,40 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    */
   private typeSubject: BehaviorSubject<CmdbType> = new BehaviorSubject<CmdbType>(undefined);
 
-  public loading: boolean = false;
-
-  public tableConfig: TableConfig;
-  public tableConfigs: Array<TableConfig> = [];
-
-  public mode: CmdbMode = CmdbMode.Simple;
-  public renderForm: FormGroup;
-
-  public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
-
-  public filter: string;
-
+  /**
+   * Getter for the type definition from the typeSubject.
+   */
   public get type(): CmdbType {
     return this.typeSubject.getValue() as CmdbType;
   }
+
+  public tableStateSubject: BehaviorSubject<TableState> = new BehaviorSubject<TableState>(undefined);
+
+  public tableStates: Array<TableState> = [];
+
+  public get tableState(): TableState {
+    return this.tableStateSubject.getValue() as TableState;
+  }
+
+  /**
+   * Objects loading flag.
+   */
+  public loading: boolean = false;
+
+  /**
+   * Render mode for the render elements.
+   */
+  public mode: CmdbMode = CmdbMode.Simple;
+
+  /**
+   * Default sort filter.
+   */
+  public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+
+  /**
+   * Filter parameter from table search-
+   */
+  public filter: string;
 
   public columns: Array<Column>;
 
@@ -110,9 +143,25 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   private deleteManyModalRef: NgbModalRef;
 
   constructor(private router: Router, private route: ActivatedRoute, private objectService: ObjectService,
-              private fileService: FileService, private fileSaverService: FileSaverService, private toastService: ToastService,
-              private sidebarService: SidebarService, private modalService: NgbModal) {
+              private fileService: FileService, private fileSaverService: FileSaverService,
+              private toastService: ToastService, private sidebarService: SidebarService,
+              private modalService: NgbModal, private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>,
+              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>) {
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
+      if (data.userSetting) {
+        const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
+          .find(payloads => payloads.id === this.id);
+        this.tableStates = userSettingPayloads.tableStates;
+        this.tableStateSubject.next(userSettingPayloads.currentState);
+      } else {
+        this.tableStates = [];
+        this.tableStateSubject.next(undefined);
+
+        const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
+        const resource: string = convertResourceURL(this.router.url.toString());
+        const userSetting = userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
+        this.indexDB.addSetting(userSetting);
+      }
       this.typeSubject.next(data.type as CmdbType);
     });
     this.fileService.callFileFormatRoute().subscribe(data => {
@@ -122,10 +171,26 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.typeSubject.asObservable().pipe(takeUntil(this.subscriber)).subscribe((type: CmdbType) => {
-      this.resetTable();
-      this.setColumns(type);
-      this.loadObjects();
+      this.reload(type);
     });
+  }
+
+  /**
+   * Reload the table
+   * @param type
+   */
+  public reload(type: CmdbType): void {
+    this.resetTable();
+    this.setColumns(type);
+    if (this.tableState) {
+      this.page = this.tableState.page;
+      this.limit = this.tableState.pageSize;
+      this.sort = this.tableState.sort;
+      for (const col of this.columns) {
+        col.hidden = !this.tableState.visibleColumns.includes(col.name);
+      }
+    }
+    this.loadObjects();
   }
 
   public resetTable() {
@@ -199,7 +264,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       searchable: false,
       render(data: any, item?: any, column?: Column, index?: number) {
         const date = new Date(data);
-        return `${ date.getDay() }/${ date.getMonth() }/${ date.getFullYear() } - ${ date.getHours() }:${ date.getMinutes() }:${ date.getSeconds() }`;
+        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
       }
     } as Column);
     columns.push({
@@ -213,7 +278,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
           return 'No modifications so far.';
         }
         const date = new Date(data);
-        return `${ date.getDay() }/${ date.getMonth() }/${ date.getFullYear() } - ${ date.getHours() }:${ date.getMinutes() }:${ date.getSeconds() }`;
+        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
       }
     } as Column);
 
@@ -231,6 +296,9 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.columns = columns;
   }
 
+  /**
+   * Load objects from the backend.
+   */
   public loadObjects() {
     this.loading = true;
     const query = [];
@@ -294,27 +362,45 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       });
   }
 
-
-  public ngOnDestroy(): void {
-    this.subscriber.next();
-    this.subscriber.complete();
-  }
-
+  /**
+   * On table page change.
+   * Reload all objects.
+   *
+   * @param page
+   */
   public onPageChange(page: number) {
     this.page = page;
     this.loadObjects();
   }
 
+  /**
+   * On table page size change.
+   * Reload all objects.
+   *
+   * @param limit
+   */
   public onPageSizeChange(limit: number): void {
     this.limit = limit;
     this.loadObjects();
   }
 
+  /**
+   * On table sort change.
+   * Reload all objects.
+   *
+   * @param sort
+   */
   public onSortChange(sort: Sort): void {
     this.sort = sort;
     this.loadObjects();
   }
 
+  /**
+   * On table search change.
+   * Reload all objects.
+   *
+   * @param search
+   */
   public onSearchChange(search: any): void {
     if (search) {
       this.filter = search;
@@ -324,12 +410,35 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.loadObjects();
   }
 
+  /**
+   * On table selection change.
+   * Map selected items by the object id
+   *
+   * @param selectedItems
+   */
   public onSelectedChange(selectedItems: Array<RenderResult>): void {
     this.selectedObjects = selectedItems.map(m => m.object_information.object_id);
   }
 
-  public onConfigChange(config: TableConfig): void {
-    this.tableConfig = config;
+  /**
+   * Select a state.
+   *
+   * @param state
+   */
+  public onStateSelect(state: TableState): void {
+    this.tableStateSubject.next(state);
+    this.page = this.tableState.page;
+    this.limit = this.tableState.pageSize;
+    this.sort = this.tableState.sort;
+    for (const col of this.columns) {
+      col.hidden = !this.tableState.visibleColumns.includes(col.name);
+    }
+    this.loadObjects();
+  }
+
+  public onStateReset(): void {
+    this.tableStateSubject.next(undefined);
+    this.reload(this.type);
   }
 
   public exportingFiles(exportType: any) {
@@ -374,6 +483,11 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         }
       });
     }
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
 }

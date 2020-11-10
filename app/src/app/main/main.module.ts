@@ -22,6 +22,8 @@ import { MainRoutingModule } from './main-routing.module';
 import { DashboardModule } from '../dashboard/dashboard.module';
 import { NgxIndexedDBModule } from 'ngx-indexed-db';
 import { userSettingsDBConfig } from '../management/user-settings/user-settings.module';
+import { UserSettingsDBService } from '../management/user-settings/services/user-settings-db.service';
+import { UserSettingsService } from '../management/user-settings/services/user-settings.service';
 
 @NgModule({
   declarations: [],
@@ -31,10 +33,12 @@ import { userSettingsDBConfig } from '../management/user-settings/user-settings.
     NgxIndexedDBModule.forRoot(userSettingsDBConfig),
     MainRoutingModule,
     DashboardModule,
-  ]
+  ],
+  providers: [UserSettingsDBService, UserSettingsService]
 })
 export class MainModule {
 
   constructor() {
+
   }
 }

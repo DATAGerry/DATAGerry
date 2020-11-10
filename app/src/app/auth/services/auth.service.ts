@@ -31,6 +31,7 @@ import { SpecialService } from '../../framework/services/special.service';
 import { Router } from '@angular/router';
 import { LoginResponse } from '../models/responses';
 import { Token } from '../models/token';
+import { NgxIndexedDBService } from 'ngx-indexed-db';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -61,7 +62,7 @@ export class AuthService<T = any> implements ApiService {
 
   constructor(private backend: HttpBackend, private connectionService: ConnectionService, private api: ApiCallService,
               private permissionService: PermissionService, private router: Router, private introService: NgbModal,
-              private specialService: SpecialService) {
+              private specialService: SpecialService, private indexDB: NgxIndexedDBService) {
     this.http = new HttpClient(backend);
     this.currentUserSubject = new BehaviorSubject<User>(
       JSON.parse(localStorage.getItem('current-user')));
@@ -112,6 +113,7 @@ export class AuthService<T = any> implements ApiService {
   }
 
   public logout() {
+    this.indexDB.clear('user-settings').subscribe();
     localStorage.removeItem('current-user');
     localStorage.removeItem('access-token');
     this.currentUserSubject.next(null);

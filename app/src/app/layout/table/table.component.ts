@@ -28,7 +28,7 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import { Observable, ReplaySubject, merge } from 'rxjs';
-import { Column, Sort, SortDirection, TableConfigData, TableConfig } from './table.types';
+import { Column, Sort, SortDirection, TableState } from './table.types';
 import { PageLengthEntry } from './components/table-page-size/table-page-size.component';
 import { takeUntil } from 'rxjs/operators';
 import { TableService } from './table.service';
@@ -138,7 +138,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   public initPage: number = 1;
 
   @Input('initPage')
-  public set Page(page: number) {
+  public set InitPage(page: number) {
     this.initPage = page;
     this.page = page;
   }
@@ -146,7 +146,12 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   /**
    * Current displayed page number.
    */
-  public page: number = 1;
+  public page: number = this.initPage;
+
+  @Input('page')
+  public set Page(page: number) {
+    this.page = page;
+  }
 
   /**
    * Pagination enabled.
@@ -245,37 +250,31 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   /**
    * Event emitter when any config was changed.
    */
-  @Input() public configEnabled: boolean = false;
+  @Input() public stateEnabled: boolean = false;
 
   /**
    * List of possible table configs.
    */
-  @Input() public tableConfigs: Array<TableConfig> = [];
+  @Input() public tableStates: Array<TableState> = [];
 
   /**
    * Current user table config.
    */
-  @Input() public tableConfig: TableConfig = {
-    data: {
-      columns: [],
-      page: this.initPage,
-      pageSize: this.pageSize,
-      sort: this.sort,
-    } as TableConfigData
-  } as TableConfig;
+  @Input() public tableState: TableState;
 
   /**
    * Event emitter when any config was changed.
    */
-  @Output() public configChange: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
+  @Output() public stateChange: EventEmitter<TableState> = new EventEmitter<TableState>();
 
   /**
    * Config save emit.
    */
-  @Output() public configSelect: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
-  @Output() public configSave: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
-  @Output() public configDelete: EventEmitter<TableConfig> = new EventEmitter<TableConfig>();
-  @Output() public configReset: EventEmitter<void> = new EventEmitter<void>();
+  @Output() public stateSelect: EventEmitter<TableState> = new EventEmitter<TableState>();
+  @Output() public stateSave: EventEmitter<TableState> = new EventEmitter<TableState>();
+  @Output() public stateUpdate: EventEmitter<TableState> = new EventEmitter<TableState>();
+  @Output() public stateDelete: EventEmitter<TableState> = new EventEmitter<TableState>();
+  @Output() public stateReset: EventEmitter<void> = new EventEmitter<void>();
 
   public constructor(private tableService: TableService, private router: Router) {
 
@@ -283,16 +282,16 @@ export class TableComponent<T> implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.configChangeObservable.pipe(takeUntil(this.subscriber)).subscribe(() => {
-      this.tableConfig = {
-        data: {
-          columns: this.columns,
-          page: this.page,
-          pageSize: this.pageSize,
-          sort: this.sort
-        } as TableConfigData
-      } as TableConfig;
-      if (this.configEnabled) {
-        this.configChange.emit(this.tableConfig);
+      this.tableState = {
+        name,
+        page: this.page,
+        pageSize: this.pageSize,
+        sort: this.sort,
+        visibleColumns: this.columns.filter(c => !c.hidden).map(c => c.name)
+      } as TableState;
+      if (this.stateEnabled) {
+        this.tableService.setCurrentTableState(this.router.url, this.id, this.tableState);
+        this.stateChange.emit(this.tableState);
       }
     });
     if (isDevMode()) {
@@ -401,20 +400,71 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   }
 
   /**
-   * Save table config over `TableService`.
-   * Reduce the columns to `name` and `hidden`.
-   * @param config
+   * Save table state over `TableService`.
+   * @param name
    */
-  public async onConfigSave(config: TableConfig) {
-    const configData = {} as TableConfigData;
+  public onStateSave(name: string): void {
+    const columns = this.columns.filter(c => !c.hidden).map(c => c.name);
+    const tableState = {
+      name,
+      page: this.page,
+      pageSize: this.pageSize,
+      sort: this.sort,
+      visibleColumns: columns
+    } as TableState;
+    this.tableState = tableState;
+    this.tableStates.push(tableState);
+    this.tableService.addTableState(this.router.url, this.id, tableState);
+    this.stateSave.emit(tableState);
+  }
 
-    const saveConfig = {
-      name: config.name,
-      data: configData
-    } as TableConfig;
-    console.log(saveConfig);
-    // this.configSave.emit(config);
-    // await this.tableService.addTableConfig(this.router.url, this.id, config);
+  /**
+   * Update a existing state.
+   * @param state
+   */
+  public onStateUpdate(state: TableState): void {
+    const columns = this.columns.filter(c => !c.hidden).map(c => c.name);
+    const tableState = {
+      name: state.name,
+      page: this.page,
+      pageSize: this.pageSize,
+      sort: this.sort,
+      visibleColumns: columns
+    } as TableState;
+    this.tableState = tableState;
+    const stateIDX = this.tableStates.indexOf(state);
+    if (stateIDX > -1) {
+      this.tableStates[stateIDX] = this.tableState;
+    }
+    this.tableService.updateTableState(this.router.url, this.id, state, this.tableState);
+    this.stateUpdate.emit(tableState);
+  }
+
+  /**
+   * When state was selected
+   * @param state
+   */
+  public onStateSelect(state: TableState): void {
+    this.tableState = state;
+    this.tableService.setCurrentTableState(this.router.url, this.id, state);
+    this.stateSelect.emit(state);
+  }
+
+  /**
+   * Delete a state from the setting.
+   * @param state
+   */
+  public onStateDelete(state: TableState): void {
+    this.tableService.removeTableState(this.router.url, this.id, state);
+    this.stateDelete.emit(state);
+  }
+
+  /**
+   * Emit current state reset.
+   */
+  public onStateReset(): void {
+    this.tableService.setCurrentTableState(this.router.url, this.id, undefined);
+    this.stateReset.emit();
   }
 
   public ngOnDestroy(): void {
