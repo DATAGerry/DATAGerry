@@ -45,6 +45,7 @@ import {
   convertResourceURL,
   UserSettingsService
 } from '../../../management/user-settings/services/user-settings.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -263,7 +264,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       searchable: false,
       render(data: any, item?: any, column?: Column, index?: number) {
         const date = new Date(data);
-        return `${ date.getDay() }/${ date.getMonth() }/${ date.getFullYear() } - ${ date.getHours() }:${ date.getMinutes() }:${ date.getSeconds() }`;
+        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
       }
     } as Column);
     columns.push({
@@ -277,7 +278,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
           return 'No modifications so far.';
         }
         const date = new Date(data);
-        return `${ date.getDay() }/${ date.getMonth() }/${ date.getFullYear() } - ${ date.getHours() }:${ date.getMinutes() }:${ date.getSeconds() }`;
+        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
       }
     } as Column);
 
