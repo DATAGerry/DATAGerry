@@ -91,9 +91,8 @@ export class TableComponent<T> implements OnInit, OnDestroy {
 
   /**
    * Column holder for reset.
-   * @private
    */
-  private initialColumns: Array<Column> = [];
+  @Input() public initialVisibleColumns: Array<string> = [];
 
   /**
    * Column setter.
@@ -103,7 +102,6 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Input('columns')
   public set Columns(columns: Array<Column>) {
     this.columns = columns;
-    this.initialColumns = Object.assign([], columns);
     this.items = [];
   }
 
@@ -377,7 +375,10 @@ export class TableComponent<T> implements OnInit, OnDestroy {
    * Reset the columns to the initial set.
    */
   public onColumnsReset(): void {
-    this.columns = Object.assign([], this.initialColumns);
+    for (const col of this.columns) {
+      col.hidden = !this.initialVisibleColumns.includes(col.name);
+    }
+    this.columnVisibilityChange.emit();
   }
 
   /**
