@@ -31,6 +31,7 @@ import { APIGetMultiResponse } from '../services/models/api-response';
 import { SpecialService } from '../framework/services/special.service';
 import { RenderResult } from '../framework/models/cmdb-render';
 import { Column } from '../layout/table/table.types';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'cmdb-dashboard',
@@ -131,7 +132,7 @@ export class DashboardComponent implements OnInit {
       cssClasses: ['text-center'],
       render(data: any, item?: any, column?: Column, index?: number) {
         const date = new Date(data.$date);
-        return `${ date.getDay() }/${ date.getMonth() }/${ date.getFullYear() } - ${ date.getHours() }:${ date.getMinutes() }:${ date.getSeconds() }`;
+        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
       }
     } as Column;
 
@@ -147,7 +148,7 @@ export class DashboardComponent implements OnInit {
           return 'No modifications so far.';
         }
         const date = new Date(data.$date);
-        return `${ date.getDay() }/${ date.getMonth() }/${ date.getFullYear() } - ${ date.getHours() }:${ date.getMinutes() }:${ date.getSeconds() }`;
+        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
       }
     } as Column;
 
