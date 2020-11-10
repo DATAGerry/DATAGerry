@@ -35,9 +35,7 @@ import { CmdbType } from '../../../framework/models/cmdb-type';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { JsonMappingComponent } from './json-mapping/json-mapping.component';
-import { ImporterFile } from '../import-object.models';
 import { CsvMappingComponent } from './csv-mapping/csv-mapping.component';
-import { ImportService } from '../../import.service';
 import { TypeMappingBaseComponent } from './type-mapping-base.component';
 
 export const mappingComponents: { [type: string]: any } = {
@@ -148,16 +146,21 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
         const refFields = this.typeInstance.get_reference_fields();
         let workingRefType;
         for (const refField of refFields) {
-          workingRefType = this.typeList.find(id => id.public_id === refField.ref_types) as CmdbType;
-          for (const typeField of workingRefType.fields) {
-            this.mappingControls.push({
-              name: refField.name,
-              ref_name: typeField.name,
-              label: typeField.label,
-              type: 'ref',
-              type_id: workingRefType.public_id,
-              type_name: workingRefType.name
-            });
+          workingRefType = this.typeList.find(id =>
+            id.public_id === refField.ref_types
+            || (Array.isArray(refField.ref_types) && refField.ref_types.includes(id.public_id))
+          ) as CmdbType;
+          if (workingRefType) {
+            for (const typeField of workingRefType.fields) {
+              this.mappingControls.push({
+                name: refField.name,
+                ref_name: typeField.name,
+                label: typeField.label,
+                type: 'ref',
+                type_id: workingRefType.public_id,
+                type_name: workingRefType.name
+              });
+            }
           }
         }
       }

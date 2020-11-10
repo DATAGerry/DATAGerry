@@ -22,7 +22,7 @@ import { ImporterConfig, ImporterFile, ImportResponse } from './import-object.mo
 import { ImportService } from '../import.service';
 import { Subscription } from 'rxjs';
 import { NgxSpinnerService } from 'ngx-spinner';
-import {SidebarService} from "../../layout/services/sidebar.service";
+import { SidebarService } from '../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-import-objects',
@@ -60,7 +60,7 @@ export class ImportObjectsComponent implements OnInit, AfterViewInit, OnDestroy 
 
   public ngOnInit(): void {
     this.spinner.show();
-    this.fileReader.onload = (e) => {
+    this.fileReader.onload = () => {
       this.importerFile.fileContent = this.fileReader.result;
     };
   }
