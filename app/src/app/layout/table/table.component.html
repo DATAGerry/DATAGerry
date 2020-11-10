@@ -7,9 +7,9 @@
       </table-page-size>
     </div>
     <div class="table-config-switch mr-1 ml-1 border-right" *ngIf="stateEnabled">
-      <table-state [tableStates]="tableStates" [currentState]="tableState"
-                   (stateSave)="onStateSave($event)" (stateSelect)="onStateSelect($event)"
-                   (stateDelete)="onStateDelete($event)" (stateReset)="onStateReset()">
+      <table-state [tableStates]="tableStates" [currentState]="tableState" (stateSave)="onStateSave($event)"
+                   (stateSelect)="onStateSelect($event)" (stateDelete)="onStateDelete($event)"
+                   (stateUpdate)="onStateUpdate($event)" (stateReset)="onStateReset()">
       </table-state>
     </div>
     <div class="table-toggle mr-1 ml-1 border-right" *ngIf="toggleable">

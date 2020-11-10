@@ -105,6 +105,16 @@ export class TableService<C = TableState> implements OnDestroy {
     });
   }
 
+  public updateTableState(url: string, id: string, state: TableState, update: TableState) {
+    const resource: string = convertResourceURL(url);
+    this.indexDB.getSetting(resource).subscribe((setting: UserSetting<TableStatePayload>) => {
+      const tableStates = setting.payloads.find(payload => payload.id === id).tableStates;
+      const stateIDX = tableStates.findIndex(s => s.name === state.name);
+      setting.payloads.find(payload => payload.id === id).tableStates[stateIDX] = update;
+      this.indexDB.updateSetting(setting);
+    });
+  }
+
 
   /**
    * Remove a table state from the payload.

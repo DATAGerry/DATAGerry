@@ -49,9 +49,15 @@ export class TableStateComponent {
   @Output() public stateSave: EventEmitter<string> = new EventEmitter<string>();
 
   /**
+   * State update event emitter.
+   */
+  @Output() public stateUpdate: EventEmitter<TableState> = new EventEmitter<TableState>();
+
+  /**
    * State delete event emitter.
    */
   @Output() public stateDelete: EventEmitter<TableState> = new EventEmitter<TableState>();
+
 
   /**
    * State reset event emitter.
@@ -100,6 +106,11 @@ export class TableStateComponent {
     event.stopPropagation();
     this.stateSave.emit(name);
     this.nameControl.setValue('');
+  }
+
+  public updateState(state: TableState, event: Event) {
+    event.stopPropagation();
+    this.stateUpdate.emit(state);
   }
 
   /**

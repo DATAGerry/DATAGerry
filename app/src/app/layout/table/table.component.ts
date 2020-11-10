@@ -272,6 +272,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
    */
   @Output() public stateSelect: EventEmitter<TableState> = new EventEmitter<TableState>();
   @Output() public stateSave: EventEmitter<TableState> = new EventEmitter<TableState>();
+  @Output() public stateUpdate: EventEmitter<TableState> = new EventEmitter<TableState>();
   @Output() public stateDelete: EventEmitter<TableState> = new EventEmitter<TableState>();
   @Output() public stateReset: EventEmitter<void> = new EventEmitter<void>();
 
@@ -415,6 +416,28 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     this.tableStates.push(tableState);
     this.tableService.addTableState(this.router.url, this.id, tableState);
     this.stateSave.emit(tableState);
+  }
+
+  /**
+   * Update a existing state.
+   * @param state
+   */
+  public onStateUpdate(state: TableState): void {
+    const columns = this.columns.filter(c => !c.hidden).map(c => c.name);
+    const tableState = {
+      name: state.name,
+      page: this.page,
+      pageSize: this.pageSize,
+      sort: this.sort,
+      visibleColumns: columns
+    } as TableState;
+    this.tableState = tableState;
+    const stateIDX = this.tableStates.indexOf(state);
+    if (stateIDX > -1) {
+      this.tableStates[stateIDX] = this.tableState;
+    }
+    this.tableService.updateTableState(this.router.url, this.id, state, this.tableState);
+    this.stateUpdate.emit(tableState);
   }
 
   /**

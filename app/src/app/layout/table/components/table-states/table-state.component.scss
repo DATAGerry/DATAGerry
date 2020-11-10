@@ -3,7 +3,7 @@
 .config-item {
   font-size: 0.875rem;
 
-  > i {
+  i {
     &:hover {
       color: theme-color("primary");
     }
@@ -21,7 +21,6 @@
 .config-item-icon {
   padding-top: 4px;
   color: #495057;
-  float: right;
 }
 
 .active {
