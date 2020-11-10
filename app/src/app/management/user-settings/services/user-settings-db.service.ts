@@ -43,7 +43,7 @@ export class UserSettingsDBService<T = UserSetting, P = UserSettingPayload> impl
   /**
    * The current login user.
    */
-  private readonly currentUser: User;
+  private currentUser: User;
 
   /**
    * Holder subject when new settings are in the database.
@@ -53,11 +53,14 @@ export class UserSettingsDBService<T = UserSetting, P = UserSettingPayload> impl
   constructor(private dbService: NgxIndexedDBService<UserSetting<P>>,
               private userSettingsService: UserSettingsService<UserSetting<P>>) {
     this.newSettings.asObservable().pipe(takeUntil(this.subscriber)).subscribe();
-    this.currentUser = this.userSettingsService.currentUser;
     this.userSettingsService.currentUserObservable.subscribe((user: User) => {
+      this.currentUser = user;
+      if (user) {
         this.syncSettings().then(() => {
           console.log('User settings loaded');
         });
+      }
+
     });
   }
 
@@ -67,8 +70,8 @@ export class UserSettingsDBService<T = UserSetting, P = UserSettingPayload> impl
   public async syncSettings() {
     try {
       this.userSettingsService.getUserSettings()
-        .subscribe((userSettings: Array<UserSetting<P>>) => {
-            this.dbService.clear(this.storeName);
+        .subscribe(async (userSettings: Array<UserSetting<P>>) => {
+            await this.dbService.clear(this.storeName);
 
             for (const setting of userSettings) {
               this.dbService.add(this.storeName, setting);

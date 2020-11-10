@@ -113,9 +113,9 @@ export class AuthService<T = any> implements ApiService {
   }
 
   public logout() {
+    this.indexDB.clear('user-settings').subscribe();
     localStorage.removeItem('current-user');
     localStorage.removeItem('access-token');
-    this.indexDB.clear('user-settings');
     this.currentUserSubject.next(null);
     this.currentUserTokenSubject.next(null);
     this.permissionService.clearUserRightStorage();

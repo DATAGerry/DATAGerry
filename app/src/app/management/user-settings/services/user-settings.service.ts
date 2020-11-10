@@ -51,7 +51,7 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
   /**
    * The current login user.
    */
-  public readonly currentUser: User;
+  public currentUser: User;
   public currentUserObservable: Observable<User>;
 
   public readonly options = {
@@ -70,11 +70,12 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
    * @param authService: AuthService
    */
   constructor(private api: ApiCallService, private authService: AuthService) {
-    this.currentUser = this.authService.currentUserValue;
+
     this.currentUserObservable = this.authService.currentUser;
-    if (this.currentUser) {
-      this.servicePrefix = `users/${ this.currentUser.public_id }/settings`;
-    }
+    this.currentUserObservable.subscribe((user: User) => {
+      this.currentUser = user;
+      this.servicePrefix = `users/${ this.authService.currentUserValue.public_id }/settings`;
+    });
   }
 
   /**
@@ -92,7 +93,7 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
   public getUserSettings(): Observable<Array<T>> {
     const options = this.options;
     options.params = new HttpParams();
-    return this.api.callGet<T>(`${ this.servicePrefix }/`, options).pipe(
+    return this.api.callGet<T>(`users/${ this.authService.currentUserValue.public_id }/settings/`, options).pipe(
       map((apiResponse: HttpResponse<APIGetListResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
       })
@@ -106,7 +107,7 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
   public getUserSetting(identifier: string): Observable<T> {
     const options = this.options;
     options.params = new HttpParams();
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ identifier }/`, options).pipe(
+    return this.api.callGet<T>(`users/${ this.authService.currentUserValue.public_id }/settings/${ identifier }/`, options).pipe(
       map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => {
         return apiResponse.body.result as T;
       })
@@ -120,7 +121,7 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
   public addUserSetting(setting: T): Observable<T> {
     const options = this.options;
     options.params = new HttpParams();
-    return this.api.callPost<T>(`${ this.servicePrefix }/`, setting, options).pipe(
+    return this.api.callPost<T>(`users/${ this.authService.currentUserValue.public_id }/settings/`, setting, options).pipe(
       map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => {
         return apiResponse.body.raw as T;
       })
@@ -135,7 +136,7 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
   public updateUserSetting(identifier: string, setting: T): Observable<T> {
     const options = this.options;
     options.params = new HttpParams();
-    return this.api.callPut<T>(`${ this.servicePrefix }/${ identifier }`, setting, options).pipe(
+    return this.api.callPut<T>(`users/${ this.authService.currentUserValue.public_id }/settings/${ identifier }`, setting, options).pipe(
       map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
         return apiResponse.body.result as T;
       })
@@ -149,7 +150,7 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
   public deleteUserSetting(identifier: string): Observable<T> {
     const options = this.options;
     options.params = new HttpParams();
-    return this.api.callDelete<T>(`${ this.servicePrefix }/${ identifier }`, options).pipe(
+    return this.api.callDelete<T>(`users/${ this.authService.currentUserValue.public_id }/settings/${ identifier }`, options).pipe(
       map((apiResponse: HttpResponse<APIDeleteSingleResponse<T>>) => {
         return apiResponse.body.raw as T;
       })
