@@ -13,17 +13,17 @@ jobs:
 
     # extract <tagname> from refs/tags/<tagname> and replace "/" characters 
     - name: extract Github tag name
-      run: echo ::set-env name=TAG::$(TAG_EXTRACTED=${GITHUB_REF#refs/tags/}; echo ${TAG_EXTRACTED//\//-})
+      run: echo "TAG=$(TAG_EXTRACTED=${GITHUB_REF#refs/tags/}; echo ${TAG_EXTRACTED//\//-})" >> $GITHUB_ENV
 
     - name: setup version strings
       run: |
-        echo ::set-env name=VERSION_STRING::$(echo ${TAG})
-        echo ::set-env name=VERSION_ID::$(echo ${TAG})
-        echo ::set-env name=VERSION_PATH::$(echo ${TAG})
-        echo ::set-env name=VERSION_DOCKER_TAG::$(echo ${TAG})
+        echo "VERSION_STRING=$(echo ${TAG})" >> $GITHUB_ENV
+        echo "VERSION_ID=$(echo ${TAG})" >> $GITHUB_ENV
+        echo "VERSION_PATH=$(echo ${TAG})" >> $GITHUB_ENV
+        echo "VERSION_DOCKER_TAG=$(echo ${TAG})" >> $GITHUB_ENV
 
     - name: build DATAGERRY
-      run:  BUILDVAR_VERSION=${{ env.VERSION_STRING }} BUILDVAR_VERSION_EXT=${{ env.VERSION_ID }} BUILDVAR_DOCKER_TAG=${{ env.VERSION_DOCKER_TAG }} make -e
+      run:  BUILDVAR_VERSION=${VERSION_STRING} BUILDVAR_VERSION_EXT=${VERSION_ID} BUILDVAR_DOCKER_TAG=${VERSION_DOCKER_TAG} make -e
 
     - name: copy artifacts to files.datagerry.com
       run: |
