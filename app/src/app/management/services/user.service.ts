@@ -134,8 +134,6 @@ export class UserService<T = User> implements ApiService {
     let httpParams: HttpParams = new HttpParams();
     if (filter !== undefined) {
       httpParams = httpParams.set('filter', JSON.stringify(filter));
-    } else {
-      httpParams = httpParams.set('filter', null);
     }
     options.params = httpParams;
     return this.api.callHead<T>(`${ this.servicePrefix }/`, options).pipe(
