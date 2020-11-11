@@ -131,11 +131,13 @@ export class UserService<T = User> implements ApiService {
    */
   public countUsers(filter?: any): Observable<number> {
     const options = this.options;
+    let httpParams: HttpParams = new HttpParams();
     if (filter !== undefined) {
-      let httpParams: HttpParams = new HttpParams();
       httpParams = httpParams.set('filter', JSON.stringify(filter));
-      options.params = httpParams;
+    } else {
+      httpParams = httpParams.set('filter', null);
     }
+    options.params = httpParams;
     return this.api.callHead<T>(`${ this.servicePrefix }/`, options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return +apiResponse.headers.get('X-Total-Count');
