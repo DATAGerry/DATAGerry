@@ -108,6 +108,11 @@ export class TableStateComponent {
     this.nameControl.setValue('');
   }
 
+  /**
+   * Update a existing state
+   * @param state
+   * @param event
+   */
   public updateState(state: TableState, event: Event) {
     event.stopPropagation();
     this.stateUpdate.emit(state);

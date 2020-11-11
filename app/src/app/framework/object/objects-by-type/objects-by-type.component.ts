@@ -17,7 +17,7 @@
 */
 
 import {
-  Component,
+  Component, Input,
   OnDestroy,
   OnInit, TemplateRef, ViewChild,
 } from '@angular/core';
@@ -129,6 +129,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * Filter parameter from table search-
    */
   public filter: string;
+
+  public initialVisibleColumns: Array<string> = [];
 
   public columns: Array<Column>;
 
@@ -293,6 +295,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       style: { width: '6em' }
     } as unknown as Column);
 
+    this.initialVisibleColumns = columns.filter(c => !c.hidden).map(c => c.name);
     this.columns = columns;
   }
 
