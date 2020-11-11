@@ -132,6 +132,11 @@ export class UserFormComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  public removeImage() {
+    this.imageControl.setValue(null);
+    this.preview = null;
+  }
+
   public onSubmit(): void {
     this.form.markAllAsTouched();
     if (this.form.valid) {

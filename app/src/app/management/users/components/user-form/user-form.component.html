@@ -118,14 +118,23 @@
       <div id="picture-upload" class="text-center">
         <cmdb-user-image [image]="preview"></cmdb-user-image>
         <div class="custom-file mt-2">
-          <input type="file" (change)="previewImage($event)"
-                 class="custom-file-input" [ngClass]="{ 'is-valid': imageControl.valid && (imageControl.dirty || imageControl.touched),
+          <div class="container">
+            <div class="row">
+              <div class="col-11 mr-0 pr-0">
+                <input type="file" (change)="previewImage($event)"
+                       class="custom-file-input" [ngClass]="{ 'is-valid': imageControl.valid && (imageControl.dirty || imageControl.touched),
                  'is-invalid': imageControl.invalid && (imageControl.dirty || imageControl.touched)}">
-          <label class="custom-file-label">Choose image </label>
+                <label class="custom-file-label">Choose image </label>
+              </div>
+              <div class="col-1 ml-0 pl-0">
+                <button type=button class="btn font-size-unset btn-outline-danger" (click)="removeImage()">x</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+    </div>
   <hr/>
   <div class="d-flex flex-row-reverse">
     <button type="button" class="btn btn-outline-success ml-2" [disabled]="form.invalid" (click)="onSubmit()">Save
