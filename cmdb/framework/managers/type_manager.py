@@ -13,12 +13,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from typing import Union
+from typing import Union, List
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework import TypeModel
 from cmdb.framework.managers.framework_manager import FrameworkManager
 from cmdb.framework.results.iteration import IterationResult
+from cmdb.framework.results.list import ListResult
 from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError, ManagerDeleteError
 from cmdb.search import Query
@@ -63,6 +64,19 @@ class TypeManager(FrameworkManager):
         iteration_result.convert_to(TypeModel)
         return iteration_result
 
+    def find(self, filter: dict, *args, **kwargs) -> ListResult[TypeModel]:
+        """
+        Get a list of types by a filter query.
+        Args:
+            filter: Filter for matched querys
+
+        Returns:
+            ListResult
+        """
+        results = self._get(self.collection, filter=filter)
+        types: List[TypeModel] = [TypeModel.from_data(result) for result in results]
+        return ListResult(types)
+
     def get(self, public_id: Union[PublicID, int]) -> TypeModel:
         """
         Get a single type by its id.
@@ -91,6 +105,8 @@ class TypeManager(FrameworkManager):
         Returns:
             int: The Public ID of the new inserted type
         """
+        if isinstance(type, TypeModel):
+            type = TypeModel.to_json(type)
         return self._insert(self.collection, resource=type)
 
     def update(self, public_id: Union[PublicID, int], type: Union[TypeModel, dict]):
@@ -122,7 +138,7 @@ class TypeManager(FrameworkManager):
             TypeModel: The deleted type as its model.
         """
         raw_type: TypeModel = self.get(public_id=public_id)
-        delete_result = self._delete(self.collection, public_id=public_id)
+        delete_result = self._delete(self.collection, filter={'public_id': public_id})
         if delete_result.deleted_count == 0:
             raise ManagerDeleteError(err='No type matched this public id')
         return raw_type

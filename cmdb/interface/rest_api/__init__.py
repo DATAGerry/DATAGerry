@@ -120,13 +120,16 @@ def register_converters(app):
 
 def register_blueprints(app):
     from cmdb.interface.rest_api.connection import connection_routes
-    from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint
+    from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint, objects_blueprint
     from cmdb.interface.rest_api.framework_routes.type_routes import types_blueprint
     from cmdb.interface.rest_api.auth_routes import auth_blueprint
     from cmdb.interface.rest_api.framework_routes.category_routes import categories_blueprint
-    from cmdb.interface.rest_api.user_management_routes.user_routes import user_blueprint
-    from cmdb.interface.rest_api.user_management_routes.right_routes import right_blueprint
-    from cmdb.interface.rest_api.user_management_routes.group_routes import group_blueprint
+
+    from cmdb.interface.rest_api.user_management_routes.user_routes import users_blueprint
+    from cmdb.interface.rest_api.user_management_routes.user_settings_routes import user_settings_blueprint
+    from cmdb.interface.rest_api.user_management_routes.right_routes import rights_blueprint
+    from cmdb.interface.rest_api.user_management_routes.group_routes import groups_blueprint
+
     from cmdb.interface.rest_api.search_routes import search_blueprint
     from cmdb.interface.rest_api.exporter_routes.file_routes import file_blueprint
     from cmdb.interface.rest_api.exporter_routes.export_type_routes import type_export_blueprint
@@ -142,12 +145,16 @@ def register_blueprints(app):
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(object_blueprint)
+    app.register_multi_blueprint(objects_blueprint, multi_prefix=['/objects'])
     app.register_multi_blueprint(types_blueprint, multi_prefix=['/type', '/types'])
     app.register_blueprint(connection_routes)
+
     app.register_multi_blueprint(categories_blueprint, multi_prefix=['/category', '/categories'])
-    app.register_blueprint(user_blueprint)
-    app.register_blueprint(group_blueprint)
-    app.register_blueprint(right_blueprint)
+    app.register_multi_blueprint(users_blueprint, multi_prefix=['/user', '/users'])
+    app.register_blueprint(user_settings_blueprint, url_prefix='/users/<int:user_id>/settings')
+
+    app.register_multi_blueprint(groups_blueprint, multi_prefix=['/group', '/groups'])
+    app.register_multi_blueprint(rights_blueprint, multi_prefix=['/right', '/rights'])
     app.register_blueprint(search_blueprint)
     app.register_blueprint(file_blueprint)
     app.register_blueprint(type_export_blueprint)

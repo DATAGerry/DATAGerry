@@ -26,7 +26,6 @@ from cmdb.interface import DEFAULT_MIME_TYPE
 from cmdb.interface.api_parameters import CollectionParameters
 
 from cmdb.interface.pagination import APIPagination, APIPager
-from cmdb.utils import json_encoding
 
 
 def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2) -> BaseResponse:
@@ -44,7 +43,7 @@ def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2
     """
     from cmdb.interface import API_VERSION
 
-    response = flask_response(dumps(body, default=json_encoding.default, indent=indent), status)
+    response = flask_response(dumps(body, default=str, indent=indent), status)
     response.mimetype = mime or DEFAULT_MIME_TYPE
     response.headers['X-API-Version'] = API_VERSION
     return response
@@ -170,7 +169,7 @@ class GetMultiResponse(BaseAPIResponse):
             params: HTTP query parameters.
             url: Requested url.
             model: Data-Model of the results.
-            body_less: If http response should not have a body.
+            body: If http response should not have a body.
 
         """
         self.results: List[dict] = results
@@ -221,7 +220,7 @@ class GetMultiResponse(BaseAPIResponse):
         extra = {}
         if pagination:
             extra = {
-                'parameters': self.parameters.to_dict(),
+                'parameters': CollectionParameters.to_dict(self.parameters),
                 'pager': self.pager.to_dict(),
                 'pagination': self.pagination.to_dict()
             }
@@ -239,18 +238,19 @@ class InsertSingleResponse(BaseAPIResponse):
     """
     __slots__ = 'result_id', 'raw'
 
-    def __init__(self, result_id: PublicID, raw: dict, url: str = None, model: Model = None):
+    def __init__(self, raw: dict, result_id: [PublicID, str] = None, url: str = None, model: Model = None):
         """
         Constructor of InsertSingleResponse.
 
         Args:
-            result_id: The new public id of the inserted resource.
+            result_id: The new public id or a identifier of the inserted resource.
             raw: The raw document
             url: The request url.
             model: Data model of the inserted resource.
         """
-        self.result_id: PublicID = result_id
+
         self.raw: dict = raw
+        self.result_id: PublicID = result_id
         super(InsertSingleResponse, self).__init__(operation_type=OperationType.INSERT, url=url, model=model)
 
     def make_response(self, prefix: str = '', *args, **kwargs) -> BaseResponse:
@@ -320,6 +320,48 @@ class UpdateSingleResponse(BaseAPIResponse):
         }, **super(UpdateSingleResponse, self).export(*args, **kwargs)}
 
 
+class UpdateMultiResponse(BaseAPIResponse):
+    """
+    API Response for update call of a multiple resources.
+    """
+
+    __slots__ = 'results'
+
+    def __init__(self, results: List[dict], url: str = None, model: Model = None):
+        """
+        Constructor of UpdateSingleResponse.
+
+        Args:
+            results: Updated resources.
+            url: Requested url.
+            model: Data model of updated resource.
+        """
+        self.results: List[dict] = results
+        super(UpdateMultiResponse, self).__init__(operation_type=OperationType.UPDATE, url=url, model=model)
+
+    def make_response(self, *args, **kwargs) -> BaseResponse:
+        """
+        Make a valid http response.
+
+        Args:
+            *args:
+            **kwargs:
+
+        Returns:
+            Instance of BaseResponse with http status code 202
+        """
+        response = make_api_response(self.export(), 202)
+        return response
+
+    def export(self, text: str = 'json', *args, **kwargs) -> dict:
+        """
+        Get the update instance as dict.
+        """
+        return {**{
+            'results': self.results
+        }, **super(UpdateMultiResponse, self).export(*args, **kwargs)}
+
+
 class DeleteSingleResponse(BaseAPIResponse):
     """
     API Response for delete call of a single resource.
@@ -357,5 +399,42 @@ class DeleteSingleResponse(BaseAPIResponse):
         Get the delete instance as dict.
         """
         return {**{
-            'deleted_entry': self.raw
+            'raw': self.raw
         }, **super(DeleteSingleResponse, self).export()}
+
+
+class GetListResponse(BaseAPIResponse):
+    """
+    API Response for a simple list without iteration.
+    """
+    __slots__ = 'results'
+
+    def __init__(self, results: List[dict], url: str = None, model: Model = None, body: bool = None):
+        self.results: List[dict] = results
+        super(GetListResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model, body=body)
+
+    def make_response(self, *args, **kwargs) -> BaseResponse:
+        """
+        Make a valid http response.
+
+        Args:
+            *args:
+            **kwargs:
+
+        Returns:
+            Instance of BaseResponse with a HTTP 200 status code.
+        """
+        if self.body:
+            response = make_api_response(self.export(*args, **kwargs))
+        else:
+            response = make_api_response(None)
+        response.headers['X-Total-Count'] = len(self.results)
+        return response
+
+    def export(self, text: str = 'json') -> dict:
+        """
+        Get the list response
+        """
+        return {**{
+            'results': self.results
+        }, **super(GetListResponse, self).export()}

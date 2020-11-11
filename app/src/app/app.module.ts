@@ -31,6 +31,10 @@ import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MainModule } from './main/main.module';
 import { AuthModule } from './auth/auth.module';
+import { NgxIndexedDBModule } from 'ngx-indexed-db';
+import { userSettingsDBConfig } from './management/user-settings/user-settings.module';
+import { APICachingInterceptor } from './services/api-cache.interceptor';
+import { RequestCacheService } from './services/request-cache.service';
 
 @NgModule({
   declarations: [
@@ -49,8 +53,10 @@ import { AuthModule } from './auth/auth.module';
   providers: [
     PreviousRouteService,
     DatePipe,
+    RequestCacheService,
     { provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: APICachingInterceptor, multi: true }
   ],
   bootstrap: [AppComponent]
 })

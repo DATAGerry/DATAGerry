@@ -23,19 +23,23 @@ import { DashboardRoutingModule } from './dashboard-routing.module';
 import { DashboardComponent } from './dashboard.component';
 import { LayoutModule } from '../layout/layout.module';
 import { DashcardComponent } from './components/dashcard/dashcard.component';
-import { NewestViewComponent } from './newest-view/newest-view.component';
-import { DataTablesModule } from 'angular-datatables';
-import { LatestChangesViewComponent } from './latest-changes-view/latest-changes-view.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { RenderModule } from '../framework/render/render.module';
+import { UsersModule } from '../management/users/users.module';
+import { ObjectModule } from '../framework/object/object.module';
+import { TableModule } from '../layout/table/table.module';
 
 @NgModule({
-  declarations: [DashboardComponent, DashcardComponent, NewestViewComponent, LatestChangesViewComponent],
+  declarations: [DashboardComponent, DashcardComponent],
   imports: [
     CommonModule,
     LayoutModule,
     DashboardRoutingModule,
-    DataTablesModule,
-    FontAwesomeModule
+    FontAwesomeModule,
+    RenderModule,
+    UsersModule,
+    ObjectModule,
+    TableModule
   ]
 })
 export class DashboardModule {

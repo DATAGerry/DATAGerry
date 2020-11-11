@@ -25,9 +25,10 @@ from cmdb.interface.blueprint import RootBlueprint
 from cmdb.security.auth import AuthModule, AuthSettingsDAO
 from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, \
     AuthenticationProviderNotActivated
+from cmdb.security.auth.response import LoginResponse
 from cmdb.security.token.generator import TokenGenerator
-from cmdb.user_management import User
-from cmdb.user_management.user_manager import UserManager
+from cmdb.user_management import UserModel
+from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 
@@ -40,7 +41,7 @@ auth_blueprint = RootBlueprint('auth_rest', __name__, url_prefix='/auth')
 LOGGER = logging.getLogger(__name__)
 
 with current_app.app_context():
-    user_manager: UserManager = current_app.user_manager
+    user_manager: UserManager = UserManager(current_app.database_manager)
     system_settings_reader: SystemSettingsReader = SystemSettingsReader(current_app.database_manager)
     system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(current_app.database_manager)
 
@@ -50,7 +51,7 @@ with current_app.app_context():
 @login_required
 @insert_request_user
 @right_required('base.system.view')
-def get_auth_settings(request_user: User):
+def get_auth_settings(request_user: UserModel):
     auth_module = AuthModule(system_settings_reader)
     return make_response(auth_module.settings)
 
@@ -60,7 +61,7 @@ def get_auth_settings(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.system.edit')
-def update_auth_settings(request_user: User):
+def update_auth_settings(request_user: UserModel):
     new_auth_settings_values = request.get_json()
     if not new_auth_settings_values:
         return abort(400, 'No new data was provided')
@@ -79,7 +80,7 @@ def update_auth_settings(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.system.view')
-def get_installed_providers(request_user: User):
+def get_installed_providers(request_user: UserModel):
     provider_names: List[dict] = []
     auth_module = AuthModule(system_settings_reader)
     for provider in auth_module.providers:
@@ -92,7 +93,7 @@ def get_installed_providers(request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.system.view')
-def get_provider_config(provider_class: str, request_user: User):
+def get_provider_config(provider_class: str, request_user: UserModel):
     auth_module = AuthModule(system_settings_reader)
     try:
         provider_class_config = auth_module.get_provider(provider_class).get_config()
@@ -106,7 +107,7 @@ def get_provider_config(provider_class: str, request_user: User):
 @login_required
 @insert_request_user
 @right_required('base.system.view')
-def get_provider_config_form(provider_class: str, request_user: User):
+def get_provider_config_form(provider_class: str, request_user: UserModel):
     auth_module = AuthModule(system_settings_reader)
     try:
         provider_class_config = auth_module.get_provider(provider_class).get_config().PROVIDER_CONFIG_FORM
@@ -136,16 +137,17 @@ def post_login():
     finally:
         # If login success generate user instance with token
         if user_instance:
-            user_instance.last_login_time = datetime.utcnow()
-            user_manager.update_user(user_instance.public_id, user_instance.to_database())
             tg = TokenGenerator()
-            token = tg.generate_token(payload={'user': {
+            token: bytes = tg.generate_token(payload={'user': {
                 'public_id': user_instance.get_public_id()
             }})
-            user_instance.token = token
-            user_instance.token_issued_at = int(datetime.now().timestamp())
-            user_instance.token_expire = int(tg.get_expire_time().timestamp())
-            return make_response(user_instance)
+            token_issued_at = int(datetime.now().timestamp())
+            token_expire = int(tg.get_expire_time().timestamp())
+
+            login_response = LoginResponse(user_instance, token, token_issued_at, token_expire)
+
+            return login_response.make_response()
+
         # Login not success
         else:
             return abort(401, 'Could not login')

@@ -1,14 +1,14 @@
 <div id="app-wrapper">
-  <cmdb-navigation *ngIf="view == 'full'"></cmdb-navigation>
-  <cmdb-sidebar *ngIf="view == 'full'"></cmdb-sidebar>
+  <cmdb-navigation *ngIf="initDone && view === 'full'"></cmdb-navigation>
+  <cmdb-sidebar *ngIf="initDone && view === 'full'"></cmdb-sidebar>
   <main id="main">
-    <cmdb-breadcrumb *ngIf="view == 'full'"></cmdb-breadcrumb>
+    <cmdb-breadcrumb *ngIf="initDone && view === 'full'"></cmdb-breadcrumb>
     <div id="content">
       <div class="container-fluid">
         <router-outlet></router-outlet>
       </div>
     </div>
-    <cmdb-footer *ngIf="view == 'full'"></cmdb-footer>
+    <cmdb-footer *ngIf="initDone && view === 'full'"></cmdb-footer>
     <cmdb-toast-container></cmdb-toast-container>
   </main>
 </div>

@@ -33,7 +33,7 @@ import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from
     <div class="modal-body">
       <strong>Are you sure you want to delete <span class="text-primary">{{category.name}}</span> category?</strong>
       <p>
-        All typs inside this category will be un assigned <span
+        All types inside this category will be un assigned <span
         class="text-danger">This operation can not be undone!</span>
       </p>
       <form id="deleteCategoryModalForm" [formGroup]="deleteCategoryModalForm" class="needs-validation" novalidate

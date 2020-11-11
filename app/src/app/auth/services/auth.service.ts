@@ -29,6 +29,9 @@ import { StepByStepIntroComponent } from '../../layout/intro/step-by-step-intro/
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SpecialService } from '../../framework/services/special.service';
 import { Router } from '@angular/router';
+import { LoginResponse } from '../models/responses';
+import { Token } from '../models/token';
+import { NgxIndexedDBService } from 'ngx-indexed-db';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -50,8 +53,8 @@ export class AuthService<T = any> implements ApiService {
   // User storage
   private currentUserSubject: BehaviorSubject<User>;
   public currentUser: Observable<User>;
-  private currentUserTokenSubject: BehaviorSubject<string>;
-  public currentUserToken: Observable<string>;
+  private currentUserTokenSubject: BehaviorSubject<Token>;
+  public currentUserToken: Observable<Token>;
 
   // First Step Intro
   private startIntroModal: any = undefined;
@@ -59,13 +62,13 @@ export class AuthService<T = any> implements ApiService {
 
   constructor(private backend: HttpBackend, private connectionService: ConnectionService, private api: ApiCallService,
               private permissionService: PermissionService, private router: Router, private introService: NgbModal,
-              private specialService: SpecialService) {
+              private specialService: SpecialService, private indexDB: NgxIndexedDBService) {
     this.http = new HttpClient(backend);
     this.currentUserSubject = new BehaviorSubject<User>(
       JSON.parse(localStorage.getItem('current-user')));
     this.currentUser = this.currentUserSubject.asObservable();
 
-    this.currentUserTokenSubject = new BehaviorSubject<string>(
+    this.currentUserTokenSubject = new BehaviorSubject<Token>(
       JSON.parse(localStorage.getItem('access-token')));
     this.currentUserToken = this.currentUserTokenSubject.asObservable();
   }
@@ -74,15 +77,15 @@ export class AuthService<T = any> implements ApiService {
     return this.currentUserSubject.value;
   }
 
-  public get currentUserTokenValue(): string {
+  public get currentUserTokenValue(): Token {
     return this.currentUserTokenSubject.value;
   }
 
 
-  public getAuthProviders(): Observable<T> {
-    return this.api.callGet<T>(`${ this.servicePrefix }/providers`).pipe(
+  public getAuthProviders(): Observable<Array<T>> {
+    return this.api.callGet<Array<T>>(`${ this.servicePrefix }/providers`).pipe(
       map((apiResponse) => {
-        return apiResponse.body;
+        return apiResponse.body as Array<T>;
       })
     );
   }
@@ -92,19 +95,25 @@ export class AuthService<T = any> implements ApiService {
       user_name: username,
       password
     };
-    return this.http.post<User>(
+    return this.http.post<LoginResponse>(
       `${ this.connectionService.currentConnection }/${ this.restPrefix }/${ this.servicePrefix }/login`, data, httpOptions)
-      .pipe(map(user => {
-        localStorage.setItem('current-user', JSON.stringify(user));
-        localStorage.setItem('access-token', JSON.stringify(user.token));
-        this.currentUserSubject.next(user);
-        this.currentUserTokenSubject.next(user.token);
+      .pipe(map((response: LoginResponse) => {
+        const token: Token = {
+          token: response.token,
+          issued: response.token_issued_at,
+          expire: response.token_expire
+        };
+        localStorage.setItem('current-user', JSON.stringify(response.user));
+        localStorage.setItem('access-token', JSON.stringify(token));
+        this.currentUserSubject.next(response.user);
+        this.currentUserTokenSubject.next(token);
         this.showIntro();
-        return user;
+        return response;
       }));
   }
 
   public logout() {
+    this.indexDB.clear('user-settings').subscribe();
     localStorage.removeItem('current-user');
     localStorage.removeItem('access-token');
     this.currentUserSubject.next(null);

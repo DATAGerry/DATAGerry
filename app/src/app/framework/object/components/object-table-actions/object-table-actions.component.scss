@@ -1,0 +1,13 @@
+@import '~src/scss/variables';
+
+a {
+  color: #000000;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+
+  &:hover{
+    > i{
+      color: theme-color('primary');
+    }
+  }
+}

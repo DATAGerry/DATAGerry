@@ -25,6 +25,7 @@ import { forkJoin, Subscription } from 'rxjs';
 import { User } from '../management/models/user';
 import { PermissionService } from './services/permission.service';
 import { Group } from '../management/models/group';
+import { LoginResponse } from './models/responses';
 
 @Component({
   selector: 'cmdb-login',
@@ -32,6 +33,15 @@ import { Group } from '../management/models/group';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit, OnDestroy {
+
+  public static defaultLogoUrl: string = '/assets/img/datagerry_logo.svg';
+  public static xmasLogoUrl: string = '/assets/img/datagerry_logo_xmas.svg';
+
+  public static defaultFallItems: string = '/assets/img/nut.svg';
+  public static xmasFallItems: string = '/assets/img/snowflake.svg';
+
+  public imageUrl: string = LoginComponent.defaultLogoUrl;
+  public itemUrl: string = LoginComponent.defaultFallItems;
 
   public loginForm: FormGroup;
   public submitted = false;
@@ -44,6 +54,14 @@ export class LoginComponent implements OnInit, OnDestroy {
     private permissionService: PermissionService,
     private render: Renderer2
   ) {
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const dateBefore = new Date(`${ year }-12-18`);
+    const dateAfter = new Date(`${ year }-12-31`);
+    if ((dateBefore < currentDate) && (currentDate < dateAfter)) {
+      this.imageUrl = LoginComponent.xmasLogoUrl;
+      this.itemUrl = LoginComponent.xmasFallItems;
+    }
   }
 
   public ngOnInit(): void {
@@ -69,8 +87,8 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     this.loginSubscription = this.authenticationService.login(
       this.loginForm.controls.username.value, this.loginForm.controls.password.value).pipe(first()).subscribe(
-      (user: User) => {
-        this.permissionService.storeUserRights(user.group_id).pipe(first()).subscribe((group: Group) => {
+      (response: LoginResponse) => {
+        this.permissionService.storeUserRights(response.user.group_id).pipe(first()).subscribe((group: Group) => {
           this.router.navigate(['/']);
         });
       },

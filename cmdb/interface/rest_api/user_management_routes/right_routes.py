@@ -14,72 +14,106 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""
-Query routes for rights system
 
-Warnings:
-    Since the rights system is fixed and not variable, protected routes are not necessary.
-"""
+from flask import request, abort
 
-import logging
+from cmdb.framework.utils import Model
+from cmdb.manager.errors import ManagerGetError, ManagerIterationError
+from cmdb.framework.results import IterationResult
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.response import GetMultiResponse, GetSingleResponse
+from cmdb.user_management.managers.right_manager import RightManager
+from cmdb.user_management.models.right import BaseRight
+from cmdb.user_management.rights import __all__ as right_tree
+from cmdb.user_management.models.right import _nameToLevel
 
-from flask import current_app
-
-from cmdb.interface.route_utils import make_response, login_required
-from cmdb.interface.blueprint import RootBlueprint
-from cmdb.user_management import UserManager
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
-
-with current_app.app_context():
-    user_manager: UserManager = current_app.user_manager
+rights_blueprint = APIBlueprint('rights', __name__)
 
 
-LOGGER = logging.getLogger(__name__)
-right_blueprint = RootBlueprint('right_rest', __name__, url_prefix='/right')
+@rights_blueprint.route('/', methods=['GET', 'HEAD'])
+@rights_blueprint.protect(auth=False, right=None)
+@rights_blueprint.parse_collection_parameters(sort='name', view='list')
+def get_rights(params: CollectionParameters):
+    """
+    HTTP `GET`/`HEAD` route for getting a iterable collection of resources.
+
+    Args:
+        params (CollectionParameters): Passed parameters over the http query string
+
+    Returns:
+        GetMultiResponse: Which includes a IterationResult of the BaseRight.
+
+    Notes:
+        Calling the route over HTTP HEAD method will result in an empty body.
+
+    Raises:
+        ManagerIterationError: If the collection could not be iterated.
+        ManagerGetError: If the collection/resources could not be found.
+    """
+    right_manager = RightManager(right_tree)
+    body = request.method == 'HEAD'
+
+    try:
+        if params.optional['view'] == 'tree':
+            api_response = GetMultiResponse(right_manager.tree_to_json(right_tree), total=len(right_tree),
+                                            params=params, url=request.url, model='Right-Tree', body=body)
+            return api_response.make_response(pagination=False)
+        else:
+            iteration_result: IterationResult[BaseRight] = right_manager.iterate(
+                filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+            rights = [BaseRight.to_dict(type) for type in iteration_result.results]
+            api_response = GetMultiResponse(rights, total=iteration_result.total, params=params,
+                                            url=request.url, model=Model('Right'), body=request.method == 'HEAD')
+            return api_response.make_response()
+    except ManagerIterationError as err:
+        return abort(400, err.message)
+    except ManagerGetError as err:
+        return abort(404, err.message)
 
 
-@right_blueprint.route('/', methods=['GET'])
-@login_required
-def get_all_rights():
-    right_list = user_manager.get_all_rights()
-    resp = make_response(right_list)
-    return resp
-
-
-@right_blueprint.route('/tree', methods=['GET'])
-@login_required
-def get_right_tree():
-    right_tree = user_manager.get_right_tree()
-    resp = make_response(right_tree)
-    return resp
-
-
-@right_blueprint.route('/<string:name>', methods=['GET'])
-@login_required
+@rights_blueprint.route('/<string:name>', methods=['GET', 'HEAD'])
+@rights_blueprint.protect(auth=False, right='None')
 def get_right(name: str):
-    right_instance = user_manager.get_right_by_name(name)
-    return make_response(right_instance)
+    """
+    HTTP `GET`/`HEAD` route for a single right resource.
+
+    Args:
+        name (str): Name of the right.
+
+    Raises:
+        ManagerGetError: When the selected right does not exists.
+
+    Notes:
+        Calling the route over HTTP HEAD method will result in an empty body.
+
+    Returns:
+        GetSingleResponse: Which includes the json data of a BaseRight.
+    """
+    right_manager: RightManager = RightManager(right_tree)
+
+    try:
+        right = right_manager.get(name)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    api_response = GetSingleResponse(BaseRight.to_dict(right), url=request.url, model=Model('Right'),
+                                     body=request.method == 'HEAD')
+    return api_response.make_response()
 
 
-@right_blueprint.route('/level/<int:level>', methods=['GET'])
-@login_required
-def get_rights_with_min_level(level: int):
-    right_list = user_manager.get_right_names_with_min_level(level)
-    return make_response(right_list)
+@rights_blueprint.route('/levels', methods=['GET', 'HEAD'])
+@rights_blueprint.protect(auth=False, right='None')
+def get_levels():
+    """
+    HTTP `GET`/`HEAD` route for a static collection of levels.
 
+    Returns:
+        GetSingleResponse: Which includes a levels as enum.
 
-@right_blueprint.route('/levels', methods=['GET'])
-@login_required
-def get_security_levels():
-    security_levels = user_manager.get_security_levels()
-    security_list = []
-    for key, value in security_levels.items():
-        temp = [key, value]
-        security_list.append(temp)
-    return make_response(security_list)
+    Notes:
+        Calling the route over HTTP HEAD method will result in an empty body.
+    """
 
-# other crud functions are not required because of static right programming
+    api_response = GetSingleResponse(_nameToLevel, url=request.url, model=Model('Security-Level'),
+                                     body=request.method == 'HEAD')
+    return api_response.make_response()

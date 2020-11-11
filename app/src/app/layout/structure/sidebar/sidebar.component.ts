@@ -52,6 +52,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.renderer.addClass(document.body, 'sidebar-fixed');
+    this.sidebarService.loadCategoryTree();
     this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable().subscribe((categoryTree: CmdbCategoryTree) => {
       this.categoryTree = categoryTree;
       this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes().subscribe(

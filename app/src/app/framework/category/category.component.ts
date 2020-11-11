@@ -75,7 +75,7 @@ export class CategoryComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.displayMode.pipe(takeUntil(this.unSubscribe)).subscribe((mode: number) => {
+    this.displayMode.pipe(takeUntil(this.unSubscribe)).subscribe(() => {
       this.categoryService.getCategoryTree().pipe(
         takeUntil(this.unSubscribe)).subscribe((categoryTree: CmdbCategoryTree) => {
         this.categoryTree = categoryTree;
@@ -148,8 +148,8 @@ export class CategoryComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   public onSave(): void {
     const observers = this.saveTree(this.categoryTree);
-    forkJoin(observers).subscribe(updateResponse => {
-      this.sidebarService.reload();
+    forkJoin(observers).subscribe(() => {
+      this.sidebarService.loadCategoryTree();
     });
   }
 
@@ -178,8 +178,8 @@ export class CategoryComponent implements OnInit, AfterViewInit, OnDestroy {
     return observers;
   }
 
-  public onTreeChange(event: any): void {
-    this.sidebarService.reload();
+  public onTreeChange(): void {
+    this.sidebarService.loadCategoryTree();
     this.ngOnInit();
     this.rerender();
   }

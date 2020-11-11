@@ -23,6 +23,7 @@ from cmdb.interface.rest_api.import_routes import importer_blueprint
 from cmdb.interface.route_utils import login_required, make_response
 from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.utils.error import CMDBError
+from cmdb.framework.managers.type_manager import TypeManager
 
 importer_type_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/type')
 
@@ -37,6 +38,8 @@ with current_app.app_context():
 def add_type():
     from bson import json_util
     from datetime import datetime
+
+    type_manager = TypeManager(database_manager=current_app.database_manager)
 
     error_collection = {}
     upload = request.form.get('uploadFile')
@@ -53,7 +56,7 @@ def add_type():
         except CMDBError:
             return abort(400)
         try:
-            object_manager.insert_type(type_instance)
+            type_manager.insert(type_instance)
         except Exception as ex:
             error_collection.update({"public_id": type_instance.public_id, "message": ex.message})
 
@@ -77,10 +80,7 @@ def update_type():
         try:
             old_fields = object_manager.get_type(update_type_instance.get_public_id()).get_fields()
             new_fields = update_type_instance.get_fields()
-            if [item for item in old_fields if item not in new_fields]:
-                update_type_instance.clean_db = False
-            if [item for item in new_fields if item not in old_fields]:
-                update_type_instance.clean_db = False
+
         except Exception as ex:
             error_collection.update({"public_id": add_data_dump['public_id'], "message": ex.message})
         try:

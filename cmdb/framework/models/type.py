@@ -229,11 +229,6 @@ class TypeModel(CmdbDAO):
         'description': {
             'type': 'string'
         },
-        'clean_db': {
-            'type': 'boolean',
-            'required': False,
-            'default': True
-        },
         'render_meta': {
             'type': 'dict',
             'allow_unknown': False,
@@ -262,18 +257,17 @@ class TypeModel(CmdbDAO):
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
-    __slots__ = 'public_id', 'name', 'label', 'description', 'version', 'active', 'clean_db', 'author_id', \
+    __slots__ = 'public_id', 'name', 'label', 'description', 'version', 'active', 'author_id', \
                 'creation_time', 'render_meta', 'fields',
 
     def __init__(self, public_id: int, name: str, author_id: int, render_meta: TypeRenderMeta,
                  creation_time: datetime = None, active: bool = True, fields: list = None, version: str = None,
-                 label: str = None, clean_db: bool = None, description: str = None):
+                 label: str = None, description: str = None):
         self.name: str = name
         self.label: str = label or self.name.title()
         self.description: str = description
         self.version: str = version or TypeModel.DEFAULT_VERSION
         self.active: bool = active
-        self.clean_db: bool = clean_db
         self.author_id: int = author_id
         self.creation_time: datetime = creation_time or datetime.utcnow()
         self.render_meta: TypeRenderMeta = render_meta
@@ -293,8 +287,7 @@ class TypeModel(CmdbDAO):
             version=data.get('version', None),
             description=data.get('description', None),
             render_meta=TypeRenderMeta.from_data(data.get('render_meta', {})),
-            fields=data.get('fields', None),
-            clean_db=data.get('clean_db', True),
+            fields=data.get('fields', None)
         )
 
     @classmethod
@@ -310,8 +303,7 @@ class TypeModel(CmdbDAO):
             'version': instance.version,
             'description': instance.description,
             'render_meta': TypeRenderMeta.to_json(instance.render_meta),
-            'fields': instance.fields,
-            'clean_db': instance.clean_db,
+            'fields': instance.fields
         }
 
     def get_name(self) -> str:

@@ -33,6 +33,7 @@ export class AppComponent implements OnInit {
 
   public readonly defaultView: AppView = 'full';
   public view: AppView;
+  public initDone: boolean = false;
 
   constructor(private router: Router, private route: ActivatedRoute) {
     this.view = this.defaultView;
@@ -47,6 +48,7 @@ export class AppComponent implements OnInit {
           } else {
             this.view = this.defaultView;
           }
+          this.initDone = true;
         });
       }
     });

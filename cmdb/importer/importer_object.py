@@ -30,7 +30,7 @@ from cmdb.importer.importer_response import ImporterObjectResponse
 from cmdb.importer.mapper import Mapping, MapEntry
 from cmdb.importer.parser_object import JsonObjectParserResponse, CsvObjectParserResponse, ExcelObjectParserResponse
 from cmdb.importer.improve_object import ImproveObject
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 
 LOGGER = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
     """Object importer for JSON"""
 
     def __init__(self, file=None, config: JsonObjectImporterConfig = None,
-                 parser: JsonObjectParser = None, object_manager: CmdbObjectManager = None, request_user: User = None):
+                 parser: JsonObjectParser = None, object_manager: CmdbObjectManager = None, request_user: UserModel = None):
         super(JsonObjectImporter, self).__init__(file=file, file_type=self.FILE_TYPE, config=config, parser=parser,
                                                  object_manager=object_manager, request_user=request_user)
 
@@ -77,19 +77,14 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
         }
         map_properties = mapping.get('properties')
 
-        # Improve insert object
-        improve_object = ImproveObject(entry, map_properties, entry.get('fields'), possible_fields)
-        entry = improve_object.improve_entry()
-
         for prop in map_properties:
             working_object = self._map_element(prop, entry, working_object)
-
 
         for entry_field in entry.get('fields'):
             field_exists = next((item for item in possible_fields if item["name"] == entry_field['name']), None)
             if field_exists:
-                improve_object.value = entry_field['value']
-                entry_field['value'] = improve_object.improve_date()
+                entry_field['value'] = ImproveObject.improve_boolean(entry_field['value'])
+                entry_field['value'] = ImproveObject.improve_date(entry_field['value'])
                 working_object.get('fields').append(entry_field)
         return working_object
 
@@ -100,7 +95,7 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
             idx_ident = map_ident.get(prop)
             if idx_ident:
                 value = entry.get(idx_ident)
-                if value:
+                if value is not None:
                     working.update({prop: value})
         return working
 
@@ -126,7 +121,7 @@ class CsvObjectImporterConfig(ObjectImporterConfig, CSVContent):
 class CsvObjectImporter(ObjectImporter, CSVContent):
 
     def __init__(self, file=None, config: CsvObjectImporterConfig = None,
-                 parser: JsonObjectParser = None, object_manager: CmdbObjectManager = None, request_user: User = None):
+                 parser: JsonObjectParser = None, object_manager: CmdbObjectManager = None, request_user: UserModel = None):
         super(CsvObjectImporter, self).__init__(file=file, file_type=self.FILE_TYPE, config=config, parser=parser,
                                                 object_manager=object_manager, request_user=request_user)
 
@@ -227,7 +222,7 @@ class ExcelObjectImporterConfig(ObjectImporterConfig, XLSXContent):
 class ExcelObjectImporter(ObjectImporter, XLSXContent):
 
     def __init__(self, file=None, config: ExcelObjectImporterConfig = None,
-                 parser: JsonObjectParser = None, object_manager: CmdbObjectManager = None, request_user: User = None):
+                 parser: JsonObjectParser = None, object_manager: CmdbObjectManager = None, request_user: UserModel = None):
         super(ExcelObjectImporter, self).__init__(file=file, file_type=self.FILE_TYPE, config=config, parser=parser,
                                                   object_manager=object_manager, request_user=request_user)
 

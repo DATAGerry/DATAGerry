@@ -29,17 +29,17 @@ import { SearchBarTag, SearchBarTagSettings } from './search-bar-tag/search-bar-
 import { ValidatorService } from '../../services/validator.service';
 import { TypeService } from '../../framework/services/type.service';
 import { CmdbType } from '../../framework/models/cmdb-type';
-import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
 import { SearchBarTagComponent } from './search-bar-tag/search-bar-tag.component';
-import { ActivatedRoute, NavigationEnd, Route, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { FormControl, FormGroup } from '@angular/forms';
-import { debounceTime } from 'rxjs/operators';
+import {debounceTime, takeUntil} from 'rxjs/operators';
 import { CategoryService } from '../../framework/services/category.service';
 import { CmdbCategory } from '../../framework/models/cmdb-category';
 import { SearchService } from '../search.service';
 import { ObjectService } from '../../framework/services/object.service';
-
 import * as $ from 'jquery';
+import { NumberSearchResults } from '../models/search-result';
 
 @Component({
   selector: 'cmdb-search-bar',
@@ -65,17 +65,14 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   public searchBarForm: FormGroup;
 
   // Dropdown
-  public possibleTextResults: number = 0;
+  public possibleTextResults: NumberSearchResults = new NumberSearchResults();
+  public possibleRegexResults: NumberSearchResults = new NumberSearchResults();
   public isExistingPublicID: boolean = false;
   public possibleTypes: CmdbType[] = [];
   public possibleCategories: CmdbCategory[] = [];
 
   // Subscriptions
-  private routeChangeSubscription: Subscription;
-  private textRegexSubscription: Subscription;
-  private isExistingPublicIDSubscription: Subscription;
-  private typeRegexSubscription: Subscription;
-  private inputControlSubscription: Subscription;
+  private unsubscribe$ = new Subject<void>();
 
   constructor(private router: Router, private route: ActivatedRoute, private searchService: SearchService,
               private typeService: TypeService, private categoryService: CategoryService, private objectService: ObjectService) {
@@ -83,11 +80,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.searchBarForm = new FormGroup({
       inputControl: new FormControl('')
     });
-    this.textRegexSubscription = new Subscription();
-    this.isExistingPublicIDSubscription = new Subscription();
-    this.typeRegexSubscription = new Subscription();
-    this.inputControlSubscription = new Subscription();
-    this.routeChangeSubscription = this.router.events.subscribe((event) => {
+    this.router.events.pipe(takeUntil(this.unsubscribe$)).subscribe((event) => {
       if (event instanceof NavigationEnd) {
         const searchQuery = this.route.snapshot.queryParams.query;
         if (searchQuery !== undefined) {
@@ -100,28 +93,39 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-
     this.inputControl.valueChanges.pipe(debounceTime(300)).subscribe((changes: string) => {
       if (changes.trim() !== '') {
-        this.textRegexSubscription = this.searchService.getEstimateValueResults(changes).subscribe((counter: number) => {
-          this.possibleTextResults = counter;
+        if (ValidatorService.getRegex().test(changes)) {
+          this.searchService.getEstimateValueResults(changes).pipe(takeUntil(this.unsubscribe$))
+            .subscribe((counter: NumberSearchResults) => {
+              this.possibleRegexResults = counter;
+          });
+        }
+        this.searchService.getEstimateValueResults(ValidatorService.replaceTextWithRegex(changes))
+          .pipe(takeUntil(this.unsubscribe$))
+          .subscribe((counter: NumberSearchResults) => {
+            this.possibleTextResults = counter;
         });
-        if (!isNaN(+changes)) {
-          this.isExistingPublicIDSubscription = this.objectService.getObject(+changes).subscribe(() => {
+        if (!isNaN(+changes) && Number.isInteger(+changes)) {
+          this.objectService.getObject(+changes).pipe(takeUntil(this.unsubscribe$))
+            .subscribe(() => {
               this.isExistingPublicID = true;
             },
-            (error) => {
+            () => {
               this.isExistingPublicID = false;
             });
         }
-        this.typeRegexSubscription = this.typeService.getTypesByNameOrLabel(changes).subscribe((typeList: CmdbType[]) => {
-          this.possibleTypes = typeList;
+        this.typeService.getTypesByNameOrLabel(changes).pipe(takeUntil(this.unsubscribe$))
+          .subscribe((typeList: CmdbType[]) => {
+            this.possibleTypes = typeList;
         });
-        this.typeRegexSubscription = this.categoryService.getCategoriesByName(changes).subscribe((categoryList: CmdbCategory[]) => {
-          this.possibleCategories = categoryList;
+        this.categoryService.getCategoriesByName(changes).pipe(takeUntil(this.unsubscribe$))
+          .subscribe((categoryList: CmdbCategory[]) => {
+            this.possibleCategories = categoryList;
         });
       } else {
-        this.possibleTextResults = 0;
+        this.possibleTextResults = new NumberSearchResults();
+        this.possibleRegexResults = new NumberSearchResults();
         this.possibleTypes = [];
         this.possibleCategories = [];
       }
@@ -139,6 +143,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     tag.searchLabel = searchTerm;
     switch (searchForm) {
       case 'text':
+        tag.searchText = searchTerm.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
+        break;
+      case 'regex':
         tag.searchText = ValidatorService.validateRegex(searchTerm).trim();
         break;
       case 'type':
@@ -211,7 +218,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   public openDropdown(currentIDx: number) {
-    $('[tabindex=' + (currentIDx) + ']').find('[data-toggle="collapse"]').first().click();
+    $('[tabindex=' + (currentIDx) + ']').find('[data-toggle="collapse"]').first().trigger('click');
   }
 
 
@@ -250,16 +257,13 @@ export class SearchBarComponent implements OnInit, OnDestroy {
       this.currentFocus = tabIdx;
     }
     setTimeout(() => { // this will make the execution after the above boolean has changed
-      $('[tabindex=' + this.currentFocus + ']').focus();
+      $('[tabindex=' + this.currentFocus + ']').trigger('focus');
     }, 0);
   }
 
   public ngOnDestroy(): void {
-    // ToDo: provisionally commented out. To be used later.
-    // this.routeChangeSubscription.unsubscribe();
-    this.textRegexSubscription.unsubscribe();
-    this.typeRegexSubscription.unsubscribe();
-    this.inputControlSubscription.unsubscribe();
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
   }
 
 }

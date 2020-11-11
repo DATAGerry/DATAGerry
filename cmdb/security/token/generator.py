@@ -53,7 +53,7 @@ class TokenGenerator:
         expire_time = int(self.auth_module.settings.get_token_lifetime(DEFAULT_TOKEN_LIFETIME))
         return datetime.now() + timedelta(minutes=expire_time)
 
-    def generate_token(self, payload: dict, optional_claims: dict = None) -> JWT:
+    def generate_token(self, payload: dict, optional_claims: dict = None) -> bytes:
         optional_claims = optional_claims or {}
 
         token_claims = {

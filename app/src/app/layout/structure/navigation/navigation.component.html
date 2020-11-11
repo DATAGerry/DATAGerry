@@ -41,7 +41,7 @@
             <div class="dropdown-header">Framework</div>
             <a class="dropdown-item"
                *permissionLink="'base.framework.object.add'" [routerLink]="['/framework/object']">
-              <i class="fas fa-object-group"></i> Objects
+              <i class="fas fa-vector-square"></i> Objects
             </a>
             <a class="dropdown-item"
                *permissionLink="'base.framework.type.view'" [routerLink]="['/framework/type']">
@@ -143,9 +143,9 @@
             </a>
 
             <div *permissionLink="'base.framework.object.edit'" class="dropdown-header">File Manager</div>
-            <a class="dropdown-item"  *permissionLink="'base.framework.object.edit'"
-               [routerLink]="['/filemanager/explorer']" role="button" data-toggle="dropdown" aria-haspopup="true"
-               aria-expanded="false"><i class="fas fa-folder"></i> Explorer</a>
+            <a *permissionLink="'base.framework.object.edit'" class="dropdown-item"
+               [routerLink]="['/filemanager/explorer']">
+              <i class="fas fa-folder"></i> Explorer</a>
 
             <div *permissionLink="'base.framework.log.view'" class="dropdown-header">Logs</div>
             <a *permissionLink="'base.framework.log.view'" class="dropdown-item"
@@ -181,7 +181,7 @@
           </a>
           <div class="dropdown-menu dropdown-menu-right">
             <div class="dropdown-header">Account</div>
-            <a routerLink="/management/users/view/{{authService.currentUserValue.public_id}}" class="dropdown-item">
+            <a routerLink="/management/users/view/" class="dropdown-item">
               <fa-icon icon="user-edit"></fa-icon>
               Profile
             </a>
@@ -190,6 +190,16 @@
               <fa-icon icon="sign-out-alt"></fa-icon>
               Logout
             </a>
+          </div>
+        </li>
+        <li class="nav-item dropdown mr-2">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+             aria-expanded="false">
+            <i class="far fa-smile"></i>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right feedback-form">
+            <div class="dropdown-header pt-3 pb-1"><h4>Feedback Form</h4></div>
+            <cmdb-feedback-form></cmdb-feedback-form>
           </div>
         </li>
       </ul>

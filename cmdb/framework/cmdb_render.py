@@ -17,7 +17,7 @@
 """
 Object/Type render
 """
-from typing import List
+from typing import List, Union
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
@@ -34,7 +34,7 @@ from datetime import datetime
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeSection
 from cmdb.framework.special.dt_html_parser import DtHtmlParser
-from cmdb.user_management.user_manager import User, UserManager
+from cmdb.user_management.user_manager import UserModel, UserManager
 
 LOGGER = logging.getLogger(__name__)
 
@@ -69,23 +69,23 @@ class CmdbRender:
 
     def __init__(self, object_instance: CmdbObject,
                  type_instance: TypeModel,
-                 render_user: User, user_list: List[User] = None,
+                 render_user: UserModel, user_list: List[UserModel] = None,
                  object_manager: CmdbObjectManager = None, dt_render=False):
         self.object_instance: CmdbObject = object_instance
         self.type_instance: TypeModel = type_instance
-        self.user_list: List[User] = user_list
-        self.render_user: User = render_user
+        self.user_list: List[UserModel] = user_list
+        self.render_user: UserModel = render_user
         self.object_manager = object_manager
         self.dt_render = dt_render
 
     def _render_username_by_id(self, user_id: int) -> str:
-        user: User = None
+        user: UserModel = None
         try:
             user = next(_ for _ in self.user_list if _.public_id == user_id)
         except Exception:
             user = None
         if user:
-            return user.get_name()
+            return user.get_display_name()
         else:
             return CmdbRender.AUTHOR_ANONYMOUS_NAME
 
@@ -180,7 +180,6 @@ class CmdbRender:
             'author_name': author_name,
             'icon': self.type_instance.render_meta.icon,
             'active': self.type_instance.active,
-            'clean_db': self.type_instance.clean_db,
             'version': self.type_instance.version
 
         }
@@ -293,7 +292,7 @@ class CmdbRender:
 
 class RenderList:
 
-    def __init__(self, object_list: List[CmdbObject], request_user: User, dt_render=False,
+    def __init__(self, object_list: List[CmdbObject], request_user: UserModel, dt_render=False,
                  object_manager: CmdbObjectManager = None):
         self.object_list: List[CmdbObject] = object_list
         self.request_user = request_user
@@ -306,8 +305,8 @@ class RenderList:
         self.user_manager = UserManager(database_manager=database_manager)
 
     @timing('RenderList')
-    def render_result_list(self) -> List[RenderResult]:
-        complete_user_list: List[User] = self.user_manager.get_users()
+    def render_result_list(self, raw: bool = False) -> List[Union[RenderResult, dict]]:
+        complete_user_list: List[UserModel] = self.user_manager.get_users()
 
         preparation_objects: List[RenderResult] = []
         for passed_object in self.object_list:
@@ -316,7 +315,10 @@ class RenderList:
                 object_instance=passed_object,
                 render_user=self.request_user, user_list=complete_user_list,
                 object_manager=self.object_manager, dt_render=self.dt_render)
-            current_render_result = tmp_render.result()
+            if raw:
+                current_render_result = tmp_render.result().__dict__
+            else:
+                current_render_result = tmp_render.result()
             preparation_objects.append(current_render_result)
         return preparation_objects
 

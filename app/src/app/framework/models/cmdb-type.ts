@@ -31,7 +31,6 @@ export class CmdbType implements CmdbDao {
   public creation_time: any;
   public render_meta: any;
   public fields: any[];
-  public clean_db: boolean;
 
   public has_references(): boolean {
     for (const field of this.fields) {

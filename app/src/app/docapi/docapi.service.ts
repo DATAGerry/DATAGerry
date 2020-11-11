@@ -97,7 +97,7 @@ export class DocapiService<T = DocTemplate> implements ApiService {
 
   // Validation functions
   public checkDocTemplateExists(docName: string) {
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ docName }`);
+    return this.api.callGet<T>(`${ this.servicePrefix }/name/${ docName }`);
   }
 
 }

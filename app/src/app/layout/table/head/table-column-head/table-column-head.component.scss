@@ -1,0 +1,41 @@
+:host {
+  position: relative;
+
+  &.sortable {
+
+    padding-right: 30px;
+
+    &::before, &::after {
+      font-family: "Font Awesome 5 Free", sans-serif;
+      font-weight: 900;
+      font-size: 1rem;
+      opacity: .3;
+      right: .7em;
+      top: .9em;
+      display: block;
+      position: absolute;
+    }
+
+    &::before {
+      content: "\f0de";
+    }
+
+    &::after {
+      content: "\f0dd";
+    }
+  }
+
+  &.sorting-asc {
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &.sorting-desc {
+    &::after {
+      opacity: 1;
+    }
+  }
+
+
+}

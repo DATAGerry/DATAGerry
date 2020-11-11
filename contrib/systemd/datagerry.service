@@ -5,7 +5,7 @@ Requires=network.target
 After=rabbitmq-server.service mongod.service network.target
 
 [Service]
-User=datagerry
+UserModel=datagerry
 Group=datagerry
 Type=simple
 ExecStart=/usr/bin/datagerry -c /etc/datagerry/cmdb.conf -s

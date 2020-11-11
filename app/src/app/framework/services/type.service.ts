@@ -18,7 +18,7 @@
 
 import { Injectable } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
-import { ApiCallService, ApiService, httpObserveOptions } from '../../services/api-call.service';
+import { ApiCallService, ApiService, httpObserveOptions, HttpProtocolHelper } from '../../services/api-call.service';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
@@ -31,6 +31,7 @@ import {
   APIUpdateSingleResponse
 } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
+import { ValidatorService } from '../../services/validator.service';
 
 
 export const checkTypeExistsValidator = (typeService: TypeService, time: number = 500) => {
@@ -108,7 +109,11 @@ export class TypeService<T = CmdbType> implements ApiService {
    * Get the complete type list
    */
   public getTypeList(): Observable<Array<T>> {
-    return this.api.callGet<Array<T>>(this.servicePrefix + '/?limit=0').pipe(
+    const options = httpObserveOptions;
+    let params = new HttpParams();
+    params = params.set('limit', '0');
+    options.params = params;
+    return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
       })
@@ -140,14 +145,11 @@ export class TypeService<T = CmdbType> implements ApiService {
    * @param name Name/Label of the type
    */
   public getTypesByNameOrLabel(name: string): Observable<Array<T>> {
-    const options = httpObserveOptions;
+    const regex = ValidatorService.validateRegex(name).trim();
     const filter = {
-      $or: [{ name: { $regex: name, $options: 'ismx' } }, { label: { $regex: name, $options: 'ismx' } }]
+      $or: [{ name: { $regex: regex, $options: 'ismx' } }, { label: { $regex: regex, $options: 'ismx' } }]
     };
-    let params: HttpParams = new HttpParams();
-    params = params.set('filter', JSON.stringify(filter));
-    params = params.set('limit', '0');
-    options.params = params;
+    const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(filter), 0);
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
@@ -184,7 +186,7 @@ export class TypeService<T = CmdbType> implements ApiService {
   public deleteType(publicID: number): Observable<T> {
     return this.api.callDelete<number>(this.servicePrefix + '/' + publicID).pipe(
       map((apiResponse: HttpResponse<APIDeleteSingleResponse<T>>) => {
-        return apiResponse.body.deleted_entry as T;
+        return apiResponse.body.raw as T;
       })
     );
   }
@@ -199,9 +201,8 @@ export class TypeService<T = CmdbType> implements ApiService {
       { $match: { categories: { $size: 0 } } },
       { $project: { categories: 0 } }
     ];
-
-    const filter = JSON.stringify(pipeline);
-    return this.api.callGet<Array<T>>(this.servicePrefix + `/?filter=${ filter }&limit=0`).pipe(
+    const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(pipeline), 0);
+    return this.api.callGet<T[]>(this.servicePrefix  + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body as APIGetMultiResponse<T>;
       })
@@ -225,8 +226,8 @@ export class TypeService<T = CmdbType> implements ApiService {
       { $match: { category: { $gt: { $size: 0 } } } },
       { $project: { category: 0 } }
     ];
-    const filter = JSON.stringify(pipeline);
-    return this.api.callGet<T[]>(this.servicePrefix + `/?filter=${ filter }&limit=0`).pipe(
+    const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(pipeline), 0);
+    return this.api.callGet<Array<T>>(this.servicePrefix  + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
       })

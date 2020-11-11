@@ -1,0 +1,72 @@
+<div [attr.id]="id" #container class="dg-table table-container">
+  <table-loading *ngIf="loadingEnabled" [loading]="loading"></table-loading>
+  <div class="table-header d-flex mb-3">
+    <div class="mr-auto" *ngIf="pageSizeEnabled">
+      <table-page-size [pageSize]="pageSize" [pageSizeList]="pageSizeList"
+                       (pageSizeChange)="pageSizeChange.emit($event)">
+      </table-page-size>
+    </div>
+    <div class="table-config-switch mr-1 ml-1 border-right" *ngIf="stateEnabled">
+      <table-state [tableStates]="tableStates" [currentState]="tableState" (stateSave)="onStateSave($event)"
+                   (stateSelect)="onStateSelect($event)" (stateDelete)="onStateDelete($event)"
+                   (stateUpdate)="onStateUpdate($event)" (stateReset)="onStateReset()">
+      </table-state>
+    </div>
+    <div class="table-toggle mr-1 ml-1 border-right" *ngIf="toggleable">
+      <table-column-toggle [columns]="columns" (columnsReset)="onColumnsReset()"
+                           (columnVisibilityChange)="onColumnVisibilityChange($event)">
+      </table-column-toggle>
+    </div>
+    <div class="table-search ml-1" *ngIf="searchEnabled">
+      <table-search [debounceTime]="debounceTime" (searchChange)="searchChange.emit($event)"></table-search>
+    </div>
+  </div>
+  <table #table layout-table class="table">
+    <thead table-head [sortable]="sortable">
+    <tr class="table-head">
+      <th *ngIf="selectEnabled" [ngStyle]="{'width': '3rem'}">
+        <div class="form-check">
+          <input class="form-check-input position-static" type="checkbox" value="all" title="select-all-rows"
+                 [checked]="items.length === selectedItems.length && items.length > 0"
+                 (change)="toggleAllRowSelections($event)"/>
+        </div>
+      </th>
+      <th table-column-head *ngFor="let column of columns" [column]="column" [sortActivated]="column.name === sort.name"
+          (sortChange)="onSortChange($event)" [ngClass]="columnClasses" [ngStyle]="column.style"
+          [hidden]="column.hidden"></th>
+    </tr>
+    </thead>
+    <tbody table-body [bodyClasses]="bodyClasses">
+    <tr table-row *ngFor="let item of items; let rowIndex= index" [item]="item" [rowIndex]="rowIndex"
+        [ngClass]="rowClasses">
+      <td *ngIf="selectEnabled" [ngStyle]="{'width': '3rem'}">
+        <div class="form-check">
+          <input class="form-check-input position-static" type="checkbox" [value]="item"
+                 title="" [checked]="selectedItems.includes(item)"
+                 (change)="toggleRowSelection(item, $event)"/>
+        </div>
+      </td>
+      <td table-cell *ngFor="let column of columns" [column]="column" [item]="item" [hidden]="column.hidden"
+          [ngStyle]="column.style"></td>
+    </tr>
+    <tr *ngIf="items.length === 0">
+      <td class="text-center" [colSpan]="(columns.length) + (selectEnabled ? 1: 0)">
+        {{emptyMessage}}
+      </td>
+    </tr>
+    </tbody>
+    <tfoot table-foot>
+    </tfoot>
+  </table>
+  <div class="table-footer d-flex">
+    <div class="mr-auto">
+      <table-info [show]="items.length" [total]="totalItems" *ngIf="infoEnabled"
+                  [selectEnabled]="selectEnabled" [selected]="selectedItems.length"></table-info>
+    </div>
+    <div *ngIf="paginationEnabled">
+      <table-pagination [currentPage]="page" [totalItems]="totalItems" [pageSize]="pageSize"
+                        (pageChange)="onPageChange($event)">
+      </table-pagination>
+    </div>
+  </div>
+</div>

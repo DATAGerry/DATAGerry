@@ -41,7 +41,7 @@ from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.search.query import Query, Pipeline
 from cmdb.utils.error import CMDBError
-from cmdb.user_management import User
+from cmdb.user_management import UserModel
 from cmdb.utils.wraps import deprecated
 
 LOGGER = logging.getLogger(__name__)
@@ -213,7 +213,7 @@ class CmdbObjectManager(CmdbManagerBase):
         try:
             ack = self.dbm.insert(
                 collection=CmdbObject.COLLECTION,
-                data=new_object.to_database()
+                data=new_object.__dict__
             )
             if self._event_queue:
                 event = Event("cmdb.core.object.added", {"id": new_object.get_public_id(),
@@ -224,7 +224,7 @@ class CmdbObjectManager(CmdbManagerBase):
             raise ObjectInsertError(e)
         return ack
 
-    def update_object(self, data: (dict, CmdbObject), request_user: User) -> str:
+    def update_object(self, data: (dict, CmdbObject), request_user: UserModel) -> str:
         if isinstance(data, dict):
             update_object = CmdbObject(**data)
         elif isinstance(data, CmdbObject):
@@ -235,7 +235,7 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = self._update(
             collection=CmdbObject.COLLECTION,
             public_id=update_object.get_public_id(),
-            data=update_object.to_database()
+            data=update_object.__dict__
         )
         # create cmdb.core.object.updated event
         if self._event_queue and request_user:
@@ -297,7 +297,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
         return referenced_by_objects
 
-    def delete_object(self, public_id: int, request_user: User):
+    def delete_object(self, public_id: int, request_user: UserModel):
         try:
             if self._event_queue:
                 event = Event("cmdb.core.object.deleted",
@@ -310,7 +310,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except (CMDBError, Exception):
             raise ObjectDeleteError(msg=public_id)
 
-    def delete_many_objects(self, filter_query: dict, public_ids, request_user: User):
+    def delete_many_objects(self, filter_query: dict, public_ids, request_user: UserModel):
         ack = self._delete_many(CmdbObject.COLLECTION, filter_query)
         if self._event_queue:
             event = Event("cmdb.core.objects.deleted", {"ids": public_ids,
@@ -584,7 +584,7 @@ class CmdbObjectManager(CmdbManagerBase):
     def insert_link(self, data: dict):
         try:
             new_link = CmdbLink(public_id=self.get_new_id(collection=CmdbLink.COLLECTION), **data)
-            return self._insert(CmdbLink.COLLECTION, new_link.to_database())
+            return self._insert(CmdbLink.COLLECTION, new_link.__dict__)
         except (CMDBError, Exception) as err:
             raise ObjectManagerInsertError(err)
 

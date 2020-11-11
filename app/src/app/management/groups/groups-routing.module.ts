@@ -13,15 +13,17 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { GroupsListComponent } from './groups-list/groups-list.component';
-import { GroupsAddComponent } from './groups-add/groups-add.component';
-import { GroupsEditComponent } from './groups-edit/groups-edit.component';
-import { GroupsDeleteComponent } from './groups-delete/groups-delete.component';
+import { GroupsComponent } from './groups.component';
+import { GroupAddComponent } from './group-add/group-add.component';
+import { GroupEditComponent } from './group-edit/group-edit.component';
+import { GroupResolver, GroupsResolver } from '../resolvers/group-resolver.service';
+import { RightsResolver } from '../resolvers/rights-resolver.service';
+import { GroupDeleteComponent } from './group-delete/group-delete.component';
 
 const routes: Routes = [
   {
@@ -31,7 +33,7 @@ const routes: Routes = [
       breadcrumb: 'List',
       right: 'base.user-management.group.view'
     },
-    component: GroupsListComponent
+    component: GroupsComponent
   },
   {
     path: 'add',
@@ -39,7 +41,10 @@ const routes: Routes = [
       breadcrumb: 'Add',
       right: 'base.user-management.group.add'
     },
-    component: GroupsAddComponent
+    resolve: {
+      rights: RightsResolver
+    },
+    component: GroupAddComponent
   },
   {
     path: 'edit/:publicID',
@@ -47,7 +52,11 @@ const routes: Routes = [
       breadcrumb: 'Edit',
       right: 'base.user-management.group.edit'
     },
-    component: GroupsEditComponent
+    resolve: {
+      group: GroupResolver,
+      rights: RightsResolver
+    },
+    component: GroupEditComponent
   },
   {
     path: 'delete/:publicID',
@@ -55,7 +64,11 @@ const routes: Routes = [
       breadcrumb: 'Delete',
       right: 'base.user-management.group.delete'
     },
-    component: GroupsDeleteComponent
+    resolve: {
+      group: GroupResolver,
+      groups: GroupsResolver
+    },
+    component: GroupDeleteComponent
   }
 ];
 

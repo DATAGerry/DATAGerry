@@ -22,6 +22,7 @@ import { ImporterConfig, ImporterFile, ImportResponse } from './import-object.mo
 import { ImportService } from '../import.service';
 import { Subscription } from 'rxjs';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { SidebarService } from '../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-import-objects',
@@ -51,7 +52,7 @@ export class ImportObjectsComponent implements OnInit, AfterViewInit, OnDestroy 
   // Import Response
   public importResponse: ImportResponse = undefined;
 
-  public constructor(private importService: ImportService, private spinner: NgxSpinnerService) {
+  public constructor(private importService: ImportService, private spinner: NgxSpinnerService, public sidebarService: SidebarService) {
     this.fileReader = new FileReader();
     this.importerSubscription = new Subscription();
     this.parseDataSubscription = new Subscription();
@@ -59,7 +60,7 @@ export class ImportObjectsComponent implements OnInit, AfterViewInit, OnDestroy 
 
   public ngOnInit(): void {
     this.spinner.show();
-    this.fileReader.onload = (e) => {
+    this.fileReader.onload = () => {
       this.importerFile.fileContent = this.fileReader.result;
     };
   }
@@ -145,6 +146,7 @@ export class ImportObjectsComponent implements OnInit, AfterViewInit, OnDestroy 
       },
       () => {
         this.spinner.hide();
+        this.sidebarService.updateTypeCounter(this.typeInstance.public_id);
       }
     );
   }
