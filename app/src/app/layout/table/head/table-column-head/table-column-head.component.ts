@@ -19,10 +19,10 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter, HostBinding,
+  EventEmitter,
+  HostBinding,
   HostListener,
   Input,
-  OnInit,
   Output,
   ViewEncapsulation
 } from '@angular/core';
@@ -39,9 +39,11 @@ import { Column, Sort, SortDirection } from '../../table.types';
 export class TableColumnHeadComponent {
 
   // noinspection JSMismatchedCollectionQueryUpdate
-  @HostBinding('class') private cssClasses: Array<string>;
-  @HostBinding('class.sortable') private sortable: boolean = false;
+  @HostBinding('class') public cssClasses: Array<string>;
+  @HostBinding('class.sortable') public sortable: boolean = false;
   @HostBinding('class.hidden') @Input() public hidden: boolean = false;
+  @HostBinding('class.sorting-asc') public sortAsc: boolean = true;
+  @HostBinding('class.sorting-desc') public sortDesc: boolean = true;
 
   /**
    * Column of this head element.
@@ -93,8 +95,20 @@ export class TableColumnHeadComponent {
     this.sortActivated = value;
     if (!this.sortActivated) {
       this.order = SortDirection.NONE;
+      this.sortAsc = false;
+      this.sortDesc = false;
     } else {
       this.order = this.reverseOrder(this.order);
+      if (this.order === SortDirection.ASCENDING) {
+        this.sortDesc = false;
+        this.sortAsc = true;
+      } else if (this.order === SortDirection.DESCENDING) {
+        this.sortDesc = true;
+        this.sortAsc = false;
+      } else {
+        this.sortAsc = false;
+        this.sortDesc = false;
+      }
     }
   }
 
