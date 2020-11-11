@@ -67,7 +67,6 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
   @ViewChild('fieldTemplate', { static: true }) fieldTemplate: TemplateRef<any>;
-  @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
   @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
 
   /**
@@ -252,10 +251,9 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     columns.push({
       display: 'Author',
       name: 'author_id',
-      data: 'object_information.author_id',
+      data: 'object_information.author_name',
       sortable: true,
       searchable: false,
-      template: this.userTemplate
     } as Column);
 
     columns.push({
