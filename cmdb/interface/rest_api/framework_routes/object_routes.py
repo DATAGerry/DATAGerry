@@ -606,7 +606,7 @@ def update_object(public_id: int, request_user: UserModel):
 
         # update edit time
         put_data['last_edit_time'] = datetime.utcnow()
-        print(put_data)
+
         try:
             update_object_instance = CmdbObject(**put_data)
         except ObjectManagerUpdateError as err:
