@@ -15,7 +15,7 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
+import * as moment from 'moment';
 import {
   Component, Input,
   OnDestroy,
@@ -263,7 +263,10 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       sortable: true,
       searchable: false,
       render(data: any, item?: any, column?: Column, index?: number) {
-        return new Date(data.$date).toUTCString();
+        if (!data) {
+          return 'No modifications so far.';
+        }
+        return moment(new Date(data)).format('DD/MM/YYYY - HH:mm:ss');
       }
     } as Column);
     columns.push({
@@ -276,8 +279,9 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         if (!data) {
           return 'No modifications so far.';
         }
-        return new Date(data.$date).toUTCString();
+        return moment(new Date(data)).format('DD/MM/YYYY - HH:mm:ss');
       }
+
     } as Column);
 
     columns.push({

@@ -16,10 +16,11 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import * as moment from 'moment';
+
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ApiCallService } from '../services/api-call.service';
 import { TypeService } from '../framework/services/type.service';
-import { CmdbType } from '../framework/models/cmdb-type';
 import { ObjectService } from '../framework/services/object.service';
 import { CmdbCategory } from '../framework/models/cmdb-category';
 import { CategoryService } from '../framework/services/category.service';
@@ -31,7 +32,6 @@ import { APIGetMultiResponse } from '../services/models/api-response';
 import { SpecialService } from '../framework/services/special.service';
 import { RenderResult } from '../framework/models/cmdb-render';
 import { Column } from '../layout/table/table.types';
-import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'cmdb-dashboard',
@@ -130,7 +130,7 @@ export class DashboardComponent implements OnInit {
       searchable: false,
       cssClasses: ['text-center'],
       render(data: any, item?: any, column?: Column, index?: number) {
-        return new Date(data.$date).toUTCString();
+        return moment(new Date(data.$date)).format('DD/MM/YYYY - HH:mm:ss');
       }
     } as Column;
 
@@ -145,7 +145,7 @@ export class DashboardComponent implements OnInit {
         if (!data) {
           return 'No modifications so far.';
         }
-        return new Date(data.$date).toUTCString();
+        return moment(new Date(data.$date)).format('DD/MM/YYYY - HH:mm:ss');
       }
     } as Column;
 
