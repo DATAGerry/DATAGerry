@@ -103,8 +103,8 @@ class UserModel(CmdbDAO):
         self.email: str = email
         self.password: str = password
         self.image: str = image
-        self.first_name: str = first_name
-        self.last_name: str = last_name
+        self.first_name: str = first_name or None
+        self.last_name: str = last_name or None
 
         super(UserModel, self).__init__(public_id=public_id)
 

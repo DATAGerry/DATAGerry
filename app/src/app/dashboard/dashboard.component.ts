@@ -116,11 +116,10 @@ export class DashboardComponent implements OnInit {
     const authorColumn = {
       display: 'Author',
       name: 'author_id',
-      data: 'object_information.author_id',
+      data: 'object_information.author_name',
       sortable: false,
       searchable: false,
-      cssClasses: ['text-center'],
-      template: this.userTemplate
+      cssClasses: ['text-center']
     } as Column;
 
     const creationColumn = {

@@ -74,8 +74,7 @@ export class TablePageSizeComponent implements OnInit, OnDestroy {
       { label: '50', value: 50 },
       { label: '100', value: 100 },
       { label: '200', value: 200 },
-      { label: '500', value: 500 },
-      { label: 'All', value: 0 }
+      { label: '500', value: 500 }
     ];
 
   /**

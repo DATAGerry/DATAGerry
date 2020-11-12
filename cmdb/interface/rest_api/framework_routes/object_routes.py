@@ -82,9 +82,9 @@ def get_objects(params: CollectionParameters):
             api_response = GetMultiResponse(object_list, total=iteration_result.total, params=params,
                                             url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
         elif view == 'render':
-            rendered_list = RenderList(iteration_result.results, None).render_result_list(raw=True)
+            rendered_list = RenderList(iteration_result.results, object_manager, ref_render=True).render_result_list(raw=True)
             api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
-                                            url=request.url, model=Model('RendeResult'), body=request.method == 'HEAD')
+                                            url=request.url, model=Model('RenderResult'), body=request.method == 'HEAD')
         else:
             return abort(401, 'No possible view parameter')
 
