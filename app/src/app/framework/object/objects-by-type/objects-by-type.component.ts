@@ -67,6 +67,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
   @ViewChild('fieldTemplate', { static: true }) fieldTemplate: TemplateRef<any>;
+  @ViewChild('dateTemplate', { static: true }) dateTemplate: TemplateRef<any>;
   @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
 
   /**
@@ -262,12 +263,9 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       data: 'object_information.creation_time',
       sortable: true,
       searchable: false,
+      template: this.dateTemplate,
       render(data: any, item?: any, column?: Column, index?: number) {
-        if (!data) {
-          return 'No modifications so far.';
-        }
-        const d = Date.parse(data);
-        return moment(d).format('DD/MM/YYYY - HH:mm:ss');
+        return data;
       }
     } as Column);
     columns.push({
@@ -276,12 +274,9 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       data: 'object_information.last_edit_time',
       sortable: true,
       searchable: false,
+      template: this.dateTemplate,
       render(data: any, item?: any, column?: Column, index?: number) {
-        if (!data) {
-          return 'No modifications so far.';
-        }
-        const d = Date.parse(data);
-        return moment(d).format('DD/MM/YYYY - HH:mm:ss');
+        return data;
       }
 
     } as Column);
