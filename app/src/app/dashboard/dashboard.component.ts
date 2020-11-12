@@ -130,8 +130,7 @@ export class DashboardComponent implements OnInit {
       searchable: false,
       cssClasses: ['text-center'],
       render(data: any, item?: any, column?: Column, index?: number) {
-        const date = new Date(data.$date);
-        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - HH:mm:ss').toString();
+        return new Date(data.$date).toUTCString();
       }
     } as Column;
 
@@ -146,8 +145,7 @@ export class DashboardComponent implements OnInit {
         if (!data) {
           return 'No modifications so far.';
         }
-        const date = new Date(data.$date);
-        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - HH:mm:ss').toString();
+        return new Date(data.$date).toUTCString();
       }
     } as Column;
 

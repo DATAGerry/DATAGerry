@@ -263,8 +263,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       sortable: true,
       searchable: false,
       render(data: any, item?: any, column?: Column, index?: number) {
-        const date = new Date(data);
-        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
+        return new Date(data.$date).toUTCString();
       }
     } as Column);
     columns.push({
@@ -277,8 +276,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         if (!data) {
           return 'No modifications so far.';
         }
-        const date = new Date(data);
-        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
+        return new Date(data.$date).toUTCString();
       }
     } as Column);
 
