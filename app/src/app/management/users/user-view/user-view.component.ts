@@ -78,7 +78,9 @@ export class UserViewComponent implements OnInit, OnDestroy {
     this.modalRef = this.modalService.open(UsersPasswdModalComponent, { size: 'lg' });
     this.modalRef.componentInstance.user = this.user;
     this.modalRef.result.then( result => {
-      this.user = result;
+      if (result instanceof User) {
+        this.user = result;
+      }
     });
   }
 
