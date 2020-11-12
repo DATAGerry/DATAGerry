@@ -20,6 +20,7 @@ Object/Type render
 from typing import List, Union
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.utils.wraps import timing
 
@@ -70,13 +71,14 @@ class CmdbRender:
     def __init__(self, object_instance: CmdbObject,
                  type_instance: TypeModel,
                  render_user: UserModel, user_list: List[UserModel] = None,
-                 object_manager: CmdbObjectManager = None, dt_render=False):
+                 object_manager: CmdbObjectManager = None, dt_render=False, ref_render=False):
         self.object_instance: CmdbObject = object_instance
         self.type_instance: TypeModel = type_instance
         self.user_list: List[UserModel] = user_list
         self.render_user: UserModel = render_user
         self.object_manager = object_manager
         self.dt_render = dt_render
+        self.ref_render = ref_render
 
     def _render_username_by_id(self, user_id: int) -> str:
         user: UserModel = None
@@ -210,12 +212,45 @@ class CmdbRender:
                 # handle dates that are stored as strings
                 if field['type'] == 'date' and isinstance(field['value'], str) and field['value']:
                     field['value'] = datetime.strptime(field['value'], '%Y-%m-%d %H:%M:%S')
+
+                if self.ref_render and field['type'] == 'ref' and field['value']:
+                    field['reference'] = self.__merge_references(field)
+
                 if self.dt_render:
                     field['value'] = html_parser.field_to_html(field['type'])
             except (ValueError, IndexError) as e:
                 field['value'] = None
             field_map.append(field)
         return field_map
+
+    def __merge_references(self, current_field):
+        reference = {
+            'summaries': [],
+            'type_label': None,
+            'icon': None
+        }
+        if current_field['value']:
+            try:
+                ref_object = self.object_manager.get_object(int(current_field['value']))
+            except ObjectManagerGetError:
+                return reference
+
+            try:
+                ref_type = self.object_manager.get_type(ref_object.get_type_id())
+                reference['type_label'] = ref_type.label
+                reference['icon'] = ref_type.get_icon()
+
+                summaries = []
+                summary_fields = ref_type.get_summary().fields
+                for field in summary_fields:
+                    summary_value = str([x for x in ref_object.fields if x['name'] == field['name']][0]['value'])
+                    if summary_value:
+                        summaries.append({"value": summary_value, "type": field.get('type')})
+                reference['summaries'] = summaries
+            except ObjectManagerGetError:
+                return reference
+
+        return reference
 
     def __set_summaries(self, render_result: RenderResult) -> RenderResult:
         # global summary list
@@ -292,11 +327,12 @@ class CmdbRender:
 
 class RenderList:
 
-    def __init__(self, object_list: List[CmdbObject], request_user: UserModel, dt_render=False,
+    def __init__(self, object_list: List[CmdbObject], request_user: UserModel, dt_render=False, ref_render=False,
                  object_manager: CmdbObjectManager = None):
         self.object_list: List[CmdbObject] = object_list
         self.request_user = request_user
         self.dt_render = dt_render
+        self.ref_render = ref_render
         from cmdb.utils.system_config import SystemConfigReader
         database_manager = DatabaseManagerMongo(
             **SystemConfigReader().get_all_values_from_section('Database')
@@ -314,7 +350,7 @@ class RenderList:
                 type_instance=self.object_manager.get_type(passed_object.type_id),
                 object_instance=passed_object,
                 render_user=self.request_user, user_list=complete_user_list,
-                object_manager=self.object_manager, dt_render=self.dt_render)
+                object_manager=self.object_manager, dt_render=self.dt_render, ref_render=self.ref_render)
             if raw:
                 current_render_result = tmp_render.result().__dict__
             else:
