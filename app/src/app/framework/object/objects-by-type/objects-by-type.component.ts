@@ -266,7 +266,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         if (!data) {
           return 'No modifications so far.';
         }
-        return moment(new Date(data)).format('DD/MM/YYYY - HH:mm:ss');
+        const d = Date.parse(data);
+        return moment(d).format('DD/MM/YYYY - HH:mm:ss');
       }
     } as Column);
     columns.push({
@@ -279,7 +280,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         if (!data) {
           return 'No modifications so far.';
         }
-        return moment(new Date(data)).format('DD/MM/YYYY - HH:mm:ss');
+        const d = Date.parse(data);
+        return moment(d).format('DD/MM/YYYY - HH:mm:ss');
       }
 
     } as Column);
