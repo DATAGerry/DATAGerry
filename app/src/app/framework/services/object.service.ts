@@ -102,7 +102,14 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   public getObject<R>(publicID: number, native: boolean = false): Observable<R> {
     const options = this.options;
     options.params = new HttpParams();
-    return this.api.callGet<R>(`${ this.servicePrefix }/${ publicID }/`, options).pipe(
+    if (native === true) {
+      return this.api.callGet<CmdbObject[]>(`${ this.servicePrefix }/${ publicID }/native/`, options).pipe(
+        map((apiResponse) => {
+          return apiResponse.body;
+        })
+      );
+    }
+    return this.api.callGet<R[]>(`${ this.servicePrefix }/${ publicID }/`, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
