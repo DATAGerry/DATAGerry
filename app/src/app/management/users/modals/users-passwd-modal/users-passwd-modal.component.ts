@@ -58,7 +58,7 @@ export class UsersPasswdModalComponent {
         this.user.public_id, this.passwdForm.get('password').value).pipe(takeUntil(this.subscriber)).subscribe(
         (user: User) => {
           this.toast.success(`Password for user with ID: ${ this.user.public_id } was changed`);
-          this.activeModal.close();
+          this.activeModal.close(user);
         }
       );
     }

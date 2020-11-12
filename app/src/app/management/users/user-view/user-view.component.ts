@@ -77,6 +77,9 @@ export class UserViewComponent implements OnInit, OnDestroy {
   public openPasswordModal() {
     this.modalRef = this.modalService.open(UsersPasswdModalComponent, { size: 'lg' });
     this.modalRef.componentInstance.user = this.user;
+    this.modalRef.result.then( result => {
+      this.user = result;
+    });
   }
 
 }
