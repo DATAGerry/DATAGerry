@@ -265,7 +265,10 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       searchable: false,
       template: this.dateTemplate,
       render(data: any, item?: any, column?: Column, index?: number) {
-        return data;
+        if (data && data.$date) {
+          return data.$date;
+        }
+        return null;
       }
     } as Column);
     columns.push({
@@ -276,7 +279,10 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       searchable: false,
       template: this.dateTemplate,
       render(data: any, item?: any, column?: Column, index?: number) {
-        return data;
+        if (data && data.$date) {
+          return data.$date;
+        }
+        return null;
       }
 
     } as Column);
