@@ -15,7 +15,7 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
+import * as moment from 'moment';
 import {
   Component, Input,
   OnDestroy,
@@ -67,6 +67,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
   @ViewChild('fieldTemplate', { static: true }) fieldTemplate: TemplateRef<any>;
+  @ViewChild('dateTemplate', { static: true }) dateTemplate: TemplateRef<any>;
   @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
 
   /**
@@ -262,9 +263,12 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       data: 'object_information.creation_time',
       sortable: true,
       searchable: false,
+      template: this.dateTemplate,
       render(data: any, item?: any, column?: Column, index?: number) {
-        const date = new Date(data);
-        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
+        if (data && data.$date) {
+          return data.$date;
+        }
+        return null;
       }
     } as Column);
     columns.push({
@@ -273,13 +277,14 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       data: 'object_information.last_edit_time',
       sortable: true,
       searchable: false,
+      template: this.dateTemplate,
       render(data: any, item?: any, column?: Column, index?: number) {
-        if (!data) {
-          return 'No modifications so far.';
+        if (data && data.$date) {
+          return data.$date;
         }
-        const date = new Date(data);
-        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
+        return null;
       }
+
     } as Column);
 
     columns.push({

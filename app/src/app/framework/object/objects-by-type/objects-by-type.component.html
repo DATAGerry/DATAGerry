@@ -58,11 +58,15 @@
   <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
 </ng-template>
 
+<ng-template #dateTemplate let-data="data">
+  {{data ? (data | date: 'dd/MM/yyyy hh:MM:ss') : 'No modifications so far.'}}
+</ng-template>
+
 <ng-template #fieldTemplate let-data="data">
   <cmdb-render-element [mode]="mode" [data]="data.field" [value]="data.value"></cmdb-render-element>
 </ng-template>
 
 <ng-template #actionTemplate let-item="item">
   <cmdb-object-table-actions [publicID]="item.object_information.object_id" [result]="item"
-  (deleteEmitter)="onObjectDelete($event)"></cmdb-object-table-actions>
+                             (deleteEmitter)="onObjectDelete($event)"></cmdb-object-table-actions>
 </ng-template>
