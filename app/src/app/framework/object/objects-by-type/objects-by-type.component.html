@@ -58,10 +58,6 @@
   <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
 </ng-template>
 
-<ng-template #dateTemplate let-data="data">
-  {{data ? (data | date: 'dd/MM/yyyy hh:MM:ss') : 'No modifications so far.'}}
-</ng-template>
-
 <ng-template #fieldTemplate let-data="data">
   <cmdb-render-element [mode]="mode" [data]="data.field" [value]="data.value"></cmdb-render-element>
 </ng-template>
