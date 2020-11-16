@@ -215,7 +215,10 @@ def get_file(filename: str):
     try:
         filter_metadata = generate_metadata_filter('metadata', request)
         filter_metadata.update({'filename': filename})
-        result = media_file_manager.get_file(metadata=filter_metadata)
+        if media_file_manager.exist_file(filter_metadata):
+            result = media_file_manager.get_file(metadata=filter_metadata)
+        else:
+            result = None
     except MediaFileManagerGetError as err:
         return abort(404, err.message)
     return make_response(result)
