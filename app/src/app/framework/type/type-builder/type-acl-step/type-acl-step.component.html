@@ -1,0 +1,35 @@
+<hr/>
+<form [formGroup]="form" class="row">
+  <div class="col-md-2">
+    <div class="card">
+      <div class="card-header">
+        <div class="custom-control custom-checkbox">
+          <input type="checkbox" class="custom-control-input" id="acl-activated-button" formControlName="activated">
+          <label class="custom-control-label" for="acl-activated-button">ACL activated</label>
+        </div>
+      </div>
+      <ul [formGroup]="groupsControl" class="list-group list-group-flush">
+        <li class="list-group-item list-group-item-action">
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="custom-control-input" id="groups-activated-button"
+                   formControlName="activated">
+            <label class="custom-control-label" for="groups-activated-button">Groups</label>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-md-10">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" role="tab">Includes</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane fade show active" role="tabpanel">
+        <cmdb-groups-acl-tabs></cmdb-groups-acl-tabs>
+      </div>
+    </div>
+  </div>
+</form>
+<hr/>
