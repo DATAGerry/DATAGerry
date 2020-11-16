@@ -22,13 +22,14 @@ T = TypeVar('T')
 @unique
 class AccessControlPermission(Enum):
     """Permission enum for possible ACL operations."""
+
+    def _generate_next_value_(self, start, count, last_values):
+        return self
+
     CREATE = auto()
     READ = auto()
     UPDATE = auto()
     DELETE = auto()
-
-    def _generate_next_value_(self, start, count, last_values):
-        return self
 
 
 class AccessControlListEntry(Generic[T]):
@@ -39,46 +40,60 @@ class AccessControlListEntry(Generic[T]):
         self.permissions = permissions or []
 
     @classmethod
-    def from_entry(cls, role: T, permissions: AccessControlPermission = None):
+    def from_entry(cls, role: T, permission: AccessControlPermission = None):
         """Creates a `AccessControlListEntry` from a role and a single permission."""
-        if permissions:
-            permissions = [permissions]
-        return cls(role=role, permissions=permissions)
+        if permission:
+            permission = [permission]
+        return cls(role=role, permissions=permission)
+
+    @classmethod
+    def from_data(cls, data: dict) -> "AccessControlListEntry[T]":
+        return cls(
+            role=data.get('role'),
+            permissions=data.get('permissions', [])
+        )
+
+    @classmethod
+    def to_json(cls, entry: "AccessControlListEntry[T]") -> dict:
+        return {
+            'role': entry.role,
+            'permissions': entry.permissions
+        }
 
 
 class AccessControlListSection(Generic[T]):
     """`AccessControlListSection` are a config element inside the complete ac-list."""
 
-    def __init__(self, activated: bool = False, include: List[AccessControlListEntry[T]] = None):
+    def __init__(self, activated: bool = False, includes: List[AccessControlListEntry[T]] = None):
         self.activated = activated
-        self.include: List[AccessControlListEntry[T]] = include or []
+        self.includes: List[AccessControlListEntry[T]] = includes or []
 
     @property
-    def include(self) -> List[AccessControlListEntry[T]]:
-        return self._include
+    def includes(self) -> List[AccessControlListEntry[T]]:
+        return self._includes
 
-    @include.setter
-    def include(self, value: List[AccessControlListEntry[T]]):
+    @includes.setter
+    def includes(self, value: List[AccessControlListEntry[T]]):
         if not isinstance(value, list):
             raise TypeError('`AccessControlListSection` only takes lists as include structure')
-        self._include = value
+        self._includes = value
 
     def _add_entry(self, role: T, permission: AccessControlPermission = None) -> AccessControlListEntry[T]:
         entry = AccessControlListEntry.from_entry(role, permission)
-        self.include.append(entry)
+        self.includes.append(entry)
         return entry
 
     def _get_entry(self, role: T) -> AccessControlListEntry[T]:
-        for entry in self.include:
+        for entry in self.includes:
             if entry.role == role:
                 return entry
         raise ValueError('No entry in the list')
 
     def _update_entry(self, entry: AccessControlListEntry[T]) -> List[AccessControlListEntry[T]]:
-        for idx, e in enumerate(self.include):
+        for idx, e in enumerate(self.includes):
             if e.role == entry.role:
-                self.include[idx] = entry
-                return self.include
+                self.includes[idx] = entry
+                return self.includes
         else:
             raise IndexError('Entry not exists')
 
@@ -99,12 +114,38 @@ class AccessControlListSection(Generic[T]):
         entry = self._get_entry(role)
         return permission in entry.permissions
 
+    @classmethod
+    def from_data(cls, data: dict) -> "AccessControlListSection[T]":
+        raise NotImplementedError
+
+    @classmethod
+    def to_json(cls, section: "AccessControlListSection[T]") -> dict:
+        raise NotImplementedError
+
 
 class GroupACL(AccessControlListSection[int]):
     """Wrapper class for the group section"""
 
-    def __init__(self, activated: bool = False, include: List = None):
-        super(GroupACL, self).__init__(activated=activated, include=include)
+    def __init__(self, activated: bool = False, includes: List[AccessControlListEntry[int]] = None):
+        super(GroupACL, self).__init__(activated=activated, includes=includes)
+
+    @classmethod
+    def from_data(cls, data: dict) -> "GroupACL":
+        includes = [AccessControlListEntry.from_data(entry) for entry in
+                    data.get('includes', [])]
+        return cls(
+            activated=data.get('activated', True),
+            includes=includes
+        )
+
+    @classmethod
+    def to_json(cls, section: "AccessControlListSection[T]") -> dict:
+        includes = [AccessControlListEntry.to_json(entry) for entry in
+                    section.includes]
+        return {
+            'activated': section.activated,
+            'includes': includes
+        }
 
 
 class AccessControlList:
@@ -115,6 +156,20 @@ class AccessControlList:
     def __init__(self, activated: bool, groups: GroupACL = None):
         self.activated = activated
         self.groups: GroupACL = groups
+
+    @classmethod
+    def from_data(cls, data: dict) -> "AccessControlList":
+        return cls(
+            activated=data.get('activated', False),
+            groups=GroupACL.from_data(data.get('groups', {}))
+        )
+
+    @classmethod
+    def to_json(cls, acl: "AccessControlList") -> dict:
+        return {
+            'activated': acl.activated,
+            'groups': GroupACL.to_json(acl.groups)
+        }
 
     def grant_access(self, section: str, role: T, permission: AccessControlPermission):
         if section == 'groups':
