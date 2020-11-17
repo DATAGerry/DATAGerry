@@ -16,11 +16,12 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { CmdbType } from '../../../models/cmdb-type';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { Group } from '../../../../management/models/group';
 import { AccessControlList } from '../../../../acl/acl.types';
 
 @Component({
@@ -34,32 +35,41 @@ export class TypeAclStepComponent implements OnInit, OnDestroy {
 
   public acl: AccessControlList;
 
-  @Input() public type: CmdbType;
+  @Input('acl')
+  public set ACL(access: AccessControlList) {
+    if (access) {
+      this.acl = access;
+      this.form.patchValue(this.acl);
+    }
+  }
+
+  @Input() public groups: Array<Group> = [];
+
+  @Output() public validStatus: EventEmitter<boolean> = new EventEmitter<boolean>();
+
   public form: FormGroup;
 
   constructor() {
-    this.acl = new AccessControlList(false);
     this.form = new FormGroup({
       activated: new FormControl(false),
       groups: new FormGroup({
         activated: new FormControl(false),
+        includes: new FormArray([])
       })
     });
-  }
-
-  public get activatedControl(): FormControl {
-    return this.form.get('activated') as FormControl;
   }
 
   public get groupsControl(): FormGroup {
     return this.form.get('groups') as FormGroup;
   }
 
+  public get groupsIncludesArray(): FormArray {
+    return this.groupsControl.get('includes') as FormArray;
+  }
+
   public ngOnInit(): void {
     this.groupsControl.valueChanges.pipe(takeUntil(this.subscriber)).subscribe(changes => {
-      if (changes.activated) {
-        this.activatedControl.setValue(true);
-      }
+      this.validStatus.emit(this.form.valid);
     });
   }
 

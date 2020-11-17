@@ -15,10 +15,11 @@
     <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
     <button class="btn btn-primary next" type="button" awNextStep>Go to next step</button>
   </aw-wizard-step>
-  <aw-wizard-step stepId="4" stepTitle="ACL">
-    <cmdb-type-acl-step [type]="typeInstance"></cmdb-type-acl-step>
+  <aw-wizard-step (stepExit)="exitAccessStep()" stepId="4" stepTitle="ACL">
+    <cmdb-type-acl-step [acl]="typeInstance?.acl" [groups]="groups"
+                        (validStatus)="aclStepValid = $event"></cmdb-type-acl-step>
     <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
-    <button class="btn btn-primary next" type="button" awNextStep>Go to next step</button>
+    <button class="btn btn-primary next" type="button" awNextStep [disabled]="!aclStepValid">Go to next step</button>
   </aw-wizard-step>
   <aw-wizard-step stepId="5" stepTitle="Validation">
     <cmdb-type-validation-step [typeInstance]="typeInstance"></cmdb-type-validation-step>

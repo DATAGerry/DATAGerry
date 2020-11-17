@@ -17,6 +17,7 @@
 */
 
 import { CmdbDao } from './cmdb-dao';
+import { AccessControlList } from '../../acl/acl.types';
 
 
 export class CmdbType implements CmdbDao {
@@ -31,6 +32,7 @@ export class CmdbType implements CmdbDao {
   public creation_time: any;
   public render_meta: any;
   public fields: any[];
+  public acl?: AccessControlList;
 
   public has_references(): boolean {
     for (const field of this.fields) {

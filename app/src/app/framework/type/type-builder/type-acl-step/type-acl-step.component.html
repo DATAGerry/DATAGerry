@@ -27,7 +27,8 @@
     </ul>
     <div class="tab-content">
       <div class="tab-pane fade show active" role="tabpanel">
-        <cmdb-groups-acl-tabs></cmdb-groups-acl-tabs>
+        <cmdb-groups-acl-tabs [form]="groupsIncludesArray" [groupIncludes]="acl?.groups?.includes" [groups]="groups">
+        </cmdb-groups-acl-tabs>
       </div>
     </div>
   </div>
