@@ -63,7 +63,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
   public aclStep: TypeAclStepComponent;
   public aclStepValid: boolean = true;
 
-  public selectedCategoryID: number = 0;
+  public selectedCategoryID: number;
 
   public groups: Array<Group> = [];
 
@@ -74,6 +74,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
+    this.selectedCategoryID = undefined;
     if (this.mode === CmdbMode.Create) {
       this.typeInstance = new CmdbType();
       this.typeInstance.version = '1.0.0';
@@ -84,8 +85,8 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     };
     this.groupService.getGroups(groupParams).pipe(takeUntil(this.subscriber))
       .subscribe((groups: APIGetMultiResponse<Group>) => {
-      this.groups = groups.results;
-    });
+        this.groups = groups.results;
+      });
   }
 
   public ngOnDestroy(): void {
@@ -154,21 +155,25 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
       this.typeInstance.creation_time = this.typeInstance.creation_time.$date;
       this.typeService.putType(this.typeInstance).subscribe((updateResp: CmdbType) => {
           if (this.basicStep.originalCategoryID !== this.selectedCategoryID) {
-            this.categoryService.getCategory(this.basicStep.originalCategoryID).subscribe((category: CmdbCategory) => {
-              const index = category.types.indexOf(this.typeInstance.public_id, 0);
-              if (index > -1) {
-                category.types.splice(index, 1);
-              }
-              this.categoryService.updateCategory(category).subscribe(() => {
-                console.log('Type id removed from category');
+            if (this.basicStep.originalCategoryID) {
+              this.categoryService.getCategory(this.basicStep.originalCategoryID).subscribe((category: CmdbCategory) => {
+                const index = category.types.indexOf(this.typeInstance.public_id, 0);
+                if (index > -1) {
+                  category.types.splice(index, 1);
+                }
+                this.categoryService.updateCategory(category).subscribe(() => {
+                  console.log('Type id removed from category');
+                });
               });
-            });
-            this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
-              category.types.push(this.typeInstance.public_id);
-              this.categoryService.updateCategory(category).subscribe(() => {
-                console.log('Type id added to category');
+            }
+            if (this.selectedCategoryID) {
+              this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
+                category.types.push(this.typeInstance.public_id);
+                this.categoryService.updateCategory(category).subscribe(() => {
+                  console.log('Type id added to category');
+                });
               });
-            });
+            }
           }
           this.sidebarService.loadCategoryTree();
           this.toast.success(`Type was successfully edited: TypeID: ${ updateResp.public_id }`);

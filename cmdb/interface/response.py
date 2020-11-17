@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2020 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -26,7 +26,7 @@ from cmdb.interface import DEFAULT_MIME_TYPE
 from cmdb.interface.api_parameters import CollectionParameters
 
 from cmdb.interface.pagination import APIPagination, APIPager
-from cmdb.utils import json_encoding
+from cmdb.interface.route_utils import default
 
 
 def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2) -> BaseResponse:
@@ -44,7 +44,7 @@ def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2
     """
     from cmdb.interface import API_VERSION
 
-    response = flask_response(dumps(body, default=json_encoding.default, indent=indent), status)
+    response = flask_response(dumps(body, default=default, indent=indent), status)
     response.mimetype = mime or DEFAULT_MIME_TYPE
     response.headers['X-API-Version'] = API_VERSION
     return response

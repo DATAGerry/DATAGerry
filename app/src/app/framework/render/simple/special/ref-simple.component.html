@@ -1,6 +1,6 @@
 <span *ngIf="refData; else noRef">
 
-    <i class="{{data.reference.icon}}"></i> {{data.reference.type_label}} #{{data.reference.value}}
+    <i class="{{data.reference.icon}}"></i> {{data.reference.type_label}} #{{data.value}}
     <span *ngFor="let sum of data.reference.summaries; let last = last; let first = first">
       <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
         <span *ngIf="first"> - </span>{{sum.value}}

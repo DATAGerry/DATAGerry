@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -15,9 +15,9 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import * as moment from 'moment';
+
 import {
-  Component, Input,
+  Component,
   OnDestroy,
   OnInit, TemplateRef, ViewChild,
 } from '@angular/core';
@@ -265,10 +265,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       searchable: false,
       template: this.dateTemplate,
       render(data: any, item?: any, column?: Column, index?: number) {
-        if (data && data.$date) {
-          return data.$date;
-        }
-        return null;
+        const date = new Date(data);
+        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
       }
     } as Column);
     columns.push({
@@ -279,12 +277,12 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       searchable: false,
       template: this.dateTemplate,
       render(data: any, item?: any, column?: Column, index?: number) {
-        if (data && data.$date) {
-          return data.$date;
+        if (!data) {
+          return 'No modifications so far.';
         }
-        return null;
+        const date = new Date(data);
+        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
       }
-
     } as Column);
 
     columns.push({

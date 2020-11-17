@@ -162,7 +162,7 @@ class SetupRoutine:
             user_name=admin_name,
             active=True,
             group_id=__FIXED_GROUPS__[0].get_public_id(),
-            registration_time=datetime.datetime.utcnow(),
+            registration_time=datetime.datetime.now(),
             password=scm.generate_hmac(admin_pass),
         )
         user_manager.insert(admin_user)
