@@ -124,20 +124,22 @@ export class TypeBuilderComponent implements OnInit {
       this.typeInstance.creation_time = this.typeInstance.creation_time.$date;
       this.typeService.putType(this.typeInstance).subscribe((updateResp: CmdbType) => {
           if (this.basicStep.originalCategoryID !== this.selectedCategoryID) {
-            this.categoryService.getCategory(this.basicStep.originalCategoryID).subscribe((category: CmdbCategory) => {
-              const index = category.types.indexOf(this.typeInstance.public_id, 0);
-              if (index > -1) {
-                category.types.splice(index, 1);
-              }
-              this.categoryService.updateCategory(category).subscribe(() => {
-                console.log('Type id removed from category');
+            // Remove from old category
+            if (this.basicStep.originalCategoryID) {
+              this.categoryService.getCategory(this.basicStep.originalCategoryID).subscribe((category: CmdbCategory) => {
+                const index = category.types.indexOf(this.typeInstance.public_id, 0);
+                if (index > -1) {
+                  category.types.splice(index, 1);
+                }
+                this.categoryService.updateCategory(category).subscribe(() => {
+                });
               });
-            });
+            }
+            // Add to new category
             if (this.selectedCategoryID) {
               this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
                 category.types.push(this.typeInstance.public_id);
                 this.categoryService.updateCategory(category).subscribe(() => {
-                  console.log('Type id added to category');
                 });
               });
             }
