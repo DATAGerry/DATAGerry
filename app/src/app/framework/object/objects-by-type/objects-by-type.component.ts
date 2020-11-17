@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 */
 
 import {
-  Component, Input,
+  Component,
   OnDestroy,
   OnInit, TemplateRef, ViewChild,
 } from '@angular/core';
@@ -67,6 +67,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
   @ViewChild('fieldTemplate', { static: true }) fieldTemplate: TemplateRef<any>;
+  @ViewChild('dateTemplate', { static: true }) dateTemplate: TemplateRef<any>;
   @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
 
   /**
@@ -262,6 +263,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       data: 'object_information.creation_time',
       sortable: true,
       searchable: false,
+      template: this.dateTemplate,
       render(data: any, item?: any, column?: Column, index?: number) {
         const date = new Date(data);
         return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
@@ -273,6 +275,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       data: 'object_information.last_edit_time',
       sortable: true,
       searchable: false,
+      template: this.dateTemplate,
       render(data: any, item?: any, column?: Column, index?: number) {
         if (!data) {
           return 'No modifications so far.';

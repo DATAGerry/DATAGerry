@@ -362,7 +362,7 @@ def get_object(public_id, request_user: UserModel):
 
     try:
         render = CmdbRender(object_instance=object_instance, type_instance=type_instance, render_user=request_user,
-                            user_list=user_manager.get_users())
+                            user_list=user_manager.get_users(), object_manager=object_manager, ref_render=True)
         render_result = render.result()
     except RenderError as err:
         LOGGER.error(err)

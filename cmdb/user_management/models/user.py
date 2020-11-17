@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2020 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -98,7 +98,7 @@ class UserModel(CmdbDAO):
 
         self.group_id: int = group_id or UserModel.DEFAULT_GROUP
         self.authenticator: str = authenticator or UserModel.DEFAULT_AUTHENTICATOR
-        self.registration_time: datetime = registration_time or datetime.utcnow()
+        self.registration_time: datetime = registration_time or datetime.now()
 
         self.email: str = email
         self.password: str = password
