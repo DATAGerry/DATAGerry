@@ -18,8 +18,6 @@
 
 import { Component, AfterViewChecked } from '@angular/core';
 import { RenderField } from '../../fields/components.fields';
-import { RenderResult } from '../../../models/cmdb-render';
-import { ObjectService } from '../../../services/object.service';
 
 @Component({
   selector: 'cmdb-ref-simple',
@@ -28,7 +26,7 @@ import { ObjectService } from '../../../services/object.service';
 })
 export class RefSimpleComponent extends RenderField implements AfterViewChecked {
 
-  public refData: any;
+  public refData: any = undefined;
 
   constructor() {
     super();
@@ -38,6 +36,7 @@ export class RefSimpleComponent extends RenderField implements AfterViewChecked 
     if (this.data && this.data.value && this.data.value !== 0) {
       this.refData = this.data;
     } else {
+      this.refData = undefined;
     }
   }
 }

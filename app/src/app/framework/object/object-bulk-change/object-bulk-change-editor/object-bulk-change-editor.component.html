@@ -10,14 +10,14 @@
     </div>
     <div id="object-view-title">
       <cmdb-active-badge [activeStatus]="activeState"></cmdb-active-badge>
-      {{typeInstance?.label}} #{{objectInstance?.public_id}}
+      {{renderResult.type_information.type_label}}
     </div>
     <div id="object-view-version"></div>
   </div>
   <div class="card-body">
     <form [formGroup]="renderForm" class="renderForm needs-validation" novalidate autocomplete="off">
       <cmdb-render [mode]="mode" [renderForm]="renderForm"
-                   [typeInstance]="typeInstance"></cmdb-render>
+                   [renderResult]="renderResult"></cmdb-render>
     </form>
   </div>
 </div>

@@ -16,9 +16,8 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, ViewChild} from '@angular/core';
+import {Component, OnDestroy, ViewChild} from '@angular/core';
 import { CmdbMode } from '../../modes.enum';
-import { CmdbType } from '../../models/cmdb-type';
 import { ObjectBulkChangeEditorComponent } from './object-bulk-change-editor/object-bulk-change-editor.component';
 import { ObjectBulkChangePreviewComponent } from './object-bulk-change-preview/object-bulk-change-preview.component';
 import { CmdbObject } from '../../models/cmdb-object';
@@ -27,13 +26,19 @@ import { ObjectService} from '../../services/object.service';
 import { TypeService } from '../../services/type.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { httpObserveOptions } from '../../../services/api-call.service';
+import { CollectionParameters } from '../../../services/models/api-parameter';
+import { takeUntil} from 'rxjs/operators';
+import { HttpResponse } from '@angular/common/http';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
+import { RenderResult } from '../../models/cmdb-render';
+import { ReplaySubject } from 'rxjs';
 
 @Component({
   selector: 'cmdb-object-bulk-change',
   templateUrl: './object-bulk-change.component.html',
   styleUrls: ['./object-bulk-change.component.scss']
 })
-export class ObjectBulkChangeComponent {
+export class ObjectBulkChangeComponent implements OnDestroy {
 
   @ViewChild(ObjectBulkChangeEditorComponent, {static: true})
   public basicStep: ObjectBulkChangeEditorComponent;
@@ -41,7 +46,10 @@ export class ObjectBulkChangeComponent {
   @ViewChild(ObjectBulkChangePreviewComponent, {static: true})
   public previewStep: ObjectBulkChangePreviewComponent;
 
-  public typeInstance: CmdbType;
+  // Subscribe
+  private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();
+
+  public renderResult: RenderResult = undefined;
   public mode: CmdbMode = CmdbMode.Bulk;
   public objectInstance: CmdbObject;
   public activeState: boolean = true;
@@ -53,10 +61,17 @@ export class ObjectBulkChangeComponent {
               private activeRoute: ActivatedRoute, private route: Router) {
     this.activeRoute.params.subscribe((params) => {
       if (params.typeID !== undefined) {
-        this.typeService.getType(params.typeID).subscribe((typeInstance: CmdbType) => {
-          this.typeInstance = typeInstance;
-          this.objectIDs = params.ids.split(',');
-        });
+        const collectionsParams: CollectionParameters = {
+          filter: [{ $match: {type_id: Number(params.typeID)}}] , limit: 1,
+          sort: 'public_id', order: 1, page: 1
+        };
+        this.objectService.getObjects(collectionsParams).pipe(takeUntil(this.unsubscribe))
+          .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
+            if (apiResponse.body.results.length > 0) {
+              this.renderResult = apiResponse.body.results[0];
+            }
+            this.objectIDs = params.ids.split(',');
+          });
       }
       this.fieldsGroups = new FormGroup({
       });
@@ -78,7 +93,7 @@ export class ObjectBulkChangeComponent {
       const patchValue = [];
       const newObjectInstance = new CmdbObject();
       newObjectInstance.active = this.activeState;
-      newObjectInstance.type_id = this.typeInstance.public_id;
+      newObjectInstance.type_id = this.renderResult.type_information.type_id;
       newObjectInstance.fields = [];
       this.renderForm.get('changedFields').value.delete('activeObj-isChanged');
       Object.keys(this.renderForm.value).forEach((key: string) => {
@@ -91,12 +106,17 @@ export class ObjectBulkChangeComponent {
         }
       });
       newObjectInstance.fields = patchValue;
-      this.objectService.putObject(0, newObjectInstance, httpOptions).subscribe((res: boolean) => {
+      this.objectService.putObject(0, newObjectInstance, httpOptions).pipe(takeUntil(this.unsubscribe))
+        .subscribe((res: boolean) => {
         if (res) {
-          this.route.navigate(['/framework/object/type', this.typeInstance.public_id]);
+          this.route.navigate(['/framework/object/type', this.renderResult.type_information.type_id]);
         }
       });
     }
   }
 
+  public ngOnDestroy(): void {
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
+  }
 }

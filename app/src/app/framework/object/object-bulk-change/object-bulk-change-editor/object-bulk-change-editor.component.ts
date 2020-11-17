@@ -21,6 +21,7 @@ import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbMode } from '../../../modes.enum';
 import { CmdbObject } from '../../../models/cmdb-object';
 import { FormGroup } from '@angular/forms';
+import {RenderResult} from "../../../models/cmdb-render";
 
 @Component({
   selector: 'cmdb-object-bulk-change-editor',
@@ -29,9 +30,8 @@ import { FormGroup } from '@angular/forms';
 })
 export class ObjectBulkChangeEditorComponent {
 
-  @Input() typeInstance: CmdbType;
+  @Input() renderResult: RenderResult;
   @Input() mode: CmdbMode;
-  @Input() objectInstance: CmdbObject;
   @Input() renderForm: FormGroup;
   @Input() fieldsGroups: FormGroup;
   @Input() activeState: boolean;

@@ -20,12 +20,14 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RenderField } from '../components.fields';
 import { ObjectService } from '../../../services/object.service';
 import { RenderResult } from '../../../models/cmdb-render';
-import { HttpBackend, HttpClient } from '@angular/common/http';
-import { HttpInterceptorHandler } from '../../../../services/api-call.service';
-import { BasicAuthInterceptor } from '../../../../auth/interceptors/basic-auth.interceptor';
+import { HttpBackend, HttpResponse } from '@angular/common/http';
 import { AuthService } from '../../../../auth/services/auth.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectPreviewModalComponent } from '../../../object/modals/object-preview-modal/object-preview-modal.component';
+import { CollectionParameters } from '../../../../services/models/api-parameter';
+import { takeUntil } from 'rxjs/operators';
+import { APIGetMultiResponse } from '../../../../services/models/api-response';
+import { ReplaySubject } from 'rxjs';
 
 @Component({
   templateUrl: './ref.component.html',
@@ -33,9 +35,11 @@ import { ObjectPreviewModalComponent } from '../../../object/modals/object-previ
 })
 export class RefComponent extends RenderField implements OnInit, OnDestroy {
 
-  public objectList: RenderResult[] = [];
-  public refObject: RenderResult;
   private modalRef: NgbModalRef;
+  private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();
+  public objectList: Array<RenderResult> = [];
+  public refObject: RenderResult;
+  public selectedCity: any;
 
   public constructor(private objectService: ObjectService, private backend: HttpBackend,
                      private authService: AuthService, private modalService: NgbModal) {
@@ -45,12 +49,22 @@ export class RefComponent extends RenderField implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.data.default = parseInt(this.data.default, 10);
     if (this.data.ref_types) {
-      this.objectService.getObjectsByType(this.data.ref_types).subscribe((objectList: RenderResult[]) => {
-        this.objectList = objectList;
-      });
+      const params: CollectionParameters = {
+        filter: [{ $match:
+            {
+              $or: [{type_id: this.data.ref_types}, {type_id: { $in: this.data.ref_types }}]
+            }
+        }] , limit: 0,
+        sort: 'public_id', order: 1, page: 1
+      };
+      this.objectService.getObjects(params).pipe(takeUntil(this.unsubscribe))
+        .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
+          this.objectList = apiResponse.body.results;
+        });
     }
     if (this.controller.value !== '' && this.data.value) {
-      this.objectService.getObject(this.controller.value, false).subscribe((refObject: RenderResult) => {
+      this.objectService.getObject(this.controller.value, false).pipe(takeUntil(this.unsubscribe))
+        .subscribe((refObject: RenderResult) => {
           this.refObject = refObject;
         },
         (error) => {
@@ -63,6 +77,8 @@ export class RefComponent extends RenderField implements OnInit, OnDestroy {
     if (this.modalRef) {
       this.modalRef.close();
     }
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
   }
 
   public searchRef(term: string, item: any) {
