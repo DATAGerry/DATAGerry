@@ -132,7 +132,6 @@ export class TypeBuilderComponent implements OnInit {
                   category.types.splice(index, 1);
                 }
                 this.categoryService.updateCategory(category).subscribe(() => {
-                  console.log('Type id removed from category');
                 });
               });
             }
@@ -141,7 +140,6 @@ export class TypeBuilderComponent implements OnInit {
               this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
                 category.types.push(this.typeInstance.public_id);
                 this.categoryService.updateCategory(category).subscribe(() => {
-                  console.log('Type id added to category');
                 });
               });
             }
