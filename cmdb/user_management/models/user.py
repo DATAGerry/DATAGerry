@@ -13,10 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from json import dumps
 from datetime import datetime
 
-from cmdb.data_storage.database_utils import default
+from dateutil import parser
 from cmdb.framework import CmdbDAO
 from cmdb.framework.utils import Collection, Model
 
@@ -51,6 +50,7 @@ class UserModel(CmdbDAO):
         'registration_time': {
             'type': 'string',
             'nullable': True,
+            'empty': True,
             'required': False
         },
         'authenticator': {
@@ -62,26 +62,31 @@ class UserModel(CmdbDAO):
         'password': {
             'type': 'string',
             'nullable': True,
+            'empty': True,
             'required': False
         },
         'first_name': {
             'type': 'string',
             'nullable': True,
+            'empty': True,
             'required': False
         },
         'last_name': {
             'type': 'string',
             'nullable': True,
+            'empty': True,
             'required': False
         },
         'email': {
             'type': 'string',
             'nullable': True,
+            'empty': True,
             'required': False
         },
         'image': {
             'type': 'string',
             'nullable': True,
+            'empty': True,
             'required': False
         }
     }
@@ -123,12 +128,15 @@ class UserModel(CmdbDAO):
 
     @classmethod
     def from_data(cls, data: dict) -> "UserModel":
+        reg_date = data.get('registration_time', None)
+        if reg_date and isinstance(reg_date, str):
+            reg_date = parser.parse(reg_date)
         return cls(
             public_id=data.get('public_id'),
             user_name=data.get('user_name'),
             active=data.get('active'),
             group_id=data.get('group_id', None),
-            registration_time=data.get('registration_time', None),
+            registration_time=reg_date,
             authenticator=data.get('authenticator', None),
             email=data.get('email', None),
             password=data.get('password', None),
