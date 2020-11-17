@@ -50,7 +50,7 @@ export class TypeBuilderComponent implements OnInit {
   @ViewChild(TypeMetaStepComponent, { static: true })
   public metaStep: TypeMetaStepComponent;
 
-  public selectedCategoryID: number = 0;
+  public selectedCategoryID: number;
 
   public constructor(private router: Router, private typeService: TypeService,
                      private toast: ToastService, private userService: UserService,
@@ -59,6 +59,7 @@ export class TypeBuilderComponent implements OnInit {
   }
 
   public ngOnInit(): void {
+    this.selectedCategoryID = undefined;
     if (this.mode === CmdbMode.Create) {
       this.typeInstance = new CmdbType();
       this.typeInstance.version = '1.0.0';
@@ -132,12 +133,14 @@ export class TypeBuilderComponent implements OnInit {
                 console.log('Type id removed from category');
               });
             });
-            this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
-              category.types.push(this.typeInstance.public_id);
-              this.categoryService.updateCategory(category).subscribe(() => {
-                console.log('Type id added to category');
+            if (this.selectedCategoryID) {
+              this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
+                category.types.push(this.typeInstance.public_id);
+                this.categoryService.updateCategory(category).subscribe(() => {
+                  console.log('Type id added to category');
+                });
               });
-            });
+            }
           }
           this.sidebarService.loadCategoryTree();
           this.toast.success(`Type was successfully edited: TypeID: ${ updateResp.public_id }`);
