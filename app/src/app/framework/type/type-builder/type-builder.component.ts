@@ -155,6 +155,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
       this.typeInstance.creation_time = this.typeInstance.creation_time.$date;
       this.typeService.putType(this.typeInstance).subscribe((updateResp: CmdbType) => {
           if (this.basicStep.originalCategoryID !== this.selectedCategoryID) {
+            // Remove from old category
             if (this.basicStep.originalCategoryID) {
               this.categoryService.getCategory(this.basicStep.originalCategoryID).subscribe((category: CmdbCategory) => {
                 const index = category.types.indexOf(this.typeInstance.public_id, 0);
@@ -162,15 +163,14 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
                   category.types.splice(index, 1);
                 }
                 this.categoryService.updateCategory(category).subscribe(() => {
-                  console.log('Type id removed from category');
                 });
               });
             }
+            // Add to new category
             if (this.selectedCategoryID) {
               this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
                 category.types.push(this.typeInstance.public_id);
                 this.categoryService.updateCategory(category).subscribe(() => {
-                  console.log('Type id added to category');
                 });
               });
             }
