@@ -39,7 +39,6 @@ export class RefComponent extends RenderField implements OnInit, OnDestroy {
   private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();
   public objectList: Array<RenderResult> = [];
   public refObject: RenderResult;
-  public selectedCity: any;
 
   public constructor(private objectService: ObjectService, private backend: HttpBackend,
                      private authService: AuthService, private modalService: NgbModal) {

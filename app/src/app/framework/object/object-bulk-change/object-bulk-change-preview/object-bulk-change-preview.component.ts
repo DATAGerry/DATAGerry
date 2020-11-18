@@ -109,6 +109,13 @@ export class ObjectBulkChangePreviewComponent implements OnInit, OnDestroy {
   public changes(field: any) {
     const temp = this.renderForm.get('changedFields').value.get(field.name);
     temp.value = this.renderForm.get(temp.name).value;
+    if (temp.hasOwnProperty('reference')) {
+      temp.reference = {
+        summaries: [],
+        type_label: '',
+        icon: ''
+      };
+    }
     return temp;
   }
 

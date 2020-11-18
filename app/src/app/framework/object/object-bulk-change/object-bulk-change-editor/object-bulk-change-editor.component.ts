@@ -17,11 +17,9 @@
 */
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbMode } from '../../../modes.enum';
-import { CmdbObject } from '../../../models/cmdb-object';
 import { FormGroup } from '@angular/forms';
-import {RenderResult} from "../../../models/cmdb-render";
+import { RenderResult } from '../../../models/cmdb-render';
 
 @Component({
   selector: 'cmdb-object-bulk-change-editor',
