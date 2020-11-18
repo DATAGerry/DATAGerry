@@ -17,7 +17,6 @@
 */
 
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { CmdbType } from '../../../models/cmdb-type';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -32,19 +31,16 @@ import { AccessControlList } from '../../../../acl/acl.types';
 export class TypeAclStepComponent implements OnInit, OnDestroy {
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
-
   public acl: AccessControlList;
 
   @Input('acl')
   public set ACL(access: AccessControlList) {
     if (access) {
       this.acl = access;
-      this.form.patchValue(this.acl);
     }
   }
 
   @Input() public groups: Array<Group> = [];
-
   @Output() public validStatus: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   public form: FormGroup;
@@ -53,8 +49,7 @@ export class TypeAclStepComponent implements OnInit, OnDestroy {
     this.form = new FormGroup({
       activated: new FormControl(false),
       groups: new FormGroup({
-        activated: new FormControl(false),
-        includes: new FormArray([])
+        includes: new FormGroup({})
       })
     });
   }
@@ -63,12 +58,13 @@ export class TypeAclStepComponent implements OnInit, OnDestroy {
     return this.form.get('groups') as FormGroup;
   }
 
-  public get groupsIncludesArray(): FormArray {
-    return this.groupsControl.get('includes') as FormArray;
+  public get includesControl(): FormGroup {
+    return this.groupsControl.get('includes') as FormGroup;
   }
 
   public ngOnInit(): void {
     this.groupsControl.valueChanges.pipe(takeUntil(this.subscriber)).subscribe(changes => {
+      this.form.get('activated').setValue(true);
       this.validStatus.emit(this.form.valid);
     });
   }

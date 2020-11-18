@@ -1,46 +1,43 @@
 <table class="table table-hover table-striped table-bordered">
   <thead>
   <tr>
-    <th scope="col" class="col-sm">#</th>
     <th scope="col">Group</th>
     <th scope="col">Permissions</th>
     <th scope="col" class="col-sm">Valid</th>
+    <th scope="col" class="col-sm text-center">#</th>
   </tr>
   </thead>
   <tbody>
-  <tr *ngFor="let group of controls" [formGroup]="group">
-    <td class="col-sm">
-      <button type="button" class="btn btn-sm btn-danger" (click)="removeEntry(group)">
-        <i class="far fa-trash-alt"></i>
-      </button>
+  <tr [formGroup]="form" *ngFor="let control of controls | keyvalue">
+    <td>
+      {{getGroupLabelByID(+control.key)}}
     </td>
     <td>
-      <ng-select formControlName="role" bindLabel="label" bindValue="public_id">
-        <ng-option *ngFor="let group of groups" [value]="group.public_id"
-                   [disabled]="isGroupSelected(group.public_id)">{{group.label}}</ng-option>
-      </ng-select>
-    </td>
-    <td>
-      <ng-select formControlName="permissions" [items]="operations" [multiple]="true"
+      <ng-select [formControlName]="control.key" [items]="operations" [multiple]="true"
                  [closeOnSelect]="false"></ng-select>
     </td>
     <td class="col-sm">
-      <span class="badge badge-success" [ngClass]="group.valid ? 'badge-success' : 'badge-danger'">
-        {{group.status}}
+      <span class="badge badge-success" [ngClass]="control.value.valid ? 'badge-success' : 'badge-danger'">
+        {{control.value.status}}
       </span>
+    </td>
+    <td class="col-sm">
+      <button type="button" class="btn btn-sm btn-danger" (click)="removeControl(control.key)">
+        <i class="far fa-trash-alt"></i>
+      </button>
     </td>
   </tr>
   <tr>
     <td class="col-sm">
-      <button [disabled]="groups.length === controls.length" type="button" class="btn btn-sm btn-success" (click)="addEntry()">
+      <button [disabled]="!currentGroup" (click)="onAddControl()" type="button" class="btn btn-sm btn-success">
         <i class="far fa-plus-square"></i>
       </button>
     </td>
-    <td colspan="2">
-      Add a group to grant access operations.
-    </td>
-    <td class="col-sm">
-      {{controls.length}} / {{groups.length}}
+    <td colspan="3">
+      <ng-select [items]="groups" [(ngModel)]="currentGroup">
+        <ng-option *ngFor="let group of groups" [value]="group">{{group.label}}</ng-option>
+      </ng-select>
+      <small>Add a group to grant access operations.</small>
     </td>
   </tr>
   </tbody>
