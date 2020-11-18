@@ -51,7 +51,7 @@ export class RefComponent extends RenderField implements OnInit, OnDestroy {
       const params: CollectionParameters = {
         filter: [{ $match:
             {
-              $or: [{type_id: this.data.ref_types}, {type_id: { $in: this.data.ref_types }}]
+              $or: [{type_id: this.data.ref_types}]
             }
         }] , limit: 0,
         sort: 'public_id', order: 1, page: 1
