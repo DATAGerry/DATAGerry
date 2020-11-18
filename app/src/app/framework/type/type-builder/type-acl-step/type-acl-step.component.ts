@@ -17,7 +17,7 @@
 */
 
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Group } from '../../../../management/models/group';
@@ -52,6 +52,10 @@ export class TypeAclStepComponent implements OnInit, OnDestroy {
         includes: new FormGroup({})
       })
     });
+  }
+
+  public get activated(): boolean {
+    return this.form.get('activated').value;
   }
 
   public get groupsControl(): FormGroup {

@@ -21,16 +21,9 @@
     </div>
   </div>
   <div class="col-md-10">
-    <ul class="nav nav-tabs">
-      <li class="nav-item">
-        <a class="nav-link active" data-toggle="tab" role="tab">Includes</a>
-      </li>
-    </ul>
-    <div class="tab-content">
-      <div [formGroup]="groupsControl" class="tab-pane fade show active" role="tabpanel">
-        <cmdb-groups-acl-tabs [groups]="groups" [form]="includesControl" [groupsACL]="acl?.groups">
-        </cmdb-groups-acl-tabs>
-      </div>
+    <div [formGroup]="groupsControl" ui-block [blocked]="!activated">
+      <cmdb-groups-acl-tabs [groups]="groups" [form]="includesControl" [groupsACL]="acl?.groups">
+      </cmdb-groups-acl-tabs>
     </div>
   </div>
 </form>
