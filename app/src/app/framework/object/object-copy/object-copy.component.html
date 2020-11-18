@@ -8,7 +8,7 @@
         <button type="submit" class="btn btn-outline-success mr-2"
                 (click)="copyObject()"
                 [disabled]="!renderForm.valid">Save</button>
-        <button class="btn btn-outline-danger"
+        <button type="button" class="btn btn-outline-danger"
                 routerLink="/framework/object/view/{{renderResult?.object_information.object_id}}">Cancel</button>
       </div>
     </div>
@@ -28,7 +28,7 @@
           <div class="btn-group" role="group">
             <button type="submit" class="btn btn-outline-success mr-2"
                     [disabled]="!renderForm.valid">Save</button>
-            <button class="btn btn-outline-danger"
+            <button type="button" class="btn btn-outline-danger"
                     routerLink="/framework/object/view/{{renderResult?.object_information.object_id}}">Cancel</button>
           </div>
         </div>
