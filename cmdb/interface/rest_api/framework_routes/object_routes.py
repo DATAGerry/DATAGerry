@@ -40,7 +40,8 @@ from cmdb.interface.response import GetMultiResponse, GetListResponse, UpdateMul
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
 from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
 from cmdb.manager import ManagerIterationError, ManagerGetError, ManagerUpdateError
-from cmdb.security.acl import AccessControlPermission
+from cmdb.security.acl.control import AccessControlList
+from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 
 with current_app.app_context():
@@ -98,6 +99,42 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
     except ManagerGetError as err:
         return abort(404, err.message)
     return api_response.make_response()
+
+
+@object_blueprint.route('/<int:public_id>/', methods=['GET'])
+@object_blueprint.route('/<int:public_id>', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.framework.object.view')
+def get_object(public_id, request_user: UserModel):
+    try:
+        object_instance = object_manager.get_object(public_id)
+    except ObjectManagerGetError as err:
+        LOGGER.error(err)
+        return abort(404)
+
+    try:
+        type_instance = object_manager.get_type(object_instance.get_type_id())
+    except ObjectManagerGetError as err:
+        LOGGER.error(err)
+        return abort(404)
+
+    acl: AccessControlList = type_instance.acl
+    if acl and acl.activated:
+        verify = acl.verify_access(request_user.group_id, AccessControlPermission.READ)
+        if not verify:
+            return abort(403, 'Protected by ACL permission.')
+
+    try:
+        render = CmdbRender(object_instance=object_instance, type_instance=type_instance, render_user=request_user,
+                            user_list=user_manager.get_users(), object_manager=object_manager, ref_render=True)
+        render_result = render.result()
+    except RenderError as err:
+        LOGGER.error(err)
+        return abort(500)
+
+    resp = make_response(render_result)
+    return resp
 
 
 @object_blueprint.route('/type/<int:public_id>', methods=['GET'])
@@ -344,36 +381,6 @@ def group_objects_by_type_id(value):
         resp = make_response(result)
     except CMDBError:
         return abort(400)
-    return resp
-
-
-@object_blueprint.route('/<int:public_id>/', methods=['GET'])
-@object_blueprint.route('/<int:public_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_object(public_id, request_user: UserModel):
-    try:
-        object_instance = object_manager.get_object(public_id)
-    except ObjectManagerGetError as err:
-        LOGGER.error(err)
-        return abort(404)
-
-    try:
-        type_instance = object_manager.get_type(object_instance.get_type_id())
-    except ObjectManagerGetError as err:
-        LOGGER.error(err)
-        return abort(404)
-
-    try:
-        render = CmdbRender(object_instance=object_instance, type_instance=type_instance, render_user=request_user,
-                            user_list=user_manager.get_users(), object_manager=object_manager, ref_render=True)
-        render_result = render.result()
-    except RenderError as err:
-        LOGGER.error(err)
-        return abort(500)
-
-    resp = make_response(render_result)
     return resp
 
 

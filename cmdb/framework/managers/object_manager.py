@@ -21,7 +21,8 @@ from cmdb.framework.managers.framework_manager import FrameworkManager, Framewor
 from cmdb.framework.results import IterationResult
 from cmdb.manager import ManagerGetError, ManagerIterationError
 from cmdb.search import Query, Pipeline
-from cmdb.security.acl import AccessControlQueryBuilder, AccessControlPermission
+from cmdb.security.acl.builder import AccessControlQueryBuilder
+from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 
 

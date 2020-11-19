@@ -14,3 +14,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+from enum import unique, Enum, auto
+
+
+@unique
+class AccessControlPermission(Enum):
+    """Permission enum for possible ACL operations."""
+
+    def _generate_next_value_(self, start, count, last_values):
+        return self
+
+    CREATE = auto()
+    READ = auto()
+    UPDATE = auto()
+    DELETE = auto()

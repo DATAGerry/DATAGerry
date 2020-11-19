@@ -22,7 +22,7 @@ from typing import List
 from cmdb.framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
 from cmdb.framework.cmdb_errors import ExternalFillError, FieldInitError, FieldNotFoundError
 from cmdb.framework.utils import Collection, Model
-from cmdb.security.acl import AccessControlList
+from cmdb.security.acl.control import AccessControlList
 from cmdb.utils.error import CMDBError
 
 LOGGER = logging.getLogger(__name__)
