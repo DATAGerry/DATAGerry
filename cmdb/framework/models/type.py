@@ -22,6 +22,7 @@ from typing import List
 from cmdb.framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
 from cmdb.framework.cmdb_errors import ExternalFillError, FieldInitError, FieldNotFoundError
 from cmdb.framework.utils import Collection, Model
+from cmdb.security.access_control import AccessControlList
 from cmdb.utils.error import CMDBError
 
 LOGGER = logging.getLogger(__name__)
@@ -250,6 +251,11 @@ class TypeModel(CmdbDAO):
                     'empty': True
                 }
             }
+        },
+        'acl': {
+            'type': 'dict',
+            'allow_unknown': True,
+            'required': False,
         }
     }
 
@@ -258,11 +264,11 @@ class TypeModel(CmdbDAO):
     ]
 
     __slots__ = 'public_id', 'name', 'label', 'description', 'version', 'active', 'author_id', \
-                'creation_time', 'render_meta', 'fields',
+                'creation_time', 'render_meta', 'fields', 'acl'
 
     def __init__(self, public_id: int, name: str, author_id: int, render_meta: TypeRenderMeta,
                  creation_time: datetime = None, active: bool = True, fields: list = None, version: str = None,
-                 label: str = None, description: str = None):
+                 label: str = None, description: str = None, acl: AccessControlList = None):
         self.name: str = name
         self.label: str = label or self.name.title()
         self.description: str = description
@@ -272,6 +278,7 @@ class TypeModel(CmdbDAO):
         self.creation_time: datetime = creation_time or datetime.utcnow()
         self.render_meta: TypeRenderMeta = render_meta
         self.fields: list = fields or []
+        self.acl: AccessControlList = acl
         super(TypeModel, self).__init__(public_id=public_id)
 
     @classmethod
@@ -287,7 +294,8 @@ class TypeModel(CmdbDAO):
             version=data.get('version', None),
             description=data.get('description', None),
             render_meta=TypeRenderMeta.from_data(data.get('render_meta', {})),
-            fields=data.get('fields', None)
+            fields=data.get('fields', None),
+            acl=AccessControlList.from_data(data.get('acl', {}))
         )
 
     @classmethod
@@ -303,7 +311,8 @@ class TypeModel(CmdbDAO):
             'version': instance.version,
             'description': instance.description,
             'render_meta': TypeRenderMeta.to_json(instance.render_meta),
-            'fields': instance.fields
+            'fields': instance.fields,
+            'acl': AccessControlList.to_json(instance.acl)
         }
 
     def get_name(self) -> str:

@@ -1,0 +1,49 @@
+<table class="table table-hover table-striped table-bordered">
+  <thead>
+  <tr>
+    <th scope="col">Group</th>
+    <th scope="col">Permissions</th>
+    <th scope="col" class="col-sm">Status</th>
+    <th scope="col" class="col-sm text-center">#</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td>
+      <ng-select [items]="groups" [(ngModel)]="selectedGroup">
+        <ng-option *ngFor="let group of groups" [value]="group">{{group.label}}</ng-option>
+      </ng-select>
+      <small>Add a group to grant access operations.</small>
+    </td>
+    <td colspan="2">
+      <ng-select [(ngModel)]="selectedPermissions" [items]="operations" [multiple]="true"
+                 [closeOnSelect]="false"></ng-select>
+      <small>Select ACL permissions.</small>
+    </td>
+    <td class="col-sm">
+      <button [disabled]="!selectedGroup" (click)="onAddControl()" type="button" class="btn btn-sm btn-success">
+        <i class="far fa-plus-square"></i>
+      </button>
+    </td>
+  </tr>
+  <tr [formGroup]="form" *ngFor="let control of controls | keyvalue">
+    <td>
+      {{getGroupLabelByID(+control.key)}}
+    </td>
+    <td>
+      <ng-select [formControlName]="control.key" [items]="operations" [multiple]="true"
+                 [closeOnSelect]="false"></ng-select>
+    </td>
+    <td class="col-sm">
+      <span class="badge badge-success" [ngClass]="control.value.valid ? 'badge-success' : 'badge-danger'">
+        {{control.value.status}}
+      </span>
+    </td>
+    <td class="col-sm">
+      <button type="button" class="btn btn-sm btn-danger" (click)="removeControl(control.key)">
+        <i class="far fa-trash-alt"></i>
+      </button>
+    </td>
+  </tr>
+  </tbody>
+</table>

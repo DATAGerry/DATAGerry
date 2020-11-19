@@ -41,6 +41,8 @@ import { AuthModule } from '../../auth/auth.module';
 import { TypeComponent } from './type.component';
 import { CleanupModalComponent } from './modals/cleanup-modal/cleanup-modal.component';
 import { CleanButtonComponent } from './components/clean-button/clean-button.component';
+import { TypeAclStepComponent } from './type-builder/type-acl-step/type-acl-step.component';
+import { GroupsAclTabsComponent } from './type-builder/type-acl-step/groups-acl-tabs/groups-acl-tabs.component';
 
 @NgModule({
   entryComponents: [TypeDeleteConfirmModalComponent, CleanupModalComponent],
@@ -56,7 +58,9 @@ import { CleanButtonComponent } from './components/clean-button/clean-button.com
     TypeDeleteConfirmModalComponent,
     TypeComponent,
     CleanupModalComponent,
-    CleanButtonComponent
+    CleanButtonComponent,
+    TypeAclStepComponent,
+    GroupsAclTabsComponent
   ],
   imports: [
     CommonModule,
