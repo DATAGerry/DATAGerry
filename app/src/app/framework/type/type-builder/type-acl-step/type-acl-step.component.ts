@@ -37,6 +37,7 @@ export class TypeAclStepComponent implements OnInit, OnDestroy {
   public set ACL(access: AccessControlList) {
     if (access) {
       this.acl = access;
+      this.form.patchValue(this.acl);
     }
   }
 
@@ -54,7 +55,7 @@ export class TypeAclStepComponent implements OnInit, OnDestroy {
     });
   }
 
-  public get activated(): boolean {
+  public get activatedStatus(): boolean {
     return this.form.get('activated').value;
   }
 
@@ -67,8 +68,7 @@ export class TypeAclStepComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.groupsControl.valueChanges.pipe(takeUntil(this.subscriber)).subscribe(changes => {
-      this.form.get('activated').setValue(true);
+    this.form.statusChanges.pipe(takeUntil(this.subscriber)).subscribe((status) => {
       this.validStatus.emit(this.form.valid);
     });
   }

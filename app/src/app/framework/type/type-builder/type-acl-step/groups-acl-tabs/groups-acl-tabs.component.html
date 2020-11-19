@@ -3,11 +3,29 @@
   <tr>
     <th scope="col">Group</th>
     <th scope="col">Permissions</th>
-    <th scope="col" class="col-sm">Valid</th>
+    <th scope="col" class="col-sm">Status</th>
     <th scope="col" class="col-sm text-center">#</th>
   </tr>
   </thead>
   <tbody>
+  <tr>
+    <td>
+      <ng-select [items]="groups" [(ngModel)]="selectedGroup">
+        <ng-option *ngFor="let group of groups" [value]="group">{{group.label}}</ng-option>
+      </ng-select>
+      <small>Add a group to grant access operations.</small>
+    </td>
+    <td colspan="2">
+      <ng-select [(ngModel)]="selectedPermissions" [items]="operations" [multiple]="true"
+                 [closeOnSelect]="false"></ng-select>
+      <small>Select ACL permissions.</small>
+    </td>
+    <td class="col-sm">
+      <button [disabled]="!selectedGroup" (click)="onAddControl()" type="button" class="btn btn-sm btn-success">
+        <i class="far fa-plus-square"></i>
+      </button>
+    </td>
+  </tr>
   <tr [formGroup]="form" *ngFor="let control of controls | keyvalue">
     <td>
       {{getGroupLabelByID(+control.key)}}
@@ -25,19 +43,6 @@
       <button type="button" class="btn btn-sm btn-danger" (click)="removeControl(control.key)">
         <i class="far fa-trash-alt"></i>
       </button>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-sm">
-      <button [disabled]="!currentGroup" (click)="onAddControl()" type="button" class="btn btn-sm btn-success">
-        <i class="far fa-plus-square"></i>
-      </button>
-    </td>
-    <td colspan="3">
-      <ng-select [items]="groups" [(ngModel)]="currentGroup">
-        <ng-option *ngFor="let group of groups" [value]="group">{{group.label}}</ng-option>
-      </ng-select>
-      <small>Add a group to grant access operations.</small>
     </td>
   </tr>
   </tbody>

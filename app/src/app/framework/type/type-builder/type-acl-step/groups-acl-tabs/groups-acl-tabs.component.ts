@@ -47,7 +47,8 @@ export class GroupsAclTabsComponent implements OnDestroy {
   @Input() public form: FormGroup;
 
   public groupsACL: AccessControlListSection<number> = new AccessControlListSection<number>();
-  public currentGroup: Group;
+  public selectedGroup: Group;
+  public selectedPermissions: Array<AccessControlPermission>;
 
   @Input('groupsACL')
   public set GroupsACL(groups: AccessControlListSection<number>) {
@@ -72,9 +73,14 @@ export class GroupsAclTabsComponent implements OnDestroy {
    * On html click event.
    */
   public onAddControl(): void {
-    if (this.currentGroup) {
-      this.addControl(this.currentGroup.public_id);
-      this.currentGroup = undefined;
+    if (this.selectedGroup) {
+      const controlName = `${ this.selectedGroup.public_id }`;
+      this.addControl(controlName);
+      if (this.selectedPermissions) {
+        this.form.get(controlName).setValue(this.selectedPermissions);
+      }
+      this.selectedGroup = undefined;
+      this.selectedPermissions = undefined;
     }
   }
 
