@@ -40,6 +40,7 @@ from cmdb.interface.response import GetMultiResponse, GetListResponse, UpdateMul
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
 from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
 from cmdb.manager import ManagerIterationError, ManagerGetError, ManagerUpdateError
+from cmdb.security.acl import AccessControlPermission
 from cmdb.user_management import UserModel
 
 with current_app.app_context():
@@ -66,7 +67,8 @@ with current_app.app_context():
 @objects_blueprint.route('/', methods=['GET', 'HEAD'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @objects_blueprint.parse_collection_parameters(view='native')
-def get_objects(params: CollectionParameters):
+@insert_request_user
+def get_objects(params: CollectionParameters, request_user: UserModel):
     from cmdb.framework.managers.object_manager import ObjectManager
     manager = ObjectManager(database_manager=current_app.database_manager)
     view = params.optional.get('view', 'native')
@@ -75,14 +77,17 @@ def get_objects(params: CollectionParameters):
 
     try:
         iteration_result: IterationResult[CmdbObject] = manager.iterate(
-            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order,
+            user=request_user, permission=AccessControlPermission.READ
+        )
 
         if view == 'native':
             object_list: List[dict] = [object_.__dict__ for object_ in iteration_result.results]
             api_response = GetMultiResponse(object_list, total=iteration_result.total, params=params,
                                             url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
         elif view == 'render':
-            rendered_list = RenderList(iteration_result.results, object_manager, ref_render=True).render_result_list(raw=True)
+            rendered_list = RenderList(iteration_result.results, object_manager, ref_render=True).render_result_list(
+                raw=True)
             api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
                                             url=request.url, model=Model('RenderResult'), body=request.method == 'HEAD')
         else:

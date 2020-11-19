@@ -16,6 +16,10 @@
 from enum import Enum, unique, auto
 from typing import Generic, TypeVar, Set, Dict
 
+from cmdb.framework.utils import PublicID
+from cmdb.search import Pipeline
+from cmdb.search.query.pipe_builder import PipelineBuilder
+
 T = TypeVar('T')
 
 
@@ -136,3 +140,47 @@ class AccessControlList:
             return self.groups.verify_access(key, permission)
         else:
             raise ValueError(f'No ACL section with name: {section}')
+
+
+class AccessControlQueryBuilder(PipelineBuilder):
+
+    def __init__(self, pipeline: Pipeline = None):
+        super(AccessControlQueryBuilder, self).__init__(pipeline=pipeline)
+
+    def build(self, group_id: PublicID, permission: AccessControlPermission, *args, **kwargs) -> Pipeline:
+        self.clear()
+        self.add_pipe(self._lookup_types())
+        self.add_pipe(self._unwind_types())
+        self.add_pipe(self._match_acl(group_id, permission))
+        return self.pipeline
+
+    def _lookup_types(self) -> dict:
+        return self.lookup_sub_(
+            from_='framework.types',
+            let_={'type_id': '$type_id'},
+            pipeline_=[
+                self.match_(query=self.expr_(expression={
+                    '$eq': [
+                        '$$type_id',
+                        '$public_id'
+                    ]
+                }))
+            ],
+            as_='type'
+        )
+
+    def _unwind_types(self) -> dict:
+        unwind = self.unwind_(path='$type')
+        return unwind
+
+    def _match_acl(self, group_id: PublicID, permission: AccessControlPermission) -> dict:
+        return self.match_(
+            self.or_([
+                self.exists_('type.acl', False),
+                {'type.acl.activated': False},
+                self.and_([
+                    self.exists_(f'type.acl.groups.includes.{group_id}', True),
+                    {f'type.acl.groups.includes.{group_id}': {'$all': [permission.value]}}
+                ])
+            ])
+        )
