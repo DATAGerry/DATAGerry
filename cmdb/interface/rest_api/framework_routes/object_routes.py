@@ -37,10 +37,12 @@ from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import Model
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse, GetListResponse, UpdateMultiResponse
-from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
+from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required, \
+    check_object_access_control
 from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
 from cmdb.manager import ManagerIterationError, ManagerGetError, ManagerUpdateError
 from cmdb.security.acl.control import AccessControlList
+from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 
@@ -119,11 +121,10 @@ def get_object(public_id, request_user: UserModel):
         LOGGER.error(err)
         return abort(404)
 
-    acl: AccessControlList = type_instance.acl
-    if acl and acl.activated:
-        verify = acl.verify_access(request_user.group_id, AccessControlPermission.READ)
-        if not verify:
-            return abort(403, 'Protected by ACL permission.')
+    try:
+        check_object_access_control(request_user, type_instance, AccessControlPermission.READ)
+    except AccessDeniedError as err:
+        return abort(403, err.message)
 
     try:
         render = CmdbRender(object_instance=object_instance, type_instance=type_instance, render_user=request_user,

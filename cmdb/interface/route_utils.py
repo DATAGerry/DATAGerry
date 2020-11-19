@@ -23,7 +23,11 @@ from datetime import datetime
 from werkzeug._compat import to_unicode
 from werkzeug.http import wsgi_to_bytes
 
+from cmdb.framework import TypeModel
 from cmdb.manager.errors import ManagerGetError
+from cmdb.security.acl.control import AccessControlList
+from cmdb.security.acl.errors import AccessDeniedError
+from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.security.auth import AuthModule
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import UserGroupModel
@@ -236,3 +240,12 @@ def parse_authorization_header(header):
         except Exception:
             return None
     return None
+
+
+def check_object_access_control(user: UserModel, type: TypeModel, permission: AccessControlPermission):
+    """Check if a user has access to object/objects for a given permission"""
+    acl: AccessControlList = type.acl
+    if acl and acl.activated:
+        verify = acl.verify_access(user.group_id, permission)
+        if not verify:
+            raise AccessDeniedError('Protected by ACL permission!')
