@@ -72,7 +72,10 @@ class AccessControlListSection(Generic[T]):
         self.includes[key].remove(permission)
 
     def verify_access(self, key: T, permission: AccessControlPermission) -> bool:
-        return permission in self.includes[key]
+        try:
+            return permission.value in self.includes[key]
+        except KeyError:
+            return False
 
     @classmethod
     def from_data(cls, data: dict) -> "AccessControlListSection[T]":
@@ -89,6 +92,18 @@ class GroupACL(AccessControlListSection[int]):
     def __init__(self, includes: AccessControlSectionDict[T]):
         super(GroupACL, self).__init__(includes=includes)
 
+    @property
+    def includes(self) -> dict:
+        return self._includes
+
+    @includes.setter
+    def includes(self, value: AccessControlSectionDict):
+        if not isinstance(value, dict):
+            raise TypeError('`AccessControlListSection` only takes dict as include structure')
+        else:
+            value = {int(k): v for k, v in value.items()}
+        self._includes = value
+
     @classmethod
     def from_data(cls, data: dict) -> "GroupACL":
         return cls(data.get('includes', set()))
@@ -96,7 +111,7 @@ class GroupACL(AccessControlListSection[int]):
     @classmethod
     def to_json(cls, section: "AccessControlListSection[T]") -> dict:
         return {
-            'includes': section.includes
+            'includes': {str(k): v for k, v in section.includes.items()}
         }
 
 
