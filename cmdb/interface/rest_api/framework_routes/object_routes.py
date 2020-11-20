@@ -108,17 +108,18 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
 @right_required('base.framework.object.view')
 def get_object(public_id, request_user: UserModel):
     try:
-        object_instance = object_manager.get_object(public_id)
+        object_instance = object_manager.get_object(public_id, user=request_user,
+                                                    permission=AccessControlPermission.READ)
     except (ObjectManagerGetError, ManagerGetError) as err:
-        return abort(404, err)
+        return abort(404, err.message)
     except AccessDeniedError as err:
         return abort(403, err.message)
 
     try:
         type_instance = object_manager.get_type(object_instance.get_type_id())
     except ObjectManagerGetError as err:
-        LOGGER.error(err)
-        return abort(404)
+        LOGGER.error(err.message)
+        return abort(404, err.message)
 
     try:
         render = CmdbRender(object_instance=object_instance, type_instance=type_instance, render_user=request_user,
@@ -129,6 +130,23 @@ def get_object(public_id, request_user: UserModel):
         return abort(500)
 
     resp = make_response(render_result)
+    return resp
+
+
+@object_blueprint.route('<int:public_id>/native/', methods=['GET'])
+@login_required
+@insert_request_user
+@right_required('base.framework.object.view')
+def get_native_object(public_id: int, request_user: UserModel):
+    try:
+        object_instance = object_manager.get_object(public_id, user=request_user,
+                                                    permission=AccessControlPermission.READ)
+    except ObjectManagerGetError:
+        return abort(404)
+    except AccessDeniedError as err:
+        return abort(403, err.message)
+
+    resp = make_response(object_instance)
     return resp
 
 
@@ -379,19 +397,6 @@ def group_objects_by_type_id(value):
     return resp
 
 
-@object_blueprint.route('<int:public_id>/native/', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_native_object(public_id: int, request_user: UserModel):
-    try:
-        object_instance = object_manager.get_object(public_id)
-    except CMDBError:
-        return abort(404)
-    resp = make_response(object_instance)
-    return resp
-
-
 @object_blueprint.route('/reference/<int:public_id>/', methods=['GET'])
 @object_blueprint.route('/reference/<int:public_id>', methods=['GET'])
 @insert_request_user
@@ -506,10 +511,15 @@ def insert_object(request_user: UserModel):
         abort(400)
 
     try:
-        new_object_id = object_manager.insert_object(new_object_data)
-    except ObjectInsertError as oie:
-        LOGGER.error(oie)
-        return abort(500)
+        new_object_id = object_manager.insert_object(new_object_data, user=request_user,
+                                                     permission=AccessControlPermission.CREATE)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    except AccessDeniedError as err:
+        return abort(403, err.message)
+    except ObjectInsertError as err:
+        LOGGER.error(err)
+        return abort(400, str(err))
 
     # get current object state
     try:
@@ -678,7 +688,12 @@ def delete_object(public_id: int, request_user: UserModel):
         return abort(500)
 
     try:
-        ack = object_manager.delete_object(public_id=public_id, request_user=request_user)
+        ack = object_manager.delete_object(public_id=public_id, user=request_user,
+                                           permission=AccessControlPermission.DELETE)
+    except ObjectManagerGetError as err:
+        return abort(400, err.message)
+    except AccessDeniedError as err:
+        return abort(403, err.message)
     except ObjectDeleteError:
         return abort(400)
     except CMDBError:

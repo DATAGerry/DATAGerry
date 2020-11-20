@@ -223,7 +223,8 @@ class CmdbObjectManager(CmdbManagerBase):
                         self._find_query_fields(item, match_fields=match_fields)
         return match_fields
 
-    def insert_object(self, data: (CmdbObject, dict)) -> int:
+    def insert_object(self, data: (CmdbObject, dict), user: UserModel = None,
+                      permission: AccessControlPermission = None) -> int:
         """
         Insert new CMDB Object
         Args:
@@ -240,6 +241,10 @@ class CmdbObjectManager(CmdbManagerBase):
                 raise ObjectManagerInsertError(e)
         elif isinstance(data, CmdbObject):
             new_object = data
+
+        type_ = self._type_manager.get(new_object.type_id)
+        verify_access(type_, user, permission)
+
         try:
             ack = self.dbm.insert(
                 collection=CmdbObject.COLLECTION,
@@ -327,20 +332,23 @@ class CmdbObjectManager(CmdbManagerBase):
 
         return referenced_by_objects
 
-    def delete_object(self, public_id: int, request_user: UserModel):
+    def delete_object(self, public_id: int, user: UserModel, permission: AccessControlPermission):
+        type_id = self.get_object(public_id=public_id).type_id
+        type_ = self._type_manager.get(type_id)
+        verify_access(type_, user, permission)
         try:
             if self._event_queue:
                 event = Event("cmdb.core.object.deleted",
                               {"id": public_id,
                                "type_id": self.get_object(public_id).get_type_id(),
-                               "user_id": request_user.get_public_id()})
+                               "user_id": user.get_public_id()})
                 self._event_queue.put(event)
             ack = self._delete(CmdbObject.COLLECTION, public_id)
             return ack
         except (CMDBError, Exception):
             raise ObjectDeleteError(msg=public_id)
 
-    def delete_many_objects(self, filter_query: dict, public_ids, request_user: UserModel):
+    def delete_many_objects(self, filter_query: dict, public_ids, user: UserModel):
         ack = self._delete_many(CmdbObject.COLLECTION, filter_query)
         if self._event_queue:
             event = Event("cmdb.core.objects.deleted", {"ids": public_ids,
