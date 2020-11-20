@@ -72,7 +72,7 @@ export class PermissionLinkDirective {
       }
     }
 
-    if (this.type && this.acl) {
+    if (this.type && this.acl && hasPermission) {
       const aclperms = this.aclPermissionService.checkRights(this.type, this.acl);
       if (aclperms !== null) {
         hasPermission = aclperms;
