@@ -8,31 +8,38 @@ import {AuthService} from './auth.service';
 export class AclPermissionService {
 
   private type: CmdbType;
-  private currentGroup: number;
+  private readonly currentGroup: number;
 
   constructor(private authService: AuthService) {
     this.currentGroup = this.authService.currentUserValue.group_id;
   }
 
-  public hasrights(type: CmdbType, rights: string | string[]) {
+  public checkRights(type: CmdbType, rights: string | string[]) {
     if (!type.acl.activated) {
       return true;
     }
+    this.type = type;
     if (Array.isArray(rights)) {
       for (const right in rights) {
-        // TODO make this work an a legit model
-        if (!(right in type.acl.groups[this.currentGroup].permissions)) {
+        if (!this.hasRight(right)) {
           return false;
         }
       }
     } else {
-      if (!(rights in type.acl.groups[this.currentGroup].permissions)) {
+      if (!this.hasRight((rights))) {
         return false;
       }
     }
-
     return true;
+  }
 
+  private hasRight(right: string) {
+    const rights = this.type.acl.groups.includes[this.currentGroup] as string[];
+    console.log(rights);
+    if (rights.includes(right)) {
+      return true;
+    }
+    return false;
   }
 
 }
