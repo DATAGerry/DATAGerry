@@ -240,12 +240,3 @@ def parse_authorization_header(header):
         except Exception:
             return None
     return None
-
-
-def check_object_access_control(user: UserModel, type: TypeModel, permission: AccessControlPermission):
-    """Check if a user has access to object/objects for a given permission"""
-    acl: AccessControlList = type.acl
-    if acl and acl.activated:
-        verify = acl.verify_access(user.group_id, permission)
-        if not verify:
-            raise AccessDeniedError('Protected by ACL permission!')

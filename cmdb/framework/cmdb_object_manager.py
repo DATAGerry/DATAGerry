@@ -31,6 +31,7 @@ from typing import List
 from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.models.category import CategoryModel, CategoryTree
 from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
 from cmdb.framework.cmdb_errors import WrongInputFormatError, TypeInsertError, TypeAlreadyExists, \
@@ -40,6 +41,9 @@ from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.search.query import Query, Pipeline
+from cmdb.security.acl.control import AccessControlList
+from cmdb.security.acl.errors import AccessDeniedError
+from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import UserModel
 from cmdb.utils.wraps import deprecated
@@ -47,9 +51,29 @@ from cmdb.utils.wraps import deprecated
 LOGGER = logging.getLogger(__name__)
 
 
+def has_access_control(type: TypeModel, user: UserModel, permission: AccessControlPermission) -> bool:
+    """Check if a user has access to object/objects for a given permission"""
+    acl: AccessControlList = type.acl
+    if acl and acl.activated:
+        return acl.verify_access(user.group_id, permission)
+    return True
+
+
+def verify_access(type: TypeModel, user: UserModel = None, permission: AccessControlPermission = None):
+    """Validate if a user has access to objects of this type."""
+    if not user or not permission:
+        return
+
+    verify = has_access_control(type, user, permission)
+    if not verify:
+        raise AccessDeniedError('Protected by ACL permission!')
+
+
 class CmdbObjectManager(CmdbManagerBase):
+
     def __init__(self, database_manager=None, event_queue=None):
         self._event_queue = event_queue
+        self._type_manager = TypeManager(database_manager)
         super(CmdbObjectManager, self).__init__(database_manager)
 
     def is_ready(self) -> bool:
@@ -70,33 +94,32 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerGetError(err)
 
-    def get_object(self, public_id: int):
+    def get_object(self, public_id: int, user: UserModel = None,
+                   permission: AccessControlPermission = None) -> CmdbObject:
         try:
-            return CmdbObject(
-                **self._get(
-                    collection=CmdbObject.COLLECTION,
-                    public_id=public_id
-                )
-            )
-        except (CMDBError, Exception) as err:
+            resource = CmdbObject(**self._get(
+                collection=CmdbObject.COLLECTION,
+                public_id=public_id))
+        except Exception as err:
             raise ObjectManagerGetError(str(err))
+
+        type_ = self._type_manager.get(resource.type_id)
+        verify_access(type_, user, permission)
+        return resource
 
     def get_objects(self, public_ids: list):
         object_list = []
         for public_id in public_ids:
-            object_list.append(self.get_object(public_id))
+            try:
+                object_list.append(self.get_object(public_id))
+            except CMDBError as err:
+                LOGGER.error(err)
+                continue
         return object_list
 
     def get_objects_by(self, sort='public_id', direction=-1, **requirements):
         ack = []
         objects = self._get_many(collection=CmdbObject.COLLECTION, sort=sort, direction=direction, **requirements)
-        for obj in objects:
-            ack.append(CmdbObject(**obj))
-        return ack
-
-    def get_all_objects(self):
-        ack = []
-        objects = self._get_many(collection=CmdbObject.COLLECTION, sort='public_id')
         for obj in objects:
             ack.append(CmdbObject(**obj))
         return ack
@@ -318,6 +341,7 @@ class CmdbObjectManager(CmdbManagerBase):
             self._event_queue.put(event)
         return ack
 
+    @deprecated
     def get_all_types(self) -> List[TypeModel]:
         try:
             raw_types: List[dict] = self._get_many(collection=TypeModel.COLLECTION)
@@ -328,6 +352,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerInitError(err=err)
 
+    @deprecated
     def get_type(self, public_id: int):
         try:
             return TypeModel.from_data(self.dbm.find_one(
@@ -339,13 +364,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerGetError(err=err)
 
-    def get_type_by(self, **requirements) -> TypeModel:
-        try:
-            found_type_list = self._get_by(collection=TypeModel.COLLECTION, **requirements)
-            return TypeModel.from_data(found_type_list)
-        except (CMDBError, Exception) as e:
-            raise ObjectManagerGetError(err=e)
-
+    @deprecated
     def get_types_by(self, sort='public_id', **requirements):
         try:
             return [TypeModel.from_data(data) for data in
@@ -353,26 +372,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerGetError(err=err)
 
-    def group_type_by_value(self, value: str, match=None):
-        """This method does not actually
-           performs the find() operation
-           but instead returns
-           a objects grouped by type of the documents that meet the selection criteria.
-
-           Args:
-               value (str): grouped by value
-               match (dict): stage filters the documents to only pass documents.
-           Returns:
-               returns the objects grouped by value of the documents
-           """
-        agr = []
-        if match:
-            agr.append({'$match': match})
-        agr.append({'$group': {'_id': '$' + value, 'count': {'$sum': 1}}})
-        agr.append({'$sort': {'count': -1}})
-
-        return self.dbm.aggregate(TypeModel.COLLECTION, agr)
-
+    @deprecated
     def get_type_aggregate(self, arguments):
         """This method does not actually
            performs the find() operation
@@ -391,20 +391,7 @@ class CmdbObjectManager(CmdbManagerBase):
             type_list.append(TypeModel.from_data(put_data))
         return type_list
 
-    def insert_type(self, data: dict):
-
-        try:
-            ack = self._insert(collection=TypeModel.COLLECTION, data=data)
-            LOGGER.debug(f"Inserted new type with ack {ack}")
-            if self._event_queue:
-                event = Event("cmdb.core.objecttype.added", {"id": ack})
-                self._event_queue.put(event)
-        except PublicIDAlreadyExists as err:
-            raise TypeAlreadyExists(type_id=str(err))
-        except (CMDBError, InsertError) as err:
-            raise TypeInsertError(str(err))
-        return ack
-
+    @deprecated
     def update_type(self, data: (TypeModel, dict)):
         if isinstance(data, TypeModel):
             update_type = data
@@ -423,44 +410,16 @@ class CmdbObjectManager(CmdbManagerBase):
             self._event_queue.put(event)
         return ack
 
+    @deprecated
     def update_many_types(self, filter: dict, update: dict):
         ack = self._update_many(TypeModel.COLLECTION, filter, update)
         return ack
 
+    @deprecated
     def count_types(self):
         return self.dbm.count(collection=TypeModel.COLLECTION)
 
-    def delete_type(self, public_id: int):
-        """Delete a type by the public id
-        Also removes the id from the category type list if existing
-        """
-        try:
-            ack = self._delete(TypeModel.COLLECTION, public_id)
-        except Exception as err:
-            raise ObjectManagerDeleteError(err=err)
-
-        if ack:
-            try:
-                category = self.get_category_by(types=public_id)
-                category.types.remove(public_id)
-                self.update_category(category=category)
-            # If no category with this ID
-            except ObjectManagerGetError:
-                pass
-            except ObjectManagerUpdateError as err:
-                LOGGER.error(err.message)
-        if self._event_queue:
-            event = Event("cmdb.core.objecttype.deleted", {"id": public_id})
-            self._event_queue.put(event)
-        return ack
-
-    def delete_many_types(self, filter_query: dict, public_ids):
-        ack = self._delete_many(TypeModel.COLLECTION, filter_query)
-        if self._event_queue:
-            event = Event("cmdb.core.objecttypes.deleted", {"ids": public_ids})
-            self._event_queue.put(event)
-        return ack
-
+    @deprecated
     def get_categories(self) -> List[CategoryModel]:
         """Get all categories as nested list"""
         try:
@@ -501,29 +460,6 @@ class CmdbObjectManager(CmdbManagerBase):
             raise ObjectManagerInitError(err)
 
     @deprecated
-    def _get_category_nodes(self, parent_list: list):
-        raise DeprecationWarning(
-            'Since the category structure has been changed this function no longer necessary')
-
-    def get_category_tree(self) -> CategoryTree:
-        """Get the complete category tree"""
-        try:
-            categories = self.get_categories()
-            types = self.get_all_types()
-        except Exception as err:
-            raise ObjectManagerGetError(err=err)
-        return CategoryTree(categories=categories, types=types)
-
-    def get_category(self, public_id: int) -> CategoryModel:
-        """Get a category from the database"""
-        try:
-            raw_category: dict = self._get(
-                collection=CategoryModel.COLLECTION,
-                public_id=public_id)
-            return CategoryModel.from_data(raw_category)
-        except Exception as err:
-            raise ObjectManagerGetError(err=err)
-
     def insert_category(self, category: CategoryModel):
         """Add a new category into the database or add the children list an existing category"""
         try:
@@ -531,6 +467,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerInsertError(err=err)
 
+    @deprecated
     def update_category(self, category: CategoryModel):
         """Update a existing category into the database"""
         try:
@@ -542,14 +479,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerUpdateError(err=err)
 
-    def delete_category(self, public_id: int):
-        """Remove a category from the database"""
-        try:
-            return self._delete(CategoryModel.COLLECTION, public_id)
-        except Exception as err:
-            raise ObjectManagerDeleteError(err=err)
-
-    # DOKUMENT FIELD CRUD
+    @deprecated
     def unset_update(self, collection: str, field: str):
         try:
             ack = self._unset_update_many(collection, field)

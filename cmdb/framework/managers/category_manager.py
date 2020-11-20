@@ -18,6 +18,7 @@ from typing import Union
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework import CategoryModel
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.models.category import CategoryTree
 from cmdb.framework.managers.error.framework_errors import FrameworkDeleteError
 from cmdb.framework.managers.framework_manager import FrameworkManager
@@ -30,6 +31,7 @@ from cmdb.search import Query
 class CategoryManager(FrameworkManager):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
+        self.__type_manager = TypeManager(database_manager=self._database_manager)
         super(CategoryManager, self).__init__(CategoryModel.COLLECTION, database_manager=database_manager)
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
@@ -130,7 +132,8 @@ class CategoryManager(FrameworkManager):
         Returns:
             CategoryTree: Categories as tree structure.
         """
-        types = CmdbObjectManager(database_manager=self._database_manager).get_all_types()
+        # Find all types
+        types = self.__type_manager.find({}).results
         categories = self.iterate(
             filter={}, limit=0, skip=0, sort='public_id', order=1).results
 
