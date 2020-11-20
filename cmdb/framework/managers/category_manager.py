@@ -31,7 +31,7 @@ from cmdb.search import Query
 class CategoryManager(FrameworkManager):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
-        self.__type_manager = TypeManager(database_manager=self._database_manager)
+        self.__type_manager = TypeManager(database_manager=database_manager)
         super(CategoryManager, self).__init__(CategoryModel.COLLECTION, database_manager=database_manager)
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \

@@ -117,10 +117,17 @@ class CmdbObjectManager(CmdbManagerBase):
                 continue
         return object_list
 
-    def get_objects_by(self, sort='public_id', direction=-1, **requirements):
+    def get_objects_by(self, sort='public_id', direction=-1, user: UserModel = None,
+                       permission: AccessControlPermission = None, **requirements):
         ack = []
         objects = self._get_many(collection=CmdbObject.COLLECTION, sort=sort, direction=direction, **requirements)
         for obj in objects:
+            object_ = CmdbObject(**obj)
+            try:
+                type_ = self._type_manager.get(object_.type_id)
+                verify_access(type_, user, permission)
+            except CMDBError:
+                continue
             ack.append(CmdbObject(**obj))
         return ack
 

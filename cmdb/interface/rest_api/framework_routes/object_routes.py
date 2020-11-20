@@ -108,9 +108,9 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
 @right_required('base.framework.object.view')
 def get_object(public_id, request_user: UserModel):
     try:
-        object_instance = object_manager.get_object(public_id, request_user, AccessControlPermission.READ)
+        object_instance = object_manager.get_object(public_id)
     except (ObjectManagerGetError, ManagerGetError) as err:
-        return abort(404, str(err))
+        return abort(404, err)
     except AccessDeniedError as err:
         return abort(403, err.message)
 

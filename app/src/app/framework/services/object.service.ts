@@ -87,14 +87,23 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     );
   }
 
-  public getObjectsByType(typeID: number): Observable<T[]> {
-    httpObjectObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    return this.api.callGet<T[]>(`${ this.servicePrefix }/type/${ typeID }`, httpObjectObserveOptions).pipe(
-      map((apiResponse) => {
+  public getObjectsByType(typeID: number): Observable<Array<T>> {
+    const options = this.options;
+    let httpParams: HttpParams = new HttpParams();
+    const filter = JSON.stringify({ type_id: typeID });
+    httpParams = httpParams.set('filter', filter);
+    httpParams = httpParams.set('limit', '0');
+    httpParams = httpParams.set('sort', 'public_id');
+    httpParams = httpParams.set('order', '1');
+    httpParams = httpParams.set('page', '1');
+    httpParams = httpParams.set('onlyActiveObjCookie', this.api.readCookies(COOCKIENAME));
+    options.params = httpParams;
+    return this.api.callGet<Array<T>>(this.newServicePrefix + '/', options).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         if (apiResponse.status === 204) {
           return [];
         }
-        return apiResponse.body;
+        return apiResponse.body.results;
       })
     );
   }
@@ -183,14 +192,12 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     );
   }
 
-  public countObjects() {
-    httpObjectObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    return this.api.callGet<number>(`${ this.servicePrefix }/count/`, httpObjectObserveOptions).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
+  public countObjects(): Observable<number> {
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callHead<T[]>(this.newServicePrefix + '/', options).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return +apiResponse.headers.get('X-Total-Count');
       })
     );
   }
