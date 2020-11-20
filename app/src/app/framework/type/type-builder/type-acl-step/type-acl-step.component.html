@@ -3,33 +3,27 @@
   <div class="col-md-2">
     <div class="card">
       <div class="card-header">
-        <div class="custom-control custom-checkbox">
+        <div class="custom-control custom-switch">
           <input type="checkbox" class="custom-control-input" id="acl-activated-button" formControlName="activated">
           <label class="custom-control-label" for="acl-activated-button">ACL activated</label>
         </div>
       </div>
-      <ul [formGroup]="groupsControl" class="list-group list-group-flush">
-        <li class="list-group-item list-group-item-action">
-          <div class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="groups-activated-button"
-                   formControlName="activated">
-            <label class="custom-control-label" for="groups-activated-button">Groups</label>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item list-group-item-action d-flex">
+          <div class="mr-auto">Groups</div>
+          <div>
+            <span class="badge badge-success" [ngClass]="groupsControl.valid ? 'badge-success' : 'badge-danger'">
+              {{groupsControl.status}}
+            </span>
           </div>
         </li>
       </ul>
     </div>
   </div>
   <div class="col-md-10">
-    <ul class="nav nav-tabs">
-      <li class="nav-item">
-        <a class="nav-link active" data-toggle="tab" role="tab">Includes</a>
-      </li>
-    </ul>
-    <div class="tab-content">
-      <div class="tab-pane fade show active" role="tabpanel">
-        <cmdb-groups-acl-tabs [form]="groupsIncludesArray" [groupIncludes]="acl?.groups?.includes" [groups]="groups">
-        </cmdb-groups-acl-tabs>
-      </div>
+    <div [formGroup]="groupsControl" ui-block [blocked]="!activatedStatus">
+      <cmdb-groups-acl-tabs [groups]="groups" [form]="includesControl" [groupsACL]="acl?.groups">
+      </cmdb-groups-acl-tabs>
     </div>
   </div>
 </form>

@@ -16,16 +16,14 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import {
-  AccessControlListEntry,
   AccessControlListSection,
   AccessControlPermission
 } from '../../../../../acl/acl.types';
 import { Group } from '../../../../../management/models/group';
-import { AbstractControl, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-groups-acl-tabs',
@@ -45,68 +43,66 @@ export class GroupsAclTabsComponent implements OnDestroy {
    */
   @Output() public valueChange: EventEmitter<any> = new EventEmitter<any>();
 
-  private _form: FormArray;
-  public get form(): FormArray {
-    return this._form;
-  }
+  @Input() public groups: Array<Group> = [];
+  @Input() public form: FormGroup;
 
-  @Input('form')
-  public set Form(arr: FormArray) {
-    this._form = arr;
-    /*this.form.valueChanges.pipe(takeUntil(this.subscriber)).subscribe(change => {
-      this.valueChange.emit(change);
-    });*/
-  }
+  public groupsACL: AccessControlListSection<number> = new AccessControlListSection<number>();
+  public selectedGroup: Group;
+  public selectedPermissions: Array<AccessControlPermission>;
 
-  public groupIncludes: Array<AccessControlListEntry<number>>;
-
-  @Input('groupIncludes')
-  public set GroupIncludes(includes: Array<AccessControlListEntry<number>>) {
-    if (includes) {
-      this.groupIncludes = includes;
-      for (const entry of this.groupIncludes) {
-        this.addEntry();
+  @Input('groupsACL')
+  public set GroupsACL(groups: AccessControlListSection<number>) {
+    if (groups) {
+      this.groupsACL = groups;
+      // tslint:disable-next-line:forin
+      for (const entry in groups.includes) {
+        this.addControl(entry);
       }
-      this.form.patchValue(includes);
+      this.form.patchValue(groups.includes);
     }
   }
 
-  @Input() public groups: Array<Group>;
 
   public readonly operations: Array<string> = Object.keys(AccessControlPermission);
 
-  public get controls(): Array<FormGroup> {
-    return this.form.controls as Array<FormGroup>;
+  public getGroupLabelByID(publicID: number): string {
+    return this.groups.find(g => g.public_id === publicID).label;
   }
 
   /**
-   * Is the group already selected
-   * @param groupID
+   * On html click event.
    */
-  public isGroupSelected(groupID: number): boolean {
-    return this.form.controls.some(c => c.get('role').value === groupID);
+  public onAddControl(): void {
+    if (this.selectedGroup) {
+      const controlName = `${ this.selectedGroup.public_id }`;
+      this.addControl(controlName);
+      if (this.selectedPermissions) {
+        this.form.get(controlName).setValue(this.selectedPermissions);
+      }
+      this.selectedGroup = undefined;
+      this.selectedPermissions = undefined;
+    }
   }
 
   /**
    * Add a new acl entry.
    */
-  public addEntry(): void {
-    const entryGroup = new FormGroup({
-      role: new FormControl(undefined, Validators.required),
-      permissions: new FormControl([])
-    });
-    this.form.push(entryGroup);
+  public addControl(name: number | string): void {
+    const control = new FormControl([]);
+    control.setValidators([Validators.required, Validators.minLength(1)]);
+    this.form.addControl(`${ name }`, control);
+  }
+
+  public get controls() {
+    return this.form.controls;
   }
 
   /**
    * Remove a existing entry.
-   * @param entry
+   * @param name
    */
-  public removeEntry(entry): void {
-    const entryIdx = this.form.controls.indexOf(entry);
-    if (entryIdx > -1) {
-      this.form.removeAt(entryIdx);
-    }
+  public removeControl(name: string): void {
+    this.form.removeControl(name);
   }
 
   public ngOnDestroy(): void {

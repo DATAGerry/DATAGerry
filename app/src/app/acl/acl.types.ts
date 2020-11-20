@@ -24,13 +24,11 @@ export enum AccessControlPermission {
 }
 
 export interface AccessControlListEntry<T> {
-  role: T;
-  permissions?: Array<AccessControlPermission>;
+  [key: number]: Array<AccessControlPermission>;
 }
 
-export interface AccessControlListSection<T> {
-  activated: boolean;
-  includes?: Array<AccessControlListEntry<T>>;
+export class AccessControlListSection<T> {
+  public includes: AccessControlListEntry<T> = {};
 }
 
 export class AccessControlList {

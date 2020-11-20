@@ -16,14 +16,17 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, HostBinding, Input } from '@angular/core';
 
-@NgModule({
-  declarations: [],
-  imports: [
-    CommonModule
-  ]
+@Component({
+  // tslint:disable-next-line:component-selector
+  selector: 'div[ui-block], span[ui-block]',
+  templateUrl: './block.component.html',
+  styleUrls: ['./block.component.scss']
 })
-export class AclModule {
+export class BlockComponent {
+
+  @HostBinding('class.content-block') content: boolean = true;
+  @Input() blocked: boolean = false;
+
 }

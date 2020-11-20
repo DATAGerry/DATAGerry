@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 from enum import Enum, unique, auto
-from typing import Generic, TypeVar, List
+from typing import Generic, TypeVar, Set, Dict
 
 T = TypeVar('T')
 
@@ -32,87 +32,43 @@ class AccessControlPermission(Enum):
     DELETE = auto()
 
 
-class AccessControlListEntry(Generic[T]):
-    """ACL entry inside the `AccessControlListSection.`"""
+class AccessControlSectionDict(Dict[T, Set[AccessControlPermission]]):
 
-    def __init__(self, role: T, permissions: List[AccessControlPermission] = None):
-        self.role = role
-        self.permissions = permissions or []
-
-    @classmethod
-    def from_entry(cls, role: T, permission: AccessControlPermission = None):
-        """Creates a `AccessControlListEntry` from a role and a single permission."""
-        if permission:
-            permission = [permission]
-        return cls(role=role, permissions=permission)
-
-    @classmethod
-    def from_data(cls, data: dict) -> "AccessControlListEntry[T]":
-        return cls(
-            role=data.get('role'),
-            permissions=data.get('permissions', [])
-        )
-
-    @classmethod
-    def to_json(cls, entry: "AccessControlListEntry[T]") -> dict:
-        return {
-            'role': entry.role,
-            'permissions': entry.permissions
-        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 class AccessControlListSection(Generic[T]):
-    """`AccessControlListSection` are a config element inside the complete ac-list."""
+    """`AccessControlListSection` are a config element inside the complete ac-dict."""
 
-    def __init__(self, activated: bool = False, includes: List[AccessControlListEntry[T]] = None):
-        self.activated = activated
-        self.includes: List[AccessControlListEntry[T]] = includes or []
+    def __init__(self, includes: AccessControlSectionDict = None):
+        self.includes: AccessControlSectionDict = includes or AccessControlSectionDict()
 
     @property
-    def includes(self) -> List[AccessControlListEntry[T]]:
+    def includes(self) -> AccessControlSectionDict:
         return self._includes
 
     @includes.setter
-    def includes(self, value: List[AccessControlListEntry[T]]):
-        if not isinstance(value, list):
-            raise TypeError('`AccessControlListSection` only takes lists as include structure')
+    def includes(self, value: AccessControlSectionDict):
+        if not isinstance(value, dict):
+            raise TypeError('`AccessControlListSection` only takes dict as include structure')
         self._includes = value
 
-    def _add_entry(self, role: T, permission: AccessControlPermission = None) -> AccessControlListEntry[T]:
-        entry = AccessControlListEntry.from_entry(role, permission)
-        self.includes.append(entry)
-        return entry
+    def _add_entry(self, key: T) -> T:
+        self.includes.update({key: Set[AccessControlPermission]()})
+        return key
 
-    def _get_entry(self, role: T) -> AccessControlListEntry[T]:
-        for entry in self.includes:
-            if entry.role == role:
-                return entry
-        raise ValueError('No entry in the list')
+    def _update_entry(self, key: T, permissions: Set[AccessControlPermission]):
+        self.includes.update({key: permissions})
 
-    def _update_entry(self, entry: AccessControlListEntry[T]) -> List[AccessControlListEntry[T]]:
-        for idx, e in enumerate(self.includes):
-            if e.role == entry.role:
-                self.includes[idx] = entry
-                return self.includes
-        else:
-            raise IndexError('Entry not exists')
+    def grant_access(self, key: T, permission: AccessControlPermission):
+        self.includes[key].add(permission)
 
-    def grant_access(self, role: T, permission: AccessControlPermission):
-        try:
-            entry = self._get_entry(role)
-        except ValueError:
-            entry = self._add_entry(role)
-        entry.permissions.append(permission)
-        self._update_entry(entry)
+    def revoke_access(self, key: T, permission: AccessControlPermission):
+        self.includes[key].remove(permission)
 
-    def revoke_access(self, role: T, permission: AccessControlPermission):
-        entry = self._get_entry(role)
-        entry.permissions.remove(permission)
-        self._update_entry(entry)
-
-    def verify_access(self, role: T, permission: AccessControlPermission) -> bool:
-        entry = self._get_entry(role)
-        return permission in entry.permissions
+    def verify_access(self, key: T, permission: AccessControlPermission) -> bool:
+        return permission in self.includes[key]
 
     @classmethod
     def from_data(cls, data: dict) -> "AccessControlListSection[T]":
@@ -126,25 +82,17 @@ class AccessControlListSection(Generic[T]):
 class GroupACL(AccessControlListSection[int]):
     """Wrapper class for the group section"""
 
-    def __init__(self, activated: bool = False, includes: List[AccessControlListEntry[int]] = None):
-        super(GroupACL, self).__init__(activated=activated, includes=includes)
+    def __init__(self, includes: AccessControlSectionDict[T]):
+        super(GroupACL, self).__init__(includes=includes)
 
     @classmethod
     def from_data(cls, data: dict) -> "GroupACL":
-        includes = [AccessControlListEntry.from_data(entry) for entry in
-                    data.get('includes', [])]
-        return cls(
-            activated=data.get('activated', True),
-            includes=includes
-        )
+        return cls(data.get('includes', set()))
 
     @classmethod
     def to_json(cls, section: "AccessControlListSection[T]") -> dict:
-        includes = [AccessControlListEntry.to_json(entry) for entry in
-                    section.includes]
         return {
-            'activated': section.activated,
-            'includes': includes
+            'includes': section.includes
         }
 
 
@@ -171,23 +119,20 @@ class AccessControlList:
             'groups': GroupACL.to_json(acl.groups)
         }
 
-    def grant_access(self, section: str, role: T, permission: AccessControlPermission):
+    def grant_access(self, section: str, key: T, permission: AccessControlPermission):
         if section == 'groups':
-            self.groups.grant_access(role, permission)
+            self.groups.grant_access(key, permission)
         else:
             raise ValueError(f'No ACL section with name: {section}')
 
-    def revoke_access(self, section: str, role: T, permission: AccessControlPermission):
+    def revoke_access(self, section: str, key: T, permission: AccessControlPermission):
         if section == 'groups':
-            self.groups.grant_access(role, permission)
+            self.groups.grant_access(key, permission)
         else:
             raise ValueError(f'No ACL section with name: {section}')
 
-    def verify_access(self, section: str, role: T, permission: AccessControlPermission) -> bool:
+    def verify_access(self, section: str, key: T, permission: AccessControlPermission) -> bool:
         if section == 'groups':
-            return self.groups.verify_access(role, permission)
+            return self.groups.verify_access(key, permission)
         else:
             raise ValueError(f'No ACL section with name: {section}')
-
-    def deny_access(self, role: T, permission: AccessControlPermission):
-        raise NotImplementedError
