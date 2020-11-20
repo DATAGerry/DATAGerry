@@ -22,6 +22,7 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectPreviewModalComponent } from '../../modals/object-preview-modal/object-preview-modal.component';
 import { ObjectDeleteModalComponent } from '../../modals/object-delete-modal/object-delete-modal.component';
 import { ReplaySubject } from 'rxjs';
+import { CmdbType } from '../../../models/cmdb-type';
 
 @Component({
   selector: 'cmdb-object-table-actions',
@@ -45,6 +46,11 @@ export class ObjectTableActionsComponent implements OnDestroy {
    * Rendered object
    */
   @Input() public result: RenderResult;
+
+  /**
+   * Object Type
+   */
+  @Input() public type: CmdbType;
 
   /**
    * Emitter when element was deleted.

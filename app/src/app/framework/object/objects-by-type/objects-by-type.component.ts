@@ -46,7 +46,6 @@ import {
   UserSettingsService
 } from '../../../management/user-settings/services/user-settings.service';
 import { DatePipe } from '@angular/common';
-import {AclPermissionService} from "../../../auth/services/acl-permission.service";
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -149,8 +148,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
               private fileService: FileService, private fileSaverService: FileSaverService,
               private toastService: ToastService, private sidebarService: SidebarService,
               private modalService: NgbModal, private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>,
-              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
-              private aclPermissionService: AclPermissionService) {
+              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>) {
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
       if (data.userSetting) {
         const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads

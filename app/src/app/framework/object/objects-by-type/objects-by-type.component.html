@@ -3,20 +3,20 @@
 <div class="d-flex">
   <div class="mr-auto">
     <button type="button"
-            *permissionLink="['base.framework.object.add']"
+            *permissionLink="['base.framework.object.add'];acl:'CREATE';type:type"
             class="btn btn-success btn-sm mr-1"
             [routerLink]="['/framework/object/add/', type?.public_id ]">
       <i class="fas fa-plus"></i> Add
     </button>
     <button type="button"
-            *permissionLink="['base.framework.object.edit']"
+            *permissionLink="['base.framework.object.edit'];acl:'UPDATE';type:type"
             [disabled]="selectedObjects.length<=0"
             class="btn btn-secondary btn-sm mr-1"
             [routerLink]="['/framework/object/change/', { typeID: type?.public_id , ids: selectedObjects}]">
       <i class="fas fa-tasks"></i> Bulk Change <span
       class="badge badge-primary badge-pill">{{selectedObjects.length}}</span>
     </button>
-    <button type="button" *permissionLink="['base.framework.object.delete']" (click)="onManyObjectDeletes()"
+    <button type="button" *permissionLink="['base.framework.object.delete'];acl:'DELETE';type:type" (click)="onManyObjectDeletes()"
             [disabled]="selectedObjects.length<=0" class="btn btn-danger btn-sm mr-1">
       <i class="far fa-trash-alt"></i> Delete Selected
       <span class="badge badge-secondary badge-pill">{{selectedObjects.length}}</span>
@@ -63,6 +63,6 @@
 </ng-template>
 
 <ng-template #actionTemplate let-item="item">
-  <cmdb-object-table-actions [publicID]="item.object_information.object_id" [result]="item"
+  <cmdb-object-table-actions [publicID]="item.object_information.object_id" [result]="item" [type]="type"
                              (deleteEmitter)="onObjectDelete($event)"></cmdb-object-table-actions>
 </ng-template>

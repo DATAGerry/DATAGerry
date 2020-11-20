@@ -16,11 +16,16 @@ export class AclPermissionService {
 
   public checkRights(type: CmdbType, rights: string | string[]) {
     if (!type.acl.activated) {
-      return true;
+      return null;
     }
     this.type = type;
     if (Array.isArray(rights)) {
-      for (const right in rights) {
+
+      if (rights.length === 1) {
+        return this.hasRight(rights[0]);
+      }
+
+      for (const right of rights) {
         if (!this.hasRight(right)) {
           return false;
         }
@@ -33,9 +38,6 @@ export class AclPermissionService {
 
   private hasRight(right: string) {
     const rights = this.type.acl.groups.includes[this.currentGroup] as string[];
-    if (!rights) {
-      return true;
-    }
     if (rights.includes(right)) {
       return true;
     }

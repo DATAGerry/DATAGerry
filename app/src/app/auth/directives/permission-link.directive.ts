@@ -19,6 +19,8 @@
 
 import { Directive, ElementRef, Input, TemplateRef, ViewContainerRef } from '@angular/core';
 import { PermissionService } from '../services/permission.service';
+import {CmdbType} from '../../framework/models/cmdb-type';
+import {AclPermissionService} from '../services/acl-permission.service';
 
 @Directive({
   // tslint:disable-next-line:directive-selector
@@ -28,10 +30,21 @@ import { PermissionService } from '../services/permission.service';
 export class PermissionLinkDirective {
 
   private rightNames: string[] = [];
+  private acl: string[] | string = undefined;
+  private type: CmdbType = undefined;
 
   constructor(private element: ElementRef,
               private templateRef: TemplateRef<any>,
-              private viewContainer: ViewContainerRef, private permissionService: PermissionService) {
+              private viewContainer: ViewContainerRef, private permissionService: PermissionService,
+              private aclPermissionService: AclPermissionService) {
+  }
+
+  @Input('permissionLinkAcl') set permissionLinkAcl(acl: string | string[]) {
+    this.acl = acl;
+  }
+
+  @Input('permissionLinkType') set permissionLinkType(type: CmdbType) {
+    this.type = type;
   }
 
   @Input('permissionLink') set permissionLink(rightNames: string | string[]) {
@@ -58,6 +71,14 @@ export class PermissionLinkDirective {
         hasPermission = true;
       }
     }
+
+    if (this.type && this.acl) {
+      const aclperms = this.aclPermissionService.checkRights(this.type, this.acl);
+      if (aclperms !== null) {
+        hasPermission = aclperms;
+      }
+    }
+
     return hasPermission;
   }
 
