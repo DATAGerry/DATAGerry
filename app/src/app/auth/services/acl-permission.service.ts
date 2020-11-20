@@ -26,16 +26,16 @@ export class AclPermissionService {
         }
       }
     } else {
-      if (!this.hasRight((rights))) {
-        return false;
-      }
+      return this.hasRight(rights);
     }
     return true;
   }
 
   private hasRight(right: string) {
     const rights = this.type.acl.groups.includes[this.currentGroup] as string[];
-    console.log(rights);
+    if (!rights) {
+      return true;
+    }
     if (rights.includes(right)) {
       return true;
     }
