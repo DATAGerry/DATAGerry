@@ -645,7 +645,13 @@ def update_object(public_id: int, request_user: UserModel):
 
         # insert object
         try:
-            update_ack = object_manager.update_object(update_object_instance, request_user)
+            update_ack = object_manager.update_object(update_object_instance, request_user,
+                                                      AccessControlPermission.UPDATE)
+
+        except ManagerGetError as err:
+            return abort(404, err.message)
+        except AccessDeniedError as err:
+            return abort(403, err.message)
         except CMDBError as e:
             LOGGER.warning(e)
             return abort(500)
@@ -756,6 +762,8 @@ def delete_many_objects(public_ids, request_user: UserModel):
                                                         request_user=request_user))
             except ObjectDeleteError:
                 return abort(400)
+            except AccessDeniedError as err:
+                return abort(403, err.message)
             except CMDBError:
                 return abort(500)
 
@@ -817,6 +825,8 @@ def update_object_state(public_id: int, request_user: UserModel):
     try:
         founded_object.active = state
         update_ack = object_manager.update_object(founded_object, request_user)
+    except AccessDeniedError as err:
+        return abort(403, err.message)
     except ObjectManagerUpdateError as err:
         LOGGER.error(err)
         return abort(500)

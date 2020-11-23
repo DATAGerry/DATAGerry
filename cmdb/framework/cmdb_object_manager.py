@@ -259,7 +259,7 @@ class CmdbObjectManager(CmdbManagerBase):
             raise ObjectInsertError(e)
         return ack
 
-    def update_object(self, data: (dict, CmdbObject), request_user: UserModel) -> str:
+    def update_object(self, data: (dict, CmdbObject), user: UserModel = None, permission: AccessControlPermission = None) -> str:
         if isinstance(data, dict):
             update_object = CmdbObject(**data)
         elif isinstance(data, CmdbObject):
@@ -267,16 +267,20 @@ class CmdbObjectManager(CmdbManagerBase):
         else:
             raise ObjectManagerUpdateError('Wrong CmdbObject init format - expecting CmdbObject or dict')
         update_object.last_edit_time = datetime.utcnow()
+
+        type_ = self._type_manager.get(update_object.type_id)
+        verify_access(type_, user, permission)
+
         ack = self._update(
             collection=CmdbObject.COLLECTION,
             public_id=update_object.get_public_id(),
             data=update_object.__dict__
         )
         # create cmdb.core.object.updated event
-        if self._event_queue and request_user:
+        if self._event_queue and user:
             event = Event("cmdb.core.object.updated", {"id": update_object.get_public_id(),
                                                        "type_id": update_object.get_type_id(),
-                                                       "user_id": request_user.get_public_id()})
+                                                       "user_id": user.get_public_id()})
             self._event_queue.put(event)
         return ack.acknowledged
 
