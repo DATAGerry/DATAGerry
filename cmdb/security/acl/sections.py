@@ -13,23 +13,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from enum import Enum, unique, auto
-from typing import Generic, TypeVar, Set, Dict
+
+from typing import TypeVar, Dict, Set, Generic
+
+from cmdb.security.acl.permission import AccessControlPermission
 
 T = TypeVar('T')
-
-
-@unique
-class AccessControlPermission(Enum):
-    """Permission enum for possible ACL operations."""
-
-    def _generate_next_value_(self, start, count, last_values):
-        return self
-
-    CREATE = auto()
-    READ = auto()
-    UPDATE = auto()
-    DELETE = auto()
 
 
 class AccessControlSectionDict(Dict[T, Set[AccessControlPermission]]):
@@ -68,7 +57,10 @@ class AccessControlListSection(Generic[T]):
         self.includes[key].remove(permission)
 
     def verify_access(self, key: T, permission: AccessControlPermission) -> bool:
-        return permission in self.includes[key]
+        try:
+            return permission.value in self.includes[key]
+        except KeyError:
+            return False
 
     @classmethod
     def from_data(cls, data: dict) -> "AccessControlListSection[T]":
@@ -85,6 +77,18 @@ class GroupACL(AccessControlListSection[int]):
     def __init__(self, includes: AccessControlSectionDict[T]):
         super(GroupACL, self).__init__(includes=includes)
 
+    @property
+    def includes(self) -> dict:
+        return self._includes
+
+    @includes.setter
+    def includes(self, value: AccessControlSectionDict):
+        if not isinstance(value, dict):
+            raise TypeError('`AccessControlListSection` only takes dict as include structure')
+        else:
+            value = {int(k): v for k, v in value.items()}
+        self._includes = value
+
     @classmethod
     def from_data(cls, data: dict) -> "GroupACL":
         return cls(data.get('includes', set()))
@@ -92,47 +96,5 @@ class GroupACL(AccessControlListSection[int]):
     @classmethod
     def to_json(cls, section: "AccessControlListSection[T]") -> dict:
         return {
-            'includes': section.includes
+            'includes': {str(k): v for k, v in section.includes.items()}
         }
-
-
-class AccessControlList:
-    """
-    The actual implementation of the Access Control List (ACL).
-    """
-
-    def __init__(self, activated: bool, groups: GroupACL = None):
-        self.activated = activated
-        self.groups: GroupACL = groups
-
-    @classmethod
-    def from_data(cls, data: dict) -> "AccessControlList":
-        return cls(
-            activated=data.get('activated', False),
-            groups=GroupACL.from_data(data.get('groups', {}))
-        )
-
-    @classmethod
-    def to_json(cls, acl: "AccessControlList") -> dict:
-        return {
-            'activated': acl.activated,
-            'groups': GroupACL.to_json(acl.groups)
-        }
-
-    def grant_access(self, section: str, key: T, permission: AccessControlPermission):
-        if section == 'groups':
-            self.groups.grant_access(key, permission)
-        else:
-            raise ValueError(f'No ACL section with name: {section}')
-
-    def revoke_access(self, section: str, key: T, permission: AccessControlPermission):
-        if section == 'groups':
-            self.groups.grant_access(key, permission)
-        else:
-            raise ValueError(f'No ACL section with name: {section}')
-
-    def verify_access(self, section: str, key: T, permission: AccessControlPermission) -> bool:
-        if section == 'groups':
-            return self.groups.verify_access(key, permission)
-        else:
-            raise ValueError(f'No ACL section with name: {section}')

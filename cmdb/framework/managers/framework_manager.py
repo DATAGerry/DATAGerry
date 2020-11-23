@@ -95,6 +95,9 @@ class FrameworkManager(ManagerBase):
         self.builder = FrameworkQueryBuilder()
         super(FrameworkManager, self).__init__(database_manager)
 
+    def count(self, filter: dict, *args, **kwargs) -> int:
+        raise NotImplementedError
+
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult:
         raise NotImplementedError
 
