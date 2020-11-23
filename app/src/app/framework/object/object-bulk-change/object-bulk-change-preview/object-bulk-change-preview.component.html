@@ -37,7 +37,7 @@
           <div class="col-sm-1"><fa-icon icon="arrow-alt-circle-right"></fa-icon> </div>
           <div class="col-sm-5">
             <strong>{{field.label}}</strong>:
-            <cmdb-render-element [mode]="mode" [data]="changes(field)"></cmdb-render-element>
+            <cmdb-render-element [mode]="mode" [data]="changes(field)" [value]="changes(field).value"></cmdb-render-element>
           </div>
         </div>
       </div>
@@ -51,4 +51,4 @@
   <hr />
 </div>
 
-<jw-pagination #paginationBulkChanges [pageSize]="limit" [items]="maxNumberOfSites" (changePage)="onChangePage()"></jw-pagination>
+<jw-pagination #paginationBulkChanges [pageSize]="10" [items]="maxNumberOfSites" (changePage)="onChangePage()"></jw-pagination>

@@ -16,25 +16,29 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, OnInit} from '@angular/core';
-import {RenderField} from '../../fields/components.fields';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { RenderField } from '../../fields/components.fields';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-object-bulk-input-appends',
   templateUrl: './object-bulk-input-appends.component.html',
   styleUrls: ['./object-bulk-input-appends.component.scss']
 })
-export class ObjectBulkInputAppendsComponent extends RenderField implements OnInit {
+export class ObjectBulkInputAppendsComponent extends RenderField implements OnInit, OnDestroy {
 
+  private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();
   public bulkControlName: string;
 
   constructor() {
     super();
   }
 
+
   ngOnInit() {
     this.bulkControlName = this.data.name + '-isChanged';
-    this.controller.valueChanges.subscribe(() => {
+    this.controller.statusChanges.pipe(takeUntil(this.unsubscribe)).subscribe(() => {
       this.parentFormGroup.get(this.bulkControlName).setValue(true);
       this.changeCheckBox();
     });
@@ -47,5 +51,10 @@ export class ObjectBulkInputAppendsComponent extends RenderField implements OnIn
     } else {
       value.set(this.data.name, this.data);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
   }
 }

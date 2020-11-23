@@ -16,99 +16,81 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import { ObjectService } from '../../../services/object.service';
-import { ActivatedRoute } from '@angular/router';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { JwPaginationComponent } from 'jw-angular-pagination';
 import { CmdbMode } from '../../../modes.enum';
 import { CollectionParameters } from '../../../../services/models/api-parameter';
-import { takeUntil } from 'rxjs/operators';
-import { HttpResponse } from '@angular/common/http';
-import { APIGetMultiResponse } from '../../../../services/models/api-response';
 import { RenderResult } from '../../../models/cmdb-render';
-import { ReplaySubject } from 'rxjs';
 
 @Component({
   selector: 'cmdb-object-bulk-change-preview',
   templateUrl: './object-bulk-change-preview.component.html',
   styleUrls: ['./object-bulk-change-preview.component.scss']
 })
-export class ObjectBulkChangePreviewComponent implements OnInit, OnDestroy {
+export class ObjectBulkChangePreviewComponent {
 
   @ViewChild('paginationBulkChanges', { static: false }) pagination: JwPaginationComponent;
-  @Input()  renderForm: FormGroup;
+
+  @Output() reloadData = new EventEmitter<any>();
+
+  // Data Binding
+  @Input() renderForm: FormGroup;
+  @Input() selectedObjectIds: number[];
+  @Input() currentPage: number;
+  @Input() maxNumberOfSites: number[];
 
   private objectState: boolean;
   @Input()
-  set activeState(value: boolean) {
+  public set activeState(value: boolean) {
     this.objectState = value;
   }
 
-  get activeState(): boolean {
+  public get activeState(): boolean {
     return this.objectState;
   }
 
-  // Unsubscribes
-  private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();
+  private result: Array<RenderResult> = [];
+  @Input()
+  public set renderResult(value: Array<RenderResult>) {
+    this.result = value;
+  }
+
+  public get renderResult(): Array<RenderResult> {
+    return this.result;
+  }
 
   // Render-Page-View information
-  private typeID: number;
   public readonly mode: CmdbMode = CmdbMode.Simple;
-  public renderResult: Array<RenderResult> = [];
-  public selectedBulkObjects: number[] = [];
 
-  // Pagination
-  public readonly limit: number = 10;
-  public initData: boolean = true;
-  public currentPage: number = 1;
-  public maxNumberOfSites: number[];
-
-  constructor(private objectService: ObjectService, private activeRoute: ActivatedRoute) {
-    this.activeRoute.params.subscribe((params) => {
-      if (params.ids !== undefined) {
-        this.selectedBulkObjects = Array.from(params.ids.split(','), Number);
-      }
-      if (params.typeID !== undefined) {
-        this.typeID = Number(params.typeID);
-      }
-    });
+  constructor() {
   }
 
-  ngOnInit(): void {
-    this.loadData();
-  }
-
-  private loadData() {
+  public loadData(): void {
     const params: CollectionParameters = {
       filter: [{ $match:
           {
-            $and: [{type_id: this.typeID} , { public_id: { $in: this.selectedBulkObjects }}]
+            $and: [
+              {type_id: this.renderResult[0].type_information.type_id},
+              { public_id: { $in: this.selectedObjectIds }}]
           }
       }] , limit: 10,
       sort: 'public_id', order: 1, page: this.currentPage
     };
-    this.objectService.getObjects(params).pipe(takeUntil(this.unsubscribe))
-      .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
-        this.renderResult = apiResponse.body.results;
-        if (this.initData) {
-          this.maxNumberOfSites = Array.from({ length: (apiResponse.body.total) }, (v, k) => k + 1);
-          this.initData = false;
-        }
-      });
-  }
-
-  public mergeFields(fields: any) {
-    return fields.filter(field => this.renderForm.get('changedFields').value.get(field.name));
+    this.reloadData.emit(params);
   }
 
   public activeStateChanged(): boolean {
     return this.renderForm.get('changedFields').value.get('activeObj-isChanged');
   }
 
+  public mergeFields(fields: any) {
+    return fields.filter(field => this.renderForm.get('changedFields').value.get(field.name));
+  }
+
   public changes(field: any) {
     const temp = this.renderForm.get('changedFields').value.get(field.name);
-    temp.value = this.renderForm.get(temp.name).value;
+    temp.value = this.renderForm.get(field.name).value;
     if (temp.hasOwnProperty('reference')) {
       temp.reference = {
         summaries: [],
@@ -124,10 +106,5 @@ export class ObjectBulkChangePreviewComponent implements OnInit, OnDestroy {
       this.currentPage = this.pagination.pager.currentPage;
       this.loadData();
     }
-  }
-
-  ngOnDestroy(): void {
-    this.unsubscribe.next();
-    this.unsubscribe.complete();
   }
 }

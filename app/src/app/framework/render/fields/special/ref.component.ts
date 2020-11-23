@@ -27,7 +27,7 @@ import { ObjectPreviewModalComponent } from '../../../object/modals/object-previ
 import { CollectionParameters } from '../../../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
-import { ReplaySubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 
 @Component({
   templateUrl: './ref.component.html',
@@ -39,6 +39,7 @@ export class RefComponent extends RenderField implements OnInit, OnDestroy {
   private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();
   public objectList: Array<RenderResult> = [];
   public refObject: RenderResult;
+  public changedReference: BehaviorSubject<any> = new BehaviorSubject<any>(undefined);
 
   public constructor(private objectService: ObjectService, private backend: HttpBackend,
                      private authService: AuthService, private modalService: NgbModal) {
@@ -48,13 +49,14 @@ export class RefComponent extends RenderField implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.data.default = parseInt(this.data.default, 10);
     if (this.data.ref_types) {
+      if (this.data.ref_types) {
+        if (!Array.isArray(this.data.ref_types)) {
+          this.data.ref_types = [this.data.ref_types];
+        }
+      }
       const params: CollectionParameters = {
-        filter: [{ $match:
-            {
-              $or: [{type_id: this.data.ref_types}]
-            }
-        }] , limit: 0,
-        sort: 'public_id', order: 1, page: 1
+        filter: [{ $match: { type_id: { $in: this.data.ref_types}}}],
+        limit: 0, sort: 'public_id', order: 1, page: 1
       };
       this.objectService.getObjects(params).pipe(takeUntil(this.unsubscribe))
         .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
@@ -71,6 +73,9 @@ export class RefComponent extends RenderField implements OnInit, OnDestroy {
         });
     }
   }
+
+  groupByFn = (item) => item.type_information.type_label;
+  groupValueFn = (_: string, children: any[]) => ({ name: children[0].type_information.type_label, total: children.length });
 
   public ngOnDestroy(): void {
     if (this.modalRef) {

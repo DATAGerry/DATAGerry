@@ -44,10 +44,16 @@
             [items]="objectList"
             id="ng-select-valid"
             class="custom-select"
+            [groupBy]="groupByFn"
+            [groupValue]="groupValueFn"
             bindValue="object_information.object_id" [searchFn]="searchRef"
             [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
             'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"
             [formControlName]="data.name">
+            <ng-template ng-optgroup-tmp let-item="item">
+              <span style="vertical-align: middle;">{{item.name}}</span>
+              <span class="ml-1 badge badge-secondary">{{item.total}}</span>
+            </ng-template>
             <ng-template ng-label-tmp let-item="item">
               <ng-container *ngIf="item.object_information == null">
                 <ng-container *ngIf="refObject != null">

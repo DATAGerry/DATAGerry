@@ -24,7 +24,7 @@ import { CmdbObject } from '../../models/cmdb-object';
 import { FormGroup } from '@angular/forms';
 import { ObjectService} from '../../services/object.service';
 import { TypeService } from '../../services/type.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import {ActivatedRoute, Params, Router} from '@angular/router';
 import { httpObserveOptions } from '../../../services/api-call.service';
 import { CollectionParameters } from '../../../services/models/api-parameter';
 import { takeUntil} from 'rxjs/operators';
@@ -49,35 +49,49 @@ export class ObjectBulkChangeComponent implements OnDestroy {
   // Subscribe
   private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public renderResult: RenderResult = undefined;
-  public mode: CmdbMode = CmdbMode.Bulk;
-  public objectInstance: CmdbObject;
-  public activeState: boolean = true;
+  // FormGroups
   public renderForm: FormGroup;
   public fieldsGroups: FormGroup;
-  private objectIDs: string[];
+
+  // Data Binding
+  public activeState: boolean = true;
+  public selectedObjectIds: number[];
+  public referenceResult: RenderResult = undefined;
+  public renderResults: Array<RenderResult> = [];
+  public readonly mode: CmdbMode = CmdbMode.Bulk;
+
+  // Pagination for Preview-Page
+  public readonly limit: number = 10;
+  public currentPage: number = 1;
+  public maxNumberOfSites: number[];
 
   constructor(private objectService: ObjectService, private typeService: TypeService,
               private activeRoute: ActivatedRoute, private route: Router) {
-    this.activeRoute.params.subscribe((params) => {
+    this.activeRoute.params.subscribe((params: Params) => {
       if (params.typeID !== undefined) {
         const collectionsParams: CollectionParameters = {
-          filter: [{ $match: {type_id: Number(params.typeID)}}] , limit: 1,
+          filter: [{ $match: {type_id: Number(params.typeID)}}] , limit: 10,
           sort: 'public_id', order: 1, page: 1
         };
-        this.objectService.getObjects(collectionsParams).pipe(takeUntil(this.unsubscribe))
-          .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
-            if (apiResponse.body.results.length > 0) {
-              this.renderResult = apiResponse.body.results[0];
-            }
-            this.objectIDs = params.ids.split(',');
-          });
+        this.loadData(collectionsParams, params, true);
       }
       this.fieldsGroups = new FormGroup({
       });
       this.renderForm = new FormGroup({
       });
     });
+  }
+
+  public loadData(collectionsParams: CollectionParameters, params?: Params,  init: boolean = false): void {
+    this.objectService.getObjects(collectionsParams).pipe(takeUntil(this.unsubscribe))
+      .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
+        this.renderResults = apiResponse.body.results;
+        if (init) {
+          this.referenceResult = apiResponse.body.results[0];
+          this.selectedObjectIds = Array.from(params.ids.split(','), Number);
+          this.maxNumberOfSites = Array.from({ length: (apiResponse.body.total) }, (v, k) => k + 1);
+        }
+      });
   }
 
   public toggleChange() {
@@ -88,12 +102,12 @@ export class ObjectBulkChangeComponent implements OnDestroy {
   public saveObject() {
     if (this.renderForm.get('changedFields').value.size > 0 ) {
       const httpOptions = Object.assign({}, httpObserveOptions);
-      httpOptions.params = {objectIDs: this.objectIDs};
+      httpOptions.params = {objectIDs: this.selectedObjectIds};
 
       const patchValue = [];
       const newObjectInstance = new CmdbObject();
       newObjectInstance.active = this.activeState;
-      newObjectInstance.type_id = this.renderResult.type_information.type_id;
+      newObjectInstance.type_id = this.referenceResult.type_information.type_id;
       newObjectInstance.fields = [];
       this.renderForm.get('changedFields').value.delete('activeObj-isChanged');
       Object.keys(this.renderForm.value).forEach((key: string) => {
@@ -109,7 +123,7 @@ export class ObjectBulkChangeComponent implements OnDestroy {
       this.objectService.putObject(0, newObjectInstance, httpOptions).pipe(takeUntil(this.unsubscribe))
         .subscribe((res: boolean) => {
         if (res) {
-          this.route.navigate(['/framework/object/type', this.renderResult.type_information.type_id]);
+          this.route.navigate(['/framework/object/type', this.referenceResult.type_information.type_id]);
         }
       });
     }
