@@ -67,11 +67,11 @@ export class PermissionLinkDirective {
   private checkPermission() {
     let hasPermission = false;
     for (const right of this.rightNames) {
-      if (this.permissionService.hasRight(right)) {
+      if (this.permissionService.hasRight(right) || this.permissionService.hasExtendedRight(right)) {
         hasPermission = true;
+      } else {
+        hasPermission = false;
         break;
-      } else if (this.permissionService.hasExtendedRight(right)) {
-        hasPermission = true;
       }
     }
 
