@@ -38,6 +38,10 @@ export class AclPermissionService {
 
   private hasRight(right: string) {
     const rights = this.type.acl.groups.includes[this.currentGroup] as string[];
+    console.log(rights);
+    if (!rights) {
+      return false;
+    }
     if (rights.includes(right)) {
       return true;
     }
