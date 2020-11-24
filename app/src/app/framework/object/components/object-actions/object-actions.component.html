@@ -14,7 +14,7 @@
               title="edit">
         <i class="fas fa-edit"></i>
       </button>
-      <button type="button" *permissionLink="'base.framework.object.edit';acl:'UPDATE';type:type"
+      <button type="button" *permissionLink="['base.framework.object.view', 'base.framework.object.add'];acl:['CREATE', 'READ'];type:type"
               routerLink="/framework/object/copy/{{renderResult?.object_information?.object_id}}"
               class="btn btn-sm btn-link"
               title="copy">

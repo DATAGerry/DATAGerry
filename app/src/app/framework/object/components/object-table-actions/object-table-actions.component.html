@@ -3,7 +3,8 @@
     title="View object">
     <i class="far fa-eye"></i>
   </a>
-  <a *permissionLink="'base.framework.object.add';acl:['CREATE', 'READ'];type:type" [routerLink]="['/', 'framework', 'object', 'copy', publicID]"
+  <a *permissionLink="['base.framework.object.view', 'base.framework.object.add'];acl:['CREATE', 'READ'];type:type"
+     [routerLink]="['/', 'framework', 'object', 'copy', publicID]"
     title="Copy object">
     <i class="far fa-clone"></i>
   </a>
