@@ -41,10 +41,8 @@ export class AclPermissionService {
     if (!rights) {
       return false;
     }
-    if (rights.includes(right)) {
-      return true;
-    }
-    return false;
+    return rights.includes(right);
+
   }
 
 }
