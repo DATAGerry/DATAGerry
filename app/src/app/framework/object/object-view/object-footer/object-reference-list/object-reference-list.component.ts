@@ -44,6 +44,8 @@ export class ObjectReferenceListComponent implements OnDestroy {
 
   @Input()
   set publicID(publicID: number) {
+    console.log("referenced publicID");
+
     this.id = publicID;
     if (this.id !== undefined && this.id !== null) {
       this.loadObjectReferences();

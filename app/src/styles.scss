@@ -36,6 +36,9 @@
 /* import archwizard */
 @import "~angular-archwizard/archwizard.scss";
 
+/* import visjs-network */
+@import "~vis-network/dist/dist/vis-network.min.css";
+
 /* custom global modules */
 @import "scss/variables";
 @import "scss/mixins";

@@ -50,7 +50,8 @@
               "./node_modules/datatables.net-buttons/js/buttons.print.js",
               "./node_modules/datatables.net-select/js/dataTables.select.js",
               "./node_modules/jszip/dist/jszip.js",
-              "./node_modules/tinymce/tinymce.min.js"
+              "./node_modules/tinymce/tinymce.min.js",
+              "./node_modules/vis-network/dist/vis-network.min.js"
             ],
             "es5BrowserSupport": true
           },

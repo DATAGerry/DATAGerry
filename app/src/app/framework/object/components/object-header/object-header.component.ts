@@ -30,7 +30,7 @@ export class ObjectHeaderComponent {
 
   public activeState: boolean = true;
   private result: RenderResult;
-  private objectID: number;
+  public objectID: number;
 
   @Output() stateChange = new EventEmitter<boolean>();
 

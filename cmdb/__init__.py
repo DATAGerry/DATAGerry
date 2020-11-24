@@ -21,7 +21,7 @@ open-source configurable management database
 import time
 
 __title__ = 'DATAGERRY'
-__version__ = '@@DG_BUILDVAR_VERSION@@'
+__version__ = 'undefined'
 __author__ = 'NETHINKS GmbH'
 __license__ = 'AGPLv3'
 __copyright__ = 'Copyright 2019 NETHINKS GmbH'
