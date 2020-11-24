@@ -1,0 +1,42 @@
+<div class="d-flex">
+  <div class="mr-auto">
+    <button type="button"
+            *permissionLink="['base.framework.object.add'];acl:'CREATE';type:type"
+            class="btn btn-success btn-sm mr-1"
+            [routerLink]="['/framework/object/add/', type?.public_id ]">
+      <i class="fas fa-plus"></i> Add
+    </button>
+    <button type="button"
+            *permissionLink="['base.framework.object.edit'];acl:'UPDATE';type:type"
+            [disabled]="selectedObjects.length<=0"
+            class="btn btn-secondary btn-sm mr-1"
+            [routerLink]="['/framework/object/change/', { typeID: type?.public_id , ids: selectedObjects}]">
+      <i class="fas fa-tasks"></i> Bulk Change <span
+      class="badge badge-primary badge-pill">{{selectedObjects.length}}</span>
+    </button>
+    <button type="button" *permissionLink="['base.framework.object.delete'];acl:'DELETE';type:type" (click)="manyObjectDeletes.emit()"
+            [disabled]="selectedObjects.length<=0" class="btn btn-danger btn-sm mr-1">
+      <i class="far fa-trash-alt"></i> Delete Selected
+      <span class="badge badge-secondary badge-pill">{{selectedObjects.length}}</span>
+    </button>
+  </div>
+  <div>
+    <div class="dropdown" *permissionLink="'base.export.object.*'">
+      <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle" data-toggle="dropdown">
+        <fa-icon icon="file-export"></fa-icon>
+        Export
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
+        <li *ngFor="let item of formatList" id="export-{{item.id}}"
+            [className]="item.active && totalResults > 0 ? 'dropdown-item' : 'dropdown-item disabled'"
+            (click)="fileExport.emit(item)"
+            [ngbTooltip]="item.helperText">
+          <fa-icon icon="{{item.icon}}"></fa-icon>
+          {{item.label}}
+          <span *ngIf="selectedObjects.length == 0">( all )</span>
+          <span *ngIf="selectedObjects.length > 0"> ( {{selectedObjects.length}} )</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
