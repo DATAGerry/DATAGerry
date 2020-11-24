@@ -43,10 +43,6 @@ export class PermissionLinkDirective {
     this.acl = acl;
   }
 
-  @Input('permissionLinkType') set permissionLinkType(type: CmdbType) {
-    this.type = type;
-  }
-
   @Input('permissionLink') set permissionLink(rightNames: string | string[]) {
     if (rightNames !== undefined) {
       if (Array.isArray(rightNames)) {
@@ -55,9 +51,16 @@ export class PermissionLinkDirective {
         this.rightNames = [];
         this.rightNames.push(rightNames);
       }
-      this.updateView();
     }
+    this.updateView();
   }
+
+  @Input('permissionLinkType') set permissionLinkType(type: CmdbType) {
+    this.type = type;
+    this.updateView();
+  }
+
+
 
   @Input() routerLink: string = undefined;
 
@@ -83,10 +86,9 @@ export class PermissionLinkDirective {
   }
 
   private updateView() {
+    this.viewContainer.clear();
     if (this.checkPermission()) {
       this.viewContainer.createEmbeddedView(this.templateRef);
-    } else {
-      this.viewContainer.clear();
     }
   }
 
