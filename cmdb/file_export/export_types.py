@@ -26,13 +26,14 @@ import openpyxl
 from cmdb.utils.helpers import load_class
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.utils import json_encoding
 from cmdb.utils.system_config import SystemConfigReader
 
-object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
-    **SystemConfigReader().get_all_values_from_section('Database')
-))
+database_manager = DatabaseManagerMongo(**SystemConfigReader().get_all_values_from_section('Database'))
+object_manager = CmdbObjectManager(database_manager=database_manager)
+type_manager = TypeManager(database_manager=database_manager)
 
 
 class ExportType:
@@ -239,58 +240,64 @@ class XlsxExportType(ExportType):
         # delete default sheet
         workbook.remove(workbook.active)
 
-        # insert data into worksheet
-        run_header = True
-        i = 2
-
         # sorts data_list by type_id
-
         type_id = "type_id"
         decorated = [(dict_.__dict__[type_id], dict_.__dict__) for dict_ in object_list]
         decorated = sorted(decorated, key=lambda x: x[0], reverse=False)
         sorted_list = [dict_ for (key, dict_) in decorated]
 
-        current_type_id = sorted_list[0][type_id]
-        p = 0
+        # init values
+        current_type_id = None
+        current_type_fields = []
+        i = 0
         for obj in sorted_list:
-            fields = obj["fields"]
 
+            # check, if starting a new object type
             if current_type_id != obj[type_id]:
+                # set current type id and fields
                 current_type_id = obj[type_id]
-                run_header = True
-                i = 2
+                current_type_fields = type_manager.get(obj[type_id]).get_fields()
+                i = 1
 
-            # insert header value
-            if run_header:
-                # get active worksheet and rename it
+                # start a new worksheet and rename it
                 title = self.__normalize_sheet_title(object_manager.get_type(obj[type_id]).label)
-                sheet = workbook.create_sheet(title, p)
-                header = sheet.cell(row=1, column=1)
-                header.value = 'public_id'
-                header = sheet.cell(row=1, column=2)
-                header.value = 'active'
+                sheet = workbook.create_sheet(title)
 
+                # insert header: public_id, active
+                cell = sheet.cell(row=i, column=1)
+                cell.value = 'public_id'
+                cell = sheet.cell(row=i, column=2)
+                cell.value = 'active'
+
+                # insert header: get fields from type definition
                 c = 3
-                for v in fields:
-                    header = sheet.cell(row=1, column=c)
-                    header.value = v.get('name')
+                for type_field in current_type_fields:
+                    cell = sheet.cell(row=i, column=c)
+                    cell.value = type_field.get('name')
                     c = c + 1
-                run_header = False
+                i = i + 1
 
-            # insert row values
+            # insert row values: public_id, active
+            cell = sheet.cell(row=i, column=1)
+            cell.value = str(obj["public_id"])
+            cell = sheet.cell(row=i, column=2)
+            cell.value = str(obj["active"])
+
+            # get object fields as dict:
+            obj_fields_dict = {}
+            for obj_field in obj['fields']:
+                obj_field_name = obj_field.get('name')
+                obj_fields_dict[obj_field_name] = obj_field.get('value')
+
+            # insert row values: fields
             c = 3
-            for key in fields:
-                header = sheet.cell(row=i, column=1)
-                header.value = str(obj["public_id"])
-                header = sheet.cell(row=i, column=2)
-                header.value = str(obj["active"])
-
-                rows = sheet.cell(row=i, column=c)
-                rows.value = str(key.get('value'))
+            for type_field in current_type_fields:
+                cell = sheet.cell(row=i, column=c)
+                cell.value = str(obj_fields_dict.get(type_field.get('name'), None))
                 c = c + 1
 
+            # increase row number
             i = i + 1
-            p = p + 1
 
         return workbook
 
