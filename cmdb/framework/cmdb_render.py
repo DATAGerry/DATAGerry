@@ -215,8 +215,6 @@ class CmdbRender:
 
                 if self.ref_render and field['type'] == 'ref' and field['value']:
                     field['reference'] = self.__merge_references(field)
-                else:
-                    field['reference'] = {'summaries': [], 'type_label': None, 'icon': None}
 
                 if self.dt_render:
                     field['value'] = html_parser.field_to_html(field['type'])
