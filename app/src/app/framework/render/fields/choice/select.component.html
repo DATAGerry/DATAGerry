@@ -12,11 +12,8 @@
           </select>
         </ng-container>
         <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
-            <ng-container *ngIf="mode == MODES.Bulk">
-                <cmdb-object-bulk-input-appends [data]="data"
-                                                [mode]="mode"
-                                                [parentFormGroup]="parentFormGroup" ></cmdb-object-bulk-input-appends>
-            </ng-container>
+          <cmdb-object-bulk-input-appends *ngIf="mode == MODES.Bulk" [data]="data" [controller]="controller"
+                                          [changeForm]="changeForm"></cmdb-object-bulk-input-appends>
             <select [formControlName]="data.name" name="{{data.name}}" class="custom-select"
                     [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
                  'is-invalid': controller.invalid && (controller.dirty || controller.touched)}">

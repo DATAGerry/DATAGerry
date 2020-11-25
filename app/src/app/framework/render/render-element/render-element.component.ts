@@ -21,7 +21,7 @@ import {fieldComponents} from '../fields/fields.list';
 import {simpleComponents} from '../simple/simple.list';
 import {RenderField} from '../fields/components.fields';
 import {ToastService} from '../../../layout/toast/toast.service';
-import {FormControl, Validators} from '@angular/forms';
+import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import {CmdbMode} from '../../modes.enum';
 
 @Component({
@@ -80,12 +80,7 @@ export class RenderElementComponent extends RenderField implements OnInit {
           this.data.name, fieldControl
         );
         if (CmdbMode.Bulk === this.mode) {
-          this.componentRef.instance.parentFormGroup.addControl(
-            this.data.name + '-isChanged', new FormControl(false),
-          );
-          this.componentRef.instance.parentFormGroup.addControl(
-            'changedFields', new FormControl(new Map<string, any>()),
-          );
+          this.componentRef.instance.changeForm = this.changeForm;
         }
         break;
       }

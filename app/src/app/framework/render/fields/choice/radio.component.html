@@ -15,9 +15,8 @@
         <div class="container">
           <div class="row">
             <div class="col-sm-auto p-0" *ngIf="mode == MODES.Bulk">
-              <cmdb-object-bulk-input-appends [data]="data"
-                                              [mode]="mode"
-                                              [parentFormGroup]="parentFormGroup" ></cmdb-object-bulk-input-appends>
+              <cmdb-object-bulk-input-appends [data]="data"[controller]="controller"
+                                              [changeForm]="changeForm"></cmdb-object-bulk-input-appends>
             </div>
             <div class="col-sm-4">
               <div class="custom-control custom-radio" *ngFor="let option of data.options">
