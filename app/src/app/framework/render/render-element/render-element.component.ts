@@ -76,6 +76,7 @@ export class RenderElementComponent extends RenderField implements OnInit {
           fieldControl.disable();
         }
 
+        this.parentFormGroup.removeControl(this.data.name);
         this.componentRef.instance.parentFormGroup.addControl(
           this.data.name, fieldControl
         );
