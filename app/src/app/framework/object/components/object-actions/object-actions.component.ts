@@ -5,7 +5,7 @@ import { ApiCallService } from '../../../../services/api-call.service';
 import { RenderResult } from '../../../models/cmdb-render';
 import {NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import {SidebarService} from '../../../../layout/services/sidebar.service';
-import {CmdbType} from "../../../models/cmdb-type";
+import {AccessControlList} from '../../../../acl/acl.types';
 
 @Component({
   selector: 'cmdb-object-actions',
@@ -15,7 +15,7 @@ import {CmdbType} from "../../../models/cmdb-type";
 export class ObjectActionsComponent implements OnDestroy {
 
   @Input() renderResult: RenderResult;
-  @Input() type: CmdbType;
+  @Input() acl: AccessControlList;
 
   constructor(private api: ApiCallService, private objectService: ObjectService,  private router: Router,
               private sidebarService: SidebarService) {

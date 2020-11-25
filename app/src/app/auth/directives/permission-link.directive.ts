@@ -21,6 +21,7 @@ import { Directive, ElementRef, Input, TemplateRef, ViewContainerRef } from '@an
 import { PermissionService } from '../services/permission.service';
 import {CmdbType} from '../../framework/models/cmdb-type';
 import {AclPermissionService} from '../services/acl-permission.service';
+import {AccessControlList} from "../../acl/acl.types";
 
 @Directive({
   // tslint:disable-next-line:directive-selector
@@ -30,8 +31,8 @@ import {AclPermissionService} from '../services/acl-permission.service';
 export class PermissionLinkDirective {
 
   private rightNames: string[] = [];
-  private acl: string[] | string = undefined;
-  private type: CmdbType = undefined;
+  private requirements: string[] | string = undefined;
+  private acl: AccessControlList = undefined;
 
   constructor(private element: ElementRef,
               private templateRef: TemplateRef<any>,
@@ -39,8 +40,8 @@ export class PermissionLinkDirective {
               private aclPermissionService: AclPermissionService) {
   }
 
-  @Input('permissionLinkAcl') set permissionLinkAcl(acl: string | string[]) {
-    this.acl = acl;
+  @Input('permissionLinkRequirements') set permissionLinkRequirements(requirements: string | string[]) {
+    this.requirements = requirements;
   }
 
   @Input('permissionLink') set permissionLink(rightNames: string | string[]) {
@@ -55,8 +56,8 @@ export class PermissionLinkDirective {
     this.updateView();
   }
 
-  @Input('permissionLinkType') set permissionLinkType(type: CmdbType) {
-    this.type = type;
+  @Input('permissionLinkAcl') set permissionLinkType(acl: AccessControlList) {
+    this.acl = acl;
     this.updateView();
   }
 
@@ -75,8 +76,8 @@ export class PermissionLinkDirective {
       }
     }
 
-    if (this.type && this.acl && hasPermission) {
-      const aclperms = this.aclPermissionService.checkRights(this.type, this.acl);
+    if (this.requirements && this.acl && hasPermission) {
+      const aclperms = this.aclPermissionService.checkRights(this.acl, this.requirements);
       if (aclperms !== null) {
         hasPermission = aclperms;
       }

@@ -182,7 +182,8 @@ class CmdbRender:
             'author_name': author_name,
             'icon': self.type_instance.render_meta.icon,
             'active': self.type_instance.active,
-            'version': self.type_instance.version
+            'version': self.type_instance.version,
+            'acl': self.type_instance.acl.to_json(self.type_instance.acl)
 
         }
         return render_result

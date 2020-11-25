@@ -46,6 +46,7 @@ export class RenderResult {
     active: boolean;
     version: string;
     icon: string;
+    acl: any;
   };
   public fields: any[];
   public sections: any[];

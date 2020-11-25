@@ -1,24 +1,25 @@
 import { Injectable } from '@angular/core';
 import {CmdbType} from '../../framework/models/cmdb-type';
 import {AuthService} from './auth.service';
+import {AccessControlList} from "../../acl/acl.types";
 
 @Injectable({
   providedIn: 'root'
 })
 export class AclPermissionService {
 
-  private type: CmdbType;
+  private acl: AccessControlList;
   private readonly currentGroup: number;
 
   constructor(private authService: AuthService) {
     this.currentGroup = this.authService.currentUserValue.group_id;
   }
 
-  public checkRights(type: CmdbType, rights: string | string[]) {
-    if (!type.acl.activated) {
+  public checkRights(acl: AccessControlList, rights: string | string[]) {
+    if (!acl.activated) {
       return null;
     }
-    this.type = type;
+    this.acl = acl;
     if (Array.isArray(rights)) {
 
       if (rights.length === 1) {
@@ -37,7 +38,7 @@ export class AclPermissionService {
   }
 
   private hasRight(right: string) {
-    const rights = this.type.acl.groups.includes[this.currentGroup] as string[];
+    const rights = this.acl.groups.includes[this.currentGroup] as string[];
     if (!rights) {
       return false;
     }
