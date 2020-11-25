@@ -1,23 +1,23 @@
 <div class="d-flex justify-content-between" *ngIf="publicID">
-  <a *permissionLink="'base.framework.object.view';acl:'READ';type:type" [routerLink]="['/', 'framework', 'object', 'view', publicID]"
-    title="View object">
+  <a *permissionLink="'base.framework.object.view';requirements:'READ';acl:acl" [routerLink]="['/', 'framework', 'object', 'view', publicID]"
+     title="View object">
     <i class="far fa-eye"></i>
   </a>
-  <a *permissionLink="['base.framework.object.view', 'base.framework.object.add'];acl:['CREATE', 'READ'];type:type"
+  <a *permissionLink="['base.framework.object.view', 'base.framework.object.add'];requirements:['CREATE', 'READ'];acl:acl"
      [routerLink]="['/', 'framework', 'object', 'copy', publicID]"
     title="Copy object">
     <i class="far fa-clone"></i>
   </a>
-  <a *permissionLink="'base.framework.object.edit';acl:'UPDATE';type:type" [routerLink]="['/', 'framework', 'object', 'edit', publicID]"
-    title="Edit object">
+  <a *permissionLink="'base.framework.object.edit';requirements:'UPDATE';acl:acl" [routerLink]="['/', 'framework', 'object', 'edit', publicID]"
+     title="Edit object">
     <i class="far fa-edit"></i>
   </a>
-  <a *permissionLink="'base.framework.object.view';acl:'READ';type:type" class="pointer" (click)="openPreviewModal()"
-    title="Preview object">
+  <a *permissionLink="'base.framework.object.view';requirements:'READ';acl:acl" class="pointer" (click)="openPreviewModal()"
+     title="Preview object">
     <i class="far fa-file-powerpoint"></i>
   </a>
-  <a *permissionLink="'base.framework.object.delete';acl:'DELETE';type:type" class="pointer" (click)="openDeleteModal()"
-    title="Delete object">
+  <a *permissionLink="'base.framework.object.delete';requirements:'DELETE';acl:acl" class="pointer" (click)="openDeleteModal()"
+     title="Delete object">
     <i class="far fa-trash-alt"></i>
   </a>
 </div>

@@ -23,8 +23,6 @@ import { CmdbMode } from '../../modes.enum';
 import { RenderResult } from '../../models/cmdb-render';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import {TypeService} from "../../services/type.service";
-import {CmdbType} from "../../models/cmdb-type";
 
 @Component({
   selector: 'cmdb-object-view',
@@ -35,7 +33,6 @@ export class ObjectViewComponent implements OnInit, OnDestroy {
 
   public mode: CmdbMode = CmdbMode.View;
   public renderResult: RenderResult;
-  public type : CmdbType;
 
   /**
    * Component un-subscriber.
@@ -47,7 +44,7 @@ export class ObjectViewComponent implements OnInit, OnDestroy {
    */
   private objectViewSubject: BehaviorSubject<RenderResult> = new BehaviorSubject<RenderResult>(undefined);
 
-  constructor(public objectService: ObjectService, private activateRoute: ActivatedRoute, private typeService: TypeService) {
+  constructor(public objectService: ObjectService, private activateRoute: ActivatedRoute) {
     this.activateRoute.data.subscribe((data: Data) => {
       this.objectViewSubject.next(data.object as RenderResult);
     });
@@ -56,9 +53,6 @@ export class ObjectViewComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.objectViewSubject.asObservable().subscribe((result) => {
       this.renderResult = result;
-      this.typeService.getType(result.type_information.type_id).pipe(takeUntil(this.unsubscribe)).subscribe( (type: CmdbType) => {
-        this.type = type;
-      });
     });
   }
 

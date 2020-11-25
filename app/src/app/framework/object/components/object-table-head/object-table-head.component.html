@@ -1,20 +1,20 @@
 <div class="d-flex">
   <div class="mr-auto">
     <button type="button"
-            *permissionLink="['base.framework.object.add'];acl:'CREATE';type:type"
+            *permissionLink="['base.framework.object.add'];acl:'CREATE';requirements:type.acl"
             class="btn btn-success btn-sm mr-1"
             [routerLink]="['/framework/object/add/', type?.public_id ]">
       <i class="fas fa-plus"></i> Add
     </button>
     <button type="button"
-            *permissionLink="['base.framework.object.edit'];acl:'UPDATE';type:type"
+            *permissionLink="['base.framework.object.edit'];acl:'UPDATE';requirements:type.acl"
             [disabled]="selectedObjects.length<=0"
             class="btn btn-secondary btn-sm mr-1"
             [routerLink]="['/framework/object/change/', { typeID: type?.public_id , ids: selectedObjects}]">
       <i class="fas fa-tasks"></i> Bulk Change <span
       class="badge badge-primary badge-pill">{{selectedObjects.length}}</span>
     </button>
-    <button type="button" *permissionLink="['base.framework.object.delete'];acl:'DELETE';type:type" (click)="manyObjectDeletes.emit()"
+    <button type="button" *permissionLink="['base.framework.object.delete'];acl:'DELETE';requirements:type.acl" (click)="manyObjectDeletes.emit()"
             [disabled]="selectedObjects.length<=0" class="btn btn-danger btn-sm mr-1">
       <i class="far fa-trash-alt"></i> Delete Selected
       <span class="badge badge-secondary badge-pill">{{selectedObjects.length}}</span>
