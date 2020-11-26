@@ -83,7 +83,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   /**
    * Selected objects
    */
-  public selectedObjects: Array<number> = [];
+  public selectedObjects: Array<RenderResult> = [];
+  public selectedObjectsIDs: Array<number> = [];
 
   /**
    * Total number of results
@@ -421,7 +422,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * @param selectedItems
    */
   public onSelectedChange(selectedItems: Array<RenderResult>): void {
-    this.selectedObjects = selectedItems.map(m => m.object_information.object_id);
+    this.selectedObjects = selectedItems;
+    this.selectedObjectsIDs = selectedItems.map(m => m.object_information.object_id);
   }
 
   /**
@@ -446,13 +448,13 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   }
 
   public exportingFiles(exportType: any) {
-    if (this.selectedObjects.length === 0) {
+    if (this.selectedObjectsIDs.length === 0) {
       this.fileService.getObjectFileByType(this.type.public_id, exportType.id)
         .subscribe(res => {
           this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
         });
     } else {
-      this.fileService.callExportRoute(this.selectedObjects.toString(), exportType.id)
+      this.fileService.callExportRoute(this.selectedObjectsIDs.toString(), exportType.id)
         .subscribe(res => {
           this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
         });
@@ -477,7 +479,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       this.deleteManyModalRef = this.modalService.open(ObjectsDeleteModalComponent, { size: 'lg' });
       this.deleteManyModalRef.result.then((response: string) => {
         if (response === 'delete') {
-          this.objectService.deleteManyObjects(this.selectedObjects.toString())
+          this.objectService.deleteManyObjects(this.selectedObjectsIDs.toString())
             .pipe(takeUntil(this.subscriber)).subscribe(() => {
             this.toastService.success(`Deleted ${ this.selectedObjects.length } objects successfully`);
             this.sidebarService.updateTypeCounter(this.type.public_id);
@@ -488,6 +490,12 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       });
     }
   }
+
+  public onBulkChange(): void {
+    this.router.navigate(['/framework/object/change/'],
+      { state: { type: this.type, objects: this.selectedObjects } });
+  }
+
 
   public ngOnDestroy(): void {
     this.subscriber.next();
