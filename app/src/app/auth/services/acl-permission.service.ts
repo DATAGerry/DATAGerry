@@ -9,10 +9,8 @@ import {AccessControlList} from "../../acl/acl.types";
 export class AclPermissionService {
 
   private acl: AccessControlList;
-  private readonly currentGroup: number;
 
   constructor(private authService: AuthService) {
-    this.currentGroup = this.authService.currentUserValue.group_id;
   }
 
   public checkRights(acl: AccessControlList, rights: string | string[]) {
@@ -38,7 +36,8 @@ export class AclPermissionService {
   }
 
   private hasRight(right: string) {
-    const rights = this.acl.groups.includes[this.currentGroup] as string[];
+    const currentGroup = this.authService.currentUserValue.group_id;
+    const rights = this.acl.groups.includes[currentGroup] as string[];
     if (!rights) {
       return false;
     }

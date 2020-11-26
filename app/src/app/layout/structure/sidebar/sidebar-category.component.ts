@@ -16,17 +16,30 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import { CmdbCategoryNode } from '../../../framework/models/cmdb-category';
+import {UserService} from '../../../management/services/user.service';
 
 @Component({
   selector: 'cmdb-sidebar-category',
   templateUrl: './sidebar-category.component.html',
   styleUrls: ['./sidebar-category.component.scss'],
 })
-export class SidebarCategoryComponent {
+export class SidebarCategoryComponent implements OnInit {
 
   @Input() categoryNode: CmdbCategoryNode;
+
+  constructor(private userService: UserService) {
+  }
+
+  ngOnInit(): void {
+    console.log(this.userService.getCurrentUser().group_id);
+    console.log(this.categoryNode.types);
+    this.categoryNode.types = this.categoryNode.types.filter(type => !type.acl.activated ||
+      (type.acl.groups.includes[this.userService.getCurrentUser().group_id] &&
+        'READ' in (type.acl.groups.includes[this.userService.getCurrentUser().group_id] as any[])));
+    console.log(this.categoryNode.types);
+  }
 
 
 }
