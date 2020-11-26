@@ -1,26 +1,33 @@
-<aw-wizard [navBarLayout]="'large-empty-symbols'" *ngIf="renderResults.length > 0">
-  <aw-wizard-step stepId="1" stepTitle="Bulk Changes">
-    <ng-template awWizardStepSymbol><i class="fas fa-file-code"></i></ng-template>
-    <cmdb-object-bulk-change-editor
-      [mode]="mode"
-      [renderForm]="renderForm"
-      [activeState]="activeState"
-      [renderResult]="referenceResult" (activeChange)="toggleChange()"></cmdb-object-bulk-change-editor>
-    <button class="btn btn-warning prev" type="button"
-            [routerLink]="['/framework/object/type', referenceResult?.type_information.type_id]"
-            awPreviousStep>Back to {{referenceResult.type_information.type_label}}</button>
-    <button class="btn btn-success next" type="button" (click)="saveObject()">Save</button>
-    <button class="btn btn-primary next mr-2" type="button" awNextStep >Next Step</button>
-  </aw-wizard-step>
-  <aw-wizard-step stepId="2" stepTitle="Preview">
-    <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
-    <cmdb-object-bulk-change-preview [activeState]="activeState"
-                                     [renderResult]="renderResults"
-                                     [selectedObjectIds]="selectedObjectIds"
-                                     [renderForm]="renderForm"
-                                     [maxNumberOfSites]="maxNumberOfSites"
-                                     (reloadData)="loadData($event)"></cmdb-object-bulk-change-preview>
-    <button class="btn btn-primary prev" type="button" awPreviousStep>Go to previous step</button>
-    <button class="btn btn-success next" type="button" (click)="saveObject()">Save</button>
-  </aw-wizard-step>
-</aw-wizard>
+<ng-container *ngIf="type; else noDataPassed;">
+  <aw-wizard [navBarLayout]="'large-empty-symbols'">
+    <aw-wizard-step stepId="1" stepTitle="Bulk Changes">
+      <ng-template awWizardStepSymbol><i class="fas fa-file-code"></i></ng-template>
+      <cmdb-object-bulk-change-editor [changeForm]="changeForm" (activeChange)="activeState = $event"
+                                      [type]="type" [renderForm]="renderForm"></cmdb-object-bulk-change-editor>
+      <button class="btn btn-warning prev" type="button"
+              [routerLink]="['/framework/object/type', type.public_id]"
+              awPreviousStep>Back to {{type.label}}</button>
+      <button class="btn btn-success next" type="button" (click)="saveObject()"
+              [disabled]="!hasChanges">Save
+      </button>
+      <button class="btn btn-primary next mr-2" type="button" awNextStep
+              [disabled]="!hasChanges">Next Step
+      </button>
+    </aw-wizard-step>
+    <aw-wizard-step stepId="2" stepTitle="Preview">
+      <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
+      <cmdb-object-bulk-change-preview [activeState]="activeState" [results]="renderResults" [changeForm]="changeForm"
+                                       [type]="type">
+      </cmdb-object-bulk-change-preview>
+      <button class="btn btn-primary prev" type="button" awPreviousStep>Go to previous step</button>
+      <button class="btn btn-success next" type="button" (click)="saveObject()"
+              [disabled]="!hasChanges">Save
+      </button>
+    </aw-wizard-step>
+  </aw-wizard>
+</ng-container>
+<ng-template #noDataPassed>
+  <div class="alert alert-danger">
+    No data to change was passed!
+  </div>
+</ng-template>

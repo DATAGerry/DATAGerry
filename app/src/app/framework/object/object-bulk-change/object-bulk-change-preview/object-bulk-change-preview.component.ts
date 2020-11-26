@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,34 +13,44 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { JwPaginationComponent } from 'jw-angular-pagination';
 import { CmdbMode } from '../../../modes.enum';
-import { CollectionParameters } from '../../../../services/models/api-parameter';
 import { RenderResult } from '../../../models/cmdb-render';
+import { CmdbType } from '../../../models/cmdb-type';
 
 @Component({
   selector: 'cmdb-object-bulk-change-preview',
   templateUrl: './object-bulk-change-preview.component.html',
-  styleUrls: ['./object-bulk-change-preview.component.scss']
+  styleUrls: ['./object-bulk-change-preview.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Default
 })
 export class ObjectBulkChangePreviewComponent {
 
-  @ViewChild('paginationBulkChanges', { static: false }) pagination: JwPaginationComponent;
+  /**
+   * Render form mode.
+   */
+  public readonly mode: CmdbMode = CmdbMode.Simple;
 
-  @Output() reloadData = new EventEmitter<any>();
+  /**
+   * Changed data.
+   */
+  @Input() public changeForm: FormGroup;
 
-  // Data Binding
-  @Input() renderForm: FormGroup;
-  @Input() selectedObjectIds: number[];
-  @Input() currentPage: number;
-  @Input() maxNumberOfSites: number[];
+  /**
+   * Object types of bulk change.
+   */
+  @Input() public type: CmdbType;
 
+  /**
+   * Activation state
+   * @private
+   */
   private objectState: boolean;
+
   @Input()
   public set activeState(value: boolean) {
     this.objectState = value;
@@ -50,61 +60,68 @@ export class ObjectBulkChangePreviewComponent {
     return this.objectState;
   }
 
-  private result: Array<RenderResult> = [];
-  @Input()
-  public set renderResult(value: Array<RenderResult>) {
-    this.result = value;
+  /**
+   * List of original results.
+   */
+  public originals: Array<RenderResult> = [];
+
+  /**
+   * List of results.
+   */
+  public results: Array<RenderResult> = [];
+
+  @Input('results')
+  public set Results(renderResults: Array<RenderResult>) {
+    this.results = renderResults;
+    this.originals = JSON.parse(JSON.stringify(renderResults));
   }
 
-  public get renderResult(): Array<RenderResult> {
-    return this.result;
+  /**
+   * List of paginated items.
+   */
+  public displayedItems: Array<RenderResult> = [];
+
+  /**
+   * Get a field from the type definition
+   * @param name
+   */
+  public getField(name: string): any {
+    const f = this.type.fields.find(field => field.name === name);
+    f.value = this.changeForm.get(name).value;
+    return f;
   }
 
-  // Render-Page-View information
-  public readonly mode: CmdbMode = CmdbMode.Simple;
-
-  constructor() {
+  /**
+   * Get the original displayed item.
+   * @param index
+   * @param name
+   */
+  public getOriginal(index: number, name: string): any {
+    return this.displayedItems[index].fields.find(field => field.name === name);
   }
 
-  public loadData(): void {
-    const params: CollectionParameters = {
-      filter: [{ $match:
-          {
-            $and: [
-              {type_id: this.renderResult[0].type_information.type_id},
-              { public_id: { $in: this.selectedObjectIds }}]
-          }
-      }] , limit: 10,
-      sort: 'public_id', order: 1, page: this.currentPage
-    };
-    this.reloadData.emit(params);
+  /**
+   * Set the displayed items on a new set.
+   * @param items
+   */
+  public onChangePage(items: Array<RenderResult>) {
+    this.displayedItems = items;
   }
 
-  public activeStateChanged(): boolean {
-    return this.renderForm.get('changedFields').value.get('activeObj-isChanged');
+  /**
+   * Get changed value
+   * @param name
+   */
+  public getChangedValue(name: string): any {
+    return this.changeForm.get(name).value;
   }
 
-  public mergeFields(fields: any) {
-    return fields.filter(field => this.renderForm.get('changedFields').value.get(field.name));
-  }
-
-  public changes(field: any) {
-    const temp = this.renderForm.get('changedFields').value.get(field.name);
-    temp.value = this.renderForm.get(field.name).value;
-    if (temp.hasOwnProperty('reference')) {
-      temp.reference = {
-        summaries: [],
-        type_label: '',
-        icon: ''
-      };
-    }
-    return temp;
-  }
-
-  public onChangePage(): void {
-    if (this.currentPage !== this.pagination.pager.currentPage) {
-      this.currentPage = this.pagination.pager.currentPage;
-      this.loadData();
-    }
+  /**
+   * Track when item was changed trigger.
+   * @param index
+   * @param item
+   */
+  public track(index, item) {
+    return item.value.value;
   }
 }
