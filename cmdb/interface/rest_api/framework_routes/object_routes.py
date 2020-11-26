@@ -90,7 +90,8 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
             api_response = GetMultiResponse(object_list, total=iteration_result.total, params=params,
                                             url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
         elif view == 'render':
-            rendered_list = RenderList(iteration_result.results, object_manager, ref_render=True).render_result_list(
+            rendered_list = RenderList(object_list=iteration_result.results, request_user=request_user,
+                                       object_manager=object_manager, ref_render=True).render_result_list(
                 raw=True)
             api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
                                             url=request.url, model=Model('RenderResult'), body=request.method == 'HEAD')
