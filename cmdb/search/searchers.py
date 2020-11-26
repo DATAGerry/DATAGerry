@@ -124,6 +124,45 @@ class SearchPipelineBuilder(PipelineBuilder):
 
         return regex_pipes
 
+    def build_resolve_reference_pipeline(self, user: UserModel = None, permission: AccessControlPermission = None,
+                                        *args, **kwargs):
+        """Build a resolve reference pipeline query"""
+        if kwargs.get('resolve', False):
+            self.add_pipe(
+                self.lookup_sub_(
+                    from_='framework.objects',
+                    let_={'ref_id': '$public_id'},
+                    pipeline_=[self.match_({'$expr': {'$in': ['$$ref_id', '$fields.value']}})],
+                    as_='refs'
+                ))
+
+            pipeline_ = [{'$match': {'$expr': {'$in': ['$$ref_id', '$fields.value']}}}]
+
+            # get only active objects
+            if kwargs.get('active', True):
+                pipeline_ = [*pipeline_, *[{'$match': {'active': {"$eq": True}}}]]
+
+            # permission builds
+            if user and permission:
+                pipeline_ = [*pipeline_, *(AccessControlQueryBuilder().build(group_id=user.group_id,
+                                                                             permission=permission))]
+
+            self.add_pipe(
+                self.facet_({
+                    'root': [{'$replaceRoot': {'newRoot': {'$mergeObjects': ['$$ROOT']}}}],
+                    'references': [
+                        {'$lookup': {'from': 'framework.objects', 'let': {'ref_id': '$public_id'},
+                                     'pipeline': pipeline_,
+                                     'as': 'refs'}},
+                        {'$unwind': '$refs'},
+                        {'$replaceRoot': {'newRoot': '$refs'}}
+                    ]
+                })
+            )
+            self.add_pipe(self.project_(specification={'complete': {'$concatArrays': ['$root', '$references']}}))
+            self.add_pipe(self.unwind_(path='$complete'))
+            self.add_pipe({'$replaceRoot': {'newRoot': '$complete'}})
+
     def build(self, params: List[SearchParam],
               obj_manager: CmdbObjectManager = None,
               user: UserModel = None, permission: AccessControlPermission = None,
@@ -203,44 +242,9 @@ class SearcherFramework(Search[CmdbObjectManager]):
 
         # define search output
         stages: dict = {}
-        active = kwargs.get('active', True)
 
-        if kwargs.get('resolve', False):
-            plb.add_pipe(
-                plb.lookup_sub_(
-                    from_='framework.objects',
-                    let_={'ref_id': '$public_id'},
-                    pipeline_=[plb.match_({'$expr': {
-                        '$in': [
-                            '$$ref_id',
-                            '$fields.value'
-                        ]
-                    }})],
-                    as_='refs'
-                ))
-            if active:
-                active_pipe = [
-                    {'$match': {'active': {"$eq": True}}},
-                    {'$match': {'$expr': {'$in': ['$$ref_id', '$fields.value']}}}
-                ]
-            else:
-                active_pipe = [{'$match': {'$expr': {'$in': ['$$ref_id', '$fields.value']}}}]
-
-            plb.add_pipe(
-                plb.facet_({
-                    'root': [{'$replaceRoot': {'newRoot': {'$mergeObjects': ['$$ROOT']}}}],
-                    'references': [
-                        {'$lookup': {'from': 'framework.objects', 'let': {'ref_id': '$public_id'},
-                                     'pipeline': active_pipe,
-                                     'as': 'refs'}},
-                        {'$unwind': '$refs'},
-                        {'$replaceRoot': {'newRoot': '$refs'}}
-                    ]
-                })
-            )
-            plb.add_pipe(plb.project_(specification={'complete': {'$concatArrays': ['$root', '$references']}}))
-            plb.add_pipe(plb.unwind_(path='$complete'))
-            plb.add_pipe({'$replaceRoot': {'newRoot': '$complete'}})
+        # build resolve reference pipeline
+        plb.build_resolve_reference_pipeline(user=request_user, permission=permission, **kwargs)
 
         stages.update({'metadata': [SearchPipelineBuilder.count_('total')]})
         stages.update({'data': [
