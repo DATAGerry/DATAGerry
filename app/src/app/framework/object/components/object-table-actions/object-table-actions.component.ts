@@ -22,7 +22,7 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectPreviewModalComponent } from '../../modals/object-preview-modal/object-preview-modal.component';
 import { ObjectDeleteModalComponent } from '../../modals/object-delete-modal/object-delete-modal.component';
 import { ReplaySubject } from 'rxjs';
-import {AccessControlList} from '../../../../acl/acl.types';
+import { AccessControlList } from '../../../../acl/acl.types';
 
 @Component({
   selector: 'cmdb-object-table-actions',

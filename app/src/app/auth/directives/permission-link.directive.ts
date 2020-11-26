@@ -19,9 +19,8 @@
 
 import { Directive, ElementRef, Input, TemplateRef, ViewContainerRef } from '@angular/core';
 import { PermissionService } from '../services/permission.service';
-import {CmdbType} from '../../framework/models/cmdb-type';
-import {AclPermissionService} from '../services/acl-permission.service';
-import {AccessControlList} from "../../acl/acl.types";
+import { AclPermissionService } from '../services/acl-permission.service';
+import { AccessControlList } from '../../acl/acl.types';
 
 @Directive({
   // tslint:disable-next-line:directive-selector
@@ -31,8 +30,8 @@ import {AccessControlList} from "../../acl/acl.types";
 export class PermissionLinkDirective {
 
   private rightNames: string[] = [];
-  private requirements: string[] | string = undefined;
-  private acl: AccessControlList = undefined;
+  private requirements: string[] | string ;
+  private acl: AccessControlList;
 
   constructor(private element: ElementRef,
               private templateRef: TemplateRef<any>,

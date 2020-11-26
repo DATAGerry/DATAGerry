@@ -22,7 +22,7 @@ import { ObjectService } from '../../services/object.service';
 import { CmdbMode } from '../../modes.enum';
 import { RenderResult } from '../../models/cmdb-render';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import {take, takeUntil} from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-object-view',
@@ -51,7 +51,7 @@ export class ObjectViewComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.objectViewSubject.asObservable().subscribe((result) => {
+    this.objectViewSubject.asObservable().pipe(takeUntil(this.unsubscribe)).subscribe((result) => {
       this.renderResult = result;
     });
   }
