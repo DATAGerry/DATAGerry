@@ -22,6 +22,8 @@ from typing import List, Union
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.security.acl.errors import AccessDeniedError
+from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.utils.wraps import timing
 
 try:
@@ -232,7 +234,10 @@ class CmdbRender:
         }
         if current_field['value']:
             try:
-                ref_object = self.object_manager.get_object(int(current_field['value']))
+                ref_object = self.object_manager.get_object(int(current_field['value']), user=self.render_user,
+                                                            permission=AccessControlPermission.READ)
+            except AccessDeniedError as err:
+                return err.message
             except ObjectManagerGetError:
                 return reference
 
