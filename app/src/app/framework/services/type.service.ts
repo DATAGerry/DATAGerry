@@ -249,13 +249,7 @@ export class TypeService<T = CmdbType> implements ApiService {
   public getTypeListByCategory(categoryID: number): Observable<Array<T>> {
     const location = 'acl.groups.includes.' + this.userService.getCurrentUser().group_id;
     const pipeline = [
-      { $match: { $or: [ { $or : [{acl: { $exists: false }}, {'acl.activated' : false}]},
-            { $and : [{'acl.activated' : true},
-                { $and : [{ [location] : { $exists: true }},
-                    { [location] : { $in : ['READ']}}
-                  ]},
-              ]}]
-        } ,
+      {
         $lookup: {
           from: 'framework.categories',
           let: { type_id: { $toInt: '$public_id' } },
@@ -263,7 +257,15 @@ export class TypeService<T = CmdbType> implements ApiService {
           as: 'category'
         }
       },
-      { $match: { category: { $gt: { $size: 0 } } } },
+      { $match: { $and: [{ category: { $gt: { $size: 0 } } },
+            { $or: [ { $or : [{acl: { $exists: false }}, {'acl.activated' : false}]},
+                { $and : [{'acl.activated' : true},
+                    { $and : [{ [location] : { $exists: true }},
+                        { [location] : { $in : ['READ']}}
+                      ]},
+                  ]}]
+            }
+          ] }},
       { $project: { category: 0 } }
     ];
     const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(pipeline), 0);
