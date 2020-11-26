@@ -35,6 +35,8 @@ export class RenderComponent {
   private renderResultBack: RenderResult = undefined;
 
   @Input() public renderForm: FormGroup;
+  @Input() public changeForm: FormGroup;
+
   @Input() public mode: CmdbMode;
   private field: any;
 

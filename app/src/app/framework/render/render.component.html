@@ -1,10 +1,12 @@
-<section id="renderModeWrapper" *ngIf="renderResult !== undefined; then renderResultTemplate else mergeBlockTemplate"></section>
+<section id="renderModeWrapper"
+         *ngIf="renderResult !== undefined; then renderResultTemplate else mergeBlockTemplate"></section>
 
 <ng-template #renderResultTemplate>
   <fieldset *ngFor="let section of renderResult?.sections">
     <legend>{{section?.label}}</legend>
-    <div id="object-renderInstance-render"  *ngFor="let field of section?.fields">
+    <div id="object-renderInstance-render" *ngFor="let field of section?.fields">
       <cmdb-render-element [mode]="mode" [parentFormGroup]="renderForm" [data]="getFieldByName(field)"
+                           [changeForm]="changeForm"
                            [value]="getValueByName(field)"></cmdb-render-element>
     </div>
   </fieldset>
@@ -14,6 +16,7 @@
     <legend>{{section?.label}}</legend>
     <div id="object-typeInstance-render" *ngFor="let field of section?.fields">
       <cmdb-render-element [mode]="mode" [parentFormGroup]="renderForm" [data]="getFieldByName(field)"
+                           [changeForm]="changeForm"
                            [value]="getValueByName(field)"></cmdb-render-element>
     </div>
   </fieldset>

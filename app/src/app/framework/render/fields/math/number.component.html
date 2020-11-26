@@ -14,7 +14,9 @@
             </span>
           </div>
         </ng-container>
-        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit">
+        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
+          <cmdb-object-bulk-input-appends *ngIf="mode == MODES.Bulk" [data]="data" [controller]="controller"
+                                          [changeForm]="changeForm"></cmdb-object-bulk-input-appends>
           <input type="number" name="{{data.name}}" placeholder="{{data?.placeholder}}" class="form-control"
                  [formControlName]="data.name" (change)="numberChange($event)"
                  [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),

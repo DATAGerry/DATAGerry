@@ -111,6 +111,11 @@ class Builder:
         """Where values match a specified regular expression"""
         return {field: {'$regex': regex, '$options': options}}
 
+    @classmethod
+    def expr_(cls, expression) -> dict:
+        """Allows the use of aggregation expressions within the query language."""
+        return {'$expr': expression}
+
     # Aggregations
     @classmethod
     def match_(cls, query: dict) -> dict:

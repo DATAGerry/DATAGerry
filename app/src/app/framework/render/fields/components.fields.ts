@@ -34,6 +34,7 @@ export class RenderField {
 
   @Input() public mode: CmdbMode = this.MODES.View;
   @Input() public parentFormGroup: FormGroup;
+  @Input() public changeForm: FormGroup;
 
   @Input('data')
   public set data(value: any) {
