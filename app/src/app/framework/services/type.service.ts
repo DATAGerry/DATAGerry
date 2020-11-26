@@ -32,7 +32,7 @@ import {
 } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import { ValidatorService } from '../../services/validator.service';
-import {UserService} from '../../management/services/user.service';
+import { UserService } from '../../management/services/user.service';
 
 
 export const checkTypeExistsValidator = (typeService: TypeService, time: number = 500) => {
@@ -64,6 +64,26 @@ export class TypeService<T = CmdbType> implements ApiService {
   public servicePrefix: string = 'types';
 
   constructor(private api: ApiCallService, private userService: UserService) {
+  }
+
+  /**
+   * returns acl read filter
+   *
+   * @param location of the acl array
+   * @private
+   */
+  private getAclReadFilter(location) {
+    return {
+      $or: [
+        { $or : [{acl: { $exists: false }}, {'acl.activated' : false}]},
+        { $and : [
+            {'acl.activated' : true},
+            {$and : [
+                { [location] : { $exists: true }},
+                { [location] : { $in : ['READ']}}
+              ]},
+          ]}]
+    };
   }
 
   /**
@@ -114,18 +134,7 @@ export class TypeService<T = CmdbType> implements ApiService {
     let params = new HttpParams();
     params = params.set('limit', '0');
     const location = 'acl.groups.includes.' + this.userService.getCurrentUser().group_id;
-    const filter = {
-      $or: [
-        { $or : [{acl: { $exists: false }}, {'acl.activated' : false}]},
-        { $and : [
-            {'acl.activated' : true},
-            {$and : [
-              { [location] : { $exists: true }},
-                { [location] : { $in : ['READ']}}
-                ]},
-          ]}]
-    };
-    params = params.set('filter', JSON.stringify(filter));
+    params = params.set('filter', JSON.stringify(this.getAclReadFilter(location)));
     options.params = params;
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
@@ -164,17 +173,7 @@ export class TypeService<T = CmdbType> implements ApiService {
     const filter = { $and : [{
       $or: [{ name: { $regex: regex, $options: 'ismx' } }, { label: { $regex: regex, $options: 'ismx' } }]
     },
-        {
-        $or: [
-          { $or : [{acl: { $exists: false }}, {'acl.activated' : false}]},
-          { $and : [
-              {'acl.activated' : true},
-              {$and : [
-                  { [location] : { $exists: true }},
-                  { [location] : { $in : ['READ']}}
-                ]},
-            ]}]
-      }
+        this.getAclReadFilter(location)
       ]};
     const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(filter), 0);
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
@@ -224,13 +223,7 @@ export class TypeService<T = CmdbType> implements ApiService {
   public getUncategorizedTypes(): Observable<APIGetMultiResponse<T>> {
     const location = 'acl.groups.includes.' + this.userService.getCurrentUser().group_id;
     const pipeline = [
-      { $match: { $or: [ { $or : [{acl: { $exists: false }}, {'acl.activated' : false}]},
-            { $and : [{'acl.activated' : true},
-                    { $and : [{ [location] : { $exists: true }},
-                    { [location] : { $in : ['READ']}}
-                  ]},
-              ]}]
-        } },
+      { $match: this.getAclReadFilter(location) },
       { $lookup: { from: 'framework.categories', localField: 'public_id', foreignField: 'types', as: 'categories' } },
       { $match: { categories: { $size: 0 } } },
       { $project: { categories: 0 } }
@@ -259,13 +252,7 @@ export class TypeService<T = CmdbType> implements ApiService {
         }
       },
       { $match: { $and: [{ category: { $gt: { $size: 0 } } },
-            { $or: [ { $or : [{acl: { $exists: false }}, {'acl.activated' : false}]},
-                { $and : [{'acl.activated' : true},
-                    { $and : [{ [location] : { $exists: true }},
-                        { [location] : { $in : ['READ']}}
-                      ]},
-                  ]}]
-            }
+            this.getAclReadFilter(location)
           ] }},
       { $project: { category: 0 } }
     ];
