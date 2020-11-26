@@ -24,10 +24,10 @@ from cmdb.interface.route_utils import make_response, insert_request_user, login
 from cmdb.search import Search
 from cmdb.search.params import SearchParam
 from cmdb.search.query import Pipeline
-from cmdb.search.query.pipe_builder import PipelineBuilder
-from cmdb.search.searchers import SearcherFramework
+from cmdb.search.searchers import SearcherFramework, SearchPipelineBuilder, QuickSearchPipelineBuilder
 from cmdb.user_management.models.user import UserModel
 from cmdb.interface.blueprint import APIBlueprint
+from cmdb.security.acl.permission import AccessControlPermission
 
 try:
     from cmdb.utils.error import CMDBError
@@ -44,36 +44,13 @@ search_blueprint = APIBlueprint('search_rest', __name__, url_prefix='/search')
 @search_blueprint.route('/quick/count', methods=['GET'])
 @search_blueprint.route('/quick/count/', methods=['GET'])
 @search_blueprint.protect(auth=True)
-def quick_search_result_counter():
-    regex = request.args.get('searchValue', Search.DEFAULT_REGEX, str)
-
-    plb = PipelineBuilder()
-    regex = plb.regex_('fields.value', f'{regex}', 'ims')
-    pipe_and = plb.and_([regex, {'active': {"$eq": True}} if _fetch_only_active_objs() else {}])
-    pipe_match = plb.match_(pipe_and)
-    plb.add_pipe(pipe_match)
-    plb.add_pipe({'$group': {"_id": {'active': '$active'},  'count': {'$sum': 1}}})
-    plb.add_pipe({'$group': {'_id': 0,
-                             'levels': {'$push': {'_id': '$_id.active', 'count': '$count'}},
-                             'total': {'$sum': '$count'}}
-                  })
-    plb.add_pipe({'$unwind': '$levels'})
-    plb.add_pipe({'$sort': {"levels._id": -1}})
-    plb.add_pipe({'$group': {'_id': 0, 'levels': {'$push': {'count': "$levels.count"}}, "total": {'$avg': '$total'}}})
-    plb.add_pipe({
-        '$project': {
-            'total': "$total",
-            'active': {'$arrayElemAt': ["$levels", 0]},
-            'inactive': {'$arrayElemAt': ["$levels", 1]}
-        }})
-    plb.add_pipe({
-        '$project': {
-            '_id': 0,
-            'active': {'$cond': [{'$ifNull': ["$active", False]}, '$active.count', 0]},
-            'inactive': {'$cond': [{'$ifNull': ['$inactive', False]}, '$inactive.count', 0]},
-            'total': '$total'
-        }})
-    pipeline = plb.pipeline
+@insert_request_user
+def quick_search_result_counter(request_user: UserModel):
+    search_term = request.args.get('searchValue', Search.DEFAULT_REGEX, str)
+    builder = QuickSearchPipelineBuilder()
+    only_active = _fetch_only_active_objs()
+    pipeline: Pipeline = builder.build(search_term=search_term, user=request_user, permission=AccessControlPermission.READ,
+                                       active_flag=only_active)
     try:
         result = list(object_manager.aggregate(collection='framework.objects', pipeline=pipeline))
     except Exception as err:
@@ -108,10 +85,12 @@ def search_framework(request_user: UserModel):
         LOGGER.error(f'[Search Framework]: {err}')
         return abort(400, err)
     try:
-        builder = PipelineBuilder()
+        builder = SearchPipelineBuilder()
         search_parameters = SearchParam.from_request(search_params)
 
-        query: Pipeline = builder.build(search_parameters, object_manager, only_active)
+        query: Pipeline = builder.build(search_parameters, object_manager,
+                                        user=request_user,
+                                        permission=AccessControlPermission.READ, active_flag=only_active)
 
         searcher = SearcherFramework(manager=object_manager)
         result = searcher.aggregate(pipeline=query, request_user=request_user, limit=limit, skip=skip,
