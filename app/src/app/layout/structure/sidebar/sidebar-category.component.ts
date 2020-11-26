@@ -19,6 +19,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 import { CmdbCategoryNode } from '../../../framework/models/cmdb-category';
 import {UserService} from '../../../management/services/user.service';
+import {AccessControlPermission} from '../../../acl/acl.types';
 
 @Component({
   selector: 'cmdb-sidebar-category',
@@ -33,12 +34,9 @@ export class SidebarCategoryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log(this.userService.getCurrentUser().group_id);
-    console.log(this.categoryNode.types);
+    const group_id = this.userService.getCurrentUser().group_id;
     this.categoryNode.types = this.categoryNode.types.filter(type => !type.acl.activated ||
-      (type.acl.groups.includes[this.userService.getCurrentUser().group_id] &&
-        'READ' in (type.acl.groups.includes[this.userService.getCurrentUser().group_id] as any[])));
-    console.log(this.categoryNode.types);
+      ( type.acl.groups.includes[group_id] && 'READ' in (type.acl.groups.includes[group_id] as any[])));
   }
 
 
