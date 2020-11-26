@@ -16,6 +16,8 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { AccessControlList } from '../../acl/acl.types';
+
 export class RenderResult {
   // tslint:disable:variable-name
   public current_render_time: {
@@ -46,6 +48,7 @@ export class RenderResult {
     active: boolean;
     version: string;
     icon: string;
+    acl: AccessControlList;
   };
   public fields: any[];
   public sections: any[];
