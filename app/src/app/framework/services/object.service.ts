@@ -183,14 +183,12 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     );
   }
 
-  public countObjects() {
-    httpObjectObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    return this.api.callGet<number>(`${ this.servicePrefix }/count/`, httpObjectObserveOptions).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
+  public countObjects(): Observable<number> {
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callHead<T[]>(this.newServicePrefix + '/', options).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return +apiResponse.headers.get('X-Total-Count');
       })
     );
   }

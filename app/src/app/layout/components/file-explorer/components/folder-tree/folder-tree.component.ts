@@ -86,7 +86,7 @@ export class FolderTreeComponent implements OnInit, OnChanges {
         }
       }
     }
-    return [{name: '', public_id: null, hasSubFolders: true, children: tree, metadata: { parent: null } }];
+    return [{filename: '', public_id: null, hasSubFolders: true, children: tree, metadata: { parent: null } }];
   }
 
   ngOnInit(): void {
