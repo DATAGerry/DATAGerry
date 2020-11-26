@@ -161,10 +161,10 @@ export class TypeService<T = CmdbType> implements ApiService {
   public getTypesByNameOrLabel(name: string): Observable<Array<T>> {
     const regex = ValidatorService.validateRegex(name).trim();
     const location = 'acl.groups.includes.' + this.userService.getCurrentUser().group_id;
-    const filter = [{
+    const filter = { $and : [{
       $or: [{ name: { $regex: regex, $options: 'ismx' } }, { label: { $regex: regex, $options: 'ismx' } }]
     },
-      {
+        {
         $or: [
           { $or : [{acl: { $exists: false }}, {'acl.activated' : false}]},
           { $and : [
@@ -174,7 +174,8 @@ export class TypeService<T = CmdbType> implements ApiService {
                   { [location] : { $in : ['READ']}}
                 ]},
             ]}]
-      }];
+      }
+      ]};
     const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(filter), 0);
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
