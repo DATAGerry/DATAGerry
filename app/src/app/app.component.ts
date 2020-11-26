@@ -16,10 +16,11 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { AuthService } from './auth/services/auth.service';
-import { ActivatedRoute, ActivationStart, Event, NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { NavigationComponent } from './layout/structure/navigation/navigation.component';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Event, NavigationEnd, Router } from '@angular/router';
+import { ApplicationLoadingIndicatorService } from './services/application-loading-indicator.service';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 declare type AppView = 'full' | 'embedded';
 
@@ -29,13 +30,17 @@ declare type AppView = 'full' | 'embedded';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
 
+  private applicationSubscriber: ReplaySubject<void> = new ReplaySubject<void>();
   public readonly defaultView: AppView = 'full';
   public view: AppView;
   public initDone: boolean = false;
 
-  constructor(private router: Router, private route: ActivatedRoute) {
+  public loading: boolean = false;
+
+  constructor(private router: Router, private route: ActivatedRoute,
+              private loadingIndicator: ApplicationLoadingIndicatorService) {
     this.view = this.defaultView;
   }
 
@@ -52,6 +57,15 @@ export class AppComponent implements OnInit {
         });
       }
     });
+    this.loadingIndicator.isNavigationPending.pipe(takeUntil(this.applicationSubscriber))
+      .subscribe((loading: boolean) => {
+      this.loading = loading;
+    });
+  }
+
+  public ngOnDestroy(): void {
+    this.applicationSubscriber.next();
+    this.applicationSubscriber.complete();
   }
 
 }

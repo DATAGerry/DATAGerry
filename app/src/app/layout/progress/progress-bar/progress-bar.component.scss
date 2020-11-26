@@ -1,0 +1,13 @@
+@import '~src/scss/variables';
+
+:host {
+  position: fixed;
+  pointer-events: none;
+  z-index: 4000;
+
+  .progress-loading-bar {
+    height: 5px;
+    background-color: theme-color('primary');
+  }
+
+}

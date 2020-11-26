@@ -1,0 +1,118 @@
+#loading-ear_to {
+  animation: loading-ear_to__to 2000ms linear infinite normal forwards
+}
+
+@keyframes loading-ear_to__to {
+  0% {
+    transform: translate(-183.975000px, 16.790001px)
+  }
+  25% {
+    transform: translate(-183.975000px, 16.790001px)
+  }
+  50% {
+    transform: translate(-183.975000px, 20.714463px)
+  }
+  69.500000% {
+    transform: translate(-183.975000px, 15.750001px)
+  }
+  75% {
+    transform: translate(-183.975000px, 16.790001px)
+  }
+  100% {
+    transform: translate(-183.975000px, 16.790001px)
+  }
+}
+
+#loading-tail_tr {
+  animation: loading-tail_tr__tr 2000ms linear infinite normal forwards
+}
+
+@keyframes loading-tail_tr__tr {
+  0% {
+    transform: translate(55.755000px, 88.470001px) rotate(0deg)
+  }
+  25% {
+    transform: translate(55.755000px, 88.470001px) rotate(-21.420860deg)
+  }
+  30% {
+    transform: translate(55.755000px, 88.470001px) rotate(-16.722132deg)
+  }
+  35% {
+    transform: translate(55.755000px, 88.470001px) rotate(-19.992803deg)
+  }
+  75% {
+    transform: translate(55.755000px, 88.470001px) rotate(0deg)
+  }
+  100% {
+    transform: translate(55.755000px, 88.470001px) rotate(0deg)
+  }
+}
+
+#loading-tip_to {
+  animation: loading-tip_to__to 2000ms linear infinite normal forwards
+}
+
+@keyframes loading-tip_to__to {
+  0% {
+    transform: translate(42.290000px, 48.065000px)
+  }
+  25% {
+    transform: translate(28.463581px, 55.773689px)
+  }
+  30% {
+    transform: translate(31.233666px, 53.647960px)
+  }
+  35% {
+    transform: translate(29.385343px, 55.259776px)
+  }
+  75% {
+    transform: translate(42.290000px, 48.065000px)
+  }
+  100% {
+    transform: translate(42.290000px, 48.065000px)
+  }
+}
+
+#loading-tip_tr {
+  animation: loading-tip_tr__tr 2000ms linear infinite normal forwards
+}
+
+@keyframes loading-tip_tr__tr {
+  0% {
+    transform: rotate(0deg)
+  }
+  25% {
+    transform: rotate(-21.420860deg)
+  }
+  30% {
+    transform: rotate(-16.722132deg)
+  }
+  35% {
+    transform: rotate(-19.992803deg)
+  }
+  75% {
+    transform: rotate(0deg)
+  }
+  100% {
+    transform: rotate(0deg)
+  }
+}
+
+#loading-glow_ts {
+  animation: loading-glow_ts__ts 2000ms linear infinite normal forwards
+}
+
+@keyframes loading-glow_ts__ts {
+  0% {
+    transform: translate(109.635015px, 86.469997px) scale(1, 1)
+  }
+  25% {
+    transform: translate(109.635015px, 86.469997px) scale(1.800000, 1.800000)
+  }
+  50% {
+    transform: translate(109.635015px, 86.469997px) scale(1, 1)
+  }
+  100% {
+    transform: translate(109.635015px, 86.469997px) scale(1, 1)
+  }
+}

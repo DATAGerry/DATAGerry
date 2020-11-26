@@ -31,10 +31,10 @@ import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MainModule } from './main/main.module';
 import { AuthModule } from './auth/auth.module';
-import { NgxIndexedDBModule } from 'ngx-indexed-db';
-import { userSettingsDBConfig } from './management/user-settings/user-settings.module';
 import { APICachingInterceptor } from './services/api-cache.interceptor';
 import { RequestCacheService } from './services/request-cache.service';
+import { ProgressModule } from './layout/progress/progress.module';
+import { ApplicationLoadingIndicatorService } from './services/application-loading-indicator.service';
 
 @NgModule({
   declarations: [
@@ -48,11 +48,13 @@ import { RequestCacheService } from './services/request-cache.service';
     AuthModule,
     LayoutModule,
     ToastModule,
-    AppRoutingModule
+    AppRoutingModule,
+    ProgressModule
   ],
   providers: [
     PreviousRouteService,
     DatePipe,
+    ApplicationLoadingIndicatorService,
     RequestCacheService,
     { provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true },
