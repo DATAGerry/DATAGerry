@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,90 +13,101 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, ViewChild} from '@angular/core';
-import { CmdbMode } from '../../modes.enum';
-import { CmdbType } from '../../models/cmdb-type';
-import { ObjectBulkChangeEditorComponent } from './object-bulk-change-editor/object-bulk-change-editor.component';
-import { ObjectBulkChangePreviewComponent } from './object-bulk-change-preview/object-bulk-change-preview.component';
-import { CmdbObject } from '../../models/cmdb-object';
+import { Component, OnDestroy } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { ObjectService} from '../../services/object.service';
+import { ObjectService } from '../../services/object.service';
 import { TypeService } from '../../services/type.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { RenderResult } from '../../models/cmdb-render';
+import { ReplaySubject } from 'rxjs';
+import { CmdbType } from '../../models/cmdb-type';
 import { httpObserveOptions } from '../../../services/api-call.service';
+import { CmdbObject } from '../../models/cmdb-object';
+import { takeUntil } from 'rxjs/operators';
+import { ToastService } from '../../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-object-bulk-change',
   templateUrl: './object-bulk-change.component.html',
   styleUrls: ['./object-bulk-change.component.scss']
 })
-export class ObjectBulkChangeComponent {
+export class ObjectBulkChangeComponent implements OnDestroy {
 
-  @ViewChild(ObjectBulkChangeEditorComponent, {static: true})
-  public basicStep: ObjectBulkChangeEditorComponent;
+  /**
+   * Component un subscriber.
+   * @private
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  @ViewChild(ObjectBulkChangePreviewComponent, {static: true})
-  public previewStep: ObjectBulkChangePreviewComponent;
+  /**
+   * Type of objects to bulk change.
+   */
+  public type: CmdbType;
 
-  public typeInstance: CmdbType;
-  public mode: CmdbMode = CmdbMode.Bulk;
-  public objectInstance: CmdbObject;
+  /**
+   * Form for bulk change editor.
+   */
+  public changeForm: FormGroup = new FormGroup({});
+  public renderForm: FormGroup = new FormGroup({});
+
+  /**
+   * Active status changed.
+   */
   public activeState: boolean = true;
-  public renderForm: FormGroup;
-  public fieldsGroups: FormGroup;
-  private objectIDs: string[];
+
+  /**
+   * List of to change selected items.
+   */
+  public renderResults: Array<RenderResult> = [];
 
   constructor(private objectService: ObjectService, private typeService: TypeService,
-              private activeRoute: ActivatedRoute, private route: Router) {
-    this.activeRoute.params.subscribe((params) => {
-      if (params.typeID !== undefined) {
-        this.typeService.getType(params.typeID).subscribe((typeInstance: CmdbType) => {
-          this.typeInstance = typeInstance;
-          this.objectIDs = params.ids.split(',');
-        });
-      }
-      this.fieldsGroups = new FormGroup({
-      });
-      this.renderForm = new FormGroup({
+              private activeRoute: ActivatedRoute, private router: Router, private toastService: ToastService) {
+    if (this.router.getCurrentNavigation().extras.state) {
+      this.type = this.router.getCurrentNavigation().extras.state.type;
+      this.renderResults = this.router.getCurrentNavigation().extras.state.objects;
+    }
+  }
+
+  /**
+   * Was the form touched.
+   */
+  public get hasChanges(): boolean {
+    return this.renderForm.dirty;
+  }
+
+  /**
+   * Save a references object to the database.
+   */
+  public saveObject() {
+    const changes = this.changeForm.getRawValue();
+    const httpOptions = Object.assign({}, httpObserveOptions);
+    httpOptions.params = { objectIDs: this.renderResults.map(m => m.object_information.object_id) };
+    console.log(httpOptions.params);
+    const patchValue = [];
+    const newObjectInstance = new CmdbObject();
+    newObjectInstance.active = this.activeState;
+    newObjectInstance.type_id = this.type.public_id;
+    newObjectInstance.fields = [];
+    Object.keys(changes).forEach((key: string) => {
+      patchValue.push({
+        name: key,
+        value: changes[key]
       });
     });
+    newObjectInstance.fields = patchValue;
+    this.objectService.putObject(0, newObjectInstance, httpOptions).pipe(takeUntil(this.subscriber))
+      .subscribe((res: boolean) => {
+        this.toastService.success(`Bulk updated objects of type ${this.type.label}`);
+        this.router.navigate(['framework', 'object', 'type', this.type.public_id]);
+      });
   }
 
-  public toggleChange() {
-    this.activeState = this.activeState !== true;
-    this.renderForm.get('changedFields').value.set('activeObj-isChanged', this.activeState);
-  }
-
-  public saveObject() {
-    if (this.renderForm.get('changedFields').value.size > 0 ) {
-      const httpOptions = Object.assign({}, httpObserveOptions);
-      httpOptions.params = {objectIDs: this.objectIDs};
-
-      const patchValue = [];
-      const newObjectInstance = new CmdbObject();
-      newObjectInstance.active = this.activeState;
-      newObjectInstance.type_id = this.typeInstance.public_id;
-      newObjectInstance.fields = [];
-      this.renderForm.get('changedFields').value.delete('activeObj-isChanged');
-      Object.keys(this.renderForm.value).forEach((key: string) => {
-        if (key.match('-isChanged') == null
-        && this.renderForm.get('changedFields').value.has(key)) {
-          patchValue.push({
-            name: key,
-            value: this.renderForm.value[key] === undefined ? '' : this.renderForm.value[key]
-          });
-        }
-      });
-      newObjectInstance.fields = patchValue;
-      this.objectService.putObject(0, newObjectInstance, httpOptions).subscribe((res: boolean) => {
-        if (res) {
-          this.route.navigate(['/framework/object/type', this.typeInstance.public_id]);
-        }
-      });
-    }
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
 }

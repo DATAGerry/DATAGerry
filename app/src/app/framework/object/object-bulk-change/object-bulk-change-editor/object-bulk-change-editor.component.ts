@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,10 +17,10 @@
 */
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbMode } from '../../../modes.enum';
-import { CmdbObject } from '../../../models/cmdb-object';
 import { FormGroup } from '@angular/forms';
+import { RenderResult } from '../../../models/cmdb-render';
+import { CmdbType } from '../../../models/cmdb-type';
 
 @Component({
   selector: 'cmdb-object-bulk-change-editor',
@@ -29,16 +29,38 @@ import { FormGroup } from '@angular/forms';
 })
 export class ObjectBulkChangeEditorComponent {
 
-  @Input() typeInstance: CmdbType;
-  @Input() mode: CmdbMode;
-  @Input() objectInstance: CmdbObject;
-  @Input() renderForm: FormGroup;
-  @Input() fieldsGroups: FormGroup;
-  @Input() activeState: boolean;
+  /**
+   * Form render mode.
+   */
+  public readonly mode: CmdbMode = CmdbMode.Bulk;
 
-  @Output() activeChange = new EventEmitter();
+  /**
+   * Form control
+   */
+  @Input() public changeForm: FormGroup = new FormGroup({});
+  @Input() public renderForm: FormGroup = new FormGroup({});
 
-  public toggleChange() {
-    this.activeChange.emit();
+  /**
+   * Bulk deactivation.
+   */
+  public activeState: boolean = true;
+  @Output() activeChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+
+  /**
+   * Type instance of the bulk change element.
+   */
+  @Input() public type: CmdbType;
+
+  /**
+   * Get the field by its name from the type.
+   * @param name
+   */
+  public getFieldByName(name: string) {
+    return this.type.fields.find(field => field.name === name);
+  }
+
+  public onActiveChange(event: Event): void {
+    this.activeState = (event.target as HTMLInputElement).checked;
+    this.activeChange.emit(this.activeState);
   }
 }

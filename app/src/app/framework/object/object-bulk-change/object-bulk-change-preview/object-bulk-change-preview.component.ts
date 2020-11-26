@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,92 +13,115 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { ObjectService } from '../../../services/object.service';
-import { DataTableFilter, DataTablesResult } from '../../../models/cmdb-datatable';
-import { ActivatedRoute } from '@angular/router';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { JwPaginationComponent } from 'jw-angular-pagination';
 import { CmdbMode } from '../../../modes.enum';
+import { RenderResult } from '../../../models/cmdb-render';
+import { CmdbType } from '../../../models/cmdb-type';
 
 @Component({
   selector: 'cmdb-object-bulk-change-preview',
   templateUrl: './object-bulk-change-preview.component.html',
-  styleUrls: ['./object-bulk-change-preview.component.scss']
+  styleUrls: ['./object-bulk-change-preview.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Default
 })
-export class ObjectBulkChangePreviewComponent implements OnInit {
+export class ObjectBulkChangePreviewComponent {
 
-  @ViewChild('paginationBulkChanges', { static: false }) pagination: JwPaginationComponent;
-  @Input()  renderForm: FormGroup;
+  /**
+   * Render form mode.
+   */
+  public readonly mode: CmdbMode = CmdbMode.Simple;
 
+  /**
+   * Changed data.
+   */
+  @Input() public changeForm: FormGroup;
+
+  /**
+   * Object types of bulk change.
+   */
+  @Input() public type: CmdbType;
+
+  /**
+   * Activation state
+   * @private
+   */
   private objectState: boolean;
+
   @Input()
-  set activeState(value: boolean) {
+  public set activeState(value: boolean) {
     this.objectState = value;
   }
 
-  get activeState(): boolean {
+  public get activeState(): boolean {
     return this.objectState;
   }
 
-  private typeID: number;
-  public SIMPLEMODE: CmdbMode = CmdbMode.Simple;
-  public renderResult: DataTablesResult;
-  public readonly limit: number = 10;
-  public currentPage: number = 1;
-  public maxNumberOfSites: number[];
-  public dtFilter: DataTableFilter = new DataTableFilter();
+  /**
+   * List of original results.
+   */
+  public originals: Array<RenderResult> = [];
 
-  constructor(private objectService: ObjectService, private activeRoute: ActivatedRoute) {
-    this.activeRoute.params.subscribe((params) => {
-      if (params.ids !== undefined) {
-        this.dtFilter.start = 0;
-        this.dtFilter.length = 10;
-        this.dtFilter.search = '';
-        this.dtFilter.dtRender = false;
-        this.dtFilter.idList = params.ids.split(',');
-      }
-      if (params.typeID !== undefined) {
-        this.typeID = params.typeID;
-      }
-    });
+  /**
+   * List of results.
+   */
+  public results: Array<RenderResult> = [];
+
+  @Input('results')
+  public set Results(renderResults: Array<RenderResult>) {
+    this.results = renderResults;
+    this.originals = JSON.parse(JSON.stringify(renderResults));
   }
 
-  ngOnInit(): void {
-    this.loadData();
+  /**
+   * List of paginated items.
+   */
+  public displayedItems: Array<RenderResult> = [];
+
+  /**
+   * Get a field from the type definition
+   * @param name
+   */
+  public getField(name: string): any {
+    const f = this.type.fields.find(field => field.name === name);
+    f.value = this.changeForm.get(name).value;
+    return f;
   }
 
-  private loadData() {
-    this.objectService.getObjectsByFilter(this.typeID, this.dtFilter).subscribe(value => {
-      this.renderResult = value;
-      if (this.dtFilter.start === 0) {
-        this.maxNumberOfSites = Array.from({ length: (this.renderResult.recordsTotal) }, (v, k) => k + 1);
-      }
-    });
+  /**
+   * Get the original displayed item.
+   * @param index
+   * @param name
+   */
+  public getOriginal(index: number, name: string): any {
+    return this.displayedItems[index].fields.find(field => field.name === name);
   }
 
-  public mergeFields(fields: any) {
-    return fields.filter(field => this.renderForm.get('changedFields').value.get(field.name));
+  /**
+   * Set the displayed items on a new set.
+   * @param items
+   */
+  public onChangePage(items: Array<RenderResult>) {
+    this.displayedItems = items;
   }
 
-  public activeStateChanged(): boolean {
-    return this.renderForm.get('changedFields').value.get('activeObj-isChanged');
+  /**
+   * Get changed value
+   * @param name
+   */
+  public getChangedValue(name: string): any {
+    return this.changeForm.get(name).value;
   }
 
-  public changes(field: any) {
-    const temp = this.renderForm.get('changedFields').value.get(field.name);
-    temp.value = this.renderForm.get(temp.name).value;
-    return temp;
-  }
-
-  public onChangePage(event): void {
-    if (this.currentPage !== this.pagination.pager.currentPage) {
-      this.currentPage = this.pagination.pager.currentPage;
-      this.dtFilter.start = (this.currentPage - 1) * this.limit;
-      this.loadData();
-    }
+  /**
+   * Track when item was changed trigger.
+   * @param index
+   * @param item
+   */
+  public track(index, item) {
+    return item.value.value;
   }
 }

@@ -74,7 +74,10 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
     manager = ObjectManager(database_manager=current_app.database_manager)
     view = params.optional.get('view', 'native')
     if _fetch_only_active_objs():
-        params.filter.append({'$match': {'active': {"$eq": True}}})
+        if isinstance(params.filter, dict):
+            params.filter.update({'$match': {'active': {"$eq": True}}})
+        elif isinstance(params.filter, list):
+            params.filter.append({'$match': {'active': {"$eq": True}}})
 
     try:
         iteration_result: IterationResult[CmdbObject] = manager.iterate(
