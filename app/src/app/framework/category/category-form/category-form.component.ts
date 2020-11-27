@@ -24,7 +24,7 @@ import { CmdbType } from '../../models/cmdb-type';
 import { CategoryService, checkCategoryExistsValidator } from '../../services/category.service';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import { TypeService } from '../../services/type.service';
-import {UserService} from "../../../management/services/user.service";
+import { AccessControlPermission } from '../../../acl/acl.types';
 
 @Component({
   selector: 'cmdb-category-form',
@@ -94,7 +94,7 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Category form constructor - Inits the category form
    */
-  public constructor(private categoryService: CategoryService, private userService: UserService) {
+  public constructor(private categoryService: CategoryService, private typeService: TypeService) {
     this.categoryForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl(''),
@@ -141,9 +141,7 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
       for (const type of this.$category.types) {
         buffer.push(this.findAssignedTypeByIndex(type));
       }
-      this.assignedTypes = buffer.filter(type => !type.acl.activated ||
-        ( type.acl.groups.includes[this.userService.getCurrentUser().group_id] && 'READ' in
-          (type.acl.groups.includes[this.userService.getCurrentUser().group_id] as any[])));
+      this.assignedTypes = this.typeService.filterTypesByAcl(buffer, AccessControlPermission.READ);
     }
   }
 

@@ -33,6 +33,7 @@ import {
 import { CollectionParameters } from '../../services/models/api-parameter';
 import { ValidatorService } from '../../services/validator.service';
 import { UserService } from '../../management/services/user.service';
+import { AccessControlPermission } from '../../acl/acl.types';
 
 
 export const checkTypeExistsValidator = (typeService: TypeService, time: number = 500) => {
@@ -67,9 +68,8 @@ export class TypeService<T = CmdbType> implements ApiService {
   }
 
   /**
-   * returns acl read filter
+   * Returns acl read filter
    *
-   * @param location of the acl array
    * @private
    */
   private getAclReadFilter() {
@@ -85,6 +85,19 @@ export class TypeService<T = CmdbType> implements ApiService {
               ]},
           ]}]
     };
+  }
+
+  /**
+   * Filters all types which don't include the READ right
+   *
+   * @param types @link{CmdbType[]}
+   * @param right
+   * @return @link{CmdbType[]}
+   */
+  public filterTypesByAcl(types: CmdbType[], right: AccessControlPermission): CmdbType[] {
+    return types.filter(type => !type.acl.activated || !type.acl ||
+      ( type.acl.groups.includes[this.userService.getCurrentUser().group_id] &&
+        type.acl.groups.includes[this.userService.getCurrentUser().group_id].includes(right)));
   }
 
   /**

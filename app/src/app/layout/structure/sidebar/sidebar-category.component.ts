@@ -16,10 +16,10 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnInit} from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CmdbCategoryNode } from '../../../framework/models/cmdb-category';
-import {UserService} from '../../../management/services/user.service';
-import {AccessControlPermission} from '../../../acl/acl.types';
+import { AccessControlPermission } from '../../../acl/acl.types';
+import { TypeService } from '../../../framework/services/type.service';
 
 @Component({
   selector: 'cmdb-sidebar-category',
@@ -30,14 +30,10 @@ export class SidebarCategoryComponent implements OnInit {
 
   @Input() categoryNode: CmdbCategoryNode;
 
-  constructor(private userService: UserService) {
+  constructor(private typeService: TypeService) {
   }
 
   ngOnInit(): void {
-    const group_id = this.userService.getCurrentUser().group_id;
-    this.categoryNode.types = this.categoryNode.types.filter(type => !type.acl.activated ||
-      ( type.acl.groups.includes[group_id] && 'READ' in (type.acl.groups.includes[group_id] as any[])));
+    this.categoryNode.types = this.typeService.filterTypesByAcl(this.categoryNode.types, AccessControlPermission.READ);
   }
-
-
 }
