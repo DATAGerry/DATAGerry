@@ -72,7 +72,8 @@ export class TypeService<T = CmdbType> implements ApiService {
    * @param location of the acl array
    * @private
    */
-  private getAclReadFilter(location) {
+  private getAclReadFilter() {
+    const location = 'acl.groups.includes.' + this.userService.getCurrentUser().group_id;
     return {
       $or: [
         { $or : [{acl: { $exists: false }}, {'acl.activated' : false}]},
@@ -133,8 +134,7 @@ export class TypeService<T = CmdbType> implements ApiService {
     const options = httpObserveOptions;
     let params = new HttpParams();
     params = params.set('limit', '0');
-    const location = 'acl.groups.includes.' + this.userService.getCurrentUser().group_id;
-    params = params.set('filter', JSON.stringify(this.getAclReadFilter(location)));
+    params = params.set('filter', JSON.stringify(this.getAclReadFilter()));
     options.params = params;
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
@@ -169,11 +169,10 @@ export class TypeService<T = CmdbType> implements ApiService {
    */
   public getTypesByNameOrLabel(name: string): Observable<Array<T>> {
     const regex = ValidatorService.validateRegex(name).trim();
-    const location = 'acl.groups.includes.' + this.userService.getCurrentUser().group_id;
     const filter = { $and : [{
       $or: [{ name: { $regex: regex, $options: 'ismx' } }, { label: { $regex: regex, $options: 'ismx' } }]
     },
-        this.getAclReadFilter(location)
+        this.getAclReadFilter()
       ]};
     const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(filter), 0);
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
@@ -221,9 +220,8 @@ export class TypeService<T = CmdbType> implements ApiService {
    * Get all uncategorized types
    */
   public getUncategorizedTypes(): Observable<APIGetMultiResponse<T>> {
-    const location = 'acl.groups.includes.' + this.userService.getCurrentUser().group_id;
     const pipeline = [
-      { $match: this.getAclReadFilter(location) },
+      { $match: this.getAclReadFilter() },
       { $lookup: { from: 'framework.categories', localField: 'public_id', foreignField: 'types', as: 'categories' } },
       { $match: { categories: { $size: 0 } } },
       { $project: { categories: 0 } }
@@ -241,7 +239,6 @@ export class TypeService<T = CmdbType> implements ApiService {
    * @param categoryID PublicID of the category
    */
   public getTypeListByCategory(categoryID: number): Observable<Array<T>> {
-    const location = 'acl.groups.includes.' + this.userService.getCurrentUser().group_id;
     const pipeline = [
       {
         $lookup: {
@@ -252,7 +249,7 @@ export class TypeService<T = CmdbType> implements ApiService {
         }
       },
       { $match: { $and: [{ category: { $gt: { $size: 0 } } },
-            this.getAclReadFilter(location)
+            this.getAclReadFilter()
           ] }},
       { $project: { category: 0 } }
     ];
