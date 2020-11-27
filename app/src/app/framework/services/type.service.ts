@@ -88,19 +88,6 @@ export class TypeService<T = CmdbType> implements ApiService {
   }
 
   /**
-   * Filters all types which don't include the READ right
-   *
-   * @param types @link{CmdbType[]}
-   * @param right
-   * @return @link{CmdbType[]}
-   */
-  public filterTypesByAcl(types: CmdbType[], right: AccessControlPermission): CmdbType[] {
-    return types.filter(type => !type.acl.activated || !type.acl ||
-      ( type.acl.groups.includes[this.userService.getCurrentUser().group_id] &&
-        type.acl.groups.includes[this.userService.getCurrentUser().group_id].includes(right)));
-  }
-
-  /**
    * Iterate over the type collection
    * @param params Instance of CollectionParameters
    */

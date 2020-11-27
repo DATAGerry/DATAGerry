@@ -139,9 +139,11 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
     ) {
       const buffer: CmdbType[] = [];
       for (const type of this.$category.types) {
-        buffer.push(this.findAssignedTypeByIndex(type));
+        if (this.findAssignedTypeByIndex(type)) {
+          buffer.push(this.findAssignedTypeByIndex(type));
+        }
       }
-      this.assignedTypes = this.typeService.filterTypesByAcl(buffer, AccessControlPermission.READ);
+      this.assignedTypes = buffer;
     }
   }
 

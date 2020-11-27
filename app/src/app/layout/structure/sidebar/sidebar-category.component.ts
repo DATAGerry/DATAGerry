@@ -18,22 +18,14 @@
 
 import { Component, Input, OnInit } from '@angular/core';
 import { CmdbCategoryNode } from '../../../framework/models/cmdb-category';
-import { AccessControlPermission } from '../../../acl/acl.types';
-import { TypeService } from '../../../framework/services/type.service';
 
 @Component({
   selector: 'cmdb-sidebar-category',
   templateUrl: './sidebar-category.component.html',
   styleUrls: ['./sidebar-category.component.scss'],
 })
-export class SidebarCategoryComponent implements OnInit {
+export class SidebarCategoryComponent {
 
   @Input() categoryNode: CmdbCategoryNode;
 
-  constructor(private typeService: TypeService) {
-  }
-
-  ngOnInit(): void {
-    this.categoryNode.types = this.typeService.filterTypesByAcl(this.categoryNode.types, AccessControlPermission.READ);
-  }
 }
