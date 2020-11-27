@@ -762,7 +762,7 @@ def delete_many_objects(public_ids, request_user: UserModel):
 
             try:
                 ack.append(object_manager.delete_object(public_id=current_object_instance.get_public_id(),
-                                                        request_user=request_user))
+                                                        user=request_user, permission=AccessControlPermission.DELETE))
             except ObjectDeleteError:
                 return abort(400)
             except AccessDeniedError as err:
