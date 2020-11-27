@@ -37,8 +37,6 @@ export class AppComponent implements OnInit, OnDestroy {
   public view: AppView;
   public initDone: boolean = false;
 
-  public loading: boolean = false;
-
   constructor(private router: Router, private route: ActivatedRoute,
               private loadingIndicator: ApplicationLoadingIndicatorService) {
     this.view = this.defaultView;
@@ -59,7 +57,6 @@ export class AppComponent implements OnInit, OnDestroy {
     });
     this.loadingIndicator.isNavigationPending.pipe(takeUntil(this.applicationSubscriber))
       .subscribe((loading: boolean) => {
-      this.loading = loading;
     });
   }
 

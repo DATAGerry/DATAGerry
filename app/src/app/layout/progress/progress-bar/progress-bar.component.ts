@@ -16,7 +16,9 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
+import { ProgressBarService } from '../progress-bar.service';
+import { ReplaySubject } from 'rxjs';
 
 @Component({
   selector: 'cmdb-progress-bar',
@@ -24,12 +26,47 @@ import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
   styleUrls: ['./progress-bar.component.scss'],
   encapsulation: ViewEncapsulation.Emulated
 })
-export class ProgressBarComponent implements OnInit {
+export class ProgressBarComponent implements OnInit, OnDestroy {
 
-  constructor() {
+  public static readonly MIN_VALUE: number = 0;
+  public static readonly MAX_VALUE: number = 100;
+
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  /**
+   * Width in percent.
+   */
+  @Input() public width: number = 0;
+  @Input() public ref: string = 'default';
+  @Input() public fixed: boolean = true;
+
+  constructor(private progressBarService: ProgressBarService) {
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
+    this.progressBarService.getRef(this.ref);
   }
+
+  public increase(value: number): void {
+    if ((this.width + value) <= ProgressBarComponent.MAX_VALUE) {
+      this.width = ProgressBarComponent.MAX_VALUE;
+    } else {
+      this.width += value;
+    }
+  }
+
+  public decrease(value: number): void {
+    if ((this.width - value) <= ProgressBarComponent.MIN_VALUE) {
+      this.width = ProgressBarComponent.MIN_VALUE;
+    } else {
+      this.width -= value;
+    }
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
+  }
+
 
 }

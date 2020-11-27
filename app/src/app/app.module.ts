@@ -35,6 +35,7 @@ import { APICachingInterceptor } from './services/api-cache.interceptor';
 import { RequestCacheService } from './services/request-cache.service';
 import { ProgressModule } from './layout/progress/progress.module';
 import { ApplicationLoadingIndicatorService } from './services/application-loading-indicator.service';
+import { ProgressBarService } from './layout/progress/progress-bar.service';
 
 @NgModule({
   declarations: [
@@ -55,6 +56,7 @@ import { ApplicationLoadingIndicatorService } from './services/application-loadi
     PreviousRouteService,
     DatePipe,
     ApplicationLoadingIndicatorService,
+    ProgressBarService,
     RequestCacheService,
     { provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true },

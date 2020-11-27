@@ -56,4 +56,5 @@ export class ApplicationLoadingIndicatorService {
       || event instanceof NavigationCancel
       || event instanceof NavigationError;
   }
+
 }

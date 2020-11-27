@@ -1,5 +1,5 @@
 <div #app id="app-wrapper">
-  <cmdb-progress-bar></cmdb-progress-bar>
+  <cmdb-progress-bar ref="app"></cmdb-progress-bar>
   <cmdb-navigation *ngIf="initDone && view === 'full'"></cmdb-navigation>
   <cmdb-sidebar *ngIf="initDone && view === 'full'"></cmdb-sidebar>
   <main id="main">
