@@ -1,6 +1,7 @@
 <h1><i class="{{type.render_meta?.icon}}"></i> {{type.label}}</h1>
 <hr/>
-<cmdb-object-table-head [type]="type" [selectedObjects]="selectedObjects" [formatList]="formatList" [totalResults]="totalResults"
+<cmdb-object-table-head [type]="type" [selectedObjects]="selectedObjects" [selectedObjectsIDs]="selectedObjectsIDs"
+                        [formatList]="formatList" [totalResults]="totalResults"
                         (manyObjectDeletes)="onManyObjectDeletes()" (fileExport)="exportingFiles($event)">
 </cmdb-object-table-head>
 
@@ -15,6 +16,8 @@
             (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)"
             (searchChange)="onSearchChange($event)">
 </cmdb-table>
+
+{{selectedObjects | json}}
 
 <ng-template #activeTemplate let-data="data">
   <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
