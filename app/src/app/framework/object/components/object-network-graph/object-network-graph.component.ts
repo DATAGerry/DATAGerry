@@ -22,7 +22,7 @@ import { Component, Input, OnInit } from '@angular/core'
 import { ObjectService } from 'src/app/framework/services/object.service'
 import { RenderResult } from '../../../models/cmdb-render'
 
-import { Network, DataSet } from 'vis-network'
+import { Network, DataSet } from 'vis-network/standalone'
 // import { stringify } from 'querystring'
 
 /**
@@ -60,7 +60,7 @@ export class ObjectNetworkGraphComponent {k
 
   public recordsLoading: number[] = []
 
-  private renderResult: RenderResult;
+  @Input() renderResult: RenderResult;
 
   @Input()
   set publicID(publicID: number) {
@@ -68,7 +68,7 @@ export class ObjectNetworkGraphComponent {k
     this.id = publicID
 
     if (this.id !== undefined && this.id !== null) {
-      this.loadObjectReferences(publicID)
+      this.loadNetworkGraphData(publicID)
     }
   }
 
@@ -80,26 +80,22 @@ export class ObjectNetworkGraphComponent {k
     console.log('construct network-graph')
   }
 
+  private loadNetworkGraphData(publicID: number, level: number = 1) {
+    console.log("load refs for", publicID)
+    
+    this.renderNetworkGraph()
+
+    console.log("renderResult", this.renderResult)
+
+    // load the references
+    this.loadObjectReferences(publicID, level)
+  }
+
   private loadObjectReferences(publicID: number, level: number = 1) {
     console.log("load refs for", publicID)
-
-    this.recordsLoading.push(1)
-    this.objectService.getObject(publicID).subscribe((rr: RenderResult)  => {
-      this.renderResult = rr
-      console.log("getObject records loading: ", this.recordsLoading.length)
-    }, 
-    (error) => {
-      console.error(error)
-    },
-    () => {
-      this.recordsLoading.pop()
-
-      if (this.recordsLoading.length == 0) {
-        this.renderNetworkGraph()
-      }
-    })
     
     this.recordsLoading.push(1)
+
     this.objectService.getObjectReferences(publicID).subscribe((references: RenderResult[])  => {
       console.log("references", references)
       this.records[publicID] = references
@@ -120,6 +116,7 @@ export class ObjectNetworkGraphComponent {k
         this.renderNetworkGraph()
       }
     })
+
   }
 
   private createIconMap() {
@@ -166,13 +163,16 @@ export class ObjectNetworkGraphComponent {k
     console.log("faMap", ObjectNetworkGraphComponent.faMap)
   }
 
-  private getIcon(ci: RenderResult) {
-    const iconInfo = ci.type_information.icon
+  private getIconCI(ci: RenderResult) {
+    return this.getIcon(ci.type_information.icon)
+  }
+
+  private getIcon(iconInfo: string) {
     var iconName1 = ""
     var iconName2 = ""
 
     // get fontawsome icon name
-    ci.type_information.icon.split(/\s+/).forEach((s) => {
+    iconInfo.split(/\s+/).forEach((s) => {
       if (s.match(/^fa-/)) {
         iconName2 = '.'+s
       }
@@ -202,7 +202,7 @@ export class ObjectNetworkGraphComponent {k
       code: icon.content,
       face: '"'+icon.fontFamily+'"',
       size: 40,
-      weight: 400
+      weight: "bold"
     }
 
 
@@ -210,8 +210,8 @@ export class ObjectNetworkGraphComponent {k
   }
 
   private renderNetworkGraph(): void {
-    if (this.rendered) return
-    this.rendered = true
+    // if (this.rendered) return
+    // this.rendered = true
 
     var target = document.querySelector('.object-network-graph')
 
@@ -231,23 +231,43 @@ export class ObjectNetworkGraphComponent {k
     const current_node = {
       id: this_ci.object_information.object_id,
       label: this_ci.summary_line,
-      shape: "icon",  // "dot"
-      icon: this.getIcon(this_ci),
+      shape: "icon", 
+      icon: this.getIconCI(this_ci),
       //opacity: 0.7,
-      x: 0,
-      y: 0,
-      fixed: {x: true, y: true}
+//      x: 0,
+ //     y: 0,
+      size: 40,
     }
 
     nodes.push(current_node)
 
+    var edgeLength : number = 100
+
     console.log("current_node", current_node)
 
-    const createNodes = (id: number) => {
+    const createNodes = (ci_obj: RenderResult) => {
+      const id = ci_obj.object_information.object_id
+
+      // add all refs this object is pointing to
+      ci_obj.fields.forEach((field) => {
+        if (field.type !== 'ref') return
+
+        nodes.push({
+          id: field.value,
+          label: field.type_label + " #" + field.value,
+          shape: "icon",
+          icon: this.getIcon(field.reference.icon),
+          size: 40,
+        })
+
+        edges.push({ from: id, to: field.value, length: edgeLength, arrows: "to" });
+      })
+
       console.log("id", id, "records", this.records)
 
       if (!(id in this.records)) return
 
+      // add all refs pointing to this object
       this.records[id].forEach((ci) => {
         const obj_id = ci.object_information.object_id
         console.log("create node for", obj_id)
@@ -255,15 +275,16 @@ export class ObjectNetworkGraphComponent {k
           id: obj_id,
           label: ci.summary_line,
           shape: "icon", // "dot"
-          icon: this.getIcon(ci),
+          icon: this.getIconCI(ci),
+          size: 40,
        //   opacity: 0.7
         });
 
-        edges.push({ from: id, to: obj_id, length: 50 });
+        edges.push({ from: obj_id, to: id, length: edgeLength, arrows: "to" });
       })
     }
 
-    createNodes(this.id)
+    createNodes(this_ci)
 
     // nodes.push data of current item
     var data = {
@@ -279,10 +300,10 @@ export class ObjectNetworkGraphComponent {k
     console.log("nodes", nodes);
     console.log("edges", edges);
 
-    //debugger;
 
     var network = new Network(target as HTMLElement, data, options);
-    network.moveTo({ position: { x: 0, y: 0}})
+    // this should be done on activating the tab
+    network.fit()
   }
 
 
