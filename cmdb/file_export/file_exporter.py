@@ -14,13 +14,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from flask import abort, Response
+from flask import Response, abort
 
 from cmdb.data_storage.database_manager import DatabaseManagerMongo
-from cmdb.framework.cmdb_errors import ObjectNotFoundError, TypeNotFoundError
-from cmdb.file_export.export_types import ExportType
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from typing import List
+from cmdb.framework.results import IterationResult
+from cmdb.framework.cmdb_object import CmdbObject
+
+from cmdb.file_export.export_types import ExportType
+from cmdb.search.query.builder import Builder
+from cmdb.user_management import UserModel
+
+from cmdb.security.acl.permission import AccessControlPermission
 
 try:
     from cmdb.utils.error import CMDBError
@@ -69,130 +74,52 @@ class SupportedExportTypes:
 
 class FileExporter:
 
-    def __init__(self, object_type, export_type: ExportType, public_id: str, *args):
+    def __init__(self, exporter_class: ExportType, ids, export_type=None, *args):
         """init of FileExporter
 
         Args:
             object_type: type of object e.g. CmdbObject or CmdbObject by TypeModel ID
-            export_type: the ExportType object
-            public_id: public id which implements the object / type
+            exporter_class: the ExportType class
+            ids: public id which implements the object / type
             *args: additional data
         """
-        self.object_type = object_type
         self.export_type = export_type
-        self.public_id = public_id
-        self.zip_class = False if len(args) == 0 else args[0]
+        self.exporter_class = exporter_class
+        self.ids = ids
+        self.zip = False if len(args) == 0 else args[0]
+        self.objects = []
 
-        # object_list: list of objects e.g CmdbObject or TypeModel
-        self.object_list = []
-        self.response = None
-
-    def get_object_type(self):
-        """
-
-        Returns:
-            type of object e.g. CmdbObject, TypeModel or CmdbObject by TypeModel ID (object, type, object/type)
-
-        """
-        return self.object_type
-
-    def get_object_list(self):
-        """
-
-        Returns:
-            list of objects e.g CmdbObject or TypeModel
-
-        """
-        file_type = self.get_object_type()
-        if 'object' == file_type:
-            return self.get_object_by_id()
-        elif 'type' == file_type:
-            return self.get_type_by_id()
-        return self.get_all_objects_by_type_id()
-
-    def get_response(self):
-        """
-
-        Returns:
-            Response element
-
-        """
-        return self.response
-
-    def set_response(self, value):
-        self.response = value
-
-    def get_object_by_id(self):
-        """ Get values from the database
-
-            Returns:
-                Object
-        """
+    def from_database(self, user: UserModel, permission: AccessControlPermission):
+        """Get all objects from the collection"""
         try:
-            query = self._build_query({'public_id': self.public_id})
-            return object_manager.get_objects_by(sort="public_id", **query)
-        except ObjectNotFoundError as e:
-            return abort(400, e)
+            builder = Builder()
+
+            if not isinstance(self.ids, list):
+                self.ids = [self.ids]
+
+            _in = builder.in_('public_id', self.ids)
+            if self.export_type == 'type' or not self.export_type:
+                _in = builder.in_('type_id', self.ids)
+
+            result: IterationResult[CmdbObject] = object_manager.get_objects_by(user=user, permission=permission, **_in)
         except CMDBError:
-            return abort(404)
-
-    def get_all_objects_by_type_id(self):
-        try:
-            return object_manager.get_objects_by_type(int(self.public_id))
-        except ObjectNotFoundError as e:
-            return abort(400, e)
-        except CMDBError:
-            return abort(404)
-
-    def get_type_by_id(self):
-        try:
-            query = self._build_query({'public_id': self.public_id})
-            return object_manager.get_types_by(sort="public_id", **query)
-        except TypeNotFoundError as e:
-            return abort(400, e)
-        except CMDBError:
-            return abort(404)
-
-    @staticmethod
-    def _build_query(parameters, operator='$or') -> dict:
-        """ Create a MongoDB query
-
-        Args:
-            parameters: dictionary of properties
-            operator: kind of linking of query properties
-
-        Returns:
-            dict
-        """
-        query_list = []
-        try:
-            for key, value in parameters.items():
-                for v in value.split(","):
-                    try:
-                        query_list.append({key: int(v)})
-                    except (ValueError, TypeError):
-                        return abort(400)
-            return {operator: query_list}
-        except CMDBError as e:
-            abort(400, e)
-
-    def add_to_object_list(self, value):
-        self.object_list.append(value)
+            return abort(400)
+        return result
 
     def export(self):
         import datetime
         import time
 
         timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
-        if self.zip_class:
-            export = self.export_type.export(self.get_object_list(), self.zip_class)
+        if self.zip:
+            export = self.exporter_class.export(self.objects, self.zip)
         else:
-            export = self.export_type.export(self.get_object_list())
+            export = self.exporter_class.export(self.objects)
         return Response(
             export,
-            mimetype="text/" + self.export_type.__class__.FILE_EXTENSION,
+            mimetype="text/" + self.exporter_class.__class__.FILE_EXTENSION,
             headers={
                 "Content-Disposition":
-                    "attachment; filename=%s.%s" % (timestamp, self.export_type.__class__.FILE_EXTENSION)
+                    "attachment; filename=%s.%s" % (timestamp, self.exporter_class.__class__.FILE_EXTENSION)
             }
         )

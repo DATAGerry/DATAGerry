@@ -455,7 +455,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
           this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
         });
     } else {
-      this.fileService.callExportRoute(this.selectedObjectsIDs.toString(), exportType.extension)
+      this.fileService.callExportRoute(this.selectedObjectsIDs, exportType.extension)
         .subscribe(res => {
           this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
         });

@@ -97,7 +97,7 @@ export class ObjectReferenceListComponent implements OnDestroy {
       for (const el of this.referenceList) {
         objectIDs.push(el.object_information.object_id);
       }
-      this.fileService.callExportRoute(objectIDs.toString(), exportType.extension, true)
+      this.fileService.callExportRoute(objectIDs, exportType.extension, true)
         .subscribe(res => this.downLoadFile(res));
     }
   }
