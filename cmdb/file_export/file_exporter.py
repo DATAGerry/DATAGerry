@@ -20,6 +20,7 @@ from cmdb.data_storage.database_manager import DatabaseManagerMongo
 from cmdb.framework.cmdb_errors import ObjectNotFoundError, TypeNotFoundError
 from cmdb.file_export.export_types import ExportType
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from typing import List
 
 try:
     from cmdb.utils.error import CMDBError
@@ -27,10 +28,43 @@ except ImportError:
     CMDBError = Exception
 
 from cmdb.utils.system_config import SystemConfigReader
+from cmdb.utils.helpers import load_class
 
 object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
     **SystemConfigReader().get_all_values_from_section('Database')
 ))
+
+
+class SupportedExportTypes:
+    """Supported export types for object-file export (csv, json, xlsx, xml)"""
+
+    def __init__(self, extensions=None):
+        """
+        Constructor of SupportedExportTypes
+        Args:
+            extensions: List of file extension
+        """
+        arguments = extensions if extensions else []
+        self.extensions = [*["CsvExportType", "JsonExportType", "XlsxExportType", "XmlExportType"], *arguments]
+
+    def get_extensions(self):
+        """Get list of supported export types"""
+        return self.extensions
+
+    def convert_to(self):
+        """Converts the supported export types inside the list to a passed ExportType type list."""
+        _list = []
+        for type_element in self.get_extensions():
+            type_element_class = load_class('cmdb.file_export.export_types.' + type_element)
+            _list.append({
+                'extension': type_element,
+                'label': type_element_class.LABEL,
+                'icon': type_element_class.ICON,
+                'multiTypeSupport': type_element_class.MULTITYPE_SUPPORT,
+                'helperText': type_element_class.DESCRIPTION,
+                'active': type_element_class.ACTIVE
+            })
+        return _list
 
 
 class FileExporter:
@@ -52,16 +86,6 @@ class FileExporter:
         # object_list: list of objects e.g CmdbObject or TypeModel
         self.object_list = []
         self.response = None
-
-    @staticmethod
-    def get_type_list():
-        """Get list of supported ExportTypes
-
-        Returns:
-            list of ExportType
-
-        """
-        return ["CsvExportType", "JsonExportType", "XlsxExportType", "XmlExportType"]
 
     def get_object_type(self):
         """

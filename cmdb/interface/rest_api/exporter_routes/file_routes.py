@@ -14,11 +14,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging, json
+import logging
 
 from flask import abort, jsonify, request
 from cmdb.framework.cmdb_errors import TypeNotFoundError
-from cmdb.file_export.file_exporter import FileExporter
+from cmdb.file_export.file_exporter import FileExporter, SupportedExportTypes
 from cmdb.interface.route_utils import make_response, login_required
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.utils.helpers import load_class
@@ -35,22 +35,7 @@ file_blueprint = RootBlueprint('file_rest', __name__, url_prefix='/file')
 @file_blueprint.route('/', methods=['GET'])
 @login_required
 def get_export_file_types():
-    _types = FileExporter.get_type_list()
-    _list = []
-
-    for type_element in _types:
-        type_element_class = load_class('cmdb.file_export.export_types.' + type_element)
-        type_element_properties = {
-                'id': type_element,
-                'label': type_element_class.LABEL,
-                'icon': type_element_class.ICON,
-                'multiTypeSupport': type_element_class.MULTITYPE_SUPPORT,
-                'helperText': type_element_class.DESCRIPTION,
-                'active': type_element_class.ACTIVE
-        }
-        _list.append(type_element_properties)
-
-    return make_response(_list)
+    return make_response(SupportedExportTypes().convert_to())
 
 
 @file_blueprint.route('/object/', methods=['GET'])

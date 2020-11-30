@@ -16,14 +16,15 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, Renderer2, ViewChild} from '@angular/core';
+import { Component, Input, OnDestroy, ViewChild} from '@angular/core';
 import { Subject } from 'rxjs';
 import { RenderResult } from '../../../../models/cmdb-render';
 import { ObjectService } from '../../../../services/object.service';
 import { DataTableDirective } from 'angular-datatables';
 import { FileService } from '../../../../../export/export.service';
-import {DatePipe} from '@angular/common';
-import {FileSaverService} from 'ngx-filesaver';
+import { DatePipe } from '@angular/common';
+import { FileSaverService } from 'ngx-filesaver';
+import { ExportObjectsFileExtension } from '../../../../../export/export-objects/model/export-objects-file-extension';
 
 @Component({
   selector: 'cmdb-object-reference-list',
@@ -40,7 +41,7 @@ export class ObjectReferenceListComponent implements OnDestroy {
   public dtTrigger: Subject<any> = new Subject();
 
   public referenceList: RenderResult[] = [];
-  public formatList: any[] = [];
+  public formatList: ExportObjectsFileExtension[] = [];
 
   @Input()
   set publicID(publicID: number) {
@@ -90,13 +91,13 @@ export class ObjectReferenceListComponent implements OnDestroy {
    *
    * @param exportType the filetype to be zipped
    */
-  public exportingFiles(exportType: any) {
+  public exportingFiles(exportType: ExportObjectsFileExtension) {
     if (this.referenceList.length !== 0) {
       const objectIDs: number[] = [];
       for (const el of this.referenceList) {
         objectIDs.push(el.object_information.object_id);
       }
-      this.fileService.callExportRoute(objectIDs.toString(), exportType.id, true)
+      this.fileService.callExportRoute(objectIDs.toString(), exportType.extension, true)
         .subscribe(res => this.downLoadFile(res));
     }
   }

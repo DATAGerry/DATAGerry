@@ -23,6 +23,7 @@ import { DatePipe } from '@angular/common';
 import { TypeService } from '../../framework/services/type.service';
 import { FileSaverService } from 'ngx-filesaver';
 import { FileService } from '../export.service';
+import { ExportObjectsFileExtension } from './model/export-objects-file-extension';
 
 @Component({
   selector: 'cmdb-export-objects',
@@ -32,7 +33,7 @@ import { FileService } from '../export.service';
 export class ExportObjectsComponent implements OnInit {
 
   public typeList: CmdbType[];
-  public formatList: any[] = [];
+  public formatList: ExportObjectsFileExtension[] = [];
   public formExport: FormGroup;
   public isSubmitted = false;
 
@@ -79,7 +80,7 @@ export class ExportObjectsComponent implements OnInit {
 
   public downLoadFile(data: any, exportType: any) {
     const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
-    const extension = this.formatList.find(x => x.id === exportType);
+    const extension = this.formatList.find(x => x.extension === exportType);
     this.fileSaverService.save(data.body, timestamp + '.' + extension.label);
   }
 

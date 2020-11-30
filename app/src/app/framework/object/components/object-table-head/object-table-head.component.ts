@@ -18,6 +18,8 @@
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CmdbType } from '../../../models/cmdb-type';
+import { ExportObjectsFileExtension } from '../../../../export/export-objects/model/export-objects-file-extension';
+
 @Component({
   selector: 'cmdb-object-table-head',
   templateUrl: './object-table-head.component.html',
@@ -34,7 +36,7 @@ export class ObjectTableHeadComponent {
   }
 
   @Input() selectedObjects: Array<number> = [];
-  @Input() formatList: any[] = [];
+  @Input() formatList: ExportObjectsFileExtension[] = [];
   @Input() totalResults: number = 0;
 
   @Output() fileExport: EventEmitter<any> = new EventEmitter<any>();

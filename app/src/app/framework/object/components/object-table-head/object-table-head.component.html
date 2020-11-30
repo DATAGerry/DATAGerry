@@ -27,7 +27,7 @@
         Export
       </button>
       <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
-        <li *ngFor="let item of formatList" id="export-{{item.id}}"
+        <li *ngFor="let item of formatList" id="export-{{item.extension}}"
             [className]="item.active && totalResults > 0 ? 'dropdown-item' : 'dropdown-item disabled'"
             (click)="fileExport.emit(item)"
             [ngbTooltip]="item.helperText">
