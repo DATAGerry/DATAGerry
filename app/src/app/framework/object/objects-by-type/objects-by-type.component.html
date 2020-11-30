@@ -17,8 +17,6 @@
             (searchChange)="onSearchChange($event)">
 </cmdb-table>
 
-{{selectedObjects | json}}
-
 <ng-template #activeTemplate let-data="data">
   <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
 </ng-template>
