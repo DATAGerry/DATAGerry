@@ -72,11 +72,7 @@ export class TypeAclStepComponent implements OnInit, OnDestroy {
   }
 
   public onAddChange(event) {
-    if ((!event[0] || event[0].length === 0) && !event[1]) {
-      this.wasEmpty = true;
-    } else {
-      this.wasEmpty = false;
-    }
+    this.wasEmpty = (!event[0] || event[0].length === 0) && !event[1];
     this.isEmpty.emit(this.wasEmpty);
   }
 
