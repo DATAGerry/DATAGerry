@@ -356,7 +356,7 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = self._delete_many(CmdbObject.COLLECTION, filter_query)
         if self._event_queue:
             event = Event("cmdb.core.objects.deleted", {"ids": public_ids,
-                                                        "user_id": request_user.get_public_id()})
+                                                        "user_id": user.get_public_id()})
             self._event_queue.put(event)
         return ack
 
