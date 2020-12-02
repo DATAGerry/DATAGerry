@@ -16,16 +16,16 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { CmdbCategoryNode } from '../../../framework/models/cmdb-category';
+export class ExportObjectsFileExtension {
 
-@Component({
-  selector: 'cmdb-sidebar-category',
-  templateUrl: './sidebar-category.component.html',
-  styleUrls: ['./sidebar-category.component.scss'],
-})
-export class SidebarCategoryComponent {
+  public readonly extension: string;
+  public label: string;
+  public icon: any;
+  public multiTypeSupport: boolean;
+  public helperText: string;
+  public active: boolean = false;
 
-  @Input() categoryNode: CmdbCategoryNode;
-
+  public constructor(init?: Partial<ExportObjectsFileExtension>) {
+    Object.assign(this, init);
+  }
 }

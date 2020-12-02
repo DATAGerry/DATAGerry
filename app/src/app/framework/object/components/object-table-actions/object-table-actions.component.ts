@@ -22,6 +22,7 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectPreviewModalComponent } from '../../modals/object-preview-modal/object-preview-modal.component';
 import { ObjectDeleteModalComponent } from '../../modals/object-delete-modal/object-delete-modal.component';
 import { ReplaySubject } from 'rxjs';
+import { AccessControlList } from '../../../../acl/acl.types';
 
 @Component({
   selector: 'cmdb-object-table-actions',
@@ -45,6 +46,11 @@ export class ObjectTableActionsComponent implements OnDestroy {
    * Rendered object
    */
   @Input() public result: RenderResult;
+
+  /**
+   * AccesContolList
+   */
+  @Input() public acl: AccessControlList;
 
   /**
    * Emitter when element was deleted.

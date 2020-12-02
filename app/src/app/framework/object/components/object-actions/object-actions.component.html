@@ -8,24 +8,24 @@
               title="object list">
             <i class="fas fa-list"></i>
       </button>
-      <button *permissionLink="'base.framework.object.edit'"
+      <button *permissionLink="'base.framework.object.edit';requirements:'UPDATE';acl:acl"
               routerLink="/framework/object/edit/{{renderResult?.object_information?.object_id}}"
               class="btn btn-sm btn-link "
               title="edit">
         <i class="fas fa-edit"></i>
       </button>
-      <button type="button" *permissionLink="'base.framework.object.edit'"
+      <button type="button" *permissionLink="['base.framework.object.view', 'base.framework.object.add'];requirements:['CREATE', 'READ'];acl:acl"
               routerLink="/framework/object/copy/{{renderResult?.object_information?.object_id}}"
               class="btn btn-sm btn-link"
               title="copy">
         <i class="fas fa-clone"></i>
       </button>
-      <button type="button" class="btn btn-sm btn-link" *permissionLink="'base.framework.object.delete'"
+      <button type="button" class="btn btn-sm btn-link" *permissionLink="'base.framework.object.delete';requirements:'DELETE';acl:acl"
               (click)="deleteObject(renderResult?.object_information?.object_id)"
               title="delete">
         <i class="fas fa-trash-alt"></i>
       </button>
-      <button type="button" *permissionLink="'base.framework.object.add'"
+      <button type="button" *permissionLink="'base.framework.object.add';requirements:'CREATE';acl:acl"
          routerLink="/framework/object/add/{{renderResult?.type_information?.type_id}}"
          class="btn btn-sm btn-link pr-2"
          title="add new object">

@@ -46,6 +46,7 @@ import {
   UserSettingsService
 } from '../../../management/user-settings/services/user-settings.service';
 import { DatePipe } from '@angular/common';
+import { ExportObjectsFileExtension } from '../../../export/export-objects/model/export-objects-file-extension';
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -130,6 +131,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * Filter parameter from table search-
    */
   public filter: string;
+
+  public selectReset: Array<RenderResult> = [];
 
   public initialVisibleColumns: Array<string> = [];
 
@@ -306,6 +309,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    */
   public loadObjects() {
     this.loading = true;
+    this.selectedObjects = [];
+    this.selectedObjectsIDs = [];
     const query = [];
     query.push({
       $match: {
@@ -447,14 +452,14 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.reload(this.type);
   }
 
-  public exportingFiles(exportType: any) {
+  public exportingFiles(exportType: ExportObjectsFileExtension) {
     if (this.selectedObjectsIDs.length === 0) {
-      this.fileService.getObjectFileByType(this.type.public_id, exportType.id)
+      this.fileService.getObjectFileByType(this.type.public_id, exportType.extension)
         .subscribe(res => {
           this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
         });
     } else {
-      this.fileService.callExportRoute(this.selectedObjectsIDs.toString(), exportType.id)
+      this.fileService.callExportRoute(this.selectedObjectsIDs, exportType.extension)
         .subscribe(res => {
           this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
         });
@@ -484,16 +489,12 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
             this.toastService.success(`Deleted ${ this.selectedObjects.length } objects successfully`);
             this.sidebarService.updateTypeCounter(this.type.public_id);
             this.selectedObjects = [];
+            this.objectsTableComponent.selectedItems = [];
             this.loadObjects();
           });
         }
       });
     }
-  }
-
-  public onBulkChange(): void {
-    this.router.navigate(['/framework/object/change/'],
-      { state: { type: this.type, objects: this.selectedObjects } });
   }
 
 

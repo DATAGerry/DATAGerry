@@ -1,46 +1,10 @@
-<h1><i class="{{type.render_meta.icon}}"></i> {{type.label}}</h1>
+<h1><i class="{{type.render_meta?.icon}}"></i> {{type.label}}</h1>
 <hr/>
-<div class="d-flex">
-  <div class="mr-auto">
-    <button type="button"
-            *permissionLink="['base.framework.object.add']"
-            class="btn btn-success btn-sm mr-1"
-            [routerLink]="['/framework/object/add/', type?.public_id ]">
-      <i class="fas fa-plus"></i> Add
-    </button>
-    <button type="button"
-            *permissionLink="['base.framework.object.edit']"
-            [disabled]="selectedObjects.length<=0"
-            class="btn btn-secondary btn-sm mr-1" (click)="onBulkChange()">
-      <i class="fas fa-tasks"></i> Bulk Change <span
-      class="badge badge-primary badge-pill">{{selectedObjects.length}}</span>
-    </button>
-    <button type="button" *permissionLink="['base.framework.object.delete']" (click)="onManyObjectDeletes()"
-            [disabled]="selectedObjectsIDs.length<=0" class="btn btn-danger btn-sm mr-1">
-      <i class="far fa-trash-alt"></i> Delete Selected
-      <span class="badge badge-secondary badge-pill">{{selectedObjects.length}}</span>
-    </button>
-  </div>
-  <div>
-    <div class="dropdown" *permissionLink="'base.export.object.*'">
-      <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle" data-toggle="dropdown">
-        <fa-icon icon="file-export"></fa-icon>
-        Export
-      </button>
-      <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left">
-        <li *ngFor="let item of formatList" id="export-{{item.id}}"
-            [className]="item.active && totalResults > 0 ? 'dropdown-item' : 'dropdown-item disabled'"
-            (click)="exportingFiles(item)"
-            [ngbTooltip]="item.helperText">
-          <fa-icon icon="{{item.icon}}"></fa-icon>
-          {{item.label}}
-          <span *ngIf="selectedObjects.length == 0">( all )</span>
-          <span *ngIf="selectedObjects.length > 0"> ( {{selectedObjects.length}} )</span>
-        </li>
-      </ul>
-    </div>
-  </div>
-</div>
+<cmdb-object-table-head [type]="type" [selectedObjects]="selectedObjects" [selectedObjectsIDs]="selectedObjectsIDs"
+                        [formatList]="formatList" [totalResults]="totalResults"
+                        (manyObjectDeletes)="onManyObjectDeletes()" (fileExport)="exportingFiles($event)">
+</cmdb-object-table-head>
+
 <hr/>
 <cmdb-table [items]="results" [totalItems]="totalResults" [columns]="columns" [sort]="sort" [toggleable]="true"
             [page]="page" [rowClasses]="['align-middle']" [pageSize]="limit" [id]="id"
@@ -62,6 +26,6 @@
 </ng-template>
 
 <ng-template #actionTemplate let-item="item">
-  <cmdb-object-table-actions [publicID]="item.object_information.object_id" [result]="item"
+  <cmdb-object-table-actions [publicID]="item.object_information.object_id" [result]="item" [acl]="type.acl"
                              (deleteEmitter)="onObjectDelete($event)"></cmdb-object-table-actions>
 </ng-template>

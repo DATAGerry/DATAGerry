@@ -90,7 +90,8 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
             api_response = GetMultiResponse(object_list, total=iteration_result.total, params=params,
                                             url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
         elif view == 'render':
-            rendered_list = RenderList(iteration_result.results, object_manager, ref_render=True).render_result_list(
+            rendered_list = RenderList(object_list=iteration_result.results, request_user=request_user,
+                                       object_manager=object_manager, ref_render=True).render_result_list(
                 raw=True)
             api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
                                             url=request.url, model=Model('RenderResult'), body=request.method == 'HEAD')
@@ -408,12 +409,17 @@ def get_objects_by_reference(public_id: int, request_user: UserModel):
         active_flag = None
         if _fetch_only_active_objs():
             active_flag = True
-
-        reference_list: list = object_manager.get_object_references(public_id=public_id, active_flag=active_flag)
-        rendered_reference_list = RenderList(reference_list, request_user).render_result_list()
+        reference_list: list = object_manager.get_object_references(public_id=public_id, active_flag=active_flag,
+                                                                    user=request_user,
+                                                                    permission=AccessControlPermission.READ)
+        rendered_reference_list = RenderList(object_list=reference_list, request_user=request_user, ref_render=True,
+                                             object_manager=object_manager).render_result_list()
     except ObjectManagerGetError as err:
-        LOGGER.error(err)
-        return abort(404)
+        return abort(404, err.message)
+
+    except AccessDeniedError as err:
+        return abort(403, err.message)
+
     if len(reference_list) < 1:
         return make_response(rendered_reference_list, 204)
     return make_response(rendered_reference_list)
@@ -762,7 +768,7 @@ def delete_many_objects(public_ids, request_user: UserModel):
 
             try:
                 ack.append(object_manager.delete_object(public_id=current_object_instance.get_public_id(),
-                                                        request_user=request_user))
+                                                        user=request_user, permission=AccessControlPermission.DELETE))
             except ObjectDeleteError:
                 return abort(400)
             except AccessDeniedError as err:
@@ -801,7 +807,8 @@ def delete_many_objects(public_ids, request_user: UserModel):
 @right_required('base.framework.object.activation')
 def get_object_state(public_id: int, request_user: UserModel):
     try:
-        founded_object = object_manager.get_object(public_id=public_id)
+        founded_object = object_manager.get_object(public_id=public_id, user=request_user,
+                                                   permission=AccessControlPermission.READ)
     except ObjectManagerGetError as err:
         LOGGER.debug(err)
         return abort(404)
@@ -827,7 +834,8 @@ def update_object_state(public_id: int, request_user: UserModel):
         return make_response(False, 204)
     try:
         founded_object.active = state
-        update_ack = object_manager.update_object(founded_object, request_user)
+        update_ack = object_manager.update_object(founded_object, user=request_user,
+                                                  permission=AccessControlPermission.READ)
     except AccessDeniedError as err:
         return abort(403, err.message)
     except ObjectManagerUpdateError as err:
@@ -886,7 +894,10 @@ def get_newest(request_user: UserModel):
     newest_objects_list = object_manager.get_objects_by(sort='creation_time',
                                                         limit=10,
                                                         active={"$eq": True},
-                                                        creation_time={'$ne': None})
+                                                        creation_time={'$ne': None},
+                                                        user=request_user,
+                                                        permission=AccessControlPermission.READ
+                                                        )
     rendered_list = RenderList(newest_objects_list, request_user).render_result_list()
     if len(rendered_list) < 1:
         return make_response(rendered_list, 204)
@@ -909,7 +920,10 @@ def get_latest(request_user: UserModel):
     last_objects_list = object_manager.get_objects_by(sort='last_edit_time',
                                                       limit=10,
                                                       active={"$eq": True},
-                                                      last_edit_time={'$ne': None})
+                                                      last_edit_time={'$ne': None},
+                                                      user=request_user,
+                                                      permission=AccessControlPermission.READ
+                                                      )
     rendered_list = RenderList(last_objects_list, request_user).render_result_list()
     if len(rendered_list) < 1:
         return make_response(rendered_list, 204)

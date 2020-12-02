@@ -13,6 +13,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
 import logging
 from typing import List
 
@@ -26,8 +28,58 @@ from cmdb.search.query import Query, Pipeline
 from cmdb.search.query.pipe_builder import PipelineBuilder
 from cmdb.search.search_result import SearchResult
 from cmdb.user_management import UserModel
+from cmdb.security.acl.permission import AccessControlPermission
+from cmdb.security.acl.builder import AccessControlQueryBuilder
 
 LOGGER = logging.getLogger(__name__)
+
+
+class QuickSearchPipelineBuilder(PipelineBuilder):
+
+    def __init__(self, pipeline: Pipeline = None):
+        """Init constructor
+        Args:
+            pipeline: preset a for defined pipeline
+        """
+        super(QuickSearchPipelineBuilder, self).__init__(pipeline=pipeline)
+
+    def build(self, search_term, user: UserModel = None, permission: AccessControlPermission = None,
+              active_flag: bool = False, *args, **kwargs) -> Pipeline:
+        """Build a pipeline query out of search search term"""
+
+        regex = self.regex_('fields.value', f'{search_term}', 'ims')
+        pipe_and = self.and_([regex, {'active': {"$eq": True}} if active_flag else {}])
+        pipe_match = self.match_(pipe_and)
+
+        # permission builds
+        if user and permission:
+            self.pipeline = [*self.pipeline, *(AccessControlQueryBuilder().build(group_id=user.group_id,
+                                                                                 permission=permission))]
+        self.add_pipe(pipe_match)
+        self.add_pipe({'$group': {"_id": {'active': '$active'}, 'count': {'$sum': 1}}})
+        self.add_pipe({'$group': {'_id': 0,
+                                  'levels': {'$push': {'_id': '$_id.active', 'count': '$count'}},
+                                  'total': {'$sum': '$count'}}
+                      })
+        self.add_pipe({'$unwind': '$levels'})
+        self.add_pipe({'$sort': {"levels._id": -1}})
+        self.add_pipe(
+            {'$group': {'_id': 0, 'levels': {'$push': {'count': "$levels.count"}}, "total": {'$avg': '$total'}}})
+        self.add_pipe({
+            '$project': {
+                'total': "$total",
+                'active': {'$arrayElemAt': ["$levels", 0]},
+                'inactive': {'$arrayElemAt': ["$levels", 1]}
+            }})
+        self.add_pipe({
+            '$project': {
+                '_id': 0,
+                'active': {'$cond': [{'$ifNull': ["$active", False]}, '$active.count', 0]},
+                'inactive': {'$cond': [{'$ifNull': ['$inactive', False]}, '$inactive.count', 0]},
+                'total': '$total'
+            }})
+
+        return self.pipeline
 
 
 class SearchPipelineBuilder(PipelineBuilder):
@@ -72,8 +124,48 @@ class SearchPipelineBuilder(PipelineBuilder):
 
         return regex_pipes
 
+    def build_resolve_reference_pipeline(self, user: UserModel = None, permission: AccessControlPermission = None,
+                                        *args, **kwargs):
+        """Build a resolve reference pipeline query"""
+        if kwargs.get('resolve', False):
+            self.add_pipe(
+                self.lookup_sub_(
+                    from_='framework.objects',
+                    let_={'ref_id': '$public_id'},
+                    pipeline_=[self.match_({'$expr': {'$in': ['$$ref_id', '$fields.value']}})],
+                    as_='refs'
+                ))
+
+            pipeline_ = [{'$match': {'$expr': {'$in': ['$$ref_id', '$fields.value']}}}]
+
+            # get only active objects
+            if kwargs.get('active', True):
+                pipeline_ = [*pipeline_, *[{'$match': {'active': {"$eq": True}}}]]
+
+            # permission builds
+            if user and permission:
+                pipeline_ = [*pipeline_, *(AccessControlQueryBuilder().build(group_id=user.group_id,
+                                                                             permission=permission))]
+
+            self.add_pipe(
+                self.facet_({
+                    'root': [{'$replaceRoot': {'newRoot': {'$mergeObjects': ['$$ROOT']}}}],
+                    'references': [
+                        {'$lookup': {'from': 'framework.objects', 'let': {'ref_id': '$public_id'},
+                                     'pipeline': pipeline_,
+                                     'as': 'refs'}},
+                        {'$unwind': '$refs'},
+                        {'$replaceRoot': {'newRoot': '$refs'}}
+                    ]
+                })
+            )
+            self.add_pipe(self.project_(specification={'complete': {'$concatArrays': ['$root', '$references']}}))
+            self.add_pipe(self.unwind_(path='$complete'))
+            self.add_pipe({'$replaceRoot': {'newRoot': '$complete'}})
+
     def build(self, params: List[SearchParam],
               obj_manager: CmdbObjectManager = None,
+              user: UserModel = None, permission: AccessControlPermission = None,
               active_flag: bool = False, *args, **kwargs) -> Pipeline:
         """Build a pipeline query out of frontend params"""
         # clear pipeline
@@ -116,6 +208,10 @@ class SearchPipelineBuilder(PipelineBuilder):
         for param in id_params:
             self.add_pipe(self.match_({'public_id': int(param.search_text)}))
 
+        # permission builds
+        if user and permission:
+            self.pipeline = [*self.pipeline, *(AccessControlQueryBuilder().build(group_id=user.group_id,
+                                                                                 permission=permission))]
         return self.pipeline
 
 
@@ -126,13 +222,15 @@ class SearcherFramework(Search[CmdbObjectManager]):
         """Normally uses a instance of CmdbObjectManager as managers"""
         super(SearcherFramework, self).__init__(manager=manager)
 
-    def aggregate(self, pipeline: Pipeline, request_user: UserModel = None, limit: int = Search.DEFAULT_LIMIT,
+    def aggregate(self, pipeline: Pipeline, request_user: UserModel = None, permission: AccessControlPermission = None,
+                  limit: int = Search.DEFAULT_LIMIT,
                   skip: int = Search.DEFAULT_SKIP, **kwargs) -> SearchResult[RenderResult]:
         """
         Use mongodb aggregation system with pipeline queries
         Args:
             pipeline (Pipeline): list of requirement pipes
             request_user (UserModel): user who started this search
+            permission (AccessControlPermission) : Permission enum for possible ACL operations..
             limit (int): max number of documents to return
             skip (int): number of documents to be skipped
             **kwargs:
@@ -144,43 +242,9 @@ class SearcherFramework(Search[CmdbObjectManager]):
 
         # define search output
         stages: dict = {}
-        active = kwargs.get('active', True)
 
-        if kwargs.get('resolve', False):
-            plb.add_pipe(
-                plb.lookup_sub_(
-                    from_='framework.objects',
-                    let_={'ref_id': '$public_id'},
-                    pipeline_=[plb.match_({'$expr': {
-                        '$in': [
-                            '$$ref_id',
-                            '$fields.value'
-                        ]
-                    }})],
-                    as_='refs'
-                ))
-            if active:
-                active_pipe = [
-                    {'$match': {'active': {"$eq": True}}},
-                    {'$match': {'$expr': {'$in': ['$$ref_id', '$fields.value']}}}
-                ]
-            else:
-                active_pipe = [{'$match': {'$expr': {'$in': ['$$ref_id', '$fields.value']}}}]
-            plb.add_pipe(
-                plb.facet_({
-                    'root': [{'$replaceRoot': {'newRoot': {'$mergeObjects': ['$$ROOT']}}}],
-                    'references': [
-                        {'$lookup': {'from': 'framework.objects', 'let': {'ref_id': '$public_id'},
-                                     'pipeline': active_pipe,
-                                     'as': 'refs'}},
-                        {'$unwind': '$refs'},
-                        {'$replaceRoot': {'newRoot': '$refs'}}
-                    ]
-                })
-            )
-            plb.add_pipe(plb.project_(specification={'complete': {'$concatArrays': ['$root', '$references']}}))
-            plb.add_pipe(plb.unwind_(path='$complete'))
-            plb.add_pipe({'$replaceRoot': {'newRoot': '$complete'}})
+        # build resolve reference pipeline
+        plb.build_resolve_reference_pipeline(user=request_user, permission=permission, **kwargs)
 
         stages.update({'metadata': [SearchPipelineBuilder.count_('total')]})
         stages.update({'data': [
