@@ -90,7 +90,8 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
             api_response = GetMultiResponse(object_list, total=iteration_result.total, params=params,
                                             url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
         elif view == 'render':
-            rendered_list = RenderList(iteration_result.results, object_manager, ref_render=True).render_result_list(
+            rendered_list = RenderList(object_list=iteration_result.results, request_user=request_user,
+                                       object_manager=object_manager, ref_render=True).render_result_list(
                 raw=True)
             api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
                                             url=request.url, model=Model('RenderResult'), body=request.method == 'HEAD')
@@ -408,12 +409,17 @@ def get_objects_by_reference(public_id: int, request_user: UserModel):
         active_flag = None
         if _fetch_only_active_objs():
             active_flag = True
-
-        reference_list: list = object_manager.get_object_references(public_id=public_id, active_flag=active_flag)
-        rendered_reference_list = RenderList(reference_list, request_user).render_result_list()
+        reference_list: list = object_manager.get_object_references(public_id=public_id, active_flag=active_flag,
+                                                                    user=request_user,
+                                                                    permission=AccessControlPermission.READ)
+        rendered_reference_list = RenderList(object_list=reference_list, request_user=request_user, ref_render=True,
+                                             object_manager=object_manager).render_result_list()
     except ObjectManagerGetError as err:
-        LOGGER.error(err)
-        return abort(404)
+        return abort(404, err.message)
+
+    except AccessDeniedError as err:
+        return abort(403, err.message)
+
     if len(reference_list) < 1:
         return make_response(rendered_reference_list, 204)
     return make_response(rendered_reference_list)
@@ -829,7 +835,7 @@ def update_object_state(public_id: int, request_user: UserModel):
     try:
         founded_object.active = state
         update_ack = object_manager.update_object(founded_object, user=request_user,
-                                                   permission=AccessControlPermission.READ)
+                                                  permission=AccessControlPermission.READ)
     except AccessDeniedError as err:
         return abort(403, err.message)
     except ObjectManagerUpdateError as err:
