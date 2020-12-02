@@ -18,6 +18,8 @@
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CmdbType } from '../../../models/cmdb-type';
+import { RenderResult } from '../../../models/cmdb-render';
+import { Router } from '@angular/router';
 @Component({
   selector: 'cmdb-object-table-head',
   templateUrl: './object-table-head.component.html',
@@ -25,20 +27,25 @@ import { CmdbType } from '../../../models/cmdb-type';
 })
 export class ObjectTableHeadComponent {
 
-  private objectType: CmdbType;
-  @Input() set type(type: CmdbType) {
-    this.objectType = type;
-  }
-  get type(): CmdbType {
-    return this.objectType;
+  @Input() public selectedObjects: Array<RenderResult> = [];
+  @Input() public selectedObjectsIDs: Array<number> = [];
+  @Input() public formatList: any[] = [];
+  @Input() public totalResults: number = 0;
+
+  @Output() public fileExport: EventEmitter<any> = new EventEmitter<any>();
+  @Output() public manyObjectDeletes: EventEmitter<any> = new EventEmitter<any>();
+
+  @Input() public type: CmdbType;
+
+  public constructor(private router: Router) {
+
   }
 
-  @Input() selectedObjects: Array<number> = [];
-  @Input() formatList: any[] = [];
-  @Input() totalResults: number = 0;
+  public onBulkChange(): void {
+    this.router.navigate(['/framework/object/change/'],
+      { state: { type: this.type, objects: this.selectedObjects } });
+  }
 
-  @Output() fileExport: EventEmitter<any> = new EventEmitter<any>();
-  @Output() manyObjectDeletes: EventEmitter<any> = new EventEmitter<any>();
 
 
 }
