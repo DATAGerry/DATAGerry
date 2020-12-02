@@ -5,9 +5,8 @@
   pointer-events: none;
   z-index: 4000;
   width: 100%;
+}
 
-  .progress-loading-bar {
-    background-color: theme-color('primary');
-  }
-
+.progress-loading-bar {
+  background-color: theme-color('primary');
 }

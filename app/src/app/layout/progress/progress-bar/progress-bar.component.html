@@ -1,10 +1,6 @@
-<ng-container *ngIf="state != null ? state : (state | async) as progress">
-  <!--<div class="progress-loading-bar-spinner spinner-border-sm">
-    <div class="spinner-border text-primary"></div>
-  </div>-->
+<ng-container *ngIf="state != null ? (state | async) : (state | async) as progress">
   <div class="progress-loading-bar"
     [style.height]="height+ 'px'"
     [style.width]="progress.value + '%'"
   ></div>
-  {{progress.value | json}}
 </ng-container>

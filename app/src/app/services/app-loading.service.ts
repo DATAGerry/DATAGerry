@@ -26,8 +26,8 @@ import {
   Router,
   RouterEvent
 } from '@angular/router';
-import { Observable } from 'rxjs';
-import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { delay, distinctUntilChanged, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { InjectionToken, Type } from '@angular/core';
 import { ProgressBarService } from '../layout/progress/progress-bar.service';
@@ -41,6 +41,7 @@ interface ProgressRouterConfig {
 
 export const PROGRESS_ROUTER_CONFIG = new InjectionToken<ProgressRouterConfig>('progressRouterConfig');
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -48,7 +49,7 @@ export class AppLoadingService {
 
   private readonly config: ProgressRouterConfig = {
     id: 'app',
-    delay: 0,
+    delay: 100,
     startEvents: [NavigationStart],
     completeEvents: [NavigationEnd, NavigationCancel, NavigationError]
   };
@@ -56,9 +57,27 @@ export class AppLoadingService {
   constructor(private router: Router, progressService: ProgressBarService,
               @Optional() @Inject(PROGRESS_ROUTER_CONFIG) config: ProgressRouterConfig) {
     this.config = config ? { ...this.config, ...config } : this.config;
-    console.log(this.config);
+    const progressBarInstance = progressService.getInstance(this.config.id);
+    const startProgress = of({}).pipe(
+      delay(this.config.delay),
+      tap(() => progressBarInstance.start())
+    );
+
+    const completeProgress = of({}).pipe(
+      delay(this.config.delay),
+      tap(() => progressBarInstance.complete())
+    );
+
+    const filterEvents = [...this.config.startEvents, ...this.config.completeEvents];
+    this.router.events.pipe(
+      filter((event: RouterEvent) => AppLoadingService.eventExists(event, filterEvents)),
+      switchMap((event: RouterEvent) => AppLoadingService.eventExists(event, this.config.startEvents) ? startProgress : completeProgress)
+    ).subscribe();
   }
 
+  /**
+   * Function which shows if the router is pending.
+   */
   public isNavigationPending: Observable<boolean> = this.router.events.pipe(
     filter((event: RouterEvent) => AppLoadingService.isConsideredEvent(event)),
     map((event: RouterEvent) => AppLoadingService.isNavigationStart(event)),
@@ -78,6 +97,12 @@ export class AppLoadingService {
     return event instanceof NavigationEnd
       || event instanceof NavigationCancel
       || event instanceof NavigationError;
+  }
+
+  static eventExists(routerEvent: RouterEvent, events: Type<RouterEvent>[]) {
+    let res = false;
+    events.map((event: Type<RouterEvent>) => res = res || routerEvent instanceof event);
+    return res;
   }
 
 }

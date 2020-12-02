@@ -20,19 +20,21 @@ import { Injectable } from '@angular/core';
 import { ProgressBarInstance } from './progress-bar/progress-bar.types';
 
 
-type state = 'pending' | 'start' | 'running' | 'stop' | 'complete';
-type action = 'start' | 'complete' | 'set' | 'stop' | 'increment';
-
 @Injectable({
   providedIn: 'root'
 })
 export class ProgressBarService {
 
+  /**
+   * Instance map.
+   * @private
+   */
   private instances: { [id: string]: ProgressBarInstance } = {};
 
-  constructor() {
-  }
-
+  /**
+   * Get the progressbar instance from the map by its id.
+   * @param id
+   */
   public getInstance(id: string = 'default'): ProgressBarInstance {
     if (!this.instances[id]) {
       this.instances[id] = new ProgressBarInstance();

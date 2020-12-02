@@ -54,6 +54,9 @@ export class ProgressBarComponent implements OnDestroy {
   constructor(private progressBarService: ProgressBarService) {
   }
 
+  /**
+   * Get the progress bar state as observable.
+   */
   public get state(): Observable<ProgressBarState> {
     return this.progressBarService.getInstance(this.ref).state;
   }
