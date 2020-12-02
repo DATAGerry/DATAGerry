@@ -32,6 +32,7 @@ export class TypeAclStepComponent implements OnInit, OnDestroy {
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
   public acl: AccessControlList;
+  private wasEmpty: boolean = true;
 
   @Input('acl')
   public set ACL(access: AccessControlList) {
@@ -43,6 +44,7 @@ export class TypeAclStepComponent implements OnInit, OnDestroy {
 
   @Input() public groups: Array<Group> = [];
   @Output() public validStatus: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() public isEmpty: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   public form: FormGroup;
 
@@ -54,6 +56,8 @@ export class TypeAclStepComponent implements OnInit, OnDestroy {
       })
     });
   }
+
+
 
   public get activatedStatus(): boolean {
     return this.form.get('activated').value;
@@ -67,9 +71,20 @@ export class TypeAclStepComponent implements OnInit, OnDestroy {
     return this.groupsControl.get('includes') as FormGroup;
   }
 
+  public onAddChange(event) {
+    this.wasEmpty = (!event[0] || event[0].length === 0) && !event[1];
+    this.isEmpty.emit(this.wasEmpty);
+  }
+
   public ngOnInit(): void {
     this.form.statusChanges.pipe(takeUntil(this.subscriber)).subscribe((status) => {
-      this.validStatus.emit(this.form.valid);
+      if (!this.form.get('activated').value) {
+        this.isEmpty.emit(true);
+        this.validStatus.emit(true);
+      } else {
+        this.isEmpty.emit(this.wasEmpty);
+        this.validStatus.emit(this.form.valid);
+      }
     });
   }
 
