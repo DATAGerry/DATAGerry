@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, AfterViewChecked, AfterViewInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RenderField } from '../../fields/components.fields';
 import { ObjectService } from '../../../services/object.service';
 import { RenderResult } from '../../../models/cmdb-render';
@@ -26,7 +26,7 @@ import { RenderResult } from '../../../models/cmdb-render';
   templateUrl: './ref-simple.component.html',
   styleUrls: ['./ref-simple.component.scss']
 })
-export class RefSimpleComponent extends RenderField implements AfterViewInit {
+export class RefSimpleComponent extends RenderField implements OnInit {
 
   public refData: any = undefined;
 
@@ -34,11 +34,10 @@ export class RefSimpleComponent extends RenderField implements AfterViewInit {
     super();
   }
 
-  public ngAfterViewInit() {
+  public ngOnInit() {
     if (this.data && this.data.value && this.data.value !== 0) {
       if (!this.data.reference) {
         this.objectService.getObject(this.data.value).subscribe((res: RenderResult) => {
-          console.log(res);
           this.refData = {
             reference: {
               icon: res.type_information.icon,
