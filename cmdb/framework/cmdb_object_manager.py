@@ -259,7 +259,8 @@ class CmdbObjectManager(CmdbManagerBase):
             raise ObjectInsertError(e)
         return ack
 
-    def update_object(self, data: (dict, CmdbObject), user: UserModel = None, permission: AccessControlPermission = None) -> str:
+    def update_object(self, data: (dict, CmdbObject), user: UserModel = None,
+                      permission: AccessControlPermission = None) -> str:
         if isinstance(data, dict):
             update_object = CmdbObject(**data)
         elif isinstance(data, CmdbObject):
@@ -292,9 +293,10 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = self._update_many(CmdbObject.COLLECTION, filter, update)
         return ack
 
-    def get_object_references(self, public_id: int, active_flag=None) -> list:
+    def get_object_references(self, public_id: int, active_flag=None, user: UserModel = None,
+                              permission: AccessControlPermission = None) -> list:
         # Type of given object id
-        type_id = self.get_object(public_id=public_id).type_id
+        type_id = self.get_object(public_id=public_id, user=user, permission=permission).type_id
 
         # query for all types with ref input type with value of type id
         req_type_query = {
@@ -320,8 +322,7 @@ class CmdbObjectManager(CmdbManagerBase):
                 for ref_field in ref_fields:
                     type_init_list.append(
                         {"type_id": current_loop_type.get_public_id(), "field_name": ref_field['name']})
-            except CMDBError as e:
-                LOGGER.warning('Unsolvable type reference with type {}'.format(e.message))
+            except CMDBError:
                 continue
 
         referenced_by_objects = []
@@ -332,7 +333,8 @@ class CmdbObjectManager(CmdbManagerBase):
             if active_flag:
                 referenced_query.update({'active': {"$eq": True}})
 
-            referenced_by_objects = referenced_by_objects + self.get_objects_by(**referenced_query)
+            referenced_by_objects = referenced_by_objects + self.get_objects_by(**referenced_query,
+                                                                                user=user, permission=permission)
 
         return referenced_by_objects
 
