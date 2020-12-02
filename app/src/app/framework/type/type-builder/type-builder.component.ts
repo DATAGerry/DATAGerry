@@ -62,6 +62,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
   @ViewChild(TypeAclStepComponent, { static: true })
   public aclStep: TypeAclStepComponent;
   public aclStepValid: boolean = true;
+  public aclNotEmpty: boolean = false;
 
   public selectedCategoryID: number;
 

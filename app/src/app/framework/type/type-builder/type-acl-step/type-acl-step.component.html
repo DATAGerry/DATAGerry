@@ -22,7 +22,7 @@
   </div>
   <div class="col-md-10">
     <div [formGroup]="groupsControl" ui-block [blocked]="!activatedStatus">
-      <cmdb-groups-acl-tabs [groups]="groups" [form]="includesControl" [groupsACL]="acl?.groups">
+      <cmdb-groups-acl-tabs [groups]="groups" [form]="includesControl" [groupsACL]="acl?.groups" (valueChange)="onAddChange($event)">
       </cmdb-groups-acl-tabs>
     </div>
   </div>

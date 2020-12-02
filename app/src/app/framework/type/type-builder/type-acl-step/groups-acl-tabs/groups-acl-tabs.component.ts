@@ -82,6 +82,7 @@ export class GroupsAclTabsComponent implements OnDestroy {
       this.selectedGroup = undefined;
       this.selectedPermissions = undefined;
     }
+    this.valueChange.emit([[], null]);
   }
 
   /**

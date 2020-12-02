@@ -10,14 +10,14 @@
   <tbody>
   <tr>
     <td>
-      <ng-select [items]="groups" [(ngModel)]="selectedGroup">
+      <ng-select [items]="groups" [(ngModel)]="selectedGroup" (ngModelChange)="valueChange.emit([selectedPermissions, $event])">
         <ng-option *ngFor="let group of groups" [value]="group">{{group.label}}</ng-option>
       </ng-select>
       <small>Add a group to grant access operations.</small>
     </td>
     <td colspan="2">
       <ng-select [(ngModel)]="selectedPermissions" [items]="operations" [multiple]="true"
-                 [closeOnSelect]="false"></ng-select>
+                 [closeOnSelect]="false" (ngModelChange)="valueChange.emit([$event, selectedGroup])"></ng-select>
       <small>Select ACL permissions.</small>
     </td>
     <td class="col-sm">
