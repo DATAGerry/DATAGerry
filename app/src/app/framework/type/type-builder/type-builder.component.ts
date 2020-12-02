@@ -62,7 +62,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
   @ViewChild(TypeAclStepComponent, { static: true })
   public aclStep: TypeAclStepComponent;
   public aclStepValid: boolean = true;
-  public aclNotEmpty: boolean = false;
+  public aclEmpty: boolean = true;
 
   public selectedCategoryID: number;
 
@@ -184,6 +184,13 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
           console.log(error);
         });
     }
+  }
+
+  public isDisabled() {
+    if (this.aclEmpty && this.aclStepValid) {
+      return false;
+    }
+    return true;
   }
 
   public assignToType(data: any, optional: any = null) {

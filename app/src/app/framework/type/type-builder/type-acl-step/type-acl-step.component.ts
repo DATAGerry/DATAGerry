@@ -43,7 +43,7 @@ export class TypeAclStepComponent implements OnInit, OnDestroy {
 
   @Input() public groups: Array<Group> = [];
   @Output() public validStatus: EventEmitter<boolean> = new EventEmitter<boolean>();
-  @Output() public isNotEmpty: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() public isEmpty: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   public form: FormGroup;
 
@@ -72,9 +72,9 @@ export class TypeAclStepComponent implements OnInit, OnDestroy {
 
   public onAddChange(event) {
     if ((!event[0] || event[0].length === 0) && !event[1]) {
-      this.isNotEmpty.emit(false);
+      this.isEmpty.emit(true);
     } else {
-      this.isNotEmpty.emit(true);
+      this.isEmpty.emit(false);
     }
   }
 

@@ -21,7 +21,7 @@
       <small>Select ACL permissions.</small>
     </td>
     <td class="col-sm">
-      <button [disabled]="!selectedGroup" (click)="onAddControl()" type="button" class="btn btn-sm btn-success">
+      <button [disabled]="!selectedGroup || !selectedPermissions" (click)="onAddControl()" type="button" class="btn btn-sm btn-success">
         <i class="far fa-plus-square"></i>
       </button>
     </td>
