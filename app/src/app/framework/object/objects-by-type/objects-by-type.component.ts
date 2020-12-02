@@ -132,6 +132,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    */
   public filter: string;
 
+  public selectReset: Array<RenderResult> = [];
+
   public initialVisibleColumns: Array<string> = [];
 
   public columns: Array<Column>;
@@ -307,6 +309,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    */
   public loadObjects() {
     this.loading = true;
+    this.selectedObjects = [];
+    this.selectedObjectsIDs = [];
     const query = [];
     query.push({
       $match: {
@@ -485,16 +489,12 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
             this.toastService.success(`Deleted ${ this.selectedObjects.length } objects successfully`);
             this.sidebarService.updateTypeCounter(this.type.public_id);
             this.selectedObjects = [];
+            this.objectsTableComponent.selectedItems = [];
             this.loadObjects();
           });
         }
       });
     }
-  }
-
-  public onBulkChange(): void {
-    this.router.navigate(['/framework/object/change/'],
-      { state: { type: this.type, objects: this.selectedObjects } });
   }
 
 
