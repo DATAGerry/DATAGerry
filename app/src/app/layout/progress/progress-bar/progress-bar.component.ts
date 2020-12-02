@@ -17,7 +17,7 @@
 */
 
 import { Component, Input, OnInit, OnDestroy, ViewEncapsulation, HostBinding } from '@angular/core';
-import { ProgressBarService} from '../progress-bar.service';
+import { ProgressBarService } from '../progress-bar.service';
 import { Observable, of, ReplaySubject } from 'rxjs';
 import { ProgressBarState } from './progress-bar.types';
 
@@ -27,9 +27,7 @@ import { ProgressBarState } from './progress-bar.types';
   styleUrls: ['./progress-bar.component.scss'],
   encapsulation: ViewEncapsulation.Emulated
 })
-export class ProgressBarComponent implements OnDestroy {
-
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+export class ProgressBarComponent {
 
   /**
    * Z Index value.
@@ -60,11 +58,5 @@ export class ProgressBarComponent implements OnDestroy {
   public get state(): Observable<ProgressBarState> {
     return this.progressBarService.getInstance(this.ref).state;
   }
-
-  public ngOnDestroy(): void {
-    this.subscriber.next();
-    this.subscriber.complete();
-  }
-
 
 }
