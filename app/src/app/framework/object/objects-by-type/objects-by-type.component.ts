@@ -46,6 +46,7 @@ import {
   UserSettingsService
 } from '../../../management/user-settings/services/user-settings.service';
 import { DatePipe } from '@angular/common';
+import { ExportObjectsFileExtension } from '../../../export/export-objects/model/export-objects-file-extension';
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -451,14 +452,14 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.reload(this.type);
   }
 
-  public exportingFiles(exportType: any) {
+  public exportingFiles(exportType: ExportObjectsFileExtension) {
     if (this.selectedObjectsIDs.length === 0) {
-      this.fileService.getObjectFileByType(this.type.public_id, exportType.id)
+      this.fileService.getObjectFileByType(this.type.public_id, exportType.extension)
         .subscribe(res => {
           this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
         });
     } else {
-      this.fileService.callExportRoute(this.selectedObjectsIDs.toString(), exportType.id)
+      this.fileService.callExportRoute(this.selectedObjectsIDs, exportType.extension)
         .subscribe(res => {
           this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
         });

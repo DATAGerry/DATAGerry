@@ -258,9 +258,6 @@ class XlsxExportType(ExportType):
         # create workbook
         workbook = openpyxl.Workbook()
 
-        # delete default sheet
-        workbook.remove(workbook.active)
-
         # sorts data_list by type_id
         type_id = "type_id"
         decorated = [(dict_.__dict__[type_id], dict_.__dict__) for dict_ in object_list]
@@ -279,6 +276,9 @@ class XlsxExportType(ExportType):
                 current_type_id = obj[type_id]
                 current_type_fields = type_manager.get(obj[type_id]).get_fields()
                 i = 1
+
+                # delete default sheet
+                workbook.remove(workbook.active)
 
                 # start a new worksheet and rename it
                 title = self.__normalize_sheet_title(object_manager.get_type(obj[type_id]).label)

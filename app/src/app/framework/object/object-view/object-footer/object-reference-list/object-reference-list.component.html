@@ -1,11 +1,11 @@
-<span class="card-group float-right">
+<div class="card-group float-right">
       <div class="btn-group" *permissionLink="'base.export.object.*'">
         <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <fa-icon icon="file-export"></fa-icon> Export
         </button>
         <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left" aria-labelledby="exportButton">
-          <li *ngFor="let item of formatList" id="export-{{item.id}}"
+          <li *ngFor="let item of formatList" id="export-{{item.extension}}"
               [className]="item.active && referenceList?.length > 0 ? 'dropdown-item' : 'dropdown-item disabled'"
               (click)="exportingFiles(item)"
               [ngbTooltip]="item.helperText">
@@ -14,9 +14,9 @@
           </li>
         </ul>
       </div>
-  </span>
+  </div>
 
-<table #dtTableElement datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-striped table-bordered" id="dt-object-ref">
+<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-striped table-bordered" id="dt-object-ref">
   <thead>
   <tr>
     <th>Object ID</th>

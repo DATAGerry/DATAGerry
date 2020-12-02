@@ -18,8 +18,10 @@
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CmdbType } from '../../../models/cmdb-type';
+import { ExportObjectsFileExtension } from '../../../../export/export-objects/model/export-objects-file-extension';
 import { RenderResult } from '../../../models/cmdb-render';
 import { Router } from '@angular/router';
+
 @Component({
   selector: 'cmdb-object-table-head',
   templateUrl: './object-table-head.component.html',
@@ -29,7 +31,7 @@ export class ObjectTableHeadComponent {
 
   @Input() public selectedObjects: Array<RenderResult> = [];
   @Input() public selectedObjectsIDs: Array<number> = [];
-  @Input() public formatList: any[] = [];
+  @Input() public formatList: ExportObjectsFileExtension[] = [];
   @Input() public totalResults: number = 0;
 
   @Output() public fileExport: EventEmitter<any> = new EventEmitter<any>();
@@ -45,7 +47,5 @@ export class ObjectTableHeadComponent {
     this.router.navigate(['/framework/object/change/'],
       { state: { type: this.type, objects: this.selectedObjects } });
   }
-
-
 
 }
