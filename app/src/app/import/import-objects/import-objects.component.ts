@@ -21,8 +21,8 @@ import { CmdbType } from '../../framework/models/cmdb-type';
 import { ImporterConfig, ImporterFile, ImportResponse } from './import-object.models';
 import { ImportService } from '../import.service';
 import { Subscription } from 'rxjs';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { SidebarService } from '../../layout/services/sidebar.service';
+import { ProgressSpinnerService } from '../../layout/progress/progress-spinner.service';
 
 @Component({
   selector: 'cmdb-import-objects',
@@ -52,7 +52,7 @@ export class ImportObjectsComponent implements OnInit, AfterViewInit, OnDestroy 
   // Import Response
   public importResponse: ImportResponse = undefined;
 
-  public constructor(private importService: ImportService, private spinner: NgxSpinnerService, public sidebarService: SidebarService) {
+  public constructor(private importService: ImportService, private spinner: ProgressSpinnerService, public sidebarService: SidebarService) {
     this.fileReader = new FileReader();
     this.importerSubscription = new Subscription();
     this.parseDataSubscription = new Subscription();

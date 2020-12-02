@@ -27,7 +27,6 @@ import { ObjectHeaderComponent } from './components/object-header/object-header.
 import { ObjectQrComponent } from './components/object-qr/object-qr.component';
 import { ObjectSummaryComponent } from './components/object-summary/object-summary.component';
 import { ObjectExternalsComponent } from './components/object-externals/object-externals.component';
-import { NgxSpinnerModule } from 'ngx-spinner';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RenderModule } from '../render/render.module';
 import { ObjectAddComponent } from './object-add/object-add.component';
@@ -114,7 +113,6 @@ import { ObjectTableHeadComponent } from './components/object-table-head/object-
     AuthModule,
     LayoutModule,
     QRCodeModule,
-    NgxSpinnerModule,
     FormsModule,
     ReactiveFormsModule,
     NgSelectModule,
