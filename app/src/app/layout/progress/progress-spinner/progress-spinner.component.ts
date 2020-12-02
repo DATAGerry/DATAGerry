@@ -16,17 +16,25 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostBinding,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewEncapsulation
+} from '@angular/core';
 import { ProgressSpinnerService } from '../progress-spinner.service';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { ProgressSpinner } from './progress-spinner.types';
 
 @Component({
   selector: 'cmdb-progress-spinner',
   templateUrl: './progress-spinner.component.html',
   styleUrls: ['./progress-spinner.component.scss'],
-  encapsulation: ViewEncapsulation.Emulated,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.Emulated
 })
 export class ProgressSpinnerComponent implements OnInit, OnDestroy {
 
@@ -36,17 +44,32 @@ export class ProgressSpinnerComponent implements OnInit, OnDestroy {
    * Reference name for ProgressSpinnerService.
    */
   @Input() public ref: string = 'app';
-  @Input() public zIndex: number = 1000;
 
-  public show: boolean = false;
+  /**
+   * Z Index value.
+   */
+  @Input() public zIndex: number = 4000;
+
+  /**
+   * Fullscreen enabled
+   */
+  @Input() public fullScreen: boolean = false;
+
+  /**
+   * Fullscreen enabled
+   */
+  @Input() public text: boolean = true;
+
+  public spinner: ProgressSpinner;
 
   constructor(private spinnerService: ProgressSpinnerService) {
   }
 
   public ngOnInit(): void {
-    this.spinnerService.getSpinner(this.ref).pipe(takeUntil(this.subscriber)).subscribe((show: boolean) => {
-      this.show = show;
-    });
+    this.spinnerService.getSpinner(this.ref).pipe(takeUntil(this.subscriber)).subscribe(
+      (spinner: ProgressSpinner) => {
+        this.spinner = spinner;
+      });
   }
 
   public ngOnDestroy(): void {

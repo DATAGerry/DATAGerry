@@ -1,81 +1,86 @@
-<div *ngIf="show" class="progress-spinner">
-  <div class="spinner-animation">
-    <svg id="loading" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-         viewBox="0 0 150 150" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
-      <defs>
-        <linearGradient id="loading-head-fill" x1="290.820000" y1="47.790000" x2="237.110000" y2="100.160000"
-                        spreadMethod="pad" gradientUnits="userSpaceOnUse">
-          <stop id="loading-head-fill-0" offset="0%" stop-color="rgb(251,186,0)"/>
-          <stop id="loading-head-fill-1" offset="100%" stop-color="rgb(233,76,21)"/>
-        </linearGradient>
-        <linearGradient id="loading-chest-fill" x1="297.720000" y1="54.860000" x2="244.010000" y2="107.240000"
-                        spreadMethod="pad" gradientUnits="userSpaceOnUse">
-          <stop id="loading-chest-fill-0" offset="0%" stop-color="rgb(251,186,0)"/>
-          <stop id="loading-chest-fill-1" offset="100%" stop-color="rgb(233,76,21)"/>
-        </linearGradient>
-        <linearGradient id="loading-body-fill" x1="291.150000" y1="48.130000" x2="237.450000" y2="100.510000"
-                        spreadMethod="pad" gradientUnits="userSpaceOnUse">
-          <stop id="loading-body-fill-0" offset="0%" stop-color="rgb(251,186,0)"/>
-          <stop id="loading-body-fill-1" offset="100%" stop-color="rgb(233,76,21)"/>
-        </linearGradient>
-        <linearGradient id="loading-tail-fill" x1="251.230000" y1="21.630000" x2="217.190000" y2="71.510000"
-                        spreadMethod="pad" gradientUnits="userSpaceOnUse">
-          <stop id="loading-tail-fill-0" offset="0%" stop-color="rgb(251,186,0)"/>
-          <stop id="loading-tail-fill-1" offset="100%" stop-color="rgb(233,76,21)"/>
-        </linearGradient>
-        <linearGradient id="loading-tip-fill" x1="238.690000" y1="13.070000" x2="204.650000" y2="62.960000"
-                        spreadMethod="pad" gradientUnits="userSpaceOnUse">
-          <stop id="loading-tip-fill-0" offset="0%" stop-color="rgb(251,186,0)"/>
-          <stop id="loading-tip-fill-1" offset="100%" stop-color="rgb(233,76,21)"/>
-        </linearGradient>
-        <radialGradient id="loading-glow-fill" cx="0" cy="0" r="11.540000" spreadMethod="pad"
-                        gradientUnits="userSpaceOnUse" gradientTransform="matrix(1 0 0 1 0 0)">
-          <stop id="loading-glow-fill-0" offset="0%" stop-color="rgb(255,255,255)"/>
-          <stop id="loading-glow-fill-1" offset="23%" stop-color="rgba(255,255,255,0.71)"/>
-          <stop id="loading-glow-fill-2" offset="54%" stop-color="rgba(255,255,255,0.33)"/>
-          <stop id="loading-glow-fill-3" offset="76%" stop-color="rgba(255,255,255,0.09)"/>
-          <stop id="loading-glow-fill-4" offset="87%" stop-color="rgba(255,255,255,0)"/>
-        </radialGradient>
-      </defs>
-      <g id="loading-ear_to" transform="translate(-183.975000,16.790001)">
-        <path id="loading-ear"
-              d="M274.070000,45.780000C274.070000,41.693093,270.756907,38.380000,266.670000,38.380000L266.670000,45.780000Z"
-              transform="translate(0,0)" fill="rgb(25,25,23)" stroke="none" stroke-width="1"/>
-      </g>
-      <path id="loading-head"
-            d="M266.670000,44.740000L266.670000,71.680000L293.600000,71.680000C293.600001,56.805353,281.544646,44.745521,266.670000,44.740000Z"
-            transform="matrix(1 0 0 1 -183.97500045552735 16.79000093405762)" fill="url(#loading-head-fill)"
-            stroke="none" stroke-width="1"/>
-      <circle id="loading-eye" r="2" transform="matrix(1 0 0 1 98.26500045999998 76.93000040000001)"
-              fill="rgb(26,26,24)" stroke="none" stroke-width="1"/>
-      <path id="loading-chest"
-            d="M293.600000,71.670000L266.670000,71.670000L266.670000,98.610000C266.669999,83.735353,278.725354,71.675521,293.600000,71.670000Z"
-            transform="matrix(1 0 0 1 -183.97500045552735 16.79000093405762)" fill="url(#loading-chest-fill)"
-            stroke="none" stroke-width="1"/>
-      <path id="loading-body"
-            d="M239.730000,71.680000C239.735521,86.554646,251.795353,98.610001,266.670000,98.610000L266.670000,71.680000Z"
-            transform="matrix(1 0 0 1 -183.97500045552735 16.79000093405762)" fill="url(#loading-body-fill)"
-            stroke="none" stroke-width="1"/>
-      <g id="loading-tail_tr" transform="translate(55.755000,88.470001) rotate(0)">
-        <path id="loading-tail"
-              d="M212.800000,44.740000C212.799999,59.614647,224.855354,71.674479,239.730000,71.680000L239.730000,44.740000Z"
-              transform="translate(-239.729998,-71.680000)" fill="url(#loading-tail-fill)" stroke="none"
-              stroke-width="1"/>
-      </g>
-      <g id="loading-tip_to" transform="translate(42.290000,48.065000)">
-        <g id="loading-tip_tr" transform="rotate(0)">
-          <path id="loading-tip"
-                d="M239.730000,44.740000C239.732654,37.596907,236.896246,30.745614,231.845316,25.694684C226.794386,20.643754,219.943093,17.807346,212.800000,17.810000L212.800000,44.740000Z"
-                transform="translate(-226.265001,-31.274999)" fill="url(#loading-tip-fill)" stroke="none"
+<div *ngIf="spinner && spinner.show" [style.z-index]="zIndex" [style.position]="fullScreen ? 'fixed' : 'absolute'"
+     class="progress-spinner">
+  <div class="progress-spinner-content">
+    <div class="progress-spinner-animation">
+      <svg id="loading" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+           viewBox="0 0 150 150" shape-rendering="geometricPrecision" text-rendering="geometricPrecision">
+        <defs>
+          <linearGradient id="loading-head-fill" x1="290.820000" y1="47.790000" x2="237.110000" y2="100.160000"
+                          spreadMethod="pad" gradientUnits="userSpaceOnUse">
+            <stop id="loading-head-fill-0" offset="0%" stop-color="rgb(251,186,0)"/>
+            <stop id="loading-head-fill-1" offset="100%" stop-color="rgb(233,76,21)"/>
+          </linearGradient>
+          <linearGradient id="loading-chest-fill" x1="297.720000" y1="54.860000" x2="244.010000" y2="107.240000"
+                          spreadMethod="pad" gradientUnits="userSpaceOnUse">
+            <stop id="loading-chest-fill-0" offset="0%" stop-color="rgb(251,186,0)"/>
+            <stop id="loading-chest-fill-1" offset="100%" stop-color="rgb(233,76,21)"/>
+          </linearGradient>
+          <linearGradient id="loading-body-fill" x1="291.150000" y1="48.130000" x2="237.450000" y2="100.510000"
+                          spreadMethod="pad" gradientUnits="userSpaceOnUse">
+            <stop id="loading-body-fill-0" offset="0%" stop-color="rgb(251,186,0)"/>
+            <stop id="loading-body-fill-1" offset="100%" stop-color="rgb(233,76,21)"/>
+          </linearGradient>
+          <linearGradient id="loading-tail-fill" x1="251.230000" y1="21.630000" x2="217.190000" y2="71.510000"
+                          spreadMethod="pad" gradientUnits="userSpaceOnUse">
+            <stop id="loading-tail-fill-0" offset="0%" stop-color="rgb(251,186,0)"/>
+            <stop id="loading-tail-fill-1" offset="100%" stop-color="rgb(233,76,21)"/>
+          </linearGradient>
+          <linearGradient id="loading-tip-fill" x1="238.690000" y1="13.070000" x2="204.650000" y2="62.960000"
+                          spreadMethod="pad" gradientUnits="userSpaceOnUse">
+            <stop id="loading-tip-fill-0" offset="0%" stop-color="rgb(251,186,0)"/>
+            <stop id="loading-tip-fill-1" offset="100%" stop-color="rgb(233,76,21)"/>
+          </linearGradient>
+          <radialGradient id="loading-glow-fill" cx="0" cy="0" r="11.540000" spreadMethod="pad"
+                          gradientUnits="userSpaceOnUse" gradientTransform="matrix(1 0 0 1 0 0)">
+            <stop id="loading-glow-fill-0" offset="0%" stop-color="rgb(255,255,255)"/>
+            <stop id="loading-glow-fill-1" offset="23%" stop-color="rgba(255,255,255,0.71)"/>
+            <stop id="loading-glow-fill-2" offset="54%" stop-color="rgba(255,255,255,0.33)"/>
+            <stop id="loading-glow-fill-3" offset="76%" stop-color="rgba(255,255,255,0.09)"/>
+            <stop id="loading-glow-fill-4" offset="87%" stop-color="rgba(255,255,255,0)"/>
+          </radialGradient>
+        </defs>
+        <g id="loading-ear_to" transform="translate(-183.975000,16.790001)">
+          <path id="loading-ear"
+                d="M274.070000,45.780000C274.070000,41.693093,270.756907,38.380000,266.670000,38.380000L266.670000,45.780000Z"
+                transform="translate(0,0)" fill="rgb(25,25,23)" stroke="none" stroke-width="1"/>
+        </g>
+        <path id="loading-head"
+              d="M266.670000,44.740000L266.670000,71.680000L293.600000,71.680000C293.600001,56.805353,281.544646,44.745521,266.670000,44.740000Z"
+              transform="matrix(1 0 0 1 -183.97500045552735 16.79000093405762)" fill="url(#loading-head-fill)"
+              stroke="none" stroke-width="1"/>
+        <circle id="loading-eye" r="2" transform="matrix(1 0 0 1 98.26500045999998 76.93000040000001)"
+                fill="rgb(26,26,24)" stroke="none" stroke-width="1"/>
+        <path id="loading-chest"
+              d="M293.600000,71.670000L266.670000,71.670000L266.670000,98.610000C266.669999,83.735353,278.725354,71.675521,293.600000,71.670000Z"
+              transform="matrix(1 0 0 1 -183.97500045552735 16.79000093405762)" fill="url(#loading-chest-fill)"
+              stroke="none" stroke-width="1"/>
+        <path id="loading-body"
+              d="M239.730000,71.680000C239.735521,86.554646,251.795353,98.610001,266.670000,98.610000L266.670000,71.680000Z"
+              transform="matrix(1 0 0 1 -183.97500045552735 16.79000093405762)" fill="url(#loading-body-fill)"
+              stroke="none" stroke-width="1"/>
+        <g id="loading-tail_tr" transform="translate(55.755000,88.470001) rotate(0)">
+          <path id="loading-tail"
+                d="M212.800000,44.740000C212.799999,59.614647,224.855354,71.674479,239.730000,71.680000L239.730000,44.740000Z"
+                transform="translate(-239.729998,-71.680000)" fill="url(#loading-tail-fill)" stroke="none"
                 stroke-width="1"/>
         </g>
-      </g>
-      <g id="loading-glow_ts" transform="translate(109.635015,86.469997) scale(1,1)">
-        <circle id="loading-glow" r="11.540000" transform="translate(-0.000015,0.000003)" fill="url(#loading-glow-fill)"
-                stroke="none" stroke-width="1"/>
-      </g>
-      <circle id="loading-nose" r="2" transform="matrix(1 0 0 1 109.63500046000000 86.46000040000001)"
-              fill="rgb(26,26,24)" stroke="none" stroke-width="1"/>
-    </svg>
+        <g id="loading-tip_to" transform="translate(42.290000,48.065000)">
+          <g id="loading-tip_tr" transform="rotate(0)">
+            <path id="loading-tip"
+                  d="M239.730000,44.740000C239.732654,37.596907,236.896246,30.745614,231.845316,25.694684C226.794386,20.643754,219.943093,17.807346,212.800000,17.810000L212.800000,44.740000Z"
+                  transform="translate(-226.265001,-31.274999)" fill="url(#loading-tip-fill)" stroke="none"
+                  stroke-width="1"/>
+          </g>
+        </g>
+        <g id="loading-glow_ts" transform="translate(109.635015,86.469997) scale(1,1)">
+          <circle id="loading-glow" r="11.540000" transform="translate(-0.000015,0.000003)"
+                  fill="url(#loading-glow-fill)"
+                  stroke="none" stroke-width="1"/>
+        </g>
+        <circle id="loading-nose" r="2" transform="matrix(1 0 0 1 109.63500046000000 86.46000040000001)"
+                fill="rgb(26,26,24)" stroke="none" stroke-width="1"/>
+      </svg>
+    </div>
+    <div *ngIf="text && spinner.text" class="progress-spinner-text">{{spinner.text}}</div>
   </div>
 </div>

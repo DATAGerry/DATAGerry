@@ -18,39 +18,45 @@
 
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { ProgressSpinner } from './progress-spinner/progress-spinner.types';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProgressSpinnerService {
 
+  public static readonly DEFAULT_TEXT: string = 'Loading';
+
   /**
    * Instance map.
    * @private
    */
-  private spinner: { [id: string]: BehaviorSubject<boolean> } = {};
+  private spinner: { [id: string]: BehaviorSubject<ProgressSpinner> } = {};
 
   /**
    * Get the progressbar instance from the map by its id.
    * @param id
    */
-  private getSpinnerInstance(id: string = 'app'): BehaviorSubject<boolean> {
+  private getSpinnerInstance(id: string = 'app'): BehaviorSubject<ProgressSpinner> {
     if (!this.spinner[id]) {
-      this.spinner[id] = new BehaviorSubject<boolean>(false);
+      this.spinner[id] = new BehaviorSubject<ProgressSpinner>({
+        show: false,
+        text: ProgressSpinnerService.DEFAULT_TEXT
+      });
     }
     return this.spinner[id];
   }
 
-  public getSpinner(id: string = 'app'): Observable<boolean> {
+  public getSpinner(id: string = 'app'): Observable<ProgressSpinner> {
     return this.getSpinnerInstance(id).asObservable();
   }
 
-  public show(id: string = 'app'): void {
-    this.getSpinnerInstance(id).next(true);
+  public show(id: string = 'app', text?: string): void {
+    this.getSpinnerInstance(id).next({ show: true, text });
   }
 
   public hide(id: string = 'app'): void {
-    this.getSpinnerInstance(id).next(false);
+    this.getSpinnerInstance(id).next({ show: false });
   }
 
 }

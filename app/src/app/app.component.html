@@ -1,4 +1,4 @@
-<div #app id="app-wrapper">
+<div id="app-wrapper">
   <cmdb-progress-bar ref="app"></cmdb-progress-bar>
   <cmdb-navigation *ngIf="initDone && view === 'full'"></cmdb-navigation>
   <cmdb-sidebar *ngIf="initDone && view === 'full'"></cmdb-sidebar>
@@ -12,5 +12,5 @@
     <cmdb-footer *ngIf="initDone && view === 'full'"></cmdb-footer>
     <cmdb-toast-container></cmdb-toast-container>
   </main>
-  <cmdb-progress-spinner [ref]="'app'"></cmdb-progress-spinner>
+  <cmdb-progress-spinner [fullScreen]="true"></cmdb-progress-spinner>
 </div>

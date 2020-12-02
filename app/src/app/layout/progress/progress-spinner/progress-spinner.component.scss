@@ -1,3 +1,32 @@
+.progress-spinner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgb(255, 255, 255, .5);
+  backdrop-filter: blur(1.2px);
+
+  .progress-spinner-content {
+    position: fixed;
+    width: 25%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    > * {
+      filter: blur(0);
+    }
+
+    .progress-spinner-text {
+      text-align: center;
+      margin-top: -20%;
+    }
+  }
+
+
+}
+
 #loading-ear_to {
   animation: loading-ear_to__to 2000ms linear infinite normal forwards
 }
