@@ -16,9 +16,10 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
-import { ProgressBarService } from '../progress-bar.service';
-import { ReplaySubject } from 'rxjs';
+import { Component, Input, OnInit, OnDestroy, ViewEncapsulation, HostBinding } from '@angular/core';
+import { ProgressBarService} from '../progress-bar.service';
+import { Observable, of, ReplaySubject } from 'rxjs';
+import { ProgressBarState } from './progress-bar.types';
 
 @Component({
   selector: 'cmdb-progress-bar',
@@ -26,41 +27,35 @@ import { ReplaySubject } from 'rxjs';
   styleUrls: ['./progress-bar.component.scss'],
   encapsulation: ViewEncapsulation.Emulated
 })
-export class ProgressBarComponent implements OnInit, OnDestroy {
-
-  public static readonly MIN_VALUE: number = 0;
-  public static readonly MAX_VALUE: number = 100;
+export class ProgressBarComponent implements OnDestroy {
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   /**
-   * Width in percent.
+   * Z Index value.
    */
-  @Input() public width: number = 0;
+  @HostBinding('style.z-index') @Input() public zIndex: number = 4000;
+
+  /**
+   * Bar height in px.
+   */
+  @Input() public height: number = 4;
+
+  /**
+   * Reference name for ProgressBarService.
+   */
   @Input() public ref: string = 'default';
+
+  /**
+   * Displayed fixed on top of page.
+   */
   @Input() public fixed: boolean = true;
 
   constructor(private progressBarService: ProgressBarService) {
   }
 
-  public ngOnInit(): void {
-    this.progressBarService.getRef(this.ref);
-  }
-
-  public increase(value: number): void {
-    if ((this.width + value) <= ProgressBarComponent.MAX_VALUE) {
-      this.width = ProgressBarComponent.MAX_VALUE;
-    } else {
-      this.width += value;
-    }
-  }
-
-  public decrease(value: number): void {
-    if ((this.width - value) <= ProgressBarComponent.MIN_VALUE) {
-      this.width = ProgressBarComponent.MIN_VALUE;
-    } else {
-      this.width -= value;
-    }
+  public get state(): Observable<ProgressBarState> {
+    return this.progressBarService.getInstance(this.ref).state;
   }
 
   public ngOnDestroy(): void {

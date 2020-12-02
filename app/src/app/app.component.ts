@@ -18,7 +18,7 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Event, NavigationEnd, Router } from '@angular/router';
-import { ApplicationLoadingIndicatorService } from './services/application-loading-indicator.service';
+import { AppLoadingService } from './services/app-loading.service';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -38,7 +38,7 @@ export class AppComponent implements OnInit, OnDestroy {
   public initDone: boolean = false;
 
   constructor(private router: Router, private route: ActivatedRoute,
-              private loadingIndicator: ApplicationLoadingIndicatorService) {
+              private loadingIndicator: AppLoadingService) {
     this.view = this.defaultView;
   }
 
@@ -54,9 +54,6 @@ export class AppComponent implements OnInit, OnDestroy {
           this.initDone = true;
         });
       }
-    });
-    this.loadingIndicator.isNavigationPending.pipe(takeUntil(this.applicationSubscriber))
-      .subscribe((loading: boolean) => {
     });
   }
 

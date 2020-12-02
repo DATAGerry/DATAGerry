@@ -4,9 +4,9 @@
   position: fixed;
   pointer-events: none;
   z-index: 4000;
+  width: 100%;
 
   .progress-loading-bar {
-    height: 5px;
     background-color: theme-color('primary');
   }
 

@@ -16,7 +16,8 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Injectable } from '@angular/core';
+
+import { Inject, Injectable, Optional } from '@angular/core';
 import {
   NavigationCancel,
   NavigationEnd,
@@ -28,23 +29,45 @@ import {
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 
+import { InjectionToken, Type } from '@angular/core';
+import { ProgressBarService } from '../layout/progress/progress-bar.service';
+
+interface ProgressRouterConfig {
+  id?: string;
+  delay?: number;
+  startEvents?: Type<RouterEvent>[];
+  completeEvents?: Type<RouterEvent>[];
+}
+
+export const PROGRESS_ROUTER_CONFIG = new InjectionToken<ProgressRouterConfig>('progressRouterConfig');
+
 @Injectable({
   providedIn: 'root'
 })
-export class ApplicationLoadingIndicatorService {
+export class AppLoadingService {
 
-  constructor(private router: Router) {
+  private readonly config: ProgressRouterConfig = {
+    id: 'app',
+    delay: 0,
+    startEvents: [NavigationStart],
+    completeEvents: [NavigationEnd, NavigationCancel, NavigationError]
+  };
+
+  constructor(private router: Router, progressService: ProgressBarService,
+              @Optional() @Inject(PROGRESS_ROUTER_CONFIG) config: ProgressRouterConfig) {
+    this.config = config ? { ...this.config, ...config } : this.config;
+    console.log(this.config);
   }
 
   public isNavigationPending: Observable<boolean> = this.router.events.pipe(
-    filter((event: RouterEvent) => ApplicationLoadingIndicatorService.isConsideredEvent(event)),
-    map((event: RouterEvent) => ApplicationLoadingIndicatorService.isNavigationStart(event)),
+    filter((event: RouterEvent) => AppLoadingService.isConsideredEvent(event)),
+    map((event: RouterEvent) => AppLoadingService.isNavigationStart(event)),
     distinctUntilChanged()
   );
 
   private static isConsideredEvent(event: RouterEvent): boolean {
-    return ApplicationLoadingIndicatorService.isNavigationStart(event)
-      || ApplicationLoadingIndicatorService.isNavigationEnd(event);
+    return AppLoadingService.isNavigationStart(event)
+      || AppLoadingService.isNavigationEnd(event);
   }
 
   private static isNavigationStart(event: RouterEvent): boolean {

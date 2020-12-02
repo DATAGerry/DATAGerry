@@ -16,28 +16,34 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Injectable } from '@angular/core';
-import { ProgressBarInstance } from './progress-bar/progress-bar.types';
+import { BehaviorSubject, Observable } from 'rxjs';
 
+export class ProgressBarInstance {
 
-type state = 'pending' | 'start' | 'running' | 'stop' | 'complete';
-type action = 'start' | 'complete' | 'set' | 'stop' | 'increment';
+  public static readonly INIT_VALUE: number = 0;
+  public static readonly MIN_VALUE: number = 0;
+  public static readonly MAX_VALUE: number = 100;
 
-@Injectable({
-  providedIn: 'root'
-})
-export class ProgressBarService {
-
-  private instances: { [id: string]: ProgressBarInstance } = {};
+  private _state: BehaviorSubject<ProgressBarState>;
 
   constructor() {
+    this._state = new BehaviorSubject<ProgressBarState>({ value: 0 });
   }
 
-  public getInstance(id: string = 'default'): ProgressBarInstance {
-    if (!this.instances[id]) {
-      this.instances[id] = new ProgressBarInstance();
-    }
-    return this.instances[id];
+  public get state(): Observable<ProgressBarState> {
+    return this._state.asObservable();
   }
 
+  public start() {
+    this._state.next({ value: 10 });
+  }
+
+  public complete() {
+
+  }
+
+}
+
+export interface ProgressBarState {
+  value: number;
 }
