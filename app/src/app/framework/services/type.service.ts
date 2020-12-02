@@ -32,6 +32,8 @@ import {
 } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import { ValidatorService } from '../../services/validator.service';
+import { UserService } from '../../management/services/user.service';
+import { AccessControlPermission } from '../../acl/acl.types';
 
 
 export const checkTypeExistsValidator = (typeService: TypeService, time: number = 500) => {
@@ -62,7 +64,27 @@ export class TypeService<T = CmdbType> implements ApiService {
 
   public servicePrefix: string = 'types';
 
-  constructor(private api: ApiCallService) {
+  constructor(private api: ApiCallService, private userService: UserService) {
+  }
+
+  /**
+   * Returns acl read filter
+   *
+   * @private
+   */
+  private getAclReadFilter() {
+    const location = 'acl.groups.includes.' + this.userService.getCurrentUser().group_id;
+    return {
+      $or: [
+        { $or : [{acl: { $exists: false }}, {'acl.activated' : false}]},
+        { $and : [
+            {'acl.activated' : true},
+            {$and : [
+                { [location] : { $exists: true }},
+                { [location] : { $in : ['READ']}}
+              ]},
+          ]}]
+    };
   }
 
   /**
@@ -112,6 +134,7 @@ export class TypeService<T = CmdbType> implements ApiService {
     const options = httpObserveOptions;
     let params = new HttpParams();
     params = params.set('limit', '0');
+    params = params.set('filter', JSON.stringify(this.getAclReadFilter()));
     options.params = params;
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
@@ -146,9 +169,11 @@ export class TypeService<T = CmdbType> implements ApiService {
    */
   public getTypesByNameOrLabel(name: string): Observable<Array<T>> {
     const regex = ValidatorService.validateRegex(name).trim();
-    const filter = {
+    const filter = { $and : [{
       $or: [{ name: { $regex: regex, $options: 'ismx' } }, { label: { $regex: regex, $options: 'ismx' } }]
-    };
+    },
+        this.getAclReadFilter()
+      ]};
     const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(filter), 0);
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
@@ -196,7 +221,7 @@ export class TypeService<T = CmdbType> implements ApiService {
    */
   public getUncategorizedTypes(): Observable<APIGetMultiResponse<T>> {
     const pipeline = [
-      { $match: {} },
+      { $match: this.getAclReadFilter() },
       { $lookup: { from: 'framework.categories', localField: 'public_id', foreignField: 'types', as: 'categories' } },
       { $match: { categories: { $size: 0 } } },
       { $project: { categories: 0 } }
@@ -223,7 +248,9 @@ export class TypeService<T = CmdbType> implements ApiService {
           as: 'category'
         }
       },
-      { $match: { category: { $gt: { $size: 0 } } } },
+      { $match: { $and: [{ category: { $gt: { $size: 0 } } },
+            this.getAclReadFilter()
+          ] }},
       { $project: { category: 0 } }
     ];
     const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(pipeline), 0);

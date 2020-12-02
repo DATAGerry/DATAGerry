@@ -29,7 +29,6 @@ export class AclPermissionService {
 
   constructor(private authService: AuthService) {}
 
-
   public checkRights(acl: AccessControlList, rights: string | string[]) {
     if (!acl.activated) {
       return null;
