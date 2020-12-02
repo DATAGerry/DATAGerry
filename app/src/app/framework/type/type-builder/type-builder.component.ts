@@ -186,13 +186,6 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     }
   }
 
-  public isDisabled() {
-    if (this.aclEmpty && this.aclStepValid) {
-      return false;
-    }
-    return true;
-  }
-
   public assignToType(data: any, optional: any = null) {
     if (optional !== null) {
       if (this.typeInstance[optional] === undefined) {
