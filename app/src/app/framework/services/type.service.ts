@@ -170,7 +170,7 @@ export class TypeService<T = CmdbType> implements ApiService {
   public getTypesByNameOrLabel(name: string): Observable<Array<T>> {
     const regex = ValidatorService.validateRegex(name).trim();
     const filter = { $and : [{
-      $or: [{ name: { $regex: regex, $options: 'ismx' } }, { label: { $regex: regex, $options: 'ismx' } }]
+      $or: [{ name: { $regex: regex, $options: 'ism' } }, { label: { $regex: regex, $options: 'ism' } }]
     },
         this.getAclReadFilter()
       ]};
