@@ -25,7 +25,7 @@ from pymongo.errors import DuplicateKeyError
 from pymongo.results import DeleteResult, UpdateResult
 
 from cmdb.data_storage import CONNECTOR
-from cmdb.data_storage.database_connection import MongoConnector
+from cmdb.data_storage.connection import MongoConnector
 from cmdb.data_storage.database_framework_counter import IDCounter
 from cmdb.utils.error import CMDBError
 from gridfs import GridFS
@@ -35,18 +35,11 @@ LOGGER = logging.getLogger(__name__)
 
 class DatabaseManager(Generic[CONNECTOR]):
     """
-    Default database managers with no implementation
-
+    Base database managers
     """
 
-    DB_MANAGER_TYPE = 'base'
-    DEFAULT_DATABASE_NAME = 'cmdb'
-    ASCENDING = 1
-    DESCENDING = -1
-
     def __init__(self, connector: CONNECTOR):
-        """instance of super class
-
+        """Constructor of DatabaseManager
         Args:
             connector (CONNECTOR): Database Connector for subclass implementation
 

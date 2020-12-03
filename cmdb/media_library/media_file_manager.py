@@ -35,7 +35,7 @@ class MediaFileManagement(CmdbManagerBase):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.dbm = database_manager
-        self.fs = DatabaseGridFS(self.dbm.get_connector().get_database(), MediaFile.COLLECTION)
+        self.fs = DatabaseGridFS(self.dbm.get_connector().database, MediaFile.COLLECTION)
         super().__init__(database_manager)
 
     def get_new_id(self, collection: str) -> int:

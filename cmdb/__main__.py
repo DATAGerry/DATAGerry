@@ -56,7 +56,7 @@ def _check_database():
     Returns: Datebase if response
 
     """
-    from cmdb.data_storage.database_connection import ServerTimeoutError
+    from cmdb.data_storage.errors import ServerTimeoutError
     ssc = SystemConfigReader()
     LOGGER.info(f'Checking database connection with {ssc.config_name} data')
     database_options = ssc.get_all_values_from_section('Database')
@@ -154,7 +154,7 @@ def main(args):
     if args.debug:
         _activate_debug()
     _init_config_reader(args.config_file)
-    from cmdb.data_storage.database_connection import DatabaseConnectionError
+    from cmdb.data_storage.errors import DatabaseConnectionError
 
     # create / check connection database managers
     dbm = None

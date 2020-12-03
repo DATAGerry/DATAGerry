@@ -170,7 +170,7 @@ class SetupRoutine:
 
     def __check_database(self):
         LOGGER.info('SETUP ROUTINE: Checking database connection')
-        from cmdb.data_storage.database_connection import ServerTimeoutError
+        from cmdb.data_storage.errors import ServerTimeoutError
         try:
             connection_test = self.setup_database_manager.connector.is_connected()
         except ServerTimeoutError:
