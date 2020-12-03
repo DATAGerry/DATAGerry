@@ -30,6 +30,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryService } from '../../services/category.service';
 import { CmdbCategory } from '../../models/cmdb-category';
 import { SidebarService } from '../../../layout/services/sidebar.service';
+import { AccessControlPermission } from '../../../acl/acl.types';
 
 @Component({
   selector: 'cmdb-object-add',
@@ -78,7 +79,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.typeService.getTypeList().subscribe((typeList: CmdbType[]) => {
+    this.typeService.getTypeList(AccessControlPermission.CREATE).subscribe((typeList: CmdbType[]) => {
       this.typeList = typeList;
     }, (e) => {
       console.error(e);

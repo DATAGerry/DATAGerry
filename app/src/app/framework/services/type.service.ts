@@ -16,13 +16,13 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Injectable } from '@angular/core';
-import { CmdbType } from '../models/cmdb-type';
-import { ApiCallService, ApiService, httpObserveOptions, HttpProtocolHelper } from '../../services/api-call.service';
-import { Observable, timer } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
-import { FormControl } from '@angular/forms';
-import { HttpParams, HttpResponse } from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {CmdbType} from '../models/cmdb-type';
+import {ApiCallService, ApiService, httpObserveOptions, HttpProtocolHelper} from '../../services/api-call.service';
+import {Observable, timer} from 'rxjs';
+import {catchError, map, switchMap} from 'rxjs/operators';
+import {FormControl} from '@angular/forms';
+import {HttpParams, HttpResponse} from '@angular/common/http';
 import {
   APIDeleteSingleResponse,
   APIGetMultiResponse,
@@ -30,10 +30,10 @@ import {
   APIInsertSingleResponse,
   APIUpdateSingleResponse
 } from '../../services/models/api-response';
-import { CollectionParameters } from '../../services/models/api-parameter';
-import { ValidatorService } from '../../services/validator.service';
-import { UserService } from '../../management/services/user.service';
-import { AccessControlPermission } from '../../acl/acl.types';
+import {CollectionParameters} from '../../services/models/api-parameter';
+import {ValidatorService} from '../../services/validator.service';
+import {UserService} from '../../management/services/user.service';
+import {AccessControlPermission} from '../../acl/acl.types';
 
 
 export const checkTypeExistsValidator = (typeService: TypeService, time: number = 500) => {
@@ -72,8 +72,19 @@ export class TypeService<T = CmdbType> implements ApiService {
    *
    * @private
    */
-  private getAclReadFilter() {
+  private getAclFilter(aclRequirement: AccessControlPermission | AccessControlPermission[] = AccessControlPermission.READ) {
     const location = 'acl.groups.includes.' + this.userService.getCurrentUser().group_id;
+    console.log({
+      $or: [
+        { $or : [{acl: { $exists: false }}, {'acl.activated' : false}]},
+        { $and : [
+            {'acl.activated' : true},
+            {$and : [
+                { [location] : { $exists: true }},
+                { [location] : { $in : [aclRequirement.toString()]}}
+              ]},
+          ]}]
+    });
     return {
       $or: [
         { $or : [{acl: { $exists: false }}, {'acl.activated' : false}]},
@@ -81,7 +92,7 @@ export class TypeService<T = CmdbType> implements ApiService {
             {'acl.activated' : true},
             {$and : [
                 { [location] : { $exists: true }},
-                { [location] : { $in : ['READ']}}
+                { [location] : { $in : [aclRequirement.toString()]}}
               ]},
           ]}]
     };
@@ -130,11 +141,12 @@ export class TypeService<T = CmdbType> implements ApiService {
   /**
    * Get the complete type list
    */
-  public getTypeList(): Observable<Array<T>> {
+  public getTypeList(aclRequirement?: AccessControlPermission | AccessControlPermission[]):
+    Observable<Array<T>> {
     const options = httpObserveOptions;
     let params = new HttpParams();
     params = params.set('limit', '0');
-    params = params.set('filter', JSON.stringify(this.getAclReadFilter()));
+    params = params.set('filter', JSON.stringify(this.getAclFilter(aclRequirement)));
     options.params = params;
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
@@ -166,13 +178,15 @@ export class TypeService<T = CmdbType> implements ApiService {
   /**
    * Get types by the name or label
    * @param name Name/Label of the type
+   * @param aclRequirements
    */
-  public getTypesByNameOrLabel(name: string): Observable<Array<T>> {
+  public getTypesByNameOrLabel(name: string, aclRequirements?: AccessControlPermission | AccessControlPermission[]):
+    Observable<Array<T>> {
     const regex = ValidatorService.validateRegex(name).trim();
     const filter = { $and : [{
       $or: [{ name: { $regex: regex, $options: 'ismx' } }, { label: { $regex: regex, $options: 'ismx' } }]
     },
-        this.getAclReadFilter()
+        this.getAclFilter(aclRequirements)
       ]};
     const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(filter), 0);
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
@@ -219,9 +233,10 @@ export class TypeService<T = CmdbType> implements ApiService {
   /**
    * Get all uncategorized types
    */
-  public getUncategorizedTypes(): Observable<APIGetMultiResponse<T>> {
+  public getUncategorizedTypes(aclRequirements?: AccessControlPermission | AccessControlPermission[]):
+    Observable<APIGetMultiResponse<T>> {
     const pipeline = [
-      { $match: this.getAclReadFilter() },
+      { $match: this.getAclFilter(aclRequirements) },
       { $lookup: { from: 'framework.categories', localField: 'public_id', foreignField: 'types', as: 'categories' } },
       { $match: { categories: { $size: 0 } } },
       { $project: { categories: 0 } }
@@ -237,8 +252,10 @@ export class TypeService<T = CmdbType> implements ApiService {
   /**
    * Get a list of types by the category
    * @param categoryID PublicID of the category
+   * @param aclRequirements
    */
-  public getTypeListByCategory(categoryID: number): Observable<Array<T>> {
+  public getTypeListByCategory(categoryID: number, aclRequirements?: AccessControlPermission | AccessControlPermission[]):
+    Observable<Array<T>> {
     const pipeline = [
       {
         $lookup: {
@@ -249,7 +266,7 @@ export class TypeService<T = CmdbType> implements ApiService {
         }
       },
       { $match: { $and: [{ category: { $gt: { $size: 0 } } },
-            this.getAclReadFilter()
+            this.getAclFilter(aclRequirements)
           ] }},
       { $project: { category: 0 } }
     ];
