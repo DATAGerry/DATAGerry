@@ -21,8 +21,8 @@ import { AuthSettingsService } from '../services/auth-settings.service';
 import { forkJoin, Observable, Subscription } from 'rxjs';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { CmdbMode } from '../../framework/modes.enum';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastService } from '../../layout/toast/toast.service';
+import { ProgressSpinnerService } from '../../layout/progress/progress-spinner.service';
 
 @Component({
   selector: 'cmdb-auth-settings',
@@ -39,9 +39,9 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
   public authProviderFormGroup: FormGroup;
   public authSettingsFormConfig: any[] = [
     {
-    name: 'enable_external',
-    label: 'Enable External',
-    type: 'checkbox'
+      name: 'enable_external',
+      label: 'Enable External',
+      type: 'checkbox'
     },
     {
       name: 'token_lifetime',
@@ -62,7 +62,7 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
   private configFormSubscriptions: Subscription;
   private configFormSaveSubscriptions: Subscription;
 
-  public constructor(private authSettingsService: AuthSettingsService, private spinner: NgxSpinnerService, private toast: ToastService) {
+  public constructor(private authSettingsService: AuthSettingsService, private spinner: ProgressSpinnerService, private toast: ToastService) {
     this.authProviderFormGroup = new FormGroup({
       _id: new FormControl('auth'),
       enable_external: new FormControl(false),

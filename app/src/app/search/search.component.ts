@@ -20,12 +20,12 @@ import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SearchService } from './search.service';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { SearchResultList } from './models/search-result';
 import { HttpParams } from '@angular/common/http';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { JwPaginationComponent } from 'jw-angular-pagination';
 import { takeUntil } from 'rxjs/operators';
+import { ProgressSpinnerService } from '../layout/progress/progress-spinner.service';
 
 @Component({
   templateUrl: './search.component.html',
@@ -103,8 +103,10 @@ export class SearchComponent implements OnInit, OnDestroy {
    *
    * @param route Current activated route.
    * @param searchService API Search service.
+   * @param spinner
    */
-  constructor(private route: ActivatedRoute, private searchService: SearchService) {
+  constructor(private route: ActivatedRoute, private searchService: SearchService,
+              private spinner: ProgressSpinnerService) {
     this.searchInputForm = new FormGroup({
       input: new FormControl('', Validators.required)
     });
@@ -122,7 +124,7 @@ export class SearchComponent implements OnInit, OnDestroy {
       this.onSearch();
     });
 
-    this.resolve.asObservable().pipe(takeUntil(this.subscriber)).subscribe((change: boolean) => {
+    this.resolve.asObservable().pipe(takeUntil(this.subscriber)).subscribe(() => {
       this.onSearch();
     });
   }
@@ -131,6 +133,7 @@ export class SearchComponent implements OnInit, OnDestroy {
    * Triggers the actual search api call.
    */
   public onSearch(): void {
+    this.spinner.show('app', 'Searching...');
     let params = new HttpParams();
     params = params.set('limit', this.limit.toString());
     params = params.set('skip', this.skip.toString());
@@ -145,6 +148,7 @@ export class SearchComponent implements OnInit, OnDestroy {
         this.initSearch = false;
         this.initFilter = false;
       }
+      this.spinner.hide('app');
     });
   }
 

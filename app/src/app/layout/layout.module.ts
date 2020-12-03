@@ -28,7 +28,6 @@ import { NavigationComponent } from './structure/navigation/navigation.component
 import { BreadcrumbComponent } from './structure/breadcrumb/breadcrumb.component';
 import { IconPickerComponent } from './helpers/icon-picker/icon-picker.component';
 import { ChartsComponent } from './components/charts/charts.component';
-import { NgxSpinnerComponent, NgxSpinnerModule } from 'ngx-spinner';
 import { IntroComponent } from './intro/intro.component';
 import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-step-intro.component';
 import { JwPaginationComponent } from 'jw-angular-pagination';
@@ -128,7 +127,6 @@ import { BlockComponent } from './components/block/block.component';
   ],
   exports: [
     FileExplorerComponent,
-    NgxSpinnerComponent,
     LowercaseDirective,
     NavigationComponent,
     BreadcrumbComponent,
@@ -156,7 +154,6 @@ import { BlockComponent } from './components/block/block.component';
     RouterModule,
     NgSelectModule,
     ReactiveFormsModule,
-    NgxSpinnerModule,
     SearchBarModule,
     NgbModule,
     FormsModule,

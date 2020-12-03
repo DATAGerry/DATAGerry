@@ -24,7 +24,6 @@ import { DataTablesModule } from 'angular-datatables';
 
 import { SearchRoutingModule } from './search-routing.module';
 import { LayoutModule } from '../layout/layout.module';
-import { NgxSpinnerModule } from 'ngx-spinner';
 import { SearchComponent } from './search.component';
 import { SearchResultComponent } from './search-result/search-result.component';
 import { SearchResultPreviewComponent } from './search-result/search-result-preview.component';
@@ -43,7 +42,6 @@ import { SearchResultBarComponent } from './search-result/search-result-bar/sear
     LayoutModule,
     ReactiveFormsModule,
     DataTablesModule,
-    NgxSpinnerModule,
     RenderModule,
     NgSelectModule
   ],
