@@ -1,7 +1,25 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+/*
+* DATAGERRY - OpenSource Enterprise CMDB
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as
+* published by the Free Software Foundation, either version 3 of the
+* License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+
+* You should have received a copy of the GNU Affero General Public License
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SystemService } from '../../../settings/system/system.service';
-import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
-import {Subscription} from 'rxjs';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'cmdb-feedback-form',
@@ -22,11 +40,17 @@ export class FeedbackFormComponent implements OnInit, OnDestroy {
       performance: new FormControl(0),
       stability: new FormControl(0),
       version: new FormControl(''),
-      email: new FormControl('', Validators.email),
+      email: new FormControl('', [
+        Validators.email, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')
+      ]),
     });
   }
 
-  ngOnInit() {
+  public get emailController(): FormControl {
+    return this.feedbackForm.get('email') as FormControl;
+  }
+
+  public ngOnInit(): void {
     this.systemService.getDatagerryInformation().subscribe((infos: any) => {
       this.feedbackForm.get('version').setValue(infos.version);
     });
@@ -36,7 +60,7 @@ export class FeedbackFormComponent implements OnInit, OnDestroy {
     });
   }
 
-  generateQRCode() {
+  private generateQRCode(): void {
     let url = 'https://datagerry.com/feedback-v1/';
     url = url + this.feedbackForm.get('happiness').value.toString() + '/'
       + this.feedbackForm.get('usability').value.toString() + '/'
@@ -48,7 +72,7 @@ export class FeedbackFormComponent implements OnInit, OnDestroy {
     this.feedbackUrl = url;
   }
 
-  ngOnDestroy() {
+  public ngOnDestroy(): void {
     this.formListener.unsubscribe();
   }
 }
