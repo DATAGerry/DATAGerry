@@ -390,7 +390,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
            Returns:
                returns computed results
            """
-        return self.connector.get_collection(collection).aggregate(*args, **kwargs)
+        return self.connector.get_collection(collection).aggregate(*args, **kwargs, allowDiskUse=True)
 
     def search(self, collection: str, *args, **kwargs):
         return self.connector.get_collection(collection).find(*args, **kwargs)
