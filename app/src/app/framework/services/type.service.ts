@@ -74,17 +74,6 @@ export class TypeService<T = CmdbType> implements ApiService {
    */
   private getAclFilter(aclRequirement: AccessControlPermission | AccessControlPermission[] = AccessControlPermission.READ) {
     const location = 'acl.groups.includes.' + this.userService.getCurrentUser().group_id;
-    console.log({
-      $or: [
-        { $or : [{acl: { $exists: false }}, {'acl.activated' : false}]},
-        { $and : [
-            {'acl.activated' : true},
-            {$and : [
-                { [location] : { $exists: true }},
-                { [location] : { $in : [aclRequirement.toString()]}}
-              ]},
-          ]}]
-    });
     return {
       $or: [
         { $or : [{acl: { $exists: false }}, {'acl.activated' : false}]},
