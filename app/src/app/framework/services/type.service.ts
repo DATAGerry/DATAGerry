@@ -16,13 +16,13 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Injectable} from '@angular/core';
-import {CmdbType} from '../models/cmdb-type';
-import {ApiCallService, ApiService, httpObserveOptions, HttpProtocolHelper} from '../../services/api-call.service';
-import {Observable, timer} from 'rxjs';
-import {catchError, map, switchMap} from 'rxjs/operators';
-import {FormControl} from '@angular/forms';
-import {HttpParams, HttpResponse} from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { CmdbType } from '../models/cmdb-type';
+import { ApiCallService, ApiService, httpObserveOptions, HttpProtocolHelper } from '../../services/api-call.service';
+import { Observable, timer } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import { FormControl } from '@angular/forms';
+import { HttpParams, HttpResponse } from '@angular/common/http';
 import {
   APIDeleteSingleResponse,
   APIGetMultiResponse,
@@ -30,10 +30,10 @@ import {
   APIInsertSingleResponse,
   APIUpdateSingleResponse
 } from '../../services/models/api-response';
-import {CollectionParameters} from '../../services/models/api-parameter';
-import {ValidatorService} from '../../services/validator.service';
-import {UserService} from '../../management/services/user.service';
-import {AccessControlPermission} from '../../acl/acl.types';
+import { CollectionParameters } from '../../services/models/api-parameter';
+import { ValidatorService } from '../../services/validator.service';
+import { UserService } from '../../management/services/user.service';
+import { AccessControlPermission } from '../../acl/acl.types';
 
 
 export const checkTypeExistsValidator = (typeService: TypeService, time: number = 500) => {
