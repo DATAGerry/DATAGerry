@@ -21,12 +21,12 @@ Database Management instance for database actions
 import logging
 from typing import Generic
 
-from pymongo.errors import DuplicateKeyError
 from pymongo.results import DeleteResult, UpdateResult
 
 from cmdb.database import CONNECTOR
 from cmdb.database.connection import MongoConnector
 from cmdb.database.counter import PublicIDCounter
+from cmdb.database.errors.database_errors import CollectionAlreadyExists, NoDocumentFound, DocumentCouldNotBeDeleted
 from cmdb.utils.error import CMDBError
 from gridfs import GridFS
 
@@ -61,6 +61,19 @@ class DatabaseManager(Generic[CONNECTOR]):
     def setup(self):
         """
         setup script for database init
+        """
+        raise NotImplementedError
+
+    def count(self, *args, **kwargs):
+        """
+        General count method.
+
+        Args:
+            *args:
+            **kwargs:
+
+        Returns:
+            Number of found documents.
         """
         raise NotImplementedError
 
@@ -292,10 +305,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return list(founded_documents)
 
     def count(self, collection: str, *args, **kwargs):
-        """This method does not actually
-        performs the find() operation
-        but instead returns
-        a numerical count of the documents that meet the selection criteria.
+        """Count documents based on filter parameters.
 
         Args:
             collection (str): name of database collection
@@ -305,23 +315,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         Returns:
             returns the count of the documents
         """
-        result = self._count(collection, *args, **kwargs)
-        return result
-
-    def _count(self, collection: str, *args, **kwargs):
-        """general find function for database search
-
-        Args:
-            collection (str): name of database collection
-            *args: arguments for search operation
-            **kwargs: key arguments
-
-        Returns:
-            count document
-
-        """
-        result = self.connector.get_collection(collection).count(*args, **kwargs)
-        return result
+        return self.connector.get_collection(collection).count_documents(*args, **kwargs)
 
     def aggregate(self, collection: str, *args, **kwargs):
         """This method does not actually
@@ -606,51 +600,3 @@ class DatabaseGridFS(GridFS):
 
 
 
-class CollectionAlreadyExists(CMDBError):
-    """
-    Creation error if collection already exists
-    """
-
-    def __init__(self, collection_name):
-        super().__init__()
-        self.message = "Collection {} already exists".format(collection_name)
-
-
-class FileImportError(CMDBError):
-    """
-    Error if json file import to database failed
-    """
-
-    def __init__(self, collection_name):
-        super().__init__()
-        self.message = "Collection {} could not be imported".format(collection_name)
-
-
-class PublicIDAlreadyExists(DuplicateKeyError):
-    """
-    Error if public_id inside database already exists
-    """
-
-    def __init__(self, public_id):
-        super().__init__("Public ID Exists")
-        self.message = "Object with this public id already exists: {}".format(public_id)
-
-
-class NoDocumentFound(CMDBError):
-    """
-    Error if no document was found
-    """
-
-    def __init__(self, collection, public_id):
-        super().__init__()
-        self.message = "No document with the id {} was found inside {}".format(public_id, collection)
-
-
-class DocumentCouldNotBeDeleted(CMDBError):
-    """
-    Error if document could not be deleted from database
-    """
-
-    def __init__(self, collection, public_id):
-        super().__init__()
-        self.message = "The document with the id {} could not be deleted inside {}".format(public_id, collection)

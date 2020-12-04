@@ -13,3 +13,56 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+from pymongo.errors import DuplicateKeyError
+
+from cmdb.utils.error import CMDBError
+
+
+class CollectionAlreadyExists(CMDBError):
+    """
+    Creation error if collection already exists
+    """
+
+    def __init__(self, collection_name):
+        super().__init__()
+        self.message = "Collection {} already exists".format(collection_name)
+
+
+class FileImportError(CMDBError):
+    """
+    Error if json file import to database failed
+    """
+
+    def __init__(self, collection_name):
+        super().__init__()
+        self.message = "Collection {} could not be imported".format(collection_name)
+
+
+class PublicIDAlreadyExists(DuplicateKeyError):
+    """
+    Error if public_id inside database already exists
+    """
+
+    def __init__(self, public_id):
+        super().__init__("Public ID Exists")
+        self.message = "Object with this public id already exists: {}".format(public_id)
+
+
+class NoDocumentFound(CMDBError):
+    """
+    Error if no document was found
+    """
+
+    def __init__(self, collection, public_id):
+        super().__init__()
+        self.message = "No document with the id {} was found inside {}".format(public_id, collection)
+
+
+class DocumentCouldNotBeDeleted(CMDBError):
+    """
+    Error if document could not be deleted from database
+    """
+
+    def __init__(self, collection, public_id):
+        super().__init__()
+        self.message = "The document with the id {} could not be deleted inside {}".format(public_id, collection)

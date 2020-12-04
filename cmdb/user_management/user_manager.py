@@ -17,7 +17,8 @@
 import logging
 from typing import List
 
-from cmdb.database.database_manager import NoDocumentFound, DatabaseManagerMongo
+from cmdb.database.database_manager import DatabaseManagerMongo
+from cmdb.database.errors.database_errors import NoDocumentFound
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.user_management.models.user import UserModel
