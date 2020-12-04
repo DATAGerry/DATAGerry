@@ -20,7 +20,7 @@ from flask import request, abort, current_app
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
-from cmdb.data_storage.database_utils import default
+from cmdb.data_storage.utils import default
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.cmdb_log import LogAction, CmdbObjectLog
 from cmdb.framework.cmdb_log_manager import LogManagerInsertError

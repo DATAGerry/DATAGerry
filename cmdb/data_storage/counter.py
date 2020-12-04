@@ -14,16 +14,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-"""Database connection and data access
 
-This module controls the connection and access to the database
+class PublicIDCounter:
+    COLLECTION = 'datastorage.counter'
 
-Attributes:
-    CLIENT (TypeVar): generic type variable for `Client` class implementation
-    CONNECTOR (TypeVar): generic type variable for `Connector` class implementation
-
-"""
-from typing import TypeVar
-
-CLIENT = TypeVar('CLIENT')
-CONNECTOR = TypeVar('CONNECTOR')
+    def __init__(self, _id: str, counter: int):
+        self._id = _id
+        self.counter = counter

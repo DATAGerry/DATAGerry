@@ -13,17 +13,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+from cmdb.utils.error import CMDBError
 
-"""Database connection and data access
 
-This module controls the connection and access to the database
+class DataBaseError(CMDBError):
 
-Attributes:
-    CLIENT (TypeVar): generic type variable for `Client` class implementation
-    CONNECTOR (TypeVar): generic type variable for `Connector` class implementation
-
-"""
-from typing import TypeVar
-
-CLIENT = TypeVar('CLIENT')
-CONNECTOR = TypeVar('CONNECTOR')
+    def __init__(self, message: str = None):
+        self.message = message

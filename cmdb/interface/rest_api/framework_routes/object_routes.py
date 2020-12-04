@@ -24,7 +24,7 @@ from datetime import datetime
 
 from flask import abort, jsonify, request, current_app
 
-from cmdb.data_storage.database_utils import object_hook, default
+from cmdb.data_storage.utils import object_hook, default
 from cmdb.framework import CmdbObject, TypeModel
 from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError, \
     ObjectManagerUpdateError

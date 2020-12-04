@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2020 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
 Database Management instance for database actions
@@ -26,7 +26,7 @@ from pymongo.results import DeleteResult, UpdateResult
 
 from cmdb.data_storage import CONNECTOR
 from cmdb.data_storage.connection import MongoConnector
-from cmdb.data_storage.database_framework_counter import IDCounter
+from cmdb.data_storage.counter import PublicIDCounter
 from cmdb.utils.error import CMDBError
 from gridfs import GridFS
 
@@ -38,7 +38,7 @@ class DatabaseManager(Generic[CONNECTOR]):
     Base database managers
     """
 
-    def __init__(self, connector: CONNECTOR):
+    def __init__(self, connector: CONNECTOR, *args, **kwargs):
         """Constructor of DatabaseManager
         Args:
             connector (CONNECTOR): Database Connector for subclass implementation
@@ -62,9 +62,6 @@ class DatabaseManager(Generic[CONNECTOR]):
         """
         setup script for database init
         """
-        raise NotImplementedError
-
-    def search(self, *args, **kwargs):
         raise NotImplementedError
 
     def __find(self, *args, **kwargs):
@@ -165,47 +162,12 @@ class DatabaseManager(Generic[CONNECTOR]):
 
         raise NotImplementedError
 
-    def create(self, db_name):
-        """create new database
-
-        Args:
-            db_name (str): name of database
-
-        Returns:
-            acknowledged
-
-        """
-
-        raise NotImplementedError
-
-    def drop(self, db_name: str):
-        """delete database
-
-        Args:
-            db_name (str): name of database
-
-        Returns:
-            acknowledged
-
-        """
-        raise NotImplementedError
-
-    def get_database_name(self):
-        """get name of selected database
-
-        Returns:
-            db_name (str): name of database
-        """
-        raise NotImplementedError
-
 
 class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
     """PyMongo (mongodb) implementation of Database Manager"""
 
-    DB_MANAGER_TYPE = 'MONGO_DB'
-
     def __init__(self, host: str, port: int, database_name: str, **kwargs):
-        connector = MongoConnector(host, port, database_name, **kwargs)
+        connector = MongoConnector(host, port, database_name, kwargs)
         super(DatabaseManagerMongo, self).__init__(connector)
 
     def setup(self) -> bool:
@@ -251,22 +213,12 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
                 return False
         return True
 
-    def create_index(self, collection: str, name: str, unique: bool, background=True):
-        self.connector.get_collection(collection).create_index(
-            name=name,
-            unique=unique,
-            background=background
-        )
-
     def create_indexes(self, collection: str, indexes: list):
         self.connector.get_collection(collection).create_indexes(indexes)
 
     def get_index_info(self, collection: str):
         """get the max index value"""
         return self.connector.get_collection(collection).index_information()
-
-    def get_database_name(self):
-        return self.connector.get_database_name()
 
     def __find(self, collection: str, *args, **kwargs):
         """general find function for database search
@@ -598,7 +550,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
 
     def get_next_public_id(self, collection: str) -> int:
         try:
-            founded_counter = self.connector.get_collection(IDCounter.COLLECTION).find_one(filter={
+            founded_counter = self.connector.get_collection(PublicIDCounter.COLLECTION).find_one(filter={
                 '_id': collection
             })
             new_id = founded_counter['counter'] + 1
@@ -612,23 +564,23 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
     def _init_public_id_counter(self, collection: str):
         LOGGER.info(f'Counter for collection {collection} wasn´t found - setup new with data from {collection}')
         docs_count = self.get_highest_id(collection)
-        self.connector.get_collection(IDCounter.COLLECTION).insert({
+        self.connector.get_collection(PublicIDCounter.COLLECTION).insert({
             '_id': collection,
             'counter': docs_count
         })
         return docs_count
 
     def increment_public_id_counter(self, collection: str):
-        working_collection = self.connector.get_collection(IDCounter.COLLECTION)
+        working_collection = self.connector.get_collection(PublicIDCounter.COLLECTION)
         query = {
             '_id': collection
         }
         counter_doc = working_collection.find_one(query)
         counter_doc['counter'] = counter_doc['counter'] + 1
-        self.connector.get_collection(IDCounter.COLLECTION).update(query, counter_doc)
+        self.connector.get_collection(PublicIDCounter.COLLECTION).update(query, counter_doc)
 
     def update_public_id_counter(self, collection: str, value: int):
-        working_collection = self.connector.get_collection(IDCounter.COLLECTION)
+        working_collection = self.connector.get_collection(PublicIDCounter.COLLECTION)
         query = {
             '_id': collection
         }
@@ -640,7 +592,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         # update counter only, if value is higher than counter
         if value > counter_doc['counter']:
             counter_doc['counter'] = value
-            self.connector.get_collection(IDCounter.COLLECTION).update(query, counter_doc)
+            self.connector.get_collection(PublicIDCounter.COLLECTION).update(query, counter_doc)
 
 
 class DatabaseGridFS(GridFS):
@@ -652,12 +604,6 @@ class DatabaseGridFS(GridFS):
         super().__init__(database, collection_name)
         self.message = "Collection {} already exists".format(collection_name)
 
-
-class InsertError(CMDBError):
-
-    def __init__(self, error):
-        super().__init__()
-        self.message = "Insert error {}".format(error)
 
 
 class CollectionAlreadyExists(CMDBError):

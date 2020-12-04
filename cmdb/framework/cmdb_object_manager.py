@@ -23,18 +23,18 @@ The implementation of the managers used is always realized using the respective 
 import logging
 import json
 
-from cmdb.data_storage.database_utils import object_hook
+from cmdb.data_storage.utils import object_hook
 from bson import json_util
 from datetime import datetime
 from typing import List
 
-from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
+from cmdb.data_storage.database_manager import PublicIDAlreadyExists
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
 from cmdb.framework.managers.type_manager import TypeManager
-from cmdb.framework.models.category import CategoryModel, CategoryTree
+from cmdb.framework.models.category import CategoryModel
 from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
-from cmdb.framework.cmdb_errors import WrongInputFormatError, TypeInsertError, TypeAlreadyExists, \
+from cmdb.framework.cmdb_errors import WrongInputFormatError, \
     ObjectInsertError, ObjectDeleteError, ObjectManagerGetError, \
     ObjectManagerInsertError, ObjectManagerUpdateError, ObjectManagerDeleteError, ObjectManagerInitError
 from cmdb.framework.cmdb_link import CmdbLink
