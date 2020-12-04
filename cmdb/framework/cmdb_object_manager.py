@@ -28,13 +28,13 @@ from bson import json_util
 from datetime import datetime
 from typing import List
 
-from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
+from cmdb.data_storage.database_manager import PublicIDAlreadyExists
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
 from cmdb.framework.managers.type_manager import TypeManager
-from cmdb.framework.models.category import CategoryModel, CategoryTree
+from cmdb.framework.models.category import CategoryModel
 from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
-from cmdb.framework.cmdb_errors import WrongInputFormatError, TypeInsertError, TypeAlreadyExists, \
+from cmdb.framework.cmdb_errors import WrongInputFormatError, \
     ObjectInsertError, ObjectDeleteError, ObjectManagerGetError, \
     ObjectManagerInsertError, ObjectManagerUpdateError, ObjectManagerDeleteError, ObjectManagerInitError
 from cmdb.framework.cmdb_link import CmdbLink
@@ -141,11 +141,7 @@ class CmdbObjectManager(CmdbManagerBase):
                a numerical count of the documents that meet the selection criteria.
 
                Args:
-                   collection (str): name of database collection
                    public_id (int): public id of document
-                   *args: arguments for search operation
-                   **kwargs:
-
                Returns:
                    returns the count of the documents
                """
@@ -229,7 +225,8 @@ class CmdbObjectManager(CmdbManagerBase):
         Insert new CMDB Object
         Args:
             data: init data
-            request_user: current user, to detect who triggered event
+            user: current user, to detect who triggered event
+            permission: extended user acl rights
         Returns:
             Public ID of the new object in database
         """
@@ -516,7 +513,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except (CMDBError, Exception) as err:
             raise ObjectManagerGetError(err)
 
-    def get_links_by_partner(self, public_id: int) -> List[CmdbLink]:
+    def get_links_by_partner(self, public_id: int, user: UserModel) -> List[CmdbLink]:
         query = {
             '$or': [
                 {'primary': public_id},
@@ -527,7 +524,15 @@ class CmdbObjectManager(CmdbManagerBase):
         try:
             find_list: List[dict] = self._get_many(CmdbLink.COLLECTION, **query)
             for link in find_list:
-                link_list.append(CmdbLink(**link))
+                query = {
+                    '$or': [
+                        {'public_id': link['primary']},
+                        {'public_id': link['secondary']}
+                    ]
+                }
+                verified_object = self.get_objects_by(user=user, permission=AccessControlPermission.READ, **query)
+                if len(verified_object) == 2:
+                    link_list.append(CmdbLink(**link))
         except CMDBError as err:
             raise ObjectManagerGetError(err)
         return link_list
