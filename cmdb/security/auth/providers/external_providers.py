@@ -17,7 +17,7 @@ import logging
 
 from datetime import datetime
 
-from cmdb.database.database_manager import DatabaseManagerMongo
+from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.manager.errors import ManagerGetError, ManagerInsertError
 from cmdb.security.auth.auth_errors import AuthenticationError
 from cmdb.security.auth.auth_providers import AuthenticationProvider

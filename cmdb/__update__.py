@@ -49,7 +49,7 @@ class UpdateRoutine:
 
     def __check_database(self):
         LOGGER.info('SETUP ROUTINE: Checking database connection')
-        from cmdb.database.database_manager import DatabaseManagerMongo
+        from cmdb.database.managers import DatabaseManagerMongo
         from cmdb.database.errors import ServerTimeoutError
         try:
             self.setup_database_manager = DatabaseManagerMongo(

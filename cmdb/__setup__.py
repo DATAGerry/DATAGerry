@@ -19,7 +19,7 @@ from enum import Enum
 
 from cmdb.user_management import UserGroupModel
 from cmdb.utils.system_config import SystemConfigReader
-from cmdb.database.database_manager import DatabaseManagerMongo
+from cmdb.database.managers import DatabaseManagerMongo
 
 LOGGER = logging.getLogger(__name__)
 

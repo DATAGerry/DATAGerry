@@ -18,7 +18,7 @@ import logging
 from datetime import datetime
 
 from cmdb.event_management.event import Event
-from cmdb.database.database_manager import DatabaseManagerMongo
+from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.utils.error import CMDBError

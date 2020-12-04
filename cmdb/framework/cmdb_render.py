@@ -19,7 +19,7 @@ Object/Type render
 """
 from typing import List, Union
 
-from cmdb.database.database_manager import DatabaseManagerMongo
+from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.security.acl.errors import AccessDeniedError

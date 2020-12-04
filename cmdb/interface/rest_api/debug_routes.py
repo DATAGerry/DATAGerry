@@ -26,7 +26,7 @@ debug_blueprint = RootBlueprint('debug_rest', __name__, url_prefix='/debug')
 LOGGER = logging.getLogger(__name__)
 
 with current_app.app_context():
-    from cmdb.database.database_manager import DatabaseManagerMongo
+    from cmdb.database.managers import DatabaseManagerMongo
     database_manager: DatabaseManagerMongo = current_app.database_manager
 
 

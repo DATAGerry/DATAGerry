@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 from typing import Union, List
 
-from cmdb.database.database_manager import DatabaseManagerMongo
+from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework.results.list import ListResult
 from cmdb.manager.errors import ManagerGetError, ManagerDeleteError
 from cmdb.manager import ManagerBase

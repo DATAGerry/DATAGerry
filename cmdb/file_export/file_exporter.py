@@ -16,7 +16,7 @@
 
 from flask import Response, abort
 
-from cmdb.database.database_manager import DatabaseManagerMongo
+from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.results import IterationResult
 from cmdb.framework.cmdb_object import CmdbObject

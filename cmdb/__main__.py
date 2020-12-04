@@ -34,7 +34,7 @@ except ImportError:
     CMDBError = Exception
 
 from cmdb.utils.system_config import SystemConfigReader
-from cmdb.database.database_manager import DatabaseManagerMongo
+from cmdb.database.managers import DatabaseManagerMongo
 
 # setup logging for startup
 logging.config.dictConfig(get_logging_conf())

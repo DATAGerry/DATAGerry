@@ -18,7 +18,7 @@ import logging
 
 from datetime import datetime
 
-from cmdb.database.database_manager import DatabaseManagerMongo, DatabaseGridFS
+from cmdb.database.managers import DatabaseManagerMongo, DatabaseGridFS
 from gridfs.grid_file import GridOutCursor, GridOut
 
 from cmdb.media_library.media_file import MediaFile
