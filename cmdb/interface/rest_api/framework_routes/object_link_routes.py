@@ -18,7 +18,6 @@ import logging
 
 from flask import abort, request, current_app
 
-from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerDeleteError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint
@@ -42,9 +41,8 @@ link_rest = NestedBlueprint(object_blueprint, url_prefix='/link')
 @link_rest.route('/<int:public_id>/', methods=['GET'])
 @link_rest.route('/<int:public_id>', methods=['GET'])
 @login_required
-@insert_request_user
 @right_required('base.framework.object.view')
-def get_link(public_id: int, request_user: UserModel):
+def get_link(public_id: int):
     try:
         return object_manager.get_link(public_id=public_id)
     except ObjectManagerGetError as err:
@@ -53,9 +51,11 @@ def get_link(public_id: int, request_user: UserModel):
 
 @link_rest.route('/partner/<int:public_id>/', methods=['GET'])
 @link_rest.route('/partner/<int:public_id>', methods=['GET'])
-def get_partner_links(public_id: int):
+@insert_request_user
+@right_required('base.framework.object.view')
+def get_partner_links(public_id: int, request_user: UserModel):
     try:
-        link_list = object_manager.get_links_by_partner(public_id=public_id)
+        link_list = object_manager.get_links_by_partner(public_id=public_id, user=request_user)
     except ObjectManagerGetError as err:
         LOGGER.error(f'[CmdbLinks] Error while getting partner links: {err}')
         return abort(404, err.message)
@@ -67,9 +67,8 @@ def get_partner_links(public_id: int):
 
 @link_rest.route('/', methods=['POST'])
 @login_required
-@insert_request_user
 @right_required('base.framework.object.add')
-def add_link(request_user: UserModel):
+def add_link():
     try:
         new_link_params = {**request.json}
     except TypeError:
@@ -84,9 +83,8 @@ def add_link(request_user: UserModel):
 
 @link_rest.route('/<int:public_id>', methods=['DELETE'])
 @login_required
-@insert_request_user
 @right_required('base.framework.object.delete')
-def remove_link(public_id: int, request_user: UserModel):
+def remove_link(public_id: int):
     try:
         ack = object_manager.delete_link(public_id)
     except ObjectManagerDeleteError as err:
