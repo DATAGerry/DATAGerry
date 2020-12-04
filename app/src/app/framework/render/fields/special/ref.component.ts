@@ -71,7 +71,7 @@ export class RefComponent extends RenderField implements OnInit, OnDestroy {
     }
 
     if (this.controller.value !== '' && this.data.value) {
-      if (typeof this.data.reference === 'string') {
+      if (typeof this.data.reference === 'string' || this.mode === CmdbMode.Create || this.mode === CmdbMode.Bulk) {
         this.protect = true;
       } else {
         this.objectService.getObject(this.controller.value, false).pipe(takeUntil(this.unsubscribe))
@@ -89,7 +89,7 @@ export class RefComponent extends RenderField implements OnInit, OnDestroy {
   groupValueFn = (_: string, children: any[]) => ({
     name: children[0].type_information.type_label,
     total: children.length
-  });
+  })
 
   public ngOnDestroy(): void {
     if (this.modalRef) {
