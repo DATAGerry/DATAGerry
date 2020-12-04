@@ -19,8 +19,8 @@
 This module controls the connection and access to the database
 
 Attributes:
-    CLIENT (TypeVar): generic type variable for `Client` class implementation
-    CONNECTOR (TypeVar): generic type variable for `Connector` class implementation
+    CLIENT: generic type variable for `Client` class implementation
+    CONNECTOR: generic type variable for `Connector` class implementation
 
 """
 from typing import TypeVar

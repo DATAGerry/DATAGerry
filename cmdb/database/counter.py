@@ -16,6 +16,11 @@
 
 
 class PublicIDCounter:
+    """
+    Class of the internal public id counter.
+    TODO:
+        Refactor to own manager implementation
+    """
     COLLECTION = 'datastorage.counter'
 
     def __init__(self, _id: str, counter: int):

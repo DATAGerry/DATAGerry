@@ -32,6 +32,8 @@ from cmdb.database.errors.database_errors import CollectionAlreadyExists, NoDocu
     DatabaseAlreadyExists, DatabaseNotExists
 from gridfs import GridFS
 
+from cmdb.database.utils import DESCENDING
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -103,11 +105,11 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             acknowledged
 
         """
-        from cmdb.framework import __COLLECTIONS__ as cmdb_collection
-        from cmdb.user_management import __COLLECTIONS__ as user_collection
-        collection = cmdb_collection + user_collection
+        from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_COLLECTIONS
+        from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTIONS
+        collection = FRAMEWORK_COLLECTIONS + USER_MANAGEMENT_COLLECTIONS
 
-        def _gen_default_tables(collection_class: object):
+        def _gen_default_tables(collection_class):
             self.create_collection(collection_class.COLLECTION)
             self.create_indexes(collection_class.COLLECTION, collection_class._SUPER_INDEX_KEYS)
             if len(collection_class.INDEX_KEYS) > 0:
@@ -429,7 +431,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         Returns:
             str: document from database
         """
-        formatted_sort = [('public_id', self.DESCENDING)]
+        formatted_sort = [('public_id', DESCENDING)]
         return self.find_one_by(collection=collection, sort=formatted_sort)
 
     def get_highest_id(self, collection: str) -> int:
@@ -498,8 +500,8 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
 
 class DatabaseGridFS(GridFS):
     """
-        Creation a GridFSBucket instance to use
-        """
+    Creation a GridFSBucket instance to use
+    """
 
     def __init__(self, database, collection_name):
         super().__init__(database, collection_name)

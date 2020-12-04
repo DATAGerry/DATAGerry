@@ -19,7 +19,7 @@ Database-Connection
 Real connection to database over a given connector
 """
 from datetime import datetime
-from typing import Generic, List
+from typing import Generic
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database

@@ -38,6 +38,9 @@ from bson.tz_util import utc
 
 _RE_TYPE = type(re.compile("foo"))
 
+ASCENDING = 1
+DESCENDING = -1
+
 
 def object_hook(dct: dict):
     """Helper function for converting json to mongo bson
