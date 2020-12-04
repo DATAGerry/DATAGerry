@@ -53,7 +53,7 @@
               <div class="col-sm-9 pre-scrollable">
                 <ng-container *ngFor="let objRefId of refId" >
                   <abbr title="Forwarding to the referenced object" class="initialism">
-                    <a [routerLink]="['/framework/object/type/view/', objRefId]" target="_blank" rel="noopener noreferrer">
+                    <a [routerLink]="['/framework/object/view/', objRefId]" target="_blank" rel="noopener noreferrer">
                       #{{objRefId}}
                     </a>
                   </abbr>
