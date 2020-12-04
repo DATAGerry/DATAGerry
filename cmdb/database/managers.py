@@ -19,15 +19,17 @@ Database Management instance for database actions
 
 """
 import logging
-from typing import Generic
+from typing import Generic, List
 
+from pymongo import IndexModel
+from pymongo.database import Database
 from pymongo.results import DeleteResult, UpdateResult
 
 from cmdb.database import CONNECTOR
 from cmdb.database.connection import MongoConnector
 from cmdb.database.counter import PublicIDCounter
-from cmdb.database.errors.database_errors import CollectionAlreadyExists, NoDocumentFound, DocumentCouldNotBeDeleted
-from cmdb.utils.error import CMDBError
+from cmdb.database.errors.database_errors import CollectionAlreadyExists, NoDocumentFound, DocumentCouldNotBeDeleted, \
+    DatabaseAlreadyExists, DatabaseNotExists
 from gridfs import GridFS
 
 LOGGER = logging.getLogger(__name__)
@@ -39,140 +41,51 @@ class DatabaseManager(Generic[CONNECTOR]):
     """
 
     def __init__(self, connector: CONNECTOR, *args, **kwargs):
-        """Constructor of DatabaseManager
+        """Constructor of `DatabaseManager`
         Args:
             connector (CONNECTOR): Database Connector for subclass implementation
-
         """
 
         self.connector: CONNECTOR = connector
 
-    def get_connector(self) -> CONNECTOR:
-        return self.connector
+    def create_database(self, *args, **kwargs):
+        """Create a new empty database."""
+        raise NotImplementedError
+
+    def drop_database(self, *args, **kwargs):
+        """Drop a existing database."""
+        raise NotImplementedError
 
     def status(self):
-        """check if connector has connection
-
-        Returns: connection status
-
-        """
+        """Check if connector has connection."""
         return self.connector.is_connected()
 
     def setup(self):
-        """
-        setup script for database init
-        """
+        """Setup script for database init."""
         raise NotImplementedError
 
     def count(self, *args, **kwargs):
-        """
-        General count method.
-
-        Args:
-            *args:
-            **kwargs:
-
-        Returns:
-            Number of found documents.
-        """
+        """General count method."""
         raise NotImplementedError
 
-    def __find(self, *args, **kwargs):
-        """general find function for database search
-
-        Args:
-            *args: arguments for search operation
-            **kwargs:
-
-        Returns:
-            str: founded document
-
-        """
-
+    def aggregate(self, *args, **kwargs):
+        """General count method."""
         raise NotImplementedError
 
-    def find_one_by(self, *args, **kwargs):
-        """find only one document by requirement
-
-        Args:
-            *args: arguments for search operation
-            **kwargs: key arguments
-
-        Returns:
-            str: founded document
-
-        """
-
-        raise NotImplementedError
-
-    def find_one(self, *args, **kwargs):
-        """calls __find with single return
-
-        Args:
-            *args: arguments for search operation
-            **kwargs: key arguments
-
-        Returns:
-            founded document
-
-        """
-
-        raise NotImplementedError
-
-    def find_all(self, *args, **kwargs):
-        """calls __find with all returns
-
-        Args:
-            *args: arguments for search operation
-            **kwargs: key arguments
-
-        Returns:
-            list: list of founded documents
-
-        """
-
+    def find(self, *args, **kwargs):
+        """Find resource by requirements."""
         raise NotImplementedError
 
     def insert(self, *args, **kwargs):
-        """adds document to database
-
-        Args:
-            *args: object data
-            **kwargs: dict of data
-
-        Returns:
-            int: public id of inserted document
-
-        """
-
+        """Insert resource to database."""
         raise NotImplementedError
 
     def update(self, *args, **kwargs):
-        """update document inside database
-
-        Args:
-            *args: object data
-            **kwargs: dict of data
-
-        Returns:
-            acknowledged
-
-        """
-
+        """Update resource inside database."""
         raise NotImplementedError
 
     def delete(self, *args, **kwargs):
-        """delete document inside database
-
-        Args:
-            *args: public id
-            **kwargs: dict of public id
-
-        Returns:
-            acknowledged
-
-        """
-
+        """Delete resource inside database."""
         raise NotImplementedError
 
 
@@ -212,22 +125,8 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         """Auto disconnect the database connection when the Manager get destroyed."""
         self.connector.disconnect()
 
-    def _import(self, collection: str, data_list: list):
-        try:
-            self.delete_collection(collection)
-        except Exception as e:
-            LOGGER.debug(e)
-        for import_data in data_list:
-            try:
-                self.insert(collection=collection, data=import_data)
-            except (Exception, CMDBError) as e:
-                LOGGER.debug(e)
-                LOGGER.debug("IMPORT ERROR: {}".format(e))
-                return False
-        return True
-
-    def create_indexes(self, collection: str, indexes: list):
-        self.connector.get_collection(collection).create_indexes(indexes)
+    def create_indexes(self, collection: str, indexes: List[IndexModel]) -> List[str]:
+        return self.connector.get_collection(collection).create_indexes(indexes)
 
     def get_index_info(self, collection: str):
         """get the max index value"""
@@ -318,21 +217,21 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return self.connector.get_collection(collection).count_documents(*args, **kwargs)
 
     def aggregate(self, collection: str, *args, **kwargs):
-        """This method does not actually
-           performs the find() operation
-           but instead Aggregation operations process data records and return computed results.
+        """
+        Aggregation on mongodb.
 
-           Args:
-               collection (str): name of database collection
-               *args: arguments for search operation
-               **kwargs: key arguments
-           Returns:
-               returns computed results
-           """
+        Args:
+            collection (str): name of database collection
+            *args: arguments for search operation
+            **kwargs: key arguments
+
+        Returns:
+            returns computed results
+        """
         return self.connector.get_collection(collection).aggregate(*args, **kwargs, allowDiskUse=True)
 
     def search(self, collection: str, *args, **kwargs):
-        return self.connector.get_collection(collection).find(*args, **kwargs)
+        return self.find(collection, *args, **kwargs)
 
     def insert(self, collection: str, data: dict, skip_public: bool = False) -> int:
         """adds document to database
@@ -459,37 +358,45 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             raise DocumentCouldNotBeDeleted(collection)
         return result
 
-    def create(self, db_name: str):
-        """create database
+    def create_database(self, name: str) -> Database:
+        """Create a new empty database.
 
         Args:
-            db_name (str): name of database
+            name (str): Name of the new database.
+
+        Raises:
+            DatabaseAlreadyExists: If a database with this name already exists.
 
         Returns:
-            acknowledge of operation
+            Database: Instance of the new create database.
 
         """
+        if name in self.connector.client.list_database_names():
+            raise DatabaseAlreadyExists(name)
+        return self.connector.client[name]
 
-        return self.connector.client[db_name]
-
-    def drop(self, db_name: str):
-        """delete database
+    def drop_database(self, database):
+        """Delete a existing database.
 
         Args:
-            db_name (str): name of database
+            database: name or instance of the database
 
-        Returns:
-            acknowledge
-
+        Raises:
+            DatabaseNotExists: If the database not exists.
         """
+        if isinstance(database, Database):
+            database = database.name
 
-        return self.connector.client.drop_database(db_name)
+        if database not in self.connector.client.list_database_names():
+            raise DatabaseNotExists(database)
+
+        self.connector.client.drop_database(database)
 
     def create_collection(self, collection_name):
         """
         Creation empty MongoDB collection
         Args:
-            collection_name: name of collectio
+            collection_name: name of collection
 
         Returns:
             collection name
@@ -597,6 +504,3 @@ class DatabaseGridFS(GridFS):
     def __init__(self, database, collection_name):
         super().__init__(database, collection_name)
         self.message = "Collection {} already exists".format(collection_name)
-
-
-

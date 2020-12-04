@@ -15,12 +15,24 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 from pymongo.errors import DuplicateKeyError
 
-from cmdb.utils.error import CMDBError
+from cmdb.database.errors import DataBaseError
 
 
-class CollectionAlreadyExists(CMDBError):
+class DatabaseAlreadyExists(DataBaseError):
+    def __init__(self, database_name: str):
+        message = f'Database with the name {database_name} already exists'
+        super(DatabaseAlreadyExists, self).__init__(message)
+
+
+class DatabaseNotExists(DataBaseError):
+    def __init__(self, database_name: str):
+        message = f'Database with the name {database_name} doesn`t exists'
+        super(DatabaseNotExists, self).__init__(message)
+
+
+class CollectionAlreadyExists(DataBaseError):
     """
-    Creation error if collection already exists
+    Error if you try to create a collection that alrady exists
     """
 
     def __init__(self, collection_name):
@@ -28,7 +40,7 @@ class CollectionAlreadyExists(CMDBError):
         self.message = "Collection {} already exists".format(collection_name)
 
 
-class FileImportError(CMDBError):
+class FileImportError(DataBaseError):
     """
     Error if json file import to database failed
     """
@@ -48,7 +60,7 @@ class PublicIDAlreadyExists(DuplicateKeyError):
         self.message = "Object with this public id already exists: {}".format(public_id)
 
 
-class NoDocumentFound(CMDBError):
+class NoDocumentFound(DataBaseError):
     """
     Error if no document was found
     """
@@ -58,7 +70,7 @@ class NoDocumentFound(CMDBError):
         self.message = "No document with the id {} was found inside {}".format(public_id, collection)
 
 
-class DocumentCouldNotBeDeleted(CMDBError):
+class DocumentCouldNotBeDeleted(DataBaseError):
     """
     Error if document could not be deleted from database
     """

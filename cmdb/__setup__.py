@@ -17,6 +17,7 @@
 import logging
 from enum import Enum
 
+from cmdb.database.errors.database_errors import DatabaseNotExists
 from cmdb.user_management import UserGroupModel
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.database.managers import DatabaseManagerMongo
@@ -185,9 +186,12 @@ class SetupRoutine:
         database_name = self.setup_system_config_reader.get_value('database_name', 'Database')
         LOGGER.info(f'SETUP ROUTINE: initialize database {database_name}')
         # delete database
-        self.setup_database_manager.drop(database_name)
+        try:
+            self.setup_database_manager.drop_database(database_name)
+        except DatabaseNotExists as err:
+            LOGGER.error(err.message)
         # create new database
-        self.setup_database_manager.create(database_name)
+        self.setup_database_manager.create_database(database_name)
 
         # generate collections
         # framework collections
