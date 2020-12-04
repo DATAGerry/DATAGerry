@@ -25,8 +25,8 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 from pymongo.errors import ConnectionFailure
 
-from cmdb.data_storage import CLIENT
-from cmdb.data_storage.errors.connection_errors import DatabaseConnectionError
+from cmdb.database import CLIENT
+from cmdb.database.errors.connection_errors import DatabaseConnectionError
 
 
 class ConnectionStatus:

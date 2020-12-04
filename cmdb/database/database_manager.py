@@ -24,9 +24,9 @@ from typing import Generic
 from pymongo.errors import DuplicateKeyError
 from pymongo.results import DeleteResult, UpdateResult
 
-from cmdb.data_storage import CONNECTOR
-from cmdb.data_storage.connection import MongoConnector
-from cmdb.data_storage.counter import PublicIDCounter
+from cmdb.database import CONNECTOR
+from cmdb.database.connection import MongoConnector
+from cmdb.database.counter import PublicIDCounter
 from cmdb.utils.error import CMDBError
 from gridfs import GridFS
 

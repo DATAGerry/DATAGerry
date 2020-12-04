@@ -49,8 +49,8 @@ class UpdateRoutine:
 
     def __check_database(self):
         LOGGER.info('SETUP ROUTINE: Checking database connection')
-        from cmdb.data_storage.database_manager import DatabaseManagerMongo
-        from cmdb.data_storage.errors import ServerTimeoutError
+        from cmdb.database.database_manager import DatabaseManagerMongo
+        from cmdb.database.errors import ServerTimeoutError
         try:
             self.setup_database_manager = DatabaseManagerMongo(
                 **self.setup_system_config_reader.get_all_values_from_section('Database')

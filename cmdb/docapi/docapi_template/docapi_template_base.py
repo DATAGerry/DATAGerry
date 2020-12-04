@@ -57,7 +57,7 @@ class TemplateManagementBase:
         Returns:
             dict: json dump with database default encoding of the object attributes
         """
-        from cmdb.data_storage.utils import default
+        from cmdb.database.utils import default
         import json
         return json.dumps(self.__dict__, default=default)
 

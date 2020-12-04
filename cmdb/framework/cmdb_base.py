@@ -18,14 +18,14 @@ from abc import ABC
 from typing import List
 
 from cmdb.utils.error import CMDBError
-from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.database.database_manager import DatabaseManagerMongo
 
 LOGGER = logging.getLogger(__name__)
 
 
 class CmdbManagerBase(ABC):
     """Represents the base class for cmdb managers. A respective implementation is always adapted to the
-       respective database managers :class:`cmdb.data_storage.DatabaseManager`.
+       respective database managers :class:`cmdb.database.DatabaseManager`.
        But should always use at least the super functions listed here.
     """
 

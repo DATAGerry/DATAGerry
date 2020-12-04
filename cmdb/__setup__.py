@@ -19,7 +19,7 @@ from enum import Enum
 
 from cmdb.user_management import UserGroupModel
 from cmdb.utils.system_config import SystemConfigReader
-from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.database.database_manager import DatabaseManagerMongo
 
 LOGGER = logging.getLogger(__name__)
 
@@ -170,7 +170,7 @@ class SetupRoutine:
 
     def __check_database(self):
         LOGGER.info('SETUP ROUTINE: Checking database connection')
-        from cmdb.data_storage.errors.connection_errors import ServerTimeoutError
+        from cmdb.database.errors.connection_errors import ServerTimeoutError
         try:
             connection_test = self.setup_database_manager.connector.is_connected()
         except ServerTimeoutError:

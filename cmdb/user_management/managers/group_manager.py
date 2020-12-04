@@ -19,7 +19,7 @@ from typing import Union, List
 from .account_manager import AccountManager
 from .right_manager import RightManager
 from .. import UserGroupModel
-from ...data_storage.database_manager import DatabaseManagerMongo
+from ...database.database_manager import DatabaseManagerMongo
 from ...framework.results import IterationResult
 from ...framework.utils import PublicID
 from ...manager import ManagerDeleteError, ManagerGetError, ManagerIterationError, ManagerUpdateError

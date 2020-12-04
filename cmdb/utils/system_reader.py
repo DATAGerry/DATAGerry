@@ -19,7 +19,7 @@ Collection of system readers which loads configuration files and settings
 """
 from typing import Any, Union, List
 
-from cmdb.data_storage.database_manager import DatabaseManagerMongo, NoDocumentFound
+from cmdb.database.database_manager import DatabaseManagerMongo, NoDocumentFound
 from cmdb.utils.system_errors import SectionError
 
 
