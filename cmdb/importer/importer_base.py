@@ -29,6 +29,7 @@ from cmdb.importer.importer_response import BaseImporterResponse, ImporterObject
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.importer.parser_response import ObjectParserResponse
 from cmdb.user_management import UserModel
+from cmdb.security.acl.permission import AccessControlPermission
 
 LOGGER = logging.getLogger(__name__)
 
@@ -166,7 +167,7 @@ class ObjectImporter(BaseImporter):
                     success_imports.append(ImportSuccessMessage(public_id=current_public_id, obj=current_import_object))
             else:
                 try:
-                    self.object_manager.delete_object(current_public_id, self.request_user)
+                    self.object_manager.delete_object(current_public_id, self.request_user, AccessControlPermission.DELETE)
                 except ObjectManagerDeleteError as err:
                     failed_imports.append(ImportFailedMessage(error_message=err.message, obj=current_import_object))
                     current_import_index += 1
