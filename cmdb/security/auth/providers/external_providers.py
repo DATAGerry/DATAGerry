@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2020 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,8 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 import logging
 
 from datetime import datetime
@@ -22,8 +23,6 @@ from cmdb.manager.errors import ManagerGetError, ManagerInsertError
 from cmdb.security.auth.auth_errors import AuthenticationError
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
-from cmdb.security.auth.provider_config_form import AuthProviderConfigForm, AuthProviderConfigFormEntry, \
-    AuthProviderConfigFormSection
 from cmdb.user_management.managers.user_manager import UserModel, UserManager
 from cmdb.utils.system_config import SystemConfigReader
 
@@ -49,40 +48,6 @@ class LdapAuthenticationProviderConfig(AuthProviderConfig):
             'searchfilter': '(uid=%username%)'
         }
     }
-
-    PROVIDER_CONFIG_FORM = AuthProviderConfigForm(
-        entries=[
-            AuthProviderConfigFormEntry(name='active', type='checkbox',
-                                        default=DEFAULT_CONFIG_VALUES.get('active')),
-            AuthProviderConfigFormEntry(name='default_group', type='number',
-                                        default=DEFAULT_CONFIG_VALUES.get('default_group'))
-        ],
-        sections=[
-            AuthProviderConfigFormSection(name='server_config', entries=[
-                AuthProviderConfigFormEntry(name='host', type='text',
-                                            default=DEFAULT_CONFIG_VALUES.get('server_config').get('host')),
-                AuthProviderConfigFormEntry(name='port', type='number',
-                                            default=DEFAULT_CONFIG_VALUES.get('server_config').get('port')),
-                AuthProviderConfigFormEntry(name='use_ssl', type='checkbox',
-                                            default=DEFAULT_CONFIG_VALUES.get('server_config').get('use_ssl'))
-            ]),
-            AuthProviderConfigFormSection(name='connection_config', entries=[
-                AuthProviderConfigFormEntry(name='user', type='text',
-                                            default=DEFAULT_CONFIG_VALUES.get('connection_config').get('user')),
-                AuthProviderConfigFormEntry(name='password', type='password', force_hidden=True,
-                                            default=DEFAULT_CONFIG_VALUES.get('connection_config').get('password')),
-                AuthProviderConfigFormEntry(name='version', type='number',
-                                            default=DEFAULT_CONFIG_VALUES.get('connection_config').get('version'))
-            ]),
-            AuthProviderConfigFormSection(name='search', entries=[
-                AuthProviderConfigFormEntry(name='basedn', type='text',
-                                            default=DEFAULT_CONFIG_VALUES.get('search').get('basedn')),
-                AuthProviderConfigFormEntry(name='searchfilter', type='text',
-                                            description='%username% will be inserted from the login data',
-                                            default=DEFAULT_CONFIG_VALUES.get('search').get('searchfilter'))
-            ])
-        ]
-    )
 
     def __init__(self, active: bool, default_group: int, server_config: dict, connection_config: dict, search: dict,
                  **kwargs):
