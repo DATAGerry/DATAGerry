@@ -88,8 +88,8 @@ def get_installed_providers(request_user: UserModel):
     return make_response(provider_names)
 
 
-@auth_blueprint.route('/providers/<string:provider_class>/config/', methods=['GET'])
-@auth_blueprint.route('/providers/<string:provider_class>/config', methods=['GET'])
+@auth_blueprint.route('/providers/<string:provider_class>/', methods=['GET'])
+@auth_blueprint.route('/providers/<string:provider_class>', methods=['GET'])
 @login_required
 @insert_request_user
 @right_required('base.system.view')
@@ -97,20 +97,6 @@ def get_provider_config(provider_class: str, request_user: UserModel):
     auth_module = AuthModule(system_settings_reader)
     try:
         provider_class_config = auth_module.get_provider(provider_class).get_config()
-    except StopIteration:
-        return abort(404, 'Provider not found')
-    return make_response(provider_class_config)
-
-
-@auth_blueprint.route('/providers/<string:provider_class>/config_form/', methods=['GET'])
-@auth_blueprint.route('/providers/<string:provider_class>/config_form', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.system.view')
-def get_provider_config_form(provider_class: str, request_user: UserModel):
-    auth_module = AuthModule(system_settings_reader)
-    try:
-        provider_class_config = auth_module.get_provider(provider_class).get_config().PROVIDER_CONFIG_FORM
     except StopIteration:
         return abort(404, 'Provider not found')
     return make_response(provider_class_config)

@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from cmdb.security.auth.provider_config_form import AuthProviderConfigForm, AuthProviderConfigFormEntry
 
 
 class AuthProviderConfig:
@@ -22,11 +21,6 @@ class AuthProviderConfig:
     DEFAULT_CONFIG_VALUES = {
         'active': True
     }
-    _BASE_PROVIDER_CONFIG_FORM = AuthProviderConfigForm(
-        entries=[AuthProviderConfigFormEntry(name='active', type='checkbox', default=True)],
-        sections=[]
-    )
-    PROVIDER_CONFIG_FORM: AuthProviderConfigForm = _BASE_PROVIDER_CONFIG_FORM
 
     def __init__(self, active: bool, **kwargs):
         """Base init constructor
