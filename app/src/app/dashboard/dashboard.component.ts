@@ -36,7 +36,7 @@ import { takeUntil } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
 import { ToastService } from '../layout/toast/toast.service';
 import { SidebarService } from '../layout/services/sidebar.service';
-import {CollectionParameters} from "../services/models/api-parameter";
+import { CollectionParameters } from '../services/models/api-parameter';
 
 @Component({
   selector: 'cmdb-dashboard',
@@ -245,7 +245,6 @@ export class DashboardComponent implements OnInit {
     let values;
     this.groupService.getGroups().subscribe((data: APIGetMultiResponse<Group>) => {
         values = data.results;
-        console.log(data);
       }, () => {
       },
       () => {
