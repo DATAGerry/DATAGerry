@@ -36,6 +36,7 @@ import { takeUntil } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
 import { ToastService } from '../layout/toast/toast.service';
 import { SidebarService } from '../layout/services/sidebar.service';
+import {CollectionParameters} from "../services/models/api-parameter";
 
 @Component({
   selector: 'cmdb-dashboard',
@@ -49,9 +50,9 @@ export class DashboardComponent implements OnInit {
   @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
 
   /**
-   * Component un-subscriber.
+   * Global unsubscriber for http calls to the rest backend.
    */
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+  private unSubscribe: ReplaySubject<void> = new ReplaySubject();
 
   public objectCount: number;
   public typeCount: number;
@@ -229,17 +230,14 @@ export class DashboardComponent implements OnInit {
   }
 
   private generateTypeChar() {
-    this.categoryService.getCategoryList().subscribe((data: CmdbCategory[]) => {
-      for (let i = 0; i < data.length; i++) {
-        this.labelsCategory.push(data[i].label);
-        this.colorsCategory.push(this.getRandomColor());
-        this.typeService.getTypeListByCategory(data[i].public_id).subscribe((list: any[]) => {
-          this.itemsCategory.push(list.length);
-        });
-        if (i === this.maxChartValue) {
-          break;
+    const apiParameters: CollectionParameters = { page: 1, limit: 5, sort: 'public_id', order: 1};
+    this.categoryService.getCategoryIteration(apiParameters).pipe(
+      takeUntil(this.unSubscribe)).subscribe((response: APIGetMultiResponse<CmdbCategory>) => {
+        for (const category of response.results) {
+          this.labelsCategory.push(category.label);
+          this.colorsCategory.push(this.getRandomColor());
+          this.itemsCategory.push(category.types.length);
         }
-      }
     });
   }
 
@@ -247,11 +245,12 @@ export class DashboardComponent implements OnInit {
     let values;
     this.groupService.getGroups().subscribe((data: APIGetMultiResponse<Group>) => {
         values = data.results;
+        console.log(data);
       }, () => {
       },
       () => {
         for (let i = 0; i < values.length; i++) {
-          this.userService.getUsersByGroup(values[i].public_id).subscribe((users: User[]) => {
+          this.userService.getUsersByGroup(values[i].public_id).pipe(takeUntil(this.unSubscribe)).subscribe((users: User[]) => {
             this.labelsGroup.push(values[i].label);
             this.colorsGroup.push(this.getRandomColor());
             this.itemsGroup.push(users.length);
@@ -270,7 +269,7 @@ export class DashboardComponent implements OnInit {
   }
 
   public onObjectDelete(value: RenderResult) {
-    this.objectService.deleteObject(value.object_information.object_id).pipe(takeUntil(this.subscriber))
+    this.objectService.deleteObject(value.object_information.object_id).pipe(takeUntil(this.unSubscribe))
       .subscribe(() => {
         this.toastService.success(`Object ${ value.object_information.object_id } was deleted successfully`);
         this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
