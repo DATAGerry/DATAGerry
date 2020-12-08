@@ -16,23 +16,17 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Pipe, PipeTransform } from '@angular/core';
-import { FormArray } from '@angular/forms';
+import { AuthProvider } from './providers';
 
-@Pipe({
-  name: 'activeProviders',
-  pure: false
-})
-export class ActiveProvidersPipe implements PipeTransform {
+const defaultAuthSettings = {
+  _id: 'auth',
+  enable_external: false,
+  token_lifetime: 1500
+};
 
-  transform(value: FormArray, ...args: any[]): any {
-    const activeProviderList: any[] = [];
-    for (const provider of value.getRawValue()) {
-      if (provider.config && provider.config.active) {
-        activeProviderList.push(provider);
-      }
-    }
-    return activeProviderList;
-  }
-
+export class AuthSettings {
+  public readonly _id: string = defaultAuthSettings._id;
+  public enable_external: boolean = defaultAuthSettings.enable_external;
+  public token_lifetime: number = defaultAuthSettings.token_lifetime;
+  public providers: Array<AuthProvider> = [];
 }

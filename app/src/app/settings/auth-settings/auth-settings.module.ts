@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
@@ -24,15 +24,17 @@ import { AuthSettingsComponent } from './auth-settings.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RenderModule } from '../../framework/render/render.module';
 import { ActiveProvidersPipe } from './active-providers.pipe';
+import { LdapAuthenticationProviderFormComponent } from './providers/ldap-authentication-provider-form/ldap-authentication-provider-form.component';
+import { LocalAuthenticationProviderFormComponent } from './providers/local-authentication-provider-form/local-authentication-provider-form.component';
 
 @NgModule({
-  declarations: [AuthSettingsComponent, ActiveProvidersPipe],
-    imports: [
-        CommonModule,
-        AuthSettingsRoutingModule,
-        ReactiveFormsModule,
-        RenderModule
-    ]
+  declarations: [AuthSettingsComponent, ActiveProvidersPipe, LdapAuthenticationProviderFormComponent, LocalAuthenticationProviderFormComponent],
+  imports: [
+    CommonModule,
+    AuthSettingsRoutingModule,
+    ReactiveFormsModule,
+    RenderModule
+  ]
 })
 export class AuthSettingsModule {
 }

@@ -16,23 +16,8 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Pipe, PipeTransform } from '@angular/core';
-import { FormArray } from '@angular/forms';
-
-@Pipe({
-  name: 'activeProviders',
-  pure: false
-})
-export class ActiveProvidersPipe implements PipeTransform {
-
-  transform(value: FormArray, ...args: any[]): any {
-    const activeProviderList: any[] = [];
-    for (const provider of value.getRawValue()) {
-      if (provider.config && provider.config.active) {
-        activeProviderList.push(provider);
-      }
-    }
-    return activeProviderList;
-  }
-
+export interface AuthProvider {
+  class_name: string;
+  external?: boolean;
+  config?: any;
 }

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2020 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import calendar
 import datetime
@@ -23,8 +23,6 @@ from cmdb.importer.importer_response import ImportMessage, BaseImporterResponse
 from cmdb.search.search_result import SearchResult, SearchResultMap
 from cmdb.security.auth import AuthSettingsDAO, AuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
-from cmdb.security.auth.provider_config_form import AuthProviderConfigFormEntry, \
-    AuthProviderConfigFormSection, AuthProviderConfigForm
 
 try:
     import uuid
@@ -71,8 +69,7 @@ def default(obj):
         return obj.to_json()
     if isinstance(obj, AuthSettingsDAO) or isinstance(obj, AuthenticationProvider):
         return obj.__dict__
-    if isinstance(obj, AuthProviderConfig) or isinstance(obj, AuthProviderConfigForm) \
-            or isinstance(obj, AuthProviderConfigFormSection) or isinstance(obj, AuthProviderConfigFormEntry):
+    if isinstance(obj, AuthProviderConfig):
         return obj.__dict__
     if isinstance(obj, bytes):
         return obj.decode("utf-8")
