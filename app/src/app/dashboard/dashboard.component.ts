@@ -18,7 +18,7 @@
 
 import * as moment from 'moment';
 
-import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ApiCallService } from '../services/api-call.service';
 import { TypeService } from '../framework/services/type.service';
 import { ObjectService } from '../framework/services/object.service';
@@ -43,7 +43,7 @@ import { CollectionParameters } from '../services/models/api-parameter';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
 
   @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
   @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
@@ -280,5 +280,10 @@ export class DashboardComponent implements OnInit {
       (error) => {
         this.toastService.error(`Error while deleting object ${ value.object_information.object_id } | Error: ${ error }`);
       });
+  }
+
+  public ngOnDestroy(): void {
+    this.unSubscribe.next();
+    this.unSubscribe.complete();
   }
 }
