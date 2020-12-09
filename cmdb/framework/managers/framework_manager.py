@@ -15,7 +15,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 from typing import Union, List
 
-from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.framework.results.list import ListResult
 from cmdb.manager.errors import ManagerGetError, ManagerDeleteError
 from cmdb.manager import ManagerBase
 from cmdb.framework.managers.error.framework_errors import FrameworkGetError, FrameworkNotFoundError, \
@@ -94,7 +95,13 @@ class FrameworkManager(ManagerBase):
         self.builder = FrameworkQueryBuilder()
         super(FrameworkManager, self).__init__(database_manager)
 
+    def count(self, filter: dict, *args, **kwargs) -> int:
+        raise NotImplementedError
+
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult:
+        raise NotImplementedError
+
+    def find(self, filter: dict, *args, **kwargs) -> ListResult:
         raise NotImplementedError
 
     def get(self, public_id: PublicID) -> dict:

@@ -20,7 +20,7 @@ from flask import current_app
 
 from cmdb.interface.route_utils import make_response
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.database.managers import DatabaseManagerMongo
 
 try:
     from cmdb.utils.error import CMDBError

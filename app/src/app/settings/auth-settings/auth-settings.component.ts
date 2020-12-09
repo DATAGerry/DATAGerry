@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,16 +13,19 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AuthSettingsService } from '../services/auth-settings.service';
-import { forkJoin, Observable, Subscription } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
-import { CmdbMode } from '../../framework/modes.enum';
-import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastService } from '../../layout/toast/toast.service';
+import { ProgressSpinnerService } from '../../layout/progress/progress-spinner.service';
+import { takeUntil } from 'rxjs/operators';
+import { AuthService } from '../../auth/services/auth.service';
+import { ActivatedRoute, Data } from '@angular/router';
+import { AuthProvider } from '../../auth/models/providers';
+import { AuthSettings } from '../../auth/models/settings';
 
 @Component({
   selector: 'cmdb-auth-settings',
@@ -31,133 +34,52 @@ import { ToastService } from '../../layout/toast/toast.service';
 })
 export class AuthSettingsComponent implements OnInit, OnDestroy {
 
-  // Params
-  public renderMode = CmdbMode.Edit;
-  public isPatched: boolean = false;
+  /**
+   * Un-subscriber for `AuthSettingsComponent`.
+   * @private
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  // Form
-  public authProviderFormGroup: FormGroup;
-  public authSettingsFormConfig: any[] = [
-    {
-    name: 'enable_external',
-    label: 'Enable External',
-    type: 'checkbox'
-    },
-    {
-      name: 'token_lifetime',
-      label: 'Token lifetime',
-      description: 'How long should the token be valid?',
-      type: 'number'
-    }
-  ];
-  public authProviderControlConfigFormMap: Map<string, any> = new Map<string, any>();
+  public authConfigForm: FormGroup;
+  public authSettings: AuthSettings;
 
-  // Data
-  public authSettings: any = undefined;
-  public installedProviderList: any[];
+  public installedProviderList: Array<AuthProvider>;
 
-  // Subscriptions
-  private authSettingsSubscription: Subscription;
-  private authProvidersSubscription: Subscription;
-  private configFormSubscriptions: Subscription;
-  private configFormSaveSubscriptions: Subscription;
-
-  public constructor(private authSettingsService: AuthSettingsService, private spinner: NgxSpinnerService, private toast: ToastService) {
-    this.authProviderFormGroup = new FormGroup({
+  public constructor(private authSettingsService: AuthService, private activateRoute: ActivatedRoute,
+                     private spinner: ProgressSpinnerService, private toast: ToastService) {
+    this.authConfigForm = new FormGroup({
       _id: new FormControl('auth'),
       enable_external: new FormControl(false),
+      token_lifetime: new FormControl(null),
       providers: new FormArray([])
     });
-    this.authSettingsSubscription = new Subscription();
-    this.authProvidersSubscription = new Subscription();
-    this.configFormSubscriptions = new Subscription();
-    this.configFormSaveSubscriptions = new Subscription();
+    this.activateRoute.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
+      this.installedProviderList = data.providers;
+    });
   }
 
   public ngOnInit(): void {
-    this.authProvidersSubscription = this.authSettingsService.getProviders().subscribe((providers: any[]) => {
-      this.installedProviderList = providers;
-    });
-    this.authSettingsSubscription = this.authSettingsService.getSettings().subscribe((settings: any) => {
+    this.authSettingsService.getSettings().pipe(takeUntil(this.subscriber)).subscribe((settings: any) => {
       this.authSettings = settings;
-      const providersFormArray = this.authProviderFormGroup.get('providers') as FormArray;
-      const configFormRequests: Observable<any>[] = [];
-      for (const provider of this.authSettings.providers) {
-        configFormRequests.push(this.authSettingsService.getProviderConfigForm(provider.class_name));
-      }
-      this.configFormSubscriptions = forkJoin(configFormRequests).subscribe((configForms: any[]) => {
-        // tslint:disable-next-line:prefer-for-of
-        for (let i = 0; i < this.authSettings.providers.length; i++) {
-          this.authProviderControlConfigFormMap.set(this.authSettings.providers[i].class_name, configForms[i]);
-          const providerFormGroup = new FormGroup({
-            class_name: new FormControl(this.authSettings.providers[i].class_name),
-            config: new FormGroup({})
-          });
-          const configGroup = providerFormGroup.get('config') as FormGroup;
-
-          this.addEntriesToFormGroup(configGroup, configForms[i].entries);
-          this.addSectionToFormGroup(configGroup, configForms[i].sections);
-          providersFormArray.push(providerFormGroup);
-        }
-        this.patchDatabaseValues();
-      });
-
+      this.authConfigForm.patchValue(this.authSettings);
     });
   }
 
-  private patchDatabaseValues(): void {
-    this.authProviderFormGroup.patchValue(this.authSettings);
-    this.isPatched = true;
-  }
-
-  private addEntriesToFormGroup(group: FormGroup, entries: any[] = []) {
-    if (entries.length > 0) {
-      for (const entry of entries) {
-        group.addControl(entry.name, new FormControl(entry.default));
-      }
-    }
-  }
-
-  private addSectionToFormGroup(group: FormGroup, sections: any[] = []) {
-    if (sections.length > 0) {
-      for (const section of sections) {
-        const sectionFormGroup = new FormGroup({});
-        this.addEntriesToFormGroup(sectionFormGroup, section.entries);
-        group.addControl(section.name, sectionFormGroup);
-      }
-    }
-  }
-
-  public getProviderConfigFormGroup(index: number): FormGroup {
-    const providersList = this.authProviderFormGroup.get('providers') as FormArray;
-    const providerFormGroup = providersList.at(index);
-    return providerFormGroup.get('config') as FormGroup;
-  }
-
-  public getProviderConfigSectionFormGroup(index: number, sectionName: string): FormGroup {
-    return this.getProviderConfigFormGroup(index).get(sectionName) as FormGroup;
-  }
-
-  public getInstalledProviderByName(providerName: string): any {
-    return this.installedProviderList.find(provider => provider.class_name === providerName);
+  public get providersArray(): FormArray {
+    return this.authConfigForm.get('providers') as FormArray;
   }
 
   public onSave(): void {
-    if (this.authProviderFormGroup.valid) {
-      this.spinner.show();
-      this.configFormSaveSubscriptions = this.authSettingsService.postSettings(this.authProviderFormGroup.value).subscribe((resp: any) => {
+    if (this.authConfigForm.valid) {
+      this.authSettingsService.postSettings(this.authConfigForm.getRawValue()).pipe(takeUntil(this.subscriber)).subscribe(() => {
         this.toast.success('Authentication config was updated!');
-      }).add(() => {
-        this.spinner.hide();
       });
     }
   }
 
   public ngOnDestroy(): void {
-    this.authSettingsSubscription.unsubscribe();
-    this.authProvidersSubscription.unsubscribe();
-    this.configFormSubscriptions.unsubscribe();
-    this.configFormSaveSubscriptions.unsubscribe();
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
 }

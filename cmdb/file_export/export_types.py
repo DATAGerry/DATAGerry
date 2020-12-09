@@ -25,14 +25,15 @@ import zipfile
 import openpyxl
 from cmdb.utils.helpers import load_class
 
-from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.utils import json_encoding
 from cmdb.utils.system_config import SystemConfigReader
 
-object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
-    **SystemConfigReader().get_all_values_from_section('Database')
-))
+database_manager = DatabaseManagerMongo(**SystemConfigReader().get_all_values_from_section('Database'))
+object_manager = CmdbObjectManager(database_manager=database_manager)
+type_manager = TypeManager(database_manager=database_manager)
 
 
 class ExportType:
@@ -129,35 +130,45 @@ class CsvExportType(ExportType):
             Csv file containing the object_list
         """
 
+        # init values
         header = ['public_id', 'active']
         rows = []
-        row = {}
-        run_into = True
-        public_id = object_list[0].type_id
+        current_type_id = None
+        current_type_fields = []
 
         for obj in object_list:
+            # get type from first object and setup csv header
+            if current_type_id is None:
+                current_type_id = obj.type_id
+                current_type_fields = type_manager.get(obj.type_id).get_fields()
+                for type_field in current_type_fields:
+                    header.append(type_field.get('name'))
 
-            if public_id != obj.type_id:
+            # throw Exception if objects of different type are detected
+            if current_type_id != obj.type_id:
                 raise Exception({'message': 'CSV can export only object of the same type'})
 
-            fields = obj.fields
-            row.update({'public_id': str(obj.public_id), 'active': str(obj.active)})
+            # get object fields as dict:
+            obj_fields_dict = {}
+            for obj_field in obj.fields:
+                obj_field_name = obj_field.get('name')
+                obj_fields_dict[obj_field_name] = obj_field.get('value')
 
-            for key in fields:
-                if run_into:
-                    header.append(key.get('name'))
-                row.update({key.get('name'): str(key.get('value'))})
-            run_into = False
+            # define output row
+            row = []
+            row.append(str(obj.public_id))
+            row.append(str(obj.active))
+            for type_field in current_type_fields:
+                row.append(str(obj_fields_dict.get(type_field.get('name'), None)))
             rows.append(row)
-            row = {}
 
         return self.csv_writer(header, rows)
 
     def csv_writer(self, header, rows, dialect=csv.excel):
 
         csv_file = io.StringIO()
-        writer = csv.DictWriter(csv_file, fieldnames=header, dialect=dialect)
-        writer.writeheader()
+        writer = csv.writer(csv_file, dialect=dialect)
+        writer.writerow(header)
         for row in rows:
             writer.writerow(row)
         csv_file.seek(0)
@@ -185,21 +196,32 @@ class JsonExportType(ExportType):
             Json file containing the object_list
         """
 
-        s_keys = ['public_id', 'active', 'type_id', 'fields']
-        filter_dict = []
+        output = []
 
         for obj in object_list:
-            new_dict = {'public_id': 0, 'active': True, 'type': '', 'fields': []}
-            for k in s_keys:
-                if k in obj.__dict__:
-                    if k == 'type_id':
-                        new_dict.update({'type': object_manager.get_type(obj.type_id).label})
-                    else:
-                        new_dict.update({k: obj.__dict__[k]})
+            # init output element
+            output_element = {}
+            output_element['public_id'] = obj.public_id
+            output_element['active'] = obj.active
+            output_element['type'] = type_manager.get(obj.type_id).get_label()
+            output_element['fields'] = []
 
-            filter_dict.append(new_dict)
+            # get object fields as dict:
+            obj_fields_dict = {}
+            for obj_field in obj.fields:
+                obj_field_name = obj_field.get('name')
+                obj_fields_dict[obj_field_name] = obj_field.get('value')
 
-        return json.dumps(filter_dict, default=json_encoding.default, ensure_ascii=False, indent=2)
+            # walk over all type fields and add object field values
+            for type_field in type_manager.get(obj.type_id).get_fields():
+                output_element['fields'].append({
+                    'name': type_field.get('name'),
+                    'value': obj_fields_dict.get(type_field.get('name'), None)
+                })
+
+            output.append(output_element)
+
+        return json.dumps(output, default=json_encoding.default, ensure_ascii=False, indent=2)
 
 
 class XlsxExportType(ExportType):
@@ -236,61 +258,67 @@ class XlsxExportType(ExportType):
         # create workbook
         workbook = openpyxl.Workbook()
 
-        # delete default sheet
-        workbook.remove(workbook.active)
-
-        # insert data into worksheet
-        run_header = True
-        i = 2
-
         # sorts data_list by type_id
-
         type_id = "type_id"
         decorated = [(dict_.__dict__[type_id], dict_.__dict__) for dict_ in object_list]
         decorated = sorted(decorated, key=lambda x: x[0], reverse=False)
         sorted_list = [dict_ for (key, dict_) in decorated]
 
-        current_type_id = sorted_list[0][type_id]
-        p = 0
+        # init values
+        current_type_id = None
+        current_type_fields = []
+        i = 0
         for obj in sorted_list:
-            fields = obj["fields"]
 
+            # check, if starting a new object type
             if current_type_id != obj[type_id]:
+                # set current type id and fields
                 current_type_id = obj[type_id]
-                run_header = True
-                i = 2
+                current_type_fields = type_manager.get(obj[type_id]).get_fields()
+                i = 1
 
-            # insert header value
-            if run_header:
-                # get active worksheet and rename it
+                # delete default sheet
+                workbook.remove(workbook.active)
+
+                # start a new worksheet and rename it
                 title = self.__normalize_sheet_title(object_manager.get_type(obj[type_id]).label)
-                sheet = workbook.create_sheet(title, p)
-                header = sheet.cell(row=1, column=1)
-                header.value = 'public_id'
-                header = sheet.cell(row=1, column=2)
-                header.value = 'active'
+                sheet = workbook.create_sheet(title)
 
+                # insert header: public_id, active
+                cell = sheet.cell(row=i, column=1)
+                cell.value = 'public_id'
+                cell = sheet.cell(row=i, column=2)
+                cell.value = 'active'
+
+                # insert header: get fields from type definition
                 c = 3
-                for v in fields:
-                    header = sheet.cell(row=1, column=c)
-                    header.value = v.get('name')
+                for type_field in current_type_fields:
+                    cell = sheet.cell(row=i, column=c)
+                    cell.value = type_field.get('name')
                     c = c + 1
-                run_header = False
+                i = i + 1
 
-            # insert row values
+            # insert row values: public_id, active
+            cell = sheet.cell(row=i, column=1)
+            cell.value = str(obj["public_id"])
+            cell = sheet.cell(row=i, column=2)
+            cell.value = str(obj["active"])
+
+            # get object fields as dict:
+            obj_fields_dict = {}
+            for obj_field in obj['fields']:
+                obj_field_name = obj_field.get('name')
+                obj_fields_dict[obj_field_name] = obj_field.get('value')
+
+            # insert row values: fields
             c = 3
-            for key in fields:
-                header = sheet.cell(row=i, column=1)
-                header.value = str(obj["public_id"])
-                header = sheet.cell(row=i, column=2)
-                header.value = str(obj["active"])
-
-                rows = sheet.cell(row=i, column=c)
-                rows.value = str(key.get('value'))
+            for type_field in current_type_fields:
+                cell = sheet.cell(row=i, column=c)
+                cell.value = str(obj_fields_dict.get(type_field.get('name'), None))
                 c = c + 1
 
+            # increase row number
             i = i + 1
-            p = p + 1
 
         return workbook
 
@@ -322,30 +350,32 @@ class XmlExportType(ExportType):
         # object list
         cmdb_object_list = ET.Element('objects')
 
-        # parse objects to JSON
-        json_obj = json.loads(json.dumps(object_list, default=json_encoding.default, indent=2))
+        for obj in object_list:
+            # get object fields as dict:
+            obj_fields_dict = {}
+            for obj_field in obj.fields:
+                obj_field_name = obj_field.get('name')
+                obj_fields_dict[obj_field_name] = obj_field.get('value')
 
-        # parse objects to XML
-        for obj in json_obj:
-            # object
+            # xml output: object
             cmdb_object = ET.SubElement(cmdb_object_list, 'object')
             cmdb_object_meta = ET.SubElement(cmdb_object, 'meta')
-            # meta: public
+            # xml output meta: public
             cmdb_object_meta_id = ET.SubElement(cmdb_object_meta, 'public_id')
-            cmdb_object_meta_id.text = str(obj['public_id'])
-            # meta: active
+            cmdb_object_meta_id.text = str(obj.public_id)
+            # xml output meta: active
             cmdb_object_meta_active = ET.SubElement(cmdb_object_meta, 'active')
-            cmdb_object_meta_active.text = str(obj['active'])
-            # meta: type
+            cmdb_object_meta_active.text = str(obj.active)
+            # xml output meta: type
             cmdb_object_meta_type = ET.SubElement(cmdb_object_meta, 'type')
-            cmdb_object_meta_type.text = object_manager.get_type(obj['type_id']).label
-            # fields
+            cmdb_object_meta_type.text = object_manager.get_type(obj.type_id).label
+            # xml output: fields
             cmdb_object_fields = ET.SubElement(cmdb_object, 'fields')
-            for curr in obj['fields']:
-                # fields: content
+            # walk over all type fields and add object field values
+            for type_field in type_manager.get(obj.type_id).get_fields():
                 field_attribs = {}
-                field_attribs["name"] = str(curr['name'])
-                field_attribs["value"] = str(curr['value'])
+                field_attribs["name"] = str(type_field.get('name'))
+                field_attribs["value"] = str(obj_fields_dict.get(type_field.get('name'), None))
                 ET.SubElement(cmdb_object_fields, "field", field_attribs)
 
         # return xml as string (pretty printed)

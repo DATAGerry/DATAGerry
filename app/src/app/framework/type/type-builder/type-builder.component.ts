@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,10 +13,10 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { TypeBasicStepComponent } from './type-basic-step/type-basic-step.component';
 import { CmdbType } from '../../models/cmdb-type';
 import { TypeFieldsStepComponent } from './type-fields-step/type-fields-step.component';
@@ -29,24 +29,23 @@ import { Router } from '@angular/router';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { CmdbCategory } from '../../models/cmdb-category';
 import { SidebarService } from '../../../layout/services/sidebar.service';
-import { HttpHeaders } from '@angular/common/http';
-import { resp } from '../../../services/api-call.service';
+import { Group } from '../../../management/models/group';
+import { ReplaySubject } from 'rxjs';
+import { CollectionParameters } from '../../../services/models/api-parameter';
+import { GroupService } from '../../../management/services/group.service';
+import { takeUntil } from 'rxjs/operators';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
+import { TypeAclStepComponent } from './type-acl-step/type-acl-step.component';
 
 @Component({
   selector: 'cmdb-type-builder',
   templateUrl: './type-builder.component.html',
   styleUrls: ['./type-builder.component.scss']
 })
-export class TypeBuilderComponent implements OnInit {
+export class TypeBuilderComponent implements OnInit, OnDestroy {
 
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  private readonly httpObserveOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json'
-    }),
-    params: {},
-    observe: resp
-  };
   @Input() public typeInstance?: CmdbType;
   @Input() public mode: number = CmdbMode.Create;
   public modes = CmdbMode;
@@ -60,20 +59,40 @@ export class TypeBuilderComponent implements OnInit {
   @ViewChild(TypeMetaStepComponent, { static: true })
   public metaStep: TypeMetaStepComponent;
 
-  public selectedCategoryID: number = 0;
+  @ViewChild(TypeAclStepComponent, { static: true })
+  public aclStep: TypeAclStepComponent;
+  public aclStepValid: boolean = true;
+  public aclEmpty: boolean = true;
+
+  public selectedCategoryID: number;
+
+  public groups: Array<Group> = [];
 
   public constructor(private router: Router, private typeService: TypeService,
-                     private toast: ToastService, private userService: UserService,
+                     private toast: ToastService, private userService: UserService, private groupService: GroupService,
                      private sidebarService: SidebarService, private categoryService: CategoryService) {
 
   }
 
   public ngOnInit(): void {
+    this.selectedCategoryID = undefined;
     if (this.mode === CmdbMode.Create) {
       this.typeInstance = new CmdbType();
       this.typeInstance.version = '1.0.0';
       this.typeInstance.author_id = this.userService.getCurrentUser().public_id;
     }
+    const groupParams: CollectionParameters = {
+      filter: undefined, limit: 0, sort: 'public_id', order: 1, page: 1
+    };
+    this.groupService.getGroups(groupParams).pipe(takeUntil(this.subscriber))
+      .subscribe((groups: APIGetMultiResponse<Group>) => {
+        this.groups = groups.results;
+      });
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
   public exitBasicStep() {
@@ -107,6 +126,10 @@ export class TypeBuilderComponent implements OnInit {
     this.assignToType({ externals: this.metaStep.externalLinks }, 'render_meta');
   }
 
+  public exitAccessStep() {
+    this.assignToType({ acl: this.aclStep.form.getRawValue() });
+  }
+
   public saveType() {
     if (this.mode === CmdbMode.Create) {
       let newTypeID = null;
@@ -116,12 +139,12 @@ export class TypeBuilderComponent implements OnInit {
             this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
               category.types.push(newTypeID);
               this.categoryService.updateCategory(category).subscribe(() => {
-                this.sidebarService.reload();
+                this.sidebarService.loadCategoryTree();
                 this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
               });
             });
           } else {
-            this.sidebarService.reload();
+            this.sidebarService.loadCategoryTree();
             this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
           }
 
@@ -133,23 +156,27 @@ export class TypeBuilderComponent implements OnInit {
       this.typeInstance.creation_time = this.typeInstance.creation_time.$date;
       this.typeService.putType(this.typeInstance).subscribe((updateResp: CmdbType) => {
           if (this.basicStep.originalCategoryID !== this.selectedCategoryID) {
-            this.categoryService.getCategory(this.basicStep.originalCategoryID).subscribe((category: CmdbCategory) => {
-              const index = category.types.indexOf(this.typeInstance.public_id, 0);
-              if (index > -1) {
-                category.types.splice(index, 1);
-              }
-              this.categoryService.updateCategory(category).subscribe(() => {
-                console.log('Type id removed from category');
+            // Remove from old category
+            if (this.basicStep.originalCategoryID) {
+              this.categoryService.getCategory(this.basicStep.originalCategoryID).subscribe((category: CmdbCategory) => {
+                const index = category.types.indexOf(this.typeInstance.public_id, 0);
+                if (index > -1) {
+                  category.types.splice(index, 1);
+                }
+                this.categoryService.updateCategory(category).subscribe(() => {
+                });
               });
-            });
-            this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
-              category.types.push(this.typeInstance.public_id);
-              this.categoryService.updateCategory(category).subscribe(() => {
-                console.log('Type id added to category');
+            }
+            // Add to new category
+            if (this.selectedCategoryID) {
+              this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
+                category.types.push(this.typeInstance.public_id);
+                this.categoryService.updateCategory(category).subscribe(() => {
+                });
               });
-            });
+            }
           }
-          this.sidebarService.reload();
+          this.sidebarService.loadCategoryTree();
           this.toast.success(`Type was successfully edited: TypeID: ${ updateResp.public_id }`);
           this.router.navigate(['/framework/type/'], { queryParams: { typeEditSuccess: updateResp.public_id } });
         },

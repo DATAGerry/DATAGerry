@@ -19,9 +19,9 @@
 import { ObjectStoreSchema } from 'ngx-indexed-db/lib/ngx-indexed-db.meta';
 
 export const userSettingsSchema: ObjectStoreSchema[] = [
-  { name: 'identifier', keypath: 'identifier', options: { unique: true } },
+  { name: 'resource', keypath: 'resource', options: { unique: true } },
   { name: 'user_id', keypath: 'user_id', options: { unique: false } },
-  { name: 'payload', keypath: 'payload', options: { unique: false } },
+  { name: 'payloads', keypath: 'payloads', options: { unique: false } },
   { name: 'setting_type', keypath: 'setting_type', options: { unique: false } }
 ];
 
@@ -29,20 +29,22 @@ export const userSettingsSchema: ObjectStoreSchema[] = [
  * Basic user setting class. Wrapper class for all CRUD functions with the API.
  */
 export class UserSetting<P = UserSettingPayload> {
-  identifier: string;
-  user_id: number;
-  payload: P;
-  setting_type: string;
 
-  constructor(identifier: string, user_id: number, payload: P) {
-    this.identifier = identifier;
+  static readonly USER_SETTING_TYPE = 'APPLICATION';
+
+  public readonly resource: string;
+  public readonly user_id: number;
+  public payloads: Array<P>;
+  public readonly setting_type: string = UserSetting.USER_SETTING_TYPE;
+
+  constructor(resource: string, user_id: number, payloads: Array<P> = []) {
+    this.resource = resource;
     this.user_id = user_id;
-    this.payload = payload;
-    this.setting_type = 'APPLICATION';
+    this.payloads = payloads;
   }
 }
 
 // tslint:disable-next-line:no-empty-interface
 export interface UserSettingPayload {
-
+  id: string;
 }

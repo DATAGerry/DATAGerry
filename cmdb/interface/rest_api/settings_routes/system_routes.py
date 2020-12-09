@@ -43,7 +43,6 @@ with current_app.app_context():
 @system_blueprint.route('/', methods=['GET'])
 @login_required
 @insert_request_user
-@right_required('base.system.view')
 def get_datagerry_information(request_user: UserModel):
     from cmdb import __title__, __version__, __runtime__
 
@@ -86,21 +85,6 @@ def get_config_information(request_user: UserModel):
     if len(config_dict) < 1:
         return make_response(config_dict, 204)
     return make_response(config_dict)
-
-
-@system_blueprint.route('/config/', methods=['POST'])
-@system_blueprint.route('/config', methods=['POST'])
-@login_required
-@insert_request_user
-@right_required('base.system.reload')
-def reload_config_reader(request_user: UserModel):
-    ssc = SystemConfigReader()
-    ssc.setup()
-    LOGGER.warning('Reload config file!')
-    status = ssc.status()
-    if status:
-        current_app.cache.clear()
-    return make_response(status)
 
 
 @system_blueprint.route('/information/', methods=['GET'])

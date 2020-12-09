@@ -1,3 +1,17 @@
+<ng-template #activeTemplate let-data="data">
+  <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
+</ng-template>
+
+<ng-template #userTemplate let-data="data">
+  <cmdb-user-compact [userID]="data"></cmdb-user-compact>
+</ng-template>
+
+<ng-template #actionTemplate let-item="item">
+  <cmdb-object-table-actions [publicID]="item.object_information.object_id" [result]="item"
+                             [acl]="item.type_information.acl"
+                             (deleteEmitter)="onObjectDelete(item)"></cmdb-object-table-actions>
+</ng-template>
+
 <div class="row mb-3">
   <div class="col-4">
     <div class="card">
@@ -43,6 +57,19 @@
     </div>
   </div>
 </div>
-
-<cmdb-newest-view></cmdb-newest-view>
-<cmdb-latest-changes-view></cmdb-latest-changes-view>
+<hr/>
+<ng-container *ngIf="newestObjects">
+  <h2>Newest objects</h2>
+  <cmdb-table [id]="'dashboard-newest-table'" [items]="newestObjects" [totalItems]="newestObjectsCount"
+              [columns]="newestTableColumns" [sortable]="false" [searchEnabled]="false" [pageSize]="10"
+              [pageSizeEnabled]="false">
+  </cmdb-table>
+</ng-container>
+<hr />
+<ng-container *ngIf="latestObjects">
+  <h2>Last modified objects</h2>
+  <cmdb-table [id]="'dashboard-latest-table'" [items]="latestObjects" [totalItems]="latestObjectsCount"
+              [columns]="latestTableColumns" [sortable]="false" [searchEnabled]="false" [pageSize]="10"
+              [pageSizeEnabled]="false">
+  </cmdb-table>
+</ng-container>

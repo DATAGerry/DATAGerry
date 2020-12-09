@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import json
 import logging
 
@@ -20,13 +21,13 @@ from flask import current_app, request, abort
 
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required
-from cmdb.interface.blueprint import RootBlueprint
 from cmdb.search import Search
 from cmdb.search.params import SearchParam
 from cmdb.search.query import Pipeline
-from cmdb.search.query.pipe_builder import PipelineBuilder
-from cmdb.search.searchers import SearcherFramework
+from cmdb.search.searchers import SearcherFramework, SearchPipelineBuilder, QuickSearchPipelineBuilder
 from cmdb.user_management.models.user import UserModel
+from cmdb.interface.blueprint import APIBlueprint
+from cmdb.security.acl.permission import AccessControlPermission
 
 try:
     from cmdb.utils.error import CMDBError
@@ -37,31 +38,28 @@ with current_app.app_context():
     object_manager: CmdbObjectManager = current_app.object_manager
 
 LOGGER = logging.getLogger(__name__)
-search_blueprint = RootBlueprint('search_rest', __name__, url_prefix='/search')
+search_blueprint = APIBlueprint('search_rest', __name__, url_prefix='/search')
 
 
 @search_blueprint.route('/quick/count', methods=['GET'])
 @search_blueprint.route('/quick/count/', methods=['GET'])
-@login_required
+@search_blueprint.protect(auth=True)
 @insert_request_user
 def quick_search_result_counter(request_user: UserModel):
-    regex = request.args.get('searchValue', Search.DEFAULT_REGEX, str)
-    plb = PipelineBuilder()
-    regex = plb.regex_('fields.value', f'{regex}', 'ims')
-    pipe_match = plb.match_(regex)
-    plb.add_pipe(pipe_match)
-    pipe_count = plb.count_('count')
-    plb.add_pipe(pipe_count)
-    pipeline = plb.pipeline
+    search_term = request.args.get('searchValue', Search.DEFAULT_REGEX, str)
+    builder = QuickSearchPipelineBuilder()
+    only_active = _fetch_only_active_objs()
+    pipeline: Pipeline = builder.build(search_term=search_term, user=request_user, permission=AccessControlPermission.READ,
+                                       active_flag=only_active)
     try:
         result = list(object_manager.aggregate(collection='framework.objects', pipeline=pipeline))
     except Exception as err:
         LOGGER.error(f'[Search count]: {err}')
         return abort(400)
     if len(result) > 0:
-        return make_response(result[0]['count'])
+        return make_response(result[0])
     else:
-        return make_response(0)
+        return make_response({'active': 0, 'inactive': 0, 'total': 0})
 
 
 @search_blueprint.route('/', methods=['GET', 'POST'])
@@ -87,14 +85,17 @@ def search_framework(request_user: UserModel):
         LOGGER.error(f'[Search Framework]: {err}')
         return abort(400, err)
     try:
-        builder = PipelineBuilder()
+        builder = SearchPipelineBuilder()
         search_parameters = SearchParam.from_request(search_params)
 
-        query: Pipeline = builder.build(search_parameters, object_manager, only_active)
+        query: Pipeline = builder.build(search_parameters, object_manager,
+                                        user=request_user,
+                                        permission=AccessControlPermission.READ, active_flag=only_active)
 
         searcher = SearcherFramework(manager=object_manager)
         result = searcher.aggregate(pipeline=query, request_user=request_user, limit=limit, skip=skip,
-                                    resolve=resolve_object_references, active=only_active)
+                                    resolve=resolve_object_references, permission=AccessControlPermission.READ,
+                                    active=only_active)
 
     except Exception as err:
         LOGGER.error(f'[Search Framework Rest]: {err}')

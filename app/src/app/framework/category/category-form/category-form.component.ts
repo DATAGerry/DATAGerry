@@ -23,6 +23,8 @@ import { CmdbCategory } from '../../models/cmdb-category';
 import { CmdbType } from '../../models/cmdb-type';
 import { CategoryService, checkCategoryExistsValidator } from '../../services/category.service';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
+import { TypeService } from '../../services/type.service';
+import { AccessControlPermission } from '../../../acl/acl.types';
 
 @Component({
   selector: 'cmdb-category-form',
@@ -75,7 +77,16 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
   public categoryForm: FormGroup;
 
   @Input() public unAssignedTypes: CmdbType[] = [];
-  @Input() public assignedTypes: CmdbType[] = [];
+
+  private tempAssignedTypes: CmdbType[] = [];
+  @Input()
+  public set assignedTypes(value: CmdbType[]) {
+    this.tempAssignedTypes = value;
+  }
+
+  public get assignedTypes(): CmdbType[] {
+    return this.tempAssignedTypes;
+  }
 
   public effect: DropEffect = 'move';
   public readonly fallBackIcon = 'far fa-folder-open';
@@ -83,7 +94,7 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Category form constructor - Inits the category form
    */
-  public constructor(private categoryService: CategoryService) {
+  public constructor(private categoryService: CategoryService, private typeService: TypeService) {
     this.categoryForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl(''),
@@ -97,9 +108,9 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   public ngOnInit(): void {
-    if (this.mode === CmdbMode.Create) {
+    if (CmdbMode.Create === this.mode) {
       this.name.setAsyncValidators(checkCategoryExistsValidator(this.categoryService));
-    } else if (this.mode === CmdbMode.Edit) {
+    } else if (CmdbMode.Edit === this.mode) {
       this.name.disable({ onlySelf: true });
     }
     this.categoryServiceSubscription = this.categoryService.getCategoryList().subscribe((categories: CmdbCategory[]) => {
@@ -123,12 +134,15 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
       }
     }
     // TODO fix wrong order!!!
-    if (changes.assignedTypes !== undefined && changes.assignedTypes.currentValue !== undefined && (
-      changes.assignedTypes.previousValue !== changes.assignedTypes.currentValue
-    )) {
+    if (changes.assignedTypes !== undefined && changes.assignedTypes.currentValue !== undefined && this.$category.types
+      && (changes.assignedTypes.previousValue !== changes.assignedTypes.currentValue)
+    ) {
       const buffer: CmdbType[] = [];
       for (const type of this.$category.types) {
-        buffer.push(this.findAssignedTypeByIndex(type));
+        const assignedType = this.findAssignedTypeByIndex(type);
+        if (assignedType) {
+          buffer.push(assignedType);
+        }
       }
       this.assignedTypes = buffer;
     }
@@ -177,16 +191,6 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
     this.assignedTypes.splice(index, 1);
     this.unAssignedTypes.push(item);
     this.types.removeAt(index);
-  }
-
-  public clickReset() {
-    this.unAssignedTypes = this.unAssignedTypes.concat(this.assignedTypes);
-    this.assignedTypes = [];
-  }
-
-  public onDragStart(event: DragEvent) {
-    console.log('Drag started!');
-    console.log(event);
   }
 
   public onDragged(item: CmdbType, list: any[], effect: DropEffect, control: boolean = false) {

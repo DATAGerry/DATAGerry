@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2020 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -26,6 +26,7 @@ from cmdb.interface import DEFAULT_MIME_TYPE
 from cmdb.interface.api_parameters import CollectionParameters
 
 from cmdb.interface.pagination import APIPagination, APIPager
+from cmdb.interface.route_utils import default
 
 
 def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2) -> BaseResponse:
@@ -43,7 +44,7 @@ def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2
     """
     from cmdb.interface import API_VERSION
 
-    response = flask_response(dumps(body, default=str, indent=indent), status)
+    response = flask_response(dumps(body, default=default, indent=indent), status)
     response.mimetype = mime or DEFAULT_MIME_TYPE
     response.headers['X-API-Version'] = API_VERSION
     return response
@@ -318,6 +319,48 @@ class UpdateSingleResponse(BaseAPIResponse):
         return {**{
             'result': self.result
         }, **super(UpdateSingleResponse, self).export(*args, **kwargs)}
+
+
+class UpdateMultiResponse(BaseAPIResponse):
+    """
+    API Response for update call of a multiple resources.
+    """
+
+    __slots__ = 'results'
+
+    def __init__(self, results: List[dict], url: str = None, model: Model = None):
+        """
+        Constructor of UpdateSingleResponse.
+
+        Args:
+            results: Updated resources.
+            url: Requested url.
+            model: Data model of updated resource.
+        """
+        self.results: List[dict] = results
+        super(UpdateMultiResponse, self).__init__(operation_type=OperationType.UPDATE, url=url, model=model)
+
+    def make_response(self, *args, **kwargs) -> BaseResponse:
+        """
+        Make a valid http response.
+
+        Args:
+            *args:
+            **kwargs:
+
+        Returns:
+            Instance of BaseResponse with http status code 202
+        """
+        response = make_api_response(self.export(), 202)
+        return response
+
+    def export(self, text: str = 'json', *args, **kwargs) -> dict:
+        """
+        Get the update instance as dict.
+        """
+        return {**{
+            'results': self.results
+        }, **super(UpdateMultiResponse, self).export(*args, **kwargs)}
 
 
 class DeleteSingleResponse(BaseAPIResponse):

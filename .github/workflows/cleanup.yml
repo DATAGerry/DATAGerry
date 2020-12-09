@@ -11,11 +11,12 @@ jobs:
     container: nethinks/datagerry_ci
     steps:
     - name: extract Github branch name
-      run: echo ::set-env name=BRANCH::$(BRANCH_EXTRACTED=${{github.event.ref}}; echo ${BRANCH_EXTRACTED//\//-})
+      run: echo "BRANCH=$(BRANCH_EXTRACTED=${{github.event.ref}}; echo ${BRANCH_EXTRACTED//\//-})" >> $GITHUB_ENV
+
     - name: setup version strings
       run: |
-        echo ::set-env name=VERSION_PATH::$(echo branches/${BRANCH})
-        echo ::set-env name=VERSION_DOCKER_TAG::$(echo branches_${BRANCH})
+        echo "VERSION_PATH=$(echo branches/${BRANCH})" >> $GITHUB_ENV
+        echo "VERSION_DOCKER_TAG=$(echo branches_${BRANCH})" >> $GITHUB_ENV
 
     - name: deleted branch files in files.datagerry.com
       run: sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "rm -rf $SCP_PATH/$VERSION_PATH"

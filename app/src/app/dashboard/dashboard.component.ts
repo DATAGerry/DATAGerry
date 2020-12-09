@@ -16,10 +16,11 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import * as moment from 'moment';
+
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ApiCallService } from '../services/api-call.service';
 import { TypeService } from '../framework/services/type.service';
-import { CmdbType } from '../framework/models/cmdb-type';
 import { ObjectService } from '../framework/services/object.service';
 import { CmdbCategory } from '../framework/models/cmdb-category';
 import { CategoryService } from '../framework/services/category.service';
@@ -28,13 +29,30 @@ import { Group } from '../management/models/group';
 import { UserService } from '../management/services/user.service';
 import { User } from '../management/models/user';
 import { APIGetMultiResponse } from '../services/models/api-response';
+import { SpecialService } from '../framework/services/special.service';
+import { RenderResult } from '../framework/models/cmdb-render';
+import { Column } from '../layout/table/table.types';
+import { takeUntil } from 'rxjs/operators';
+import { ReplaySubject } from 'rxjs';
+import { ToastService } from '../layout/toast/toast.service';
+import { SidebarService } from '../layout/services/sidebar.service';
+import { CollectionParameters } from '../services/models/api-parameter';
 
 @Component({
   selector: 'cmdb-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
+
+  @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
+  @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
+  @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
+
+  /**
+   * Global unsubscriber for http calls to the rest backend.
+   */
+  private unSubscribe: ReplaySubject<void> = new ReplaySubject();
 
   public objectCount: number;
   public typeCount: number;
@@ -58,12 +76,101 @@ export class DashboardComponent implements OnInit {
   public itemsGroup: number [] = [];
   public colorsGroup: any [] = [];
 
+  public newestObjects: Array<RenderResult>;
+  public newestTableColumns: Array<Column>;
+  public newestObjectsCount: number;
+
+  public latestObjects: Array<RenderResult>;
+  public latestTableColumns: Array<Column>;
+  public latestObjectsCount: number;
+
   constructor(private api: ApiCallService, private typeService: TypeService,
               private objectService: ObjectService, private categoryService: CategoryService,
-              private userService: UserService, private groupService: GroupService) {
+              private toastService: ToastService, private sidebarService: SidebarService,
+              private userService: UserService, private groupService: GroupService,
+              private specialService: SpecialService<RenderResult>) {
   }
 
   public ngOnInit(): void {
+
+    const activeColumn = {
+      display: 'Active',
+      name: 'active',
+      data: 'object_information.active',
+      searchable: false,
+      sortable: false,
+      template: this.activeTemplate,
+      cssClasses: ['text-center'],
+      style: { width: '6rem' }
+    } as unknown as Column;
+
+    const publicColumn = {
+      display: 'Public ID',
+      name: 'public_id',
+      data: 'object_information.object_id',
+      cssClasses: ['text-center'],
+      style: { width: '6rem' },
+      searchable: false,
+      sortable: false
+    } as unknown as Column;
+
+    const typeColumn = {
+      display: 'Type',
+      name: 'type',
+      data: 'type_information.type_label',
+      cssClasses: ['text-center'],
+      searchable: false,
+      sortable: false
+    } as unknown as Column;
+
+    const authorColumn = {
+      display: 'Author',
+      name: 'author_id',
+      data: 'object_information.author_name',
+      sortable: false,
+      searchable: false,
+      cssClasses: ['text-center']
+    } as Column;
+
+    const creationColumn = {
+      display: 'Creation Time',
+      name: 'creation_time',
+      data: 'object_information.creation_time',
+      sortable: false,
+      searchable: false,
+      cssClasses: ['text-center'],
+      render(data: any, item?: any, column?: Column, index?: number) {
+        return moment(new Date(data.$date)).format('DD/MM/YYYY - HH:mm:ss');
+      }
+    } as Column;
+
+    const lastModColumn = {
+      display: 'Modification Time',
+      name: 'last_edit_time',
+      data: 'object_information.last_edit_time',
+      sortable: false,
+      searchable: false,
+      cssClasses: ['text-center'],
+      render(data: any, item?: any, column?: Column, index?: number) {
+        if (!data) {
+          return 'No modifications so far.';
+        }
+        return moment(new Date(data.$date)).format('DD/MM/YYYY - HH:mm:ss');
+      }
+    } as Column;
+
+    const actionColumn = {
+      display: 'Actions',
+      name: 'actions',
+      sortable: false,
+      searchable: false,
+      fixed: true,
+      template: this.actionTemplate,
+      cssClasses: ['text-center'],
+      style: { width: '6em' }
+    } as unknown as Column;
+    this.newestTableColumns = [activeColumn, publicColumn, typeColumn, authorColumn, creationColumn, actionColumn];
+    this.latestTableColumns = [activeColumn, publicColumn, typeColumn, authorColumn, lastModColumn, actionColumn];
 
     this.objectService.countObjects().subscribe((totals) => {
       this.objectCount = totals;
@@ -77,9 +184,26 @@ export class DashboardComponent implements OnInit {
       this.userCount = totals;
     });
 
+    this.loadNewstObjects();
+    this.loadLatestObjects();
+
     this.generateObjectChar();
     this.generateTypeChar();
     this.generateGroupChar();
+  }
+
+  private loadNewstObjects(): void {
+    this.specialService.getNewestObjects().subscribe((results: Array<RenderResult>) => {
+      this.newestObjects = results;
+      this.newestObjectsCount = results.length;
+    });
+  }
+
+  private loadLatestObjects(): void {
+    this.specialService.getLatestObjects().subscribe((results: Array<RenderResult>) => {
+      this.latestObjects = results;
+      this.latestObjectsCount = results.length;
+    });
   }
 
   private generateObjectChar() {
@@ -106,17 +230,14 @@ export class DashboardComponent implements OnInit {
   }
 
   private generateTypeChar() {
-    this.categoryService.getCategoryList().subscribe((data: CmdbCategory[]) => {
-      for (let i = 0; i < data.length; i++) {
-        this.labelsCategory.push(data[i].label);
-        this.colorsCategory.push(this.getRandomColor());
-        this.typeService.getTypeListByCategory(data[i].public_id).subscribe((list: any[]) => {
-          this.itemsCategory.push(list.length);
-        });
-        if (i === this.maxChartValue) {
-          break;
+    const apiParameters: CollectionParameters = { page: 1, limit: 5, sort: 'public_id', order: 1};
+    this.categoryService.getCategoryIteration(apiParameters).pipe(
+      takeUntil(this.unSubscribe)).subscribe((response: APIGetMultiResponse<CmdbCategory>) => {
+        for (const category of response.results) {
+          this.labelsCategory.push(category.label);
+          this.colorsCategory.push(this.getRandomColor());
+          this.itemsCategory.push(category.types.length);
         }
-      }
     });
   }
 
@@ -124,11 +245,11 @@ export class DashboardComponent implements OnInit {
     let values;
     this.groupService.getGroups().subscribe((data: APIGetMultiResponse<Group>) => {
         values = data.results;
-      }, (error) => {
+      }, () => {
       },
       () => {
         for (let i = 0; i < values.length; i++) {
-          this.userService.getUsersByGroup(values[i].public_id).subscribe((users: User[]) => {
+          this.userService.getUsersByGroup(values[i].public_id).pipe(takeUntil(this.unSubscribe)).subscribe((users: User[]) => {
             this.labelsGroup.push(values[i].label);
             this.colorsGroup.push(this.getRandomColor());
             this.itemsGroup.push(users.length);
@@ -144,5 +265,25 @@ export class DashboardComponent implements OnInit {
   getRandomColor() {
     const color = Math.floor(0x1000000 * Math.random()).toString(16);
     return '#' + ('000000' + color).slice(-6);
+  }
+
+  public onObjectDelete(value: RenderResult) {
+    this.objectService.deleteObject(value.object_information.object_id).pipe(takeUntil(this.unSubscribe))
+      .subscribe(() => {
+        this.toastService.success(`Object ${ value.object_information.object_id } was deleted successfully`);
+        this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
+            this.loadLatestObjects();
+            this.loadNewstObjects();
+          }
+        );
+      },
+      (error) => {
+        this.toastService.error(`Error while deleting object ${ value.object_information.object_id } | Error: ${ error }`);
+      });
+  }
+
+  public ngOnDestroy(): void {
+    this.unSubscribe.next();
+    this.unSubscribe.complete();
   }
 }

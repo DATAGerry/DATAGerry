@@ -16,14 +16,14 @@ jobs:
 
     # extract <branchname> from refs/heads/<branchname> and replace "/" characters 
     - name: extract Github branch name
-      run: echo ::set-env name=BRANCH::$(BRANCH_EXTRACTED=${GITHUB_REF#refs/heads/}; echo ${BRANCH_EXTRACTED//\//-})
+      run: echo "BRANCH=$(BRANCH_EXTRACTED=${GITHUB_REF#refs/heads/}; echo ${BRANCH_EXTRACTED//\//-})" >> $GITHUB_ENV
 
     - name: setup version strings
       run: |
-        echo ::set-env name=VERSION_STRING::$(echo ${BRANCH})
-        echo ::set-env name=VERSION_ID::$(echo ${BRANCH}-${GITHUB_SHA})
-        echo ::set-env name=VERSION_PATH::$(echo branches/${BRANCH})
-        echo ::set-env name=VERSION_DOCKER_TAG::$(echo branches_${BRANCH})
+        echo "VERSION_STRING=$(echo ${BRANCH})" >> $GITHUB_ENV
+        echo "VERSION_ID=$(echo ${BRANCH}-${GITHUB_SHA})" >> $GITHUB_ENV
+        echo "VERSION_PATH=$(echo branches/${BRANCH})" >> $GITHUB_ENV
+        echo "VERSION_DOCKER_TAG=$(echo branches_${BRANCH})" >> $GITHUB_ENV
 
     - name: setup build cache for node_modules and python packages
       uses: actions/cache@v2
@@ -34,7 +34,7 @@ jobs:
         key: ${{ runner.os }}-buildcache
     
     - name: build DATAGERRY
-      run:  BUILDVAR_VERSION=${{ env.VERSION_STRING }} BUILDVAR_VERSION_EXT=${{ env.VERSION_ID }} BUILDVAR_DOCKER_TAG=${{ env.VERSION_DOCKER_TAG }} make -e
+      run:  BUILDVAR_VERSION=${VERSION_STRING} BUILDVAR_VERSION_EXT=${VERSION_ID} BUILDVAR_DOCKER_TAG=${VERSION_DOCKER_TAG} make -e
 
     - name: copy artifacts to files.datagerry.com
       run: |

@@ -23,23 +23,27 @@ The implementation of the managers used is always realized using the respective 
 import logging
 import json
 
-from cmdb.data_storage.database_utils import object_hook
+from cmdb.database.utils import object_hook
 from bson import json_util
 from datetime import datetime
 from typing import List
 
-from cmdb.data_storage.database_manager import InsertError, PublicIDAlreadyExists
+from cmdb.database.errors.database_errors import PublicIDAlreadyExists
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
-from cmdb.framework.models.category import CategoryModel, CategoryTree
+from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.framework.models.category import CategoryModel
 from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
-from cmdb.framework.cmdb_errors import WrongInputFormatError, TypeInsertError, TypeAlreadyExists, \
+from cmdb.framework.cmdb_errors import WrongInputFormatError, \
     ObjectInsertError, ObjectDeleteError, ObjectManagerGetError, \
     ObjectManagerInsertError, ObjectManagerUpdateError, ObjectManagerDeleteError, ObjectManagerInitError
 from cmdb.framework.cmdb_link import CmdbLink
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.search.query import Query, Pipeline
+from cmdb.security.acl.control import AccessControlList
+from cmdb.security.acl.errors import AccessDeniedError
+from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import UserModel
 from cmdb.utils.wraps import deprecated
@@ -47,9 +51,29 @@ from cmdb.utils.wraps import deprecated
 LOGGER = logging.getLogger(__name__)
 
 
+def has_access_control(type: TypeModel, user: UserModel, permission: AccessControlPermission) -> bool:
+    """Check if a user has access to object/objects for a given permission"""
+    acl: AccessControlList = type.acl
+    if acl and acl.activated:
+        return acl.verify_access(user.group_id, permission)
+    return True
+
+
+def verify_access(type: TypeModel, user: UserModel = None, permission: AccessControlPermission = None):
+    """Validate if a user has access to objects of this type."""
+    if not user or not permission:
+        return
+
+    verify = has_access_control(type, user, permission)
+    if not verify:
+        raise AccessDeniedError('Protected by ACL permission!')
+
+
 class CmdbObjectManager(CmdbManagerBase):
+
     def __init__(self, database_manager=None, event_queue=None):
         self._event_queue = event_queue
+        self._type_manager = TypeManager(database_manager)
         super(CmdbObjectManager, self).__init__(database_manager)
 
     def is_ready(self) -> bool:
@@ -70,34 +94,40 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerGetError(err)
 
-    def get_object(self, public_id: int):
+    def get_object(self, public_id: int, user: UserModel = None,
+                   permission: AccessControlPermission = None) -> CmdbObject:
         try:
-            return CmdbObject(
-                **self._get(
-                    collection=CmdbObject.COLLECTION,
-                    public_id=public_id
-                )
-            )
-        except (CMDBError, Exception) as err:
+            resource = CmdbObject(**self._get(
+                collection=CmdbObject.COLLECTION,
+                public_id=public_id))
+        except Exception as err:
             raise ObjectManagerGetError(str(err))
+
+        type_ = self._type_manager.get(resource.type_id)
+        verify_access(type_, user, permission)
+        return resource
 
     def get_objects(self, public_ids: list):
         object_list = []
         for public_id in public_ids:
-            object_list.append(self.get_object(public_id))
+            try:
+                object_list.append(self.get_object(public_id))
+            except CMDBError as err:
+                LOGGER.error(err)
+                continue
         return object_list
 
-    def get_objects_by(self, sort='public_id', direction=-1, **requirements):
+    def get_objects_by(self, sort='public_id', direction=-1, user: UserModel = None,
+                       permission: AccessControlPermission = None, **requirements):
         ack = []
         objects = self._get_many(collection=CmdbObject.COLLECTION, sort=sort, direction=direction, **requirements)
         for obj in objects:
-            ack.append(CmdbObject(**obj))
-        return ack
-
-    def get_all_objects(self):
-        ack = []
-        objects = self._get_many(collection=CmdbObject.COLLECTION, sort='public_id')
-        for obj in objects:
+            object_ = CmdbObject(**obj)
+            try:
+                type_ = self._type_manager.get(object_.type_id)
+                verify_access(type_, user, permission)
+            except CMDBError:
+                continue
             ack.append(CmdbObject(**obj))
         return ack
 
@@ -111,11 +141,7 @@ class CmdbObjectManager(CmdbManagerBase):
                a numerical count of the documents that meet the selection criteria.
 
                Args:
-                   collection (str): name of database collection
                    public_id (int): public id of document
-                   *args: arguments for search operation
-                   **kwargs:
-
                Returns:
                    returns the count of the documents
                """
@@ -193,12 +219,14 @@ class CmdbObjectManager(CmdbManagerBase):
                         self._find_query_fields(item, match_fields=match_fields)
         return match_fields
 
-    def insert_object(self, data: (CmdbObject, dict)) -> int:
+    def insert_object(self, data: (CmdbObject, dict), user: UserModel = None,
+                      permission: AccessControlPermission = None) -> int:
         """
         Insert new CMDB Object
         Args:
             data: init data
-            request_user: current user, to detect who triggered event
+            user: current user, to detect who triggered event
+            permission: extended user acl rights
         Returns:
             Public ID of the new object in database
         """
@@ -210,6 +238,10 @@ class CmdbObjectManager(CmdbManagerBase):
                 raise ObjectManagerInsertError(e)
         elif isinstance(data, CmdbObject):
             new_object = data
+
+        type_ = self._type_manager.get(new_object.type_id)
+        verify_access(type_, user, permission)
+
         try:
             ack = self.dbm.insert(
                 collection=CmdbObject.COLLECTION,
@@ -224,7 +256,8 @@ class CmdbObjectManager(CmdbManagerBase):
             raise ObjectInsertError(e)
         return ack
 
-    def update_object(self, data: (dict, CmdbObject), request_user: UserModel) -> str:
+    def update_object(self, data: (dict, CmdbObject), user: UserModel = None,
+                      permission: AccessControlPermission = None) -> str:
         if isinstance(data, dict):
             update_object = CmdbObject(**data)
         elif isinstance(data, CmdbObject):
@@ -232,16 +265,20 @@ class CmdbObjectManager(CmdbManagerBase):
         else:
             raise ObjectManagerUpdateError('Wrong CmdbObject init format - expecting CmdbObject or dict')
         update_object.last_edit_time = datetime.utcnow()
+
+        type_ = self._type_manager.get(update_object.type_id)
+        verify_access(type_, user, permission)
+
         ack = self._update(
             collection=CmdbObject.COLLECTION,
             public_id=update_object.get_public_id(),
             data=update_object.__dict__
         )
         # create cmdb.core.object.updated event
-        if self._event_queue and request_user:
+        if self._event_queue and user:
             event = Event("cmdb.core.object.updated", {"id": update_object.get_public_id(),
                                                        "type_id": update_object.get_type_id(),
-                                                       "user_id": request_user.get_public_id()})
+                                                       "user_id": user.get_public_id()})
             self._event_queue.put(event)
         return ack.acknowledged
 
@@ -253,9 +290,10 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = self._update_many(CmdbObject.COLLECTION, filter, update)
         return ack
 
-    def get_object_references(self, public_id: int, active_flag=None) -> list:
+    def get_object_references(self, public_id: int, active_flag=None, user: UserModel = None,
+                              permission: AccessControlPermission = None) -> list:
         # Type of given object id
-        type_id = self.get_object(public_id=public_id).type_id
+        type_id = self.get_object(public_id=public_id, user=user, permission=permission).type_id
 
         # query for all types with ref input type with value of type id
         req_type_query = {
@@ -281,8 +319,7 @@ class CmdbObjectManager(CmdbManagerBase):
                 for ref_field in ref_fields:
                     type_init_list.append(
                         {"type_id": current_loop_type.get_public_id(), "field_name": ref_field['name']})
-            except CMDBError as e:
-                LOGGER.warning('Unsolvable type reference with type {}'.format(e.message))
+            except CMDBError:
                 continue
 
         referenced_by_objects = []
@@ -293,31 +330,36 @@ class CmdbObjectManager(CmdbManagerBase):
             if active_flag:
                 referenced_query.update({'active': {"$eq": True}})
 
-            referenced_by_objects = referenced_by_objects + self.get_objects_by(**referenced_query)
+            referenced_by_objects = referenced_by_objects + self.get_objects_by(**referenced_query,
+                                                                                user=user, permission=permission)
 
         return referenced_by_objects
 
-    def delete_object(self, public_id: int, request_user: UserModel):
+    def delete_object(self, public_id: int, user: UserModel, permission: AccessControlPermission):
+        type_id = self.get_object(public_id=public_id).type_id
+        type_ = self._type_manager.get(type_id)
+        verify_access(type_, user, permission)
         try:
             if self._event_queue:
                 event = Event("cmdb.core.object.deleted",
                               {"id": public_id,
                                "type_id": self.get_object(public_id).get_type_id(),
-                               "user_id": request_user.get_public_id()})
+                               "user_id": user.get_public_id()})
                 self._event_queue.put(event)
             ack = self._delete(CmdbObject.COLLECTION, public_id)
             return ack
         except (CMDBError, Exception):
             raise ObjectDeleteError(msg=public_id)
 
-    def delete_many_objects(self, filter_query: dict, public_ids, request_user: UserModel):
+    def delete_many_objects(self, filter_query: dict, public_ids, user: UserModel):
         ack = self._delete_many(CmdbObject.COLLECTION, filter_query)
         if self._event_queue:
             event = Event("cmdb.core.objects.deleted", {"ids": public_ids,
-                                                        "user_id": request_user.get_public_id()})
+                                                        "user_id": user.get_public_id()})
             self._event_queue.put(event)
         return ack
 
+    @deprecated
     def get_all_types(self) -> List[TypeModel]:
         try:
             raw_types: List[dict] = self._get_many(collection=TypeModel.COLLECTION)
@@ -328,6 +370,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerInitError(err=err)
 
+    @deprecated
     def get_type(self, public_id: int):
         try:
             return TypeModel.from_data(self.dbm.find_one(
@@ -339,13 +382,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerGetError(err=err)
 
-    def get_type_by(self, **requirements) -> TypeModel:
-        try:
-            found_type_list = self._get_by(collection=TypeModel.COLLECTION, **requirements)
-            return TypeModel.from_data(found_type_list)
-        except (CMDBError, Exception) as e:
-            raise ObjectManagerGetError(err=e)
-
+    @deprecated
     def get_types_by(self, sort='public_id', **requirements):
         try:
             return [TypeModel.from_data(data) for data in
@@ -353,26 +390,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerGetError(err=err)
 
-    def group_type_by_value(self, value: str, match=None):
-        """This method does not actually
-           performs the find() operation
-           but instead returns
-           a objects grouped by type of the documents that meet the selection criteria.
-
-           Args:
-               value (str): grouped by value
-               match (dict): stage filters the documents to only pass documents.
-           Returns:
-               returns the objects grouped by value of the documents
-           """
-        agr = []
-        if match:
-            agr.append({'$match': match})
-        agr.append({'$group': {'_id': '$' + value, 'count': {'$sum': 1}}})
-        agr.append({'$sort': {'count': -1}})
-
-        return self.dbm.aggregate(TypeModel.COLLECTION, agr)
-
+    @deprecated
     def get_type_aggregate(self, arguments):
         """This method does not actually
            performs the find() operation
@@ -391,20 +409,7 @@ class CmdbObjectManager(CmdbManagerBase):
             type_list.append(TypeModel.from_data(put_data))
         return type_list
 
-    def insert_type(self, data: dict):
-
-        try:
-            ack = self._insert(collection=TypeModel.COLLECTION, data=data)
-            LOGGER.debug(f"Inserted new type with ack {ack}")
-            if self._event_queue:
-                event = Event("cmdb.core.objecttype.added", {"id": ack})
-                self._event_queue.put(event)
-        except PublicIDAlreadyExists as err:
-            raise TypeAlreadyExists(type_id=str(err))
-        except (CMDBError, InsertError) as err:
-            raise TypeInsertError(str(err))
-        return ack
-
+    @deprecated
     def update_type(self, data: (TypeModel, dict)):
         if isinstance(data, TypeModel):
             update_type = data
@@ -423,44 +428,16 @@ class CmdbObjectManager(CmdbManagerBase):
             self._event_queue.put(event)
         return ack
 
+    @deprecated
     def update_many_types(self, filter: dict, update: dict):
         ack = self._update_many(TypeModel.COLLECTION, filter, update)
         return ack
 
+    @deprecated
     def count_types(self):
         return self.dbm.count(collection=TypeModel.COLLECTION)
 
-    def delete_type(self, public_id: int):
-        """Delete a type by the public id
-        Also removes the id from the category type list if existing
-        """
-        try:
-            ack = self._delete(TypeModel.COLLECTION, public_id)
-        except Exception as err:
-            raise ObjectManagerDeleteError(err=err)
-
-        if ack:
-            try:
-                category = self.get_category_by(types=public_id)
-                category.types.remove(public_id)
-                self.update_category(category=category)
-            # If no category with this ID
-            except ObjectManagerGetError:
-                pass
-            except ObjectManagerUpdateError as err:
-                LOGGER.error(err.message)
-        if self._event_queue:
-            event = Event("cmdb.core.objecttype.deleted", {"id": public_id})
-            self._event_queue.put(event)
-        return ack
-
-    def delete_many_types(self, filter_query: dict, public_ids):
-        ack = self._delete_many(TypeModel.COLLECTION, filter_query)
-        if self._event_queue:
-            event = Event("cmdb.core.objecttypes.deleted", {"ids": public_ids})
-            self._event_queue.put(event)
-        return ack
-
+    @deprecated
     def get_categories(self) -> List[CategoryModel]:
         """Get all categories as nested list"""
         try:
@@ -501,29 +478,6 @@ class CmdbObjectManager(CmdbManagerBase):
             raise ObjectManagerInitError(err)
 
     @deprecated
-    def _get_category_nodes(self, parent_list: list):
-        raise DeprecationWarning(
-            'Since the category structure has been changed this function no longer necessary')
-
-    def get_category_tree(self) -> CategoryTree:
-        """Get the complete category tree"""
-        try:
-            categories = self.get_categories()
-            types = self.get_all_types()
-        except Exception as err:
-            raise ObjectManagerGetError(err=err)
-        return CategoryTree(categories=categories, types=types)
-
-    def get_category(self, public_id: int) -> CategoryModel:
-        """Get a category from the database"""
-        try:
-            raw_category: dict = self._get(
-                collection=CategoryModel.COLLECTION,
-                public_id=public_id)
-            return CategoryModel.from_data(raw_category)
-        except Exception as err:
-            raise ObjectManagerGetError(err=err)
-
     def insert_category(self, category: CategoryModel):
         """Add a new category into the database or add the children list an existing category"""
         try:
@@ -531,6 +485,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerInsertError(err=err)
 
+    @deprecated
     def update_category(self, category: CategoryModel):
         """Update a existing category into the database"""
         try:
@@ -542,14 +497,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerUpdateError(err=err)
 
-    def delete_category(self, public_id: int):
-        """Remove a category from the database"""
-        try:
-            return self._delete(CategoryModel.COLLECTION, public_id)
-        except Exception as err:
-            raise ObjectManagerDeleteError(err=err)
-
-    # DOKUMENT FIELD CRUD
+    @deprecated
     def unset_update(self, collection: str, field: str):
         try:
             ack = self._unset_update_many(collection, field)
@@ -565,7 +513,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except (CMDBError, Exception) as err:
             raise ObjectManagerGetError(err)
 
-    def get_links_by_partner(self, public_id: int) -> List[CmdbLink]:
+    def get_links_by_partner(self, public_id: int, user: UserModel) -> List[CmdbLink]:
         query = {
             '$or': [
                 {'primary': public_id},
@@ -576,7 +524,15 @@ class CmdbObjectManager(CmdbManagerBase):
         try:
             find_list: List[dict] = self._get_many(CmdbLink.COLLECTION, **query)
             for link in find_list:
-                link_list.append(CmdbLink(**link))
+                query = {
+                    '$or': [
+                        {'public_id': link['primary']},
+                        {'public_id': link['secondary']}
+                    ]
+                }
+                verified_object = self.get_objects_by(user=user, permission=AccessControlPermission.READ, **query)
+                if len(verified_object) == 2:
+                    link_list.append(CmdbLink(**link))
         except CMDBError as err:
             raise ObjectManagerGetError(err)
         return link_list

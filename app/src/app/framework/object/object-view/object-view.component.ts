@@ -17,48 +17,42 @@
 */
 
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute, Data } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { CmdbMode } from '../../modes.enum';
 import { RenderResult } from '../../models/cmdb-render';
-import { DataTableFilter, DataTablesResult } from '../../models/cmdb-datatable';
+import { BehaviorSubject, Subject } from 'rxjs';
+import {take, takeUntil} from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-object-view',
   templateUrl: './object-view.component.html',
   styleUrls: ['./object-view.component.scss']
 })
-export class ObjectViewComponent implements OnInit, OnDestroy{
+export class ObjectViewComponent implements OnInit, OnDestroy {
 
   public mode: CmdbMode = CmdbMode.View;
-  private objectID: number;
-  private readonly previousLoadSubscription: any;
   public renderResult: RenderResult;
-  public recordsTotal: number = 0;
 
-  constructor(public objectService: ObjectService, private activateRoute: ActivatedRoute, private router: Router) {
-    this.activateRoute.params.subscribe((params) => {
-      this.objectID = params.publicID;
-      this.ngOnInit();
+  /**
+   * Component un-subscriber.
+   */
+  private unsubscribe = new Subject();
+
+  /**
+   * Current type from the route resolve.
+   */
+  private objectViewSubject: BehaviorSubject<RenderResult> = new BehaviorSubject<RenderResult>(undefined);
+
+  constructor(public objectService: ObjectService, private activateRoute: ActivatedRoute) {
+    this.activateRoute.data.subscribe((data: Data) => {
+      this.objectViewSubject.next(data.object as RenderResult);
     });
-
-    this.router.routeReuseStrategy.shouldReuseRoute = (future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot) => {
-      return false;
-    };
-
   }
 
   public ngOnInit(): void {
-    this.objectService.getObject(this.objectID).subscribe((result: RenderResult) => {
+    this.objectViewSubject.asObservable().pipe(takeUntil(this.unsubscribe)).subscribe((result) => {
       this.renderResult = result;
-      if (result) {
-        this.objectService.getObjectsByFilter(result.type_information.type_id, new DataTableFilter())
-          .subscribe((resp: DataTablesResult) => {
-            this.recordsTotal = resp.recordsTotal;
-          });
-      }
-    }, (error) => {
-      console.error(error);
     });
   }
 
@@ -75,13 +69,8 @@ export class ObjectViewComponent implements OnInit, OnDestroy{
     }
   }
 
-  public logChange(event) {
-    // TODO: Update log list after object changed
-  }
-
   public ngOnDestroy(): void {
-    if (this.previousLoadSubscription) {
-      this.previousLoadSubscription.unsubscribe();
-    }
+    this.unsubscribe.next();
+    this.unsubscribe.complete();
   }
 }

@@ -42,7 +42,7 @@ def create_rest_api(event_queue):
     system_config_reader = SystemConfigReader()
 
     # Create managers
-    from cmdb.data_storage.database_manager import DatabaseManagerMongo
+    from cmdb.database.managers import DatabaseManagerMongo
     app_database = DatabaseManagerMongo(
         **system_config_reader.get_all_values_from_section('Database')
     )
@@ -120,7 +120,7 @@ def register_converters(app):
 
 def register_blueprints(app):
     from cmdb.interface.rest_api.connection import connection_routes
-    from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint
+    from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint, objects_blueprint
     from cmdb.interface.rest_api.framework_routes.type_routes import types_blueprint
     from cmdb.interface.rest_api.auth_routes import auth_blueprint
     from cmdb.interface.rest_api.framework_routes.category_routes import categories_blueprint
@@ -145,6 +145,7 @@ def register_blueprints(app):
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(object_blueprint)
+    app.register_multi_blueprint(objects_blueprint, multi_prefix=['/objects'])
     app.register_multi_blueprint(types_blueprint, multi_prefix=['/type', '/types'])
     app.register_blueprint(connection_routes)
 

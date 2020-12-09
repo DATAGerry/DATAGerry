@@ -122,13 +122,13 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
         this.categoryService.postCategory(newCategory).subscribe((raw: CmdbCategory) => {
             this.basicCategoryForm.get('category_id').setValue(raw.public_id);
             categoryID = raw.public_id;
-          }, error => {
+          }, () => {
           },
           () => {
             this.categoriesSubscription = this.categoryService.getCategoryList().subscribe((categories: Array<CmdbCategory>) => {
               this.categories = categories;
             });
-            this.sidebarService.reload();
+            this.sidebarService.loadCategoryTree();
             this.toast.success('Category # ' + categoryID + ' was created');
           });
       }

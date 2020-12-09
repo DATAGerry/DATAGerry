@@ -12,7 +12,9 @@
       <cmdb-sidebar-category *ngFor="let categoryChild of categoryNode.children;"
                              [categoryNode]="categoryChild"></cmdb-sidebar-category>
     </ng-template>
-    <cmdb-sidebar-type *ngFor="let type of categoryNode.types;" [type]="type"></cmdb-sidebar-type>
+    <ng-container *ngFor="let type of categoryNode.types;">
+      <cmdb-sidebar-type *permissionLink="'base.framework.object.view';acl:type.acl;requirements:'READ'" [type]="type"></cmdb-sidebar-type>
+    </ng-container>
     <li class="list-group" *ngIf="categoryNode.types.length == 0 && categoryNode.children.length == 0">
       <a class="list-group-item d-flex justify-content-between align-items-center disabled">
       <span class="shorten-long-text">

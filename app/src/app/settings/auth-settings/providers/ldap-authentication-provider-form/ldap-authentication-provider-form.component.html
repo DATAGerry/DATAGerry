@@ -1,0 +1,129 @@
+<div class="card-header">
+  <ul class="nav nav-tabs card-header-tabs">
+    <li class="nav-item">
+      <a class="nav-link active" data-toggle="tab" href="#ldap-global-panel"
+         role="tab">
+        LDAP Authentication Provider
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#ldap-server-panel"
+         role="tab">
+        Server Config
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#ldap-connection-panel"
+         role="tab">
+        Connection Config
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#ldap-search-panel"
+         role="tab">
+        Search
+      </a>
+    </li>
+  </ul>
+</div>
+<div class="card-body" [formGroup]="form">
+  <div class="tab-content">
+    <div id="ldap-global-panel" class="tab-pane fade show active">
+      <div class="form-group row mb-3">
+        <div class="col-sm-3">Active:</div>
+        <div class="col-sm-9">
+          <div class="custom-control custom-checkbox">
+            <input class="custom-control-input" type="checkbox"
+                   formControlName="active" id="ldap-provider-active-input">
+            <label class="custom-control-label" for="ldap-provider-active-input"></label>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row mb-3">
+        <label class="col-sm-3 col-form-label" for="default-group-input">Default Group:</label>
+        <div class="col-sm-9">
+          <div class="input-group">
+            <input class="form-control" type="number" id="default-group-input"
+                   formControlName="default_group">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="ldap-server-panel" [formGroup]="serverConfigControl" class="tab-pane fade" role="tabpanel">
+      <div class="form-group row mb-3">
+        <label class="col-sm-3 col-form-label" for="host-input">Host:</label>
+        <div class="col-sm-9">
+          <div class="input-group">
+            <input class="form-control" type="text" id="host-input" formControlName="host">
+          </div>
+        </div>
+      </div>
+      <div class="form-group row mb-3">
+        <label class="col-sm-3 col-form-label" for="port-input">Port:</label>
+        <div class="col-sm-9">
+          <div class="input-group">
+            <input class="form-control" type="number" id="port-input" formControlName="port">
+          </div>
+        </div>
+      </div>
+      <div class="form-group row mb-3">
+        <div class="col-sm-3">Use SSL:</div>
+        <div class="col-sm-9">
+          <div class="custom-control custom-checkbox">
+            <input class="custom-control-input" type="checkbox"
+                   formControlName="use_ssl" id="ssl-input">
+            <label class="custom-control-label" for="ssl-input"></label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="ldap-connection-panel" [formGroup]="connectionConfigControl" class="tab-pane fade" role="tabpanel">
+      <div class="form-group row mb-3">
+        <label class="col-sm-3 col-form-label" for="user-input">User:</label>
+        <div class="col-sm-9">
+          <div class="input-group">
+            <input class="form-control" type="text" id="user-input" formControlName="user">
+          </div>
+        </div>
+      </div>
+      <div class="form-group row mb-3">
+        <label class="col-sm-3 col-form-label" for="password-input">Password:</label>
+        <div class="col-sm-9">
+          <div class="input-group">
+            <input class="form-control" type="password" id="password-input" formControlName="password">
+          </div>
+        </div>
+      </div>
+      <div class="form-group row mb-3">
+        <label class="col-sm-3 col-form-label" for="version-input">Version:</label>
+        <div class="col-sm-9">
+          <div class="input-group">
+            <input class="form-control" type="number" min="1" max="3" id="version-input" formControlName="version">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="ldap-search-panel" [formGroup]="searchControl" class="tab-pane fade" role="tabpanel">
+      <div class="form-group row mb-3">
+        <label class="col-sm-3 col-form-label" for="basedn-input">Basedn:</label>
+        <div class="col-sm-9">
+          <div class="input-group">
+            <input class="form-control" type="text" id="basedn-input" formControlName="basedn">
+          </div>
+        </div>
+      </div>
+      <div class="form-group row mb-3">
+        <label class="col-sm-3 col-form-label" for="search-filter-input">Searchfilter:</label>
+        <div class="col-sm-9">
+          <div class="input-group">
+            <input class="form-control" type="text" id="search-filter-input" formControlName="searchfilter">
+          </div>
+          <small class="description form-text text-muted">%username% will be inserted from the login data</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="card-footer text-muted text-right">
+  <span class="badge badge-primary">External</span>
+</div>

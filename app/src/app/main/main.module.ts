@@ -19,17 +19,11 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MainRoutingModule } from './main-routing.module';
-import { FileSaverModule } from 'ngx-filesaver';
-import { LayoutModule } from '../layout/layout.module';
-import { ToastModule } from '../layout/toast/toast.module';
 import { DashboardModule } from '../dashboard/dashboard.module';
 import { NgxIndexedDBModule } from 'ngx-indexed-db';
 import { userSettingsDBConfig } from '../management/user-settings/user-settings.module';
-import { UserSettingsService } from '../management/user-settings/services/user-settings.service';
-import { UserSetting } from '../management/user-settings/models/user-setting';
-import { Subscription } from 'rxjs';
 import { UserSettingsDBService } from '../management/user-settings/services/user-settings-db.service';
-
+import { UserSettingsService } from '../management/user-settings/services/user-settings.service';
 
 @NgModule({
   declarations: [],
@@ -39,23 +33,12 @@ import { UserSettingsDBService } from '../management/user-settings/services/user
     NgxIndexedDBModule.forRoot(userSettingsDBConfig),
     MainRoutingModule,
     DashboardModule,
-    LayoutModule,
-    FileSaverModule,
-    ToastModule
-  ]
+  ],
+  providers: [UserSettingsDBService, UserSettingsService]
 })
 export class MainModule {
 
-  constructor(private userSettingsService: UserSettingsService, private dbService: UserSettingsDBService) {
-    try {
-      const userSettingsSubscription: Subscription = this.userSettingsService.getUserSettings()
-        .subscribe(
-          (userSettings: Array<UserSetting>) => {
-            this.dbService.syncSettings(userSettings).then();
-          },
-          error => console.error(`Error while loading user settings: ${ error }`),
-          () => userSettingsSubscription.unsubscribe());
-    } catch (e) {
-    }
+  constructor() {
+
   }
 }

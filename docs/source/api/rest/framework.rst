@@ -70,8 +70,7 @@ Types
                       "name": "f",
                       "label": "F"
                     }
-                  ],
-                  "clean_db": true
+                  ]
                 }
               ],
               "count": 1,
@@ -178,8 +177,7 @@ Types
                       "name": "f",
                       "label": "F"
                     }
-                  ],
-                  "clean_db": true
+                  ]
                 },
                 "response_type": "GET",
                 "model": "Type",

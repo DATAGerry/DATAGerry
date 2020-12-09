@@ -30,50 +30,67 @@ class ImproveObject:
             possible_fields: Field types
         """
         self.entry = entry
-        self.property_entries= property_entries
+        self.property_entries = property_entries
         self.field_entries = field_entries
         self.possible_fields = possible_fields
         self.value = None
         super(ImproveObject, self)
 
     def improve_entry(self) -> dict:
+        """
+        This method converts field values to the appropriate type
+        Returns: dict
+
+        """
         # improve properties
         for property_entry in self.property_entries:
             self.value = self.entry.get(property_entry.get_value())
-            if property_entry.get_display_name() == "active":
-                self.entry.update({property_entry.get_value(): self.improve_boolean()})
+            if property_entry.get_name() == "active":
+                self.entry.update({property_entry.get_value(): ImproveObject.improve_boolean(self.value)})
 
         # improve fields
         for entry_field in self.field_entries:
             for item in self.possible_fields:
                 self.value = self.entry.get(entry_field.get_value())
-                if item['type'] == 'date' and item["name"] == entry_field.get_display_name():
-                    self.entry.update({entry_field.get_value(): self.improve_date()})
-                if item['type'] == 'ref' and item["name"] == entry_field.get_display_name():
-                    self.improve_ref()
+                if item['type'] == 'date' and item["name"] == entry_field.get_name():
+                    self.entry.update({entry_field.get_value(): ImproveObject.improve_date(self.value)})
         return self.entry
 
+    @staticmethod
+    def improve_boolean(value) -> bool:
+        """
+        This method converts the value from Type: String to Type: Boolean
 
-    def improve_boolean(self):
-        if isinstance(self.value, str):
-            if self.value in ['False', 'false', 'FALSE', '0', 'no']:
+        Returns:
+            True if value in ['True', 'true', 'TRUE', '1']
+            False if value in ['False', 'false', 'FALSE', '0', 'no']
+
+        """
+        if isinstance(value, str):
+            if value in ['False', 'false', 'FALSE', '0', 'no']:
                 return False
-            else:
+            elif value in ['True', 'true', 'TRUE', '1']:
                 return True
 
-        return self.value
+        return value
 
+    @staticmethod
+    def improve_date(value):
+        """
+        This method converts the date format
+        Returns:
+            datetime parsed from a string
 
-    def improve_date(self):
+        """
         import datetime
 
         try:
-            if isinstance(self.value, dict) and self.value.get('$date'):
-                return datetime.datetime.fromtimestamp(self.value["$date"]/1000)
+            if isinstance(value, dict) and value.get('$date'):
+                return datetime.datetime.fromtimestamp(value["$date"]/1000)
         except Exception:
             pass
 
-        if isinstance(self.value, str):
+        if isinstance(value, str):
             dt_format = ('%Y/%m/%d', '%Y-%m-%d', '%Y.%m.%d', '%Y,%m,%d',
                          '%d/%m/%Y', '%d-%m-%Y', '%d.%m.%Y', '%d,%m,%Y',
                          '%d.%m.%y %H:%M', '%d.%m.%y %H:%M:%S', '%y.%m.%d %H:%M', '%y.%m.%d %H:%M:%S',
@@ -82,12 +99,7 @@ class ImproveObject:
                          '%d-%m-%Y %H:%M', '%d-%m-%Y %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S')
             for fmt in dt_format:
                 try:
-                    return datetime.datetime.strptime(str(self.value), fmt)
+                    return datetime.datetime.strptime(str(value), fmt)
                 except ValueError:
                     pass
-        return self.value
-
-    def improve_ref(self):
-        # TODO: Consultation necessary.
-        #  Which value is set if no reference exists.
-        pass
+        return value

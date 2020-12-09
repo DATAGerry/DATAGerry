@@ -22,6 +22,7 @@ LOGGER = logging.getLogger(__name__)
 class SearchParam:
     POSSIBLE_FORM_TYPES = [
         'text',
+        'regex',
         'type',
         'category',
         'disjunction',

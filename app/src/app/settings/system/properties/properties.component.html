@@ -6,7 +6,7 @@
 </div>
 <hr/>
 <div class="row">
-  <div class="col-md-9">
+  <div class="col-md-12">
     <table datatable [dtTrigger]="dtTrigger" [dtOptions]="dtOptions" class="table table-hover table-striped">
       <thead>
       <tr>
@@ -23,17 +23,5 @@
       </tr>
       </tbody>
     </table>
-  </div>
-  <div class="col-md-3">
-    <div class="card">
-      <div class="card-header">
-        Config action
-      </div>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item list-group-item-action list-group-item-danger pointer" (click)="reload()">
-          <i class="fas fa-sync-alt"></i> Reload config file
-        </li>
-      </ul>
-    </div>
   </div>
 </div>

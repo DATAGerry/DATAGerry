@@ -1,54 +1,32 @@
-
-<h2>Changed objects: {{renderResult?.recordsTotal}}</h2>
+<h2>Changed objects: {{results?.length}}</h2>
 <hr/>
-
-<div class="bulk-changed-result" *ngFor="let item of renderResult?.data">
+<div class="bulk-changed-result" *ngFor="let item of displayedItems; let itemIdx = index">
   <div class="row">
     <div class="col-sm-4">
-      <h5>
-        <cmdb-active-badge [activeStatus]="activeState"></cmdb-active-badge>
-        <a [routerLink]="['/','framework', 'object', 'view', item.object_information.object_id]">
-          {{item.type_information.type_label}}#{{item.object_information.object_id}}</a>
-      </h5>
+      <cmdb-active-badge [activeStatus]="activeState"></cmdb-active-badge>
+      <a [routerLink]="['/','framework', 'object', 'view', item.object_information.object_id]">
+        {{item.type_information.type_label}}#{{item.object_information.object_id}}</a>
       <div class="summary"><strong>Summary:</strong> {{item.summary_line}}</div>
     </div>
     <div class="col-sm-8">
       <div class="container">
-        <div class="row pb-1" *ngIf="activeStateChanged() !== undefined">
-          <div class="col-sm-5 text-nowrap">
-            <strong>Active</strong>:
-            <span [ngClass]="item?.object_information?.active ? 'badge badge-success':'badge badge-danger' ">
-             {{item?.object_information?.active ? 'A' : 'D'}}
-            </span>
-          </div>
-          <div class="col-sm-1"><fa-icon icon="arrow-alt-circle-right"></fa-icon> </div>
+        <div class="row pb-1" *ngFor="let changedControl of changeForm.controls | keyvalue ; trackBy track">
           <div class="col-sm-5">
-            <strong>Active</strong>:
-            <span [ngClass]="activeState ? 'badge badge-success':'badge badge-danger' ">
-             {{activeState ? 'A' : 'D'}}
-            </span>
+            <strong>{{getField(changedControl.key).label}}</strong>:
+            <cmdb-render-element [mode]="mode" [data]="getOriginal(itemIdx, changedControl.key)"></cmdb-render-element>
           </div>
-        </div>
-        <div class="row pb-1" *ngFor="let field of mergeFields(item.fields)">
-          <div class="col-sm-5">
-            <strong>{{field.label}}</strong>:
-            <cmdb-render-element [mode]="SIMPLEMODE" [data]="field"></cmdb-render-element>
+          <div class="col-sm-1">
+            <i class="far fa-arrow-alt-circle-right"></i>
           </div>
-          <div class="col-sm-1"><fa-icon icon="arrow-alt-circle-right"></fa-icon> </div>
           <div class="col-sm-5">
-            <strong>{{field.label}}</strong>:
-            <cmdb-render-element [mode]="SIMPLEMODE" [data]="changes(field)"></cmdb-render-element>
+            <strong>{{getField(changedControl.key).label}}</strong>:
+            <cmdb-render-element [mode]="mode" [data]="getField(changedControl.key)"
+                                 [value]="getChangedValue(changedControl.key)"></cmdb-render-element>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div class="result-separator row">
-    <div class="col-md-12">
-      <ng-content></ng-content>
-    </div>
-  </div>
-  <hr />
+  <hr/>
 </div>
-
-<jw-pagination #paginationBulkChanges [pageSize]="limit" [items]="maxNumberOfSites" (changePage)="onChangePage($event)"></jw-pagination>
+<jw-pagination #paginationBulkChanges [pageSize]="10" [items]="originals" (changePage)="onChangePage($event)"></jw-pagination>

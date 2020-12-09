@@ -82,14 +82,7 @@ In DATAGERRY objects are stored. An object can be for example a router, server, 
         </a>
       </td>
       <td *permissionLink="['base.framework.type.clean']">
-        <fieldset [disabled]="typeInstance.clean_db !== false">
-          <button type="button" class="btn badge-pill" (click)="callCleanUpModal(typeInstance)"
-                  data-toggle="modal" data-target="#cleanup-progress-modal"
-                  [ngClass]="typeInstance.clean_db === false ? 'btn-danger' : 'btn-success'">clean
-            <fa-icon *ngIf="typeInstance.clean_db === false" icon="exclamation-circle"></fa-icon>
-            <fa-icon *ngIf="typeInstance.clean_db !== false" icon="check-circle"></fa-icon>
-          </button>
-        </fieldset>
+        <cmdb-clean-button [type]="typeInstance"></cmdb-clean-button>
       </td>
     </tr>
     </tbody>

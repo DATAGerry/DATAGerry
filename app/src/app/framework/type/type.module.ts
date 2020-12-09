@@ -39,9 +39,13 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { AuthModule } from '../../auth/auth.module';
 import { TypeComponent } from './type.component';
+import { CleanupModalComponent } from './modals/cleanup-modal/cleanup-modal.component';
+import { CleanButtonComponent } from './components/clean-button/clean-button.component';
+import { TypeAclStepComponent } from './type-builder/type-acl-step/type-acl-step.component';
+import { GroupsAclTabsComponent } from './type-builder/type-acl-step/groups-acl-tabs/groups-acl-tabs.component';
 
 @NgModule({
-  entryComponents: [TypeDeleteConfirmModalComponent],
+  entryComponents: [TypeDeleteConfirmModalComponent, CleanupModalComponent],
   declarations: [
     TypeAddComponent,
     TypeBasicStepComponent,
@@ -53,6 +57,10 @@ import { TypeComponent } from './type.component';
     TypeDeleteComponent,
     TypeDeleteConfirmModalComponent,
     TypeComponent,
+    CleanupModalComponent,
+    CleanButtonComponent,
+    TypeAclStepComponent,
+    GroupsAclTabsComponent
   ],
   imports: [
     CommonModule,

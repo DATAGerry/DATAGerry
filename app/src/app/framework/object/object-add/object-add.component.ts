@@ -29,6 +29,8 @@ import { ObjectService } from '../../services/object.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryService } from '../../services/category.service';
 import { CmdbCategory } from '../../models/cmdb-category';
+import { SidebarService } from '../../../layout/services/sidebar.service';
+import { AccessControlPermission } from '../../../acl/acl.types';
 
 @Component({
   selector: 'cmdb-object-add',
@@ -52,7 +54,8 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
 
 
   constructor(private router: Router, private typeService: TypeService, private categoryService: CategoryService,
-              private objectService: ObjectService, private userService: UserService, private route: ActivatedRoute) {
+              private objectService: ObjectService, private userService: UserService, private route: ActivatedRoute,
+              private sidebarService: SidebarService) {
 
     this.objectInstance = new CmdbObject();
     this.typeIDSubject = new BehaviorSubject<number>(null);
@@ -76,7 +79,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.typeService.getTypeList().subscribe((typeList: CmdbType[]) => {
+    this.typeService.getTypeList(AccessControlPermission.CREATE).subscribe((typeList: CmdbType[]) => {
       this.typeList = typeList;
     }, (e) => {
       console.error(e);
@@ -140,6 +143,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
           console.error(e);
         }, () => {
           this.router.navigate(['/framework/object/view/' + ack]);
+          this.sidebarService.updateTypeCounter(this.typeInstance.public_id);
         });
     }
   }

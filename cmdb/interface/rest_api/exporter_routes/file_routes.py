@@ -14,14 +14,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging, json
+import logging
 
 from flask import abort, jsonify, request
 from cmdb.framework.cmdb_errors import TypeNotFoundError
-from cmdb.file_export.file_exporter import FileExporter
-from cmdb.interface.route_utils import make_response, login_required
+from cmdb.file_export.file_exporter import FileExporter, SupportedExportTypes
+from cmdb.interface.route_utils import make_response, login_required, insert_request_user
 from cmdb.interface.blueprint import RootBlueprint
+from cmdb.user_management import UserModel
 from cmdb.utils.helpers import load_class
+
+from cmdb.security.acl.permission import AccessControlPermission
 
 try:
     from cmdb.utils.error import CMDBError
@@ -35,39 +38,27 @@ file_blueprint = RootBlueprint('file_rest', __name__, url_prefix='/file')
 @file_blueprint.route('/', methods=['GET'])
 @login_required
 def get_export_file_types():
-    _types = FileExporter.get_type_list()
-    _list = []
-
-    for type_element in _types:
-        type_element_class = load_class('cmdb.file_export.export_types.' + type_element)
-        type_element_properties = {
-                'id': type_element,
-                'label': type_element_class.LABEL,
-                'icon': type_element_class.ICON,
-                'multiTypeSupport': type_element_class.MULTITYPE_SUPPORT,
-                'helperText': type_element_class.DESCRIPTION,
-                'active': type_element_class.ACTIVE
-        }
-        _list.append(type_element_properties)
-
-    return make_response(_list)
+    return make_response(SupportedExportTypes().convert_to())
 
 
 @file_blueprint.route('/object/', methods=['GET'])
 @login_required
-def export_file():
+@insert_request_user
+def export_file(request_user: UserModel):
+    import json
     try:
-        _object_ids = request.args.get('ids', [])
+        _object_ids = json.loads(request.args.get('ids', []))
         _class = request.args.get('classname', '')
-        _zipping = request.args.get('zip')
+        _zipping = request.args.get('zip', False) in ['true', 'True']
 
         if _zipping:
             export_type_class = load_class('cmdb.file_export.export_types.' + 'ZipExportType')()
-            file_export = FileExporter('object', export_type_class, _object_ids, _class)
+            file_export = FileExporter(export_type_class, _object_ids, 'object', _class)
         else:
             export_type_class = load_class('cmdb.file_export.export_types.' + _class)()
-            file_export = FileExporter('object', export_type_class, _object_ids)
+            file_export = FileExporter(export_type_class, _object_ids, 'object')
 
+        file_export.objects = file_export.from_database(user=request_user, permission=AccessControlPermission.READ)
     except TypeNotFoundError as e:
         return abort(400, e.message)
     except ModuleNotFoundError as e:
@@ -78,13 +69,15 @@ def export_file():
     return file_export.export()
 
 
-@file_blueprint.route('/object/type/<int:public_id>/<string:export_class>', methods=['GET'])
+@file_blueprint.route('/object/type/<int:type_id>/<string:export_class>', methods=['GET'])
 @login_required
-def export_file_by_type_id(public_id, export_class):
+@insert_request_user
+def export_file_by_type_id(type_id, export_class, request_user: UserModel):
     try:
         export_type_class = load_class('cmdb.file_export.export_types.' + export_class)
         export_type = export_type_class()
-        file_export = FileExporter(None, export_type, public_id)
+        file_export = FileExporter(export_type, type_id)
+        file_export.objects = file_export.from_database(user=request_user, permission=AccessControlPermission.READ)
     except TypeNotFoundError as e:
         return abort(400, e.message)
     except ModuleNotFoundError as e:
