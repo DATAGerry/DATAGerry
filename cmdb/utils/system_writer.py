@@ -17,8 +17,8 @@
 """
 Configuration module for settings in file format and in the database
 """
-from cmdb.data_storage.database_manager import DatabaseManagerMongo
-from cmdb.data_storage.database_manager import NoDocumentFound
+from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.errors.database_errors import NoDocumentFound
 from cmdb.utils.error import CMDBError
 
 import logging

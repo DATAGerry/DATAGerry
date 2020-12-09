@@ -23,12 +23,12 @@ The implementation of the managers used is always realized using the respective 
 import logging
 import json
 
-from cmdb.data_storage.database_utils import object_hook
+from cmdb.database.utils import object_hook
 from bson import json_util
 from datetime import datetime
 from typing import List
 
-from cmdb.data_storage.database_manager import PublicIDAlreadyExists
+from cmdb.database.errors.database_errors import PublicIDAlreadyExists
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
 from cmdb.framework.managers.type_manager import TypeManager

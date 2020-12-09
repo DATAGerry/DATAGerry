@@ -16,7 +16,7 @@
 
 from typing import Any
 
-from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework.utils import Collection, PublicID
 
 from .errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, ManagerIterationError

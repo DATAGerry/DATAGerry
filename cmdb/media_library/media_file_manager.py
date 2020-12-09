@@ -18,7 +18,7 @@ import logging
 
 from datetime import datetime
 
-from cmdb.data_storage.database_manager import DatabaseManagerMongo, DatabaseGridFS
+from cmdb.database.managers import DatabaseManagerMongo, DatabaseGridFS
 from gridfs.grid_file import GridOutCursor, GridOut
 
 from cmdb.media_library.media_file import MediaFile
@@ -35,7 +35,7 @@ class MediaFileManagement(CmdbManagerBase):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.dbm = database_manager
-        self.fs = DatabaseGridFS(self.dbm.get_connector().get_database(), MediaFile.COLLECTION)
+        self.fs = DatabaseGridFS(self.dbm.connector.database, MediaFile.COLLECTION)
         super().__init__(database_manager)
 
     def get_new_id(self, collection: str) -> int:

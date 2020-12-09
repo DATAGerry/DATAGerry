@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2020 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,17 +12,17 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-class ConnectionStatus:
+class PublicIDCounter:
+    """
+    Class of the internal public id counter.
+    TODO:
+        Refactor to own manager implementation
+    """
+    COLLECTION = 'datastorage.counter'
 
-    def __init__(self, status: bool, message: str = None):
-        self._status: bool = status  # Connected = True, Disconnected = False
-        self.message: str = message or 'No message given'
-
-    def status(self) -> bool:
-        return self._status
-
-    def get_message(self) -> str:
-        return self.message
+    def __init__(self, _id: str, counter: int):
+        self._id = _id
+        self.counter = counter
