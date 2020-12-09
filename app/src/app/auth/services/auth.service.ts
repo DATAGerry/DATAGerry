@@ -116,8 +116,8 @@ export class AuthService<T = any> implements ApiService {
     this.indexDB.clear('user-settings').subscribe();
     localStorage.removeItem('current-user');
     localStorage.removeItem('access-token');
-    this.currentUserSubject.next(null);
-    this.currentUserTokenSubject.next(null);
+    this.currentUserSubject = new BehaviorSubject<User>(null);
+    this.currentUserTokenSubject = new BehaviorSubject<Token>(null);
     this.permissionService.clearUserRightStorage();
 
     // Close Intro-Modal if open

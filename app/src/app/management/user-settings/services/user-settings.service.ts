@@ -74,9 +74,7 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
     this.currentUserObservable = this.authService.currentUser;
     this.currentUserObservable.subscribe((user: User) => {
       this.currentUser = user;
-      if (this.authService.currentUserValue) {
-        this.servicePrefix = `users/${ this.authService.currentUserValue.public_id }/settings`;
-      }
+      this.servicePrefix = `users/${ this.authService.currentUserValue.public_id }/settings`;
     });
   }
 
