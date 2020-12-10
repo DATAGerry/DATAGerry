@@ -507,11 +507,16 @@ class CmdbObjectManager(CmdbManagerBase):
         return ack.acknowledged
 
     # Link CRUD
-    def get_link(self, public_id: int):
+    def get_link(self, public_id: int, user: UserModel = None, permission: AccessControlPermission = None) -> CmdbLink:
         try:
-            return CmdbLink(**self._get(collection=CmdbLink.COLLECTION, public_id=public_id))
+            link = CmdbLink(**self._get(collection=CmdbLink.COLLECTION, public_id=public_id))
         except (CMDBError, Exception) as err:
             raise ObjectManagerGetError(err)
+        # Check permissions
+        if user and permission:
+            self.get_object(public_id=link.primary, user=user, permission=permission)
+            self.get_object(public_id=link.secondary, user=user, permission=permission)
+        return link
 
     def get_links_by_partner(self, public_id: int, user: UserModel) -> List[CmdbLink]:
         query = {
@@ -537,16 +542,26 @@ class CmdbObjectManager(CmdbManagerBase):
             raise ObjectManagerGetError(err)
         return link_list
 
-    def insert_link(self, data: dict):
+    def insert_link(self, data: dict, user: UserModel = None, permission: AccessControlPermission = None):
         try:
-            new_link = CmdbLink(public_id=self.get_new_id(collection=CmdbLink.COLLECTION), **data)
-            return self._insert(CmdbLink.COLLECTION, new_link.__dict__)
-        except (CMDBError, Exception) as err:
+            link = CmdbLink(public_id=self.get_new_id(collection=CmdbLink.COLLECTION), **data)
+        except Exception as err:
             raise ObjectManagerInsertError(err)
 
-    def delete_link(self, public_id: int):
+        # Check permissions
+        if user and permission:
+            self.get_object(public_id=link.primary, user=user, permission=permission)
+            self.get_object(public_id=link.secondary, user=user, permission=permission)
+        try:
+            return self._insert(CmdbLink.COLLECTION, link.__dict__)
+        except Exception as err:
+            raise ObjectManagerInsertError(err)
+
+    def delete_link(self, public_id: int, user: UserModel = None, permission: AccessControlPermission = None):
+        # Check permissions and existing
+        self.get_link(public_id=public_id, user=user, permission=permission)
         try:
             ack = self._delete(CmdbLink.COLLECTION, public_id)
-        except (CMDBError, Exception) as err:
+        except Exception as err:
             raise ObjectManagerDeleteError(err)
         return ack
