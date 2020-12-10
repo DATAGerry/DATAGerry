@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2020 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,15 +12,15 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 import logging
 
-from cmdb.data_storage.database_manager import DatabaseManagerMongo
+from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.manager import ManagerGetError
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.auth_errors import AuthenticationError
 from cmdb.security.auth.provider_config import AuthProviderConfig
-from cmdb.security.auth.provider_config_form import AuthProviderConfigForm, AuthProviderConfigFormEntry
 from cmdb.user_management import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.security.security import SecurityManager
@@ -30,13 +30,6 @@ LOGGER = logging.getLogger(__name__)
 
 
 class LocalAuthenticationProviderConfig(AuthProviderConfig):
-    PROVIDER_CONFIG_FORM = AuthProviderConfigForm(
-        entries=[
-            AuthProviderConfigFormEntry(name='active', type='checkbox',
-                                        default=AuthProviderConfig.DEFAULT_CONFIG_VALUES.get('active'), disabled=True,
-                                        helperText='The deactivation of the local provider will be ignored!')
-        ]
-    )
 
     def __init__(self, active: bool, **kwargs):
         super(LocalAuthenticationProviderConfig, self).__init__(active, **kwargs)

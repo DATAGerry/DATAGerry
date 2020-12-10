@@ -24,12 +24,16 @@
         </div>
         <ng-container *ngIf="filterTerm.value">
           <label class="nav-title"><strong>Matched Types</strong></label>
-          <cmdb-sidebar-type *ngFor="let type of typeList | typeFilter: filterTerm.value;"
-                             [type]="type"></cmdb-sidebar-type>
+          <ng-container *ngFor="let type of typeList | typeFilter: filterTerm.value;">
+            <cmdb-sidebar-type *permissionLink="'base.framework.object.view'" [type]="type"></cmdb-sidebar-type>
+          </ng-container>
+
         </ng-container>
         <ng-container *ngIf="unCategorizedTypes && unCategorizedTypes.length > 0">
           <label class="nav-title"><strong>Uncategorized</strong></label>
-          <cmdb-sidebar-type *ngFor="let type of unCategorizedTypes" [type]="type"></cmdb-sidebar-type>
+          <ng-container *ngFor="let type of unCategorizedTypes">
+            <cmdb-sidebar-type *permissionLink="'base.framework.object.view'" [type]="type"></cmdb-sidebar-type>
+          </ng-container>
         </ng-container>
       </li>
     </ul>

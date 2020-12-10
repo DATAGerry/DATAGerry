@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2020 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,17 +12,16 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+from cmdb.utils.error import CMDBError
 
 
-class ConnectionStatus:
+class AccessControlError(CMDBError):
+    def __init__(self):
+        super(AccessControlError, self).__init__()
 
-    def __init__(self, status: bool, message: str = None):
-        self._status: bool = status  # Connected = True, Disconnected = False
-        self.message: str = message or 'No message given'
 
-    def status(self) -> bool:
-        return self._status
-
-    def get_message(self) -> str:
-        return self.message
+class AccessDeniedError(AccessControlError):
+    def __init__(self, message: str = None):
+        self.message = message or ''

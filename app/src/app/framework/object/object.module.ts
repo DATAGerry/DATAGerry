@@ -27,7 +27,6 @@ import { ObjectHeaderComponent } from './components/object-header/object-header.
 import { ObjectQrComponent } from './components/object-qr/object-qr.component';
 import { ObjectSummaryComponent } from './components/object-summary/object-summary.component';
 import { ObjectExternalsComponent } from './components/object-externals/object-externals.component';
-import { NgxSpinnerModule } from 'ngx-spinner';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RenderModule } from '../render/render.module';
 import { ObjectAddComponent } from './object-add/object-add.component';
@@ -64,6 +63,7 @@ import { ObjectTableActionsComponent } from './components/object-table-actions/o
 import { QRCodeModule } from 'angularx-qrcode';
 import { ObjectDeleteModalComponent } from './modals/object-delete-modal/object-delete-modal.component';
 import { ObjectsDeleteModalComponent } from './modals/objects-delete-modal/objects-delete-modal.component';
+import { ObjectTableHeadComponent } from './components/object-table-head/object-table-head.component';
 
 @NgModule({
   entryComponents: [
@@ -103,7 +103,8 @@ import { ObjectsDeleteModalComponent } from './modals/objects-delete-modal/objec
     ObjectsByTypeComponent,
     ObjectTableActionsComponent,
     ObjectDeleteModalComponent,
-    ObjectsDeleteModalComponent
+    ObjectsDeleteModalComponent,
+    ObjectTableHeadComponent
   ],
   imports: [
     CommonModule,
@@ -112,7 +113,6 @@ import { ObjectsDeleteModalComponent } from './modals/objects-delete-modal/objec
     AuthModule,
     LayoutModule,
     QRCodeModule,
-    NgxSpinnerModule,
     FormsModule,
     ReactiveFormsModule,
     NgSelectModule,

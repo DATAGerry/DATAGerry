@@ -39,10 +39,10 @@ export class FileService {
     );
   }
 
-  public callExportRoute(objectIDs: string, exportType: string, zipping: boolean = false) {
+  public callExportRoute(objectIDs: number[], exportType: string, zipping: boolean = false) {
     const options = httpFileOptions;
     let params = new HttpParams();
-    params = params.set('ids', objectIDs);
+    params = params.set('ids', JSON.stringify(objectIDs));
     params = params.set('classname', exportType);
     params = params.set('zip', JSON.stringify(zipping));
     options.params = params;

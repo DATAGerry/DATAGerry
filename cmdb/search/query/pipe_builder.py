@@ -16,10 +16,8 @@
 import logging
 from typing import List
 
-from cmdb.search.params import SearchParam
 from cmdb.search.query import Pipeline
 from cmdb.search.query.builder import Builder
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
 LOGGER = logging.getLogger(__name__)
 
@@ -60,81 +58,5 @@ class PipelineBuilder(Builder):
         """Remove a pipe to the pipeline"""
         self.pipeline.remove(pipe)
 
-    def get_regex_pipes_values(self) -> List[str]:
-        """Extract the regex pipes value from the pipeline"""
-        regex_pipes: List[str] = []
-
-        def gen_dict_extract(key, var) -> str:
-            for k, v in var.items():
-                if k == key:
-                    yield v
-                if isinstance(v, dict):
-                    for result in gen_dict_extract(key, v):
-                        yield result
-                elif isinstance(v, list):
-                    for d in v:
-                        for result in gen_dict_extract(key, d):
-                            yield result
-
-        for pipe in self.pipeline:
-            pipe_extract = []
-            extract_generator = gen_dict_extract('$regex', pipe)
-            while True:
-                try:
-                    pipe_extract.append(next(extract_generator))
-                except StopIteration:
-                    break
-                except Exception:
-                    continue
-
-            if len(pipe_extract) > 0:
-                for px in pipe_extract:
-                    regex_pipes.append(px)
-
-        return regex_pipes
-
-    def build(self, params: List[SearchParam],
-              obj_manager: CmdbObjectManager = None,
-              active_flag: bool = False) -> Pipeline:
-        """Build a pipeline query out of frontend params"""
-        # clear pipeline
-        self.clear()
-
-        # fetch only active objects
-        if active_flag:
-            self.add_pipe(self.match_({'active': {"$eq": True}}))
-
-        # text builds
-        text_params = [_ for _ in params if _.search_form == 'text' or _.search_form == 'regex']
-        for param in text_params:
-            regex = self.regex_('fields.value', param.search_text, 'ims')
-            self.add_pipe(self.match_(regex))
-
-        # type builds
-        disjunction_query = []
-        type_params = [_ for _ in params if _.search_form == 'type']
-        for param in type_params:
-            if param.settings and len(param.settings.get('types', [])) > 0:
-                type_id_in = self.in_('type_id', param.settings['types'])
-                if param.disjunction:
-                    disjunction_query.append(type_id_in)
-                else:
-                    self.add_pipe(self.match_(type_id_in))
-        if len(disjunction_query) > 0:
-            self.add_pipe(self.match_(self.or_(disjunction_query)))
-
-        # category builds
-        category_params = [_ for _ in params if _.search_form == 'category']
-        for param in category_params:
-            if param.settings and len(param.settings.get('categories', [])) > 0:
-                categories = obj_manager.get_categories_by(**self.regex_('label', param.search_text))
-                for curr_category in categories:
-                    type_id_in = self.in_('type_id', curr_category.types)
-                    self.add_pipe(self.match_(type_id_in))
-
-        # public builds
-        id_params = [_ for _ in params if _.search_form == 'publicID']
-        for param in id_params:
-            self.add_pipe(self.match_({'public_id': int(param.search_text)}))
-
-        return self.pipeline
+    def build(self, *args, **kwargs) -> Pipeline:
+        raise NotImplementedError

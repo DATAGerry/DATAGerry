@@ -21,7 +21,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbCategory } from '../../../../models/cmdb-category';
 import { CategoryService, checkCategoryExistsValidator } from '../../../../services/category.service';
-import { NgxSpinnerService } from 'ngx-spinner';
+import { ProgressSpinnerService } from '../../../../../layout/progress/progress-spinner.service';
 
 @Component({
   selector: 'cmdb-add-category-modal',
@@ -33,7 +33,7 @@ export class AddCategoryModalComponent implements OnInit {
   public catAddForm: FormGroup;
   public categoryList: CmdbCategory[];
 
-  constructor(public activeModal: NgbActiveModal, private spinner: NgxSpinnerService,
+  constructor(public activeModal: NgbActiveModal, private spinner: ProgressSpinnerService,
               private categoryService: CategoryService) {
     this.catAddForm = new FormGroup({
       name: new FormControl('', Validators.required),
@@ -43,8 +43,8 @@ export class AddCategoryModalComponent implements OnInit {
 
   public ngOnInit(): void {
     this.name.setAsyncValidators(checkCategoryExistsValidator(this.categoryService));
+    this.spinner.show();
     this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
-        this.spinner.show();
         this.categoryList = list;
       }, error => {
       },

@@ -1,17 +1,15 @@
 <span *ngIf="refData; else noRef">
-
-    <i class="{{data.reference.icon}}"></i> {{data.reference.type_label}} #{{data.reference.value}}
-    <span *ngFor="let sum of data.reference.summaries; let last = last; let first = first">
-      <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
-        <span *ngIf="first"> - </span>{{sum.value}}
-      </ng-template>
-      <ng-template #templateDate>
-        <span *ngIf="first"> - </span>{{sum.value | date:"dd/MM/yyyy - HH:mm:ss"}}
-      </ng-template>
-      <span *ngIf="!last"> | </span>
-    </span>
-
+  <i class="{{refData.reference.icon}}"></i> {{refData.reference.type_label}} #{{refData.value}}
+  <span *ngFor="let sum of refData.reference.summaries; let last = last; let first = first">
+    <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
+      <span *ngIf="first"> - </span>{{sum.value}}
+    </ng-template>
+    <ng-template #templateDate>
+      <span *ngIf="first"> - </span>{{(sum.value !== 'None') ? (sum.value | date:"dd/MM/yyyy - HH:mm:ss") : ''}}
+    </ng-template>
+    <span *ngIf="!last"> | </span>
   </span>
+</span>
 <ng-template #noRef>
   <span>No reference set</span>
 </ng-template>

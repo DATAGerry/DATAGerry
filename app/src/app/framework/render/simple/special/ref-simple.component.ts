@@ -16,28 +16,42 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, AfterViewChecked } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RenderField } from '../../fields/components.fields';
-import { RenderResult } from '../../../models/cmdb-render';
 import { ObjectService } from '../../../services/object.service';
+import { RenderResult } from '../../../models/cmdb-render';
 
 @Component({
   selector: 'cmdb-ref-simple',
   templateUrl: './ref-simple.component.html',
   styleUrls: ['./ref-simple.component.scss']
 })
-export class RefSimpleComponent extends RenderField implements AfterViewChecked {
+export class RefSimpleComponent extends RenderField implements OnInit {
 
-  public refData: any;
+  public refData: any = undefined;
 
-  constructor() {
+  constructor(private objectService: ObjectService) {
     super();
   }
 
-  public ngAfterViewChecked() {
+  public ngOnInit() {
     if (this.data && this.data.value && this.data.value !== 0) {
-      this.refData = this.data;
+      if (!this.data.reference) {
+        this.objectService.getObject(this.data.value).subscribe((res: RenderResult) => {
+          this.refData = {
+            reference: {
+              icon: res.type_information.icon,
+              type_label: res.type_information.type_label,
+              summaries: res.summaries
+            },
+            value: this.data.value,
+          };
+        });
+      } else {
+        this.refData = this.data;
+      }
     } else {
+      this.refData = undefined;
     }
   }
 }

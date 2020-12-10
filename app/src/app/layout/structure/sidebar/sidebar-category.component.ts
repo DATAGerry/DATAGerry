@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CmdbCategoryNode } from '../../../framework/models/cmdb-category';
 
 @Component({
@@ -27,6 +27,5 @@ import { CmdbCategoryNode } from '../../../framework/models/cmdb-category';
 export class SidebarCategoryComponent {
 
   @Input() categoryNode: CmdbCategoryNode;
-
 
 }

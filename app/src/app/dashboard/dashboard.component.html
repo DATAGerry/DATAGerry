@@ -7,7 +7,9 @@
 </ng-template>
 
 <ng-template #actionTemplate let-item="item">
-  <cmdb-object-table-actions [publicID]="item.object_information.object_id" [result]="item"></cmdb-object-table-actions>
+  <cmdb-object-table-actions [publicID]="item.object_information.object_id" [result]="item"
+                             [acl]="item.type_information.acl"
+                             (deleteEmitter)="onObjectDelete(item)"></cmdb-object-table-actions>
 </ng-template>
 
 <div class="row mb-3">

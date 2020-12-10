@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
@@ -28,7 +28,6 @@ import { NavigationComponent } from './structure/navigation/navigation.component
 import { BreadcrumbComponent } from './structure/breadcrumb/breadcrumb.component';
 import { IconPickerComponent } from './helpers/icon-picker/icon-picker.component';
 import { ChartsComponent } from './components/charts/charts.component';
-import { NgxSpinnerComponent, NgxSpinnerModule } from 'ngx-spinner';
 import { IntroComponent } from './intro/intro.component';
 import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-step-intro.component';
 import { JwPaginationComponent } from 'jw-angular-pagination';
@@ -79,6 +78,7 @@ import { TableModule } from './table/table.module';
 import { QRCodeModule } from 'angularx-qrcode';
 import { QrCodeComponent } from './helpers/qrcode/qr-code.component';
 import { FeedbackFormComponent } from './components/feedback-form/feedback-form.component';
+import { BlockComponent } from './components/block/block.component';
 
 @NgModule({
   declarations: [
@@ -122,11 +122,11 @@ import { FeedbackFormComponent } from './components/feedback-form/feedback-form.
     TableSortEventDirective,
     AttachmentsListModalComponent,
     QrCodeComponent,
-    FeedbackFormComponent
+    FeedbackFormComponent,
+    BlockComponent
   ],
   exports: [
     FileExplorerComponent,
-    NgxSpinnerComponent,
     LowercaseDirective,
     NavigationComponent,
     BreadcrumbComponent,
@@ -146,14 +146,14 @@ import { FeedbackFormComponent } from './components/feedback-form/feedback-form.
     TypeFilterPipe,
     FileExtensionPipe,
     InfoBoxComponent,
-    QrCodeComponent
+    QrCodeComponent,
+    BlockComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
     NgSelectModule,
     ReactiveFormsModule,
-    NgxSpinnerModule,
     SearchBarModule,
     NgbModule,
     FormsModule,

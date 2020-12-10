@@ -16,13 +16,13 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, ComponentFactoryResolver, ComponentRef, OnInit, ViewChild, ViewContainerRef} from '@angular/core';
-import {fieldComponents} from '../fields/fields.list';
-import {simpleComponents} from '../simple/simple.list';
-import {RenderField} from '../fields/components.fields';
-import {ToastService} from '../../../layout/toast/toast.service';
-import {FormControl, Validators} from '@angular/forms';
-import {CmdbMode} from '../../modes.enum';
+import { Component, ComponentFactoryResolver, ComponentRef, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { fieldComponents } from '../fields/fields.list';
+import { simpleComponents } from '../simple/simple.list';
+import { RenderField } from '../fields/components.fields';
+import { ToastService } from '../../../layout/toast/toast.service';
+import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { CmdbMode } from '../../modes.enum';
 
 @Component({
   selector: 'cmdb-render-element',
@@ -32,8 +32,8 @@ import {CmdbMode} from '../../modes.enum';
 export class RenderElementComponent extends RenderField implements OnInit {
 
   @ViewChild('fieldContainer', { read: ViewContainerRef, static: true }) containerField;
-  @ViewChild('simpleContainer', { read: ViewContainerRef, static: true }) containerSimple;
 
+  public simpleRender: boolean = false;
   private component: any;
   private componentRef: ComponentRef<any>;
 
@@ -43,13 +43,13 @@ export class RenderElementComponent extends RenderField implements OnInit {
 
   public ngOnInit(): void {
     this.containerField.clear();
-    this.containerSimple.clear();
 
     switch (this.mode) {
       case CmdbMode.View :
       case CmdbMode.Create:
       case CmdbMode.Edit:
       case CmdbMode.Bulk: {
+        this.simpleRender = false;
         this.component = fieldComponents[this.data.type];
         const factory = this.resolver.resolveComponentFactory(this.component);
         this.componentRef = this.containerField.createComponent(factory);
@@ -76,16 +76,12 @@ export class RenderElementComponent extends RenderField implements OnInit {
           fieldControl.disable();
         }
 
+        this.parentFormGroup.removeControl(this.data.name);
         this.componentRef.instance.parentFormGroup.addControl(
           this.data.name, fieldControl
         );
         if (CmdbMode.Bulk === this.mode) {
-          this.componentRef.instance.parentFormGroup.addControl(
-            this.data.name + '-isChanged', new FormControl(false),
-          );
-          this.componentRef.instance.parentFormGroup.addControl(
-            'changedFields', new FormControl(new Map<string, any>()),
-          );
+          this.componentRef.instance.changeForm = this.changeForm;
         }
         break;
       }
@@ -93,7 +89,7 @@ export class RenderElementComponent extends RenderField implements OnInit {
         this.data.value = this.value;
         this.component = simpleComponents[this.data.type];
         const factory = this.resolver.resolveComponentFactory(this.component);
-        this.componentRef = this.containerSimple.createComponent(factory);
+        this.componentRef = this.containerField.createComponent(factory);
         this.componentRef.instance.mode = this.mode;
         this.componentRef.instance.data = this.data;
         this.componentRef.instance.toast = this.toast;

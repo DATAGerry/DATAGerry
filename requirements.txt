@@ -36,7 +36,7 @@ Pygments==2.7.1
 pyinstaller==4.0
 pyinstaller-hooks-contrib==2020.8
 pylint==2.6.0
-pymongo==3.11.0
+pymongo==3.11.2
 PyMySQL==0.10.1
 pyparsing==2.4.7
 PyPDF2==1.26.0
@@ -59,3 +59,4 @@ webencodings==0.5.1
 Werkzeug==1.0.1
 wrapt==1.12.1
 xhtml2pdf==0.2.4
+python-dateutil~=2.8.0

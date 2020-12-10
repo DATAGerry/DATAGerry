@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2020 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
 List of useful functions for the database
@@ -38,37 +38,8 @@ from bson.tz_util import utc
 
 _RE_TYPE = type(re.compile("foo"))
 
-
-def convert_form_data(data: dict) -> dict:
-    """
-    Quick convert data from data for database entry
-    Args:
-        data: data for conversion
-
-    Returns:
-        converted dictionary
-    """
-    buf_dict = {}
-    for k, v in data.items():
-        b = form_converter(k, v)
-        buf_dict.update(b)
-    return buf_dict
-
-
-def form_converter(k, v) -> dict:
-    """filter function for dict"""
-    dict_buffer = {}
-    if v is None:
-        dict_buffer.update({k: None})
-    if v == "on":
-        dict_buffer.update({k: True})
-    else:
-        try:
-            converted = ast.literal_eval(v)
-            dict_buffer.update({k: converted})
-        except Exception:
-            dict_buffer.update({k: v})
-    return dict_buffer
+ASCENDING = 1
+DESCENDING = -1
 
 
 def object_hook(dct: dict):

@@ -7,47 +7,53 @@
       <ng-container [ngSwitch]="true">
         <ng-container *ngSwitchCase="mode == MODES.View">
           <div class="form-control text-left overflow-auto" readonly>
-            <ng-container *ngIf="refObject != null">
-              <i class="{{refObject?.type_information?.icon}}"></i> {{refObject?.type_information?.type_label}}
-              #{{refObject?.object_information?.object_id}}
-              <span *ngFor="let sum of refObject?.summaries; let last = last; let first = first">
+            <ng-container *ngIf="data.reference; else noRef;">
+              <ng-container *ngIf="!protect">
+                <i class="{{data.reference?.icon}}"></i> {{data.reference?.type_label}} #{{data.value}}
+                <span *ngFor="let sum of data.reference?.summaries; let last = last; let first = first">
                 <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
                   <span *ngIf="first"> - </span>{{sum.value}}
                 </ng-template>
                 <ng-template #templateDate>
-                  <span *ngIf="first"> - </span>{{(sum.value && sum.value.$date)? (sum.value.$date | date:"dd/MM/yyyy") : " - "}}
+                  <span
+                    *ngIf="first"> - </span>{{(sum.value && sum.value.$date) ? (sum.value.$date | date:"dd/MM/yyyy") : " - "}}
                 </ng-template>
                 <span *ngIf="!last"> | </span>
               </span>
+              </ng-container>
+              <ng-container *ngIf="protect">{{data.reference}}</ng-container>
             </ng-container>
-            <ng-container *ngIf="refObject == null"> No reference set </ng-container>
+            <ng-template #noRef> No reference set</ng-template>
           </div>
-          <div class="input-group-append" *ngIf="refObject != null" >
+          <div class="input-group-append" *ngIf="data.reference && !protect">
             <span class="input-group-text" (click)="showReferencePreview()">
               <fa-icon icon="file-powerpoint"></fa-icon>
             </span>
             <span class="input-group-text">
-              <a  [class.ref-disabled]="!controller.value"
-                [routerLink]="'/framework/object/view/'+ controller.value">
+              <a [class.ref-disabled]="!controller.value"
+                 [routerLink]="'/framework/object/view/'+ controller.value">
                 <fa-icon icon="arrow-right"></fa-icon>
               </a>
             </span>
           </div>
         </ng-container>
         <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
-          <ng-container *ngIf="mode == MODES.Bulk">
-            <cmdb-object-bulk-input-appends [data]="data"
-                                            [mode]="mode"
-                                            [parentFormGroup]="parentFormGroup" ></cmdb-object-bulk-input-appends>
-          </ng-container>
+          <cmdb-object-bulk-input-appends *ngIf="mode == MODES.Bulk" [data]="data" [controller]="controller"
+                                          [changeForm]="changeForm"></cmdb-object-bulk-input-appends>
           <ng-select
             [items]="objectList"
             id="ng-select-valid"
             class="custom-select"
+            [groupBy]="groupByFn"
+            [groupValue]="groupValueFn"
             bindValue="object_information.object_id" [searchFn]="searchRef"
             [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
             'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"
             [formControlName]="data.name">
+            <ng-template ng-optgroup-tmp let-item="item">
+              <span style="vertical-align: middle;">{{item.name}}</span>
+              <span class="ml-1 badge badge-secondary">{{item.total}}</span>
+            </ng-template>
             <ng-template ng-label-tmp let-item="item">
               <ng-container *ngIf="item.object_information == null">
                 <ng-container *ngIf="refObject != null">
@@ -58,22 +64,24 @@
                       <span *ngIf="first"> - </span>{{sum.value}}
                     </ng-template>
                     <ng-template #templateDate>
-                      <span *ngIf="first"> - </span>{{(sum.value  && sum.value.$date)? (sum.value.$date | date:"dd/MM/yyyy") : " - "}}
+                      <span
+                        *ngIf="first"> - </span>{{(sum.value && sum.value.$date) ? (sum.value.$date | date:"dd/MM/yyyy") : " - "}}
                     </ng-template>
                     <span *ngIf="!last"> | </span>
                   </span>
                 </ng-container>
-                <ng-container *ngIf="refObject == null"> No reference set </ng-container>
+                <ng-container *ngIf="refObject == null"> No reference set</ng-container>
               </ng-container>
               <ng-container *ngIf="item.object_information != null">
                 <i class="{{item?.type_information?.icon}}"></i> {{item?.type_information?.type_label}}
-                 #{{item?.object_information?.object_id}}
+                #{{item?.object_information?.object_id}}
                 <span *ngFor="let sum of item?.summaries; let last = last; let first = first">
                   <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
                     <span *ngIf="first"> - </span>{{sum.value}}
                   </ng-template>
                   <ng-template #templateDate>
-                    <span *ngIf="first"> - </span>{{(sum.value && sum.value.$date)? (sum.value.$date | date:"dd/MM/yyyy") : " - "}}
+                    <span
+                      *ngIf="first"> - </span>{{(sum.value && sum.value.$date) ? (sum.value.$date | date:"dd/MM/yyyy") : " - "}}
                   </ng-template>
                   <span *ngIf="!last"> | </span>
                 </span>
@@ -87,7 +95,8 @@
                   <span *ngIf="first"> - </span>{{sum.value}}
                 </ng-template>
                 <ng-template #templateDate>
-                  <span *ngIf="first"> - </span>{{(sum.value && sum.value.$date)? (sum.value.$date | date:"dd/MM/yyyy") : " - "}}
+                  <span
+                    *ngIf="first"> - </span>{{(sum.value && sum.value.$date) ? (sum.value.$date | date:"dd/MM/yyyy") : " - "}}
                 </ng-template>
                 <span *ngIf="!last"> | </span>
               </span>

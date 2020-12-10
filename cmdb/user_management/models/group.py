@@ -15,10 +15,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-from json import dumps
 from typing import List
 
-from cmdb.data_storage.database_utils import default
 from cmdb.framework import CmdbDAO
 from cmdb.framework.utils import Collection, Model
 from cmdb.user_management.models.right import GLOBAL_RIGHT_IDENTIFIER, BaseRight

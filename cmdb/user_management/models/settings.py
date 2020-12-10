@@ -20,7 +20,7 @@ from json import dumps
 from typing import Any, List
 from pymongo import IndexModel
 
-from cmdb.data_storage.database_utils import default
+from cmdb.database.utils import default
 from cmdb.framework.utils import Collection, Model
 
 

@@ -19,6 +19,8 @@
 
 import { Directive, ElementRef, Input, TemplateRef, ViewContainerRef } from '@angular/core';
 import { PermissionService } from '../services/permission.service';
+import { AclPermissionService } from '../services/acl-permission.service';
+import { AccessControlList } from '../../acl/acl.types';
 
 @Directive({
   // tslint:disable-next-line:directive-selector
@@ -28,10 +30,17 @@ import { PermissionService } from '../services/permission.service';
 export class PermissionLinkDirective {
 
   private rightNames: string[] = [];
+  private requirements: string[] | string ;
+  private acl: AccessControlList;
 
   constructor(private element: ElementRef,
               private templateRef: TemplateRef<any>,
-              private viewContainer: ViewContainerRef, private permissionService: PermissionService) {
+              private viewContainer: ViewContainerRef, private permissionService: PermissionService,
+              private aclPermissionService: AclPermissionService) {
+  }
+
+  @Input('permissionLinkRequirements') set permissionLinkRequirements(requirements: string | string[]) {
+    this.requirements = requirements;
   }
 
   @Input('permissionLink') set permissionLink(rightNames: string | string[]) {
@@ -42,30 +51,44 @@ export class PermissionLinkDirective {
         this.rightNames = [];
         this.rightNames.push(rightNames);
       }
-      this.updateView();
     }
+    this.updateView();
   }
+
+  @Input('permissionLinkAcl') set permissionLinkType(acl: AccessControlList) {
+    this.acl = acl;
+    this.updateView();
+  }
+
+
 
   @Input() routerLink: string = undefined;
 
   private checkPermission() {
     let hasPermission = false;
     for (const right of this.rightNames) {
-      if (this.permissionService.hasRight(right)) {
+      if (this.permissionService.hasRight(right) || this.permissionService.hasExtendedRight(right)) {
         hasPermission = true;
+      } else {
+        hasPermission = false;
         break;
-      } else if (this.permissionService.hasExtendedRight(right)) {
-        hasPermission = true;
       }
     }
+
+    if (this.requirements && this.acl && hasPermission) {
+      const aclperms = this.aclPermissionService.checkRights(this.acl, this.requirements);
+      if (aclperms !== null) {
+        hasPermission = aclperms;
+      }
+    }
+
     return hasPermission;
   }
 
   private updateView() {
+    this.viewContainer.clear();
     if (this.checkPermission()) {
       this.viewContainer.createEmbeddedView(this.templateRef);
-    } else {
-      this.viewContainer.clear();
     }
   }
 

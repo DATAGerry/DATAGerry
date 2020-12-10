@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2020 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,22 +12,19 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import logging
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
-
-LOGGER = logging.getLogger(__name__)
+from enum import unique, Enum, auto
 
 
-class IDCounter:
+@unique
+class AccessControlPermission(Enum):
+    """Permission enum for possible ACL operations."""
 
-    COLLECTION = 'datastorage.counter'
+    def _generate_next_value_(self, start, count, last_values):
+        return self
 
-    def __init__(self, _id: str, counter: int):
-        self._id = _id
-        self.counter = counter
+    CREATE = auto()
+    READ = auto()
+    UPDATE = auto()
+    DELETE = auto()

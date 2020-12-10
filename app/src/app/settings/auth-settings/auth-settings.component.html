@@ -2,64 +2,42 @@
 <hr/>
 <div class="row">
   <div class="col-md-9">
-    <form class="renderForm" [formGroup]="authProviderFormGroup" (ngSubmit)="onSave()">
-      <ng-container *ngFor="let settingConf of authSettingsFormConfig">
-        <cmdb-render-element [parentFormGroup]="authProviderFormGroup" [mode]="renderMode"
-                             [data]="settingConf"></cmdb-render-element>
-      </ng-container>
-      <div *ngIf="authSettings && authProviderControlConfigFormMap && isPatched" id="providerSettings">
-        <div formArrayName="providers" class="card mb-3"
-             *ngFor="let providerSettings of authSettings?.providers; index as i">
-          <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs">
-              <li class="nav-item">
-                <a class="nav-link active" data-toggle="tab" [href]="'#'+providerSettings?.class_name+'_pane_entry'"
-                   role="tab">
-                  {{providerSettings?.class_name}}
-                </a>
-              </li>
-              <ng-container *ngIf="authProviderControlConfigFormMap.get(providerSettings?.class_name)">
-                <li class="nav-item"
-                    *ngFor="let providerSettingSection of authProviderControlConfigFormMap.get(providerSettings?.class_name).sections">
-                  <a class="nav-link" data-toggle="tab"
-                     [href]="'#'+providerSettings?.class_name+'_pane_section_'+providerSettingSection.name" role="tab">
-                    {{providerSettingSection?.label}}
-                  </a>
-                </li>
-              </ng-container>
-            </ul>
-          </div>
-          <div class="card-body">
-            <div *ngIf="authProviderControlConfigFormMap.get(providerSettings?.class_name)" class="tab-content">
-              <div class="tab-pane fade show active" [id]="providerSettings?.class_name+'_pane_entry'" role="tabpanel">
-                <ng-container
-                  *ngFor="let entry of authProviderControlConfigFormMap.get(providerSettings.class_name).entries">
-                  <cmdb-render-element [mode]="renderMode" [data]="entry"
-                                       [parentFormGroup]="getProviderConfigFormGroup(i)">
-                  </cmdb-render-element>
-                </ng-container>
-              </div>
-              <div
-                *ngFor="let providerSettingSection of authProviderControlConfigFormMap.get(providerSettings.class_name).sections"
-                class="tab-pane fade" [id]="providerSettings?.class_name+'_pane_section_'+providerSettingSection.name"
-                role="tabpanel">
-                <ng-container *ngFor="let sectionEntry of providerSettingSection.entries">
-                  <cmdb-render-element [mode]="renderMode" [data]="sectionEntry"
-                                       [parentFormGroup]="getProviderConfigSectionFormGroup(i, providerSettingSection.name)">
-                  </cmdb-render-element>
-                </ng-container>
-              </div>
-            </div>
-          </div>
-          <div class="card-footer text-muted text-right">
-            <span class="badge badge-primary">
-              {{getInstalledProviderByName(providerSettings?.class_name).external === true ? "External" : "Internal"}}
-            </span>
+    <form class="needs-validation" [formGroup]="authConfigForm" (ngSubmit)="onSave()" novalidate>
+      <div class="form-group row mb-3">
+        <div class="col-sm-3">Enable external</div>
+        <div class="col-sm-9">
+          <div class="custom-control custom-checkbox">
+            <input class="custom-control-input" type="checkbox" id="enable-external-input"
+                   formControlName="enable_external">
+            <label class="custom-control-label" for="enable-external-input"></label>
           </div>
         </div>
       </div>
+      <div class="form-group row mb-3">
+          <label class="col-sm-3 col-form-label" for="token-lifetime-input">Token lifetime</label>
+        <div class="col-sm-9">
+          <div class="input-group">
+            <input class="form-control" type="number" id="token-lifetime-input"
+                   formControlName="token_lifetime">
+          </div>
+          <small class="description form-text text-muted">How long should the token be valid?</small>
+        </div>
+      </div>
+      <div *ngIf="authSettings" id="providerSettings">
+        <ng-container formArrayName="providers"
+             *ngFor="let providerSettings of authSettings.providers; index as i">
+          <div class="card mb-3" [ngSwitch]="providerSettings.class_name">
+          <cmdb-local-authentication-provider-form [provider]="providerSettings" [parent]="providersArray"
+                                                   *ngSwitchCase="'LocalAuthenticationProvider'">
+          </cmdb-local-authentication-provider-form>
+          <cmdb-ldap-authentication-provider-form [provider]="providerSettings" [parent]="providersArray"
+                                                  *ngSwitchCase="'LdapAuthenticationProvider'">
+          </cmdb-ldap-authentication-provider-form>
+          </div>
+        </ng-container>
+      </div>
       <hr/>
-      <button type="submit" class="btn btn-success float-right" [disabled]="!authProviderFormGroup.valid">
+      <button type="submit" class="btn btn-success float-right" [disabled]="!authConfigForm.valid">
         <i class="far fa-save"></i> Save
       </button>
       <div class="clearfix"></div>
@@ -76,7 +54,8 @@
         </li>
       </ul>
       <div class="card-footer text-center text-muted">
-        {{(authProviderFormGroup.get('providers').value | activeProviders).length}}/{{installedProviderList.length}} activated
+        {{(providersArray| activeProviders).length}}/{{installedProviderList.length}}
+        activated
       </div>
     </div>
   </div>

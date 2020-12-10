@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,17 +13,17 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { HttpBackend, HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { ConnectionService } from '../../connect/connection.service';
 import { User } from '../../management/models/user';
 import { PermissionService } from './permission.service';
-import { ApiCallService, ApiService } from '../../services/api-call.service';
+import { ApiCallService, ApiService, httpObserveOptions } from '../../services/api-call.service';
 import { IntroComponent } from '../../layout/intro/intro.component';
 import { StepByStepIntroComponent } from '../../layout/intro/step-by-step-intro/step-by-step-intro.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -82,10 +82,33 @@ export class AuthService<T = any> implements ApiService {
   }
 
 
-  public getAuthProviders(): Observable<Array<T>> {
-    return this.api.callGet<Array<T>>(`${ this.servicePrefix }/providers`).pipe(
+  public getProviders(): Observable<Array<T>> {
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callGet<Array<T>>(`${ this.servicePrefix }/providers/`, options).pipe(
       map((apiResponse) => {
         return apiResponse.body as Array<T>;
+      })
+    );
+  }
+
+
+  public getSettings(): Observable<T> {
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callGet<T[]>(`${ this.servicePrefix }/settings/`, options).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public postSettings(data: T): Observable<T> {
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callPost<T>(`${ this.servicePrefix }/settings/`, data, options).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
       })
     );
   }
@@ -116,8 +139,8 @@ export class AuthService<T = any> implements ApiService {
     this.indexDB.clear('user-settings').subscribe();
     localStorage.removeItem('current-user');
     localStorage.removeItem('access-token');
-    this.currentUserSubject.next(null);
-    this.currentUserTokenSubject.next(null);
+    this.currentUserSubject = new BehaviorSubject<User>(null);
+    this.currentUserTokenSubject = new BehaviorSubject<Token>(null);
     this.permissionService.clearUserRightStorage();
 
     // Close Intro-Modal if open

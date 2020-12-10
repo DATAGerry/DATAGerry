@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2020 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,12 +16,18 @@
 import base64
 import functools
 import json
+import calendar
 from functools import wraps
+from datetime import datetime
 
 from werkzeug._compat import to_unicode
 from werkzeug.http import wsgi_to_bytes
 
+from cmdb.framework import TypeModel
 from cmdb.manager.errors import ManagerGetError
+from cmdb.security.acl.control import AccessControlList
+from cmdb.security.acl.errors import AccessDeniedError
+from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.security.auth import AuthModule
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import UserGroupModel
@@ -40,6 +46,13 @@ from cmdb.utils.wraps import deprecated
 from cmdb.utils import json_encoding
 
 DEFAULT_MIME_TYPE = 'application/json'
+
+
+def default(obj):
+    """Json encoder for database values."""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    return str(obj)
 
 
 @deprecated

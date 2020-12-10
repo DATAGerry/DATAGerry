@@ -18,7 +18,7 @@
             <i class="{{item?.render_meta?.icon}}"></i> {{item?.label}}
             #{{item?.public_id}}
           </ng-template>
-          <ng-template ng-option-tmp let-item="item" let-index="index">
+          <ng-template ng-option-tmp let-item="item">
             <i class="{{item?.render_meta?.icon}}"></i> {{item?.label}}
             #{{item?.public_id}}
           </ng-template>
@@ -36,14 +36,14 @@
                    [items]="formatList"
                    required
                    bindLabel="label"
-                   bindValue="id"
+                   bindValue="extension"
                    placeholder="Choose your option"
                    formControlName="format">
 
           <ng-template ng-label-tmp let-item="item">
             <fa-icon icon="{{item.icon}}"></fa-icon> {{item.label}}
           </ng-template>
-          <ng-template ng-option-tmp let-item="item" let-index="index">
+          <ng-template ng-option-tmp let-item="item">
             <fa-icon icon="{{item.icon}}"></fa-icon> {{item.label}}
           </ng-template>
         </ng-select>

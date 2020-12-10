@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -15,9 +15,9 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import * as moment from 'moment';
+
 import {
-  Component, Input,
+  Component,
   OnDestroy,
   OnInit, TemplateRef, ViewChild,
 } from '@angular/core';
@@ -46,6 +46,7 @@ import {
   UserSettingsService
 } from '../../../management/user-settings/services/user-settings.service';
 import { DatePipe } from '@angular/common';
+import { ExportObjectsFileExtension } from '../../../export/export-objects/model/export-objects-file-extension';
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -83,7 +84,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   /**
    * Selected objects
    */
-  public selectedObjects: Array<number> = [];
+  public selectedObjects: Array<RenderResult> = [];
+  public selectedObjectsIDs: Array<number> = [];
 
   /**
    * Total number of results
@@ -129,6 +131,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * Filter parameter from table search-
    */
   public filter: string;
+
+  public selectReset: Array<RenderResult> = [];
 
   public initialVisibleColumns: Array<string> = [];
 
@@ -265,10 +269,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       searchable: false,
       template: this.dateTemplate,
       render(data: any, item?: any, column?: Column, index?: number) {
-        if (data && data.$date) {
-          return data.$date;
-        }
-        return null;
+        const date = new Date(data);
+        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
       }
     } as Column);
     columns.push({
@@ -279,12 +281,12 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       searchable: false,
       template: this.dateTemplate,
       render(data: any, item?: any, column?: Column, index?: number) {
-        if (data && data.$date) {
-          return data.$date;
+        if (!data) {
+          return 'No modifications so far.';
         }
-        return null;
+        const date = new Date(data);
+        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
       }
-
     } as Column);
 
     columns.push({
@@ -307,6 +309,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    */
   public loadObjects() {
     this.loading = true;
+    this.selectedObjects = [];
+    this.selectedObjectsIDs = [];
     const query = [];
     query.push({
       $match: {
@@ -423,7 +427,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * @param selectedItems
    */
   public onSelectedChange(selectedItems: Array<RenderResult>): void {
-    this.selectedObjects = selectedItems.map(m => m.object_information.object_id);
+    this.selectedObjects = selectedItems;
+    this.selectedObjectsIDs = selectedItems.map(m => m.object_information.object_id);
   }
 
   /**
@@ -447,14 +452,14 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.reload(this.type);
   }
 
-  public exportingFiles(exportType: any) {
-    if (this.selectedObjects.length === 0) {
-      this.fileService.getObjectFileByType(this.type.public_id, exportType.id)
+  public exportingFiles(exportType: ExportObjectsFileExtension) {
+    if (this.selectedObjectsIDs.length === 0) {
+      this.fileService.getObjectFileByType(this.type.public_id, exportType.extension)
         .subscribe(res => {
           this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
         });
     } else {
-      this.fileService.callExportRoute(this.selectedObjects.toString(), exportType.id)
+      this.fileService.callExportRoute(this.selectedObjectsIDs, exportType.extension)
         .subscribe(res => {
           this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
         });
@@ -479,17 +484,19 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       this.deleteManyModalRef = this.modalService.open(ObjectsDeleteModalComponent, { size: 'lg' });
       this.deleteManyModalRef.result.then((response: string) => {
         if (response === 'delete') {
-          this.objectService.deleteManyObjects(this.selectedObjects.toString())
+          this.objectService.deleteManyObjects(this.selectedObjectsIDs.toString())
             .pipe(takeUntil(this.subscriber)).subscribe(() => {
             this.toastService.success(`Deleted ${ this.selectedObjects.length } objects successfully`);
             this.sidebarService.updateTypeCounter(this.type.public_id);
             this.selectedObjects = [];
+            this.objectsTableComponent.selectedItems = [];
             this.loadObjects();
           });
         }
       });
     }
   }
+
 
   public ngOnDestroy(): void {
     this.subscriber.next();
