@@ -43,14 +43,14 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     this.METHOD_NOT_ALLOWED,
     this.NOT_ACCEPTABLE,
     this.PAGE_GONE,
-    this.NOT_IMPLEMENTED
+    this.NOT_IMPLEMENTED,
+    this.FORBIDDEN
   ];
 
   private readonly REDIRECT_ERRORS: number[] = [
     this.CONNECTION_REFUSED,
     this.UNAUTHORIZED,
-    this.INTERNAL_SERVER_ERROR,
-    this.FORBIDDEN
+    this.INTERNAL_SERVER_ERROR
   ];
 
   constructor(private router: Router, private authService: AuthService) {

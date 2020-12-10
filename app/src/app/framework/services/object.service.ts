@@ -20,9 +20,9 @@ import { Injectable } from '@angular/core';
 import { ApiCallService, ApiService, httpObserveOptions, resp } from '../../services/api-call.service';
 import { ValidatorService } from '../../services/validator.service';
 import { CmdbObject } from '../models/cmdb-object';
-import { Observable } from 'rxjs';
+import { Observable, timer } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { map } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { RenderResult } from '../models/cmdb-render';
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { DataTableFilter, DataTablesResult } from '../models/cmdb-datatable';
@@ -30,6 +30,31 @@ import { GeneralModalComponent } from '../../layout/helpers/modals/general-modal
 import { CollectionParameters } from '../../services/models/api-parameter';
 import { APIGetListResponse, APIGetMultiResponse } from '../../services/models/api-response';
 import { CmdbType } from '../models/cmdb-type';
+import { FormControl } from '@angular/forms';
+
+export const checkObjectExistsValidator = (objectService: ObjectService, time: number = 500) => {
+  return (control: FormControl) => {
+    return timer(time).pipe(switchMap(() => {
+      return objectService.getObject(+control.value).pipe(
+        map((response) => {
+          if (response === null) {
+            return { objectExists: true };
+          } else {
+            return null;
+          }
+        }),
+        catchError((e) => {
+          return new Promise(resolve => {
+            if (e.status === 403) {
+              resolve({ objectProtected: true });
+            }
+            resolve({ objectExists: true });
+          });
+        })
+      );
+    }));
+  };
+};
 
 export const httpObjectObserveOptions = {
   headers: new HttpHeaders({
@@ -44,7 +69,6 @@ export const COOCKIENAME = 'onlyActiveObjCookie';
 @Injectable({
   providedIn: 'root'
 })
-
 export class ObjectService<T = CmdbObject | RenderResult> implements ApiService {
 
   public servicePrefix: string = 'object';
