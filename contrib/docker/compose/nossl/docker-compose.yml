@@ -2,6 +2,7 @@ version: "3.0"
 services:
   nginx:
     image: nethinks/nginx:latest
+    hostname: nginx
     ports:
     - "80:80"
     depends_on:
@@ -12,6 +13,7 @@ services:
 
   datagerry:
     image: nethinks/datagerry:latest
+    hostname: datagerry
     depends_on:
     - db
     - broker
@@ -22,6 +24,7 @@ services:
 
   db:
     image: mongo:4.2-bionic
+    hostname: db
     restart: unless-stopped
     volumes:
       - mongodb-data:/data/db
@@ -29,6 +32,7 @@ services:
     
   broker:
     image: rabbitmq:3.8
+    hostname: broker
     restart: unless-stopped
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
