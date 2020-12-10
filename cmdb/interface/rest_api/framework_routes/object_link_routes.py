@@ -66,9 +66,9 @@ def get_link(public_id: int, request_user: UserModel):
 @right_required('base.framework.object.view')
 def get_partner_links(public_id: int, request_user: UserModel):
     try:
-        link_list = object_manager.get_links_by_partner(public_id=public_id, user=request_user)
+        link_list = object_manager.get_links_by_partner(public_id=public_id, user=request_user,
+                                                        permission=AccessControlPermission.READ)
     except ObjectManagerGetError as err:
-        LOGGER.error(f'[CmdbLinks] Error while getting partner links: {err}')
         return abort(404, err.message)
 
     if len(link_list) == 0:

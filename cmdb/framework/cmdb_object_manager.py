@@ -518,7 +518,9 @@ class CmdbObjectManager(CmdbManagerBase):
             self.get_object(public_id=link.secondary, user=user, permission=permission)
         return link
 
-    def get_links_by_partner(self, public_id: int, user: UserModel) -> List[CmdbLink]:
+    def get_links_by_partner(self, public_id: int, user: UserModel = None,
+                             permission: AccessControlPermission = None) -> List[
+        CmdbLink]:
         query = {
             '$or': [
                 {'primary': public_id},
@@ -535,7 +537,7 @@ class CmdbObjectManager(CmdbManagerBase):
                         {'public_id': link['secondary']}
                     ]
                 }
-                verified_object = self.get_objects_by(user=user, permission=AccessControlPermission.READ, **query)
+                verified_object = self.get_objects_by(user=user, permission=permission, **query)
                 if len(verified_object) == 2:
                     link_list.append(CmdbLink(**link))
         except CMDBError as err:
