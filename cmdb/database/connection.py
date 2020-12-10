@@ -90,7 +90,7 @@ class MongoConnector(Connector[MongoClient]):
     """
 
     def __init__(self, host: str, port: int, database_name: str, client_options: dict):
-        client = MongoClient(host=host, port=int(port), **client_options)
+        client = MongoClient(host=host, port=int(port), connect=False, **client_options)
         self.database: Database = client.get_database(database_name)
         super(MongoConnector, self).__init__(client, host, port)
 
