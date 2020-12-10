@@ -205,18 +205,20 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         founded_documents = self.__find(collection=collection, *args, **kwargs)
         return list(founded_documents)
 
-    def count(self, collection: str, *args, **kwargs):
+    def count(self, collection: str, filter: dict = None, *args, **kwargs):
         """Count documents based on filter parameters.
 
         Args:
             collection (str): name of database collection
+            filter (dict): document count requirements
             *args: arguments for search operation
             **kwargs:
 
         Returns:
             returns the count of the documents
         """
-        return self.connector.get_collection(collection).count_documents(*args, **kwargs)
+        filter = filter or {}
+        return self.connector.get_collection(collection).count_documents(filter=filter, *args, **kwargs)
 
     def aggregate(self, collection: str, *args, **kwargs):
         """
