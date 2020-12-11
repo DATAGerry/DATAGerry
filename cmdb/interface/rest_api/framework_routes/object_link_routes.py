@@ -85,7 +85,7 @@ def add_link(request_user: UserModel):
     data['creation_time'] = datetime.now()
     try:
         ack = object_manager.insert_link(data, user=request_user, permission=AccessControlPermission.CREATE)
-    except ObjectManagerInsertError as err:
+    except (ObjectManagerInsertError, ObjectManagerGetError) as err:
         return abort(400, err.message)
     except AccessDeniedError as err:
         return abort(403, err.message)

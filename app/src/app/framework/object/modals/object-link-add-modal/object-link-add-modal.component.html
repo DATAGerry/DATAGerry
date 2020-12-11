@@ -5,9 +5,9 @@
     <span aria-hidden="true">&times;</span>
   </button>
 </div>
-<form [formGroup]="form" novalidate>
+<form novalidate>
   <div class="modal-body">
-    <div class="form-group">
+    <div class="form-group" [formGroup]="form">
       <label for="secondary">Enter Public ID:</label>
       <input type="number" class="form-control" min="0" formControlName="secondary" name="secondary" id="secondary"
              [ngClass]="{ 'is-valid': secondary.valid && (secondary.dirty || secondary.touched),
@@ -32,7 +32,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Close click')">Close</button>
-    <button type="button" class="btn btn-outline-primary" [disabled]="!form.valid" (click)="onSave()">Save</button>
+    <button type="button" class="btn btn-outline-dark" (click)="activeModal.dismiss('Close click')">Close</button>
+    <button type="button" class="btn btn-outline-primary" (click)="onSave()">Save</button>
   </div>
 </form>

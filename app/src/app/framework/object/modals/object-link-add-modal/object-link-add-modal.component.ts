@@ -16,15 +16,13 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { RenderResult } from '../../../models/cmdb-render';
 import { checkObjectExistsValidator, ObjectService } from '../../../services/object.service';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { LinkService } from '../../../services/link.service';
-import { ToastService } from '../../../../layout/toast/toast.service';
 
 @Component({
   templateUrl: './object-link-add-modal.component.html',
@@ -35,8 +33,6 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   public primaryResult: RenderResult;
-
-  @Output() public closeEmitter: EventEmitter<string> = new EventEmitter<string>();
 
   @Input('primaryResult')
   public set primaryRenderResult(result: RenderResult) {
@@ -53,8 +49,7 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
     };
   }
 
-  constructor(public activeModal: NgbActiveModal, private objectService: ObjectService, private linkService: LinkService,
-              private toast: ToastService) {
+  constructor(public activeModal: NgbActiveModal, private objectService: ObjectService) {
     this.form = new FormGroup({
       primary: new FormControl(null, [Validators.required]),
       secondary: new FormControl('', [Validators.required, this.sameIDValidator],
@@ -74,15 +69,9 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
     this.form.get('secondary').updateValueAndValidity();
   }
 
-  public onSave(): void {
+  public async onSave() {
     const formData = this.form.getRawValue();
-    if (this.form.valid) {
-      this.linkService.postLink(formData).pipe(takeUntil(this.subscriber)).subscribe(() => {
-        this.toast.success(`Object #${ formData.primary } linked with #${ formData.secondary }.`);
-        this.closeEmitter.emit('save');
-      });
-      this.activeModal.close();
-    }
+    this.activeModal.close(formData);
   }
 
   public ngOnDestroy(): void {
