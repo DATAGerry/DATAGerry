@@ -19,8 +19,9 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiCallService, ApiService } from '../../services/api-call.service';
+import { ApiCallService, ApiService, httpObserveOptions } from '../../services/api-call.service';
 import { CmdbLink } from '../models/cmdb-link';
+import { HttpParams } from '@angular/common/http';
 
 
 @Injectable({
@@ -37,7 +38,9 @@ export class LinkService<T = CmdbLink> implements ApiService {
   }
 
   public getLinks(publicID: number): Observable<T[]> {
-    return this.api.callGet<T[]>(`${ this.servicePrefix }/${ publicID }/`).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callGet<T[]>(`${ this.servicePrefix }/${ publicID }/`, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -45,7 +48,9 @@ export class LinkService<T = CmdbLink> implements ApiService {
   }
 
   public getLinksByPartner(publicID: number): Observable<T[]> {
-    return this.api.callGet<T[]>(`${ this.servicePrefix }/partner/${ publicID }/`).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callGet<T[]>(`${ this.servicePrefix }/partner/${ publicID }/`, options).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -56,7 +61,9 @@ export class LinkService<T = CmdbLink> implements ApiService {
   }
 
   public postLink(data: CmdbLink): Observable<any> {
-    return this.api.callPost<CmdbLink>(`${ this.servicePrefix }/`, data).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callPost<CmdbLink>(`${ this.servicePrefix }/`, data, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -64,7 +71,9 @@ export class LinkService<T = CmdbLink> implements ApiService {
   }
 
   public deleteLink(publicID: number): Observable<any> {
-    return this.api.callDelete<number>(`${ this.servicePrefix }/${ publicID }`).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callDelete<number>(`${ this.servicePrefix }/${ publicID }`, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })

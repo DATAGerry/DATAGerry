@@ -26,6 +26,7 @@ import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import { ObjectLinkAddModalComponent } from '../../../modals/object-link-add-modal/object-link-add-modal.component';
 import { ObjectService } from '../../../../services/object.service';
 import { ObjectLinkDeleteModalComponent } from '../../../modals/object-link-delete-modal/object-link-delete-modal.component';
+import { ToastService } from '../../../../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-object-links',
@@ -51,7 +52,7 @@ export class ObjectLinksComponent implements OnInit, OnDestroy {
 
   // Links
   @Input() public renderResult: RenderResult = undefined;
-  public linkList: CmdbLink[];
+  public linkList: CmdbLink[] = [];
   private linkPartnerSubscription: Subscription;
   private linkListSubscription: Subscription;
   public partnerObjects: RenderResult[];
@@ -70,7 +71,8 @@ export class ObjectLinksComponent implements OnInit, OnDestroy {
   };
   public dtTrigger: Subject<any>;
 
-  constructor(private linkService: LinkService, private objectService: ObjectService, private modalService: NgbModal) {
+  constructor(private linkService: LinkService, private objectService: ObjectService, private modalService: NgbModal,
+              private toast: ToastService) {
     this.dtTrigger = new Subject();
     this.linkPartnerSubscription = new Subscription();
     this.linkListSubscription = new Subscription();
@@ -92,10 +94,14 @@ export class ObjectLinksComponent implements OnInit, OnDestroy {
   public onShowAddModal(): void {
     this.modalRef = this.modalService.open(ObjectLinkAddModalComponent);
     this.modalRef.componentInstance.primaryRenderResult = this.renderResult;
-    this.modalRef.componentInstance.closeEmitter.subscribe((closeResponse: string) => {
-      if (closeResponse === 'save') {
-          this.loadLinks();
-      }
+    this.modalRef.result.then((formData: any) => {
+      this.linkService.postLink(formData).subscribe(() => {
+        this.toast.success(`Object #${ formData.primary } linked with #${ formData.secondary }.`);
+        this.loadLinks();
+      },
+        (e)  => {
+          this.toast.error(`${e.message}`);
+        });
     });
   }
 

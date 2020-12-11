@@ -1,13 +1,13 @@
 <div class="modal-header bg-primary text-white">
-  <h4 class="modal-title">Add connection to object:
-    #{{primaryRenderResult?.object_information?.object_id}} {{primaryRenderResult?.type_information?.type_label}}</h4>
+  <h4 class="modal-title" *ngIf="primaryResult">Add connection to object:
+    #{{primaryResult?.object_information?.object_id}} {{primaryResult?.type_information?.type_label}}</h4>
   <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
     <span aria-hidden="true">&times;</span>
   </button>
 </div>
-<form [formGroup]="addLinkForm" (ngSubmit)="onSave()" novalidate>
+<form novalidate>
   <div class="modal-body">
-    <div class="form-group">
+    <div class="form-group" [formGroup]="form">
       <label for="secondary">Enter Public ID:</label>
       <input type="number" class="form-control" min="0" formControlName="secondary" name="secondary" id="secondary"
              [ngClass]="{ 'is-valid': secondary.valid && (secondary.dirty || secondary.touched),
@@ -20,17 +20,19 @@
         <div class="float-right" *ngIf="secondary.errors.sameID">
           You can`t link a object to itself.
         </div>
+        <div class="float-right" *ngIf="secondary.errors.objectExists">
+          Object not exists!
+        </div>
+        <div class="float-right" *ngIf="secondary.errors.objectProtected">
+          No access to this object!
+        </div>
         <div class="clearfix"></div>
       </div>
       <div class="clearfix"></div>
     </div>
-    <div *ngIf="secondaryResult">
-      <strong>{{primaryRenderResult?.type_information?.type_label}} #{{secondaryResult?.object_information?.object_id}}</strong>:
-      {{secondaryResult?.summary_line}}
-    </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Close click')">Close</button>
-    <button type="submit" class="btn btn-outline-primary" [disabled]="addLinkForm.invalid">Save</button>
+    <button type="button" class="btn btn-outline-dark" (click)="activeModal.dismiss('Close click')">Close</button>
+    <button type="button" class="btn btn-outline-primary" (click)="onSave()">Save</button>
   </div>
 </form>

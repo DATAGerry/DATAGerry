@@ -30,7 +30,7 @@ class CmdbLink(CmdbDAO):
             raise ValueError(f'Same link IDs: {primary}/{secondary}')
         self.primary: int = primary
         self.secondary: int = secondary
-        self.creation_time: datetime = creation_time or datetime.utcnow()
+        self.creation_time: datetime = creation_time or datetime.now()
         super(CmdbLink, self).__init__(**kwargs)
 
     def get_primary(self) -> int:
