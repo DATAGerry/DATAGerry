@@ -20,7 +20,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TypeRoutingModule } from './type-routing.module';
 import { LayoutModule } from '../../layout/layout.module';
-import { DataTablesModule } from 'angular-datatables';
 import { TypeAddComponent } from './type-add/type-add.component';
 import { ArchwizardModule } from 'angular-archwizard';
 import { TypeBuilderComponent } from './type-builder/type-builder.component';
@@ -68,7 +67,6 @@ import { TypeTableActionsComponent } from './components/type-table-actions/type-
     imports: [
         CommonModule,
         TypeRoutingModule,
-        DataTablesModule,
         LayoutModule,
         ReactiveFormsModule,
         ArchwizardModule,
