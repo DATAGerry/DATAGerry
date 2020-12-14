@@ -82,7 +82,7 @@ class CmdbRender:
         self.dt_render = dt_render
         self.ref_render = ref_render
 
-    def _render_username_by_id(self, user_id: int) -> str:
+    def _render_username_by_id(self, user_id: int, default=AUTHOR_ANONYMOUS_NAME) -> str:
         user: UserModel = None
         try:
             user = next(_ for _ in self.user_list if _.public_id == user_id)
@@ -91,7 +91,7 @@ class CmdbRender:
         if user:
             return user.get_display_name()
         else:
-            return CmdbRender.AUTHOR_ANONYMOUS_NAME
+            return default
 
     @property
     def object_instance(self) -> CmdbObject:
@@ -151,16 +151,16 @@ class CmdbRender:
     def __generate_object_information(self, render_result: RenderResult) -> RenderResult:
         try:
             author_name = self._render_username_by_id(self.object_instance.author_id)
-        except CMDBError as err:
+        except CMDBError:
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
 
         if self.object_instance.editor_id:
             try:
                 editor_name = self._render_username_by_id(self.object_instance.editor_id)
             except CMDBError:
-                editor_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
+                editor_name = None
         else:
-            editor_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
+            editor_name = None
 
         render_result.object_information = {
             'object_id': self.object_instance.get_public_id(),
