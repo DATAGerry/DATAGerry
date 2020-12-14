@@ -341,7 +341,7 @@ export class TypeComponent implements OnInit, OnDestroy {
    * Call the export routes with the selected types
    */
   public exportingFiles() {
-    if (this.selectedTypeIDs.length === 0 || this.selectedTypeIDs.length === this.types.length) {
+    if (this.selectedTypeIDs.length === 0 || this.selectedTypeIDs.length === this.totalTypes) {
       this.fileService.getTypeFile()
         .subscribe(res => this.downLoadFile(res, 'json'));
     } else {
