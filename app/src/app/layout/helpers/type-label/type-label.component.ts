@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, Input, OnInit } from '@angular/core';
@@ -24,23 +24,13 @@ import { CmdbType } from '../../../framework/models/cmdb-type';
   templateUrl: './type-label.component.html',
   styleUrls: ['./type-label.component.scss']
 })
-export class TypeLabelComponent implements OnInit {
+export class TypeLabelComponent {
 
   public label: string;
   public icon: string;
-  private type: CmdbType;
 
-  ngOnInit() {
-  }
+  @Input() public description: string;
 
-  @Input()
-  public set typeInstance(value: CmdbType) {
-    this.type = value;
-  }
-
-  public get typeInstance(): CmdbType {
-    return this.type;
-  }
 
   @Input()
   public set title(value: string) {
@@ -59,4 +49,6 @@ export class TypeLabelComponent implements OnInit {
   public get faIcon(): string {
     return this.icon;
   }
+
+
 }

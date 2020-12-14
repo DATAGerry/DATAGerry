@@ -43,7 +43,9 @@
 </ng-template>
 
 <ng-template #typeNameTemplate let-item="item">
-  <cmdb-type-label [faIcon]="item.render_meta?.icon" [title]="item.label ? item.label : item.name"></cmdb-type-label>
+  <cmdb-type-label [faIcon]="item.render_meta?.icon" [description]="item?.description"
+                   [title]="item.label ? item.label : item.name"
+  ></cmdb-type-label>
 </ng-template>
 
 <ng-template #actionsTemplate let-item="item">

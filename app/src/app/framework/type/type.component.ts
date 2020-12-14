@@ -160,13 +160,6 @@ export class TypeComponent implements OnInit, OnDestroy {
         template: this.typeNameTemplate,
       },
       {
-        display: 'Description',
-        name: 'description',
-        data: 'description',
-        searchable: true,
-        sortable: false
-      },
-      {
         display: 'Creation Time',
         name: 'creation_time',
         data: 'creation_time',
