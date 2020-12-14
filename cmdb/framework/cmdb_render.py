@@ -153,13 +153,23 @@ class CmdbRender:
             author_name = self._render_username_by_id(self.object_instance.author_id)
         except CMDBError as err:
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
-            LOGGER.error(err.message)
+
+        if self.object_instance.editor_id:
+            try:
+                editor_name = self._render_username_by_id(self.object_instance.editor_id)
+            except CMDBError:
+                editor_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
+        else:
+            editor_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
+
         render_result.object_information = {
             'object_id': self.object_instance.get_public_id(),
             'creation_time': self.object_instance.creation_time,
             'last_edit_time': self.object_instance.last_edit_time,
             'author_id': self.object_instance.author_id,
             'author_name': author_name,
+            'editor_id': self.object_instance.editor_id,
+            'editor_name': editor_name,
             'active': self.object_instance.active,
             'version': self.object_instance.version
         }
