@@ -258,6 +258,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def update_object(self, data: (dict, CmdbObject), user: UserModel = None,
                       permission: AccessControlPermission = None) -> str:
+
         if isinstance(data, dict):
             update_object = CmdbObject(**data)
         elif isinstance(data, CmdbObject):
@@ -265,6 +266,8 @@ class CmdbObjectManager(CmdbManagerBase):
         else:
             raise ObjectManagerUpdateError('Wrong CmdbObject init format - expecting CmdbObject or dict')
         update_object.last_edit_time = datetime.utcnow()
+        if user:
+            update_object.editor_id = user.public_id
 
         type_ = self._type_manager.get(update_object.type_id)
         verify_access(type_, user, permission)
