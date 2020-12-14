@@ -58,8 +58,8 @@ export class CategoryNodeComponent implements OnDestroy {
     this.deleteRef.componentInstance.category = category;
     this.deleteRef.result.then((result) => {
       if (result === 'delete') {
-        this.categoryService.deleteCategory(category.public_id).subscribe((id: number) => {
-          this.change.emit({ type: 'delete', value: 'id' });
+        this.categoryService.deleteCategory(category.public_id).subscribe(() => {
+          this.change.emit();
         });
       }
     });
