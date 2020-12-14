@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { CmdbCategory, CmdbCategoryNode } from '../../../models/cmdb-category';
 import { CmdbMode } from '../../../modes.enum';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -24,6 +24,8 @@ import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap/modal/modal-ref';
 import { CategoryService } from '../../../services/category.service';
 import { Router } from '@angular/router';
 import { DeleteCategoryModalComponent } from '../modals/delete-category-modal/delete-category-modal.component';
+import {ReplaySubject} from "rxjs";
+import {takeUntil} from "rxjs/operators";
 
 @Component({
   selector: 'cmdb-category-node',
@@ -47,6 +49,11 @@ export class CategoryNodeComponent implements OnDestroy {
    */
   @Output() public change: EventEmitter<{ type: string, value: any }>;
 
+  /**
+   * Global unsubscriber for http calls to the rest backend.
+   */
+  private unSubscribe: ReplaySubject<void> = new ReplaySubject();
+
   private deleteRef: NgbModalRef;
 
   public constructor(private deleteModal: NgbModal, private router: Router, private categoryService: CategoryService) {
@@ -58,14 +65,17 @@ export class CategoryNodeComponent implements OnDestroy {
     this.deleteRef.componentInstance.category = category;
     this.deleteRef.result.then((result) => {
       if (result === 'delete') {
-        this.categoryService.deleteCategory(category.public_id).subscribe(() => {
-          this.change.emit();
+        this.categoryService.deleteCategory(category.public_id).pipe(takeUntil(this.unSubscribe))
+          .subscribe(() => {
+            this.change.emit();
         });
       }
     });
   }
 
   public ngOnDestroy(): void {
+    this.unSubscribe.next();
+    this.unSubscribe.complete();
   }
 
 }

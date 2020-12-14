@@ -17,7 +17,7 @@
 */
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import {animationFrameScheduler, BehaviorSubject, forkJoin, Observable, ReplaySubject} from 'rxjs';
+import { BehaviorSubject, forkJoin, Observable, ReplaySubject } from 'rxjs';
 import { CmdbCategory, CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb-category';
 import { CategoryService } from '../services/category.service';
 import { CmdbMode } from '../modes.enum';
@@ -118,6 +118,10 @@ export class CategoryComponent implements OnInit, OnDestroy {
 
     this.tableColumns = [publicColumn, labelColumn, nameColumn, parentColumn];
   }
+
+  /**
+   * Load categories from the backend.
+   */
   private loadCategories(): void {
     this.categoryService.getCategoryIteration(this.apiParameters).pipe(
       takeUntil(this.unSubscribe)).subscribe((response: APIGetMultiResponse<CmdbCategory>) => {
@@ -127,6 +131,9 @@ export class CategoryComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Load category tree from the backend.
+   */
   private loadCategoryTree(): void {
     this.displayMode.subscribe(() => {
       this.sidebarService.categoryTree.asObservable().pipe(takeUntil(this.unSubscribe))
@@ -136,6 +143,9 @@ export class CategoryComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Will generate all needed data for cmdb-table.
+   */
   private dataLoader(): void {
     this.tableColumnBuilder();
     this.loadCategoryTree();
