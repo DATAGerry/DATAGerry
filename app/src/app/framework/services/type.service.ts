@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Injectable } from '@angular/core';
@@ -91,7 +91,7 @@ export class TypeService<T = CmdbType> implements ApiService {
    * Iterate over the type collection
    * @param params Instance of CollectionParameters
    */
-  public getTypesIteration(params: CollectionParameters = {
+  public getTypes(params: CollectionParameters = {
     filter: undefined,
     limit: 10,
     sort: 'public_id',
@@ -101,7 +101,8 @@ export class TypeService<T = CmdbType> implements ApiService {
     const options = httpObserveOptions;
     let httpParams: HttpParams = new HttpParams();
     if (params.filter !== undefined) {
-      httpParams = httpParams.set('filter', params.filter);
+      const filter = JSON.stringify(params.filter);
+      httpParams = httpParams.set('filter', filter);
     }
     httpParams = httpParams.set('limit', params.limit.toString());
     httpParams = httpParams.set('sort', params.sort);

@@ -1,0 +1,17 @@
+<div class="d-flex justify-content-center" *ngIf="publicID">
+  <a *permissionLink="['base.framework.type.view', 'base.framework.type.edit']"
+     [routerLink]="['/', 'framework', 'type', 'edit', publicID]"
+     title="Edit type">
+    <i class="far fa-edit"></i>
+  </a>
+  <a *permissionLink="['base.framework.type.view', 'base.framework.type.add']"
+     [routerLink]="['/', 'framework', 'type', 'add']" [queryParams]="{copy: publicID}"
+     title="Copy type">
+    <i class="far fa-clone"></i>
+  </a>
+  <a *permissionLink="'base.framework.type.delete'"
+     [routerLink]="['/', 'framework', 'type', 'delete', publicID]"
+     title="Delete type">
+    <i class="far fa-edit"></i>
+  </a>
+</div>

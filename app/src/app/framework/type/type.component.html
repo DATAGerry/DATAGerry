@@ -1,24 +1,19 @@
-<span class="d-flex justify-content-between">
+<div class="d-flex justify-content-between">
   <h1>Type List</h1>
-  <h1><i class="far fa fa-info-circle" (click)="showAlert()"></i></h1>
-</span>
+  <div class="pointer" style="font-size: 2.5rem"><i class="far fa fa-info-circle" (click)="showAlert()"></i></div>
+</div>
 <hr/>
-<cmdb-info-box message="DATAGERRY is an asset management tool (or CMDB), where you can define the data model for your own.
-
-In DATAGERRY objects are stored. An object can be for example a router, server, location or maintenance contract and
- consists of multiple fields (e.g. management IP, hostname, … of a router). Each field has a specific data type.
- A datatype could be for example text, checkbox, date, dropdown or many more. The blueprint for an object is defined
- in an object type."
+<cmdb-info-box [message]="INFO_MESSAGE"
                icon="fas fa-cube"
                doc="/docs/admin_guide/objects.html"></cmdb-info-box>
-<div class="card-body clearfix" style="padding: 0 0 1em 0">
+<div id="type-list-buttons" class="mt-2 mb-2">
   <button type="button"
           *permissionLink="['base.framework.type.add']"
           class="btn btn-success btn-sm"
           [routerLink]="['/framework/type/add']">
     <i class="fas fa-plus"></i> Add
   </button>
-  <span class="card-group float-right" *permissionLink="'base.export.type.*'">
+  <span class="float-right" *permissionLink="'base.export.type.*'">
     <div class="btn-group">
       <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle"
               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -28,63 +23,33 @@ In DATAGERRY objects are stored. An object can be for example a router, server, 
         <li id="export-type" [className]="'dropdown-item'"
             (click)="exportingFiles()">
           <fa-icon icon="file-code"></fa-icon> JSON
-          <span *ngIf="selected.length == 0">( all )</span>
-          <span *ngIf="selected.length > 0"> ( {{selected.length}} )</span>
+          <span *ngIf="selectedTypeIDs.length == 0">( all )</span>
+          <span *ngIf="selectedTypeIDs.length > 0"> ( {{selectedTypeIDs.length}} )</span>
         </li>
       </ul>
     </div>
   </span>
 </div>
-<div id="type-list">
+<cmdb-table [items]="types" [columns]="columns" [page]="page" [sort]="sort" [id]="'type-list-table'"
+            [stateEnabled]="false" [emptyMessage]="'No types were found!'"
+            [totalItems]="totalTypes" [selectEnabled]="selectEnabled" [loading]="loading" [pageSize]="limit"
+            (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
+            (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)"
+            (searchChange)="onSearchChange($event)"></cmdb-table>
 
-  <table id="type-list-datatable" datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger"
-         class="table table-striped table-bordered" style="width:100%">
-    <thead>
-    <tr>
-      <th><input type="checkbox" class="selectAll" [checked]="all" name="selectAll" value="all" (click)="selectAll()"></th>
-      <th>Active</th>
-      <th>Public ID</th>
-      <th>Type</th>
-      <th>Creation time</th>
-      <th *permissionLink="['base.framework.type.add', 'base.framework.type.edit', 'base.framework.type.delete']">Action</th>
-      <th *permissionLink="['base.framework.type.clean']">Cleanup Database</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr *ngFor="let typeInstance of types">
-      <td>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" [checked]="selected.indexOf(typeInstance.public_id) > -1"
-          (click)="toggleSelection(typeInstance.public_id)">
-        </div>
-      </td>
-      <td>
-        <cmdb-active-badge [activeStatus]="typeInstance.active"></cmdb-active-badge>
-      </td>
-      <td scope="row">{{typeInstance.public_id}}</td>
-      <td>
-        <cmdb-type-label [faIcon]="typeInstance?.render_meta?.icon" [title]="typeInstance.label"></cmdb-type-label>
-      </td>
-      <td>{{typeInstance?.creation_time | date: "dd/MM/yyyy - HH:mm:ss"}}</td>
-      <td *permissionLink="['base.framework.type.add', 'base.framework.type.edit', 'base.framework.type.delete']">
-        <a *permissionLink="'base.framework.type.edit'"
-           class="text-dark" routerLink="/framework/type/edit/{{typeInstance.public_id}}">
-          <fa-icon [icon]="['far', 'edit']"></fa-icon>
-        </a>
-        <a *permissionLink="'base.framework.type.add'"
-           class="ml-1 text-dark" [routerLink]="['/framework/type/add/']"
-           [queryParams]="{copy: typeInstance.public_id}">
-          <fa-icon [icon]="['far', 'clone']"></fa-icon>
-        </a>
-        <a *permissionLink="'base.framework.type.delete'"
-           class="ml-1 text-dark" routerLink="/framework/type/delete/{{typeInstance.public_id}}">
-          <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
-        </a>
-      </td>
-      <td *permissionLink="['base.framework.type.clean']">
-        <cmdb-clean-button [type]="typeInstance"></cmdb-clean-button>
-      </td>
-    </tr>
-    </tbody>
-  </table>
-</div>
+<!-- Table templates -->
+<ng-template #activeTemplate let-data="data">
+  <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
+</ng-template>
+
+<ng-template #typeNameTemplate let-item="item">
+  <cmdb-type-label [faIcon]="item.render_meta?.icon" [title]="item.label ? item.label : item.name"></cmdb-type-label>
+</ng-template>
+
+<ng-template #actionsTemplate let-item="item">
+  <cmdb-type-table-actions [publicID]="item.public_id"></cmdb-type-table-actions>
+</ng-template>
+
+<ng-template #cleanTemplate let-item="item">
+  <cmdb-clean-button [type]="item"></cmdb-clean-button>
+</ng-template>
