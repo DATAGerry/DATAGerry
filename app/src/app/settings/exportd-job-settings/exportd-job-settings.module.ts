@@ -59,7 +59,6 @@ import { ExportdJobSettingsCopyComponent } from './exportd-job-settings-copy/exp
 import { AuthModule } from '../../auth/auth.module';
 
 @NgModule({
-  entryComponents: [DeleteLogJobModalComponent],
   declarations: [
     ExportdJobSettingsListComponent,
     ExportdJobSettingsEditComponent,

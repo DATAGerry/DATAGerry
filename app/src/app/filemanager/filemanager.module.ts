@@ -24,8 +24,6 @@ import { FilemanagerRoutingModule } from './filemanager-routing.module';
 import { FilemanagerComponent } from './filemanager.component';
 
 @NgModule({
-    entryComponents: [
-    ],
     declarations: [
       FilemanagerComponent
     ],

@@ -38,7 +38,6 @@ import { DeactivateExportdTabComponent } from './log-exportd-settings/deactivate
 import { AuthModule } from '../../auth/auth.module';
 
 @NgModule({
-  entryComponents: [DeleteModalComponent, DeleteExportdModalComponent],
   declarations: [
     DeleteModalComponent,
     DeleteExportdModalComponent,

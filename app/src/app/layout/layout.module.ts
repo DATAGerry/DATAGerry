@@ -170,15 +170,6 @@ import { BlockComponent } from './components/block/block.component';
   providers: [
     BreadcrumbService,
     NgbActiveModal
-  ],
-  entryComponents: [
-    GeneralModalComponent,
-    AddAttachmentsModalComponent,
-    AttachmentsListModalComponent,
-    FilemanagerModalComponent,
-    IntroComponent,
-    StepByStepIntroComponent,
-    ObjectPreviewModalComponent
   ]
 })
 export class LayoutModule {

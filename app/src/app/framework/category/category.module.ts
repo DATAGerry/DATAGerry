@@ -52,8 +52,7 @@ import { DeleteCategoryModalComponent } from './components/modals/delete-categor
         IconPickerModule,
         AuthModule,
         DataTablesModule
-    ],
-  entryComponents: [AddCategoryModalComponent, DeleteCategoryModalComponent]
+    ]
 })
 export class CategoryModule {
 }

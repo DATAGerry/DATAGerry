@@ -52,30 +52,6 @@ import { ObjectBulkInputAppendsComponent } from './components/object-bulk-input-
 
 
 @NgModule({
-  entryComponents: [
-    TextComponent,
-    PasswordComponent,
-    DummyComponent,
-    EmailComponent,
-    PhoneComponent,
-    HrefComponent,
-    NumberComponent,
-    RadioComponent,
-    SelectComponent,
-    RefComponent,
-    CheckboxComponent,
-    TextareaComponent,
-    DateComponent,
-    TextSimpleComponent,
-    PasswordSimpleComponent,
-    CheckboxSimpleComponent,
-    RadioSimpleComponent,
-    SelectSimpleComponent,
-    RefSimpleComponent,
-    DateSimpleComponent,
-    RenderComponent,
-    RenderElementComponent
-  ],
   declarations: [
     RenderComponent,
     RenderElementComponent,

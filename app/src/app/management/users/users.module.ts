@@ -40,9 +40,6 @@ import { UserDeleteComponent } from './user-delete/user-delete.component';
 import { UserCompactComponent } from './components/user-compact/user-compact.component';
 
 @NgModule({
-  entryComponents: [
-    UsersPasswdModalComponent
-  ],
   declarations: [
     UserViewComponent,
     UsersPasswdModalComponent,

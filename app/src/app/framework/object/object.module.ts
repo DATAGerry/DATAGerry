@@ -66,12 +66,6 @@ import { ObjectsDeleteModalComponent } from './modals/objects-delete-modal/objec
 import { ObjectTableHeadComponent } from './components/object-table-head/object-table-head.component';
 
 @NgModule({
-  entryComponents: [
-    ObjectLinkAddModalComponent,
-    ObjectDeleteModalComponent,
-    ObjectLinkDeleteModalComponent,
-    ObjectsDeleteModalComponent
-  ],
   declarations: [
     ObjectViewComponent,
     ObjectHeaderComponent,

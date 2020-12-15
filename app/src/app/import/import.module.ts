@@ -51,7 +51,6 @@ import { DataTablesModule } from 'angular-datatables';
 
 
 @NgModule({
-  entryComponents: [JsonConfigComponent, CsvConfigComponent, JsonMappingComponent, CsvMappingComponent],
   declarations: [
     ImportComponent,
     ImportObjectsComponent,
