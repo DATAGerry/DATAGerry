@@ -34,7 +34,7 @@ export class GroupTableComponent implements OnInit {
    * Datatable
    */
   @Input() public tableOptions: any = {};
-  @ViewChild(DataTableDirective, { static: false }) dtElement: DataTableDirective;
+  @ViewChild(DataTableDirective) dtElement: DataTableDirective;
 
   constructor() {
   }

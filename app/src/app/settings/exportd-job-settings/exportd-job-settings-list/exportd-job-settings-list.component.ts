@@ -36,7 +36,7 @@ import { GeneralModalComponent } from '../../../layout/helpers/modals/general-mo
 })
 export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
 
-  @ViewChild(DataTableDirective, {static: false})
+  @ViewChild(DataTableDirective)
   public dtElement: DataTableDirective;
   public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();

@@ -58,7 +58,7 @@ export class DeleteLogJobModalComponent {
 })
 export class ExportdJobLogsComponent implements OnInit, OnDestroy {
 
-  @ViewChild(DataTableDirective, {static: false})
+  @ViewChild(DataTableDirective)
   public dtElement: DataTableDirective;
   public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();

@@ -31,7 +31,7 @@ export class RightsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public rights: Array<Right> = [];
 
-  @ViewChild(DataTableDirective, { static: false })
+  @ViewChild(DataTableDirective)
   private dtElement: DataTableDirective;
   public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();

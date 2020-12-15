@@ -49,9 +49,9 @@ import { NumberSearchResults } from '../models/search-result';
 export class SearchBarComponent implements OnInit, OnDestroy {
 
   // Child components
-  @ViewChild('tagInput', { static: false }) tagInput: ElementRef;
-  @ViewChild('inputDropdown', { static: false }) inputDropdown: ElementRef;
-  @ViewChild('inputSubDropdown', { static: false }) inputSubDropdown: ElementRef;
+  @ViewChild('tagInput') tagInput: ElementRef;
+  @ViewChild('inputDropdown') inputDropdown: ElementRef;
+  @ViewChild('inputSubDropdown') inputSubDropdown: ElementRef;
   @ViewChildren(SearchBarTagComponent) searchBarTagComponents: QueryList<SearchBarTagComponent>;
 
   // Tabs

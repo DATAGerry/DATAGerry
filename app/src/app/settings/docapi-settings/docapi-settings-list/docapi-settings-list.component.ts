@@ -33,7 +33,7 @@ import { GeneralModalComponent } from '../../../layout/helpers/modals/general-mo
 })
 export class DocapiSettingsListComponent implements OnInit, OnDestroy {
 
-  @ViewChild(DataTableDirective, {static: false})
+  @ViewChild(DataTableDirective)
   public dtElement: DataTableDirective;
   public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();

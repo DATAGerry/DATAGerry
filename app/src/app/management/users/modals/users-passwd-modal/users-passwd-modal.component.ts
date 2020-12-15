@@ -13,7 +13,7 @@ import { takeUntil } from 'rxjs/operators';
 })
 export class UsersPasswdModalComponent {
 
-  @ViewChild('passWordInput', { static: false }) public passWordToggle: ElementRef;
+  @ViewChild('passWordInput') public passWordToggle: ElementRef;
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
   // Data

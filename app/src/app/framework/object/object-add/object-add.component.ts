@@ -50,7 +50,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
   public renderForm: FormGroup;
   public fieldsGroups: FormGroup;
   @Output() parentSubmit = new EventEmitter<any>();
-  @ViewChild(RenderComponent, {static: false}) render: RenderComponent;
+  @ViewChild(RenderComponent) render: RenderComponent;
 
 
   constructor(private router: Router, private typeService: TypeService, private categoryService: CategoryService,

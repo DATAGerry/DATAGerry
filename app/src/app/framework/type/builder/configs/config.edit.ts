@@ -15,8 +15,9 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-import {Input} from '@angular/core';
+import { Input, Directive } from '@angular/core';
 
+@Directive()
 export class ConfigEdit {
   private innerData: any;
   private innerSections: any[];

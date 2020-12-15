@@ -27,7 +27,7 @@ import { CmdbMode } from '../../../modes.enum';
 })
 export class TypeFieldsStepComponent implements AfterContentInit {
 
-  @ViewChild(BuilderComponent, {static: false})
+  @ViewChild(BuilderComponent)
   public typeBuilder: BuilderComponent;
 
   @Input() public mode: number = CmdbMode.View;

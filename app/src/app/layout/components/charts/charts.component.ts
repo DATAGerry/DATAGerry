@@ -30,7 +30,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 })
 export class ChartsComponent implements AfterViewInit, AfterViewChecked {
 
-  @ViewChild('chartcanvas', {static : false})
+  @ViewChild('chartcanvas')
   public chartRef;
 
   @Input() chartType: string;

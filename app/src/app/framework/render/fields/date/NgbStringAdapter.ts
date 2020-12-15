@@ -1,5 +1,7 @@
 import {NgbDateAdapter, NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
+import { Injectable } from "@angular/core";
 
+@Injectable()
 export class NgbStringAdapter extends NgbDateAdapter<Date> {
 
   parse(value: string): NgbDateStruct {

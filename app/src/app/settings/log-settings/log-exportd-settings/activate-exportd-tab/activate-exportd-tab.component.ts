@@ -28,7 +28,7 @@ import { ExportdLog } from '../../../models/exportd-log';
 })
 export class ActivateExportdTabComponent implements AfterContentInit, OnDestroy, OnInit {
 
-  @ViewChild(DataTableDirective, {static: false})
+  @ViewChild(DataTableDirective)
   public dtElement: DataTableDirective;
   public dtOptions: any = {};
   public dtTrigger: Subject<any> = new Subject();

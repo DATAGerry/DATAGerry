@@ -51,7 +51,7 @@ export const mappingComponents: { [type: string]: any } = {
 })
 export class TypeMappingComponent extends TypeMappingBaseComponent implements OnInit, OnChanges, OnDestroy {
 
-  @ViewChild('mappingContainer', { read: ViewContainerRef, static: false }) mappingContainer;
+  @ViewChild('mappingContainer', { read: ViewContainerRef }) mappingContainer;
   @Output() public typeChange: EventEmitter<any>;
   @Input() public fileFormat;
   @Input() public manuallyMapping: boolean = true;

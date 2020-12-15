@@ -66,7 +66,7 @@ export class CategoryComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   public dtOptions: DataTables.Settings = {};
   public dtTrigger: Subject<void> = new Subject();
-  @ViewChild(DataTableDirective, { static: false }) dtElement: DataTableDirective;
+  @ViewChild(DataTableDirective) dtElement: DataTableDirective;
 
   constructor(private categoryService: CategoryService, private route: ActivatedRoute, private sidebarService: SidebarService) {
     this.categories = [];
