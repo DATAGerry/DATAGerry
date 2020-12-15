@@ -96,14 +96,47 @@ def get_logs_with_existing_objects(request_user: UserModel):
     existing_list = []
     deleted_list = []
     passed_objects = []
+    location = 'type.acl.groups.includes.' + str(request_user.group_id)
+
     try:
-        query = {
-            'log_type': CmdbObjectLog.__name__,
-            'action': {
-                '$ne': LogAction.DELETE.value
-            }
-        }
-        object_logs = log_manager.get_logs_by(**query)
+        query = [
+            {
+                '$lookup':
+                    {
+                        'from': 'framework.objects',
+                        'localField': 'object_id',
+                        'foreignField': 'public_id',
+                        'as': 'object'
+                    }
+            },
+            {'$lookup':
+                {
+                    'from': 'framework.types',
+                    'localField': 'object.0.type_id',
+                    'foreignField': 'public_id',
+                    'as': 'type'
+                }
+            },
+            {'$unwind': {'path': '$type'}},
+            {
+                '$match':
+                    {'$and': [
+                        {'$or': [
+                            {'$or': [{'type.acl': {'$exists': False}}, {'type.acl.activated': False}]},
+                            {'$and': [
+                                {'type.acl.activated': True},
+                                {'$and': [
+                                    {location: {'$exists': True}},
+                                    {location: {'$in': ['READ']}}
+                                ]},
+                            ]}]
+                        },
+                        {'log_type': CmdbObjectLog.__name__, 'action': {'$ne': LogAction.DELETE.value}}]
+                    }
+            },
+            {'$project': {'object': 0, 'type': 0}}
+        ]
+        object_logs = log_manager.get_logs_by(query)
     except ObjectManagerGetError as err:
         LOGGER.error(f'Error in get_logs_with_existing_objects: {err}')
         return abort(404)
@@ -138,14 +171,52 @@ def get_logs_with_deleted_objects(request_user: UserModel):
     existing_list = []
     deleted_list = []
     passed_objects = []
+    location = 'type.acl.groups.includes.' + str(request_user.group_id)
     try:
-        query = {
-            'log_type': CmdbObjectLog.__name__,
-            'action': {
-                '$ne': LogAction.DELETE.value
-            }
-        }
-        object_logs = log_manager.get_logs_by(**query)
+        query = [
+            {
+                '$lookup':
+                    {
+                        'from': 'framework.objects',
+                        'localField': 'object_id',
+                        'foreignField': 'public_id',
+                        'as': 'object'
+                    }
+            },
+            {'$lookup':
+                {
+                    'from': 'framework.types',
+                    'localField': 'object.0.type_id',
+                    'foreignField': 'public_id',
+                    'as': 'type'
+                }
+            },
+            {'$unwind': {'path': '$type'}},
+            {
+                '$match':
+                    {'$and': [
+                        {'$or': [
+                            {'$or': [{'type.acl': {'$exists': False}}, {'type.acl.activated': False}]},
+                            {'$and': [
+                                {'type.acl.activated': True},
+                                {'$and': [
+                                    {location: {'$exists': True}},
+                                    {location: {'$in': ['READ']}}
+                                ]},
+                            ]}]
+                        },
+                        {'log_type': CmdbObjectLog.__name__, 'action': {'$ne': LogAction.DELETE.value}}]
+                    }
+            },
+            {'$project': {'object': 0, 'type': 0}}
+        ]
+        # query = {
+        #     'log_type': CmdbObjectLog.__name__,
+        #     'action': {
+        #         '$ne': LogAction.DELETE.value
+        #     }
+        # }
+        object_logs = log_manager.get_logs_by(query)
     except ObjectManagerGetError as err:
         LOGGER.error(f'Error in get_logs_with_existing_objects: {err}')
         return abort(404)
@@ -178,11 +249,46 @@ def get_logs_with_deleted_objects(request_user: UserModel):
 @right_required('base.framework.log.view')
 def get_object_delete_logs(request_user: UserModel):
     try:
-        query = {
-            'log_type': CmdbObjectLog.__name__,
-            'action': LogAction.DELETE.value
-        }
-        object_logs = log_manager.get_logs_by(**query)
+        location = 'type.acl.groups.includes.' + str(request_user.group_id)
+        query = [
+            {
+                '$lookup':
+                    {
+                        'from': 'framework.objects',
+                        'localField': 'object_id',
+                        'foreignField': 'public_id',
+                        'as': 'object'
+                    }
+            },
+            {'$lookup':
+                {
+                    'from': 'framework.types',
+                    'localField': 'object.0.type_id',
+                    'foreignField': 'public_id',
+                    'as': 'type'
+                }
+            },
+            {'$unwind': {'path': '$type'}},
+            {
+                '$match':
+                    {'$and': [
+                        {'$or': [
+                            {'$or': [{'type.acl': {'$exists': False}}, {'type.acl.activated': False}]},
+                            {'$and': [
+                                {'type.acl.activated': True},
+                                {'$and': [
+                                    {location: {'$exists': True}},
+                                    {location: {'$in': ['READ']}}
+                                ]},
+                            ]}]
+                        },
+                        {'log_type': CmdbObjectLog.__name__, 'action':  LogAction.DELETE.value}]
+                    }
+            },
+            {'$project': {'object': 0, 'type': 0}}
+        ]
+
+        object_logs = log_manager.get_logs_by(query)
     except ObjectManagerGetError as err:
         LOGGER.error(f'Error in get_object_delete_logs: {err}')
         return abort(404)
@@ -216,16 +322,54 @@ def get_logs_by_objects(public_id: int, request_user: UserModel):
 def get_corresponding_object_logs(public_id: int, request_user: UserModel):
     try:
         selected_log = log_manager.get_log(public_id=public_id)
-        query = {
-            'log_type': CmdbObjectLog.__name__,
-            'object_id': selected_log.object_id,
-            'action': LogAction.EDIT.value,
-            '$nor': [{
-                'public_id': public_id
-            }]
-        }
+        location = 'type.acl.groups.includes.' + str(request_user.group_id)
+        query = [
+            {
+                '$lookup':
+                    {
+                        'from': 'framework.objects',
+                        'localField': 'object_id',
+                        'foreignField': 'public_id',
+                        'as': 'object'
+                    }
+            },
+            {'$lookup':
+                {
+                    'from': 'framework.types',
+                    'localField': 'object.0.type_id',
+                    'foreignField': 'public_id',
+                    'as': 'type'
+                }
+            },
+            {'$unwind': {'path': '$type'}},
+            {
+                '$match':
+                    {'$and': [
+                        {'$or': [
+                            {'$or': [{'type.acl': {'$exists': False}}, {'type.acl.activated': False}]},
+                            {'$and': [
+                                {'type.acl.activated': True},
+                                {'$and': [
+                                    {location: {'$exists': True}},
+                                    {location: {'$in': ['READ']}}
+                                ]},
+                            ]}]
+                        },
+                        {
+                            'log_type': CmdbObjectLog.__name__,
+                            'object_id': selected_log.object_id,
+                            'action': LogAction.EDIT.value,
+                            '$nor': [{
+                                'public_id': public_id
+                            }]
+                        }]
+                    }
+            },
+            {'$project': {'object': 0, 'type': 0}}
+        ]
+
         LOGGER.debug(f'Corresponding query: {query}')
-        corresponding_logs = log_manager.get_logs_by(**query)
+        corresponding_logs = log_manager.get_logs_by(query)
     except LogManagerGetError as err:
         LOGGER.error(err)
         return abort(404)

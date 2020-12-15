@@ -41,10 +41,10 @@ class CmdbLogManager(CmdbManagerBase):
             LOGGER.error(err)
             raise LogManagerGetError(err)
 
-    def get_logs_by(self, sort='public_id', **requirements):
+    def get_logs_by(self, requirements=[]):
         ack = []
         try:
-            logs = self._get_many(collection=CmdbMetaLog.COLLECTION, sort=sort, **requirements)
+            logs = self._aggregate(collection=CmdbMetaLog.COLLECTION, pipeline=requirements)
             for log in logs:
                 ack.append(CmdbLog(**log))
         except (CMDBError, Exception) as err:
