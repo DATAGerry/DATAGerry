@@ -57,15 +57,6 @@ const routes: Routes = [
       right: 'base.framework.category.view'
     },
     loadChildren: () => import('./category/category.module').then(m => m.CategoryModule),
-  },
-  {
-    path: 'collection',
-    canActivateChild: [PermissionGuard],
-    data: {
-      breadcrumb: 'Collection',
-      right: 'base.framework.collection.view'
-    },
-    loadChildren: () => import('./collection/collection.module').then(m => m.CollectionModule)
   }
 ];
 
