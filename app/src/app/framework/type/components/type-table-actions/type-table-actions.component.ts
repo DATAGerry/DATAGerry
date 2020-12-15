@@ -16,39 +16,18 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { CmdbType } from '../../../framework/models/cmdb-type';
+import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'cmdb-type-label',
-  templateUrl: './type-label.component.html',
-  styleUrls: ['./type-label.component.scss']
+  selector: 'cmdb-type-table-actions',
+  templateUrl: './type-table-actions.component.html',
+  styleUrls: ['./type-table-actions.component.scss']
 })
-export class TypeLabelComponent {
+export class TypeTableActionsComponent {
 
-  public label: string;
-  public icon: string;
-
-  @Input() public description: string;
-
-
-  @Input()
-  public set title(value: string) {
-    this.label = value === undefined ? '' : value;
-  }
-
-  public get title(): string {
-    return this.label;
-  }
-
-  @Input()
-  public set faIcon(value: string) {
-    this.icon = value === undefined ? 'cube' : value;
-  }
-
-  public get faIcon(): string {
-    return this.icon;
-  }
-
+  /**
+   * PublicID of the type.
+   */
+  @Input() public publicID: number;
 
 }
