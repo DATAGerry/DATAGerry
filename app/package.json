@@ -52,7 +52,7 @@
     "jw-angular-pagination": "^1.2.0",
     "ng-inline-svg": "^11.0.1",
     "ngx-drag-drop": "^2.0.0",
-    "ngx-filesaver": "^8.1.0",
+    "ngx-filesaver": "^9.0.0",
     "ngx-icon-picker": "1.4.0",
     "ngx-indexed-db": "^6.1.2",
     "rxjs": "^6.5.5",
