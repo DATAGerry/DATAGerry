@@ -29,7 +29,7 @@
     "@fortawesome/free-regular-svg-icons": "^5.15.1",
     "@fortawesome/free-solid-svg-icons": "^5.15.1",
     "@ng-bootstrap/ng-bootstrap": "^5.1.4",
-    "@ng-select/ng-select": "^3.5.0",
+    "@ng-select/ng-select": "^4.0.4",
     "@tinymce/tinymce-angular": "^3.6.0",
     "@types/chart.js": "^2.9.0",
     "angular-archwizard": "^5.0.0",
