@@ -42,9 +42,10 @@
       <div class="card-header">Category-List</div>
       <div class="card-body">
         <cmdb-table [id]="'category-list-table'" [items]="categories" [columns]="tableColumns"
-                    [totalItems]="totalResults" [pageSize]="apiParameters.limit" [page]="apiParameters.page"
-                    [emptyMessage]="'There are no categories for this list yet!'"
-                    [sortable]="false" [searchEnabled]="false" [pageSizeEnabled]="true"
+                    [sort]="sort" [totalItems]="totalResults" [pageSize]="apiParameters.limit"
+                    [page]="apiParameters.page" [emptyMessage]="'There are no categories for this list yet!'"
+                    [sortable]="true" [searchEnabled]="false" [pageSizeEnabled]="true"
+                    (sortChange)="onSortChange($event)"
                     (pageSizeChange)="onPageSizeChange($event)"
                     (pageChange)="onPageChange($event)">
         </cmdb-table>
@@ -52,5 +53,3 @@
     </div>
   </div>
 </div>
-
-

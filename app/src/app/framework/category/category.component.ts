@@ -26,7 +26,7 @@ import { SidebarService } from '../../layout/services/sidebar.service';
 import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
-import { Column} from '../../layout/table/table.types';
+import { Column, Sort, SortDirection } from '../../layout/table/table.types';
 
 @Component({
   selector: 'cmdb-category',
@@ -64,11 +64,14 @@ export class CategoryComponent implements OnInit, OnDestroy {
   /**
    * Table datas
    */
-  public apiParameters: CollectionParameters = {
-    limit: 10, sort: 'public_id', order: -1, page: 1
-  };
+  public apiParameters: CollectionParameters = { limit: 10, sort: 'public_id', order: -1, page: 1};
   public tableColumns: Array<Column>;
   public totalResults: number = 0;
+
+  /**
+   * Default sort filter.
+   */
+  public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
 
   constructor(private categoryService: CategoryService, private route: ActivatedRoute, private sidebarService: SidebarService) {
     this.categories = [];
@@ -85,7 +88,7 @@ export class CategoryComponent implements OnInit, OnDestroy {
       cssClasses: ['text-center'],
       style: { width: '6rem' },
       searchable: false,
-      sortable: false
+      sortable: true
     } as unknown as Column;
 
     const nameColumn = {
@@ -94,7 +97,7 @@ export class CategoryComponent implements OnInit, OnDestroy {
       data: 'name',
       cssClasses: ['text-center'],
       searchable: false,
-      sortable: false
+      sortable: true
     } as unknown as Column;
 
     const labelColumn = {
@@ -103,7 +106,7 @@ export class CategoryComponent implements OnInit, OnDestroy {
       data: 'label',
       cssClasses: ['text-center'],
       searchable: false,
-      sortable: false
+      sortable: true
     } as unknown as Column;
 
     const parentColumn = {
@@ -113,7 +116,7 @@ export class CategoryComponent implements OnInit, OnDestroy {
       cssClasses: ['text-center'],
       style: { width: '6rem' },
       searchable: false,
-      sortable: false
+      sortable: true
     } as unknown as Column;
 
     this.tableColumns = [publicColumn, labelColumn, nameColumn, parentColumn];
@@ -157,6 +160,19 @@ export class CategoryComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * On table sort change.
+   * Reload all objects.
+   *
+   * @param sort
+   */
+  public onSortChange(sort: Sort): void {
+    this.sort = sort;
+    this.apiParameters.sort = sort.name;
+    this.apiParameters.order = sort.order;
+    this.loadCategories();
+  }
+
+  /**
    * On table page change.
    * Reload all objects.
    *
@@ -194,6 +210,7 @@ export class CategoryComponent implements OnInit, OnDestroy {
     const observers = this.saveTree(this.categoryTree);
     forkJoin(observers).subscribe(() => {
       this.sidebarService.loadCategoryTree();
+      this.dataLoader();
     });
   }
 
