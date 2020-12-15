@@ -46,12 +46,12 @@ import { ProgressSpinnerService } from './layout/progress/progress-spinner.servi
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
+    LayoutModule,
     MainModule,
     AuthModule,
-    LayoutModule,
     ToastModule,
+    ProgressModule,
     AppRoutingModule,
-    ProgressModule
   ],
   providers: [
     PreviousRouteService,

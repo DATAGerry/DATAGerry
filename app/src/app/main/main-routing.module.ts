@@ -113,15 +113,6 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     canActivateChild: [AuthGuard],
     loadChildren: () => import('../filemanager/filemanager.module').then(m => m.FilemanagerModule)
-  },
-  {
-    path: 'debug',
-    data: {
-      breadcrumb: 'Debug'
-    },
-    canActivate: [AuthGuard],
-    canActivateChild: [AuthGuard],
-    loadChildren: () => import('../debug/debug.module').then(m => m.DebugModule)
   }
 ];
 

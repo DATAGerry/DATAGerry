@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -39,20 +39,30 @@ import { DataTablesModule } from 'angular-datatables';
 import { DeleteCategoryModalComponent } from './components/modals/delete-category-modal/delete-category-modal.component';
 
 @NgModule({
-  declarations: [CategoryComponent, CategoryAddComponent, CategoryFormComponent, CategoryEditComponent, CategoryTreeComponent, CategoryNodeComponent, AddCategoryModalComponent, DeleteCategoryModalComponent, CategoryViewComponent],
-    imports: [
-        CommonModule,
-        CategoryRoutingModule,
-        DndModule,
-        ReactiveFormsModule,
-        LayoutModule,
-        NgSelectModule,
-        FontAwesomeModule,
-        FormsModule,
-        IconPickerModule,
-        AuthModule,
-        DataTablesModule
-    ]
+  declarations: [
+    CategoryComponent,
+    CategoryAddComponent,
+    CategoryFormComponent,
+    CategoryEditComponent,
+    CategoryTreeComponent,
+    CategoryNodeComponent,
+    AddCategoryModalComponent,
+    DeleteCategoryModalComponent,
+    CategoryViewComponent
+  ],
+  imports: [
+    CommonModule,
+    CategoryRoutingModule,
+    DndModule,
+    ReactiveFormsModule,
+    LayoutModule,
+    NgSelectModule,
+    FontAwesomeModule,
+    FormsModule,
+    IconPickerModule,
+    AuthModule,
+    DataTablesModule
+  ]
 })
 export class CategoryModule {
 }
