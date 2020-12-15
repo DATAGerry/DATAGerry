@@ -78,7 +78,7 @@ import { QRCodeModule } from 'angularx-qrcode';
 import { QrCodeComponent } from './helpers/qrcode/qr-code.component';
 import { FeedbackFormComponent } from './components/feedback-form/feedback-form.component';
 import { BlockComponent } from './components/block/block.component';
-import { JwPaginationComponent } from 'jw-angular-pagination';
+import { JwPaginationModule } from 'jw-angular-pagination';
 
 @NgModule({
   declarations: [
@@ -96,7 +96,6 @@ import { JwPaginationComponent } from 'jw-angular-pagination';
     IconPickerComponent,
     ChartsComponent,
     StepByStepIntroComponent,
-    JwPaginationComponent,
     NameDirective,
     NameGuidePipe,
     FileDragDropDirective,
@@ -136,7 +135,6 @@ import { JwPaginationComponent } from 'jw-angular-pagination';
     TypeLabelComponent,
     IconPickerComponent,
     ChartsComponent,
-    JwPaginationComponent,
     SidebarComponent,
     NameDirective,
     NameGuidePipe,
@@ -165,7 +163,8 @@ import { JwPaginationComponent } from 'jw-angular-pagination';
     AuthModule,
     RenderModule,
     FileexplorerModule,
-    QRCodeModule
+    QRCodeModule,
+    JwPaginationModule
   ],
   providers: [
     BreadcrumbService,

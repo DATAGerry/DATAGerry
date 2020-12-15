@@ -64,6 +64,7 @@ import { QRCodeModule } from 'angularx-qrcode';
 import { ObjectDeleteModalComponent } from './modals/object-delete-modal/object-delete-modal.component';
 import { ObjectsDeleteModalComponent } from './modals/objects-delete-modal/objects-delete-modal.component';
 import { ObjectTableHeadComponent } from './components/object-table-head/object-table-head.component';
+import { JwPaginationModule } from 'jw-angular-pagination';
 
 @NgModule({
   declarations: [
@@ -100,23 +101,24 @@ import { ObjectTableHeadComponent } from './components/object-table-head/object-
     ObjectsDeleteModalComponent,
     ObjectTableHeadComponent
   ],
-  imports: [
-    CommonModule,
-    ObjectRoutingModule,
-    DataTablesModule,
-    AuthModule,
-    LayoutModule,
-    QRCodeModule,
-    FormsModule,
-    ReactiveFormsModule,
-    NgSelectModule,
-    NgbTooltipModule,
-    FontAwesomeModule,
-    ArchwizardModule,
-    RenderModule,
-    UsersModule,
-    TableModule
-  ],
+    imports: [
+        CommonModule,
+        ObjectRoutingModule,
+        DataTablesModule,
+        AuthModule,
+        LayoutModule,
+        QRCodeModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgSelectModule,
+        NgbTooltipModule,
+        FontAwesomeModule,
+        ArchwizardModule,
+        RenderModule,
+        UsersModule,
+        TableModule,
+        JwPaginationModule
+    ],
   exports: [
     ObjectViewRenderComponent,
     ObjectTableActionsComponent
