@@ -31,7 +31,7 @@
     "@ng-bootstrap/ng-bootstrap": "^5.1.4",
     "@ng-select/ng-select": "^4.0.4",
     "@tinymce/tinymce-angular": "^4.1.0",
-    "angular-archwizard": "^5.0.0",
+    "angular-archwizard": "^6.1.0",
     "angular-datatables": "^8.0.0",
     "angularx-qrcode": "^2.3.5",
     "bootstrap": "^4.3.1",
