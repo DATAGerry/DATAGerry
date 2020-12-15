@@ -37,6 +37,9 @@ import { ReplaySubject } from 'rxjs';
 import { ToastService } from '../layout/toast/toast.service';
 import { SidebarService } from '../layout/services/sidebar.service';
 import { CollectionParameters } from '../services/models/api-parameter';
+import { CmdbType } from '../framework/models/cmdb-type';
+import { HttpResponse } from '@angular/common/http';
+
 
 @Component({
   selector: 'cmdb-dashboard',
@@ -172,13 +175,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.newestTableColumns = [activeColumn, publicColumn, typeColumn, authorColumn, creationColumn, actionColumn];
     this.latestTableColumns = [activeColumn, publicColumn, typeColumn, authorColumn, lastModColumn, actionColumn];
 
-    this.objectService.countObjects().subscribe((totals) => {
-      this.objectCount = totals;
-    });
-
-    this.typeService.countTypes().subscribe(totals => {
-      this.typeCount = totals;
-    });
+    this.countTypes();
+    this.countObjects();
 
     this.userService.countUsers().subscribe((totals: any) => {
       this.userCount = totals;
@@ -190,6 +188,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.generateObjectChar();
     this.generateTypeChar();
     this.generateGroupChar();
+  }
+
+  private countObjects(): void {
+    const apiParameters: CollectionParameters = { limit: 5, sort: 'count', order: -1, page: 1,
+      filter: [{ $match: { } }]};
+    this.objectService.getObjects(apiParameters).pipe(takeUntil(this.unSubscribe))
+      .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
+        this.objectCount = apiResponse.body.total;
+      });
+  }
+
+  private countTypes(): void {
+    const filter = JSON.stringify(this.typeService.getAclFilter());
+    const apiParameters: CollectionParameters = { page: 1, limit: 1, sort: 'public_id', order: 1, filter};
+    this.typeService.getTypesIteration(apiParameters).pipe(takeUntil(this.unSubscribe))
+      .subscribe((response: APIGetMultiResponse<CmdbType>) => {
+        this.typeCount = response.total;
+      });
   }
 
   private loadNewstObjects(): void {
@@ -230,14 +246,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private generateTypeChar() {
-    const apiParameters: CollectionParameters = { page: 1, limit: 5, sort: 'public_id', order: 1};
-    this.categoryService.getCategoryIteration(apiParameters).pipe(
-      takeUntil(this.unSubscribe)).subscribe((response: APIGetMultiResponse<CmdbCategory>) => {
-        for (const category of response.results) {
-          this.labelsCategory.push(category.label);
-          this.colorsCategory.push(this.getRandomColor());
-          this.itemsCategory.push(category.types.length);
+    this.categoryService.getCategoryList().subscribe((data: CmdbCategory[]) => {
+      for (let i = 0; i < data.length; i++) {
+        this.typeService.getTypeListByCategory(data[i].public_id).pipe(
+          takeUntil(this.unSubscribe)).subscribe((list: any[]) => {
+            this.itemsCategory.push(list.length);
+            this.labelsCategory.push(data[i].label);
+            this.colorsCategory.push(this.getRandomColor());
+        });
+        if (i === this.maxChartValue) {
+          break;
         }
+      }
     });
   }
 

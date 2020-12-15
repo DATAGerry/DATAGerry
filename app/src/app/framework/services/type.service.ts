@@ -70,9 +70,9 @@ export class TypeService<T = CmdbType> implements ApiService {
   /**
    * Returns acl read filter
    *
-   * @private
+   * @public
    */
-  private getAclFilter(aclRequirement: AccessControlPermission | AccessControlPermission[] = AccessControlPermission.READ) {
+  public getAclFilter(aclRequirement: AccessControlPermission | AccessControlPermission[] = AccessControlPermission.READ) {
     const location = 'acl.groups.includes.' + this.userService.getCurrentUser().group_id;
     return {
       $or: [
