@@ -132,6 +132,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
       cssClasses: ['text-center']
     } as Column;
 
+    const editorColumn = {
+      display: 'Last editor',
+      name: 'editor_id',
+      data: 'object_information.editor_name',
+      sortable: false,
+      searchable: false,
+      cssClasses: ['text-center'],
+      render(data: any) {
+        if (!data) {
+          return '';
+        }
+        return data;
+      }
+    } as Column;
+
     const creationColumn = {
       display: 'Creation Time',
       name: 'creation_time',
@@ -170,7 +185,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       style: { width: '6em' }
     } as unknown as Column;
     this.newestTableColumns = [activeColumn, publicColumn, typeColumn, authorColumn, creationColumn, actionColumn];
-    this.latestTableColumns = [activeColumn, publicColumn, typeColumn, authorColumn, lastModColumn, actionColumn];
+    this.latestTableColumns = [activeColumn, publicColumn, typeColumn, editorColumn, lastModColumn, actionColumn];
 
     this.objectService.countObjects().subscribe((totals) => {
       this.objectCount = totals;
@@ -230,14 +245,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private generateTypeChar() {
-    const apiParameters: CollectionParameters = { page: 1, limit: 5, sort: 'public_id', order: 1};
+    const apiParameters: CollectionParameters = { page: 1, limit: 5, sort: 'public_id', order: 1 };
     this.categoryService.getCategoryIteration(apiParameters).pipe(
       takeUntil(this.unSubscribe)).subscribe((response: APIGetMultiResponse<CmdbCategory>) => {
-        for (const category of response.results) {
-          this.labelsCategory.push(category.label);
-          this.colorsCategory.push(this.getRandomColor());
-          this.itemsCategory.push(category.types.length);
-        }
+      for (const category of response.results) {
+        this.labelsCategory.push(category.label);
+        this.colorsCategory.push(this.getRandomColor());
+        this.itemsCategory.push(category.types.length);
+      }
     });
   }
 
@@ -270,16 +285,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public onObjectDelete(value: RenderResult) {
     this.objectService.deleteObject(value.object_information.object_id).pipe(takeUntil(this.unSubscribe))
       .subscribe(() => {
-        this.toastService.success(`Object ${ value.object_information.object_id } was deleted successfully`);
-        this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
-            this.loadLatestObjects();
-            this.loadNewstObjects();
-          }
-        );
-      },
-      (error) => {
-        this.toastService.error(`Error while deleting object ${ value.object_information.object_id } | Error: ${ error }`);
-      });
+          this.toastService.success(`Object ${ value.object_information.object_id } was deleted successfully`);
+          this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
+              this.loadLatestObjects();
+              this.loadNewstObjects();
+            }
+          );
+        },
+        (error) => {
+          this.toastService.error(`Error while deleting object ${ value.object_information.object_id } | Error: ${ error }`);
+        });
   }
 
   public ngOnDestroy(): void {

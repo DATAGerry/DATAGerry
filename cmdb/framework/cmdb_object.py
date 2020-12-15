@@ -43,8 +43,8 @@ class CmdbObject(CmdbDAO):
         'version'
     ]
 
-    def __init__(self, type_id, creation_time, author_id, active, fields, last_edit_time=None, status: int = None,
-                 version: str = '1.0.0', **kwargs):
+    def __init__(self, type_id, creation_time, author_id, active, fields, last_edit_time=None, editor_id: int = None,
+                 status: int = None, version: str = '1.0.0', **kwargs):
         """init of object
 
         Args:
@@ -53,6 +53,7 @@ class CmdbObject(CmdbDAO):
             creation_time: date of object creation
             author_id: public id of author
             last_edit_time: last date of editing
+            editor_id: id of the last editor
             active: object activation status
             fields: data inside fields
             **kwargs: additional data
@@ -63,6 +64,7 @@ class CmdbObject(CmdbDAO):
         self.creation_time = creation_time
         self.author_id = author_id
         self.last_edit_time = last_edit_time
+        self.editor_id = editor_id
         self.active = active
         self.fields = fields
         super(CmdbObject, self).__init__(**kwargs)
@@ -81,6 +83,7 @@ class CmdbObject(CmdbDAO):
             creation_time=data.get('creation_time'),
             author_id=data.get('author_id'),
             last_edit_time=data.get('last_edit_time', None),
+            editor_id=data.get('editor_id', None),
             active=data.get('active'),
             fields=data.get('fields', []),
             public_id=data.get('public_id')
