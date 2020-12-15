@@ -15,11 +15,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-Blueprint for DATAGERRYApp routes
+Blueprint for datagerry-app routes
 """
 from flask import Blueprint
 
-app_pages = Blueprint("app_pages", __name__, static_folder="DATAGERRYApp", static_url_path="")
+app_pages = Blueprint("app_pages", __name__, static_folder="datagerry-app", static_url_path="")
 
 
 @app_pages.route('/')
