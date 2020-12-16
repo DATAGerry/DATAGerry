@@ -3,9 +3,10 @@ import { ObjectService } from '../../../services/object.service';
 import { Router } from '@angular/router';
 import { ApiCallService } from '../../../../services/api-call.service';
 import { RenderResult } from '../../../models/cmdb-render';
-import {NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
-import {SidebarService} from '../../../../layout/services/sidebar.service';
-import {AccessControlList} from '../../../../acl/acl.types';
+import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { SidebarService } from '../../../../layout/services/sidebar.service';
+import { AccessControlList } from '../../../../acl/acl.types';
+import { ToastService } from '../../../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-object-actions',
@@ -18,7 +19,7 @@ export class ObjectActionsComponent implements OnDestroy {
   @Input() acl: AccessControlList;
 
   constructor(private api: ApiCallService, private objectService: ObjectService,  private router: Router,
-              private sidebarService: SidebarService) {
+              private sidebarService: SidebarService, private toastService: ToastService) {
 
   }
   private modalRef: NgbModalRef;
@@ -34,6 +35,8 @@ export class ObjectActionsComponent implements OnDestroy {
       if (result) {
         this.api.callDelete('/object/' + publicID).subscribe((res: boolean) => {
           if (res) {
+            this.toastService.success('Object ' + this.renderResult.object_information.object_id.toString() +  ' ' +
+              'was deleted succesfully');
             this.router.navigate(['/']);
           }
           this.sidebarService.updateTypeCounter(this.renderResult.type_information.type_id);

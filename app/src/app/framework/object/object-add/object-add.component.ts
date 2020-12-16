@@ -31,6 +31,7 @@ import { CategoryService } from '../../services/category.service';
 import { CmdbCategory } from '../../models/cmdb-category';
 import { SidebarService } from '../../../layout/services/sidebar.service';
 import { AccessControlPermission } from '../../../acl/acl.types';
+import { ToastService } from '../../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-object-add',
@@ -55,7 +56,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
 
   constructor(private router: Router, private typeService: TypeService, private categoryService: CategoryService,
               private objectService: ObjectService, private userService: UserService, private route: ActivatedRoute,
-              private sidebarService: SidebarService) {
+              private sidebarService: SidebarService, private toastService: ToastService) {
 
     this.objectInstance = new CmdbObject();
     this.typeIDSubject = new BehaviorSubject<number>(null);
@@ -144,6 +145,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
         }, () => {
           this.router.navigate(['/framework/object/view/' + ack]);
           this.sidebarService.updateTypeCounter(this.typeInstance.public_id);
+          this.toastService.success('Object ' + ack.toString() + ' was created succesfully');
         });
     }
   }
