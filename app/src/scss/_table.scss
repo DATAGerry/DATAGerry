@@ -35,6 +35,20 @@
           &.hidden {
             display: none;
           }
+
+          &.actions-buttons {
+            a {
+              color: #000000;
+              padding-left: .25rem;
+              padding-right: .25rem;
+
+              &:hover {
+                > i {
+                  color: theme-color('primary');
+                }
+              }
+            }
+          }
         }
       }
     }

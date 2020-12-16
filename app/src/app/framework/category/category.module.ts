@@ -35,11 +35,21 @@ import { CategoryNodeComponent } from './components/category-node/category-node.
 import { AuthModule } from '../../auth/auth.module';
 import { AddCategoryModalComponent } from './components/modals/add-category-modal/add-category-modal.component';
 import { CategoryViewComponent } from './category-view/category-view.component';
-import { DataTablesModule } from 'angular-datatables';
 import { DeleteCategoryModalComponent } from './components/modals/delete-category-modal/delete-category-modal.component';
+import { TableModule } from '../../layout/table/table.module';
 
 @NgModule({
-  declarations: [CategoryComponent, CategoryAddComponent, CategoryFormComponent, CategoryEditComponent, CategoryTreeComponent, CategoryNodeComponent, AddCategoryModalComponent, DeleteCategoryModalComponent, CategoryViewComponent],
+  declarations: [
+    CategoryComponent,
+    CategoryAddComponent,
+    CategoryFormComponent,
+    CategoryEditComponent,
+    CategoryTreeComponent,
+    CategoryNodeComponent,
+    AddCategoryModalComponent,
+    DeleteCategoryModalComponent,
+    CategoryViewComponent
+  ],
     imports: [
         CommonModule,
         CategoryRoutingModule,
@@ -51,7 +61,7 @@ import { DeleteCategoryModalComponent } from './components/modals/delete-categor
         FormsModule,
         IconPickerModule,
         AuthModule,
-        DataTablesModule
+        TableModule
     ],
   entryComponents: [AddCategoryModalComponent, DeleteCategoryModalComponent]
 })

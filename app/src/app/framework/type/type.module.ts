@@ -20,7 +20,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TypeRoutingModule } from './type-routing.module';
 import { LayoutModule } from '../../layout/layout.module';
-import { DataTablesModule } from 'angular-datatables';
 import { TypeAddComponent } from './type-add/type-add.component';
 import { ArchwizardModule } from 'angular-archwizard';
 import { TypeBuilderComponent } from './type-builder/type-builder.component';
@@ -43,6 +42,8 @@ import { CleanupModalComponent } from './modals/cleanup-modal/cleanup-modal.comp
 import { CleanButtonComponent } from './components/clean-button/clean-button.component';
 import { TypeAclStepComponent } from './type-builder/type-acl-step/type-acl-step.component';
 import { GroupsAclTabsComponent } from './type-builder/type-acl-step/groups-acl-tabs/groups-acl-tabs.component';
+import { TableModule } from '../../layout/table/table.module';
+import { TypeTableActionsComponent } from './components/type-table-actions/type-table-actions.component';
 
 @NgModule({
   entryComponents: [TypeDeleteConfirmModalComponent, CleanupModalComponent],
@@ -60,24 +61,25 @@ import { GroupsAclTabsComponent } from './type-builder/type-acl-step/groups-acl-
     CleanupModalComponent,
     CleanButtonComponent,
     TypeAclStepComponent,
-    GroupsAclTabsComponent
+    GroupsAclTabsComponent,
+    TypeTableActionsComponent
   ],
-  imports: [
-    CommonModule,
-    TypeRoutingModule,
-    DataTablesModule,
-    LayoutModule,
-    ReactiveFormsModule,
-    ArchwizardModule,
-    QRCodeModule,
-    NgSelectModule,
-    RenderModule,
-    BuilderModule,
-    FormsModule,
-    NgbModule,
-    FontAwesomeModule,
-    AuthModule
-  ]
+    imports: [
+        CommonModule,
+        TypeRoutingModule,
+        LayoutModule,
+        ReactiveFormsModule,
+        ArchwizardModule,
+        QRCodeModule,
+        NgSelectModule,
+        RenderModule,
+        BuilderModule,
+        FormsModule,
+        NgbModule,
+        FontAwesomeModule,
+        AuthModule,
+        TableModule
+    ]
 })
 export class TypeModule {
 }

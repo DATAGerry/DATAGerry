@@ -35,6 +35,7 @@ export class TableCellComponent<T> {
 
   // noinspection JSMismatchedCollectionQueryUpdate
   @HostBinding('class') private cssClasses: Array<string>;
+  @HostBinding('class') private cellClasses: Array<string>;
 
   /**
    * When column is hidden, add css class hidden to cell.
@@ -55,6 +56,7 @@ export class TableCellComponent<T> {
     this.column = col;
     this.hidden = this.column.hidden;
     this.cssClasses = this.column.cssClasses || [];
+    this.cellClasses = this.column.cellClasses || [];
   }
 
   public item: T;
