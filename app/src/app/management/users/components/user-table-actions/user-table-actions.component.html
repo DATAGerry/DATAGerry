@@ -1,0 +1,15 @@
+<div class="d-flex justify-content-center" *ngIf="user">
+  <a *permissionLink="'base.user-management.user.edit'" [routerLink]="['/management/users/edit/', user.public_id]">
+    <i class="far fa-edit"></i>
+  </a>
+  <a class="text-dark pointer" (click)="passWordAction.emit(user)"
+     *permissionLink="'base.user-management.user.edit'">
+    <i class="fas fa-key"></i>
+  </a>
+  <ng-container *ngIf="user.public_id != 1">
+    <a *permissionLink="'base.user-management.user.delete'"
+       [routerLink]="['/management/users/delete/', user.public_id]">
+      <i class="far fa-trash-alt"></i>
+    </a>
+  </ng-container>
+</div>

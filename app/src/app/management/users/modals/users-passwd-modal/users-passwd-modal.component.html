@@ -4,7 +4,7 @@
     <span aria-hidden="true">&times;</span>
   </button>
 </div>
-<form [formGroup]="passwdForm" (ngSubmit)="changePasswd()" novalidate>
+<form [formGroup]="passwdForm" (ngSubmit)="onPasswordChange()" novalidate>
   <div class="modal-body">
     <p>Change password of the user: {{user.user_name}}</p>
     <div class="form-group row">
@@ -33,7 +33,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Close click')">Close</button>
-    <button type="submit" class="btn btn-outline-primary">Save</button>
+    <button type="button" class="btn btn-outline-dark" (click)="activeModal.dismiss('Close click')">Close</button>
+    <button type="submit" class="btn btn-outline-primary" [disabled]="!passwdForm.valid">Save</button>
   </div>
 </form>

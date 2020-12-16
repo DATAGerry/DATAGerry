@@ -1,15 +1,18 @@
-<div id="user-list-header" class="d-flex justify-content-between">
-  <h1>Users</h1>
-  <div class="header-buttons">
-    <button *permissionLink="'base.user-management.user.add'"
-            routerLink="/management/users/add/" type="button" class="btn btn-success">
-      Add
-    </button>
-  </div>
-</div>
-<hr />
-<div id="user-list" class="row">
-  <div class="col-md-12">
-    <cmdb-users-table [tableOptions]="tableOptions" [users]="users" [groups]="groups"></cmdb-users-table>
-  </div>
-</div>
+<h1>{{title}} <small class="text-muted">{{description}}</small></h1>
+<hr/>
+<cmdb-table [id]="'user-list-table'" [columns]="columns" [items]="users" [loading]="loading"
+            [sort]="sort" [pageSize]="params.limit" [page]="params.page" [totalItems]="totalUsers"
+            [stateEnabled]="false" (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
+            (sortChange)="onSortChange($event)" (searchChange)="onSearchChange($event)">
+
+</cmdb-table>
+
+<!-- Table templates -->
+<ng-template #groupTemplate let-data="data">
+  <cmdb-user-table-group-cell [groups]="groups" [groupID]="data" [group]="getGroupByID(data)"
+                              [groupLoadingStack]="groupLoadingStack"></cmdb-user-table-group-cell>
+</ng-template>
+
+<ng-template #actionsTemplate let-item="item">
+  <cmdb-user-table-actions [user]="item" (passWordAction)="onPasswordChange($event)"></cmdb-user-table-actions>
+</ng-template>

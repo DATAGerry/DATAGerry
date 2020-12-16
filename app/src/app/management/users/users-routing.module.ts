@@ -35,9 +35,6 @@ const routes: Routes = [
       breadcrumb: 'List',
       right: 'base.user-management.user.view'
     },
-    resolve: {
-      groups: GroupsResolver
-    },
     component: UsersComponent
   },
   {
