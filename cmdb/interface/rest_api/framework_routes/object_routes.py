@@ -381,13 +381,15 @@ def count_objects():
 
 @object_blueprint.route('/group/<string:value>', methods=['GET'])
 @login_required
-def group_objects_by_type_id(value):
+@insert_request_user
+def group_objects_by_type_id(value, request_user: UserModel):
     try:
         filter_state = None
         if _fetch_only_active_objs():
             filter_state = {'active': {"$eq": True}}
         result = []
-        cursor = object_manager.group_objects_by_value(value, filter_state)
+        cursor = object_manager.group_objects_by_value(value, filter_state, user=request_user,
+                                                       permission=AccessControlPermission.READ)
         max_length = 0
         for document in cursor:
             document['label'] = object_manager.get_type(document['_id']).label

@@ -149,7 +149,8 @@ class CmdbObjectManager(CmdbManagerBase):
         formatted_type_id = {'type_id': public_id}
         return self.dbm.count(CmdbObject.COLLECTION, formatted_type_id)
 
-    def group_objects_by_value(self, value: str, match=None):
+    def group_objects_by_value(self, value: str, match=None, user: UserModel = None,
+                               permission: AccessControlPermission = None):
         """This method does not actually
            performs the find() operation
            but instead returns
@@ -158,16 +159,34 @@ class CmdbObjectManager(CmdbManagerBase):
            Args:
                value (str): grouped by value
                match (dict): stage filters the documents to only pass documents.
+               user (UserModel): request user
+               permission (AccessControlPermission):  ACL operations
            Returns:
                returns the objects grouped by value of the documents
            """
+        ack = []
         agr = []
         if match:
             agr.append({'$match': match})
-        agr.append({'$group': {'_id': '$' + value, 'count': {'$sum': 1}}})
+        agr.append({
+            '$group': {
+                '_id': '$' + value,
+                'result': {'$first': '$$ROOT'},
+                'count': {'$sum': 1},
+            }
+        })
         agr.append({'$sort': {'count': -1}})
 
-        return self.dbm.aggregate(CmdbObject.COLLECTION, agr)
+        objects = self.dbm.aggregate(CmdbObject.COLLECTION, agr)
+        for obj in objects:
+            object_ = CmdbObject(**obj['result'])
+            try:
+                type_ = self._type_manager.get(object_.type_id)
+                verify_access(type_, user, permission)
+            except CMDBError:
+                continue
+            ack.append(obj)
+        return ack
 
     def sort_objects_by_field_value(self, value: str, order=-1, match=None):
         """This method does not actually
