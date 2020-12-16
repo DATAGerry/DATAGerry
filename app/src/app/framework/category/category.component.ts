@@ -86,7 +86,7 @@ export class CategoryComponent implements OnInit, OnDestroy {
       name: 'public_id',
       data: 'public_id',
       cssClasses: ['text-center'],
-      style: { width: '6rem' },
+      style: { 'white-space': 'nowrap'  },
       searchable: false,
       sortable: true
     } as unknown as Column;
@@ -114,7 +114,7 @@ export class CategoryComponent implements OnInit, OnDestroy {
       name: 'parent',
       data: 'parent',
       cssClasses: ['text-center'],
-      style: { width: '6rem' },
+      style: { 'white-space': 'nowrap' },
       searchable: false,
       sortable: true
     } as unknown as Column;
