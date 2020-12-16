@@ -82,10 +82,8 @@ export class DeleteCategoryModalComponent implements OnDestroy {
   @Input() public category: CmdbCategory;
   public deleteCategoryModalForm: FormGroup;
   private modalRef: NgbModalRef;
-    ngOnDestroy(): void {
-        throw new Error('Method not implemented.');
-    }
-  public NgOnDestroy(): void {
+
+  public ngOnDestroy(): void {
     if (this.modalRef) {
       this.modalRef.close();
     }

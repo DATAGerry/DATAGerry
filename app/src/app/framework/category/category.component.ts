@@ -16,8 +16,8 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { BehaviorSubject, forkJoin, Observable, ReplaySubject, Subject } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { BehaviorSubject, forkJoin, Observable, ReplaySubject } from 'rxjs';
 import { CmdbCategory, CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb-category';
 import { CategoryService } from '../services/category.service';
 import { CmdbMode } from '../modes.enum';
@@ -26,14 +26,14 @@ import { SidebarService } from '../../layout/services/sidebar.service';
 import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
-import { DataTableDirective } from 'angular-datatables';
+import { Column, Sort, SortDirection } from '../../layout/table/table.types';
 
 @Component({
   selector: 'cmdb-category',
   templateUrl: './category.component.html',
   styleUrls: ['./category.component.scss']
 })
-export class CategoryComponent implements OnInit, AfterViewInit, OnDestroy {
+export class CategoryComponent implements OnInit, OnDestroy {
 
   /**
    * Global unsubscriber for http calls to the rest backend.
@@ -62,11 +62,16 @@ export class CategoryComponent implements OnInit, AfterViewInit, OnDestroy {
   private displayModeSubject: BehaviorSubject<CmdbMode> = new BehaviorSubject<CmdbMode>(CmdbMode.View);
 
   /**
-   * Datatable datas
+   * Table datas
    */
-  public dtOptions: DataTables.Settings = {};
-  public dtTrigger: Subject<void> = new Subject();
-  @ViewChild(DataTableDirective, { static: false }) dtElement: DataTableDirective;
+  public apiParameters: CollectionParameters = { limit: 10, sort: 'public_id', order: -1, page: 1};
+  public tableColumns: Array<Column>;
+  public totalResults: number = 0;
+
+  /**
+   * Default sort filter.
+   */
+  public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
 
   constructor(private categoryService: CategoryService, private route: ActivatedRoute, private sidebarService: SidebarService) {
     this.categories = [];
@@ -74,64 +79,119 @@ export class CategoryComponent implements OnInit, AfterViewInit, OnDestroy {
     this.displayModeSubject.next(this.route.snapshot.data.mode);
   }
 
-  public ngOnInit(): void {
-    this.displayMode.pipe(takeUntil(this.unSubscribe)).subscribe(() => {
-      this.categoryService.getCategoryTree().pipe(
-        takeUntil(this.unSubscribe)).subscribe((categoryTree: CmdbCategoryTree) => {
-        this.categoryTree = categoryTree;
-      });
-    });
-    this.dtOptions = {
-      columns: [
-        {
-          title: 'PublicID',
-          name: 'public_id',
-          data: 'public_id'
-        },
-        {
-          title: 'Name',
-          name: 'name',
-          data: 'name'
-        },
-        {
-          title: 'Label',
-          name: 'label',
-          data: 'label'
-        },
-        {
-          title: 'ParentID',
-          name: 'parent',
-          data: 'parent'
-        }
-      ],
-      searching: false,
-      serverSide: true,
-      processing: true,
-      ajax: (params: any, callback) => {
+  private tableColumnBuilder(): void {
 
-        const apiParameters: CollectionParameters = {
-          page: Math.ceil(params.start / params.length) + 1,
-          limit: params.length,
-          sort: params.columns[params.order[0].column].name,
-          order: params.order[0].dir === 'desc' ? -1 : 1,
-        };
+    const publicColumn = {
+      display: 'Public ID',
+      name: 'public_id',
+      data: 'public_id',
+      cssClasses: ['text-center'],
+      style: { 'white-space': 'nowrap'  },
+      searchable: false,
+      sortable: true
+    } as unknown as Column;
 
-        this.categoryService.getCategoryIteration(apiParameters).pipe(
-          takeUntil(this.unSubscribe)).subscribe((response: APIGetMultiResponse<CmdbCategory>) => {
-          this.categoriesAPIResponse = response;
-          this.categories = this.categoriesAPIResponse.results;
-          callback({
-            recordsTotal: response.total,
-            recordsFiltered: response.total,
-            data: this.categories
-          });
-        });
-      }
-    };
+    const nameColumn = {
+      display: 'Name',
+      name: 'name',
+      data: 'name',
+      cssClasses: ['text-center'],
+      searchable: false,
+      sortable: true
+    } as unknown as Column;
+
+    const labelColumn = {
+      display: 'Label',
+      name: 'label',
+      data: 'label',
+      cssClasses: ['text-center'],
+      searchable: false,
+      sortable: true
+    } as unknown as Column;
+
+    const parentColumn = {
+      display: 'Parent ID',
+      name: 'parent',
+      data: 'parent',
+      cssClasses: ['text-center'],
+      style: { 'white-space': 'nowrap' },
+      searchable: false,
+      sortable: true
+    } as unknown as Column;
+
+    this.tableColumns = [publicColumn, labelColumn, nameColumn, parentColumn];
   }
 
-  public ngAfterViewInit(): void {
-    this.dtTrigger.next();
+  /**
+   * Load categories from the backend.
+   */
+  private loadCategories(): void {
+    this.categoryService.getCategoryIteration(this.apiParameters).pipe(
+      takeUntil(this.unSubscribe)).subscribe((response: APIGetMultiResponse<CmdbCategory>) => {
+      this.categoriesAPIResponse = response;
+      this.categories = this.categoriesAPIResponse.results;
+      this.totalResults = response.total;
+    });
+  }
+
+  /**
+   * Load category tree from the backend.
+   */
+  private loadCategoryTree(): void {
+    this.displayMode.subscribe(() => {
+      this.sidebarService.categoryTree.asObservable().pipe(takeUntil(this.unSubscribe))
+        .subscribe((categoryTree: CmdbCategoryTree) => {
+          this.categoryTree = categoryTree;
+      });
+    });
+  }
+
+  /**
+   * Will generate all needed data for cmdb-table.
+   */
+  private dataLoader(): void {
+    this.tableColumnBuilder();
+    this.loadCategoryTree();
+    this.loadCategories();
+  }
+
+  public ngOnInit(): void {
+    this.dataLoader();
+  }
+
+  /**
+   * On table sort change.
+   * Reload all objects.
+   *
+   * @param sort
+   */
+  public onSortChange(sort: Sort): void {
+    this.sort = sort;
+    this.apiParameters.sort = sort.name;
+    this.apiParameters.order = sort.order;
+    this.loadCategories();
+  }
+
+  /**
+   * On table page change.
+   * Reload all objects.
+   *
+   * @param page
+   */
+  public onPageChange(page: number) {
+    this.apiParameters.page = page;
+    this.loadCategories();
+  }
+
+  /**
+   * On table page size change.
+   * Reload all objects.
+   *
+   * @param limit
+   */
+  public onPageSizeChange(limit: number): void {
+    this.apiParameters.limit = limit;
+    this.loadCategories();
   }
 
   public ngOnDestroy(): void {
@@ -150,6 +210,7 @@ export class CategoryComponent implements OnInit, AfterViewInit, OnDestroy {
     const observers = this.saveTree(this.categoryTree);
     forkJoin(observers).subscribe(() => {
       this.sidebarService.loadCategoryTree();
+      this.dataLoader();
     });
   }
 
@@ -180,15 +241,6 @@ export class CategoryComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public onTreeChange(): void {
     this.sidebarService.loadCategoryTree();
-    this.ngOnInit();
-    this.rerender();
+    this.dataLoader();
   }
-
-  public rerender(): void {
-    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-      dtInstance.destroy();
-      this.dtTrigger.next();
-    });
-  }
-
 }
