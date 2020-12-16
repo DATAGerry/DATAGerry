@@ -217,7 +217,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private countTypes(): void {
     const filter = JSON.stringify(this.typeService.getAclFilter());
     const apiParameters: CollectionParameters = { page: 1, limit: 1, sort: 'public_id', order: 1, filter};
-    this.typeService.getTypesIteration(apiParameters).pipe(takeUntil(this.unSubscribe))
+    this.typeService.getTypes(apiParameters).pipe(takeUntil(this.unSubscribe))
       .subscribe((response: APIGetMultiResponse<CmdbType>) => {
         this.typeCount = response.total;
       });
