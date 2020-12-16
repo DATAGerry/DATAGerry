@@ -63,7 +63,7 @@ class RightManager(AccountManager):
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult[
         BaseRight]:
         try:
-            sorted_rights = sorted(self.rights, key=lambda right: right[sort])
+            sorted_rights = sorted(self.rights, key=lambda right: right[sort], reverse=order == -1)
             if limit > 0:
                 spliced_rights = [sorted_rights[i:i + limit] for i in range(0, len(sorted_rights), limit)][
                     int(skip / limit)]
