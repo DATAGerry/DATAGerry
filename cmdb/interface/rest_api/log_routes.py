@@ -19,6 +19,7 @@ import logging
 from werkzeug.exceptions import abort
 from flask import current_app
 
+from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.cmdb_log import CmdbObjectLog, LogAction
 from cmdb.framework.cmdb_log_manager import LogManagerGetError, LogManagerDeleteError
@@ -46,9 +47,11 @@ with current_app.app_context():
 @right_required('base.framework.log.view')
 def get_log(public_id: int, request_user: UserModel):
     try:
-        selected_log = log_manager.get_log(public_id=public_id)
+        selected_log = log_manager.get_log(public_id=public_id, group_id=request_user.group_id)
     except LogManagerGetError:
         return abort(404)
+    except AccessDeniedError as err:
+        return abort(403, err.message)
     return make_response(selected_log)
 
 
@@ -131,7 +134,12 @@ def get_logs_with_existing_objects(request_user: UserModel):
                                 ]},
                             ]}]
                         },
-                        {'log_type': CmdbObjectLog.__name__, 'action': {'$ne': LogAction.DELETE.value}}]
+                        {
+                            'log_type': CmdbObjectLog.__name__,
+                            'action': {
+                                '$ne': LogAction.DELETE.value
+                            }
+                        }]
                     }
             },
             {'$project': {'object': 0, 'type': 0}}
@@ -205,17 +213,16 @@ def get_logs_with_deleted_objects(request_user: UserModel):
                                 ]},
                             ]}]
                         },
-                        {'log_type': CmdbObjectLog.__name__, 'action': {'$ne': LogAction.DELETE.value}}]
+                        {
+                            'log_type': CmdbObjectLog.__name__,
+                            'action': {
+                                '$ne': LogAction.DELETE.value
+                            }
+                        }]
                     }
             },
             {'$project': {'object': 0, 'type': 0}}
         ]
-        # query = {
-        #     'log_type': CmdbObjectLog.__name__,
-        #     'action': {
-        #         '$ne': LogAction.DELETE.value
-        #     }
-        # }
         object_logs = log_manager.get_logs_by(query)
     except ObjectManagerGetError as err:
         LOGGER.error(f'Error in get_logs_with_existing_objects: {err}')
@@ -282,7 +289,10 @@ def get_object_delete_logs(request_user: UserModel):
                                 ]},
                             ]}]
                         },
-                        {'log_type': CmdbObjectLog.__name__, 'action':  LogAction.DELETE.value}]
+                        {
+                            'log_type': CmdbObjectLog.__name__,
+                            'action': LogAction.DELETE.value
+                        }]
                     }
             },
             {'$project': {'object': 0, 'type': 0}}
@@ -321,7 +331,7 @@ def get_logs_by_objects(public_id: int, request_user: UserModel):
 @right_required('base.framework.log.view')
 def get_corresponding_object_logs(public_id: int, request_user: UserModel):
     try:
-        selected_log = log_manager.get_log(public_id=public_id)
+        selected_log = log_manager.get_log(public_id=public_id, group_id=request_user.group_id)
         location = 'type.acl.groups.includes.' + str(request_user.group_id)
         query = [
             {

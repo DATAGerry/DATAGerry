@@ -14,8 +14,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from datetime import datetime
-
-from cmdb.framework import CmdbLog, CmdbMetaLog, CmdbObjectLog
+from cmdb.security.acl.errors import AccessDeniedError
+from cmdb.security.acl.permission import AccessControlPermission
+from cmdb.framework import CmdbLog, CmdbMetaLog, CmdbObjectLog, CmdbObject
+from cmdb.framework.managers.type_manager import TypeManager, TypeModel
 from cmdb.framework.cmdb_base import CmdbManagerBase
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerUpdateError, \
     ObjectManagerDeleteError
@@ -25,18 +27,37 @@ from cmdb.framework.cmdb_log import CMDBError, LOGGER, LogAction
 class CmdbLogManager(CmdbManagerBase):
 
     def __init__(self, database_manager=None):
+        self._type_manager = TypeManager(database_manager)
         super(CmdbLogManager, self).__init__(database_manager)
 
     def search(self):
         pass
 
     # CRUD functions
-    def get_log(self, public_id: int):
+    def get_log(self, public_id: int, group_id: int):
         try:
-            return CmdbLog(**self._get(
+            log = CmdbLog(**self._get(
                 collection=CmdbMetaLog.COLLECTION,
                 public_id=public_id
             ))
+
+            type_id = CmdbObject(**self._get(
+                collection=CmdbObject.COLLECTION,
+                public_id=log.object_id
+            )).type_id
+
+            acl = self._type_manager.get(type_id).acl
+
+            if acl and acl.activated:
+                if group_id not in acl.groups.includes.keys():
+                    raise AccessDeniedError('Request user is not authorized!')
+
+                if 'READ' not in acl.groups.includes[group_id]:
+                    raise AccessDeniedError('Request user is not authorized!')
+
+            return log
+        except AccessDeniedError:
+            raise
         except (CMDBError, Exception) as err:
             LOGGER.error(err)
             raise LogManagerGetError(err)

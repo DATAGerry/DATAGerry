@@ -18,7 +18,7 @@
 
 import { Component, OnInit, Renderer2 } from '@angular/core';
 import { LogService } from '../../services/log.service';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import { CmdbLog } from '../../models/cmdb-log';
 import { RenderResult } from '../../models/cmdb-render';
 import { CmdbMode } from '../../modes.enum';
@@ -40,7 +40,8 @@ export class ObjectLogComponent implements OnInit {
   public renderResult: RenderResult;
   public compareResult: RenderResult;
 
-  constructor(private logService: LogService, private activateRoute: ActivatedRoute, private render: Renderer2) {
+  constructor(private logService: LogService, private activateRoute: ActivatedRoute, private render: Renderer2,
+              private router: Router) {
     this.renderForm = new FormGroup({});
     this.compareForm = new FormGroup({});
     this.activateRoute.params.subscribe((params) => {
@@ -55,6 +56,9 @@ export class ObjectLogComponent implements OnInit {
       },
       (error) => {
         console.error(error);
+        if (error.status === 403) {
+          this.router.navigate(['/error/', 403]);
+        }
       },
       () => {
         this.logService.getCorrespondingLogs(this.logID).subscribe((logs: CmdbLog[]) => {
