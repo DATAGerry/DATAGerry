@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,31 +16,21 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { DataTableDirective } from 'angular-datatables';
+import { Component, Input } from '@angular/core';
 import { Group } from '../../../models/group';
 
 @Component({
-  selector: 'cmdb-group-table',
-  templateUrl: './group-table.component.html',
-  styleUrls: ['./group-table.component.scss']
+  selector: 'cmdb-group-table-actions',
+  templateUrl: './group-table-actions.component.html',
+  styleUrls: ['./group-table-actions.component.scss']
 })
-export class GroupTableComponent implements OnInit {
-
-
-  @Input() public groups: Array<Group> = [];
+export class GroupTableActionsComponent {
 
   /**
-   * Datatable
+   * PublicID of groups which are not delete able.
    */
-  @Input() public tableOptions: any = {};
-  @ViewChild(DataTableDirective, { static: false }) dtElement: DataTableDirective;
+  public readonly notDeleteAbleGroups: Array<number> = [1, 2];
 
-  constructor() {
-  }
-
-  public ngOnInit(): void {
-  }
-
+  @Input() group: Group;
 
 }
