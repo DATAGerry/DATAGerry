@@ -102,8 +102,7 @@ export class ObjectCopyComponent implements OnInit {
           console.log(ack);
           this.router.navigate(['/framework/object/view/' + ack]);
           this.sidebarService.updateTypeCounter(this.renderResult.type_information.type_id);
-          this.toastService.success('Object ' + this.objectID.toString() + ' was successfully copied into ' +
-            ack.toString());
+          this.toastService.success(`Object ${ this.objectID } was successfully copied into ${ ack }!`);
         });
     }
   }

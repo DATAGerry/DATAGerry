@@ -145,7 +145,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
         }, () => {
           this.router.navigate(['/framework/object/view/' + ack]);
           this.sidebarService.updateTypeCounter(this.typeInstance.public_id);
-          this.toastService.success('Object ' + ack.toString() + ' was created succesfully');
+          this.toastService.success(`Object ${ ack } was created succesfully!`);
         });
     }
   }
