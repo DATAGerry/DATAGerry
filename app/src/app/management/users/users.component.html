@@ -1,11 +1,20 @@
 <h1>{{title}} <small class="text-muted">{{description}}</small></h1>
 <hr/>
-<cmdb-table [id]="'user-list-table'" [columns]="columns" [items]="users" [loading]="loading"
-            [sort]="sort" [pageSize]="params.limit" [page]="params.page" [totalItems]="totalUsers"
-            [stateEnabled]="false" (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
-            (sortChange)="onSortChange($event)" (searchChange)="onSearchChange($event)">
 
+<cmdb-table [id]="'user-list-table'" [columns]="columns" [items]="users" [loading]="loading"
+            [customButtons]="[buttonTemplate]" [sort]="sort" [pageSize]="params.limit" [page]="params.page"
+            [totalItems]="totalUsers" [stateEnabled]="false"
+            (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
+            (sortChange)="onSortChange($event)" (searchChange)="onSearchChange($event)">
 </cmdb-table>
+
+<!-- Custom table buttons -->
+<ng-template #addButtonTemplate>
+  <button *permissionLink="'base.user-management.user.add'" [routerLink]="['/', 'management','users', 'add']"
+          type="button" class="btn btn-sm btn-success mr-1 ml-1">
+    <i class="fas fa-plus"></i> New
+  </button>
+</ng-template>
 
 <!-- Table templates -->
 <ng-template #groupTemplate let-data="data">
