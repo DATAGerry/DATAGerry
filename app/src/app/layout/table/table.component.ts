@@ -24,7 +24,7 @@ import {
   Input, isDevMode,
   OnDestroy,
   OnInit,
-  Output, ViewChild,
+  Output, QueryList, TemplateRef, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
 import { Observable, ReplaySubject, merge } from 'rxjs';
@@ -52,6 +52,11 @@ export class TableComponent<T> implements OnInit, OnDestroy {
    * `ViewChild` for accessing the table html element.
    */
   @ViewChild('table', { static: true }) public tableRef: ElementRef;
+
+  /**
+   * Array of possible custom buttons displayed in header.
+   */
+  @Input() public customButtons: Array<TemplateRef<any>>;
 
   /**
    * Component un subscriber.

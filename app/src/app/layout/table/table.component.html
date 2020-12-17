@@ -6,6 +6,9 @@
                        (pageSizeChange)="pageSizeChange.emit($event)">
       </table-page-size>
     </div>
+    <div *ngIf="customButtons && customButtons.length > 0" class="custom-button-templates">
+      <ng-template *ngFor="let customButton of customButtons" [ngTemplateOutlet]="customButton"></ng-template>
+    </div>
     <div class="table-config-switch mr-1 ml-1 border-right" *ngIf="stateEnabled">
       <table-state [tableStates]="tableStates" [currentState]="tableState" (stateSave)="onStateSave($event)"
                    (stateSelect)="onStateSelect($event)" (stateDelete)="onStateDelete($event)"
