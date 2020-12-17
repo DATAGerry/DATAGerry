@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import { LinkService } from '../../../../services/link.service';
 import { CmdbLink } from '../../../../models/cmdb-link';
 import { forkJoin, Observable, Subject, Subscription } from 'rxjs';
@@ -27,6 +27,13 @@ import { ObjectLinkAddModalComponent } from '../../../modals/object-link-add-mod
 import { ObjectService } from '../../../../services/object.service';
 import { ObjectLinkDeleteModalComponent } from '../../../modals/object-link-delete-modal/object-link-delete-modal.component';
 import { ToastService } from '../../../../../layout/toast/toast.service';
+import {Column, Sort, SortDirection} from '../../../../../layout/table/table.types';
+import {CmdbType} from '../../../../models/cmdb-type';
+import {DatePipe} from '@angular/common';
+import {CollectionParameters} from '../../../../../services/models/api-parameter';
+import {takeUntil} from 'rxjs/operators';
+import {HttpResponse} from '@angular/common/http';
+import {APIGetMultiResponse} from '../../../../../services/models/api-response';
 
 @Component({
   selector: 'cmdb-object-links',
@@ -58,34 +65,35 @@ export class ObjectLinksComponent implements OnInit, OnDestroy {
   public partnerObjects: RenderResult[];
   private modalRef: NgbModalRef;
 
-  // Table
-  @ViewChild(DataTableDirective, { static: true })
-  private dtElement: DataTableDirective;
-  public readonly dtOptions: any = {
-    ordering: true,
-    order: [[3, 'asc']],
-    language: {
-      search: '',
-      searchPlaceholder: 'Filter...'
-    }
-  };
-  public dtTrigger: Subject<any>;
+
+  public columns: Array<Column>;
+
+  @ViewChild('dateTemplate', {static: true}) dateTemplate: TemplateRef<any>;
+
+  @ViewChild('idTemplate', {static: true}) idTemplate: TemplateRef<any>;
+
+  @ViewChild('partnerTemplate', {static: true}) partnerTemplate: TemplateRef<any>;
+
+  @ViewChild('deleteTemplate', {static: true}) deleteTemplate: TemplateRef<any>;
+
+  @ViewChild('summaryTemplate', {static: true}) summaryTemplate: TemplateRef<any>;
+
+  public sort: Sort = {name: 'public_id', order: SortDirection.DESCENDING} as Sort;
 
   constructor(private linkService: LinkService, private objectService: ObjectService, private modalService: NgbModal,
               private toast: ToastService) {
-    this.dtTrigger = new Subject();
     this.linkPartnerSubscription = new Subscription();
     this.linkListSubscription = new Subscription();
   }
 
   public ngOnInit(): void {
     this.linkList = [];
+    this.setColumns();
   }
 
   public ngOnDestroy(): void {
     this.linkPartnerSubscription.unsubscribe();
     this.linkListSubscription.unsubscribe();
-    this.dtTrigger.unsubscribe();
     if (this.modalRef) {
       this.modalRef.close();
     }
@@ -96,10 +104,10 @@ export class ObjectLinksComponent implements OnInit, OnDestroy {
     this.modalRef.componentInstance.primaryRenderResult = this.renderResult;
     this.modalRef.result.then((formData: any) => {
       this.linkService.postLink(formData).subscribe(() => {
-        this.toast.success(`Object #${ formData.primary } linked with #${ formData.secondary }.`);
-        this.loadLinks();
-      },
-        (e)  => {
+          this.toast.success(`Object #${formData.primary} linked with #${formData.secondary}.`);
+          this.loadLinks();
+        },
+        (e) => {
           this.toast.error(`${e.message}`);
         });
     });
@@ -148,15 +156,69 @@ export class ObjectLinksComponent implements OnInit, OnDestroy {
     for (const link of this.linkList) {
       link.partnerObject = this.getPartnerObject(link);
     }
-    this.renderTable();
   }
 
-  private renderTable(): void {
-    if (typeof this.dtElement !== 'undefined' && typeof this.dtElement.dtInstance !== 'undefined') {
-      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-        dtInstance.destroy();
-        this.dtTrigger.next();
-      });
-    }
+  private setColumns(): void {
+
+    const columns = [];
+
+    columns.push({
+      display: 'Link ID',
+      name: 'link-id',
+      data: 'public_id',
+      template: this.idTemplate,
+      sortable: false,
+      searchable: false,
+      fixed: true,
+      cssClasses: ['text-center'],
+      style: {width: '6em', 'font-weight': 'bold'}
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Partner',
+      name: 'partner',
+      template: this.partnerTemplate,
+      sortable: false,
+      searchable: false,
+      fixed: true,
+      cssClasses: ['text-center'],
+      style: {width: '6em'}
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Summary',
+      name: 'summary',
+      template: this.summaryTemplate,
+      sortable: false,
+      searchable: false,
+      fixed: true,
+      cssClasses: ['text-center'],
+      style: {width: '6em'}
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Creation time',
+      name: 'creation-time',
+      data: 'creation_time',
+      sortable: false,
+      searchable: false,
+      template: this.dateTemplate,
+      fixed: true,
+      cssClasses: ['text-center'],
+      style: {width: '6em'}
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Action',
+      name: 'action',
+      data: 'public_id',
+      template: this.deleteTemplate,
+      sortable: false,
+      searchable: false,
+      cssClasses: ['text-center'],
+      style: {width: '6em' }
+    } as unknown as Column);
+
+    this.columns = columns;
   }
 }
