@@ -40,7 +40,7 @@
     "chart.js": "^2.9.3",
     "chartjs-plugin-datalabels": "^0.7.0",
     "core-js": "^3.8.1",
-    "datatables.net": "^1.10.20",
+    "datatables.net": "^1.10.22",
     "datatables.net-bs4": "^1.10.20",
     "datatables.net-buttons": "^1.6.1",
     "datatables.net-fixedheader-bs4": "^3.1.6",
