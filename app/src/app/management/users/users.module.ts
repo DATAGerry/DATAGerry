@@ -69,7 +69,6 @@ import { UserTableGroupCellComponent } from './components/user-table-group-cell/
   imports: [
     CommonModule,
     UsersRoutingModule,
-    DataTablesModule,
     PasswordStrengthMeterModule,
     ReactiveFormsModule,
     LayoutModule,

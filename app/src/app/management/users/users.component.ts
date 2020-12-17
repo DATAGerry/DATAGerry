@@ -55,7 +55,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   public readonly description: string = 'Management';
 
   /**
-   * Table Template: User actions column.
+   * Table Template: User add button.
    */
   @ViewChild('addButtonTemplate', { static: true }) public buttonTemplate: TemplateRef<any>;
 
