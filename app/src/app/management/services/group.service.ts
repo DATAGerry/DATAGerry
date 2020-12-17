@@ -84,7 +84,8 @@ export class GroupService<T = Group> implements ApiService {
     const options = this.post;
     let httpParams: HttpParams = new HttpParams();
     if (params.filter !== undefined) {
-      httpParams = httpParams.set('filter', params.filter);
+      const filter = JSON.stringify(params.filter);
+      httpParams = httpParams.set('filter', filter);
     }
     httpParams = httpParams.set('limit', params.limit.toString());
     httpParams = httpParams.set('sort', params.sort);

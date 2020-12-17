@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,14 +13,13 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { GroupsRoutingModule } from './groups-routing.module';
-import { DataTablesModule } from 'angular-datatables';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { LayoutModule } from '../../layout/layout.module';
@@ -30,9 +29,11 @@ import { GroupsComponent } from './groups.component';
 import { GroupFormComponent } from './components/group-form/group-form.component';
 import { GroupAddComponent } from './group-add/group-add.component';
 import { GroupEditComponent } from './group-edit/group-edit.component';
-import { GroupTableComponent } from './components/group-table/group-table.component';
 import { GroupDeleteComponent } from './group-delete/group-delete.component';
 import { GroupSelectPipe } from './pipes/group-select.pipe';
+import { TableModule } from '../../layout/table/table.module';
+import { GroupTableUserCellComponent } from './components/group-table-user-cell/group-table-user-cell.component';
+import { GroupTableActionsComponent } from './components/group-table-actions/group-table-actions.component';
 
 @NgModule({
   declarations: [
@@ -40,19 +41,20 @@ import { GroupSelectPipe } from './pipes/group-select.pipe';
     GroupFormComponent,
     GroupAddComponent,
     GroupEditComponent,
-    GroupTableComponent,
     GroupDeleteComponent,
-    GroupSelectPipe
+    GroupSelectPipe,
+    GroupTableUserCellComponent,
+    GroupTableActionsComponent
   ],
   imports: [
     CommonModule,
     GroupsRoutingModule,
-    DataTablesModule,
     ReactiveFormsModule,
     NgSelectModule,
     LayoutModule,
     FontAwesomeModule,
-    AuthModule
+    AuthModule,
+    TableModule
   ]
 })
 export class GroupsModule {
