@@ -21,6 +21,8 @@ import { Group } from '../../../models/group';
 import { UserService } from '../../../services/user.service';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { GroupUsersModalComponent } from '../../modals/group-users-modal/group-users-modal.component';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'cmdb-group-table-user-cell',
@@ -28,6 +30,11 @@ import { takeUntil } from 'rxjs/operators';
   styleUrls: ['./group-table-user-cell.component.scss']
 })
 export class GroupTableUserCellComponent implements OnDestroy {
+
+  /**
+   * User list modal ref.
+   */
+  private modalRef: NgbModalRef;
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
   public group: Group;
@@ -42,10 +49,19 @@ export class GroupTableUserCellComponent implements OnDestroy {
     });
   }
 
-  constructor(private userService: UserService) {
+  constructor(private userService: UserService, private modalService: NgbModal) {
   }
 
+  public openUserListModal(group: Group): void {
+    this.modalRef = this.modalService.open(GroupUsersModalComponent);
+    this.modalRef.componentInstance.group = group;
+  }
+
+
   public ngOnDestroy(): void {
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
     this.subscriber.next();
     this.subscriber.complete();
   }

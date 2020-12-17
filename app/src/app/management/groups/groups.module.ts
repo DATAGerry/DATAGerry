@@ -34,8 +34,13 @@ import { GroupSelectPipe } from './pipes/group-select.pipe';
 import { TableModule } from '../../layout/table/table.module';
 import { GroupTableUserCellComponent } from './components/group-table-user-cell/group-table-user-cell.component';
 import { GroupTableActionsComponent } from './components/group-table-actions/group-table-actions.component';
+import { GroupUsersModalComponent } from './modals/group-users-modal/group-users-modal.component';
+import { UsersModule } from '../users/users.module';
 
 @NgModule({
+  entryComponents: [
+    GroupUsersModalComponent
+  ],
   declarations: [
     GroupsComponent,
     GroupFormComponent,
@@ -44,7 +49,8 @@ import { GroupTableActionsComponent } from './components/group-table-actions/gro
     GroupDeleteComponent,
     GroupSelectPipe,
     GroupTableUserCellComponent,
-    GroupTableActionsComponent
+    GroupTableActionsComponent,
+    GroupUsersModalComponent
   ],
   imports: [
     CommonModule,
@@ -54,7 +60,8 @@ import { GroupTableActionsComponent } from './components/group-table-actions/gro
     LayoutModule,
     FontAwesomeModule,
     AuthModule,
-    TableModule
+    TableModule,
+    UsersModule
   ]
 })
 export class GroupsModule {

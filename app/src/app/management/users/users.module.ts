@@ -40,6 +40,7 @@ import { UserCompactComponent } from './components/user-compact/user-compact.com
 import { TableModule } from '../../layout/table/table.module';
 import { UserTableActionsComponent } from './components/user-table-actions/user-table-actions.component';
 import { UserTableGroupCellComponent } from './components/user-table-group-cell/user-table-group-cell.component';
+import { UserTableListComponent } from './components/user-table-list/user-table-list.component';
 
 @NgModule({
   entryComponents: [
@@ -59,12 +60,14 @@ import { UserTableGroupCellComponent } from './components/user-table-group-cell/
     UserDeleteComponent,
     UserCompactComponent,
     UserTableActionsComponent,
-    UserTableGroupCellComponent
+    UserTableGroupCellComponent,
+    UserTableListComponent
   ],
   exports: [
     UserImageComponent,
     UserDisplayComponent,
-    UserCompactComponent
+    UserCompactComponent,
+    UserTableListComponent
   ],
   imports: [
     CommonModule,

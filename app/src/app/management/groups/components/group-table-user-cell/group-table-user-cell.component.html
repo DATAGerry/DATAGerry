@@ -1,5 +1,6 @@
 <div *ngIf="numberOfUsers || numberOfUsers == 0; else loading" class="text-center">
-  <span class="text-primary pointer" *ngIf="numberOfUsers > 0; else zero">{{numberOfUsers}}</span>
+  <span (click)="openUserListModal(group)" class="text-primary pointer"
+        *ngIf="numberOfUsers > 0; else zero">{{numberOfUsers}}</span>
   <ng-template #zero>{{numberOfUsers}}</ng-template>
 </div>
 <ng-template #loading>
