@@ -24,6 +24,7 @@ import { ObjectService } from '../../services/object.service';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { PreviousRouteService } from '../../../services/previous-route.service';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { ToastService } from '../../../layout/toast/toast.service';
 
 
 @Component({
@@ -111,7 +112,8 @@ export class TypeDeleteComponent implements OnInit {
   public numberOfObjects: number;
 
   constructor(private typeService: TypeService, private objectService: ObjectService, private router: Router,
-              private route: ActivatedRoute, public prevRoute: PreviousRouteService, private modalService: NgbModal) {
+              private route: ActivatedRoute, public prevRoute: PreviousRouteService, private modalService: NgbModal,
+              private toast: ToastService) {
     this.route.params.subscribe((id) => {
       this.typeID = id.publicID;
     });
@@ -126,6 +128,7 @@ export class TypeDeleteComponent implements OnInit {
       if (result === 'delete') {
         this.typeService.deleteType(this.typeID).subscribe((deletedType) => {
           this.router.navigate(['/']);
+          this.toast.success(`Type was successfully Deleted: TypeID: ${ this.typeID }`);
         });
       }
     }, (reason) => {
