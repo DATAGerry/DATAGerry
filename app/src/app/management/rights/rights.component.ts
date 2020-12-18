@@ -71,9 +71,14 @@ export class RightsComponent implements OnInit, OnDestroy {
   private params: CollectionParameters = { filter: undefined, limit: 0, sort: 'name', order: 1, page: 1 };
 
   /**
-   * Table Template: User group column.
+   * Table Template: level column.
    */
   @ViewChild('levelTemplate', { static: true }) public levelTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: groups with rights column.
+   */
+  @ViewChild('groupsRightTemplate', { static: true }) public groupsRightTemplate: TemplateRef<any>;
 
   constructor(private route: ActivatedRoute, private rightService: RightService) {
     this.rights = this.route.snapshot.data.rights as Array<Right>;
@@ -112,6 +117,13 @@ export class RightsComponent implements OnInit, OnDestroy {
         },
         template: this.levelTemplate
       },
+      {
+        display: 'Groups',
+        name: 'groups',
+        data: 'name',
+        sortable: false,
+        template: this.groupsRightTemplate
+      }
     ] as Array<Column>;
   }
 

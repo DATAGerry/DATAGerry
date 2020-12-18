@@ -36,6 +36,7 @@ import { GroupTableUserCellComponent } from './components/group-table-user-cell/
 import { GroupTableActionsComponent } from './components/group-table-actions/group-table-actions.component';
 import { GroupUsersModalComponent } from './modals/group-users-modal/group-users-modal.component';
 import { UsersModule } from '../users/users.module';
+import { GroupTableListComponent } from './components/group-table-list/group-table-list.component';
 
 @NgModule({
   entryComponents: [
@@ -50,7 +51,11 @@ import { UsersModule } from '../users/users.module';
     GroupSelectPipe,
     GroupTableUserCellComponent,
     GroupTableActionsComponent,
-    GroupUsersModalComponent
+    GroupUsersModalComponent,
+    GroupTableListComponent
+  ],
+  exports: [
+    GroupTableListComponent
   ],
   imports: [
     CommonModule,
