@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019-2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,24 +16,21 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
-import { Subject } from 'rxjs';
+import {Component, Input, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import { RenderResult } from '../../../../models/cmdb-render';
 import { ObjectService } from '../../../../services/object.service';
-import { DataTableDirective } from 'angular-datatables';
 import { FileService } from '../../../../../export/export.service';
 import { DatePipe } from '@angular/common';
 import { FileSaverService } from 'ngx-filesaver';
 import { ExportObjectsFileExtension } from '../../../../../export/export-objects/model/export-objects-file-extension';
-import {CmdbType} from '../../../../models/cmdb-type';
-import {Column, Sort, SortDirection} from '../../../../../layout/table/table.types';
+import { Column, Sort, SortDirection } from '../../../../../layout/table/table.types';
 
 @Component({
   selector: 'cmdb-object-reference-list',
   templateUrl: './object-reference-list.component.html',
   styleUrls: ['./object-reference-list.component.scss']
 })
-export class ObjectReferenceListComponent implements OnInit, OnDestroy {
+export class ObjectReferenceListComponent implements OnInit {
 
   private id: number;
 
@@ -217,8 +214,5 @@ export class ObjectReferenceListComponent implements OnInit, OnDestroy {
     } else {
       this.filter = undefined;
     }
-  }
-
-  public ngOnDestroy(): void {
   }
 }

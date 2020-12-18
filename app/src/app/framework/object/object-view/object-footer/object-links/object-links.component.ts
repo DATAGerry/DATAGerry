@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019-2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -19,22 +19,14 @@
 import {Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import { LinkService } from '../../../../services/link.service';
 import { CmdbLink } from '../../../../models/cmdb-link';
-import { forkJoin, Observable, Subject, Subscription } from 'rxjs';
-import { DataTableDirective } from 'angular-datatables';
+import { forkJoin, Observable, Subscription } from 'rxjs';
 import { RenderResult } from '../../../../models/cmdb-render';
-import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectLinkAddModalComponent } from '../../../modals/object-link-add-modal/object-link-add-modal.component';
 import { ObjectService } from '../../../../services/object.service';
 import { ObjectLinkDeleteModalComponent } from '../../../modals/object-link-delete-modal/object-link-delete-modal.component';
 import { ToastService } from '../../../../../layout/toast/toast.service';
-import {Column, Sort, SortDirection} from '../../../../../layout/table/table.types';
-import {CmdbType} from '../../../../models/cmdb-type';
-import {DatePipe} from '@angular/common';
-import {CollectionParameters} from '../../../../../services/models/api-parameter';
-import {takeUntil} from 'rxjs/operators';
-import {HttpResponse} from '@angular/common/http';
-import {APIGetMultiResponse} from '../../../../../services/models/api-response';
-
+import { Column, Sort, SortDirection } from '../../../../../layout/table/table.types';
 @Component({
   selector: 'cmdb-object-links',
   templateUrl: './object-links.component.html',
