@@ -16,24 +16,20 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { LogService } from '../../../../services/log.service';
 import { CmdbLog } from '../../../../models/cmdb-log';
-import { Subject } from 'rxjs';
-import { DataTableDirective } from 'angular-datatables';
+import { Column, Sort, SortDirection } from '../../../../../layout/table/table.types';
+import { CollectionParameters} from '../../../../../services/models/api-parameter';
 
 @Component({
   selector: 'cmdb-object-log-list',
   templateUrl: './object-log-list.component.html',
   styleUrls: ['./object-log-list.component.scss']
 })
-export class ObjectLogListComponent implements OnInit, OnDestroy {
+export class ObjectLogListComponent implements OnInit {
 
   private id: number;
-  @ViewChild(DataTableDirective, {static: true})
-  private dtElement: DataTableDirective;
-  public dtOptions: any = {};
-  public dtTrigger: Subject<any> = new Subject();
 
   @Input()
   set publicID(publicID: number) {
@@ -47,7 +43,33 @@ export class ObjectLogListComponent implements OnInit, OnDestroy {
     return this.id;
   }
 
+  @ViewChild('dateTemplate', {static: true}) dateTemplate: TemplateRef<any>;
+
+  @ViewChild('linkTemplate', {static: true}) linkTemplate: TemplateRef<any>;
+
+  @ViewChild('dataTemplate', {static: true}) dataTemplate: TemplateRef<any>;
+
+  @ViewChild('changeTemplate', {static: true}) changeTemplate: TemplateRef<any>;
+
+  @ViewChild('userTemplate', {static: true}) userTemplate: TemplateRef<any>;
+
+  public filter: string;
+
   public logList: CmdbLog[] = [];
+
+  public columns: Array<Column>;
+
+  public sort: Sort = { name: 'date', order: SortDirection.DESCENDING } as Sort;
+
+  private readonly initLimit: number = 10;
+  public limit: number = this.initLimit;
+
+  public readonly initPage: number = 1;
+  public page: number = this.initPage;
+
+  public loading: boolean = false;
+
+  public apiParameters: CollectionParameters = { limit: 10, sort: 'date', order: -1, page: 1};
 
   constructor(private logService: LogService) {
   }
@@ -57,36 +79,131 @@ export class ObjectLogListComponent implements OnInit, OnDestroy {
       this.logList = logs;
     }, (error) => {
       console.log(error);
-    }, () => {
-      this.renderTable();
     });
   }
 
-  private renderTable(): void {
-    if (this.dtElement.dtInstance === undefined) {
-      this.dtTrigger.next();
-    } else {
-      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-        dtInstance.destroy();
-        this.dtTrigger.next();
-      });
-    }
-
-  }
-
   public ngOnInit(): void {
-    this.dtOptions = {
-      ordering: true,
-      order: [1, 'desc'],
-      language: {
-        search: '',
-        searchPlaceholder: 'Filter...'
-      }
-    };
+    this.setColumns();
   }
 
-  public ngOnDestroy(): void {
-    this.dtTrigger.unsubscribe();
+  private setColumns(): void {
+
+    const columns = [];
+
+    columns.push({
+      display: 'Date',
+      name: 'date',
+      data: 'log_time',
+      sortable: true,
+      searchable: false,
+      fixed: true,
+      template: this.dateTemplate,
+      cssClasses: ['text-center'],
+      style: { width: '6em' }
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Log ID',
+      name: 'log-id',
+      data: 'public_id',
+      sortable: true,
+      searchable: false,
+      fixed: true,
+      template: this.dataTemplate,
+      cssClasses: ['text-center'],
+      style: { width: '6em' }
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Action',
+      name: 'action',
+      data: 'action_name',
+      sortable: true,
+      searchable: false,
+      fixed: true,
+      template: this.dataTemplate,
+      cssClasses: ['text-center'],
+      style: { width: '6em' }
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Changes',
+      name: 'changes',
+      sortable: true,
+      searchable: false,
+      fixed: true,
+      template: this.changeTemplate,
+      cssClasses: ['text-center'],
+      style: { width: '6em' }
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Comment',
+      name: 'comment',
+      data: 'comment',
+      sortable: true,
+      searchable: false,
+      fixed: true,
+      template: this.dataTemplate,
+      cssClasses: ['text-center'],
+      style: { width: '6em' }
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Author',
+      name: 'author',
+      sortable: true,
+      searchable: false,
+      fixed: true,
+      template: this.userTemplate,
+      cssClasses: ['text-center'],
+      style: { width: '6em' }
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Version',
+      name: 'version',
+      data: 'version',
+      sortable: true,
+      searchable: false,
+      fixed: true,
+      template: this.dataTemplate,
+      cssClasses: ['text-center'],
+      style: { width: '6em' }
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Links',
+      name: 'links',
+      data: 'public_id',
+      sortable: true,
+      searchable: false,
+      fixed: true,
+      template: this.linkTemplate,
+      cssClasses: ['text-center'],
+      style: { width: '6em' }
+    } as unknown as Column);
+
+    this.columns = columns;
+  }
+  public onPageChange(page: number) {
+    this.page = page;
+  }
+
+  public onPageSizeChange(limit: number): void {
+    this.limit = limit;
+  }
+
+  public onSortChange(sort: Sort): void {
+    this.sort = sort;
+  }
+
+  public onSearchChange(search: any): void {
+    if (search) {
+      this.filter = search;
+    } else {
+      this.filter = undefined;
+    }
   }
 
 }
