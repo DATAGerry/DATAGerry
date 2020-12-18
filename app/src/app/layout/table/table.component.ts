@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -24,11 +24,11 @@ import {
   Input, isDevMode,
   OnDestroy,
   OnInit,
-  Output, QueryList, TemplateRef, ViewChild,
+  Output, TemplateRef, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
 import { Observable, ReplaySubject, merge } from 'rxjs';
-import { Column, Sort, SortDirection, TableState } from './table.types';
+import { Column, GroupRowsBy, Sort, SortDirection, TableState } from './table.types';
 import { PageLengthEntry } from './components/table-page-size/table-page-size.component';
 import { takeUntil } from 'rxjs/operators';
 import { TableService } from './table.service';
@@ -200,6 +200,11 @@ export class TableComponent<T> implements OnInit, OnDestroy {
    * Info display enabled.
    */
   @Input() public infoEnabled: boolean = true;
+
+  /**
+   * Row group parameter.
+   */
+  @Input() public groupRowsBy: GroupRowsBy;
 
   /**
    * Are columns toggleable.

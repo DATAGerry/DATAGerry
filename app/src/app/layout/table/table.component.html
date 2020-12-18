@@ -39,8 +39,8 @@
           [hidden]="column.hidden"></th>
     </tr>
     </thead>
-    <tbody table-body [bodyClasses]="bodyClasses">
-    <tr table-row *ngFor="let item of items; let rowIndex= index" [item]="item" [rowIndex]="rowIndex"
+    <tbody table-body [bodyClasses]="bodyClasses" *ngIf="!groupRowsBy; else rowGroupTable">
+    <tr table-row *ngFor="let item of items; let rowIndex = index" [item]="item" [rowIndex]="rowIndex"
         [ngClass]="rowClasses">
       <td *ngIf="selectEnabled" [ngStyle]="{'width': '3rem'}">
         <div class="form-check">
@@ -58,6 +58,15 @@
       </td>
     </tr>
     </tbody>
+    <ng-template #rowGroupTable>
+      <tbody table-body [bodyClasses]="bodyClasses" *ngFor="let rowGroup of groupRowsBy.group(items, groupRowsBy.src)">
+      <tr>
+        <td [colSpan]="(columns.length) + (selectEnabled ? 1: 0)">
+          Grouping is currently not complete implemented.
+        </td>
+      </tr>
+      </tbody>
+    </ng-template>
     <tfoot table-foot>
     </tfoot>
   </table>
