@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,23 +13,25 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-export class Right {
-  public level: number | SecurityLevel;
-  public is_master: boolean;
-  public name: string;
-  public label: string;
-  public description: string;
-}
+import { Component, Input, OnInit } from '@angular/core';
+import { SecurityLevel } from '../../../models/right';
 
+@Component({
+  selector: 'cmdb-right-table-level-cell',
+  templateUrl: './right-table-level-cell.component.html',
+  styleUrls: ['./right-table-level-cell.component.scss']
+})
+export class RightTableLevelCellComponent implements OnInit {
 
-export enum SecurityLevel {
-  NOTSET = 0,
-  PERMISSION = 10,
-  PROTECTED = 30,
-  SECURE = 50,
-  DANGER = 80,
-  CRITICAL = 100
+  public levels = SecurityLevel;
+  @Input() public level: SecurityLevel;
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
 }

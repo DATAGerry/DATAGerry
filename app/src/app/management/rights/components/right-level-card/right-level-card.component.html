@@ -1,0 +1,28 @@
+<div class="card">
+  <div *ngIf="cardHeader" class="card-header">{{cardHeader}}</div>
+  <div *ngIf="securityLevels" class="card-body">
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        NOTSET <span class="badge badge-primary float-right">{{getLevel('NOTSET')}}</span>
+      </li>
+      <li class="list-group-item">
+        PERMISSION <span class="badge badge-primary float-right">{{getLevel('PERMISSION')}}</span>
+      </li>
+      <li class="list-group-item">
+        PROTECTED <span class="badge badge-primary float-right">{{getLevel('PROTECTED')}}</span>
+      </li>
+      <li class="list-group-item">
+        SECURE <span class="badge badge-primary float-right">{{getLevel('SECURE')}}</span>
+      </li>
+      <li class="list-group-item">
+        DANGER <span class="badge badge-primary float-right">{{getLevel('DANGER')}}</span>
+      </li>
+      <li class="list-group-item">
+        CRITICAL <span class="badge badge-primary float-right">{{getLevel('CRITICAL')}}</span>
+      </li>
+    </ul>
+  </div>
+  <div *ngIf="securityLevels" class="card-footer">
+    There are {{securityLevels.length}} security levels defined
+  </div>
+</div>

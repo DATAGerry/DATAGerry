@@ -18,7 +18,7 @@
 
 import { Injectable } from '@angular/core';
 import { ApiCallService, ApiService, httpObserveOptions } from '../../services/api-call.service';
-import { Right } from '../models/right';
+import { Right, SecurityLevel } from '../models/right';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpParams, HttpResponse } from '@angular/common/http';
@@ -63,7 +63,9 @@ export class RightService<T = Right> implements ApiService {
    * @param name: Name of the right.
    */
   public getRight(name: string): Observable<T> {
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ name }/`).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callGet<T>(`${ this.servicePrefix }/${ name }`, options).pipe(
       map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => {
         return apiResponse.body.result as T;
       })
@@ -71,12 +73,15 @@ export class RightService<T = Right> implements ApiService {
   }
 
   /**
-   * Get security levels.
+   * Get security levels from backend.
+   * Should be the same as the SecurityLevel Enum.
    */
-  public getLevels(): Observable<any> {
-    return this.api.callGet<T>(`${ this.servicePrefix }/levels/`).pipe(
-      map((apiResponse: HttpResponse<APIGetSingleResponse<any>>) => {
-        return apiResponse.body.result;
+  public getLevels(): Observable<SecurityLevel> {
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callGet<T>(`${ this.servicePrefix }/levels`, options).pipe(
+      map((apiResponse: HttpResponse<APIGetSingleResponse<SecurityLevel>>) => {
+        return apiResponse.body.result as SecurityLevel;
       })
     );
   }

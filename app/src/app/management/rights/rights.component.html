@@ -1,24 +1,17 @@
-<h1>Rights</h1>
+<h1>{{title}} <small class="text-muted">{{description}}</small></h1>
 <hr/>
 <div class="row">
-  <div class="col-md-12">
-    <table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table">
-      <thead>
-      <tr>
-        <th>Name</th>
-        <th>Label</th>
-        <th>Description</th>
-        <th>Level</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let right of rights" >
-        <th scope="col" [className]="right.is_master ? 'table-success' : ''">{{right.name}}</th>
-        <td>{{right.label}}</td>
-        <td>{{right.description}}</td>
-        <td [level]="right.level" classPrefix="table-" rightLevelColor>{{right.level}}</td>
-      </tr>
-      </tbody>
-    </table>
+  <div class="col-sm-9">
+    <cmdb-table [items]="rights" [totalItems]="rights.length" [searchEnabled]="false" [paginationEnabled]="false"
+                [pageSizeEnabled]="false" [columns]="columns" (sortChange)="onSortChange($event)">
+    </cmdb-table>
+  </div>
+  <div class="col-sm-3">
+    <cmdb-right-level-card></cmdb-right-level-card>
   </div>
 </div>
+
+<!-- Table templates -->
+<ng-template #levelTemplate let-data="data">
+  <cmdb-right-table-level-cell [level]="data"></cmdb-right-table-level-cell>
+</ng-template>
