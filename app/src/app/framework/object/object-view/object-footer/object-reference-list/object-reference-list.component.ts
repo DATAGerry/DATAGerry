@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, ViewChild} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import { Subject } from 'rxjs';
 import { RenderResult } from '../../../../models/cmdb-render';
 import { ObjectService } from '../../../../services/object.service';
@@ -25,20 +25,39 @@ import { FileService } from '../../../../../export/export.service';
 import { DatePipe } from '@angular/common';
 import { FileSaverService } from 'ngx-filesaver';
 import { ExportObjectsFileExtension } from '../../../../../export/export-objects/model/export-objects-file-extension';
+import {CmdbType} from '../../../../models/cmdb-type';
+import {Column, Sort, SortDirection} from '../../../../../layout/table/table.types';
 
 @Component({
   selector: 'cmdb-object-reference-list',
   templateUrl: './object-reference-list.component.html',
   styleUrls: ['./object-reference-list.component.scss']
 })
-export class ObjectReferenceListComponent implements OnDestroy {
+export class ObjectReferenceListComponent implements OnInit, OnDestroy {
 
   private id: number;
 
-  @ViewChild(DataTableDirective, {static: true})
-  private dtElement: DataTableDirective;
-  public dtOptions: any = {};
-  public dtTrigger: Subject<any> = new Subject();
+  @ViewChild('objectTemplate', {static: true}) objectTemplate: TemplateRef<any>;
+
+  @ViewChild('typeTemplate', {static: true}) typeTemplate: TemplateRef<any>;
+
+  @ViewChild('summaryTemplate', {static: true}) summaryTemplate: TemplateRef<any>;
+
+  @ViewChild('linkTemplate', {static: true}) linkTemplate: TemplateRef<any>;
+
+  public columns: Column[];
+
+  public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+
+  public readonly initPage: number = 1;
+  public page: number = this.initPage;
+
+  private readonly initLimit: number = 25;
+  public limit: number = this.initLimit;
+
+  public loading: boolean = false;
+
+  private filter: string;
 
   public referenceList: RenderResult[] = [];
   public formatList: ExportObjectsFileExtension[] = [];
@@ -62,6 +81,10 @@ export class ObjectReferenceListComponent implements OnDestroy {
     });
   }
 
+  ngOnInit(): void {
+        this.setColumns();
+  }
+
   private loadObjectReferences() {
     this.objectService.getObjectReferences(this.publicID).subscribe((references: RenderResult[]) => {
         this.referenceList = references;
@@ -70,20 +93,7 @@ export class ObjectReferenceListComponent implements OnDestroy {
         console.error(error);
       },
       () => {
-        this.renderTable();
       });
-  }
-
-  private renderTable(): void {
-    if (this.dtElement.dtInstance === undefined) {
-      this.dtTrigger.next();
-    } else {
-      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-        dtInstance.destroy();
-        this.dtTrigger.next();
-      });
-    }
-
   }
 
   /**
@@ -111,7 +121,104 @@ export class ObjectReferenceListComponent implements OnDestroy {
     this.fileSaverService.save(data.body, timestamp + '.' + 'zip');
   }
 
+  private setColumns(): void {
+    const columns = [];
+
+    columns.push({
+      display: 'Object ID',
+      name: 'object-id',
+      data: 'object_information.object_id',
+      sortable: true,
+      searchable: false,
+      fixed: true,
+      template: this.objectTemplate,
+      cssClasses: ['text-center'],
+      style: { width: '6em' }
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Type',
+      name: 'actions',
+      data: 'type_information',
+      sortable: true,
+      searchable: false,
+      fixed: true,
+      template: this.typeTemplate,
+      cssClasses: ['text-center'],
+      style: { width: '6em' }
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Summary',
+      name: 'summary',
+      sortable: true,
+      searchable: false,
+      fixed: true,
+      template: this.summaryTemplate,
+      cssClasses: ['text-center'],
+      style: { width: '6em' }
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Link',
+      name: 'link',
+      data: 'object_information.object_id',
+      sortable: true,
+      searchable: false,
+      fixed: true,
+      template: this.linkTemplate,
+      cssClasses: ['text-center'],
+      style: { width: '6em' }
+    } as unknown as Column);
+
+    this.columns = columns;
+  }
+
+
+  /**
+   * On table page change.
+   * Reload all objects.
+   *
+   * @param page
+   */
+  public onPageChange(page: number) {
+    this.page = page;
+  }
+
+  /**
+   * On table page size change.
+   * Reload all objects.
+   *
+   * @param limit
+   */
+  public onPageSizeChange(limit: number): void {
+    this.limit = limit;
+  }
+
+  /**
+   * On table sort change.
+   * Reload all objects.
+   *
+   * @param sort
+   */
+  public onSortChange(sort: Sort): void {
+    this.sort = sort;
+  }
+
+  /**
+   * On table search change.
+   * Reload all objects.
+   *
+   * @param search
+   */
+  public onSearchChange(search: any): void {
+    if (search) {
+      this.filter = search;
+    } else {
+      this.filter = undefined;
+    }
+  }
+
   public ngOnDestroy(): void {
-    this.dtTrigger.unsubscribe();
   }
 }
