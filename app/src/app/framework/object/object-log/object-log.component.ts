@@ -55,7 +55,6 @@ export class ObjectLogComponent implements OnInit {
         this.renderResult = JSON.parse(this.log.render_state);
       },
       (error) => {
-        console.error(error);
         if (error.status === 403) {
           this.router.navigate(['/error/', 403]);
         }

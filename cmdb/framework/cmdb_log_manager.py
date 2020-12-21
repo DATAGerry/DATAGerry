@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from datetime import datetime
 from cmdb.security.acl.errors import AccessDeniedError
+from cmdb.security.acl.control import AccessControlList
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.framework import CmdbLog, CmdbMetaLog, CmdbObjectLog, CmdbObject
 from cmdb.framework.managers.type_manager import TypeManager, TypeModel
@@ -34,26 +35,23 @@ class CmdbLogManager(CmdbManagerBase):
         pass
 
     # CRUD functions
-    def get_log(self, public_id: int, group_id: int):
+    def get_log(self, public_id: int, group_id: int = None, aclPermission = None):
         try:
             log = CmdbLog(**self._get(
                 collection=CmdbMetaLog.COLLECTION,
                 public_id=public_id
             ))
 
-            type_id = CmdbObject(**self._get(
-                collection=CmdbObject.COLLECTION,
-                public_id=log.object_id
-            )).type_id
+            if aclPermission and group_id:
+                type_id = CmdbObject(**self._get(
+                    collection=CmdbObject.COLLECTION,
+                    public_id=log.object_id
+                )).type_id
 
-            acl = self._type_manager.get(type_id).acl
+                acl: AccessControlList = self._type_manager.get(type_id).acl
 
-            if acl and acl.activated:
-                if group_id not in acl.groups.includes.keys():
-                    raise AccessDeniedError('Request user is not authorized!')
-
-                if 'READ' not in acl.groups.includes[group_id]:
-                    raise AccessDeniedError('Request user is not authorized!')
+                if not acl.verify_access(group_id, aclPermission):
+                    raise AccessDeniedError("Required ACL Permission not given!")
 
             return log
         except AccessDeniedError:

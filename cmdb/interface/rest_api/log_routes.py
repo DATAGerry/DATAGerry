@@ -20,6 +20,7 @@ from werkzeug.exceptions import abort
 from flask import current_app
 
 from cmdb.security.acl.errors import AccessDeniedError
+from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.cmdb_log import CmdbObjectLog, LogAction
 from cmdb.framework.cmdb_log_manager import LogManagerGetError, LogManagerDeleteError
@@ -47,7 +48,8 @@ with current_app.app_context():
 @right_required('base.framework.log.view')
 def get_log(public_id: int, request_user: UserModel):
     try:
-        selected_log = log_manager.get_log(public_id=public_id, group_id=request_user.group_id)
+        selected_log = log_manager.get_log(public_id=public_id, group_id=request_user.group_id,
+                                           aclPermission=AccessControlPermission.READ)
     except LogManagerGetError:
         return abort(404)
     except AccessDeniedError as err:
@@ -331,7 +333,8 @@ def get_logs_by_objects(public_id: int, request_user: UserModel):
 @right_required('base.framework.log.view')
 def get_corresponding_object_logs(public_id: int, request_user: UserModel):
     try:
-        selected_log = log_manager.get_log(public_id=public_id, group_id=request_user.group_id)
+        selected_log = log_manager.get_log(public_id=public_id, group_id=request_user.group_id,
+                                           aclPermission=AccessControlPermission.READ)
         location = 'type.acl.groups.includes.' + str(request_user.group_id)
         query = [
             {
