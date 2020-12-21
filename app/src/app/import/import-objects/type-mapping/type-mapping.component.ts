@@ -22,11 +22,14 @@ import {
   ComponentFactory,
   ComponentFactoryResolver,
   ComponentRef,
-  EventEmitter, forwardRef,
-  Input, OnChanges,
+  EventEmitter,
+  forwardRef,
+  Input,
+  OnChanges,
   OnDestroy,
   OnInit,
-  Output, SimpleChanges,
+  Output,
+  SimpleChanges,
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
@@ -37,6 +40,7 @@ import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { JsonMappingComponent } from './json-mapping/json-mapping.component';
 import { CsvMappingComponent } from './csv-mapping/csv-mapping.component';
 import { TypeMappingBaseComponent } from './type-mapping-base.component';
+import { AccessControlPermission } from '../../../acl/acl.types';
 
 export const mappingComponents: { [type: string]: any } = {
   json: JsonMappingComponent,
@@ -96,7 +100,9 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
   }
 
   public ngOnInit(): void {
-    this.typeListSubscription = this.typeService.getTypeList().subscribe((typeList: CmdbType[]) => {
+    this.typeListSubscription = this.typeService.getTypeList(
+      [AccessControlPermission.READ, AccessControlPermission.CREATE, AccessControlPermission.UPDATE])
+      .subscribe((typeList: CmdbType[]) => {
       this.typeList = typeList;
     });
     this.valueChangeSubscription = this.configForm.get('typeID').valueChanges.subscribe((typeID: number) => {
