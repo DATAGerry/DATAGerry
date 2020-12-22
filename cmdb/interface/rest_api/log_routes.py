@@ -27,6 +27,7 @@ from cmdb.framework.cmdb_log_manager import LogManagerGetError, LogManagerDelete
 from cmdb.interface.route_utils import make_response, login_required, right_required, insert_request_user
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import UserModel
+from cmdb.interface.rest_api import log_routes_util
 
 try:
     from cmdb.utils.error import CMDBError
@@ -104,48 +105,12 @@ def get_logs_with_existing_objects(request_user: UserModel):
     location = 'type.acl.groups.includes.' + str(request_user.group_id)
 
     try:
-        query = [
-            {
-                '$lookup':
-                    {
-                        'from': 'framework.objects',
-                        'localField': 'object_id',
-                        'foreignField': 'public_id',
-                        'as': 'object'
-                    }
-            },
-            {'$lookup':
-                {
-                    'from': 'framework.types',
-                    'localField': 'object.0.type_id',
-                    'foreignField': 'public_id',
-                    'as': 'type'
-                }
-            },
-            {'$unwind': {'path': '$type'}},
-            {
-                '$match':
-                    {'$and': [
-                        {'$or': [
-                            {'$or': [{'type.acl': {'$exists': False}}, {'type.acl.activated': False}]},
-                            {'$and': [
-                                {'type.acl.activated': True},
-                                {'$and': [
-                                    {location: {'$exists': True}},
-                                    {location: {'$in': ['READ']}}
-                                ]},
-                            ]}]
-                        },
-                        {
+        query = log_routes_util.get_log_acl_filter_query(location, {
                             'log_type': CmdbObjectLog.__name__,
                             'action': {
                                 '$ne': LogAction.DELETE.value
                             }
-                        }]
-                    }
-            },
-            {'$project': {'object': 0, 'type': 0}}
-        ]
+                        })
         object_logs = log_manager.get_logs_by(query)
     except ObjectManagerGetError as err:
         LOGGER.error(f'Error in get_logs_with_existing_objects: {err}')
@@ -183,48 +148,12 @@ def get_logs_with_deleted_objects(request_user: UserModel):
     passed_objects = []
     location = 'type.acl.groups.includes.' + str(request_user.group_id)
     try:
-        query = [
-            {
-                '$lookup':
-                    {
-                        'from': 'framework.objects',
-                        'localField': 'object_id',
-                        'foreignField': 'public_id',
-                        'as': 'object'
-                    }
-            },
-            {'$lookup':
-                {
-                    'from': 'framework.types',
-                    'localField': 'object.0.type_id',
-                    'foreignField': 'public_id',
-                    'as': 'type'
-                }
-            },
-            {'$unwind': {'path': '$type'}},
-            {
-                '$match':
-                    {'$and': [
-                        {'$or': [
-                            {'$or': [{'type.acl': {'$exists': False}}, {'type.acl.activated': False}]},
-                            {'$and': [
-                                {'type.acl.activated': True},
-                                {'$and': [
-                                    {location: {'$exists': True}},
-                                    {location: {'$in': ['READ']}}
-                                ]},
-                            ]}]
-                        },
-                        {
+        query = log_routes_util.get_log_acl_filter_query(location, {
                             'log_type': CmdbObjectLog.__name__,
                             'action': {
                                 '$ne': LogAction.DELETE.value
                             }
-                        }]
-                    }
-            },
-            {'$project': {'object': 0, 'type': 0}}
-        ]
+                        })
         object_logs = log_manager.get_logs_by(query)
     except ObjectManagerGetError as err:
         LOGGER.error(f'Error in get_logs_with_existing_objects: {err}')
@@ -259,46 +188,10 @@ def get_logs_with_deleted_objects(request_user: UserModel):
 def get_object_delete_logs(request_user: UserModel):
     try:
         location = 'type.acl.groups.includes.' + str(request_user.group_id)
-        query = [
-            {
-                '$lookup':
-                    {
-                        'from': 'framework.objects',
-                        'localField': 'object_id',
-                        'foreignField': 'public_id',
-                        'as': 'object'
-                    }
-            },
-            {'$lookup':
-                {
-                    'from': 'framework.types',
-                    'localField': 'object.0.type_id',
-                    'foreignField': 'public_id',
-                    'as': 'type'
-                }
-            },
-            {'$unwind': {'path': '$type'}},
-            {
-                '$match':
-                    {'$and': [
-                        {'$or': [
-                            {'$or': [{'type.acl': {'$exists': False}}, {'type.acl.activated': False}]},
-                            {'$and': [
-                                {'type.acl.activated': True},
-                                {'$and': [
-                                    {location: {'$exists': True}},
-                                    {location: {'$in': ['READ']}}
-                                ]},
-                            ]}]
-                        },
-                        {
+        query = log_routes_util.get_log_acl_filter_query(location, {
                             'log_type': CmdbObjectLog.__name__,
                             'action': LogAction.DELETE.value
-                        }]
-                    }
-            },
-            {'$project': {'object': 0, 'type': 0}}
-        ]
+                        })
 
         object_logs = log_manager.get_logs_by(query)
     except ObjectManagerGetError as err:
@@ -336,50 +229,14 @@ def get_corresponding_object_logs(public_id: int, request_user: UserModel):
         selected_log = log_manager.get_log(public_id=public_id, group_id=request_user.group_id,
                                            aclPermission=AccessControlPermission.READ)
         location = 'type.acl.groups.includes.' + str(request_user.group_id)
-        query = [
-            {
-                '$lookup':
-                    {
-                        'from': 'framework.objects',
-                        'localField': 'object_id',
-                        'foreignField': 'public_id',
-                        'as': 'object'
-                    }
-            },
-            {'$lookup':
-                {
-                    'from': 'framework.types',
-                    'localField': 'object.0.type_id',
-                    'foreignField': 'public_id',
-                    'as': 'type'
-                }
-            },
-            {'$unwind': {'path': '$type'}},
-            {
-                '$match':
-                    {'$and': [
-                        {'$or': [
-                            {'$or': [{'type.acl': {'$exists': False}}, {'type.acl.activated': False}]},
-                            {'$and': [
-                                {'type.acl.activated': True},
-                                {'$and': [
-                                    {location: {'$exists': True}},
-                                    {location: {'$in': ['READ']}}
-                                ]},
-                            ]}]
-                        },
-                        {
+        query = log_routes_util.get_log_acl_filter_query(location, {
                             'log_type': CmdbObjectLog.__name__,
                             'object_id': selected_log.object_id,
                             'action': LogAction.EDIT.value,
                             '$nor': [{
                                 'public_id': public_id
                             }]
-                        }]
-                    }
-            },
-            {'$project': {'object': 0, 'type': 0}}
-        ]
+                        })
 
         LOGGER.debug(f'Corresponding query: {query}')
         corresponding_logs = log_manager.get_logs_by(query)
