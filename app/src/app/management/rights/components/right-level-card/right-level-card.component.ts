@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,31 +16,25 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { DataTableDirective } from 'angular-datatables';
-import { Group } from '../../../models/group';
+import { Component } from '@angular/core';
+import { SecurityLevel } from '../../../models/right';
 
 @Component({
-  selector: 'cmdb-group-table',
-  templateUrl: './group-table.component.html',
-  styleUrls: ['./group-table.component.scss']
+  selector: 'cmdb-right-level-card',
+  templateUrl: './right-level-card.component.html',
+  styleUrls: ['./right-level-card.component.scss']
 })
-export class GroupTableComponent implements OnInit {
+export class RightLevelCardComponent {
 
+  public readonly cardHeader: string = 'Security Levels';
+  public securityLevel = SecurityLevel;
 
-  @Input() public groups: Array<Group> = [];
-
-  /**
-   * Datatable
-   */
-  @Input() public tableOptions: any = {};
-  @ViewChild(DataTableDirective, { static: false }) dtElement: DataTableDirective;
-
-  constructor() {
+  public get securityLevels() {
+    return Object.keys(SecurityLevel).filter(key => !isNaN(Number(SecurityLevel[key])));
   }
 
-  public ngOnInit(): void {
+  public getLevel(name: string) {
+    return this.securityLevel[name];
   }
-
 
 }

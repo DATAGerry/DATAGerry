@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,23 +13,20 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-export class Right {
-  public level: number | SecurityLevel;
-  public is_master: boolean;
-  public name: string;
-  public label: string;
-  public description: string;
-}
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { User } from '../../../models/user';
 
+@Component({
+  selector: 'cmdb-user-table-actions',
+  templateUrl: './user-table-actions.component.html',
+  styleUrls: ['./user-table-actions.component.scss']
+})
+export class UserTableActionsComponent {
 
-export enum SecurityLevel {
-  NOTSET = 0,
-  PERMISSION = 10,
-  PROTECTED = 30,
-  SECURE = 50,
-  DANGER = 80,
-  CRITICAL = 100
+  @Input() public user: User;
+  @Output() public passWordAction: EventEmitter<User> = new EventEmitter<User>();
+
 }

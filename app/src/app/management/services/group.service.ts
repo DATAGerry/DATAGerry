@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Injectable } from '@angular/core';
@@ -84,7 +84,8 @@ export class GroupService<T = Group> implements ApiService {
     const options = this.post;
     let httpParams: HttpParams = new HttpParams();
     if (params.filter !== undefined) {
-      httpParams = httpParams.set('filter', params.filter);
+      const filter = JSON.stringify(params.filter);
+      httpParams = httpParams.set('filter', filter);
     }
     httpParams = httpParams.set('limit', params.limit.toString());
     httpParams = httpParams.set('sort', params.sort);
@@ -159,6 +160,12 @@ export class GroupService<T = Group> implements ApiService {
     );
   }
 
+  /**
+   * Delete a existing group.
+   * @param publicID
+   * @param action
+   * @param groupID
+   */
   public deleteGroup(publicID: number, action: string = null, groupID?: number): Observable<T> {
     const groupDeleteOptions: any = this.post;
     let params = new HttpParams();
@@ -176,9 +183,22 @@ export class GroupService<T = Group> implements ApiService {
     );
   }
 
-  // Special functions
-  public checkGroupExists(groupName: string) {
-    return this.api.callGet<T>(`${ this.servicePrefix }/${ groupName }`);
+  /**
+   * Get the number of groups.
+   */
+  public countGroups(filter?: any): Observable<number> {
+    const options = this.post;
+    let httpParams: HttpParams = new HttpParams();
+    if (filter !== undefined) {
+      httpParams = httpParams.set('filter', JSON.stringify(filter));
+    }
+    options.params = httpParams;
+    return this.api.callHead<T>(`${ this.servicePrefix }/`, options).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return +apiResponse.headers.get('X-Total-Count');
+      })
+    );
   }
+
 
 }

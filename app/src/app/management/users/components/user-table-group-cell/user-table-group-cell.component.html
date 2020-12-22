@@ -1,0 +1,8 @@
+<ng-container *ngIf="group; else loading;">{{group.label ? group?.label : group?.name}}</ng-container>
+<ng-template #loading>
+  <div class="text-center">
+    <div class="spinner-border spinner-border-sm" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+  </div>
+</ng-template>

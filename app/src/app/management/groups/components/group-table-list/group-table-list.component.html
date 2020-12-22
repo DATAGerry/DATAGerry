@@ -1,0 +1,9 @@
+<cmdb-table [id]="'group-list-table'" [columns]="columns" [items]="groups" [loading]="loading"
+            [sort]="sort" [pageSize]="params.limit" [page]="params.page" [totalItems]="totalGroups"
+            [stateEnabled]="false" [searchEnabled]="false"
+            (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
+            (sortChange)="onSortChange($event)">
+</cmdb-table>
+<ng-template #usersTemplate let-item="item">
+  <cmdb-group-table-user-cell [group]="item"></cmdb-group-table-user-cell>
+</ng-template>

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,61 +13,148 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Right } from '../models/right';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Right, SecurityLevel } from '../models/right';
 import { ActivatedRoute } from '@angular/router';
-import { DataTableDirective } from 'angular-datatables';
-import { Subject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
+import { Column, Sort } from '../../layout/table/table.types';
+import { takeUntil } from 'rxjs/operators';
+import { APIGetMultiResponse } from '../../services/models/api-response';
+import { RightService } from '../services/right.service';
+import { CollectionParameters } from '../../services/models/api-parameter';
 
 @Component({
   selector: 'cmdb-rights',
   templateUrl: './rights.component.html',
   styleUrls: ['./rights.component.scss']
 })
-export class RightsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class RightsComponent implements OnInit, OnDestroy {
 
+  /**
+   * Component un-subscriber.
+   * @private
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  /**
+   * Component title h1.
+   */
+  public readonly title: string = 'Right';
+
+  /**
+   * Title small.
+   */
+  public readonly description: string = 'Management';
+
+  /**
+   * List of all rights, loaded from backend.
+   */
   public rights: Array<Right> = [];
 
-  @ViewChild(DataTableDirective, { static: false })
-  private dtElement: DataTableDirective;
-  public dtOptions: any = {};
-  public dtTrigger: Subject<any> = new Subject();
+  /**
+   * Defined security levels
+   */
+  public securityLevels: SecurityLevel;
 
-  constructor(private route: ActivatedRoute) {
+  /**
+   * Table columns.
+   */
+  public columns: Array<Column> = [];
+
+  /**
+   * Collection params for api call.
+   * @private
+   */
+  private params: CollectionParameters = { filter: undefined, limit: 0, sort: 'name', order: 1, page: 1 };
+
+  /**
+   * Table Template: level column.
+   */
+  @ViewChild('levelTemplate', { static: true }) public levelTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: groups with rights column.
+   */
+  @ViewChild('groupsRightTemplate', { static: true }) public groupsRightTemplate: TemplateRef<any>;
+
+  constructor(private route: ActivatedRoute, private rightService: RightService) {
     this.rights = this.route.snapshot.data.rights as Array<Right>;
   }
 
   public ngOnInit(): void {
-    this.dtOptions = {
-      ordering: false,
-      rowGroup: {
-        startRender: (rows, group) => {
-          return group + ' (' + rows.count() + ' rights)';
-        },
-        dataSrc: (data) => {
-          const baseData = data[0].split('.');
-          return `${baseData[0]}.${baseData[1]}`;
-        }
+    this.columns = [
+      {
+        display: 'Name',
+        name: 'name',
+        data: 'name',
+        sortable: true
       },
-      pageLength: 50
-    };
-
+      {
+        display: 'Label',
+        name: 'label',
+        data: 'label',
+        sortable: true
+      },
+      {
+        display: 'Description',
+        name: 'description',
+        data: 'description',
+        sortable: true
+      },
+      {
+        display: 'Level',
+        name: 'level',
+        data: 'level',
+        sortable: true,
+        render(data: any) {
+          if (!data) {
+            return '0';
+          }
+          return data;
+        },
+        template: this.levelTemplate
+      },
+      {
+        display: 'Groups',
+        name: 'groups',
+        data: 'name',
+        sortable: false,
+        template: this.groupsRightTemplate
+      }
+    ] as Array<Column>;
   }
 
+  /**
+   * Loads the rights from the api based on the params.
+   */
+  public loadRightsFromAPI() {
+    this.rightService.getRights(this.params).pipe(takeUntil(this.subscriber))
+      .subscribe((response: APIGetMultiResponse<Right>) => {
+        this.rights = response.results as Array<Right>;
+      });
+  }
+
+  /**
+   * On table sort change.
+   * Reload all rights.
+   *
+   * @param sort
+   */
+  public onSortChange(sort: Sort): void {
+    this.params.sort = sort.name;
+    this.params.order = sort.order;
+    this.loadRightsFromAPI();
+  }
+
+  /**
+   * Un-subscribe on component close.
+   */
   public ngOnDestroy(): void {
-    this.dtTrigger.unsubscribe();
-    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-      dtInstance.destroy();
-    });
-
+    this.subscriber.next();
+    this.subscriber.complete();
   }
-
-  public ngAfterViewInit(): void {
-    this.dtTrigger.next();
-  }
-
 
 }

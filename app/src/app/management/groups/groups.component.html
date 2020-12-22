@@ -1,13 +1,26 @@
-<div id="group-list-header" class="d-flex justify-content-between">
-  <h1>Groups</h1>
-  <div class="header-buttons">
-    <button *permissionLink="'base.user-management.group.add'"
-            routerLink="/management/groups/add/" type="button" class="btn btn-success">
-      Add
-    </button>
-  </div>
-</div>
+<h1>{{title}} <small class="text-muted">{{description}}</small></h1>
 <hr/>
-<div id="group-list">
-  <cmdb-group-table [groups]="groups" [tableOptions]="tableOptions"></cmdb-group-table>
-</div>
+
+<cmdb-table [id]="'user-list-table'" [columns]="columns" [items]="groups" [loading]="loading"
+            [customButtons]="[buttonTemplate]" [sort]="sort" [pageSize]="params.limit" [page]="params.page"
+            [totalItems]="totalGroups" [stateEnabled]="false"
+            (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
+            (sortChange)="onSortChange($event)" (searchChange)="onSearchChange($event)">
+</cmdb-table>
+
+<!-- Custom table buttons -->
+<ng-template #addButtonTemplate>
+  <button *permissionLink="'base.user-management.group.add'" [routerLink]="['/', 'management','groups', 'add']"
+          type="button" class="btn btn-sm btn-success mr-1 ml-1">
+    <i class="fas fa-plus"></i> New
+  </button>
+</ng-template>
+
+<!-- Table templates -->
+<ng-template #usersTemplate let-item="item">
+  <cmdb-group-table-user-cell [group]="item"></cmdb-group-table-user-cell>
+</ng-template>
+
+<ng-template #actionsTemplate let-item="item">
+  <cmdb-group-table-actions [group]="item"></cmdb-group-table-actions>
+</ng-template>

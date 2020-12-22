@@ -1,11 +1,25 @@
+/*
+* DATAGERRY - OpenSource Enterprise CMDB
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as
+* published by the Free Software Foundation, either version 3 of the
+* License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+
+* You should have received a copy of the GNU Affero General Public License
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { User } from '../../../models/user';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { UserService } from '../../../services/user.service';
-import { ToastService } from '../../../../layout/toast/toast.service';
-import { ReplaySubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
 @Component({
   templateUrl: './users-passwd-modal.component.html',
@@ -14,26 +28,11 @@ import { takeUntil } from 'rxjs/operators';
 export class UsersPasswdModalComponent {
 
   @ViewChild('passWordInput', { static: false }) public passWordToggle: ElementRef;
+  @Input() public user: User;
 
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
-  // Data
-  // tslint:disable-next-line:variable-name
-  private _user: User;
-
-  @Input('user')
-  public set user(value: User) {
-    this._user = value;
-    this.passwdForm.get('public_id').setValue(this._user.public_id);
-  }
-
-  public get user(): User {
-    return this._user;
-  }
-
-  // Form
   public passwdForm: FormGroup;
 
-  constructor(private userService: UserService, private toast: ToastService, public activeModal: NgbActiveModal) {
+  constructor(public activeModal: NgbActiveModal) {
     this.passwdForm = new FormGroup({
       public_id: new FormControl(null),
       password: new FormControl('', Validators.required)
@@ -52,15 +51,9 @@ export class UsersPasswdModalComponent {
     }
   }
 
-  public changePasswd() {
+  public onPasswordChange(): void {
     if (this.passwdForm.valid) {
-      const changePasswd = this.userService.changeUserPassword(
-        this.user.public_id, this.passwdForm.get('password').value).pipe(takeUntil(this.subscriber)).subscribe(
-        (user: User) => {
-          this.toast.success(`Password for user with ID: ${ this.user.public_id } was changed`);
-          this.activeModal.close(user);
-        }
-      );
+      this.activeModal.close({public_id: this.user.public_id, password: this.password.value});
     }
   }
 

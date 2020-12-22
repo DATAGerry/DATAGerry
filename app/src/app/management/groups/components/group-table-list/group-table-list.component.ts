@@ -16,41 +16,27 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { GroupService } from '../services/group.service';
+import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
-import { Group } from '../models/group';
-import { APIGetMultiResponse } from '../../services/models/api-response';
-import { CollectionParameters } from '../../services/models/api-parameter';
+import { CollectionParameters } from '../../../../services/models/api-parameter';
+import { Column, Sort, SortDirection } from '../../../../layout/table/table.types';
 import { takeUntil } from 'rxjs/operators';
-import { Column, Sort, SortDirection } from '../../layout/table/table.types';
+import { APIGetMultiResponse } from '../../../../services/models/api-response';
+import { GroupService } from '../../../services/group.service';
+import { Group } from 'src/app/management/models/group';
 
 @Component({
-  selector: 'cmdb-groups',
-  templateUrl: './groups.component.html',
-  styleUrls: ['./groups.component.scss']
+  selector: 'cmdb-group-table-list',
+  templateUrl: './group-table-list.component.html',
+  styleUrls: ['./group-table-list.component.scss']
 })
-export class GroupsComponent implements OnInit, OnDestroy {
+export class GroupTableListComponent implements OnInit, OnDestroy {
 
   /**
-   * Component title h1.
-   */
-  public readonly title: string = 'Group';
-
-  /**
-   * Title small.
-   */
-  public readonly description: string = 'Management';
-
-  /**
-   * Subscriber replay for auto unsubscribe.
+   * Component un-subscriber.
+   * @private
    */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
-
-  /**
-   * Table Template: Group add button.
-   */
-  @ViewChild('addButtonTemplate', { static: true }) public buttonTemplate: TemplateRef<any>;
 
   /**
    * Table Template: Group users column.
@@ -58,22 +44,19 @@ export class GroupsComponent implements OnInit, OnDestroy {
   @ViewChild('usersTemplate', { static: true }) public usersTemplate: TemplateRef<any>;
 
   /**
-   * Table Template: Group actions column.
+   * Collection params
    */
-  @ViewChild('actionsTemplate', { static: true }) public actionsTemplate: TemplateRef<any>;
+  public params: CollectionParameters = { filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1 };
+  public columns: Array<Column> = [];
+  public totalGroups: number;
+
+  @Input('filter')
+  public set Filter(filter: any) {
+    this.params.filter = filter;
+  }
 
   /**
-   * List of current loaded groups.
-   */
-  public groups: Array<Group> = [];
-
-  /**
-   * Backend http call response for user groups.
-   */
-  private groupAPIResponse: APIGetMultiResponse<Group>;
-
-  /**
-   * Table loading.
+   * Table loading?
    */
   public loading: boolean = false;
 
@@ -83,11 +66,9 @@ export class GroupsComponent implements OnInit, OnDestroy {
   public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
 
   /**
-   * Collection params
+   * Groups
    */
-  public params: CollectionParameters = { filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1 };
-  public columns: Array<Column> = [];
-  public totalGroups: number;
+  public groups: Array<Group> = [];
 
   constructor(private groupService: GroupService) {
   }
@@ -124,38 +105,23 @@ export class GroupsComponent implements OnInit, OnDestroy {
         fixed: true,
         template: this.usersTemplate,
         cssClasses: ['text-center']
-      },
-      {
-        display: 'Actions',
-        name: 'actions',
-        searchable: false,
-        sortable: false,
-        fixed: true,
-        template: this.actionsTemplate,
-        cssClasses: ['text-center'],
-        cellClasses: ['actions-buttons']
       }
     ] as Array<Column>;
     this.loadGroupsFromApi();
   }
 
-  /**
-   * Load the groups from the api.
-   * @private
-   */
   private loadGroupsFromApi(): void {
     this.loading = true;
     this.groupService.getGroups(this.params).pipe(takeUntil(this.subscriber)).subscribe((response: APIGetMultiResponse<Group>) => {
       this.groups = response.results as Array<Group>;
       this.totalGroups = response.total;
-      this.groupAPIResponse = response;
       this.loading = false;
     });
   }
 
   /**
    * On table page change.
-   * Reload all groups.
+   * Reload all users.
    *
    * @param page
    */
@@ -166,7 +132,7 @@ export class GroupsComponent implements OnInit, OnDestroy {
 
   /**
    * On table page size change.
-   * Reload all groups.
+   * Reload all users.
    *
    * @param limit
    */
@@ -176,52 +142,8 @@ export class GroupsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * On table search change.
-   * Reload all groups.
-   *
-   * @param search
-   */
-  public onSearchChange(search: any): void {
-    if (search) {
-      let query;
-      query = [];
-      const or = [];
-      const searchableColumns = this.columns.filter(c => c.searchable);
-      // Searchable Columns
-      for (const column of searchableColumns) {
-        const regex: any = {};
-        regex[column.name] = {
-          $regex: String(search),
-          $options: 'ismx'
-        };
-        or.push(regex);
-      }
-      query.push({
-        $addFields: {
-          public_id: { $toString: '$public_id' }
-        }
-      });
-      or.push({
-        public_id: {
-          $elemMatch: {
-            value: {
-              $regex: String(search),
-              $options: 'ismx'
-            }
-          }
-        }
-      });
-      query.push({ $match: { $or: or } });
-      this.params.filter = query;
-    } else {
-      this.params.filter = undefined;
-    }
-    this.loadGroupsFromApi();
-  }
-
-  /**
    * On table sort change.
-   * Reload all groups.
+   * Reload all users.
    *
    * @param sort
    */

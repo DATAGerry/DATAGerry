@@ -1,10 +1,13 @@
 <div [attr.id]="id" #container class="dg-table table-container">
   <table-loading *ngIf="loadingEnabled" [loading]="loading"></table-loading>
-  <div class="table-header d-flex mb-3">
+  <div class="table-header d-flex mb-3" *ngIf="pageSizeEnabled || stateEnabled || toggleable || searchEnabled">
     <div class="mr-auto" *ngIf="pageSizeEnabled">
       <table-page-size [pageSize]="pageSize" [pageSizeList]="pageSizeList"
                        (pageSizeChange)="pageSizeChange.emit($event)">
       </table-page-size>
+    </div>
+    <div *ngIf="customButtons && customButtons.length > 0" class="custom-button-templates">
+      <ng-template *ngFor="let customButton of customButtons" [ngTemplateOutlet]="customButton"></ng-template>
     </div>
     <div class="table-config-switch mr-1 ml-1 border-right" *ngIf="stateEnabled">
       <table-state [tableStates]="tableStates" [currentState]="tableState" (stateSave)="onStateSave($event)"
@@ -36,8 +39,8 @@
           [hidden]="column.hidden"></th>
     </tr>
     </thead>
-    <tbody table-body [bodyClasses]="bodyClasses">
-    <tr table-row *ngFor="let item of items; let rowIndex= index" [item]="item" [rowIndex]="rowIndex"
+    <tbody table-body [bodyClasses]="bodyClasses" *ngIf="!groupRowsBy; else rowGroupTable">
+    <tr table-row *ngFor="let item of items; let rowIndex = index" [item]="item" [rowIndex]="rowIndex"
         [ngClass]="rowClasses">
       <td *ngIf="selectEnabled" [ngStyle]="{'width': '3rem'}">
         <div class="form-check">
@@ -55,6 +58,15 @@
       </td>
     </tr>
     </tbody>
+    <ng-template #rowGroupTable>
+      <tbody table-body [bodyClasses]="bodyClasses" *ngFor="let rowGroup of groupRowsBy.group(items, groupRowsBy.src)">
+      <tr>
+        <td [colSpan]="(columns.length) + (selectEnabled ? 1: 0)">
+          Grouping is currently not complete implemented.
+        </td>
+      </tr>
+      </tbody>
+    </ng-template>
     <tfoot table-foot>
     </tfoot>
   </table>
