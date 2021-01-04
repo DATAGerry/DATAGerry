@@ -403,28 +403,57 @@ def group_objects_by_type_id(value, request_user: UserModel):
     return resp
 
 
-@object_blueprint.route('/reference/<int:public_id>/', methods=['GET'])
-@object_blueprint.route('/reference/<int:public_id>', methods=['GET'])
+@objects_blueprint.route('/<int:public_id>/references', methods=['GET', 'HEAD'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
+@objects_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
-def get_objects_by_reference(public_id: int, request_user: UserModel):
-    try:
-        active_flag = None
-        if _fetch_only_active_objs():
-            active_flag = True
-        reference_list: list = object_manager.get_object_references(public_id=public_id, active_flag=active_flag,
-                                                                    user=request_user,
-                                                                    permission=AccessControlPermission.READ)
-        rendered_reference_list = RenderList(object_list=reference_list, request_user=request_user, ref_render=True,
-                                             object_manager=object_manager).render_result_list()
-    except ObjectManagerGetError as err:
-        return abort(404, err.message)
+def get_object_references(public_id: int, params: CollectionParameters, request_user: UserModel):
+    from cmdb.framework.managers.object_manager import ObjectManager
+    manager = ObjectManager(database_manager=current_app.database_manager)
+    view = params.optional.get('view', 'native')
 
+    if _fetch_only_active_objs():
+        if isinstance(params.filter, dict):
+            params.filter.update({'$match': {'active': {"$eq": True}}})
+        elif isinstance(params.filter, list):
+            params.filter.append({'$match': {'active': {"$eq": True}}})
+
+
+    try:
+        referenced_object: CmdbObject = manager.get(public_id, user=request_user,
+                                                    permission=AccessControlPermission.READ)
+    except ManagerGetError as err:
+        return abort(404, err.message)
     except AccessDeniedError as err:
         return abort(403, err.message)
 
-    if len(reference_list) < 1:
-        return make_response(rendered_reference_list, 204)
-    return make_response(rendered_reference_list)
+    try:
+        iteration_result: IterationResult[CmdbObject] = manager.references(object_=referenced_object,
+                                                                           filter=params.filter,
+                                                                           limit=params.limit,
+                                                                           skip=params.skip,
+                                                                           sort=params.sort,
+                                                                           order=params.order,
+                                                                           user=request_user,
+                                                                           permission=AccessControlPermission.READ
+                                                                           )
+
+        if view == 'native':
+            object_list: List[dict] = [object_.__dict__ for object_ in iteration_result.results]
+            api_response = GetMultiResponse(object_list, total=iteration_result.total, params=params,
+                                            url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
+        elif view == 'render':
+            rendered_list = RenderList(object_list=iteration_result.results, request_user=request_user,
+                                       object_manager=object_manager, ref_render=True).render_result_list(
+                raw=True)
+            api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
+                                            url=request.url, model=Model('RenderResult'), body=request.method == 'HEAD')
+        else:
+            return abort(401, 'No possible view parameter')
+
+    except ManagerIterationError as err:
+        return abort(400, err.message)
+    return api_response.make_response()
 
 
 @object_blueprint.route('/user/<int:public_id>/', methods=['GET'])
