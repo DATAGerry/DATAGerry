@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019-2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,11 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-<<<<<<< HEAD
-import {Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-=======
 import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
->>>>>>> b8a73bab... [NET-778] Replace datatables in object log list.
 import { LogService } from '../../../../services/log.service';
 import { CmdbLog } from '../../../../models/cmdb-log';
 import { Column, Sort, SortDirection } from '../../../../../layout/table/table.types';
