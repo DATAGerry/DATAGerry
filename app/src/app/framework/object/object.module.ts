@@ -125,7 +125,9 @@ import { ObjectTableHeadComponent } from './components/object-table-head/object-
   ],
   exports: [
     ObjectViewRenderComponent,
-    ObjectTableActionsComponent
+    ObjectTableActionsComponent,
+    ObjectLogChangeViewComponent,
+    ObjectLogUserComponent
   ]
 })
 export class ObjectModule {

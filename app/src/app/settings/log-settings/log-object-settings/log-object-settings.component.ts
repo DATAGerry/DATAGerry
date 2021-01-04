@@ -22,6 +22,7 @@ import { CmdbLog } from '../../../framework/models/cmdb-log';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { Observable, forkJoin } from 'rxjs';
+import {APIGetMultiResponse} from "../../../services/models/api-response";
 
 @Component({
   selector: 'cmdb-modal-content',
@@ -53,10 +54,9 @@ export class DeleteModalComponent {
   templateUrl: './log-object-settings.component.html',
   styleUrls: ['./log-object-settings.component.scss']
 })
-export class LogObjectSettingsComponent implements OnInit {
+export class LogObjectSettingsComponent {
 
   public activeLogList: CmdbLog[];
-  public activeLength: number = 0;
   public deActiveLogList: CmdbLog[];
   public deActiveLength: number = 0;
   public deleteLogList: CmdbLog[];
@@ -65,50 +65,6 @@ export class LogObjectSettingsComponent implements OnInit {
   public cleanupProgress: number = 0;
 
   constructor(private logService: LogService, private modalService: NgbModal, private toastService: ToastService) {
-
-  }
-
-  public ngOnInit(): void {
-    this.reloadLogs();
-  }
-
-  private reloadLogs() {
-    this.loadExists();
-    this.loadNotExists();
-    this.loadDeletes();
-  }
-
-  private loadExists() {
-    this.logService.getLogsWithExistingObject().subscribe((activeLogs: CmdbLog[]) => {
-      this.activeLogList = activeLogs;
-    }, error => {
-      console.error(error);
-      this.activeLength = 0;
-    }, () => {
-      this.activeLength = this.activeLogList.length;
-    });
-  }
-
-  private loadNotExists() {
-    this.logService.getLogsWithNotExistingObject().subscribe((deActiveLogs: CmdbLog[]) => {
-      this.deActiveLogList = deActiveLogs;
-    }, error => {
-      console.error(error);
-      this.deActiveLength = 0;
-    }, () => {
-      this.deActiveLength = this.deActiveLogList.length;
-    });
-  }
-
-  private loadDeletes() {
-    this.logService.getDeleteLogs().subscribe((deletedLogs: CmdbLog[]) => {
-      this.deleteLogList = deletedLogs;
-    }, error => {
-      console.error(error);
-      this.deleteLogLength = 0;
-    }, () => {
-      this.deleteLogLength = this.deleteLogList.length;
-    });
   }
 
 
@@ -124,13 +80,10 @@ export class LogObjectSettingsComponent implements OnInit {
           () => {
             switch (reloadList) {
               case 'active':
-                this.loadExists();
                 break;
               case 'deactive':
-                this.loadNotExists();
                 break;
               case 'delete':
-                this.loadDeletes();
                 break;
             }
           }
@@ -158,13 +111,10 @@ export class LogObjectSettingsComponent implements OnInit {
       ), () => {
         switch (reloadList) {
           case 'active':
-            this.loadExists();
             break;
           case 'deactive':
-            this.loadNotExists();
             break;
           case 'delete':
-            this.loadDeletes();
             break;
         }
       });

@@ -16,11 +16,13 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { LogService } from '../../../../services/log.service';
 import { CmdbLog } from '../../../../models/cmdb-log';
 import { Column, Sort, SortDirection } from '../../../../../layout/table/table.types';
-import { CollectionParameters} from '../../../../../services/models/api-parameter';
+import { CollectionParameters } from '../../../../../services/models/api-parameter';
+import { APIGetMultiResponse } from '../../../../../services/models/api-response';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'cmdb-object-log-list',
@@ -67,59 +69,95 @@ export class ObjectLogListComponent implements OnInit {
   public readonly initPage: number = 1;
   public page: number = this.initPage;
 
+  public total: number = 0;
   public loading: boolean = false;
 
-  public apiParameters: CollectionParameters = { limit: 10, sort: 'date', order: -1, page: 1};
+  public apiParameters: CollectionParameters = { limit: 10, sort: 'log_time', order: -1, page: 1};
 
   constructor(private logService: LogService) {
   }
 
   private loadLogList() {
-    this.logService.getLogsByObject(this.publicID).subscribe((logs: CmdbLog[]) => {
-      this.logList = logs;
-    }, (error) => {
-      console.log(error);
+    this.apiParameters = { filter: this.filterBuilder(),
+      limit: this.limit, sort: this.sort.name, order: this.sort.order, page: this.page};
+    this.logService.getLogsByObject(this.publicID, this.apiParameters)
+      .subscribe((apiResponse: APIGetMultiResponse<CmdbLog>) => {
+      this.logList = apiResponse.results;
+      this.total = apiResponse.total;
     });
   }
 
+  private resetCollectionParameters(): void {
+    this.apiParameters = { limit: 10, sort: 'date', order: -1, page: 1};
+  }
+
+  public filterBuilder(): any {
+    const query = [];
+    if (this.filter) {
+      const searchableColumns = this.columns.filter(c => c.searchable);
+      const or = [];
+      // Searchable Columns
+      for (const column of searchableColumns) {
+        const regex: any = {};
+        regex[column.name] = {
+          $regex: String(this.filter),
+          $options: 'ismx'
+        };
+        or.push(regex);
+      }
+      query.push({
+        $addFields: {
+          public_id: { $toString: '$public_id' }
+        }
+      });
+      query.push({ $match: { $and: [{log_type: 'CmdbObjectLog', object_id: this.publicID}, {$or: or}]}});
+    } else {
+      query.push({$match: {log_type: 'CmdbObjectLog', object_id: this.publicID}});
+    }
+    return query;
+  }
+
   public ngOnInit(): void {
+    this.resetCollectionParameters();
     this.setColumns();
   }
 
   private setColumns(): void {
-
     const columns = [];
-
-    columns.push({
-      display: 'Date',
-      name: 'date',
-      data: 'log_time',
-      sortable: true,
-      searchable: false,
-      fixed: true,
-      template: this.dateTemplate,
-      cssClasses: ['text-center'],
-      style: { width: '6em' }
-    } as unknown as Column);
+    columns.push(
+      {
+        display: 'Log Time',
+        name: 'log_time',
+        data: 'log_time',
+        sortable: true,
+        cssClasses: ['text-center'],
+        style: { 'white-space': 'nowrap' },
+        template: this.dataTemplate,
+        searchable: false,
+        render(data: any) {
+          const date = new Date(data);
+          return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
+        }
+      } as Column
+    );
 
     columns.push({
       display: 'Log ID',
-      name: 'log-id',
+      name: 'public_id',
       data: 'public_id',
       sortable: true,
-      searchable: false,
+      searchable: true,
       fixed: true,
       template: this.dataTemplate,
-      cssClasses: ['text-center'],
-      style: { width: '6em' }
+      style: { 'white-space': 'nowrap' },
     } as unknown as Column);
 
     columns.push({
       display: 'Action',
-      name: 'action',
+      name: 'action_name',
       data: 'action_name',
       sortable: true,
-      searchable: false,
+      searchable: true,
       fixed: true,
       template: this.dataTemplate,
       cssClasses: ['text-center'],
@@ -151,9 +189,10 @@ export class ObjectLogListComponent implements OnInit {
 
     columns.push({
       display: 'Author',
-      name: 'author',
+      data: 'author_name',
+      name: 'author_name',
       sortable: true,
-      searchable: false,
+      searchable: true,
       fixed: true,
       template: this.userTemplate,
       cssClasses: ['text-center'],
@@ -165,7 +204,7 @@ export class ObjectLogListComponent implements OnInit {
       name: 'version',
       data: 'version',
       sortable: true,
-      searchable: false,
+      searchable: true,
       fixed: true,
       template: this.dataTemplate,
       cssClasses: ['text-center'],
@@ -188,14 +227,17 @@ export class ObjectLogListComponent implements OnInit {
   }
   public onPageChange(page: number) {
     this.page = page;
+    this.loadLogList();
   }
 
   public onPageSizeChange(limit: number): void {
     this.limit = limit;
+    this.loadLogList();
   }
 
   public onSortChange(sort: Sort): void {
     this.sort = sort;
+    this.loadLogList();
   }
 
   public onSearchChange(search: any): void {
@@ -204,6 +246,7 @@ export class ObjectLogListComponent implements OnInit {
     } else {
       this.filter = undefined;
     }
+    this.loadLogList();
   }
 
 }

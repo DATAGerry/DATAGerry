@@ -17,20 +17,23 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService } from '../../services/api-call.service';
+import {ApiCallService, ApiService, httpObserveOptions, HttpProtocolHelper} from '../../services/api-call.service';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import {filter, map} from 'rxjs/operators';
 import { CmdbLog } from '../models/cmdb-log';
+import { CollectionParameters } from '../../services/models/api-parameter';
+import { APIGetMultiResponse } from '../../services/models/api-response';
+import { HttpParams, HttpResponse } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LogService<T = CmdbLog> implements ApiService {
 
-  public servicePrefix: string = 'log';
-
   constructor(private api: ApiCallService) {
   }
+
+  public servicePrefix: string = 'log';
 
   public getLog(publicID: number): Observable<T> {
     return this.api.callGet<T>(`${this.servicePrefix}/${publicID}/`).pipe(
@@ -40,34 +43,41 @@ export class LogService<T = CmdbLog> implements ApiService {
     );
   }
 
-  public getLogsByObject(publicID: number) {
-    return this.api.callGet<T>(`${this.servicePrefix}/object/${publicID}/`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
+  /**
+   * Iterate over the log collection
+   * @param publicID
+   * @param params Instance of CollectionParameters
+   */
+  public getLogsByObject(publicID: number, params: CollectionParameters = { filter: undefined,
+    limit: 10, sort: 'public_id', order: 1, page: 1}): Observable<APIGetMultiResponse<T>> {
+    const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions,
+      JSON.stringify(params.filter), params.limit, params.sort, params.order, params.page);
+    return this.api.callGet<Array<T>>(this.servicePrefix + '/object/' + publicID, options).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
     );
   }
 
-  public getLogsWithExistingObject() {
-    return this.api.callGet<T>(`${this.servicePrefix}/object/exists/`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
+  public getLogsWithExistingObject(params: CollectionParameters = { filter: undefined,
+    limit: 10, sort: 'public_id', order: 1, page: 1}): Observable<APIGetMultiResponse<T>> {
+    const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, params.filter,
+      params.limit, params.sort, params.order, params.page);
+
+    return this.api.callGet<Array<T>>(`${this.servicePrefix}/object/exists/`, options).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
     );
   }
 
-  public getLogsWithNotExistingObject() {
-    return this.api.callGet<T>(`${this.servicePrefix}/object/notexists/`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
+  public getLogsWithNotExistingObject(params: CollectionParameters = { filter: undefined,
+    limit: 10, sort: 'public_id', order: 1, page: 1}): Observable<APIGetMultiResponse<T>> {
+    const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, params.filter,
+      params.limit, params.sort, params.order, params.page);
+
+    return this.api.callGet<T>(`${this.servicePrefix}/object/notexists/`, options).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
     );
@@ -102,5 +112,4 @@ export class LogService<T = CmdbLog> implements ApiService {
       })
     );
   }
-
 }

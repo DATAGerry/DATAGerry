@@ -158,7 +158,7 @@ def register_blueprints(app):
     app.register_blueprint(search_blueprint)
     app.register_blueprint(file_blueprint)
     app.register_blueprint(type_export_blueprint)
-    app.register_blueprint(log_blueprint)
+    app.register_multi_blueprint(log_blueprint, multi_prefix=['/log_rest', '/log'])
     app.register_blueprint(settings_blueprint)
     app.register_blueprint(importer_blueprint)
     app.register_blueprint(exportd_job_blueprint)

@@ -1,17 +1,17 @@
 <ul class="nav nav-tabs" id="myTab" role="tablist">
   <li class="nav-item">
     <a class="nav-link active" id="log-object-activate-tab" data-toggle="tab" href="#activate" role="tab">
-      Existing Objects Logs <span class="badge badge-secondary">{{activeLength}}</span>
+      Existing Objects Logs
     </a>
   </li>
   <li class="nav-item">
     <a class="nav-link" id="log-object-deactivate-tab" data-toggle="tab" href="#deactivate" role="tab">
-      Deleted Objects Logs <span class="badge badge-secondary">{{deActiveLength}}</span>
+      Deleted Objects Logs
     </a>
   </li>
   <li class="nav-item">
     <a class="nav-link" id="log-object-delete-tab" data-toggle="tab" href="#delete-logs" role="tab">
-      Delete Logs <span class="badge badge-secondary">{{deleteLogLength}}</span>
+      Delete Logs
     </a>
   </li>
 </ul>
@@ -20,16 +20,15 @@
     <ngb-progressbar type="danger" [value]="cleanupProgress" [animated]="true" [striped]="true"></ngb-progressbar>
   </div>
   <div class="tab-pane fade show active" id="activate" role="tabpanel">
-    <cmdb-activate-tab [activeLogList]="activeLogList"
-                       (deleteEmitter)="deleteLog($event, 'active')"></cmdb-activate-tab>
+    <cmdb-activate-tab (deleteEmitter)="deleteLog($event, 'active')"></cmdb-activate-tab>
   </div>
   <div class="tab-pane fade" id="deactivate" role="tabpanel">
-    <cmdb-deactivate-tab [deActiveLogList]="deActiveLogList" (deleteEmitter)="deleteLog($event, 'deactive')"
+    <cmdb-deactivate-tab (deleteEmitter)="deleteLog($event, 'deactive')"
                          (cleanUpEmitter)="cleanup($event, 'deactive')">
     </cmdb-deactivate-tab>
   </div>
   <div class="tab-pane fade" id="delete-logs" role="tabpanel">
-    <cmdb-delete-tab [deleteLogList]="deleteLogList" (deleteEmitter)="deleteLog($event, 'delete')"
+    <cmdb-delete-tab (deleteEmitter)="deleteLog($event, 'delete')"
                      (cleanUpEmitter)="cleanup($event, 'delete')"></cmdb-delete-tab>
   </div>
 </div>
