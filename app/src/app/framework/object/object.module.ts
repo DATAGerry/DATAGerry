@@ -125,7 +125,9 @@ import { ObjectReferencesTableComponent } from './components/object-references-t
   ],
   exports: [
     ObjectViewRenderComponent,
-    ObjectTableActionsComponent
+    ObjectTableActionsComponent,
+    ObjectLogChangeViewComponent,
+    ObjectLogUserComponent
   ]
 })
 export class ObjectModule {

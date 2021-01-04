@@ -13,44 +13,69 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
 from datetime import datetime
 
-from cmdb.framework import CmdbLog, CmdbMetaLog, CmdbObjectLog
-from cmdb.framework.cmdb_base import CmdbManagerBase
-from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerUpdateError, \
-    ObjectManagerDeleteError
+from cmdb.framework import CmdbLog, CmdbMetaLog
+from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.framework.managers.framework_manager import FrameworkManager
+
+from cmdb.framework.results.iteration import IterationResult
+from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerDeleteError, ManagerInsertError, ManagerUpdateError
 from cmdb.framework.cmdb_log import CMDBError, LOGGER, LogAction
+from cmdb.search import Query
 
 
-class CmdbLogManager(CmdbManagerBase):
+class CmdbLogManager(FrameworkManager):
+    """
+        Manager for the CmdbLog module. Manages the CRUD functions of the logs and the iteration over the collection.
+        """
 
-    def __init__(self, database_manager=None):
-        super(CmdbLogManager, self).__init__(database_manager)
+    def __init__(self, database_manager: DatabaseManagerMongo):
+        """
+        Constructor of `CmdbLogManager`
 
-    def search(self):
-        pass
+        Args:
+            database_manager: Connection to the database class.
+        """
+        self.dbm = database_manager
+        super(CmdbLogManager, self).__init__(CmdbMetaLog.COLLECTION, database_manager=database_manager)
 
     # CRUD functions
     def get_log(self, public_id: int):
-        try:
-            return CmdbLog(**self._get(
-                collection=CmdbMetaLog.COLLECTION,
-                public_id=public_id
-            ))
-        except (CMDBError, Exception) as err:
-            LOGGER.error(err)
-            raise LogManagerGetError(err)
+        cursor_result = self._get(self.collection, filter={'public_id': public_id}, limit=1)
+        for resource_result in cursor_result.limit(-1):
+            return CmdbMetaLog.from_data(resource_result)
+        raise ManagerGetError(f'Type with ID: {public_id} not found!')
 
-    def get_logs_by(self, sort='public_id', **requirements):
-        ack = []
+    def get_logs(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs):
+        """
+        Iterate over a collection of object logs resources.
+
+        Args:
+            filter: match requirements of field values
+            limit: max number of elements to return
+            skip: number of elements to skip first
+            sort: sort field
+            order: sort order
+
+        Returns:
+            IterationResult: Instance of IterationResult with generic CmdbObjectLog.
+        """
         try:
-            logs = self._get_many(collection=CmdbMetaLog.COLLECTION, sort=sort, **requirements)
-            for log in logs:
-                ack.append(CmdbLog(**log))
+            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            aggregation_result = next(self._aggregate(self.collection, query))
+        except ManagerGetError as err:
+            raise ManagerIterationError(err=err)
+
+        try:
+            iteration_result: IterationResult[CmdbMetaLog] = IterationResult.from_aggregation(aggregation_result)
+            iteration_result.convert_to(CmdbMetaLog)
         except (CMDBError, Exception) as err:
             LOGGER.error(err)
-            raise LogManagerGetError(err)
-        return ack
+            raise ManagerGetError(err)
+        return iteration_result
 
     def insert_log(self, action: LogAction, log_type: str, **kwargs) -> int:
         # Get possible public id
@@ -82,50 +107,29 @@ class CmdbLogManager(CmdbManagerBase):
             ack = self._delete(CmdbMetaLog.COLLECTION, public_id)
         except CMDBError as err:
             LOGGER.error(err)
-            raise LogManagerDeleteError(err)
+            raise ManagerDeleteError(err)
         return ack
 
-    # FIND functions
-    def get_object_logs(self, public_id: int) -> list:
-        """
-        Get corresponding logs to object.
-        Args:
-            public_id: Public id for logs
 
-        Returns:
-            List of object-logs
-        """
-        object_list: list = []
-        try:
-            query = {'filter': {'log_type': str(CmdbObjectLog.__name__), 'object_id': public_id}}
-            founded_logs = self.dbm.find_all(CmdbMetaLog.COLLECTION, **query)
-            for _ in founded_logs:
-                object_list.append(CmdbLog(**_))
-        except (CMDBError, Exception) as err:
-            LOGGER.error(f'Error in get_object_logs: {err}')
-            raise LogManagerGetError(err)
-        return object_list
-
-
-class LogManagerGetError(ObjectManagerGetError):
+class LogManagerGetError(ManagerGetError):
 
     def __init__(self, err):
         super(LogManagerGetError, self).__init__(err)
 
 
-class LogManagerInsertError(ObjectManagerInsertError):
+class LogManagerInsertError(ManagerInsertError):
 
     def __init__(self, err):
         super(LogManagerInsertError, self).__init__(err)
 
 
-class LogManagerUpdateError(ObjectManagerUpdateError):
+class LogManagerUpdateError(ManagerUpdateError):
 
     def __init__(self, err):
         super(LogManagerUpdateError, self).__init__(err)
 
 
-class LogManagerDeleteError(ObjectManagerDeleteError):
+class LogManagerDeleteError(ManagerDeleteError):
 
     def __init__(self, err):
         super(LogManagerDeleteError, self).__init__(err)

@@ -36,6 +36,8 @@ import { LogSettingsComponent } from './log-settings.component';
 import { ActivateExportdTabComponent } from './log-exportd-settings/activate-exportd-tab/activate-exportd-tab.component';
 import { DeactivateExportdTabComponent } from './log-exportd-settings/deactivate-exportd-tab/deactivate-exportd-tab.component';
 import { AuthModule } from '../../auth/auth.module';
+import { TableModule } from '../../layout/table/table.module';
+import { ObjectModule } from '../../framework/object/object.module';
 
 @NgModule({
   entryComponents: [DeleteModalComponent, DeleteExportdModalComponent],
@@ -58,7 +60,9 @@ import { AuthModule } from '../../auth/auth.module';
     NgbTooltipModule,
     NgbProgressbarModule,
     FontAwesomeModule,
-    AuthModule
+    AuthModule,
+    TableModule,
+    ObjectModule
   ]
 })
 export class LogSettingsModule {

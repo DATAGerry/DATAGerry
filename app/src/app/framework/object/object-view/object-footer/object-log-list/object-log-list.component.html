@@ -1,4 +1,5 @@
-<cmdb-table [items]="logList" [totalItems]="logList.length" [columns]="columns" [sort]="sort"
+
+<cmdb-table [items]="logList" [totalItems]="total" [columns]="columns" [sort]="sort"
             [loading]="loading" [page]="page" [rowClasses]="['align-middle']" [sortable]="true"
             [searchEnabled]="true" [id]="'object-log-list-table'" [pageSize]="limit"
             [emptyMessage]="'No Log entries were found!'" (pageChange)="onPageChange($event)"

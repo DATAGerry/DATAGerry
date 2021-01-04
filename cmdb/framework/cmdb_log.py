@@ -20,6 +20,7 @@ from datetime import datetime
 from enum import Enum
 
 from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.framework.utils import Collection, Model
 
 try:
     from cmdb.utils.error import CMDBError
@@ -37,7 +38,61 @@ class LogAction(Enum):
 
 
 class CmdbMetaLog(CmdbDAO):
-    COLLECTION = 'framework.logs'
+    """
+    CmdbLog
+    """
+    COLLECTION: Collection = 'framework.logs'
+    MODEL: Model = 'CmdbLog'
+    DEFAULT_VERSION: str = '1.0.0'
+    SCHEMA: dict = {
+        'object_id': {
+            'type': 'integer'
+        },
+        'public_id': {
+            'type': 'integer'
+        },
+        'version': {
+            'type': 'integer',
+            'default': DEFAULT_VERSION
+        },
+        'user_id': {
+            'type': 'integer'
+        },
+        'user_name': {
+            'type': 'string',
+            'required': True,
+            'regex': r'(\w+)-*(\w)([\w-]*)'  # kebab case validation,
+        },
+        'render_state': {
+            'type': 'string'
+        },
+        'log_type': {
+            'type': 'string',
+            'required': True,
+        },
+        'log_time': {
+            'type': 'datetime',
+            'required': True,
+        },
+        'changes': {
+            'type': 'list',
+            'empty': True,
+            'default': []
+        },
+        'comment': {
+            'type': 'string'
+        },
+        'action': {
+            'type': 'integer',
+            'required': True,
+        },
+        'action_name': {
+            'type': 'string',
+            'required': True
+        },
+
+    }
+
     REQUIRED_INIT_KEYS = [
         'log_type',
         'log_time',
@@ -49,6 +104,42 @@ class CmdbMetaLog(CmdbDAO):
         self.log_time: datetime = log_time
         self.action: LogAction = action
         super(CmdbMetaLog, self).__init__(**kwargs)
+
+    @classmethod
+    def from_data(cls, data: dict) -> "CmdbMetaLog":
+        """Create a instance of TypeModel from database values"""
+        return cls(
+            public_id=data.get('public_id'),
+            object_id=data.get('object_id'),
+            version=data.get('version', None),
+            user_name=data.get('user_name'),
+            user_id=data.get('user_id'),
+            render_state=data.get('render_state'),
+            log_time=data.get('log_time', None),
+            log_type=data.get('log_type', None),
+            changes=data.get('changes', None),
+            comment=data.get('comment', None),
+            action=data.get('action', None),
+            action_name=data.get('action_name', None),
+        )
+
+    @classmethod
+    def to_json(cls, instance: "CmdbMetaLog") -> dict:
+        """Convert a type instance to json conform data"""
+        return {
+            'public_id':instance.public_id,
+            'log_time': instance.log_time,
+            'log_type': instance.log_type,
+            'action': instance.action,
+            'object_id': instance.object_id,
+            'version': instance.version,
+            'user_name': instance.user_name,
+            'user_id': instance.user_id,
+            'render_state': instance.render_state,
+            'changes': instance.changes,
+            'comment': instance.comment,
+            'action_name': instance.action_name
+        }
 
 
 class CmdbObjectLog(CmdbMetaLog):
