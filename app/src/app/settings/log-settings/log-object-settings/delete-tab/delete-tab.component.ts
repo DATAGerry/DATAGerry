@@ -23,6 +23,7 @@ import { CollectionParameters } from '../../../../services/models/api-parameter'
 import { LogService } from '../../../../framework/services/log.service';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
 import { DatePipe } from '@angular/common';
+import { TableComponent } from '../../../../layout/table/table.component';
 
 @Component({
   selector: 'cmdb-delete-tab',
@@ -31,14 +32,15 @@ import { DatePipe } from '@angular/common';
 })
 export class DeleteTabComponent implements OnInit {
 
-  private deleteLogList: CmdbLog[];
-
   @Output() deleteEmitter = new EventEmitter<number>();
   @Output() cleanUpEmitter = new EventEmitter<number[]>();
 
-  @ViewChild('dateTemplate', {static: true}) dateTemplate: TemplateRef<any>;
+  /**
+   * Table component.
+   */
+  @ViewChild(TableComponent, { static: false }) objectsTableComponent: TableComponent<CmdbLog>;
 
-  @ViewChild('linkTemplate', {static: true}) linkTemplate: TemplateRef<any>;
+  @ViewChild('dateTemplate', {static: true}) dateTemplate: TemplateRef<any>;
 
   @ViewChild('dataTemplate', {static: true}) dataTemplate: TemplateRef<any>;
 
@@ -46,9 +48,18 @@ export class DeleteTabComponent implements OnInit {
 
   @ViewChild('userTemplate', {static: true}) userTemplate: TemplateRef<any>;
 
+  @Input() set reloadLogs(value: boolean) {
+    if (value) {
+      this.resetCollectionParameters();
+      this.loadDeleted();
+    }
+  }
+
+  public selectedLogIDs: Array<number> = [];
+
   public filter: string;
 
-  public deActiveLogList: CmdbLog[] = [];
+  public deleteLogList: CmdbLog[] = [];
 
   public columns: Array<Column>;
 
@@ -77,8 +88,8 @@ export class DeleteTabComponent implements OnInit {
   private loadDeleted() {
     const filter = JSON.stringify(this.filterBuilder());
     this.apiParameters = {filter, limit: this.limit, sort: this.sort.name, order: this.sort.order, page: this.page};
-    this.logService.getLogsWithNotExistingObject(this.apiParameters).subscribe((apiResponse: APIGetMultiResponse<CmdbLog>) => {
-      this.deActiveLogList = apiResponse.results;
+    this.logService.getDeleteLogs(this.apiParameters).subscribe((apiResponse: APIGetMultiResponse<CmdbLog>) => {
+      this.deleteLogList = apiResponse.results;
       this.total = apiResponse.total;
     });
   }
@@ -89,27 +100,21 @@ export class DeleteTabComponent implements OnInit {
 
   private setColumns(): void {
     const columns = [];
-    columns.push(
-      {
-        display: 'Log Time',
-        name: 'log_time',
-        data: 'log_time',
-        sortable: true,
-        cssClasses: ['text-center'],
-        style: { 'white-space': 'nowrap' },
-        template: this.dataTemplate,
-        searchable: false,
-        render(data: any) {
-          const date = new Date(data);
-          return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
-        }
-      } as Column
-    );
-
     columns.push({
       display: 'Log ID',
       name: 'public_id',
       data: 'public_id',
+      sortable: true,
+      searchable: true,
+      fixed: true,
+      template: this.dataTemplate,
+      style: { 'white-space': 'nowrap' },
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Object ID',
+      name: 'object_id',
+      data: 'object_id',
       sortable: true,
       searchable: true,
       fixed: true,
@@ -176,17 +181,22 @@ export class DeleteTabComponent implements OnInit {
       style: { width: '6em' }
     } as unknown as Column);
 
-    columns.push({
-      display: 'Links',
-      name: 'links',
-      data: 'public_id',
-      sortable: true,
-      searchable: false,
-      fixed: true,
-      template: this.linkTemplate,
-      cssClasses: ['text-center'],
-      style: { width: '6em' }
-    } as unknown as Column);
+    columns.push(
+      {
+        display: 'Log Time',
+        name: 'log_time',
+        data: 'log_time',
+        sortable: true,
+        cssClasses: ['text-center'],
+        style: { 'white-space': 'nowrap' },
+        template: this.dataTemplate,
+        searchable: false,
+        render(data: any) {
+          const date = new Date(data);
+          return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
+        }
+      } as Column
+    );
 
     this.columns = columns;
   }
@@ -213,6 +223,10 @@ export class DeleteTabComponent implements OnInit {
       this.filter = undefined;
     }
     this.loadDeleted();
+  }
+
+  public onSelectedChange(selectedItems: Array<CmdbLog>): void {
+    this.selectedLogIDs = selectedItems.map(m => m.public_id);
   }
 
   public filterBuilder(): any {
@@ -242,10 +256,8 @@ export class DeleteTabComponent implements OnInit {
   }
 
   public cleanup() {
-    const idList: number[] = [];
-    for (const log of this.deleteLogList) {
-      idList.push(log.public_id);
-    }
-    this.cleanUpEmitter.emit(idList);
+    this.cleanUpEmitter.emit(this.selectedLogIDs);
+    this.objectsTableComponent.selectedItems = [];
+    this.selectedLogIDs = [];
   }
 }

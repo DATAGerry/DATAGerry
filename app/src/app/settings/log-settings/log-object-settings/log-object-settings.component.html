@@ -20,15 +20,19 @@
     <ngb-progressbar type="danger" [value]="cleanupProgress" [animated]="true" [striped]="true"></ngb-progressbar>
   </div>
   <div class="tab-pane fade show active" id="activate" role="tabpanel">
-    <cmdb-activate-tab (deleteEmitter)="deleteLog($event, 'active')"></cmdb-activate-tab>
+    <cmdb-activate-tab [reloadLogs]="reloadActiveLogs"
+                       (deleteEmitter)="deleteLog($event, 'active')"
+                       (cleanUpEmitter)="cleanup($event, 'active')"></cmdb-activate-tab>
   </div>
   <div class="tab-pane fade" id="deactivate" role="tabpanel">
-    <cmdb-deactivate-tab (deleteEmitter)="deleteLog($event, 'deactive')"
+    <cmdb-deactivate-tab [reloadLogs]="reloadDeActiveLogs"
+                         (deleteEmitter)="deleteLog($event, 'deactive')"
                          (cleanUpEmitter)="cleanup($event, 'deactive')">
     </cmdb-deactivate-tab>
   </div>
   <div class="tab-pane fade" id="delete-logs" role="tabpanel">
-    <cmdb-delete-tab (deleteEmitter)="deleteLog($event, 'delete')"
+    <cmdb-delete-tab [reloadLogs]="reloadDeleteLogs"
+                     (deleteEmitter)="deleteLog($event, 'delete')"
                      (cleanUpEmitter)="cleanup($event, 'delete')"></cmdb-delete-tab>
   </div>
 </div>

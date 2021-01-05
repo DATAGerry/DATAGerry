@@ -38,6 +38,7 @@ import { DeactivateExportdTabComponent } from './log-exportd-settings/deactivate
 import { AuthModule } from '../../auth/auth.module';
 import { TableModule } from '../../layout/table/table.module';
 import { ObjectModule } from '../../framework/object/object.module';
+import { LogObjectTableActionsComponent } from './log-object-settings/log-object-table-actions/log-object-table-actions.component';
 
 @NgModule({
   entryComponents: [DeleteModalComponent, DeleteExportdModalComponent],
@@ -51,7 +52,8 @@ import { ObjectModule } from '../../framework/object/object.module';
     LogSettingsComponent,
     LogExportdSettingsComponent,
     ActivateExportdTabComponent,
-    DeactivateExportdTabComponent],
+    DeactivateExportdTabComponent,
+    LogObjectTableActionsComponent],
   imports: [
     CommonModule,
     LayoutModule,

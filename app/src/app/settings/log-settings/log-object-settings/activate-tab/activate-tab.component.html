@@ -1,18 +1,26 @@
 <div id="complete-log-list" class="row">
   <div class="col-12">
-    <cmdb-table [items]="activeLogs" [totalItems]="total" [columns]="columns" [sort]="sort"
-                [loading]="loading" [page]="page" [rowClasses]="['align-middle']" [sortable]="true"
+    <button type="button" class="btn btn-danger btn-sm my-2" [disabled]="selectedLogIDs.length<=0"
+            placement="auto" ngbTooltip="Delete selected logs" (click)="cleanup()">
+      <i class="far fa-trash-alt"></i> Cleanup
+      <span class="badge badge-secondary">{{selectedLogIDs.length}}</span>
+    </button>
+    <hr/>
+  </div>
+  <div class="col-12">
+    <cmdb-table [items]="activeLogs" [totalItems]="total" [columns]="columns" [sort]="sort" [sortable]="true"
+                [selectEnabled]="true" [loading]="loading" [page]="page" [rowClasses]="['align-middle']"
                 [searchEnabled]="true" [id]="'object-log-list-table'" [pageSize]="limit"
                 [emptyMessage]="'No Log entries were found!'" (pageChange)="onPageChange($event)"
                 (pageSizeChange)="onPageSizeChange($event)" (sortChange)="onSortChange($event)"
-                (searchChange)="onSearchChange($event)">
+                (searchChange)="onSearchChange($event)" (selectedChange)="onSelectedChange($event)">
     </cmdb-table>
 
     <ng-template #dateTemplate let-data="data">
       {{data.$date | date:'MM.dd.yyyy HH:mm:ss'}}
     </ng-template>
-    <ng-template #linkTemplate let-data="data">
-      <a routerLink="/framework/object/log/{{data}}">View</a>
+    <ng-template #actionTemplate let-data="data">
+      <cmdb-log-object-table-actions [publicID]="data" (deleteEmitter)="deleteEmitter.emit(data);"></cmdb-log-object-table-actions>
     </ng-template>
     <ng-template #dataTemplate let-data="data">
       {{data}}

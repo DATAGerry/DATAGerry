@@ -83,12 +83,13 @@ export class LogService<T = CmdbLog> implements ApiService {
     );
   }
 
-  public getDeleteLogs() {
-    return this.api.callGet<T>(`${this.servicePrefix}/object/deleted/`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
+  public getDeleteLogs(params: CollectionParameters = { filter: undefined,
+    limit: 10, sort: 'public_id', order: 1, page: 1}): Observable<APIGetMultiResponse<T>> {
+    const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, params.filter,
+      params.limit, params.sort, params.order, params.page);
+
+    return this.api.callGet<T>(`${this.servicePrefix}/object/deleted/`, options).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
     );

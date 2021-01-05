@@ -1,18 +1,23 @@
 <div id="delete-log-list" class="row">
-  <div class="col-9">
-    <cmdb-table [items]="deleteLogList" [totalItems]="total" [columns]="columns" [sort]="sort"
-                [loading]="loading" [page]="page" [rowClasses]="['align-middle']" [sortable]="true"
-                [searchEnabled]="true" [id]="'object-log-list-table'" [pageSize]="limit"
-                [emptyMessage]="'No Log entries were found!'" (pageChange)="onPageChange($event)"
-                (pageSizeChange)="onPageSizeChange($event)" (sortChange)="onSortChange($event)"
-                (searchChange)="onSearchChange($event)">
+  <div class="col-12">
+    <button type="button" class="btn btn-danger btn-sm my-2" [disabled]="selectedLogIDs.length<=0"
+            placement="auto" ngbTooltip="Delete selected logs" (click)="cleanup()">
+      <i class="far fa-trash-alt"></i> Cleanup
+      <span class="badge badge-secondary">{{selectedLogIDs.length}}</span>
+    </button>
+    <hr/>
+  </div>
+  <div class="col-12">
+   <cmdb-table [items]="deleteLogList" [totalItems]="total" [columns]="columns" [sort]="sort"
+               [selectEnabled]="true" [loading]="loading" [page]="page" [rowClasses]="['align-middle']" [sortable]="true"
+               [searchEnabled]="true" [id]="'object-log-list-table'" [pageSize]="limit"
+               [emptyMessage]="'No Log entries were found!'" (pageChange)="onPageChange($event)"
+               (pageSizeChange)="onPageSizeChange($event)" (sortChange)="onSortChange($event)"
+               (searchChange)="onSearchChange($event)" (selectedChange)="onSelectedChange($event)">
     </cmdb-table>
 
     <ng-template #dateTemplate let-data="data">
       {{data.$date | date:'MM.dd.yyyy HH:mm:ss'}}
-    </ng-template>
-    <ng-template #linkTemplate let-data="data">
-      <a routerLink="/framework/object/log/{{data}}">View</a>
     </ng-template>
     <ng-template #dataTemplate let-data="data">
       {{data}}
@@ -24,18 +29,4 @@
       <cmdb-object-log-user [userID]="item.user_id" [userName]="item.user_name"></cmdb-object-log-user>
     </ng-template>
   </div>
-  <div class="col-3">
-    <div class="card">
-      <div class="card-header">
-        Log Methods:
-      </div>
-      <ul class="list-group list-group-flush" *permissionLink="['base.framework.log.delete']">
-        <li class="list-group-item list-group-item-action list-group-item-danger pointer" (click)="cleanup()">
-          <i class="far fa-trash-alt"></i> Cleanup
-          <i class="fas fa-question-circle float-right" placement="left" ngbTooltip="Deletes all logs"></i>
-        </li>
-      </ul>
-    </div>
-  </div>
-
 </div>
