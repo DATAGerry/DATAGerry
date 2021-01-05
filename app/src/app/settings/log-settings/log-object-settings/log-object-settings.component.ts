@@ -21,7 +21,8 @@ import { LogService } from '../../../framework/services/log.service';
 import { CmdbLog } from '../../../framework/models/cmdb-log';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../../layout/toast/toast.service';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable, forkJoin, ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-modal-content',
@@ -66,6 +67,11 @@ export class LogObjectSettingsComponent {
   public cleanupInProgress: boolean = false;
   public cleanupProgress: number = 0;
 
+  /**
+   * Component un-subscriber.
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
   constructor(private logService: LogService, private modalService: NgbModal, private toastService: ToastService) {
   }
 
@@ -74,7 +80,7 @@ export class LogObjectSettingsComponent {
     const deleteModalRef = this.modalService.open(DeleteModalComponent);
     deleteModalRef.componentInstance.publicID = publicID;
     deleteModalRef.result.then(result => {
-        this.logService.deleteLog(result).subscribe(() => {
+        this.logService.deleteLog(result).pipe(takeUntil(this.subscriber)).subscribe(() => {
             this.toastService.success('Log was deleted!');
           }, (error) => {
             console.error(error);
