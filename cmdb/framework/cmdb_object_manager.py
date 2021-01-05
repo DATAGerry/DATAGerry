@@ -357,7 +357,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
         return referenced_by_objects
 
-    def delete_object(self, public_id: int, user: UserModel, permission: AccessControlPermission):
+    def delete_object(self, public_id: int, user: UserModel, permission: AccessControlPermission = None):
         type_id = self.get_object(public_id=public_id).type_id
         type_ = self._type_manager.get(type_id)
         verify_access(type_, user, permission)

@@ -73,6 +73,7 @@ export class TypeService<T = CmdbType> implements ApiService {
    * @public
    */
   public getAclFilter(aclRequirement: AccessControlPermission | AccessControlPermission[] = AccessControlPermission.READ) {
+    aclRequirement = Array.isArray(aclRequirement) ? aclRequirement : [aclRequirement];
     const location = 'acl.groups.includes.' + this.userService.getCurrentUser().group_id;
     return {
       $or: [
@@ -81,7 +82,7 @@ export class TypeService<T = CmdbType> implements ApiService {
             {'acl.activated' : true},
             {$and : [
                 { [location] : { $exists: true }},
-                { [location] : { $in : [aclRequirement.toString()]}}
+                { [location] : { $all : aclRequirement}}
               ]},
           ]}]
     };
