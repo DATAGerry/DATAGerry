@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { CmdbLog } from '../../../../framework/models/cmdb-log';
 import { Column, Sort, SortDirection } from '../../../../layout/table/table.types';
 import { CollectionParameters } from '../../../../services/models/api-parameter';
@@ -24,6 +24,8 @@ import { LogService } from '../../../../framework/services/log.service';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
 import { DatePipe } from '@angular/common';
 import { TableComponent } from '../../../../layout/table/table.component';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 
 @Component({
@@ -31,10 +33,15 @@ import { TableComponent } from '../../../../layout/table/table.component';
   templateUrl: './deactivate-tab.component.html',
   styleUrls: ['./deactivate-tab.component.scss']
 })
-export class DeactivateTabComponent implements OnInit {
+export class DeactivateTabComponent implements OnInit, OnDestroy {
 
   @Output() deleteEmitter = new EventEmitter<number>();
   @Output() cleanUpEmitter = new EventEmitter<number[]>();
+
+  /**
+   * Component un-subscriber.
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   /**
    * Table component.
@@ -91,9 +98,10 @@ export class DeactivateTabComponent implements OnInit {
   private loadDeActivated() {
     const filter = JSON.stringify(this.filterBuilder());
     this.apiParameters = {filter, limit: this.limit, sort: this.sort.name, order: this.sort.order, page: this.page};
-    this.logService.getLogsWithNotExistingObject(this.apiParameters).subscribe((apiResponse: APIGetMultiResponse<CmdbLog>) => {
-      this.deActiveLogList = apiResponse.results;
-      this.total = apiResponse.total;
+    this.logService.getLogsWithNotExistingObject(this.apiParameters).pipe(takeUntil(this.subscriber))
+      .subscribe((apiResponse: APIGetMultiResponse<CmdbLog>) => {
+        this.deActiveLogList = apiResponse.results;
+        this.total = apiResponse.total;
     });
   }
 
@@ -274,5 +282,10 @@ export class DeactivateTabComponent implements OnInit {
     this.cleanUpEmitter.emit(this.selectedLogIDs);
     this.objectsTableComponent.selectedItems = [];
     this.selectedLogIDs = [];
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 }

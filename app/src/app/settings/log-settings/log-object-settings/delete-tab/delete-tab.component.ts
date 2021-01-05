@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { CmdbLog } from '../../../../framework/models/cmdb-log';
 import { Column, Sort, SortDirection } from '../../../../layout/table/table.types';
 import { CollectionParameters } from '../../../../services/models/api-parameter';
@@ -24,16 +24,23 @@ import { LogService } from '../../../../framework/services/log.service';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
 import { DatePipe } from '@angular/common';
 import { TableComponent } from '../../../../layout/table/table.component';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-delete-tab',
   templateUrl: './delete-tab.component.html',
   styleUrls: ['./delete-tab.component.scss']
 })
-export class DeleteTabComponent implements OnInit {
+export class DeleteTabComponent implements OnInit, OnDestroy {
 
   @Output() deleteEmitter = new EventEmitter<number>();
   @Output() cleanUpEmitter = new EventEmitter<number[]>();
+
+  /**
+   * Component un-subscriber.
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   /**
    * Table component.
@@ -88,9 +95,10 @@ export class DeleteTabComponent implements OnInit {
   private loadDeleted() {
     const filter = JSON.stringify(this.filterBuilder());
     this.apiParameters = {filter, limit: this.limit, sort: this.sort.name, order: this.sort.order, page: this.page};
-    this.logService.getDeleteLogs(this.apiParameters).subscribe((apiResponse: APIGetMultiResponse<CmdbLog>) => {
-      this.deleteLogList = apiResponse.results;
-      this.total = apiResponse.total;
+    this.logService.getDeleteLogs(this.apiParameters).pipe(takeUntil(this.subscriber))
+      .subscribe((apiResponse: APIGetMultiResponse<CmdbLog>) => {
+        this.deleteLogList = apiResponse.results;
+        this.total = apiResponse.total;
     });
   }
 
@@ -259,5 +267,10 @@ export class DeleteTabComponent implements OnInit {
     this.cleanUpEmitter.emit(this.selectedLogIDs);
     this.objectsTableComponent.selectedItems = [];
     this.selectedLogIDs = [];
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 }
