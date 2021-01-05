@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
 Init module for rest routes
@@ -24,6 +24,7 @@ from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManager
+from cmdb.interface.rest_api.framework_routes.object_link_routes import links_blueprint
 from cmdb.media_library.media_file_manager import MediaFileManagement
 from cmdb.user_management import UserManager
 from cmdb.security.security import SecurityManager
@@ -146,6 +147,7 @@ def register_blueprints(app):
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(object_blueprint)
     app.register_multi_blueprint(objects_blueprint, multi_prefix=['/objects'])
+    app.register_multi_blueprint(links_blueprint, multi_prefix=['/object/link', '/objects/links'])
     app.register_multi_blueprint(types_blueprint, multi_prefix=['/type', '/types'])
     app.register_blueprint(connection_routes)
 
