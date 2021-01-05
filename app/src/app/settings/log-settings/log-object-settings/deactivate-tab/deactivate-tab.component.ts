@@ -16,13 +16,14 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { CmdbLog } from '../../../../framework/models/cmdb-log';
 import { Column, Sort, SortDirection } from '../../../../layout/table/table.types';
 import { CollectionParameters } from '../../../../services/models/api-parameter';
 import { LogService } from '../../../../framework/services/log.service';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
 import { DatePipe } from '@angular/common';
+import { TableComponent } from '../../../../layout/table/table.component';
 
 
 @Component({
@@ -35,15 +36,27 @@ export class DeactivateTabComponent implements OnInit {
   @Output() deleteEmitter = new EventEmitter<number>();
   @Output() cleanUpEmitter = new EventEmitter<number[]>();
 
+  /**
+   * Table component.
+   */
+  @ViewChild(TableComponent, { static: false }) objectsTableComponent: TableComponent<CmdbLog>;
+
   @ViewChild('dateTemplate', {static: true}) dateTemplate: TemplateRef<any>;
 
-  @ViewChild('linkTemplate', {static: true}) linkTemplate: TemplateRef<any>;
+  @ViewChild('actionTemplate', {static: true}) actionTemplate: TemplateRef<any>;
 
   @ViewChild('dataTemplate', {static: true}) dataTemplate: TemplateRef<any>;
 
   @ViewChild('changeTemplate', {static: true}) changeTemplate: TemplateRef<any>;
 
   @ViewChild('userTemplate', {static: true}) userTemplate: TemplateRef<any>;
+
+  @Input() set reloadLogs(value: boolean) {
+    if (value) {
+      this.resetCollectionParameters();
+      this.loadDeActivated();
+    }
+  }
 
   public filter: string;
 
@@ -52,6 +65,8 @@ export class DeactivateTabComponent implements OnInit {
   public columns: Array<Column>;
 
   public sort: Sort = { name: 'date', order: SortDirection.DESCENDING } as Sort;
+
+  public selectedLogIDs: Array<number> = [];
 
   private readonly initLimit: number = 10;
   public limit: number = this.initLimit;
@@ -70,10 +85,10 @@ export class DeactivateTabComponent implements OnInit {
   public ngOnInit(): void {
     this.resetCollectionParameters();
     this.setColumns();
-    this.loadDeleted();
+    this.loadDeActivated();
   }
 
-  private loadDeleted() {
+  private loadDeActivated() {
     const filter = JSON.stringify(this.filterBuilder());
     this.apiParameters = {filter, limit: this.limit, sort: this.sort.name, order: this.sort.order, page: this.page};
     this.logService.getLogsWithNotExistingObject(this.apiParameters).subscribe((apiResponse: APIGetMultiResponse<CmdbLog>) => {
@@ -88,27 +103,21 @@ export class DeactivateTabComponent implements OnInit {
 
   private setColumns(): void {
     const columns = [];
-    columns.push(
-      {
-        display: 'Log Time',
-        name: 'log_time',
-        data: 'log_time',
-        sortable: true,
-        cssClasses: ['text-center'],
-        style: { 'white-space': 'nowrap' },
-        template: this.dataTemplate,
-        searchable: false,
-        render(data: any) {
-          const date = new Date(data);
-          return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
-        }
-      } as Column
-    );
-
     columns.push({
       display: 'Log ID',
       name: 'public_id',
       data: 'public_id',
+      sortable: true,
+      searchable: true,
+      fixed: true,
+      template: this.dataTemplate,
+      style: { 'white-space': 'nowrap' },
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Object ID',
+      name: 'object_id',
+      data: 'object_id',
       sortable: true,
       searchable: true,
       fixed: true,
@@ -175,14 +184,31 @@ export class DeactivateTabComponent implements OnInit {
       style: { width: '6em' }
     } as unknown as Column);
 
+    columns.push(
+      {
+        display: 'Log Time',
+        name: 'log_time',
+        data: 'log_time',
+        sortable: true,
+        cssClasses: ['text-center'],
+        style: { 'white-space': 'nowrap' },
+        template: this.dataTemplate,
+        searchable: false,
+        render(data: any) {
+          const date = new Date(data);
+          return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
+        }
+      } as Column
+    );
+
     columns.push({
-      display: 'Links',
-      name: 'links',
+      display: 'Actions',
+      name: 'actions',
       data: 'public_id',
-      sortable: true,
+      sortable: false,
       searchable: false,
       fixed: true,
-      template: this.linkTemplate,
+      template: this.actionTemplate,
       cssClasses: ['text-center'],
       style: { width: '6em' }
     } as unknown as Column);
@@ -192,17 +218,17 @@ export class DeactivateTabComponent implements OnInit {
 
   public onPageChange(page: number) {
     this.page = page;
-    this.loadDeleted();
+    this.loadDeActivated();
   }
 
   public onPageSizeChange(limit: number): void {
     this.limit = limit;
-    this.loadDeleted();
+    this.loadDeActivated();
   }
 
   public onSortChange(sort: Sort): void {
     this.sort = sort;
-    this.loadDeleted();
+    this.loadDeActivated();
   }
 
   public onSearchChange(search: any): void {
@@ -211,7 +237,11 @@ export class DeactivateTabComponent implements OnInit {
     } else {
       this.filter = undefined;
     }
-    this.loadDeleted();
+    this.loadDeActivated();
+  }
+
+  public onSelectedChange(selectedItems: Array<CmdbLog>): void {
+    this.selectedLogIDs = selectedItems.map(m => m.public_id);
   }
 
   public filterBuilder(): any {
@@ -241,10 +271,8 @@ export class DeactivateTabComponent implements OnInit {
   }
 
   public cleanup() {
-    const idList: number[] = [];
-    for (const log of this.deActiveLogList) {
-      idList.push(log.public_id);
-    }
-    this.cleanUpEmitter.emit(idList);
+    this.cleanUpEmitter.emit(this.selectedLogIDs);
+    this.objectsTableComponent.selectedItems = [];
+    this.selectedLogIDs = [];
   }
 }

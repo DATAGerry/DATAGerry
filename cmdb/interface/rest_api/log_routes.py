@@ -240,12 +240,18 @@ def get_corresponding_object_logs(public_id: int):
             }]
         }
         LOGGER.debug(f'Corresponding query: {query}')
-        corresponding_logs = log_manager.get_logs(filter=query, limit=10, skip=0, order=1, sort='public_id')
+        logs = log_manager.get_logs(filter=query, limit=0, skip=0, order=1, sort='public_id')
+        corresponding_logs = [CmdbObjectLog.to_json(_) for _ in logs.results]
     except LogManagerGetError as err:
         LOGGER.error(err)
         return abort(404)
+    except ManagerIterationError as err:
+        return abort(400, err.message)
+    except ObjectManagerGetError as err:
+        LOGGER.error(f'Error in get_logs_by_objects: {err}')
+        return abort(404)
     LOGGER.debug(f'Corresponding logs: {corresponding_logs}')
-    if len(corresponding_logs.results) < 1:
-        return make_response(corresponding_logs.results, 204)
+    if len(corresponding_logs) < 1:
+        return make_response(corresponding_logs, 204)
 
-    return make_response(corresponding_logs.results)
+    return make_response(corresponding_logs)

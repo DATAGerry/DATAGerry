@@ -16,13 +16,12 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { LogService } from '../../../framework/services/log.service';
 import { CmdbLog } from '../../../framework/models/cmdb-log';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { Observable, forkJoin } from 'rxjs';
-import {APIGetMultiResponse} from "../../../services/models/api-response";
 
 @Component({
   selector: 'cmdb-modal-content',
@@ -57,9 +56,12 @@ export class DeleteModalComponent {
 export class LogObjectSettingsComponent {
 
   public activeLogList: CmdbLog[];
+  public reloadActiveLogs: boolean = false;
   public deActiveLogList: CmdbLog[];
+  public reloadDeActiveLogs: boolean = false;
   public deActiveLength: number = 0;
   public deleteLogList: CmdbLog[];
+  public reloadDeleteLogs: boolean = false;
   public deleteLogLength: number = 0;
   public cleanupInProgress: boolean = false;
   public cleanupProgress: number = 0;
@@ -72,7 +74,7 @@ export class LogObjectSettingsComponent {
     const deleteModalRef = this.modalService.open(DeleteModalComponent);
     deleteModalRef.componentInstance.publicID = publicID;
     deleteModalRef.result.then(result => {
-        this.logService.deleteLog(result).subscribe(ack => {
+        this.logService.deleteLog(result).subscribe(() => {
             this.toastService.success('Log was deleted!');
           }, (error) => {
             console.error(error);
@@ -80,10 +82,13 @@ export class LogObjectSettingsComponent {
           () => {
             switch (reloadList) {
               case 'active':
+                this.reloadActiveLogs = true;
                 break;
               case 'deactive':
+                this.reloadDeActiveLogs = true;
                 break;
               case 'delete':
+                this.reloadDeleteLogs = true;
                 break;
             }
           }
@@ -104,17 +109,20 @@ export class LogObjectSettingsComponent {
       this.cleanupProgress += step;
     }
     forkJoin(deleteObserves)
-      .subscribe(dataArray => {
+      .subscribe(() => {
         this.cleanupInProgress = false;
       }, error => console.error(
         error
       ), () => {
         switch (reloadList) {
           case 'active':
+            this.reloadActiveLogs = true;
             break;
           case 'deactive':
+            this.reloadDeActiveLogs = true;
             break;
           case 'delete':
+            this.reloadDeleteLogs = true;
             break;
         }
       });

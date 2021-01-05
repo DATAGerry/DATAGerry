@@ -16,13 +16,14 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, OnInit, Output, TemplateRef, ViewChild} from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { CmdbLog } from '../../../../framework/models/cmdb-log';
 import { Column, Sort, SortDirection } from '../../../../layout/table/table.types';
 import { CollectionParameters } from '../../../../services/models/api-parameter';
 import { LogService } from '../../../../framework/services/log.service';
 import { DatePipe } from '@angular/common';
-import {APIGetMultiResponse} from '../../../../services/models/api-response';
+import { APIGetMultiResponse } from '../../../../services/models/api-response';
+import { TableComponent } from '../../../../layout/table/table.component';
 
 @Component({
   selector: 'cmdb-activate-tab',
@@ -32,16 +33,31 @@ import {APIGetMultiResponse} from '../../../../services/models/api-response';
 export class ActivateTabComponent implements OnInit {
 
   @Output() deleteEmitter = new EventEmitter<number>();
+  @Output() cleanUpEmitter = new EventEmitter<number[]>();
+
+  /**
+   * Table component.
+   */
+  @ViewChild(TableComponent, { static: false }) objectsTableComponent: TableComponent<CmdbLog>;
 
   @ViewChild('dateTemplate', {static: true}) dateTemplate: TemplateRef<any>;
 
-  @ViewChild('linkTemplate', {static: true}) linkTemplate: TemplateRef<any>;
+  @ViewChild('actionTemplate', {static: true}) actionTemplate: TemplateRef<any>;
 
   @ViewChild('dataTemplate', {static: true}) dataTemplate: TemplateRef<any>;
 
   @ViewChild('changeTemplate', {static: true}) changeTemplate: TemplateRef<any>;
 
   @ViewChild('userTemplate', {static: true}) userTemplate: TemplateRef<any>;
+
+  @Input() set reloadLogs(value: boolean) {
+    if (value) {
+      this.resetCollectionParameters();
+      this.loadExists();
+    }
+  }
+
+  public selectedLogIDs: Array<number> = [];
 
   public filter: string;
 
@@ -86,27 +102,21 @@ export class ActivateTabComponent implements OnInit {
 
   private setColumns(): void {
     const columns = [];
-    columns.push(
-      {
-        display: 'Log Time',
-        name: 'log_time',
-        data: 'log_time',
-        sortable: true,
-        cssClasses: ['text-center'],
-        style: { 'white-space': 'nowrap' },
-        template: this.dataTemplate,
-        searchable: false,
-        render(data: any) {
-          const date = new Date(data);
-          return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
-        }
-      } as Column
-    );
-
     columns.push({
       display: 'Log ID',
       name: 'public_id',
       data: 'public_id',
+      sortable: true,
+      searchable: true,
+      fixed: true,
+      template: this.dataTemplate,
+      style: { 'white-space': 'nowrap' },
+    } as unknown as Column);
+
+    columns.push({
+      display: 'Object ID',
+      name: 'object_id',
+      data: 'object_id',
       sortable: true,
       searchable: true,
       fixed: true,
@@ -173,14 +183,31 @@ export class ActivateTabComponent implements OnInit {
       style: { width: '6em' }
     } as unknown as Column);
 
+    columns.push(
+      {
+        display: 'Log Time',
+        name: 'log_time',
+        data: 'log_time',
+        sortable: true,
+        cssClasses: ['text-center'],
+        style: { 'white-space': 'nowrap' },
+        template: this.dataTemplate,
+        searchable: false,
+        render(data: any) {
+          const date = new Date(data);
+          return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
+        }
+      } as Column
+    );
+
     columns.push({
-      display: 'Links',
-      name: 'links',
+      display: 'Actions',
+      name: 'actions',
       data: 'public_id',
-      sortable: true,
+      sortable: false,
       searchable: false,
       fixed: true,
-      template: this.linkTemplate,
+      template: this.actionTemplate,
       cssClasses: ['text-center'],
       style: { width: '6em' }
     } as unknown as Column);
@@ -212,6 +239,10 @@ export class ActivateTabComponent implements OnInit {
     this.loadExists();
   }
 
+  public onSelectedChange(selectedItems: Array<CmdbLog>): void {
+    this.selectedLogIDs = selectedItems.map(m => m.public_id);
+  }
+
   public filterBuilder(): any {
     const query = [];
     if (this.filter) {
@@ -236,5 +267,11 @@ export class ActivateTabComponent implements OnInit {
       query.push({$match: {log_type: 'CmdbObjectLog'}});
     }
     return query;
+  }
+
+  public cleanup() {
+    this.cleanUpEmitter.emit(this.selectedLogIDs);
+    this.objectsTableComponent.selectedItems = [];
+    this.selectedLogIDs = [];
   }
 }

@@ -15,11 +15,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from typing import Union
 from datetime import datetime
 
 from cmdb.framework import CmdbLog, CmdbMetaLog
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework.managers.framework_manager import FrameworkManager
+from cmdb.framework.utils import PublicID
 
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerDeleteError, ManagerInsertError, ManagerUpdateError
@@ -43,7 +45,7 @@ class CmdbLogManager(FrameworkManager):
         super(CmdbLogManager, self).__init__(CmdbMetaLog.COLLECTION, database_manager=database_manager)
 
     # CRUD functions
-    def get_log(self, public_id: int):
+    def get_log(self, public_id: Union[PublicID, int]):
         cursor_result = self._get(self.collection, filter={'public_id': public_id}, limit=1)
         for resource_result in cursor_result.limit(-1):
             return CmdbMetaLog.from_data(resource_result)
@@ -102,13 +104,21 @@ class CmdbLogManager(FrameworkManager):
     def update_log(self, data) -> int:
         raise NotImplementedError
 
-    def delete_log(self, public_id):
-        try:
-            ack = self._delete(CmdbMetaLog.COLLECTION, public_id)
-        except CMDBError as err:
-            LOGGER.error(err)
-            raise ManagerDeleteError(err)
-        return ack
+    def delete_log(self, public_id: Union[PublicID, int]) -> CmdbMetaLog:
+        """
+        Delete a existing log by its PublicID.
+
+        Args:
+            public_id (int): PublicID of the log in the system.
+
+        Returns:
+            CmdbMetaLog: The deleted log as its model.
+        """
+        raw_log: CmdbMetaLog = self.get_log(public_id=public_id)
+        delete_result = self._delete(self.collection, filter={'public_id': public_id})
+        if delete_result.deleted_count == 0:
+            raise ManagerDeleteError(err='No log matched this public id')
+        return raw_log
 
 
 class LogManagerGetError(ManagerGetError):
