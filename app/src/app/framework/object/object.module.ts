@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
@@ -42,7 +42,6 @@ import { ObjectLinksComponent } from './object-view/object-footer/object-links/o
 import { ObjectTypeLabelComponent } from './components/object-type-label/object-type-label.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ObjectLogListComponent } from './object-view/object-footer/object-log-list/object-log-list.component';
-import { ObjectReferenceListComponent } from './object-view/object-footer/object-reference-list/object-reference-list.component';
 import { ObjectLogComponent } from './object-log/object-log.component';
 // tslint:disable-next-line:max-line-length
 import { ObjectLogChangeViewComponent } from './object-view/object-footer/object-log-list/object-log-change-view/object-log-change-view.component';
@@ -64,6 +63,7 @@ import { QRCodeModule } from 'angularx-qrcode';
 import { ObjectDeleteModalComponent } from './modals/object-delete-modal/object-delete-modal.component';
 import { ObjectsDeleteModalComponent } from './modals/objects-delete-modal/objects-delete-modal.component';
 import { ObjectTableHeadComponent } from './components/object-table-head/object-table-head.component';
+import { ObjectReferencesTableComponent } from './components/object-references-table/object-references-table.component';
 
 @NgModule({
   entryComponents: [
@@ -88,7 +88,6 @@ import { ObjectTableHeadComponent } from './components/object-table-head/object-
     ObjectLinksComponent,
     ObjectTypeLabelComponent,
     ObjectLogListComponent,
-    ObjectReferenceListComponent,
     ObjectLogComponent,
     ObjectLogChangeViewComponent,
     ObjectLogUserComponent,
@@ -104,7 +103,8 @@ import { ObjectTableHeadComponent } from './components/object-table-head/object-
     ObjectTableActionsComponent,
     ObjectDeleteModalComponent,
     ObjectsDeleteModalComponent,
-    ObjectTableHeadComponent
+    ObjectTableHeadComponent,
+    ObjectReferencesTableComponent
   ],
   imports: [
     CommonModule,

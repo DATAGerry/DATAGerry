@@ -142,10 +142,9 @@ class ObjectManager(FrameworkManager):
             -> IterationResult[CmdbObject]:
         query = []
         if isinstance(filter, dict):
-            query.append(ObjectQueryBuilder.match_(filter))
+            query.append(filter)
         elif isinstance(filter, list):
-            for pipe in filter:
-                query.append(pipe)
+            query += filter
         query.append({
             '$lookup': {
                 'from': 'framework.types',

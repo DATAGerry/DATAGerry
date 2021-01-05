@@ -30,7 +30,8 @@ export class TypeLabelComponent {
   public icon: string;
 
   @Input() public description: string;
-
+  @Input() public publicID: number;
+  @Input() useURL: boolean = false;
 
   @Input()
   public set title(value: string) {
