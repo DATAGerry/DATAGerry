@@ -35,6 +35,28 @@ from cmdb.user_management import UserModel
 links_blueprint = APIBlueprint('links', __name__)
 
 
+@links_blueprint.route('/', methods=['GET', 'HEAD'])
+@links_blueprint.protect(auth=True, right='base.framework.object.view')
+@links_blueprint.parse_collection_parameters()
+@insert_request_user
+def get_links(params: CollectionParameters, request_user: UserModel):
+    link_manager = ObjectLinkManager(database_manager=current_app.database_manager)
+    body = request.method == 'HEAD'
+
+    try:
+        iteration_result: IterationResult[ObjectLinkModel] = link_manager.iterate(
+            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order,
+            user=request_user, permission=AccessControlPermission.READ)
+        types = [ObjectLinkModel.to_json(type) for type in iteration_result.results]
+        api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
+                                        url=request.url, model=ObjectLinkModel.MODEL, body=body)
+    except ManagerIterationError as err:
+        return abort(400, err.message)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    return api_response.make_response()
+
+
 @links_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
 @links_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
@@ -49,27 +71,6 @@ def get_link(public_id: int, request_user: UserModel):
         return abort(403, err.message)
     api_response = GetSingleResponse(ObjectLinkModel.to_json(link), url=request.url,
                                      model=ObjectLinkModel.MODEL, body=body)
-    return api_response.make_response()
-
-
-@links_blueprint.route('/contains/<int:public_id>/', methods=['GET', 'HEAD'])
-@links_blueprint.protect(auth=True, right='base.framework.object.view')
-@links_blueprint.parse_collection_parameters()
-@insert_request_user
-def contains(public_id: int, request_user: UserModel, params: CollectionParameters):
-    link_manager = ObjectLinkManager(database_manager=current_app.database_manager)
-    body = request.method == 'HEAD'
-
-    try:
-        iteration_result: IterationResult[ObjectLinkModel] = link_manager.iterate(
-            public_id=public_id, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
-        types = [ObjectLinkModel.to_json(type) for type in iteration_result.results]
-        api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
-                                        url=request.url, model=ObjectLinkModel.MODEL, body=body)
-    except ManagerIterationError as err:
-        return abort(400, err.message)
-    except ManagerGetError as err:
-        return abort(404, err.message)
     return api_response.make_response()
 
 

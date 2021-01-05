@@ -33,20 +33,17 @@ class ObjectLinkQueryBuilder(FrameworkQueryBuilder):
     def __init__(self):
         super(ObjectLinkQueryBuilder, self).__init__()
 
-    def build(self, public_id: int, limit: int, skip: int, sort: str, order: int,
+    def build(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
               user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) -> \
             Union[Query, Pipeline]:
         self.clear()
         self.query = Pipeline([])
 
-        self.query.append(
-            self.match_(
-                self.or_([
-                    {'primary': public_id},
-                    {'secondary': public_id}
-                ])
-            )
-        )
+        if isinstance(filter, dict):
+            self.query.append(self.match_(filter))
+        elif isinstance(filter, list):
+            for pipe in filter:
+                self.query.append(pipe)
 
         if user and permission:
             pass  # TODO: ACLs
@@ -94,7 +91,7 @@ class ObjectLinkManager(FrameworkManager):
             return link
         raise ManagerGetError(f'ObjectLinkModel with ID: {public_id} not found!')
 
-    def iterate(self, public_id: int, limit: int, skip: int, sort: str, order: int,
+    def iterate(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
                 user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) \
             -> IterationResult[ObjectLinkModel]:
         """
@@ -102,7 +99,7 @@ class ObjectLinkManager(FrameworkManager):
         """
 
         try:
-            query: Query = self.query_builder.build(public_id=public_id, limit=limit, skip=skip, sort=sort, order=order,
+            query: Query = self.query_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order,
                                                     user=user, permission=permission)
             aggregation_result = next(self._aggregate(self.collection, query))
         except ManagerGetError as err:
