@@ -143,7 +143,7 @@ export class HttpProtocolHelper {
                                    page?: number) {
     const options = Object.assign(this, httpProtocol);
     let httpParams: HttpParams = new HttpParams();
-    httpParams = httpParams.set('filter', filter === undefined ? JSON.stringify({$match: {}}) : filter);
+    httpParams = httpParams.set('filter', filter === undefined || filter === 'undefined' ? undefined : filter);
     httpParams = httpParams.set('limit', limit === undefined ? '0' : limit.toString());
     httpParams = httpParams.set('sort', sort === undefined ? 'public_id' : sort);
     httpParams = httpParams.set('order', order === undefined ? '1' : order.toString());
