@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
 This managers represents the core functionalities for the use of CMDB objects.
@@ -37,7 +37,7 @@ from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
 from cmdb.framework.cmdb_errors import WrongInputFormatError, \
     ObjectInsertError, ObjectDeleteError, ObjectManagerGetError, \
     ObjectManagerInsertError, ObjectManagerUpdateError, ObjectManagerDeleteError, ObjectManagerInitError
-from cmdb.framework.cmdb_link import CmdbLink
+from cmdb.framework import ObjectLinkModel
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.search.query import Query, Pipeline
@@ -527,65 +527,3 @@ class CmdbObjectManager(CmdbManagerBase):
             LOGGER.error(err)
             raise ObjectManagerUpdateError(err)
         return ack.acknowledged
-
-    # Link CRUD
-    def get_link(self, public_id: int, user: UserModel = None, permission: AccessControlPermission = None) -> CmdbLink:
-        try:
-            link = CmdbLink(**self._get(collection=CmdbLink.COLLECTION, public_id=public_id))
-        except (CMDBError, Exception) as err:
-            raise ObjectManagerGetError(err)
-        # Check permissions
-        if user and permission:
-            self.get_object(public_id=link.primary, user=user, permission=permission)
-            self.get_object(public_id=link.secondary, user=user, permission=permission)
-        return link
-
-    def get_links_by_partner(self, public_id: int, user: UserModel = None,
-                             permission: AccessControlPermission = None) -> List[
-        CmdbLink]:
-        query = {
-            '$or': [
-                {'primary': public_id},
-                {'secondary': public_id}
-            ]
-        }
-        link_list: List[CmdbLink] = []
-        try:
-            find_list: List[dict] = self._get_many(CmdbLink.COLLECTION, **query)
-            for link in find_list:
-                query = {
-                    '$or': [
-                        {'public_id': link['primary']},
-                        {'public_id': link['secondary']}
-                    ]
-                }
-                verified_object = self.get_objects_by(user=user, permission=permission, **query)
-                if len(verified_object) == 2:
-                    link_list.append(CmdbLink(**link))
-        except CMDBError as err:
-            raise ObjectManagerGetError(err)
-        return link_list
-
-    def insert_link(self, data: dict, user: UserModel = None, permission: AccessControlPermission = None):
-        try:
-            link = CmdbLink(public_id=self.get_new_id(collection=CmdbLink.COLLECTION), **data)
-        except Exception as err:
-            raise ObjectManagerInsertError(err)
-
-        # Check permissions
-        if user and permission:
-            self.get_object(public_id=link.primary, user=user, permission=permission)
-            self.get_object(public_id=link.secondary, user=user, permission=permission)
-        try:
-            return self._insert(CmdbLink.COLLECTION, link.__dict__)
-        except Exception as err:
-            raise ObjectManagerInsertError(err)
-
-    def delete_link(self, public_id: int, user: UserModel = None, permission: AccessControlPermission = None):
-        # Check permissions and existing
-        self.get_link(public_id=public_id, user=user, permission=permission)
-        try:
-            ack = self._delete(CmdbLink.COLLECTION, public_id)
-        except Exception as err:
-            raise ObjectManagerDeleteError(err)
-        return ack
