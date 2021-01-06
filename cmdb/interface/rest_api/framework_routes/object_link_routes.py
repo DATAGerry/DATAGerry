@@ -14,18 +14,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-from datetime import datetime
-
 from flask import abort, request, current_app
 
 from cmdb.framework.models.object_link import ObjectLinkModel
-from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerDeleteError
 from cmdb.framework.managers.object_link_manager import ObjectLinkManager
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetSingleResponse, DeleteSingleResponse, InsertSingleResponse, GetMultiResponse
-from cmdb.interface.route_utils import make_response, insert_request_user
+from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.manager.errors import ManagerGetError, ManagerDeleteError, ManagerInsertError, ManagerIterationError
 from cmdb.security.acl.errors import AccessDeniedError

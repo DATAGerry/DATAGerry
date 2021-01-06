@@ -1,0 +1,11 @@
+<div class="d-flex justify-content-center">
+  <a *permissionLink="'base.framework.object.view';acl:acl;requirements:'READ'"
+     [routerLink]="['/', 'framework', 'object', 'view', partnerLinkID]"
+     title="View linked object">
+    <i class="far fa-eye"></i>
+  </a>
+  <a *permissionLink="'base.framework.object.delete';acl:acl;requirements:'DELETE'" class="pointer"
+     title="Delete link" (click)="deleteEmitter.emit(link)">
+    <i class="far fa-trash-alt"></i>
+  </a>
+</div>
