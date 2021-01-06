@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2020 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -15,10 +15,15 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 from typing import Union, List
 
+from bson import Regex
+
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework import CmdbObject
+from cmdb.framework.cmdb_object_manager import verify_access
 from cmdb.framework.managers.framework_manager import FrameworkManager, FrameworkQueryBuilder
+from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.results import IterationResult
+from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerIterationError
 from cmdb.search import Query, Pipeline
 from cmdb.security.acl.builder import AccessControlQueryBuilder
@@ -70,12 +75,12 @@ class ObjectQueryBuilder(FrameworkQueryBuilder):
         # TODO: Remove nasty quick hack
         if sort.startswith('fields'):
             sort_value = sort[7:]
-            self.query.append({"$addFields": {
-                "order": {
-                    "$filter": {
-                        "input": "$fields",
-                        "as": "fields",
-                        "cond": {"$eq": ["$$fields.name", sort_value]}
+            self.query.append({'$addFields': {
+                'order': {
+                    '$filter': {
+                        'input': '$fields',
+                        'as': 'fields',
+                        'cond': {'$eq': ['$$fields.name', sort_value]}
                     }
                 }
             }})
@@ -96,7 +101,29 @@ class ObjectManager(FrameworkManager):
         self.object_builder = ObjectQueryBuilder()
         super(ObjectManager, self).__init__(CmdbObject.COLLECTION, database_manager=database_manager)
 
-    def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int,
+    def get(self, public_id: Union[PublicID, int], user: UserModel = None,
+            permission: AccessControlPermission = None) -> CmdbObject:
+        """
+        Get a single object by its id.
+
+        Args:
+            public_id (int): ID of the object.
+            user: Request user
+            permission: ACL permission
+
+        Returns:
+            CmdbObject: Instance of CmdbObject with data.
+        """
+        cursor_result = self._get(self.collection, filter={'public_id': public_id}, limit=1)
+        for resource_result in cursor_result.limit(-1):
+            resource = CmdbObject.from_data(resource_result)
+            type_ = TypeManager(database_manager=self._database_manager).get(resource.type_id)
+            verify_access(type_, user, permission)
+            return resource
+        else:
+            raise ManagerGetError(f'Object with ID: {public_id} not found!')
+
+    def iterate(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
                 user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) \
             -> IterationResult[CmdbObject]:
 
@@ -109,3 +136,41 @@ class ObjectManager(FrameworkManager):
         iteration_result: IterationResult[CmdbObject] = IterationResult.from_aggregation(aggregation_result)
         iteration_result.convert_to(CmdbObject)
         return iteration_result
+
+    def references(self, object_: CmdbObject, filter: dict, limit: int, skip: int, sort: str, order: int,
+                   user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) \
+            -> IterationResult[CmdbObject]:
+        query = []
+        if isinstance(filter, dict):
+            query.append(filter)
+        elif isinstance(filter, list):
+            query += filter
+        query.append({
+            '$lookup': {
+                'from': 'framework.types',
+                'localField': 'type_id',
+                'foreignField': 'public_id',
+                'as': 'type'
+            }
+        })
+        query.append({
+            '$unwind': {
+                'path': '$type'
+            }
+        })
+        query.append({
+            '$match': {
+                'type.fields.type': 'ref',
+                '$or': [
+                    {'type.fields.ref_types': Regex(f'.*{object_.type_id}.*', 'i')},
+                    {'type.fields.ref_types': object_.type_id}
+                ]
+            }
+        })
+        query.append({
+            '$match': {
+                'fields.value': object_.public_id
+            }
+        })
+        return self.iterate(filter=query, limit=limit, skip=skip, sort=sort, order=order,
+                            user=user, permission=permission)
