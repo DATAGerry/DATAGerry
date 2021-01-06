@@ -41,7 +41,6 @@ import { ObjectCopyComponent } from './object-copy/object-copy.component';
 import { ObjectTypeLabelComponent } from './components/object-type-label/object-type-label.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ObjectLogListComponent } from './object-view/object-footer/object-log-list/object-log-list.component';
-import { ObjectReferenceListComponent } from './object-view/object-footer/object-reference-list/object-reference-list.component';
 import { ObjectLogComponent } from './object-log/object-log.component';
 import { ObjectLogChangeViewComponent } from './object-view/object-footer/object-log-list/object-log-change-view/object-log-change-view.component';
 import { ObjectLogUserComponent } from './object-view/object-footer/object-log-list/object-log-user/object-log-user.component';
@@ -62,6 +61,7 @@ import { QRCodeModule } from 'angularx-qrcode';
 import { ObjectDeleteModalComponent } from './modals/object-delete-modal/object-delete-modal.component';
 import { ObjectsDeleteModalComponent } from './modals/objects-delete-modal/objects-delete-modal.component';
 import { ObjectTableHeadComponent } from './components/object-table-head/object-table-head.component';
+import { ObjectReferencesTableComponent } from './components/object-references-table/object-references-table.component';
 import { ObjectLinksTableComponent } from './components/object-links-table/object-links-table.component';
 import { ObjectLinksTablePartnerCellComponent } from './components/object-links-table/object-links-table-partner-cell/object-links-table-partner-cell.component';
 import { ObjectLinksTableActionCellComponent } from './components/object-links-table/object-links-table-action-cell/object-links-table-action-cell.component';
@@ -88,7 +88,6 @@ import { ObjectLinksTableActionCellComponent } from './components/object-links-t
     ObjectCopyComponent,
     ObjectTypeLabelComponent,
     ObjectLogListComponent,
-    ObjectReferenceListComponent,
     ObjectLogComponent,
     ObjectLogChangeViewComponent,
     ObjectLogUserComponent,
@@ -107,7 +106,8 @@ import { ObjectLinksTableActionCellComponent } from './components/object-links-t
     ObjectTableHeadComponent,
     ObjectLinksTableComponent,
     ObjectLinksTablePartnerCellComponent,
-    ObjectLinksTableActionCellComponent
+    ObjectLinksTableActionCellComponent,
+    ObjectReferencesTableComponent
   ],
   imports: [
     CommonModule,
