@@ -128,7 +128,9 @@ import { ObjectLinksTableActionCellComponent } from './components/object-links-t
   ],
   exports: [
     ObjectViewRenderComponent,
-    ObjectTableActionsComponent
+    ObjectTableActionsComponent,
+    ObjectLogChangeViewComponent,
+    ObjectLogUserComponent
   ]
 })
 export class ObjectModule {

@@ -16,19 +16,24 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { CmdbDao } from './cmdb-dao';
 
-export class CmdbLog implements CmdbDao {
-  // tslint:disable:variable-name
-  public readonly public_id: number;
-  public render_state: string;
-  public user_name: string;
-  public user_id: number;
-  public version: string;
-  public comment: string;
-  public action: number;
-  public action_name: string;
-  public log_time: any;
-  public changes: any;
-  // tslint:enable
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+
+@Component({
+  selector: 'cmdb-log-object-table-actions',
+  templateUrl: './log-object-table-actions.component.html',
+  styleUrls: ['./log-object-table-actions.component.scss']
+})
+export class LogObjectTableActionsComponent {
+
+  /**
+   * Public id of the object.
+   */
+  @Input() public publicID: number;
+
+  /**
+   * Emitter when element was deleted.
+   */
+  @Output() public deleteEmitter: EventEmitter<number> = new EventEmitter<number>();
+
 }
