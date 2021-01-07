@@ -28,8 +28,8 @@ from cmdb.database.utils import object_hook, default
 from cmdb.framework import CmdbObject, TypeModel
 from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError, \
     ObjectManagerUpdateError
-from cmdb.framework.cmdb_log import LogAction, CmdbObjectLog
-from cmdb.framework.cmdb_log_manager import LogManagerInsertError
+from cmdb.framework.models.log import LogAction, CmdbObjectLog
+from cmdb.framework.managers.log_manager import LogManagerInsertError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
 from cmdb.framework.managers.type_manager import TypeManager
@@ -580,7 +580,7 @@ def insert_object(request_user: UserModel):
             'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
             'version': current_object.version
         }
-        log_ack = log_manager.insert_log(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
+        log_ack = log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
     except LogManagerInsertError as err:
         LOGGER.error(err)
 
@@ -701,7 +701,7 @@ def update_object(public_id: int, request_user: UserModel):
                 'changes': changes,
                 'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
             }
-            log_manager.insert_log(action=LogAction.EDIT, log_type=CmdbObjectLog.__name__, **log_data)
+            log_manager.insert(action=LogAction.EDIT, log_type=CmdbObjectLog.__name__, **log_data)
         except (CMDBError, LogManagerInsertError) as err:
             LOGGER.error(err)
 
@@ -749,7 +749,7 @@ def delete_object(public_id: int, request_user: UserModel):
             'comment': 'Object was deleted',
             'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
         }
-        log_manager.insert_log(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
+        log_manager.insert(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
     except (CMDBError, LogManagerInsertError) as err:
         LOGGER.error(err)
 
@@ -811,7 +811,7 @@ def delete_many_objects(public_ids, request_user: UserModel):
                     'comment': 'Object was deleted',
                     'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
                 }
-                log_manager.insert_log(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
+                log_manager.insert(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
             except (CMDBError, LogManagerInsertError) as err:
                 LOGGER.error(err)
 
@@ -895,7 +895,7 @@ def update_object_state(public_id: int, request_user: UserModel):
             'comment': 'Active status has changed',
             'changes': change,
         }
-        log_manager.insert_log(action=LogAction.ACTIVE_CHANGE, log_type=CmdbObjectLog.__name__, **log_data)
+        log_manager.insert(action=LogAction.ACTIVE_CHANGE, log_type=CmdbObjectLog.__name__, **log_data)
     except (CMDBError, LogManagerInsertError) as err:
         LOGGER.error(err)
 

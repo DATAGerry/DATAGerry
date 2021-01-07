@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
 
@@ -20,8 +20,8 @@ from werkzeug.exceptions import abort
 from flask import current_app, request
 
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
-from cmdb.framework.cmdb_log import CmdbObjectLog, CmdbMetaLog, LogAction
-from cmdb.framework.cmdb_log_manager import LogManagerGetError, LogManagerDeleteError
+from cmdb.framework.models.log import CmdbObjectLog, CmdbMetaLog, LogAction
+from cmdb.framework.managers.log_manager import LogManagerGetError, LogManagerDeleteError
 from cmdb.manager.errors import ManagerIterationError
 from cmdb.interface.route_utils import make_response
 
@@ -48,7 +48,7 @@ with current_app.app_context():
 @log_blueprint.protect(auth=True, right='base.framework.log.view')
 def get_log(public_id: int):
     try:
-        selected_log = log_manager.get_log(public_id=public_id)
+        selected_log = log_manager.get(public_id=public_id)
     except LogManagerGetError:
         return abort(404)
     return make_response(selected_log)
@@ -80,7 +80,7 @@ def update_log(public_id, *args, **kwargs):
 @log_blueprint.protect(auth=True, right='base.framework.log.delete')
 def delete_log(public_id: int):
     try:
-        delete_ack = log_manager.delete_log(public_id=public_id)
+        delete_ack = log_manager.delete(public_id=public_id)
     except LogManagerDeleteError as err:
         return abort(500, err.message)
     return make_response(delete_ack)
@@ -119,8 +119,8 @@ def get_logs_with_existing_objects(params: CollectionParameters):
         query.append({'$match': {'logs': {'$exists': True}}})
 
         body = request.method == 'HEAD'
-        object_logs = log_manager.get_logs(filter=query, limit=params.limit,
-                                           skip=params.skip, sort=params.sort, order=params.order)
+        object_logs = log_manager.iterate(filter=query, limit=params.limit,
+                                          skip=params.skip, sort=params.sort, order=params.order)
         logs = [CmdbObjectLog.to_json(_) for _ in object_logs.results]
         api_response = GetMultiResponse(logs, total=object_logs.total, params=params,
                                         url=request.url, model=CmdbMetaLog.MODEL, body=body)
@@ -165,8 +165,8 @@ def get_logs_with_deleted_objects(params: CollectionParameters):
         query.append({'$match': {'logs': {'$exists': False}}})
 
         body = request.method == 'HEAD'
-        object_logs = log_manager.get_logs(filter=query, limit=params.limit,
-                                           skip=params.skip, sort=params.sort, order=params.order)
+        object_logs = log_manager.iterate(filter=query, limit=params.limit,
+                                          skip=params.skip, sort=params.sort, order=params.order)
 
         logs = [CmdbObjectLog.to_json(_) for _ in object_logs.results]
         api_response = GetMultiResponse(logs, total=object_logs.total, params=params,
@@ -191,8 +191,8 @@ def get_object_delete_logs(params: CollectionParameters):
             'action': LogAction.DELETE.value
         }
         body = request.method == 'HEAD'
-        object_logs = log_manager.get_logs(filter=query, limit=params.limit, skip=params.skip,
-                                           sort=params.sort, order=params.order)
+        object_logs = log_manager.iterate(filter=query, limit=params.limit, skip=params.skip,
+                                          sort=params.sort, order=params.order)
         logs = [CmdbObjectLog.to_json(_) for _ in object_logs.results]
         api_response = GetMultiResponse(logs, total=object_logs.total, params=params,
                                         url=request.url, model=CmdbMetaLog.MODEL, body=body)
@@ -212,8 +212,8 @@ def get_object_delete_logs(params: CollectionParameters):
 def get_logs_by_objects(public_id: int, params: CollectionParameters):
     try:
         body = request.method == 'HEAD'
-        iteration_result = log_manager.get_logs(public_id=public_id, filter=params.filter, limit=params.limit,
-                                                skip=params.skip, sort=params.sort, order=params.order)
+        iteration_result = log_manager.iterate(public_id=public_id, filter=params.filter, limit=params.limit,
+                                               skip=params.skip, sort=params.sort, order=params.order)
         logs = [CmdbObjectLog.to_json(_) for _ in iteration_result.results]
         api_response = GetMultiResponse(logs, total=iteration_result.total, params=params,
                                         url=request.url, model=CmdbMetaLog.MODEL, body=body)
@@ -230,7 +230,7 @@ def get_logs_by_objects(public_id: int, params: CollectionParameters):
 @log_blueprint.protect(auth=True, right='base.framework.log.view')
 def get_corresponding_object_logs(public_id: int):
     try:
-        selected_log = log_manager.get_log(public_id=public_id)
+        selected_log = log_manager.get(public_id=public_id)
         query = {
             'log_type': CmdbObjectLog.__name__,
             'object_id': selected_log.object_id,
@@ -240,7 +240,7 @@ def get_corresponding_object_logs(public_id: int):
             }]
         }
         LOGGER.debug(f'Corresponding query: {query}')
-        logs = log_manager.get_logs(filter=query, limit=0, skip=0, order=1, sort='public_id')
+        logs = log_manager.iterate(filter=query, limit=0, skip=0, order=1, sort='public_id')
         corresponding_logs = [CmdbObjectLog.to_json(_) for _ in logs.results]
     except LogManagerGetError as err:
         LOGGER.error(err)

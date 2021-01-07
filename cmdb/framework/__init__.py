@@ -28,7 +28,7 @@ from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models import TypeModel
 from cmdb.framework.models import CategoryModel
 from cmdb.framework.models import ObjectLinkModel
-from cmdb.framework.cmdb_log import CmdbLog, CmdbObjectLog, CmdbMetaLog
+from cmdb.framework.models.log import CmdbLog, CmdbObjectLog, CmdbMetaLog
 
 CmdbLog.register_log_type(CmdbObjectLog.__name__, CmdbObjectLog)
 

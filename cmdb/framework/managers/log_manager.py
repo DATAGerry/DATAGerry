@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 from typing import Union
@@ -25,8 +25,9 @@ from cmdb.framework.utils import PublicID
 
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerDeleteError, ManagerInsertError, ManagerUpdateError
-from cmdb.framework.cmdb_log import CMDBError, LOGGER, LogAction
+from cmdb.framework.models.log import LOGGER, LogAction
 from cmdb.search import Query
+from cmdb.utils.error import CMDBError
 
 
 class CmdbLogManager(FrameworkManager):
@@ -44,14 +45,14 @@ class CmdbLogManager(FrameworkManager):
         self.dbm = database_manager
         super(CmdbLogManager, self).__init__(CmdbMetaLog.COLLECTION, database_manager=database_manager)
 
-    # CRUD functions
-    def get_log(self, public_id: Union[PublicID, int]):
+    def get(self, public_id: Union[PublicID, int]) -> CmdbMetaLog:
         cursor_result = self._get(self.collection, filter={'public_id': public_id}, limit=1)
         for resource_result in cursor_result.limit(-1):
-            return CmdbMetaLog.from_data(resource_result)
-        raise ManagerGetError(f'Type with ID: {public_id} not found!')
+            return CmdbLog.from_data(resource_result)
 
-    def get_logs(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs):
+        raise ManagerGetError(f'Log with ID: {public_id} not found!')
+
+    def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs):
         """
         Iterate over a collection of object logs resources.
 
@@ -74,12 +75,11 @@ class CmdbLogManager(FrameworkManager):
         try:
             iteration_result: IterationResult[CmdbMetaLog] = IterationResult.from_aggregation(aggregation_result)
             iteration_result.convert_to(CmdbMetaLog)
-        except (CMDBError, Exception) as err:
-            LOGGER.error(err)
+        except ManagerGetError as err:
             raise ManagerGetError(err)
         return iteration_result
 
-    def insert_log(self, action: LogAction, log_type: str, **kwargs) -> int:
+    def insert(self, action: LogAction, log_type: str, *args, **kwargs) -> int:
         # Get possible public id
         log_init = {}
         available_id = self.dbm.get_next_public_id(collection=CmdbMetaLog.COLLECTION)
@@ -101,10 +101,10 @@ class CmdbLogManager(FrameworkManager):
             raise LogManagerInsertError(err)
         return ack
 
-    def update_log(self, data) -> int:
+    def update(self, data) -> int:
         raise NotImplementedError
 
-    def delete_log(self, public_id: Union[PublicID, int]) -> CmdbMetaLog:
+    def delete(self, public_id: Union[PublicID, int]) -> CmdbMetaLog:
         """
         Delete a existing log by its PublicID.
 
@@ -114,7 +114,7 @@ class CmdbLogManager(FrameworkManager):
         Returns:
             CmdbMetaLog: The deleted log as its model.
         """
-        raw_log: CmdbMetaLog = self.get_log(public_id=public_id)
+        raw_log: CmdbMetaLog = self.get(public_id=public_id)
         delete_result = self._delete(self.collection, filter={'public_id': public_id})
         if delete_result.deleted_count == 0:
             raise ManagerDeleteError(err='No log matched this public id')
