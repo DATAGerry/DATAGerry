@@ -36,7 +36,7 @@ export class LogService<T = CmdbLog> implements ApiService {
   public servicePrefix: string = 'log';
 
   public getLog(publicID: number): Observable<T> {
-    return this.api.callGet<T>(`${this.servicePrefix}/${publicID}/`).pipe(
+    return this.api.callGet<T>(`${this.servicePrefix}/${publicID}`).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -52,7 +52,7 @@ export class LogService<T = CmdbLog> implements ApiService {
     limit: 10, sort: 'public_id', order: 1, page: 1}): Observable<APIGetMultiResponse<T>> {
     const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions,
       JSON.stringify(params.filter), params.limit, params.sort, params.order, params.page);
-    return this.api.callGet<Array<T>>(this.servicePrefix + '/object/' + publicID, options).pipe(
+    return this.api.callGet<Array<T>>(`${this.servicePrefix}/object/${publicID}`, options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
@@ -64,7 +64,7 @@ export class LogService<T = CmdbLog> implements ApiService {
     const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, params.filter,
       params.limit, params.sort, params.order, params.page);
 
-    return this.api.callGet<Array<T>>(`${this.servicePrefix}/object/exists/`, options).pipe(
+    return this.api.callGet<Array<T>>(`${this.servicePrefix}/object/exists`, options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
@@ -76,7 +76,7 @@ export class LogService<T = CmdbLog> implements ApiService {
     const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, params.filter,
       params.limit, params.sort, params.order, params.page);
 
-    return this.api.callGet<T>(`${this.servicePrefix}/object/notexists/`, options).pipe(
+    return this.api.callGet<T>(`${this.servicePrefix}/object/notexists`, options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
@@ -88,7 +88,7 @@ export class LogService<T = CmdbLog> implements ApiService {
     const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, params.filter,
       params.limit, params.sort, params.order, params.page);
 
-    return this.api.callGet<T>(`${this.servicePrefix}/object/deleted/`, options).pipe(
+    return this.api.callGet<T>(`${this.servicePrefix}/object/deleted`, options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
@@ -96,7 +96,7 @@ export class LogService<T = CmdbLog> implements ApiService {
   }
 
   public getCorrespondingLogs(publicID: number) {
-    return this.api.callGet<T>(`${this.servicePrefix}/${publicID}/corresponding/`).pipe(
+    return this.api.callGet<T>(`${this.servicePrefix}/${publicID}/corresponding`).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -106,8 +106,8 @@ export class LogService<T = CmdbLog> implements ApiService {
     );
   }
 
-  public deleteLog(publicID: number) {
-    return this.api.callDelete<boolean>(`${this.servicePrefix}/${publicID}/`).pipe(
+  public deleteLog(publicID: number): Observable<T>  {
+    return this.api.callDelete<boolean>(`${this.servicePrefix}/${publicID}`).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
