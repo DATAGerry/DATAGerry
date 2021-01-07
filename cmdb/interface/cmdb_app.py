@@ -18,7 +18,7 @@ from flask import Flask
 import logging
 
 from cmdb.database.managers import DatabaseManagerMongo
-from cmdb.framework.cmdb_log_manager import CmdbLogManager
+from cmdb.framework.managers.log_manager import CmdbLogManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement

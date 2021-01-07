@@ -19,7 +19,7 @@ Init module for rest routes
 """
 import logging
 
-from cmdb.framework.cmdb_log_manager import CmdbLogManager
+from cmdb.framework.managers.log_manager import CmdbLogManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager

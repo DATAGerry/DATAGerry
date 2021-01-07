@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,21 +12,77 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from typing import Union
+from typing import Union, List
 from datetime import datetime
 
 from cmdb.framework import CmdbLog, CmdbMetaLog
 from cmdb.database.managers import DatabaseManagerMongo
-from cmdb.framework.managers.framework_manager import FrameworkManager
+from cmdb.framework.managers.framework_manager import FrameworkManager, FrameworkQueryBuilder
 from cmdb.framework.utils import PublicID
 
 from cmdb.framework.results.iteration import IterationResult
-from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerDeleteError, ManagerInsertError, ManagerUpdateError
-from cmdb.framework.cmdb_log import CMDBError, LOGGER, LogAction
-from cmdb.search import Query
+from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerDeleteError, ManagerInsertError, \
+    ManagerUpdateError
+from cmdb.framework.models.log import LOGGER, LogAction, CmdbObjectLog
+from cmdb.search import Query, Pipeline
+from cmdb.security.acl.builder import LookedAccessControlQueryBuilder
+from cmdb.security.acl.permission import AccessControlPermission
+from cmdb.user_management import UserModel
+from cmdb.utils.error import CMDBError
+
+
+class LogQueryBuilder(FrameworkQueryBuilder):
+
+    def __init__(self):
+        super(LogQueryBuilder, self).__init__()
+
+    def build(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
+              user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) -> \
+            Union[Query, Pipeline]:
+        """
+        Converts the parameters from the call to a mongodb aggregation pipeline
+        Args:
+            filter: dict or list of dict query/queries which the elements have to match.
+            limit: max number of documents to return.
+            skip: number of documents to skip first.
+            sort: sort field
+            order: sort order
+            user: request user
+            permission: AccessControlPermission
+            *args:
+            **kwargs:
+
+        Returns:
+            The `LogQueryBuilder` query pipeline with the parameter contents.
+        """
+        self.clear()
+        self.query = Pipeline([])
+
+        if isinstance(filter, dict):
+            self.query.append(self.match_(filter))
+        elif isinstance(filter, list):
+            for pipe in filter:
+                self.query.append(pipe)
+
+        if user and permission:
+            self.query += (
+                LookedAccessControlQueryBuilder().build(group_id=PublicID(user.group_id), permission=permission))
+
+        if limit == 0:
+            results_query = [self.skip_(limit)]
+        else:
+            results_query = [self.skip_(skip), self.limit_(limit)]
+
+        self.query.append(self.sort_(sort=sort, order=order))
+
+        self.query.append(self.facet_({
+            'meta': [self.count_('total')],
+            'results': results_query
+        }))
+        return self.query
 
 
 class CmdbLogManager(FrameworkManager):
@@ -41,17 +97,18 @@ class CmdbLogManager(FrameworkManager):
         Args:
             database_manager: Connection to the database class.
         """
-        self.dbm = database_manager
+        self.log_builder = LogQueryBuilder()
         super(CmdbLogManager, self).__init__(CmdbMetaLog.COLLECTION, database_manager=database_manager)
 
-    # CRUD functions
-    def get_log(self, public_id: Union[PublicID, int]):
+    def get(self, public_id: Union[PublicID, int]) -> Union[CmdbMetaLog, CmdbObjectLog]:
         cursor_result = self._get(self.collection, filter={'public_id': public_id}, limit=1)
         for resource_result in cursor_result.limit(-1):
-            return CmdbMetaLog.from_data(resource_result)
-        raise ManagerGetError(f'Type with ID: {public_id} not found!')
+            return CmdbLog.from_data(resource_result)
 
-    def get_logs(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs):
+        raise ManagerGetError(f'Log with ID: {public_id} not found!')
+
+    def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int,
+                user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs):
         """
         Iterate over a collection of object logs resources.
 
@@ -66,23 +123,23 @@ class CmdbLogManager(FrameworkManager):
             IterationResult: Instance of IterationResult with generic CmdbObjectLog.
         """
         try:
-            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            query: Query = self.log_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order,
+                                                  user=user, permission=permission)
             aggregation_result = next(self._aggregate(self.collection, query))
         except ManagerGetError as err:
             raise ManagerIterationError(err=err)
 
         try:
             iteration_result: IterationResult[CmdbMetaLog] = IterationResult.from_aggregation(aggregation_result)
-            iteration_result.convert_to(CmdbMetaLog)
-        except (CMDBError, Exception) as err:
-            LOGGER.error(err)
+            iteration_result.convert_to(CmdbObjectLog)
+        except ManagerGetError as err:
             raise ManagerGetError(err)
         return iteration_result
 
-    def insert_log(self, action: LogAction, log_type: str, **kwargs) -> int:
+    def insert(self, action: LogAction, log_type: str, *args, **kwargs) -> int:
         # Get possible public id
         log_init = {}
-        available_id = self.dbm.get_next_public_id(collection=CmdbMetaLog.COLLECTION)
+        available_id = self._database_manager.get_next_public_id(collection=CmdbMetaLog.COLLECTION)
         log_init['public_id'] = available_id
 
         # set static values
@@ -101,10 +158,10 @@ class CmdbLogManager(FrameworkManager):
             raise LogManagerInsertError(err)
         return ack
 
-    def update_log(self, data) -> int:
+    def update(self, data) -> int:
         raise NotImplementedError
 
-    def delete_log(self, public_id: Union[PublicID, int]) -> CmdbMetaLog:
+    def delete(self, public_id: Union[PublicID, int]) -> Union[CmdbMetaLog, CmdbObjectLog]:
         """
         Delete a existing log by its PublicID.
 
@@ -114,7 +171,7 @@ class CmdbLogManager(FrameworkManager):
         Returns:
             CmdbMetaLog: The deleted log as its model.
         """
-        raw_log: CmdbMetaLog = self.get_log(public_id=public_id)
+        raw_log: Union[CmdbMetaLog, CmdbObjectLog] = self.get(public_id=public_id)
         delete_result = self._delete(self.collection, filter={'public_id': public_id})
         if delete_result.deleted_count == 0:
             raise ManagerDeleteError(err='No log matched this public id')

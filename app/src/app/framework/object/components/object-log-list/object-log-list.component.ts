@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019-2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,16 +13,16 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { LogService } from '../../../../services/log.service';
-import { CmdbLog } from '../../../../models/cmdb-log';
-import { Column, Sort, SortDirection } from '../../../../../layout/table/table.types';
-import { CollectionParameters } from '../../../../../services/models/api-parameter';
-import { APIGetMultiResponse } from '../../../../../services/models/api-response';
 import { DatePipe } from '@angular/common';
+import { CmdbLog } from '../../../models/cmdb-log';
+import { Column, Sort, SortDirection } from '../../../../layout/table/table.types';
+import { APIGetMultiResponse } from '../../../../services/models/api-response';
+import { CollectionParameters } from '../../../../services/models/api-parameter';
+import { LogService } from 'src/app/framework/services/log.service';
 
 @Component({
   selector: 'cmdb-object-log-list',
@@ -61,7 +61,7 @@ export class ObjectLogListComponent implements OnInit {
 
   public columns: Array<Column>;
 
-  public sort: Sort = { name: 'date', order: SortDirection.DESCENDING } as Sort;
+  public sort: Sort = { name: 'log_time', order: SortDirection.DESCENDING } as Sort;
 
   private readonly initLimit: number = 10;
   public limit: number = this.initLimit;
@@ -72,7 +72,7 @@ export class ObjectLogListComponent implements OnInit {
   public total: number = 0;
   public loading: boolean = false;
 
-  public apiParameters: CollectionParameters = { limit: 10, sort: 'log_time', order: -1, page: 1};
+  public apiParameters: CollectionParameters;
 
   constructor(private logService: LogService) {
   }
@@ -157,9 +157,8 @@ export class ObjectLogListComponent implements OnInit {
       name: 'action_name',
       data: 'action_name',
       sortable: true,
-      searchable: true,
+      searchable: false,
       fixed: true,
-      template: this.dataTemplate,
       cssClasses: ['text-center'],
       style: { width: '6em' }
     } as unknown as Column);
@@ -182,7 +181,6 @@ export class ObjectLogListComponent implements OnInit {
       sortable: true,
       searchable: false,
       fixed: true,
-      template: this.dataTemplate,
       cssClasses: ['text-center'],
       style: { width: '6em' }
     } as unknown as Column);
@@ -192,7 +190,7 @@ export class ObjectLogListComponent implements OnInit {
       data: 'author_name',
       name: 'author_name',
       sortable: true,
-      searchable: true,
+      searchable: false,
       fixed: true,
       template: this.userTemplate,
       cssClasses: ['text-center'],
@@ -206,7 +204,6 @@ export class ObjectLogListComponent implements OnInit {
       sortable: true,
       searchable: true,
       fixed: true,
-      template: this.dataTemplate,
       cssClasses: ['text-center'],
       style: { width: '6em' }
     } as unknown as Column);

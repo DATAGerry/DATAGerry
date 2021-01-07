@@ -135,7 +135,7 @@ def add_job(request_user: UserModel):
             'event': LogAction.CREATE.name,
             'message': '',
         }
-        log_manager.insert_log(action=LogAction.CREATE, log_type=ExportdJobLog.__name__, **log_params)
+        log_manager.insert(action=LogAction.CREATE, log_type=ExportdJobLog.__name__, **log_params)
     except LogManagerInsertError as err:
         LOGGER.error(err)
 
@@ -177,7 +177,7 @@ def update_job(request_user: UserModel):
                 'event': LogAction.EDIT.name,
                 'message': '',
             }
-            log_manager.insert_log(action=LogAction.EDIT, log_type=ExportdJobLog.__name__, **log_params)
+            log_manager.insert(action=LogAction.EDIT, log_type=ExportdJobLog.__name__, **log_params)
         except LogManagerInsertError as err:
             LOGGER.error(err)
 
@@ -202,7 +202,7 @@ def delete_job(public_id: int, request_user: UserModel):
                 'event': LogAction.DELETE.name,
                 'message': '',
             }
-            log_manager.insert_log(action=LogAction.DELETE, log_type=ExportdJobLog.__name__, **log_params)
+            log_manager.insert(action=LogAction.DELETE, log_type=ExportdJobLog.__name__, **log_params)
         except (ExportdJobManagerGetError, LogManagerInsertError) as err:
             LOGGER.error(err)
             return abort(404)

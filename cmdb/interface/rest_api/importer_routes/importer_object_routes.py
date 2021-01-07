@@ -22,8 +22,8 @@ from werkzeug.utils import secure_filename
 
 from cmdb.database.utils import default
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
-from cmdb.framework.cmdb_log import LogAction, CmdbObjectLog
-from cmdb.framework.cmdb_log_manager import LogManagerInsertError
+from cmdb.framework.models.log import LogAction, CmdbObjectLog
+from cmdb.framework.managers.log_manager import LogManagerInsertError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_render import RenderError, CmdbRender
@@ -218,7 +218,7 @@ def import_objects(request_user: UserModel):
                 'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
                 'version': current_object.version
             }
-            log_ack = log_manager.insert_log(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
+            log_ack = log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
 
         except ObjectManagerGetError as err:
             LOGGER.error(err)
