@@ -40,10 +40,10 @@ import { ObjectViewRenderComponent } from './components/object-view-render/objec
 import { ObjectCopyComponent } from './object-copy/object-copy.component';
 import { ObjectTypeLabelComponent } from './components/object-type-label/object-type-label.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { ObjectLogListComponent } from './object-view/object-footer/object-log-list/object-log-list.component';
+import { ObjectLogListComponent } from './components/object-log-list/object-log-list.component';
 import { ObjectLogComponent } from './object-log/object-log.component';
-import { ObjectLogChangeViewComponent } from './object-view/object-footer/object-log-list/object-log-change-view/object-log-change-view.component';
-import { ObjectLogUserComponent } from './object-view/object-footer/object-log-list/object-log-user/object-log-user.component';
+import { ObjectLogChangeViewComponent } from './components/object-log-list/object-log-change-view/object-log-change-view.component';
+import { ObjectLogUserComponent } from './components/object-log-list/object-log-user/object-log-user.component';
 import { ObjectLinkAddModalComponent } from './modals/object-link-add-modal/object-link-add-modal.component';
 import { ObjectLinkDeleteModalComponent } from './modals/object-link-delete-modal/object-link-delete-modal.component';
 import { AuthModule } from '../../auth/auth.module';

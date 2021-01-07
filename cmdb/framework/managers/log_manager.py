@@ -25,7 +25,7 @@ from cmdb.framework.utils import PublicID
 
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerDeleteError, ManagerInsertError, ManagerUpdateError
-from cmdb.framework.models.log import LOGGER, LogAction
+from cmdb.framework.models.log import LOGGER, LogAction, CmdbObjectLog
 from cmdb.search import Query
 from cmdb.utils.error import CMDBError
 
@@ -74,7 +74,7 @@ class CmdbLogManager(FrameworkManager):
 
         try:
             iteration_result: IterationResult[CmdbMetaLog] = IterationResult.from_aggregation(aggregation_result)
-            iteration_result.convert_to(CmdbMetaLog)
+            iteration_result.convert_to(CmdbObjectLog)
         except ManagerGetError as err:
             raise ManagerGetError(err)
         return iteration_result
