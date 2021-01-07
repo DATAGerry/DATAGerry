@@ -16,7 +16,7 @@
 
 from .type import TypeModel
 from .category import CategoryModel
-from .object_link import ObjectLinkModel
+from .link import ObjectLinkModel
 
 __all__ = [
     CategoryModel,

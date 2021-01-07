@@ -16,7 +16,7 @@
 
 from flask import abort, request, current_app
 
-from cmdb.framework.models.object_link import ObjectLinkModel
+from cmdb.framework.models.link import ObjectLinkModel
 from cmdb.framework.managers.object_link_manager import ObjectLinkManager
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
