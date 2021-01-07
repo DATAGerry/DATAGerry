@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
@@ -38,15 +38,12 @@ import { ObjectEditComponent } from './object-edit/object-edit.component';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectViewRenderComponent } from './components/object-view-render/object-view-render.component';
 import { ObjectCopyComponent } from './object-copy/object-copy.component';
-import { ObjectLinksComponent } from './object-view/object-footer/object-links/object-links.component';
 import { ObjectTypeLabelComponent } from './components/object-type-label/object-type-label.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { ObjectLogListComponent } from './object-view/object-footer/object-log-list/object-log-list.component';
-import { ObjectReferenceListComponent } from './object-view/object-footer/object-reference-list/object-reference-list.component';
+import { ObjectLogListComponent } from './components/object-log-list/object-log-list.component';
 import { ObjectLogComponent } from './object-log/object-log.component';
-// tslint:disable-next-line:max-line-length
-import { ObjectLogChangeViewComponent } from './object-view/object-footer/object-log-list/object-log-change-view/object-log-change-view.component';
-import { ObjectLogUserComponent } from './object-view/object-footer/object-log-list/object-log-user/object-log-user.component';
+import { ObjectLogChangeViewComponent } from './components/object-log-list/object-log-change-view/object-log-change-view.component';
+import { ObjectLogUserComponent } from './components/object-log-list/object-log-user/object-log-user.component';
 import { ObjectLinkAddModalComponent } from './modals/object-link-add-modal/object-link-add-modal.component';
 import { ObjectLinkDeleteModalComponent } from './modals/object-link-delete-modal/object-link-delete-modal.component';
 import { AuthModule } from '../../auth/auth.module';
@@ -64,6 +61,10 @@ import { QRCodeModule } from 'angularx-qrcode';
 import { ObjectDeleteModalComponent } from './modals/object-delete-modal/object-delete-modal.component';
 import { ObjectsDeleteModalComponent } from './modals/objects-delete-modal/objects-delete-modal.component';
 import { ObjectTableHeadComponent } from './components/object-table-head/object-table-head.component';
+import { ObjectReferencesTableComponent } from './components/object-references-table/object-references-table.component';
+import { ObjectLinksTableComponent } from './components/object-links-table/object-links-table.component';
+import { ObjectLinksTablePartnerCellComponent } from './components/object-links-table/object-links-table-partner-cell/object-links-table-partner-cell.component';
+import { ObjectLinksTableActionCellComponent } from './components/object-links-table/object-links-table-action-cell/object-links-table-action-cell.component';
 
 @NgModule({
   entryComponents: [
@@ -85,10 +86,8 @@ import { ObjectTableHeadComponent } from './components/object-table-head/object-
     ObjectViewMetaComponent,
     ObjectEditComponent,
     ObjectCopyComponent,
-    ObjectLinksComponent,
     ObjectTypeLabelComponent,
     ObjectLogListComponent,
-    ObjectReferenceListComponent,
     ObjectLogComponent,
     ObjectLogChangeViewComponent,
     ObjectLogUserComponent,
@@ -104,7 +103,11 @@ import { ObjectTableHeadComponent } from './components/object-table-head/object-
     ObjectTableActionsComponent,
     ObjectDeleteModalComponent,
     ObjectsDeleteModalComponent,
-    ObjectTableHeadComponent
+    ObjectTableHeadComponent,
+    ObjectLinksTableComponent,
+    ObjectLinksTablePartnerCellComponent,
+    ObjectLinksTableActionCellComponent,
+    ObjectReferencesTableComponent
   ],
   imports: [
     CommonModule,
@@ -125,7 +128,9 @@ import { ObjectTableHeadComponent } from './components/object-table-head/object-
   ],
   exports: [
     ObjectViewRenderComponent,
-    ObjectTableActionsComponent
+    ObjectTableActionsComponent,
+    ObjectLogChangeViewComponent,
+    ObjectLogUserComponent
   ]
 })
 export class ObjectModule {

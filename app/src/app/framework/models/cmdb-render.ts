@@ -33,6 +33,8 @@ export class RenderResult {
     },
     author_id: number;
     author_name: string;
+    editor_id?: number;
+    editor_name?: string;
     active: boolean;
     version: string;
   };

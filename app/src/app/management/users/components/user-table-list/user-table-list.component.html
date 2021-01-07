@@ -1,0 +1,6 @@
+<cmdb-table [id]="'user-list-table'" [columns]="columns" [items]="users" [loading]="loading"
+            [sort]="sort" [pageSize]="params.limit" [page]="params.page" [totalItems]="totalUsers"
+            [stateEnabled]="false" [searchEnabled]="false"
+            (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
+            (sortChange)="onSortChange($event)">
+</cmdb-table>

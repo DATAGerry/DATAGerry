@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,190 +13,310 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { TypeService } from '../services/type.service';
-import { DataTableDirective } from 'angular-datatables';
-import { takeUntil } from 'rxjs/operators';
-import { ReplaySubject, Subject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CmdbType } from '../models/cmdb-type';
-import { CollectionParameters } from '../../services/models/api-parameter';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { Router } from '@angular/router';
 import { FileSaverService } from 'ngx-filesaver';
 import { DatePipe } from '@angular/common';
 import { FileService } from '../../export/export.service';
-import { ObjectService } from '../services/object.service';
+import { Column, Sort, SortDirection } from '../../layout/table/table.types';
+import { CollectionParameters } from '../../services/models/api-parameter';
+import { takeUntil } from 'rxjs/operators';
+import { PermissionService } from '../../auth/services/permission.service';
 
 @Component({
   selector: 'cmdb-type',
   templateUrl: './type.component.html',
   styleUrls: ['./type.component.scss']
 })
-export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
+export class TypeComponent implements OnInit, OnDestroy {
 
   /**
-   * Datatable datas
+   * Global un-subscriber for http calls to the rest backend.
    */
-  public dtOptions: any = {};
-  public dtTrigger: Subject<void> = new Subject();
-  @ViewChild(DataTableDirective, { static: false }) dtElement: DataTableDirective;
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   /**
-   * Global unsubscriber for http calls to the rest backend.
+   * Info message.
    */
-  private unSubscribe: ReplaySubject<void> = new ReplaySubject();
+  public readonly INFO_MESSAGE: string = '' +
+    'DATAGERRY is an asset management tool (or CMDB), where you can define the data model for your own.\n' +
+    '\n' +
+    'In DATAGERRY objects are stored. An object can be for example a router, server, location or maintenance contract and\n' +
+    ' consists of multiple fields (e.g. management IP, hostname, … of a router). Each field has a specific data type.\n' +
+    ' A datatype could be for example text, checkbox, date, dropdown or many more. The blueprint for an object is defined\n' +
+    ' in an object type.';
 
   /**
    * Current category collection
    */
-  public types: Array<CmdbType>;
+  public types: Array<CmdbType> = [];
   public typesAPIResponse: APIGetMultiResponse<CmdbType>;
+  public totalTypes: number = 0;
 
   /**
-   * Selection parameters
+   * Type selection.
    */
-  public selected: Array<number> = [];
-  public all: boolean = false;
-  public remove: boolean = false;
-  public update: boolean = false;
+  public selectedTypes: Array<CmdbType> = [];
+  public selectedTypeIDs: Array<number> = [];
 
-  constructor(private typeService: TypeService, private router: Router, private fileService: FileService,
-              private fileSaverService: FileSaverService, private datePipe: DatePipe) {
-    this.types = [];
+  /**
+   * Table Template: active column.
+   */
+  @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: Type name column.
+   */
+  @ViewChild('typeNameTemplate', { static: true }) typeNameTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: Type actions column.
+   */
+  @ViewChild('actionsTemplate', { static: true }) actionsTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: Type clean column.
+   */
+  @ViewChild('cleanTemplate', { static: true }) cleanTemplate: TemplateRef<any>;
+
+  /**
+   * Table columns definition.
+   */
+  public columns: Array<Column>;
+
+  /**
+   * Table selection enabled.
+   */
+  public selectEnabled: boolean = false;
+
+  /**
+   * Begin with first page.
+   */
+  public readonly initPage: number = 1;
+  public page: number = this.initPage;
+
+  /**
+   * Max number of types per site.
+   * @private
+   */
+  private readonly initLimit: number = 10;
+  public limit: number = this.initLimit;
+
+  /**
+   * Filter query from the table search input.
+   */
+  public filter: string;
+
+  /**
+   * Default sort filter.
+   */
+  public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+
+  /**
+   * Loading indicator.
+   */
+  public loading: boolean = false;
+
+
+  constructor(private typeService: TypeService, private fileService: FileService,
+              private permissionService: PermissionService, private fileSaverService: FileSaverService,
+              private datePipe: DatePipe) {
   }
 
   /**
    * Starts the component and init the table
    */
   public ngOnInit(): void {
-    this.dtOptions = {
-      ordering: true,
-      columnDefs: [
-        {
-          orderable: true,
-          searchable: true,
-          targets: [1, 2, 3]
-        },
-        {
-          name: 'active',
-          targets: [1]
-        },
-        {
-          name: 'public_id',
-          targets: [2]
-        },
-        {
-          name: 'name',
-          targets: [3]
-        },
-        {
-          name: 'creation_time',
-          targets: [4],
-          orderable: true,
-          searchable: false
-        },
-        {
-          orderable: false,
-          searchable: false
-        }
-      ],
-      language: {
-        search: '',
-        searchPlaceholder: 'Filter...'
+    this.columns = [
+      {
+        display: 'Active',
+        name: 'active',
+        data: 'active',
+        searchable: false,
+        sortable: true,
+        template: this.activeTemplate,
+        cssClasses: ['text-center'],
+        style: { width: '6rem' }
       },
-      order: [[2, 'desc']],
-      dom:
-        '<"row" <"col-sm-2" l><"col" f> >' +
-        '<"row" <"col-sm-12"tr>>' +
-        '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
-      searching: true,
-      serverSide: true,
-      processing: true,
-      ajax: (params: any, callback) => {
-        let filter;
-        if (params.search.value !== '') {
-          const searchableColumns = params.columns.filter(column => {
-            return column.searchable === true;
-          });
-
-          const columnQueries = [];
-          for (const column of searchableColumns) {
-            // Must be filtered for empty values. '$' i not a valid FieldPath in MongoDB
-            if (column.name === '') {
-              continue;
-            }
-            const regex = {
-              $regexMatch: {
-                input: { $toString: `$${ column.name }` },
-                regex: params.search.value,
-                options: 'ismx'
-              }
-            };
-            columnQueries.push(regex);
-          }
-          const query = [
-            { $addFields: { match: { $or: columnQueries } } },
-            { $match: { match: true } },
-            { $project: { match: 0 } }
-          ];
-          filter = JSON.stringify(query);
+      {
+        display: 'Public ID',
+        name: 'public_id',
+        data: 'public_id',
+        searchable: true,
+        sortable: true
+      },
+      {
+        display: 'Type',
+        name: 'name',
+        data: 'name',
+        searchable: true,
+        sortable: true,
+        template: this.typeNameTemplate,
+      },
+      {
+        display: 'Creation Time',
+        name: 'creation_time',
+        data: 'creation_time',
+        sortable: true,
+        searchable: false,
+        render(data: any) {
+          const date = new Date(data);
+          return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
         }
+      },
+      {
+        display: 'Actions',
+        name: 'actions',
+        searchable: false,
+        sortable: false,
+        fixed: true,
+        template: this.actionsTemplate,
+        cssClasses: ['text-center'],
+        cellClasses: ['actions-buttons']
+      },
 
-        const apiParameters: CollectionParameters = {
-          filter,
-          page: Math.ceil(params.start / params.length) + 1,
-          limit: params.length,
-          sort: params.columns[params.order[0].column].name,
-          order: params.order[0].dir === 'desc' ? -1 : 1,
-        };
-
-        this.typeService.getTypesIteration(apiParameters).pipe(
-          takeUntil(this.unSubscribe)).subscribe(
-          (response: APIGetMultiResponse<CmdbType>) => {
-            this.typesAPIResponse = response;
-            this.types = this.typesAPIResponse.results;
-            callback({
-              recordsTotal: response.total,
-              recordsFiltered: response.total,
-              data: []
-            });
-          });
-      }
-    };
+    ] as Array<Column>;
+    const cleanRight = 'base.framework.type.clean';
+    if (this.permissionService.hasRight(cleanRight) || this.permissionService.hasExtendedRight(cleanRight)) {
+      this.columns.push({
+        display: 'Clean',
+        name: 'clean',
+        searchable: false,
+        sortable: false,
+        fixed: true,
+        template: this.cleanTemplate,
+        cssClasses: ['text-center'],
+        cellClasses: ['text-center']
+      } as Column);
+    }
+    const exportRight = 'base.export.type.*';
+    if (this.permissionService.hasRight(exportRight) || this.permissionService.hasExtendedRight(exportRight)) {
+      this.selectEnabled = true;
+    }
+    this.loadTypesFromAPI();
   }
 
   /**
-   * Trigger the table render after init the data
+   * Load/reload types from the api.
+   * @private
    */
-  public ngAfterViewInit(): void {
-    this.dtTrigger.next();
+  private loadTypesFromAPI(): void {
+    this.loading = true;
+    let query;
+    if (this.filter) {
+      query = [];
+      const or = [];
+      const searchableColumns = this.columns.filter(c => c.searchable);
+      // Searchable Columns
+      for (const column of searchableColumns) {
+        const regex: any = {};
+        regex[column.name] = {
+          $regex: String(this.filter),
+          $options: 'ismx'
+        };
+        or.push(regex);
+      }
+      query.push({
+        $addFields: {
+          public_id: { $toString: '$public_id' }
+        }
+      });
+      or.push({
+        public_id: {
+          $elemMatch: {
+            value: {
+              $regex: String(this.filter),
+              $options: 'ismx'
+            }
+          }
+        }
+      });
+      query.push({ $match: { $or: or } });
+    }
+    const params: CollectionParameters = {
+      filter: query, limit: this.limit,
+      sort: this.sort.name, order: this.sort.order, page: this.page
+    };
+    this.typeService.getTypes(params).pipe(takeUntil(this.subscriber)).subscribe(
+      (apiResponse: APIGetMultiResponse<CmdbType>) => {
+        this.typesAPIResponse = apiResponse;
+        this.types = apiResponse.results as Array<CmdbType>;
+        this.totalTypes = apiResponse.total;
+        this.loading = false;
+      });
   }
 
   /**
-   * Destroy subscriptions after clsoe
+   * Destroy subscriptions after closed.
    */
   public ngOnDestroy(): void {
-    this.dtTrigger.unsubscribe();
-
-    this.unSubscribe.next();
-    this.unSubscribe.complete();
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
   /**
-   * Call the export routes with the selected types
+   * On table sort change.
+   * Reload all types.
+   *
+   * @param sort
    */
-  public exportingFiles() {
-    if (this.selected.length === 0 || this.selected.length === this.types.length) {
-      this.fileService.getTypeFile()
-        .subscribe(res => this.downLoadFile(res, 'json'));
+  public onSortChange(sort: Sort): void {
+    this.sort = sort;
+    this.loadTypesFromAPI();
+  }
+
+  /**
+   * On table selection change.
+   * Map selected items by the object id
+   *
+   * @param selectedItems
+   */
+  public onSelectedChange(selectedItems: Array<CmdbType>): void {
+    this.selectedTypes = selectedItems;
+    this.selectedTypeIDs = selectedItems.map(t => t.public_id);
+  }
+
+  /**
+   * On table page change.
+   * Reload all types.
+   *
+   * @param page
+   */
+  public onPageChange(page: number) {
+    this.page = page;
+    this.loadTypesFromAPI();
+  }
+
+  /**
+   * On table page size change.
+   * Reload all types.
+   *
+   * @param limit
+   */
+  public onPageSizeChange(limit: number): void {
+    this.limit = limit;
+    this.loadTypesFromAPI();
+  }
+
+  /**
+   * On table search change.
+   * Reload all types.
+   *
+   * @param search
+   */
+  public onSearchChange(search: any): void {
+    if (search) {
+      this.filter = search;
     } else {
-      this.fileService.callExportTypeRoute('/export/type/' + this.selected.toString())
-        .subscribe(res => this.downLoadFile(res, 'json'));
+      this.filter = undefined;
     }
+    this.loadTypesFromAPI();
   }
 
   /**
@@ -211,39 +331,20 @@ export class TypeComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Select all types in the table
+   * Call the export routes with the selected types
    */
-  public selectAll() {
-    if (this.all) {
-      this.selected = [];
-      this.all = false;
+  public exportingFiles() {
+    if (this.selectedTypeIDs.length === 0 || this.selectedTypeIDs.length === this.totalTypes) {
+      this.fileService.getTypeFile()
+        .subscribe(res => this.downLoadFile(res, 'json'));
     } else {
-      this.selected = [];
-      for (const type of this.types) {
-        this.selected.push(type.public_id);
-      }
-      this.all = true;
+      this.fileService.callExportTypeRoute('/export/type/' + this.selectedTypeIDs.toString())
+        .subscribe(res => this.downLoadFile(res, 'json'));
     }
   }
 
   /**
-   * Toggle a specific selection in the table.
-   * Disables the `all` selection in the headline.
-   *
-   * @param publicID ID of the row/type
-   */
-  public toggleSelection(publicID: number) {
-    const idx = this.selected.indexOf(publicID);
-    if (idx === -1) {
-      this.selected.push(publicID);
-    } else {
-      this.selected.splice(idx, 1);
-      this.all = false;
-    }
-  }
-
-  /**
-   * Quickhack to open the selection box.
+   * Quick-hack to open the selection box.
    */
   public showAlert(): void {
     $('#infobox').show();

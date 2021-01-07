@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,23 +13,48 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Injectable } from '@angular/core';
 import { ApiCallService, ApiService, httpObserveOptions, resp } from '../../services/api-call.service';
 import { ValidatorService } from '../../services/validator.service';
 import { CmdbObject } from '../models/cmdb-object';
-import { Observable } from 'rxjs';
+import { Observable, timer } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { map } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { RenderResult } from '../models/cmdb-render';
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { DataTableFilter, DataTablesResult } from '../models/cmdb-datatable';
 import { GeneralModalComponent } from '../../layout/helpers/modals/general-modal/general-modal.component';
 import { CollectionParameters } from '../../services/models/api-parameter';
-import { APIGetListResponse, APIGetMultiResponse } from '../../services/models/api-response';
+import { APIGetListResponse, APIGetMultiResponse, APIGetSingleResponse } from '../../services/models/api-response';
 import { CmdbType } from '../models/cmdb-type';
+import { FormControl } from '@angular/forms';
+
+export const checkObjectExistsValidator = (objectService: ObjectService, time: number = 500) => {
+  return (control: FormControl) => {
+    return timer(time).pipe(switchMap(() => {
+      return objectService.getObject(+control.value).pipe(
+        map((response) => {
+          if (response === null) {
+            return { objectExists: true };
+          } else {
+            return null;
+          }
+        }),
+        catchError((e) => {
+          return new Promise(resolve => {
+            if (e.status === 403) {
+              resolve({ objectProtected: true });
+            }
+            resolve({ objectExists: true });
+          });
+        })
+      );
+    }));
+  };
+};
 
 export const httpObjectObserveOptions = {
   headers: new HttpHeaders({
@@ -44,7 +69,6 @@ export const COOCKIENAME = 'onlyActiveObjCookie';
 @Injectable({
   providedIn: 'root'
 })
-
 export class ObjectService<T = CmdbObject | RenderResult> implements ApiService {
 
   public servicePrefix: string = 'object';
@@ -194,13 +218,36 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   // Custom calls
-  public getObjectReferences(publicID: number) {
-    httpObjectObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    return this.api.callGet<RenderResult[]>(`${ this.servicePrefix }/reference/${ publicID }`, httpObjectObserveOptions).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
+  /**
+   * API call to get iterable objects which referer to a object.
+   * @param publicID of the referenced object.
+   * @param params collection iteration parameters
+   * @param view
+   */
+  public getObjectReferences<R = T>(publicID: number,
+                                    params: CollectionParameters = {
+                                      filter: undefined,
+                                      limit: 10,
+                                      sort: 'public_id',
+                                      order: 1,
+                                      page: 1
+                                    },
+                                    view: string = 'render'): Observable<APIGetMultiResponse<T>> {
+    const options = httpObserveOptions;
+    let httpParams: HttpParams = new HttpParams();
+    if (params.filter !== undefined) {
+      const filter = JSON.stringify(params.filter);
+      httpParams = httpParams.set('filter', filter);
+    }
+    httpParams = httpParams.set('limit', params.limit.toString());
+    httpParams = httpParams.set('sort', params.sort);
+    httpParams = httpParams.set('order', params.order.toString());
+    httpParams = httpParams.set('page', params.page.toString());
+    httpParams = httpParams.set('onlyActiveObjCookie', this.api.readCookies(COOCKIENAME));
+    httpParams = httpParams.set('view', view);
+    options.params = httpParams;
+    return this.api.callGet<Array<R>>(`${ this.newServicePrefix }/${ publicID }/references`, options).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
     );

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
@@ -31,13 +31,16 @@ import { UserHeadlineComponent } from './components/user-headline/user-headline.
 import { UserDisplayNameComponent } from './components/user-display-name/user-display-name.component';
 import { UserImageComponent } from './components/user-image/user-image.component';
 import { UserDisplayComponent } from './components/user-display/user-display.component';
-import { UsersTableComponent } from './components/users-table/users-table.component';
 import { AuthModule } from '../../auth/auth.module';
 import { UserFormComponent } from './components/user-form/user-form.component';
 import { UserAddComponent } from './user-add/user-add.component';
 import { UserEditComponent } from './user-edit/user-edit.component';
 import { UserDeleteComponent } from './user-delete/user-delete.component';
 import { UserCompactComponent } from './components/user-compact/user-compact.component';
+import { TableModule } from '../../layout/table/table.module';
+import { UserTableActionsComponent } from './components/user-table-actions/user-table-actions.component';
+import { UserTableGroupCellComponent } from './components/user-table-group-cell/user-table-group-cell.component';
+import { UserTableListComponent } from './components/user-table-list/user-table-list.component';
 
 @NgModule({
   entryComponents: [
@@ -51,28 +54,31 @@ import { UserCompactComponent } from './components/user-compact/user-compact.com
     UserHeadlineComponent,
     UserDisplayNameComponent,
     UserDisplayComponent,
-    UsersTableComponent,
     UserFormComponent,
     UserAddComponent,
     UserEditComponent,
     UserDeleteComponent,
-    UserCompactComponent
+    UserCompactComponent,
+    UserTableActionsComponent,
+    UserTableGroupCellComponent,
+    UserTableListComponent
   ],
   exports: [
     UserImageComponent,
     UserDisplayComponent,
-    UserCompactComponent
+    UserCompactComponent,
+    UserTableListComponent
   ],
-    imports: [
-        CommonModule,
-        UsersRoutingModule,
-        DataTablesModule,
-        PasswordStrengthMeterModule,
-        ReactiveFormsModule,
-        LayoutModule,
-        FontAwesomeModule,
-        AuthModule,
-    ]
+  imports: [
+    CommonModule,
+    UsersRoutingModule,
+    PasswordStrengthMeterModule,
+    ReactiveFormsModule,
+    LayoutModule,
+    FontAwesomeModule,
+    AuthModule,
+    TableModule,
+  ]
 })
 export class UsersModule {
 }

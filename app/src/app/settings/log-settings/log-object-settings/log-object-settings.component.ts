@@ -16,12 +16,13 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { LogService } from '../../../framework/services/log.service';
 import { CmdbLog } from '../../../framework/models/cmdb-log';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../../layout/toast/toast.service';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable, forkJoin, ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-modal-content',
@@ -53,62 +54,25 @@ export class DeleteModalComponent {
   templateUrl: './log-object-settings.component.html',
   styleUrls: ['./log-object-settings.component.scss']
 })
-export class LogObjectSettingsComponent implements OnInit {
+export class LogObjectSettingsComponent {
 
   public activeLogList: CmdbLog[];
-  public activeLength: number = 0;
+  public reloadActiveLogs: boolean = false;
   public deActiveLogList: CmdbLog[];
+  public reloadDeActiveLogs: boolean = false;
   public deActiveLength: number = 0;
   public deleteLogList: CmdbLog[];
+  public reloadDeleteLogs: boolean = false;
   public deleteLogLength: number = 0;
   public cleanupInProgress: boolean = false;
   public cleanupProgress: number = 0;
 
+  /**
+   * Component un-subscriber.
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
   constructor(private logService: LogService, private modalService: NgbModal, private toastService: ToastService) {
-
-  }
-
-  public ngOnInit(): void {
-    this.reloadLogs();
-  }
-
-  private reloadLogs() {
-    this.loadExists();
-    this.loadNotExists();
-    this.loadDeletes();
-  }
-
-  private loadExists() {
-    this.logService.getLogsWithExistingObject().subscribe((activeLogs: CmdbLog[]) => {
-      this.activeLogList = activeLogs;
-    }, error => {
-      console.error(error);
-      this.activeLength = 0;
-    }, () => {
-      this.activeLength = this.activeLogList.length;
-    });
-  }
-
-  private loadNotExists() {
-    this.logService.getLogsWithNotExistingObject().subscribe((deActiveLogs: CmdbLog[]) => {
-      this.deActiveLogList = deActiveLogs;
-    }, error => {
-      console.error(error);
-      this.deActiveLength = 0;
-    }, () => {
-      this.deActiveLength = this.deActiveLogList.length;
-    });
-  }
-
-  private loadDeletes() {
-    this.logService.getDeleteLogs().subscribe((deletedLogs: CmdbLog[]) => {
-      this.deleteLogList = deletedLogs;
-    }, error => {
-      console.error(error);
-      this.deleteLogLength = 0;
-    }, () => {
-      this.deleteLogLength = this.deleteLogList.length;
-    });
   }
 
 
@@ -116,7 +80,7 @@ export class LogObjectSettingsComponent implements OnInit {
     const deleteModalRef = this.modalService.open(DeleteModalComponent);
     deleteModalRef.componentInstance.publicID = publicID;
     deleteModalRef.result.then(result => {
-        this.logService.deleteLog(result).subscribe(ack => {
+        this.logService.deleteLog(result).pipe(takeUntil(this.subscriber)).subscribe(() => {
             this.toastService.success('Log was deleted!');
           }, (error) => {
             console.error(error);
@@ -124,13 +88,13 @@ export class LogObjectSettingsComponent implements OnInit {
           () => {
             switch (reloadList) {
               case 'active':
-                this.loadExists();
+                this.reloadActiveLogs = true;
                 break;
               case 'deactive':
-                this.loadNotExists();
+                this.reloadDeActiveLogs = true;
                 break;
               case 'delete':
-                this.loadDeletes();
+                this.reloadDeleteLogs = true;
                 break;
             }
           }
@@ -151,20 +115,20 @@ export class LogObjectSettingsComponent implements OnInit {
       this.cleanupProgress += step;
     }
     forkJoin(deleteObserves)
-      .subscribe(dataArray => {
+      .subscribe(() => {
         this.cleanupInProgress = false;
       }, error => console.error(
         error
       ), () => {
         switch (reloadList) {
           case 'active':
-            this.loadExists();
+            this.reloadActiveLogs = true;
             break;
           case 'deactive':
-            this.loadNotExists();
+            this.reloadDeActiveLogs = true;
             break;
           case 'delete':
-            this.loadDeletes();
+            this.reloadDeleteLogs = true;
             break;
         }
       });

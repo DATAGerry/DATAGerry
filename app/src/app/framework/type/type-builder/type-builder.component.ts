@@ -147,7 +147,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
             this.sidebarService.loadCategoryTree();
             this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
           }
-
+          this.toast.success(`Type was successfully created: TypeID: ${ newTypeID }`);
         },
         (error) => {
           console.error(error);

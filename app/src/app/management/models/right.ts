@@ -17,9 +17,19 @@
 */
 
 export class Right {
-  public level: number;
+  public level: number | SecurityLevel;
   public is_master: boolean;
   public name: string;
   public label: string;
   public description: string;
+}
+
+
+export enum SecurityLevel {
+  NOTSET = 0,
+  PERMISSION = 10,
+  PROTECTED = 30,
+  SECURE = 50,
+  DANGER = 80,
+  CRITICAL = 100
 }

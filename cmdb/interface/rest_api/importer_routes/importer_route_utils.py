@@ -13,6 +13,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
 import json
 import logging
 
@@ -20,6 +22,12 @@ from flask import request, abort
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 from werkzeug.wrappers import Request
+
+from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.user_management import UserModel
+from cmdb.security.acl.errors import AccessDeniedError
+from cmdb.security.acl.permission import AccessControlPermission
+from cmdb.framework.models.type import TypeModel
 
 LOGGER = logging.getLogger(__name__)
 
@@ -52,3 +60,32 @@ def generate_parsed_output(request_file, file_format, parser_config):
     parser = parser_class(parser_config)
     output = parser.parse(working_file)
     return output
+
+
+def verify_import_access(user: UserModel, _type: TypeModel, _manager: TypeManager):
+    """Validate if a user has access to objects of this type."""
+
+    location = 'acl.groups.includes.' + str(user.group_id)
+    query = {'$and': [{'$or': [
+        {'$or': [
+            {'acl': {'$exists': False}}, {'acl.activated': False}]
+        },
+        {'$and': [
+            {'acl.activated': True},
+            {'$and': [
+                {location: {'$exists': True}},
+                {location: {'$all': [
+                    AccessControlPermission.READ.value,
+                    AccessControlPermission.CREATE.value,
+                    AccessControlPermission.UPDATE.value]
+                    }
+                }
+            ]
+            }
+        ]
+        }]
+    }, {'public_id': _type.public_id}]}
+    types_ = _manager.iterate(filter=query, limit=1, skip=0, sort='public_id', order=1)
+    if len([TypeModel.to_json(_) for _ in types_.results]) == 0:
+        raise AccessDeniedError(f'The objects of the type `{_type.name}` are protected by ACL permission!')
+

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,17 +13,16 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { RenderResult } from '../../../models/cmdb-render';
-import { ObjectService } from '../../../services/object.service';
-import { Subscription } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
-import { LinkService } from '../../../services/link.service';
+import { checkObjectExistsValidator, ObjectService } from '../../../services/object.service';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   templateUrl: './object-link-add-modal.component.html',
@@ -31,46 +30,17 @@ import { LinkService } from '../../../services/link.service';
 })
 export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
 
-  // Data
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
   public primaryResult: RenderResult;
-  public secondaryResult: RenderResult;
 
-  @Output() public closeEmitter: EventEmitter<string> = new EventEmitter<string>();
-
-  @Input()
+  @Input('primaryResult')
   public set primaryRenderResult(result: RenderResult) {
     this.primaryResult = result;
-    this.addLinkForm.get('primary').setValue(this.primaryRenderResult.object_information.object_id);
+    this.form.get('primary').setValue(this.primaryResult.object_information.object_id);
   }
 
-  public get primaryRenderResult(): RenderResult {
-    return this.primaryResult;
-  }
-
-  // Form
-  public addLinkForm: FormGroup;
-
-  // Subscriptions
-  private secondarySelectionSubscription: Subscription;
-  private secondaryResultSubscription: Subscription;
-
-  constructor(public activeModal: NgbActiveModal, private objectService: ObjectService, private linkService: LinkService) {
-    this.addLinkForm = new FormGroup({
-      primary: new FormControl(null, [Validators.required]),
-      secondary: new FormControl('', [Validators.required, this.sameIDValidator])
-    });
-
-    this.primaryResult = undefined;
-    this.secondaryResult = undefined;
-  }
-
-  public get primary() {
-    return this.addLinkForm.get('primary');
-  }
-
-  public get secondary() {
-    return this.addLinkForm.get('secondary');
-  }
+  public form: FormGroup;
 
   private sameIDValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
@@ -79,38 +49,34 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
     };
   }
 
+  constructor(public activeModal: NgbActiveModal, private objectService: ObjectService) {
+    this.form = new FormGroup({
+      primary: new FormControl(null, [Validators.required]),
+      secondary: new FormControl('', [Validators.required, this.sameIDValidator],
+        [checkObjectExistsValidator(objectService)])
+    });
+  }
+
+  public get primary(): FormControl {
+    return this.form.get('primary') as FormControl;
+  }
+
+  public get secondary(): FormControl {
+    return this.form.get('secondary') as FormControl;
+  }
+
   public ngOnInit(): void {
-    this.secondarySelectionSubscription = new Subscription();
-    this.secondaryResultSubscription = new Subscription();
-    this.secondarySelectionSubscription = this.addLinkForm.get('secondary').valueChanges.pipe(debounceTime(500))
-      .subscribe((selectedID: number) => {
-        this.addLinkForm.get('secondary').setValidators([Validators.required, this.sameIDValidator()]);
-        if (selectedID !== null && this.addLinkForm.get('secondary').valid) {
-          this.secondaryResultSubscription = this.objectService.getObject(selectedID).subscribe(
-            (secondaryResult: RenderResult) => {
-              this.secondaryResult = secondaryResult;
-            },
-            () => {
-              this.secondaryResult = undefined;
-            }
-          );
-        }
-      });
-    this.addLinkForm.get('secondary').updateValueAndValidity();
+    this.form.get('secondary').updateValueAndValidity();
+  }
+
+  public async onSave() {
+    const formData = this.form.getRawValue();
+    this.activeModal.close(formData);
   }
 
   public ngOnDestroy(): void {
-    this.secondarySelectionSubscription.unsubscribe();
-    this.secondaryResultSubscription.unsubscribe();
-  }
-
-  public onSave() {
-    const formData = this.addLinkForm.getRawValue();
-    this.linkService.postLink(formData).subscribe(insertResult => {
-    }).add(() => {
-      this.activeModal.close();
-      this.closeEmitter.emit('save');
-    });
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
 }

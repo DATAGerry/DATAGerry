@@ -22,12 +22,14 @@ from werkzeug.utils import secure_filename
 
 from cmdb.database.utils import default
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
-from cmdb.framework.cmdb_log import LogAction, CmdbObjectLog
-from cmdb.framework.cmdb_log_manager import LogManagerInsertError
+from cmdb.framework.models.log import LogAction, CmdbObjectLog
+from cmdb.framework.managers.log_manager import LogManagerInsertError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_render import RenderError, CmdbRender
 from cmdb.importer import load_parser_class, load_importer_class, __OBJECT_IMPORTER__, __OBJECT_PARSER__, \
     __OBJECT_IMPORTER_CONFIG__, load_importer_config_class, ParserLoadError, ImporterLoadError
+from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.importer.importer_errors import ImportRuntimeError, ParserRuntimeError
 from cmdb.importer.importer_config import ObjectImporterConfig
 from cmdb.importer.importer_response import ImporterObjectResponse
@@ -38,7 +40,7 @@ from cmdb.interface.route_utils import make_response, insert_request_user, login
     right_required
 from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.interface.rest_api.importer_routes.importer_route_utils import get_file_in_request, \
-    get_element_from_data_request, generate_parsed_output
+    get_element_from_data_request, generate_parsed_output, verify_import_access
 from cmdb.user_management import UserModel
 
 LOGGER = logging.getLogger(__name__)
@@ -151,9 +153,14 @@ def import_objects(request_user: UserModel):
 
     # Check if type exists
     try:
-        object_manager.get_type(public_id=importer_config_request.get('type_id'))
+        type_manager = TypeManager(database_manager=current_app.database_manager)
+        verify_import_access(user=request_user,
+                             _type=type_manager.get(importer_config_request.get('type_id')),
+                             _manager=type_manager)
     except ObjectManagerGetError as err:
         return abort(404, err.message)
+    except AccessDeniedError as err:
+        return abort(403, err.message)
 
     # Load parser
     try:
@@ -184,6 +191,8 @@ def import_objects(request_user: UserModel):
     except ImportRuntimeError as ire:
         LOGGER.error(f'Error while importing objects: {ire.message}')
         return abort(500, ire.message)
+    except AccessDeniedError as err:
+        return abort(403, err.message)
 
     # close request file
     request_file.close()
@@ -209,7 +218,7 @@ def import_objects(request_user: UserModel):
                 'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
                 'version': current_object.version
             }
-            log_ack = log_manager.insert_log(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
+            log_ack = log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
 
         except ObjectManagerGetError as err:
             LOGGER.error(err)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
 This module presents the core system of the CMDB.
@@ -27,8 +27,8 @@ from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models import TypeModel
 from cmdb.framework.models import CategoryModel
-from cmdb.framework.cmdb_link import CmdbLink
-from cmdb.framework.cmdb_log import CmdbLog, CmdbObjectLog, CmdbMetaLog
+from cmdb.framework.models import ObjectLinkModel
+from cmdb.framework.models.log import CmdbLog, CmdbObjectLog, CmdbMetaLog
 
 CmdbLog.register_log_type(CmdbObjectLog.__name__, CmdbObjectLog)
 
@@ -38,6 +38,6 @@ __COLLECTIONS__ = [
     TypeModel,
     CategoryModel,
     CmdbMetaLog,
-    CmdbLink
+    ObjectLinkModel
 ]
 

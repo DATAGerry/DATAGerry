@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -28,8 +28,8 @@ from cmdb.database.utils import object_hook, default
 from cmdb.framework import CmdbObject, TypeModel
 from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError, \
     ObjectManagerUpdateError
-from cmdb.framework.cmdb_log import LogAction, CmdbObjectLog
-from cmdb.framework.cmdb_log_manager import LogManagerInsertError
+from cmdb.framework.models.log import LogAction, CmdbObjectLog
+from cmdb.framework.managers.log_manager import LogManagerInsertError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
 from cmdb.framework.managers.type_manager import TypeManager
@@ -58,12 +58,6 @@ LOGGER = logging.getLogger(__name__)
 
 objects_blueprint = APIBlueprint('objects', __name__)
 object_blueprint = RootBlueprint('object_blueprint', __name__, url_prefix='/object')
-
-with current_app.app_context():
-    from cmdb.interface.rest_api.framework_routes.object_link_routes import link_rest
-
-    object_blueprint.register_nested_blueprint(link_rest)
-
 
 @objects_blueprint.route('/', methods=['GET', 'HEAD'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
@@ -381,13 +375,15 @@ def count_objects():
 
 @object_blueprint.route('/group/<string:value>', methods=['GET'])
 @login_required
-def group_objects_by_type_id(value):
+@insert_request_user
+def group_objects_by_type_id(value, request_user: UserModel):
     try:
         filter_state = None
         if _fetch_only_active_objs():
             filter_state = {'active': {"$eq": True}}
         result = []
-        cursor = object_manager.group_objects_by_value(value, filter_state)
+        cursor = object_manager.group_objects_by_value(value, filter_state, user=request_user,
+                                                       permission=AccessControlPermission.READ)
         max_length = 0
         for document in cursor:
             document['label'] = object_manager.get_type(document['_id']).label
@@ -401,28 +397,57 @@ def group_objects_by_type_id(value):
     return resp
 
 
-@object_blueprint.route('/reference/<int:public_id>/', methods=['GET'])
-@object_blueprint.route('/reference/<int:public_id>', methods=['GET'])
+@objects_blueprint.route('/<int:public_id>/references', methods=['GET', 'HEAD'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
+@objects_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
-def get_objects_by_reference(public_id: int, request_user: UserModel):
-    try:
-        active_flag = None
-        if _fetch_only_active_objs():
-            active_flag = True
-        reference_list: list = object_manager.get_object_references(public_id=public_id, active_flag=active_flag,
-                                                                    user=request_user,
-                                                                    permission=AccessControlPermission.READ)
-        rendered_reference_list = RenderList(object_list=reference_list, request_user=request_user, ref_render=True,
-                                             object_manager=object_manager).render_result_list()
-    except ObjectManagerGetError as err:
-        return abort(404, err.message)
+def get_object_references(public_id: int, params: CollectionParameters, request_user: UserModel):
+    from cmdb.framework.managers.object_manager import ObjectManager
+    manager = ObjectManager(database_manager=current_app.database_manager)
+    view = params.optional.get('view', 'native')
 
+    if _fetch_only_active_objs():
+        if isinstance(params.filter, dict):
+            params.filter.update({'$match': {'active': {"$eq": True}}})
+        elif isinstance(params.filter, list):
+            params.filter.append({'$match': {'active': {"$eq": True}}})
+
+
+    try:
+        referenced_object: CmdbObject = manager.get(public_id, user=request_user,
+                                                    permission=AccessControlPermission.READ)
+    except ManagerGetError as err:
+        return abort(404, err.message)
     except AccessDeniedError as err:
         return abort(403, err.message)
 
-    if len(reference_list) < 1:
-        return make_response(rendered_reference_list, 204)
-    return make_response(rendered_reference_list)
+    try:
+        iteration_result: IterationResult[CmdbObject] = manager.references(object_=referenced_object,
+                                                                           filter=params.filter,
+                                                                           limit=params.limit,
+                                                                           skip=params.skip,
+                                                                           sort=params.sort,
+                                                                           order=params.order,
+                                                                           user=request_user,
+                                                                           permission=AccessControlPermission.READ
+                                                                           )
+
+        if view == 'native':
+            object_list: List[dict] = [object_.__dict__ for object_ in iteration_result.results]
+            api_response = GetMultiResponse(object_list, total=iteration_result.total, params=params,
+                                            url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
+        elif view == 'render':
+            rendered_list = RenderList(object_list=iteration_result.results, request_user=request_user,
+                                       object_manager=object_manager, ref_render=True).render_result_list(
+                raw=True)
+            api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
+                                            url=request.url, model=Model('RenderResult'), body=request.method == 'HEAD')
+        else:
+            return abort(401, 'No possible view parameter')
+
+    except ManagerIterationError as err:
+        return abort(400, err.message)
+    return api_response.make_response()
 
 
 @object_blueprint.route('/user/<int:public_id>/', methods=['GET'])
@@ -555,7 +580,7 @@ def insert_object(request_user: UserModel):
             'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
             'version': current_object.version
         }
-        log_ack = log_manager.insert_log(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
+        log_ack = log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
     except LogManagerInsertError as err:
         LOGGER.error(err)
 
@@ -676,7 +701,7 @@ def update_object(public_id: int, request_user: UserModel):
                 'changes': changes,
                 'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
             }
-            log_manager.insert_log(action=LogAction.EDIT, log_type=CmdbObjectLog.__name__, **log_data)
+            log_manager.insert(action=LogAction.EDIT, log_type=CmdbObjectLog.__name__, **log_data)
         except (CMDBError, LogManagerInsertError) as err:
             LOGGER.error(err)
 
@@ -724,7 +749,7 @@ def delete_object(public_id: int, request_user: UserModel):
             'comment': 'Object was deleted',
             'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
         }
-        log_manager.insert_log(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
+        log_manager.insert(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
     except (CMDBError, LogManagerInsertError) as err:
         LOGGER.error(err)
 
@@ -786,7 +811,7 @@ def delete_many_objects(public_ids, request_user: UserModel):
                     'comment': 'Object was deleted',
                     'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
                 }
-                log_manager.insert_log(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
+                log_manager.insert(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
             except (CMDBError, LogManagerInsertError) as err:
                 LOGGER.error(err)
 
@@ -870,7 +895,7 @@ def update_object_state(public_id: int, request_user: UserModel):
             'comment': 'Active status has changed',
             'changes': change,
         }
-        log_manager.insert_log(action=LogAction.ACTIVE_CHANGE, log_type=CmdbObjectLog.__name__, **log_data)
+        log_manager.insert(action=LogAction.ACTIVE_CHANGE, log_type=CmdbObjectLog.__name__, **log_data)
     except (CMDBError, LogManagerInsertError) as err:
         LOGGER.error(err)
 

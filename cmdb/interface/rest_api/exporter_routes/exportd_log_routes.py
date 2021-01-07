@@ -17,7 +17,7 @@
 import logging
 
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
-from cmdb.framework.cmdb_log_manager import LogManagerDeleteError
+from cmdb.framework.managers.log_manager import LogManagerDeleteError
 from cmdb.exportd.exportd_logs.exportd_log import ExportdJobLog, LogAction
 
 
@@ -68,7 +68,7 @@ def get_log_list(request_user: UserModel):
 @right_required('base.exportd.log.delete')
 def delete_log(public_id: int, request_user: UserModel):
     try:
-        delete_ack = log_manager.delete_log(public_id=public_id)
+        delete_ack = log_manager.delete(public_id=public_id)
     except LogManagerDeleteError as err:
         return abort(500)
     return make_response(delete_ack)

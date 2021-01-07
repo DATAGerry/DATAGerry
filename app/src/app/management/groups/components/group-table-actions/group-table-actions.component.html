@@ -1,0 +1,12 @@
+<div class="d-flex justify-content-center" *ngIf="group">
+  <a *permissionLink="'base.user-management.group.edit'"
+     [routerLink]="['/','management','groups', 'edit', group.public_id]">
+    <i class="far fa-edit"></i>
+  </a>
+  <ng-container *ngIf="notDeleteAbleGroups.indexOf(group.public_id) == -1">
+    <a *permissionLink="'base.user-management.group.delete'"
+       [routerLink]="['/','management', 'groups', 'delete', group.public_id]">
+      <i class="far fa-trash-alt"></i>
+    </a>
+  </ng-container>
+</div>

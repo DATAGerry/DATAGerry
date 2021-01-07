@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
 This managers represents the core functionalities for the use of CMDB objects.
@@ -37,7 +37,7 @@ from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
 from cmdb.framework.cmdb_errors import WrongInputFormatError, \
     ObjectInsertError, ObjectDeleteError, ObjectManagerGetError, \
     ObjectManagerInsertError, ObjectManagerUpdateError, ObjectManagerDeleteError, ObjectManagerInitError
-from cmdb.framework.cmdb_link import CmdbLink
+from cmdb.framework import ObjectLinkModel
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.search.query import Query, Pipeline
@@ -149,7 +149,8 @@ class CmdbObjectManager(CmdbManagerBase):
         formatted_type_id = {'type_id': public_id}
         return self.dbm.count(CmdbObject.COLLECTION, formatted_type_id)
 
-    def group_objects_by_value(self, value: str, match=None):
+    def group_objects_by_value(self, value: str, match=None, user: UserModel = None,
+                               permission: AccessControlPermission = None):
         """This method does not actually
            performs the find() operation
            but instead returns
@@ -158,16 +159,34 @@ class CmdbObjectManager(CmdbManagerBase):
            Args:
                value (str): grouped by value
                match (dict): stage filters the documents to only pass documents.
+               user (UserModel): request user
+               permission (AccessControlPermission):  ACL operations
            Returns:
                returns the objects grouped by value of the documents
            """
+        ack = []
         agr = []
         if match:
             agr.append({'$match': match})
-        agr.append({'$group': {'_id': '$' + value, 'count': {'$sum': 1}}})
+        agr.append({
+            '$group': {
+                '_id': '$' + value,
+                'result': {'$first': '$$ROOT'},
+                'count': {'$sum': 1},
+            }
+        })
         agr.append({'$sort': {'count': -1}})
 
-        return self.dbm.aggregate(CmdbObject.COLLECTION, agr)
+        objects = self.dbm.aggregate(CmdbObject.COLLECTION, agr)
+        for obj in objects:
+            object_ = CmdbObject(**obj['result'])
+            try:
+                type_ = self._type_manager.get(object_.type_id)
+                verify_access(type_, user, permission)
+            except CMDBError:
+                continue
+            ack.append(obj)
+        return ack
 
     def sort_objects_by_field_value(self, value: str, order=-1, match=None):
         """This method does not actually
@@ -258,6 +277,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def update_object(self, data: (dict, CmdbObject), user: UserModel = None,
                       permission: AccessControlPermission = None) -> str:
+
         if isinstance(data, dict):
             update_object = CmdbObject(**data)
         elif isinstance(data, CmdbObject):
@@ -265,6 +285,8 @@ class CmdbObjectManager(CmdbManagerBase):
         else:
             raise ObjectManagerUpdateError('Wrong CmdbObject init format - expecting CmdbObject or dict')
         update_object.last_edit_time = datetime.utcnow()
+        if user:
+            update_object.editor_id = user.public_id
 
         type_ = self._type_manager.get(update_object.type_id)
         verify_access(type_, user, permission)
@@ -335,7 +357,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
         return referenced_by_objects
 
-    def delete_object(self, public_id: int, user: UserModel, permission: AccessControlPermission):
+    def delete_object(self, public_id: int, user: UserModel, permission: AccessControlPermission = None):
         type_id = self.get_object(public_id=public_id).type_id
         type_ = self._type_manager.get(type_id)
         verify_access(type_, user, permission)
@@ -505,48 +527,3 @@ class CmdbObjectManager(CmdbManagerBase):
             LOGGER.error(err)
             raise ObjectManagerUpdateError(err)
         return ack.acknowledged
-
-    # Link CRUD
-    def get_link(self, public_id: int):
-        try:
-            return CmdbLink(**self._get(collection=CmdbLink.COLLECTION, public_id=public_id))
-        except (CMDBError, Exception) as err:
-            raise ObjectManagerGetError(err)
-
-    def get_links_by_partner(self, public_id: int, user: UserModel) -> List[CmdbLink]:
-        query = {
-            '$or': [
-                {'primary': public_id},
-                {'secondary': public_id}
-            ]
-        }
-        link_list: List[CmdbLink] = []
-        try:
-            find_list: List[dict] = self._get_many(CmdbLink.COLLECTION, **query)
-            for link in find_list:
-                query = {
-                    '$or': [
-                        {'public_id': link['primary']},
-                        {'public_id': link['secondary']}
-                    ]
-                }
-                verified_object = self.get_objects_by(user=user, permission=AccessControlPermission.READ, **query)
-                if len(verified_object) == 2:
-                    link_list.append(CmdbLink(**link))
-        except CMDBError as err:
-            raise ObjectManagerGetError(err)
-        return link_list
-
-    def insert_link(self, data: dict):
-        try:
-            new_link = CmdbLink(public_id=self.get_new_id(collection=CmdbLink.COLLECTION), **data)
-            return self._insert(CmdbLink.COLLECTION, new_link.__dict__)
-        except (CMDBError, Exception) as err:
-            raise ObjectManagerInsertError(err)
-
-    def delete_link(self, public_id: int):
-        try:
-            ack = self._delete(CmdbLink.COLLECTION, public_id)
-        except (CMDBError, Exception) as err:
-            raise ObjectManagerDeleteError(err)
-        return ack

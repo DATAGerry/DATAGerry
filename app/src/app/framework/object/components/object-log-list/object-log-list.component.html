@@ -1,0 +1,24 @@
+
+<cmdb-table [items]="logList" [totalItems]="total" [columns]="columns" [sort]="sort"
+            [loading]="loading" [page]="page" [rowClasses]="['align-middle']" [sortable]="true"
+            [searchEnabled]="true" [id]="'object-log-list-table'" [pageSize]="limit"
+            [emptyMessage]="'No Log entries were found!'" (pageChange)="onPageChange($event)"
+            (pageSizeChange)="onPageSizeChange($event)" (sortChange)="onSortChange($event)"
+            (searchChange)="onSearchChange($event)">
+</cmdb-table>
+
+<ng-template #dateTemplate let-data="data">
+  {{data.$date | date:'MM.dd.yyyy HH:mm:ss'}}
+</ng-template>
+<ng-template #linkTemplate let-data="data">
+  <a routerLink="/framework/object/log/{{data}}">View</a>
+</ng-template>
+<ng-template #dataTemplate let-data="data">
+  {{data}}
+</ng-template>
+<ng-template #changeTemplate let-item="item">
+  <cmdb-object-log-change-view [action]="item.action" [changes]="item.changes"></cmdb-object-log-change-view>
+</ng-template>
+<ng-template #userTemplate let-item="item">
+  <cmdb-object-log-user [userID]="item.user_id" [userName]="item.user_name"></cmdb-object-log-user>
+</ng-template>
