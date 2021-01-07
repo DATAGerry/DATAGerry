@@ -18,9 +18,13 @@
 Different wrapper functions for interface module
 """
 import logging
+import warnings
+import inspect
+
+import cmdb
 from functools import wraps
 
-from flask import request, abort
+string_types = (type(b''), type(u''))
 
 try:
     from cmdb.utils.error import CMDBError
@@ -30,11 +34,70 @@ except ImportError:
 LOGGER = logging.getLogger(__name__)
 
 
-def deprecated(f):
-    @wraps(f)
+def deprecated(message):
+    """
+        This is a decorator which can be used to mark functions as deprecated.
+        It will result in a warning being emitted when the function is used.
+        The `message` argument must be an instance of :class:`basestring`
+        (:class:`str` in python 3) For example::
+
+            # The @deprecated is used with a 'message'.
+            @deprecated("please, use another function")
+            def old_function(x, y):
+                pass
+
+            # The @deprecated is used without any 'message'.
+            @deprecated
+            def old_function(x, y):
+                pass
+
+            # The @deprecated is used for class.
+            @deprecated
+            def OldClass(object):
+                 pass
+    """
+
+    if cmdb.__MODE__ == 'DEBUG':
+        if isinstance(message, string_types):
+            def deprecated_decorator(func1):
+
+                warning1 = "Call to deprecated class {name} ({message})." \
+                    if inspect.isclass(func1) else "Call to deprecated function {name} ({message})."
+
+                @wraps(func1)
+                def deprecated_func1(*args, **kwargs):
+                    warnings.warn(
+                        warning1.format(name=deprecated_func1.__name__, message=message),
+                        category=DeprecationWarning,
+                        stacklevel=2
+                    )
+                    warnings.simplefilter('default', DeprecationWarning)
+                    return func1(*args, **kwargs)
+
+                return deprecated_func1
+
+            return deprecated_decorator
+
+        elif inspect.isclass(message) or inspect.isfunction(message):
+            warning2 = "Call to deprecated class {name}." \
+                if inspect.isclass(message) else "Call to deprecated function {name}."
+
+            @wraps(message)
+            def deprecated_func2(*args, **kwargs):
+                warnings.warn(
+                    warning2.format(name=message.__name__),
+                    category=DeprecationWarning,
+                    stacklevel=2
+                )
+                warnings.simplefilter('default', DeprecationWarning)
+                return message(*args, **kwargs)
+
+            return deprecated_func2
+
+    @wraps(message)
     def _deprecated(*args, **kwargs):
-        LOGGER.debug(f'{f} is likely to be deprecated soon!')
-        return f(*args, **kwargs)
+        LOGGER.debug(f'{message} is likely to be deprecated soon!')
+        return message(*args, **kwargs)
 
     return _deprecated
 
