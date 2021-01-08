@@ -15,6 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from enum import Enum
+from json import loads
 from typing import NewType, List, Union
 
 Parameter = NewType('Parameter', str)
@@ -36,11 +37,19 @@ class ApiParameters:
 
     @classmethod
     def from_http(cls, query_string: str, **optional) -> "ApiParameters":
-        raise NotImplementedError
+        if 'projection' in optional:
+            optional['projection'] = loads(optional['projection'])
+        return cls(Parameter(query_string), **optional)
 
     @classmethod
-    def to_dict(cls, *args, **kwargs) -> dict:
-        raise NotImplementedError
+    def to_dict(cls, parameters: "ApiParameters") -> dict:
+        """Get the object as a dict"""
+        params: dict = {
+            'query_string': parameters.query_string
+        }
+        if parameters.projection:
+            params.update({'projection': parameters.projection})
+        return params
 
     def __repr__(self):
         return f'Parameters: Query({self.query_string}) | Projection({self.projection}) |Optional({self.optional})'
@@ -86,7 +95,6 @@ class CollectionParameters(ApiParameters):
         Returns:
             CollectionParameters instance
         """
-        from json import loads
         if 'filter' in optional:
             optional['filter'] = loads(optional['filter'])
         if 'projection' in optional:

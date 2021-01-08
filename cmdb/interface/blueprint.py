@@ -104,7 +104,7 @@ class APIBlueprint(Blueprint):
         return _validate
 
     @classmethod
-    def parse_parameters(cls, parameters_class: Type[ApiParameters], **optional):
+    def parse_parameters(cls, parameters_class, **optional):
         """
         Parse generic parameters from http to a class
         Args:

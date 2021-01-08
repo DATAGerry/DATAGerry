@@ -117,7 +117,7 @@ class GetSingleResponse(BaseAPIResponse):
     """
     __slots__ = 'result'
 
-    def __init__(self, result: dict, url: str = None, model: Model = None, body: bool = None):
+    def __init__(self, result: dict, url: str = None, model: Model = None, body: bool = None, projection: dict = None):
         """
         Constructor of GetSingleResponse.
 
@@ -126,7 +126,11 @@ class GetSingleResponse(BaseAPIResponse):
             url: requested url
             model: model type of body
         """
-        self.result: dict = result
+        if projection:
+            projection = ApiProjection(projection)
+            self.result = ApiProjector(result, projection).project
+        else:
+            self.result: dict = result
         super(GetSingleResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model,
                                                 body=body)
 
