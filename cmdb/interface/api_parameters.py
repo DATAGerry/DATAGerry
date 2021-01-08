@@ -17,8 +17,6 @@
 from enum import Enum
 from typing import NewType, List, Union
 
-from cmdb.interface.api_project import ApiProjection
-
 Parameter = NewType('Parameter', str)
 
 

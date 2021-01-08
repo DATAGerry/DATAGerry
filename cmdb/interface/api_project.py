@@ -19,6 +19,9 @@ from cmdb.utils.error import CMDBError
 
 
 class ApiProjection:
+    """
+    ApiProjection is a wrapper for the api http parameters under `projection`.
+    """
     __slots__ = 'projection', '__includes', '__has_includes', '__excludes', '__has_excludes'
 
     def __init__(self, projection: Union[dict, list] = None):
@@ -32,28 +35,35 @@ class ApiProjection:
 
     @property
     def includes(self) -> List[str]:
+        """Get all keys which includes (value set to 1)"""
         if not self.__includes:
             self.__includes = [key for key, value in self.projection.items() if value == 1]
         return self.__includes
 
     def has_includes(self) -> bool:
+        """Has include values"""
         if not self.__has_includes:
             self.__has_includes = len(self.includes) > 0
         return self.__has_includes
 
     @property
     def excludes(self) -> List[str]:
+        """Get all keys which excludes (value set to 0)"""
         if not self.__excludes:
             self.__excludes = [key for key, value in self.projection.items() if value == 0]
         return self.__excludes
 
     def has_excludes(self) -> bool:
+        """Has excludes values"""
         if not self.__has_excludes:
             self.__has_excludes = len(self.excludes) > 0
         return self.__has_excludes
 
 
 class ApiProjector:
+    """
+    Converts the API Responses based on the ApiProjection mapping.
+    """
     __slots__ = '_output', '__data', '__projection'
 
     def __init__(self, data: Union[dict, List[dict]], projection: ApiProjection = None):
@@ -63,11 +73,13 @@ class ApiProjector:
 
     @property
     def project(self) -> dict:
+        """Outputs the projected data."""
         if not self._output:
             self._output = self.__project_output()
         return self._output
 
     def __project_output(self) -> Union[dict, List[dict]]:
+        """Generate the output from the the api result or results"""
         if not self.__projection:
             return self.__data
 
@@ -81,6 +93,7 @@ class ApiProjector:
         return output
 
     def __parse_element(self, data: dict) -> dict:
+        """Converts a single resource based on projection."""
         element = {}
         if not isinstance(data, dict):
             raise TypeError('Project elements must be a dict!')
