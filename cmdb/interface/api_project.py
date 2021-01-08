@@ -19,7 +19,6 @@ from cmdb.utils.error import CMDBError
 
 
 class Projection:
-
     __slots__ = 'projection', '__includes', '__has_includes', '__excludes', '__has_excludes'
 
     def __init__(self, projection: Union[Dict[str], List[str]] = None):
@@ -55,7 +54,6 @@ class Projection:
 
 
 class Projector:
-
     __slots__ = '_output', '__data', '__projection'
 
     def __init__(self, data: Union[dict, List[dict]], projection: Projection = None):
@@ -84,7 +82,7 @@ class Projector:
 
     def __parse_element(self, data: dict) -> dict:
         element = {}
-        if not isinstance(self.__data, dict):
+        if not isinstance(data, dict):
             raise TypeError('Project elements must be a dict!')
 
         if self.__projection.has_includes():
@@ -93,6 +91,11 @@ class Projector:
                     element.update({key: item})
         else:
             element = data
+
+        if self.__projection.has_excludes():
+            for key, item in element.items():
+                if key in self.__projection.excludes:
+                    del element[key]
 
         return element
 
