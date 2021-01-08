@@ -18,10 +18,10 @@ from typing import List, Union, Dict
 from cmdb.utils.error import CMDBError
 
 
-class Projection:
+class ApiProjection:
     __slots__ = 'projection', '__includes', '__has_includes', '__excludes', '__has_excludes'
 
-    def __init__(self, projection: Union[Dict[str], List[str]] = None):
+    def __init__(self, projection: Union[dict, list] = None):
         if isinstance(projection, (list, List)):
             projection = dict.fromkeys(projection, 1)
         self.projection = projection or {}
@@ -53,10 +53,10 @@ class Projection:
         return self.__has_excludes
 
 
-class Projector:
+class ApiProjector:
     __slots__ = '_output', '__data', '__projection'
 
-    def __init__(self, data: Union[dict, List[dict]], projection: Projection = None):
+    def __init__(self, data: Union[dict, List[dict]], projection: ApiProjection = None):
         self._output = None
         self.__data = data
         self.__projection = projection
@@ -100,8 +100,8 @@ class Projector:
         return element
 
 
-class ProjectionError(CMDBError):
+class ApiProjectionError(CMDBError):
 
     def __init__(self, message: str = None):
         self.message = message
-        super(ProjectionError, self).__init__()
+        super(ApiProjectionError, self).__init__()
