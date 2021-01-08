@@ -31,9 +31,9 @@ class SortOrder(Enum):
 class ApiParameters:
     """Rest API Parameter superclass"""
 
-    def __init__(self, query_string: Parameter = None, projection: ApiProjection = None, **optional):
+    def __init__(self, query_string: Parameter = None, projection: dict = None, **optional):
         self.query_string: Parameter = query_string or Parameter('')
-        self.projection: ApiProjection = projection
+        self.projection: dict = projection
         self.optional = optional
 
     @classmethod

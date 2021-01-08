@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from typing import List, Union, Dict
+from typing import List, Union
 
 from cmdb.utils.error import CMDBError
 
@@ -62,7 +62,7 @@ class ApiProjector:
         self.__projection = projection
 
     @property
-    def output(self) -> dict:
+    def project(self) -> dict:
         if not self._output:
             self._output = self.__project_output()
         return self._output
@@ -93,7 +93,7 @@ class ApiProjector:
             element = data
 
         if self.__projection.has_excludes():
-            for key, item in element.items():
+            for key, item in element.copy().items():
                 if key in self.__projection.excludes:
                     del element[key]
 

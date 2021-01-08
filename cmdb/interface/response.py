@@ -24,6 +24,7 @@ from werkzeug.wrappers import BaseResponse
 from cmdb.framework.utils import PublicID, Model
 from cmdb.interface import DEFAULT_MIME_TYPE
 from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.api_project import ApiProjection, ApiProjector
 
 from cmdb.interface.pagination import APIPagination, APIPager
 from cmdb.interface.route_utils import default
@@ -173,10 +174,14 @@ class GetMultiResponse(BaseAPIResponse):
             body: If http response should not have a body.
 
         """
-        self.results: List[dict] = results
+        self.parameters = params
+        if self.parameters.projection:
+            project = ApiProjection(self.parameters.projection)
+            self.results = ApiProjector(results, project).project
+        else:
+            self.results = results
         self.count: int = len(self.results)
         self.total: int = total
-        self.parameters = params
 
         if params.limit == 0:
             total_pages = 1
