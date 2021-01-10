@@ -24,7 +24,7 @@ from werkzeug.wrappers import BaseResponse
 from cmdb.framework.utils import PublicID, Model
 from cmdb.interface import DEFAULT_MIME_TYPE
 from cmdb.interface.api_parameters import CollectionParameters
-from cmdb.interface.api_project import ApiProjection, ApiProjector
+from cmdb.interface.api_project import APIProjection, APIProjector
 
 from cmdb.interface.pagination import APIPagination, APIPager
 from cmdb.interface.route_utils import default
@@ -127,8 +127,8 @@ class GetSingleResponse(BaseAPIResponse):
             model: model type of body
         """
         if projection:
-            projection = ApiProjection(projection)
-            self.result = ApiProjector(result, projection).project
+            projection = APIProjection(projection)
+            self.result = APIProjector(result, projection).project
         else:
             self.result: dict = result
         super(GetSingleResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model,
@@ -180,8 +180,8 @@ class GetMultiResponse(BaseAPIResponse):
         """
         self.parameters = params
         if self.parameters.projection:
-            project = ApiProjection(self.parameters.projection)
-            self.results = ApiProjector(results, project).project
+            project = APIProjection(self.parameters.projection)
+            self.results = APIProjector(results, project).project
         else:
             self.results = results
         self.count: int = len(self.results)

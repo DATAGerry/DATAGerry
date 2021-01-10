@@ -21,7 +21,7 @@ from cerberus import Validator
 from flask import Blueprint, abort, request, current_app
 
 from cmdb.manager import ManagerGetError
-from cmdb.interface.api_parameters import CollectionParameters, ApiParameters
+from cmdb.interface.api_parameters import CollectionParameters, APIParameters
 from cmdb.interface.route_utils import auth_is_valid, user_has_right, parse_authorization_header
 from cmdb.security.token.validator import TokenValidator, ValidationError
 from cmdb.user_management import UserModel
@@ -112,7 +112,7 @@ class APIBlueprint(Blueprint):
             **optional: Dynamic route parameters
 
         Returns:
-            ApiParameters: Wrapper class
+            APIParameters: Wrapper class
         """
 
         def _parse(f):

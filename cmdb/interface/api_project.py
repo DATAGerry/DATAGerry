@@ -18,7 +18,7 @@ from typing import List, Union
 from cmdb.utils.error import CMDBError
 
 
-class ApiProjection:
+class APIProjection:
     """
     ApiProjection is a wrapper for the api http parameters under `projection`.
     """
@@ -60,13 +60,13 @@ class ApiProjection:
         return self.__has_excludes
 
 
-class ApiProjector:
+class APIProjector:
     """
     Converts the API Responses based on the ApiProjection mapping.
     """
     __slots__ = '_output', '__data', '__projection'
 
-    def __init__(self, data: Union[dict, List[dict]], projection: ApiProjection = None):
+    def __init__(self, data: Union[dict, List[dict]], projection: APIProjection = None):
         self._output = None
         self.__data = data
         self.__projection = projection
@@ -113,8 +113,8 @@ class ApiProjector:
         return element
 
 
-class ApiProjectionError(CMDBError):
+class APIProjectionError(CMDBError):
 
     def __init__(self, message: str = None):
         self.message = message
-        super(ApiProjectionError, self).__init__()
+        super(APIProjectionError, self).__init__()

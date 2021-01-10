@@ -27,7 +27,7 @@ class SortOrder(Enum):
     DESCENDING = -1
 
 
-class ApiParameters:
+class APIParameters:
     """Rest API Parameter superclass"""
 
     def __init__(self, query_string: Parameter = None, projection: dict = None, **optional):
@@ -36,13 +36,13 @@ class ApiParameters:
         self.optional = optional
 
     @classmethod
-    def from_http(cls, query_string: str, **optional) -> "ApiParameters":
+    def from_http(cls, query_string: str, **optional) -> "APIParameters":
         if 'projection' in optional:
             optional['projection'] = loads(optional['projection'])
         return cls(Parameter(query_string), **optional)
 
     @classmethod
-    def to_dict(cls, parameters: "ApiParameters") -> dict:
+    def to_dict(cls, parameters: "APIParameters") -> dict:
         """Get the object as a dict"""
         params: dict = {
             'query_string': parameters.query_string
@@ -55,7 +55,7 @@ class ApiParameters:
         return f'Parameters: Query({self.query_string}) | Projection({self.projection}) |Optional({self.optional})'
 
 
-class CollectionParameters(ApiParameters):
+class CollectionParameters(APIParameters):
     """Rest API class for parameters passed by a http request on a collection route"""
 
     def __init__(self, query_string: Parameter, limit: int = None, sort: str = None,
