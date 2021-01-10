@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2020 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -23,7 +23,7 @@ from werkzeug.wrappers import BaseResponse
 
 from cmdb.framework.utils import PublicID, Model
 from cmdb.interface import DEFAULT_MIME_TYPE
-from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.api_parameters import CollectionParameters, APIParameters
 from cmdb.interface.api_project import APIProjection, APIProjector
 
 from cmdb.interface.pagination import APIPagination, APIPager
@@ -417,10 +417,17 @@ class GetListResponse(BaseAPIResponse):
     """
     API Response for a simple list without iteration.
     """
-    __slots__ = 'results'
+    __slots__ = 'results', 'params'
 
-    def __init__(self, results: List[dict], url: str = None, model: Model = None, body: bool = None):
-        self.results: List[dict] = results
+    def __init__(self, results: List[dict], url: str = None, model: Model = None, body: bool = None,
+                 params: APIParameters = None):
+
+        self.params = params
+        if self.params and self.params.projection:
+            projection = APIProjection(self.params.projection)
+            self.results = APIProjector(results, projection).project
+        else:
+            self.results: List[dict] = results
         super(GetListResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model, body=body)
 
     def make_response(self, *args, **kwargs) -> BaseResponse:
