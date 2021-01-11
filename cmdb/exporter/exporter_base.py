@@ -26,6 +26,7 @@ import openpyxl
 from cmdb.utils.helpers import load_class
 
 from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.exporter.format.format_base import BaseExporterFormat
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.utils import json_encoding
@@ -36,22 +37,7 @@ object_manager = CmdbObjectManager(database_manager=database_manager)
 type_manager = TypeManager(database_manager=database_manager)
 
 
-class ExportType:
-    FILE_EXTENSION = None
-    LABEL = None
-    MULTITYPE_SUPPORT = False
-    ICON = None
-    DESCRIPTION = None
-    ACTIVE = None
-
-    def __init__(self):
-        pass
-
-    def export(self, object_list, *args):
-        pass
-
-
-class ZipExportType(ExportType):
+class ZipExportType(BaseExporterFormat):
 
     FILE_EXTENSION = "zip"
     LABEL = "ZIP"
@@ -60,13 +46,13 @@ class ZipExportType(ExportType):
     DESCRIPTION = "Export Zipped Files"
     ACTIVE = True
 
-    def export(self, object_list, *args):
+    def export(self, data, *args):
 
         """
         Export a zip file, containing the object list sorted by type in several files.
 
         Args:
-            object_list: List of objects to be exported
+            data: List of objects to be exported
             args: the filetype with which the objects are stored
 
         Returns:
@@ -74,26 +60,26 @@ class ZipExportType(ExportType):
         """
 
         # check what export type is requested and intitializes a new zip file in memory
-        export_type = load_class("cmdb.file_export.export_types." + args[0])()
+        export_type = load_class(f'cmdb.exporter.exporter_base.{args[0]}')()
         zipped_file = io.BytesIO()
 
         # Build .zip file
         with zipfile.ZipFile(zipped_file, "a", zipfile.ZIP_DEFLATED, False) as f:
 
             # Enters loop until the object list is empty
-            while len(object_list) > 0:
+            while len(data) > 0:
 
                 # Set what type the loop filters to and makes an empty list
-                type_id = object_list[len(object_list) - 1].type_id
+                type_id = data[len(data) - 1].type_id
                 type_name = object_manager.get_type(type_id).get_name()
                 type_list = []
 
                 # Filters object list to the current type_id and inserts it into type_list
                 # When an object is inserted into type_list it gets deleted from object_list
-                for i in range(len(object_list) - 1, -1, -1):
-                    if object_list[i].type_id == type_id:
-                        type_list.append(object_list[i])
-                        del object_list[i]
+                for i in range(len(data) - 1, -1, -1):
+                    if data[i].type_id == type_id:
+                        type_list.append(data[i])
+                        del data[i]
 
                 # Runs the requested export function and returns the output in the export variable
                 export = export_type.export(type_list)
@@ -109,7 +95,7 @@ class ZipExportType(ExportType):
         return zipped_file
 
 
-class CsvExportType(ExportType):
+class CsvExportType(BaseExporterFormat):
 
     FILE_EXTENSION = "csv"
     LABEL = "CSV"
@@ -118,16 +104,15 @@ class CsvExportType(ExportType):
     DESCRIPTION = "Export as CSV (only of the same type)"
     ACTIVE = True
 
-    def export(self, object_list, *args):
+    def export(self, data, *args):
 
-        """ Exports object_list as .csv file
+        """ Exports data as .csv file
 
         Args:
-            object_list: The objects to be exported
-            args:
+            data: The objects to be exported
 
         Returns:
-            Csv file containing the object_list
+            Csv file containing the data
         """
 
         # init values
@@ -136,7 +121,7 @@ class CsvExportType(ExportType):
         current_type_id = None
         current_type_fields = []
 
-        for obj in object_list:
+        for obj in data:
             # get type from first object and setup csv header
             if current_type_id is None:
                 current_type_id = obj.type_id
@@ -175,7 +160,7 @@ class CsvExportType(ExportType):
         return csv_file
 
 
-class JsonExportType(ExportType):
+class JsonExportType(BaseExporterFormat):
 
     FILE_EXTENSION = "json"
     LABEL = "JSON"
@@ -184,21 +169,20 @@ class JsonExportType(ExportType):
     DESCRIPTION = "Export as JSON"
     ACTIVE = True
 
-    def export(self, object_list, *args):
+    def export(self, data, *args):
 
-        """Exports object_list as .json file
+        """Exports data as .json file
 
         Args:
-            object_list: The objects to be exported
-            args:
+            data: The objects to be exported
 
         Returns:
-            Json file containing the object_list
+            Json file containing the data
         """
 
         output = []
 
-        for obj in object_list:
+        for obj in data:
             # init output element
             output_element = {}
             output_element['public_id'] = obj.public_id
@@ -224,7 +208,7 @@ class JsonExportType(ExportType):
         return json.dumps(output, default=json_encoding.default, ensure_ascii=False, indent=2)
 
 
-class XlsxExportType(ExportType):
+class XlsxExportType(BaseExporterFormat):
 
     FILE_EXTENSION = "xlsx"
     LABEL = "XLSX"
@@ -233,19 +217,18 @@ class XlsxExportType(ExportType):
     DESCRIPTION = "Export as XLS"
     ACTIVE = True
 
-    def export(self, object_list, *args):
+    def export(self, data, *args):
 
         """Exports object_list as .xlsx file
 
         Args:
-            object_list: The objects to be exported
-            args:
+            data: The objects to be exported
 
         Returns:
-            Xlsx file containing the object_list
+            Xlsx file containing the data
         """
 
-        workbook = self.create_xls_object(object_list)
+        workbook = self.create_xls_object(data)
 
         # save workbook
         with tempfile.NamedTemporaryFile() as tmp:
@@ -253,14 +236,14 @@ class XlsxExportType(ExportType):
             tmp.seek(0)
             return tmp.read()
 
-    def create_xls_object(self, object_list):
+    def create_xls_object(self, data):
 
         # create workbook
         workbook = openpyxl.Workbook()
 
         # sorts data_list by type_id
         type_id = "type_id"
-        decorated = [(dict_.__dict__[type_id], dict_.__dict__) for dict_ in object_list]
+        decorated = [(dict_.__dict__[type_id], dict_.__dict__) for dict_ in data]
         decorated = sorted(decorated, key=lambda x: x[0], reverse=False)
         sorted_list = [dict_ for (key, dict_) in decorated]
 
@@ -326,7 +309,7 @@ class XlsxExportType(ExportType):
         return re.sub('[\\*?:/\[\]]', '_', input_data)
 
 
-class XmlExportType(ExportType):
+class XmlExportType(BaseExporterFormat):
 
     FILE_EXTENSION = "xml"
     LABEL = "XML"
@@ -335,22 +318,21 @@ class XmlExportType(ExportType):
     DESCRIPTION = "Export as XML"
     ACTIVE = True
 
-    def export(self, object_list, *args):
+    def export(self, data, *args):
 
         """Exports object_list as .xml file
 
         Args:
-            object_list: The objects to be exported
-            args:
+            data: The objects to be exported
 
         Returns:
-            Xml file containing the object_list
+            Xml file containing the data
         """
 
         # object list
         cmdb_object_list = ET.Element('objects')
 
-        for obj in object_list:
+        for obj in data:
             # get object fields as dict:
             obj_fields_dict = {}
             for obj_field in obj.fields:

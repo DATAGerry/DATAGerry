@@ -40,7 +40,7 @@ type_export_blueprint = RootBlueprint('type_export_rest', __name__, url_prefix='
 
 
 @type_export_blueprint.route('/', methods=['POST'])
-# @login_required
+@login_required
 def export_type():
     try:
         type_list = [TypeModel.to_json(type) for type in object_manager.get_all_types()]
@@ -63,26 +63,20 @@ def export_type():
     )
 
 
-@type_export_blueprint.route('/<string:public_ids>/', methods=['POST'])
 @type_export_blueprint.route('/<string:public_ids>', methods=['POST'])
 @login_required
 def export_type_by_ids(public_ids):
     try:
-        type_list = []
-        try:
-            query_list = []
-            for key, value in {'public_id': public_ids}.items():
-                for v in value.split(","):
-                    try:
-                        query_list.append({key: int(v)})
-                    except (ValueError, TypeError):
-                        return abort(400)
-            type_list_data = json.dumps([TypeModel.to_json(type_) for type_ in
-                                         object_manager.get_types_by(sort="public_id", **{'$or': query_list})],
-                                        default=json_encoding.default, indent=2)
-        except CMDBError as e:
-            abort(400, e)
-
+        query_list = []
+        for key, value in {'public_id': public_ids}.items():
+            for v in value.split(","):
+                try:
+                    query_list.append({key: int(v)})
+                except (ValueError, TypeError):
+                    return abort(400)
+        type_list_data = json.dumps([TypeModel.to_json(type_) for type_ in
+                                     object_manager.get_types_by(sort="public_id", **{'$or': query_list})],
+                                    default=json_encoding.default, indent=2)
     except TypeNotFoundError as e:
         return abort(400, e.message)
     except ModuleNotFoundError as e:

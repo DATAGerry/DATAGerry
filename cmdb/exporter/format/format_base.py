@@ -18,6 +18,13 @@
 class BaseExporterFormat:
     FILE_EXTENSION = None
     LABEL = None
+    MULTITYPE_SUPPORT = False
+    ICON = None
+    DESCRIPTION = None
+    ACTIVE = None
 
-    def __init__(self, file_name):
+    def __init__(self, file_name=''):
         self.file_name = f'{file_name}.{self.FILE_EXTENSION}'
+
+    def export(self, data, *args):
+        pass

@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-class BaseExportConfig:
+class BaseExporterConfig:
 
     def __init__(self, config_type: str):
         self.config_type = config_type

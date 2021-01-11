@@ -13,12 +13,20 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from cmdb.exporter.config.config_base import BaseExportConfig
 
 
-class TypeExportConfig(BaseExportConfig):
+from cmdb.exporter.config.config_base import BaseExporterConfig
 
-    def __init__(self, properties, options=None):
-        self.properties = properties
-        self.options = options or []
-        super(TypeExportConfig, self).__init__(config_type='type')
+
+class ExporterConfig(BaseExporterConfig):
+
+    def __init__(self, filter_query: dict, options=None):
+        """
+        Args:
+            filter_query: The raw http query string. Be used for the parsed parameters
+            options: dict of optional collection parameters for given route function.
+
+        """
+        self.filter_query = filter_query
+        self.options = options
+        super(ExporterConfig, self).__init__(config_type='type')

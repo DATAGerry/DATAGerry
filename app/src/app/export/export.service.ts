@@ -26,13 +26,13 @@ import { HttpParams } from '@angular/common/http';
 })
 export class FileService {
 
-  private servicePrefix: string = 'file';
+  private servicePrefix: string = 'export/object';
 
   constructor(private api: ApiCallService) {
   }
 
   public callFileFormatRoute() {
-    return this.api.callGet<any>(this.servicePrefix + '/').pipe(
+    return this.api.callGet<any>(this.servicePrefix + '/extensions').pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -42,16 +42,16 @@ export class FileService {
   public callExportRoute(objectIDs: number[], exportType: string, zipping: boolean = false) {
     const options = httpFileOptions;
     let params = new HttpParams();
-    params = params.set('ids', JSON.stringify(objectIDs));
+    params = params.set('filter', JSON.stringify({public_id: {$in: objectIDs}}));
     params = params.set('classname', exportType);
     params = params.set('zip', JSON.stringify(zipping));
     options.params = params;
 
-    return this.api.callGet<any>(this.servicePrefix + '/object/', options);
+    return this.api.callGet<any>(this.servicePrefix + '/', options);
   }
 
   public getObjectFileByType(typeID: number, exportType: string) {
-    return this.api.callGet(this.servicePrefix + '/object/type/' + typeID + '/' + exportType, httpFileOptions);
+    return this.api.callGet(this.servicePrefix + '/' + typeID + '/' + exportType, httpFileOptions);
   }
 
   public getTypeFile() {
