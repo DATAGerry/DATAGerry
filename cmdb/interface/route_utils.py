@@ -214,7 +214,9 @@ def parse_authorization_header(header):
                 group_manager: GroupManager = GroupManager(current_app.database_manager,
                                                            right_manager=RightManager(rights))
                 security_manager: SecurityManager = SecurityManager(current_app.database_manager)
-                auth_module = AuthModule(SystemSettingsReader(current_app.database_manager), user_manager=user_manager,
+                auth_settings = SystemSettingsReader(current_app.database_manager).get_all_values_from_section(
+                    'auth', default=AuthModule.__DEFAULT_SETTINGS__)
+                auth_module = AuthModule(auth_settings, user_manager=user_manager,
                                          group_manager=group_manager, security_manager=security_manager)
 
                 try:

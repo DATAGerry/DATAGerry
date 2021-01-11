@@ -45,9 +45,9 @@ with current_app.app_context():
 
 @auth_blueprint.route('/settings', methods=['GET'])
 @auth_blueprint.protect(auth=True, right='base.system.view')
-@insert_request_user
-def get_auth_settings(request_user: UserModel):
-    auth_module = AuthModule(system_settings_reader)
+def get_auth_settings():
+    auth_settings = system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__)
+    auth_module = AuthModule(auth_settings)
     return make_response(auth_module.settings)
 
 
@@ -59,7 +59,7 @@ def update_auth_settings(request_user: UserModel):
     if not new_auth_settings_values:
         return abort(400, 'No new data was provided')
     try:
-        new_auth_setting_instance = AuthSettingsDAO(**new_auth_settings_values, default=AuthModule.__DEFAULT_SETTINGS__)
+        new_auth_setting_instance = AuthSettingsDAO(**new_auth_settings_values)
     except Exception as err:
         return abort(400, err)
     update_result = system_setting_writer.write(_id='auth', data=new_auth_setting_instance.__dict__)
@@ -73,7 +73,8 @@ def update_auth_settings(request_user: UserModel):
 @insert_request_user
 def get_installed_providers(request_user: UserModel):
     provider_names: List[dict] = []
-    auth_module = AuthModule(system_settings_reader)
+    auth_module = AuthModule(
+        system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__))
     for provider in auth_module.providers:
         provider_names.append({'class_name': provider.get_name(), 'external': provider.EXTERNAL_PROVIDER})
     return make_response(provider_names)
@@ -83,7 +84,8 @@ def get_installed_providers(request_user: UserModel):
 @auth_blueprint.protect(auth=True, right='base.system.view')
 @insert_request_user
 def get_provider_config(provider_class: str, request_user: UserModel):
-    auth_module = AuthModule(system_settings_reader)
+    auth_module = AuthModule(
+        system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__))
     try:
         provider_class_config = auth_module.get_provider(provider_class).get_config()
     except StopIteration:
@@ -103,8 +105,10 @@ def post_login():
     request_user_name = login_data['user_name']
     request_password = login_data['password']
 
-    auth_module = AuthModule(system_settings_reader, user_manager=user_manager, group_manager=group_manager,
-                             security_manager=security_manager)
+    auth_module = AuthModule(
+        system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__),
+        user_manager=user_manager, group_manager=group_manager,
+        security_manager=security_manager)
     user_instance = None
     try:
         user_instance = auth_module.login(request_user_name, request_password)

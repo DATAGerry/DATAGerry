@@ -17,7 +17,9 @@
 import logging
 
 from datetime import datetime
+
 from ldap3 import Server, Connection
+from ldap3.core.exceptions import LDAPExceptionError
 
 from cmdb.manager.errors import ManagerGetError, ManagerInsertError
 from cmdb.search import Query
@@ -48,16 +50,23 @@ class LdapAuthenticationProviderConfig(AuthProviderConfig):
         'search': {
             'basedn': 'dc=example,dc=com',
             'searchfilter': '(uid=%username%)'
+        },
+        'group_mapping': {
+            'active': False,
+            'searchfiltergroup': '(memberUid=%username%)',
+            'mapping': []
         }
     }
 
     def __init__(self, active: bool, default_group: int, server_config: dict, connection_config: dict, search: dict,
-                 **kwargs):
+                 group_mapping: dict = None):
         self.default_group = default_group
         self.server_config: dict = server_config
         self.connection_config: dict = connection_config
         self.search: dict = search
-        super(LdapAuthenticationProviderConfig, self).__init__(active, **kwargs)
+        self.group_mapping: dict = group_mapping or \
+                                   LdapAuthenticationProviderConfig.DEFAULT_CONFIG_VALUES.get('group_mapping')
+        super(LdapAuthenticationProviderConfig, self).__init__(active)
 
 
 class LdapAuthenticationProvider(AuthenticationProvider):
@@ -84,19 +93,23 @@ class LdapAuthenticationProvider(AuthenticationProvider):
     def authenticate(self, user_name: str, password: str, **kwargs) -> UserModel:
         try:
             ldap_connection_status = self.connect()
-            LOGGER.debug(f'[LdapAuthenticationProvider] Connection status: {ldap_connection_status}')
-        except Exception as e:
-            LOGGER.error(f'[LdapAuthenticationProvider] Failed to connect to LDAP server - error: {e}')
-            raise AuthenticationError(LdapAuthenticationProvider.get_name(), e)
-        ldap_search_filter = self.config.search['searchfilter'].replace("%username%", user_name)
-        LOGGER.debug(f'[LdapAuthenticationProvider] Search Filter: {ldap_search_filter}')
-        search_result = self.__ldap_connection.search(self.config.search['basedn'], ldap_search_filter)
-        LOGGER.debug(f'[LdapAuthenticationProvider] Search result: {search_result}')
+            if not ldap_connection_status:
+                raise AuthenticationError('Could not connection to ldap server.')
+        except LDAPExceptionError as err:
+            raise AuthenticationError(LdapAuthenticationProvider.get_name(), str(err))
 
-        if not search_result or len(self.__ldap_connection.entries) == 0:
+        user_search_filter = self.config.search['searchfilter'].replace("%username%", user_name)
+        user_search_result = self.__ldap_connection.search(self.config.search['basedn'], user_search_filter)
+        user_search_result_entries = self.__ldap_connection.entries
+
+        if not user_search_result or len(user_search_result_entries) == 0:
             raise AuthenticationError(LdapAuthenticationProvider.get_name(), 'No matching entry')
 
-        for entry in self.__ldap_connection.entries:
+        '''group_search_filter = self.config.group_mapping['searchfiltergroup'].replace("%username%", user_name)
+        group_search_result = self.__ldap_connection.search(self.config.search['basedn'], group_search_filter)
+        group_search_result_entries: list = [entry.entry_to_json() for entry in self.__ldap_connection.entries]'''
+
+        for entry in user_search_result_entries:
             LOGGER.debug(f'[LdapAuthenticationProvider] Entry: {entry}')
             entry_dn = entry.entry_dn
             try:

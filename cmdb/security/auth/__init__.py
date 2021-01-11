@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Basic Authentication Module"""
 import logging
+from collections import defaultdict
 from typing import List, ClassVar, Union
 
 from cmdb.manager.errors import ManagerGetError
@@ -29,7 +30,6 @@ from cmdb.security.auth.provider_config import AuthProviderConfig
 from cmdb.security.security import SecurityManager
 from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.user_manager import UserManager, UserModel
-from cmdb.utils.system_reader import SystemSettingsReader
 
 LOGGER = logging.getLogger(__name__)
 
@@ -56,18 +56,17 @@ class AuthModule:
         ]
     }
 
-    def __init__(self, system_settings_reader: SystemSettingsReader, user_manager: UserManager = None,
+    def __init__(self, settings: dict, user_manager: UserManager = None,
                  group_manager: GroupManager = None, security_manager: SecurityManager = None):
+        self.__settings: AuthSettingsDAO = self.__init_settings(settings)
         self.__user_manager = user_manager
         self.__group_manager = group_manager
         self.__security_manager = security_manager
-        auth_settings_values = system_settings_reader. \
-            get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__)
-        self.__settings: AuthSettingsDAO = self.__init_settings(auth_settings_values)
 
-    def __init_settings(self, auth_settings_values: dict) -> AuthSettingsDAO:
+    @staticmethod
+    def __init_settings(auth_settings_values: dict) -> AuthSettingsDAO:
         """Merge default values with database entries"""
-        for provider in self.get_installed_providers():
+        for provider in AuthModule.get_installed_providers():
             LOGGER.debug(f'[AuthModule][__init_settings] Installed provider: {provider}')
             provider_config_list: List[dict] = auth_settings_values.get('providers')
             LOGGER.debug(f'[AuthModule][__init_settings] Database provider list: {provider_config_list}')
@@ -82,7 +81,7 @@ class AuthModule:
         Notes:
             This only means that a provider is installed, not that the provider is used or activated!
         """
-        AuthModule.__installed_providers.append(provider)
+        cls.__installed_providers.append(provider)
         return provider
 
     @classmethod
@@ -111,10 +110,10 @@ class AuthModule:
         except StopIteration:
             return False
 
-    @staticmethod
-    def get_installed_providers() -> List[AuthenticationProvider]:
+    @classmethod
+    def get_installed_providers(cls) -> List[AuthenticationProvider]:
         """Get all installed providers as static list"""
-        return AuthModule.__installed_providers
+        return cls.__installed_providers
 
     @property
     def providers(self) -> List[AuthenticationProvider]:
@@ -146,7 +145,7 @@ class AuthModule:
             LOGGER.error(f'[AuthModule] {err}')
             return None
 
-    def login(self, user_name: str, password: str) -> Union[UserModel, None]:
+    def login(self, user_name: str, password: str) -> UserModel:
         """
         Performs a login try with given username and password
         If the user is not found, iterate over all installed and activated providers
@@ -156,10 +155,10 @@ class AuthModule:
 
         Returns:
             UserModel: instance if user was found and password was correct
-            None: if something went wrong
         """
         user_name = user_name.lower()
         user_instance = None
+
         try:
             founded_user = self.__user_manager.get_by(Query({'user_name': user_name}))
             provider_class_name = founded_user.authenticator
@@ -178,20 +177,16 @@ class AuthModule:
                 raise AuthenticationProviderNotActivated(f'Provider {provider_class_name} is deactivated')
             if provider_instance.EXTERNAL_PROVIDER and not self.settings.enable_external:
                 raise AuthenticationProviderNotActivated(f'External providers are deactivated')
-            try:
-                user_instance = provider_instance.authenticate(user_name, password)
-            except AuthenticationError as ae:
-                LOGGER.error(f'[LOGIN] UserModel could not login: {ae}')
+
+            return provider_instance.authenticate(user_name, password)
 
         except ManagerGetError as umge:
-            LOGGER.error(f'[AUTH] {user_name} not in database: {umge}')
-            LOGGER.info(f'[AUTH] Check for other providers - request_user: {user_name}')
+
             # get installed providers
             provider_list = self.providers
-            LOGGER.debug(f'[AUTH] Provider list: {provider_list}')
-            external_enabled = self.settings.enable_external
+
             for provider in provider_list:
-                LOGGER.debug(f'[AUTH] using provider: {provider}')
+
                 provider_config_class = provider.PROVIDER_CONFIG_CLASS
                 provider_settings = self.settings.get_provider_settings(provider.get_name())
                 provider_config_instance = provider_config_class(**provider_settings)
@@ -200,19 +195,14 @@ class AuthModule:
                     continue
                 if provider.EXTERNAL_PROVIDER and not self.settings.enable_external:
                     continue
-                provider_instance = provider(config=provider_config_instance)
+
+                provider_instance = provider(config=provider_config_instance, user_manager=self.__user_manager,
+                                             group_manager=self.__group_manager,
+                                             security_manager=self.__security_manager)
                 try:
                     user_instance = provider_instance.authenticate(user_name, password)
-                    if user_instance:
-                        break
-                except AuthenticationError as ae:
-                    LOGGER.error(
-                        f'[AUTH] UserModel {user_name} could not validate with provider {provider}: {ae}')
-                LOGGER.info(f'[AUTH] Provider instance: {provider_instance}')
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            LOGGER.error(f'[AUTH] Error while login: {e}')
-            return None
-        finally:
-            return user_instance
+                except AuthenticationError:
+                    continue
+                finally:
+                    return user_instance
+                raise AuthenticationError('Unknown user could not login.')
