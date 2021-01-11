@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2020 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -17,14 +17,16 @@
 import logging
 
 from datetime import datetime
+from ldap3 import Server, Connection
 
-from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.manager.errors import ManagerGetError, ManagerInsertError
+from cmdb.search import Query
 from cmdb.security.auth.auth_errors import AuthenticationError
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
+from cmdb.security.security import SecurityManager
+from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.user_manager import UserModel, UserManager
-from cmdb.utils.system_config import SystemConfigReader
 
 LOGGER = logging.getLogger(__name__)
 
@@ -59,18 +61,18 @@ class LdapAuthenticationProviderConfig(AuthProviderConfig):
 
 
 class LdapAuthenticationProvider(AuthenticationProvider):
-    from ldap3 import Server, Connection
     PASSWORD_ABLE: bool = False
     EXTERNAL_PROVIDER: bool = True
     PROVIDER_CONFIG_CLASS = LdapAuthenticationProviderConfig
 
-    def __init__(self, config: LdapAuthenticationProviderConfig = None):
+    def __init__(self, config: LdapAuthenticationProviderConfig = None, user_manager: UserManager = None,
+                 group_manager: GroupManager = None, security_manager: SecurityManager = None):
 
-        super(LdapAuthenticationProvider, self).__init__(config)
-
-        self.__ldap_server = LdapAuthenticationProvider.Server(**self.config.server_config)
-        self.__ldap_connection = LdapAuthenticationProvider.Connection(self.__ldap_server,
-                                                                       **self.config.connection_config)
+        self.__ldap_server = Server(**config.server_config)
+        self.__ldap_connection = Connection(self.__ldap_server, **config.connection_config)
+        super(LdapAuthenticationProvider, self).__init__(config, user_manager=user_manager,
+                                                         group_manager=group_manager,
+                                                         security_manager=security_manager)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.__ldap_connection:
@@ -80,10 +82,6 @@ class LdapAuthenticationProvider(AuthenticationProvider):
         return self.__ldap_connection.bind()
 
     def authenticate(self, user_name: str, password: str, **kwargs) -> UserModel:
-        __dbm = DatabaseManagerMongo(
-            **SystemConfigReader().get_all_values_from_section('Database')
-        )
-        __user_manager = UserManager(__dbm)
         try:
             ldap_connection_status = self.connect()
             LOGGER.debug(f'[LdapAuthenticationProvider] Connection status: {ldap_connection_status}')
@@ -102,8 +100,8 @@ class LdapAuthenticationProvider(AuthenticationProvider):
             LOGGER.debug(f'[LdapAuthenticationProvider] Entry: {entry}')
             entry_dn = entry.entry_dn
             try:
-                entry_connection_result = LdapAuthenticationProvider.Connection(self.__ldap_server, entry_dn, password,
-                                                                                auto_bind=True)
+                entry_connection_result = Connection(self.__ldap_server, entry_dn, password,
+                                                     auto_bind=True)
                 LOGGER.debug(f'[LdapAuthenticationProvider] UserModel connection result: {entry_connection_result}')
             except Exception as e:
                 LOGGER.error(f'[LdapAuthenticationProvider] UserModel auth result: {e}')
@@ -111,7 +109,7 @@ class LdapAuthenticationProvider(AuthenticationProvider):
 
         # Check if user exists
         try:
-            user_instance: UserModel = __user_manager.get_by({'user_name': user_name})
+            user_instance: UserModel = self.user_manager.get_by(Query({'user_name': user_name}))
         except ManagerGetError as umge:
             LOGGER.warning(f'[LdapAuthenticationProvider] UserModel exists on LDAP but not in database: {umge}')
             LOGGER.debug(f'[LdapAuthenticationProvider] Try creating user: {user_name}')
@@ -128,12 +126,12 @@ class LdapAuthenticationProvider(AuthenticationProvider):
                 raise AuthenticationError(LdapAuthenticationProvider.get_name(), e)
             LOGGER.debug(f'[LdapAuthenticationProvider] New user was init')
             try:
-                user_id = __user_manager.insert(new_user_data)
+                user_id = self.user_manager.insert(new_user_data)
             except ManagerInsertError as umie:
                 LOGGER.debug(f'[LdapAuthenticationProvider] {umie}')
                 raise AuthenticationError(LdapAuthenticationProvider.get_name(), umie)
             try:
-                user_instance: UserModel = __user_manager.get(public_id=user_id)
+                user_instance: UserModel = self.user_manager.get(public_id=user_id)
             except ManagerGetError as umge:
                 LOGGER.debug(f'[LdapAuthenticationProvider] {umge}')
                 raise AuthenticationError(LdapAuthenticationProvider.get_name(), umge)

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2020 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 import base64
 import functools
 import json
@@ -24,6 +24,7 @@ from werkzeug.http import wsgi_to_bytes
 
 from cmdb.manager.errors import ManagerGetError
 from cmdb.security.auth import AuthModule
+from cmdb.security.security import SecurityManager
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import UserGroupModel
 from cmdb.user_management.rights import __all__ as rights
@@ -210,10 +211,14 @@ def parse_authorization_header(header):
                 password = to_unicode(password, "utf-8")
 
                 user_manager: UserManager = UserManager(current_app.database_manager)
-                auth_module = AuthModule(SystemSettingsReader(current_app.database_manager))
+                group_manager: GroupManager = GroupManager(current_app.database_manager,
+                                                           right_manager=RightManager(rights))
+                security_manager: SecurityManager = SecurityManager(current_app.database_manager)
+                auth_module = AuthModule(SystemSettingsReader(current_app.database_manager), user_manager=user_manager,
+                                         group_manager=group_manager, security_manager=security_manager)
 
                 try:
-                    user_instance = auth_module.login(user_manager, username, password)
+                    user_instance = auth_module.login(username, password)
                 except Exception as e:
                     return None
                 if user_instance:

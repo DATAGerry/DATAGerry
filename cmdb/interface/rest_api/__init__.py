@@ -144,7 +144,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.media_library_routes.media_file_routes import media_file_blueprint
     from cmdb.interface.rest_api.special_routes import special_blueprint
 
-    app.register_blueprint(auth_blueprint)
+    app.register_multi_blueprint(auth_blueprint, multi_prefix=['/auth'])
     app.register_blueprint(object_blueprint)
     app.register_multi_blueprint(objects_blueprint, multi_prefix=['/objects'])
     app.register_multi_blueprint(links_blueprint, multi_prefix=['/object/link', '/objects/links'])

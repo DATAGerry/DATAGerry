@@ -18,6 +18,7 @@ import logging
 from typing import List, ClassVar, Union
 
 from cmdb.manager.errors import ManagerGetError
+from cmdb.search import Query
 from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, AuthenticationProviderNotActivated, \
     AuthenticationError
 from cmdb.security.auth.auth_providers import AuthenticationProvider
@@ -25,6 +26,8 @@ from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.providers.external_providers import LdapAuthenticationProvider
 from cmdb.security.auth.providers.internal_providers import LocalAuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
+from cmdb.security.security import SecurityManager
+from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.user_manager import UserManager, UserModel
 from cmdb.utils.system_reader import SystemSettingsReader
 
@@ -53,7 +56,11 @@ class AuthModule:
         ]
     }
 
-    def __init__(self, system_settings_reader: SystemSettingsReader):
+    def __init__(self, system_settings_reader: SystemSettingsReader, user_manager: UserManager = None,
+                 group_manager: GroupManager = None, security_manager: SecurityManager = None):
+        self.__user_manager = user_manager
+        self.__group_manager = group_manager
+        self.__security_manager = security_manager
         auth_settings_values = system_settings_reader. \
             get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__)
         self.__settings: AuthSettingsDAO = self.__init_settings(auth_settings_values)
@@ -130,19 +137,20 @@ class AuthModule:
             _provider_config_values: dict = self.settings.get_provider_settings(_provider_class_name) \
                 .get('config', _provider_config_class.DEFAULT_CONFIG_VALUES)
             _provider_config_instance = _provider_config_class(**_provider_config_values)
-            _provider_instance = _provider_class(config=_provider_config_instance)
+            _provider_instance = _provider_class(config=_provider_config_instance, user_manager=self.__user_manager,
+                                                 group_manager=self.__group_manager,
+                                                 security_manager=self.__securitymanager)
 
             return _provider_instance
         except Exception as err:
             LOGGER.error(f'[AuthModule] {err}')
             return None
 
-    def login(self, user_manager: UserManager, user_name: str, password: str) -> Union[UserModel, None]:
+    def login(self, user_name: str, password: str) -> Union[UserModel, None]:
         """
         Performs a login try with given username and password
         If the user is not found, iterate over all installed and activated providers
         Args:
-            user_manager: Usermanager instance
             user_name: Name of the user
             password: Password
 
@@ -153,7 +161,7 @@ class AuthModule:
         user_name = user_name.lower()
         user_instance = None
         try:
-            founded_user = user_manager.get_by({'user_name': user_name})
+            founded_user = self.__user_manager.get_by(Query({'user_name': user_name}))
             provider_class_name = founded_user.authenticator
             LOGGER.debug(f'[AUTH] Founded user: {founded_user} with provider: {provider_class_name}')
             if not self.provider_exists(provider_class_name):
@@ -164,7 +172,8 @@ class AuthModule:
             provider_config_settings = self.settings.get_provider_settings(provider.get_name())
 
             provider_config_instance = provider_config_class(**provider_config_settings)
-            provider_instance = provider(config=provider_config_instance)
+            provider_instance = provider(config=provider_config_instance, user_manager=self.__user_manager,
+                                         group_manager=self.__group_manager, security_manager=self.__security_manager)
             if not provider_instance.is_active():
                 raise AuthenticationProviderNotActivated(f'Provider {provider_class_name} is deactivated')
             if provider_instance.EXTERNAL_PROVIDER and not self.settings.enable_external:
