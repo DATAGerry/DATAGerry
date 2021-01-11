@@ -26,9 +26,10 @@ import { RenderModule } from '../../framework/render/render.module';
 import { ActiveProvidersPipe } from './active-providers.pipe';
 import { LdapAuthenticationProviderFormComponent } from './providers/ldap-authentication-provider-form/ldap-authentication-provider-form.component';
 import { LocalAuthenticationProviderFormComponent } from './providers/local-authentication-provider-form/local-authentication-provider-form.component';
+import { LdapProviderFormGroupMappingComponent } from './providers/ldap-authentication-provider-form/ldap-provider-form-group-mapping/ldap-provider-form-group-mapping.component';
 
 @NgModule({
-  declarations: [AuthSettingsComponent, ActiveProvidersPipe, LdapAuthenticationProviderFormComponent, LocalAuthenticationProviderFormComponent],
+  declarations: [AuthSettingsComponent, ActiveProvidersPipe, LdapAuthenticationProviderFormComponent, LocalAuthenticationProviderFormComponent, LdapProviderFormGroupMappingComponent],
   imports: [
     CommonModule,
     AuthSettingsRoutingModule,

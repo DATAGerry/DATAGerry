@@ -1,0 +1,30 @@
+<table class="table table-hover table-striped">
+  <thead>
+  <tr class="d-flex">
+    <th scope="col" class="col-5">LDAP DN</th>
+    <th scope="col" class="col-5">Group</th>
+    <th scope="col" class="col-2 text-center">#</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr class="d-flex">
+    <td class="col-5" [formGroup]="form">
+      <div class="input-group">
+        <input class="form-control" type="text" formControlName="group_dn">
+      </div>
+    </td>
+    <td class="col-5">
+      <div class="input-group">
+        <select class="custom-select" formControlName="group_id">
+          <option *ngFor="let group of groups"
+                  [value]="group.public_id">{{group.label ? group.label : group.name}}</option>
+        </select>
+      </div>
+    </td>
+    <td class="col-2">
+      <button type="button" class="btn btn-sm btn-success" (click)="addMapping()">
+        <i class="far fa-plus-square"></i>
+      </button>
+    </td>
+  </tr>
+</table>

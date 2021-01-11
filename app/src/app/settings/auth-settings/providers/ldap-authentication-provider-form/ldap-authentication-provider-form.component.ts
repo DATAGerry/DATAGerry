@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -19,6 +19,7 @@
 import { Component, Input } from '@angular/core';
 import { AuthProvider } from '../../../../auth/models/providers';
 import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import { Group } from '../../../../management/models/group';
 
 @Component({
   selector: 'cmdb-ldap-authentication-provider-form',
@@ -30,6 +31,8 @@ export class LdapAuthenticationProviderFormComponent {
   public form: FormGroup;
   public parent: FormArray;
   public provider: AuthProvider;
+
+  @Input() public groups: Array<Group> = [];
 
   @Input('parent')
   public set Parent(form: FormArray) {
@@ -63,6 +66,11 @@ export class LdapAuthenticationProviderFormComponent {
       search: new FormGroup({
         basedn: new FormControl(),
         searchfilter: new FormControl()
+      }),
+      group_mapping: new FormGroup({
+        active: new FormControl(false),
+        searchfiltergroup: new FormControl(),
+        mapping: new FormArray([])
       })
     });
   }
@@ -77,6 +85,14 @@ export class LdapAuthenticationProviderFormComponent {
 
   public get searchControl(): FormGroup {
     return this.form.get('search') as FormGroup;
+  }
+
+  public get groupMappingControl(): FormGroup {
+    return this.form.get('group_mapping') as FormGroup;
+  }
+
+  public get groupMappingMappingControl(): FormArray {
+    return this.groupMappingControl.get('mapping') as FormArray;
   }
 
 }
