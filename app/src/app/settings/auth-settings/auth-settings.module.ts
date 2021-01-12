@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -27,6 +27,7 @@ import { ActiveProvidersPipe } from './active-providers.pipe';
 import { LdapAuthenticationProviderFormComponent } from './providers/ldap-authentication-provider-form/ldap-authentication-provider-form.component';
 import { LocalAuthenticationProviderFormComponent } from './providers/local-authentication-provider-form/local-authentication-provider-form.component';
 import { LdapProviderFormGroupMappingComponent } from './providers/ldap-authentication-provider-form/ldap-provider-form-group-mapping/ldap-provider-form-group-mapping.component';
+import { DndModule } from 'ngx-drag-drop';
 
 @NgModule({
   declarations: [AuthSettingsComponent, ActiveProvidersPipe, LdapAuthenticationProviderFormComponent, LocalAuthenticationProviderFormComponent, LdapProviderFormGroupMappingComponent],
@@ -34,7 +35,8 @@ import { LdapProviderFormGroupMappingComponent } from './providers/ldap-authenti
     CommonModule,
     AuthSettingsRoutingModule,
     ReactiveFormsModule,
-    RenderModule
+    RenderModule,
+    DndModule
   ]
 })
 export class AuthSettingsModule {

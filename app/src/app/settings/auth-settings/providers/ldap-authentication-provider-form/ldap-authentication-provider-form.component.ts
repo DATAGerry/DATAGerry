@@ -28,10 +28,24 @@ import { Group } from '../../../../management/models/group';
 })
 export class LdapAuthenticationProviderFormComponent {
 
+  /**
+   * The configuration form for the ldap auth provider.
+   */
   public form: FormGroup;
+
+  /**
+   * The parent holder of the auth settings provider array.
+   */
   public parent: FormArray;
+
+  /**
+   * Auth provider type.
+   */
   public provider: AuthProvider;
 
+  /**
+   * List of a possible mapping groups.
+   */
   @Input() public groups: Array<Group> = [];
 
   @Input('parent')
@@ -67,7 +81,7 @@ export class LdapAuthenticationProviderFormComponent {
         basedn: new FormControl(),
         searchfilter: new FormControl()
       }),
-      group_mapping: new FormGroup({
+      groups: new FormGroup({
         active: new FormControl(false),
         searchfiltergroup: new FormControl(),
         mapping: new FormArray([])
@@ -75,24 +89,39 @@ export class LdapAuthenticationProviderFormComponent {
     });
   }
 
+  /**
+   * Ldap server config control.
+   */
   public get serverConfigControl(): FormGroup {
     return this.form.get('server_config') as FormGroup;
   }
 
+  /**
+   * Ldap connection config control.
+   */
   public get connectionConfigControl(): FormGroup {
     return this.form.get('connection_config') as FormGroup;
   }
 
+  /**
+   * Ldap user search control.
+   */
   public get searchControl(): FormGroup {
     return this.form.get('search') as FormGroup;
   }
 
-  public get groupMappingControl(): FormGroup {
-    return this.form.get('group_mapping') as FormGroup;
+  /**
+   * Ldap groups control.
+   */
+  public get groupsControl(): FormGroup {
+    return this.form.get('groups') as FormGroup;
   }
 
-  public get groupMappingMappingControl(): FormArray {
-    return this.groupMappingControl.get('mapping') as FormArray;
+  /**
+   * Nested ldap groups mapping form array.
+   */
+  public get groupMappingControl(): FormArray {
+    return this.groupsControl.get('mapping') as FormArray;
   }
 
 }

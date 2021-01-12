@@ -132,7 +132,7 @@
         </div>
       </div>
     </div>
-    <div id="ldap-group-mapping-panel" [formGroup]="groupMappingControl" class="tab-pane fade" role="tabpanel">
+    <div id="ldap-group-mapping-panel" [formGroup]="groupsControl" class="tab-pane fade" role="tabpanel">
       <div class="form-group row mb-3">
         <div class="col-sm-3">Active:</div>
         <div class="col-sm-9">
@@ -149,13 +149,13 @@
         <div class="col-sm-9">
           <div class="input-group">
             <input class="form-control" type="text" id="ldap-provider-group-mapping-search-filter-input"
-                   formControlName="searchfiltergroup">
+                   formControlName="searchfiltergroup" placeholder="(memberUid=%username%)">
           </div>
           <small class="description form-text text-muted">%username% will be inserted from the login data</small>
         </div>
       </div>
       <cmdb-ldap-provider-form-group-mapping
-        [groups]="groups" [mappingFormArray]="groupMappingMappingControl"></cmdb-ldap-provider-form-group-mapping>
+        [groups]="groups" [mappingForm]="groupMappingControl"></cmdb-ldap-provider-form-group-mapping>
     </div>
   </div>
 </div>
