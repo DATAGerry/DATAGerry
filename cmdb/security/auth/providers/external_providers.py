@@ -58,14 +58,19 @@ class LdapAuthenticationProviderConfig(AuthProviderConfig):
         }
     }
 
-    def __init__(self, active: bool, default_group: int, server_config: dict, connection_config: dict, search: dict,
-                 group_mapping: dict = None):
-        self.default_group = default_group
-        self.server_config: dict = server_config
-        self.connection_config: dict = connection_config
-        self.search: dict = search
-        self.group_mapping: dict = group_mapping or \
-                                   LdapAuthenticationProviderConfig.DEFAULT_CONFIG_VALUES.get('group_mapping')
+    def __init__(self, active: bool = None, default_group: int = None, server_config: dict = None,
+                 connection_config: dict = None, search: dict = None, group_mapping: dict = None, *args, **kwargs):
+        active = active or False
+        self.default_group = default_group or LdapAuthenticationProviderConfig. \
+            DEFAULT_CONFIG_VALUES.get('default_group')
+        self.server_config: dict = server_config or LdapAuthenticationProviderConfig. \
+            DEFAULT_CONFIG_VALUES.get('server_config')
+        self.connection_config: dict = connection_config or LdapAuthenticationProviderConfig. \
+            DEFAULT_CONFIG_VALUES.get('connection_config')
+        self.search: dict = search or LdapAuthenticationProviderConfig. \
+            DEFAULT_CONFIG_VALUES.get('search')
+        self.group_mapping: dict = group_mapping or LdapAuthenticationProviderConfig. \
+            DEFAULT_CONFIG_VALUES.get('group_mapping')
         super(LdapAuthenticationProviderConfig, self).__init__(active)
 
 

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,11 +12,10 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Basic Authentication Module"""
 import logging
-from collections import defaultdict
-from typing import List, ClassVar, Union
+from typing import List, ClassVar
 
 from cmdb.manager.errors import ManagerGetError
 from cmdb.search import Query
@@ -66,13 +65,23 @@ class AuthModule:
     @staticmethod
     def __init_settings(auth_settings_values: dict) -> AuthSettingsDAO:
         """Merge default values with database entries"""
-        for provider in AuthModule.get_installed_providers():
-            LOGGER.debug(f'[AuthModule][__init_settings] Installed provider: {provider}')
-            provider_config_list: List[dict] = auth_settings_values.get('providers')
-            LOGGER.debug(f'[AuthModule][__init_settings] Database provider list: {provider_config_list}')
-            if not any(p["class_name"] == provider.get_name() for p in provider_config_list):
-                LOGGER.warning(f'[AuthModule][__init_settings] No config for: {provider.get_name()}')
+        provider_config_list: List[dict] = auth_settings_values.get('providers')
+        installed_providers = AuthModule.get_installed_providers()
+        for provider in installed_providers:
+            if not any(p['class_name'] == provider.get_name() for p in provider_config_list):
                 auth_settings_values['providers'].append(provider.PROVIDER_CONFIG_CLASS.DEFAULT_CONFIG_VALUES)
+            else:
+                provider_index = next(
+                    (i for i, item in enumerate(provider_config_list) if item['class_name'] == provider.get_name()), -1)
+                try:
+                    auth_settings_values['providers'][provider_index]['config'] = provider.PROVIDER_CONFIG_CLASS(
+                        **auth_settings_values['providers'][provider_index]['config']).__dict__
+                except Exception as err:
+                    LOGGER.error(
+                        f'Error while parsing auth provider settings for: {provider.get_name()}: {err} \n Fallback to default values!')
+                    auth_settings_values['providers'][provider_index][
+                        'config'] = provider.PROVIDER_CONFIG_CLASS.DEFAULT_CONFIG_VALUES
+
         return AuthSettingsDAO(**auth_settings_values)
 
     @classmethod

@@ -31,7 +31,7 @@ LOGGER = logging.getLogger(__name__)
 
 class LocalAuthenticationProviderConfig(AuthProviderConfig):
 
-    def __init__(self, active: bool, **kwargs):
+    def __init__(self, active: bool = None, **kwargs):
         super(LocalAuthenticationProviderConfig, self).__init__(active, **kwargs)
 
 
