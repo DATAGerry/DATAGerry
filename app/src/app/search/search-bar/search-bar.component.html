@@ -34,16 +34,7 @@
           {{possibleRegexResults.inactive}} inactive</i>)</i>
       </span>
     </li>
-    <li #tabID tabindex="4" *ngIf="isExistingPublicID" (keyup.arrowUp)="arrowUp(tabID.tabIndex)" (keyup.arrowDown)="arrowDown(tabID.tabIndex)"
-        (keyup.enter)="addTag('publicID')" (click)="addTag('publicID')">
-      <span>
-        <button class="btn btn-link" type="button">
-          <i class="fas fa-angle-double-right"></i>
-        </button>
-        <i>Public ID</i>: {{inputControl.value}}
-      </span>
-    </li>
-    <li #tabType tabindex="5" *ngIf="possibleTypes && possibleTypes.length > 0"
+    <li #tabType tabindex="4" *ngIf="possibleTypes && possibleTypes.length > 0"
         (keyup.arrowUp)="arrowUp(tabType.tabIndex)"
         (keyup.arrowDown)="arrowDown(tabType.tabIndex)"
         (keyup.enter)="addTag('type', possibleTypes)" (keyup.arrowRight)="openDropdown(tabType.tabIndex)">

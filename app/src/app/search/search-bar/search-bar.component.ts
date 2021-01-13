@@ -67,7 +67,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   // Dropdown
   public possibleTextResults: NumberSearchResults = new NumberSearchResults();
   public possibleRegexResults: NumberSearchResults = new NumberSearchResults();
-  public isExistingPublicID: boolean = false;
   public possibleTypes: CmdbType[] = [];
   public possibleCategories: CmdbCategory[] = [];
 
@@ -97,15 +96,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
           .subscribe((counter: NumberSearchResults) => {
             this.possibleTextResults = counter;
           });
-        if (!isNaN(+changes) && Number.isInteger(+changes)) {
-          this.objectService.getObject(+changes).pipe(takeUntil(this.subscriber))
-            .subscribe(() => {
-                this.isExistingPublicID = true;
-              },
-              () => {
-                this.isExistingPublicID = false;
-              });
-        }
         this.typeService.getTypesByNameOrLabel(changes).pipe(takeUntil(this.subscriber))
           .subscribe((typeList: CmdbType[]) => {
             this.possibleTypes = typeList;
@@ -148,6 +138,9 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     switch (searchForm) {
       case 'text':
         tag.searchText = searchTerm.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
+        if (!isNaN(parseInt(searchTerm, 10))) {
+          tag.settings =  { publicID: searchTerm }  as SearchBarTagSettings;
+        }
         break;
       case 'regex':
         tag.searchText = ValidatorService.validateRegex(searchTerm).trim();
@@ -167,9 +160,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         }
         tag.searchLabel = params.length === 1 ? params[0].label : searchTerm;
         tag.settings = { categories: categoryIDs } as SearchBarTagSettings;
-        break;
-      case 'publicID':
-        tag.settings = { publicID: searchTerm } as SearchBarTagSettings;
         break;
       default:
         break;
