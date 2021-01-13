@@ -91,7 +91,7 @@ export class LdapProviderFormGroupMappingComponent implements OnInit {
     if (this.form.valid) {
       const formGroup = new FormGroup({
         group_dn: new FormControl(this.groupDNValue),
-        group_id: new FormControl(this.groupIDValue),
+        group_id: new FormControl(this.groupIDValue)
       });
       this.mappingForm.push(formGroup);
       this.form.reset();

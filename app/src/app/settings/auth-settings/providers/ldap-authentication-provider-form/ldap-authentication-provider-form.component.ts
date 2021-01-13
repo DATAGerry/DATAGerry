@@ -60,6 +60,16 @@ export class LdapAuthenticationProviderFormComponent {
   @Input('provider')
   public set Provider(provider: AuthProvider) {
     this.provider = provider;
+    if (provider) {
+      provider.config.groups.mapping.forEach((value, index) => {
+        const formGroup = new FormGroup({
+          group_dn: new FormControl(value.group_dn),
+          group_id: new FormControl(value.group_id)
+        });
+        this.groupMappingControl.insert(index, formGroup);
+      });
+
+    }
     this.form.patchValue(provider.config);
   }
 

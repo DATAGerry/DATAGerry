@@ -14,10 +14,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Basic Authentication Module"""
+from __future__ import annotations
+
 import logging
 from typing import List, ClassVar
 
-from cmdb.manager.errors import ManagerGetError
+from cmdb.manager.errors import ManagerGetError, ManagerInsertError
 from cmdb.search import Query
 from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, AuthenticationProviderNotActivated, \
     AuthenticationError
@@ -103,7 +105,7 @@ class AuthModule:
             return False
 
     @staticmethod
-    def get_provider_class(provider_name: str) -> AuthenticationProvider:
+    def get_provider_class(provider_name: str) -> 'AuthenticationProvider':
         """Get a specific provider class by class name"""
         return next(_ for _ in AuthModule.__installed_providers if _.__qualname__ == provider_name)
 
@@ -120,12 +122,22 @@ class AuthModule:
             return False
 
     @classmethod
-    def get_installed_providers(cls) -> List[AuthenticationProvider]:
+    def get_installed_providers(cls) -> List['AuthenticationProvider']:
+        """Get all installed providers as static list"""
+        return cls.__installed_providers
+
+    @classmethod
+    def get_installed_internals(cls) -> List['AuthenticationProvider']:
+        """Get all installed providers as static list"""
+        return cls.__installed_providers
+
+    @classmethod
+    def get_installed_external(cls) -> List['AuthenticationProvider']:
         """Get all installed providers as static list"""
         return cls.__installed_providers
 
     @property
-    def providers(self) -> List[AuthenticationProvider]:
+    def providers(self) -> List['AuthenticationProvider']:
         """Get all installed providers as property list"""
         return AuthModule.__installed_providers
 
@@ -166,12 +178,11 @@ class AuthModule:
             UserModel: instance if user was found and password was correct
         """
         user_name = user_name.lower()
-        user_instance = None
 
         try:
-            founded_user = self.__user_manager.get_by(Query({'user_name': user_name}))
-            provider_class_name = founded_user.authenticator
-            LOGGER.debug(f'[AUTH] Founded user: {founded_user} with provider: {provider_class_name}')
+            user = self.__user_manager.get_by(Query({'user_name': user_name}))
+            provider_class_name = user.authenticator
+
             if not self.provider_exists(provider_class_name):
                 raise AuthenticationProviderNotExistsError(provider_class_name)
 
@@ -189,8 +200,7 @@ class AuthModule:
 
             return provider_instance.authenticate(user_name, password)
 
-        except ManagerGetError as umge:
-
+        except ManagerGetError:
             # get installed providers
             provider_list = self.providers
 
@@ -204,14 +214,14 @@ class AuthModule:
                     continue
                 if provider.EXTERNAL_PROVIDER and not self.settings.enable_external:
                     continue
-
                 provider_instance = provider(config=provider_config_instance, user_manager=self.__user_manager,
                                              group_manager=self.__group_manager,
                                              security_manager=self.__security_manager)
                 try:
-                    user_instance = provider_instance.authenticate(user_name, password)
-                except AuthenticationError:
+                    return provider_instance.authenticate(user_name, password)
+                except AuthenticationError as err:
                     continue
-                finally:
-                    return user_instance
-                raise AuthenticationError('Unknown user could not login.')
+                except (ManagerGetError, ManagerInsertError):
+                    LOGGER.error(f'User found by provider but could not be inserted or found {err}')
+                    continue
+            raise AuthenticationError('Unknown user could not login.')

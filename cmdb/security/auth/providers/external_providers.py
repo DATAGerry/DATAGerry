@@ -15,15 +15,17 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+import re
 
 from datetime import datetime
+from typing import List
 
 from ldap3 import Server, Connection
 from ldap3.core.exceptions import LDAPExceptionError
 
-from cmdb.manager.errors import ManagerGetError, ManagerInsertError
+from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError
 from cmdb.search import Query
-from cmdb.security.auth.auth_errors import AuthenticationError
+from cmdb.security.auth.auth_errors import AuthenticationError, GroupMappingError
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
 from cmdb.security.security import SecurityManager
@@ -51,7 +53,7 @@ class LdapAuthenticationProviderConfig(AuthProviderConfig):
             'basedn': 'dc=example,dc=com',
             'searchfilter': '(uid=%username%)'
         },
-        'group_mapping': {
+        'groups': {
             'active': False,
             'searchfiltergroup': '(memberUid=%username%)',
             'mapping': []
@@ -59,19 +61,27 @@ class LdapAuthenticationProviderConfig(AuthProviderConfig):
     }
 
     def __init__(self, active: bool = None, default_group: int = None, server_config: dict = None,
-                 connection_config: dict = None, search: dict = None, group_mapping: dict = None, *args, **kwargs):
+                 connection_config: dict = None, search: dict = None, groups: dict = None, *args, **kwargs):
         active = active or False
-        self.default_group = default_group or LdapAuthenticationProviderConfig. \
-            DEFAULT_CONFIG_VALUES.get('default_group')
+        self.default_group = int(default_group or LdapAuthenticationProviderConfig. \
+                                 DEFAULT_CONFIG_VALUES.get('default_group'))
         self.server_config: dict = server_config or LdapAuthenticationProviderConfig. \
             DEFAULT_CONFIG_VALUES.get('server_config')
         self.connection_config: dict = connection_config or LdapAuthenticationProviderConfig. \
             DEFAULT_CONFIG_VALUES.get('connection_config')
         self.search: dict = search or LdapAuthenticationProviderConfig. \
             DEFAULT_CONFIG_VALUES.get('search')
-        self.group_mapping: dict = group_mapping or LdapAuthenticationProviderConfig. \
-            DEFAULT_CONFIG_VALUES.get('group_mapping')
+        self.groups: dict = groups or LdapAuthenticationProviderConfig. \
+            DEFAULT_CONFIG_VALUES.get('groups')
         super(LdapAuthenticationProviderConfig, self).__init__(active)
+
+    def mapping(self, group_dn: str) -> int:
+        """Get a group mapping by the group_dn"""
+        try:
+            return next(int(group['group_id']) for group in self.groups['mapping'] if
+                        group['group_dn'].lower() == group_dn.lower())
+        except StopIteration as err:
+            raise GroupMappingError(str(err))
 
 
 class LdapAuthenticationProvider(AuthenticationProvider):
@@ -95,6 +105,21 @@ class LdapAuthenticationProvider(AuthenticationProvider):
     def connect(self) -> bool:
         return self.__ldap_connection.bind()
 
+    def __map_group(self, possible_user_groups: List[str]) -> int:
+        """Get the user group for this user by the ldap user list"""
+        user_group = self.config.default_group
+        if not self.config.groups['mapping'] or len(self.config.groups['mapping']) == 0 or len(
+                possible_user_groups) == 0:
+            return user_group
+
+        for possible_group in possible_user_groups:
+            try:
+                user_group = self.config.mapping(possible_group)
+                break
+            except GroupMappingError:
+                continue
+        return user_group
+
     def authenticate(self, user_name: str, password: str, **kwargs) -> UserModel:
         try:
             ldap_connection_status = self.connect()
@@ -110,24 +135,36 @@ class LdapAuthenticationProvider(AuthenticationProvider):
         if not user_search_result or len(user_search_result_entries) == 0:
             raise AuthenticationError(LdapAuthenticationProvider.get_name(), 'No matching entry')
 
-        '''group_search_filter = self.config.group_mapping['searchfiltergroup'].replace("%username%", user_name)
-        group_search_result = self.__ldap_connection.search(self.config.search['basedn'], group_search_filter)
-        group_search_result_entries: list = [entry.entry_to_json() for entry in self.__ldap_connection.entries]'''
+        user_group_id = self.config.default_group
+        if self.config.groups['active']:
+            group_search_filter = self.config.groups['searchfiltergroup'].replace("%username%", user_name)
+            group_search_result = self.__ldap_connection.search(self.config.search['basedn'], group_search_filter)
+            group_search_result_entries = self.__ldap_connection.entries
+            if not group_search_result or len(group_search_result_entries) == 0:
+                user_group_id = self.config.default_group
+            else:
+                group_dns: list = [entry.entry_dn for entry in
+                                   self.__ldap_connection.entries]
+                possible_user_groups = [re.search('.*?=(.*?),.*', group_name).group(1) for group_name in group_dns]
+                user_group_id = self.__map_group(possible_user_groups)
 
         for entry in user_search_result_entries:
-            LOGGER.debug(f'[LdapAuthenticationProvider] Entry: {entry}')
             entry_dn = entry.entry_dn
             try:
-                entry_connection_result = Connection(self.__ldap_server, entry_dn, password,
-                                                     auto_bind=True)
-                LOGGER.debug(f'[LdapAuthenticationProvider] UserModel connection result: {entry_connection_result}')
+                Connection(self.__ldap_server, entry_dn, password,
+                           auto_bind=True)
             except Exception as e:
-                LOGGER.error(f'[LdapAuthenticationProvider] UserModel auth result: {e}')
                 raise AuthenticationError(LdapAuthenticationProvider.get_name(), e)
 
-        # Check if user exists
         try:
             user_instance: UserModel = self.user_manager.get_by(Query({'user_name': user_name}))
+            if user_instance.group_id != user_group_id:
+                user_instance.group_id = user_group_id
+                try:
+                    self.user_manager.update(user_instance.public_id, user_instance)
+                    user_instance: UserModel = self.user_manager.get_by(Query({'user_name': user_name}))
+                except ManagerUpdateError as err:
+                    raise AuthenticationError(LdapAuthenticationProvider.get_name(), err)
         except ManagerGetError as umge:
             LOGGER.warning(f'[LdapAuthenticationProvider] UserModel exists on LDAP but not in database: {umge}')
             LOGGER.debug(f'[LdapAuthenticationProvider] Try creating user: {user_name}')
@@ -135,7 +172,7 @@ class LdapAuthenticationProvider(AuthenticationProvider):
                 new_user_data = dict()
                 new_user_data['user_name'] = user_name
                 new_user_data['active'] = True
-                new_user_data['group_id'] = self.config.default_group
+                new_user_data['group_id'] = int(user_group_id)
                 new_user_data['registration_time'] = datetime.now()
                 new_user_data['authenticator'] = LdapAuthenticationProvider.get_name()
 

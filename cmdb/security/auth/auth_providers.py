@@ -30,7 +30,7 @@ class AuthenticationProvider:
     """Provider super class"""
     PASSWORD_ABLE: bool = True
     EXTERNAL_PROVIDER: bool = False
-    PROVIDER_CONFIG_CLASS: ClassVar[AuthProviderConfig] = AuthProviderConfig
+    PROVIDER_CONFIG_CLASS: 'AuthProviderConfig' = AuthProviderConfig
 
     def __init__(self, config: AuthProviderConfig = None, user_manager: UserManager = None,
                  group_manager: GroupManager = None, security_manager: SecurityManager = None):
