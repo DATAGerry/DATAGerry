@@ -6,6 +6,15 @@
 
 <hr/>
 <div id="search-results" class="row">
+  <div class="col-md-12" *ngIf="publicIdResult">
+    <div *ngIf="publicIdResult" class="mb-2">
+      <h2>Public ID</h2>
+      <cmdb-search-result [searchResult]="publicIdResult">
+        <hr/>
+      </cmdb-search-result>
+      <h2>Search Result</h2>
+    </div>
+  </div>
   <div class="col-md-12" *ngIf="searchResultList">
     <div *ngIf="searchResultList.total_results == 0" class="alert alert-warning" role="alert">
       Unfortunately we didn't found any objects for your request.

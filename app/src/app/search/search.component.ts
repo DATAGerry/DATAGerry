@@ -81,6 +81,7 @@ export class SearchComponent implements OnInit, OnDestroy {
    * List of search results.
    */
   public searchResultList: SearchResultList;
+  public publicIdResult = undefined;
   public filterResultList: any[];
 
   /**
@@ -133,6 +134,7 @@ export class SearchComponent implements OnInit, OnDestroy {
    * Triggers the actual search api call.
    */
   public onSearch(): void {
+    this.publicIdResult = undefined;
     this.spinner.show('app', 'Searching...');
     let params = new HttpParams();
     params = params.set('limit', this.limit.toString());
@@ -140,16 +142,31 @@ export class SearchComponent implements OnInit, OnDestroy {
     if (this.resolve.value) {
       params = params.set('resolve', this.resolve.value.toString());
     }
-    this.searchService.postSearch(this.queryParameters, params).subscribe((results: SearchResultList) => {
-      this.searchResultList = results;
-      this.filterResultList = this.initFilter ? results.groups : this.filterResultList;
-      if (this.initSearch) {
-        this.maxNumberOfSites = Array.from({ length: (this.searchResultList.total_results) }, (v, k) => k + 1);
-        this.initSearch = false;
-        this.initFilter = false;
-      }
-      this.spinner.hide('app');
+    this.searchService.postSearch(this.queryParameters, params).pipe(takeUntil(this.subscriber)).subscribe((results: SearchResultList) => {
+        this.searchResultList = results;
+        this.filterResultList = this.initFilter && results !== null ? results.groups : this.filterResultList;
+        if (this.initSearch) {
+          this.maxNumberOfSites = Array.from({length: (this.searchResultList.total_results)}, (v, k) => k + 1);
+          this.initSearch = false;
+          this.initFilter = false;
+        }
     });
+    let localParameters = JSON.parse(this.queryParameters);
+    if (localParameters.length === 1) {
+      localParameters[0].searchForm = 'publicID';
+      localParameters = JSON.stringify(localParameters);
+      this.searchService.postSearch(localParameters, params).pipe(takeUntil(this.subscriber)).subscribe((results: SearchResultList) => {
+        if (results !== null && results.results.length > 0) {
+          this.publicIdResult = results.results[0];
+        }
+        this.spinner.hide('app');
+      }, () => {},
+        () => {
+          this.spinner.hide('app');
+        });
+    } else {
+      this.spinner.hide('app');
+    }
   }
 
   /**
