@@ -206,7 +206,7 @@ Objects.
 Access Control
 ==============
 Datagerry uses multiple access controls to restrict the access to data and functions.
-In addition to the :ref:`system-access-rights`. implemented by default at the user level,
+In addition to the :ref:`system-access-rights`. implemented by default at the user management level,
 there is also the concept of the access control list. These are currently only implemented for the object level,
 but will be extended to various sections of the core framework.
 They should provide more precise setting options for accesses within already authorized levels/functions.
