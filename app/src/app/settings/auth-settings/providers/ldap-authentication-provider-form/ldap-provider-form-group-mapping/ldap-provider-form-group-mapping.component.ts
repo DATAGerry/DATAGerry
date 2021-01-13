@@ -90,8 +90,8 @@ export class LdapProviderFormGroupMappingComponent implements OnInit {
   public addMapping(): void {
     if (this.form.valid) {
       const formGroup = new FormGroup({
-        groupDN: new FormControl(this.groupDNValue),
-        groupID: new FormControl(this.groupIDValue),
+        group_dn: new FormControl(this.groupDNValue),
+        group_id: new FormControl(this.groupIDValue),
       });
       this.mappingForm.push(formGroup);
       this.form.reset();
@@ -121,7 +121,11 @@ export class LdapProviderFormGroupMappingComponent implements OnInit {
    */
   private dnAlreadyExistsValidator(mapForm: FormArray): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
-      const exists = mapForm.controls.map(c => c.get('groupDN').value).includes(control.value);
+      let controlValue = control.value;
+      if (controlValue) {
+        controlValue = controlValue.toLowerCase();
+      }
+      const exists = mapForm.controls.map(c => c.get('group_dn').value.toLowerCase()).includes(controlValue);
       return exists ? { dnAlreadyExists: { value: control.value } } : null;
     };
   }

@@ -64,10 +64,10 @@
       dndEffectAllowed="move">
     <div class="row">
       <div class="col-5">
-        {{group.get('groupDN').value}}
+        {{group.get('group_dn').value}}
       </div>
       <div class="col-6">
-        {{getGroupFromID(group.get('groupID').value) ? getGroupFromID(group.get('groupID').value).label : 'Unknown Group'}}
+        {{getGroupFromID(group.get('group_id').value) ? getGroupFromID(group.get('group_id').value).label : 'Unknown Group'}}
       </div>
       <div class="col-1 d-flex justify-content-center action-buttons">
         <i class="fas fa-arrows-alt-v move mr-3"></i>
