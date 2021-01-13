@@ -11,7 +11,7 @@ Admin Guide
     setup
     configuration
     gettingstarted
-    objects
+    framework
     exportd
     docapi
     user-management
