@@ -35,6 +35,7 @@ DATAGERRY can be extended easily - also by experienced users.
 %install
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_unitdir}
+mkdir -p %{buildroot}%{_tmpfilesdir}
 mkdir -p %{buildroot}%{_sysconfdir}/datagerry
 install %{_sourcedir}/datagerry %{buildroot}%{_bindir}/datagerry
 install %{_sourcedir}/datagerry.service %{buildroot}%{_unitdir}/datagerry.service
