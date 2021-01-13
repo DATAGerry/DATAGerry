@@ -81,7 +81,7 @@ export class SearchComponent implements OnInit, OnDestroy {
    * List of search results.
    */
   public searchResultList: SearchResultList;
-  public publicIdResult = undefined;
+  public publicIdResult;
   public filterResultList: any[];
 
   /**
@@ -159,11 +159,7 @@ export class SearchComponent implements OnInit, OnDestroy {
         if (results !== null && results.results.length > 0) {
           this.publicIdResult = results.results[0];
         }
-        this.spinner.hide('app');
-      }, () => {},
-        () => {
-          this.spinner.hide('app');
-        });
+      }).add(() => this.spinner.hide('app'));
     } else {
       this.spinner.hide('app');
     }

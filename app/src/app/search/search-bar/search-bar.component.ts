@@ -138,7 +138,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     switch (searchForm) {
       case 'text':
         tag.searchText = searchTerm.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
-        if (!isNaN(Number(searchTerm))) {
+        if (!isNaN(parseInt(searchTerm, 10))) {
           tag.settings =  { publicID: searchTerm }  as SearchBarTagSettings;
         }
         break;
@@ -161,9 +161,6 @@ export class SearchBarComponent implements OnInit, OnDestroy {
         tag.searchLabel = params.length === 1 ? params[0].label : searchTerm;
         tag.settings = { categories: categoryIDs } as SearchBarTagSettings;
         break;
-      // case 'publicID':
-      //   tag.settings = { publicID: searchTerm } as SearchBarTagSettings;
-      //   break;
       default:
         break;
     }
