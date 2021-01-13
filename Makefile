@@ -112,6 +112,7 @@ rpm: bin
 	cp ${DIR_BIN_BUILD}/datagerry ${DIR_RPM_BUILD}/SOURCES
 	cp contrib/systemd/datagerry.service ${DIR_RPM_BUILD}/SOURCES
 	cp etc/cmdb.conf ${DIR_RPM_BUILD}/SOURCES
+	cp contrib/tmpfiles.d/datagerry.conf ${DIR_RPM_BUILD}/SOURCES
 	cp contrib/rpm/datagerry.spec ${DIR_RPM_BUILD}
 	sed -i 's/@@DG_BUILDVAR_VERSION@@/$(subst -,_,${BUILDVAR_VERSION})/g' ${DIR_RPM_BUILD}/datagerry.spec
 	${BIN_RPMBUILD} --define '_topdir ${DIR_RPM_BUILD}' -bb ${DIR_RPM_BUILD}/datagerry.spec
@@ -125,6 +126,7 @@ targz: bin
 	mkdir -p ${DIR_TARGZ_BUILD}/src/datagerry/files
 	cp ${DIR_BIN_BUILD}/datagerry ${DIR_TARGZ_BUILD}/src/datagerry/files
 	cp contrib/systemd/datagerry.service ${DIR_TARGZ_BUILD}/src/datagerry/files
+	cp contrib/tmpfiles.d/datagerry.conf ${DIR_TARGZ_BUILD}/src/datagerry/files
 	cp etc/cmdb.conf ${DIR_TARGZ_BUILD}/src/datagerry/files
 	cp LICENSE ${DIR_TARGZ_BUILD}/src/datagerry
 	cp contrib/setup/setup.sh ${DIR_TARGZ_BUILD}/src/datagerry

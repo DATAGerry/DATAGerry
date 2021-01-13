@@ -8,6 +8,7 @@ License:	AGPLv3
 URL:		https://www.datagerry.org
 Vendor:     NETHINKS GmbH
 Source0:	https://github.com/NETHINKS/DATAGERRY
+BuildRequires: systemd
 
 %description
 A CMDB is a database which includes all informations about objects 
@@ -37,10 +38,12 @@ mkdir -p %{buildroot}%{_unitdir}
 mkdir -p %{buildroot}%{_sysconfdir}/datagerry
 install %{_sourcedir}/datagerry %{buildroot}%{_bindir}/datagerry
 install %{_sourcedir}/datagerry.service %{buildroot}%{_unitdir}/datagerry.service
+install %{_sourcedir}/datagerry.conf %{buildroot}%{_tmpfilesdir}/datagerry.conf
 install -D %{_sourcedir}/cmdb.conf %{buildroot}%{_sysconfdir}/datagerry/cmdb.conf
 
 
 %files
 %{_bindir}/datagerry
 %{_unitdir}/datagerry.service
+%{_tmpfilesdir}/datagerry.conf
 %{_sysconfdir}/datagerry/cmdb.conf
