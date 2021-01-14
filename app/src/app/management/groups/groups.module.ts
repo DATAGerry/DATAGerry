@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -37,6 +37,7 @@ import { GroupTableActionsComponent } from './components/group-table-actions/gro
 import { GroupUsersModalComponent } from './modals/group-users-modal/group-users-modal.component';
 import { UsersModule } from '../users/users.module';
 import { GroupTableListComponent } from './components/group-table-list/group-table-list.component';
+import { GroupAclComponent } from './group-acl/group-acl.component';
 
 @NgModule({
   entryComponents: [
@@ -52,7 +53,8 @@ import { GroupTableListComponent } from './components/group-table-list/group-tab
     GroupTableUserCellComponent,
     GroupTableActionsComponent,
     GroupUsersModalComponent,
-    GroupTableListComponent
+    GroupTableListComponent,
+    GroupAclComponent
   ],
   exports: [
     GroupTableListComponent

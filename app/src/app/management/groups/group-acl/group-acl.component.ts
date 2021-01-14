@@ -16,15 +16,18 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { AclObjectsInformationTableComponent } from './components/acl-objects-information-table/acl-objects-information-table.component';
+import { Component, OnInit } from '@angular/core';
 
-@NgModule({
-  declarations: [AclObjectsInformationTableComponent],
-  imports: [
-    CommonModule
-  ]
+@Component({
+  selector: 'cmdb-group-acl',
+  templateUrl: './group-acl.component.html',
+  styleUrls: ['./group-acl.component.scss']
 })
-export class AclModule {
+export class GroupAclComponent implements OnInit {
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
 }

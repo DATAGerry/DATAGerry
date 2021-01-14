@@ -141,7 +141,9 @@
             <a class="dropdown-item" [routerLink]="['/management/rights']">
               <i class="fas fa-low-vision"></i> Rights
             </a>
-
+            <a class="dropdown-item" *permissionLink="'base.framework.type.view'" [routerLink]="['/management/acl']">
+              <i class="fas fa-list"></i> ACL
+            </a>
             <div *permissionLink="'base.framework.object.edit'" class="dropdown-header">File Manager</div>
             <a *permissionLink="'base.framework.object.edit'" class="dropdown-item"
                [routerLink]="['/filemanager/explorer']">
