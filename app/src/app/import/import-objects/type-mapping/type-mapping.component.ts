@@ -41,6 +41,7 @@ import { JsonMappingComponent } from './json-mapping/json-mapping.component';
 import { CsvMappingComponent } from './csv-mapping/csv-mapping.component';
 import { TypeMappingBaseComponent } from './type-mapping-base.component';
 import { AccessControlPermission } from '../../../acl/acl.types';
+import {takeUntil} from "rxjs/operators";
 
 export const mappingComponents: { [type: string]: any } = {
   json: JsonMappingComponent,
@@ -104,6 +105,9 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
       [AccessControlPermission.READ, AccessControlPermission.CREATE, AccessControlPermission.UPDATE])
       .subscribe((typeList: CmdbType[]) => {
       this.typeList = typeList;
+      if (typeList.length === 1) {
+        this.configForm.get('typeID').patchValue(this.typeList[0].public_id);
+      }
     });
     this.valueChangeSubscription = this.configForm.get('typeID').valueChanges.subscribe((typeID: number) => {
       this.typeService.getType(+typeID).subscribe((typeInstance: CmdbType) => {
