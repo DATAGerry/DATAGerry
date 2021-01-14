@@ -24,6 +24,7 @@ import { LayoutModule } from '../layout/layout.module';
 import { AclObjectsInformationActivationColumnComponent } from './components/acl-objects-information-activation-column/acl-objects-information-activation-column.component';
 import { AclObjectsInformationPermissionsColumnComponent } from './components/acl-objects-information-permissions-column/acl-objects-information-permissions-column.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [AclObjectsInformationTableComponent, AclObjectsInformationActivationColumnComponent, AclObjectsInformationPermissionsColumnComponent],
@@ -34,7 +35,8 @@ import { ReactiveFormsModule } from '@angular/forms';
     CommonModule,
     TableModule,
     LayoutModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    RouterModule
   ]
 })
 export class AclModule {

@@ -19,6 +19,16 @@
                                                    [acl]="data"></cmdb-acl-objects-information-permissions-column>
 </ng-template>
 
+<ng-template #aclTypeEditTemplate let-item="item">
+  <div class="d-flex justify-content-center">
+    <a [routerLink]="['/', 'framework', 'type', 'edit', item.public_id]" [queryParams]="{ stepIndex: 3}"
+       title="Edit type">
+      <i class="far fa-edit"></i>
+    </a>
+  </div>
+
+</ng-template>
+
 <!-- Custom table buttons -->
 <ng-template #activatedButtonTemplate>
   <div [formGroup]="activatedForm" class="acl-group-active-button-group d-flex align-items-center border-right pr-2">

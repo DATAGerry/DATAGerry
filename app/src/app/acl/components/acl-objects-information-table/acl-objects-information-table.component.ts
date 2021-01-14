@@ -26,6 +26,7 @@ import { Column, Sort, SortDirection } from '../../../layout/table/table.types';
 import { CollectionParameters } from '../../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
 import { FormControl, FormGroup } from '@angular/forms';
+import { PermissionService } from '../../../auth/services/permission.service';
 
 @Component({
   selector: 'cmdb-acl-objects-information-table',
@@ -62,6 +63,11 @@ export class AclObjectsInformationTableComponent implements OnInit, OnDestroy {
    * Table Template: Only active button.
    */
   @ViewChild('activatedButtonTemplate', { static: true }) public activatedButtonTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: Type edit action column.
+   */
+  @ViewChild('aclTypeEditTemplate', { static: true }) public aclTypeEditTemplate: TemplateRef<any>;
 
   /**
    * Types
@@ -104,6 +110,9 @@ export class AclObjectsInformationTableComponent implements OnInit, OnDestroy {
    */
   public loading: boolean = false;
 
+  /**
+   * Passed group.
+   */
   public group: Group;
 
   @Input('group')
@@ -112,7 +121,7 @@ export class AclObjectsInformationTableComponent implements OnInit, OnDestroy {
     this.loadTypesFromAPI();
   }
 
-  constructor(private typeService: TypeService) {
+  constructor(private typeService: TypeService, private permissionService: PermissionService) {
   }
 
   public get activeControl(): FormControl {
@@ -154,6 +163,19 @@ export class AclObjectsInformationTableComponent implements OnInit, OnDestroy {
       }
 
     ] as Array<Column>;
+    const typeEditRight = 'base.framework.type.edit';
+    if (this.permissionService.hasRight(typeEditRight) || this.permissionService.hasExtendedRight(typeEditRight)) {
+      this.columns.push({
+        display: 'Actions',
+        name: 'actions',
+        searchable: false,
+        sortable: false,
+        fixed: true,
+        template: this.aclTypeEditTemplate,
+        cssClasses: ['text-center'],
+        cellClasses: ['actions-buttons']
+      } as Column);
+    }
     this.loadTypesFromAPI();
     this.activatedForm.valueChanges.pipe(takeUntil(this.subscriber)).subscribe(() => {
       this.page = 1;
