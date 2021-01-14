@@ -41,7 +41,6 @@ import { JsonMappingComponent } from './json-mapping/json-mapping.component';
 import { CsvMappingComponent } from './csv-mapping/csv-mapping.component';
 import { TypeMappingBaseComponent } from './type-mapping-base.component';
 import { AccessControlPermission } from '../../../acl/acl.types';
-import {takeUntil} from "rxjs/operators";
 
 export const mappingComponents: { [type: string]: any } = {
   json: JsonMappingComponent,
