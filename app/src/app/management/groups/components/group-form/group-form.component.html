@@ -43,7 +43,7 @@
            'is-invalid': rightsControl.invalid && (rightsControl.dirty || rightsControl.touched)}"
                    formControlName="rights">
         </ng-select>
-        <cmdb-group-form-helper [rights]="rights"></cmdb-group-form-helper>
+        <cmdb-group-form-helper [form]="form" [rights]="rights"></cmdb-group-form-helper>
       </div>
     </div>
   </div>

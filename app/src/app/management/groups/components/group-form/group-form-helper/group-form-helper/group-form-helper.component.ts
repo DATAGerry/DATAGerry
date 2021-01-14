@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Right } from '../../../../../models/right';
+import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-group-form-helper',
@@ -12,25 +13,36 @@ export class GroupFormHelperComponent implements OnInit {
 
   @Input() public rights: Array<Right> = [];
 
+  public rightNames: any[] = [];
+
+  @Input() public form: FormGroup;
+
   public minRights: any[] = [];
 
   constructor() { }
 
   ngOnInit() {
-    this.minRights = this.rights.filter(right => right.name.includes('view') && (right.name.includes('framework') ||
-      right.name.includes('user-management')));
+    this.rights.forEach( right => {
+      this.rightNames.push(right.name);
+    });
+    this.minRights = this.rightNames.filter(right => right.includes('view') && (right.includes('framework') ||
+      right.includes('user-management')));
     this.presetList.push({
         name: 'Read-Only',
         value: this.minRights
       },
       {
         name: 'Object-Write',
-        value: this.rights.filter(right => right.name.includes('object.add')).concat(this.minRights)
+        value: this.rightNames.filter(right => right.includes('object.add')).concat(this.minRights)
       },
       {
         name: 'Administrator',
-        value: this.rights.filter(right => right.name.includes('base.*'))
+        value: this.rightNames.filter(right => right.includes('base.*'))
       }
     );
+  }
+
+  public insertSelectedRights(rights) {
+    this.form.get('rights').patchValue(rights);
   }
 }
