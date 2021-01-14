@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -25,6 +25,7 @@ import { ToastService } from '../../../layout/toast/toast.service';
 import { takeUntil } from 'rxjs/operators';
 import { User } from '../../models/user';
 import { ActivatedRoute, Router } from '@angular/router';
+import { PermissionService } from '../../../auth/services/permission.service';
 
 @Component({
   selector: 'cmdb-user-edit',
@@ -54,14 +55,24 @@ export class UserEditComponent implements OnInit, OnDestroy {
   public groups: Array<Group> = [];
 
   /**
+   * Group of user while loaded.
+   */
+
+  public userGroup: Group;
+
+  /**
    * List of possible auth providers.
    */
   public providers: Array<any> = [];
 
+  private typeEditRightName = 'base.framework.type.edit';
+  public typeEditRight = this.permissionService.hasRight(this.typeEditRightName) || this.permissionService.hasExtendedRight(this.typeEditRightName);
+
   constructor(private route: ActivatedRoute, private router: Router, private userService: UserService,
-              private toastService: ToastService) {
+              private toastService: ToastService, private permissionService: PermissionService) {
     this.user = this.route.snapshot.data.user as User;
     this.groups = this.route.snapshot.data.groups as Array<Group>;
+    this.userGroup = this.groups.find(group => group.public_id === this.user.group_id);
     this.providers = this.route.snapshot.data.providers as Array<any>;
   }
 
@@ -78,7 +89,7 @@ export class UserEditComponent implements OnInit, OnDestroy {
     const editUser = Object.assign(this.user, user);
     this.userService.putUser(this.user.public_id, editUser).pipe(takeUntil(this.subscriber)).subscribe((apiUser: User) => {
 
-      this.toastService.success(`User ${apiUser.user_name} was updated`);
+      this.toastService.success(`User ${ apiUser.user_name } was updated`);
       this.router.navigate(['/', 'management', 'users']);
     });
   }

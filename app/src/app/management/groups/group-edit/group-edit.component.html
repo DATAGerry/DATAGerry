@@ -3,4 +3,10 @@
   </h1>
 </div>
 <hr/>
-<cmdb-group-form [group]="group" [rights]="rights" (submit)="edit($event)" (validation)="valid = $event"></cmdb-group-form>
+<cmdb-group-form [group]="group" [rights]="rights" (submit)="edit($event)"
+                 (validation)="valid = $event"></cmdb-group-form>
+<ng-container *ngIf="typeEditRight">
+  <h2>Object ACL of {{group?.label}}</h2>
+  <hr/>
+  <cmdb-acl-objects-information-table [group]="group"></cmdb-acl-objects-information-table>
+</ng-container>
