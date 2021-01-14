@@ -19,14 +19,22 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AclObjectsInformationTableComponent } from './components/acl-objects-information-table/acl-objects-information-table.component';
+import { TableModule } from '../layout/table/table.module';
+import { LayoutModule } from '../layout/layout.module';
+import { AclObjectsInformationActivationColumnComponent } from './components/acl-objects-information-activation-column/acl-objects-information-activation-column.component';
+import { AclObjectsInformationPermissionsColumnComponent } from './components/acl-objects-information-permissions-column/acl-objects-information-permissions-column.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
-  declarations: [AclObjectsInformationTableComponent],
+  declarations: [AclObjectsInformationTableComponent, AclObjectsInformationActivationColumnComponent, AclObjectsInformationPermissionsColumnComponent],
   exports: [
     AclObjectsInformationTableComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    TableModule,
+    LayoutModule,
+    ReactiveFormsModule
   ]
 })
 export class AclModule {

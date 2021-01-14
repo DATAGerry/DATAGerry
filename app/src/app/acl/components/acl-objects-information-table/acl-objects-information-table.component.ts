@@ -16,21 +16,267 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { Group } from '../../../management/models/group';
+import { CmdbType } from '../../../framework/models/cmdb-type';
+import { TypeService } from '../../../framework/services/type.service';
+import { ReplaySubject } from 'rxjs';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
+import { Column, Sort, SortDirection } from '../../../layout/table/table.types';
+import { CollectionParameters } from '../../../services/models/api-parameter';
+import { takeUntil } from 'rxjs/operators';
+import { FormControl, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-acl-objects-information-table',
   templateUrl: './acl-objects-information-table.component.html',
   styleUrls: ['./acl-objects-information-table.component.scss']
 })
-export class AclObjectsInformationTableComponent implements OnInit {
+export class AclObjectsInformationTableComponent implements OnInit, OnDestroy {
 
-  @Input() public group: Group;
+  /**
+   * Global un-subscriber for http calls to the rest backend.
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  constructor() { }
+  public activatedForm = new FormGroup({
+    active: new FormControl(false)
+  });
 
-  ngOnInit() {
+  /**
+   * Table Template: Type name column.
+   */
+  @ViewChild('typeNameTemplate', { static: true }) public typeNameTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: Type ACL column.
+   */
+  @ViewChild('aclActivateTemplate', { static: true }) public aclActivateTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: Type ACL permissions column.
+   */
+  @ViewChild('aclPermissionsTemplate', { static: true }) public aclPermissionsTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: Only active button.
+   */
+  @ViewChild('activatedButtonTemplate', { static: true }) public activatedButtonTemplate: TemplateRef<any>;
+
+  /**
+   * Types
+   */
+  public types: Array<CmdbType> = [];
+  public typesAPIResponse: APIGetMultiResponse<CmdbType>;
+  public totalTypes: number = 0;
+
+  /**
+   * Filter query from the table search input.
+   */
+  public filter: string;
+
+  /**
+   * Begin with first page.
+   */
+  public readonly initPage: number = 1;
+  public page: number = this.initPage;
+
+
+  /**
+   * Max number of types per site.
+   * @private
+   */
+  private readonly initLimit: number = 10;
+  public limit: number = this.initLimit;
+
+  /**
+   * Default sort filter.
+   */
+  public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+
+  /**
+   * Table columns definition.
+   */
+  public columns: Array<Column>;
+
+  /**
+   * Loading indicator.
+   */
+  public loading: boolean = false;
+
+  public group: Group;
+
+  @Input('group')
+  public set Group(group: Group) {
+    this.group = group;
+    this.loadTypesFromAPI();
+  }
+
+  constructor(private typeService: TypeService) {
+  }
+
+  public get activeControl(): FormControl {
+    return this.activatedForm.get('active') as FormControl;
+  }
+
+  public ngOnInit(): void {
+    this.columns = [
+      {
+        display: 'Public ID',
+        name: 'public_id',
+        data: 'public_id',
+        searchable: true,
+        sortable: true
+      },
+      {
+        display: 'Type',
+        name: 'name',
+        data: 'name',
+        searchable: true,
+        sortable: true,
+        template: this.typeNameTemplate,
+      },
+      {
+        display: 'ACL',
+        name: 'acl',
+        data: 'acl',
+        searchable: false,
+        sortable: true,
+        template: this.aclActivateTemplate,
+      },
+      {
+        display: 'Permissions',
+        name: 'acl.groups.includes',
+        data: 'acl',
+        searchable: false,
+        sortable: false,
+        template: this.aclPermissionsTemplate
+      }
+
+    ] as Array<Column>;
+    this.loadTypesFromAPI();
+    this.activatedForm.valueChanges.pipe(takeUntil(this.subscriber)).subscribe(() => {
+      this.page = 1;
+      this.loadTypesFromAPI();
+    });
+  }
+
+  private loadTypesFromAPI(): void {
+    this.loading = true;
+    let query;
+
+    if (this.filter) {
+      query = [];
+      const or = [];
+      const searchableColumns = this.columns.filter(c => c.searchable);
+      // Searchable Columns
+      for (const column of searchableColumns) {
+        const regex: any = {};
+        regex[column.name] = {
+          $regex: String(this.filter),
+          $options: 'ismx'
+        };
+        or.push(regex);
+      }
+      query.push({
+        $addFields: {
+          public_id: { $toString: '$public_id' }
+        }
+      });
+      or.push({
+        public_id: {
+          $elemMatch: {
+            value: {
+              $regex: String(this.filter),
+              $options: 'ismx'
+            }
+          }
+        }
+      });
+      query.push({ $match: { $or: or } });
+    }
+    if (this.activeControl.value) {
+      const activeMatch = {
+        $match: {
+          acl: {
+            $exists: true
+          },
+          'acl.activated': true
+        }
+      };
+      if (!query) {
+        query = [];
+      }
+      query.push(activeMatch);
+    }
+    const params: CollectionParameters = {
+      filter: query, limit: this.limit,
+      sort: this.sort.name, order: this.sort.order, page: this.page
+    };
+    this.typeService.getTypes(params).pipe(takeUntil(this.subscriber)).subscribe(
+      (apiResponse: APIGetMultiResponse<CmdbType>) => {
+        this.typesAPIResponse = apiResponse;
+        this.types = apiResponse.results as Array<CmdbType>;
+        this.totalTypes = apiResponse.total;
+        this.loading = false;
+      });
+  }
+
+  /**
+   * Destroy subscriptions after closed.
+   */
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
+  }
+
+  /**
+   * On table sort change.
+   * Reload all types.
+   *
+   * @param sort
+   */
+  public onSortChange(sort: Sort): void {
+    this.sort = sort;
+    this.loadTypesFromAPI();
+  }
+
+  /**
+   * On table page change.
+   * Reload all types.
+   *
+   * @param page
+   */
+  public onPageChange(page: number) {
+    this.page = page;
+    this.loadTypesFromAPI();
+  }
+
+  /**
+   * On table page size change.
+   * Reload all types.
+   *
+   * @param limit
+   */
+  public onPageSizeChange(limit: number): void {
+    this.limit = limit;
+    this.page = 1;
+    this.loadTypesFromAPI();
+  }
+
+  /**
+   * On table search change.
+   * Reload all types.
+   *
+   * @param search
+   */
+  public onSearchChange(search: any): void {
+    if (search) {
+      this.filter = search;
+    } else {
+      this.filter = undefined;
+    }
+    this.loadTypesFromAPI();
   }
 
 }

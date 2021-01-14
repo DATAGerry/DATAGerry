@@ -33,13 +33,41 @@ import { ToastService } from '../../../layout/toast/toast.service';
 })
 export class GroupAclComponent implements OnInit, OnDestroy {
 
+  /**
+   * Component unsubscriber.
+   * @private
+   */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  /**
+   * Group form selector.
+   */
   public objectsACLGroupForm: FormGroup;
 
+  /**
+   * Chosen group.
+   */
   public selectedGroup: Group;
+
+  /**
+   * Array of loaded cmdb groups.
+   */
   public groups: Array<Group> = [];
+
+  /**
+   * Number of group pages.
+   * @private
+   */
   private totalGroupPages: number;
+
+  /**
+   * Total number of groups.
+   */
   public totalGroups: number;
+
+  /**
+   * ng-select loading indicator.
+   */
   public groupsLoading: boolean = false;
 
   public groupParams: CollectionParameters = {
@@ -71,6 +99,9 @@ export class GroupAclComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Load more groups until end of list is reached.
+   */
   public onScrollToEnd() {
     if (this.groupParams.page < this.totalGroupPages) {
       this.groupParams.page += 1;
@@ -78,6 +109,10 @@ export class GroupAclComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Load the groups from backend.
+   * @private
+   */
   private loadGroupsFromAPI() {
     this.groupsLoading = true;
     this.groupService.getGroups(this.groupParams).pipe(takeUntil(this.subscriber))

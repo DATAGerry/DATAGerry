@@ -1,6 +1,5 @@
-<h1>ACL Management</h1>
+<h1>Object ACL Management</h1>
 <hr/>
-<h2>Object ACL</h2>
 <form [formGroup]="objectsACLGroupForm">
   <div class="form-group row">
     <label class="col-sm-2 col-form-label">Group</label>
@@ -20,4 +19,4 @@
     </div>
   </div>
 </form>
-<cmdb-acl-objects-information-table [group]="selectedGroup"></cmdb-acl-objects-information-table>
+<cmdb-acl-objects-information-table *ngIf="selectedGroup" [group]="selectedGroup"></cmdb-acl-objects-information-table>
