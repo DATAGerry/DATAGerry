@@ -249,12 +249,11 @@ export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
    * @param see the filetype to be zipped
    */
   public exportingFiles(see: SupportedExporterExtension) {
+    const filter = {public_id: {$in: this.selectedObjectIDs}};
+    const optional = {classname: see.extension, zip: true};
+    const exportAPI: CollectionParameters = {filter, optional, order: this.sort.order, sort: this.sort.name};
     if (this.selectedObjects.length !== 0) {
-      const exportApi: CollectionParameters = {
-        filter: {public_id: {$in: this.selectedObjectIDs}},
-        optional: {classname: see.extension, zip: true}
-      };
-      this.fileService.callExportRoute(exportApi)
+      this.fileService.callExportRoute(exportAPI)
         .subscribe(res => this.downLoadFile(res));
     }
   }

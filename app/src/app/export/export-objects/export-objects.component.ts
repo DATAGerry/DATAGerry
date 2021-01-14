@@ -74,11 +74,10 @@ export class ExportObjectsComponent implements OnInit {
     const fileExtension: any = this.formExport.get('format').value;
 
     if (fileExtension != null && typeID != null) {
-      const exporterApi: CollectionParameters = {
-        filter: {type_id: typeID},
-        optional: {classname: fileExtension, zip: false}
-      };
-      this.exportService.callExportRoute(exporterApi)
+      const filter = {type_id: typeID};
+      const optional = {classname: fileExtension, zip: false};
+      const exportAPI: CollectionParameters = {filter, optional, order: 1, sort: 'public_id'};
+      this.exportService.callExportRoute(exportAPI)
         .subscribe(res => this.downLoadFile(res, fileExtension));
     }
   }
