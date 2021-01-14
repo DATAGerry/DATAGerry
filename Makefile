@@ -90,7 +90,6 @@ bin: requirements buildvars docs webapp
 		--hidden-import cmdb.file_export \
 		--hidden-import cmdb.file_export.file_exporter \
 		--hidden-import cmdb.interface.gunicorn \
-		--hidden-import cmdb.security.auth \
 		--hidden-import gunicorn.glogging \
 		--hidden-import gunicorn.workers.sync \
 		--hidden-import reportlab.graphics.barcode.common \
