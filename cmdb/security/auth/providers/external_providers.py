@@ -112,12 +112,15 @@ class LdapAuthenticationProvider(AuthenticationProvider):
                 possible_user_groups) == 0:
             return user_group
 
-        for possible_group in possible_user_groups:
-            try:
-                user_group = self.config.mapping(possible_group)
-                break
-            except GroupMappingError:
-                continue
+        mappings = self.config.groups['mapping']
+        for mapping in mappings:
+            if mapping['group_dn'] in possible_user_groups:
+
+                try:
+                    user_group = self.config.mapping(mapping['group_dn'])
+                    break
+                except GroupMappingError:
+                    continue
         return user_group
 
     def authenticate(self, user_name: str, password: str, **kwargs) -> UserModel:
@@ -136,7 +139,8 @@ class LdapAuthenticationProvider(AuthenticationProvider):
             raise AuthenticationError(LdapAuthenticationProvider.get_name(), 'No matching entry')
 
         user_group_id = self.config.default_group
-        if self.config.groups['active']:
+        group_mapping_active = self.config.groups.get('active', False)
+        if group_mapping_active:
             group_search_filter = self.config.groups['searchfiltergroup'].replace("%username%", user_name)
             group_search_result = self.__ldap_connection.search(self.config.search['basedn'], group_search_filter)
             group_search_result_entries = self.__ldap_connection.entries
@@ -158,7 +162,7 @@ class LdapAuthenticationProvider(AuthenticationProvider):
 
         try:
             user_instance: UserModel = self.user_manager.get_by(Query({'user_name': user_name}))
-            if user_instance.group_id != user_group_id:
+            if (user_instance.group_id != user_group_id) and group_mapping_active:
                 user_instance.group_id = user_group_id
                 try:
                     self.user_manager.update(user_instance.public_id, user_instance)

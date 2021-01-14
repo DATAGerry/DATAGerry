@@ -54,8 +54,6 @@
                       [value]="group.public_id">{{group.label ? group.label : group.name}}</option>
             </select>
           </div>
-          <small class="description form-text text-muted">This is the default group when NO group mapping is
-            enabled.</small>
         </div>
       </div>
     </div>
@@ -141,6 +139,9 @@
                    formControlName="active" id="ldap-provider-group-mapping-active-input">
             <label class="custom-control-label" for="ldap-provider-group-mapping-active-input"></label>
           </div>
+          <small class="description form-text text-muted">
+            If no mapping is activated, <strong>new</strong> users will be moved to the default group.
+          </small>
         </div>
       </div>
       <div class="form-group row mb-3">
