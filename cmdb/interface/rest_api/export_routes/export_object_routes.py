@@ -16,7 +16,7 @@
 
 import logging
 
-from flask import abort, jsonify, request
+from flask import abort, jsonify
 from cmdb.framework.cmdb_errors import TypeNotFoundError
 from cmdb.exporter.config.config_type import ExporterConfig
 from cmdb.exporter.writer.writer_base import SupportedExporterExtension, BaseExportWriter
@@ -50,8 +50,9 @@ def get_export_file_types():
 @insert_request_user
 def export_objects(params: CollectionParameters, request_user: UserModel):
     try:
-        _config = ExporterConfig(filter_query=params.filter, options=params.optional)
-        _class = 'ZipExportType' if params.optional.get('zip', False) in ['true'] else params.optional.get('classname', '')
+        _config = ExporterConfig(parameters=params, options=params.optional)
+        _class = 'ZipExportType' if params.optional.get('zip', False) in ['true'] \
+            else params.optional.get('classname', 'JsonExportType')
 
         exporter_class = load_class('cmdb.exporter.exporter_base.' + _class)()
         exporter = BaseExportWriter(exporter_class, _config)

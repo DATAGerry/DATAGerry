@@ -40,7 +40,7 @@ export class FileService {
     );
   }
 
-  public callExportRoute(params: CollectionParameters) {
+  public callExportRoute(params: CollectionParameters, view: string = 'native') {
     const options = httpFileOptions;
     let httpParams: HttpParams = new HttpParams();
     if (params.filter !== undefined) {
@@ -51,6 +51,9 @@ export class FileService {
         httpParams = httpParams.set(key, params.optional[key]);
       }
     }
+    httpParams = httpParams.set('sort', params.sort);
+    httpParams = httpParams.set('order', params.order.toString());
+    httpParams = httpParams.set('view', view);
     options.params = httpParams;
     return this.api.callGet<any>(this.servicePrefix + '/', options);
   }

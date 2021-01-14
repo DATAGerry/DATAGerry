@@ -15,18 +15,18 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from cmdb.exporter.config.config_base import BaseExporterConfig
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.exporter.config.config_base import BaseExporterConfig, ExporterConfigType
 
 
 class ExporterConfig(BaseExporterConfig):
 
-    def __init__(self, filter_query: dict, options: dict = None):
+    def __init__(self, parameters: CollectionParameters, options: dict = None):
         """
         Args:
-
-filter_query: The raw http query string. Be used for the parsed parameters
+            parameters: Rest API class for parameters passed by a http request on a collection route
             options: dict of optional parameters for given route function.
         """
-        self.filter_query = filter_query
+        self.parameters = parameters
         self.options = options or None
-        super(ExporterConfig, self).__init__(config_type='type')
+        super(ExporterConfig, self).__init__(config_type=ExporterConfigType.OBJECT)

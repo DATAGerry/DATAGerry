@@ -311,6 +311,29 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.selectedObjects = [];
     this.selectedObjectsIDs = [];
+
+    const searchableColumns = this.columns.filter(c => c.searchable);
+    const filter = this.filterBuilder(searchableColumns);
+    const params: CollectionParameters = {
+      filter, limit: this.limit,
+      sort: this.sort.name, order: this.sort.order, page: this.page
+    };
+    this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
+      .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
+        this.results = apiResponse.body.results as Array<RenderResult>;
+        this.totalResults = apiResponse.body.total;
+        this.loading = false;
+      });
+  }
+
+  /**
+   * DB Query / Filter Builder
+   * Creates a database query using the passed parameters.
+   *
+   * @param columns {@link Array<Column>} are taken into account in the query.
+   * @return query {@link: any[]}
+   */
+  private filterBuilder(columns: Array<Column>) {
     const query = [];
     query.push({
       $match: {
@@ -319,9 +342,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     });
     if (this.filter) {
       const or = [];
-      const searchableColumns = this.columns.filter(c => c.searchable);
-      // Searchable Columns
-      for (const column of searchableColumns) {
+      for (const column of columns) {
         const regex: any = {};
         regex[column.name] = {
           $regex: String(this.filter),
@@ -329,7 +350,6 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         };
         or.push(regex);
       }
-
       // Nasty public id quick hack
       query.push({
         $addFields: {
@@ -359,17 +379,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       });
       query.push({ $match: { $or: or } });
     }
-
-    const params: CollectionParameters = {
-      filter: query, limit: this.limit,
-      sort: this.sort.name, order: this.sort.order, page: this.page
-    };
-    this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
-      .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
-        this.results = apiResponse.body.results as Array<RenderResult>;
-        this.totalResults = apiResponse.body.total;
-        this.loading = false;
-      });
+    return query;
   }
 
   /**
@@ -454,19 +464,16 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   public exportingFiles(see: SupportedExporterExtension) {
     const optional = {classname: see.extension, zip: false};
-    if (this.selectedObjectsIDs.length === 0) {
-      this.fileService.callExportRoute({filter: {type_id: this.type.public_id}, optional})
-        .subscribe(res => {
-          this.fileSaverService.save(res.body, new Date().toISOString() + '.' + see.label);
-        });
-    } else {
-      this.fileService.callExportRoute({filter: {public_id: {$in: this.selectedObjectsIDs}}, optional})
-        .subscribe(res => {
-          this.fileSaverService.save(res.body, new Date().toISOString() + '.' + see.label);
-        });
-
+    const columns = this.columns.filter(c => !c.hidden && !c.fixed);
+    const filter = this.filterBuilder(columns);
+    const exportAPI: CollectionParameters = {filter, optional, order: this.sort.order, sort: this.sort.name};
+    if (this.selectedObjectsIDs.length > 0) {
+      exportAPI.filter = [{$match: {public_id: {$in: this.selectedObjectsIDs}}}, ...filter] ;
     }
-
+    this.fileService.callExportRoute(exportAPI)
+      .subscribe(res => {
+        this.fileSaverService.save(res.body, new Date().toISOString() + '.' + see.label);
+      });
   }
 
   public onObjectDelete(publicID: number) {
