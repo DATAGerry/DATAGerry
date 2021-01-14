@@ -38,6 +38,7 @@ import { GroupUsersModalComponent } from './modals/group-users-modal/group-users
 import { UsersModule } from '../users/users.module';
 import { GroupTableListComponent } from './components/group-table-list/group-table-list.component';
 import { GroupAclComponent } from './group-acl/group-acl.component';
+import { AclModule } from '../../acl/acl.module';
 
 @NgModule({
   entryComponents: [
@@ -68,7 +69,8 @@ import { GroupAclComponent } from './group-acl/group-acl.component';
     FontAwesomeModule,
     AuthModule,
     TableModule,
-    UsersModule
+    UsersModule,
+    AclModule
   ]
 })
 export class GroupsModule {

@@ -25,6 +25,7 @@ import { GroupResolver, GroupsResolver } from '../resolvers/group-resolver.servi
 import { RightsResolver } from '../resolvers/rights-resolver.service';
 import { GroupDeleteComponent } from './group-delete/group-delete.component';
 import { PermissionGuard } from '../../auth/guards/permission.guard';
+import { GroupAclComponent } from './group-acl/group-acl.component';
 
 const routes: Routes = [
   {
@@ -78,6 +79,7 @@ const routes: Routes = [
       breadcrumb: 'Access Control List',
       right: 'base.framework.type.view'
     },
+    component: GroupAclComponent
   }
 ];
 

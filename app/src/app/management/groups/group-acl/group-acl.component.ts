@@ -16,18 +16,81 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
+import { GroupService } from '../../services/group.service';
+import { Group } from '../../models/group';
+import { CollectionParameters } from '../../../services/models/api-parameter';
+import { takeUntil } from 'rxjs/operators';
+import { pairs, ReplaySubject } from 'rxjs';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
+import { ToastService } from '../../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-group-acl',
   templateUrl: './group-acl.component.html',
   styleUrls: ['./group-acl.component.scss']
 })
-export class GroupAclComponent implements OnInit {
+export class GroupAclComponent implements OnInit, OnDestroy {
 
-  constructor() { }
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+  public objectsACLGroupForm: FormGroup;
 
-  ngOnInit() {
+  public selectedGroup: Group;
+  public groups: Array<Group> = [];
+  private totalGroupPages: number;
+  public totalGroups: number;
+  public groupsLoading: boolean = false;
+
+  public groupParams: CollectionParameters = {
+    filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1
+  };
+
+  constructor(private groupService: GroupService, private toast: ToastService) {
+    this.objectsACLGroupForm = new FormGroup({
+      group: new FormControl(undefined)
+    });
+  }
+
+  public get groupControl(): FormControl {
+    return this.objectsACLGroupForm.get('group') as FormControl;
+  }
+
+  public ngOnInit(): void {
+    this.groupsLoading = true;
+    this.groupService.getGroups(this.groupParams).pipe(takeUntil(this.subscriber))
+      .subscribe((apiResponse: APIGetMultiResponse<Group>) => {
+          this.groups = apiResponse.results as Array<Group>;
+          this.totalGroups = apiResponse.total;
+          this.totalGroupPages = apiResponse.pager.total_pages;
+          this.groupsLoading = false;
+        },
+        (err) => this.toast.error(err)).add(() => this.groupsLoading = false);
+    this.groupControl.valueChanges.pipe(takeUntil(this.subscriber)).subscribe((group: Group) => {
+      this.selectedGroup = group;
+    });
+  }
+
+  public onScrollToEnd() {
+    if (this.groupParams.page < this.totalGroupPages) {
+      this.groupParams.page += 1;
+      this.loadGroupsFromAPI();
+    }
+  }
+
+  private loadGroupsFromAPI() {
+    this.groupsLoading = true;
+    this.groupService.getGroups(this.groupParams).pipe(takeUntil(this.subscriber))
+      .subscribe((apiResponse: APIGetMultiResponse<Group>) => {
+          this.groups = this.groups.concat(apiResponse.results as Array<Group>);
+          this.groupsLoading = false;
+        },
+        (err) => this.toast.error(err)).add(() => this.groupsLoading = false);
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
 }

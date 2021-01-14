@@ -22,6 +22,9 @@ import { AclObjectsInformationTableComponent } from './components/acl-objects-in
 
 @NgModule({
   declarations: [AclObjectsInformationTableComponent],
+  exports: [
+    AclObjectsInformationTableComponent
+  ],
   imports: [
     CommonModule
   ]
