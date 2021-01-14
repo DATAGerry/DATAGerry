@@ -46,7 +46,7 @@ import {
   UserSettingsService
 } from '../../../management/user-settings/services/user-settings.service';
 import { DatePipe } from '@angular/common';
-import { ExportObjectsFileExtension } from '../../../export/export-objects/model/export-objects-file-extension';
+import { SupportedExporterExtension } from '../../../export/export-objects/model/supported-exporter-extension';
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -452,16 +452,17 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.reload(this.type);
   }
 
-  public exportingFiles(exportType: ExportObjectsFileExtension) {
+  public exportingFiles(see: SupportedExporterExtension) {
+    const optional = {classname: see.extension, zip: false};
     if (this.selectedObjectsIDs.length === 0) {
-      this.fileService.getObjectFileByType(this.type.public_id, exportType.extension)
+      this.fileService.callExportRoute({filter: {type_id: this.type.public_id}, optional})
         .subscribe(res => {
-          this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
+          this.fileSaverService.save(res.body, new Date().toISOString() + '.' + see.label);
         });
     } else {
-      this.fileService.callExportRoute(this.selectedObjectsIDs, exportType.extension)
+      this.fileService.callExportRoute({filter: {public_id: {$in: this.selectedObjectsIDs}}, optional})
         .subscribe(res => {
-          this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
+          this.fileSaverService.save(res.body, new Date().toISOString() + '.' + see.label);
         });
 
     }

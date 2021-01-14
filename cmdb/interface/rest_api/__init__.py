@@ -132,7 +132,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.user_management_routes.group_routes import groups_blueprint
 
     from cmdb.interface.rest_api.search_routes import search_blueprint
-    from cmdb.interface.rest_api.export_routes.export_object_routes import file_blueprint
+    from cmdb.interface.rest_api.export_routes.export_object_routes import exporter_blueprint
     from cmdb.interface.rest_api.export_routes.export_type_routes import type_export_blueprint
     from cmdb.interface.rest_api.log_routes import log_blueprint
     from cmdb.interface.rest_api.setting_routes import settings_blueprint
@@ -150,7 +150,6 @@ def register_blueprints(app):
     app.register_multi_blueprint(links_blueprint, multi_prefix=['/object/link', '/objects/links'])
     app.register_multi_blueprint(types_blueprint, multi_prefix=['/type', '/types'])
     app.register_blueprint(connection_routes)
-
     app.register_multi_blueprint(categories_blueprint, multi_prefix=['/category', '/categories'])
     app.register_multi_blueprint(users_blueprint, multi_prefix=['/user', '/users'])
     app.register_blueprint(user_settings_blueprint, url_prefix='/users/<int:user_id>/settings')
@@ -158,7 +157,7 @@ def register_blueprints(app):
     app.register_multi_blueprint(groups_blueprint, multi_prefix=['/group', '/groups'])
     app.register_multi_blueprint(rights_blueprint, multi_prefix=['/right', '/rights'])
     app.register_blueprint(search_blueprint)
-    app.register_blueprint(file_blueprint)
+    app.register_multi_blueprint(exporter_blueprint, multi_prefix=['/exporter', '/exporter/'])
     app.register_blueprint(type_export_blueprint)
     app.register_multi_blueprint(log_blueprint, multi_prefix=['/log', '/logs'])
     app.register_blueprint(settings_blueprint)

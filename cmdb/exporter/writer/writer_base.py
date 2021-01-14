@@ -103,10 +103,8 @@ class BaseExportWriter:
 
         conf_option = self.export_config.options
         timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
-        if conf_option and conf_option['zip']:
-            export = self.export_format.export(self.data, conf_option['classname'])
-        else:
-            export = self.export_format.export(self.data)
+        export = self.export_format.export(self.data, conf_option.get('classname', ''))
+
         return Response(
             export,
             mimetype="text/" + self.export_format.__class__.FILE_EXTENSION,

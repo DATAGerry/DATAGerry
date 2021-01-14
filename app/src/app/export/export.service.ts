@@ -17,16 +17,17 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, httpFileOptions} from '../services/api-call.service';
+import { ApiCallService, httpFileOptions } from '../services/api-call.service';
 import { map } from 'rxjs/operators';
 import { HttpParams } from '@angular/common/http';
+import { CollectionParameters } from '../services/models/api-parameter';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FileService {
 
-  private servicePrefix: string = 'export/object';
+  private servicePrefix: string = 'exporter';
 
   constructor(private api: ApiCallService) {
   }
@@ -39,19 +40,19 @@ export class FileService {
     );
   }
 
-  public callExportRoute(objectIDs: number[], exportType: string, zipping: boolean = false) {
+  public callExportRoute(params: CollectionParameters) {
     const options = httpFileOptions;
-    let params = new HttpParams();
-    params = params.set('filter', JSON.stringify({public_id: {$in: objectIDs}}));
-    params = params.set('classname', exportType);
-    params = params.set('zip', JSON.stringify(zipping));
-    options.params = params;
-
+    let httpParams: HttpParams = new HttpParams();
+    if (params.filter !== undefined) {
+      httpParams = httpParams.set('filter', JSON.stringify(params.filter));
+    }
+    if (params.optional !== undefined) {
+      for (const key of Object.keys(params.optional)) {
+        httpParams = httpParams.set(key, params.optional[key]);
+      }
+    }
+    options.params = httpParams;
     return this.api.callGet<any>(this.servicePrefix + '/', options);
-  }
-
-  public getObjectFileByType(typeID: number, exportType: string) {
-    return this.api.callGet(this.servicePrefix + '/' + typeID + '/' + exportType, httpFileOptions);
   }
 
   public getTypeFile() {

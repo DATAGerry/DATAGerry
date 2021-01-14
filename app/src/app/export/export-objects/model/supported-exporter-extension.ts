@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export class ExportObjectsFileExtension {
+export class SupportedExporterExtension {
 
   public readonly extension: string;
   public label: string;
@@ -25,7 +25,7 @@ export class ExportObjectsFileExtension {
   public helperText: string;
   public active: boolean = false;
 
-  public constructor(init?: Partial<ExportObjectsFileExtension>) {
+  public constructor(init?: Partial<SupportedExporterExtension>) {
     Object.assign(this, init);
   }
 }

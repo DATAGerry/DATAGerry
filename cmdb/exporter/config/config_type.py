@@ -20,13 +20,13 @@ from cmdb.exporter.config.config_base import BaseExporterConfig
 
 class ExporterConfig(BaseExporterConfig):
 
-    def __init__(self, filter_query: dict, options=None):
+    def __init__(self, filter_query: dict, options: dict = None):
         """
         Args:
-            filter_query: The raw http query string. Be used for the parsed parameters
-            options: dict of optional collection parameters for given route function.
 
+filter_query: The raw http query string. Be used for the parsed parameters
+            options: dict of optional parameters for given route function.
         """
         self.filter_query = filter_query
-        self.options = options
+        self.options = options or None
         super(ExporterConfig, self).__init__(config_type='type')

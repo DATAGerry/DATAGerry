@@ -21,10 +21,11 @@ from cmdb.framework.cmdb_errors import TypeNotFoundError
 from cmdb.exporter.config.config_type import ExporterConfig
 from cmdb.exporter.writer.writer_base import SupportedExporterExtension, BaseExportWriter
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user
-from cmdb.interface.blueprint import RootBlueprint
+from cmdb.interface.blueprint import APIBlueprint
 from cmdb.user_management import UserModel
 from cmdb.utils.helpers import load_class
 
+from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.security.acl.permission import AccessControlPermission
 
 try:
@@ -33,34 +34,28 @@ except ImportError:
     CMDBError = Exception
 
 LOGGER = logging.getLogger(__name__)
-file_blueprint = RootBlueprint('file_rest', __name__, url_prefix='/export/object')
+exporter_blueprint = APIBlueprint('exporter', __name__)
 
 
-@file_blueprint.route('/extensions', methods=['GET'])
+@exporter_blueprint.route('/extensions', methods=['GET'])
 @login_required
 def get_export_file_types():
     return make_response(SupportedExporterExtension().convert_to())
 
 
-@file_blueprint.route('/', methods=['GET'])
-@login_required
+@exporter_blueprint.route('/', methods=['GET'])
+@exporter_blueprint.protect(auth=True, right='base.framework.object.view')
+@exporter_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
-def export_objects(request_user: UserModel):
-    import json
+@insert_request_user
+def export_objects(params: CollectionParameters, request_user: UserModel):
     try:
-        _filter = json.loads(request.args.get('filter', None))
-        _class = request.args.get('classname', '')
-        _zipping = request.args.get('zip', False) in ['true', 'True']
-        _config = ExporterConfig(filter_query=_filter, options={'classname': _class, 'zip': _zipping})
+        _config = ExporterConfig(filter_query=params.filter, options=params.optional)
+        _class = 'ZipExportType' if params.optional.get('zip', False) in ['true'] else params.optional.get('classname', '')
 
-        if _zipping:
-            export_type_class = load_class('cmdb.exporter.exporter_base.' + 'ZipExportType')()
-            file_export = BaseExportWriter(export_type_class, _config)
-        else:
-            export_type_class = load_class('cmdb.exporter.exporter_base.' + _class)()
-            file_export = BaseExportWriter(export_type_class, _config)
-
-        file_export.from_database(user=request_user, permission=AccessControlPermission.READ)
+        exporter_class = load_class('cmdb.exporter.exporter_base.' + _class)()
+        exporter = BaseExportWriter(exporter_class, _config)
+        exporter.from_database(user=request_user, permission=AccessControlPermission.READ)
     except TypeNotFoundError as e:
         return abort(400, e.message)
     except ModuleNotFoundError as e:
@@ -68,26 +63,4 @@ def export_objects(request_user: UserModel):
     except CMDBError as e:
         return abort(404, jsonify(message='Not Found', error=e.message))
 
-    return file_export.export()
-
-
-@file_blueprint.route('/<int:type_id>/<string:export_class>', methods=['GET'])
-@login_required
-@insert_request_user
-def export_objects_by_type_id(type_id, export_class, request_user: UserModel):
-    try:
-        exporter_format_class = load_class('cmdb.exporter.exporter_base.' + export_class)
-        _format = exporter_format_class()
-        _filter = {'type_id': type_id}
-        _config = ExporterConfig(filter_query=_filter)
-        file_export = BaseExportWriter(_format, _config)
-        file_export.from_database(user=request_user, permission=AccessControlPermission.READ)
-    except TypeNotFoundError as e:
-        return abort(400, e.message)
-    except ModuleNotFoundError as e:
-        return abort(400, e)
-    except CMDBError as e:
-        return abort(404, jsonify(message='Not Found', error=e.message))
-
-    return file_export.export()
-
+    return exporter.export()

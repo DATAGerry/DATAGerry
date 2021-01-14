@@ -18,7 +18,7 @@
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CmdbType } from '../../../models/cmdb-type';
-import { ExportObjectsFileExtension } from '../../../../export/export-objects/model/export-objects-file-extension';
+import { SupportedExporterExtension } from '../../../../export/export-objects/model/supported-exporter-extension';
 import { RenderResult } from '../../../models/cmdb-render';
 import { Router } from '@angular/router';
 
@@ -31,7 +31,7 @@ export class ObjectTableHeadComponent {
 
   @Input() public selectedObjects: Array<RenderResult> = [];
   @Input() public selectedObjectsIDs: Array<number> = [];
-  @Input() public formatList: ExportObjectsFileExtension[] = [];
+  @Input() public formatList: SupportedExporterExtension[] = [];
   @Input() public totalResults: number = 0;
 
   @Output() public fileExport: EventEmitter<any> = new EventEmitter<any>();
