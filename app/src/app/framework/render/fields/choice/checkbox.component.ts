@@ -16,20 +16,24 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { RenderField } from '../components.fields';
 
 @Component({
   templateUrl: './checkbox.component.html',
   styleUrls: ['./checkbox.component.scss']
 })
-export class CheckboxComponent extends RenderField {
+export class CheckboxComponent extends RenderField implements OnInit{
 
   public namePrefix: string = 'dummy_';
 
   public constructor() {
     super();
     this.namePrefix = `${ Math.random().toString(36).slice(-8) }_`;
+  }
+
+  ngOnInit() {
+      this.controller.setValue(this.controller.value || false, {onlySelf: true});
   }
 
 }
