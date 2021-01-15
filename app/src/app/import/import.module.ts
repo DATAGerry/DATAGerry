@@ -48,6 +48,8 @@ import { CategoryModule } from '../framework/category/category.module';
 import { ImportTypeCompleteComponent } from './import-types/import-type-complete/import-type-complete.component';
 import { ImportCompleteComponent } from './import-objects/import-complete/import-complete.component';
 import { DataTablesModule } from 'angular-datatables';
+import {TableModule} from "../layout/table/table.module";
+import { FailedImportTableComponent } from './import-objects/import-complete/failed-import-table/failed-import-table.component';
 
 
 @NgModule({
@@ -70,6 +72,7 @@ import { DataTablesModule } from 'angular-datatables';
     TypePreviewComponent,
     ImportTypeCompleteComponent,
     ImportCompleteComponent,
+    FailedImportTableComponent,
   ],
   imports: [
     CommonModule,
@@ -85,7 +88,7 @@ import { DataTablesModule } from 'angular-datatables';
     NgbTooltipModule,
     FormsModule,
     CategoryModule,
-    DataTablesModule
+    TableModule
   ]
 })
 export class ImportModule {
