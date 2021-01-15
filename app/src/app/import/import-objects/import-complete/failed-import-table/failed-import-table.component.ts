@@ -1,5 +1,4 @@
 import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { Column } from '../../../../layout/table/table.types';
 
 @Component({
@@ -20,7 +19,6 @@ export class FailedImportTableComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    console.log(this.failedImports);
     this.columns = [
       {
         display: 'Error Message',
