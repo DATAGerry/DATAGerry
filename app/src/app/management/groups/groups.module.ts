@@ -37,6 +37,8 @@ import { GroupTableActionsComponent } from './components/group-table-actions/gro
 import { GroupUsersModalComponent } from './modals/group-users-modal/group-users-modal.component';
 import { UsersModule } from '../users/users.module';
 import { GroupTableListComponent } from './components/group-table-list/group-table-list.component';
+import { GroupFormHelperComponent } from './components/group-form/group-form-helper/group-form-helper/group-form-helper.component';
+import {NgbTooltipModule} from "@ng-bootstrap/ng-bootstrap";
 
 @NgModule({
   entryComponents: [
@@ -52,22 +54,24 @@ import { GroupTableListComponent } from './components/group-table-list/group-tab
     GroupTableUserCellComponent,
     GroupTableActionsComponent,
     GroupUsersModalComponent,
-    GroupTableListComponent
+    GroupTableListComponent,
+    GroupFormHelperComponent
   ],
   exports: [
     GroupTableListComponent
   ],
-  imports: [
-    CommonModule,
-    GroupsRoutingModule,
-    ReactiveFormsModule,
-    NgSelectModule,
-    LayoutModule,
-    FontAwesomeModule,
-    AuthModule,
-    TableModule,
-    UsersModule
-  ]
+    imports: [
+        CommonModule,
+        GroupsRoutingModule,
+        ReactiveFormsModule,
+        NgSelectModule,
+        LayoutModule,
+        FontAwesomeModule,
+        AuthModule,
+        TableModule,
+        UsersModule,
+        NgbTooltipModule
+    ]
 })
 export class GroupsModule {
 }
