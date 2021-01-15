@@ -92,6 +92,19 @@ class APIProjector:
 
         return output
 
+    @staticmethod
+    def element_includes(include_key: str, element: dict) -> dict:
+        """Get the dict value if an elements has the include key"""
+        if '.' not in include_key:
+            try:
+                return {include_key: element[include_key]}
+            except (KeyError, ValueError, TypeError) as err:
+                raise APIProjectionInclusionError(
+                    f'Projected element does not include the key: {include_key} | Error: {err}')
+
+        key, rest = include_key.split('.', 1)
+        return {key: APIProjector.element_includes(rest, element[key])}
+
     def __parse_element(self, data: dict) -> dict:
         """Converts a single resource based on projection."""
         element = {}
@@ -99,9 +112,11 @@ class APIProjector:
             raise TypeError('Project elements must be a dict!')
 
         if self.__projection.has_includes():
-            for key, item in data.items():
-                if key in self.__projection.includes:
-                    element.update({key: item})
+            for include in self.__projection.includes:
+                try:
+                    element.update(self.element_includes(include, data))
+                except APIProjectionInclusionError as err:
+                    continue
         else:
             element = data
 
@@ -118,3 +133,10 @@ class APIProjectionError(CMDBError):
     def __init__(self, message: str = None):
         self.message = message
         super(APIProjectionError, self).__init__()
+
+
+class APIProjectionInclusionError(APIProjectionError):
+
+    def __init__(self, message: str):
+        message = f'Error while inclusion projection: err {message}'
+        super(APIProjectionInclusionError, self).__init__(message)
