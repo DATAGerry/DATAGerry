@@ -132,7 +132,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
       this.render.renderForm.removeControl('active');
       Object.keys(this.render.renderForm.controls).forEach(field => {
         let val = this.renderForm.value[field];
-        if (val === undefined) { val = ''; }
+        if (val === undefined || val == null) { val = ''; }
         this.objectInstance.fields.push({
           name: field,
           value: val
