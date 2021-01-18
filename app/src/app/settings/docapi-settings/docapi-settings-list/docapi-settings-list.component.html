@@ -22,11 +22,13 @@
             (sortChange)="onSortChange($event)" (searchChange)="onSearchChange($event)"></cmdb-table>
 
 <ng-template #actionsTemplate let-item="item">
-  <a class="ml-1 text-dark mr-1" *permissionLink="['base.docapi.template.edit']"
-      [routerLink]="['/settings/docapi/edit/', item?.public_id]">
-  <fa-icon [icon]="['far', 'edit']"></fa-icon>
-</a>
-  <a class="ml-1 text-dark mr-1" *permissionLink="['base.docapi.template.delete']">
-    <fa-icon [icon]="['far', 'trash-alt']" (click)="delDocTemplate(item?.public_id)"></fa-icon>
-  </a>
+  <div class="d-flex justify-content-center">
+    <a class="ml-1 text-dark mr-1" *permissionLink="['base.docapi.template.edit']"
+       [routerLink]="['/settings/docapi/edit/', item?.public_id]">
+      <fa-icon [icon]="['far', 'edit']"></fa-icon>
+    </a>
+    <a class="ml-1 text-dark mr-1" *permissionLink="['base.docapi.template.delete']">
+      <fa-icon [icon]="['far', 'trash-alt']" (click)="delDocTemplate(item?.public_id)"></fa-icon>
+    </a>
+  </div>
 </ng-template>
